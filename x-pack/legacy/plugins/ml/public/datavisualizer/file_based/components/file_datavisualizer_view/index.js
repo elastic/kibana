@@ -6,4 +6,3 @@
 
 
 export { FileDataVisualizerView } from './file_datavisualizer_view';
-export { MODE } from './constants';

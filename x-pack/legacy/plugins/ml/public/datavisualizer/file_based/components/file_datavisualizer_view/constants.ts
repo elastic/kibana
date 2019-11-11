@@ -5,7 +5,7 @@
  */
 
 /**
- * Date Visualizer modes.
+ *  File data visualizer modes.
  */
 export enum MODE {
   READ,
