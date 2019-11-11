@@ -20,23 +20,22 @@ export function Readme({
   version: string;
 }) {
   const [markdown, setMarkdown] = useState<string | undefined>(undefined);
-
+  const { toRelativeImage } = useLinks();
   const handleImageUri = React.useCallback(
     (uri: string) => {
-      const { toRelativeImage } = useLinks();
       const isRelative =
         uri.indexOf('http://') === 0 || uri.indexOf('https://') === 0 ? false : true;
       const fullUri = isRelative ? toRelativeImage({ packageName, version, path: uri }) : uri;
       return fullUri;
     },
-    [packageName, version]
+    [toRelativeImage, packageName, version]
   );
 
   useEffect(() => {
     getFileByPath(readmePath).then(res => {
       setMarkdown(res);
     });
-  }, []);
+  }, [readmePath]);
 
   return (
     <Fragment>
