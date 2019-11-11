@@ -9,14 +9,6 @@ import { FIELD_ORIGIN } from '../../../common/constants';
 
 export class AbstractField {
 
-  //todo consider removing
-  //double check if we're actually using this consistently
-  static FIELD_TYPE = {
-    STRING: 'string',
-    NUMBER: 'number',
-    DATE: 'date'
-  };
-
   constructor({ fieldName, source }) {
     this._fieldName = fieldName;
     this._source = source;
@@ -30,8 +22,8 @@ export class AbstractField {
     return !!this._fieldName;
   }
 
-  async getType() {
-    return AbstractField.FIELD_TYPE.STRING;
+  async getIndexPatternType() {
+    return 'string';
   }
 
   async getLabel() {

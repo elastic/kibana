@@ -66,7 +66,7 @@ export class TooltipSelector extends Component {
       return new Promise(async (resolve, reject) => {
         try {
           const label = await field.getLabel();
-          const type = await field.getType();
+          const type = await field.getIndexPatternType();
           resolve({
             label: label,
             type: type,
