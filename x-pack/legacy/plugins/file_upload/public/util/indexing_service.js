@@ -14,6 +14,11 @@ import { sizeLimitedChunking } from './size_limited_chunking';
 const basePath = chrome.addBasePath('/api/fileupload');
 const fileType = 'json';
 
+let savedObjectsClient;
+export function initResources(soClient) {
+  savedObjectsClient = soClient;
+}
+
 export async function indexData(parsedFile, transformDetails, indexName, dataType, appName) {
   if (!parsedFile) {
     throw(i18n.translate('xpack.fileUpload.indexingService.noFileImported', {
@@ -223,7 +228,6 @@ export async function createIndexPattern(indexPatternName) {
 }
 
 async function getIndexPatternId(name) {
-  const savedObjectsClient = chrome.getSavedObjectsClient();
   const savedObjectSearch =
     await savedObjectsClient.find({ type: 'index-pattern', perPage: 1000 });
   const indexPatternSavedObjects = savedObjectSearch.savedObjects;
@@ -248,7 +252,6 @@ export const getExistingIndexNames = async () => {
 };
 
 export const getExistingIndexPatternNames = async () => {
-  const savedObjectsClient = chrome.getSavedObjectsClient();
   const indexPatterns = await savedObjectsClient.find({
     type: 'index-pattern',
     fields: ['id', 'title', 'type', 'fields'],
