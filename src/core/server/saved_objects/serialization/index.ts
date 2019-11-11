@@ -117,7 +117,7 @@ export class SavedObjectsSerializer {
     return {
       type,
       id: this.trimIdPrefix(namespace, type, _id),
-      ...(namespace && !this.schema.isNamespaceAgnostic(type) && { namespace }),
+      ...(namespace && this.schema.isNamespaceIsolated(type) && { namespace }),
       attributes: _source[type],
       references: _source.references || [],
       ...(_source.migrationVersion && { migrationVersion: _source.migrationVersion }),
@@ -146,7 +146,7 @@ export class SavedObjectsSerializer {
       [type]: attributes,
       type,
       references,
-      ...(namespace && !this.schema.isNamespaceAgnostic(type) && { namespace }),
+      ...(namespace && this.schema.isNamespaceIsolated(type) && { namespace }),
       ...(migrationVersion && { migrationVersion }),
       ...(updated_at && { updated_at }),
     };

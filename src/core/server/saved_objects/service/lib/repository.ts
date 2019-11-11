@@ -422,7 +422,7 @@ export class SavedObjectsRepository {
 
     const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
 
-    const typesToDelete = allTypes.filter(type => !this._schema.isNamespaceAgnostic(type));
+    const typesToDelete = allTypes.filter(type => this._schema.isNamespaceIsolated(type));
 
     const esOptions = {
       index: this.getIndicesForTypes(typesToDelete),

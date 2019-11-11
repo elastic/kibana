@@ -20,8 +20,8 @@
 import { Config } from '../../config';
 
 interface SavedObjectsSchemaTypeDefinition {
-  isNamespaceAgnostic: boolean;
-  isNamespaceIsolated: boolean;
+  isNamespaceAgnostic?: boolean;
+  isNamespaces?: boolean;
   hidden?: boolean;
   indexPattern?: ((config: Config) => string) | string;
   convertToAliasScript?: string;
@@ -77,14 +77,16 @@ export class SavedObjectsSchema {
   }
 
   public isNamespaceIsolated(type: string) {
+    // if no plugins have registered a uiExports.savedObjectSchemas,
+    // this.schema will be undefined, and all types are namespace isolated
     if (!this.definition) {
-      return false;
+      return true;
     }
 
     const typeSchema = this.definition[type];
     if (!typeSchema) {
-      return false;
+      return true;
     }
-    return Boolean(typeSchema.isNamespaceIsolated);
+    return !Boolean(typeSchema.isNamespaceAgnostic) && !Boolean(typeSchema.isNamespaces);
   }
 }
