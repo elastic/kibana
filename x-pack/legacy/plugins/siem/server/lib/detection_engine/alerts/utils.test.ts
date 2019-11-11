@@ -27,7 +27,25 @@ import {
 import { SignalAlertParams } from './types';
 import { buildEventsSearchQuery } from './build_events_query';
 
+const mockLogger: Logger = {
+  info: jest.fn((logString: string) => {
+    return logString;
+  }),
+  warn: jest.fn((logString: string) => {
+    return logString;
+  }),
+  trace: jest.fn(),
+  debug: jest.fn(),
+  error: jest.fn((logString: string) => {
+    return logString;
+  }),
+  fatal: jest.fn(),
+  log: jest.fn(),
+};
 describe('utils', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   describe('buildBulkBody', () => {
     test('if bulk body builds well-defined body', () => {
       const sampleParams: SignalAlertParams = sampleSignalAlertParams(undefined);
@@ -58,7 +76,6 @@ describe('utils', () => {
   });
   describe('singleBulkIndex', () => {
     test('create successful bulk index', async () => {
-      // need a sample search result, sample signal params, mock service, mock logger
       const sampleParams = sampleSignalAlertParams(undefined);
       const sampleSearchResult = sampleDocSearchResultsNoSortId;
       const savedObjectsClient = savedObjectsClientMock.create();
@@ -92,19 +109,6 @@ describe('utils', () => {
         alertInstanceFactory: jest.fn(),
         savedObjectsClient,
       };
-      const mockLogger: Logger = {
-        info: jest.fn((logString: string) => {
-          return logString;
-        }),
-        warn: jest.fn((logString: string) => {
-          return logString;
-        }),
-        trace: jest.fn(),
-        debug: jest.fn(),
-        error: jest.fn(),
-        fatal: jest.fn(),
-        log: jest.fn(),
-      };
       const successfulSingleBulkIndex = await singleBulkIndex(
         sampleSearchResult,
         sampleParams,
@@ -127,19 +131,6 @@ describe('utils', () => {
         },
         alertInstanceFactory: jest.fn(),
         savedObjectsClient,
-      };
-      const mockLogger: Logger = {
-        info: jest.fn((logString: string) => {
-          return logString;
-        }),
-        warn: jest.fn((logString: string) => {
-          return logString;
-        }),
-        trace: jest.fn(),
-        debug: jest.fn(),
-        error: jest.fn(),
-        fatal: jest.fn(),
-        log: jest.fn(),
       };
       const successfulSingleBulkIndex = await singleBulkIndex(
         sampleSearchResult,
@@ -181,19 +172,6 @@ describe('utils', () => {
         alertInstanceFactory: jest.fn(),
         savedObjectsClient,
       };
-      const mockLogger: Logger = {
-        info: jest.fn((logString: string) => {
-          return logString;
-        }),
-        warn: jest.fn((logString: string) => {
-          return logString;
-        }),
-        trace: jest.fn(),
-        debug: jest.fn(),
-        error: jest.fn(),
-        fatal: jest.fn(),
-        log: jest.fn(),
-      };
       const successfulSingleBulkIndex = await singleBulkIndex(
         sampleSearchResult,
         sampleParams,
@@ -230,19 +208,6 @@ describe('utils', () => {
         alertInstanceFactory: jest.fn(),
         savedObjectsClient,
       };
-      const mockLogger: Logger = {
-        info: jest.fn((logString: string) => {
-          return logString;
-        }),
-        warn: jest.fn((logString: string) => {
-          return logString;
-        }),
-        trace: jest.fn(),
-        debug: jest.fn(),
-        error: jest.fn(),
-        fatal: jest.fn(),
-        log: jest.fn(),
-      };
       try {
         const searchAfterResult = await singleSearchAfter(
           searchAfterSortId,
@@ -278,19 +243,6 @@ describe('utils', () => {
         alertInstanceFactory: jest.fn(),
         savedObjectsClient,
       };
-      const mockLogger: Logger = {
-        info: jest.fn((logString: string) => {
-          return logString;
-        }),
-        warn: jest.fn((logString: string) => {
-          return logString;
-        }),
-        trace: jest.fn(),
-        debug: jest.fn(),
-        error: jest.fn(),
-        fatal: jest.fn(),
-        log: jest.fn(),
-      };
       const searchAfterResult = await singleSearchAfter(
         searchAfterSortId,
         sampleParams,
@@ -321,19 +273,6 @@ describe('utils', () => {
         },
         alertInstanceFactory: jest.fn(),
         savedObjectsClient,
-      };
-      const mockLogger: Logger = {
-        info: jest.fn((logString: string) => {
-          return logString;
-        }),
-        warn: jest.fn((logString: string) => {
-          return logString;
-        }),
-        trace: jest.fn(),
-        debug: jest.fn(),
-        error: jest.fn(),
-        fatal: jest.fn(),
-        log: jest.fn(),
       };
       try {
         await singleSearchAfter(searchAfterSortId, sampleParams, mockService, mockLogger);
@@ -380,23 +319,6 @@ describe('utils', () => {
         alertInstanceFactory: jest.fn(),
         savedObjectsClient,
       };
-      const mockLogger: Logger = {
-        info: jest.fn((logString: string) => {
-          return logString;
-        }),
-        warn: jest.fn((logString: string) => {
-          expect(logString).toEqual('something');
-          return logString;
-        }),
-        trace: jest.fn(),
-        debug: jest.fn(),
-        error: jest.fn((logString: string) => {
-          expect(logString).toEqual('something');
-          return logString;
-        }),
-        fatal: jest.fn(),
-        log: jest.fn(),
-      };
       const result = await searchAfterAndBulkIndex(
         sampleDocSearchResultsWithSortId,
         sampleParams,
@@ -442,23 +364,6 @@ describe('utils', () => {
         alertInstanceFactory: jest.fn(),
         savedObjectsClient,
       };
-      const mockLogger: Logger = {
-        info: jest.fn((logString: string) => {
-          return logString;
-        }),
-        warn: jest.fn((logString: string) => {
-          expect(logString).toEqual('something');
-          return logString;
-        }),
-        trace: jest.fn(),
-        debug: jest.fn(),
-        error: jest.fn((logString: string) => {
-          expect(logString).toEqual('something');
-          return logString;
-        }),
-        fatal: jest.fn(),
-        log: jest.fn(),
-      };
       const result = await searchAfterAndBulkIndex(
         repeatedSearchResultsWithSortId(4),
         sampleParams,
@@ -484,22 +389,6 @@ describe('utils', () => {
         },
         alertInstanceFactory: jest.fn(),
         savedObjectsClient,
-      };
-      const mockLogger: Logger = {
-        info: jest.fn((logString: string) => {
-          return logString;
-        }),
-        warn: jest.fn((logString: string) => {
-          return logString;
-        }),
-        trace: jest.fn(),
-        debug: jest.fn(),
-        error: jest.fn((logString: string) => {
-          expect(logString).toEqual('[-] bulkResponse had errors: true');
-          return logString;
-        }),
-        fatal: jest.fn(),
-        log: jest.fn(),
       };
       const result = await searchAfterAndBulkIndex(
         repeatedSearchResultsWithSortId(4),
@@ -546,22 +435,6 @@ describe('utils', () => {
         alertInstanceFactory: jest.fn(),
         savedObjectsClient,
       };
-      const mockLogger: Logger = {
-        info: jest.fn((logString: string) => {
-          return logString;
-        }),
-        warn: jest.fn((logString: string) => {
-          expect(logString).toEqual('sortIds was empty on first search but expected more');
-          return logString;
-        }),
-        trace: jest.fn(),
-        debug: jest.fn(),
-        error: jest.fn((logString: string) => {
-          return logString;
-        }),
-        fatal: jest.fn(),
-        log: jest.fn(),
-      };
       const result = await searchAfterAndBulkIndex(
         sampleDocSearchResultsNoSortId,
         sampleParams,
@@ -607,22 +480,6 @@ describe('utils', () => {
         alertInstanceFactory: jest.fn(),
         savedObjectsClient,
       };
-      const mockLogger: Logger = {
-        info: jest.fn((logString: string) => {
-          return logString;
-        }),
-        warn: jest.fn((logString: string) => {
-          expect(logString).toEqual('sortIds was empty on first search but expected more');
-          return logString;
-        }),
-        trace: jest.fn(),
-        debug: jest.fn(),
-        error: jest.fn((logString: string) => {
-          return logString;
-        }),
-        fatal: jest.fn(),
-        log: jest.fn(),
-      };
       const result = await searchAfterAndBulkIndex(
         sampleDocSearchResultsNoSortIdNoHits,
         sampleParams,
@@ -666,22 +523,6 @@ describe('utils', () => {
         },
         alertInstanceFactory: jest.fn(),
         savedObjectsClient,
-      };
-      const mockLogger: Logger = {
-        info: jest.fn((logString: string) => {
-          return logString;
-        }),
-        warn: jest.fn((logString: string) => {
-          expect(logString).toEqual('sortIds was empty on search');
-          return logString;
-        }),
-        trace: jest.fn(),
-        debug: jest.fn(),
-        error: jest.fn((logString: string) => {
-          return logString;
-        }),
-        fatal: jest.fn(),
-        log: jest.fn(),
       };
       const result = await searchAfterAndBulkIndex(
         repeatedSearchResultsWithSortId(4),
@@ -741,23 +582,6 @@ describe('utils', () => {
         alertInstanceFactory: jest.fn(),
         savedObjectsClient,
       };
-      const mockLogger: Logger = {
-        info: jest.fn((logString: string) => {
-          return logString;
-        }),
-        warn: jest.fn((logString: string) => {
-          // expect(logString).toEqual('something');
-          return logString;
-        }),
-        trace: jest.fn(),
-        debug: jest.fn(),
-        error: jest.fn((logString: string) => {
-          // expect(logString).toEqual('[-] bulk index failed');
-          return logString;
-        }),
-        fatal: jest.fn(),
-        log: jest.fn(),
-      };
       const result = await searchAfterAndBulkIndex(
         repeatedSearchResultsWithSortId(4),
         sampleParams,
@@ -802,21 +626,6 @@ describe('utils', () => {
         },
         alertInstanceFactory: jest.fn(),
         savedObjectsClient,
-      };
-      const mockLogger: Logger = {
-        info: jest.fn((logString: string) => {
-          return logString;
-        }),
-        warn: jest.fn((logString: string) => {
-          return logString;
-        }),
-        trace: jest.fn(),
-        debug: jest.fn(),
-        error: jest.fn((logString: string) => {
-          return logString;
-        }),
-        fatal: jest.fn(),
-        log: jest.fn(),
       };
       const result = await searchAfterAndBulkIndex(
         repeatedSearchResultsWithSortId(4),
