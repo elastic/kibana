@@ -8,11 +8,9 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
 
 export interface Error {
-  data: {
-    error: string;
-    cause?: string[];
-    message?: string;
-  };
+  cause?: string[];
+  message?: string;
+  statusText?: string;
 }
 
 interface Props {
