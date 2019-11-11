@@ -48,17 +48,17 @@ export default function ({ getService, updateBaselines }) {
       });
 
       it('with single metric data', async () => {
-        const expression = 'metricVis colorRange={range from=0 to=10000} metric={visdimension 0}';
+        const expression = 'metricVis metric={visdimension 0}';
         await (await expectExpression('metric_single_metric_data', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
       });
 
       it('with multiple metric data', async () => {
-        const expression = 'metricVis colorRange={range from=0 to=10000} metric={visdimension 0} metric={visdimension 1}';
+        const expression = 'metricVis metric={visdimension 0} metric={visdimension 1}';
         await (await expectExpression('metric_multi_metric_data', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
       });
 
       it('with metric and bucket data', async () => {
-        const expression = 'metricVis colorRange={range from=0 to=10000} metric={visdimension 0} bucket={visdimension 2}';
+        const expression = 'metricVis metric={visdimension 0} bucket={visdimension 2}';
         await (await expectExpression('metric_all_data', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
       });
 
