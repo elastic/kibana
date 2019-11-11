@@ -20,7 +20,7 @@ export const config = Joi.object({
 export function fleet(kibana: any) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'encrypted_saved_objects', 'ingest'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'encryptedSavedObjects', 'ingest'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       // app: {
@@ -57,7 +57,7 @@ export function fleet(kibana: any) {
     config: () => config,
     configPrefix: CONFIG_PREFIX,
     init(server: any) {
-      server.plugins.encrypted_saved_objects.registerType({
+      server.newPlatform.setup.plugins.encryptedSavedObjects.registerType({
         type: 'enrollment_api_keys',
         attributesToEncrypt: new Set(['api_key']),
         attributesToExcludeFromAAD: new Set(['enrollment_rules']),

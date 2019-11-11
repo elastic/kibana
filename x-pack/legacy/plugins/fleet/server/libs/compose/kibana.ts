@@ -33,7 +33,9 @@ export function compose(server: any): FleetServerLib {
     server.plugins.elasticsearch
   );
   const esAdapter = new ElasticsearchAdapter(server.plugins.elasticsearch);
-  const encryptedObjectAdapter = new EncryptedSavedObjects(server.plugins.encrypted_saved_objects);
+  const encryptedObjectAdapter = new EncryptedSavedObjects(
+    server.newPlatform.start.plugins.encryptedSavedObjects
+  );
   const agentsRepository = new AgentsRepository(soDatabaseAdapter);
   const agentEventsRepository = new AgentEventsRepository(soDatabaseAdapter);
   const enrollmentApiKeysRepository = new EnrollmentApiKeysRepository(
