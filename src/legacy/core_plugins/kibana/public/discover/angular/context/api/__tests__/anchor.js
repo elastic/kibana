@@ -37,7 +37,7 @@ describe('context app', function () {
       $provide.value('indexPatterns', createIndexPatternsStub());
     }));
 
-    beforeEach(ngMock.inject(function createPrivateStubs(Private) {
+    beforeEach(ngMock.inject(function createPrivateStubs() {
       searchSourceStub = createSearchSourceStub([
         { _id: 'hit1' },
       ]);
