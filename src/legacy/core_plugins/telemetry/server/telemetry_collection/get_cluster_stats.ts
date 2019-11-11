@@ -17,12 +17,24 @@
  * under the License.
  */
 
-// @ts-ignore
-import { getLocalStats } from './get_local_stats';
-import { StatsGetter, getStatsCollectionConfig } from '../collection_manager';
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { TIMEOUT } from './constants';
+import { ClusterUuidsGetter } from '../collection_manager';
+/**
+ * Get the cluster stats from the connected cluster.
+ *
+ * This is the equivalent to GET /_cluster/stats?timeout=30s.
+ */
+export async function getClusterStats(callCluster: CallCluster) {
+  return await callCluster('cluster.stats', {
+    timeout: TIMEOUT,
+  });
+}
 
-export const getStats: StatsGetter = async function(config) {
-  const { callCluster, server } = getStatsCollectionConfig(config, 'data');
-
-  return [await getLocalStats({ callCluster, server })];
+/**
+ * Get the cluster uuids from the connected cluster.
+ */
+export const getClusterUuids: ClusterUuidsGetter = async ({ callCluster }) => {
+  const result = await getClusterStats(callCluster);
+  return [result];
 };

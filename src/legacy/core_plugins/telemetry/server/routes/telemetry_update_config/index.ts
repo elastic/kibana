@@ -17,18 +17,21 @@
  * under the License.
  */
 
-import { TIMEOUT } from './constants';
+import { CoreSetup } from 'src/core/server';
+import { registerOptInRoute } from './update_opt_in';
+import { registerUsageFetcherRoute } from './update_usage_fetcher';
 
-/**
- * Get the cluster stats from the connected cluster.
- *
- * This is the equivalent to GET /_cluster/stats?timeout=30s.
- *
- * @param {function} callCluster The callWithInternalUser handler (exposed for testing)
- * @return {Promise} The response from Elasticsearch equivalent to GET /_cluster/stats.
- */
-export function getClusterStats(callCluster) {
-  return callCluster('cluster.stats', {
-    timeout: TIMEOUT
-  });
+interface RegisterUsageFetcherRouteParams {
+  core: CoreSetup;
+  currentKibanaVersion: string;
 }
+
+type RegisterTelemetryConfigRoutes = (params: RegisterUsageFetcherRouteParams) => void;
+
+export const registerTelemetryConfigRoutes: RegisterTelemetryConfigRoutes = ({
+  core,
+  currentKibanaVersion,
+}) => {
+  registerOptInRoute({ core, currentKibanaVersion });
+  registerUsageFetcherRoute({ core });
+};

@@ -18,7 +18,7 @@
  */
 
 import { CoreSetup } from 'src/core/server';
-import { registerTelemetryConfigRoutes } from './telemetry_config';
+import { registerTelemetryConfigRoutes } from './telemetry_update_config';
 import { registerTelemetryDataRoutes } from './telemetry_stats';
 
 interface RegisterRoutesParams {

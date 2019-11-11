@@ -5,33 +5,28 @@
  */
 
 import { get } from 'lodash';
+// @ts-ignore
 import { createQuery } from './create_query';
+// @ts-ignore
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
+
+import {
+  ClusterUuidsGetter,
+  StatsCollectionConfig,
+} from '../../../../../../src/legacy/core_plugins/telemetry/server/collection_manager';
 
 /**
  * Get a list of Cluster UUIDs that exist within the specified timespan.
- *
- * @param {Object} server The server instance
- * @param {function} callCluster The callWithRequest or callWithInternalUser handler
- * @param {Date} start The start date to look for clusters
- * @param {Date} end The end date to look for clusters
- * @return {Array} Array of strings; one per Cluster UUID.
  */
-export function getClusterUuids(server, callCluster, start, end) {
-  return fetchClusterUuids(server, callCluster, start, end)
-    .then(handleClusterUuidsResponse);
-}
+export const getClusterUuids: ClusterUuidsGetter = async config => {
+  const response = await fetchClusterUuids(config);
+  return handleClusterUuidsResponse(response);
+};
 
 /**
  * Fetch the aggregated Cluster UUIDs from the monitoring cluster.
- *
- * @param {Object} server The server instance
- * @param {function} callCluster The callWithRequest or callWithInternalUser handler
- * @param {Date} start The start date to look for clusters
- * @param {Date} end The end date to look for clusters
- * @return {Promise} Object response from the aggregation.
  */
-export function fetchClusterUuids(server, callCluster, start, end) {
+export function fetchClusterUuids({ server, callCluster, start, end }: StatsCollectionConfig) {
   const config = server.config();
   const params = {
     index: INDEX_PATTERN_ELASTICSEARCH,
@@ -44,11 +39,11 @@ export function fetchClusterUuids(server, callCluster, start, end) {
         cluster_uuids: {
           terms: {
             field: 'cluster_uuid',
-            size: config.get('xpack.monitoring.max_bucket_size')
-          }
-        }
-      }
-    }
+            size: config.get('xpack.monitoring.max_bucket_size'),
+          },
+        },
+      },
+    },
   };
 
   return callCluster('search', params);
@@ -60,7 +55,7 @@ export function fetchClusterUuids(server, callCluster, start, end) {
  * @param {Object} response The aggregation response
  * @return {Array} Strings; each representing a Cluster's UUID.
  */
-export function handleClusterUuidsResponse(response) {
+export function handleClusterUuidsResponse(response: any): string[] {
   const uuidBuckets = get(response, 'aggregations.cluster_uuids.buckets', []);
 
   return uuidBuckets.map(uuidBucket => uuidBucket.key);

@@ -80,11 +80,9 @@ export class FetcherTask {
   };
 
   private fetchTelemetry = async () => {
-    const { getStats, title } = telemetryCollectionManager.getStatsGetter();
-    this.server.log(['debug', 'telemetry', 'fetcher'], `Fetching usage using ${title} getter.`);
     const config = this.server.config();
 
-    return await getStats({
+    return await telemetryCollectionManager.getStats({
       unencrypted: false,
       server: this.server,
       start: moment()

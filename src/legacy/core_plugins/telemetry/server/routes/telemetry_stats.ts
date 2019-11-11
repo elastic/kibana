@@ -47,10 +47,7 @@ export function registerTelemetryDataRoutes(core: CoreSetup) {
       const isDev = config.get('env.dev');
 
       try {
-        const { getStats, title } = telemetryCollectionManager.getStatsGetter();
-        server.log(['debug', 'telemetry', 'fetcher'], `Fetching usage using ${title} getter.`);
-
-        return await getStats({
+        return await telemetryCollectionManager.getStats({
           unencrypted,
           server,
           req,

@@ -23,17 +23,13 @@ import { CoreSetup } from 'src/core/server';
 import {
   TelemetrySavedObjectAttributes,
   updateTelemetrySavedObject,
-} from '../telemetry_repository';
+} from '../../telemetry_repository';
 
-interface RegisterOptInRoutesParams {
+interface RegisterUsageFetcherRouteParams {
   core: CoreSetup;
-  currentKibanaVersion: string;
 }
 
-export function registerTelemetryConfigRoutes({
-  core,
-  currentKibanaVersion,
-}: RegisterOptInRoutesParams) {
+export function registerUsageFetcherRoute({ core }: RegisterUsageFetcherRouteParams) {
   const { server } = core.http as any;
 
   server.route({
@@ -51,31 +47,6 @@ export function registerTelemetryConfigRoutes({
     handler: async (req: any, h: any) => {
       try {
         const attributes: TelemetrySavedObjectAttributes = req.payload;
-        const savedObjectsClient = req.getSavedObjectsClient();
-        await updateTelemetrySavedObject(savedObjectsClient, attributes);
-      } catch (err) {
-        return boomify(err);
-      }
-      return h.response({}).code(200);
-    },
-  });
-
-  server.route({
-    method: 'POST',
-    path: '/api/telemetry/v2/optIn',
-    options: {
-      validate: {
-        payload: Joi.object({
-          enabled: Joi.bool().required(),
-        }),
-      },
-    },
-    handler: async (req: any, h: any) => {
-      try {
-        const attributes: TelemetrySavedObjectAttributes = {
-          enabled: req.payload.enabled,
-          lastVersionChecked: currentKibanaVersion,
-        };
         const savedObjectsClient = req.getSavedObjectsClient();
         await updateTelemetrySavedObject(savedObjectsClient, attributes);
       } catch (err) {

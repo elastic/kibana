@@ -49,6 +49,15 @@ const telemetry = (kibana: any) => {
         // `config` is used internally and not intended to be set
         config: Joi.string().default(Joi.ref('$defaultConfigPath')),
         banner: Joi.boolean().default(true),
+        optInStatusUrl: Joi.when('$dev', {
+          is: true,
+          then: Joi.string().default(
+            `https://telemetry-staging.elastic.co/opt_in_status/${ENDPOINT_VERSION}/send`
+          ),
+          otherwise: Joi.string().default(
+            `https://telemetry.elastic.co/opt_in_status/${ENDPOINT_VERSION}/send`
+          ),
+        }),
         url: Joi.when('$dev', {
           is: true,
           then: Joi.string().default(
