@@ -8,6 +8,7 @@ import { GenericParams } from 'elasticsearch';
 import { EnvironmentMode } from 'kibana/public';
 import { GraphQLSchema } from 'graphql';
 import { Legacy } from 'kibana';
+import { ServerFacade } from '../../types';
 
 import {
   graphiqlHapi,
@@ -31,7 +32,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   public version: string;
   public envMode: EnvironmentMode;
 
-  constructor(private server: Legacy.Server) {
+  constructor(private server: ServerFacade) {
     this.version = server.config().get('pkg.version');
     this.envMode = server.newPlatform.env.mode;
   }

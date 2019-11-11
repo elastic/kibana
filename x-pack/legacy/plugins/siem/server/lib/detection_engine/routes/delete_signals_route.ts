@@ -8,6 +8,7 @@ import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 
 import { deleteSignals } from '../alerts/delete_signals';
+import { ServerFacade } from '../../../types';
 
 export const createDeleteSignalsRoute: Hapi.ServerRoute = {
   method: 'DELETE',
@@ -37,6 +38,6 @@ export const createDeleteSignalsRoute: Hapi.ServerRoute = {
   },
 };
 
-export const deleteSignalsRoute = (server: Hapi.Server): void => {
+export const deleteSignalsRoute = (server: ServerFacade): void => {
   server.route(createDeleteSignalsRoute);
 };

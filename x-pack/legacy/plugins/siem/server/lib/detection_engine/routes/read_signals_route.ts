@@ -8,6 +8,7 @@ import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 
 import { readSignals } from '../alerts/read_signals';
+import { ServerFacade } from '../../../types';
 
 export const createReadSignalsRoute: Hapi.ServerRoute = {
   method: 'GET',
@@ -35,6 +36,6 @@ export const createReadSignalsRoute: Hapi.ServerRoute = {
   },
 };
 
-export const readSignalsRoute = (server: Hapi.Server) => {
+export const readSignalsRoute = (server: ServerFacade) => {
   server.route(createReadSignalsRoute);
 };

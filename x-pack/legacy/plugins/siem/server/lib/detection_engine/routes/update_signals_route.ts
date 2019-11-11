@@ -10,6 +10,7 @@ import { isFunction } from 'lodash/fp';
 import { updateSignal } from '../alerts/update_signals';
 import { UpdateSignalsRequest } from '../alerts/types';
 import { updateSignalSchema } from './schemas';
+import { ServerFacade } from '../../../types';
 
 export const createUpdateSignalsRoute: Hapi.ServerRoute = {
   method: 'PUT',
@@ -91,6 +92,6 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
   },
 };
 
-export const updateSignalsRoute = (server: Hapi.Server) => {
+export const updateSignalsRoute = (server: ServerFacade) => {
   server.route(createUpdateSignalsRoute);
 };

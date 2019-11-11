@@ -9,6 +9,7 @@ import { isFunction } from 'lodash/fp';
 import { createSignals } from '../alerts/create_signals';
 import { SignalsRequest } from '../alerts/types';
 import { createSignalsSchema } from './schemas';
+import { ServerFacade } from '../../../types';
 
 export const createCreateSignalsRoute: Hapi.ServerRoute = {
   method: 'POST',
@@ -85,6 +86,6 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
   },
 };
 
-export const createSignalsRoute = (server: Hapi.Server) => {
+export const createSignalsRoute = (server: ServerFacade) => {
   server.route(createCreateSignalsRoute);
 };
