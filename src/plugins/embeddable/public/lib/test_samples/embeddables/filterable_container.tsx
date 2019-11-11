@@ -16,14 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Filter } from '@kbn/es-query';
+
 import { Container, ContainerInput } from '../../containers';
 import { GetEmbeddableFactory } from '../../types';
+import { esFilters } from '../../../../../data/public';
 
 export const FILTERABLE_CONTAINER = 'FILTERABLE_CONTAINER';
 
 export interface FilterableContainerInput extends ContainerInput {
-  filters: Filter[];
+  filters: esFilters.Filter[];
 }
 
 /**
@@ -33,7 +34,7 @@ export interface FilterableContainerInput extends ContainerInput {
  */
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type InheritedChildrenInput = {
-  filters: Filter[];
+  filters: esFilters.Filter[];
   id?: string;
 };
 

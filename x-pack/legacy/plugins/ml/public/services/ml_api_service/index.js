@@ -292,7 +292,8 @@ export const ml = {
       'useDedicatedIndex',
       'startDatafeed',
       'start',
-      'end'
+      'end',
+      'jobOverrides',
     ]);
 
     return http({
