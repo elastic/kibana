@@ -103,7 +103,6 @@ class HeaderHelpMenuUI extends Component<Props, State> {
           href={this.props.isCloudEnabled ? ELASTIC_SUPPORT_LINK : KIBANA_ASK_ELASTIC_LINK}
           target="_blank"
           size="xs"
-          iconType="help"
           flush="left"
         >
           <FormattedMessage
@@ -114,13 +113,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
 
         <EuiSpacer size="xs" />
 
-        <EuiButtonEmpty
-          href={KIBANA_FEEDBACK_LINK}
-          target="_blank"
-          size="xs"
-          iconType="editorComment"
-          flush="left"
-        >
+        <EuiButtonEmpty href={KIBANA_FEEDBACK_LINK} target="_blank" size="xs" flush="left">
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle"
             defaultMessage="Give feedback"
