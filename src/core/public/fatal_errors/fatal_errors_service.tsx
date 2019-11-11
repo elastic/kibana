@@ -132,5 +132,20 @@ export class FatalErrorsService {
         console.log(`Detected an unhandled Promise rejection.\n${e.reason}`); // eslint-disable-line no-console
       });
     }
+
+    window.onerror = (
+      event: Event | string,
+      source?: string,
+      lineno?: number,
+      colno?: number,
+      error?: Error
+    ) => {
+      const errorDescription = event.toString();
+      if (!IGNORED_ERRORS.includes(errorDescription)) {
+        fatalErrorsSetup.add(event.toString(), source);
+      }
+    };
   }
 }
+
+const IGNORED_ERRORS = ['ResizeObserver loop limit exceeded'];
