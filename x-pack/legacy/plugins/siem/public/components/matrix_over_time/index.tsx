@@ -41,10 +41,10 @@ const getBarchartConfigs = (
   from: number,
   to: number,
   onBrushEnd: UpdateDateRange,
-  scaleType: ScaleType = ScaleType.Time
+  scaleType: ScaleType
 ) => ({
   series: {
-    xScaleType: ScaleType.Ordinal,
+    xScaleType: scaleType || ScaleType.Time,
     yScaleType: ScaleType.Linear,
     stackAccessors: ['g'],
   },
@@ -90,7 +90,7 @@ export const MatrixHistogram = ({
   title,
   subtitle,
   totalCount,
-  scaleType,
+  scaleType = ScaleType.Time,
 }: MatrixHistogramProps<MatrixOverTimeHistogramData | MatrixOverOrdinalHistogramData>) => {
   const barchartConfigs = getBarchartConfigs(startDate!, endDate!, updateDateRange, scaleType);
   const [showInspect, setShowInspect] = useState(false);

@@ -197,12 +197,20 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
   }
 }
 
-const getHistogramData = (data: NetworkDnsEdges[]): MatrixOverOrdinalHistogramData[] => {
-  return data.map(({ node: { dnsBytesOut, _id } }) => ({
-    x: _id != null ? _id : '',
-    y: dnsBytesOut != null ? dnsBytesOut : 0,
-    g: _id != null ? _id : '',
-  }));
+const getHistogramData = (data: NetworkDnsEdges[]): MatrixOverOrdinalHistogramData[] | null => {
+  if (!Array.isArray(data)) return null;
+  return data.reduce((acc: MatrixOverOrdinalHistogramData[], { node: { dnsBytesOut, _id } }) => {
+    if (_id && dnsBytesOut)
+      return [
+        ...acc,
+        {
+          x: _id,
+          y: dnsBytesOut,
+          g: _id,
+        },
+      ];
+    return acc;
+  }, []);
 };
 
 const getTopNFlowEdges = (

@@ -663,11 +663,11 @@ export interface AuthenticationsOverTimeData {
 }
 
 export interface MatrixOverTimeHistogramData {
-  x?: Maybe<number>;
+  x: number;
 
-  y?: Maybe<number>;
+  y: number;
 
-  g?: Maybe<string>;
+  g: string;
 }
 
 export interface TimelineData {
@@ -1609,11 +1609,11 @@ export interface NetworkDnsItem {
 }
 
 export interface MatrixOverOrdinalHistogramData {
-  x?: Maybe<string>;
+  x: string;
 
-  y?: Maybe<number>;
+  y: number;
 
-  g?: Maybe<string>;
+  g: string;
 }
 
 export interface NetworkHttpData {
@@ -3783,25 +3783,25 @@ export namespace AuthenticationsOverTimeDataResolvers {
 
 export namespace MatrixOverTimeHistogramDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = MatrixOverTimeHistogramData> {
-    x?: XResolver<Maybe<number>, TypeParent, TContext>;
+    x?: XResolver<number, TypeParent, TContext>;
 
-    y?: YResolver<Maybe<number>, TypeParent, TContext>;
+    y?: YResolver<number, TypeParent, TContext>;
 
-    g?: GResolver<Maybe<string>, TypeParent, TContext>;
+    g?: GResolver<string, TypeParent, TContext>;
   }
 
   export type XResolver<
-    R = Maybe<number>,
+    R = number,
     Parent = MatrixOverTimeHistogramData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type YResolver<
-    R = Maybe<number>,
+    R = number,
     Parent = MatrixOverTimeHistogramData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type GResolver<
-    R = Maybe<string>,
+    R = string,
     Parent = MatrixOverTimeHistogramData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -6970,25 +6970,25 @@ export namespace NetworkDnsItemResolvers {
 
 export namespace MatrixOverOrdinalHistogramDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = MatrixOverOrdinalHistogramData> {
-    x?: XResolver<Maybe<string>, TypeParent, TContext>;
+    x?: XResolver<string, TypeParent, TContext>;
 
-    y?: YResolver<Maybe<number>, TypeParent, TContext>;
+    y?: YResolver<number, TypeParent, TContext>;
 
-    g?: GResolver<Maybe<string>, TypeParent, TContext>;
+    g?: GResolver<string, TypeParent, TContext>;
   }
 
   export type XResolver<
-    R = Maybe<string>,
+    R = string,
     Parent = MatrixOverOrdinalHistogramData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type YResolver<
-    R = Maybe<number>,
+    R = number,
     Parent = MatrixOverOrdinalHistogramData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type GResolver<
-    R = Maybe<string>,
+    R = string,
     Parent = MatrixOverOrdinalHistogramData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;

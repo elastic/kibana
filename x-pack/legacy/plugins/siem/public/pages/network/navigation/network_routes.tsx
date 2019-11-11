@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
@@ -19,6 +19,7 @@ import { DnsQueryTabBody } from './dns_query_tab_body';
 import { ConditionalFlexGroup } from './conditional_flex_group';
 import { NetworkRoutesProps, NetworkRouteType } from './types';
 import { TlsQueryTabBody } from './tls_query_tab_body';
+import { Anomaly, NarrowDateRange } from '../../../components/ml/types';
 
 export const NetworkRoutes = ({
   networkPagePath,
@@ -31,28 +32,17 @@ export const NetworkRoutes = ({
   setQuery,
   setAbsoluteRangeDatePicker,
 }: NetworkRoutesProps) => {
-  const narrowDateRange = useCallback(
-    (score, interval) => {
-      const fromTo = scoreIntervalToDateTime(score, interval);
-      setAbsoluteRangeDatePicker({
-        id: 'global',
-        from: fromTo.from,
-        to: fromTo.to,
-      });
-    },
-    [scoreIntervalToDateTime, setAbsoluteRangeDatePicker]
-  );
-
-  const updateDateRange = useCallback(
-    (score, interval) => {
-      setAbsoluteRangeDatePicker({
-        id: 'global',
-        from,
-        to,
-      });
-    },
-    [setAbsoluteRangeDatePicker]
-  );
+  const narrowDateRange: NarrowDateRange = (score: Anomaly, interval: string) => {
+    const fromTo = scoreIntervalToDateTime(score, interval);
+    setAbsoluteRangeDatePicker({
+      id: 'global',
+      from: fromTo.from,
+      to: fromTo.to,
+    });
+  };
+  const updateDateRange = (min: number, max: number) => {
+    setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+  };
 
   const tabProps = {
     networkPagePath,

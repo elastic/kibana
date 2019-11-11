@@ -146,9 +146,9 @@ export const networkSchema = gql`
   }
 
   type MatrixOverOrdinalHistogramData {
-    x: String
-    y: Float
-    g: String
+    x: String!
+    y: Float!
+    g: String!
   }
 
   type NetworkDnsData {
