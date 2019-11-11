@@ -26,7 +26,7 @@ import { QueryBar } from '../../query_bar';
 import { DataProvider } from '../data_providers/data_provider';
 import { buildGlobalQuery } from '../helpers';
 
-interface QueryBarTimelineComponentProps {
+export interface QueryBarTimelineComponentProps {
   applyKqlFilterQuery: (expression: string, kind: KueryFilterQueryKind) => void;
   browserFields: BrowserFields;
   dataProviders: DataProvider[];
@@ -288,7 +288,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
   }
 );
 
-const getDataProviderFilter = (dataProviderDsl: string): Filter => {
+export const getDataProviderFilter = (dataProviderDsl: string): Filter => {
   const dslObject = JSON.parse(dataProviderDsl);
   const key = Object.keys(dslObject);
   return {

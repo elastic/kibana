@@ -5,12 +5,11 @@
  */
 
 import { Filter } from '@kbn/es-query';
+import { isEqual } from 'lodash/fp';
 import React, { memo, useState, useEffect, useMemo, useCallback } from 'react';
 import { StaticIndexPattern, IndexPattern } from 'ui/index_patterns';
 
 import { Query, TimeRange } from 'src/plugins/data/common/types';
-
-import { isEqual } from 'lodash/fp';
 
 import { SavedQuery, SearchBar } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
@@ -18,15 +17,15 @@ import { SavedQueryTimeFilter } from '../../../../../../../src/legacy/core_plugi
 import { TimeHistory } from '../../../../../../../src/legacy/core_plugins/data/public/timefilter';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 
-interface QueryBarComponentProps {
+export interface QueryBarComponentProps {
   dateRangeFrom?: string;
   dateRangeTo?: string;
   hideSavedQuery?: boolean;
   indexPattern: StaticIndexPattern;
+  isRefreshPaused?: boolean;
   filterQuery: Query;
   filterManager: FilterManager;
   filters: Filter[];
-  isRefreshPaused?: boolean;
   onChangedQuery: (query: Query) => void;
   onSubmitQuery: (query: Query, timefilter?: SavedQueryTimeFilter) => void;
   refreshInterval?: number;
@@ -68,7 +67,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     const onQueryChange = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
         if (payload.query != null && !isEqual(payload.query, draftQuery)) {
-          setDraftQuery(draftQuery);
+          setDraftQuery(payload.query);
           onChangedQuery(payload.query);
         }
       },
@@ -101,7 +100,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         filterManager.setFilters([]);
         onSavedQuery(null);
       }
-    }, [filterManager, onSubmitQuery, savedQuery]);
+    }, [filterManager, onSubmitQuery, onSavedQuery, savedQuery]);
 
     const onFiltersUpdated = useCallback(
       (newFilters: Filter[]) => {

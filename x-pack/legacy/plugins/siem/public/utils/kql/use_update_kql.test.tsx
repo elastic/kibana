@@ -14,12 +14,6 @@ mockDispatch.mockImplementation(fn => fn);
 
 const applyTimelineKqlMock: jest.Mock = (dispatchApplyTimelineFilterQuery as unknown) as jest.Mock;
 
-jest.mock('../../store/hosts/actions', () => ({
-  applyHostsFilterQuery: jest.fn(),
-}));
-jest.mock('../../store/network/actions', () => ({
-  applyNetworkFilterQuery: jest.fn(),
-}));
 jest.mock('../../store/timeline/actions', () => ({
   applyKqlFilterQuery: jest.fn(),
 }));
