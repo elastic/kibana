@@ -65,7 +65,17 @@ const telemetry = (kibana: any) => {
             `https://telemetry.elastic.co/xpack/${ENDPOINT_VERSION}/send`
           ),
         }),
-      }).default();
+      })
+        .when(
+          Joi.object({
+            optIn: Joi.valid(null).valid(false),
+            allowChangingOptInStatus: false,
+          }).unknown(),
+          {
+            then: Joi.object({ allowChangingOptInStatus: Joi.invalid(false) }),
+          }
+        )
+        .default();
     },
     uiExports: {
       managementSections: ['plugins/telemetry/views/management'],
