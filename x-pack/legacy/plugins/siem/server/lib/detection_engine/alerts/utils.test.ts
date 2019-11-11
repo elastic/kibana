@@ -35,7 +35,9 @@ const mockLogger: Logger = {
     return logString;
   }),
   trace: jest.fn(),
-  debug: jest.fn(),
+  debug: jest.fn((logString: string) => {
+    return logString;
+  }),
   error: jest.fn((logString: string) => {
     return logString;
   }),
@@ -115,7 +117,7 @@ describe('utils', () => {
         mockService,
         mockLogger
       );
-      expect(mockLogger.info).toHaveBeenCalledTimes(2);
+      expect(mockLogger.debug).toHaveBeenCalledTimes(2);
       expect(mockLogger.warn).toHaveBeenCalledTimes(0);
       expect(successfulSingleBulkIndex).toEqual(true);
     });
@@ -138,9 +140,9 @@ describe('utils', () => {
         mockService,
         mockLogger
       );
-      expect(mockLogger.info).toHaveBeenCalledTimes(0);
-      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
-      expect(successfulSingleBulkIndex).toEqual(false);
+      expect(mockLogger.debug).toHaveBeenCalledTimes(0);
+      expect(mockLogger.error).toHaveBeenCalledTimes(0);
+      expect(successfulSingleBulkIndex).toEqual(true);
     });
     test('create unsuccessful bulk index due to bulk index errors', async () => {
       // need a sample search result, sample signal params, mock service, mock logger
@@ -178,7 +180,7 @@ describe('utils', () => {
         mockService,
         mockLogger
       );
-      expect(mockLogger.info).toHaveBeenCalledTimes(2);
+      expect(mockLogger.debug).toHaveBeenCalledTimes(2);
       expect(mockLogger.warn).toHaveBeenCalledTimes(0);
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
       expect(successfulSingleBulkIndex).toEqual(false);
@@ -283,6 +285,33 @@ describe('utils', () => {
     });
   });
   describe('searchAfterAndBulkIndex', () => {
+    test('if successful with empty search results', async () => {
+      const searchAfterSortId = '1234567891111';
+      const sampleParams = sampleSignalAlertParams(undefined);
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const expectedSearchAfterQuery = buildEventsSearchQuery({
+        index: sampleParams.index,
+        from: sampleParams.from,
+        to: sampleParams.to,
+        filter: sampleParams.filter,
+        size: sampleParams.size ? sampleParams.size : 1,
+        searchAfterSortId,
+        maxDocs: undefined,
+      });
+      const mockService: AlertServices = {
+        callCluster: jest.fn(),
+        alertInstanceFactory: jest.fn(),
+        savedObjectsClient,
+      };
+      const result = await searchAfterAndBulkIndex(
+        sampleEmptyDocSearchResults,
+        sampleParams,
+        mockService,
+        mockLogger
+      );
+      expect(mockService.callCluster).toHaveBeenCalledTimes(0);
+      expect(result).toEqual(true);
+    });
     test('if one successful iteration of searchAfterAndBulkIndex', async () => {
       const searchAfterSortId = '1234567891111';
       const sampleParams = sampleSignalAlertParams(undefined);
@@ -396,7 +425,7 @@ describe('utils', () => {
         mockService,
         mockLogger
       );
-      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).toHaveBeenCalledTimes(2);
       expect(result).toEqual(false);
     });
     test('if unsuccessful iteration of searchAfterAndBulkIndex due to empty sort ids', async () => {
@@ -530,7 +559,7 @@ describe('utils', () => {
         mockService,
         mockLogger
       );
-      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).toHaveBeenCalledTimes(1);
       expect(result).toEqual(true);
     });
     test('if logs error when iteration is unsuccessful when bulk index results in a failure', async () => {
