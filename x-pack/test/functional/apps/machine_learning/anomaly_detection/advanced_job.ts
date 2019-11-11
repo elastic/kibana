@@ -276,8 +276,7 @@ export default function({ getService }: FtrProviderContext) {
     },
   ];
 
-  // failing test in 7.5, see #50010
-  describe.skip('advanced job', function() {
+  describe('advanced job', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/ecommerce');
