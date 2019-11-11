@@ -5,6 +5,7 @@
  */
 
 import Joi from 'joi';
+import { range, chunk } from 'lodash';
 
 const scope = 'perf-testing';
 export function initRoutes(server, performanceState) {
@@ -18,32 +19,56 @@ export function initRoutes(server, performanceState) {
         payload: Joi.object({
           tasksToSpawn: Joi.number().required(),
           durationInSeconds: Joi.number().required(),
-          trackExecutionTimeline: Joi.boolean().default(false).required(),
+          trackExecutionTimeline: Joi.boolean()
+            .default(false)
+            .required(),
         }),
       },
     },
     async handler(request) {
-      const { tasksToSpawn, durationInSeconds, trackExecutionTimeline } = request.payload;
-      const tasks = [];
+      performanceState.capture();
 
-      for (let taskIndex = 0; taskIndex < tasksToSpawn; taskIndex++) {
-        tasks.push(
-          await taskManager.schedule(
-            {
-              taskType: 'performanceTestTask',
-              params: { taskIndex, trackExecutionTimeline },
-              scope: [scope],
-            },
-            { request }
+      const { tasksToSpawn, durationInSeconds, trackExecutionTimeline } = request.payload;
+      const startAt = millisecondsFromNow(5000).getTime();
+      await chunk(range(tasksToSpawn), 200)
+        .map(chunkOfTasksToSpawn => () =>
+          Promise.all(
+            chunkOfTasksToSpawn.map(taskIndex =>
+              taskManager.schedule(
+                {
+                  taskType: 'performanceTestTask',
+                  params: {
+                    startAt,
+                    taskIndex,
+                    trackExecutionTimeline,
+                    runUntil: millisecondsFromNow(durationInSeconds * 1000).getTime(),
+                  },
+                  scope: [scope],
+                },
+                { request }
+              )
+            )
           )
-        );
-      }
+        )
+        .reduce((chain, nextExecutor) => {
+          return chain.then(() => nextExecutor());
+        }, Promise.resolve());
 
       return new Promise(resolve => {
         setTimeout(() => {
-          resolve(performanceState);
-        }, durationInSeconds * 1000);
+          performanceState.endCapture().then(resolve);
+        }, durationInSeconds * 1000 + 10000 /* wait extra 10s to drain queue */);
       });
     },
   });
+}
+
+function millisecondsFromNow(ms) {
+  if (!ms) {
+    return;
+  }
+
+  const dt = new Date();
+  dt.setTime(dt.getTime() + ms);
+  return dt;
 }

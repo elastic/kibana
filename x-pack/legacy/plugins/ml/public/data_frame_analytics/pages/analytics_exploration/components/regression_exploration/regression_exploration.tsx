@@ -5,7 +5,8 @@
  */
 
 import React, { FC, Fragment, useState, useEffect } from 'react';
-import { EuiSpacer, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ml } from '../../../../../services/ml_api_service';
 import { DataFrameAnalyticsConfig } from '../../../../common';
 import { EvaluatePanel } from './evaluate_panel';
@@ -18,9 +19,20 @@ interface GetDataFrameAnalyticsResponse {
 }
 
 const LoadingPanel: FC = () => (
-  <EuiPanel>
-    <EuiLoadingSpinner className="mlRegressionExploration__evaluateLoadingSpinner" size="xl" />
+  <EuiPanel className="eui-textCenter">
+    <EuiLoadingSpinner size="xl" />
   </EuiPanel>
+);
+
+export const ExplorationTitle: React.SFC<{ jobId: string }> = ({ jobId }) => (
+  <EuiTitle size="xs">
+    <span>
+      {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.jobIdTitle', {
+        defaultMessage: 'Regression job ID {jobId}',
+        values: { jobId },
+      })}
+    </span>
+  </EuiTitle>
 );
 
 interface Props {
@@ -31,10 +43,11 @@ interface Props {
 export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
   const [isLoadingJobConfig, setIsLoadingJobConfig] = useState<boolean>(false);
+  const [jobConfigErrorMessage, setJobConfigErrorMessage] = useState<undefined | string>(undefined);
 
-  useEffect(() => {
-    (async function() {
-      setIsLoadingJobConfig(true);
+  const loadJobConfig = async () => {
+    setIsLoadingJobConfig(true);
+    try {
       const analyticsConfigs: GetDataFrameAnalyticsResponse = await ml.dataFrameAnalytics.getDataFrameAnalytics(
         jobId
       );
@@ -45,8 +58,41 @@ export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
         setJobConfig(analyticsConfigs.data_frame_analytics[0]);
         setIsLoadingJobConfig(false);
       }
-    })();
+    } catch (e) {
+      if (e.message !== undefined) {
+        setJobConfigErrorMessage(e.message);
+      } else {
+        setJobConfigErrorMessage(JSON.stringify(e));
+      }
+      setIsLoadingJobConfig(false);
+    }
+  };
+
+  useEffect(() => {
+    loadJobConfig();
   }, []);
+
+  if (jobConfigErrorMessage !== undefined) {
+    return (
+      <EuiPanel grow={false}>
+        <ExplorationTitle jobId={jobId} />
+        <EuiSpacer />
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.ml.dataframe.analytics.regressionExploration.jobConfigurationFetchError',
+            {
+              defaultMessage:
+                'Unable to fetch results. An error occurred loading the job configuration data.',
+            }
+          )}
+          color="danger"
+          iconType="cross"
+        >
+          <p>{jobConfigErrorMessage}</p>
+        </EuiCallOut>
+      </EuiPanel>
+    );
+  }
 
   return (
     <Fragment>
