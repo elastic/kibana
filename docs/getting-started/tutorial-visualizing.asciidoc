@@ -140,7 +140,7 @@ menu to create a Map.
 
 . Map the geo coordinates from the log files.
 
-.. Click *Add layer* button.
+.. Click *Add layer*.
 .. Click the *Grid aggregation* data source.
 .. Set *Index pattern* to *logstash*.
 .. Click the *Add layer* button.
