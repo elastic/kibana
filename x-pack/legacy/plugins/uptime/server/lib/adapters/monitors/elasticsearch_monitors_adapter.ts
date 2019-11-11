@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set, reduce } from 'lodash';
-import { INDEX_NAMES, QUERY } from '../../../../common/constants';
+import { get } from 'lodash';
+import { INDEX_NAMES } from '../../../../common/constants';
 import {
   FilterBar,
   MonitorChart,
@@ -13,7 +13,7 @@ import {
   Ping,
   LocationDurationLine,
 } from '../../../../common/graphql/types';
-import { getFilterClause, parseFilterQuery, getHistogramIntervalFormatted } from '../../helper';
+import { getHistogramIntervalFormatted } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
 
@@ -181,155 +181,6 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     });
 
     return monitorChartsData;
-  }
-
-  /**
-   * Provides a count of the current monitors
-   * @param request Kibana request
-   * @param dateRangeStart timestamp bounds
-   * @param dateRangeEnd timestamp bounds
-   * @param filters filters defined by client
-   */
-  public async getSnapshotCount(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    filters?: string | null,
-    statusFilter?: string | null
-  ): Promise<any> {
-    const query = parseFilterQuery(filters);
-    const additionalFilters = [{ exists: { field: 'summary.up' } }];
-    if (query) {
-      additionalFilters.push(query);
-    }
-    const filter = getFilterClause(dateRangeStart, dateRangeEnd, additionalFilters);
-    const params = {
-      index: INDEX_NAMES.HEARTBEAT,
-      body: {
-        query: {
-          bool: {
-            filter,
-          },
-        },
-        size: 0,
-        aggs: {
-          ids: {
-            composite: {
-              sources: [
-                {
-                  id: {
-                    terms: {
-                      field: 'monitor.id',
-                    },
-                  },
-                },
-                {
-                  location: {
-                    terms: {
-                      field: 'observer.geo.name',
-                      missing_bucket: true,
-                    },
-                  },
-                },
-              ],
-              size: QUERY.DEFAULT_AGGS_CAP,
-            },
-            aggs: {
-              latest: {
-                top_hits: {
-                  sort: [{ '@timestamp': { order: 'desc' } }],
-                  _source: {
-                    includes: ['summary.*', 'monitor.id', '@timestamp', 'observer.geo.name'],
-                  },
-                  size: 1,
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    let searchAfter: any = null;
-
-    const summaryByIdLocation: {
-      // ID
-      [key: string]: {
-        // Location
-        [key: string]: { up: number; down: number; timestamp: number };
-      };
-    } = {};
-
-    do {
-      if (searchAfter) {
-        set(params, 'body.aggs.ids.composite.after', searchAfter);
-      }
-
-      const queryResult = await this.database.search(request, params);
-      const idBuckets = get(queryResult, 'aggregations.ids.buckets', []);
-
-      idBuckets.forEach(bucket => {
-        // We only get the latest doc
-        const source: any = get(bucket, 'latest.hits.hits[0]._source');
-        const {
-          summary: { up, down },
-          monitor: { id },
-        } = source;
-        const timestamp = get(source, '@timestamp', 0);
-        const location = get(source, 'observer.geo.name', '');
-
-        let idSummary = summaryByIdLocation[id];
-        if (!idSummary) {
-          idSummary = {};
-          summaryByIdLocation[id] = idSummary;
-        }
-        const locationSummary = idSummary[location];
-        if (!locationSummary || locationSummary.timestamp < timestamp) {
-          idSummary[location] = { timestamp, up, down };
-        }
-      });
-
-      searchAfter = get(queryResult, 'aggregations.ids.after_key');
-    } while (searchAfter);
-
-    let up: number = 0;
-    let mixed: number = 0;
-    let down: number = 0;
-
-    for (const id in summaryByIdLocation) {
-      if (!summaryByIdLocation.hasOwnProperty(id)) {
-        continue;
-      }
-      const locationInfo = summaryByIdLocation[id];
-      const { up: locationUp, down: locationDown } = reduce(
-        locationInfo,
-        (acc, value, key) => {
-          acc.up += value.up;
-          acc.down += value.down;
-          return acc;
-        },
-        { up: 0, down: 0 }
-      );
-
-      if (locationDown === 0) {
-        up++;
-      } else if (locationUp > 0) {
-        mixed++;
-      } else {
-        down++;
-      }
-    }
-
-    const result: any = { up, down, mixed, total: up + down + mixed };
-    if (statusFilter) {
-      for (const status in result) {
-        if (status !== 'total' && status !== statusFilter) {
-          result[status] = 0;
-        }
-      }
-    }
-
-    return result;
   }
 
   /**

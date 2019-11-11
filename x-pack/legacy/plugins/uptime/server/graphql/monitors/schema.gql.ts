@@ -31,17 +31,6 @@ export const monitorsSchema = gql`
     y: UnsignedInteger
   }
 
-  type SnapshotCount {
-    up: Int!
-    down: Int!
-    mixed: Int!
-    total: Int!
-  }
-
-  type Snapshot {
-    counts: SnapshotCount!
-  }
-
   type DataPoint {
     x: UnsignedInteger
     y: Float
@@ -138,13 +127,6 @@ export const monitorsSchema = gql`
       filters: String
       statusFilter: String
     ): LatestMonitorsResult
-
-    getSnapshot(
-      dateRangeStart: String!
-      dateRangeEnd: String!
-      filters: String
-      statusFilter: String
-    ): Snapshot
 
     getSnapshotHistogram(
       dateRangeStart: String!

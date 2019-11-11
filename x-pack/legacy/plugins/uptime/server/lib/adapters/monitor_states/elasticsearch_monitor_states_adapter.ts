@@ -6,10 +6,11 @@
 
 import { DatabaseAdapter } from '../database';
 import { UMMonitorStatesAdapter, GetMonitorStatesResult, CursorPagination } from './adapter_types';
-import { StatesIndexStatus, SnapshotCount } from '../../../../common/graphql/types';
+import { StatesIndexStatus } from '../../../../common/graphql/types';
 import { INDEX_NAMES, CONTEXT_DEFAULTS } from '../../../../common/constants';
 import { fetchPage, MonitorGroups } from './search';
 import { MonitorGroupIterator } from './search/monitor_group_iterator';
+import { Snapshot } from '../../../../common/runtime_types';
 
 export interface QueryContext {
   database: any;
@@ -64,7 +65,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     dateRangeEnd: string,
     filters?: string,
     statusFilter?: string
-  ): Promise<SnapshotCount> {
+  ): Promise<Snapshot> {
     const context: QueryContext = {
       database: this.database,
       request,

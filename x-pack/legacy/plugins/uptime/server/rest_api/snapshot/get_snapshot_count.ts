@@ -6,7 +6,7 @@
 
 import Joi from 'joi';
 import { UMServerLibs } from '../../lib/lib';
-import { SnapshotCount } from '../../../common/graphql/types';
+import { Snapshot } from '../../../common/runtime_types';
 
 export const createGetSnapshotCount = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -22,7 +22,7 @@ export const createGetSnapshotCount = (libs: UMServerLibs) => ({
     },
     tags: ['access:uptime'],
   },
-  handler: async (request: any): Promise<SnapshotCount> => {
+  handler: async (request: any): Promise<Snapshot> => {
     const { dateRangeStart, dateRangeEnd, filters, statusFilter } = request.query;
     return await libs.monitorStates.getSnapshotCount(
       request,
