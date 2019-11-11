@@ -78,7 +78,7 @@ export function getTimelionRequestHandler(dependencies: TimelionVisualizationDep
     const esQueryConfigs = getEsQueryConfig(uiSettings);
 
     // parse the time range client side to make sure it behaves like other charts
-    const timeRangeBounds = timefilter.timefilter.calculateBounds(timeRange);
+    const timeRangeBounds = timefilter.calculateBounds(timeRange);
 
     try {
       return await http.post('../api/timelion/run', {
