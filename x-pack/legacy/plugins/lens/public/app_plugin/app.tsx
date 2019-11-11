@@ -63,7 +63,6 @@ export function App({
   docStorage: SavedObjectStore;
   redirectTo: (id?: string) => void;
 }) {
-  const timeDefaults = core.uiSettings.get('timepicker:timeDefaults');
   const language =
     storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
 
@@ -73,8 +72,8 @@ export function App({
     indexPatternsForTopNav: [],
     query: { query: '', language },
     dateRange: {
-      fromDate: timeDefaults.from,
-      toDate: timeDefaults.to,
+      fromDate: dataShim.timefilter.timefilter.getTime().from,
+      toDate: dataShim.timefilter.timefilter.getTime().to,
     },
     filters: [],
   });
@@ -82,14 +81,14 @@ export function App({
   const { lastKnownDoc } = state;
 
   useEffect(() => {
-    const subscription = data.query.filterManager.getUpdates$().subscribe({
+    const filterSubscription = data.query.filterManager.getUpdates$().subscribe({
       next: () => {
         setState(s => ({ ...s, filters: data.query.filterManager.getFilters() }));
         trackUiEvent('app_filters_updated');
       },
     });
     return () => {
-      subscription.unsubscribe();
+      filterSubscription.unsubscribe();
     };
   }, []);
 
@@ -204,6 +203,8 @@ export function App({
                 } else {
                   trackUiEvent('app_query_change');
                 }
+
+                dataShim.timefilter.timefilter.setTime(dateRange);
 
                 setState(s => ({
                   ...s,
