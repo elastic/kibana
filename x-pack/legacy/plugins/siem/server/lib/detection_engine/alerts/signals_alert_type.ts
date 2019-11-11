@@ -82,6 +82,8 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         to,
         filter: esFilter,
         size: searchAfterSize,
+        maxDocs: maxSignals,
+        searchAfterSortId: undefined,
       });
 
       try {
@@ -99,7 +101,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
             name,
             timeDetected: new Date().toISOString(),
             filter: esFilter,
-            maxDocs: maxSignals,
+            maxDocs: typeof maxSignals === 'number' ? maxSignals : 1000,
             ruleRevision: 1,
             id,
             type,

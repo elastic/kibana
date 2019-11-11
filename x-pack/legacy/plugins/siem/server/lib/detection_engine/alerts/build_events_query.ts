@@ -10,7 +10,8 @@ interface BuildEventsSearchQuery {
   to: string;
   filter: unknown;
   size: number;
-  searchAfterSortId?: string | number;
+  maxDocs: number | undefined;
+  searchAfterSortId: string | number | undefined;
 }
 
 export const buildEventsSearchQuery = ({
@@ -19,6 +20,7 @@ export const buildEventsSearchQuery = ({
   to,
   filter,
   size,
+  maxDocs,
   searchAfterSortId,
 }: BuildEventsSearchQuery) => {
   const filterWithTime = [
@@ -74,7 +76,8 @@ export const buildEventsSearchQuery = ({
           ],
         },
       },
-      track_total_hits: true,
+      // if we have maxDocs, don't utilize track total hits.
+      track_total_hits: maxDocs != null ? false : true,
       sort: [
         {
           '@timestamp': {

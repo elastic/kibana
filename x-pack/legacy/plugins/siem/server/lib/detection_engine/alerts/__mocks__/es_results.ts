@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SignalSourceHit, SignalSearchResponse, SignalAlertParams, BulkResponse } from '../types';
+import { SignalSourceHit, SignalSearchResponse, SignalAlertParams } from '../types';
 
-export const sampleSignalAlertParams = (): SignalAlertParams => ({
+export const sampleSignalAlertParams = (maxSignals: number | undefined): SignalAlertParams => ({
   id: 'rule-1',
   description: 'Detecting root and admin users',
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -19,7 +19,7 @@ export const sampleSignalAlertParams = (): SignalAlertParams => ({
   query: 'user.name: root or user.name: admin',
   language: 'kuery',
   references: ['http://google.com'],
-  maxSignals: 100,
+  maxSignals,
   enabled: true,
   filter: undefined,
   filters: undefined,
@@ -52,6 +52,22 @@ export const sampleDocWithSortId: SignalSourceHit = {
   sort: ['1234567891111'],
 };
 
+export const sampleEmptyDocSearchResults: SignalSearchResponse = {
+  took: 10,
+  timed_out: false,
+  _shards: {
+    total: 10,
+    successful: 10,
+    failed: 0,
+    skipped: 0,
+  },
+  hits: {
+    total: 0,
+    max_score: 100,
+    hits: [],
+  },
+};
+
 export const sampleDocSearchResultsNoSortId: SignalSearchResponse = {
   took: 10,
   timed_out: false,
@@ -71,6 +87,44 @@ export const sampleDocSearchResultsNoSortId: SignalSearchResponse = {
     ],
   },
 };
+
+export const sampleDocSearchResultsNoSortIdNoHits: SignalSearchResponse = {
+  took: 10,
+  timed_out: false,
+  _shards: {
+    total: 10,
+    successful: 10,
+    failed: 0,
+    skipped: 0,
+  },
+  hits: {
+    total: 0,
+    max_score: 100,
+    hits: [
+      {
+        ...sampleDocNoSortId,
+      },
+    ],
+  },
+};
+
+export const repeatedSearchResultsWithSortId = (repeat: number) => ({
+  took: 10,
+  timed_out: false,
+  _shards: {
+    total: 10,
+    successful: 10,
+    failed: 0,
+    skipped: 0,
+  },
+  hits: {
+    total: 1,
+    max_score: 100,
+    hits: Array.from({ length: repeat }).map(x => ({
+      ...sampleDocWithSortId,
+    })),
+  },
+});
 
 export const sampleDocSearchResultsWithSortId: SignalSearchResponse = {
   took: 10,
