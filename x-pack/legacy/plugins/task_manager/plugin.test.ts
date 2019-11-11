@@ -46,6 +46,7 @@ describe('Task Manager Plugin', () => {
           "registerTaskDefinitions": [Function],
           "remove": [Function],
           "schedule": [Function],
+          "scheduleIfNotExists": [Function],
         }
       `);
     });
