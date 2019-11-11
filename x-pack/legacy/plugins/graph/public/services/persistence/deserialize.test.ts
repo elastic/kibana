@@ -91,8 +91,8 @@ describe('deserialize', () => {
           },
         ],
         links: [
-          { inferred: false, label: '', weight: 5, width: 5, source: 2, target: 0 },
-          { inferred: false, label: '', weight: 5, width: 5, source: 2, target: 4 },
+          { label: '', weight: 5, width: 5, source: 2, target: 0 },
+          { label: '', weight: 5, width: 5, source: 2, target: 4 },
         ],
         urlTemplates: [
           {
