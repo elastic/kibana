@@ -10,8 +10,14 @@ import React from 'react';
 import { EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 
+import { HttpSetup } from 'src/core/public';
+
 import { LoadingState } from '../../types';
-// import { AppContext, ContextValue } from '../../../app_context';
+
+interface DeprecationLoggingTabProps extends ReactIntl.InjectedIntlProps {
+  xsrf: string;
+  http: HttpSetup;
+}
 
 interface DeprecationLoggingTabState {
   loadingState: LoadingState;
@@ -19,12 +25,10 @@ interface DeprecationLoggingTabState {
 }
 
 export class DeprecationLoggingToggleUI extends React.Component<
-  ReactIntl.InjectedIntlProps,
+  DeprecationLoggingTabProps,
   DeprecationLoggingTabState
 > {
-  // static contextType = AppContext;
-  // readonly context: ContextValue = null as any;
-  constructor(props: ReactIntl.InjectedIntlProps) {
+  constructor(props: DeprecationLoggingTabProps) {
     super(props);
 
     this.state = {
@@ -85,7 +89,7 @@ export class DeprecationLoggingToggleUI extends React.Component<
     try {
       this.setState({ loadingState: LoadingState.Loading });
       const resp = await axios.get(
-        this.context.http.basePath.prepend('/api/upgrade_assistant/deprecation_logging')
+        this.props.http.basePath.prepend('/api/upgrade_assistant/deprecation_logging')
       );
       this.setState({
         loadingState: LoadingState.Success,
@@ -98,18 +102,19 @@ export class DeprecationLoggingToggleUI extends React.Component<
 
   private toggleLogging = async () => {
     try {
+      const { http, xsrf } = this.props;
       // Optimistically toggle the UI
       const newEnabled = !this.state.loggingEnabled;
       this.setState({ loadingState: LoadingState.Loading, loggingEnabled: newEnabled });
 
       const resp = await axios.put(
-        this.context.http.basePath.prepend('/api/upgrade_assistant/deprecation_logging'),
+        http.basePath.prepend('/api/upgrade_assistant/deprecation_logging'),
         {
           isEnabled: newEnabled,
         },
         {
           headers: {
-            'kbn-xsrf': this.context.XSRF,
+            'kbn-xsrf': xsrf,
           },
         }
       );

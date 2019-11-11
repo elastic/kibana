@@ -22,7 +22,7 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { CURRENT_MAJOR_VERSION, NEXT_MAJOR_VERSION } from '../../../../../../common/version';
 import { UpgradeAssistantTabProps } from '../../types';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
-// import { useAppContext } from '../../../app_context';
+import { useAppContext } from '../../../app_context';
 
 // Leaving these here even if unused so they are picked up for i18n static analysis
 // Keep this until last minor release (when next major is also released).
@@ -105,6 +105,8 @@ export const StepsUI: StatelessComponent<
     },
     {} as { [checkupType: string]: number }
   );
+
+  const { http, XSRF } = useAppContext();
 
   return (
     <EuiSteps
@@ -262,7 +264,7 @@ export const StepsUI: StatelessComponent<
                 })}
                 describedByIds={['deprecation-logging']}
               >
-                <DeprecationLoggingToggle />
+                <DeprecationLoggingToggle http={http} xsrf={XSRF} />
               </EuiFormRow>
             </Fragment>
           ),

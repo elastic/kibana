@@ -10,14 +10,16 @@ import { Subscription } from 'rxjs';
 
 import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { HttpSetup } from 'src/core/public';
 import { ReindexStatus, UIReindexOption } from '../../../../../../../../common/types';
 import { LoadingState } from '../../../../types';
 import { ReindexFlyout } from './flyout';
 import { ReindexPollingService, ReindexState } from './polling_service';
-// import { AppContext, ContextValue } from '../../../../../app_context';
 
 interface ReindexButtonProps {
   indexName: string;
+  xsrf: string;
+  http: HttpSetup;
 }
 
 interface ReindexButtonState {
@@ -30,8 +32,6 @@ interface ReindexButtonState {
  * the given `indexName`.
  */
 export class ReindexButton extends React.Component<ReindexButtonProps, ReindexButtonState> {
-  // static contextType = AppContext;
-  // readonly context: ContextValue = null as any;
   private service: ReindexPollingService;
   private subscription?: Subscription;
 
@@ -154,7 +154,8 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
   }
 
   private newService() {
-    return new ReindexPollingService(this.props.indexName);
+    const { indexName, xsrf, http } = this.props;
+    return new ReindexPollingService(indexName, xsrf, http);
   }
 
   private subscribeToUpdates() {
@@ -200,7 +201,7 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
   };
 
   private async sendUIReindexTelemetryInfo(uiReindexAction: UIReindexOption) {
-    await this.context.http.fetch('/api/upgrade_assistant/telemetry/ui_reindex', {
+    await this.props.http.fetch('/api/upgrade_assistant/telemetry/ui_reindex', {
       method: 'PUT',
       body: JSON.stringify(set({}, uiReindexAction, true)),
     });
