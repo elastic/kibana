@@ -302,6 +302,9 @@ export const convertTimelineAsInput = (
                   ...(basicFilter.query != null
                     ? { query: convertToString(basicFilter.query) }
                     : { query: null }),
+                  ...(basicFilter.range != null
+                    ? { range: convertToString(basicFilter.range) }
+                    : { range: null }),
                 };
               })
             : [],

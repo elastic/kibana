@@ -197,6 +197,8 @@ export interface FilterTimelineInput {
   exists?: Maybe<string>;
 
   bool?: Maybe<string>;
+
+  range?: Maybe<string>;
 }
 
 export interface FilterMetaTimelineInput {
@@ -1913,6 +1915,8 @@ export interface FilterTimelineResult {
   exists?: Maybe<string>;
 
   bool?: Maybe<string>;
+
+  range?: Maybe<string>;
 }
 
 export interface FilterMetaTimelineResult {

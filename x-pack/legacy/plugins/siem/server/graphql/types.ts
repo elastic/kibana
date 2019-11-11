@@ -199,6 +199,8 @@ export interface FilterTimelineInput {
   exists?: Maybe<string>;
 
   bool?: Maybe<string>;
+
+  range?: Maybe<string>;
 }
 
 export interface FilterMetaTimelineInput {
@@ -1915,6 +1917,8 @@ export interface FilterTimelineResult {
   exists?: Maybe<string>;
 
   bool?: Maybe<string>;
+
+  range?: Maybe<string>;
 }
 
 export interface FilterMetaTimelineResult {
@@ -7928,6 +7932,8 @@ export namespace FilterTimelineResultResolvers {
     exists?: ExistsResolver<Maybe<string>, TypeParent, TContext>;
 
     bool?: BoolResolver<Maybe<string>, TypeParent, TContext>;
+
+    range?: RangeResolver<Maybe<string>, TypeParent, TContext>;
   }
 
   export type MetaResolver<
@@ -7946,6 +7952,11 @@ export namespace FilterTimelineResultResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type BoolResolver<
+    R = Maybe<string>,
+    Parent = FilterTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type RangeResolver<
     R = Maybe<string>,
     Parent = FilterTimelineResult,
     TContext = SiemContext

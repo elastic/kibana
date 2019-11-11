@@ -234,6 +234,7 @@ describe('Epic Timeline', () => {
               value: null,
             },
             query: '{"match_phrase":{"event.category":"file"}}',
+            range: null,
           },
           {
             bool: null,
@@ -248,6 +249,7 @@ describe('Epic Timeline', () => {
               value: 'exists',
             },
             query: null,
+            range: null,
           },
         ],
         kqlMode: 'filter',

@@ -118,6 +118,7 @@ export const timelineSchema = gql`
     query: String
     exists: String
     bool: String
+    range: String
   }
 
   input TimelineInput {
@@ -205,6 +206,7 @@ export const timelineSchema = gql`
     query: String
     exists: String
     bool: String
+    range: String
   }
 
   type TimelineResult {

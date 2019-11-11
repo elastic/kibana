@@ -79,6 +79,7 @@ const SavedFilterRuntimeType = runtimeTypes.partial({
   bool: unionWithNullType(runtimeTypes.string),
   meta: unionWithNullType(SavedFilterMetaRuntimeType),
   query: unionWithNullType(runtimeTypes.string),
+  range: unionWithNullType(runtimeTypes.string),
 });
 
 /*
