@@ -37,7 +37,7 @@ import {
   EuiConfirmModal,
   EuiCallOut,
 } from '@elastic/eui';
-import { SavedObject, ToastsStart, UiSettingsClientContract } from 'kibana/public';
+import { ToastsStart, UiSettingsClientContract } from 'kibana/public';
 
 export const EMPTY_FILTER = '';
 
@@ -47,13 +47,17 @@ interface Column {
   actions?: object[];
 }
 
+interface Item {
+  id?: string;
+}
+
 export interface TableListViewProps {
   createItem?(): void;
-  deleteItems?(items: SavedObject[]): Promise<void>;
-  editItem?(item: SavedObject): void;
+  deleteItems?(items: object[]): Promise<void>;
+  editItem?(item: object): void;
   entityName: string;
   entityNamePlural: string;
-  findItems(query: string): Promise<{ total: number; hits: SavedObject[] }>;
+  findItems(query: string): Promise<{ total: number; hits: object[] }>;
   listingLimit: number;
   initialFilter: string;
   noItemsFragment: JSX.Element;
@@ -65,7 +69,7 @@ export interface TableListViewProps {
 }
 
 export interface TableListViewState {
-  items: SavedObject[];
+  items: object[];
   hasInitialFetchReturned: boolean;
   isFetchingItems: boolean;
   isDeletingItems: boolean;
@@ -353,7 +357,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   renderTable() {
     const selection = this.props.deleteItems
       ? {
-          onSelectionChange: (obj: SavedObject[]) => {
+          onSelectionChange: (obj: Item[]) => {
             this.setState({
               selectedIds: obj
                 .map(item => item.id)
