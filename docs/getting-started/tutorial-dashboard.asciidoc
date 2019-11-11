@@ -7,6 +7,7 @@ this tutorial.
 
 . Open *Dashboard*.
 . On the Dashboard overview page, click *Create new dashboard*.
+. Set the time filter to May 18, 2015 to May 20, 2015.
 . Click *Add* in the menu bar.
 . Add *Bar Example*, *Map Example*, *Markdown Example*, and *Pie Example*.
 +
