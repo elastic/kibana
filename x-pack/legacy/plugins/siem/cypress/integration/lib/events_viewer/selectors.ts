@@ -11,7 +11,7 @@ export const EVENTS_VIEWER_PANEL = '[data-test-subj="events-viewer-panel"]';
 export const EVENTS_VIEWER_FIELDS_BUTTON = `${EVENTS_VIEWER_PANEL} [data-test-subj="show-field-browser-gear"]`;
 
 /** The KQL search bar that exists at the top of most pages */
-export const KQL_SEARCH_BAR = '[data-test-subj="kqlInput"]';
+export const KQL_SEARCH_BAR = '[data-test-subj="queryInput"]';
 
 /** The Events Viewer Showing N events header subtitle */
 export const HEADER_SUBTITLE = `${EVENTS_VIEWER_PANEL} [data-test-subj="subtitle"]`;
