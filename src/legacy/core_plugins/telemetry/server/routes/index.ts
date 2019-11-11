@@ -24,17 +24,9 @@ import { registerTelemetryDataRoutes } from './telemetry_stats';
 interface RegisterRoutesParams {
   core: CoreSetup;
   currentKibanaVersion: string;
-  allowChangingOptInStatus: boolean;
 }
 
-export function registerRoutes({
-  allowChangingOptInStatus,
-  core,
-  currentKibanaVersion,
-}: RegisterRoutesParams) {
+export function registerRoutes({ core, currentKibanaVersion }: RegisterRoutesParams) {
   registerTelemetryDataRoutes(core);
-
-  if (allowChangingOptInStatus) {
-    registerOptInRoutes({ core, currentKibanaVersion });
-  }
+  registerOptInRoutes({ core, currentKibanaVersion });
 }

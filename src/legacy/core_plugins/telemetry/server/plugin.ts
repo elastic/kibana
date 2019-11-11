@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { first } from 'rxjs/operators';
-import { Observable } from 'rxjs';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { registerRoutes } from './routes';
 import { telemetryCollectionManager } from './collection_manager';
@@ -26,18 +24,14 @@ import { getStats } from './telemetry_collection';
 
 export class TelemetryPlugin {
   private readonly currentKibanaVersion: string;
-  private readonly config$: Observable<any>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.currentKibanaVersion = initializerContext.env.packageInfo.version;
-    this.config$ = initializerContext.config.create();
   }
 
   public async setup(core: CoreSetup) {
     const currentKibanaVersion = this.currentKibanaVersion;
     telemetryCollectionManager.setStatsGetter(getStats, 'local');
-
-    const { allowChangingOptInStatus } = await this.config$.pipe(first()).toPromise();
-    registerRoutes({ allowChangingOptInStatus, core, currentKibanaVersion });
+    registerRoutes({ core, currentKibanaVersion });
   }
 }
