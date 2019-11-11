@@ -244,8 +244,8 @@ describe('filter_manager', () => {
       const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
       const f2 = getFilter(FilterStateStore.APP_STATE, false, false, 'gender', 'female');
 
-      filterManager.addFilters([f1]);
-      filterManager.addFilters([f2]);
+      await filterManager.addFilters([f1]);
+      await filterManager.addFilters([f2]);
       const appFilters = filterManager.getAppFilters();
       expect(appFilters).toHaveLength(2);
       expect(appFilters).toEqual([f1, f2]);
@@ -266,7 +266,7 @@ describe('filter_manager', () => {
       const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
       const f2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'gender', 'female');
 
-      filterManager.addFilters([f1, f2]);
+      await filterManager.addFilters([f1, f2]);
       expect(filterManager.getAppFilters()).toHaveLength(0);
       const globalFilters = filterManager.getGlobalFilters();
       expect(globalFilters).toHaveLength(2);
@@ -276,7 +276,7 @@ describe('filter_manager', () => {
     test('mixed filters: global filters should stay in the beginning', async () => {
       const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
       const f2 = getFilter(FilterStateStore.APP_STATE, false, false, 'gender', 'female');
-      filterManager.addFilters([f1, f2]);
+      await filterManager.addFilters([f1, f2]);
       const filters = filterManager.getFilters();
       expect(filters).toHaveLength(2);
       expect(filters).toEqual([f1, f2]);
@@ -285,7 +285,7 @@ describe('filter_manager', () => {
     test('mixed filters: global filters should move to the beginning', async () => {
       const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
       const f2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'gender', 'female');
-      filterManager.addFilters([f1, f2]);
+      await filterManager.addFilters([f1, f2]);
       const filters = filterManager.getFilters();
       expect(filters).toHaveLength(2);
       expect(filters).toEqual([f2, f1]);
