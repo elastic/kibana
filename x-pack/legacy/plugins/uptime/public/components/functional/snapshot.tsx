@@ -53,12 +53,29 @@ interface DispatchProps {
  */
 type Props = OwnProps & StoreProps & DispatchProps;
 
+export const PresentationalComponent: React.FC<StoreProps & Pick<OwnProps, 'height'>> = ({
+  count,
+  height,
+  loading,
+}) => (
+  <ChartWrapper loading={loading} height={height}>
+    <SnapshotHeading down={get<number>(count, 'down', 0)} total={get<number>(count, 'total', 0)} />
+    <EuiSpacer size="xs" />
+    <DonutChart
+      up={get<number>(count, 'up', 0)}
+      down={get<number>(count, 'down', 0)}
+      height={SNAPSHOT_CHART_HEIGHT}
+      width={SNAPSHOT_CHART_WIDTH}
+    />
+  </ChartWrapper>
+);
+
 /**
  * This component visualizes a KPI and histogram chart to help users quickly
  * glean the status of their uptime environment.
  * @param props the props required by the component
  */
-export const SnapshotComponent: React.FC<Props> = ({
+export const Container: React.FC<Props> = ({
   count,
   dateRangeStart,
   dateRangeEnd,
@@ -71,21 +88,7 @@ export const SnapshotComponent: React.FC<Props> = ({
   useEffect(() => {
     loadSnapshotCount(dateRangeStart, dateRangeEnd, filters, statusFilter);
   }, [dateRangeStart, dateRangeEnd, filters, statusFilter]);
-  return (
-    <ChartWrapper loading={loading} height={height}>
-      <SnapshotHeading
-        down={get<number>(count, 'down', 0)}
-        total={get<number>(count, 'total', 0)}
-      />
-      <EuiSpacer size="xs" />
-      <DonutChart
-        up={get<number>(count, 'up', 0)}
-        down={get<number>(count, 'down', 0)}
-        height={SNAPSHOT_CHART_HEIGHT}
-        width={SNAPSHOT_CHART_WIDTH}
-      />
-    </ChartWrapper>
-  );
+  return <PresentationalComponent count={count} height={height} loading={loading} />;
 };
 
 /**
@@ -116,4 +119,4 @@ export const Snapshot = connect<StoreProps, DispatchProps, OwnProps>(
   // @ts-ignore connect is expecting null | undefined for some reason
   mapStateToProps,
   mapDispatchToProps
-)(SnapshotComponent);
+)(Container);
