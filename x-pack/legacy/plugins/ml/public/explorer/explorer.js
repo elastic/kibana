@@ -10,7 +10,7 @@
 
 import _ from 'lodash';
 import PropTypes from 'prop-types';
-import React, { Fragment } from 'react';
+import React, { createRef } from 'react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import DragSelect from 'dragselect/dist/ds.min.js';
 import { map, takeUntil } from 'rxjs/operators';
@@ -40,7 +40,7 @@ import { formatHumanReadableDateTime } from '../util/date_utils';
 import { getBoundsRoundedToInterval } from '../util/time_buckets';
 import { getSelectedJobIds } from '../components/job_selector/job_select_service_utils';
 import { InfluencersList } from '../components/influencers_list';
-import { ALLOW_CELL_RANGE_SELECTION, dragSelect$, explorer$ } from './explorer_dashboard_service';
+import { ALLOW_CELL_RANGE_SELECTION, dragSelect$, getExplorerDefaultState, explorer$, explorerState$ } from './explorer_dashboard_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { NavigationMenu } from '../components/navigation_menu';
@@ -89,48 +89,19 @@ import {
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
-import { ML_RESULTS_INDEX_PATTERN } from '../../common/constants/index_patterns';
 
 // Explorer Charts
 import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_container';
 
 // Anomalies Table
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
+
+import { ResizeChecker } from 'ui/resize_checker';
 import { timefilter } from 'ui/timefilter';
 import { toastNotifications } from 'ui/notify';
 
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 import { Subject } from 'rxjs';
-
-function getExplorerDefaultState() {
-  return {
-    annotationsData: [],
-    anomalyChartRecords: [],
-    chartsData: getDefaultChartsData(),
-    filterActive: false,
-    filteredFields: [],
-    filterPlaceHolder: undefined,
-    indexPattern: { title: ML_RESULTS_INDEX_PATTERN, fields: [] },
-    influencersFilterQuery: undefined,
-    hasResults: false,
-    influencers: {},
-    isAndOperator: false,
-    loading: true,
-    noInfluencersConfigured: true,
-    noJobsFound: true,
-    overallSwimlaneData: [],
-    queryString: '',
-    selectedCells: null,
-    selectedJobs: null,
-    swimlaneViewByFieldName: undefined,
-    tableData: {},
-    tableQueryString: '',
-    viewByLoadedForTimeFormatted: null,
-    viewBySwimlaneData: getDefaultViewBySwimlaneData(),
-    viewBySwimlaneDataLoading: false,
-    viewBySwimlaneOptions: [],
-  };
-}
 
 function mapSwimlaneOptionsToEuiOptions(options) {
   return options.map(option => ({
@@ -139,18 +110,19 @@ function mapSwimlaneOptionsToEuiOptions(options) {
   }));
 }
 
-const ExplorerPage = ({ children, jobSelectorProps }) => (
-  <Fragment>
+const ExplorerPage = ({ children, jobSelectorProps, resizeRef }) => (
+  <div ref={resizeRef}>
     <NavigationMenu tabId="explorer" />
     <JobSelector {...jobSelectorProps} />
     {children}
-  </Fragment>
+  </div>
 );
 
 export const Explorer = injectI18n(injectObservablesAsProps(
   {
     annotationsRefresh: annotationsRefresh$,
     explorer: explorer$,
+    explorerState: explorerState$,
     showCharts: showCharts$,
     swimlaneLimit: limit$.pipe(map(d => d.val)),
     tableInterval: interval$.pipe(map(d => d.val)),
@@ -158,11 +130,18 @@ export const Explorer = injectI18n(injectObservablesAsProps(
   },
   class Explorer extends React.Component {
     static propTypes = {
+      annotationsRefresh: PropTypes.bool,
       appStateHandler: PropTypes.func.isRequired,
-      config: PropTypes.object.isRequired,
+      componentDidMountCallback: PropTypes.func.isRequired,
       dateFormatTz: PropTypes.string.isRequired,
+      explorer: PropTypes.object.isRequired,
+      explorerState: PropTypes.object.isRequired,
       globalState: PropTypes.object.isRequired,
       jobSelectService: PropTypes.object.isRequired,
+      showCharts: PropTypes.bool.isRequired,
+      swimlaneLimit: PropTypes.number.isRequired,
+      tableInterval: PropTypes.string.isRequired,
+      tableSeverity: PropTypes.number.isRequired,
       TimeBuckets: PropTypes.func.isRequired,
     };
 
@@ -217,6 +196,12 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       this.dragSelect.setSelectables(document.getElementsByClassName('sl-cell'));
     };
 
+    resizeRef = createRef();
+    resizeChecker = undefined;
+    resizeHandler = () => {
+      explorer$.next({ action: EXPLORER_ACTION.REDRAW });
+    }
+
     componentDidMount() {
       this.updateCharts = explorerChartsContainerServiceFactory((data) => {
         this.setState({
@@ -234,11 +219,21 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         this.resetCache();
         this.updateExplorer();
       });
+
+      // Required to redraw the time series chart when the container is resized.
+      this.resizeChecker = new ResizeChecker(this.resizeRef.current);
+      this.resizeChecker.on('resize', () => {
+        this.resizeHandler();
+      });
+      this.resizeHandler();
+
+      this.props.componentDidMountCallback();
     }
 
     componentWillUnmount() {
       this._unsubscribeAll.next();
       this._unsubscribeAll.complete();
+      this.resizeChecker.destroy();
     }
 
     resetCache() {
@@ -1139,7 +1134,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       if (loading === true) {
         return (
-          <ExplorerPage jobSelectorProps={jobSelectorProps}>
+          <ExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}>
             <LoadingIndicator
               label={intl.formatMessage({
                 id: 'xpack.ml.explorer.loadingLabel',
@@ -1151,11 +1146,11 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       }
 
       if (noJobsFound) {
-        return <ExplorerPage jobSelectorProps={jobSelectorProps}><ExplorerNoJobsFound /></ExplorerPage>;
+        return <ExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}><ExplorerNoJobsFound /></ExplorerPage>;
       }
 
       if (noJobsFound && hasResults === false) {
-        return <ExplorerPage jobSelectorProps={jobSelectorProps}><ExplorerNoResultsFound /></ExplorerPage>;
+        return <ExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}><ExplorerNoResultsFound /></ExplorerPage>;
       }
 
       const mainColumnWidthClassName = noInfluencersConfigured === true ? 'col-xs-12' : 'col-xs-10';
@@ -1168,7 +1163,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       );
 
       return (
-        <ExplorerPage jobSelectorProps={jobSelectorProps}>
+        <ExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}>
           <div className="results-container">
             {/* Make sure ChartTooltip is inside this plain wrapping div so positioning can be infered correctly. */}
             <ChartTooltip />

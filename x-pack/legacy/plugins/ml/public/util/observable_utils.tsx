@@ -41,6 +41,17 @@ export function injectObservablesAsProps(
     }
 
     public render() {
+      // All injected observables are expected to provide initial state.
+      // If an observable has undefined as its current value, rendering
+      // the wrapped component will be skipped.
+      if (
+        Object.keys(this.state)
+          .map(k => this.state[k])
+          .some(v => v === undefined)
+      ) {
+        return null;
+      }
+
       return (
         <WrappedComponent {...this.props} {...this.state}>
           {this.props.children}
