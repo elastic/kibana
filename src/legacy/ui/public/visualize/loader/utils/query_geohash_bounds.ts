@@ -22,13 +22,13 @@ import { get } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 
 import { AggConfig } from 'ui/vis';
-import { Filter } from '@kbn/es-query';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { timefilter } from 'ui/timefilter';
 import { Vis } from '../../../vis';
+import { esFilters } from '../../../../../../plugins/data/public';
 
 interface QueryGeohashBoundsParams {
-  filters?: Filter[];
+  filters?: esFilters.Filter[];
   query?: Query;
 }
 
@@ -76,7 +76,7 @@ export async function queryGeohashBounds(vis: Vis, params: QueryGeohashBoundsPar
         const useTimeFilter = !!indexPattern.timeFieldName;
         if (useTimeFilter) {
           const filter = timefilter.createFilter(indexPattern);
-          if (filter) activeFilters.push((filter as any) as Filter);
+          if (filter) activeFilters.push((filter as any) as esFilters.Filter);
         }
         return activeFilters;
       });
