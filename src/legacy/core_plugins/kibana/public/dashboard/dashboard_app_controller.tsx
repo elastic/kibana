@@ -38,7 +38,6 @@ import { State } from 'ui/state_management/state';
 import { AppStateClass as TAppStateClass } from 'ui/state_management/app_state';
 
 import { KbnUrl } from 'ui/url/kbn_url';
-import { Filter } from '@kbn/es-query';
 import { IndexPattern } from 'ui/index_patterns';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
 import { Subscription } from 'rxjs';
@@ -50,6 +49,8 @@ import {
   Query,
   SavedQuery,
 } from '../../../data/public';
+import { start as data } from '../../../data/public/legacy';
+import { esFilters } from '../../../../../plugins/data/public';
 
 import {
   DashboardContainer,
@@ -511,7 +512,7 @@ export class DashboardAppController {
       }
     );
 
-    $scope.$watch('appState.$newFilters', (filters: Filter[] = []) => {
+    $scope.$watch('appState.$newFilters', (filters: esFilters.Filter[] = []) => {
       if (filters.length === 1) {
         $scope.onApplyFilters(filters);
       }

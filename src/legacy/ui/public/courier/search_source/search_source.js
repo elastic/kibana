@@ -71,13 +71,13 @@
 
 import _ from 'lodash';
 import angular from 'angular';
-import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
+import { getEsQueryConfig, buildEsQuery } from '@kbn/es-query';
 
 import { normalizeSortRequest } from './_normalize_sort_request';
 
 import { fetchSoon } from '../fetch';
 import { fieldWildcardFilter } from '../../field_wildcard';
-import { getHighlightRequest } from '../../../../../plugins/data/common/field_formats';
+import { getHighlightRequest } from '../../../../../plugins/data/public';
 import { npSetup } from 'ui/new_platform';
 import chrome from '../../chrome';
 import { RequestFailure } from '../fetch/errors';

@@ -18,13 +18,13 @@
  */
 
 import { EuiBadge, useInnerText } from '@elastic/eui';
-import { Filter, isFilterPinned } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { SFC } from 'react';
 import { getFilterDisplayText } from '../filter_editor/lib/get_filter_display_text';
+import { esFilters } from '../../../../../../../plugins/data/public';
 
 interface Props {
-  filter: Filter;
+  filter: esFilters.Filter;
   displayName: string;
   [propName: string]: any;
 }
@@ -44,7 +44,7 @@ export const FilterView: SFC<Props> = ({
     values: { innerText },
   });
 
-  if (isFilterPinned(filter)) {
+  if (esFilters.isFilterPinned(filter)) {
     title = `${i18n.translate('data.filter.filterBar.pinnedFilterPrefix', {
       defaultMessage: 'Pinned',
     })} ${title}`;
