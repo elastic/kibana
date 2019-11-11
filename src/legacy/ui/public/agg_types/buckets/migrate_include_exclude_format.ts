@@ -37,7 +37,11 @@ export const migrateIncludeExcludeFormat = {
     if (!value || isString(value)) return value;
     else return value.pattern;
   },
-  write(this: BucketAggType<IBucketAggConfig>, aggConfig: AggConfig, output: Record<string, any>) {
+  write(
+    this: BucketAggType<IBucketAggConfig>,
+    aggConfig: IBucketAggConfig,
+    output: Record<string, any>
+  ) {
     const value = aggConfig.getParam(this.name);
 
     if (isObject(value)) {

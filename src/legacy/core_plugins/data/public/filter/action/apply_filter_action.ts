@@ -18,21 +18,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Filter } from '@kbn/es-query';
 import { CoreStart } from 'src/core/public';
 import {
   IAction,
   createAction,
   IncompatibleActionError,
 } from '../../../../../../plugins/ui_actions/public';
-import { FilterManager } from '../../../../../../plugins/data/public';
+import { FilterManager, esFilters } from '../../../../../../plugins/data/public';
 import { TimefilterContract, changeTimeFilter, extractTimeFilter } from '../../timefilter';
 import { applyFiltersPopover } from '../apply_filters/apply_filters_popover';
 import { IndexPatternsStart } from '../../index_patterns';
 export const GLOBAL_APPLY_FILTER_ACTION = 'GLOBAL_APPLY_FILTER_ACTION';
 
 interface ActionContext {
-  filters: Filter[];
+  filters: esFilters.Filter[];
   timeFieldName?: string;
 }
 
@@ -64,7 +63,7 @@ export function createFilterAction(
         throw new IncompatibleActionError();
       }
 
-      let selectedFilters: Filter[] = filters;
+      let selectedFilters: esFilters.Filter[] = filters;
 
       if (selectedFilters.length > 1) {
         const indexPatterns = await Promise.all(
@@ -73,7 +72,7 @@ export function createFilterAction(
           })
         );
 
-        const filterSelectionPromise: Promise<Filter[]> = new Promise(resolve => {
+        const filterSelectionPromise: Promise<esFilters.Filter[]> = new Promise(resolve => {
           const overlay = overlays.openModal(
             applyFiltersPopover(
               filters,
@@ -82,7 +81,7 @@ export function createFilterAction(
                 overlay.close();
                 resolve([]);
               },
-              (filterSelection: Filter[]) => {
+              (filterSelection: esFilters.Filter[]) => {
                 overlay.close();
                 resolve(filterSelection);
               }

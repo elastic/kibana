@@ -28,7 +28,6 @@ import { NumberIntervalParamEditor } from '../../vis/editors/default/controls/nu
 import { MinDocCountParamEditor } from '../../vis/editors/default/controls/min_doc_count';
 import { HasExtendedBoundsParamEditor } from '../../vis/editors/default/controls/has_extended_bounds';
 import { ExtendedBoundsParamEditor } from '../../vis/editors/default/controls/extended_bounds';
-import { AggConfig } from '../agg_config';
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
@@ -205,7 +204,7 @@ export const histogramBucketAgg = new BucketAggType<IBucketHistogramAggConfig>({
           output.params.extended_bounds = { min, max };
         }
       },
-      shouldShow: (aggConfig: AggConfig) => aggConfig.params.has_extended_bounds,
+      shouldShow: (aggConfig: IBucketAggConfig) => aggConfig.params.has_extended_bounds,
     },
   ],
 });

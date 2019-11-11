@@ -32,7 +32,6 @@ import { DropPartialsParamEditor } from '../../vis/editors/default/controls/drop
 import { ScaleMetricsParamEditor } from '../../vis/editors/default/controls/scale_metrics';
 import { dateHistogramInterval } from '../../../../core_plugins/data/public';
 import { writeParams } from '../agg_params';
-import { AggConfig } from '../agg_config';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
@@ -194,7 +193,7 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
         const scaleMetrics = scaleMetricValues && interval.scaled && interval.scale < 1;
         if (scaleMetrics && aggs) {
           const metrics = aggs.aggs.filter(a => isMetricAggType(a.type));
-          const all = _.every(metrics, (a: AggConfig) => {
+          const all = _.every(metrics, (a: IBucketAggConfig) => {
             const { type } = a;
 
             if (isMetricAggType(type)) {
