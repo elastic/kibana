@@ -329,13 +329,13 @@ export interface InternalApplicationStart
    * Apps available based on the current capabilities. Should be used
    * to show navigation links and make routing decisions.
    */
-  availableApps: ReadonlyMap<string, App>;
+  availableApps$: Observable<ReadonlyMap<string, App>>;
   /**
    * Apps available based on the current capabilities. Should be used
    * to show navigation links and make routing decisions.
    * @internal
    */
-  availableLegacyApps: ReadonlyMap<string, LegacyApp>;
+  availableLegacyApps$: Observable<ReadonlyMap<string, LegacyApp>>;
 
   /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the

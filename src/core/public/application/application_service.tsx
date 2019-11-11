@@ -124,9 +124,14 @@ export class ApplicationService {
     // Only setup history if we're not in legacy mode
     const history = legacyMode ? null : createBrowserHistory({ basename: http.basePath.get() });
 
+    const availableApps$ = new BehaviorSubject<ReadonlyMap<string, App>>(availableApps);
+    const availableLegacyApps$ = new BehaviorSubject<ReadonlyMap<string, LegacyApp>>(
+      availableLegacyApps
+    );
+
     return {
-      availableApps,
-      availableLegacyApps,
+      availableApps$,
+      availableLegacyApps$,
       capabilities,
       registerMountContext: this.mountContext.registerContext,
       currentAppId$,

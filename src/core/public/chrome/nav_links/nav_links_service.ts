@@ -18,7 +18,7 @@
  */
 
 import { sortBy } from 'lodash';
-import { BehaviorSubject, ReplaySubject, Observable } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, Observable, combineLatest } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { NavLinkWrapper, ChromeNavLinkUpdateableFields, ChromeNavLink } from './nav_link';
 import { InternalApplicationStart } from '../../application';
@@ -99,33 +99,53 @@ export class NavLinksService {
   private readonly stop$ = new ReplaySubject(1);
 
   public start({ application, http }: StartDeps): ChromeNavLinks {
-    const appLinks = [...application.availableApps].map(
-      ([appId, app]) =>
-        [
-          appId,
-          new NavLinkWrapper({
-            ...app,
-            legacy: false,
-            baseUrl: relativeToAbsolute(http.basePath.prepend(`/app/${appId}`)),
-          }),
-        ] as [string, NavLinkWrapper]
+    const appLinks$ = application.availableApps$.pipe(
+      map(apps => {
+        return new Map(
+          [...apps].map(
+            ([appId, app]) =>
+              [
+                appId,
+                new NavLinkWrapper({
+                  ...app,
+                  legacy: false,
+                  baseUrl: relativeToAbsolute(http.basePath.prepend(`/app/${appId}`)),
+                }),
+              ] as [string, NavLinkWrapper]
+          )
+        );
+      })
+    );
+    const legacyAppLinks$ = application.availableLegacyApps$.pipe(
+      map(apps => {
+        return new Map(
+          [...apps].map(
+            ([appId, app]) =>
+              [
+                appId,
+                new NavLinkWrapper({
+                  ...app,
+                  legacy: true,
+                  baseUrl: relativeToAbsolute(http.basePath.prepend(app.appUrl)),
+                }),
+              ] as [string, NavLinkWrapper]
+          )
+        );
+      })
     );
 
-    const legacyAppLinks = [...application.availableLegacyApps].map(
-      ([appId, app]) =>
-        [
-          appId,
-          new NavLinkWrapper({
-            ...app,
-            legacy: true,
-            baseUrl: relativeToAbsolute(http.basePath.prepend(app.appUrl)),
-          }),
-        ] as [string, NavLinkWrapper]
-    );
+    const navLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(new Map());
 
-    const navLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(
-      new Map([...legacyAppLinks, ...appLinks])
-    );
+    combineLatest([appLinks$, legacyAppLinks$])
+      .pipe(
+        map(([appLinks, legacyAppLinks]) => {
+          return new Map([...legacyAppLinks, ...appLinks]);
+        })
+      )
+      .subscribe(navlinks => {
+        navLinks$.next(navlinks);
+      });
+
     const forceAppSwitcherNavigation$ = new BehaviorSubject(false);
 
     return {
@@ -153,7 +173,6 @@ export class NavLinksService {
         if (!this.has(id)) {
           return;
         }
-
         navLinks$.next(new Map([...navLinks$.value.entries()].filter(([linkId]) => linkId === id)));
       },
 
@@ -161,7 +180,6 @@ export class NavLinksService {
         if (!this.has(id)) {
           return;
         }
-
         navLinks$.next(
           new Map(
             [...navLinks$.value.entries()].map(([linkId, link]) => {
@@ -172,7 +190,6 @@ export class NavLinksService {
             })
           )
         );
-
         return this.get(id);
       },
 

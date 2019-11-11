@@ -19,27 +19,30 @@
 
 import { NavLinksService } from './nav_links_service';
 import { take, map, takeLast } from 'rxjs/operators';
-import { LegacyApp } from '../../application';
+import { App, LegacyApp } from '../../application';
+import { BehaviorSubject } from 'rxjs';
 
 const mockAppService = {
-  availableApps: new Map(),
-  availableLegacyApps: new Map<string, LegacyApp>([
-    [
-      'legacyApp1',
-      { id: 'legacyApp1', order: 0, title: 'Legacy App 1', icon: 'legacyApp1', appUrl: '/app1' },
-    ],
-    [
-      'legacyApp2',
-      {
-        id: 'legacyApp2',
-        order: -10,
-        title: 'Legacy App 2',
-        euiIconType: 'canvasApp',
-        appUrl: '/app2',
-      },
-    ],
-    ['legacyApp3', { id: 'legacyApp3', order: 20, title: 'Legacy App 3', appUrl: '/app3' }],
-  ]),
+  availableApps$: new BehaviorSubject<ReadonlyMap<string, App>>(new Map()),
+  availableLegacyApps$: new BehaviorSubject<ReadonlyMap<string, LegacyApp>>(
+    new Map([
+      [
+        'legacyApp1',
+        { id: 'legacyApp1', order: 0, title: 'Legacy App 1', icon: 'legacyApp1', appUrl: '/app1' },
+      ],
+      [
+        'legacyApp2',
+        {
+          id: 'legacyApp2',
+          order: -10,
+          title: 'Legacy App 2',
+          euiIconType: 'canvasApp',
+          appUrl: '/app2',
+        },
+      ],
+      ['legacyApp3', { id: 'legacyApp3', order: 20, title: 'Legacy App 3', appUrl: '/app3' }],
+    ])
+  ),
 } as any;
 
 const mockHttp = {

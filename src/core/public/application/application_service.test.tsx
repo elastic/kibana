@@ -25,6 +25,7 @@ import { MockCapabilitiesService, MockHistory } from './application_service.test
 import { ApplicationService } from './application_service';
 import { contextServiceMock } from '../context/context_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
+import { take } from 'rxjs/operators';
 
 describe('#setup()', () => {
   describe('register', () => {
@@ -107,14 +108,16 @@ describe('#start()', () => {
     const injectedMetadata = injectedMetadataServiceMock.createStartContract();
     const startContract = await service.start({ http, injectedMetadata });
 
-    expect(startContract.availableApps).toMatchInlineSnapshot(`
+    await expect(startContract.availableApps$.pipe(take(1)).toPromise()).resolves
+      .toMatchInlineSnapshot(`
                         Map {
                           "app1" => Object {
                             "id": "app1",
                           },
                         }
                 `);
-    expect(startContract.availableLegacyApps).toMatchInlineSnapshot(`
+    await expect(startContract.availableLegacyApps$.pipe(take(1)).toPromise()).resolves
+      .toMatchInlineSnapshot(`
                         Map {
                           "app2" => Object {
                             "id": "app2",
