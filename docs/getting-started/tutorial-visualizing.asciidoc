@@ -7,7 +7,7 @@ visualizations:
 
 * <<tutorial-visualize-pie, Pie chart>>
 * <<tutorial-visualize-bar, Bar chart>>
-* <<tutorial-visualize-map, Coordinate map>>
+* <<tutorial-visualize-map, Map>>
 * <<tutorial-visualize-markdown, Markdown widget>>
 
 [float]
@@ -160,6 +160,7 @@ menu to create a Map.
 .. Set the *Start date* to May 18, 2015.
 .. In the time filter, click *now*, then *Absolute*.
 .. Set the *End date* to May 20, 2015.
+.. Click *Update*
 
 . Map the geo coordinates from the log files.
 
@@ -181,5 +182,3 @@ image::images/tutorial-visualize-map-2.png[]
 . Navigate the map by clicking and dragging.  Use the controls
 on the left to zoom the map and set filters.
 . *Save* this map with the name `Map Example`.
-
-
