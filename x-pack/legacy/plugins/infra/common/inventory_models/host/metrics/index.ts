@@ -52,4 +52,5 @@ export const metrics: InventoryMetrics = {
   },
   snapshot: { count, cpu, load, logRate, memory, rx, tx },
   defaultSnapshot: 'cpu',
+  defaultTimeRangeInSeconds: 3600, // 1 hour
 };

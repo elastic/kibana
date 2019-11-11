@@ -9,6 +9,7 @@ import { InventoryModel } from '../types';
 
 export const awsEC2: InventoryModel = {
   id: 'awsEC2',
+  displayName: 'EC2',
   requiredModules: ['aws'],
   metrics,
   fields: {
@@ -16,16 +17,5 @@ export const awsEC2: InventoryModel = {
     name: 'cloud.instance.name',
     ip: 'aws.ec2.instance.public.ip',
   },
-  requiredMetrics: [
-    'hostSystemOverview',
-    'hostCpuUsage',
-    'hostLoad',
-    'hostMemoryUsage',
-    'hostNetworkTraffic',
-    'hostK8sOverview',
-    'hostK8sCpuCap',
-    'hostK8sMemoryCap',
-    'hostK8sDiskCap',
-    'hostK8sPodCap',
-  ],
+  requiredMetrics: ['awsEC2CpuUtilization', 'awsEC2NetworkTraffic', 'awsEC2DiskIOBytes'],
 };

@@ -2588,6 +2588,24 @@
             "isDeprecated": false,
             "deprecationReason": null
           },
+          {
+            "name": "awsEC2CpuUtilization",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "awsEC2NetworkTraffic",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "awsEC2DiskIOBytes",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           { "name": "custom", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
         "possibleTypes": null

@@ -8,89 +8,25 @@ import { i18n } from '@kbn/i18n';
 import { LayoutPropsWithTheme } from '../../../public/pages/metrics/types';
 import { Section } from '../../../public/pages/metrics/components/section';
 import { SubSection } from '../../../public/pages/metrics/components/sub_section';
-import { GaugesSectionVis } from '../../../public/pages/metrics/components/gauges_section_vis';
 import { ChartSectionVis } from '../../../public/pages/metrics/components/chart_section_vis';
 import { withTheme } from '../../../../../common/eui_styled_components';
-import * as Aws from '../shared/layouts/aws';
-import * as Ngnix from '../shared/layouts/nginx';
 
 export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
   <React.Fragment>
     <Section
-      navLabel={i18n.translate('xpack.infra.metricDetailPage.hostMetricsLayout.layoutLabel', {
-        defaultMessage: 'Host',
-      })}
+      navLabel="AWS EC2"
       sectionLabel={i18n.translate(
-        'xpack.infra.metricDetailPage.hostMetricsLayout.overviewSection.sectionLabel',
+        'xpack.infra.metricDetailPage.ec2MetricsLayout.overviewSection.sectionLabel',
         {
-          defaultMessage: 'Host Overview',
+          defaultMessage: 'Aws EC2 Overview',
         }
       )}
       metrics={metrics}
     >
-      <SubSection id="hostSystemOverview">
-        <GaugesSectionVis
-          seriesOverrides={{
-            cpu: {
-              name: i18n.translate(
-                'xpack.infra.metricDetailPage.hostMetricsLayout.overviewSection.cpuUsageSeriesLabel',
-                {
-                  defaultMessage: 'CPU Usage',
-                }
-              ),
-              color: theme.eui.euiColorFullShade,
-              formatter: 'percent',
-              gaugeMax: 1,
-            },
-            load: {
-              name: i18n.translate(
-                'xpack.infra.metricDetailPage.hostMetricsLayout.overviewSection.loadSeriesLabel',
-                {
-                  defaultMessage: 'Load (5m)',
-                }
-              ),
-              color: theme.eui.euiColorFullShade,
-            },
-            memory: {
-              name: i18n.translate(
-                'xpack.infra.metricDetailPage.hostMetricsLayout.overviewSection.memoryCapacitySeriesLabel',
-                {
-                  defaultMessage: 'Memory Usage',
-                }
-              ),
-              color: theme.eui.euiColorFullShade,
-              formatter: 'percent',
-              gaugeMax: 1,
-            },
-            rx: {
-              name: i18n.translate(
-                'xpack.infra.metricDetailPage.hostMetricsLayout.overviewSection.inboundRXSeriesLabel',
-                {
-                  defaultMessage: 'Inbound (RX)',
-                }
-              ),
-              color: theme.eui.euiColorFullShade,
-              formatter: 'bits',
-              formatterTemplate: '{{value}}/s',
-            },
-            tx: {
-              name: i18n.translate(
-                'xpack.infra.metricDetailPage.hostMetricsLayout.overviewSection.outboundTXSeriesLabel',
-                {
-                  defaultMessage: 'Outbound (TX)',
-                }
-              ),
-              color: theme.eui.euiColorFullShade,
-              formatter: 'bits',
-              formatterTemplate: '{{value}}/s',
-            },
-          }}
-        />
-      </SubSection>
       <SubSection
-        id="hostCpuUsage"
+        id="awsEC2CpuUtilization"
         label={i18n.translate(
-          'xpack.infra.metricDetailPage.hostMetricsLayout.cpuUsageSection.sectionLabel',
+          'xpack.infra.metricDetailPage.ec2MetricsLayout.cpuUsageSection.sectionLabel',
           {
             defaultMessage: 'CPU Usage',
           }
@@ -99,83 +35,17 @@ export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
         <ChartSectionVis
           stacked={true}
           type="area"
-          formatter="percent"
+          formatter="number"
+          formatterTemplate="{{value}}%"
           seriesOverrides={{
-            user: { color: theme.eui.euiColorVis0 },
-            system: { color: theme.eui.euiColorVis2 },
-            steal: { color: theme.eui.euiColorVis9 },
-            irq: { color: theme.eui.euiColorVis4 },
-            softirq: { color: theme.eui.euiColorVis6 },
-            iowait: { color: theme.eui.euiColorVis7 },
-            nice: { color: theme.eui.euiColorVis5 },
+            total: { color: theme.eui.euiColorVis1 },
           }}
         />
       </SubSection>
       <SubSection
-        id="hostLoad"
+        id="awsEC2NetworkTraffic"
         label={i18n.translate(
-          'xpack.infra.metricDetailPage.hostMetricsLayout.loadSection.sectionLabel',
-          {
-            defaultMessage: 'Load',
-          }
-        )}
-      >
-        <ChartSectionVis
-          seriesOverrides={{
-            load_1m: {
-              color: theme.eui.euiColorVis0,
-              name: i18n.translate(
-                'xpack.infra.metricDetailPage.hostMetricsLayout.loadSection.oneMinuteSeriesLabel',
-                {
-                  defaultMessage: '1m',
-                }
-              ),
-            },
-            load_5m: {
-              color: theme.eui.euiColorVis1,
-              name: i18n.translate(
-                'xpack.infra.metricDetailPage.hostMetricsLayout.loadSection.fiveMinuteSeriesLabel',
-                {
-                  defaultMessage: '5m',
-                }
-              ),
-            },
-            load_15m: {
-              color: theme.eui.euiColorVis3,
-              name: i18n.translate(
-                'xpack.infra.metricDetailPage.hostMetricsLayout.loadSection.fifteenMinuteSeriesLabel',
-                {
-                  defaultMessage: '15m',
-                }
-              ),
-            },
-          }}
-        />
-      </SubSection>
-      <SubSection
-        id="hostMemoryUsage"
-        label={i18n.translate(
-          'xpack.infra.metricDetailPage.hostMetricsLayout.memoryUsageSection.sectionLabel',
-          {
-            defaultMessage: 'Memory Usage',
-          }
-        )}
-      >
-        <ChartSectionVis
-          stacked={true}
-          formatter="bytes"
-          type="area"
-          seriesOverrides={{
-            used: { color: theme.eui.euiColorVis2 },
-            free: { color: theme.eui.euiColorVis0 },
-            cache: { color: theme.eui.euiColorVis1 },
-          }}
-        />
-      </SubSection>
-      <SubSection
-        id="hostNetworkTraffic"
-        label={i18n.translate(
-          'xpack.infra.metricDetailPage.hostMetricsLayout.networkTrafficSection.sectionLabel',
+          'xpack.infra.metricDetailPage.ec2MetricsLayout.networkTrafficSection.sectionLabel',
           {
             defaultMessage: 'Network Traffic',
           }
@@ -207,146 +77,41 @@ export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
           }}
         />
       </SubSection>
-    </Section>
-    <Section
-      navLabel="Kubernetes"
-      sectionLabel={i18n.translate(
-        'xpack.infra.metricDetailPage.kubernetesMetricsLayout.overviewSection.sectionLabel',
-        {
-          defaultMessage: 'Kubernetes Overview',
-        }
-      )}
-      metrics={metrics}
-    >
-      <SubSection id="hostK8sOverview">
-        <GaugesSectionVis
-          seriesOverrides={{
-            cpucap: {
-              name: i18n.translate(
-                'xpack.infra.metricDetailPage.kubernetesMetricsLayout.overviewSection.cpuUsageSeriesLabel',
-                {
-                  defaultMessage: 'CPU Capacity',
-                }
-              ),
-              color: 'secondary',
-              formatter: 'percent',
-              gaugeMax: 1,
-            },
-            load: {
-              name: i18n.translate(
-                'xpack.infra.metricDetailPage.kubernetesMetricsLayout.overviewSection.loadSeriesLabel',
-                {
-                  defaultMessage: 'Load (5m)',
-                }
-              ),
-              color: 'secondary',
-            },
-            memorycap: {
-              name: i18n.translate(
-                'xpack.infra.metricDetailPage.kubernetesMetricsLayout.overviewSection.memoryUsageSeriesLabel',
-                {
-                  defaultMessage: 'Memory Capacity',
-                }
-              ),
-              color: 'secondary',
-              formatter: 'percent',
-              gaugeMax: 1,
-            },
-            podcap: {
-              name: i18n.translate(
-                'xpack.infra.metricDetailPage.kubernetesMetricsLayout.overviewSection.podCapacitySeriesLabel',
-                {
-                  defaultMessage: 'Pod Capacity',
-                }
-              ),
-              color: 'secondary',
-              formatter: 'percent',
-              gaugeMax: 1,
-            },
-            diskcap: {
-              name: i18n.translate(
-                'xpack.infra.metricDetailPage.kubernetesMetricsLayout.overviewSection.diskCapacitySeriesLabel',
-                {
-                  defaultMessage: 'Disk Capacity',
-                }
-              ),
-              color: 'secondary',
-              formatter: 'percent',
-              gaugeMax: 1,
-            },
-          }}
-        />
-      </SubSection>
       <SubSection
-        id="hostK8sCpuCap"
+        id="awsEC2DiskIOBytes"
         label={i18n.translate(
-          'xpack.infra.metricDetailPage.kubernetesMetricsLayout.nodeCpuCapacitySection.sectionLabel',
+          'xpack.infra.metricDetailPage.ec2MetricsLayout.diskIOBytesSection.sectionLabel',
           {
-            defaultMessage: 'Node CPU Capacity',
-          }
-        )}
-      >
-        <ChartSectionVis
-          formatter="abbreviatedNumber"
-          seriesOverrides={{
-            capacity: { color: theme.eui.euiColorVis2 },
-            used: { color: theme.eui.euiColorVis1, type: 'area' },
-          }}
-        />
-      </SubSection>
-      <SubSection
-        id="hostK8sMemoryCap"
-        label={i18n.translate(
-          'xpack.infra.metricDetailPage.kubernetesMetricsLayout.nodeMemoryCapacitySection.sectionLabel',
-          {
-            defaultMessage: 'Node Memory Capacity',
+            defaultMessage: 'Disk IO (Bytes)',
           }
         )}
       >
         <ChartSectionVis
           formatter="bytes"
+          formatterTemplate="{{value}}/s"
+          type="area"
           seriesOverrides={{
-            capacity: { color: theme.eui.euiColorVis2 },
-            used: { color: theme.eui.euiColorVis1, type: 'area' },
-          }}
-        />
-      </SubSection>
-      <SubSection
-        id="hostK8sDiskCap"
-        label={i18n.translate(
-          'xpack.infra.metricDetailPage.kubernetesMetricsLayout.nodeDiskCapacitySection.sectionLabel',
-          {
-            defaultMessage: 'Node Disk Capacity',
-          }
-        )}
-      >
-        <ChartSectionVis
-          formatter="bytes"
-          seriesOverrides={{
-            capacity: { color: theme.eui.euiColorVis2 },
-            used: { color: theme.eui.euiColorVis1, type: 'area' },
-          }}
-        />
-      </SubSection>
-      <SubSection
-        id="hostK8sPodCap"
-        label={i18n.translate(
-          'xpack.infra.metricDetailPage.kubernetesMetricsLayout.nodePodCapacitySection.sectionLabel',
-          {
-            defaultMessage: 'Node Pod Capacity',
-          }
-        )}
-      >
-        <ChartSectionVis
-          formatter="number"
-          seriesOverrides={{
-            capacity: { color: theme.eui.euiColorVis2 },
-            used: { color: theme.eui.euiColorVis1, type: 'area' },
+            write: {
+              color: theme.eui.euiColorVis2,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.ec2MetricsLayout.diskIOBytesSection.writeLabel',
+                {
+                  defaultMessage: 'writes',
+                }
+              ),
+            },
+            read: {
+              color: theme.eui.euiColorVis1,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.ec2MetricsLayout.diskIOBytesSection.readLabel',
+                {
+                  defaultMessage: 'reads',
+                }
+              ),
+            },
           }}
         />
       </SubSection>
     </Section>
-    <Aws.Layout metrics={metrics} />
-    <Ngnix.Layout metrics={metrics} />
   </React.Fragment>
 ));

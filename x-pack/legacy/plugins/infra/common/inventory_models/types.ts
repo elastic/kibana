@@ -72,6 +72,9 @@ export const InventoryMetricRT = rt.keyof({
   awsNetworkPackets: null,
   awsDiskioBytes: null,
   awsDiskioOps: null,
+  awsEC2CpuUtilization: null,
+  awsEC2NetworkTraffic: null,
+  awsEC2DiskIOBytes: null,
   custom: null,
 });
 export type InventoryMetric = rt.TypeOf<typeof InventoryMetricRT>;
@@ -277,10 +280,13 @@ export interface InventoryMetrics {
   tsvb: { [name: string]: TSVBMetricModelCreator };
   snapshot: { [name: string]: SnapshotModel };
   defaultSnapshot: SnapshotMetricType;
+  /** This is used by the inventory view to calculate the appropriate amount of time for the metrics detail page. Some metris like awsS3 require multiple days where others like host only need an hour.*/
+  defaultTimeRangeInSeconds: number;
 }
 
 export interface InventoryModel {
   id: string;
+  displayName: string;
   requiredModules: string[];
   fields: {
     id: string;

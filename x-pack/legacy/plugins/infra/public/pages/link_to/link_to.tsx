@@ -23,7 +23,7 @@ export const LinkToPage: React.SFC<LinkToPageProps> = props => (
       component={RedirectToNodeLogs}
     />
     <Route
-      path={`${props.match.url}/:nodeType(host|container|pod)-detail/:nodeId`}
+      path={`${props.match.url}/:nodeType(host|container|pod|awsEC2)-detail/:nodeId`}
       component={RedirectToNodeDetail}
     />
     <Route

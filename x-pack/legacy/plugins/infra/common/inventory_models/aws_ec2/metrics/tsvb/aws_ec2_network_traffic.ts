@@ -6,50 +6,44 @@
 
 import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
-export const hostLoad: TSVBMetricModelCreator = (
+export const awsEC2NetworkTraffic: TSVBMetricModelCreator = (
   timeField,
-  indexPattern,
-  interval
+  indexPattern
 ): TSVBMetricModel => ({
-  id: 'hostLoad',
-  requires: ['system.cpu'],
+  id: 'awsEC2NetworkTraffic',
+  requires: ['aws.ec2'],
   index_pattern: indexPattern,
-  interval,
+  interval: '>=300s',
   time_field: timeField,
   type: 'timeseries',
   series: [
     {
-      id: 'load_1m',
+      id: 'tx',
+      split_mode: 'everything',
       metrics: [
         {
-          field: 'system.load.1',
-          id: 'avg-load-1m',
+          field: 'aws.ec2.network.out.bytes_per_sec',
+          id: 'avg-tx',
           type: 'avg',
         },
       ],
-      split_mode: 'everything',
     },
     {
-      id: 'load_5m',
+      id: 'rx',
+      split_mode: 'everything',
       metrics: [
         {
-          field: 'system.load.5',
-          id: 'avg-load-5m',
+          field: 'aws.ec2.network.in.bytes_per_sec',
+          id: 'avg-rx',
           type: 'avg',
         },
-      ],
-      split_mode: 'everything',
-    },
-    {
-      id: 'load_15m',
-      metrics: [
         {
-          field: 'system.load.15',
-          id: 'avg-load-15m',
-          type: 'avg',
+          id: 'calculation-rate',
+          type: 'calculation',
+          variables: [{ id: 'rate-var', name: 'rate', field: 'avg-rx' }],
+          script: 'params.rate * -1',
         },
       ],
-      split_mode: 'everything',
     },
   ],
 });

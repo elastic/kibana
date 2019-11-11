@@ -19,6 +19,7 @@ import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../pages/link_to';
 import { createUptimeLink } from './lib/create_uptime_link';
+import { findInventoryModel } from '../../../common/inventory_models';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -41,7 +42,6 @@ export const NodeContextMenu = injectUICapabilities(
     isPopoverOpen,
     closePopover,
     nodeType,
-
     uiCapabilities,
     popoverPosition,
   }: Props) => {
@@ -56,6 +56,8 @@ export const NodeContextMenu = injectUICapabilities(
       [InfraNodeType.awsEC2]: 'cloud.instance.id',
     };
 
+    const inventoryModel = findInventoryModel(nodeType);
+
     const nodeLogsMenuItem = {
       name: i18n.translate('xpack.infra.nodeContextMenu.viewLogsName', {
         defaultMessage: 'View logs',
@@ -68,6 +70,7 @@ export const NodeContextMenu = injectUICapabilities(
       'data-test-subj': 'viewLogsContextMenuItem',
     };
 
+    const nodeDetailFrom = timeRange.to - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
     const nodeDetailMenuItem = {
       name: i18n.translate('xpack.infra.nodeContextMenu.viewMetricsName', {
         defaultMessage: 'View metrics',
@@ -75,15 +78,15 @@ export const NodeContextMenu = injectUICapabilities(
       href: getNodeDetailUrl({
         nodeType,
         nodeId: node.id,
-        from: timeRange.from,
+        from: nodeDetailFrom,
         to: timeRange.to,
       }),
     };
 
     const apmTracesMenuItem = {
       name: i18n.translate('xpack.infra.nodeContextMenu.viewAPMTraces', {
-        defaultMessage: 'View {nodeType} APM traces',
-        values: { nodeType },
+        defaultMessage: 'View {name} APM traces',
+        values: { name: inventoryModel.displayName },
       }),
       href: `../app/apm#/traces?_g=()&kuery=${APM_FIELDS[nodeType]}:"${node.id}"`,
       'data-test-subj': 'viewApmTracesContextMenuItem',
@@ -91,8 +94,8 @@ export const NodeContextMenu = injectUICapabilities(
 
     const uptimeMenuItem = {
       name: i18n.translate('xpack.infra.nodeContextMenu.viewUptimeLink', {
-        defaultMessage: 'View {nodeType} in Uptime',
-        values: { nodeType },
+        defaultMessage: 'View {name} in Uptime',
+        values: { name: inventoryModel.displayName },
       }),
       href: createUptimeLink(options, nodeType, node),
     };

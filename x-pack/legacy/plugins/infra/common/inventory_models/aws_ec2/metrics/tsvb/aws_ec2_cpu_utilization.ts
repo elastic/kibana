@@ -6,31 +6,27 @@
 
 import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
-export const hostDockerTop5ByMemory: TSVBMetricModelCreator = (
+export const awsEC2CpuUtilization: TSVBMetricModelCreator = (
   timeField,
-  indexPattern,
-  interval
+  indexPattern
 ): TSVBMetricModel => ({
-  id: 'hostDockerTop5ByMemory',
-  requires: ['docker.memory'],
+  id: 'awsEC2CpuUtilization',
+  requires: ['aws.ec2'],
   index_pattern: indexPattern,
-  interval,
+  interval: '>=300s',
   time_field: timeField,
   type: 'timeseries',
   series: [
     {
-      id: 'avg-memory',
+      id: 'total',
+      split_mode: 'everything',
       metrics: [
         {
-          field: 'docker.memory.usage.pct',
-          id: 'avg-memory-metric',
+          field: 'aws.ec2.cpu.total.pct',
+          id: 'avg-cpu',
           type: 'avg',
         },
       ],
-      split_mode: 'terms',
-      terms_field: 'container.name',
-      terms_order_by: 'avg-memory',
-      terms_size: 5,
     },
   ],
 });

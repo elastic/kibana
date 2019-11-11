@@ -45,6 +45,9 @@ export const metricsSchema: any = gql`
     awsNetworkPackets
     awsDiskioBytes
     awsDiskioOps
+    awsEC2CpuUtilization
+    awsEC2NetworkTraffic
+    awsEC2DiskIOBytes
     custom
   }
 

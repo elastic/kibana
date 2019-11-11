@@ -6,16 +6,11 @@
 
 import * as rt from 'io-ts';
 import { InfraWrappableRequest } from '../../server/lib/adapters/framework';
-
-export const InfraMetadataNodeTypeRT = rt.keyof({
-  host: null,
-  pod: null,
-  container: null,
-});
+import { ItemTypeRT } from '../../common/inventory_models/types';
 
 export const InfraMetadataRequestRT = rt.type({
   nodeId: rt.string,
-  nodeType: InfraMetadataNodeTypeRT,
+  nodeType: ItemTypeRT,
   sourceId: rt.string,
 });
 
