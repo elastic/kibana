@@ -8,7 +8,7 @@ import React, { Fragment, StatelessComponent } from 'react';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EnrichedDeprecationInfo } from '../../../../../../../server/lib/es_migration_apis';
+import { EnrichedDeprecationInfo } from '../../../../../../../server/np_ready/lib/es_migration_apis';
 
 export const DeprecationCountSummary: StatelessComponent<{
   deprecations: EnrichedDeprecationInfo[];

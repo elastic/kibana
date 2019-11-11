@@ -6,15 +6,16 @@
 
 import Boom from 'boom';
 import Joi from 'joi';
-import { Legacy } from 'kibana';
 
 import {
   getDeprecationLoggingStatus,
   setDeprecationLogging,
 } from '../lib/es_deprecation_logging_apis';
 import { EsVersionPrecheck } from '../lib/es_version_precheck';
+import { ServerShim } from '../types';
+import { createRequestShim } from './create_request_shim';
 
-export function registerDeprecationLoggingRoutes(server: Legacy.Server) {
+export function registerDeprecationLoggingRoutes(server: ServerShim) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
 
   server.route({
@@ -24,8 +25,9 @@ export function registerDeprecationLoggingRoutes(server: Legacy.Server) {
       pre: [EsVersionPrecheck],
     },
     async handler(request) {
+      const reqShim = createRequestShim(request);
       try {
-        return await getDeprecationLoggingStatus(callWithRequest, request);
+        return await getDeprecationLoggingStatus(callWithRequest, reqShim);
       } catch (e) {
         return Boom.boomify(e, { statusCode: 500 });
       }
@@ -44,9 +46,10 @@ export function registerDeprecationLoggingRoutes(server: Legacy.Server) {
       },
     },
     async handler(request) {
+      const reqShim = createRequestShim(request);
       try {
-        const { isEnabled } = request.payload as { isEnabled: boolean };
-        return await setDeprecationLogging(callWithRequest, request, isEnabled);
+        const { isEnabled } = reqShim.payload as { isEnabled: boolean };
+        return await setDeprecationLogging(callWithRequest, reqShim, isEnabled);
       } catch (e) {
         return Boom.boomify(e, { statusCode: 500 });
       }

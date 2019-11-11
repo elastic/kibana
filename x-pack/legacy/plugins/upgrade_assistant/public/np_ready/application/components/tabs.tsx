@@ -18,7 +18,7 @@ import {
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { HttpSetup } from 'src/core/public';
 
-import { UpgradeAssistantStatus } from '../../../../server/lib/es_migration_apis';
+import { UpgradeAssistantStatus } from '../../../../server/np_ready/lib/es_migration_apis';
 import { LatestMinorBanner } from './latest_minor_banner';
 import { CheckupTab } from './tabs/checkup';
 import { OverviewTab } from './tabs/overview';

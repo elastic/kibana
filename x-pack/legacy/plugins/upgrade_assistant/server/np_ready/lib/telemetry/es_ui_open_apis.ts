@@ -4,19 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
 import {
   UIOpen,
   UIOpenOption,
   UPGRADE_ASSISTANT_DOC_ID,
   UPGRADE_ASSISTANT_TYPE,
-  UpgradeAssistantTelemetryServer,
-} from '../../../common/types';
+} from '../../../../common/types';
+import { RequestShim, ServerShim } from '../../types';
 
-async function incrementUIOpenOptionCounter(
-  server: UpgradeAssistantTelemetryServer,
-  uiOpenOptionCounter: UIOpenOption
-) {
+async function incrementUIOpenOptionCounter(server: ServerShim, uiOpenOptionCounter: UIOpenOption) {
   const { getSavedObjectsRepository } = server.savedObjects;
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const internalRepository = getSavedObjectsRepository(callWithInternalUser);
@@ -28,10 +24,7 @@ async function incrementUIOpenOptionCounter(
   );
 }
 
-export async function upsertUIOpenOption(
-  server: UpgradeAssistantTelemetryServer,
-  req: Legacy.Request
-): Promise<UIOpen> {
+export async function upsertUIOpenOption(server: ServerShim, req: RequestShim): Promise<UIOpen> {
   const { overview, cluster, indices } = req.payload as UIOpen;
 
   if (overview) {

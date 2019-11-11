@@ -25,7 +25,12 @@ jest.mock('../lib/reindexing', () => {
   };
 });
 
-import { IndexGroup, ReindexSavedObject, ReindexStatus, ReindexWarning } from '../../common/types';
+import {
+  IndexGroup,
+  ReindexSavedObject,
+  ReindexStatus,
+  ReindexWarning,
+} from '../../../common/types';
 import { credentialStoreFactory } from '../lib/reindexing/credential_store';
 import { registerReindexIndicesRoutes } from './reindex_indices';
 

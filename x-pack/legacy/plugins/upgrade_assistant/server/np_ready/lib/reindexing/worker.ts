@@ -5,11 +5,11 @@
  */
 import { CallCluster, CallClusterWithRequest } from 'src/legacy/core_plugins/elasticsearch';
 import { Request, Server } from 'src/legacy/server/kbn_server';
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract } from 'kibana/server';
 
 import moment from 'moment';
-import { XPackInfo } from '../../../../xpack_main/server/lib/xpack_info';
-import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
+import { XPackInfo } from '../../../../../xpack_main/server/lib/xpack_info';
+import { ReindexSavedObject, ReindexStatus } from '../../../../common/types';
 import { CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';
 import { ReindexService, reindexServiceFactory } from './reindex_service';

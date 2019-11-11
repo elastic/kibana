@@ -9,7 +9,7 @@ import React from 'react';
 import {
   EnrichedDeprecationInfo,
   UpgradeAssistantStatus,
-} from '../../../../server/lib/es_migration_apis';
+} from '../../../../server/np_ready/lib/es_migration_apis';
 
 export interface UpgradeAssistantTabProps {
   alertBanner?: React.ReactNode;

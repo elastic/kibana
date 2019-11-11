@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
 import {
   UIReindex,
   UIReindexOption,
   UPGRADE_ASSISTANT_DOC_ID,
   UPGRADE_ASSISTANT_TYPE,
-  UpgradeAssistantTelemetryServer,
-} from '../../../common/types';
+} from '../../../../common/types';
+import { RequestShim, ServerShim } from '../../types';
 
 async function incrementUIReindexOptionCounter(
-  server: UpgradeAssistantTelemetryServer,
+  server: ServerShim,
   uiOpenOptionCounter: UIReindexOption
 ) {
   const { getSavedObjectsRepository } = server.savedObjects;
@@ -29,8 +28,8 @@ async function incrementUIReindexOptionCounter(
 }
 
 export async function upsertUIReindexOption(
-  server: UpgradeAssistantTelemetryServer,
-  req: Legacy.Request
+  server: ServerShim,
+  req: RequestShim
 ): Promise<UIReindex> {
   const { close, open, start, stop } = req.payload as UIReindex;
 

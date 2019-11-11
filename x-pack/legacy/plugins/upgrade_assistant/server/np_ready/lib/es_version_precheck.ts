@@ -10,7 +10,7 @@ import { uniq } from 'lodash';
 import { SemVer } from 'semver';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { CURRENT_VERSION } from '../../common/version';
+import { CURRENT_VERSION } from '../../../common/version';
 
 /**
  * Returns an array of all the unique Elasticsearch Node Versions in the Elasticsearch cluster.

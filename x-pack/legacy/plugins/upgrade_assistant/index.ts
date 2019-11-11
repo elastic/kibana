@@ -7,7 +7,7 @@ import Joi from 'joi';
 import { Legacy } from 'kibana';
 import { resolve } from 'path';
 import mappings from './mappings.json';
-import { initServer } from './server';
+import { plugin } from './server/np_ready';
 
 export function upgradeAssistant(kibana: any) {
   const publicSrc = resolve(__dirname, 'public');
@@ -41,7 +41,20 @@ export function upgradeAssistant(kibana: any) {
 
     init(server: Legacy.Server) {
       // Add server routes and initialize the plugin here
-      initServer(server);
+      const instance = plugin({} as any);
+      instance.setup({} as any, {
+        __LEGACY: {
+          route: server.route.bind(server),
+          savedObjects: server.savedObjects,
+          log: server.log.bind(server),
+          events: server.events.bind(server),
+
+          plugins: {
+            elasticsearch: server.plugins.elasticsearch,
+            xpack_main: server.plugins.xpack_main,
+          },
+        },
+      });
     },
   };
   return new kibana.Plugin(config);

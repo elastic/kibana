@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
-
-import { Request } from 'hapi';
 import {
   CallClusterWithRequest,
   DeprecationAPIResponse,
   DeprecationInfo,
 } from 'src/legacy/core_plugins/elasticsearch';
+
+import { RequestShim } from '../types';
 
 export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
@@ -27,7 +26,7 @@ export interface UpgradeAssistantStatus {
 
 export async function getUpgradeAssistantStatus(
   callWithRequest: CallClusterWithRequest,
-  req: Request,
+  req: RequestShim,
   isCloudEnabled: boolean
 ): Promise<UpgradeAssistantStatus> {
   const deprecations = await callWithRequest(req, 'transport.request', {

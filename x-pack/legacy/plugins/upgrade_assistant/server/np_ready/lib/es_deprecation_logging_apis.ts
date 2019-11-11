@@ -5,8 +5,8 @@
  */
 import { get } from 'lodash';
 
-import { Legacy } from 'kibana';
 import { CallClusterWithRequest } from 'src/legacy/core_plugins/elasticsearch';
+import { RequestShim } from '../types';
 
 interface DeprecationLoggingStatus {
   isEnabled: boolean;
@@ -14,7 +14,7 @@ interface DeprecationLoggingStatus {
 
 export async function getDeprecationLoggingStatus(
   callWithRequest: CallClusterWithRequest,
-  req: Legacy.Request
+  req: RequestShim
 ): Promise<DeprecationLoggingStatus> {
   const response = await callWithRequest(req, 'cluster.getSettings', {
     includeDefaults: true,
@@ -27,7 +27,7 @@ export async function getDeprecationLoggingStatus(
 
 export async function setDeprecationLogging(
   callWithRequest: CallClusterWithRequest,
-  req: Legacy.Request,
+  req: RequestShim,
   isEnabled: boolean
 ): Promise<DeprecationLoggingStatus> {
   const response = await callWithRequest(req, 'cluster.putSettings', {

@@ -5,7 +5,7 @@
  */
 
 import { SemVer } from 'semver';
-import { CURRENT_VERSION } from '../../common/version';
+import { CURRENT_VERSION } from '../../../common/version';
 import {
   EsVersionPrecheck,
   getAllNodeVersions,

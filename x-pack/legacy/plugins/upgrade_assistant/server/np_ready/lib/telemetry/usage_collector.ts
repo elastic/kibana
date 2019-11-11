@@ -13,8 +13,8 @@ import {
   UpgradeAssistantTelemetry,
   UpgradeAssistantTelemetrySavedObject,
   UpgradeAssistantTelemetrySavedObjectAttributes,
-  UpgradeAssistantTelemetryServer,
-} from '../../../common/types';
+} from '../../../../common/types';
+import { ServerShim } from '../../types';
 import { isDeprecationLoggingEnabled } from '../es_deprecation_logging_apis';
 
 async function getSavedObjectAttributesFromRepo(
@@ -43,7 +43,7 @@ async function getDeprecationLoggingStatusValue(callCluster: any): Promise<boole
 
 export async function fetchUpgradeAssistantMetrics(
   callCluster: any,
-  server: UpgradeAssistantTelemetryServer
+  server: ServerShim
 ): Promise<UpgradeAssistantTelemetry> {
   const { getSavedObjectsRepository } = server.savedObjects;
   const savedObjectsRepository = getSavedObjectsRepository(callCluster);
@@ -97,13 +97,12 @@ export async function fetchUpgradeAssistantMetrics(
   };
 }
 
-export function makeUpgradeAssistantUsageCollector(server: UpgradeAssistantTelemetryServer) {
-  const kbnServer = server as UpgradeAssistantTelemetryServer;
-  const upgradeAssistantUsageCollector = kbnServer.usage.collectorSet.makeUsageCollector({
+export function makeUpgradeAssistantUsageCollector(server: ServerShim) {
+  const upgradeAssistantUsageCollector = server.usage.collectorSet.makeUsageCollector({
     type: UPGRADE_ASSISTANT_TYPE,
     isReady: () => true,
     fetch: async (callCluster: any) => fetchUpgradeAssistantMetrics(callCluster, server),
   });
 
-  kbnServer.usage.collectorSet.register(upgradeAssistantUsageCollector);
+  server.usage.collectorSet.register(upgradeAssistantUsageCollector);
 }

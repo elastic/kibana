@@ -8,7 +8,7 @@ import { createHash } from 'crypto';
 import { Request } from 'hapi';
 import stringify from 'json-stable-stringify';
 
-import { ReindexSavedObject } from '../../../common/types';
+import { ReindexSavedObject } from '../../../../common/types';
 
 export type Credential = Request['headers'];
 

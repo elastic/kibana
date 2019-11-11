@@ -7,7 +7,7 @@
 import moment from 'moment';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { SavedObjectsFindResponse, SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsFindResponse, SavedObjectsClientContract } from 'kibana/server';
 import {
   IndexGroup,
   REINDEX_OP_TYPE,
@@ -15,7 +15,7 @@ import {
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
-} from '../../../common/types';
+} from '../../../../common/types';
 import { generateNewIndexName } from './index_settings';
 import { FlatSettings } from './types';
 

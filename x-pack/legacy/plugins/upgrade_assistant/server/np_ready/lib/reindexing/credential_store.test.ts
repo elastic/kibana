@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReindexSavedObject } from '../../../common/types';
+import { ReindexSavedObject } from '../../../../common/types';
 import { Credential, credentialStoreFactory } from './credential_store';
 
 describe('credentialStore', () => {

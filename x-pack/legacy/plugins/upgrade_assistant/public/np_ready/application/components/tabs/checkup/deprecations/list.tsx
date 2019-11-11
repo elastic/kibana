@@ -7,7 +7,7 @@
 import React, { StatelessComponent } from 'react';
 
 import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
-import { EnrichedDeprecationInfo } from '../../../../../../../server/lib/es_migration_apis';
+import { EnrichedDeprecationInfo } from '../../../../../../../server/np_ready/lib/es_migration_apis';
 import { GroupByOption } from '../../../types';
 
 import { COLOR_MAP, LEVEL_MAP } from '../constants';

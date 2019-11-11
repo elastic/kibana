@@ -5,13 +5,15 @@
  */
 
 import Boom from 'boom';
-import { Legacy } from 'kibana';
 import _ from 'lodash';
 
+import { ServerShim } from '../types';
 import { getUpgradeAssistantStatus } from '../lib/es_migration_apis';
 import { EsVersionPrecheck } from '../lib/es_version_precheck';
 
-export function registerClusterCheckupRoutes(server: Legacy.Server) {
+import { createRequestShim } from './create_request_shim';
+
+export function registerClusterCheckupRoutes(server: ServerShim) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
   const isCloudEnabled = _.get(server.plugins, 'cloud.config.isCloudEnabled', false);
 
@@ -22,8 +24,9 @@ export function registerClusterCheckupRoutes(server: Legacy.Server) {
       pre: [EsVersionPrecheck],
     },
     async handler(request) {
+      const reqShim = createRequestShim(request);
       try {
-        return await getUpgradeAssistantStatus(callWithRequest, request, isCloudEnabled);
+        return await getUpgradeAssistantStatus(callWithRequest, reqShim, isCloudEnabled);
       } catch (e) {
         if (e.status === 403) {
           return Boom.forbidden(e.message);

@@ -6,11 +6,12 @@
 
 import Boom from 'boom';
 import Joi from 'joi';
-import { UpgradeAssistantTelemetryServer } from '../../common/types';
 import { upsertUIOpenOption } from '../lib/telemetry/es_ui_open_apis';
 import { upsertUIReindexOption } from '../lib/telemetry/es_ui_reindex_apis';
+import { ServerShim } from '../types';
+import { createRequestShim } from './create_request_shim';
 
-export function registerTelemetryRoutes(server: UpgradeAssistantTelemetryServer) {
+export function registerTelemetryRoutes(server: ServerShim) {
   server.route({
     path: '/api/upgrade_assistant/telemetry/ui_open',
     method: 'PUT',
@@ -24,8 +25,9 @@ export function registerTelemetryRoutes(server: UpgradeAssistantTelemetryServer)
       },
     },
     async handler(request) {
+      const reqShim = createRequestShim(request);
       try {
-        return await upsertUIOpenOption(server, request);
+        return await upsertUIOpenOption(server, reqShim);
       } catch (e) {
         return Boom.boomify(e, { statusCode: 500 });
       }
@@ -46,8 +48,9 @@ export function registerTelemetryRoutes(server: UpgradeAssistantTelemetryServer)
       },
     },
     async handler(request) {
+      const reqShim = createRequestShim(request);
       try {
-        return await upsertUIReindexOption(server, request);
+        return await upsertUIReindexOption(server, reqShim);
       } catch (e) {
         return Boom.boomify(e, { statusCode: 500 });
       }

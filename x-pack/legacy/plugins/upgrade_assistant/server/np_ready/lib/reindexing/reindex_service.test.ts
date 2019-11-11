@@ -10,8 +10,8 @@ import {
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
-} from '../../../common/types';
-import { CURRENT_MAJOR_VERSION, PREV_MAJOR_VERSION } from '../../../common/version';
+} from '../../../../common/types';
+import { CURRENT_MAJOR_VERSION, PREV_MAJOR_VERSION } from '../../../../common/version';
 import {
   isMlIndex,
   isWatcherIndex,

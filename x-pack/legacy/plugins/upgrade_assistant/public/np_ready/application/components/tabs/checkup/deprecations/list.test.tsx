@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { EnrichedDeprecationInfo } from '../../../../../../../server/lib/es_migration_apis';
+import { EnrichedDeprecationInfo } from '../../../../../../../server/np_ready/lib/es_migration_apis';
 import { GroupByOption } from '../../../types';
 import { DeprecationList } from './list';
 

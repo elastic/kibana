@@ -8,14 +8,16 @@ import Boom from 'boom';
 import { Server } from 'hapi';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { SavedObjectsClientContract } from 'src/core/server';
-import { ReindexStatus } from '../../common/types';
+import { SavedObjectsClientContract } from 'kibana/server';
+import { ReindexStatus } from '../../../common/types';
 import { EsVersionPrecheck } from '../lib/es_version_precheck';
 import { reindexServiceFactory, ReindexWorker } from '../lib/reindexing';
 import { CredentialStore } from '../lib/reindexing/credential_store';
 import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
+import { ServerShim } from '../types';
+import { createRequestShim } from './create_request_shim';
 
-export function registerReindexWorker(server: Server, credentialStore: CredentialStore) {
+export function registerReindexWorker(server: ServerShim, credentialStore: CredentialStore) {
   const { callWithRequest, callWithInternalUser } = server.plugins.elasticsearch.getCluster(
     'admin'
   );
@@ -54,7 +56,7 @@ export function registerReindexWorker(server: Server, credentialStore: Credentia
 }
 
 export function registerReindexIndicesRoutes(
-  server: Server,
+  server: ServerShim,
   worker: ReindexWorker,
   credentialStore: CredentialStore
 ) {
@@ -70,9 +72,10 @@ export function registerReindexIndicesRoutes(
       pre: [EsVersionPrecheck],
     },
     async handler(request) {
-      const client = request.getSavedObjectsClient();
-      const { indexName } = request.params;
-      const callCluster = callWithRequest.bind(null, request) as CallCluster;
+      const reqShim = createRequestShim(request);
+      const client = reqShim.getSavedObjectsClient();
+      const { indexName } = reqShim.params;
+      const callCluster = callWithRequest.bind(null, reqShim) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
       const reindexService = reindexServiceFactory(
         callCluster,
@@ -95,7 +98,7 @@ export function registerReindexIndicesRoutes(
             : await reindexService.createReindexOperation(indexName);
 
         // Add users credentials for the worker to use
-        credentialStore.set(reindexOp, request.headers);
+        credentialStore.set(reindexOp, reqShim.headers);
 
         // Kick the worker on this node to immediately pickup the new reindex operation.
         worker.forceRefresh();
@@ -119,9 +122,10 @@ export function registerReindexIndicesRoutes(
       pre: [EsVersionPrecheck],
     },
     async handler(request) {
-      const client = request.getSavedObjectsClient();
-      const { indexName } = request.params;
-      const callCluster = callWithRequest.bind(null, request) as CallCluster;
+      const reqShim = createRequestShim(request);
+      const client = reqShim.getSavedObjectsClient();
+      const { indexName } = reqShim.params;
+      const callCluster = callWithRequest.bind(null, reqShim) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
       const reindexService = reindexServiceFactory(
         callCluster,
@@ -163,9 +167,10 @@ export function registerReindexIndicesRoutes(
       pre: [EsVersionPrecheck],
     },
     async handler(request) {
-      const client = request.getSavedObjectsClient();
-      const { indexName } = request.params;
-      const callCluster = callWithRequest.bind(null, request) as CallCluster;
+      const reqShim = createRequestShim(request);
+      const client = reqShim.getSavedObjectsClient();
+      const { indexName } = reqShim.params;
+      const callCluster = callWithRequest.bind(null, reqShim) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
       const reindexService = reindexServiceFactory(
         callCluster,

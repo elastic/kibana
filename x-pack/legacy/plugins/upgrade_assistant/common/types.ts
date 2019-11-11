@@ -6,6 +6,7 @@
 
 import { Legacy } from 'kibana';
 import { SavedObject, SavedObjectAttributes } from 'src/core/server';
+import { ServerShim } from '../server/np_ready/types';
 
 export enum ReindexStep {
   // Enum values are spaced out by 10 to give us room to insert steps in between.
@@ -77,15 +78,6 @@ export interface UIReindex {
   open: boolean;
   start: boolean;
   stop: boolean;
-}
-
-export interface UpgradeAssistantTelemetryServer extends Legacy.Server {
-  usage: {
-    collectorSet: {
-      makeUsageCollector: any;
-      register: any;
-    };
-  };
 }
 
 export interface UpgradeAssistantTelemetrySavedObject {
