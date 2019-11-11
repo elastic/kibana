@@ -19,7 +19,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
-import { Filter } from '@kbn/es-query';
 import { CoreStart } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
@@ -27,6 +26,7 @@ import { KibanaContextProvider } from '../../../../../../../../src/plugins/kiban
 import { TimefilterSetup } from '../../../timefilter';
 import { SearchBar } from '../../../';
 import { SearchBarOwnProps } from '.';
+import { esFilters } from '../../../../../../../plugins/data/public';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
@@ -40,7 +40,7 @@ export type StatetfulSearchBarProps = SearchBarOwnProps & {
 };
 
 const defaultFiltersUpdated = (data: DataPublicPluginStart) => {
-  return (filters: Filter[]) => {
+  return (filters: esFilters.Filter[]) => {
     data.query.filterManager.setFilters(filters);
   };
 };
