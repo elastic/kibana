@@ -85,7 +85,7 @@ export class Plugin {
     });
 
     // Encrypted attributes
-    plugins.encrypted_saved_objects.registerType({
+    plugins.encryptedSavedObjects.registerType({
       type: 'alert',
       attributesToEncrypt: new Set(['apiKey']),
       attributesToExcludeFromAAD: new Set([
@@ -147,7 +147,7 @@ export class Plugin {
         };
       },
       executeAction: plugins.actions.execute,
-      encryptedSavedObjectsPlugin: plugins.encrypted_saved_objects,
+      encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       spaceIdToNamespace(spaceId?: string): string | undefined {
         const spacesPlugin = plugins.spaces();
         return spacesPlugin && spaceId ? spacesPlugin.spaceIdToNamespace(spaceId) : undefined;

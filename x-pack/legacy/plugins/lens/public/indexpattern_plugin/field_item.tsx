@@ -35,8 +35,9 @@ import {
   niceTimeFormatter,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { Filter, buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
+import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/common';
+import { esFilters } from '../../../../../../src/plugins/data/public';
 // @ts-ignore
 import { fieldFormats } from '../../../../../../src/legacy/ui/public/registry/field_formats';
 import { DraggedField } from './indexpattern';
@@ -55,7 +56,8 @@ export interface FieldItemProps {
   exists: boolean;
   query: Query;
   dateRange: DatasourceDataPanelProps['dateRange'];
-  filters: Filter[];
+  filters: esFilters.Filter[];
+  hideDetails?: boolean;
 }
 
 interface State {
@@ -75,7 +77,17 @@ function wrapOnDot(str?: string) {
 }
 
 export function FieldItem(props: FieldItemProps) {
-  const { core, field, indexPattern, highlight, exists, query, dateRange, filters } = props;
+  const {
+    core,
+    field,
+    indexPattern,
+    highlight,
+    exists,
+    query,
+    dateRange,
+    filters,
+    hideDetails,
+  } = props;
 
   const [infoIsOpen, setOpen] = useState(false);
 
@@ -140,6 +152,10 @@ export function FieldItem(props: FieldItemProps) {
   }
 
   function togglePopover() {
+    if (hideDetails) {
+      return;
+    }
+
     setOpen(!infoIsOpen);
     if (!infoIsOpen) {
       trackUiEvent('indexpattern_field_info_click');
@@ -175,7 +191,7 @@ export function FieldItem(props: FieldItemProps) {
                 }
               }}
               aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
-                defaultMessage: 'Click for a field preview. Or, drag and drop to visualize.',
+                defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
               })}
             >
               <LensFieldIcon type={field.type as DataType} />
@@ -186,9 +202,15 @@ export function FieldItem(props: FieldItemProps) {
 
               <EuiIconTip
                 anchorClassName="lnsFieldItem__infoIcon"
-                content={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
-                  defaultMessage: 'Click for a field preview. Or, drag and drop to visualize.',
-                })}
+                content={
+                  hideDetails
+                    ? i18n.translate('xpack.lens.indexPattern.fieldItemTooltip', {
+                        defaultMessage: 'Drag and drop to visualize.',
+                      })
+                    : i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
+                        defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
+                      })
+                }
                 type="iInCircle"
                 color="subdued"
                 size="s"
@@ -461,7 +483,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
                   )}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="s" textAlign="left" color={euiTextColor}>
+                  <EuiText size="xs" textAlign="left" color={euiTextColor}>
                     {Math.round((topValue.count / props.sampledValues!) * 100)}%
                   </EuiText>
                 </EuiFlexItem>

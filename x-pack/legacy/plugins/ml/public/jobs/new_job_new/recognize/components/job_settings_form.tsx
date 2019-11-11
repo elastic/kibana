@@ -27,9 +27,8 @@ import {
   patternValidator,
 } from '../../../../../common/util/validators';
 import { JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
-import { isJobIdValid } from '../../../../../common/util/job_utils';
 import { usePartialState } from '../../../../components/custom_hooks';
-import { JobGroupsInput, TimeRangePicker, TimeRange } from '../../common/components';
+import { TimeRange, TimeRangePicker } from '../../common/components';
 
 export interface JobSettingsFormValues {
   jobPrefix: string;
@@ -37,15 +36,12 @@ export interface JobSettingsFormValues {
   useFullIndexData: boolean;
   timeRange: TimeRange;
   useDedicatedIndex: boolean;
-  jobGroups: string[];
 }
 
 interface JobSettingsFormProps {
   saveState: SAVE_STATE;
   onSubmit: (values: JobSettingsFormValues) => any;
   onChange: (values: JobSettingsFormValues) => any;
-  jobGroups: string[];
-  existingGroupIds: string[];
   jobs: ModuleJobUI[];
 }
 
@@ -53,9 +49,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
   onSubmit,
   onChange,
   saveState,
-  existingGroupIds,
   jobs,
-  jobGroups,
 }) => {
   const { from, to } = getTimeFilterRange();
   const { currentIndexPattern: indexPattern } = useKibanaContext();
@@ -63,10 +57,6 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
   const jobPrefixValidator = composeValidators(
     patternValidator(/^([a-z0-9]+[a-z0-9\-_]*)?$/),
     maxLengthValidator(JOB_ID_MAX_LENGTH - Math.max(...jobs.map(({ id }) => id.length)))
-  );
-  const groupValidator = composeValidators(
-    (value: string) => (isJobIdValid(value) ? null : { pattern: true }),
-    maxLengthValidator(JOB_ID_MAX_LENGTH)
   );
 
   const [formState, setFormState] = usePartialState({
@@ -78,7 +68,6 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
       end: to,
     },
     useDedicatedIndex: false,
-    jobGroups: [] as string[],
   });
   const [validationResult, setValidationResult] = useState<Record<string, any>>({});
 
@@ -90,28 +79,20 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
 
   const handleValidation = () => {
     const jobPrefixValidationResult = jobPrefixValidator(formState.jobPrefix);
-    const jobGroupsValidationResult = formState.jobGroups
-      .map(group => groupValidator(group))
-      .filter(result => result !== null);
 
     setValidationResult({
       jobPrefix: jobPrefixValidationResult,
-      jobGroups: jobGroupsValidationResult,
-      formValid: !jobPrefixValidationResult && jobGroupsValidationResult.length === 0,
+      formValid: !jobPrefixValidationResult,
     });
   };
 
   useEffect(() => {
     handleValidation();
-  }, [formState.jobPrefix, formState.jobGroups]);
+  }, [formState.jobPrefix]);
 
   useEffect(() => {
     onChange(formState);
   }, [formState]);
-
-  useEffect(() => {
-    setFormState({ jobGroups });
-  }, [jobGroups]);
 
   return (
     <>
@@ -174,24 +155,6 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
-        <JobGroupsInput
-          existingGroups={existingGroupIds}
-          selectedGroups={formState.jobGroups}
-          onChange={value => {
-            setFormState({
-              jobGroups: value,
-            });
-          }}
-          validation={{
-            valid: !validationResult.jobGroups || validationResult.jobGroups.length === 0,
-            message: (
-              <FormattedMessage
-                id="xpack.ml.newJob.recognize.jobGroupAllowedCharactersDescription"
-                defaultMessage="Job group names can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character"
-              />
-            ),
-          }}
-        />
         <EuiSpacer size="l" />
         <EuiFormRow>
           <EuiSwitch

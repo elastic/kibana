@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { calculateInterval, calculateKqlAndFilter } from './update_signals';
+import { calculateInterval } from './update_signals';
 
 describe('update_signals', () => {
   describe('#calculateInterval', () => {
@@ -21,32 +21,6 @@ describe('update_signals', () => {
     test('given both an undefined signalInterval and a undefined interval, it returns 5m', () => {
       const interval = calculateInterval(undefined, undefined);
       expect(interval).toEqual('5m');
-    });
-  });
-
-  describe('#calculateKqlAndFilter', () => {
-    test('given a undefined kql filter it returns a null kql', () => {
-      const kqlFilter = calculateKqlAndFilter(undefined, {});
-      expect(kqlFilter).toEqual({
-        filter: {},
-        kql: null,
-      });
-    });
-
-    test('given a undefined filter it returns a null filter', () => {
-      const kqlFilter = calculateKqlAndFilter('some kql string', undefined);
-      expect(kqlFilter).toEqual({
-        filter: null,
-        kql: 'some kql string',
-      });
-    });
-
-    test('given both a undefined filter and undefined kql it returns both as undefined', () => {
-      const kqlFilter = calculateKqlAndFilter(undefined, undefined);
-      expect(kqlFilter).toEqual({
-        filter: undefined,
-        kql: undefined,
-      });
     });
   });
 });
