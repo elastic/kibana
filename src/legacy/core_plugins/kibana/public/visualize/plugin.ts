@@ -63,7 +63,6 @@ export interface VisualizePluginStartDependencies {
   embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
   navigation: NavigationStart;
   visualizations: VisualizationsStart;
-  getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
 }
 
 export interface VisualizePluginSetupDependencies {
@@ -167,15 +166,8 @@ export class VisualizePlugin implements Plugin {
   }
 
   async start(
-    { savedObjects: { client: savedObjectsClient }, uiSettings, http, application }: CoreStart,
-    {
-      dataStart,
-      embeddables,
-      navigation,
-      visualizations,
-      npData,
-      getAngularDependencies,
-    }: VisualizePluginStartDependencies
+    { savedObjects: { client: savedObjectsClient } }: CoreStart,
+    { dataStart, embeddables, navigation, visualizations, npData }: VisualizePluginStartDependencies
   ) {
     this.startDependencies = {
       dataStart,
@@ -185,17 +177,6 @@ export class VisualizePlugin implements Plugin {
       savedObjectsClient,
       visualizations,
     };
-
-    const { savedVisualizations } = await getAngularDependencies();
-    // we partially set services because embeddable factory can be used without running visualize plugin
-    setServices({
-      visualizations,
-      uiSettings,
-      addBasePath: http.basePath.prepend,
-      savedObjectsClient,
-      savedVisualizations,
-      visualizeCapabilities: application.capabilities.visualize,
-    });
 
     const embeddableFactory = new VisualizeEmbeddableFactory(visualizations.types);
     embeddables.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);

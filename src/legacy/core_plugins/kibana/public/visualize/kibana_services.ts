@@ -64,9 +64,9 @@ export interface VisualizeKibanaServices {
   wrapInI18nContext: any;
 }
 
-let services: Partial<VisualizeKibanaServices> | null = null;
-export function setServices(newServices: Partial<VisualizeKibanaServices>) {
-  services = { ...services, ...newServices };
+let services: VisualizeKibanaServices | null = null;
+export function setServices(newServices: VisualizeKibanaServices) {
+  services = newServices;
 }
 
 export function getServices() {

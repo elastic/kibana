@@ -76,12 +76,11 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
       VisEditorTypesRegistryProvider,
     },
   });
-  await instance.start(npStart.core, {
+  instance.start(npStart.core, {
     dataStart,
     npData: npStart.plugins.data,
     embeddables,
     navigation,
     visualizations,
-    getAngularDependencies,
   });
 })();

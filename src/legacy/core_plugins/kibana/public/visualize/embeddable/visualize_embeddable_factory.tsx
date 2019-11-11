@@ -45,7 +45,6 @@ import chrome from 'ui/chrome';
 import { getVisualizeLoader } from 'ui/visualize/loader';
 
 import { SavedObjectAttributes } from 'kibana/server';
-import { npSetup } from 'ui/new_platform';
 import {
   EmbeddableFactory,
   ErrorEmbeddable,
