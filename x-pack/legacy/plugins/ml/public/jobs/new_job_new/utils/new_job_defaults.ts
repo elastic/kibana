@@ -70,8 +70,8 @@ export function cloudDeploymentId(): string | null {
   }
   const tempCloudId = cloudInfo.cloudId.replace(/^.+:/, '');
   try {
-    const matches = atob(tempCloudId).match(/(?<=\$).+(?=\$)/);
-    return matches !== null ? matches[0] : null;
+    const matches = atob(tempCloudId).match(/^.+\$(.+)(?=\$)/);
+    return matches !== null && matches.length === 2 ? matches[1] : null;
   } catch (error) {
     return null;
   }
