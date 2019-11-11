@@ -5,7 +5,7 @@
  */
 
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../common/constants';
-import { ConditionalHeaders, KbnServer } from '../../../types';
+import { ConditionalHeaders, ServerFacade } from '../../../types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types'; // Logo is PDF only
 
 export const getCustomLogo = async ({
@@ -15,7 +15,7 @@ export const getCustomLogo = async ({
 }: {
   job: JobDocPayloadPDF;
   conditionalHeaders: ConditionalHeaders;
-  server: KbnServer;
+  server: ServerFacade;
 }) => {
   const serverBasePath: string = server.config().get('server.basePath');
 

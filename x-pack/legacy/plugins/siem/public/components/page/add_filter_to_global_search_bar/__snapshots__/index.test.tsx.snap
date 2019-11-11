@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddFilterToGlobalSearchBar Component Rendering 1`] = `
+<Component
+  store={
+    Object {
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+      Symbol(observable): [Function],
+    }
+  }
+>
+  <AddFilterToGlobalSearchBar
+    filter={
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.name",
+          "negate": false,
+          "params": Object {
+            "query": "siem-kibana",
+          },
+          "type": "phrase",
+          "value": "siem-kibana",
+        },
+        "query": Object {
+          "match": Object {
+            "host.name": Object {
+              "query": "siem-kibana",
+              "type": "phrase",
+            },
+          },
+        },
+      }
+    }
+  >
+    siem-kibana
+  </AddFilterToGlobalSearchBar>
+</Component>
+`;

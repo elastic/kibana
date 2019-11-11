@@ -114,6 +114,18 @@ describe('kuery functions', function () {
         expect(geoPolygon.toElasticsearchQuery)
           .withArgs(node, indexPattern).to.throwException(/Geo polygon query does not support scripted fields/);
       });
+
+      it('should use a provided nested context to create a full field name', function () {
+        const node = nodeTypes.function.buildNode('geoPolygon', 'geo', points);
+        const result = geoPolygon.toElasticsearchQuery(
+          node,
+          indexPattern,
+          {},
+          { nested: { path: 'nestedField' } }
+        );
+        expect(result).to.have.property('geo_polygon');
+        expect(result.geo_polygon).to.have.property('nestedField.geo');
+      });
     });
   });
 });

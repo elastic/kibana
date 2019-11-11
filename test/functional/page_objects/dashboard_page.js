@@ -22,6 +22,7 @@ import { DashboardConstants } from '../../../src/legacy/core_plugins/kibana/publ
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
+export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
 
 export function DashboardPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -499,7 +500,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         { name: 'Visualization☺ VerticalBarChart', description: 'VerticalBarChart' },
         { name: AREA_CHART_VIS_NAME, description: 'AreaChart' },
         { name: 'Visualization☺漢字 DataTable', description: 'DataTable' },
-        { name: 'Visualization漢字 LineChart', description: 'LineChart' },
+        { name: LINE_CHART_VIS_NAME, description: 'LineChart' },
         { name: 'Visualization TileMap', description: 'TileMap' },
         { name: 'Visualization MetricChart', description: 'MetricChart' }
       ];

@@ -19,14 +19,14 @@ export async function getExistingEnvironmentsForService({
   serviceName: string | undefined;
   setup: Setup;
 }) {
-  const { client, config } = setup;
+  const { client, indices } = setup;
 
   const bool = serviceName
     ? { filter: [{ term: { [SERVICE_NAME]: serviceName } }] }
     : { must_not: [{ exists: { field: SERVICE_NAME } }] };
 
   const params = {
-    index: config.get<string>('apm_oss.apmAgentConfigurationIndex'),
+    index: indices['apm_oss.apmAgentConfigurationIndex'],
     body: {
       size: 0,
       query: { bool },
@@ -44,5 +44,5 @@ export async function getExistingEnvironmentsForService({
 
   const resp = await client.search(params);
   const buckets = idx(resp.aggregations, _ => _.environments.buckets) || [];
-  return buckets.map(bucket => bucket.key);
+  return buckets.map(bucket => bucket.key as string);
 }

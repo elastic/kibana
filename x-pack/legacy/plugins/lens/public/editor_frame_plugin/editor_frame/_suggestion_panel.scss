@@ -16,6 +16,7 @@
 }
 
 .lnsSuggestionPanel__button {
+  position: relative; // Let the expression progress indicator position itself against the button
   flex: 0 0 auto;
   width: $lnsSuggestionWidth !important; // sass-lint:disable-line no-important
   height: $lnsSuggestionHeight;
@@ -45,16 +46,22 @@
 
 .lnsSuggestionPanel__chartWrapper {
   display: flex;
-  height: $lnsSuggestionHeight - $euiSize;
+  height: 100%;
+  width: 100%;
   pointer-events: none;
-  margin: 0 $euiSizeS;
+  padding: $euiSizeS;
+
+  > .expExpressionRenderer {
+    position: static; // Let the progress indicator position itself against the button
+  }
 }
 
 .lnsSuggestionPanel__chartWrapper--withLabel {
-  height: $lnsSuggestionHeight - $euiSizeL;
+  height: calc(100% - #{$euiSizeL});
 }
 
 .lnsSuggestionPanel__buttonLabel {
+  @include euiTextTruncate;
   @include euiFontSizeXS;
   display: block;
   font-weight: $euiFontWeightBold;

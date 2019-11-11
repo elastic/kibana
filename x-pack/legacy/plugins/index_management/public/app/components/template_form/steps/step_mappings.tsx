@@ -39,12 +39,12 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <h3 data-test-subj="stepTitle">
+            <h2 data-test-subj="stepTitle">
               <FormattedMessage
                 id="xpack.idxMgmt.templateForm.stepMappings.stepTitle"
                 defaultMessage="Mappings (optional)"
               />
-            </h3>
+            </h2>
           </EuiTitle>
 
           <EuiSpacer size="s" />

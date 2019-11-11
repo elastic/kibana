@@ -6,14 +6,14 @@
 
 import { noop } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import * as React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { BrowserFields } from '../../../containers/source';
 import { TimelineItem } from '../../../graphql/types';
 import { Note } from '../../../lib/note';
-import { appSelectors, State, timelineSelectors } from '../../../store';
+import { appModel, appSelectors, State, timelineSelectors } from '../../../store';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
   OnColumnRemoved,
@@ -45,7 +45,7 @@ interface OwnProps {
 interface ReduxProps {
   columnHeaders: ColumnHeader[];
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
-  getNotesByIds: (noteIds: string[]) => Note[];
+  notesById: appModel.NotesById;
   pinnedEventIds: Readonly<Record<string, boolean>>;
   range?: string;
 }
@@ -92,10 +92,10 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     columnHeaders,
     data,
     eventIdToNoteIds,
-    getNotesByIds,
     height,
     id,
     isEventViewer = false,
+    notesById,
     pinEvent,
     pinnedEventIds,
     range,
@@ -107,30 +107,44 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     updateNote,
     updateSort,
   }) => {
-    const onAddNoteToEvent: AddNoteToEvent = ({
-      eventId,
-      noteId,
-    }: {
-      eventId: string;
-      noteId: string;
-    }) => addNoteToEvent!({ id, eventId, noteId });
+    const getNotesByIds = useCallback(
+      (noteIds: string[]): Note[] => appSelectors.getNotes(notesById, noteIds),
+      [notesById]
+    );
 
-    const onColumnSorted: OnColumnSorted = sorted => {
-      updateSort!({ id, sort: sorted });
-    };
+    const onAddNoteToEvent: AddNoteToEvent = useCallback(
+      ({ eventId, noteId }: { eventId: string; noteId: string }) =>
+        addNoteToEvent!({ id, eventId, noteId }),
+      [id]
+    );
 
-    const onColumnRemoved: OnColumnRemoved = columnId => removeColumn!({ id, columnId });
+    const onColumnSorted: OnColumnSorted = useCallback(
+      sorted => {
+        updateSort!({ id, sort: sorted });
+      },
+      [id]
+    );
 
-    const onColumnResized: OnColumnResized = ({ columnId, delta }) =>
-      applyDeltaToColumnWidth!({ id, columnId, delta });
+    const onColumnRemoved: OnColumnRemoved = useCallback(
+      columnId => removeColumn!({ id, columnId }),
+      [id]
+    );
 
-    const onPinEvent: OnPinEvent = eventId => pinEvent!({ id, eventId });
+    const onColumnResized: OnColumnResized = useCallback(
+      ({ columnId, delta }) => applyDeltaToColumnWidth!({ id, columnId, delta }),
+      [id]
+    );
 
-    const onUnPinEvent: OnUnPinEvent = eventId => unPinEvent!({ id, eventId });
+    const onPinEvent: OnPinEvent = useCallback(eventId => pinEvent!({ id, eventId }), [id]);
 
-    const onUpdateNote: UpdateNote = (note: Note) => updateNote!({ note });
+    const onUnPinEvent: OnUnPinEvent = useCallback(eventId => unPinEvent!({ id, eventId }), [id]);
 
-    const onUpdateColumns: OnUpdateColumns = columns => updateColumns!({ id, columns });
+    const onUpdateNote: UpdateNote = useCallback((note: Note) => updateNote!({ note }), []);
+
+    const onUpdateColumns: OnUpdateColumns = useCallback(
+      columns => updateColumns!({ id, columns }),
+      [id]
+    );
 
     return (
       <Body
@@ -166,7 +180,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       prevProps.columnHeaders === nextProps.columnHeaders &&
       prevProps.data === nextProps.data &&
       prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
-      prevProps.getNotesByIds === nextProps.getNotesByIds &&
+      prevProps.notesById === nextProps.notesById &&
       prevProps.height === nextProps.height &&
       prevProps.id === nextProps.id &&
       prevProps.isEventViewer === nextProps.isEventViewer &&
@@ -194,7 +208,7 @@ const makeMapStateToProps = () => {
     return {
       columnHeaders: memoizedColumnHeaders(columns, browserFields),
       eventIdToNoteIds,
-      getNotesByIds: getNotesByIds(state),
+      notesById: getNotesByIds(state),
       id,
       pinnedEventIds,
     };

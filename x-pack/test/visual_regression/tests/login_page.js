@@ -11,8 +11,8 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'security']);
 
-  describe('Security', () => {
-    describe.skip('Login Page', () => {
+  describe.skip('Security', () => {
+    describe('Login Page', () => {
       before(async () => {
         await esArchiver.load('empty_kibana');
         await PageObjects.security.logout();

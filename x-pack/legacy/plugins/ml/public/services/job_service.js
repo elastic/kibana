@@ -24,13 +24,11 @@ let datafeedIds = {};
 
 class JobService {
   constructor() {
-    // currentJob -> used to pass a job object between the job management page and
+    // tempJobCloningObjects -> used to pass a job object between the job management page and
     // and the advanced wizard.
     // if populated when loading the advanced wizard, the job is used for cloning.
     // if populated when loading the job management page, the start datafeed modal
     // is automatically opened.
-    this.currentJob = undefined;
-
     this.tempJobCloningObjects = {
       job: undefined,
       skipTimeRangeStep: false,

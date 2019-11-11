@@ -7,7 +7,6 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { Hint } from 'react-vis';
-import moment from 'moment';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import {
@@ -20,6 +19,7 @@ import {
 } from '../../../../style/variables';
 import Legend from '../Legend';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { asAbsoluteTime } from '../../TimestampTooltip';
 
 const TooltipElm = styled.div`
   margin: 0 ${px(unit)};
@@ -87,7 +87,9 @@ export default function Tooltip({
   return (
     <Hint {...props} value={{ x, y }}>
       <TooltipElm>
-        <Header>{header || moment(x).format('MMMM Do YYYY, HH:mm:ss')}</Header>
+        <Header>
+          {header || asAbsoluteTime({ time: x, precision: 'seconds' })}
+        </Header>
 
         <Content>
           {showLegends ? (

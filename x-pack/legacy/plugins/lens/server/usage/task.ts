@@ -8,17 +8,13 @@ import moment from 'moment';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import { CoreSetup } from 'src/core/server';
 import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
-// This import has the side effect of allowing us to use the elasticsearch type
-// extensions below. Without this import, the compiler is unable to find these
-// in tests
-import {} from '../../../apm/typings/elasticsearch';
 import {
   SearchParams,
   DeleteDocumentByQueryParams,
   SearchResponse,
   DeleteDocumentByQueryResponse,
-  AggregationSearchResponseWithTotalHitsAsInt,
 } from 'elasticsearch';
+import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 import { RunContext } from '../../../task_manager';
 import { getVisualizationCounts } from './visualization_counts';
@@ -49,7 +45,13 @@ export function initializeLensTelemetry(core: CoreSetup, { server }: { server: S
 }
 
 function registerLensTelemetryTask(core: CoreSetup, { server }: { server: Server }) {
-  const taskManager = server.plugins.task_manager!;
+  const taskManager = server.plugins.task_manager;
+
+  if (!taskManager) {
+    server.log(['debug', 'telemetry'], `Task manager is not available`);
+    return;
+  }
+
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Lens telemetry fetch task',
@@ -66,6 +68,11 @@ function scheduleTasks(server: Server) {
     status: { plugin: { kbnServer: KbnServer } };
   }).status.plugin;
 
+  if (!taskManager) {
+    server.log(['debug', 'telemetry'], `Task manager is not available`);
+    return;
+  }
+
   kbnServer.afterPluginsInit(() => {
     // The code block below can't await directly within "afterPluginsInit"
     // callback due to circular dependency The server isn't "ready" until
@@ -75,14 +82,14 @@ function scheduleTasks(server: Server) {
     // function block.
     (async () => {
       try {
-        await taskManager!.schedule({
+        await taskManager.schedule({
           id: TASK_ID,
           taskType: TELEMETRY_TASK_TYPE,
           state: { byDate: {}, suggestionsByDate: {}, saved: {}, runs: 0 },
           params: {},
         });
       } catch (e) {
-        server.log(['warning', 'telemetry'], `Error scheduling task, received ${e.message}`);
+        server.log(['debug', 'telemetry'], `Error scheduling task, received ${e.message}`);
       }
     })();
   });
@@ -135,11 +142,12 @@ export async function getDailyEvents(
     },
   };
 
-  const metrics: AggregationSearchResponseWithTotalHitsAsInt<
+  const metrics: ESSearchResponse<
     unknown,
     {
       body: { aggs: typeof aggs };
-    }
+    },
+    { restTotalHitsAsInt: true }
   > = await callCluster('search', {
     index: kibanaIndex,
     rest_total_hits_as_int: true,

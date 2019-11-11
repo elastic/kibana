@@ -102,3 +102,12 @@ export const DRAW_TYPE = {
   BOUNDS: 'BOUNDS',
   POLYGON: 'POLYGON'
 };
+
+export const METRIC_TYPE = {
+  AVG: 'avg',
+  COUNT: 'count',
+  MAX: 'max',
+  MIN: 'min',
+  SUM: 'sum',
+  UNIQUE_COUNT: 'cardinality',
+};

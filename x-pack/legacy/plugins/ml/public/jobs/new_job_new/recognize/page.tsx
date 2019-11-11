@@ -21,12 +21,13 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
-import { merge, flatten } from 'lodash';
+import { merge } from 'lodash';
 import { ml } from '../../../services/ml_api_service';
 import { useKibanaContext } from '../../../contexts/kibana';
 import {
   DatafeedResponse,
   DataRecognizerConfigResponse,
+  JobOverride,
   JobResponse,
   KibanaObject,
   KibanaObjectResponse,
@@ -40,6 +41,7 @@ import { ModuleJobs } from './components/module_jobs';
 import { checkForSavedObjects } from './resolvers';
 import { JobSettingsForm, JobSettingsFormValues } from './components/job_settings_form';
 import { TimeRange } from '../common/components';
+import { JobId } from '../common/job_creator/configs';
 
 export interface ModuleJobUI extends ModuleJob {
   datafeedResult?: DatafeedResponse;
@@ -57,6 +59,8 @@ interface PageProps {
   existingGroupIds: string[];
 }
 
+export type JobOverrides = Record<JobId, JobOverride>;
+
 export enum SAVE_STATE {
   NOT_SAVED,
   SAVING,
@@ -69,7 +73,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   // #region State
   const [jobPrefix, setJobPrefix] = useState<string>('');
   const [jobs, setJobs] = useState<ModuleJobUI[]>([]);
-  const [jobGroups, setJobGroups] = useState<string[]>([]);
+  const [jobOverrides, setJobOverrides] = useState<JobOverrides>({});
   const [kibanaObjects, setKibanaObjects] = useState<KibanaObjects>({});
   const [saveState, setSaveState] = useState<SAVE_STATE>(SAVE_STATE.NOT_SAVED);
   const [resultsUrl, setResultsUrl] = useState<string>('');
@@ -93,6 +97,9 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const displayQueryWarning = savedSearch.id !== undefined;
   const tempQuery = savedSearch.id === undefined ? undefined : combinedQuery;
 
+  /**
+   * Loads recognizer module configuration.
+   */
   const loadModule = async () => {
     try {
       const response: Module = await ml.getDataRecognizerModule({ moduleId });
@@ -101,9 +108,6 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       const kibanaObjectsResult = await checkForSavedObjects(response.kibana as KibanaObjects);
       setKibanaObjects(kibanaObjectsResult);
 
-      setJobGroups([
-        ...new Set(flatten(response.jobs.map(({ config: { groups = [] } }) => groups))),
-      ]);
       setSaveState(SAVE_STATE.NOT_SAVED);
     } catch (e) {
       // eslint-disable-next-line no-console
@@ -134,11 +138,13 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     loadModule();
   }, []);
 
+  /**
+   * Sets up recognizer module configuration.
+   */
   const save = async (formValues: JobSettingsFormValues) => {
     setSaveState(SAVE_STATE.SAVING);
     const {
       jobPrefix: resultJobPrefix,
-      jobGroups: resultJobGroups,
       startDatafeedAfterSave,
       useDedicatedIndex,
       useFullIndexData,
@@ -148,14 +154,17 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     const resultTimeRange = await getTimeRange(useFullIndexData, timeRange);
 
     try {
+      let jobOverridesPayload: JobOverride[] | null = Object.values(jobOverrides);
+      jobOverridesPayload = jobOverridesPayload.length > 0 ? jobOverridesPayload : null;
+
       const response: DataRecognizerConfigResponse = await ml.setupDataRecognizerConfig({
         moduleId,
         prefix: resultJobPrefix,
-        groups: resultJobGroups,
         query: tempQuery,
         indexPatternName: indexPattern.title,
         useDedicatedIndex,
         startDatafeed: startDatafeedAfterSave,
+        ...(jobOverridesPayload !== null ? { jobOverrides: jobOverridesPayload } : {}),
         ...resultTimeRange,
       });
       const { datafeeds: datafeedsResponse, jobs: jobsResponse, kibana: kibanaResponse } = response;
@@ -206,6 +215,13 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         }),
       });
     }
+  };
+
+  const onJobOverridesChange = (job: JobOverride) => {
+    setJobOverrides({
+      ...jobOverrides,
+      [job.job_id as string]: job,
+    });
   };
 
   const isFormVisible = [SAVE_STATE.NOT_SAVED, SAVE_STATE.SAVING].includes(saveState);
@@ -271,10 +287,8 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
                   onChange={formValues => {
                     setJobPrefix(formValues.jobPrefix);
                   }}
-                  existingGroupIds={existingGroupIds}
                   saveState={saveState}
                   jobs={jobs}
-                  jobGroups={jobGroups}
                 />
               )}
               <CreateResultCallout
@@ -286,7 +300,14 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
           </EuiFlexItem>
           <EuiFlexItem grow={2}>
             <EuiPanel grow={false}>
-              <ModuleJobs jobs={jobs} jobPrefix={jobPrefix} saveState={saveState} />
+              <ModuleJobs
+                jobs={jobs}
+                jobPrefix={jobPrefix}
+                saveState={saveState}
+                existingGroupIds={existingGroupIds}
+                jobOverrides={jobOverrides}
+                onJobOverridesChange={onJobOverridesChange}
+              />
             </EuiPanel>
             {Object.keys(kibanaObjects).length > 0 && (
               <>

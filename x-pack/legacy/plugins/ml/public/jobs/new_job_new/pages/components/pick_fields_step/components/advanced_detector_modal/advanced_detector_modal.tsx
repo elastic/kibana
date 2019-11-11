@@ -15,16 +15,20 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { AdvancedJobCreator, JobCreatorType } from '../../../../../common/job_creator';
+import { AdvancedJobCreator } from '../../../../../common/job_creator';
+import {
+  createFieldOptions,
+  createScriptFieldOptions,
+  createMlcategoryFieldOption,
+} from '../../../../../common/job_creator/util/general';
 import {
   Field,
   Aggregation,
   EVENT_RATE_FIELD_ID,
+  mlCategory,
 } from '../../../../../../../../common/types/fields';
 import { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
-import { ES_FIELD_TYPES } from '../../../../../../../../../../../../src/plugins/data/public';
 import { ModalWrapper } from './modal_wrapper';
-import { MLCATEGORY } from '../../../../../../../../common/constants/field_types';
 import { detectorToString } from '../../../../../../../util/string_utils';
 import { createBasicDetector } from '../../../../../common/job_creator/util/default_configs';
 
@@ -55,13 +59,6 @@ const emptyOption: EuiComboBoxOptionProps = {
   label: '',
 };
 
-const mlCategory: Field = {
-  id: MLCATEGORY,
-  name: MLCATEGORY,
-  type: ES_FIELD_TYPES.KEYWORD,
-  aggregatable: false,
-};
-
 const excludeFrequentOptions: EuiComboBoxOptionProps[] = [{ label: 'all' }, { label: 'none' }];
 
 export const AdvancedDetectorModal: FC<Props> = ({
@@ -86,24 +83,33 @@ export const AdvancedDetectorModal: FC<Props> = ({
     createExcludeFrequentOption(detector.excludeFrequent)
   );
   const [descriptionOption, setDescriptionOption] = useState(detector.description || '');
-  const [fieldsEnabled, setFieldsEnabled] = useState(true);
+  const [splitFieldsEnabled, setSplitFieldsEnabled] = useState(true);
   const [excludeFrequentEnabled, setExcludeFrequentEnabled] = useState(true);
   const [fieldOptionEnabled, setFieldOptionEnabled] = useState(true);
   const { descriptionPlaceholder, setDescriptionPlaceholder } = useDetectorPlaceholder(detector);
 
-  // list of aggregation combobox options. filtering out any aggs with no fields.
+  const usingScriptFields = jobCreator.scriptFields.length > 0;
+  // list of aggregation combobox options.
+
   const aggOptions: EuiComboBoxOptionProps[] = aggs
-    .filter(a => a.fields !== undefined && a.fields.length)
+    .filter(agg => filterAggs(agg, usingScriptFields))
     .map(createAggOption);
 
   // fields available for the selected agg
-  const { currentFieldOptions, setCurrentFieldOptions } = useCurrentFieldOptions(detector.agg);
+  const { currentFieldOptions, setCurrentFieldOptions } = useCurrentFieldOptions(
+    detector.agg,
+    jobCreator.scriptFields
+  );
 
-  const allFieldOptions: EuiComboBoxOptionProps[] = fields
-    .filter(f => f.id !== EVENT_RATE_FIELD_ID)
-    .map(createFieldOption);
+  const allFieldOptions: EuiComboBoxOptionProps[] = [
+    ...createFieldOptions(fields),
+    ...createScriptFieldOptions(jobCreator.scriptFields),
+  ].sort(comboBoxOptionsSort);
 
-  const splitFieldOptions = [...allFieldOptions, ...createMlcategoryField(jobCreator)];
+  const splitFieldOptions: EuiComboBoxOptionProps[] = [
+    ...allFieldOptions,
+    ...createMlcategoryFieldOption(jobCreator.categorizationFieldName),
+  ].sort(comboBoxOptionsSort);
 
   const eventRateField = fields.find(f => f.id === EVENT_RATE_FIELD_ID);
 
@@ -120,7 +126,9 @@ export const AdvancedDetectorModal: FC<Props> = ({
     if (title === mlCategory.id) {
       return mlCategory;
     }
-    return fields.find(a => a.id === title) || null;
+    return (
+      fields.find(f => f.id === title) || jobCreator.scriptFields.find(f => f.id === title) || null
+    );
   }
 
   useEffect(() => {
@@ -131,20 +139,22 @@ export const AdvancedDetectorModal: FC<Props> = ({
     const partitionField = getField(partitionFieldOption.label);
 
     if (agg !== null) {
-      setFieldsEnabled(true);
       setCurrentFieldOptions(agg);
 
       if (isFieldlessAgg(agg) && eventRateField !== undefined) {
+        setSplitFieldsEnabled(true);
         setFieldOption(emptyOption);
         setFieldOptionEnabled(false);
         field = eventRateField;
       } else {
+        setSplitFieldsEnabled(field !== null);
         setFieldOptionEnabled(true);
-        // only enable exclude frequent if there is a by or over selected
-        setExcludeFrequentEnabled(byField !== null || overField !== null);
       }
+      // only enable exclude frequent if there is a by or over selected
+      setExcludeFrequentEnabled(byField !== null || overField !== null);
     } else {
-      setFieldsEnabled(false);
+      setSplitFieldsEnabled(false);
+      setFieldOptionEnabled(false);
     }
 
     const dtr: RichDetector = {
@@ -155,6 +165,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
       partitionField,
       excludeFrequent: excludeFrequentOption.label !== '' ? excludeFrequentOption.label : null,
       description: descriptionOption !== '' ? descriptionOption : null,
+      customRules: null,
     };
     setDetector(dtr);
     setDescriptionPlaceholder(dtr);
@@ -170,7 +181,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
 
   useEffect(() => {
     const agg = getAgg(aggOption.label);
-    setFieldsEnabled(aggOption.label !== '');
+    setSplitFieldsEnabled(aggOption.label !== '');
     if (agg !== null) {
       setFieldOptionEnabled(isFieldlessAgg(agg) === false);
 
@@ -193,7 +204,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
 
   function saveEnabled() {
     return (
-      fieldsEnabled &&
+      splitFieldsEnabled &&
       (fieldOptionEnabled === false || (fieldOptionEnabled === true && fieldOption.label !== ''))
     );
   }
@@ -202,18 +213,18 @@ export const AdvancedDetectorModal: FC<Props> = ({
     <ModalWrapper onCreateClick={onCreateClick} closeModal={closeModal} saveEnabled={saveEnabled()}>
       <Fragment>
         <EuiFlexGroup>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="mlAdvancedFunctionSelect">
             <AggDescription>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={aggOptions}
-                selectedOptions={[aggOption]}
+                selectedOptions={createSelectedOptions(aggOption, aggOptions)}
                 onChange={onOptionChange(setAggOption)}
                 isClearable={true}
               />
             </AggDescription>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="mlAdvancedFieldSelect">
             <FieldDescription>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
@@ -221,14 +232,14 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 selectedOptions={createSelectedOptions(fieldOption, currentFieldOptions)}
                 onChange={onOptionChange(setFieldOption)}
                 isClearable={true}
-                isDisabled={fieldsEnabled === false || fieldOptionEnabled === false}
+                isDisabled={fieldOptionEnabled === false}
               />
             </FieldDescription>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="l" />
         <EuiFlexGrid columns={2}>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="mlAdvancedByFieldSelect">
             <ByFieldDescription>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
@@ -236,11 +247,11 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 selectedOptions={createSelectedOptions(byFieldOption, splitFieldOptions)}
                 onChange={onOptionChange(setByFieldOption)}
                 isClearable={true}
-                isDisabled={fieldsEnabled === false}
+                isDisabled={splitFieldsEnabled === false}
               />
             </ByFieldDescription>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="mlAdvancedOverFieldSelect">
             <OverFieldDescription>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
@@ -248,11 +259,11 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 selectedOptions={createSelectedOptions(overFieldOption, splitFieldOptions)}
                 onChange={onOptionChange(setOverFieldOption)}
                 isClearable={true}
-                isDisabled={fieldsEnabled === false}
+                isDisabled={splitFieldsEnabled === false}
               />
             </OverFieldDescription>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="mlAdvancedPartitionFieldSelect">
             <PartitionFieldDescription>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
@@ -260,19 +271,22 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 selectedOptions={createSelectedOptions(partitionFieldOption, splitFieldOptions)}
                 onChange={onOptionChange(setPartitionFieldOption)}
                 isClearable={true}
-                isDisabled={fieldsEnabled === false}
+                isDisabled={splitFieldsEnabled === false}
               />
             </PartitionFieldDescription>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="mlAdvancedExcludeFrequentSelect">
             <ExcludeFrequentDescription>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={excludeFrequentOptions}
-                selectedOptions={[excludeFrequentOption]}
+                selectedOptions={createSelectedOptions(
+                  excludeFrequentOption,
+                  excludeFrequentOptions
+                )}
                 onChange={onOptionChange(setExcludeFrequentOption)}
                 isClearable={true}
-                isDisabled={fieldsEnabled === false || excludeFrequentEnabled === false}
+                isDisabled={splitFieldsEnabled === false || excludeFrequentEnabled === false}
               />
             </ExcludeFrequentDescription>
           </EuiFlexItem>
@@ -287,6 +301,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 placeholder={descriptionPlaceholder}
                 value={descriptionOption}
                 onChange={e => setDescriptionOption(e.target.value)}
+                data-test-subj="mlAdvancedDetectorDescriptionInput"
               />
             </DescriptionDescription>
           </EuiFlexItem>
@@ -303,6 +318,13 @@ function createAggOption(agg: Aggregation | null): EuiComboBoxOptionProps {
   return {
     label: agg.id,
   };
+}
+
+// get list of aggregations, filtering out any aggs with no fields,
+// unless script fields are being used, in which case list all fields, as it's not possible
+// to determine the type of a script field and so all aggs should be available.
+function filterAggs(agg: Aggregation, usingScriptFields: boolean) {
+  return agg.fields !== undefined && (usingScriptFields || agg.fields.length);
 }
 
 function createFieldOption(field: Field | null): EuiComboBoxOptionProps {
@@ -330,17 +352,6 @@ function isFieldlessAgg(agg: Aggregation) {
   return agg.fields && agg.fields.length === 1 && agg.fields[0].id === EVENT_RATE_FIELD_ID;
 }
 
-function createMlcategoryField(jobCreator: JobCreatorType): EuiComboBoxOptionProps[] {
-  if (jobCreator.categorizationFieldName === null) {
-    return [];
-  }
-  return [
-    {
-      label: MLCATEGORY,
-    },
-  ];
-}
-
 function useDetectorPlaceholder(detector: RichDetector) {
   const [descriptionPlaceholder, setDescriptionPlaceholderString] = useState(
     createDefaultDescription(detector)
@@ -354,22 +365,21 @@ function useDetectorPlaceholder(detector: RichDetector) {
 }
 
 // creates list of combobox options based on an aggregation's field list
-function createFieldOptionList(agg: Aggregation | null) {
-  return (agg !== null && agg.fields !== undefined ? agg.fields : [])
-    .filter(f => f.id !== EVENT_RATE_FIELD_ID)
-    .map(createFieldOption);
+function createFieldOptionsFromAgg(agg: Aggregation | null) {
+  return createFieldOptions(agg !== null && agg.fields !== undefined ? agg.fields : []);
 }
 
 // custom hook for storing combobox options based on an aggregation field list
-function useCurrentFieldOptions(aggregation: Aggregation | null) {
+function useCurrentFieldOptions(aggregation: Aggregation | null, scriptFields: Field[]) {
   const [currentFieldOptions, setCurrentFieldOptions] = useState(
-    createFieldOptionList(aggregation)
+    createFieldOptionsFromAgg(aggregation)
   );
+  const scriptFieldOptions = createScriptFieldOptions(scriptFields);
 
   return {
     currentFieldOptions,
     setCurrentFieldOptions: (agg: Aggregation | null) =>
-      setCurrentFieldOptions(createFieldOptionList(agg)),
+      setCurrentFieldOptions([...createFieldOptionsFromAgg(agg), ...scriptFieldOptions]),
   };
 }
 
@@ -389,8 +399,15 @@ function createDefaultDescription(dtr: RichDetector) {
 // if the options list only contains one option and nothing has been selected, set
 // selectedOptions list to be an empty array
 function createSelectedOptions(
-  option: EuiComboBoxOptionProps,
+  selectedOption: EuiComboBoxOptionProps,
   options: EuiComboBoxOptionProps[]
 ): EuiComboBoxOptionProps[] {
-  return options.length === 1 && options[0].label !== option.label ? [] : [option];
+  return (options.length === 1 && options[0].label !== selectedOption.label) ||
+    selectedOption.label === ''
+    ? []
+    : [selectedOption];
+}
+
+function comboBoxOptionsSort(a: EuiComboBoxOptionProps, b: EuiComboBoxOptionProps) {
+  return a.label.localeCompare(b.label);
 }

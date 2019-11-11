@@ -5,7 +5,7 @@
  */
 
 import { EuiAvatar, EuiPopover, PopoverAnchorPosition } from '@elastic/eui';
-import React, { Component, ComponentClass } from 'react';
+import React, { Component } from 'react';
 import { Space } from '../../../common/model/space';
 import { SpaceAvatar } from '../../components';
 import { SpacesManager } from '../../lib/spaces_manager';
@@ -21,7 +21,7 @@ interface Props {
     space: Space;
   };
   anchorPosition: PopoverAnchorPosition;
-  buttonClass: ComponentClass<ButtonProps>;
+  buttonClass: React.ComponentType<ButtonProps>;
 }
 
 interface State {

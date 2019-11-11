@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FormMessage, State } from './state';
+import { FormMessage, State, SourceIndexMap } from './state';
 
 export enum ACTION {
   ADD_REQUEST_MESSAGE,
@@ -48,8 +48,7 @@ export type Action =
   | {
       type: ACTION.SET_INDEX_PATTERN_TITLES;
       payload: {
-        indexPatternTitles: State['indexPatternTitles'];
-        indexPatternsWithNumericFields: State['indexPatternsWithNumericFields'];
+        indexPatternsMap: SourceIndexMap;
       };
     }
   | { type: ACTION.SET_IS_JOB_CREATED; isJobCreated: State['isJobCreated'] }

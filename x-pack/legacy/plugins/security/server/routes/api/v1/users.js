@@ -108,7 +108,7 @@ export function initUsersApi({ authc: { login }, config }, server) {
             return Boom.unauthorized(authenticationResult.error);
           }
         } catch(err) {
-          return Boom.unauthorized(err);
+          throw Boom.forbidden(err);
         }
       }
 

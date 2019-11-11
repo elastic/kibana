@@ -61,6 +61,25 @@ describe('rename_columns', () => {
     `);
   });
 
+  it('should replace "" with a visible value', () => {
+    const input: KibanaDatatable = {
+      type: 'kibana_datatable',
+      columns: [{ id: 'a', name: 'A' }],
+      rows: [{ a: '' }],
+    };
+
+    const idMap = {
+      a: {
+        id: 'a',
+        label: 'Austrailia',
+      },
+    };
+
+    expect(renameColumns.fn(input, { idMap: JSON.stringify(idMap) }, {}).rows[0].a).toEqual(
+      '(empty)'
+    );
+  });
+
   it('should keep columns which are not mapped', () => {
     const input: KibanaDatatable = {
       type: 'kibana_datatable',

@@ -65,7 +65,7 @@ and lighter shades symbolize countries with less traffic.
 ==== Add a vector layer from the Elastic Maps Service source
 
 . In the map legend, click *Add layer*.
-. Click the *Vector shapes* data source.
+. Click the *EMS Boundaries* data source.
 . From the *Layer* dropdown menu, select *World Countries*.
 . Click the *Add layer* button.
 . Set *Layer name* to `Total Requests by Country`.

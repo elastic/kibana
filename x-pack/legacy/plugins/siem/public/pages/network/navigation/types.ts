@@ -34,6 +34,10 @@ export type TlsQueryTabBodyProps = QueryTabBodyProps &
     ip?: string;
   };
 
+export type HttpQueryTabBodyProps = QueryTabBodyProps &
+  GlobalTimeArgs & {
+    ip?: string;
+  };
 export type AnomaliesQueryTabBodyProps = QueryTabBodyProps &
   Pick<GlobalTimeArgs, 'to' | 'from' | 'isInitializing'> & {
     narrowDateRange: NarrowDateRange;
@@ -63,6 +67,7 @@ export enum NetworkRouteType {
   dns = 'dns',
   anomalies = 'anomalies',
   tls = 'tls',
+  http = 'http',
 }
 
 export type GetNetworkRoutePath = (

@@ -22,7 +22,7 @@ import { schemas } from '../template_form_schemas';
 
 // Create or Form components with partial props that are common to all instances
 const UseField = getUseField({ component: Field });
-const FormRow = getFormRow({ titleTag: 'h4' });
+const FormRow = getFormRow({ titleTag: 'h3' });
 
 const fieldsMeta = {
   name: {
@@ -97,12 +97,12 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <h3>
+            <h2>
               <FormattedMessage
                 id="xpack.idxMgmt.templateForm.stepLogistics.stepTitle"
                 defaultMessage="Logistics"
               />
-            </h3>
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
 

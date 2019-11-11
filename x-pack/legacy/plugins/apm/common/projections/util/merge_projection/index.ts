@@ -4,9 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { merge, isPlainObject } from 'lodash';
+import { DeepPartial } from 'utility-types';
+import { AggregationInputMap } from '../../../../typings/elasticsearch/aggregations';
+import {
+  ESSearchRequest,
+  ESSearchBody
+} from '../../../../typings/elasticsearch';
 import { Projection } from '../../typings';
 
 type PlainObject = Record<string | number | symbol, any>;
+
+type SourceProjection = Omit<DeepPartial<ESSearchRequest>, 'body'> & {
+  body: Omit<DeepPartial<ESSearchBody>, 'aggs'> & {
+    aggs?: AggregationInputMap;
+  };
+};
 
 type DeepMerge<T, U> = U extends PlainObject
   ? (T extends PlainObject
@@ -19,10 +31,10 @@ type DeepMerge<T, U> = U extends PlainObject
       : U)
   : U;
 
-export function mergeProjection<T extends Projection, U>(
-  target: T,
-  source: U
-): DeepMerge<T, U> {
+export function mergeProjection<
+  T extends Projection,
+  U extends SourceProjection
+>(target: T, source: U): DeepMerge<T, U> {
   return merge({}, target, source, (a, b) => {
     if (isPlainObject(a) && isPlainObject(b)) {
       return undefined;
