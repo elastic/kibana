@@ -113,6 +113,7 @@ export class TelemetryForm extends Component {
                 value: telemetryOptInProvider.getOptIn() || false,
                 description: this.renderDescription(),
                 defVal: false,
+                ariaName: 'Provide usage statistics'
               }}
               save={this.toggleOptIn}
               clear={this.toggleOptIn}
