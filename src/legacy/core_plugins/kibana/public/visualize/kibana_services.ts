@@ -18,8 +18,6 @@
  */
 
 import 'angular-sanitize'; // used in visualization_editor.js and visualization.js
-import 'ui/collapsible_sidebar'; // used in default editor
-import 'ui/vis/editors/default/sidebar';
 // load directives
 import '../../../data/public';
 
