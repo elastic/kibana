@@ -88,7 +88,8 @@ export default function({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should return log highlights in a field column', async () => {
+        // https://github.com/elastic/kibana/issues/49959
+        it.skip('should return log highlights in a field column', async () => {
           const {
             data: {
               source: { logEntryHighlights },
@@ -121,7 +122,7 @@ export default function({ getService }: FtrProviderContext) {
             expect(logEntryHighlight.columns).to.have.length(3);
             expect(logEntryHighlight.columns[1]).to.have.property('field');
             expect(logEntryHighlight.columns[1]).to.have.property('highlights');
-            expect(logEntryHighlight.columns[1].highlights).to.eql(['generate_test_data']);
+            expect(logEntryHighlight.columns[1].highlights).to.eql(['generate_test_data/simple_logs']);
             expect(logEntryHighlight.columns[2]).to.have.property('message');
             expect(logEntryHighlight.columns[2].message).to.be.an('array');
             expect(logEntryHighlight.columns[2].message.length).to.be(1);
