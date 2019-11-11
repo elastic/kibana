@@ -201,7 +201,6 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
 
     const onSubmitQuery = useCallback(
       (newQuery: Query, timefilter?: SavedQueryTimeFilter) => {
-        // TODO need to add time
         if (
           filterQuery == null ||
           ((filterQuery != null && filterQuery.expression !== newQuery.query) ||
