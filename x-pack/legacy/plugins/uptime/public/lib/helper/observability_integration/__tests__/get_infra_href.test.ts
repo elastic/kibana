@@ -161,6 +161,11 @@ describe('getInfraHref', () => {
     expect(getInfraIpHref(summary, 'foo')).toBeUndefined();
   });
 
+  it('getInfraIpHref returns undefined when ip is null', () => {
+    summary.state.checks![0].monitor.ip = null;
+    expect(getInfraIpHref(summary, 'foo')).toBeUndefined();
+  });
+
   it('getInfraIpHref returns a url for ors between multiple ips', () => {
     summary.state.checks = [
       {

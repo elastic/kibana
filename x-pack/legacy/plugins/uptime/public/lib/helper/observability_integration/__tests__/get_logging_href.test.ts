@@ -91,4 +91,9 @@ describe('getLoggingHref', () => {
     delete summary.state.checks;
     expect(getLoggingIpHref(summary, '')).toBeUndefined();
   });
+
+  it('returns undefined ip href if ip is null', () => {
+    summary.state.checks![0].monitor.ip = null;
+    expect(getLoggingIpHref(summary, '')).toBeUndefined();
+  });
 });
