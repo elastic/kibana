@@ -10,6 +10,7 @@ export const FETCH_SNAPSHOT_COUNT_FAIL = 'FETCH_SNAPSHOT_COUNT_FAIL';
 export const FETCH_SNAPSHOT_COUNT_SUCCESS = 'FETCH_SNAPSHOT_COUNT_SUCCESS';
 
 export interface GetSnapshotPayload {
+  basePath: string;
   dateRangeStart: string;
   dateRangeEnd: string;
   filters?: string;
@@ -37,6 +38,7 @@ export type SnapshotActionTypes =
   | GetSnapshotCountFailAction;
 
 export const fetchSnapshotCount = (
+  basePath: string,
   dateRangeStart: string,
   dateRangeEnd: string,
   filters?: string,
@@ -44,6 +46,7 @@ export const fetchSnapshotCount = (
 ): GetSnapshotCountFetchAction => ({
   type: FETCH_SNAPSHOT_COUNT,
   payload: {
+    basePath,
     dateRangeStart,
     dateRangeEnd,
     filters,
