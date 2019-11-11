@@ -23,7 +23,7 @@ const colors = [
   theme.euiColorVis9
 ];
 
-function toTimeSeries(data: AvgDurationByBrowserAPIResponse): TimeSeries[] {
+function toTimeSeries(data?: AvgDurationByBrowserAPIResponse): TimeSeries[] {
   if (!data) {
     return [];
   }

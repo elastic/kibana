@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams } from 'elasticsearch';
-import { ESFilter, ESSearchRequest } from '../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../../typings/common';
 import {
   PROCESSOR_EVENT,
@@ -19,7 +18,6 @@ import { getBucketSize } from '../../helpers/get_bucket_size';
 import { Options } from '.';
 
 export type ESResponse = PromiseReturnType<typeof fetcher>;
-type Document = unknown;
 
 export function fetcher(options: Options) {
   const { end, client, indices, start, uiFiltersES } = options.setup;
