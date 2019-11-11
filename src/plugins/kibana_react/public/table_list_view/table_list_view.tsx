@@ -164,7 +164,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       this.props.toastNotifications.addDanger({
         title: (
           <FormattedMessage
-            id="kibana-react.table_list_view.listing.unableToDeleteDangerMessage"
+            id="kibana-react.tableListView.listing.unableToDeleteDangerMessage"
             defaultMessage="Unable to delete {entityName}(s)"
             values={{ entityName: this.props.entityName }}
           />
@@ -210,14 +210,14 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   renderConfirmDeleteModal() {
     let deleteButton = (
       <FormattedMessage
-        id="kibana-react.table_list_view.listing.deleteSelectedItemsConfirmModal.confirmButtonLabel"
+        id="kibana-react.tableListView.listing.deleteSelectedItemsConfirmModal.confirmButtonLabel"
         defaultMessage="Delete"
       />
     );
     if (this.state.isDeletingItems) {
       deleteButton = (
         <FormattedMessage
-          id="kibana-react.table_list_view.listing.deleteSelectedItemsConfirmModal.confirmButtonLabelDeleting"
+          id="kibana-react.tableListView.listing.deleteSelectedItemsConfirmModal.confirmButtonLabelDeleting"
           defaultMessage="Deleting"
         />
       );
@@ -228,7 +228,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         <EuiConfirmModal
           title={
             <FormattedMessage
-              id="kibana-react.table_list_view.listing.deleteSelectedConfirmModal.title"
+              id="kibana-react.tableListView.listing.deleteSelectedConfirmModal.title"
               defaultMessage="Delete {itemCount} {entityName}?"
               values={{
                 itemCount: this.state.selectedIds.length,
@@ -244,7 +244,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
           onConfirm={this.deleteSelectedItems}
           cancelButtonText={
             <FormattedMessage
-              id="kibana-react.table_list_view.listing.deleteSelectedItemsConfirmModal.cancelButtonLabel"
+              id="kibana-react.tableListView.listing.deleteSelectedItemsConfirmModal.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           }
@@ -253,7 +253,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         >
           <p>
             <FormattedMessage
-              id="kibana-react.table_list_view.listing.deleteConfirmModalDescription"
+              id="kibana-react.tableListView.listing.deleteConfirmModalDescription"
               defaultMessage="You can't recover deleted {entityNamePlural}."
               values={{ entityNamePlural: this.props.entityNamePlural }}
             />
@@ -270,7 +270,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
           <EuiCallOut
             title={
               <FormattedMessage
-                id="kibana-react.table_list_view.listing.listingLimitExceededTitle"
+                id="kibana-react.tableListView.listing.listingLimitExceededTitle"
                 defaultMessage="Listing limit exceeded"
               />
             }
@@ -279,7 +279,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
           >
             <p>
               <FormattedMessage
-                id="kibana-react.table_list_view.listing.listingLimitExceededDescription"
+                id="kibana-react.tableListView.listing.listingLimitExceededDescription"
                 defaultMessage="You have {totalItems} {entityNamePlural}, but your {listingLimitText} setting prevents
                 the table below from displaying more than {listingLimitValue}. You can change this setting under {advancedSettingsLink}."
                 values={{
@@ -290,7 +290,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
                   advancedSettingsLink: (
                     <EuiLink href="#/management/kibana/settings">
                       <FormattedMessage
-                        id="kibana-react.table_list_view.listing.listingLimitExceeded.advancedSettingsLinkText"
+                        id="kibana-react.tableListView.listing.listingLimitExceeded.advancedSettingsLinkText"
                         defaultMessage="Advanced Settings"
                       />
                     </EuiLink>
@@ -311,7 +311,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     } else {
       return (
         <FormattedMessage
-          id="kibana-react.table_list_view.listing.noAvailableItemsMessage"
+          id="kibana-react.tableListView.listing.noAvailableItemsMessage"
           defaultMessage="No {entityNamePlural} available."
           values={{ entityNamePlural: this.props.entityNamePlural }}
         />
@@ -338,7 +338,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         data-test-subj="deleteSelectedItems"
       >
         <FormattedMessage
-          id="kibana-react.table_list_view.listing.deleteButtonMessage"
+          id="kibana-react.tableListView.listing.deleteButtonMessage"
           defaultMessage="Delete {itemCount} {entityName}"
           values={{
             itemCount: selection.length,
@@ -365,11 +365,11 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
 
     const actions = [
       {
-        name: i18n.translate('kibana-react.table_list_view.listing.table.editActionName', {
+        name: i18n.translate('kibana-react.tableListView.listing.table.editActionName', {
           defaultMessage: 'Edit',
         }),
         description: i18n.translate(
-          'kibana-react.table_list_view.listing.table.editActionDescription',
+          'kibana-react.tableListView.listing.table.editActionDescription',
           {
             defaultMessage: 'Edit',
           }
@@ -392,7 +392,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     const columns = this.props.tableColumns.slice();
     if (this.props.editItem) {
       columns.push({
-        name: i18n.translate('kibana-react.table_list_view.listing.table.actionTitle', {
+        name: i18n.translate('kibana-react.tableListView.listing.table.actionTitle', {
           defaultMessage: 'Actions',
         }),
         width: '100px',
@@ -402,7 +402,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
 
     const noItemsMessage = (
       <FormattedMessage
-        id="kibana-react.table_list_view.listing.noMatchedItemsMessage"
+        id="kibana-react.tableListView.listing.noMatchedItemsMessage"
         defaultMessage="No {entityNamePlural} matched your search."
         values={{ entityNamePlural: this.props.entityNamePlural }}
       />
@@ -443,7 +443,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
             fill
           >
             <FormattedMessage
-              id="kibana-react.table_list_view.listing.createNewItemButtonLabel"
+              id="kibana-react.tableListView.listing.createNewItemButtonLabel"
               defaultMessage="Create {entityName}"
               values={{ entityName: this.props.entityName }}
             />
