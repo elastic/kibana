@@ -87,8 +87,8 @@ export const ProfileQueryEditor = memo(() => {
                   disabled={!licenseEnabled}
                   inputRef={ref => {
                     if (ref) {
-                      indexInputRef.current = ref!;
-                      ref!.value = DEFAULT_INDEX_VALUE;
+                      indexInputRef.current = ref;
+                      ref.value = DEFAULT_INDEX_VALUE;
                     }
                   }}
                 />
