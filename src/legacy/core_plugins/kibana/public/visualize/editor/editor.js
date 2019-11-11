@@ -31,8 +31,7 @@ import editorTemplate from './editor.html';
 import { DashboardConstants } from '../../dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
-import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
-
+import { extractTimeFilter, changeTimeFilter } from '../../../../../../plugins/data/public';
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 
 import {
