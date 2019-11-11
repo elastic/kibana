@@ -25,8 +25,8 @@ export const fetchSnapshotCount = async ({
 }: ApiRequest): Promise<Snapshot> => {
   const url = getApiPath(`/api/uptime/snapshot/count`, basePath);
   const urlParams = `?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}${
-    filters ? `&${filters}` : ''
-  }${statusFilter ? `&${statusFilter}` : ''}`;
+    filters ? `&filters=${filters}` : ''
+  }${statusFilter ? `&statusFilter=${statusFilter}` : ''}`;
   const response = await fetch(`${url}${urlParams}`);
   if (!response.ok) {
     throw new Error(response.statusText);
