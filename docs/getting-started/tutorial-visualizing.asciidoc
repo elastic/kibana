@@ -144,6 +144,11 @@ menu to create a Map.
 .. Click the *Grid aggregation* data source.
 .. Set *Index pattern* to *logstash*.
 .. Click the *Add layer* button.
+
+. Set the vector style.
+.. For *Fill color*, select the yellow to red color ramp.
+.. For *Border color*, select white.
+.. Click *Save & close*.
 +
 The map now looks like this:
 +
