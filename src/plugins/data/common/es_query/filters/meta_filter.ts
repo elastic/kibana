@@ -51,6 +51,7 @@ export interface Filter {
   query?: any;
   exists?: any;
   bool?: any;
+  range?: any;
 }
 
 export interface LatLon {

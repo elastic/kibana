@@ -4,16 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter, FilterStateStore } from '@kbn/es-query';
 import { isEqual, isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useState, useEffect } from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { Query } from 'src/plugins/data/common/types';
-
 import { Subscription } from 'rxjs';
+
 import { SavedQueryTimeFilter } from '../../../../../../../../src/legacy/core_plugins/data/public/search';
 import { SavedQuery } from '../../../../../../../../src/legacy/core_plugins/data/public';
 import { FilterManager } from '../../../../../../../../src/plugins/data/public';
+import {
+  Filter,
+  FilterStateStore,
+} from '../../../../../../../../src/plugins/data/common/es_query/filters';
 
 import { BrowserFields } from '../../../containers/source';
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';

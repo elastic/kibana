@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
 import actionCreatorFactory from 'typescript-fsa';
 
+import { Filter } from '../../../../../../../src/plugins/data/common/es_query/filters';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { Sort } from '../../components/timeline/body/sort';
 import {

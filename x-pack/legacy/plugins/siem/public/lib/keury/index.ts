@@ -4,16 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  buildEsQuery,
-  Filter,
-  fromKueryExpression,
-  toElasticsearchQuery,
-  JsonObject,
-} from '@kbn/es-query';
+import { buildEsQuery, fromKueryExpression, toElasticsearchQuery, JsonObject } from '@kbn/es-query';
 import { isEmpty, isString, flow } from 'lodash/fp';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { Query } from 'src/plugins/data/common';
+
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 import { KueryFilterQuery } from '../../store';

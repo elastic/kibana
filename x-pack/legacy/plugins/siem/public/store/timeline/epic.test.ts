@@ -5,9 +5,9 @@
  */
 
 import { TimelineModel } from './model';
-import { FilterStateStore } from '@kbn/es-query';
 import { Direction } from '../../graphql/types';
 import { convertTimelineAsInput } from './epic';
+import { FilterStateStore } from '../../../../../../../src/plugins/data/common/es_query/filters';
 
 describe('Epic Timeline', () => {
   describe('#convertTimelineAsInput ', () => {

@@ -28,7 +28,7 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 
-import { Filter } from '@kbn/es-query';
+import { Filter } from '../../../../../../../src/plugins/data/common/es_query/filters';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { persistTimelineMutation } from '../../containers/timeline/persist.gql_query';
 import {

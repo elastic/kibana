@@ -5,12 +5,12 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled, { injectGlobal } from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
+import { Filter } from '../../../../../../../../src/plugins/data/common/es_query/filters';
 import { BrowserFields } from '../../../containers/source';
 import { KueryFilterQuery, KueryFilterQueryKind } from '../../../store';
 import { KqlMode } from '../../../store/timeline/model';

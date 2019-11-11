@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { getOr, omit, uniq, isEmpty, isEqualWith } from 'lodash/fp';
 
+import { Filter } from '../../../../../../../src/plugins/data/common/es_query/filters';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { getColumnWidthFromType } from '../../components/timeline/body/helpers';
 import { Sort } from '../../components/timeline/body/sort';

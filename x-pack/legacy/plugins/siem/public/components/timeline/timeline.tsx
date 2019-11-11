@@ -5,12 +5,13 @@
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
-import { getEsQueryConfig, Filter } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/es-query';
 import { getOr, isEmpty } from 'lodash/fp';
 import * as React from 'react';
 import styled from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
+import { Filter } from '../../../../../../../src/plugins/data/common/es_query/filters';
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
