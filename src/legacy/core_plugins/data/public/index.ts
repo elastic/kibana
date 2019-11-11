@@ -59,12 +59,3 @@ export {
   NoDefaultIndexPattern,
   NoDefinedIndexPatterns,
 } from './index_patterns';
-
-export {
-  TimeHistoryContract,
-  TimefilterContract,
-  getTime,
-  InputTimeRange,
-  extractTimeFilter,
-  changeTimeFilter,
-} from './timefilter';
