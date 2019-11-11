@@ -178,6 +178,7 @@ function VisEditor(
 
   vis.on('dirtyStateChange', ({ isDirty }) => {
     $scope.isDirty = isDirty;
+    $scope.$apply();
   });
 
   $scope.topNavMenu = [...(capabilities.visualize.save ? [{
