@@ -41,7 +41,13 @@ import { formatHumanReadableDateTime } from '../util/date_utils';
 import { getBoundsRoundedToInterval } from '../util/time_buckets';
 import { getSelectedJobIds } from '../components/job_selector/job_select_service_utils';
 import { InfluencersList } from '../components/influencers_list';
-import { ALLOW_CELL_RANGE_SELECTION, dragSelect$, getExplorerDefaultState, explorer$, explorerState$ } from './explorer_dashboard_service';
+import {
+  ALLOW_CELL_RANGE_SELECTION,
+  dragSelect$,
+  getExplorerDefaultState,
+  explorer$,
+  explorerAction$,
+} from './explorer_dashboard_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { NavigationMenu } from '../components/navigation_menu';
@@ -122,7 +128,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
   {
     annotationsRefresh: annotationsRefresh$,
     explorer: explorer$,
-    explorerState: explorerState$,
     showCharts: showCharts$,
     swimlaneLimit: limit$.pipe(map(d => d.val)),
     tableInterval: interval$.pipe(map(d => d.val)),
@@ -135,7 +140,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       componentDidMountCallback: PropTypes.func.isRequired,
       dateFormatTz: PropTypes.string.isRequired,
       explorer: PropTypes.object.isRequired,
-      explorerState: PropTypes.object.isRequired,
       globalState: PropTypes.object.isRequired,
       jobSelectService: PropTypes.object.isRequired,
       showCharts: PropTypes.bool.isRequired,
@@ -199,7 +203,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     resizeRef = createRef();
     resizeChecker = undefined;
     resizeHandler = () => {
-      explorer$.next({ action: EXPLORER_ACTION.REDRAW });
+      explorerAction$.next({ action: EXPLORER_ACTION.REDRAW });
     }
 
     subscriptions = new Subscription();
@@ -265,8 +269,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     previousTableInterval = interval$.getValue().val;
     previousTableSeverity = severity$.getValue().val;
     async componentDidUpdate() {
-      if (this.props.explorer !== undefined && this.props.explorer.action !== EXPLORER_ACTION.IDLE) {
-        explorer$.next({ action: EXPLORER_ACTION.IDLE });
+      if (this.props.explorer !== null && this.props.explorer.action !== EXPLORER_ACTION.IDLE) {
+        explorerAction$.next({ action: EXPLORER_ACTION.IDLE });
 
         const { action, payload } = this.props.explorer;
 
@@ -361,6 +365,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           this.updateExplorer({}, false);
           return;
         }
+
+        return;
       } else if (this.previousSwimlaneLimit !== this.props.swimlaneLimit) {
         this.previousSwimlaneLimit = this.props.swimlaneLimit;
         this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);

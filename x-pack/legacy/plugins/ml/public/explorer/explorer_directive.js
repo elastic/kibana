@@ -13,7 +13,8 @@ import ReactDOM from 'react-dom';
 
 import moment from 'moment-timezone';
 
-import { Subscription } from 'rxjs';
+import { from, of, Subscription } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -33,7 +34,7 @@ import { subscribeAppStateToObservable } from '../util/app_state_utils';
 
 import { Explorer } from './explorer';
 import { APP_STATE_ACTION, EXPLORER_ACTION } from './explorer_constants';
-import { explorer$ } from './explorer_dashboard_service';
+import { explorerAction$ } from './explorer_dashboard_service';
 import { createJobs } from './explorer_utils';
 
 module.directive('mlExplorerDirective', function (config, globalState, $rootScope, $timeout, AppState) {
@@ -114,50 +115,6 @@ module.directive('mlExplorerDirective', function (config, globalState, $rootScop
       element[0]
     );
 
-    function jobSelectionUpdate(action, {
-      fullJobs,
-      filterData,
-      selectedCells,
-      selectedJobIds,
-      swimlaneViewByFieldName
-    }) {
-      const jobs = createJobs(fullJobs).map((job) => {
-        job.selected = selectedJobIds.some((id) => job.id === id);
-        return job;
-      });
-
-      const selectedJobs = jobs.filter(job => job.selected);
-
-      function fieldFormatServiceCallback() {
-        $scope.$applyAsync();
-
-        const noJobsFound = (jobs.length === 0);
-
-        explorer$.next({
-          action,
-          payload: {
-            loading: false,
-            noJobsFound,
-            selectedCells,
-            selectedJobs,
-            swimlaneViewByFieldName,
-            filterData
-          }
-        });
-        $scope.jobSelectionUpdateInProgress = false;
-        $scope.$applyAsync();
-      }
-
-      // Populate the map of jobs / detectors / field formatters for the selected IDs.
-      mlFieldFormatService.populateFormats(selectedJobIds)
-        .catch((err) => {
-          console.log('Error populating field formats:', err);
-        })
-        .then(() => {
-          fieldFormatServiceCallback();
-        });
-    }
-
     // Listen for changes to job selection.
     $scope.jobSelectionUpdateInProgress = false;
 
@@ -191,23 +148,58 @@ module.directive('mlExplorerDirective', function (config, globalState, $rootScop
           };
         }
 
-        jobSelectionUpdate(EXPLORER_ACTION.INITIALIZE, {
-          filterData,
-          fullJobs: mlJobService.jobs,
-          selectedCells,
-          selectedJobIds,
-          swimlaneViewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName,
+        function jobSelectionActionCreator(actionName) {
+          return from(mlFieldFormatService.populateFormats(selectedJobIds)).pipe(
+            catchError(error => of({ error })),
+            map(resp => {
+              if (resp.error) {
+                console.log('Error populating field formats:', resp.error);
+                return { action: EXPLORER_ACTION.FIELD_FORMATS_LOADED };
+              }
+
+              const jobs = createJobs(mlJobService.jobs).map((job) => {
+                job.selected = selectedJobIds.some((id) => job.id === id);
+                return job;
+              });
+
+              const selectedJobs = jobs.filter(job => job.selected);
+
+              const noJobsFound = (jobs.length === 0);
+
+              const payload = from([{
+                action: actionName,
+                payload: {
+                  loading: false,
+                  noJobsFound,
+                  selectedCells,
+                  selectedJobs,
+                  swimlaneViewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName,
+                  filterData
+                }
+              }]);
+
+              return { action: EXPLORER_ACTION.FIELD_FORMATS_LOADED, payload };
+            })
+          );
+        }
+
+        explorerAction$.next({
+          action: EXPLORER_ACTION.FIELD_FORMATS_LOADING,
+          payload: jobSelectionActionCreator(EXPLORER_ACTION.INITIALIZE)
         });
 
         subscriptions.add(jobSelectService.subscribe(({ selection }) => {
           if (selection !== undefined) {
             $scope.jobSelectionUpdateInProgress = true;
-            jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, { fullJobs: mlJobService.jobs, selectedJobIds: selection });
+            explorerAction$.next({
+              action: EXPLORER_ACTION.FIELD_FORMATS_LOADING,
+              payload: jobSelectionActionCreator(EXPLORER_ACTION.JOB_SELECTION_CHANGE)
+            });
           }
         }));
 
       } else {
-        explorer$.next({
+        explorerAction$.next({
           action: EXPLORER_ACTION.RELOAD,
           payload: {
             loading: false,
@@ -227,7 +219,7 @@ module.directive('mlExplorerDirective', function (config, globalState, $rootScop
 
     function redrawOnResize() {
       if ($scope.jobSelectionUpdateInProgress === false) {
-        explorer$.next({ action: EXPLORER_ACTION.REDRAW });
+        explorerAction$.next({ action: EXPLORER_ACTION.REDRAW });
       }
     }
     */

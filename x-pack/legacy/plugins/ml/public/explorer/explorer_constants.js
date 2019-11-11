@@ -17,6 +17,8 @@ export const DRAG_SELECT_ACTION = {
 };
 
 export const EXPLORER_ACTION = {
+  FIELD_FORMATS_LOADING: 'fieldFormatsLoading',
+  FIELD_FORMATS_LOADED: 'fieldFormatsLoaded',
   IDLE: 'idle',
   INITIALIZE: 'initialize',
   JOB_SELECTION_CHANGE: 'jobSelectionChange',

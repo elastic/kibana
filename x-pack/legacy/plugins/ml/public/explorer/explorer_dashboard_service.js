@@ -11,8 +11,8 @@
  * components in the Explorer dashboard.
  */
 
-import { isObservable, BehaviorSubject, Subject } from 'rxjs';
-import { map, scan } from 'rxjs/operators';
+import { from, isObservable, BehaviorSubject, Subject } from 'rxjs';
+import { distinctUntilChanged, filter, flatMap, map, scan } from 'rxjs/operators';
 
 import { ML_RESULTS_INDEX_PATTERN } from '../../common/constants/index_patterns';
 
@@ -23,7 +23,7 @@ import { getDefaultViewBySwimlaneData, getInfluencers } from './explorer_utils';
 export const ALLOW_CELL_RANGE_SELECTION = true;
 
 export const dragSelect$ = new Subject();
-export const explorer$ = new BehaviorSubject(null);
+export const explorerAction$ = new BehaviorSubject(null);
 
 // Creates index pattern in the format expected by the kuery bar/kuery autocomplete provider
 // Field objects required fields: name, type, aggregatable, searchable
@@ -47,6 +47,7 @@ export function getExplorerDefaultState() {
     annotationsData: [],
     anomalyChartRecords: [],
     chartsData: getDefaultChartsData(),
+    fieldFormatsLoading: false,
     filterActive: false,
     filteredFields: [],
     filterPlaceHolder: undefined,
@@ -71,14 +72,6 @@ export function getExplorerDefaultState() {
     viewBySwimlaneOptions: [],
   };
 }
-
-const sideEffect = (nextAction) => {
-  if (nextAction !== null && isObservable(nextAction.payload)) {
-    explorer$.next(nextAction.payload);
-  }
-
-  return nextAction;
-};
 
 const initialize = (state, payload) => {
   const { noJobsFound, selectedCells, selectedJobs, swimlaneViewByFieldName, filterData } = payload;
@@ -121,13 +114,35 @@ const reducer = (state, nextAction) => {
     case EXPLORER_ACTION.INITIALIZE:
       return initialize(state, payload);
 
+    case EXPLORER_ACTION.FIELD_FORMATS_LOADING:
+      return { ...state, fieldFormatsLoading: true };
+
+    case EXPLORER_ACTION.FIELD_FORMATS_LOADED:
+      return { ...state, fieldFormatsLoading: false };
+
     default:
       return state;
   }
 
 };
 
+const triggerSideEffect = nextAction => {
+  if (nextAction !== null && isObservable(nextAction.payload)) {
+    explorerAction$.next({ action: nextAction.action });
+    explorerAction$.next(nextAction.payload);
+  }
+  return nextAction;
+};
+
+const filterSideEffect = nextAction => nextAction === null || !isObservable(nextAction.payload);
+
+export const explorer$ = explorerAction$.pipe(
+  flatMap((action) => isObservable(action) ? action : from([action])),
+  map(triggerSideEffect),
+  filter(filterSideEffect),
+  distinctUntilChanged(((prev, curr) => (prev !== null && curr !== null && prev.action === curr.action)))
+);
+
 export const explorerState$ = explorer$.pipe(
-  map(sideEffect),
   scan(reducer, getExplorerDefaultState())
 );
