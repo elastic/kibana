@@ -36,7 +36,7 @@ describe('EmptyState component', () => {
   it(`doesn't render child components when count is falsey`, () => {
     const component = mountWithIntl(
       <EmptyStateComponent basePath="" data={undefined} loading={false}>
-        <div>Shouldn't be rendered</div>
+        <div>Shouldn&apos;t be rendered</div>
       </EmptyStateComponent>
     );
     expect(component).toMatchSnapshot();
@@ -58,7 +58,7 @@ describe('EmptyState component', () => {
     ];
     const component = mountWithIntl(
       <EmptyStateComponent basePath="" data={undefined} errors={errors} loading={false}>
-        <div>Shouldn't appear...</div>
+        <div>Shouldn&apos;t appear...</div>
       </EmptyStateComponent>
     );
     expect(component).toMatchSnapshot();

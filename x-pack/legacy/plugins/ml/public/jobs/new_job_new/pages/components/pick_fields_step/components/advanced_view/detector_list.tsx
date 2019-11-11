@@ -25,6 +25,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { Validation } from '../../../../../common/job_validator';
 import { detectorToString } from '../../../../../../../util/string_utils';
+import { Detector } from '../../../../../common/job_creator/configs';
 
 interface Props {
   isActive: boolean;
@@ -62,6 +63,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
                 defaultMessage: 'Edit',
               }
             )}
+            data-test-subj="mlAdvancedDetectorEditButton"
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -75,6 +77,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
                 defaultMessage: 'Delete',
               }
             )}
+            data-test-subj="mlAdvancedDetectorDeleteButton"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -98,14 +101,16 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
 
       <EuiFlexGrid columns={3}>
         {detectors.map((d, i) => (
-          <EuiFlexItem key={i}>
+          <EuiFlexItem key={i} data-test-subj={`mlAdvancedDetector ${i}`}>
             <EuiPanel paddingSize="m">
               <EuiFlexGroup>
                 <EuiFlexItem>
                   {d.detector_description !== undefined ? (
-                    <div style={{ fontWeight: 'bold' }}>{d.detector_description}</div>
+                    <div style={{ fontWeight: 'bold' }} data-test-subj="mlDetectorDescription">
+                      {d.detector_description}
+                    </div>
                   ) : (
-                    detectorToString(d)
+                    <StringifiedDetector detector={d} />
                   )}
                 </EuiFlexItem>
                 {isActive && (
@@ -117,7 +122,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
               {d.detector_description !== undefined && (
                 <Fragment>
                   <EuiHorizontalRule margin="s" />
-                  {detectorToString(d)}
+                  <StringifiedDetector detector={d} />
                 </Fragment>
               )}
             </EuiPanel>
@@ -142,6 +147,7 @@ const NoDetectorsWarning: FC<{ show: boolean }> = ({ show }) => {
           defaultMessage: 'No detectors',
         })}
         iconType="alert"
+        data-test-subj="mlAdvancedNoDetectorsMessage"
       >
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.noDetectorsCallout.message"
@@ -165,4 +171,8 @@ const DuplicateDetectorsWarning: FC<{ validation: Validation }> = ({ validation 
       <EuiSpacer size="s" />
     </Fragment>
   );
+};
+
+const StringifiedDetector: FC<{ detector: Detector }> = ({ detector }) => {
+  return <div data-test-subj="mlDetectorIdentifier">{detectorToString(detector)}</div>;
 };

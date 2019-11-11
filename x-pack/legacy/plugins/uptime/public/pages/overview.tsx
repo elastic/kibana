@@ -151,7 +151,6 @@ export const OverviewPage = ({
         <StatusPanel
           absoluteDateRangeStart={absoluteDateRangeStart}
           absoluteDateRangeEnd={absoluteDateRangeEnd}
-          colors={colors}
           sharedProps={sharedProps}
         />
         <EuiSpacer size="s" />

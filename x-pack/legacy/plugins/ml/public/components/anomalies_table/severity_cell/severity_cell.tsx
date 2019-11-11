@@ -36,7 +36,7 @@ export const SeverityCell: FC<SeverityCellProps> = memo(({ score, multiBucketImp
           <path
             d="M-6.708203932499369,-2.23606797749979H-2.23606797749979V-6.708203932499369H2.23606797749979V-2.23606797749979H6.708203932499369V2.23606797749979H2.23606797749979V6.708203932499369H-2.23606797749979V2.23606797749979H-6.708203932499369Z"
             transform="translate(8,8)"
-          ></path>
+          />
         </svg>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{severity}</EuiFlexItem>

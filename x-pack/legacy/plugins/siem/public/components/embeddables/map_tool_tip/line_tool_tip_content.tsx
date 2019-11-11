@@ -28,8 +28,11 @@ interface LineToolTipContentProps {
 
 export const LineToolTipContent = React.memo<LineToolTipContentProps>(
   ({ contextId, featureProps }) => {
-    const lineProps = featureProps.reduce<Record<string, string>>(
-      (acc, f) => ({ ...acc, ...{ [f._propertyKey]: f._rawValue } }),
+    const lineProps = featureProps.reduce<Record<string, string[]>>(
+      (acc, f) => ({
+        ...acc,
+        ...{ [f._propertyKey]: Array.isArray(f._rawValue) ? f._rawValue : [f._rawValue] },
+      }),
       {}
     );
 
@@ -44,9 +47,9 @@ export const LineToolTipContent = React.memo<LineToolTipContentProps>(
         </EuiFlexItem>
         <SourceDestinationArrows
           contextId={contextId}
-          destinationBytes={[lineProps[SUM_OF_DESTINATION_BYTES]]}
+          destinationBytes={lineProps[SUM_OF_DESTINATION_BYTES]}
           eventId={`map-line-tooltip-${contextId}`}
-          sourceBytes={[lineProps[SUM_OF_SOURCE_BYTES]]}
+          sourceBytes={lineProps[SUM_OF_SOURCE_BYTES]}
         />
         <EuiFlexItem>
           <FlowBadge color="hollow">
