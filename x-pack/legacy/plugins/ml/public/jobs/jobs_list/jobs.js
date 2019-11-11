@@ -19,7 +19,7 @@ export const JobsPage = (props) => (
       <h1>
         <FormattedMessage
           id="xpack.ml.jobsList.title"
-          defaultMessage="Anomaly Detection"
+          defaultMessage="Anomaly detection jobs"
         />
       </h1>
     </EuiTitle>
