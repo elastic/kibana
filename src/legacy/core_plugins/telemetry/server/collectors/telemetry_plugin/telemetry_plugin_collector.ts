@@ -21,9 +21,9 @@ import { TELEMETRY_STATS_TYPE } from '../../../common/constants';
 import { getTelemetrySavedObject, TelemetrySavedObject } from '../../telemetry_repository';
 import { getTelemetryOptIn, getTelemetryUsageFetcher } from '../../telemetry_config';
 export interface TelemetryUsageStats {
-  optIn?: boolean | null;
-  usageFetcher?: 'browser' | 'server';
-  lastReported?: number;
+  opt_in_status?: boolean | null;
+  usage_fetcher?: 'browser' | 'server';
+  last_reported?: number;
 }
 
 export function createCollectorFetch(server: any) {
@@ -44,9 +44,9 @@ export function createCollectorFetch(server: any) {
     }
 
     return {
-      optIn: getTelemetryOptIn({ currentKibanaVersion, telemetrySavedObject }),
-      lastReported: telemetrySavedObject ? telemetrySavedObject.lastReported : undefined,
-      usageFetcher: getTelemetryUsageFetcher({
+      opt_in_status: getTelemetryOptIn({ currentKibanaVersion, telemetrySavedObject }),
+      last_reported: telemetrySavedObject ? telemetrySavedObject.lastReported : undefined,
+      usage_fetcher: getTelemetryUsageFetcher({
         telemetrySavedObject,
         defaultTelemetryUsageFetcher,
       }),
