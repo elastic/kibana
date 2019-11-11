@@ -25,7 +25,7 @@ class MockField {
     return this._label || 'foobar_label';
   }
 
-  async getType() {
+  async getIndexPatternType() {
     return this._type || 'foobar_type';
   }
 }
