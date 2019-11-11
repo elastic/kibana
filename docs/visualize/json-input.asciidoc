@@ -1,9 +1,0 @@
-*JSON Input*:: A text field where you can add specific JSON-formatted properties to merge with the aggregation
-definition, as in the following example:
-
-[source,shell]
-{ "script" : "doc['grade'].value * 1.2" }
-
-This example implements a {es} {ref}/search-aggregations.html[Script Value Source] which replaces
-the value in the metric. The availability of these options varies depending on the aggregation
-you choose.

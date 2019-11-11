@@ -1,7 +1,9 @@
 [[most-frequent]]
 == Most frequently used visualizations
 
-These are:
+These visualizations allow you to plot aggregated data from a <<save-open-search, saved search>> or <<index-patterns, index pattern>>. They all support a single level of 
+Elasticsearch {es} {ref}/search-aggregations-metrics.html[metric] aggregations, and one or more
+levels of {es} {ref}/search-aggregations-bucket.html[bucket] aggregations:
 
 * Line, Area and Bar charts
 * Pie charts
@@ -11,12 +13,8 @@ These are:
 * Heat maps
 * Tag cloud
 
-These visualizations allow you to plot aggregated data from a <<save-open-search, saved search>> or <<index-patterns, index pattern>>. They all support a single level of 
-Elasticsearch {es} {ref}/search-aggregations-metrics.html[metric] aggregations, and one or more
-levels of {es} {ref}/search-aggregations-bucket.html[bucket] aggregations.
-
 [float]
-=== Configuring your visualization
+=== Configure your visualization
 
 Once you have selected a visualization and data source, you will see the default editor.
 This editor is broken into *Metrics* and *Buckets*, and includes a default count
@@ -63,11 +61,3 @@ Most of these visualizations allow you to customize the color of a specific seri
 image::images/color-picker.png[An array of color dots that users can select,height=267]
 
 include::aggregations.asciidoc[]
-
-include::xychart.asciidoc[]
-include::pie.asciidoc[]
-include::datatable.asciidoc[]
-include::metric.asciidoc[]
-include::goal.asciidoc[]
-include::heatmap.asciidoc[]
-include::tagcloud.asciidoc[]

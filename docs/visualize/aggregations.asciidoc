@@ -7,21 +7,24 @@ The most frequently used visualizations support the following aggregations.
 [[visualize-metric-aggregations]]
 ==== Metric aggregations
 
-{ref}/search-aggregations-metrics-avg-aggregation.html[Average]:: The mean value in a set of data.
+The *Count* metric lets you visualize the number of documents in a bucket.
+If there are no bucket aggregations defined, this is the total number of documents that match the query.
+It is the default selection.
 
-{ref}/search-aggregations-metrics-valuecount-aggregation.html[Count]::
+All other metric aggregations require a field selection, which will read from the indexed values. Alternatively,
+you can override field values with a script using the <<visualize-advanced-aggregation-options, JSON input>>. The
+other metric aggregations are:
 
-{ref}/search-aggregations-metrics-max-aggregation.html[Maximum]:: The top value in a set of data.
-
+{ref}/search-aggregations-metrics-avg-aggregation.html[Average]:: The mean value.
+{ref}/search-aggregations-metrics-max-aggregation.html[Maximum]:: The highest value.
 {ref}/search-aggregations-metrics-percentile-aggregation.html[Median]:: The value that is in the 50% percentile.
+{ref}/search-aggregations-metrics-min-aggregation.html[Minimum]:: The lowest value.
+{ref}/search-aggregations-metrics-sum-aggregation.html[Sum]:: The total value.
 
-{ref}/search-aggregations-metrics-min-aggregation.html[Minimum]:: The lowest value in a set of data.
+Unique Count:: The {ref}/search-aggregations-metrics-cardinality-aggregation.html[Cardinality] of the field within the bucket.
+Supports any data type.
 
-{ref}/search-aggregations-metrics-sum-aggregation.html[Sum]:: The total value in a set of data.
-
-Unique Count:: Uses the {ref}/search-aggregations-metrics-cardinality-aggregation.html[Cardinality] aggregation.
-
-Standard Deviation:: Uses the {ref}/search-aggregations-metrics-extendedstats-aggregation.html[_extended stats_] aggregation.
+Standard Deviation:: Requires a numeric field. Uses the {ref}/search-aggregations-metrics-extendedstats-aggregation.html[_extended stats_] aggregation.
 
 {ref}/search-aggregations-metrics-top-hits-aggregation.html[Top Hit]:: Returns a sample of individual documents. When the Top Hit aggregation is matched to more than one document, you must choose a technique for combining the values. Techniques include average, minimum, maximum, and sum.
 
@@ -63,14 +66,35 @@ Click the red *(x)* symbol to remove a range.
 
 {ref}/search-aggregations-bucket-iprange-aggregation.html[IPv4 Range]:: Specify ranges of IPv4 addresses. Click *Add Range* to add a set of range endpoints. Click the red *(x)* symbol to remove a range.
 
-{ref}/search-aggregations-bucket-terms-aggregation.html[Terms]:: Specify the top or bottom _n_ elements of a  given field to display, ordered by count or a custom metric.
-
 *Filters*:: Each filter creates a bucket of documents. You can specify a filter as a
 <<kuery-query, KQL>> or <<lucene-query, Lucene>> query string. Click *Add Filter* to
 add another filter. Click the image:images/labelbutton.png[Label button icon] *label* button to open the label field, where
 you can type in a name to display on the visualization.
 
+{ref}/search-aggregations-bucket-terms-aggregation.html[Terms]:: Specify the top or bottom _n_ elements of a  given field to display, ordered by count or a custom metric.
+
 {ref}/search-aggregations-bucket-significantterms-aggregation.html[Significant Terms]:: Returns interesting or unusual occurrences of terms in a set.
+
+Both Terms and Significant Terms support {es} {ref}/search-aggregations-bucket-terms-aggregation.html#_filtering_values_4[exclude and include patterns] which
+are available by clicking *Advanced* after selecting a field.
+
+Kibana only supports filtering string fields with regular expression patterns, it does not support matching with arrays or filtering numeric fields.
+Patterns are case sensitive.
+
+Example:
+
+* You want to exclude the metricbeat process from your visualization of top processes: `metricbeat.*`
+* You only want to show processes collecting beats: `.*beat`
+* You want to exclude two specific values, the string `"empty"` and `"none"`: `empty|none`
+
+*Geo aggregations*
+
+These are only supported by the tile map and table visualizations:
+
+{ref}/search-aggregations-bucket-geohashgrid-aggregation.html[Geohash]:: Displays points based on a geohash.
+
+{ref}/search-aggregations-bucket-geotilegrid-aggregation.html[Geotile]:: Groups points based on web map tiling.
+
 
 [float]
 [[visualize-parent-pipeline-aggregations]]
@@ -78,7 +102,7 @@ you can type in a name to display on the visualization.
 
 For each of the parent pipeline aggregations you have to define a bucket and metric to calculate. These
 metrics expect the buckets to be ordered, and are especially useful for time series data.
-You can also nest these aggregations, for example to produce a third derivative.
+You can also nest these aggregations. For example, if you want to produce a third derivative.
 
 These visualizations support parent pipeline aggregations:
 
@@ -99,6 +123,14 @@ Custom {kib} plugins can <<development-visualize-index, add more capabilities to
 [[visualize-advanced-aggregation-options]]
 ==== Advanced aggregation options
 
-include::json-input.asciidoc[]
+*JSON Input*:: A text field where you can add specific JSON-formatted properties to merge with the aggregation
+definition, as in the following example:
+
+[source,shell]
+{ "script" : "doc['grade'].value * 1.2" }
+
+This example implements a {es} {ref}/search-aggregations.html[Script Value Source] which replaces
+the value in the metric. The availability of these options varies depending on the aggregation
+you choose.
 
 When multiple bucket aggregations are defined, you can use the drag target on each aggregation to change the priority. For more information about working with aggregation order, see https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[Kibana, Aggregation Execution Order, and You].

@@ -14,7 +14,8 @@ To add a filter from the Fields list:
 . Click the name of the field you want to filter on. This displays the top
 five values for that field.
 +
-image::images/filter-field.png[]
+[role="screenshot"]
+image::images/filter-field.png[height=317]
 . To add a positive filter, click the *Positive Filter* button
 image:images/PositiveFilter.jpg[Positive Filter].
 This includes only those documents that contain that value in the field.
@@ -83,20 +84,20 @@ image::images/filter-allbuttons.png[]
 
 &nbsp;
 
-image:images/filter-pin.png[] Pin across all apps :: Pinned filters
+Pin across all apps :: Pinned filters
 persist when you switch contexts in Kibana. For example, you can pin a filter
 in Discover and it remains in place when you switch to Visualize.
 Note that a filter is based on a particular index field--if the indices being
 searched don't contain the field in a pinned filter, it has no effect.
-image:images/filter-custom.png[] Edit Filter :: <<filter-edit, Edit the
+Edit Filter :: <<filter-edit, Edit the
 filter>> definition.  Enables you to manually update the filter and
 specify a label for the filter.
-image:images/filter-toggle.png[] Exclude results :: Switch from a positive
+Exclude results :: Switch from a positive
 filter to a negative filter and vice-versa.
-image:images/filter-enable.png[] Temporarily disable :: Disable the filter without
+Temporarily disable :: Disable the filter without
 removing it. Click again to reenable the filter. Diagonal stripes indicate
 that a filter is disabled.
-image:images/filter-delete.png[] Remove Filter :: Remove the filter.
+Remove Filter :: Remove the filter.
 
 To apply a filter action to all of the applied filters,
 click *Actions* and select the action.

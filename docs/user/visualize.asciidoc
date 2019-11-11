@@ -25,13 +25,13 @@ or start from an <<index-patterns, index pattern>>.
 +
 * *<<most-frequent,Most frequently used visualizations>>*
 [horizontal]
-<<most-frequent,Line&comma; area and bar charts>>:: Compare different series in X/Y charts.
-<<most-frequent,Pie chart>>:: Display each source contribution to a total.
-<<most-frequent,Data table>>:: Flattens aggregations into table format.
-<<most-frequent,Metric>>:: Display a single number.
-<<most-frequent,Goal and gauge>>:: Display a number with more decoration.
-<<most-frequent,Heat maps>>:: Display shaded cells within a matrix.
-<<most-frequent,Tag cloud>>:: Display words in a cloud, where the size of the word corresponds to its importance.
+Line&comma; area and bar charts:: Compare different series in X/Y charts.
+Pie chart:: Display each source contribution to a total.
+Data table:: Flattens aggregations into table format.
+Metric:: Display a single number.
+Goal and gauge:: Display a number with progress indicators.
+Heat maps:: Display shaded cells within a matrix.
+Tag cloud:: Display words in a cloud, where the size of the word corresponds to its importance.
 * *Time series optimized*
 [horizontal]
 <<TSVB,TSVB>>:: Visualize time series data using pipeline aggregations.
