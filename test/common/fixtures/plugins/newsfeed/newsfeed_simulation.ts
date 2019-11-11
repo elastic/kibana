@@ -55,8 +55,8 @@ function newsfeedHandler(request: WebhookRequest, h: any) {
 const mockNewsfeed = (version: string) => ({
   items: [
     {
-      title: { en: `Newsfeeds are live for v${version}!` },
-      description: { en: 'Hello world' },
+      title: { en: `You are functionally testing the newsfeed widget with fixtures!` },
+      description: { en: 'See test/common/fixtures/plugins/newsfeed/newsfeed_simulation' },
       link_text: { en: 'Generic feed-viewer could go here' },
       link_url: { en: 'https://feeds.elastic.co' },
       languages: null,

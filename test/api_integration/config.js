@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import path from 'path';
 import { services } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -41,9 +40,6 @@ export default async function ({ readConfigFile }) {
         '--optimize.enabled=false',
         '--elasticsearch.healthCheck.delay=3600000',
         '--server.xsrf.disableProtection=true',
-        `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'newsfeed')}`,
-        `--newsfeed.service.urlRoot=/api/_newsfeed-FTS-external-service-simulators`,
-        `--server.xsrf.whitelist=${JSON.stringify([`/api/_newsfeed-FTS-external-service-simulators`])}`,
       ],
     },
   };
