@@ -23,7 +23,7 @@ export const StatusPanel = ({
   <EuiPanel>
     <EuiFlexGroup gutterSize="l">
       <EuiFlexItem grow={2}>
-        <Snapshot variables={sharedProps} />
+        <Snapshot variables={sharedProps} height="160px" />
       </EuiFlexItem>
       <EuiFlexItem grow={10}>
         <SnapshotHistogram

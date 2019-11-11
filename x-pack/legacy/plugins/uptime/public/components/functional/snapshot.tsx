@@ -21,16 +21,22 @@ interface SnapshotQueryResult {
   snapshot?: SnapshotType;
 }
 
+interface SnapshotProps {
+  /**
+   * Height is needed, since by default charts takes height of 100%
+   */
+  height?: string;
+}
+
+export type SnapshotComponentProps = SnapshotProps & UptimeGraphQLQueryProps<SnapshotQueryResult>;
+
 /**
  * This component visualizes a KPI and histogram chart to help users quickly
  * glean the status of their uptime environment.
  * @param props the props required by the component
  */
-export const SnapshotComponent = ({
-  data,
-  loading,
-}: UptimeGraphQLQueryProps<SnapshotQueryResult>) => (
-  <ChartWrapper loading={loading}>
+export const SnapshotComponent = ({ data, loading, height }: SnapshotComponentProps) => (
+  <ChartWrapper loading={loading} height={height}>
     <SnapshotHeading
       down={get<number>(data, 'snapshot.counts.down', 0)}
       total={get<number>(data, 'snapshot.counts.total', 0)}
@@ -49,4 +55,7 @@ export const SnapshotComponent = ({
  * This component visualizes a KPI and histogram chart to help users quickly
  * glean the status of their uptime environment.
  */
-export const Snapshot = withUptimeGraphQL<SnapshotQueryResult>(SnapshotComponent, snapshotQuery);
+export const Snapshot = withUptimeGraphQL<SnapshotQueryResult, SnapshotProps>(
+  SnapshotComponent,
+  snapshotQuery
+);
