@@ -73,8 +73,6 @@ export const renderApp = async (
   }
   const $injector = mountVisualizeApp(appBasePath, element, deps.angular);
   return () => {
-    const currentGlobalState = $injector.get<State>('globalState');
-    deps.sessionStorage.set('oss-kibana-cross-app-state', currentGlobalState.toObject());
     $injector.get('$rootScope').$destroy();
   };
 };

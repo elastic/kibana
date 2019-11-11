@@ -45,6 +45,11 @@ import {
 export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl, $injector) {
   const Events = Private(EventsProvider);
 
+  const isDummyRoute = () =>
+    $injector.has('$route') &&
+    $injector.get('$route').current &&
+    $injector.get('$route').current.outerAngularWrapperRoute;
+
   createLegacyClass(State).inherits(Events);
   function State(
     urlParam,
@@ -135,16 +140,11 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
       return;
     }
 
-    const isDummyRoute =
-      $injector.has('$route') &&
-      $injector.get('$route').current &&
-      $injector.get('$route').current.outerAngularWrapperRoute;
-
     let stash = this._readFromURL();
 
     // nothing to read from the url? save if ordered to persist, but only if it's not on a wrapper route
     if (stash === null) {
-      if (this._persistAcrossApps && !isDummyRoute) {
+      if (this._persistAcrossApps) {
         return this.save();
       } else {
         stash = {};
@@ -155,7 +155,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
     // apply diff to state from stash, will change state in place via side effect
     const diffResults = applyDiff(this, stash);
 
-    if (!isDummyRoute && diffResults.keys.length) {
+    if (!isDummyRoute() && diffResults.keys.length) {
       this.emit('fetch_with_changes', diffResults.keys);
     }
   };
@@ -166,6 +166,10 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
    */
   State.prototype.save = function (replace) {
     if (!stateManagementConfig.enabled) {
+      return;
+    }
+
+    if (isDummyRoute()) {
       return;
     }
 

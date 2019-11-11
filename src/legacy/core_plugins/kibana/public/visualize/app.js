@@ -26,6 +26,8 @@ import visualizeListingTemplate from './listing/visualize_listing.html';
 import { initVisualizeAppDirective } from './visualize_app';
 import { VisualizeConstants } from './visualize_constants';
 import { VisualizeListingController } from './listing/visualize_listing';
+import { registerTimefilterWithGlobalStateFactory } from '../../../../ui/public/timefilter/setup_router';
+import { syncOnMount } from './global_state_sync';
 
 import {
   getLandingBreadcrumbs,
@@ -40,24 +42,15 @@ export function initVisualizeApp(app, deps) {
   initVisualizeAppDirective(app, deps);
 
   app.run(globalState => {
-    globalState.fetch();
-    const hasGlobalURLState = Object.keys(globalState.toObject()).length;
-    if (!globalState.time) {
-      globalState.time = deps.dataStart.timefilter.timefilter.getTime();
-    }
-    if (!globalState.refreshInterval) {
-      globalState.refreshInterval = deps.dataStart.timefilter.timefilter.getRefreshInterval();
-    }
-    // only inject cross app global state if there is none in the url itself (that takes precedence)
-    if (!hasGlobalURLState) {
-      const globalStateStuff = deps.sessionStorage.get('oss-kibana-cross-app-state') || {};
-      Object.keys(globalStateStuff).forEach(key => {
-        globalState[key] = globalStateStuff[key];
-      });
-    } else {
-      globalState.$inheritedGlobalState = true;
-    }
-    globalState.save();
+    syncOnMount(globalState, deps.dataStart, deps.npDataStart);
+  });
+
+  app.run((globalState, $rootScope) => {
+    registerTimefilterWithGlobalStateFactory(
+      deps.dataStart.timefilter.timefilter,
+      globalState,
+      $rootScope
+    );
   });
 
   app.config(function ($routeProvider) {

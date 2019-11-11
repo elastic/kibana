@@ -19,11 +19,11 @@
 
 import { npStart } from 'ui/new_platform';
 import { onBrushEvent } from './brush_event';
+import { uniqFilters } from '../../../../../plugins/data/public';
+import { toggleFilterNegated } from '@kbn/es-query';
 import _ from 'lodash';
 import { changeTimeFilter, extractTimeFilter } from '../../../../core_plugins/data/public/timefilter';
 import {  start as data } from '../../../../core_plugins/data/public/legacy';
-import { uniqFilters, esFilters } from '../../../../../plugins/data/public';
-
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
  * terms based on a specific cell in the tabified data.
@@ -96,7 +96,7 @@ const createFiltersFromEvent = (event) => {
     if (filter) {
       filter.forEach(f => {
         if (event.negate) {
-          f = esFilters.toggleFilterNegated(f);
+          f = toggleFilterNegated(f);
         }
         filters.push(f);
       });
