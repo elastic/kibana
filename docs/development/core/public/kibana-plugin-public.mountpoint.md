@@ -4,7 +4,7 @@
 
 ## MountPoint type
 
-A function that will should mount DOM content inside the provided container element and return a handler to unmount it.
+A function that should mount DOM content inside the provided container element and return a handler to unmount it.
 
 <b>Signature:</b>
 

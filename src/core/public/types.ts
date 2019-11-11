@@ -18,7 +18,7 @@
  */
 
 /**
- * A function that will should mount DOM content inside the provided container element
+ * A function that should mount DOM content inside the provided container element
  * and return a handler to unmount it.
  *
  * @param element the container element to render into
