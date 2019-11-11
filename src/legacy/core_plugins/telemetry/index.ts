@@ -46,9 +46,13 @@ const telemetry = (kibana: any) => {
     config(Joi: typeof JoiNamespace) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        optIn: Joi.boolean()
-          .allow(null)
-          .default(null),
+        optIn: Joi.when('allowChangingOptInStatus', {
+          is: false,
+          then: Joi.valid(true),
+          otherwise: Joi.boolean()
+            .allow(null)
+            .default(null),
+        }),
         allowChangingOptInStatus: Joi.boolean().default(true),
         // `config` is used internally and not intended to be set
         config: Joi.string().default(Joi.ref('$defaultConfigPath')),
@@ -65,17 +69,7 @@ const telemetry = (kibana: any) => {
             `https://telemetry.elastic.co/xpack/${ENDPOINT_VERSION}/send`
           ),
         }),
-      })
-        .when(
-          Joi.object({
-            optIn: Joi.valid(null).valid(false),
-            allowChangingOptInStatus: false,
-          }).unknown(),
-          {
-            then: Joi.object({ allowChangingOptInStatus: Joi.invalid(false) }),
-          }
-        )
-        .default();
+      }).default();
     },
     uiExports: {
       managementSections: ['plugins/telemetry/views/management'],
