@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { ActionCreator } from 'typescript-fsa';
-import { Query } from 'src/plugins/data/common';
+import { Query, esFilters } from 'src/plugins/data/public';
 
 import { NetworkType } from '../../../store/network/model';
 import { ESTermQuery } from '../../../../common/typed_json';
@@ -25,7 +24,7 @@ type SetAbsoluteRangeDatePicker = ActionCreator<{
 }>;
 
 interface IPDetailsComponentReduxProps {
-  filters: Filter[];
+  filters: esFilters.Filter[];
   flowTarget: FlowTarget;
   query: Query;
 }
