@@ -18,7 +18,6 @@
  */
 
 import { compact } from 'lodash';
-import { Filter } from '@kbn/es-query';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
@@ -39,14 +38,15 @@ import {
   KibanaReactContextValue,
 } from '../../../../../../../plugins/kibana_react/public';
 import { IDataPluginServices } from '../../../types';
+import { esFilters } from '../../../../../../../plugins/data/public';
 
 interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
   intl: InjectedIntl;
   timeHistory: TimeHistoryContract;
   // Filter bar
-  onFiltersUpdated?: (filters: Filter[]) => void;
-  filters?: Filter[];
+  onFiltersUpdated?: (filters: esFilters.Filter[]) => void;
+  filters?: esFilters.Filter[];
   // Date picker
   dateRangeFrom?: string;
   dateRangeTo?: string;

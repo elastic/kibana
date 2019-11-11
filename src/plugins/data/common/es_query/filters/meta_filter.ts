@@ -55,7 +55,7 @@ export interface LatLon {
   lon: number;
 }
 
-export function buildEmptyFilter(isPinned: boolean, index?: string): Filter {
+export const buildEmptyFilter = (isPinned: boolean, index?: string): Filter => {
   const meta: FilterMeta = {
     disabled: false,
     negate: false,
@@ -65,43 +65,43 @@ export function buildEmptyFilter(isPinned: boolean, index?: string): Filter {
   const $state: FilterState = {
     store: isPinned ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
   };
+
   return { meta, $state };
-}
+};
 
-export function isFilterPinned(filter: Filter) {
+export const isFilterPinned = (filter: Filter) => {
   return filter.$state && filter.$state.store === FilterStateStore.GLOBAL_STATE;
-}
+};
 
-export function toggleFilterDisabled(filter: Filter) {
+export const toggleFilterDisabled = (filter: Filter) => {
   const disabled = !filter.meta.disabled;
   const meta = { ...filter.meta, disabled };
-  return { ...filter, meta };
-}
 
-export function toggleFilterNegated(filter: Filter) {
+  return { ...filter, meta };
+};
+
+export const toggleFilterNegated = (filter: Filter) => {
   const negate = !filter.meta.negate;
   const meta = { ...filter.meta, negate };
-  return { ...filter, meta };
-}
 
-export function toggleFilterPinned(filter: Filter) {
+  return { ...filter, meta };
+};
+
+export const toggleFilterPinned = (filter: Filter) => {
   const store = isFilterPinned(filter) ? FilterStateStore.APP_STATE : FilterStateStore.GLOBAL_STATE;
   const $state = { ...filter.$state, store };
+
   return { ...filter, $state };
-}
+};
 
-export function enableFilter(filter: Filter) {
-  return !filter.meta.disabled ? filter : toggleFilterDisabled(filter);
-}
+export const enableFilter = (filter: Filter) =>
+  !filter.meta.disabled ? filter : toggleFilterDisabled(filter);
 
-export function disableFilter(filter: Filter) {
-  return filter.meta.disabled ? filter : toggleFilterDisabled(filter);
-}
+export const disableFilter = (filter: Filter) =>
+  filter.meta.disabled ? filter : toggleFilterDisabled(filter);
 
-export function pinFilter(filter: Filter) {
-  return isFilterPinned(filter) ? filter : toggleFilterPinned(filter);
-}
+export const pinFilter = (filter: Filter) =>
+  isFilterPinned(filter) ? filter : toggleFilterPinned(filter);
 
-export function unpinFilter(filter: Filter) {
-  return !isFilterPinned(filter) ? filter : toggleFilterPinned(filter);
-}
+export const unpinFilter = (filter: Filter) =>
+  !isFilterPinned(filter) ? filter : toggleFilterPinned(filter);
