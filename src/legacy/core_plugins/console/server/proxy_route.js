@@ -58,7 +58,7 @@ function getProxyHeaders(req) {
 }
 
 export const createProxyRoute = ({
-  baseUrl = '/',
+  liveHostsManager,
   pathFilters = [/.*/],
   getConfigForReq = () => ({}),
 }) => ({
@@ -100,6 +100,7 @@ export const createProxyRoute = ({
     handler: async (req, h) => {
       const { payload, query } = req;
       const { path, method } = query;
+      const baseUrl = await liveHostsManager.getLiveHost();
       const uri = toURL(baseUrl, path);
 
       // Because this can technically be provided by a settings-defined proxy config, we need to

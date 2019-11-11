@@ -22,6 +22,7 @@ import { first } from 'rxjs/operators';
 import { resolve, join, sep } from 'path';
 import url from 'url';
 import { has, isEmpty, head, pick } from 'lodash';
+import { LiveHostsManager } from './server/live_hosts_manager';
 
 // @ts-ignore
 import { addProcessorDefinition } from './server/api_server/es_6_0/ingest';
@@ -142,7 +143,8 @@ export default function(kibana: any) {
 
       server.route(
         createProxyRoute({
-          baseUrl: head(legacyEsConfig.hosts),
+          // baseUrl: head(legacyEsConfig.hosts),
+          liveHostsManager: new LiveHostsManager(legacyEsConfig.hosts),
           pathFilters: proxyPathFilters,
           getConfigForReq(req: any, uri: any) {
             const filteredHeaders = filterHeaders(
