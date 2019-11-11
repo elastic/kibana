@@ -78,33 +78,39 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     const iterator = new MonitorGroupIterator(context);
     const items: MonitorGroups[] = [];
     let res: MonitorGroups | null;
+    // query the index to find the most recent check group for each monitor/location
     do {
       res = await iterator.next();
       if (res) {
         items.push(res);
       }
     } while (res !== null);
-    return items
-      .map(({ groups }) =>
-        groups.reduce<'up' | 'down'>((acc, cur) => {
-          if (acc === 'down') {
+    return (
+      items
+        // result is a list of 'up' | 'down', 1:1 per monitor
+        .map(({ groups }) =>
+          // for each location, infer a status
+          groups.reduce<'up' | 'down'>((acc, cur) => {
+            if (acc === 'down') {
+              return acc;
+            }
+            return cur.status === 'down' ? 'down' : 'up';
+          }, 'up')
+        )
+        // count each status up into a single object
+        .reduce(
+          (acc, cur) => {
+            if (cur === 'up') {
+              acc.up++;
+            } else {
+              acc.down++;
+            }
+            acc.total++;
             return acc;
-          }
-          return cur.status === 'down' ? 'down' : 'up';
-        }, 'up')
-      )
-      .reduce(
-        (acc, cur) => {
-          if (cur === 'up') {
-            acc.up++;
-          } else {
-            acc.down++;
-          }
-          acc.total++;
-          return acc;
-        },
-        { up: 0, down: 0, mixed: 0, total: 0 }
-      );
+          },
+          { up: 0, down: 0, mixed: 0, total: 0 }
+        )
+    );
   }
 
   public async statesIndexExists(request: any): Promise<StatesIndexStatus> {
