@@ -26,15 +26,6 @@ const name = 'number';
 
 export const number = (): ExpressionType<typeof name, number> => ({
   name,
-  validate: (value: number) => {
-    if (Number.isNaN(value)) {
-      throw new Error(
-        i18n.translate('expressions_np.types.number.isNaNValidationErrorMessage', {
-          defaultMessage: "Number can't be NaN",
-        })
-      );
-    }
-  },
   from: {
     null: () => 0,
     boolean: b => Number(b),

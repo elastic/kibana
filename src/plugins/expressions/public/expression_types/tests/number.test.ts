@@ -25,10 +25,4 @@ describe('number', () => {
       `"Can't typecast \\"123test\\" string to number"`
     );
   });
-
-  it('should be considered invalid if value is NaN', () => {
-    expect(() => number().validate!(NaN)).toThrowErrorMatchingInlineSnapshot(
-      `"Number can't be NaN"`
-    );
-  });
 });
