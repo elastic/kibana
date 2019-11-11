@@ -36,8 +36,6 @@ import {
 
 export function HomeApp({ directories }) {
   const {
-    telemetryOptInProvider,
-    shouldShowTelemetryOptIn,
     getInjected,
     savedObjectsClient,
     getBasePath,
@@ -101,10 +99,6 @@ export function HomeApp({ directories }) {
             find={savedObjectsClient.find}
             localStorage={localStorage}
             urlBasePath={getBasePath()}
-            shouldShowTelemetryOptIn={shouldShowTelemetryOptIn}
-            setOptIn={telemetryOptInProvider.setOptIn}
-            fetchTelemetry={telemetryOptInProvider.fetchExample}
-            getTelemetryBannerId={telemetryOptInProvider.getBannerId}
           />
         </Route>
       </Switch>
