@@ -30,6 +30,19 @@ export const queryEsSQL = (elasticsearchClient, { count, query, filter, timezone
       });
       const columnNames = map(columns, 'name');
       const rows = res.rows.map(row => zipObject(columnNames, row));
+
+      if (!!res.cursor) {
+        elasticsearchClient('transport.request', {
+          path: '/_sql/close',
+          method: 'POST',
+          body: {
+            cursor: res.cursor,
+          },
+        }).catch(e => {
+          throw new Error(`Unexpected error from Elasticsearch: ${e.message}`);
+        });
+      }
+
       return {
         type: 'datatable',
         columns,
