@@ -582,8 +582,6 @@
     "core.ui.overlays.banner.closeButtonLabel": "关闭",
     "core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel": "前往主页",
     "core.ui.chrome.headerGlobalNav.helpMenuButtonAriaLabel": "帮助菜单",
-    "core.ui.chrome.headerGlobalNav.helpMenuGoToDocumentation": "前往文档",
-    "core.ui.chrome.headerGlobalNav.helpMenuHelpDescription": "在我们的文档中获取更新、信息以及答案。",
     "core.ui.chrome.headerGlobalNav.helpMenuTitle": "帮助",
     "core.ui.chrome.headerGlobalNav.helpMenuVersion": "v {version}",
     "core.ui.chrome.sideGlobalNav.viewRecentItemsFlyoutTitle": "最近项",

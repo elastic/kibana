@@ -17,16 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup } from 'src/core/server';
-import { registerOptInRoutes } from './opt_in';
-import { registerTelemetryDataRoutes } from './telemetry_stats';
-
-interface RegisterRoutesParams {
-  core: CoreSetup;
-  currentKibanaVersion: string;
-}
-
-export function registerRoutes({ core, currentKibanaVersion }: RegisterRoutesParams) {
-  registerTelemetryDataRoutes(core);
-  registerOptInRoutes({ core, currentKibanaVersion });
-}
+export const ELASTIC_SUPPORT_LINK = 'https://support.elastic.co/';
+export const KIBANA_FEEDBACK_LINK = 'https://www.elastic.co/kibana/feedback';
+export const KIBANA_ASK_ELASTIC_LINK = 'https://www.elastic.co/kibana/ask-elastic';
+export const GITHUB_CREATE_ISSUE_LINK = 'https://github.com/elastic/kibana/issues/new/choose';
