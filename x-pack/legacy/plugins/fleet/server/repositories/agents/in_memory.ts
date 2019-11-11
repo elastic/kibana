@@ -48,6 +48,15 @@ export class InMemoryAgentsRepository implements AgentsRepository {
     return agent || null;
   }
 
+  public async getByAccessApiKeyId(
+    user: FrameworkUser,
+    accessApiKeyId: string
+  ): Promise<Agent | null> {
+    const agent = Object.values(this.agents).find(a => a.access_api_key_id === accessApiKeyId);
+
+    return agent || null;
+  }
+
   public async update(user: FrameworkUser, id: string, newData: Partial<Agent>): Promise<void> {
     if (this.agents[id]) {
       Object.assign(this.agents[id], newData);
@@ -85,9 +94,5 @@ export class InMemoryAgentsRepository implements AgentsRepository {
     const total = Object.keys(allAgents).length;
 
     return { agents, total, page, perPage };
-  }
-
-  public async getByEphemeralAccessToken(token: any): Promise<Agent | null> {
-    return null;
   }
 }

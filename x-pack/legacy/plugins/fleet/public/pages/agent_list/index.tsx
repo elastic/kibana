@@ -106,9 +106,8 @@ export const AgentListPage: React.SFC<{}> = () => {
     setIsPoliciesLoading(false);
   };
 
-  // Load initial list of agents
+  // Load initial list of policies
   useEffect(() => {
-    fetchAgents();
     fetchPolicies();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showInactive]);
@@ -118,7 +117,7 @@ export const AgentListPage: React.SFC<{}> = () => {
     fetchAgents();
     setAreAllAgentsSelected(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination, search, selectedPolicies]);
+  }, [pagination, search, showInactive, selectedPolicies]);
 
   // Poll for agents on interval
   useInterval(() => {

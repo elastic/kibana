@@ -16,11 +16,6 @@ export const createEnrollAgentsRoute = (libs: FleetServerLib) => ({
   options: {
     auth: false,
     validate: {
-      headers: Joi.object({
-        'kbn-fleet-enrollment-token': Joi.string().required(),
-      }).options({
-        allowUnknown: true,
-      }),
       payload: {
         shared_id: Joi.string().optional(),
         type: Joi.string()
@@ -41,17 +36,13 @@ export const createEnrollAgentsRoute = (libs: FleetServerLib) => ({
         metadata: { local: any; user_provided: any };
       };
       headers: {
-        'kbn-fleet-enrollment-token': string;
+        authorization: string;
       };
     }>
   ): Promise<ReturnTypeCreate<Agent>> => {
-    const enrollmentToken = request.headers['kbn-fleet-enrollment-token'];
     const { shared_id: sharedId, type, metadata } = request.payload;
     const agent = await libs.agents.enroll(
-      {
-        kind: 'internal',
-      },
-      enrollmentToken,
+      request.user,
       type,
       metadata && {
         local: metadata.local,

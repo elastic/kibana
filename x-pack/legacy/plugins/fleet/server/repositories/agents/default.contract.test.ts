@@ -88,7 +88,7 @@ describe('AgentsRepository', () => {
       const agent = await adapter.create(getUser(), {
         shared_id: 'agent1',
         active: false,
-        access_token: 'TOKEN_1',
+        access_api_key_id: 'api_key_1',
         policy_id: 'policy_id_1',
         type: 'EPHEMERAL',
         version: '1',
@@ -104,7 +104,7 @@ describe('AgentsRepository', () => {
       expect(agent).toMatchObject({
         shared_id: 'agent1',
         active: false,
-        access_token: 'TOKEN_1',
+        access_api_key_id: 'api_key_1',
         policy_id: 'policy_id_1',
         type: 'EPHEMERAL',
         version: '1',
@@ -120,7 +120,7 @@ describe('AgentsRepository', () => {
         {
           shared_id: 'agent1',
           active: false,
-          access_token: 'TOKEN_1',
+          access_api_key_id: 'api_key_1',
           policy_id: 'policy_id_1',
           type: 'EPHEMERAL',
           version: '1',
@@ -145,7 +145,7 @@ describe('AgentsRepository', () => {
         {
           shared_id: 'agent1',
           active: false,
-          access_token: 'TOKEN_1',
+          access_api_key_id: 'api_key_1',
           policy_id: 'policy_id_1',
           type: 'EPHEMERAL',
           version: '1',
@@ -164,7 +164,7 @@ describe('AgentsRepository', () => {
         {
           shared_id: 'agent1',
           active: false,
-          access_token: 'TOKEN_1',
+          access_api_key_id: 'api_key_1',
           policy_id: 'policy_id_1',
           type: 'EPHEMERAL',
           version: '1',
@@ -191,7 +191,7 @@ describe('AgentsRepository', () => {
         {
           shared_id: 'agent1',
           active: false,
-          access_token: 'TOKEN_1',
+          access_api_key_id: 'api_key_1',
           policy_id: 'policy_id_1',
           type: 'EPHEMERAL',
           version: '1',
@@ -226,7 +226,7 @@ describe('AgentsRepository', () => {
         {
           shared_id: 'agent1',
           active: false,
-          access_token: 'TOKEN_1',
+          access_api_key_id: 'api_key_1',
           policy_id: 'policy_id_1',
           type: 'EPHEMERAL',
           version: '1',
@@ -257,7 +257,7 @@ describe('AgentsRepository', () => {
           return {
             shared_id: `agent${idx}`,
             active: true,
-            access_token: 'TOKEN_1',
+            access_api_key_id: 'api_key_1',
             policy_id: 'policy_id_1',
             type: 'PERMANENT',
             version: '1',
@@ -276,7 +276,7 @@ describe('AgentsRepository', () => {
         {
           shared_id: `ephemeral1`,
           active: true,
-          access_token: 'TOKEN_1',
+          access_api_key_id: 'api_key_1',
           policy_id: 'policy_id_1',
           type: 'EPHEMERAL',
           version: '1',
@@ -296,7 +296,7 @@ describe('AgentsRepository', () => {
         {
           shared_id: `inactive_agent_1`,
           active: false,
-          access_token: 'TOKEN_1',
+          access_api_key_id: 'api_key_1',
           policy_id: 'policy_id_1',
           type: 'PERMANENT',
           version: '1',
@@ -314,7 +314,7 @@ describe('AgentsRepository', () => {
         {
           shared_id: `inactive_agent_2`,
           active: true,
-          access_token: 'TOKEN_1',
+          access_api_key_id: 'api_key_1',
           policy_id: 'policy_id_1',
           type: 'EPHEMERAL',
           version: '1',
@@ -380,7 +380,7 @@ describe('AgentsRepository', () => {
         {
           shared_id: `agent1`,
           active: true,
-          access_token: 'TOKEN_1',
+          access_api_key_id: 'api_key_1',
           policy_id: 'policy-id-1',
           type: 'PERMANENT',
           version: '1',
@@ -391,7 +391,7 @@ describe('AgentsRepository', () => {
         {
           shared_id: `agent2`,
           active: true,
-          access_token: 'TOKEN_1',
+          access_api_key_id: 'api_key_1',
           policy_id: 'policy-id-1',
           type: 'PERMANENT',
           version: '1',
@@ -403,7 +403,7 @@ describe('AgentsRepository', () => {
         {
           shared_id: `agent3`,
           active: true,
-          access_token: 'TOKEN_1',
+          access_api_key_id: 'api_key_1',
           policy_id: 'policy-id-2',
           type: 'PERMANENT',
           version: '1',
@@ -430,7 +430,7 @@ describe('AgentsRepository', () => {
         {
           shared_id: 'agent1',
           active: false,
-          access_token: 'TOKEN_1',
+          access_api_key_id: 'api_key_1',
           policy_id: 'policy_id_1',
           type: 'EPHEMERAL',
           version: '1',
@@ -445,7 +445,7 @@ describe('AgentsRepository', () => {
         {
           shared_id: 'agent2',
           active: false,
-          access_token: 'TOKEN_1',
+          access_api_key_id: 'api_key_1',
           policy_id: 'policy_id_1',
           type: 'EPHEMERAL',
           version: '1',

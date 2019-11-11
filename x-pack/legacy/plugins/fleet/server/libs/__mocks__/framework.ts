@@ -4,8 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FrameworkUser } from '../../adapters/framework/adapter_types';
+
 export class FrameworkLib {
   public getSetting(setting: 'encryptionKey'): string {
     return 'mockedEncryptionKey';
+  }
+
+  public getInternalUser(): FrameworkUser {
+    return { kind: 'internal' };
   }
 }

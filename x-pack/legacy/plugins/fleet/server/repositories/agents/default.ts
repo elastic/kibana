@@ -76,6 +76,22 @@ export class AgentsRepository implements AgentsRepositoryType {
     return this._savedObjectToAgent(response);
   }
 
+  public async getByAccessApiKeyId(user: FrameworkUser, apiKeyId: string): Promise<Agent | null> {
+    const response = await this.soAdapter.find<SavedObjectAgentAttributes>(user, {
+      type: 'agents',
+      searchFields: ['access_api_key_id'],
+      search: apiKeyId,
+    });
+
+    const agents = response.saved_objects.map(this._savedObjectToAgent);
+
+    if (agents.length > 0) {
+      return agents[0];
+    }
+
+    return null;
+  }
+
   /**
    * Get an agent by ES shared_id
    * @param agent
@@ -207,25 +223,6 @@ export class AgentsRepository implements AgentsRepositoryType {
     });
   }
 
-  /**
-   * Get an agent by ephemeral access token
-   * @param token
-   */
-  public async getByEphemeralAccessToken(user: FrameworkUser, token: any): Promise<Agent | null> {
-    const res = await this.soAdapter.find<SavedObjectAgentAttributes>(user, {
-      type: 'agents',
-      search: token,
-      searchFields: ['access_token'],
-    });
-
-    const agents = res.saved_objects.map(this._savedObjectToAgent);
-
-    if (agents.length < 0) {
-      return null;
-    }
-
-    return agents[0];
-  }
   private _savedObjectToAgent(so: SavedObject<SavedObjectAgentAttributes>): Agent {
     if (so.error) {
       throw new Error(so.error.message);

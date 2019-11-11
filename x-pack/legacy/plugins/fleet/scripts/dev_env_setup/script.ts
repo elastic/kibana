@@ -7,10 +7,6 @@
 import { createFlagError, run } from '@kbn/dev-utils';
 import fetch from 'node-fetch';
 
-interface Policy {
-  id: string;
-}
-
 run(
   async ({ flags, log }) => {
     const kibanaUrl = flags.kibanaUrl || 'http://localhost:5601';
@@ -28,14 +24,12 @@ run(
       throw createFlagError('please provide a single --kibanaPassword flag');
     }
 
-    const policy = await createPolicy(kibanaUrl, kibanaUser, kibanaPassword);
-    log.info('Policy created', policy);
-    const token = await getEnrollmentToken(kibanaUrl, kibanaUser, kibanaPassword, policy.id);
-    log.info('Enrollment token', token);
+    const apiKey = await createEnrollmentApiKey(kibanaUrl, kibanaUser, kibanaPassword);
+    log.info('Enrollment API Key', apiKey);
   },
   {
     description: `
-      Setup a fleet test policy and generate an enrollment token.
+      Setup a fleet enrollment API Key.
     `,
     flags: {
       string: ['kibanaUrl', 'kibanaUser', 'kibanaPassword'],
@@ -48,48 +42,24 @@ run(
   }
 );
 
-async function createPolicy(
+async function createEnrollmentApiKey(
   kibanaURL: string,
   kibanaUser: string,
-  kibanaPassword: string
-): Promise<Policy> {
-  const res = await fetch(`${kibanaURL}/api/ingest/policies`, {
+  kibanaPassword: string,
+  policyId?: string
+): Promise<string> {
+  const res = await fetch(`${kibanaURL}/api/fleet/enrollment-api-keys`, {
     method: 'POST',
+    body: JSON.stringify({
+      policy_id: policyId,
+    }),
     headers: {
       'kbn-xsrf': 'xsrf',
       'content-type': 'application/json',
       authorization: `Basic ${Buffer.from(`${kibanaUser}:${kibanaPassword}`).toString('base64')}`,
     },
-    body: JSON.stringify({
-      name: 'Dev policy',
-    }),
   });
 
   const json = await res.json();
-
-  return {
-    id: json.item.id,
-  };
-}
-
-async function getEnrollmentToken(
-  kibanaURL: string,
-  kibanaUser: string,
-  kibanaPassword: string,
-  policyId: string
-): Promise<string> {
-  const res = await fetch(
-    `${kibanaURL}/api/fleet/policies/${policyId}/enrollment-tokens?regenerate=true`,
-    {
-      method: 'GET',
-      headers: {
-        'kbn-xsrf': 'xsrf',
-        'content-type': 'application/json',
-        authorization: `Basic ${Buffer.from(`${kibanaUser}:${kibanaPassword}`).toString('base64')}`,
-      },
-    }
-  );
-
-  const json = await res.json();
-  return json.item.token;
+  return json.item.api_key;
 }

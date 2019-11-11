@@ -54,7 +54,6 @@ export type AgentType = t.TypeOf<typeof RuntimeAgentType>;
 const newAgentProperties = {
   type: RuntimeAgentType,
   active: t.boolean,
-  policy_id: t.string,
 };
 
 const newAgentOptionalProperties = t.partial({
@@ -64,7 +63,9 @@ const newAgentOptionalProperties = t.partial({
   user_provided_metadata: t.dictionary(t.string, t.string),
   local_metadata: t.dictionary(t.string, t.string),
   shared_id: t.string,
-  access_token: t.string,
+  access_api_key_id: t.string,
+  access_api_key: t.string,
+  policy_id: t.string,
 });
 
 export const NewRuntimeAgent = t.intersection([
@@ -88,7 +89,7 @@ export const RuntimeAgent = t.intersection([
 export const RuntimeSavedObjectAgentAttributes = t.intersection([
   t.partial({
     shared_id: t.string,
-    access_token: t.string,
+    access_api_key_id: t.string,
     last_updated: t.string,
     last_checkin: t.string,
     parent_id: t.string,
@@ -132,6 +133,8 @@ export interface AgentsRepository {
 
   delete(user: FrameworkUser, agent: Agent): Promise<void>;
 
+  getByAccessApiKeyId(user: FrameworkUser, apiKeyid: string): Promise<Agent | null>;
+
   getById(user: FrameworkUser, id: string): Promise<Agent | null>;
 
   getBySharedId(user: FrameworkUser, sharedId: string): Promise<Agent | null>;
@@ -153,6 +156,4 @@ export interface AgentsRepository {
     policyId: string,
     options?: ListOptions
   ): Promise<{ agents: Agent[]; total: number; page: number; perPage: number }>;
-
-  getByEphemeralAccessToken(user: FrameworkUser, token: any): Promise<Agent | null>;
 }

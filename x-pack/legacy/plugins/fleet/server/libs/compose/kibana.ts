@@ -5,12 +5,12 @@
  */
 
 import os from 'os';
-import { TokenLib } from '../token';
+import { ApiKeyLib } from '../api_keys';
 import { AgentLib } from '../agent';
 import { FrameworkLib } from '../framework';
 import { AgentsRepository } from '../../repositories/agents/default';
 import { SODatabaseAdapter } from '../../adapters/saved_objects_database/default';
-import { TokensRepository } from '../../repositories/tokens/default';
+import { EnrollmentApiKeysRepository } from '../../repositories/enrollment_api_keys/default';
 import { FrameworkAdapter } from '../../adapters/framework/default';
 import { PolicyLib } from '../policy';
 import { EncryptedSavedObjects } from '../../adapters/encrypted_saved_objects/default';
@@ -21,6 +21,7 @@ import { FileSystemArtifactRepository } from '../../repositories/artifacts/file_
 import { HttpAdapter } from '../../adapters/http_adapter/default';
 import { AgentEventsRepository } from '../../repositories/agent_events/default';
 import { InstallLib } from '../install';
+import { ElasticsearchAdapter } from '../../adapters/elasticsearch/default';
 
 export function compose(server: any): FleetServerLib {
   const frameworkAdapter = new FrameworkAdapter(server);
@@ -31,14 +32,20 @@ export function compose(server: any): FleetServerLib {
     server.savedObjects,
     server.plugins.elasticsearch
   );
-  const encryptedObjectAdapter = new EncryptedSavedObjects(server.plugins.encrypted_saved_objects);
+  const esAdapter = new ElasticsearchAdapter(server.plugins.elasticsearch);
+  const encryptedObjectAdapter = new EncryptedSavedObjects(
+    server.newPlatform.start.plugins.encryptedSavedObjects
+  );
   const agentsRepository = new AgentsRepository(soDatabaseAdapter);
   const agentEventsRepository = new AgentEventsRepository(soDatabaseAdapter);
-  const tokensRepository = new TokensRepository(soDatabaseAdapter, encryptedObjectAdapter);
+  const enrollmentApiKeysRepository = new EnrollmentApiKeysRepository(
+    soDatabaseAdapter,
+    encryptedObjectAdapter
+  );
 
   const policies = new PolicyLib(policyAdapter);
-  const tokens = new TokenLib(tokensRepository, framework);
-  const agents = new AgentLib(agentsRepository, agentEventsRepository, tokens, policies);
+  const apiKeys = new ApiKeyLib(enrollmentApiKeysRepository, esAdapter, framework);
+  const agents = new AgentLib(agentsRepository, agentEventsRepository, apiKeys, policies);
 
   const artifactRepository = new FileSystemArtifactRepository(os.tmpdir());
   const artifacts = new ArtifactLib(artifactRepository, new HttpAdapter());
@@ -47,7 +54,7 @@ export function compose(server: any): FleetServerLib {
 
   return {
     agents,
-    tokens,
+    apiKeys,
     policies,
     artifacts,
     install,

@@ -9,7 +9,6 @@ import { createListAgentsRoute } from './agents/list';
 import { createDeleteAgentsRoute } from './agents/delete';
 import { createEnrollAgentsRoute } from './agents/enroll';
 import { createCheckinAgentsRoute } from './agents/checkin';
-import { createGetEnrollmentTokenRoute } from './policy/tokens';
 import { FleetServerLib } from '../libs/types';
 import { HapiFrameworkAdapter } from '../adapters/framework/hapi_framework_adapter';
 import { createAgentsAddActionRoute } from './agents/actions';
@@ -17,20 +16,25 @@ import {
   createDeleteEnrollmentRuleRoute,
   createGetEnrollmentRulesRoute,
   createPostEnrollmentRulesRoute,
-} from './policy/rules';
+} from './enrollment_api_keys/rules';
 import { createGETArtifactsRoute } from './artifacts';
 import { createGETAgentEventsRoute } from './agents/events';
 import { createGETInstallScript } from './install';
 import { createGETAgentsRoute } from './agents/get';
 import { createPOSTAgentsUnenrollRoute } from './agents/unenroll';
 import { createPUTAgentsRoute } from './agents/put';
+import {
+  createGETEnrollmentApiKeysRoute,
+  createPOSTEnrollmentApiKeysRoute,
+  createDELETEEnrollmentApiKeyRoute,
+  createGETEnrollmentApiKeyRoute,
+} from './enrollment_api_keys';
 
 export function initRestApi(server: Server, libs: FleetServerLib) {
   const frameworkAdapter = new HapiFrameworkAdapter(server);
 
   createAgentsRoutes(frameworkAdapter, libs);
-  createTokensRoutes(frameworkAdapter, libs);
-  createPolicyEnrollmentRoutes(frameworkAdapter, libs);
+  createEnrollmentApiKeysRoutes(frameworkAdapter, libs);
 
   frameworkAdapter.registerRoute(createGETArtifactsRoute(libs));
   frameworkAdapter.registerRoute(createGETInstallScript(libs));
@@ -48,11 +52,13 @@ function createAgentsRoutes(adapter: HapiFrameworkAdapter, libs: FleetServerLib)
   adapter.registerRoute(createGETAgentEventsRoute(libs));
 }
 
-function createTokensRoutes(adapter: HapiFrameworkAdapter, libs: FleetServerLib) {
-  adapter.registerRoute(createGetEnrollmentTokenRoute(libs));
-}
+function createEnrollmentApiKeysRoutes(adapter: HapiFrameworkAdapter, libs: FleetServerLib) {
+  adapter.registerRoute(createGETEnrollmentApiKeysRoute(libs));
+  adapter.registerRoute(createPOSTEnrollmentApiKeysRoute(libs));
+  adapter.registerRoute(createDELETEEnrollmentApiKeyRoute(libs));
+  adapter.registerRoute(createGETEnrollmentApiKeyRoute(libs));
 
-function createPolicyEnrollmentRoutes(adapter: HapiFrameworkAdapter, libs: FleetServerLib) {
+  // enrollment rules
   adapter.registerRoute(createDeleteEnrollmentRuleRoute(libs));
   adapter.registerRoute(createGetEnrollmentRulesRoute(libs));
   adapter.registerRoute(createPostEnrollmentRulesRoute(libs));

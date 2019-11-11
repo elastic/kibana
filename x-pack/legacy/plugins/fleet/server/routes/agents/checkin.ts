@@ -11,7 +11,6 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
 import { FrameworkRequest } from '../../adapters/framework/adapter_types';
 import { ReturnTypeCheckin } from '../../../common/return_types';
-import { TokenType } from '../../repositories/tokens/types';
 import { RuntimeAgentEvent, AgentEvent } from '../../repositories/agent_events/types';
 import { FleetServerLib } from '../../libs/types';
 
@@ -19,9 +18,6 @@ type CheckinRequest = FrameworkRequest<{
   payload: {
     events: any[];
     local_metadata: any;
-  };
-  headers: {
-    'kbn-fleet-access-token': string;
   };
   params: {
     agentId: string;
@@ -34,11 +30,6 @@ export const createCheckinAgentsRoute = (libs: FleetServerLib) => ({
   config: {
     auth: false,
     validate: {
-      headers: Joi.object({
-        'kbn-fleet-access-token': Joi.string().required(),
-      }).options({
-        allowUnknown: true,
-      }),
       payload: {
         events: Joi.array().required(),
         local_metadata: Joi.object().optional(),
@@ -46,13 +37,9 @@ export const createCheckinAgentsRoute = (libs: FleetServerLib) => ({
     },
   },
   handler: async (request: CheckinRequest): Promise<ReturnTypeCheckin> => {
-    await validateToken(request, libs);
     const { events } = await validateAndDecodePayload(request);
     const { actions, policy } = await libs.agents.checkin(
-      {
-        kind: 'internal',
-      },
-      request.params.agentId,
+      request.user,
       events,
       request.payload.local_metadata
     );
@@ -67,14 +54,6 @@ export const createCheckinAgentsRoute = (libs: FleetServerLib) => ({
     };
   },
 });
-
-async function validateToken(request: CheckinRequest, libs: FleetServerLib) {
-  const jsonToken = request.headers['kbn-fleet-access-token'];
-  const token = await libs.tokens.verify(request.user, jsonToken);
-  if (!token.valid || token.type !== TokenType.ACCESS_TOKEN) {
-    throw Boom.unauthorized('Invalid token');
-  }
-}
 
 async function validateAndDecodePayload(
   request: CheckinRequest

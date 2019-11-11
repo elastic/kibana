@@ -8,13 +8,12 @@ export default function loadTests({ loadTestFile }) {
   describe('Fleet Endpoints', () => {
     loadTestFile(require.resolve('./delete_agent'));
     loadTestFile(require.resolve('./list_agent'));
-    loadTestFile(require.resolve('./enroll_agent'));
-    loadTestFile(require.resolve('./unenroll_agent'));
-    loadTestFile(require.resolve('./agent_checkin'));
-    loadTestFile(require.resolve('./agent_actions'));
-    loadTestFile(require.resolve('./agent_events'));
-    loadTestFile(require.resolve('./enrollment_rules'));
-    loadTestFile(require.resolve('./get_enrollment_token'));
+    loadTestFile(require.resolve('./agents/enroll'));
+    loadTestFile(require.resolve('./agents/checkin'));
+    loadTestFile(require.resolve('./agents/actions'));
+    loadTestFile(require.resolve('./agents/events'));
+    loadTestFile(require.resolve('./enrollment_api_keys/crud'));
+    loadTestFile(require.resolve('./enrollment_api_keys/rules'));
     loadTestFile(require.resolve('./artifacts'));
     loadTestFile(require.resolve('./install'));
   });

@@ -15,7 +15,7 @@ import {
   AgentAction,
   AgentActionType,
 } from '../repositories/agents/types';
-import { TokenLib } from './token';
+import { ApiKeyLib } from './api_keys';
 import { PolicyLib } from './policy';
 import { FullPolicyFile } from '../repositories/policies/types';
 import { FrameworkUser } from '../adapters/framework/adapter_types';
@@ -25,29 +25,29 @@ export class AgentLib {
   constructor(
     private readonly agentsRepository: AgentsRepository,
     private readonly agentEventsRepository: AgentEventsRepository,
-    private readonly tokens: TokenLib,
-    private readonly policy: PolicyLib
+    private readonly apiKeys: ApiKeyLib,
+    private readonly policies: PolicyLib
   ) {}
 
   /**
-   * Enroll a new token into elastic fleet
+   * Enroll a new agent into elastic fleet
    */
   public async enroll(
     user: FrameworkUser,
-    token: any,
     type: AgentType,
     metadata?: { local: any; userProvided: any },
     sharedId?: string
   ): Promise<Agent> {
-    const verifyResponse = await this.tokens.verify(user, token);
+    const internalUser = this._getInternalUser();
+    const verifyResponse = await this.apiKeys.verifyEnrollmentApiKey(user);
 
     if (!verifyResponse.valid) {
-      throw Boom.unauthorized(`Enrollment token is not valid: ${verifyResponse.reason}`);
+      throw Boom.unauthorized(`Enrollment apiKey is not valid: ${verifyResponse.reason}`);
     }
-    const policyId = verifyResponse.token.policy_id;
+    const policyId = verifyResponse.enrollmentApiKey.policy_id;
 
     const existingAgent = sharedId
-      ? await this.agentsRepository.getBySharedId(user, sharedId)
+      ? await this.agentsRepository.getBySharedId(internalUser, sharedId)
       : null;
 
     if (existingAgent && existingAgent.active === true) {
@@ -68,22 +68,22 @@ export class AgentLib {
 
     let agent;
     if (existingAgent) {
-      await this.agentsRepository.update(user, existingAgent.id, agentData);
+      await this.agentsRepository.update(internalUser, existingAgent.id, agentData);
 
       agent = {
         ...existingAgent,
         ...agentData,
       };
     } else {
-      agent = await this.agentsRepository.create(user, agentData);
+      agent = await this.agentsRepository.create(internalUser, agentData);
     }
 
-    const accessToken = await this.tokens.generateAccessToken(agent.id, policyId);
+    const accessApiKey = await this.apiKeys.generateAccessApiKey(agent.id, policyId);
     await this.agentsRepository.update(user, agent.id, {
-      access_token: accessToken,
+      access_api_key_id: accessApiKey.id,
     });
 
-    return { ...agent, access_token: accessToken };
+    return { ...agent, access_api_key: accessApiKey.key };
   }
 
   public async unenrollForPolicy(user: FrameworkUser, policyId: string) {
@@ -199,16 +199,20 @@ export class AgentLib {
    */
   public async checkin(
     user: FrameworkUser,
-    agentId: string,
     events: AgentEvent[],
     localMetadata?: any
-  ): Promise<{ actions: AgentAction[]; policy: FullPolicyFile }> {
-    const agent = await this.agentsRepository.getById(user, agentId);
+  ): Promise<{ actions: AgentAction[]; policy: FullPolicyFile | null }> {
+    const res = await this.apiKeys.verifyAccessApiKey(user);
+    if (!res.valid) {
+      throw Boom.unauthorized('Invalid apiKey');
+    }
 
+    const internalUser = this._getInternalUser();
+
+    const agent = await this.agentsRepository.getByAccessApiKeyId(internalUser, res.accessApiKeyId);
     if (!agent) {
       throw Boom.notFound('Agent not found or inactive');
     }
-
     if (!agent.active) {
       throw Boom.forbidden('Agent inactive');
     }
@@ -229,10 +233,10 @@ export class AgentLib {
       updateData.local_metadata = localMetadata;
     }
 
-    const policy = await this.policy.getFullPolicy(agent.policy_id);
-    await this.agentsRepository.update(user, agent.id, updateData);
+    const policy = agent.policy_id ? await this.policies.getFullPolicy(agent.policy_id) : null;
+    await this.agentsRepository.update(internalUser, agent.id, updateData);
     if (events.length > 0) {
-      await this.agentEventsRepository.createEventsForAgent(user, agent.id, events);
+      await this.agentEventsRepository.createEventsForAgent(internalUser, agent.id, events);
     }
 
     return { actions, policy };
@@ -287,5 +291,11 @@ export class AgentLib {
 
   public _filterActionsForCheckin(agent: Agent): AgentAction[] {
     return agent.actions.filter(a => !a.sent_at);
+  }
+
+  private _getInternalUser(): FrameworkUser {
+    return {
+      kind: 'internal',
+    };
   }
 }

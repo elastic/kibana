@@ -20,7 +20,7 @@ export const config = Joi.object({
 export function fleet(kibana: any) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'encrypted_saved_objects', 'ingest'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'encryptedSavedObjects', 'ingest'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       // app: {
@@ -46,7 +46,7 @@ export function fleet(kibana: any) {
           // TODO https://github.com/elastic/kibana/issues/46373
           // indexPattern: INDEX_NAMES.EVENT,
         },
-        tokens: {
+        enrollment_api_keys: {
           isNamespaceAgnostic: true,
           // TODO https://github.com/elastic/kibana/issues/46373
           // indexPattern: INDEX_NAMES.FLEET,
@@ -57,9 +57,9 @@ export function fleet(kibana: any) {
     config: () => config,
     configPrefix: CONFIG_PREFIX,
     init(server: any) {
-      server.plugins.encrypted_saved_objects.registerType({
-        type: 'tokens',
-        attributesToEncrypt: new Set(['token']),
+      server.newPlatform.setup.plugins.encryptedSavedObjects.registerType({
+        type: 'enrollment_api_keys',
+        attributesToEncrypt: new Set(['api_key']),
         attributesToExcludeFromAAD: new Set(['enrollment_rules']),
       });
       server.plugins.xpack_main.registerFeature({
@@ -70,7 +70,7 @@ export function fleet(kibana: any) {
         privileges: {
           all: {
             savedObject: {
-              all: ['agents', 'events', 'tokens'],
+              all: ['agents', 'events', 'enrollment_api_keys'],
               read: [],
             },
             ui: ['read', 'write'],
@@ -79,7 +79,7 @@ export function fleet(kibana: any) {
           read: {
             savedObject: {
               all: [],
-              read: ['agents', 'events', 'tokens'],
+              read: ['agents', 'events', 'enrollment_api_keys'],
             },
             ui: ['read'],
             api: ['fleet-read'],

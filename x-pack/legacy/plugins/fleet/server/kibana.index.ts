@@ -19,8 +19,14 @@ export const initServerWithKibana = (hapiServer: any) => {
       kind: 'internal',
     }
   ) {
+    if (event.type === 'created') {
+      await libs.apiKeys.generateEnrollmentApiKey(user, {
+        policyId: event.policyId,
+      });
+    }
     if (event.type === 'deleted') {
       await libs.agents.unenrollForPolicy(user, event.policyId);
+      await libs.apiKeys.deleteEnrollmentApiKeyForPolicyId(user, event.policyId);
     }
   });
 };

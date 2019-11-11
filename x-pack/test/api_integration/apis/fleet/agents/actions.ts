@@ -6,8 +6,8 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { SecurityService } from '../../../common/services';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { SecurityService } from '../../../../common/services';
 
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -35,7 +35,7 @@ export default function({ getService }: FtrProviderContext) {
       password: 'changeme',
     },
   };
-  describe('fleet_agent_actions', () => {
+  describe('fleet_agents_actions', () => {
     before(async () => {
       for (const roleName in users) {
         if (users.hasOwnProperty(roleName)) {
