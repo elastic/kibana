@@ -20,6 +20,7 @@ export interface AppBase
 |  [icon](./kibana-plugin-public.appbase.icon.md) | <code>string</code> | A URL to an image file used as an icon. Used as a fallback if <code>euiIconType</code> is not provided. |
 |  [id](./kibana-plugin-public.appbase.id.md) | <code>string</code> |  |
 |  [order](./kibana-plugin-public.appbase.order.md) | <code>number</code> | An ordinal used to sort nav links relative to one another for display. |
+|  [status](./kibana-plugin-public.appbase.status.md) | <code>AppStatus</code> | The status of the application. |
 |  [title](./kibana-plugin-public.appbase.title.md) | <code>string</code> | The title of the application. |
-|  [tooltip$](./kibana-plugin-public.appbase.tooltip_.md) | <code>Observable&lt;string&gt;</code> | An observable for a tooltip shown when hovering over app link. |
+|  [tooltip](./kibana-plugin-public.appbase.tooltip.md) | <code>string</code> | A tooltip shown when hovering over app link. |
 

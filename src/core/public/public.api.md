@@ -26,14 +26,20 @@ export interface AppBase {
     icon?: string;
     // (undocumented)
     id: string;
+    // @internal
+    legacy?: boolean;
     order?: number;
+    // Warning: (ae-forgotten-export) The symbol "AppStatus" needs to be exported by the entry point index.d.ts
+    status?: AppStatus;
     title: string;
-    tooltip$?: Observable<string>;
+    tooltip?: string;
 }
 
 // @public (undocumented)
 export interface ApplicationSetup {
     register(app: App): void;
+    // Warning: (ae-forgotten-export) The symbol "AppStatusUpdater" needs to be exported by the entry point index.d.ts
+    registerAppStatusUpdater(statusUpdater$: Observable<AppStatusUpdater>): void;
     registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<App['mount'], T>): void;
 }
 
