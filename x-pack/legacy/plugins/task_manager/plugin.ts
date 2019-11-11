@@ -11,7 +11,7 @@ export interface PluginSetupContract {
   fetch: TaskManager['fetch'];
   remove: TaskManager['remove'];
   schedule: TaskManager['schedule'];
-  scheduleIfNotExists: TaskManager['scheduleIfNotExists'];
+  ensureScheduling: TaskManager['ensureScheduling'];
   addMiddleware: TaskManager['addMiddleware'];
   registerTaskDefinitions: TaskManager['registerTaskDefinitions'];
 }
@@ -60,7 +60,7 @@ export class Plugin {
       fetch: (...args) => taskManager.fetch(...args),
       remove: (...args) => taskManager.remove(...args),
       schedule: (...args) => taskManager.schedule(...args),
-      scheduleIfNotExists: (...args) => taskManager.scheduleIfNotExists(...args),
+      ensureScheduling: (...args) => taskManager.ensureScheduling(...args),
       addMiddleware: (...args) => taskManager.addMiddleware(...args),
       registerTaskDefinitions: (...args) => taskManager.registerTaskDefinitions(...args),
     };

@@ -68,7 +68,7 @@ export default function ({ getService }) {
     function scheduleTaskIfNotExists(task) {
       return supertest.post('/api/sample_tasks')
         .set('kbn-xsrf', 'xxx')
-        .send({ task, scheduleIfNotExists: true })
+        .send({ task, ensureScheduling: true })
         .expect(200)
         .then((response) => response.body);
     }

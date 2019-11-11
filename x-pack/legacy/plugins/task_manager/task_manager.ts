@@ -228,7 +228,7 @@ export class TaskManager {
    * @param task - The task being scheduled.
    * @returns {Promise<ConcreteTaskInstance>}
    */
-  public async scheduleIfNotExists(
+  public async ensureScheduling(
     taskInstance: ExistingTaskInstance,
     options?: any
   ): Promise<ExistingTaskInstance> {

@@ -136,7 +136,7 @@ describe('TaskManager', () => {
 
     client.start();
 
-    const result = await client.scheduleIfNotExists({
+    const result = await client.ensureScheduling({
       id: 'my-foo-id',
       taskType: 'foo',
       params: {},
@@ -162,7 +162,7 @@ describe('TaskManager', () => {
     client.start();
 
     return expect(
-      client.scheduleIfNotExists({
+      client.ensureScheduling({
         id: 'my-foo-id',
         taskType: 'foo',
         params: {},

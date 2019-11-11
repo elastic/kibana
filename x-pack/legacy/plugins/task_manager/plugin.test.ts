@@ -42,11 +42,11 @@ describe('Task Manager Plugin', () => {
       expect(setupResult).toMatchInlineSnapshot(`
         Object {
           "addMiddleware": [Function],
+          "ensureScheduling": [Function],
           "fetch": [Function],
           "registerTaskDefinitions": [Function],
           "remove": [Function],
           "schedule": [Function],
-          "scheduleIfNotExists": [Function],
         }
       `);
     });
