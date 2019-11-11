@@ -20,7 +20,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { Filter } from '@kbn/es-query';
 import { RefreshInterval, TimeRange, Query } from '../../../data/public';
 import { CoreStart } from '../../../../core/public';
 import { IUiActionsStart } from '../ui_actions_plugin';
@@ -38,6 +37,7 @@ import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import { Start as InspectorStartContract } from '../../../inspector/public';
+import { esFilters } from '../../../../plugins/data/public';
 import {
   KibanaContextProvider,
   KibanaReactContext,
@@ -46,7 +46,7 @@ import {
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;
-  filters: Filter[];
+  filters: esFilters.Filter[];
   query: Query;
   timeRange: TimeRange;
   refreshConfig?: RefreshInterval;
@@ -65,7 +65,7 @@ interface IndexSignature {
 }
 
 export interface InheritedChildInput extends IndexSignature {
-  filters: Filter[];
+  filters: esFilters.Filter[];
   query: Query;
   timeRange: TimeRange;
   refreshConfig?: RefreshInterval;

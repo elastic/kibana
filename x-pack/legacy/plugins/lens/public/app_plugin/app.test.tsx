@@ -7,12 +7,12 @@
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { buildExistsFilter } from '@kbn/es-query';
 import { App } from './app';
 import { EditorFrameInstance } from '../types';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
+import { esFilters } from '../../../../../../src/plugins/data/public';
 
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 const dataStartMock = dataPluginMock.createStartContract();
@@ -595,7 +595,7 @@ describe('Lens App', () => {
       const instance = mount(<App {...args} />);
 
       args.data.query.filterManager.setFilters([
-        buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
+        esFilters.buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
       ]);
 
       instance.update();
@@ -603,7 +603,7 @@ describe('Lens App', () => {
       expect(frame.mount).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({
-          filters: [buildExistsFilter({ name: 'myfield' }, { id: 'index1' })],
+          filters: [esFilters.buildExistsFilter({ name: 'myfield' }, { id: 'index1' })],
         })
       );
     });
@@ -726,7 +726,7 @@ describe('Lens App', () => {
       });
 
       args.data.query.filterManager.setFilters([
-        buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
+        esFilters.buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
       ]);
       instance.update();
 
