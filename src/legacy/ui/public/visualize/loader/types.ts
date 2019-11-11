@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { TimeRange } from 'src/plugins/data/public';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { SavedObject } from 'ui/saved_objects/saved_object';
@@ -26,6 +25,7 @@ import { SearchSource } from '../../courier';
 import { PersistedState } from '../../persisted_state';
 import { AppState } from '../../state_management/app_state';
 import { Vis } from '../../vis';
+import { esFilters } from '../../../../../plugins/data/public';
 
 export interface VisSavedObject extends SavedObject {
   vis: Vis;
@@ -68,7 +68,7 @@ export interface VisualizeLoaderParams {
   /**
    * Specifies the filters that should be applied to that visualization.
    */
-  filters?: Filter[];
+  filters?: esFilters.Filter[];
   /**
    * The query that should apply to that visualization.
    */
