@@ -9,20 +9,28 @@ import {
   PopoverState,
   SET_INTEGRATION_POPOVER_STATE,
   SET_BASE_PATH,
+  REFRESH_APP,
 } from '../actions/ui';
 
 export interface UiState {
   integrationsPopoverOpen: PopoverState | null;
   basePath: string;
+  lastRefresh: number;
 }
 
 const initialState: UiState = {
   integrationsPopoverOpen: null,
   basePath: '',
+  lastRefresh: Date.now(),
 };
 
 export function uiReducer(state = initialState, action: UiActionTypes): UiState {
   switch (action.type) {
+    case REFRESH_APP:
+      return {
+        ...state,
+        lastRefresh: action.payload,
+      };
     case SET_INTEGRATION_POPOVER_STATE:
       const popoverState = action.payload;
       return {
