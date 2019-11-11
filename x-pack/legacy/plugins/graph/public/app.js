@@ -347,11 +347,7 @@ export function initGraphApp(angularModule, deps) {
     };
 
     $scope.clickEdge = function (edge) {
-      if (edge.inferred) {
-        $scope.setDetail ({ 'inferredEdge': edge });
-      }else {
-        $scope.workspace.getAllIntersections($scope.handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
-      }
+      $scope.workspace.getAllIntersections($scope.handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
     };
 
     $scope.submit = function (searchTerm) {
