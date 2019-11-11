@@ -487,6 +487,8 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
       sourceConfigUpdated,
       valid,
     });
+    // custom comparison
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, [
     JSON.stringify(pivotAggsArr),
     JSON.stringify(pivotGroupByArr),
@@ -495,6 +497,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     searchString,
     searchQuery,
     valid,
+    /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 
   // TODO This should use the actual value of `indices.query.bool.max_clause_count`

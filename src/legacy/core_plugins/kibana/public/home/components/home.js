@@ -136,7 +136,7 @@ export class Home extends Component {
     const { apmUiEnabled, mlEnabled } = this.props;
 
     return (
-      <EuiPage restrictWidth={1200}>
+      <EuiPage restrictWidth={1200} data-test-subj="homeApp">
         <EuiPageBody className="eui-displayBlock">
 
           <EuiScreenReaderOnly>

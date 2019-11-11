@@ -33,8 +33,8 @@ The {kibana-ref}/xpack-uptime.html[Elasticsearch Uptime app] in Kibana provides 
 
 [float]
 === Example deployments
-// ++ I like the Infra/logging diagram which shows Infrastructure and Logging apps as separate components inside Kibana
-// ++ In diagram, should be Uptime app, not Uptime UI, possibly even Elastic Uptime? Also applies to Infra/logging/APM.
+// ++ I like the Infra/logging diagram which shows Metrics and Logging apps as separate components inside Kibana
+// ++ In diagram, should be Uptime app, not Uptime UI, possibly even Elastic Uptime? Also applies to Metrics/Logging/APM.
 // ++ Need more whitespace around components.
 
 image::images/uptime-simple-deployment.png[Uptime simple deployment]

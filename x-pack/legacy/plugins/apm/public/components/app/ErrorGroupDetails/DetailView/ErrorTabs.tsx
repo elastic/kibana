@@ -17,7 +17,7 @@ export interface ErrorTab {
 export const logStacktraceTab: ErrorTab = {
   key: 'log_stacktrace',
   label: i18n.translate('xpack.apm.propertiesTable.tabs.logStacktraceLabel', {
-    defaultMessage: 'Log stacktrace'
+    defaultMessage: 'Log stack trace'
   })
 };
 
@@ -26,7 +26,7 @@ export const exceptionStacktraceTab: ErrorTab = {
   label: i18n.translate(
     'xpack.apm.propertiesTable.tabs.exceptionStacktraceLabel',
     {
-      defaultMessage: 'Exception stacktrace'
+      defaultMessage: 'Exception stack trace'
     }
   )
 };

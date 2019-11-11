@@ -34,6 +34,6 @@ export const TabAliases: React.FunctionComponent<Props> = ({ templateDetails }) 
       }
       iconType="pin"
       data-test-subj="noAliasesCallout"
-    ></EuiCallOut>
+    />
   );
 };

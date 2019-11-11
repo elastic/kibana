@@ -1298,7 +1298,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
                           "link": <React.Fragment>
                              
                             <ForwardRef
-                              href="https://www.elastic.co/guide/en/kibana/reference/current/configuring-metricbeat.html"
+                              href="https://www.elastic.co/guide/en/kibana/reference/current/monitoring-metricbeat.html"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -1365,7 +1365,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
                           "link": <React.Fragment>
                              
                             <ForwardRef
-                              href="https://www.elastic.co/guide/en/kibana/reference/current/configuring-metricbeat.html"
+                              href="https://www.elastic.co/guide/en/kibana/reference/current/monitoring-metricbeat.html"
                               target="_blank"
                             >
                               <FormattedMessage

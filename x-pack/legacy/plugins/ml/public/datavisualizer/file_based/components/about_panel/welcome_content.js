@@ -133,7 +133,7 @@ export function WelcomeContent() {
               values={{
                 githubLink: (
                   <EuiLink
-                    href="https://github.com/elastic/kibana/issues/new"
+                    href="https://github.com/elastic/kibana/issues/new/choose"
                     target="_blank"
                   >
                     GitHub

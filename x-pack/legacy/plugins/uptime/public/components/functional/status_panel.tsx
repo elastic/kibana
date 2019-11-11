@@ -8,19 +8,16 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { SnapshotHistogram } from './charts';
 import { Snapshot } from './snapshot';
-import { UptimeAppColors } from '../../uptime_app';
 
 interface StatusPanelProps {
   absoluteDateRangeStart: number;
   absoluteDateRangeEnd: number;
-  colors: UptimeAppColors;
   sharedProps: { [key: string]: any };
 }
 
 export const StatusPanel = ({
   absoluteDateRangeStart,
   absoluteDateRangeEnd,
-  colors: { danger, success },
   sharedProps,
 }: StatusPanelProps) => (
   <EuiPanel>
@@ -32,8 +29,9 @@ export const StatusPanel = ({
         <SnapshotHistogram
           absoluteStartDate={absoluteDateRangeStart}
           absoluteEndDate={absoluteDateRangeEnd}
-          variables={sharedProps}
           height="160px"
+          isResponsive={true}
+          variables={sharedProps}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
