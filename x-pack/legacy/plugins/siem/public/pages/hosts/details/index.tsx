@@ -12,7 +12,6 @@ import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 
 import { inputsSelectors, State } from '../../../store';
-
 import { FiltersGlobal } from '../../../components/filters_global';
 import { HeaderPage } from '../../../components/header_page';
 import { KpiHostDetailsQuery } from '../../../containers/kpi_host_details';
