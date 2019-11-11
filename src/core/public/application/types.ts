@@ -41,14 +41,19 @@ export interface AppBase {
   title: string;
 
   /**
+   * The status of the application.
+   */
+  status?: AppStatus;
+
+  /**
    * An ordinal used to sort nav links relative to one another for display.
    */
   order?: number;
 
   /**
-   * An observable for a tooltip shown when hovering over app link.
+   * A tooltip shown when hovering over app link.
    */
-  tooltip$?: Observable<string>;
+  tooltip?: string;
 
   /**
    * A EUI iconType that will be used for the app's icon. This icon
@@ -67,6 +72,37 @@ export interface AppBase {
    */
   capabilities?: Partial<Capabilities>;
 }
+
+/**
+ *
+ * @public
+ */
+export enum AppStatus {
+  /**
+   * Application is accessible.
+   */
+  accessible = 0,
+  /**
+   *
+   */
+  inaccessibleWithDisabledNavLink = 1,
+  /**
+   * Application is not accessible.
+   */
+  inaccessible = 2,
+}
+
+/**
+ *
+ * @public
+ */
+export type AppUpdatableFields = Pick<AppBase, 'status' | 'tooltip'>;
+
+/**
+ *
+ * @public
+ */
+export type AppStatusUpdater = (app: AppBase) => Partial<AppUpdatableFields>;
 
 /**
  * Extension of {@link AppBase | common app properties} with the mount function.
@@ -194,6 +230,12 @@ export interface ApplicationSetup {
   register(app: App): void;
 
   /**
+   * TODO
+   * @param statusUpdater$
+   */
+  registerAppStatusUpdater(statusUpdater$: Observable<AppStatusUpdater>): void;
+
+  /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the
    * plugin that registered this context.
    *
@@ -214,6 +256,12 @@ export interface InternalApplicationSetup {
    * @param app
    */
   register(plugin: PluginOpaqueId, app: App): void;
+
+  /**
+   * TODO
+   * @param statusUpdater$
+   */
+  registerAppStatusUpdater(statusUpdater$: Observable<AppStatusUpdater>): void;
 
   /**
    * Register metadata about legacy applications. Legacy apps will not be mounted when navigated to.

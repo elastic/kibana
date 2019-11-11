@@ -32,12 +32,14 @@ type ApplicationServiceContract = PublicMethodsOf<ApplicationService>;
 
 const createSetupContractMock = (): jest.Mocked<ApplicationSetup> => ({
   register: jest.fn(),
+  registerAppStatusUpdater: jest.fn(),
   registerMountContext: jest.fn(),
 });
 
 const createInternalSetupContractMock = (): jest.Mocked<InternalApplicationSetup> => ({
   register: jest.fn(),
   registerLegacyApp: jest.fn(),
+  registerAppStatusUpdater: jest.fn(),
   registerMountContext: jest.fn(),
 });
 

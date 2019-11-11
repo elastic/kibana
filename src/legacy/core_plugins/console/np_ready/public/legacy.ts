@@ -77,6 +77,7 @@ uiRoutes.when('/dev_tools/console', {
               npSetup.core.fatalErrors.add(e);
             }
           },
+          registerAppStatusUpdater() {},
           registerMountContext() {},
         },
       };

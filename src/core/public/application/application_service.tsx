@@ -18,7 +18,7 @@
  */
 
 import { createBrowserHistory } from 'history';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import React from 'react';
 
 import { InjectedMetadataStart } from '../injected_metadata';
@@ -32,6 +32,7 @@ import {
   AppMounter,
   InternalApplicationSetup,
   InternalApplicationStart,
+  AppStatusUpdater,
 } from './types';
 
 interface SetupDeps {
@@ -58,8 +59,10 @@ interface AppBox {
  * @internal
  */
 export class ApplicationService {
-  private readonly apps$ = new BehaviorSubject<ReadonlyMap<string, AppBox>>(new Map());
-  private readonly legacyApps$ = new BehaviorSubject<ReadonlyMap<string, LegacyApp>>(new Map());
+  private started = false;
+  private readonly apps = new Map<string, AppBox>();
+  private readonly legacyApps = new Map<string, LegacyApp>();
+
   private readonly capabilities = new CapabilitiesService();
   private mountContext?: IContextContainer<App['mount']>;
 
@@ -68,28 +71,31 @@ export class ApplicationService {
 
     return {
       register: (plugin: symbol, app: App) => {
-        if (this.apps$.value.has(app.id)) {
+        if (this.apps.has(app.id)) {
           throw new Error(`An application is already registered with the id "${app.id}"`);
         }
-        if (this.apps$.isStopped) {
+        if (this.started) {
           throw new Error(`Applications cannot be registered after "setup"`);
         }
-
         const appBox: AppBox = {
           app,
           mount: this.mountContext!.createHandler(plugin, app.mount),
         };
-        this.apps$.next(new Map([...this.apps$.value.entries(), [app.id, appBox]]));
+        this.apps.set(app.id, appBox);
+        // this.apps$.next(new Map([...this.apps$.value.entries(), [app.id, appBox]]));
+      },
+      registerAppStatusUpdater: (statusUpdater$: Observable<AppStatusUpdater>) => {
+        // TODO
       },
       registerLegacyApp: (app: LegacyApp) => {
-        if (this.legacyApps$.value.has(app.id)) {
+        if (this.legacyApps.has(app.id)) {
           throw new Error(`A legacy application is already registered with the id "${app.id}"`);
         }
-        if (this.legacyApps$.isStopped) {
+        if (this.started) {
           throw new Error(`Applications cannot be registered after "setup"`);
         }
-
-        this.legacyApps$.next(new Map([...this.legacyApps$.value.entries(), [app.id, app]]));
+        this.legacyApps.set(app.id, app);
+        // this.legacyApps$.next(new Map([...this.legacyApps$.value.entries(), [app.id, app]]));
       },
       registerMountContext: this.mountContext!.registerContext,
     };
@@ -105,14 +111,13 @@ export class ApplicationService {
     }
 
     // Disable registration of new applications
-    this.apps$.complete();
-    this.legacyApps$.complete();
+    this.started = true;
 
     const legacyMode = injectedMetadata.getLegacyMode();
     const currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
     const { availableApps, availableLegacyApps, capabilities } = await this.capabilities.start({
-      apps: new Map([...this.apps$.value].map(([id, { app }]) => [id, app])),
-      legacyApps: this.legacyApps$.value,
+      apps: new Map([...this.apps].map(([id, { app }]) => [id, app])),
+      legacyApps: this.legacyApps,
       injectedMetadata,
     });
 
@@ -147,7 +152,7 @@ export class ApplicationService {
 
         // Filter only available apps and map to just the mount function.
         const appMounters = new Map<string, AppMounter>(
-          [...this.apps$.value]
+          [...this.apps]
             .filter(([id]) => availableApps.has(id))
             .map(([id, { mount }]) => [id, mount])
         );

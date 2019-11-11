@@ -76,6 +76,7 @@ export class LegacyPlatformService {
     const legacyCore: LegacyCoreSetup = {
       ...core,
       application: {
+        ...core.application,
         register: notSupported(`core.application.register()`),
         registerMountContext: notSupported(`core.application.registerMountContext()`),
       },

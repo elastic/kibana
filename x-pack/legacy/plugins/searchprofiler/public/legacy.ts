@@ -42,6 +42,7 @@ uiRoutes.when('/dev_tools/searchprofiler', {
           const unmount = app.mount();
           $scope.$on('$destroy', () => unmount());
         },
+        registerAppStatusUpdater: {} as any,
         registerMountContext: {} as any,
       };
 
