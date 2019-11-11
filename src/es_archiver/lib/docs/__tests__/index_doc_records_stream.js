@@ -35,11 +35,11 @@ import {
 
 const recordsToBulkBody = records => {
   return records.reduce((acc, record) => {
-    const { index, type, id, source } = record.value;
+    const { index, id, source } = record.value;
 
     return [
       ...acc,
-      { index: { _index: index, _type: type, _id: id } },
+      { index: { _index: index, _id: id } },
       source
     ];
   }, []);
