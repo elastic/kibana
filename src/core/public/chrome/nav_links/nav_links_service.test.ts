@@ -23,12 +23,18 @@ import { App, LegacyApp } from '../../application';
 import { BehaviorSubject } from 'rxjs';
 
 const mockAppService = {
-  availableApps$: new BehaviorSubject<ReadonlyMap<string, App>>(new Map()),
-  availableLegacyApps$: new BehaviorSubject<ReadonlyMap<string, LegacyApp>>(
+  availableApps$: new BehaviorSubject<ReadonlyMap<string, App | LegacyApp>>(
     new Map([
       [
         'legacyApp1',
-        { id: 'legacyApp1', order: 0, title: 'Legacy App 1', icon: 'legacyApp1', appUrl: '/app1' },
+        {
+          id: 'legacyApp1',
+          order: 0,
+          title: 'Legacy App 1',
+          icon: 'legacyApp1',
+          appUrl: '/app1',
+          legacy: true,
+        },
       ],
       [
         'legacyApp2',
@@ -38,9 +44,13 @@ const mockAppService = {
           title: 'Legacy App 2',
           euiIconType: 'canvasApp',
           appUrl: '/app2',
+          legacy: true,
         },
       ],
-      ['legacyApp3', { id: 'legacyApp3', order: 20, title: 'Legacy App 3', appUrl: '/app3' }],
+      [
+        'legacyApp3',
+        { id: 'legacyApp3', order: 20, title: 'Legacy App 3', appUrl: '/app3', legacy: true },
+      ],
     ])
   ),
 } as any;

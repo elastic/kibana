@@ -27,7 +27,6 @@ import {
   ApplicationStart,
   InternalApplicationSetup,
   App,
-  LegacyApp,
 } from './types';
 
 type ApplicationServiceContract = PublicMethodsOf<ApplicationService>;
@@ -54,7 +53,6 @@ const createStartContractMock = (legacyMode = false): jest.Mocked<ApplicationSta
 
 const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart> => ({
   availableApps$: new Subject<ReadonlyMap<string, App>>(),
-  availableLegacyApps$: new Subject<ReadonlyMap<string, LegacyApp>>(),
   capabilities: capabilitiesServiceMock.createStartContract().capabilities,
   navigateToApp: jest.fn(),
   getUrlForApp: jest.fn(),

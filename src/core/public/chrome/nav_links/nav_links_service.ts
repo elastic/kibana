@@ -21,7 +21,7 @@ import { sortBy } from 'lodash';
 import { BehaviorSubject, ReplaySubject, Observable, combineLatest } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { NavLinkWrapper, ChromeNavLinkUpdateableFields, ChromeNavLink } from './nav_link';
-import { InternalApplicationStart } from '../../application';
+import { App, InternalApplicationStart, LegacyApp } from '../../application';
 import { HttpStart } from '../../http';
 
 interface StartDeps {
@@ -108,25 +108,10 @@ export class NavLinksService {
                 appId,
                 new NavLinkWrapper({
                   ...app,
-                  legacy: false,
-                  baseUrl: relativeToAbsolute(http.basePath.prepend(`/app/${appId}`)),
-                }),
-              ] as [string, NavLinkWrapper]
-          )
-        );
-      })
-    );
-    const legacyAppLinks$ = application.availableLegacyApps$.pipe(
-      map(apps => {
-        return new Map(
-          [...apps].map(
-            ([appId, app]) =>
-              [
-                appId,
-                new NavLinkWrapper({
-                  ...app,
-                  legacy: true,
-                  baseUrl: relativeToAbsolute(http.basePath.prepend(app.appUrl)),
+                  legacy: isLegacyApp(app),
+                  baseUrl: isLegacyApp(app)
+                    ? relativeToAbsolute(http.basePath.prepend(app.appUrl))
+                    : relativeToAbsolute(http.basePath.prepend(`/app/${appId}`)),
                 }),
               ] as [string, NavLinkWrapper]
           )
@@ -136,10 +121,10 @@ export class NavLinksService {
 
     const navLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(new Map());
 
-    combineLatest([appLinks$, legacyAppLinks$])
+    combineLatest([appLinks$])
       .pipe(
-        map(([appLinks, legacyAppLinks]) => {
-          return new Map([...legacyAppLinks, ...appLinks]);
+        map(([appLinks]) => {
+          return new Map([...appLinks]);
         })
       )
       .subscribe(navlinks => {
@@ -217,4 +202,8 @@ function relativeToAbsolute(url: string) {
   const a = document.createElement('a');
   a.setAttribute('href', url);
   return a.href;
+}
+
+function isLegacyApp(app: App | LegacyApp): app is LegacyApp {
+  return app.legacy === true;
 }

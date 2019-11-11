@@ -21,11 +21,9 @@ import { deepFreeze } from '../../../utils/';
 import { App, LegacyApp } from '../types';
 
 const createStartContractMock = (
-  apps: ReadonlyMap<string, App> = new Map(),
-  legacyApps: ReadonlyMap<string, LegacyApp> = new Map()
+  apps: ReadonlyMap<string, App | LegacyApp> = new Map()
 ): jest.Mocked<CapabilitiesStart> => ({
   availableApps: apps,
-  availableLegacyApps: legacyApps,
   capabilities: deepFreeze({
     catalogue: {},
     management: {},
@@ -35,9 +33,7 @@ const createStartContractMock = (
 
 type CapabilitiesServiceContract = PublicMethodsOf<CapabilitiesService>;
 const createMock = (): jest.Mocked<CapabilitiesServiceContract> => ({
-  start: jest
-    .fn()
-    .mockImplementation(({ apps, legacyApps }) => createStartContractMock(apps, legacyApps)),
+  start: jest.fn().mockImplementation(({ apps }) => createStartContractMock(apps)),
 });
 
 export const capabilitiesServiceMock = {

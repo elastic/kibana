@@ -18,7 +18,8 @@
  */
 
 import { createBrowserHistory } from 'history';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import React from 'react';
 
 import { InjectedMetadataStart } from '../injected_metadata';
@@ -28,11 +29,13 @@ import { HttpStart } from '../http';
 import { ContextSetup, IContextContainer } from '../context';
 import {
   App,
-  LegacyApp,
+  AppBase,
   AppMounter,
+  AppStatusUpdater,
+  AppUpdatableFields,
   InternalApplicationSetup,
   InternalApplicationStart,
-  AppStatusUpdater,
+  LegacyApp,
 } from './types';
 
 interface SetupDeps {
@@ -50,8 +53,12 @@ interface StartDeps {
 }
 
 interface AppBox {
-  app: App;
+  app: AppBase;
   mount: AppMounter;
+}
+
+function isLegacyApp(app: AppBox | LegacyApp): app is LegacyApp {
+  return (app as AppBox).mount === undefined;
 }
 
 /**
@@ -60,8 +67,8 @@ interface AppBox {
  */
 export class ApplicationService {
   private started = false;
-  private readonly apps = new Map<string, AppBox>();
-  private readonly legacyApps = new Map<string, LegacyApp>();
+  private readonly apps = new Map<string, AppBox | LegacyApp>();
+  private readonly statusUpdaters$ = new BehaviorSubject<Map<symbol, AppStatusUpdater>>(new Map());
 
   private readonly capabilities = new CapabilitiesService();
   private mountContext?: IContextContainer<App['mount']>;
@@ -78,24 +85,33 @@ export class ApplicationService {
           throw new Error(`Applications cannot be registered after "setup"`);
         }
         const appBox: AppBox = {
-          app,
+          app: {
+            ...app,
+            legacy: false,
+          },
           mount: this.mountContext!.createHandler(plugin, app.mount),
         };
         this.apps.set(app.id, appBox);
-        // this.apps$.next(new Map([...this.apps$.value.entries(), [app.id, appBox]]));
-      },
-      registerAppStatusUpdater: (statusUpdater$: Observable<AppStatusUpdater>) => {
-        // TODO
       },
       registerLegacyApp: (app: LegacyApp) => {
-        if (this.legacyApps.has(app.id)) {
+        if (this.apps.has(app.id)) {
           throw new Error(`A legacy application is already registered with the id "${app.id}"`);
         }
         if (this.started) {
           throw new Error(`Applications cannot be registered after "setup"`);
         }
-        this.legacyApps.set(app.id, app);
-        // this.legacyApps$.next(new Map([...this.legacyApps$.value.entries(), [app.id, app]]));
+        this.apps.set(app.id, {
+          ...app,
+          legacy: true,
+        });
+      },
+      registerAppStatusUpdater: (statusUpdater$: Observable<AppStatusUpdater>) => {
+        const updaterId = Symbol();
+        statusUpdater$.subscribe(statusUpdater => {
+          const nextValue = new Map(this.statusUpdaters$.getValue());
+          nextValue.set(updaterId, statusUpdater);
+          this.statusUpdaters$.next(nextValue);
+        });
       },
       registerMountContext: this.mountContext!.registerContext,
     };
@@ -115,23 +131,34 @@ export class ApplicationService {
 
     const legacyMode = injectedMetadata.getLegacyMode();
     const currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
-    const { availableApps, availableLegacyApps, capabilities } = await this.capabilities.start({
-      apps: new Map([...this.apps].map(([id, { app }]) => [id, app])),
-      legacyApps: this.legacyApps,
+    const { availableApps, capabilities } = await this.capabilities.start({
+      apps: new Map(
+        [...this.apps].map(([id, appBox]) => [
+          id,
+          (isLegacyApp(appBox) ? appBox : appBox.app) as App | LegacyApp,
+        ])
+      ),
       injectedMetadata,
     });
 
     // Only setup history if we're not in legacy mode
     const history = legacyMode ? null : createBrowserHistory({ basename: http.basePath.get() });
 
-    const availableApps$ = new BehaviorSubject<ReadonlyMap<string, App>>(availableApps);
-    const availableLegacyApps$ = new BehaviorSubject<ReadonlyMap<string, LegacyApp>>(
-      availableLegacyApps
-    );
+    const availableApps$ = new BehaviorSubject<ReadonlyMap<string, App | LegacyApp>>(availableApps);
+
+    combineLatest([
+      of(availableApps),
+      this.statusUpdaters$.pipe(map(statusUpdaters => [...statusUpdaters.values()])),
+    ])
+      .pipe(
+        map(([apps, statusUpdaters]) => {
+          return new Map([...apps].map(([id, app]) => [id, updateStatus(app, statusUpdaters)]));
+        })
+      )
+      .subscribe(apps => availableApps$.next(apps));
 
     return {
       availableApps$,
-      availableLegacyApps$,
       capabilities,
       registerMountContext: this.mountContext.registerContext,
       currentAppId$,
@@ -158,14 +185,20 @@ export class ApplicationService {
         // Filter only available apps and map to just the mount function.
         const appMounters = new Map<string, AppMounter>(
           [...this.apps]
-            .filter(([id]) => availableApps.has(id))
-            .map(([id, { mount }]) => [id, mount])
+            .filter(([id, app]) => availableApps.has(id) && !isLegacyApp(app))
+            .map(([id, app]) => [id, (app as AppBox).mount])
+        );
+
+        const legacyApps = new Map<string, LegacyApp>(
+          [...this.apps]
+            .filter(([id, app]) => availableApps.has(id) && isLegacyApp(app))
+            .map(([id, app]) => [id, app as LegacyApp])
         );
 
         return (
           <AppRouter
             apps={appMounters}
-            legacyApps={availableLegacyApps}
+            legacyApps={legacyApps}
             basePath={http.basePath}
             currentAppId$={currentAppId$}
             history={history!}
@@ -178,6 +211,24 @@ export class ApplicationService {
 
   public stop() {}
 }
+
+const updateStatus = <T extends AppBase>(app: T, statusUpdaters: AppStatusUpdater[]): T => {
+  let changes: Partial<AppUpdatableFields> = {};
+  statusUpdaters.forEach(updater => {
+    const fields = updater(app);
+    if (fields) {
+      changes = {
+        ...changes,
+        ...fields,
+        status: Math.max(changes.status || 0, fields.status || 0),
+      };
+    }
+  });
+  return {
+    ...app,
+    ...changes,
+  };
+};
 
 const appPath = (appId: string, { path }: { path?: string } = {}): string =>
   path

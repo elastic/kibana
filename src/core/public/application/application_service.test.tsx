@@ -26,213 +26,330 @@ import { ApplicationService } from './application_service';
 import { contextServiceMock } from '../context/context_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { take } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
+import { AppStatus, AppStatusUpdater } from './types';
+import { HttpSetup, ContextSetup } from 'kibana/public';
+import { InjectedMetadataSetup } from '../injected_metadata';
 
-describe('#setup()', () => {
-  describe('register', () => {
-    it('throws an error if two apps with the same id are registered', () => {
-      const service = new ApplicationService();
-      const context = contextServiceMock.createSetupContract();
+describe('ApplicationService', () => {
+  let service: ApplicationService;
+  let context: jest.Mocked<ContextSetup>;
+  let http: jest.Mocked<HttpSetup>;
+  let injectedMetadata: jest.Mocked<InjectedMetadataSetup>;
+
+  beforeEach(() => {
+    service = new ApplicationService();
+    context = contextServiceMock.createSetupContract();
+    http = httpServiceMock.createStartContract();
+    injectedMetadata = injectedMetadataServiceMock.createStartContract();
+  });
+
+  describe('#setup()', () => {
+    describe('register', () => {
+      it('throws an error if two apps with the same id are registered', () => {
+        const setup = service.setup({ context });
+        setup.register(Symbol(), { id: 'app1' } as any);
+        expect(() =>
+          setup.register(Symbol(), { id: 'app1' } as any)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"An application is already registered with the id \\"app1\\""`
+        );
+      });
+
+      it('throws error if additional apps are registered after setup', async () => {
+        const setup = service.setup({ context });
+        await service.start({ http, injectedMetadata });
+        expect(() =>
+          setup.register(Symbol(), { id: 'app1' } as any)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Applications cannot be registered after \\"setup\\""`
+        );
+      });
+    });
+
+    describe('registerLegacyApp', () => {
+      it('throws an error if two apps with the same id are registered', () => {
+        const setup = service.setup({ context });
+        setup.registerLegacyApp({ id: 'app2' } as any);
+        expect(() =>
+          setup.registerLegacyApp({ id: 'app2' } as any)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"A legacy application is already registered with the id \\"app2\\""`
+        );
+      });
+
+      it('throws error if additional apps are registered after setup', async () => {
+        const setup = service.setup({ context });
+        await service.start({ http, injectedMetadata });
+        expect(() =>
+          setup.registerLegacyApp({ id: 'app2' } as any)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Applications cannot be registered after \\"setup\\""`
+        );
+      });
+    });
+
+    describe('registerAppStatusUpdater', () => {
+      it('updates status fields', async () => {
+        const setup = service.setup({ context });
+
+        const pluginId = Symbol('plugin');
+        setup.register(pluginId, { id: 'app1' } as any);
+        setup.register(pluginId, { id: 'app2' } as any);
+        setup.registerAppStatusUpdater(
+          new BehaviorSubject<AppStatusUpdater>(app => {
+            if (app.id === 'app1') {
+              return {
+                status: AppStatus.inaccessibleWithDisabledNavLink,
+                tooltip: 'App inaccessible due to reason',
+              };
+            }
+          })
+        );
+
+        const start = await service.start({ http, injectedMetadata });
+
+        expect(await start.availableApps$.pipe(take(1)).toPromise()).toMatchInlineSnapshot(`
+          Map {
+            "app1" => Object {
+              "id": "app1",
+              "legacy": false,
+              "status": 1,
+              "tooltip": "App inaccessible due to reason",
+            },
+            "app2" => Object {
+              "id": "app2",
+              "legacy": false,
+            },
+          }
+        `);
+      });
+
+      it('applies the most restrictive status in case of multiple updaters', async () => {
+        const setup = service.setup({ context });
+
+        const pluginId = Symbol('plugin');
+        setup.register(pluginId, { id: 'app1' } as any);
+        setup.registerAppStatusUpdater(
+          new BehaviorSubject<AppStatusUpdater>(app => {
+            return {
+              status: AppStatus.inaccessible,
+            };
+          })
+        );
+        setup.registerAppStatusUpdater(
+          new BehaviorSubject<AppStatusUpdater>(app => {
+            return {
+              status: AppStatus.accessible,
+            };
+          })
+        );
+
+        const start = await service.start({ http, injectedMetadata });
+
+        expect(await start.availableApps$.pipe(take(1)).toPromise()).toMatchInlineSnapshot(`
+          Map {
+            "app1" => Object {
+              "id": "app1",
+              "legacy": false,
+              "status": 2,
+            },
+          }
+        `);
+      });
+
+      it('emits on availableApps$ when a status updater changes', async () => {
+        const setup = service.setup({ context });
+
+        const pluginId = Symbol('plugin');
+        setup.register(pluginId, { id: 'app1' } as any);
+
+        const statusUpdater = new BehaviorSubject<AppStatusUpdater>(app => {
+          return {
+            status: AppStatus.inaccessible,
+          };
+        });
+        setup.registerAppStatusUpdater(statusUpdater);
+
+        const start = await service.start({ http, injectedMetadata });
+
+        let latestValue = null;
+
+        start.availableApps$.subscribe(apps => {
+          latestValue = apps;
+        });
+
+        expect(latestValue).toMatchInlineSnapshot(`
+          Map {
+            "app1" => Object {
+              "id": "app1",
+              "legacy": false,
+              "status": 2,
+            },
+          }
+        `);
+
+        statusUpdater.next(app => {
+          return {
+            status: AppStatus.accessible,
+          };
+        });
+
+        expect(latestValue).toMatchInlineSnapshot(`
+          Map {
+            "app1" => Object {
+              "id": "app1",
+              "legacy": false,
+              "status": 0,
+            },
+          }
+        `);
+      });
+
+      it('also updates legacy apps', async () => {
+        const setup = service.setup({ context });
+
+        setup.registerLegacyApp({ id: 'app1' } as any);
+
+        setup.registerAppStatusUpdater(
+          new BehaviorSubject<AppStatusUpdater>(app => {
+            return {
+              status: AppStatus.inaccessibleWithDisabledNavLink,
+              tooltip: 'App inaccessible due to reason',
+            };
+          })
+        );
+
+        const start = await service.start({ http, injectedMetadata });
+
+        expect(await start.availableApps$.pipe(take(1)).toPromise()).toMatchInlineSnapshot(`
+          Map {
+            "app1" => Object {
+              "id": "app1",
+              "legacy": true,
+              "status": 1,
+              "tooltip": "App inaccessible due to reason",
+            },
+          }
+        `);
+      });
+    });
+
+    it("`registerMountContext` calls context container's registerContext", () => {
+      const setup = service.setup({ context });
+      const container = context.createContextContainer.mock.results[0].value;
+      const pluginId = Symbol();
+      const noop = () => {};
+      setup.registerMountContext(pluginId, 'test' as any, noop as any);
+      expect(container.registerContext).toHaveBeenCalledWith(pluginId, 'test', noop);
+    });
+  });
+
+  describe('#start()', () => {
+    beforeEach(() => {
+      MockHistory.push.mockReset();
+    });
+
+    it('exposes available apps from capabilities', async () => {
       const setup = service.setup({ context });
       setup.register(Symbol(), { id: 'app1' } as any);
-      expect(() =>
-        setup.register(Symbol(), { id: 'app1' } as any)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"An application is already registered with the id \\"app1\\""`
-      );
-    });
-
-    it('throws error if additional apps are registered after setup', async () => {
-      const service = new ApplicationService();
-      const context = contextServiceMock.createSetupContract();
-      const setup = service.setup({ context });
-      const http = httpServiceMock.createStartContract();
-      const injectedMetadata = injectedMetadataServiceMock.createStartContract();
-      await service.start({ http, injectedMetadata });
-      expect(() =>
-        setup.register(Symbol(), { id: 'app1' } as any)
-      ).toThrowErrorMatchingInlineSnapshot(`"Applications cannot be registered after \\"setup\\""`);
-    });
-  });
-
-  describe('registerLegacyApp', () => {
-    it('throws an error if two apps with the same id are registered', () => {
-      const service = new ApplicationService();
-      const context = contextServiceMock.createSetupContract();
-      const setup = service.setup({ context });
       setup.registerLegacyApp({ id: 'app2' } as any);
-      expect(() =>
-        setup.registerLegacyApp({ id: 'app2' } as any)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"A legacy application is already registered with the id \\"app2\\""`
-      );
+
+      const startContract = await service.start({ http, injectedMetadata });
+
+      await expect(startContract.availableApps$.pipe(take(1)).toPromise()).resolves
+        .toMatchInlineSnapshot(`
+              Map {
+                "app1" => Object {
+                  "id": "app1",
+                  "legacy": false,
+                },
+                "app2" => Object {
+                  "id": "app2",
+                  "legacy": true,
+                },
+              }
+            `);
     });
 
-    it('throws error if additional apps are registered after setup', async () => {
-      const service = new ApplicationService();
-      const context = contextServiceMock.createSetupContract();
+    it('passes registered applications to capabilities', async () => {
       const setup = service.setup({ context });
-      const http = httpServiceMock.createStartContract();
-      const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+      setup.register(Symbol(), { id: 'app1' } as any);
+
       await service.start({ http, injectedMetadata });
-      expect(() =>
-        setup.registerLegacyApp({ id: 'app2' } as any)
-      ).toThrowErrorMatchingInlineSnapshot(`"Applications cannot be registered after \\"setup\\""`);
+
+      expect(MockCapabilitiesService.start).toHaveBeenCalledWith({
+        apps: new Map([['app1', { id: 'app1', legacy: false }]]),
+        injectedMetadata,
+      });
     });
-  });
 
-  it("`registerMountContext` calls context container's registerContext", () => {
-    const service = new ApplicationService();
-    const context = contextServiceMock.createSetupContract();
-    const setup = service.setup({ context });
-    const container = context.createContextContainer.mock.results[0].value;
-    const pluginId = Symbol();
-    const noop = () => {};
-    setup.registerMountContext(pluginId, 'test' as any, noop as any);
-    expect(container.registerContext).toHaveBeenCalledWith(pluginId, 'test', noop);
-  });
-});
+    it('passes registered legacy applications to capabilities', async () => {
+      const setup = service.setup({ context });
+      setup.registerLegacyApp({ id: 'legacyApp1' } as any);
 
-describe('#start()', () => {
-  beforeEach(() => {
-    MockHistory.push.mockReset();
-  });
+      await service.start({ http, injectedMetadata });
 
-  it('exposes available apps from capabilities', async () => {
-    const service = new ApplicationService();
-    const context = contextServiceMock.createSetupContract();
-    const setup = service.setup({ context });
-    setup.register(Symbol(), { id: 'app1' } as any);
-    setup.registerLegacyApp({ id: 'app2' } as any);
-
-    const http = httpServiceMock.createStartContract();
-    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
-    const startContract = await service.start({ http, injectedMetadata });
-
-    await expect(startContract.availableApps$.pipe(take(1)).toPromise()).resolves
-      .toMatchInlineSnapshot(`
-                        Map {
-                          "app1" => Object {
-                            "id": "app1",
-                          },
-                        }
-                `);
-    await expect(startContract.availableLegacyApps$.pipe(take(1)).toPromise()).resolves
-      .toMatchInlineSnapshot(`
-                        Map {
-                          "app2" => Object {
-                            "id": "app2",
-                          },
-                        }
-                `);
-  });
-
-  it('passes registered applications to capabilities', async () => {
-    const service = new ApplicationService();
-    const context = contextServiceMock.createSetupContract();
-    const setup = service.setup({ context });
-    setup.register(Symbol(), { id: 'app1' } as any);
-
-    const http = httpServiceMock.createStartContract();
-    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
-    await service.start({ http, injectedMetadata });
-
-    expect(MockCapabilitiesService.start).toHaveBeenCalledWith({
-      apps: new Map([['app1', { id: 'app1' }]]),
-      legacyApps: new Map(),
-      injectedMetadata,
+      expect(MockCapabilitiesService.start).toHaveBeenCalledWith({
+        apps: new Map([['legacyApp1', { id: 'legacyApp1', legacy: true }]]),
+        injectedMetadata,
+      });
     });
-  });
 
-  it('passes registered legacy applications to capabilities', async () => {
-    const service = new ApplicationService();
-    const context = contextServiceMock.createSetupContract();
-    const setup = service.setup({ context });
-    setup.registerLegacyApp({ id: 'legacyApp1' } as any);
-
-    const http = httpServiceMock.createStartContract();
-    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
-    await service.start({ http, injectedMetadata });
-
-    expect(MockCapabilitiesService.start).toHaveBeenCalledWith({
-      apps: new Map(),
-      legacyApps: new Map([['legacyApp1', { id: 'legacyApp1' }]]),
-      injectedMetadata,
-    });
-  });
-
-  it('returns renderable JSX tree', async () => {
-    const service = new ApplicationService();
-    const context = contextServiceMock.createSetupContract();
-    service.setup({ context });
-
-    const http = httpServiceMock.createStartContract();
-    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
-    injectedMetadata.getLegacyMode.mockReturnValue(false);
-    const start = await service.start({ http, injectedMetadata });
-
-    expect(() => shallow(React.createElement(() => start.getComponent()))).not.toThrow();
-  });
-
-  describe('navigateToApp', () => {
-    it('changes the browser history to /app/:appId', async () => {
-      const service = new ApplicationService();
-      const context = contextServiceMock.createSetupContract();
+    it('returns renderable JSX tree', async () => {
       service.setup({ context });
 
-      const http = httpServiceMock.createStartContract();
-      const injectedMetadata = injectedMetadataServiceMock.createStartContract();
       injectedMetadata.getLegacyMode.mockReturnValue(false);
       const start = await service.start({ http, injectedMetadata });
 
-      start.navigateToApp('myTestApp');
-      expect(MockHistory.push).toHaveBeenCalledWith('/app/myTestApp', undefined);
-      start.navigateToApp('myOtherApp');
-      expect(MockHistory.push).toHaveBeenCalledWith('/app/myOtherApp', undefined);
+      expect(() => shallow(React.createElement(() => start.getComponent()))).not.toThrow();
     });
 
-    it('appends a path if specified', async () => {
-      const service = new ApplicationService();
-      const context = contextServiceMock.createSetupContract();
-      service.setup({ context });
+    describe('navigateToApp', () => {
+      it('changes the browser history to /app/:appId', async () => {
+        service.setup({ context });
 
-      const http = httpServiceMock.createStartContract();
-      const injectedMetadata = injectedMetadataServiceMock.createStartContract();
-      injectedMetadata.getLegacyMode.mockReturnValue(false);
-      const start = await service.start({ http, injectedMetadata });
+        injectedMetadata.getLegacyMode.mockReturnValue(false);
+        const start = await service.start({ http, injectedMetadata });
 
-      start.navigateToApp('myTestApp', { path: 'deep/link/to/location/2' });
-      expect(MockHistory.push).toHaveBeenCalledWith(
-        '/app/myTestApp/deep/link/to/location/2',
-        undefined
-      );
-    });
+        start.navigateToApp('myTestApp');
+        expect(MockHistory.push).toHaveBeenCalledWith('/app/myTestApp', undefined);
+        start.navigateToApp('myOtherApp');
+        expect(MockHistory.push).toHaveBeenCalledWith('/app/myOtherApp', undefined);
+      });
 
-    it('includes state if specified', async () => {
-      const service = new ApplicationService();
-      const context = contextServiceMock.createSetupContract();
-      service.setup({ context });
+      it('appends a path if specified', async () => {
+        service.setup({ context });
 
-      const http = httpServiceMock.createStartContract();
-      const injectedMetadata = injectedMetadataServiceMock.createStartContract();
-      injectedMetadata.getLegacyMode.mockReturnValue(false);
-      const start = await service.start({ http, injectedMetadata });
+        injectedMetadata.getLegacyMode.mockReturnValue(false);
+        const start = await service.start({ http, injectedMetadata });
 
-      start.navigateToApp('myTestApp', { state: 'my-state' });
-      expect(MockHistory.push).toHaveBeenCalledWith('/app/myTestApp', 'my-state');
-    });
+        start.navigateToApp('myTestApp', { path: 'deep/link/to/location/2' });
+        expect(MockHistory.push).toHaveBeenCalledWith(
+          '/app/myTestApp/deep/link/to/location/2',
+          undefined
+        );
+      });
 
-    it('redirects when in legacyMode', async () => {
-      const service = new ApplicationService();
-      const context = contextServiceMock.createSetupContract();
-      service.setup({ context });
+      it('includes state if specified', async () => {
+        service.setup({ context });
 
-      const http = httpServiceMock.createStartContract();
-      const injectedMetadata = injectedMetadataServiceMock.createStartContract();
-      injectedMetadata.getLegacyMode.mockReturnValue(true);
-      const redirectTo = jest.fn();
-      const start = await service.start({ http, injectedMetadata, redirectTo });
-      start.navigateToApp('myTestApp');
-      expect(redirectTo).toHaveBeenCalledWith('/app/myTestApp');
+        injectedMetadata.getLegacyMode.mockReturnValue(false);
+        const start = await service.start({ http, injectedMetadata });
+
+        start.navigateToApp('myTestApp', { state: 'my-state' });
+        expect(MockHistory.push).toHaveBeenCalledWith('/app/myTestApp', 'my-state');
+      });
+
+      it('redirects when in legacyMode', async () => {
+        service.setup({ context });
+
+        injectedMetadata.getLegacyMode.mockReturnValue(true);
+        const redirectTo = jest.fn();
+        const start = await service.start({ http, injectedMetadata, redirectTo });
+        start.navigateToApp('myTestApp');
+        expect(redirectTo).toHaveBeenCalledWith('/app/myTestApp');
+      });
     });
   });
 });

@@ -71,6 +71,14 @@ export interface AppBase {
    * Custom capabilities defined by the app.
    */
   capabilities?: Partial<Capabilities>;
+
+  /**
+   * Flag to keep track of legacy applications.
+   * For internal use only. any value will be overridden when registering an App.
+   *
+   * @internal
+   */
+  legacy?: boolean;
 }
 
 /**
@@ -102,7 +110,7 @@ export type AppUpdatableFields = Pick<AppBase, 'status' | 'tooltip'>;
  *
  * @public
  */
-export type AppStatusUpdater = (app: AppBase) => Partial<AppUpdatableFields>;
+export type AppStatusUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefined;
 
 /**
  * Extension of {@link AppBase | common app properties} with the mount function.
@@ -329,13 +337,7 @@ export interface InternalApplicationStart
    * Apps available based on the current capabilities. Should be used
    * to show navigation links and make routing decisions.
    */
-  availableApps$: Observable<ReadonlyMap<string, App>>;
-  /**
-   * Apps available based on the current capabilities. Should be used
-   * to show navigation links and make routing decisions.
-   * @internal
-   */
-  availableLegacyApps$: Observable<ReadonlyMap<string, LegacyApp>>;
+  availableApps$: Observable<ReadonlyMap<string, App | LegacyApp>>;
 
   /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the
