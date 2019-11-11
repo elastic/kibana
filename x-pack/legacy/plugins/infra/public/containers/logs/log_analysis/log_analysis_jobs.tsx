@@ -5,8 +5,7 @@
  */
 
 import createContainer from 'constate';
-import { useMemo, useCallback, useEffect } from 'react';
-import { useAsyncMemo } from 'use-async-memo';
+import { useMemo, useCallback, useEffect, useState } from 'react';
 
 import { callGetMlModuleAPI } from './api/ml_get_module';
 import { bucketSpan, getJobId } from '../../../../common/log_analysis';
@@ -95,15 +94,39 @@ export const useLogAnalysisJobs = ({
     [spaceId, sourceId, timeField, bucketSpan]
   );
 
+  const indexPatterns = indexPattern.split(',');
+
+  const [availableIndices, setAvailableIndices] = useState<AvailableIndex[]>(
+    indexPatterns.map<AvailableIndex>(pattern => ({ indexPattern: pattern, valid: false }))
+  );
+
   const [fetchJobStatusRequest, fetchJobStatus] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
         dispatch({ type: 'fetchingJobStatuses' });
-        return await callJobsSummaryAPI(spaceId, sourceId);
+        return Promise.all([
+          callJobsSummaryAPI(spaceId, sourceId),
+          callIndexPatternsValidate({
+            timestamp: timeField,
+            indexPatternName: indexPattern,
+          }),
+        ]);
       },
-      onResolve: response => {
-        dispatch({ type: 'fetchedJobStatuses', payload: response, spaceId, sourceId });
+      onResolve: ([jobResponse, validationResponse]) => {
+        setAvailableIndices(
+          indexPatterns.map<AvailableIndex>(pattern => {
+            const indexValidation = validationResponse.data.errors.find(
+              err => err.indexPattern === pattern
+            );
+            return {
+              indexPattern: pattern,
+              valid: indexValidation === undefined,
+              errorMessage: indexValidation ? indexValidation.message : undefined,
+            };
+          })
+        );
+        dispatch({ type: 'fetchedJobStatuses', payload: jobResponse, spaceId, sourceId });
       },
       onReject: err => {
         dispatch({ type: 'failedFetchingJobStatuses' });
@@ -118,28 +141,6 @@ export const useLogAnalysisJobs = ({
     [fetchJobStatusRequest.state, fetchModuleDefinitionRequest.state]
   );
 
-  const indexPatterns = indexPattern.split(',');
-  const availableIndices = useAsyncMemo<AvailableIndex[]>(
-    async () => {
-      const indicesValidation = await callIndexPatternsValidate({
-        timestamp: timeField,
-        indexPatternName: indexPattern,
-      });
-
-      const errors = indicesValidation.data.errors || [];
-
-      return indexPatterns.map<AvailableIndex>(pattern => {
-        const indexValidation = errors.find(err => err.indexPattern === pattern);
-        return {
-          indexPattern: pattern,
-          valid: indexValidation === undefined,
-          errorMessage: indexValidation ? indexValidation.message : undefined,
-        };
-      });
-    },
-    [indexPattern],
-    indexPatterns.map<AvailableIndex>(pattern => ({ indexPattern: pattern, valid: false }))
-  );
   const viewResults = useCallback(() => {
     dispatch({ type: 'viewedResults' });
   }, []);

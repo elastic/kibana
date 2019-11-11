@@ -14,7 +14,6 @@
   "dependencies": {
     "@types/color": "^3.0.0",
     "boom": "7.3.0",
-    "lodash": "^4.17.15",
-    "use-async-memo": "^1.2.2"
+    "lodash": "^4.17.15"
   }
 }
