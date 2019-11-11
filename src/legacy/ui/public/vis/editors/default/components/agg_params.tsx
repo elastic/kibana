@@ -57,7 +57,11 @@ type EditorParamConfigType = EditorParamConfig & {
 };
 export interface SubAggParamsProp {
   formIsTouched: boolean;
-  setAggParamValue: EditorActions['setAggParamValue'];
+  setAggParamValue: <T extends keyof AggConfig['params']>(
+    aggId: AggConfig['id'],
+    paramName: T,
+    value: AggConfig['params'][T]
+  ) => void;
   onAggTypeChange: (aggId: AggConfig['id'], aggType: AggType) => void;
 }
 export interface DefaultEditorAggParamsProps extends SubAggParamsProp {
@@ -95,10 +99,10 @@ function DefaultEditorAggParams({
   const groupedAggTypeOptions = getAggTypeOptions(agg, indexPattern, groupName);
   const errors = getError(agg, aggIsTooLow);
 
-  const editorConfig = useMemo(
-    () => editorConfigProviders.getConfigForAgg((aggTypes as any)[groupName], indexPattern, agg),
-    [groupName, agg.type]
-  );
+  const editorConfig = useMemo(() => editorConfigProviders.getConfigForAgg(indexPattern, agg), [
+    indexPattern,
+    agg,
+  ]);
   const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
   const allParams = [...params.basic, ...params.advanced];
   const [paramsState, onChangeParamsState] = useReducer(

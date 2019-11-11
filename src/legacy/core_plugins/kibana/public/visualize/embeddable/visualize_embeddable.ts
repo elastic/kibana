@@ -18,14 +18,6 @@
  */
 
 import _ from 'lodash';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { PersistedState } from 'ui/persisted_state';
-import { VisualizeLoader, EmbeddedVisualizeHandler } from 'ui/visualize';
-import {
-  VisSavedObject,
-  VisualizeLoaderParams,
-  VisualizeUpdateParams,
-} from 'ui/visualize/loader/types';
 import { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize_handler';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';

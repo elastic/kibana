@@ -28,7 +28,11 @@ export interface DefaultEditorAggCommonProps {
   lastParentPipelineAggTitle?: string;
   metricAggs: AggConfig[];
   state: VisState;
-  setAggParamValue: EditorActions['setAggParamValue'];
+  setAggParamValue: <T extends keyof AggConfig['params']>(
+    aggId: AggConfig['id'],
+    paramName: T,
+    value: AggConfig['params'][T]
+  ) => void;
   setStateParamValue: EditorActions['setStateParamValue'];
   onAggTypeChange: (aggId: AggConfig['id'], aggType: AggType) => void;
   onToggleEnableAgg: (aggId: AggConfig['id'], isEnable: boolean) => void;

@@ -19,7 +19,8 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 
-import { getVisualizeLoader, EmbeddedVisualizeHandler } from 'ui/visualize';
+import { getVisualizeLoader } from 'ui/visualize';
+import { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize_handler';
 import { EditorRenderProps } from 'src/legacy/core_plugins/kibana/public/visualize/types';
 
 import { DefaultEditorSideBar } from './components/sidebar';

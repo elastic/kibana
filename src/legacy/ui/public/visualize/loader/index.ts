@@ -18,4 +18,3 @@
  */
 
 export * from './visualize_loader';
-export { EmbeddedVisualizeHandler } from './embedded_visualize_handler';

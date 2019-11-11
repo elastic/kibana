@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AggParamType } from '../../../../agg_types/param_types/agg';
 import { AggConfig } from '../../..';
@@ -25,6 +25,7 @@ import { AggParamEditorProps, DefaultEditorAggParams } from '..';
 
 function SubAggParamEditor({
   agg,
+  aggParam,
   value,
   metricAggs,
   state,
@@ -32,18 +33,48 @@ function SubAggParamEditor({
   setValidity,
   setTouched,
   subAggParams,
-}: AggParamEditorProps<AggConfig>) {
+}: AggParamEditorProps<AggConfig, AggParamType>) {
   useEffect(() => {
     // we aren't creating a custom aggConfig
     if (agg.params.metricAgg !== 'custom') {
       setValue(undefined);
     } else if (!agg.params.customMetric) {
-      const customMetric = agg.type.paramByName('customMetric');
-      if (customMetric) {
-        setValue((customMetric as AggParamType).makeAgg(agg));
-      }
+      // const customMetric = agg.type.paramByName('customMetric');
+      // if (customMetric) {
+      //   setValue(customMetric.makeAgg(agg));
+      // }
+      setValue(aggParam.makeAgg(agg));
     }
   }, [value, metricAggs]);
+
+  const setAggParamValue = useCallback(
+    (aggId, paramName, val) => {
+      const parsedParams = agg.params.customMetric.toJSON();
+      const params = {
+        ...parsedParams,
+        params: {
+          ...parsedParams.params,
+          [paramName]: val,
+        },
+      };
+
+      setValue(aggParam.makeAgg(agg, params));
+    },
+    [agg, setValue]
+  );
+  const onAggTypeChange = useCallback(
+    (aggId, aggType) => {
+      const parsedAgg = agg.params.customMetric.toJSON();
+
+      const params = {
+        ...parsedAgg,
+        type: aggType,
+      };
+
+      setValue(aggParam.makeAgg(agg, params));
+    },
+    [agg, setValue]
+  );
 
   if (agg.params.metricAgg !== 'custom' || !agg.params.customMetric) {
     return null;
@@ -60,8 +91,8 @@ function SubAggParamEditor({
         indexPattern={agg.getIndexPattern()}
         metricAggs={metricAggs}
         state={state}
-        setAggParamValue={subAggParams.setAggParamValue}
-        onAggTypeChange={subAggParams.onAggTypeChange}
+        setAggParamValue={setAggParamValue}
+        onAggTypeChange={onAggTypeChange}
         setValidity={setValidity}
         setTouched={setTouched}
       />

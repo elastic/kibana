@@ -29,9 +29,9 @@ import { SubAggParamsProp } from './agg_params';
 // as there is currently a bug on babel typescript transform plugin for it
 // https://github.com/babel/babel/issues/7641
 //
-export interface AggParamCommonProps<T> {
+export interface AggParamCommonProps<T, P = AggParam> {
   agg: AggConfig;
-  aggParam: AggParam;
+  aggParam: P;
   disabled?: boolean;
   editorConfig: EditorConfig;
   indexedFields?: ComboBoxGroupedOptions<Field>;
@@ -44,6 +44,6 @@ export interface AggParamCommonProps<T> {
   setTouched(): void;
 }
 
-export interface AggParamEditorProps<T> extends AggParamCommonProps<T> {
+export interface AggParamEditorProps<T, P = AggParam> extends AggParamCommonProps<T, P> {
   setValue(value?: T): void;
 }
