@@ -33,6 +33,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiButtonGroup,
+  EuiOutsideClickDetector,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -245,6 +246,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
       </EuiForm>
     </div>
   );
+
   return (
     <React.Fragment>
       <EuiFlexGroup responsive={false} gutterSize={'s'}>
@@ -261,33 +263,37 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <div className="dscFieldSearch__filterWrapper">
-        <EuiPopover
-          id="dataPanelTypeFilter"
-          panelClassName="euiFilterGroup__popoverPanel"
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
-          display="block"
-          isOpen={isPopoverOpen}
-          closePopover={() => {}}
-          button={buttonContent}
-        >
-          <EuiPopoverTitle>
-            {i18n.translate('kbn.discover.fieldChooser.filter.filterByTypeLabel', {
-              defaultMessage: 'Filter by type',
-            })}
-          </EuiPopoverTitle>
-          {selectionPanel}
-          <EuiPopoverFooter>
-            <EuiSwitch
-              label={i18n.translate('kbn.discover.fieldChooser.filter.hideMissingFieldsLabel', {
-                defaultMessage: 'Hide missing fields',
+        <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
+          <EuiPopover
+            id="dataPanelTypeFilter"
+            panelClassName="euiFilterGroup__popoverPanel"
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+            display="block"
+            isOpen={isPopoverOpen}
+            closePopover={() => {
+              setPopoverOpen(false);
+            }}
+            button={buttonContent}
+          >
+            <EuiPopoverTitle>
+              {i18n.translate('kbn.discover.fieldChooser.filter.filterByTypeLabel', {
+                defaultMessage: 'Filter by type',
               })}
-              checked={values.missing}
-              onChange={handleMissingChange}
-              data-test-subj="missingSwitch"
-            />
-          </EuiPopoverFooter>
-        </EuiPopover>
+            </EuiPopoverTitle>
+            {selectionPanel}
+            <EuiPopoverFooter>
+              <EuiSwitch
+                label={i18n.translate('kbn.discover.fieldChooser.filter.hideMissingFieldsLabel', {
+                  defaultMessage: 'Hide missing fields',
+                })}
+                checked={values.missing}
+                onChange={handleMissingChange}
+                data-test-subj="missingSwitch"
+              />
+            </EuiPopoverFooter>
+          </EuiPopover>
+        </EuiOutsideClickDetector>
       </div>
     </React.Fragment>
   );
