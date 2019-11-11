@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { App } from 'kibana/public';
+import { App, AppUnmount } from 'kibana/public';
 import { UIRoutes } from 'ui/routes';
-import { IScope } from 'angular';
+import { ILocationService, IScope } from 'angular';
 import { npStart } from 'ui/new_platform';
 import { htmlIdGenerator } from '@elastic/eui';
 
@@ -30,7 +30,7 @@ interface ForwardDefinition {
 }
 
 const matchAllWithPrefix = (prefixOrApp: string | App) =>
-  `/${typeof prefixOrApp === 'string' ? prefixOrApp : prefixOrApp.id}:tail*?`;
+  `/${typeof prefixOrApp === 'string' ? prefixOrApp : prefixOrApp.id}/:tail*?`;
 
 /**
  * To be able to migrate and shim parts of the Kibana app plugin
@@ -112,11 +112,20 @@ export class LocalApplicationService {
         template: `<div style="height:100%" id="${wrapperElementId}"></div>`,
         controller($scope: IScope) {
           const element = document.getElementById(wrapperElementId)!;
+          let unmountHandler: AppUnmount | null = null;
+          let isUnmounted = false;
+          $scope.$on('$destroy', () => {
+            if (unmountHandler) {
+              unmountHandler();
+            }
+            isUnmounted = true;
+          });
           (async () => {
-            const onUnmount = await app.mount({ core: npStart.core }, { element, appBasePath: '' });
-            $scope.$on('$destroy', () => {
-              onUnmount();
-            });
+            unmountHandler = await app.mount({ core: npStart.core }, { element, appBasePath: '' });
+            // immediately unmount app if scope got destroyed in the meantime
+            if (isUnmounted) {
+              unmountHandler();
+            }
           })();
         },
       });
@@ -124,9 +133,9 @@ export class LocalApplicationService {
 
     this.forwards.forEach(({ legacyAppId, newAppId, keepPrefix }) => {
       angularRouteManager.when(matchAllWithPrefix(legacyAppId), {
-        redirectTo: (_params: unknown, path: string, search: string) => {
-          const newPath = `/${newAppId}${keepPrefix ? path : path.replace(legacyAppId, '')}`;
-          return `${newPath}?${search}`;
+        resolveRedirectTo: ($location: ILocationService) => {
+          const url = $location.url();
+          return `/${newAppId}${keepPrefix ? url : url.replace(legacyAppId, '')}`;
         },
       });
     });
