@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { StaticIndexPattern } from './index_pattern';
-import { stubFields } from '../fields/field.stub';
+import { IndexPattern } from '../../common';
+import { stubFields } from './field.stub';
 
-export const stubIndexPattern: StaticIndexPattern = {
+export const stubIndexPattern: IndexPattern = {
   id: 'logstash-*',
   fields: stubFields,
   title: 'logstash-*',

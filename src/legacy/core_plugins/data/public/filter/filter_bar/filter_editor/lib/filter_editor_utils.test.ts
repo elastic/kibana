@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { stubIndexPattern, stubFields } from '../../../../stubs';
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+import { stubIndexPattern, stubFields } from '../../../../../../../../plugins/data/public/stubs';
 import { IndexPattern, Field } from '../../../../index';
 import {
   buildFilter,

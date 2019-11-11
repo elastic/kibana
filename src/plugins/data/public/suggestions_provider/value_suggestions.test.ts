@@ -21,7 +21,7 @@
 jest.mock('ui/new_platform');
 jest.mock('ui/index_patterns');
 
-import { stubIndexPattern, stubFields } from 'ui/index_patterns/__mocks__';
+import { stubIndexPattern, stubFields } from '../stubs';
 import { getSuggestionsProvider } from './value_suggestions';
 import { UiSettingsClientContract } from 'kibana/public';
 

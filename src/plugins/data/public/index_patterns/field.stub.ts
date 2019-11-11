@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { FieldType } from './field';
+import { Field } from '../../common';
 
-export const stubFields: FieldType[] = [
+export const stubFields: Field[] = [
   {
     name: 'machine.os',
     esTypes: ['text'],
