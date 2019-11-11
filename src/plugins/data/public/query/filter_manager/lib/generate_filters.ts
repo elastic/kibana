@@ -61,7 +61,12 @@ export function generateFilters(
   index: string
 ): esFilters.Filter[] {
   values = Array.isArray(values) ? values : [values];
-  const fieldName = _.isObject(field) ? field.name : field;
+  const fieldObj = _.isObject(field)
+    ? field
+    : {
+        name: field,
+      };
+  const fieldName = fieldObj.name;
   const newFilters: esFilters.Filter[] = [];
   const appFilters = filterManager.getAppFilters();
 
@@ -78,15 +83,10 @@ export function generateFilters(
       const tmpIndexPattern = { id: index };
       switch (fieldName) {
         case '_exists_':
-          filter = esFilters.buildExistsFilter(
-            {
-              name: value,
-            },
-            tmpIndexPattern
-          );
+          filter = esFilters.buildExistsFilter(fieldObj, tmpIndexPattern);
           break;
         default:
-          filter = esFilters.buildPhraseFilter(field, value, tmpIndexPattern);
+          filter = esFilters.buildPhraseFilter(fieldObj, value, tmpIndexPattern);
           break;
       }
 

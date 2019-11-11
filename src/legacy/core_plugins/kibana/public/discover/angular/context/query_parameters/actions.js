@@ -29,7 +29,7 @@ import {
 
 
 export function QueryParameterActionsProvider(indexPatterns) {
-  const { filterManager } = npStart.plugins.data;
+  const { filterManager } = npStart.plugins.data.query;
 
   const setPredecessorCount = (state) => (predecessorCount) => (
     state.queryParameters.predecessorCount = clamp(
@@ -60,7 +60,7 @@ export function QueryParameterActionsProvider(indexPatterns) {
 
   const addFilter = (state) => async (field, values, operation) => {
     const indexPatternId = state.queryParameters.indexPatternId;
-    const newFilters = generateFilters(field, values, operation, indexPatternId);
+    const newFilters = generateFilters(filterManager, field, values, operation, indexPatternId);
     filterManager.addFilters(newFilters);
     const indexPattern = await indexPatterns.get(indexPatternId);
     indexPattern.popularizeField(field.name, 1);
