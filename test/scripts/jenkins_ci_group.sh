@@ -3,7 +3,7 @@
 source test/scripts/jenkins_test_setup.sh
 
 if [[ -z "$IS_PIPELINE_JOB" ]] ; then
-  yarn run grunt functionalTests:ensureAllTestsInCiGroup;
+  #yarn run grunt functionalTests:ensureAllTestsInCiGroup;
   node scripts/build --debug --oss;
 else
   installDir="$(realpath $PARENT_DIR/kibana/build/oss/kibana-*-SNAPSHOT-linux-x86_64)"
