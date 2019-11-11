@@ -37,9 +37,6 @@ class MockSource {
 }
 
 
-
-
-
 describe('getDescriptorWithMissingStylePropsRemoved', () => {
   const fieldName = 'doIStillExist';
   const properties = {
@@ -68,9 +65,7 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
   it('Should return no changes when next oridinal fields contain existing style property fields', () => {
     const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
-    const nextOridinalFields = [
-      { name: fieldName }
-    ];
+    const nextOridinalFields = [new MockField({ fieldName })];
     const { hasChanges } = vectorStyle.getDescriptorWithMissingStylePropsRemoved(nextOridinalFields);
     expect(hasChanges).toBe(false);
   });
