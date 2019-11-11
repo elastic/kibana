@@ -184,14 +184,15 @@ describe('filter_manager', () => {
       expect(updateListener.callCount).toBe(1);
     });
 
-    test('app state should accept array', async () => {
+    test('app state should accept array and preserve order', async () => {
       const f1 = getFilter(esFilters.FilterStateStore.APP_STATE, false, false, 'age', 34);
       const f2 = getFilter(esFilters.FilterStateStore.APP_STATE, false, false, 'gender', 'female');
+
       filterManager.addFilters([f1]);
       filterManager.addFilters([f2]);
       const appFilters = filterManager.getAppFilters();
       expect(appFilters).toHaveLength(2);
-      expect(appFilters).toEqual([f2, f1]);
+      expect(appFilters).toEqual([f1, f2]);
       expect(filterManager.getGlobalFilters()).toHaveLength(0);
     });
 
@@ -206,7 +207,7 @@ describe('filter_manager', () => {
       expect(updateListener.callCount).toBe(1);
     });
 
-    test('global state should be accept array', async () => {
+    test('global state should be accept array and preserve order', async () => {
       const f1 = getFilter(esFilters.FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
       const f2 = getFilter(
         esFilters.FilterStateStore.GLOBAL_STATE,
@@ -215,11 +216,36 @@ describe('filter_manager', () => {
         'gender',
         'female'
       );
+
       filterManager.addFilters([f1, f2]);
       expect(filterManager.getAppFilters()).toHaveLength(0);
       const globalFilters = filterManager.getGlobalFilters();
       expect(globalFilters).toHaveLength(2);
-      expect(globalFilters).toEqual([f2, f1]);
+      expect(globalFilters).toEqual([f1, f2]);
+    });
+
+    test('mixed filters: global filters should stay in the beginning', async () => {
+      const f1 = getFilter(esFilters.FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
+      const f2 = getFilter(esFilters.FilterStateStore.APP_STATE, false, false, 'gender', 'female');
+      filterManager.addFilters([f1, f2]);
+      const filters = filterManager.getFilters();
+      expect(filters).toHaveLength(2);
+      expect(filters).toEqual([f1, f2]);
+    });
+
+    test('mixed filters: global filters should move to the beginning', async () => {
+      const f1 = getFilter(esFilters.FilterStateStore.APP_STATE, false, false, 'age', 34);
+      const f2 = getFilter(
+        esFilters.FilterStateStore.GLOBAL_STATE,
+        false,
+        false,
+        'gender',
+        'female'
+      );
+      filterManager.addFilters([f1, f2]);
+      const filters = filterManager.getFilters();
+      expect(filters).toHaveLength(2);
+      expect(filters).toEqual([f2, f1]);
     });
 
     test('add multiple filters at once', async () => {
