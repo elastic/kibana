@@ -5,10 +5,16 @@
  */
 
 export const SET_INTEGRATION_POPOVER_STATE = 'SET_INTEGRATION_POPOVER_STATE';
+export const SET_BASE_PATH = 'SET_BASE_PATH';
 
 export interface PopoverState {
   id: string;
   open: boolean;
+}
+
+interface SetBasePathAction {
+  type: typeof SET_BASE_PATH;
+  payload: string;
 }
 
 interface SetIntegrationPopoverAction {
@@ -23,4 +29,11 @@ export function toggleIntegrationsPopover(popoverState: PopoverState): SetIntegr
   };
 }
 
-export type UiActionTypes = SetIntegrationPopoverAction;
+export function setBasePath(basePath: string): SetBasePathAction {
+  return {
+    type: SET_BASE_PATH,
+    payload: basePath,
+  };
+}
+
+export type UiActionTypes = SetIntegrationPopoverAction | SetBasePathAction;
