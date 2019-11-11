@@ -177,8 +177,9 @@ function VisEditor(
   $scope.isDirty = false;
 
   vis.on('dirtyStateChange', ({ isDirty }) => {
-    $scope.isDirty = isDirty;
-    $scope.$apply();
+    $scope.$evalAsync(() => {
+      $scope.isDirty = isDirty;
+    });
   });
 
   $scope.topNavMenu = [...(capabilities.visualize.save ? [{

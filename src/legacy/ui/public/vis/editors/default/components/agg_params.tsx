@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import React, { useReducer, useEffect, useMemo } from 'react';
+import React, { useCallback, useReducer, useEffect, useMemo } from 'react';
 import { EuiForm, EuiAccordion, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { VisState } from 'ui/vis';
-import { aggTypes, AggType, AggParam, AggConfig } from 'ui/agg_types/';
+import { AggType, AggParam, AggConfig } from 'ui/agg_types/';
 import { IndexPattern } from 'ui/index_patterns';
 
 import { DefaultEditorAggSelect } from './agg_select';
@@ -48,7 +48,6 @@ import { FixedParam, TimeIntervalParam, EditorParamConfig } from '../../config/t
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { useUnmount } from '../../../../../../../plugins/kibana_react/public/util/use_unmount';
 import { AggGroupNames } from '../agg_groups';
-import { EditorActions } from '../state/actions';
 
 const FIXED_VALUE_PROP = 'fixedValue';
 const DEFAULT_PROP = 'default';
@@ -119,6 +118,17 @@ function DefaultEditorAggParams({
 
   const isAllInvalidParamsTouched =
     !!errors.length || isInvalidParamsTouched(agg.type, aggType, paramsState);
+
+  const onAggSelect = useCallback(
+    value => {
+      if (agg.type !== value) {
+        onAggTypeChange(agg.id, value);
+        // reset touched and valid of params
+        onChangeParamsState({ type: AGG_PARAMS_ACTION_KEYS.RESET });
+      }
+    },
+    [onAggTypeChange, agg]
+  );
 
   // reset validity before component destroyed
   useUnmount(() => setValidity(true));
@@ -213,11 +223,7 @@ function DefaultEditorAggParams({
         aggTypeOptions={groupedAggTypeOptions}
         isSubAggregation={aggIndex >= 1 && groupName === AggGroupNames.Buckets}
         showValidation={formIsTouched || aggType.touched}
-        setValue={value => {
-          onAggTypeChange(agg.id, value);
-          // reset touched and valid of params
-          onChangeParamsState({ type: AGG_PARAMS_ACTION_KEYS.RESET });
-        }}
+        setValue={onAggSelect}
         setTouched={() => onChangeAggType({ type: AGG_TYPE_ACTION_KEYS.TOUCHED, payload: true })}
         setValidity={valid => onChangeAggType({ type: AGG_TYPE_ACTION_KEYS.VALID, payload: valid })}
       />

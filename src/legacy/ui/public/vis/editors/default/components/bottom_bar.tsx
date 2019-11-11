@@ -38,6 +38,9 @@ function DefaultEditorBottomBar({ discardChanges, vis, state }: DefaultEditorBot
   const applyChanges = useCallback(() => {
     vis.setCurrentState(state);
     vis.updateState();
+    vis.emit('dirtyStateChange', {
+      isDirty: false,
+    });
     setDirty(false);
   }, [vis, state]);
 
@@ -50,7 +53,7 @@ function DefaultEditorBottomBar({ discardChanges, vis, state }: DefaultEditorBot
   return (
     <EuiBottomBar>
       <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}></EuiFlexItem>
+        <EuiFlexItem grow={false} />
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s">
             {!enableAutoApply && (

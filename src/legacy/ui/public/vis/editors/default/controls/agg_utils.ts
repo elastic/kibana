@@ -55,7 +55,7 @@ function useFallbackMetric(
         .filter(isCompatibleAgg)
         .find(aggregation => aggregation.id === value);
 
-      if (!respAgg) {
+      if (!respAgg && value !== fallbackValue) {
         setValue(fallbackValue);
       }
     }

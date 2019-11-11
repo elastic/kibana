@@ -48,13 +48,10 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
       const { aggId, value } = action.payload;
 
       const newAggs = state.aggs.aggs.map(agg => {
-        if (agg.id === aggId) {
-          const parsedAgg = agg.toJSON();
+        if (agg.id === aggId && agg.type !== value) {
+          agg.type = value;
 
-          return {
-            ...parsedAgg,
-            type: value,
-          };
+          return agg.toJSON();
         }
 
         return agg;

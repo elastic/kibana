@@ -25,6 +25,7 @@ import { AggParamEditorProps, DefaultEditorAggParams } from '..';
 
 function OrderAggParamEditor({
   agg,
+  aggParam,
   value,
   metricAggs,
   state,
@@ -33,23 +34,17 @@ function OrderAggParamEditor({
   setTouched,
   subAggParams,
 }: AggParamEditorProps<AggConfig>) {
-  useEffect(() => {
-    if (metricAggs) {
-      const orderBy = agg.params.orderBy;
+  const orderBy = agg.params.orderBy;
 
-      // we aren't creating a custom aggConfig
-      if (!orderBy || orderBy !== 'custom') {
-        setValue(undefined);
-      } else if (value) {
-        setValue(value);
-      } else {
-        const paramDef = agg.type.paramByName('orderAgg');
-        if (paramDef) {
-          setValue((paramDef as AggParamType).makeAgg(agg));
-        }
-      }
+  useEffect(() => {
+    if (orderBy === 'custom' && !value) {
+      setValue((aggParam as AggParamType).makeAgg(agg));
     }
-  }, [agg.params.orderBy, metricAggs]);
+
+    if (orderBy !== 'custom' && value) {
+      setValue(undefined);
+    }
+  }, [orderBy]);
 
   if (!agg.params.orderAgg) {
     return null;
