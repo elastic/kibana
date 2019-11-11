@@ -161,9 +161,9 @@ image::maps/images/grid_metrics_both.png[]
 . Select *Sum* in the aggregation select.
 . Select *bytes* in the field select.
 
-===== Set the vector style
+===== Set the layer style
 
-. In *Vector style*, change *Symbol size*:
+. In *Layer style*, change *Symbol size*:
   .. Set *Min size* to 1.
   .. Set *Max size* to 25.
   .. In the field select, select *sum of bytes*.
