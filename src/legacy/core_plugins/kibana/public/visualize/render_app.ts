@@ -22,7 +22,6 @@ import { IModule, IAngularStatic } from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/src/angular';
 
 import { IPrivate } from 'ui/private';
-import { State } from 'ui/state_management/state';
 import { configureAppAngularModule } from 'ui/legacy_compat';
 // @ts-ignore
 import { GlobalStateProvider } from 'ui/state_management/global_state';

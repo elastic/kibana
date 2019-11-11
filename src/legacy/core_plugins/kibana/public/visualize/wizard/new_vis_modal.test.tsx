@@ -45,7 +45,7 @@ beforeEach(() => {
 });
 
 describe('NewVisModal', () => {
-  const settingsGet = getServices().uiSettings.get as jest.Mock;
+  const settingsGet = getServices().uiSettings!.get as jest.Mock;
 
   const defaultVisTypeParams = {
     hidden: false,

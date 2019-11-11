@@ -49,7 +49,6 @@ import {
   Query,
   SavedQuery,
 } from '../../../data/public';
-import { start as data } from '../../../data/public/legacy';
 import { esFilters } from '../../../../../plugins/data/public';
 
 import {

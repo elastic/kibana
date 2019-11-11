@@ -53,7 +53,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
   constructor(props: TypeSelectionProps) {
     super(props);
-    this.isLabsEnabled = getServices().uiSettings.get('visualize:enableLabs');
+    this.isLabsEnabled = getServices().uiSettings!.get('visualize:enableLabs');
 
     this.state = {
       showSearchVisModal: false,
@@ -122,7 +122,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     this.trackUiMetric(METRIC_TYPE.CLICK, visType.name);
 
     if ('aliasUrl' in visType) {
-      window.location.href = getServices().addBasePath(visType.aliasUrl);
+      window.location.href = getServices().addBasePath!(visType.aliasUrl);
 
       return;
     }

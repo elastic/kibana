@@ -17,25 +17,50 @@
  * under the License.
  */
 
+import 'ui/registry/field_formats';
+import 'uiExports/contextMenuActions';
+import 'uiExports/devTools';
+import 'uiExports/docViews';
+import 'uiExports/embeddableFactories';
+import 'uiExports/embeddableActions';
+import 'uiExports/fieldFormatEditors';
+import 'uiExports/fieldFormats';
+import 'uiExports/home';
+import 'uiExports/indexManagement';
+import 'uiExports/inspectorViews';
+import 'uiExports/savedObjectTypes';
+import 'uiExports/search';
+import 'uiExports/shareContextMenuExtensions';
+import 'uiExports/visEditorTypes';
+import 'uiExports/visTypes';
+import 'uiExports/visualize';
+
 import { i18n } from '@kbn/i18n';
 
+import { Legacy } from 'kibana';
+
+import { capabilities } from 'ui/capabilities';
+
+import chrome from 'ui/chrome';
+import { getVisualizeLoader } from 'ui/visualize/loader';
+
 import { SavedObjectAttributes } from 'kibana/server';
+import { npSetup } from 'ui/new_platform';
+import {
+  EmbeddableFactory,
+  ErrorEmbeddable,
+  Container,
+  EmbeddableOutput,
+} from '../../../../../../plugins/embeddable/public';
+import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 import { showNewVisModal } from '../wizard';
+import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getIndexPattern } from './get_index_pattern';
 import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
-
-import {
-  getServices,
-  Container,
-  EmbeddableFactory,
-  EmbeddableOutput,
-  ErrorEmbeddable,
-  getVisualizeLoader,
-  VisSavedObject,
-} from '../kibana_services';
+import { VisSavedObject } from '../../../../../ui/public/visualize/loader/types';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -51,7 +76,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   private readonly visTypes: TypesStart;
 
   static async createVisualizeEmbeddableFactory(): Promise<VisualizeEmbeddableFactory> {
-    return new VisualizeEmbeddableFactory(getServices().visualizations.types);
+    return new VisualizeEmbeddableFactory(visualizations.types);
   }
 
   constructor(visTypes: TypesStart) {
@@ -85,7 +110,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
           if (!visType) {
             return false;
           }
-          if (getServices().uiSettings.get('visualize:enableLabs')) {
+          if (chrome.getUiSettingsClient().get('visualize:enableLabs')) {
             return true;
           }
           return visType.stage !== 'experimental';
@@ -97,7 +122,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   }
 
   public isEditable() {
-    return getServices().visualizeCapabilities.save as boolean;
+    return capabilities.get().visualize.save as boolean;
   }
 
   public getDisplayName() {
@@ -111,14 +136,18 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     input: Partial<VisualizeInput> & { id: string },
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
-    const { addBasePath, uiSettings, savedVisualizations } = getServices();
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const config = $injector.get<Legacy.KibanaConfig>('config');
+    const savedVisualizations = $injector.get<SavedVisualizations>('savedVisualizations');
 
     try {
       const visId = savedObject.id as string;
 
-      const editUrl = visId ? addBasePath(`/app/kibana${savedVisualizations.urlFor(visId)}`) : '';
+      const editUrl = visId
+        ? chrome.addBasePath(`/app/kibana${savedVisualizations.urlFor(visId)}`)
+        : '';
       const loader = await getVisualizeLoader();
-      const isLabsEnabled = uiSettings.get('visualize:enableLabs');
+      const isLabsEnabled = config.get<boolean>('visualize:enableLabs');
 
       if (!isLabsEnabled && savedObject.vis.type.stage === 'experimental') {
         return new DisabledLabEmbeddable(savedObject.title, input);
@@ -150,10 +179,13 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     input: Partial<VisualizeInput> & { id: string },
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const savedVisualizations = $injector.get<SavedVisualizations>('savedVisualizations');
+
     try {
       const visId = savedObjectId;
 
-      const savedObject = await getServices().savedVisualizations.get(visId);
+      const savedObject = await savedVisualizations.get(visId);
       return this.createFromObject(savedObject, input, parent);
     } catch (e) {
       console.error(e); // eslint-disable-line no-console

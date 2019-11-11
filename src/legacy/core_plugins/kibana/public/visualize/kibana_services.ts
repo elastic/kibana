@@ -84,30 +84,13 @@ export function clearServices() {
 
 // export types
 export { DocTitle } from 'ui/doc_title/doc_title';
-export { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize_handler';
-export { StaticIndexPattern } from 'ui/index_patterns';
-export { PersistedState } from 'ui/persisted_state';
-export { AppState } from 'ui/state_management/app_state';
 export { VisType } from 'ui/vis';
-export { VisualizeLoader } from 'ui/visualize/loader';
-export {
-  VisSavedObject,
-  VisualizeLoaderParams,
-  VisualizeUpdateParams,
-} from 'ui/visualize/loader/types';
-export {
-  Container,
-  Embeddable,
-  EmbeddableFactory,
-  EmbeddableInput,
-  EmbeddableOutput,
-  ErrorEmbeddable,
-} from '../../../../../plugins/embeddable/public';
+export { VisSavedObject } from 'ui/visualize/loader/types';
+export { EmbeddableFactory, ErrorEmbeddable } from '../../../../../plugins/embeddable/public';
 
 // export legacy static dependencies
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
-export { getFromSavedObject } from 'ui/index_patterns';
 export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
