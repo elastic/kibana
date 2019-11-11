@@ -10,10 +10,6 @@ import { hrefIsForPath } from '../concerns/routing';
 import { actions as alertListActions } from '../actions/alert_list';
 import * as alertListSelectors from '../selectors/alert_list';
 
-function isOnPage(href: any) {
-  return hrefIsForPath(href, '/app/endpoint/alerts');
-}
-
 // TODO: type this properly
 export async function alertListSaga(...args: any[]) {
   await Promise.all([resourceSaga(...args)]);
@@ -24,6 +20,10 @@ async function resourceSaga(
   { actionsAndState, dispatch }: { actionsAndState: any; dispatch: any },
   context: AppMountContext
 ) {
+  function isOnPage(href: any) {
+    return hrefIsForPath(href, `${context.core.http.basePath.get()}/app/endpoint/alerts`);
+  }
+
   for await (const {
     action,
     userIsOnPageAndLoggedIn,
