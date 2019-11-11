@@ -53,7 +53,7 @@ export const initServerWithKibana = (kbnServer: Server) => {
   }
 
   const libs = compose(kbnServer);
-  initServer(libs, { mocking, logger });
+  initServer(libs);
   if (
     kbnServer.config().has('xpack.actions.enabled') &&
     kbnServer.config().get('xpack.actions.enabled') === true &&
