@@ -51,7 +51,7 @@ export default function ({ getService, updateBaselines }) {
           {"id":"2","enabled":true,"type":"terms","schema":"segment","params":
             {"field":"response.raw","size":4,"order":"desc","orderBy":"1"}
           }]'  | 
-        metricVis metric={visdimension 1 format="number"} bucket={visdimension 0} colorRange={range from=0 to=10000}
+        metricVis metric={visdimension 1 format="number"} bucket={visdimension 0}
       `;
 
       // we can execute an expression and validate the result manually:
@@ -98,7 +98,7 @@ export default function ({ getService, updateBaselines }) {
         await (await expectExpression('partial_test_1', tagCloudExpr, context).toMatchSnapshot()).toMatchScreenshot();
 
         const metricExpr =
-          `metricVis metric={visdimension 1 format="number"} bucket={visdimension 0} colorRange={range from=0 to=10000}`;
+          `metricVis metric={visdimension 1 format="number"} bucket={visdimension 0}`;
         await (await expectExpression('partial_test_2', metricExpr, context).toMatchSnapshot()).toMatchScreenshot();
 
         const regionMapExpr =
