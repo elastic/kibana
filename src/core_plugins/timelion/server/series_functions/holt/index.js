@@ -50,10 +50,10 @@ module.exports = new Chainable('holt', {
     }
   ],
   help: `
-    Sample the beginning of a series and use it to forecast what should happen
-    via several optional parameters. In general, like everything, this is crappy at predicting the
-    future. You're much better off using it to predict what should be happening right now, for the
-    purpose of anomaly detection. Note that nulls will be filled with forecasted values. Deal with it.`,
+    Sample the beginning of a series and use it to predict what should happen
+    using several optional parameters. Since predictions are based on part of a series, they can be inaccurate. 
+    To discover anomalies, you can also sample the beginning of a series to predict current occurences. 
+    NOTE: Nulls contain forecasted values.`,
   fn: function expsmoothFn(args, tlConfig) {
 
     let newSeries = _.cloneDeep(args.byName.inputSeries);
