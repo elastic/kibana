@@ -6,13 +6,12 @@
 
 import qs from 'querystring';
 import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
-import { StringMap } from '../../../../typings/common';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
   return search ? qs.parse(search.slice(1)) : {};
 }
 
-export function fromQuery(query: StringMap<any>) {
+export function fromQuery(query: Record<string, any>) {
   return qs.stringify(query, undefined, undefined, {
     encodeURIComponent: (value: string) => {
       return encodeURIComponent(value).replace(/%3A/g, ':');
@@ -39,6 +38,7 @@ export type APMQueryParams = {
   rangeTo?: string;
   refreshPaused?: string | boolean;
   refreshInterval?: string | number;
+  searchTerm?: string;
 } & { [key in LocalUIFilterName]?: string };
 
 // forces every value of T[K] to be type: string

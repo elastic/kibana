@@ -7,12 +7,12 @@
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { buildExistsFilter } from '@kbn/es-query';
 import { App } from './app';
 import { EditorFrameInstance } from '../types';
-import { Storage } from 'ui/storage';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
+import { esFilters } from '../../../../../../src/plugins/data/public';
 
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 const dataStartMock = dataPluginMock.createStartContract();
@@ -80,7 +80,7 @@ describe('Lens App', () => {
     data: typeof dataStartMock;
     core: typeof core;
     dataShim: DataStart;
-    store: Storage;
+    storage: Storage;
     docId?: string;
     docStorage: SavedObjectStore;
     redirectTo: (id?: string) => void;
@@ -97,6 +97,11 @@ describe('Lens App', () => {
           },
         },
       },
+      data: {
+        query: {
+          filterManager: createMockFilterManager(),
+        },
+      },
       dataShim: {
         indexPatterns: {
           indexPatterns: {
@@ -106,11 +111,8 @@ describe('Lens App', () => {
           },
         },
         timefilter: { history: {} },
-        filter: {
-          filterManager: createMockFilterManager(),
-        },
       },
-      store: {
+      storage: {
         get: jest.fn(),
       },
       docStorage: {
@@ -123,7 +125,7 @@ describe('Lens App', () => {
       data: typeof dataStartMock;
       core: typeof core;
       dataShim: DataStart;
-      store: Storage;
+      storage: Storage;
       docId?: string;
       docStorage: SavedObjectStore;
       redirectTo: (id?: string) => void;
@@ -592,8 +594,8 @@ describe('Lens App', () => {
 
       const instance = mount(<App {...args} />);
 
-      args.dataShim.filter.filterManager.setFilters([
-        buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
+      args.data.query.filterManager.setFilters([
+        esFilters.buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
       ]);
 
       instance.update();
@@ -601,7 +603,7 @@ describe('Lens App', () => {
       expect(frame.mount).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({
-          filters: [buildExistsFilter({ name: 'myfield' }, { id: 'index1' })],
+          filters: [esFilters.buildExistsFilter({ name: 'myfield' }, { id: 'index1' })],
         })
       );
     });
@@ -723,8 +725,8 @@ describe('Lens App', () => {
         query: { query: 'new', language: 'lucene' },
       });
 
-      args.dataShim.filter.filterManager.setFilters([
-        buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
+      args.data.query.filterManager.setFilters([
+        esFilters.buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
       ]);
       instance.update();
 

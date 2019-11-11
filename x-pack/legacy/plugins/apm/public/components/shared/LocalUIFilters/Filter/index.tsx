@@ -168,7 +168,7 @@ const Filter = ({
             }}
             value={value}
           />
-          <EuiSpacer size="s"></EuiSpacer>
+          <EuiSpacer size="s" />
         </>
       ) : null}
     </>

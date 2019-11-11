@@ -22,20 +22,16 @@ interface DetailParams {
 const removeRelativePath = (relativePath: string): string =>
   new URL(relativePath, 'http://example.com').pathname;
 
-function addBasePath(path: string) {
-  const { http } = useCore();
-  return http.basePath.prepend(path);
-}
-
-function appRoot(path: string) {
-  // include '#' because we're using HashRouter
-  return addBasePath(patterns.APP_ROOT + '#' + path);
-}
-
 export function useLinks() {
+  const { http } = useCore();
+  function appRoot(path: string) {
+    // include '#' because we're using HashRouter
+    return http.basePath.prepend(patterns.APP_ROOT + '#' + path);
+  }
+
   return {
-    toAssets: (path: string) => addBasePath(`/plugins/${PLUGIN.ID}/assets/${path}`),
-    toImage: (path: string) => addBasePath(getFilePath(path)),
+    toAssets: (path: string) => http.basePath.prepend(`/plugins/${PLUGIN.ID}/assets/${path}`),
+    toImage: (path: string) => http.basePath.prepend(getFilePath(path)),
     toRelativeImage: ({
       path,
       packageName,
@@ -48,7 +44,7 @@ export function useLinks() {
       const imagePath = removeRelativePath(path);
       const pkgkey = `${packageName}-${version}`;
       const filePath = `${getInfoPath(pkgkey)}/${imagePath}`;
-      return addBasePath(filePath);
+      return http.basePath.prepend(filePath);
     },
     toListView: () => appRoot(patterns.LIST_VIEW),
     toDetailView: ({ name, version, panel }: DetailParams) => {

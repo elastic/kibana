@@ -3,6 +3,7 @@ module.exports = {
     './javascript.js',
     './typescript.js',
     './jest.js',
+    './react.js',
   ],
   plugins: ['@kbn/eslint-plugin-eslint'],
 

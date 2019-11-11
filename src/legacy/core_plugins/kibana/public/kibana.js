@@ -58,6 +58,9 @@ import 'ui/agg_response';
 import 'ui/agg_types';
 import { showAppRedirectNotification } from 'ui/notify';
 import 'leaflet';
+import { localApplicationService } from './local_application_service';
+
+localApplicationService.attachToAngular(routes);
 
 routes.enable();
 

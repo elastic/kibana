@@ -16,9 +16,6 @@ import { ExamplesList } from '../examples_list';
 
 export const OtherContent: FC<FieldDataCardProps> = ({ config }) => {
   const { stats, type, aggregatable } = config;
-  if (stats === undefined) {
-    return null;
-  }
 
   const { count, sampleCount, cardinality, examples } = stats;
   const docsPercent = roundToDecimalPlace((count / sampleCount) * 100);
