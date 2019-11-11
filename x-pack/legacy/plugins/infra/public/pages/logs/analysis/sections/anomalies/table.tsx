@@ -168,8 +168,8 @@ export const AnomaliesTable: React.FunctionComponent<{
   );
 };
 
-const isIE11 = Boolean('MSInputMethodContext' in window) && Boolean('documentMode' in document);
-
 const StyledEuiBasicTable = euiStyled(EuiBasicTable)`
-  ${isIE11 ? 'max-width: 90vw;' : ''}
+  & .euiTable {
+    table-layout: auto;
+  }
 `;
