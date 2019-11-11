@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
+import { esFilters } from '../../../../../plugins/data/public';
 
 export interface PartitionedFilters {
-  globalFilters: Filter[];
-  appFilters: Filter[];
+  globalFilters: esFilters.Filter[];
+  appFilters: esFilters.Filter[];
 }
