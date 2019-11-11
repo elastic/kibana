@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiBasicTable } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 import { ReindexButton } from './reindex';
+import { AppContext } from '../../../../app_context';
 
 const PAGE_SIZES = [10, 25, 50, 100, 250, 500, 1000];
 
@@ -143,7 +144,13 @@ export class IndexDeprecationTableUI extends React.Component<
       actions: [
         {
           render(indexDep: IndexDeprecationDetails) {
-            return <ReindexButton indexName={indexDep.index!} />;
+            return (
+              <AppContext.Consumer>
+                {({ XSRF, http }) => (
+                  <ReindexButton indexName={indexDep.index!} http={http} xsrf={XSRF} />
+                )}
+              </AppContext.Consumer>
+            );
           },
         },
       ],

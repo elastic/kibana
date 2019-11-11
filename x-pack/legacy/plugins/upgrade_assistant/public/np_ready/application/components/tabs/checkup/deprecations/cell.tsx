@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ReindexButton } from './reindex';
+import { AppContext } from '../../../../app_context';
 
 interface DeprecationCellProps {
   items?: Array<{ title?: string; body: string }>;
@@ -77,7 +78,11 @@ export const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
 
       {reindexIndexName && (
         <EuiFlexItem grow={false}>
-          <ReindexButton indexName={reindexIndexName} />
+          <AppContext.Consumer>
+            {({ http, XSRF }) => (
+              <ReindexButton indexName={reindexIndexName} http={http} xsrf={XSRF} />
+            )}
+          </AppContext.Consumer>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

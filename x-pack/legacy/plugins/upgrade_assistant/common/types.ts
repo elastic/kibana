@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
 import { SavedObject, SavedObjectAttributes } from 'src/core/server';
-import { ServerShim } from '../server/np_ready/types';
 
 export enum ReindexStep {
   // Enum values are spaced out by 10 to give us room to insert steps in between.
