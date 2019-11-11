@@ -5,8 +5,6 @@
  */
 import euiLight from '@elastic/eui/dist/eui_theme_light.json';
 import euiDark from '@elastic/eui/dist/eui_theme_dark.json';
-import 'ui/autoload/all';
-import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 import { npSetup, npStart } from 'ui/new_platform';
 import { useUiSetting$ } from '../../../../../src/plugins/kibana_react/public';
