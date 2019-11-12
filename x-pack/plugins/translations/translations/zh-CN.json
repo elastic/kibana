@@ -557,7 +557,6 @@
     "common.ui.vislib.colormaps.greysText": "灰色",
     "common.ui.vislib.colormaps.redsText": "红色",
     "common.ui.vislib.colormaps.yellowToRedText": "黄到红",
-    "common.ui.visualize.dataLoaderError": "可视化错误",
     "common.ui.visualize.queryGeohashBounds.unableToGetBoundErrorTitle": "无法获取边界",
     "common.ui.welcomeErrorMessage": "Kibana 未正确加载。检查服务器输出以了解详情。",
     "common.ui.welcomeMessage": "正在加载 Kibana",

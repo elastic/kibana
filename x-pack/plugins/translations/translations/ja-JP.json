@@ -556,7 +556,6 @@
     "common.ui.vislib.colormaps.greysText": "グレー",
     "common.ui.vislib.colormaps.redsText": "赤",
     "common.ui.vislib.colormaps.yellowToRedText": "黄色から赤",
-    "common.ui.visualize.dataLoaderError": "ビジュアライゼーションエラー",
     "common.ui.visualize.queryGeohashBounds.unableToGetBoundErrorTitle": "バウンドを取得できませんでした",
     "common.ui.welcomeErrorMessage": "Kibana が正常に読み込まれませんでした。詳細はサーバーアウトプットを確認してください。",
     "common.ui.welcomeMessage": "Kibana を読み込み中",
