@@ -7,7 +7,7 @@
 import { ChartSeriesData } from '../../../charts/common';
 import { KpiHostsChartColors } from '../kpi_hosts/types';
 
-export enum AuthMatrixDataGroup {
+enum AuthMatrixDataGroup {
   authSuccess = 'authentication_success',
   authFailure = 'authentication_failure',
 }

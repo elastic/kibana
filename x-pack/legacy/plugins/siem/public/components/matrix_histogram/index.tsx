@@ -21,19 +21,22 @@ import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { Loader } from '../loader';
 import { Panel } from '../panel';
 
-export interface MatrixHistogramProps<T> {
-  id: string;
+export interface MatrixHistogramBasicProps<T> {
   data: T[];
-  dataKey?: string;
   endDate: number;
+  id: string;
   loading: boolean;
   mapping?: MatrixHistogramMappingTypes;
-  scaleType?: ScaleType;
   startDate: number;
-  subtitle?: string;
-  title?: string;
   totalCount: number;
   updateDateRange: UpdateDateRange;
+}
+
+export interface MatrixHistogramProps<T> extends MatrixHistogramBasicProps<T> {
+  dataKey?: string;
+  scaleType?: ScaleType;
+  subtitle?: string;
+  title?: string;
 }
 
 const getBarchartConfigs = (

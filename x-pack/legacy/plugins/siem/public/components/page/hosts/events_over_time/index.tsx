@@ -7,11 +7,11 @@
 import React from 'react';
 
 import * as i18n from './translation';
-import { MatrixHistogram, MatrixHistogramProps } from '../../../matrix_histogram';
+import { MatrixHistogram, MatrixHistogramBasicProps } from '../../../matrix_histogram';
 import { MatrixOverTimeHistogramData } from '../../../../graphql/types';
 
 export const EventsOverTimeHistogram = (
-  props: MatrixHistogramProps<MatrixOverTimeHistogramData>
+  props: MatrixHistogramBasicProps<MatrixOverTimeHistogramData>
 ) => {
   const dataKey = 'eventsOverTime';
   const { totalCount } = props;
