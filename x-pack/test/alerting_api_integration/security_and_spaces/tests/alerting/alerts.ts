@@ -407,6 +407,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
         });
 
         it('should throttle alerts when appropriate', async () => {
+          // We'll use this start time to query tasks created after this point
+          const testStart = new Date();
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringAction({
             reference,
@@ -430,11 +432,33 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
               // Wait until alerts scheduled actions 3 times to ensure actions had a chance to execute twice
               await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 3);
-              const executedActionsResult = await esTestIndexTool.search(
-                'action:test.index-record',
-                reference
-              );
-              expect(executedActionsResult.hits.total.value).to.eql(1);
+              // Wait until one action executed
+              await esTestIndexTool.waitForDocs('action:test.index-record', reference, 1);
+              // Should not have pending tasks for actions
+              const taskManagerSearchResult = await es.search({
+                index: '.kibana_task_manager',
+                body: {
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'task.taskType': 'actions:test.index-record',
+                          },
+                        },
+                        {
+                          range: {
+                            'task.scheduledAt': {
+                              gte: testStart,
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              });
+              expect(taskManagerSearchResult.hits.total.value).to.eql(0);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -488,14 +512,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'superuser at space1':
-              // Wait until alerts scheduled actions 3 times to ensure actions had a chance to execute twice
-              await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 3);
-              const executedActionsResult = await esTestIndexTool.search(
+              // Ensure actions executed twice
+              const executedActionsResults = await esTestIndexTool.waitForDocs(
                 'action:test.index-record',
-                reference
+                reference,
+                2
               );
-              expect(executedActionsResult.hits.total.value).to.eql(2);
-              const messages: string[] = executedActionsResult.hits.hits.map(
+              const messages: string[] = executedActionsResults.map(
                 (hit: { _source: { params: { message: string } } }) => hit._source.params.message
               );
               expect(messages.sort()).to.eql(['from:default', 'from:other']);
@@ -532,13 +555,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'superuser at space1':
-              // Wait until alerts scheduled actions 4 times to ensure actions had a chance to execute twice
-              await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 4);
-              const executedActionsResult = await esTestIndexTool.search(
-                'action:test.index-record',
-                reference
-              );
-              expect(executedActionsResult.hits.total.value).to.eql(2);
+              // Actions should execute twice
+              await esTestIndexTool.waitForDocs('action:test.index-record', reference, 2);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -546,6 +564,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
         });
 
         it(`shouldn't schedule actions when alert is muted`, async () => {
+          // We'll use this start time to query tasks created after this point
+          const testStart = new Date();
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringAction({
             reference,
@@ -572,6 +592,32 @@ export default function alertTests({ getService }: FtrProviderContext) {
               await alertUtils.enable(response.body.id);
               // Wait until alerts schedule actions twice to ensure actions had a chance to skip execution once
               await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
+              // Should not have pending tasks for actions
+              const taskManagerSearchResult = await es.search({
+                index: '.kibana_task_manager',
+                body: {
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'task.taskType': 'actions:test.index-record',
+                          },
+                        },
+                        {
+                          range: {
+                            'task.scheduledAt': {
+                              gte: testStart,
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              });
+              expect(taskManagerSearchResult.hits.total.value).to.eql(0);
+              // Should not have executed action tasks
               const executedActionsResult = await esTestIndexTool.search(
                 'action:test.index-record',
                 reference
@@ -584,6 +630,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
         });
 
         it(`shouldn't schedule actions when alert instance is muted`, async () => {
+          // We'll use this start time to query tasks created after this point
+          const testStart = new Date();
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringAction({
             reference,
@@ -610,6 +658,32 @@ export default function alertTests({ getService }: FtrProviderContext) {
               await alertUtils.enable(response.body.id);
               // Wait until alerts scheduled actions twice to ensure actions had a chance to execute once
               await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
+              // Should not have pending tasks for actions
+              const taskManagerSearchResult = await es.search({
+                index: '.kibana_task_manager',
+                body: {
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'task.taskType': 'actions:test.index-record',
+                          },
+                        },
+                        {
+                          range: {
+                            'task.scheduledAt': {
+                              gte: testStart,
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              });
+              expect(taskManagerSearchResult.hits.total.value).to.eql(0);
+              // Should not have executed action tasks
               const executedActionsResult = await esTestIndexTool.search(
                 'action:test.index-record',
                 reference
@@ -648,13 +722,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
               await alertUtils.muteAll(response.body.id);
               await alertUtils.unmuteAll(response.body.id);
               await alertUtils.enable(response.body.id);
-              // Wait until alerts scheduled actions twice to ensure actions had a chance to execute once
-              await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
-              const executedActionsResult = await esTestIndexTool.search(
-                'action:test.index-record',
-                reference
-              );
-              expect(executedActionsResult.hits.total.value).to.eql(1);
+              // Ensure actions are executed once
+              await esTestIndexTool.waitForDocs('action:test.index-record', reference, 1);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
