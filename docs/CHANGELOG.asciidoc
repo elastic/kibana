@@ -36,7 +36,7 @@ This section summarizes the changes in each release.
 [float]
 [[breaking-7.5.0]]
 === Breaking changes
-//See also <<breaking-changes-7.5, breaking changes in 7.5>>.
+See also <<breaking-changes-7.5, breaking changes in 7.5>>.
 
 Platform::
 * Default to _search instead of _msearch in courier {pull}45174[#45174]
