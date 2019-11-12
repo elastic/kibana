@@ -28,10 +28,11 @@ do {
     \"interval\": \"24h\",
     \"name\": \"Detect Root/Admin Users\",
     \"severity\": \"high\",
-    \"type\": \"kql\",
+    \"type\": \"query\",
     \"from\": \"now-6m\",
     \"to\": \"now\",
-    \"kql\": \"user.name: root or user.name: admin\"
+    \"query\": \"user.name: root or user.name: admin\"
+    \"language\": \"kuery\"
   }" \
   | jq .;
 } &

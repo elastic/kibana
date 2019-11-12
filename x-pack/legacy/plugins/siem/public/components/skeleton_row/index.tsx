@@ -54,7 +54,7 @@ export interface SkeletonRowProps extends CellProps, RowProps {
 export const SkeletonRow = React.memo<SkeletonRowProps>(
   ({ cellColor, cellCount = 4, cellMargin, rowHeight, rowPadding, style }) => {
     const cells = [...Array(cellCount)].map((_, i) => (
-      <Cell cellColor={cellColor} cellMargin={cellMargin} key={i}></Cell>
+      <Cell cellColor={cellColor} cellMargin={cellMargin} key={i} />
     ));
 
     return (

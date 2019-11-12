@@ -26,9 +26,10 @@ export function buildNodeParams(fieldName) {
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern) {
+export function toElasticsearchQuery(node, indexPattern = null, config, context = {}) {
   const { arguments: [ fieldNameArg ] } = node;
-  const fieldName = literal.toElasticsearchQuery(fieldNameArg);
+  const fullFieldNameArg = { ...fieldNameArg, value: context.nested ? `${context.nested.path}.${fieldNameArg.value}` : fieldNameArg.value };
+  const fieldName = literal.toElasticsearchQuery(fullFieldNameArg);
   const field = get(indexPattern, 'fields', []).find(field => field.name === fieldName);
 
   if (field && field.scripted) {

@@ -100,9 +100,9 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
 
   const outcome$: Rx.Observable<number | null> = Rx.race(
     // observe first exit event
-    Rx.fromEvent(childProcess, 'exit').pipe(
+    Rx.fromEvent<[number]>(childProcess, 'exit').pipe(
       take(1),
-      map(([code]: [number]) => {
+      map(([code]) => {
         if (stopCalled) {
           return null;
         }

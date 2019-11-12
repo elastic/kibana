@@ -44,7 +44,7 @@ export const AdvancedSettings: FC<Props> = ({ setIsValid }) => {
         <EuiFlexItem>
           <ModelMemoryLimitInput />
         </EuiFlexItem>
-        <EuiFlexItem></EuiFlexItem>
+        <EuiFlexItem />
       </EuiFlexGroup>
     </Fragment>
   );

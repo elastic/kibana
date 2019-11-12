@@ -21,24 +21,6 @@
         "airline": {
           "type": "keyword"
         },
-        "host": {
-          "fields": {
-            "keyword": {
-              "ignore_above": 256,
-              "type": "keyword"
-            }
-          },
-          "type": "text"
-        },
-        "path": {
-          "fields": {
-            "keyword": {
-              "ignore_above": 256,
-              "type": "keyword"
-            }
-          },
-          "type": "text"
-        },
         "responsetime": {
           "type": "float"
         },

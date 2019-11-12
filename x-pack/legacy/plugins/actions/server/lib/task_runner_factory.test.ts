@@ -11,7 +11,7 @@ import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager';
 import { TaskRunnerFactory } from './task_runner_factory';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { actionExecutorMock } from './action_executor.mock';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
+import { encryptedSavedObjectsMock } from '../../../../../plugins/encrypted_saved_objects/server/mocks';
 import {
   savedObjectsClientMock,
   loggingServiceMock,
@@ -19,7 +19,7 @@ import {
 
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
-const mockedEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
+const mockedEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.createStart();
 const mockedActionExecutor = actionExecutorMock.create();
 
 let fakeTimer: sinon.SinonFakeTimers;

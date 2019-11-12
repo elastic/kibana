@@ -24,7 +24,7 @@ export function SearchResults({ term, results }: SearchResultsProps) {
       controls={
         <EuiTitle>
           <EuiText>
-            {results.length} results for "{term}"
+            {results.length} results for &quot;{term}&quot;
           </EuiText>
         </EuiTitle>
       }
