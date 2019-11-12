@@ -18,9 +18,11 @@
  */
 
 import chrome from 'ui/chrome';
-import { visualizationLoader } from 'ui/visualize/loader/visualization_loader';
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 // @ts-ignore
-import { VisProvider } from 'ui/visualize/loader/vis';
+import { VisProvider } from '../../../../ui/public/visualize/loader/vis';
+import { Visualization } from '../../../../ui/public/visualize/components';
 
 export const visualization = () => ({
   name: 'visualization',
@@ -50,17 +52,27 @@ export const visualization = () => ({
         type: visType,
         params: visConfig,
       });
-      handlers.vis.eventsSubject = handlers.eventsSubject;
     }
+
+    handlers.vis.eventsSubject = { next: handlers.event };
 
     const uiState = handlers.uiState || handlers.vis.getUiState();
 
-    handlers.onDestroy(() => visualizationLoader.destroy());
+    handlers.onDestroy(() => {
+      unmountComponentAtNode(domNode);
+    });
 
-    await visualizationLoader
-      .render(domNode, handlers.vis, visData, handlers.vis.params, uiState, params)
-      .then(() => {
-        if (handlers.done) handlers.done();
-      });
+    const listenOnChange = params ? params.listenOnChange : false;
+    render(
+      <Visualization
+        vis={handlers.vis}
+        visData={visData}
+        visParams={handlers.vis.params}
+        uiState={uiState}
+        listenOnChange={listenOnChange}
+        onInit={handlers.done}
+      />,
+      domNode
+    );
   },
 });

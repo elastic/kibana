@@ -221,7 +221,7 @@ export default function ({ getService, getPageObjects }) {
 
         it('when not checked does not add filters to aggregation', async () => {
           await PageObjects.visualize.toggleOpenEditor(2);
-          await PageObjects.visualize.toggleIsFilteredByCollarCheckbox();
+          await PageObjects.visualize.setIsFilteredByCollarCheckbox(false);
           await PageObjects.visualize.clickGo();
           await inspector.open();
           await inspector.expectTableHeaders(['geohash_grid', 'Count', 'Geo Centroid']);
@@ -229,7 +229,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         after(async () => {
-          await PageObjects.visualize.toggleIsFilteredByCollarCheckbox();
+          await PageObjects.visualize.setIsFilteredByCollarCheckbox(true);
           await PageObjects.visualize.clickGo();
         });
       });
