@@ -28,8 +28,9 @@ To resolve this issue, upgrade {kib} to 6.3 or later. See
 
 *Symptoms:*
 
-The *Stack Monitoring* application displays an error indicating that Filebeat
-indices are corrupt.
+The *Stack Monitoring* application displays a Monitoring Request error indicating
+that an illegal argument exception has occurred because fielddata is disabled on
+text fields by default.
 
 *Resolution*
 
