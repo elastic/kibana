@@ -42,6 +42,7 @@ const createSetupContract = (): VisualizationsSetup => ({
   types: {
     registerVisualization: jest.fn(),
     registerAlias: jest.fn(),
+    hideTypes: jest.fn(),
   },
 });
 

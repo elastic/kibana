@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { ExitFullScreenButton } from './exit_full_screen_button';
+export { ExitFullScreenButton, ExitFullScreenButtonProps } from './exit_full_screen_button';

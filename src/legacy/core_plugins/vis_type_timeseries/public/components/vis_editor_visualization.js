@@ -18,9 +18,8 @@
  */
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { get, isEqual } from 'lodash';
+import { get } from 'lodash';
 import { keyCodes, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
-import { getVisualizeLoader } from 'ui/visualize/loader/visualize_loader';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import {
   getInterval,
@@ -30,6 +29,7 @@ import {
   AUTO_INTERVAL,
 } from './lib/get_interval';
 import { PANEL_TYPES } from '../../common/panel_types';
+import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
 
 const MIN_CHART_HEIGHT = 300;
 
@@ -65,23 +65,21 @@ class VisEditorVisualizationUI extends Component {
   };
 
   async _loadVisualization() {
-    const loader = await getVisualizeLoader();
-
     if (!this._visEl.current) {
       // In case the visualize loader isn't done before the component is unmounted.
       return;
     }
 
-    const { uiState, timeRange, appState, savedObj, onDataChange } = this.props;
+    const { timeRange, appState, savedObj, onDataChange } = this.props;
 
-    this._handler = loader.embedVisualizationWithSavedObject(this._visEl.current, savedObj, {
-      listenOnChange: false,
-      uiState,
-      timeRange,
-      appState,
+    this._handler = await embeddables.getEmbeddableFactory('visualization').createFromObject(savedObj, {
+      vis: {},
+      timeRange: timeRange,
+      filters: appState.filters || [],
     });
+    this._handler.render(this._visEl.current);
 
-    this._subscription = this._handler.data$.subscribe(data => {
+    this._subscription = this._handler.handler.data$.subscribe(data => {
       this.setPanelInterval(data.visData);
       onDataChange(data);
     });
@@ -152,10 +150,12 @@ class VisEditorVisualizationUI extends Component {
     this._loadVisualization();
   }
 
-  componentDidUpdate(prevProps) {
-    if (this._handler && !isEqual(this.props.timeRange, prevProps.timeRange)) {
-      this._handler.update({
+  componentDidUpdate() {
+    if (this._handler) {
+      this._handler.updateInput({
         timeRange: this.props.timeRange,
+        filters: this.props.filters || [],
+        query: this.props.query,
       });
     }
   }
