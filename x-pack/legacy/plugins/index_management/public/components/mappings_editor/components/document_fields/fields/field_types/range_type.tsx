@@ -16,13 +16,7 @@ import {
 import { EditFieldSection, AdvancedSettingsWrapper } from '../edit_field';
 
 const getDefaultValueToggle = (param: string, field: FieldType) => {
-  switch (param) {
-    case 'boost': {
-      return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
-    }
-    default:
-      return false;
-  }
+  return field.boost !== undefined && field.boost !== getFieldConfig('boost').defaultValue;
 };
 
 interface Props {
