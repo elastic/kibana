@@ -5,7 +5,7 @@
  */
 
 import { kfetch } from 'ui/kfetch';
-import { Role } from '../../common/model/role';
+import { Role } from '../../common/model';
 
 export class RolesApi {
   public static async getRoles(): Promise<Role[]> {
