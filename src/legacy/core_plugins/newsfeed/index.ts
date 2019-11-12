@@ -42,7 +42,7 @@ export default function(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> 
             is: true,
             then: Joi.string().default(DEFAULT_SERVICE_URLROOT),
             otherwise: Joi.string().default(DEV_SERVICE_URLROOT),
-          }).regex(/[^\/]$/),
+          }),
         }).default(),
         defaultLanguage: Joi.string().default('en'),
         mainInterval: Joi.number().default(120 * 1000), // (2min) How often to retry failed fetches, and/or check if newsfeed items need to be refreshed from remote

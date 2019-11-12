@@ -24,8 +24,13 @@ export function NewsfeedPageProvider({ getService, getPageObjects }: FtrProvider
   const retry = getService('retry');
   const flyout = getService('flyout');
   const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects(['common']);
 
   class NewsfeedPage {
+    async resetPage() {
+      await PageObjects.common.navigateToUrl('home');
+    }
+
     async closeNewsfeedPanel() {
       await flyout.ensureClosed('NewsfeedFlyout');
       log.debug('clickNewsfeed icon');
