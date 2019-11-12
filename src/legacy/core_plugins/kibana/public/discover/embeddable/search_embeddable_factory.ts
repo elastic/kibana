@@ -75,13 +75,12 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
 
     const $compile = $injector.get<ng.ICompileService>('$compile');
     const $rootScope = $injector.get<ng.IRootScopeService>('$rootScope');
-    const kbnUrl = $injector.get<ng.IRootScopeService>('kbnUrl');
-    const queryFilter = $injector.get<ng.IRootScopeService>('queryFilter');
+    const queryFilter = getServices().filterManager;
 
-    const url = await getServices().getSavedSearchUrlById(savedObjectId, kbnUrl);
+    const url = await getServices().getSavedSearchUrlById(savedObjectId);
     const editUrl = await getServices().addBasePath(`/app/kibana${url}`);
     try {
-      const savedObject = await getServices().getSavedSearchById(savedObjectId, kbnUrl);
+      const savedObject = await getServices().getSavedSearchById(savedObjectId);
       return new SearchEmbeddable(
         {
           savedSearch: savedObject,

@@ -146,7 +146,9 @@ export function getInnerAngular(
   if (embeddable) {
     return angular
       .module(name, [
-        ...thirdPartyAngularDependencies,
+        'ngSanitize',
+        'react',
+        'ui.bootstrap',
         'discoverI18n',
         'discoverPrivate',
         'discoverDocTable',
@@ -157,10 +159,7 @@ export function getInnerAngular(
       .directive('icon', reactDirective => reactDirective(EuiIcon))
       .directive('fieldName', FieldNameDirectiveProvider)
       .directive('renderComplete', createRenderCompleteDirective)
-      .service('debounce', ['$timeout', DebounceProviderTimeout])
-      .service('queryFilter', function(Private: any) {
-        return Private(FilterBarQueryFilterProvider);
-      });
+      .service('debounce', ['$timeout', DebounceProviderTimeout]);
   }
 
   return angular

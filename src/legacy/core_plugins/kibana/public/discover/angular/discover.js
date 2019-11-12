@@ -88,12 +88,11 @@ const fetchStatuses = {
 };
 
 const app = getAngularModule();
-app.run((globalState, $rootScope) => {
-  registerTimefilterWithGlobalStateFactory(
-    timefilter,
-    globalState,
-    $rootScope
-  );
+app.run((globalState, $rootScope) => {registerTimefilterWithGlobalStateFactory(
+  timefilter,
+  globalState,
+  $rootScope
+);
 });
 
 app.config($routeProvider => {

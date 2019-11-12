@@ -42,17 +42,18 @@ export interface AngularGlobalInjectedDependencies {
 export async function getGlobalAngular(): Promise<AngularGlobalInjectedDependencies> {
   const injector = await chromeLegacy.dangerouslyGetActiveInjector();
   const Private = injector.get<IPrivate>('Private');
+  const kbnUrl = injector.get<IPrivate>('kbnUrl');
   const getUnhashableStates = Private(getUnhashableStatesProvider);
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
   const State = Private(StateProvider);
 
   return {
-    getSavedSearchById: async (id: string, kbnUrl: unknown) => {
+    getSavedSearchById: async (id: string) => {
       const SavedSearch = createSavedSearchFactory(Private);
       const service = createSavedSearchesService(Private, SavedSearch, kbnUrl, chromeLegacy);
       return service.get(id);
     },
-    getSavedSearchUrlById: async (id: string, kbnUrl: unknown) => {
+    getSavedSearchUrlById: async (id: string) => {
       const SavedSearch = createSavedSearchFactory(Private);
       const service = createSavedSearchesService(Private, SavedSearch, kbnUrl, chromeLegacy);
       return service.urlFor(id);

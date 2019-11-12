@@ -48,6 +48,7 @@ interface ServiceDeps {
   eui_utils: any;
   indexPatterns: any;
   inspector: any;
+  filterManager: any;
   metadata: any;
   toastNotifications: any;
   uiSettings: any;
@@ -69,6 +70,7 @@ let services: ServiceDeps = {
   chrome: npStart.core.chrome,
   docLinks: npStart.core.docLinks,
   eui_utils: npStart.plugins.eui_utils,
+  filterManager: npStart.plugins.data.query.filterManager,
   indexPatterns: data.indexPatterns.indexPatterns,
   inspector: npStart.plugins.inspector,
   metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
