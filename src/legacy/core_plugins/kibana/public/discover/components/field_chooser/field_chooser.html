@@ -9,10 +9,8 @@
     <form>
       <discover-field-search
         on-change="setFilterValue"
-        on-show-filter="toggleShowFilter"
-        show-filter="showFilter"
         value="filter.vals.name"
-        filters-active="filtersActive"
+        types="fieldTypes"
       >
       </discover-field-search>
       <div data-test-subj="discoverFieldFilter" class="dscFieldFilter" ng-show="showFilter">
