@@ -10,6 +10,7 @@ const createTaskManagerMock = () => {
   const mocked: jest.Mocked<TaskManager> = {
     registerTaskDefinitions: jest.fn(),
     addMiddleware: jest.fn(),
+    ensureScheduling: jest.fn(),
     schedule: jest.fn(),
     fetch: jest.fn(),
     remove: jest.fn(),

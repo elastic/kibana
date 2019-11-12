@@ -217,6 +217,17 @@ export interface TaskInstance {
 }
 
 /**
+ * A task instance that has an id.
+ */
+export interface ExistingTaskInstance extends TaskInstance {
+  /**
+   * The id of the Elastic document that stores this instance's data. This can
+   * be passed by the caller when scheduling the task.
+   */
+  id: string;
+}
+
+/**
  * A task instance that has an id and is ready for storage.
  */
 export interface ConcreteTaskInstance extends TaskInstance {
