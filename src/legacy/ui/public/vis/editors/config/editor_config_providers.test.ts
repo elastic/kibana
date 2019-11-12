@@ -51,7 +51,7 @@ describe('EditorConfigProvider', () => {
     expect(provider).not.toHaveBeenCalled();
     const aggType = {} as AggType;
     const aggConfig = {} as AggConfig;
-    registry.getConfigForAgg(aggType, indexPattern, aggConfig);
+    registry.getConfigForAgg(indexPattern, aggConfig);
     expect(provider).toHaveBeenCalledWith(aggType, indexPattern, aggConfig);
   });
 
@@ -64,7 +64,7 @@ describe('EditorConfigProvider', () => {
     expect(provider2).not.toHaveBeenCalled();
     const aggType = {} as AggType;
     const aggConfig = {} as AggConfig;
-    registry.getConfigForAgg(aggType, indexPattern, aggConfig);
+    registry.getConfigForAgg(indexPattern, aggConfig);
     expect(provider).toHaveBeenCalledWith(aggType, indexPattern, aggConfig);
     expect(provider2).toHaveBeenCalledWith(aggType, indexPattern, aggConfig);
   });
@@ -75,7 +75,7 @@ describe('EditorConfigProvider', () => {
     }
 
     function getOutputConfig(reg: EditorConfigProviderRegistry) {
-      return reg.getConfigForAgg({} as AggType, indexPattern, {} as AggConfig).singleParam;
+      return reg.getConfigForAgg(indexPattern, {} as AggConfig).singleParam;
     }
 
     it('should have hidden true if at least one config was hidden true', () => {

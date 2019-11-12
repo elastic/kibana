@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { findLast } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
@@ -27,25 +27,36 @@ import { MetricAggType } from 'ui/agg_types/metrics/metric_agg_type';
 import { VisState } from 'ui/vis';
 import { DefaultEditorAggGroup } from '../agg_group';
 import { AggGroupNames } from '../../agg_groups';
-import { EditorActions } from '../../state/actions';
+import {
+  EditorAction,
+  addNewAgg,
+  removeAgg,
+  reorderAggs,
+  setAggParamValue,
+  changeAggType,
+  toggleEnabledAgg,
+} from '../../state/actions';
 import { ISchemas } from '../../schemas';
+import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from '../agg_common_props';
 
 export interface DefaultEditorDataTabProps {
-  actions: EditorActions;
+  dispatch: React.Dispatch<EditorAction>;
   metricAggs: AggConfig[];
   schemas: ISchemas;
   state: VisState;
   setTouched(isTouched: boolean): void;
   setValidity(isValid: boolean): void;
+  setStateValue: DefaultEditorAggCommonProps['setStateParamValue'];
 }
 
 function DefaultEditorDataTab({
-  actions,
+  dispatch,
   metricAggs,
   schemas,
   state,
   setTouched,
   setValidity,
+  setStateValue,
 }: DefaultEditorDataTabProps) {
   const lastParentPipelineAgg = useMemo(
     () =>
@@ -57,19 +68,45 @@ function DefaultEditorDataTab({
   );
   const lastParentPipelineAggTitle = lastParentPipelineAgg && lastParentPipelineAgg.type.title;
 
+  const addSchema: AddSchema = useCallback(schema => dispatch(addNewAgg(schema)), [dispatch]);
+
+  const onAggRemove: DefaultEditorAggCommonProps['removeAgg'] = useCallback(
+    aggId => dispatch(removeAgg(aggId)),
+    [dispatch]
+  );
+
+  const onReorderAggs: ReorderAggs = useCallback((...props) => dispatch(reorderAggs(...props)), [
+    dispatch,
+  ]);
+
+  const onAggParamValueChange: DefaultEditorAggCommonProps['setAggParamValue'] = useCallback(
+    (...props) => dispatch(setAggParamValue(...props)),
+    [dispatch]
+  );
+
+  const onAggTypeChange: DefaultEditorAggCommonProps['onAggTypeChange'] = useCallback(
+    (...props) => dispatch(changeAggType(...props)),
+    [dispatch]
+  );
+
+  const onToggleEnableAgg: DefaultEditorAggCommonProps['onToggleEnableAgg'] = useCallback(
+    (...props) => dispatch(toggleEnabledAgg(...props)),
+    [dispatch]
+  );
+
   const commonProps = {
-    addSchema: actions.addNewAgg,
+    addSchema,
     lastParentPipelineAggTitle,
     metricAggs,
     state,
-    reorderAggs: actions.reorderAggs,
-    setAggParamValue: actions.setAggParamValue,
-    setStateParamValue: actions.setStateParamValue,
-    onAggTypeChange: actions.changeAggType,
-    onToggleEnableAgg: actions.toggleEnabledAgg,
+    reorderAggs: onReorderAggs,
+    setAggParamValue: onAggParamValueChange,
+    setStateParamValue: setStateValue,
+    onAggTypeChange,
+    onToggleEnableAgg,
     setValidity,
     setTouched,
-    removeAgg: actions.removeAgg,
+    removeAgg: onAggRemove,
   };
 
   return (

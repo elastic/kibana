@@ -17,18 +17,19 @@
  * under the License.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
+import { get, isEqual } from 'lodash';
 
 import { Vis, VisState } from 'ui/vis';
 import { PersistedState } from 'ui/persisted_state';
 import { DefaultEditorNavBar, OptionTab } from './navbar';
-import { EditorActions } from '../../state/actions';
+import { setStateParamValue, EditorAction } from '../../state/actions';
 import { AggGroupNames } from '../../agg_groups';
+import { DefaultEditorAggCommonProps } from '../agg_common_props';
 
 interface DefaultEditorSideBarProps {
-  actions: EditorActions;
+  dispatch: React.Dispatch<EditorAction>;
   optionTabs: OptionTab[];
   state: VisState;
   uiState: PersistedState;
@@ -36,7 +37,7 @@ interface DefaultEditorSideBarProps {
 }
 
 function DefaultEditorSideBar({
-  actions,
+  dispatch,
   optionTabs,
   state,
   uiState,
@@ -56,13 +57,25 @@ function DefaultEditorSideBar({
   const setValidity = () => {};
   const setTouched = () => {};
 
+  const setStateValue: DefaultEditorAggCommonProps['setStateParamValue'] = useCallback(
+    (paramName, value) => {
+      const shouldUpdate = !isEqual(state.params[paramName], value);
+
+      if (shouldUpdate) {
+        dispatch(setStateParamValue(paramName, value));
+      }
+    },
+    [dispatch]
+  );
+
   const dataTabProps = {
-    actions,
+    dispatch,
     metricAggs,
     state,
     schemas: vis.type.schemas,
     setValidity,
     setTouched,
+    setStateValue,
   };
 
   const optionTabProps = {
@@ -71,7 +84,7 @@ function DefaultEditorSideBar({
     stateParams: state.params,
     vis,
     uiState,
-    setValue: actions.setStateParamValue,
+    setValue: setStateValue,
     setValidity,
     setTouched,
   };

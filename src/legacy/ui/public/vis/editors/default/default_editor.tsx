@@ -44,7 +44,7 @@ function DefaultEditor({
   const [visHandler, setVisHandler] = useState<EmbeddedVisualizeHandler | null>(null);
   // const [sidebarStyle, setSidebarStyle] = useState({});
   const { vis } = savedObj;
-  const [state, actions] = useEditorReducer(vis);
+  const [state, dispatch] = useEditorReducer(vis);
 
   useEffect(() => {
     async function visualize() {
@@ -104,11 +104,11 @@ function DefaultEditor({
           vis={vis}
           state={state}
           uiState={uiState}
-          actions={actions}
+          dispatch={dispatch}
         />
       </div>
 
-      <DefaultEditorBottomBar discardChanges={actions.discardChanges} state={state} vis={vis} />
+      <DefaultEditorBottomBar dispatch={dispatch} state={state} vis={vis} />
     </div>
   );
 }

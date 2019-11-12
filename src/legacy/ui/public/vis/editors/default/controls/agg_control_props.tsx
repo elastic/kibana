@@ -18,11 +18,11 @@
  */
 
 import { AggConfig, VisParams } from 'ui/vis';
-import { EditorActions } from '../state/actions';
+import { DefaultEditorAggCommonProps } from '../components/agg_common_props';
 
 export interface AggControlProps {
   agg: AggConfig;
   editorStateParams: VisParams;
-  setAggParamValue: EditorActions['setAggParamValue'];
-  setStateParamValue: EditorActions['setStateParamValue'];
+  setAggParamValue: DefaultEditorAggCommonProps['setAggParamValue'];
+  setStateParamValue: DefaultEditorAggCommonProps['setStateParamValue'];
 }

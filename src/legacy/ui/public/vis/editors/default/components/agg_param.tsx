@@ -20,11 +20,11 @@
 import React, { useCallback, useEffect } from 'react';
 
 import { AggParamEditorProps, AggParamCommonProps } from './agg_param_props';
-import { EditorActions } from '../state/actions';
+import { DefaultEditorAggCommonProps } from './agg_common_props';
 
 interface DefaultEditorAggParamProps<T> extends AggParamCommonProps<T> {
   paramEditor: React.ComponentType<AggParamEditorProps<T>>;
-  setAggParamValue: EditorActions['setAggParamValue'];
+  setAggParamValue: DefaultEditorAggCommonProps['setAggParamValue'];
 }
 
 function DefaultEditorAggParam<T>(props: DefaultEditorAggParamProps<T>) {

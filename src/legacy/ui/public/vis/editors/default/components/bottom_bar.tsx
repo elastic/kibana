@@ -23,16 +23,17 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Vis } from 'ui/vis';
 import { useEditorContext } from '../state';
+import { discardChanges, EditorAction } from '../state/actions';
 
 interface DefaultEditorBottomBarProps {
   vis: Vis;
   state: any;
-  discardChanges(vis: Vis): void;
+  dispatch: React.Dispatch<EditorAction>;
 }
 
-function DefaultEditorBottomBar({ discardChanges, vis, state }: DefaultEditorBottomBarProps) {
+function DefaultEditorBottomBar({ dispatch, vis, state }: DefaultEditorBottomBarProps) {
   const { enableAutoApply } = vis.type.editorConfig;
-  const onClickDiscard = useCallback(() => discardChanges(vis), [discardChanges, vis]);
+  const onClickDiscard = useCallback(() => dispatch(discardChanges(vis)), [dispatch, vis]);
   const { isDirty, setDirty } = useEditorContext();
 
   const applyChanges = useCallback(() => {

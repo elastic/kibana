@@ -35,7 +35,7 @@ type ChangeAggType = ActionType<
   EditorStateActionTypes.CHANGE_AGG_TYPE,
   { aggId: AggId; value: AggConfig['type'] }
 >;
-type SetAggParamValue<T extends AggParams = string> = ActionType<
+type SetAggParamValue<T extends AggParams = any> = ActionType<
   EditorStateActionTypes.SET_AGG_PARAM_VALUE,
   {
     aggId: AggId;
@@ -43,7 +43,7 @@ type SetAggParamValue<T extends AggParams = string> = ActionType<
     value: AggParams[T];
   }
 >;
-type SetStateParamValue<T extends keyof AggParams = string> = ActionType<
+type SetStateParamValue<T extends keyof AggParams = any> = ActionType<
   EditorStateActionTypes.SET_STATE_PARAM_VALUE,
   { paramName: T; value: AggParams[T] }
 >;
@@ -145,7 +145,7 @@ const toggleEnabledAgg: EditorActions['toggleEnabledAgg'] = (aggId, enabled) => 
   },
 });
 
-export const editorActions = {
+export {
   addNewAgg,
   discardChanges,
   changeAggType,

@@ -17,37 +17,27 @@
  * under the License.
  */
 
-import { useMemo, useReducer } from 'react';
+import { useReducer, useCallback } from 'react';
 import { Vis, VisState } from 'ui/vis';
 import { editorStateReducer, initEditorState } from './reducers';
 import { EditorStateActionTypes } from './constants';
-import { editorActions, EditorActions } from './actions';
+import { EditorAction } from './actions';
 
 export * from './editor_state_context';
 
-export function useEditorReducer(vis: Vis): [VisState, EditorActions] {
+export function useEditorReducer(vis: Vis): [VisState, React.Dispatch<EditorAction>] {
   const [state, dispatch] = useReducer(editorStateReducer, vis, initEditorState);
 
-  const actions = useMemo(
-    () =>
-      (Object.keys(editorActions) as Array<keyof EditorActions>).reduce<EditorActions>(
-        (wrappedDispatchActions, actionCreator) => {
-          wrappedDispatchActions[actionCreator] = (...params: any) => {
-            const action = editorActions[actionCreator](...params);
+  const wrappedDispatch = useCallback(
+    (action: EditorAction) => {
+      vis.emit('dirtyStateChange', {
+        isDirty: action.type !== EditorStateActionTypes.DISCARD_CHANGES,
+      });
 
-            vis.emit('dirtyStateChange', {
-              isDirty: action.type !== EditorStateActionTypes.DISCARD_CHANGES,
-            });
-
-            dispatch(action);
-          };
-
-          return wrappedDispatchActions;
-        },
-        {} as EditorActions
-      ),
+      dispatch(action);
+    },
     [vis]
   );
 
-  return [state, actions];
+  return [state, wrappedDispatch];
 }

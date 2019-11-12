@@ -34,7 +34,7 @@ import { AggConfig } from '../../../../agg_types/agg_config';
 import { aggGroupNamesMap, AggGroupNames } from '../agg_groups';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
-import { DefaultEditorAggCommonProps } from './agg_common_props';
+import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from './agg_common_props';
 import {
   isInvalidAggsTouched,
   isAggRemovable,
@@ -43,12 +43,11 @@ import {
 } from './agg_group_helper';
 import { aggGroupReducer, initAggsState, AGGS_ACTION_KEYS } from './agg_group_state';
 import { Schema } from '../schemas';
-import { EditorActions } from '../state/actions';
 
 export interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {
   schemas: Schema[];
-  addSchema: (schemas: Schema) => void;
-  reorderAggs: EditorActions['reorderAggs'];
+  addSchema: AddSchema;
+  reorderAggs: ReorderAggs;
 }
 
 function DefaultEditorAggGroup({
