@@ -7,6 +7,6 @@
 export const PLUGIN = {
   APP_ROOT_ID: 'react-uptime-root',
   ID: 'uptime',
-  ROUTER_BASE_NAME: '/app/uptime',
+  ROUTER_BASE_NAME: '/app/uptime#',
   LOCAL_STORAGE_KEY: 'xpack.uptime',
 };
