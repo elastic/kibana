@@ -16,5 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export * from './visualize_loader';
+export * from './table_list_view';
