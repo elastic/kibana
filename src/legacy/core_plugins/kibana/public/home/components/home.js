@@ -51,6 +51,7 @@ export class Home extends Component {
       getServices().getInjected('disableWelcomeScreen') ||
       props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false'
     );
+    const showTelemetryDisclaimer = getServices().getInjected('allowChangingOptInStatus');
 
     this.state = {
       // If welcome is enabled, we wait for loading to complete
@@ -60,6 +61,7 @@ export class Home extends Component {
       isLoading: isWelcomeEnabled,
       isNewKibanaInstance: false,
       isWelcomeEnabled,
+      showTelemetryDisclaimer,
     };
   }
 
@@ -228,6 +230,7 @@ export class Home extends Component {
       <Welcome
         onSkip={this.skipWelcome}
         urlBasePath={this.props.urlBasePath}
+        showTelemetryDisclaimer={this.state.showTelemetryDisclaimer}
       />
     );
   }

@@ -42,7 +42,8 @@ import { SampleDataCard } from './sample_data';
 
 interface Props {
   urlBasePath: string;
-  onSkip: () => {};
+  onSkip: () => void;
+  showTelemetryDisclaimer: boolean;
 }
 
 /**
@@ -82,7 +83,7 @@ export class Welcome extends React.Component<Props> {
   }
 
   render() {
-    const { urlBasePath } = this.props;
+    const { urlBasePath, showTelemetryDisclaimer } = this.props;
 
     return (
       <EuiPortal>
@@ -118,28 +119,34 @@ export class Welcome extends React.Component<Props> {
                   onDecline={this.onSampleDataDecline}
                 />
                 <EuiSpacer size="s" />
-                <EuiTextColor className="euiText--small" color="subdued">
-                  <FormattedMessage
-                    id="kbn.home.dataManagementDisclaimerPrivacy"
-                    defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
-                  />
-                  <EuiLink href="#">
+                {showTelemetryDisclaimer && (
+                  <EuiTextColor className="euiText--small" color="subdued">
                     <FormattedMessage
-                      id="kbn.home.dataManagementDisclaimerPrivacyLink"
-                      defaultMessage="Privacy Policy."
+                      id="kbn.home.dataManagementDisclaimerPrivacy"
+                      defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
                     />
-                  </EuiLink>
-                  <FormattedMessage
-                    id="kbn.home.dataManagementDisableCollection"
-                    defaultMessage=" To disable collection, "
-                  />
-                  <EuiLink href="#">
+                    <EuiLink
+                      href="https://www.elastic.co/legal/privacy-statement"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      <FormattedMessage
+                        id="kbn.home.dataManagementDisclaimerPrivacyLink"
+                        defaultMessage="Privacy Policy."
+                      />
+                    </EuiLink>
                     <FormattedMessage
-                      id="kbn.home.dataManagementDisableCollectionLink"
-                      defaultMessage="click here."
+                      id="kbn.home.dataManagementDisableCollection"
+                      defaultMessage=" To disable collection, "
                     />
-                  </EuiLink>
-                </EuiTextColor>
+                    <EuiLink href="#/management/kibana/settings">
+                      <FormattedMessage
+                        id="kbn.home.dataManagementDisableCollectionLink"
+                        defaultMessage="click here."
+                      />
+                    </EuiLink>
+                  </EuiTextColor>
+                )}
                 <EuiSpacer size="xs" />
               </EuiFlexItem>
             </EuiFlexGroup>
