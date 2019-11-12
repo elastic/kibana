@@ -6,30 +6,14 @@
 
 import { createQueryFilterClauses, calculateTimeseriesInterval } from '../../utils/build_query';
 import { RequestBasicOptions } from '../framework';
-import { useKibanaUiSetting } from '../../../public/lib/settings/use_kibana_ui_setting';
-import { DEFAULT_ANOMALY_SCORE } from '../../../common/constants';
 
 export const buildAnomaliesOverTimeQuery = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,
 }: RequestBasicOptions) => {
-  const [anomalyScore] = useKibanaUiSetting(DEFAULT_ANOMALY_SCORE);
-
   const filter = [
     ...createQueryFilterClauses(filterQuery),
-    {
-      match_phrase: {
-        result_type: 'record',
-      },
-    },
-    {
-      range: {
-        record_score: {
-          gte: anomalyScore,
-        },
-      },
-    },
     {
       range: {
         timestamp: {

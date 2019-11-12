@@ -15,6 +15,7 @@ import { QueryTemplate, QueryTemplateProps } from '../../query_template';
 
 import { AnomaliesOverTimeGqlQuery } from './anomalies_over_time.gql_query';
 import { GetAnomaliesOverTimeQuery, MatrixOverTimeHistogramData } from '../../../graphql/types';
+import { getAnomaliesFilterQuery } from './utils';
 
 const ID = 'anomaliesOverTimeQuery';
 
@@ -55,13 +56,17 @@ class AnomaliesOverTimeComponentQuery extends QueryTemplate<
       sourceId,
       startDate,
     } = this.props;
+
+    const filterQueryString = createFilter(filterQuery);
+    const anomaliesFilterQuery = getAnomaliesFilterQuery(filterQueryString);
+
     return (
       <Query<GetAnomaliesOverTimeQuery.Query, GetAnomaliesOverTimeQuery.Variables>
         query={AnomaliesOverTimeGqlQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         variables={{
-          filterQuery: createFilter(filterQuery),
+          filterQuery: anomaliesFilterQuery,
           sourceId,
           timerange: {
             interval: 'hour',
@@ -94,7 +99,7 @@ class AnomaliesOverTimeComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { type, id = ID }: OwnProps) => {
+  const mapStateToProps = (state: State, { id = ID }: OwnProps) => {
     const { isInspected } = getQuery(state, id);
     return {
       isInspected,
