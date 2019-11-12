@@ -20,7 +20,7 @@
 import React from 'react';
 import { BehaviorSubject, Observable, ReplaySubject, combineLatest, of, merge } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import * as Url from 'url';
+import { parse } from 'url';
 
 import { i18n } from '@kbn/i18n';
 import { IconType, Breadcrumb as EuiBreadcrumb } from '@elastic/eui';
@@ -40,11 +40,6 @@ import { DocLinksStart } from '../doc_links';
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
 const IS_COLLAPSED_KEY = 'core.chrome.isCollapsed';
-
-function isEmbedParamInHash() {
-  const { query } = Url.parse(String(window.location.hash).slice(1), true);
-  return Boolean(query.embed);
-}
 
 /** @public */
 export interface ChromeBadge {
@@ -94,20 +89,22 @@ export class ChromeService {
     injectedMetadata,
     notifications,
   }: StartDeps): Promise<InternalChromeStart> {
+    // Start off the chrome service hidden if "embed" is in the hash query string.
+    const isEmbedded = 'embed' in parse(location.hash.slice(1), true).query;
+
     /**
      * These observables allow consumers to toggle the chrome visibility via either:
      *   1. Using setIsVisible() to trigger the next chromeHidden$
      *   2. Setting `chromeless` when registering an application, which will
      *      reset the visibility whenever the next application is mounted
-     *   3. Having embed=true in the query string
+     *   3. Having "embed" in the query string
      */
-    const chromeHidden$ = new BehaviorSubject(false);
-    const forceHidden$ = of(isEmbedParamInHash());
+    const chromeHidden$ = new BehaviorSubject(isEmbedded);
     const appHidden$ = merge(
-      // Default the app being hidden to the same value as forceHidden$ in case the
-      // application service has not emitted an app ID yet, since we want to trigger
+      // Default the app being hidden to the same value initial value as the chrome visibility
+      // in case the application service has not emitted an app ID yet, since we want to trigger
       // combineLatest below regardless of having an application value yet.
-      forceHidden$,
+      of(isEmbedded),
       application.currentAppId$.pipe(
         map(
           appId =>
@@ -117,8 +114,8 @@ export class ChromeService {
         )
       )
     );
-    const isVisible$ = combineLatest(appHidden$, forceHidden$, chromeHidden$).pipe(
-      map(([appHidden, forceHidden, chromeHidden]) => !(appHidden || forceHidden || chromeHidden)),
+    const isVisible$ = combineLatest(appHidden$, chromeHidden$).pipe(
+      map(([appHidden, chromeHidden]) => !(appHidden || chromeHidden)),
       takeUntil(this.stop$)
     );
 
