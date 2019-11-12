@@ -24,7 +24,7 @@ To resolve this issue, upgrade {kib} to 6.3 or later. See
 {stack-ref}/upgrading-elastic-stack.html[Upgrading the {stack}]. 
 
 [float]
-=== Filebeat index is corrupt
+=== {filebeat} index is corrupt
 
 *Symptoms:*
 
@@ -34,10 +34,10 @@ text fields by default.
 
 *Resolution*
 
- - Stop all your Filebeat instances.
- - Delete indices beginning with `filebeat-$VERSION`, where `VERSION` corresponds
-   to the version of Filebeat running.
- - Restart all your Filebeat instances.
+ . Stop all your {filebeat} instances.
+ . Delete indices beginning with `filebeat-$VERSION`, where `VERSION` corresponds
+   to the version of {filebeat} running.
+. Restart all your {filebeat} instances.
 
 
 [float]
