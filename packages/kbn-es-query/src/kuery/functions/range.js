@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
-import { getRangeScript } from '../../filters';
+import { getRangeScript } from '../../utils/filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings } from '../../utils/get_time_zone_from_settings';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';

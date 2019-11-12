@@ -23,7 +23,6 @@ import { metadata } from 'ui/metadata';
 // @ts-ignore undeclared module
 import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view';
 import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/analytics_management/components/analytics_list';
-import { RefreshAnalyticsListButton } from '../../../../data_frame_analytics/pages/analytics_management/components/refresh_analytics_list_button';
 
 interface Props {
   isMlEnabledInSpace: boolean;
@@ -56,10 +55,6 @@ function getTabs(isMlEnabledInSpace: boolean): Tab[] {
       content: (
         <Fragment>
           <EuiSpacer size="m" />
-          <span className="mlKibanaManagement__analyticsRefreshButton">
-            <RefreshAnalyticsListButton />
-          </span>
-          <EuiSpacer size="s" className="mlKibanaManagement__analyticsSpacer" />
           <DataFrameAnalyticsList
             isManagementTable={true}
             isMlEnabledInSpace={isMlEnabledInSpace}
