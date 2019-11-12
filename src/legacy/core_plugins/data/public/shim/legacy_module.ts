@@ -24,7 +24,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
-import { FilterBar, ApplyFiltersPopover } from '../filter';
+import { FilterBar } from '../filter';
 import { IndexPatterns } from '../index_patterns/index_patterns';
 
 /** @internal */
@@ -70,54 +70,7 @@ export const initLegacyModule = once((indexPatterns: IndexPatterns): void => {
         ['className', { watchDepth: 'reference' }],
         ['pluginDataStart', { watchDepth: 'reference' }],
       ]);
-    })
-    .directive('applyFiltersPopover', () => {
-      return {
-        restrict: 'E',
-        template: '',
-        compile: (elem: any) => {
-          const child = document.createElement('apply-filters-popover-helper');
-
-          // Copy attributes to the child directive
-          for (const attr of elem[0].attributes) {
-            child.setAttribute(attr.name, attr.value);
-          }
-
-          // Add a key attribute that will force a full rerender every time that
-          // a filter changes.
-          child.setAttribute('key', 'key');
-
-          // Append helper directive
-          elem.append(child);
-
-          const linkFn = ($scope: any, _: any, $attr: any) => {
-            // Watch only for filter changes to update key.
-            $scope.$watch(
-              () => {
-                return $scope.$eval($attr.filters) || [];
-              },
-              (newVal: any) => {
-                $scope.key = Date.now();
-              },
-              true
-            );
-          };
-
-          return linkFn;
-        },
-      };
-    })
-    .directive('applyFiltersPopoverHelper', (reactDirective: any) =>
-      reactDirective(wrapInI18nContext(ApplyFiltersPopover), [
-        ['filters', { watchDepth: 'collection' }],
-        ['onCancel', { watchDepth: 'reference' }],
-        ['onSubmit', { watchDepth: 'reference' }],
-        ['indexPatterns', { watchDepth: 'collection' }],
-
-        // Key is needed to trigger a full rerender of the component
-        'key',
-      ])
-    );
+    });
 
   uiModules.get('kibana/index_patterns').value('indexPatterns', indexPatterns);
 });

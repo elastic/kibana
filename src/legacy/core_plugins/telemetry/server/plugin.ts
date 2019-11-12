@@ -29,7 +29,7 @@ export class TelemetryPlugin {
     this.currentKibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup) {
+  public async setup(core: CoreSetup) {
     const currentKibanaVersion = this.currentKibanaVersion;
     telemetryCollectionManager.setStatsGetter(getStats, 'local');
     registerRoutes({ core, currentKibanaVersion });
