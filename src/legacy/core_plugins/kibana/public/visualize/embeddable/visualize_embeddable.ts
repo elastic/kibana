@@ -375,7 +375,9 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     this.vis.filters = { timeRange: this.timeRange };
 
-    this.handler.update(this.expression, expressionParams);
+    if (this.handler) {
+      this.handler.update(this.expression, expressionParams);
+    }
   }
 
   private handleVisUpdate = async () => {

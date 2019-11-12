@@ -44,10 +44,7 @@ import { SavedObjectsClientProvider } from 'ui/saved_objects';
 // @ts-ignore
 import { SavedObject, SavedObjectProvider } from 'ui/saved_objects/saved_object';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import { Vis } from 'ui/vis';
-import { SearchSource } from 'ui/courier';
 
-import { from } from 'rxjs';
 import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
 import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
 import { start as data } from '../../../data/public/legacy';
