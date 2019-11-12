@@ -5,11 +5,12 @@
  */
 
 import React from 'react';
+import { pure } from 'recompose';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { WrapperPage } from '../components/wrapper_page';
 
-export const NotFoundPage = React.memo(() => (
+export const NotFoundPage = pure(() => (
   <WrapperPage>
     <FormattedMessage
       id="xpack.siem.pages.fourohfour.noContentFoundDescription"

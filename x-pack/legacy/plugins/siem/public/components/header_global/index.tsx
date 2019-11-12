@@ -5,11 +5,13 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
+import { pickBy } from 'lodash/fp';
 import React from 'react';
 import styled, { css } from 'styled-components';
 
 import { gutterTimeline } from '../../lib/helpers';
 import { navTabs } from '../../pages/home/home_navigations';
+import { SiemPageName } from '../../pages/home/types';
 import { getOverviewUrl } from '../link_to';
 import { MlPopover } from '../ml_popover/ml_popover';
 import { SiemNavigation } from '../navigation';
@@ -30,7 +32,10 @@ const FlexItem = styled(EuiFlexItem)`
 `;
 FlexItem.displayName = 'FlexItem';
 
-export const HeaderGlobal = React.memo(() => (
+interface HeaderGlobalProps {
+  hideDetectionEngine?: boolean;
+}
+export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine = true }) => (
   <Wrapper className="siemHeaderGlobal">
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
       <FlexItem>
@@ -42,7 +47,14 @@ export const HeaderGlobal = React.memo(() => (
           </FlexItem>
 
           <FlexItem component="nav">
-            <SiemNavigation display="condensed" navTabs={navTabs} />
+            <SiemNavigation
+              display="condensed"
+              navTabs={
+                hideDetectionEngine
+                  ? pickBy((value, key) => key !== SiemPageName.detectionEngine, navTabs)
+                  : navTabs
+              }
+            />
           </FlexItem>
         </EuiFlexGroup>
       </FlexItem>
