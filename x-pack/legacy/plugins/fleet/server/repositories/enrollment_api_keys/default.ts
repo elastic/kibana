@@ -12,7 +12,7 @@ import {
   EnrollmentApiKeysRepository as EnrollmentApiKeysRepositoryType,
   SAVED_OBJECT_TYPE,
 } from './types';
-import { EncryptedSavedObjects } from '../../adapters/encrypted_saved_objects/default';
+import { EncryptedSavedObjects } from '../../adapters/encrypted_saved_objects/adapter_types';
 import { FrameworkUser } from '../../adapters/framework/adapter_types';
 
 function getFirstOrNull<T>(list: T[]): T | null {

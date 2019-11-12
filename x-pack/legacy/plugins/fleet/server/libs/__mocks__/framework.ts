@@ -14,4 +14,6 @@ export class FrameworkLib {
   public getInternalUser(): FrameworkUser {
     return { kind: 'internal' };
   }
+
+  public expose(key: string, method: any) {}
 }

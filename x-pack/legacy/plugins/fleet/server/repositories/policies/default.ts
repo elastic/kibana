@@ -7,7 +7,7 @@
 import { IngestPlugin, PoliciesRepository as PoliciesRepositoryType } from './types';
 
 export class PoliciesRepository implements PoliciesRepositoryType {
-  constructor(private readonly plugin: IngestPlugin) {}
+  constructor(private readonly plugin?: IngestPlugin) {}
 
   /**
    * Return a full policy
@@ -15,6 +15,10 @@ export class PoliciesRepository implements PoliciesRepositoryType {
    * @param id
    */
   async getFullPolicy(id: string) {
-    return await this.plugin.getFull(id);
+    if (this.plugin) {
+      return await this.plugin.getFull(id);
+    }
+
+    return null;
   }
 }
