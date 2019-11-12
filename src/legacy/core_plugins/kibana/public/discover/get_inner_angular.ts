@@ -117,26 +117,51 @@ export const mainTemplate = (basePath: string) => `<div style="height: 100%">
 </div>
 `;
 
+let initialized = false;
+
 export function getInnerAngular(
   name = 'app/discover',
   core: CoreStart,
   navigation: NavigationStart,
   embeddable = false
 ) {
-  createLocalI18nModule();
-  createLocalPrivateModule();
-  createLocalPromiseModule();
-  createLocalConfigModule(core.uiSettings);
-  createLocalKbnUrlModule();
-  createLocalPersistedStateModule();
-  createLocalTopNavModule(navigation);
-  createLocalGlobalStateModule();
-  createLocalAppStateModule();
-  createLocalStorageModule();
-  createElasticSearchModule();
-  createIndexPatternsModule();
-  createPagerFactoryModule();
-  createDocTableModule();
+  if (!initialized) {
+    createLocalI18nModule();
+    createLocalPrivateModule();
+    createLocalPromiseModule();
+    createLocalConfigModule(core.uiSettings);
+    createLocalKbnUrlModule();
+    createLocalPersistedStateModule();
+    createLocalTopNavModule(navigation);
+    createLocalGlobalStateModule();
+    createLocalAppStateModule();
+    createLocalStorageModule();
+    createElasticSearchModule();
+    createIndexPatternsModule();
+    createPagerFactoryModule();
+    createDocTableModule();
+    initialized = true;
+  }
+
+  if (embeddable) {
+    return angular
+      .module(name, [
+        ...thirdPartyAngularDependencies,
+        'discoverI18n',
+        'discoverPrivate',
+        'discoverDocTable',
+        'discoverPagerFactory',
+        'discoverPersistedState',
+      ])
+      .config(watchMultiDecorator)
+      .directive('icon', reactDirective => reactDirective(EuiIcon))
+      .directive('fieldName', FieldNameDirectiveProvider)
+      .directive('renderComplete', createRenderCompleteDirective)
+      .service('debounce', ['$timeout', DebounceProviderTimeout])
+      .service('queryFilter', function(Private: any) {
+        return Private(FilterBarQueryFilterProvider);
+      });
+  }
 
   return angular
     .module(name, [
