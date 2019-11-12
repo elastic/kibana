@@ -17,39 +17,28 @@
  * under the License.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Vis } from 'ui/vis';
-import { useEditorContext } from '../state';
 import { discardChanges, EditorAction } from '../state/actions';
 
 interface DefaultEditorBottomBarProps {
-  vis: Vis;
-  state: any;
+  applyChanges(): void;
+  isDirty: boolean;
   dispatch: React.Dispatch<EditorAction>;
+  vis: Vis;
 }
 
-function DefaultEditorBottomBar({ dispatch, vis, state }: DefaultEditorBottomBarProps) {
+function DefaultEditorBottomBar({
+  applyChanges,
+  isDirty,
+  dispatch,
+  vis,
+}: DefaultEditorBottomBarProps) {
   const { enableAutoApply } = vis.type.editorConfig;
   const onClickDiscard = useCallback(() => dispatch(discardChanges(vis)), [dispatch, vis]);
-  const { isDirty, setDirty } = useEditorContext();
-
-  const applyChanges = useCallback(() => {
-    vis.setCurrentState(state);
-    vis.updateState();
-    vis.emit('dirtyStateChange', {
-      isDirty: false,
-    });
-    setDirty(false);
-  }, [vis, state]);
-
-  useEffect(() => {
-    vis.on('dirtyStateChange', ({ isDirty: dirty }: { isDirty: boolean }) => {
-      setDirty(dirty);
-    });
-  }, [vis]);
 
   return (
     <EuiBottomBar>

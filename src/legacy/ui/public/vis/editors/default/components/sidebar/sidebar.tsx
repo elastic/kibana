@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import React, { useMemo, useState, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { useMemo, useState, useCallback, KeyboardEventHandler } from 'react';
 import { get, isEqual } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { keyCodes } from '@elastic/eui';
 
 import { Vis, VisState } from 'ui/vis';
 import { PersistedState } from 'ui/persisted_state';
@@ -30,6 +31,7 @@ import { DefaultEditorAggCommonProps } from '../agg_common_props';
 
 interface DefaultEditorSideBarProps {
   dispatch: React.Dispatch<EditorAction>;
+  applyChanges(): void;
   optionTabs: OptionTab[];
   state: VisState;
   uiState: PersistedState;
@@ -38,6 +40,7 @@ interface DefaultEditorSideBarProps {
 
 function DefaultEditorSideBar({
   dispatch,
+  applyChanges,
   optionTabs,
   state,
   uiState,
@@ -68,6 +71,18 @@ function DefaultEditorSideBar({
     [dispatch]
   );
 
+  const onSubmit: KeyboardEventHandler<HTMLFormElement> = useCallback(
+    event => {
+      if (event.ctrlKey && event.keyCode === keyCodes.ENTER) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        applyChanges();
+      }
+    },
+    [applyChanges]
+  );
+
   const dataTabProps = {
     dispatch,
     metricAggs,
@@ -92,7 +107,7 @@ function DefaultEditorSideBar({
   return (
     <div className="visEditor__sidebar">
       <div className="visEditorSidebar__container">
-        <form className="visEditorSidebar__form" name="visualizeEditor">
+        <form className="visEditorSidebar__form" name="visualizeEditor" onKeyDownCapture={onSubmit}>
           {vis.type.requiresSearch && vis.type.options.showIndexSelection && (
             <h2
               aria-label={i18n.translate('common.ui.vis.editors.sidebar.indexPatternAriaLabel', {

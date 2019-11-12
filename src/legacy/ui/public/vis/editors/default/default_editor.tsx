@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 import { getVisualizeLoader } from 'ui/visualize';
 import { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize_handler';
@@ -25,9 +25,8 @@ import { EditorRenderProps } from 'src/legacy/core_plugins/kibana/public/visuali
 
 import { DefaultEditorSideBar } from './components/sidebar';
 import { DefaultEditorBottomBar } from './components/bottom_bar';
-import { useEditorReducer } from './state';
+import { useEditorReducer, useEditorContext } from './state';
 import { DefaultEditorControllerState } from './default_editor_controller';
-// import { Resizer } from './resizer';
 
 const sidebarClassName = 'visEditor__collapsibleSidebar';
 
@@ -42,8 +41,8 @@ function DefaultEditor({
   const visRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [visHandler, setVisHandler] = useState<EmbeddedVisualizeHandler | null>(null);
-  // const [sidebarStyle, setSidebarStyle] = useState({});
   const { vis } = savedObj;
+  const { isDirty, setDirty } = useEditorContext();
   const [state, dispatch] = useEditorReducer(vis);
 
   useEffect(() => {
@@ -73,9 +72,20 @@ function DefaultEditor({
     visualize();
   }, [visRef.current, visHandler, uiState, savedObj, timeRange, filters, appState]);
 
-  // const onResize = useCallback(width => {
-  //   setSidebarStyle(style => ({ ...style, width }));
-  // }, []);
+  useEffect(() => {
+    vis.on('dirtyStateChange', ({ isDirty: dirty }: { isDirty: boolean }) => {
+      setDirty(dirty);
+    });
+  }, [vis]);
+
+  const applyChanges = useCallback(() => {
+    vis.setCurrentState(state);
+    vis.updateState();
+    vis.emit('dirtyStateChange', {
+      isDirty: false,
+    });
+    setDirty(false);
+  }, [vis, state]);
 
   return (
     <div className="visEditor--default">
@@ -100,15 +110,21 @@ function DefaultEditor({
         ref={sidebarRef}
       >
         <DefaultEditorSideBar
+          dispatch={dispatch}
           optionTabs={optionTabs}
+          applyChanges={applyChanges}
           vis={vis}
           state={state}
           uiState={uiState}
-          dispatch={dispatch}
         />
       </div>
 
-      <DefaultEditorBottomBar dispatch={dispatch} state={state} vis={vis} />
+      <DefaultEditorBottomBar
+        applyChanges={applyChanges}
+        dispatch={dispatch}
+        isDirty={isDirty}
+        vis={vis}
+      />
     </div>
   );
 }
