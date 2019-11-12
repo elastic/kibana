@@ -41,9 +41,6 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
 
   async function handleIndex(record) {
     const { index, settings, mappings, aliases } = record.value;
-
-    // Determine if the mapping belongs to a pre-7.0 instance, for BWC tests, mainly
-    const isPre7Mapping = !!mappings && Object.keys(mappings).length > 0 && !mappings.properties;
     const isKibana = index.startsWith('.kibana');
 
     async function attemptToCreate(attemptNumber = 1) {
@@ -52,7 +49,7 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
           await deleteKibanaIndicesOnce({ client, stats, log });
         }
 
-        const createArgs = {
+        await client.indices.create({
           method: 'PUT',
           index,
           body: {
@@ -60,13 +57,7 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
             mappings,
             aliases
           },
-        };
-
-        if (isPre7Mapping) {
-          createArgs.include_type_name = isPre7Mapping;
-        }
-
-        await client.indices.create(createArgs);
+        });
 
         stats.createdIndex(index, { settings });
       } catch (err) {
