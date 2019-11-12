@@ -46,6 +46,31 @@ export async function initPlugin(server: Hapi.Server, path: string) {
     },
     handler: newsfeedHandler,
   });
+
+  server.route({
+    method: ['GET'],
+    path: `${path}/kibana/crash.json`,
+    options: {
+      cors: {
+        origin: ['*'],
+        additionalHeaders: [
+          'Sec-Fetch-Mode',
+          'Access-Control-Request-Method',
+          'Access-Control-Request-Headers',
+          'cache-control',
+          'x-requested-with',
+          'Origin',
+          'User-Agent',
+          'DNT',
+          'content-type',
+          'kbn-version',
+        ],
+      },
+    },
+    handler() {
+      throw new Error('Internal server error');
+    },
+  });
 }
 
 function newsfeedHandler(request: WebhookRequest, h: any) {
