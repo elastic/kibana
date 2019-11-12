@@ -30,7 +30,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('has red icon which is a sign of not checked news', async () => {
-      await PageObjects.common.navigateToApp('home');
       const hasCheckedNews = await PageObjects.newsfeed.getRedButtonSign();
       expect(hasCheckedNews).to.be(true);
     });
