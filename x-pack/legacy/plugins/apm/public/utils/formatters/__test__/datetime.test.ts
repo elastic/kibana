@@ -8,13 +8,11 @@ import { asRelativeDateTimeRange, asAbsoluteDateTime } from '../datetime';
 
 describe('date time formatters', () => {
   describe('asRelativeDateTimeRange', () => {
-    const formatDateToTimezone = (
-      date: string,
-      timezone: string = 'Europe/Amsterdam'
-    ) =>
-      moment(date)
-        .tz(timezone)
-        .valueOf();
+    beforeAll(() => {
+      moment.tz.setDefault('Europe/Amsterdam');
+    });
+    afterAll(() => moment.tz.setDefault(''));
+    const formatDateToTimezone = (date: string) => moment(date).valueOf();
 
     describe('years range', () => {
       it('returns years range when difference is greater than 5 years', () => {

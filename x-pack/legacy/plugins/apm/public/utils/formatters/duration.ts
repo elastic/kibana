@@ -10,15 +10,10 @@ import { memoize } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { asDecimal, asInteger } from './formatters';
 import { TimeUnit } from './datetime';
+import { Maybe } from '../../../typings/common';
 
 const SPACE = ' ';
 
-/*
- * value: time in microseconds
- * withUnit: add unit suffix
- * defaultValue: value to use if the specified is null/undefined
- */
-type FormatterValue = number | undefined | null;
 interface FormatterOptions {
   withUnit?: boolean;
   defaultValue?: string;
@@ -66,7 +61,7 @@ const durationUnit: DurationTimeUnit = {
 
 function convertTo(
   timeUnit: string,
-  value: FormatterValue,
+  value: Maybe<number>,
   withUnit: boolean,
   defaultValue: string
 ) {
@@ -86,32 +81,32 @@ function convertTo(
 }
 
 export const asHours = (
-  value: FormatterValue,
+  value: Maybe<number>,
   { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
 ) => convertTo('hours', value, withUnit, defaultValue);
 
 export const asMinutes = (
-  value: FormatterValue,
+  value: Maybe<number>,
   { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
 ) => convertTo('minutes', value, withUnit, defaultValue);
 
 export const asSeconds = (
-  value: FormatterValue,
+  value: Maybe<number>,
   { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
 ) => convertTo('seconds', value, withUnit, defaultValue);
 
 export const asMillis = (
-  value: FormatterValue,
+  value: Maybe<number>,
   { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
 ) => convertTo('milliseconds', value, withUnit, defaultValue);
 
 export const asMicros = (
-  value: FormatterValue,
+  value: Maybe<number>,
   { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
 ) => convertTo('microseconds', value, withUnit, defaultValue);
 
 export type TimeFormatter = (
-  value: FormatterValue,
+  value: Maybe<number>,
   options?: FormatterOptions
 ) => string;
 
@@ -155,7 +150,7 @@ export function getDurationUnit(max: number) {
 }
 
 export function asDuration(
-  value: FormatterValue,
+  value: Maybe<number>,
   { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
 ) {
   if (value == null) {
