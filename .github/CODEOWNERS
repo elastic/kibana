@@ -64,6 +64,7 @@
 /config/kibana.yml @elastic/kibana-platform
 /x-pack/plugins/features/  @elastic/kibana-platform
 /x-pack/plugins/licensing/  @elastic/kibana-platform
+/packages/kbn-config-schema/ @elastic/kibana-platform
 
 # Security
 /x-pack/legacy/plugins/security/  @elastic/kibana-security
