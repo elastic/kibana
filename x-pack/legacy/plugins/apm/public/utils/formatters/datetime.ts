@@ -72,20 +72,29 @@ function getFormatsAccordingToDateDifference(
     return { dateFormat: getDateFormat('months') };
   }
 
-  const dateFormat = getDateFormat('days');
+  const dateFormatWithDays = getDateFormat('days');
   if (getDateDifference('days') > 1) {
-    return { dateFormat };
+    return { dateFormat: dateFormatWithDays };
   }
 
   if (getDateDifference('hours') >= 5) {
-    return { dateFormat, timeFormat: getTimeFormat('minutes') };
+    return {
+      dateFormat: dateFormatWithDays,
+      timeFormat: getTimeFormat('minutes')
+    };
   }
 
   if (getDateDifference('minutes') >= 5) {
-    return { dateFormat, timeFormat: getTimeFormat('seconds') };
+    return {
+      dateFormat: dateFormatWithDays,
+      timeFormat: getTimeFormat('seconds')
+    };
   }
 
-  return { dateFormat, timeFormat: getTimeFormat('milliseconds') };
+  return {
+    dateFormat: dateFormatWithDays,
+    timeFormat: getTimeFormat('milliseconds')
+  };
 }
 
 export function asAbsoluteDateTime(

@@ -8,84 +8,81 @@ import { asRelativeDateTimeRange, asAbsoluteDateTime } from '../datetime';
 
 describe('date time formatters', () => {
   describe('asRelativeDateTimeRange', () => {
-    beforeAll(() => {
-      moment.tz.setDefault('Europe/Amsterdam');
-    });
-    afterAll(() => moment.tz.setDefault(''));
-    const formatDateToTimezone = (date: string) => moment(date).valueOf();
+    const formatDateToTimezone = (dateTimeString: string) =>
+      new Date(dateTimeString).getTime();
 
-    describe('years range', () => {
-      it('returns years range when difference is greater than 5 years', () => {
+    describe('YYYY - YYYY', () => {
+      it('range: 10 years', () => {
         const start = formatDateToTimezone('2000-01-01 01:01:01');
         const end = formatDateToTimezone('2010-01-01 01:01:01');
         const dateRange = asRelativeDateTimeRange(start, end);
         expect(dateRange).toEqual('2000 - 2010');
       });
-      it('returns years range when difference is equal to 5 years', () => {
+      it('range: 5 years', () => {
         const start = formatDateToTimezone('2010-01-01 01:01:01');
         const end = formatDateToTimezone('2015-01-01 01:01:01');
         const dateRange = asRelativeDateTimeRange(start, end);
         expect(dateRange).toEqual('2010 - 2015');
       });
     });
-    describe('months range', () => {
-      it('when difference is equal to 4 years ', () => {
+    describe('MMM YYYY - MMM YYYY', () => {
+      it('range: 4 years ', () => {
         const start = formatDateToTimezone('2010-01-01 01:01:01');
         const end = formatDateToTimezone('2014-04-01 01:01:01');
         const dateRange = asRelativeDateTimeRange(start, end);
         expect(dateRange).toEqual('Jan 2010 - Apr 2014');
       });
-      it('when difference is equal to 6 months ', () => {
+      it('range: 6 months ', () => {
         const start = formatDateToTimezone('2019-01-01 01:01:01');
         const end = formatDateToTimezone('2019-07-01 01:01:01');
         const dateRange = asRelativeDateTimeRange(start, end);
         expect(dateRange).toEqual('Jan 2019 - Jul 2019');
       });
     });
-    describe('days range', () => {
-      it('when difference is greater than 1 days', () => {
+    describe('MMM D, YYYY - MMM D, YYYY', () => {
+      it('range: 2 days', () => {
         const start = formatDateToTimezone('2019-10-01 01:01:01');
         const end = formatDateToTimezone('2019-10-05 01:01:01');
         const dateRange = asRelativeDateTimeRange(start, end);
         expect(dateRange).toEqual('Oct 1, 2019 - Oct 5, 2019');
       });
-      it('when difference is equal to 1 days', () => {
+      it('range: 1 day', () => {
         const start = formatDateToTimezone('2019-10-01 01:01:01');
         const end = formatDateToTimezone('2019-10-03 01:01:01');
         const dateRange = asRelativeDateTimeRange(start, end);
         expect(dateRange).toEqual('Oct 1, 2019 - Oct 3, 2019');
       });
     });
-    describe('hours range', () => {
-      it('when difference is greater than 5 hours', () => {
+    describe('MMM D, YYYY, HH:mm - HH:mm (UTC)', () => {
+      it('range: 9 hours', () => {
         const start = formatDateToTimezone('2019-10-31 01:01:01');
         const end = formatDateToTimezone('2019-10-31 10:01:01');
         const dateRange = asRelativeDateTimeRange(start, end);
         expect(dateRange).toEqual('Oct 31, 2019, 01:01 - 10:01 (UTC+1)');
       });
-      it('when difference is equal to 5 hours', () => {
+      it('range: 5 hours', () => {
         const start = formatDateToTimezone('2019-10-31 01:01:01');
         const end = formatDateToTimezone('2019-10-31 06:01:01');
         const dateRange = asRelativeDateTimeRange(start, end);
         expect(dateRange).toEqual('Oct 31, 2019, 01:01 - 06:01 (UTC+1)');
       });
     });
-    describe('minutes range', () => {
-      it('when difference is greater than 5 minutes', () => {
+    describe('MMM D, YYYY, HH:mm:ss - HH:mm:ss (UTC)', () => {
+      it('range: 14 minutes', () => {
         const start = formatDateToTimezone('2019-10-31 01:01:01');
         const end = formatDateToTimezone('2019-10-31 01:15:01');
         const dateRange = asRelativeDateTimeRange(start, end);
         expect(dateRange).toEqual('Oct 31, 2019, 01:01:01 - 01:15:01 (UTC+1)');
       });
-      it('when difference is equal to 5 minutes', () => {
+      it('range: 5 minutes', () => {
         const start = formatDateToTimezone('2019-10-31 01:01:01');
         const end = formatDateToTimezone('2019-10-31 01:06:01');
         const dateRange = asRelativeDateTimeRange(start, end);
         expect(dateRange).toEqual('Oct 31, 2019, 01:01:01 - 01:06:01 (UTC+1)');
       });
     });
-    describe('milliseconds range', () => {
-      it('when difference is greater than 5 seconds', () => {
+    describe('MMM D, YYYY, HH:mm:ss.SSS - HH:mm:ss.SSS (UTC)', () => {
+      it('range: 9 seconds', () => {
         const start = formatDateToTimezone('2019-10-31 01:01:01.001');
         const end = formatDateToTimezone('2019-10-31 01:01:10.002');
         const dateRange = asRelativeDateTimeRange(start, end);
@@ -93,7 +90,7 @@ describe('date time formatters', () => {
           'Oct 31, 2019, 01:01:01.001 - 01:01:10.002 (UTC+1)'
         );
       });
-      it('when difference is equal to 1 second', () => {
+      it('range: 1 second', () => {
         const start = formatDateToTimezone('2019-10-31 01:01:01.001');
         const end = formatDateToTimezone('2019-10-31 01:01:02.002');
         const dateRange = asRelativeDateTimeRange(start, end);
