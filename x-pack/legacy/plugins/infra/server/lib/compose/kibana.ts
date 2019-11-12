@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FrameworkFieldsAdapter } from '../adapters/fields/framework_fields_adapter';
-import { InfraKibanaBackendFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
+import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
 import { InfraKibanaLogEntriesAdapter } from '../adapters/log_entries/kibana_log_entries_adapter';
 import { KibanaMetricsAdapter } from '../adapters/metrics/kibana_metrics_adapter';
 import { InfraElasticsearchSourceStatusAdapter } from '../adapters/source_status';
@@ -21,7 +21,7 @@ import { CoreSetup } from '../../../../../../../src/core/server';
 import { InfraServerPluginDeps } from '../adapters/framework/adapter_types';
 
 export function compose(core: CoreSetup, config: InfraConfig, plugins: InfraServerPluginDeps) {
-  const framework = new InfraKibanaBackendFrameworkAdapter(core, config, plugins);
+  const framework = new KibanaFramework(core, config, plugins);
   const sources = new InfraSources({
     config,
     savedObjects: plugins.savedObjects,

@@ -9,7 +9,7 @@ import { InfraConfig } from '../../../../plugins/infra/server';
 import { initInfraServer } from './infra_server';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
 import { FrameworkFieldsAdapter } from './lib/adapters/fields/framework_fields_adapter';
-import { InfraKibanaBackendFrameworkAdapter } from './lib/adapters/framework/kibana_framework_adapter';
+import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
 import { InfraKibanaLogEntriesAdapter } from './lib/adapters/log_entries/kibana_log_entries_adapter';
 import { KibanaMetricsAdapter } from './lib/adapters/metrics/kibana_metrics_adapter';
 import { InfraElasticsearchSourceStatusAdapter } from './lib/adapters/source_status';
@@ -61,7 +61,7 @@ export class InfraServerPlugin {
   }
 
   setup(core: CoreSetup, plugins: InfraServerPluginDeps) {
-    const framework = new InfraKibanaBackendFrameworkAdapter(core, this.config, plugins);
+    const framework = new KibanaFramework(core, this.config, plugins);
     const sources = new InfraSources({
       config: this.config,
       savedObjects: plugins.savedObjects,
