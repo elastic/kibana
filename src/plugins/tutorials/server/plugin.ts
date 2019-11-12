@@ -16,7 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import Joi from 'joi';
 import { CoreSetup, Plugin, KibanaRequest } from 'src/core/server';
+import { tutorialSchema } from './tutorial_schema';
 import {
   TutorialsRegistrySetup,
   TutorialsRegistryStart,
@@ -38,15 +40,46 @@ type TutorialContextFactory = (
     }>
   >
 ) => { [key: string]: unknown };
+type ScopedTutorialContextFactory = (...args: any[]) => any;
+type AddScopedTutorialContextFactory = (arg0: ScopedTutorialContextFactory) => void;
 // following similar signature to the features_catalogue plugin
 export class TutorialsPlugin implements Plugin<TutorialsRegistrySetup, TutorialsRegistryStart> {
   private readonly tutorialProviders: TutorialProvider[] = [];
   private readonly scopedTutorialContextFactories: TutorialContextFactory[] = [];
 
   public async setup(core: CoreSetup) {
+    /*
+    core.http.registerRouterHandlerContext is used to provide a specific value for this request (as the route context)
+    This context is available in route handlers
+
+    Otherwise, we return an object containing `registerTutorial` and `addScopedTutorialContextFactory`
+    Question: is the way the `addScopedTutorialContextFactory` implemented correct?
+    */
+    // core.http.registerRouteHandlerContext('getTutorials', (request: any) => {
+    //   const initialContext = {};
+    //   const scopedContext = this.scopedTutorialContextFactories.reduce(
+    //     (accumulatedContext, contextFactory) => {
+    //       return { ...accumulatedContext, ...contextFactory(request) };
+    //     },
+    //     initialContext
+    //   );
+    //   return this.tutorialProviders.map(tutorialProvider => {
+    //     return tutorialProvider(scopedContext); // All the tutorial providers need to be refactored so that they only accept the sscopedContext.
+    //   });
+    // });
+
+    // const router = core.http.createRouter();
+    // router.get(
+    //   { path: '/api/kibana/home/NP_tutorials', validate: false },
+    //   async (context, req, res) => {
+    //     return res.ok({ body: context.getTutorials });
+    //   }
+    // );
+
+    // The following handler implementation is pretty much the same as using the code from above.
     const router = core.http.createRouter();
     router.get(
-      { path: '/api/kibana/home/tutorials', validate: false },
+      { path: '/api/kibana/home/NP_tutorials', validate: false },
       async (context, req, res) => {
         const initialContext = {};
         const scopedContext = this.scopedTutorialContextFactories.reduce(
@@ -58,25 +91,26 @@ export class TutorialsPlugin implements Plugin<TutorialsRegistrySetup, Tutorials
 
         return res.ok({
           body: this.tutorialProviders.map(tutorialProvider => {
-            return tutorialProvider(scopedContext); // needs to be refactored to not take in the server. Does the provider even need the server.
+            return tutorialProvider(scopedContext); // All the tutorialProviders need to be refactored so that they don't need the server.
           }),
         });
       }
     );
     return {
       registerTutorial: (specProvider: TutorialProvider) => {
-        // registration during setup
-        // const emptyContext = {};
-        // const { error } = Joi.validate(specProvider(server, emptyContext), tutorialSchema);
+        const emptyContext = {};
+        const { error } = Joi.validate(specProvider(emptyContext), tutorialSchema);
 
-        // if (error) {
-        //   throw new Error(`Unable to register tutorial spec because its invalid. ${error}`);
-        // }
+        if (error) {
+          throw new Error(`Unable to register tutorial spec because its invalid. ${error}`);
+        }
 
         this.tutorialProviders.push(specProvider);
       },
-      addScopedTutorialContextFactory: (scopedTutorialContextFactory: any) => {
-        // returned by the setup method of the new plugin, they will do the same thing as now
+
+      addScopedTutorialContextFactory: (
+        scopedTutorialContextFactory: ScopedTutorialContextFactory
+      ) => {
         if (typeof scopedTutorialContextFactory !== 'function') {
           throw new Error(
             `Unable to add scoped(request) context factory because you did not provide a function`

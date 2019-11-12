@@ -25,7 +25,7 @@ import {
   onPremCloudInstructions,
 } from '../../../common/tutorials/filebeat_instructions';
 
-export function ciscoLogsSpecProvider(server, context) {
+export function ciscoLogsSpecProvider(context) {
   const moduleName = 'cisco';
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
