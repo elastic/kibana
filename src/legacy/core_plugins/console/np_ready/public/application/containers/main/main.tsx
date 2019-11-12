@@ -30,14 +30,14 @@ import { TopNavMenu, WelcomePanel, HelpPanel } from '../../components';
 import { useServicesContext } from '../../contexts';
 
 import { getTopNavConfig } from './get_top_nav';
-import { useEditorReadContext } from '../editor';
+import { useEditorReadContext } from '../../contexts/editor_context';
 
 export function Main() {
   const {
     services: { storage },
   } = useServicesContext();
 
-  const { editorsReady } = useEditorReadContext();
+  const { ready: editorReady } = useEditorReadContext();
 
   const [showWelcome, setShowWelcomePanel] = useState(
     () => storage.get('version_welcome_shown') !== '@@SENSE_REVISION'
@@ -48,7 +48,7 @@ export function Main() {
   const [showHelp, setShowHelp] = useState(false);
 
   const renderConsoleHistory = () => {
-    return editorsReady ? <ConsoleHistory close={() => setShowHistory(false)} /> : null;
+    return editorReady ? <ConsoleHistory close={() => setShowHistory(false)} /> : null;
   };
 
   return (

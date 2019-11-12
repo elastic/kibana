@@ -26,8 +26,12 @@ export const title = i18n.translate('console.visRawOutputPane.title', { defaultM
 
 export const isCompatible = (_: unknown) => true;
 
-export const Raw = ({ data }: OutputPaneVisualisationProps<any>) => {
-  return <EuiCodeBlock>{data}</EuiCodeBlock>;
+export const Raw = ({ data }: OutputPaneVisualisationProps) => {
+  return (
+    <EuiCodeBlock paddingSize="none" isCopyable={true}>
+      {data.response.value}
+    </EuiCodeBlock>
+  );
 };
 
 export const descriptor: OutputPaneVisualisationDescriptor = {

@@ -25,7 +25,7 @@ const RequestReadContext = createContext<store.Store>(null as any);
 const RequestActionContext = createContext<Dispatch<store.Actions>>(null as any);
 
 export function RequestContextProvider({ children }: { children: React.ReactNode }) {
-  const [state, dispatch] = useReducer(store.reducer, undefined as any);
+  const [state, dispatch] = useReducer(store.reducer, store.initialValue);
   return (
     <RequestReadContext.Provider value={state}>
       <RequestActionContext.Provider value={dispatch}>{children}</RequestActionContext.Provider>

@@ -17,4 +17,14 @@
  * under the License.
  */
 
-export const useSendRequestToES = () => {};
+import { useEditorActionContext } from '../contexts/editor_context';
+import { instance as registry } from '../contexts/editor_context/editor_registry';
+
+export const useSetInputEditor = () => {
+  const dispatch = useEditorActionContext();
+
+  return (editor: any) => {
+    dispatch({ type: 'setInputEditor', payload: editor });
+    registry.setInputEditor(editor);
+  };
+};

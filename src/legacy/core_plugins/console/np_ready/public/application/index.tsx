@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { NotificationsSetup } from '../../../../../../core/public';
+import { NotificationsSetup } from 'src/core/public';
 import { ServicesContextProvider } from './contexts';
 import { EditorContextProvider } from './contexts/editor_context';
 import { Main } from './containers';

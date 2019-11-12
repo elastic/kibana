@@ -16,26 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { instance as registry } from '../../contexts/editor_context/editor_registry';
+import { restoreRequestFromHistory } from './restore_request_from_history';
 
-import { FunctionComponent } from 'react';
-import { ESRequestResult } from '../../hooks/use_send_current_request_to_es/send_request_to_es';
-
-export type BaseResponseTypes =
-  | 'application/json'
-  | 'text/csv'
-  | 'text/tab-separated-values'
-  | 'text/plain'
-  | 'application/yaml'
-  | 'unknown';
-
-export interface OutputPaneVisualisationProps<T = ESRequestResult> {
-  data: T;
-}
-
-export interface OutputPaneVisualisationDescriptor<T = ESRequestResult> {
-  // i18n friendly name
-  title: string;
-  // A way to test if the visualisation is compatible with the data
-  isCompatible: (result: { data: unknown; type: BaseResponseTypes }) => boolean;
-  Component: FunctionComponent<OutputPaneVisualisationProps<T>>;
-}
+export const useRestoreRequestFromHistory = () => {
+  return (req: any) => {
+    const editor = registry.getInputEditor();
+    restoreRequestFromHistory(editor, req);
+  };
+};

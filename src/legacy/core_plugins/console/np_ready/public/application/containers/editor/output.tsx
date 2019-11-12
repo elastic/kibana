@@ -22,11 +22,12 @@ import { OutputPane, BaseResponseTypes } from '../../components';
 
 import * as rawVis from '../../components/output_pane/visualisations/raw';
 import { useRequestReadContext } from '../../contexts/request_context';
+import { ESRequestResult } from '../../hooks/use_send_current_request_to_es/send_request_to_es';
 
 export const Output = () => {
   const { lastResult } = useRequestReadContext();
 
-  let data: unknown | null = null;
+  let data: ESRequestResult[] | null = null;
   let type: BaseResponseTypes | null = null;
   if (lastResult) {
     data = lastResult.data;

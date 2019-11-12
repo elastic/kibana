@@ -18,12 +18,12 @@
  */
 
 import React, { createContext, Dispatch, useReducer } from 'react';
-import { Action, reducer, Store, initialValue } from './reducer';
+import * as editor from '../../stores/editor';
 import { DevToolsSettings } from '../../../services';
 import { createUseContext } from '../create_use_context';
 
-const EditorReadContext = createContext<Store>(null as any);
-const EditorActionContext = createContext<Dispatch<Action>>(null as any);
+const EditorReadContext = createContext<editor.Store>(null as any);
+const EditorActionContext = createContext<Dispatch<editor.Action>>(null as any);
 
 export interface EditorContextArgs {
   children: any;
@@ -31,7 +31,7 @@ export interface EditorContextArgs {
 }
 
 export function EditorContextProvider({ children, settings }: EditorContextArgs) {
-  const [state, dispatch] = useReducer(reducer, initialValue, value => ({
+  const [state, dispatch] = useReducer(editor.reducer, editor.initialValue, value => ({
     ...value,
     settings,
   }));

@@ -19,22 +19,13 @@
 
 export class EditorRegistry {
   inputEditor: any;
-  outputEditor: any;
 
   setInputEditor(inputEditor: any) {
     this.inputEditor = inputEditor;
   }
 
-  setOutputEditor(outputEditor: any) {
-    this.outputEditor = outputEditor;
-  }
-
   getInputEditor() {
     return this.inputEditor;
-  }
-
-  getOutputEditor() {
-    return this.outputEditor;
   }
 }
 

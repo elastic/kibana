@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
+import React, { CSSProperties, useEffect, useRef, useState } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -37,9 +37,11 @@ import { initializeEditor } from '../../../../../../../public/quarantined/src/in
 // @ts-ignore
 import mappings from '../../../../../../../public/quarantined/src/mappings';
 
-import { useEditorActionContext, useEditorReadContext } from '../../../../contexts/editor_context';
+import { useEditorReadContext } from '../../../../contexts/editor_context';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { loadRemoteState } from './load_remote_editor_state';
+import { useSendCurrentRequestToES } from '../../../../hooks/use_send_current_request_to_es';
+import { useSetInputEditor } from '../../../../hooks/use_set_input_editor';
 
 export interface EditorProps {
   previousStateLocation?: 'stored' | string;
@@ -68,7 +70,6 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
   } = useServicesContext();
 
   const { settings } = useEditorReadContext();
-  const dispatch = useEditorActionContext();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
   const actionsRef = useRef<HTMLDivElement | null>(null);
@@ -84,6 +85,8 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
     }
     window.open(documentation, '_blank');
   };
+
+  const setInputEditor = useSetInputEditor();
 
   useEffect(() => {
     const $editor = $(editorRef.current!);
@@ -120,11 +123,7 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
       }
     }
 
-    dispatch({
-      type: 'setInputEditor',
-      payload: editorInstanceRef.current,
-    });
-
+    setInputEditor(editorInstanceRef.current);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
     mappings.retrieveAutoCompleteInfo();
@@ -143,23 +142,13 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
     };
   }, []);
 
-  const sendCurrentRequestToES = useCallback(() => {
-    dispatch({
-      type: 'sendRequestToEs',
-      value: {
-        isUsingTripleQuotes: settings.tripleQuotes,
-        isPolling: settings.polling,
-        callback: (esPath: any, esMethod: any, esData: any) =>
-          history.addToHistory(esPath, esMethod, esData),
-      },
-    });
-  }, [settings]);
-
   useEffect(() => {
     applyCurrentSettings(editorInstanceRef.current!, settings);
     // Preserve legacy focus behavior after settings have updated.
     editorInstanceRef.current!.focus();
   }, [settings]);
+
+  const sendCurrentRequestToES = useSendCurrentRequestToES();
 
   useEffect(() => {
     registerCommands({

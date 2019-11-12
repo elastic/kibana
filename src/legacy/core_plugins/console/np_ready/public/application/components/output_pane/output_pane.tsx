@@ -17,18 +17,20 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { OutputPaneVisualisationDescriptor, BaseResponseTypes } from './types';
+import { ESRequestResult } from '../../hooks/use_send_current_request_to_es/send_request_to_es';
 
 export interface Props {
   type: BaseResponseTypes | null;
-  data: unknown | null;
+  data: ESRequestResult[] | null;
   visualisationDescriptors: OutputPaneVisualisationDescriptor[];
 }
 
 export const OutputPane = ({ visualisationDescriptors, data, type }: Props) => {
   const [currentVis, setCurrentVis] = useState<string | null>(null);
+  const containerRef = useRef<HTMLElement>(null as any);
 
   if (!type) {
     return <p>Empty!</p>;
@@ -36,20 +38,44 @@ export const OutputPane = ({ visualisationDescriptors, data, type }: Props) => {
   const compatibleVisualisations = visualisationDescriptors.filter(vis =>
     vis.isCompatible({ data, type })
   );
+
+  if (!data) {
+    return null;
+  }
+
+  const renderVis = () => {
+    const CurrentVis = currentVis
+      ? compatibleVisualisations.find(vis => vis.title === currentVis)!.Component
+      : null;
+
+    if (CurrentVis) {
+      return data.map((datum, idx) => {
+        return <CurrentVis key={idx} data={datum} />;
+      });
+    }
+    return null;
+  };
+
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
+    <EuiFlexGroup
+      ref={containerRef}
+      className="outputPane__visContainer"
+      responsive={false}
+      gutterSize="none"
+      direction="column"
+    >
+      <EuiFlexItem grow={false}>
         <EuiTabs>
           {compatibleVisualisations.map(({ title }) => {
-            return <EuiTab onClick={() => setCurrentVis(title)}>{title}</EuiTab>;
+            return (
+              <EuiTab key={title} onClick={() => setCurrentVis(title)}>
+                {title}
+              </EuiTab>
+            );
           })}
         </EuiTabs>
       </EuiFlexItem>
-      <EuiFlexItem>
-        {currentVis
-          ? compatibleVisualisations.find(vis => vis.title === currentVis)!.Component
-          : null}
-      </EuiFlexItem>
+      <EuiFlexItem grow={true}>{renderVis()}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };

@@ -34,7 +34,8 @@ import {
 
 import { useServicesContext } from '../../contexts';
 import { HistoryViewer } from './history_viewer';
-import { useEditorActionContext, useEditorReadContext } from '../../contexts/editor_context';
+import { useEditorReadContext } from '../../contexts/editor_context';
+import { useRestoreRequestFromHistory } from '../../hooks/use_restore_request_from_history/use_restore_request_from_history';
 
 interface Props {
   close: () => void;
@@ -48,7 +49,6 @@ export function ConsoleHistory({ close }: Props) {
     ResizeChecker,
   } = useServicesContext();
 
-  const dispatch = useEditorActionContext();
   const { settings: readOnlySettings } = useEditorReadContext();
 
   const [requests, setPastRequests] = useState<any[]>(history.getHistory());
@@ -103,8 +103,9 @@ export function ConsoleHistory({ close }: Props) {
     initialize();
   };
 
+  const restoreRequestFromHistory = useRestoreRequestFromHistory();
   const restore = (req: any = selectedReq.current) => {
-    dispatch({ type: 'restoreRequest', value: req });
+    restoreRequestFromHistory({ type: 'restoreRequest', value: req });
   };
 
   useEffect(() => {

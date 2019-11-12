@@ -20,13 +20,7 @@
 import { Reducer } from 'react';
 import { produce } from 'immer';
 import { identity } from 'fp-ts/lib/function';
-
-// import { restoreRequestFromHistory } from '../legacy/console_history/restore_request_from_history';
-// import {
-//   sendCurrentRequestToES,
-//   EsRequestArgs,
-// } from '../legacy/console_editor/send_current_request_to_es';
-import { DevToolsSettings } from '../../../services';
+import { DevToolsSettings } from '../../services';
 
 export interface Store {
   ready: boolean;
@@ -45,7 +39,7 @@ export type Action =
   | { type: 'setInputEditor'; payload: any }
   | { type: 'updateSettings'; payload: DevToolsSettings };
 
-export const reducer: Reducer<Store | undefined, Action> = (state = initialValue, action) =>
+export const reducer: Reducer<Store, Action> = (state, action) =>
   produce<Store>(state, draft => {
     if (action.type === 'setInputEditor') {
       if (action.payload) {
@@ -58,18 +52,6 @@ export const reducer: Reducer<Store | undefined, Action> = (state = initialValue
       draft.settings = action.payload;
       return;
     }
-
-    //
-    // if (action.type === 'sendRequestToEs') {
-    //   const { callback, isPolling, isUsingTripleQuotes } = action.value;
-    //   sendCurrentRequestToES({
-    //     input: registry.getInputEditor(),
-    //     output: registry.getOutputEditor(),
-    //     callback,
-    //     isUsingTripleQuotes,
-    //     isPolling,
-    //   });
-    // }
 
     return draft;
   });

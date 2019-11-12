@@ -46,7 +46,7 @@ jest.mock('../../../../../../../public/quarantined/src/input.ts', () => {
   };
 });
 
-import * as sendRequestModule from '../../../../hooks/use_send_request_to_es/send_current_request_to_es';
+import * as sendRequestModule from '../../../../hooks/use_send_current_request_to_es/send_request_to_es';
 import * as consoleMenuActions from '../console_menu_actions';
 
 describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
