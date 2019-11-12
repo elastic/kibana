@@ -9,13 +9,15 @@ import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
+import { UseField, Field, FIELD_TYPES } from '../../../../shared_imports';
 import {
   StoreParameter,
   IndexParameter,
   DocValuesParameter,
   BoostParameter,
+  NullValueParameter,
 } from '../../field_parameters';
-import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
+import { EditFieldSection, AdvancedSettingsWrapper } from '../edit_field';
 
 const getDefaultValueToggle = (param: string, field: FieldType) => {
   switch (param) {
@@ -34,6 +36,33 @@ interface Props {
   field: NormalizedField;
 }
 
+const nullValueOptions = [
+  {
+    value: '"true"',
+    text: i18n.translate('xpack.idxMgmt.mappingsEditor.stringTrueFieldDescription', {
+      defaultMessage: '"true"',
+    }),
+  },
+  {
+    value: 'true',
+    text: i18n.translate('xpack.idxMgmt.mappingsEditor.booleanTrueFieldDescription', {
+      defaultMessage: 'true',
+    }),
+  },
+  {
+    value: '"false"',
+    text: i18n.translate('xpack.idxMgmt.mappingsEditor.stringFalseFieldDescription', {
+      defaultMessage: '"false"',
+    }),
+  },
+  {
+    value: 'false',
+    text: i18n.translate('xpack.idxMgmt.mappingsEditor.booleanFalseFieldDescription', {
+      defaultMessage: 'false',
+    }),
+  },
+];
+
 export const BooleanType = ({ field }: Props) => {
   return (
     <>
@@ -49,22 +78,41 @@ export const BooleanType = ({ field }: Props) => {
           <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
 
           {/* null_value */}
-          <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.booleanNullValueFieldTitle', {
-                  defaultMessage: 'Set null value',
-                })}
-              </h3>
-            }
+          <NullValueParameter
+            defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.booleanNullValueFieldDescription',
               {
                 defaultMessage: 'Whether to substitute values for any explicit null values.',
               }
             )}
-            formFieldPath="null_value"
-          />
+          >
+            <UseField
+              path="null_value"
+              config={{
+                type: FIELD_TYPES.SELECT,
+                deserializer: (value: string | boolean) => {
+                  if (typeof value === 'boolean') {
+                    return value.toString();
+                  }
+                  return `"${value}"`;
+                },
+                serializer: (value: string) => {
+                  if (value.indexOf('"') > -1) {
+                    return value.slice(1, -1);
+                  }
+                  return value === 'true';
+                },
+              }}
+              component={Field}
+              componentProps={{
+                euiFieldProps: {
+                  options: nullValueOptions,
+                  style: { maxWidth: 300 },
+                },
+              }}
+            />
+          </NullValueParameter>
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>
