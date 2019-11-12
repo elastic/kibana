@@ -50,6 +50,10 @@ import {
 } from './expression_types';
 import { interpreterProvider } from './interpreter_provider';
 import { createHandlers } from './create_handlers';
+import { ExpressionRendererImplementation } from './expression_renderer';
+import { ExpressionLoader, loader } from './loader';
+import { ExpressionDataHandler, execute } from './execute';
+import { render, ExpressionRenderHandler } from './render';
 
 export interface ExpressionsSetupDeps {
   inspector: InspectorSetup;
@@ -71,7 +75,15 @@ export interface ExpressionsSetup {
   };
 }
 
-export type ExpressionsStart = void;
+export interface ExpressionsStart {
+  execute: typeof execute;
+  ExpressionDataHandler: typeof ExpressionDataHandler;
+  ExpressionLoader: typeof ExpressionLoader;
+  ExpressionRenderer: typeof ExpressionRendererImplementation;
+  ExpressionRenderHandler: typeof ExpressionRenderHandler;
+  loader: typeof loader;
+  render: typeof render;
+}
 
 export class ExpressionsPublicPlugin
   implements
@@ -145,6 +157,16 @@ export class ExpressionsPublicPlugin
 
   public start(core: CoreStart, { inspector }: ExpressionsStartDeps): ExpressionsStart {
     setCoreStart(core);
+
+    return {
+      execute,
+      ExpressionDataHandler,
+      ExpressionLoader,
+      ExpressionRenderer: ExpressionRendererImplementation,
+      ExpressionRenderHandler,
+      loader,
+      render,
+    };
   }
 
   public stop() {}

@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import * as React from 'react';
 import { ExpressionsSetup, ExpressionsStart } from '.';
 
 export type Setup = jest.Mocked<ExpressionsSetup>;
@@ -47,8 +49,15 @@ const createSetupContract = (): Setup => {
 };
 
 const createStartContract = (): Start => {
-  const startContract: Start = undefined;
-  return startContract;
+  return {
+    execute: jest.fn(),
+    ExpressionDataHandler: jest.fn(),
+    ExpressionLoader: jest.fn(),
+    ExpressionRenderer: jest.fn(props => <></>),
+    ExpressionRenderHandler: jest.fn(),
+    loader: jest.fn(),
+    render: jest.fn(),
+  };
 };
 
 export const expressionsPluginMock = {
