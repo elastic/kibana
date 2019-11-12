@@ -18,15 +18,15 @@
  */
 
 import { EuiModal, EuiOverlayMask } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
 import React, { Component } from 'react';
 import { ApplyFiltersPopoverContent } from './apply_filter_popover_content';
 import { IndexPattern } from '../../index_patterns/index_patterns';
+import { esFilters } from '../../../../../../plugins/data/public';
 
 interface Props {
-  filters: Filter[];
+  filters: esFilters.Filter[];
   onCancel: () => void;
-  onSubmit: (filters: Filter[]) => void;
+  onSubmit: (filters: esFilters.Filter[]) => void;
   indexPatterns: IndexPattern[];
 }
 
@@ -56,9 +56,9 @@ export class ApplyFiltersPopover extends Component<Props, State> {
 }
 
 type cancelFunction = () => void;
-type submitFunction = (filters: Filter[]) => void;
+type submitFunction = (filters: esFilters.Filter[]) => void;
 export const applyFiltersPopover = (
-  filters: Filter[],
+  filters: esFilters.Filter[],
   indexPatterns: IndexPattern[],
   onCancel: cancelFunction,
   onSubmit: submitFunction

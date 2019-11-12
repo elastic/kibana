@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import { buildRangeFilter } from '@kbn/es-query';
+import { esFilters } from '../../../../../plugins/data/public';
 
 export function onBrushEvent(event) {
   const isNumber = event.data.ordered;
@@ -56,7 +56,7 @@ export function onBrushEvent(event) {
     };
   }
 
-  const newFilter = buildRangeFilter(
+  const newFilter = esFilters.buildRangeFilter(
     field,
     range,
     indexPattern,
