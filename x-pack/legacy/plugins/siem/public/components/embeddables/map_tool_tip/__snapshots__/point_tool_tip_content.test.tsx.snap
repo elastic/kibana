@@ -10,7 +10,6 @@ exports[`PointToolTipContent renders correctly against snapshot 1`] = `
         Object {
           "_propertyKey": "host.name",
           "_rawValue": "testPropValue",
-          "getESFilters": [Function],
         },
       ]
     }

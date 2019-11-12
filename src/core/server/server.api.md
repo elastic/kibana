@@ -511,6 +511,8 @@ export interface CoreSetup {
     elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
     http: HttpServiceSetup;
+    // (undocumented)
+    uiSettings: UiSettingsServiceSetup;
 }
 
 // @public
@@ -737,7 +739,7 @@ export interface InternalCoreStart {
 // @internal (undocumented)
 export interface InternalUiSettingsServiceSetup {
     asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
-    setDefaults(values: Record<string, UiSettingsParams>): void;
+    register(settings: Record<string, UiSettingsParams>): void;
 }
 
 // @public
@@ -763,11 +765,8 @@ export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser'
 export interface IUiSettingsClient {
     get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
     getAll: <T extends SavedObjectAttribute = any>() => Promise<Record<string, T>>;
-    getDefaults: () => Record<string, UiSettingsParams>;
-    getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<Record<string, {
-        userValue?: T;
-        isOverridden?: boolean;
-    }>>;
+    getRegistered: () => Readonly<Record<string, UiSettingsParams>>;
+    getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<Record<string, UserProvidedValues<T>>>;
     isOverridden: (key: string) => boolean;
     remove: (key: string) => Promise<void>;
     removeMany: (keys: string[]) => Promise<void>;
@@ -1073,6 +1072,9 @@ export interface RequestHandlerContext {
         elasticsearch: {
             dataClient: IScopedClusterClient;
             adminClient: IScopedClusterClient;
+        };
+        uiSettings: {
+            client: IUiSettingsClient;
         };
     };
 }
@@ -1610,24 +1612,37 @@ export interface SessionStorageFactory<T> {
 
 // @public
 export interface UiSettingsParams {
-    category: string[];
-    description: string;
-    name: string;
+    category?: string[];
+    description?: string;
+    name?: string;
     optionLabels?: Record<string, string>;
     options?: string[];
     readonly?: boolean;
     requiresPageReload?: boolean;
     type?: UiSettingsType;
-    value: SavedObjectAttribute;
+    value?: SavedObjectAttribute;
+}
+
+// @public (undocumented)
+export interface UiSettingsServiceSetup {
+    register(settings: Record<string, UiSettingsParams>): void;
 }
 
 // @public
 export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
 
+// @public
+export interface UserProvidedValues<T extends SavedObjectAttribute = any> {
+    // (undocumented)
+    isOverridden?: boolean;
+    // (undocumented)
+    userValue?: T;
+}
+
 
 // Warnings were encountered during analysis:
 // 
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugins_service.ts:39:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugins_service.ts:38:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
 
 ```

@@ -26,6 +26,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
 
       const updatedData = {
+        name: 'bcd',
         tags: ['bar'],
         alertTypeParams: {
           foo: true,
@@ -65,6 +66,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .put(`${getUrlPrefix(Spaces.other.id)}/api/alert/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .send({
+          name: 'bcd',
           tags: ['foo'],
           alertTypeParams: {
             foo: true,

@@ -8,10 +8,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable } from '@elastic/eui';
-import { ExpressionFunction } from '../../../../../../src/plugins/expressions/common';
+import { ExpressionFunction } from '../../../../../../src/plugins/expressions/public';
 import { KibanaDatatable } from '../../../../../../src/legacy/core_plugins/interpreter/public';
 import { LensMultiTable } from '../types';
-import { IInterpreterRenderFunction } from '../../../../../../src/legacy/core_plugins/expressions/public';
+import {
+  IInterpreterRenderFunction,
+  IInterpreterRenderHandlers,
+} from '../../../../../../src/legacy/core_plugins/expressions/public';
 import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
 import { VisualizationContainer } from '../visualization_container';
 
@@ -113,8 +116,19 @@ export const getDatatableRenderer = (
   help: '',
   validate: () => {},
   reuseDomNode: true,
-  render: async (domNode: Element, config: DatatableProps, _handlers: unknown) => {
-    ReactDOM.render(<DatatableComponent {...config} formatFactory={formatFactory} />, domNode);
+  render: async (
+    domNode: Element,
+    config: DatatableProps,
+    handlers: IInterpreterRenderHandlers
+  ) => {
+    ReactDOM.render(
+      <DatatableComponent {...config} formatFactory={formatFactory} />,
+      domNode,
+      () => {
+        handlers.done();
+      }
+    );
+    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },
 });
 

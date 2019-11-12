@@ -3,10 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { Legacy } from 'kibana';
 import { setupRequest } from './setup_request';
 import { uiSettingsServiceMock } from 'src/core/server/mocks';
+
+jest.mock('../settings/apm_indices/get_apm_indices', () => ({
+  getApmIndices: async () => ({
+    'apm_oss.sourcemapIndices': 'apm-*',
+    'apm_oss.errorIndices': 'apm-*',
+    'apm_oss.onboardingIndices': 'apm-*',
+    'apm_oss.spanIndices': 'apm-*',
+    'apm_oss.transactionIndices': 'apm-*',
+    'apm_oss.metricsIndices': 'apm-*',
+    'apm_oss.apmAgentConfigurationIndex': 'apm-*'
+  })
+}));
 
 function getMockRequest() {
   const callWithRequestSpy = jest.fn();

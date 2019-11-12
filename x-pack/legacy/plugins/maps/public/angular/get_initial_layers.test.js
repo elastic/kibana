@@ -44,7 +44,6 @@ describe('kibana.yml configured with map.tilemap.url', () => {
     expect(layers).toEqual([{
       alpha: 1,
       __dataRequests: [],
-      __injectedData: null,
       id: layers[0].id,
       applyGlobalQuery: true,
       label: null,
@@ -87,7 +86,6 @@ describe('EMS is enabled', () => {
     expect(layers).toEqual([{
       alpha: 1,
       __dataRequests: [],
-      __injectedData: null,
       id: layers[0].id,
       applyGlobalQuery: true,
       label: null,

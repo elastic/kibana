@@ -7,7 +7,7 @@
 import { defaults } from 'lodash/fp';
 import { AlertAction } from '../../../../../alerting/server/types';
 import { readSignals } from './read_signals';
-import { SignalParams } from './types';
+import { UpdateSignalParams } from './types';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -22,16 +22,22 @@ export const calculateInterval = (
   }
 };
 
-export const calculateKqlAndFilter = (
-  kql: string | undefined,
-  filter: {} | undefined
-): { kql: string | null | undefined; filter: {} | null | undefined } => {
-  if (filter != null) {
-    return { kql: null, filter };
-  } else if (kql != null) {
-    return { kql, filter: null };
+export const calculateName = ({
+  updatedName,
+  originalName,
+}: {
+  updatedName: string | undefined;
+  originalName: string | undefined;
+}): string => {
+  if (updatedName != null) {
+    return updatedName;
+  } else if (originalName != null) {
+    return originalName;
   } else {
-    return { kql: undefined, filter: undefined };
+    // You really should never get to this point. This is a fail safe way to send back
+    // the name of "untitled" just in case a signal rule name became null or undefined at
+    // some point since TypeScript allows it.
+    return 'untitled';
   }
 };
 
@@ -40,19 +46,22 @@ export const updateSignal = async ({
   actionsClient, // TODO: Use this whenever we add feature support for different action types
   description,
   enabled,
+  query,
+  language,
+  savedId,
+  filters,
   filter,
   from,
   id,
   index,
   interval,
-  kql,
   maxSignals,
   name,
   severity,
   to,
   type,
   references,
-}: SignalParams) => {
+}: UpdateSignalParams) => {
   // TODO: Error handling and abstraction. Right now if this is an error then what happens is we get the error of
   // "message": "Saved object [alert/{id}] not found"
   const signal = await readSignals({ alertsClient, id });
@@ -63,20 +72,20 @@ export const updateSignal = async ({
 
   const alertTypeParams = signal.alertTypeParams || {};
 
-  const { kql: nextKql, filter: nextFilter } = calculateKqlAndFilter(kql, filter);
-
   const nextAlertTypeParams = defaults(
     {
       ...alertTypeParams,
     },
     {
       description,
-      filter: nextFilter,
+      filter,
       from,
+      query,
+      language,
+      savedId,
+      filters,
       index,
-      kql: nextKql,
       maxSignals,
-      name,
       severity,
       to,
       type,
@@ -94,6 +103,7 @@ export const updateSignal = async ({
     id: signal.id,
     data: {
       tags: [],
+      name: calculateName({ updatedName: name, originalName: signal.name }),
       interval: calculateInterval(interval, signal.interval),
       actions,
       alertTypeParams: nextAlertTypeParams,

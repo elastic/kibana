@@ -274,7 +274,7 @@ export default function({ getService }: FtrProviderContext) {
   describe('saved search', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.load('ml/farequote');
     });
 
     after(async () => {
@@ -467,6 +467,12 @@ export default function({ getService }: FtrProviderContext) {
               timestamp: testData.expected.modelSizeStats.timestamp,
             }
           );
+        });
+
+        it('has detector results', async () => {
+          for (let i = 0; i < testData.aggAndFieldIdentifiers.length; i++) {
+            await ml.api.assertDetectorResultsExist(testData.jobId, i);
+          }
         });
       });
     }

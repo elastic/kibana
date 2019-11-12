@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
@@ -77,24 +77,34 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
     type,
     updateNetworkTable,
   }) => {
-    const onChange = (criteria: Criteria) => {
-      if (criteria.sort != null) {
-        const newDnsSortField: NetworkDnsSortField = {
-          field: criteria.sort.field.split('.')[1] as NetworkDnsFields,
-          direction: criteria.sort.direction,
-        };
-        if (!isEqual(newDnsSortField, sort)) {
-          updateNetworkTable({ networkType: type, tableType, updates: { sort: newDnsSortField } });
+    const onChange = useCallback(
+      (criteria: Criteria) => {
+        if (criteria.sort != null) {
+          const newDnsSortField: NetworkDnsSortField = {
+            field: criteria.sort.field.split('.')[1] as NetworkDnsFields,
+            direction: criteria.sort.direction,
+          };
+          if (!isEqual(newDnsSortField, sort)) {
+            updateNetworkTable({
+              networkType: type,
+              tableType,
+              updates: { sort: newDnsSortField },
+            });
+          }
         }
-      }
-    };
+      },
+      [sort, type]
+    );
 
-    const onChangePtrIncluded = () =>
-      updateNetworkTable({
-        networkType: type,
-        tableType,
-        updates: { isPtrIncluded: !isPtrIncluded },
-      });
+    const onChangePtrIncluded = useCallback(
+      () =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { isPtrIncluded: !isPtrIncluded },
+        }),
+      [type, isPtrIncluded]
+    );
 
     return (
       <PaginatedTable

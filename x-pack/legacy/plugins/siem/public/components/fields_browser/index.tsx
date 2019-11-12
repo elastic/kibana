@@ -6,7 +6,7 @@
 
 import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
@@ -82,77 +82,79 @@ export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & Dis
     }, []);
 
     /** Shows / hides the field browser */
-    function toggleShow() {
+    const toggleShow = useCallback(() => {
       setShow(!show);
-    }
+    }, [show]);
 
     /** Invoked when the user types in the filter input */
-    function updateFilter(newFilterInput: string) {
-      setFilterInput(newFilterInput);
-      setIsSearching(true);
+    const updateFilter = useCallback(
+      (newFilterInput: string) => {
+        setFilterInput(newFilterInput);
+        setIsSearching(true);
+        if (inputTimeoutId.current !== 0) {
+          clearTimeout(inputTimeoutId.current); // ⚠️ mutation: cancel any previous timers
+        }
+        // ⚠️ mutation: schedule a new timer that will apply the filter when it fires:
+        inputTimeoutId.current = window.setTimeout(() => {
+          const newFilteredBrowserFields = filterBrowserFieldsByFieldName({
+            browserFields: mergeBrowserFieldsWithDefaultCategory(browserFields),
+            substring: newFilterInput,
+          });
+          setFilteredBrowserFields(newFilteredBrowserFields);
+          setIsSearching(false);
 
-      if (inputTimeoutId.current !== 0) {
-        clearTimeout(inputTimeoutId.current); // ⚠️ mutation: cancel any previous timers
-      }
-      // ⚠️ mutation: schedule a new timer that will apply the filter when it fires:
-      inputTimeoutId.current = window.setTimeout(() => {
-        const newFilteredBrowserFields = filterBrowserFieldsByFieldName({
-          browserFields: mergeBrowserFieldsWithDefaultCategory(browserFields),
-          substring: newFilterInput,
-        });
-
-        setFilteredBrowserFields(newFilteredBrowserFields);
-        setIsSearching(false);
-
-        const newSelectedCategoryId =
-          newFilterInput === '' || Object.keys(newFilteredBrowserFields).length === 0
-            ? DEFAULT_CATEGORY_NAME
-            : Object.keys(newFilteredBrowserFields)
-                .sort()
-                .reduce<string>(
-                  (selected, category) =>
-                    newFilteredBrowserFields[category].fields != null &&
-                    newFilteredBrowserFields[selected].fields != null &&
-                    Object.keys(newFilteredBrowserFields[category].fields!).length >
-                      Object.keys(newFilteredBrowserFields[selected].fields!).length
-                      ? category
-                      : selected,
-                  Object.keys(newFilteredBrowserFields)[0]
-                );
-        setSelectedCategoryId(newSelectedCategoryId);
-      }, INPUT_TIMEOUT);
-    }
+          const newSelectedCategoryId =
+            newFilterInput === '' || Object.keys(newFilteredBrowserFields).length === 0
+              ? DEFAULT_CATEGORY_NAME
+              : Object.keys(newFilteredBrowserFields)
+                  .sort()
+                  .reduce<string>(
+                    (selected, category) =>
+                      newFilteredBrowserFields[category].fields != null &&
+                      newFilteredBrowserFields[selected].fields != null &&
+                      Object.keys(newFilteredBrowserFields[category].fields!).length >
+                        Object.keys(newFilteredBrowserFields[selected].fields!).length
+                        ? category
+                        : selected,
+                    Object.keys(newFilteredBrowserFields)[0]
+                  );
+          setSelectedCategoryId(newSelectedCategoryId);
+        }, INPUT_TIMEOUT);
+      },
+      [browserFields, filterInput, inputTimeoutId.current]
+    );
 
     /**
      * Invoked when the user clicks a category name in the left-hand side of
      * the field browser
      */
-    function updateSelectedCategoryId(categoryId: string) {
+    const updateSelectedCategoryId = useCallback((categoryId: string) => {
       setSelectedCategoryId(categoryId);
-    }
+    }, []);
 
     /**
      * Invoked when the user clicks on the context menu to view a category's
      * columns in the timeline, this function dispatches the action that
      * causes the timeline display those columns.
      */
-    function updateColumnsAndSelectCategoryId(columns: ColumnHeader[]) {
+    const updateColumnsAndSelectCategoryId = useCallback((columns: ColumnHeader[]) => {
       onUpdateColumns(columns); // show the category columns in the timeline
-    }
+    }, []);
 
     /** Invoked when the field browser should be hidden */
-    function hideFieldBrowser() {
+    const hideFieldBrowser = useCallback(() => {
       setFilterInput('');
       setFilterInput('');
       setFilteredBrowserFields(null);
       setIsSearching(false);
       setSelectedCategoryId(DEFAULT_CATEGORY_NAME);
       setShow(false);
-    }
+    }, []);
     // only merge in the default category if the field browser is visible
-    const browserFieldsWithDefaultCategory = show
-      ? mergeBrowserFieldsWithDefaultCategory(browserFields)
-      : {};
+    const browserFieldsWithDefaultCategory = useMemo(
+      () => (show ? mergeBrowserFieldsWithDefaultCategory(browserFields) : {}),
+      [show, browserFields]
+    );
 
     return (
       <>

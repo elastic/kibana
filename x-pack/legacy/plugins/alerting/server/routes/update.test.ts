@@ -37,6 +37,7 @@ test('calls the update function with proper parameters', async () => {
     url: '/api/alert/1',
     payload: {
       throttle: null,
+      name: 'abc',
       tags: ['bar'],
       interval: '12s',
       alertTypeParams: {
@@ -77,6 +78,7 @@ test('calls the update function with proper parameters', async () => {
             "otherField": false,
           },
           "interval": "12s",
+          "name": "abc",
           "tags": Array [
             "bar",
           ],

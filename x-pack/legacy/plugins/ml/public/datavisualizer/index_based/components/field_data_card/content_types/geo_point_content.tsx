@@ -36,9 +36,6 @@ export const GeoPointContent: FC<FieldDataCardProps> = ({ config }) => {
   // }
 
   const { stats } = config;
-  if (stats === undefined) {
-    return null;
-  }
 
   const { count, sampleCount, cardinality, examples } = stats;
   const docsPercent = roundToDecimalPlace((count / sampleCount) * 100);

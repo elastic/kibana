@@ -32,6 +32,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { getServices } from '../../kibana_services';
 
 // eslint-disable-next-line react/prefer-stateless-function
 export class DiscoverNoResults extends Component {
@@ -39,7 +40,6 @@ export class DiscoverNoResults extends Component {
     shardFailures: PropTypes.array,
     timeFieldName: PropTypes.string,
     queryLanguage: PropTypes.string,
-    getDocLink: PropTypes.func.isRequired,
   };
 
   render() {
@@ -47,7 +47,6 @@ export class DiscoverNoResults extends Component {
       shardFailures,
       timeFieldName,
       queryLanguage,
-      getDocLink,
     } = this.props;
 
     let shardFailuresMessage;
@@ -226,7 +225,7 @@ export class DiscoverNoResults extends Component {
                   queryStringSyntaxLink: (
                     <EuiLink
                       target="_blank"
-                      href={getDocLink('query.luceneQuerySyntax')}
+                      href={getServices().docLinks.links.query.luceneQuerySyntax}
                     >
                       <FormattedMessage
                         id="kbn.discover.noResults.searchExamples.queryStringSyntaxLinkText"

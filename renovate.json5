@@ -402,14 +402,6 @@
         ],
       },
       {
-        groupSlug: 'humps',
-        groupName: 'humps related packages',
-        packageNames: [
-          'humps',
-          '@types/humps',
-        ],
-      },
-      {
         groupSlug: 'jquery',
         groupName: 'jquery related packages',
         packageNames: [
@@ -575,6 +567,14 @@
         packageNames: [
           'supertest',
           '@types/supertest',
+        ],
+      },
+      {
+        groupSlug: 'supertest-as-promised',
+        groupName: 'supertest-as-promised related packages',
+        packageNames: [
+          'supertest-as-promised',
+          '@types/supertest-as-promised',
         ],
       },
       {

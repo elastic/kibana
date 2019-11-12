@@ -13,7 +13,7 @@ import { TestProviders } from '../../mock';
 
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './helpers';
 
-import { INPUT_TIMEOUT, StatefulFieldsBrowser } from '.';
+import { StatefulFieldsBrowser } from '.';
 // Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
 /* eslint-disable no-console */
 const originalError = console.error;
@@ -95,7 +95,7 @@ describe('StatefulFieldsBrowser', () => {
 
   describe('updateSelectedCategoryId', () => {
     beforeEach(() => {
-      jest.setTimeout(10000);
+      jest.useFakeTimers();
     });
     test('it updates the selectedCategoryId state, which makes the category bold, when the user clicks a category name in the left hand side of the field browser', () => {
       const wrapper = mount(
@@ -127,7 +127,8 @@ describe('StatefulFieldsBrowser', () => {
         wrapper.find(`.field-browser-category-pane-auditd-${timelineId}`).first()
       ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
     });
-    test('it updates the selectedCategoryId state according to most fields returned', done => {
+
+    test('it updates the selectedCategoryId state according to most fields returned', () => {
       const wrapper = mount(
         <TestProviders>
           <StatefulFieldsBrowser
@@ -154,14 +155,11 @@ describe('StatefulFieldsBrowser', () => {
         .last()
         .simulate('change', { target: { value: 'cloud' } });
 
-      setTimeout(() => {
-        wrapper.update();
-        expect(
-          wrapper.find(`.field-browser-category-pane-cloud-${timelineId}`).first()
-        ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
-        wrapper.unmount();
-        done();
-      }, INPUT_TIMEOUT);
+      jest.runOnlyPendingTimers();
+      wrapper.update();
+      expect(
+        wrapper.find(`.field-browser-category-pane-cloud-${timelineId}`).first()
+      ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
     });
   });
 

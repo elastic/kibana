@@ -61,6 +61,7 @@ export class ExpressionDataHandler {
     this.promise = interpreter.interpretAst(this.ast, params.context || defaultContext, {
       getInitialContext,
       inspectorAdapters: this.inspectorAdapters,
+      abortSignal: this.abortController.signal,
     });
   }
 
@@ -69,7 +70,18 @@ export class ExpressionDataHandler {
   };
 
   getData = async () => {
-    return await this.promise;
+    try {
+      return await this.promise;
+    } catch (e) {
+      return {
+        type: 'error',
+        error: {
+          type: e.type,
+          message: e.message,
+          stack: e.stack,
+        },
+      };
+    }
   };
 
   getExpression = () => {

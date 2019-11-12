@@ -56,6 +56,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
               expect(match).to.eql({
                 id: createdAlert.id,
+                name: 'abc',
                 tags: ['foo'],
                 alertTypeId: 'test.noop',
                 interval: '10s',
@@ -112,6 +113,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
               expect(match).to.eql({
                 id: createdAlert.id,
+                name: 'abc',
                 tags: ['foo'],
                 alertTypeId: 'test.noop',
                 interval: '10s',

@@ -22,8 +22,14 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('Suggestions API', function () {
-    before(() => esArchiver.load('index_patterns/basic_index'));
-    after(() => esArchiver.unload('index_patterns/basic_index'));
+    before(async () => {
+      await esArchiver.load('index_patterns/basic_index');
+      await esArchiver.load('index_patterns/basic_kibana');
+    });
+    after(async () => {
+      await esArchiver.unload('index_patterns/basic_index');
+      await esArchiver.unload('index_patterns/basic_kibana');
+    });
 
     it('should return 200 with special characters', () => (
       supertest
@@ -33,6 +39,16 @@ export default function ({ getService }) {
           query: '<something?with:lots&of^ bad characters'
         })
         .expect(200)
+    ));
+
+    it('should support nested fields', () => (
+      supertest
+        .post('/api/kibana/suggestions/values/basic_index')
+        .send({
+          field: 'nestedField.child',
+          query: 'nes'
+        })
+        .expect(200, ['nestedValue'])
     ));
   });
 }

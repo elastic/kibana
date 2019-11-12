@@ -8,16 +8,15 @@
 // Which is basically the Haskel equivalent of Rust/ML/Scala's Result
 // I'll reach out to other's in Kibana to see if we can merge these into one type
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type Ok<T> = {
+export interface Ok<T> {
   tag: 'ok';
   value: T;
-};
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type Err<E> = {
+}
+
+export interface Err<E> {
   tag: 'err';
   error: E;
-};
+}
 export type Result<T, E> = Ok<T> | Err<E>;
 
 export function asOk<T>(value: T): Ok<T> {
