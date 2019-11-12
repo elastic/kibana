@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { systemLogsSpecProvider } from './system_logs';
 import { systemMetricsSpecProvider } from './system_metrics';
 import { apacheLogsSpecProvider } from './apache_logs';
@@ -81,8 +80,8 @@ import { consulMetricsSpecProvider } from './consul_metrics';
 import { cockroachdbMetricsSpecProvider } from './cockroachdb_metrics';
 
 export function registerTutorials(server) {
-  server.registerTutorial(systemLogsSpecProvider);
-  server.registerTutorial(systemMetricsSpecProvider);
+  server.newPlatform.setup.plugins.tutorials.registerTutorial(systemLogsSpecProvider);
+  server.newPlatform.setup.plugins.tutorials.registerTutorial(systemMetricsSpecProvider);
   server.registerTutorial(apacheLogsSpecProvider);
   server.registerTutorial(apacheMetricsSpecProvider);
   server.registerTutorial(elasticsearchLogsSpecProvider);

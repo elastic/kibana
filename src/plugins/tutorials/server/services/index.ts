@@ -23,4 +23,5 @@ export {
   TutorialsRegistry,
   TutorialsRegistrySetup,
   TutorialsRegistryStart,
+  TutorialSchema,
 } from './tutorials_registry';

@@ -67,31 +67,31 @@ export interface ArtifactsSchema {
   };
 }
 export interface TutorialSchema {
-  readonly id: string;
-  readonly category: TutorialsCategory;
-  readonly name: string;
-  readonly isBeta: boolean;
-  readonly shortDescription: string;
-  readonly euiIconType: IconType; // EUI icon type string, one of https://elastic.github.io/eui/#/icon;
-  readonly longDescription: string;
-  readonly completionTimeMinutes: number;
-  readonly previewImagePath: string;
+  id: string;
+  category: TutorialsCategory;
+  name: string;
+  isBeta: boolean;
+  shortDescription: string;
+  euiIconType: IconType; // EUI icon type string, one of https://elastic.github.io/eui/#/icon;
+  longDescription: string;
+  completionTimeMinutes: number;
+  previewImagePath: string;
 
   // kibana and elastic cluster running on prem
-  readonly onPrem: InstructionsSchema;
+  onPrem: InstructionsSchema;
 
   // kibana and elastic cluster running in elastic's cloud
-  readonly elasticCloud: InstructionsSchema;
+  elasticCloud: InstructionsSchema;
 
   // kibana running on prem and elastic cluster running in elastic's cloud
-  readonly onPremElasticCloud: InstructionsSchema;
+  onPremElasticCloud: InstructionsSchema;
 
   // Elastic stack artifacts produced by product when it is setup and run.
-  readonly artifacts: ArtifactsSchema;
+  artifacts: ArtifactsSchema;
 
   // saved objects used by data module.
-  readonly savedObjects: any[];
-  readonly savedObjectsInstallMsg: string;
+  savedObjects: any[];
+  savedObjectsInstallMsg: string;
 }
 
 export class TutorialsRegistry {
