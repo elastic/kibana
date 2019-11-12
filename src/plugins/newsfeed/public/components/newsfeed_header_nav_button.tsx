@@ -29,8 +29,10 @@ export interface INewsfeedContext {
 }
 export const NewsfeedContext = React.createContext({} as INewsfeedContext);
 
-interface Props {
-  apiFetchResult: Rx.Observable<void | FetchResult | null>;
+export type NewsfeedApiFetchResult = Rx.Observable<void | FetchResult | null>;
+
+export interface Props {
+  apiFetchResult: NewsfeedApiFetchResult;
 }
 
 export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {

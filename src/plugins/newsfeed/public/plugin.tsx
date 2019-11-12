@@ -24,7 +24,7 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { NewsfeedPluginInjectedConfig } from '../types';
-import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
+import { NewsfeedNavButton, NewsfeedApiFetchResult } from './components/newsfeed_header_nav_button';
 import { getApi } from './lib/api';
 
 export type Setup = void;
@@ -41,27 +41,24 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
   public setup(core: CoreSetup): Setup {}
 
   public start(core: CoreStart): Start {
-    function mount(targetDomElement: HTMLElement) {
-      ReactDOM.render(
-        <I18nProvider>
-          <NewsfeedNavButton apiFetchResult={api$} />
-        </I18nProvider>,
-        targetDomElement
-      );
-      return () => ReactDOM.unmountComponentAtNode(targetDomElement);
-    }
-
+    const api$ = this.fetchNewsfeed(core);
     core.chrome.navControls.registerRight({
       order: 1000,
-      mount,
+      mount: target => this.mount(api$, target),
     });
+  }
 
+  public stop() {
+    this.stop$.next();
+  }
+
+  private fetchNewsfeed(core: CoreStart) {
     const { http, injectedMetadata } = core;
     const config = injectedMetadata.getInjectedVar(
       'newsfeed'
     ) as NewsfeedPluginInjectedConfig['newsfeed'];
 
-    const api$ = getApi(http, config, this.kibanaVersion).pipe(
+    return getApi(http, config, this.kibanaVersion).pipe(
       takeUntil(this.stop$), // stop the interval when stop method is called
       catchError(() => {
         // show a message to try again later?
@@ -71,7 +68,13 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
     );
   }
 
-  public stop() {
-    this.stop$.next();
+  private mount(api$: NewsfeedApiFetchResult, targetDomElement: HTMLElement) {
+    ReactDOM.render(
+      <I18nProvider>
+        <NewsfeedNavButton apiFetchResult={api$} />
+      </I18nProvider>,
+      targetDomElement
+    );
+    return () => ReactDOM.unmountComponentAtNode(targetDomElement);
   }
 }
