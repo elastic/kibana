@@ -52,16 +52,21 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
           await deleteKibanaIndicesOnce({ client, stats, log });
         }
 
-        await client.indices.create({
+        const createArgs = {
           method: 'PUT',
           index,
-          include_type_name: isPre7Mapping,
           body: {
             settings,
             mappings,
             aliases
           },
-        });
+        };
+
+        if (isPre7Mapping) {
+          createArgs.include_type_name = isPre7Mapping;
+        }
+
+        await client.indices.create(createArgs);
 
         stats.createdIndex(index, { settings });
       } catch (err) {
