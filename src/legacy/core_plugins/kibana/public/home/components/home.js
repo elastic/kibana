@@ -48,7 +48,7 @@ export class Home extends Component {
     super(props);
 
     const isWelcomeEnabled = !(chrome.getInjected('disableWelcomeScreen') || props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false');
-
+    const showTelemetryDisclaimer = chrome().getInjected('allowChangingOptInStatus');
     this.state = {
       // If welcome is enabled, we wait for loading to complete
       // before rendering. This prevents an annoying flickering
@@ -57,6 +57,7 @@ export class Home extends Component {
       isLoading: isWelcomeEnabled,
       isNewKibanaInstance: false,
       isWelcomeEnabled,
+      showTelemetryDisclaimer,
     };
   }
 
@@ -225,10 +226,7 @@ export class Home extends Component {
       <Welcome
         onSkip={this.skipWelcome}
         urlBasePath={this.props.urlBasePath}
-        shouldShowTelemetryOptIn={this.props.shouldShowTelemetryOptIn}
-        fetchTelemetry={this.props.fetchTelemetry}
-        setOptIn={this.props.setOptIn}
-        getTelemetryBannerId={this.props.getTelemetryBannerId}
+        showTelemetryDisclaimer={this.state.showTelemetryDisclaimer}
       />
     );
   }
@@ -251,10 +249,6 @@ export class Home extends Component {
 
 Home.propTypes = {
   addBasePath: PropTypes.func.isRequired,
-  fetchTelemetry: PropTypes.func.isRequired,
-  getTelemetryBannerId: PropTypes.func.isRequired,
-  setOptIn: PropTypes.func.isRequired,
-  shouldShowTelemetryOptIn: PropTypes.bool,
   directories: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
