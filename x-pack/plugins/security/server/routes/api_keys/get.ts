@@ -4,42 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
-import { wrapError } from '../../../../../../../../plugins/security/server';
-import { INTERNAL_API_BASE_PATH } from  '../../../../../common/constants';
+import { schema } from '@kbn/config-schema';
+import { ApiKey } from '../../../common/model';
+import { wrapIntoCustomErrorResponse } from '../../errors';
+import { createLicensedRouteHandler } from '../licensed_route_handler';
+import { RouteDefinitionParams } from '..';
 
-export function initGetApiKeysApi(server, callWithRequest, routePreCheckLicenseFn) {
-  server.route({
-    method: 'GET',
-    path: `${INTERNAL_API_BASE_PATH}/api_key`,
-    async handler(request) {
-      try {
-        const { isAdmin } = request.query;
-
-        const result = await callWithRequest(
-          request,
-          'shield.getAPIKeys',
-          {
-            owner: !isAdmin
-          }
-        );
-
-        const validKeys = result.api_keys.filter(({ invalidated }) => !invalidated);
-
-        return {
-          apiKeys: validKeys,
-        };
-      } catch (error) {
-        return wrapError(error);
-      }
-    },
-    config: {
-      pre: [routePreCheckLicenseFn],
+export function defineGetApiKeysRoutes({ router, clusterClient }: RouteDefinitionParams) {
+  router.get(
+    {
+      path: '/internal/security/api_key',
       validate: {
-        query: Joi.object().keys({
-          isAdmin: Joi.bool().required(),
-        }).required(),
+        query: schema.object({
+          // We don't use `schema.boolean` here, because all query string parameters are treated as
+          // strings and @kbn/config-schema doesn't coerce strings to booleans.
+          //
+          // A boolean flag that can be used to query API keys owned by the currently authenticated
+          // user. `false` means that only API keys of currently authenticated user will be returned.
+          isAdmin: schema.oneOf([schema.literal('true'), schema.literal('false')]),
+        }),
       },
-    }
-  });
+    },
+    createLicensedRouteHandler(async (context, request, response) => {
+      try {
+        const isAdmin = request.query.isAdmin === 'true';
+        const { api_keys: apiKeys } = (await clusterClient
+          .asScoped(request)
+          .callAsCurrentUser('shield.getAPIKeys', { owner: !isAdmin })) as { api_keys: ApiKey[] };
+
+        const validKeys = apiKeys.filter(({ invalidated }) => !invalidated);
+
+        return response.ok({ body: { apiKeys: validKeys } });
+      } catch (error) {
+        return response.customError(wrapIntoCustomErrorResponse(error));
+      }
+    })
+  );
 }

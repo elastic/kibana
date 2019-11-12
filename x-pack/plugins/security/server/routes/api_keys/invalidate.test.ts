@@ -3,111 +3,147 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Hapi from 'hapi';
+
 import Boom from 'boom';
+import { Type } from '@kbn/config-schema';
+import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../src/core/server';
+import { LICENSE_CHECK_STATE, LicenseCheck } from '../../../../licensing/server';
+import { defineInvalidateApiKeysRoutes } from './invalidate';
 
-import { initInvalidateApiKeysApi } from './invalidate';
-import { INTERNAL_API_BASE_PATH } from '../../../../../common/constants';
+import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import { routeDefinitionParamsMock } from '../index.mock';
 
-const createMockServer = () => new Hapi.Server({ debug: false, port: 8080 });
+interface TestOptions {
+  licenseCheckResult?: LicenseCheck;
+  apiResponses?: Array<() => Promise<unknown>>;
+  payload?: Record<string, any>;
+  asserts: { statusCode: number; result?: Record<string, any>; apiArguments?: unknown[][] };
+}
 
-describe('POST invalidate', () => {
+describe('Invalidate API keys', () => {
   const postInvalidateTest = (
-    description,
+    description: string,
     {
-      preCheckLicenseImpl = () => null,
-      callWithRequestImpls = [],
+      licenseCheckResult = { state: LICENSE_CHECK_STATE.Valid },
+      apiResponses = [],
       asserts,
       payload,
-    }
+    }: TestOptions
   ) => {
     test(description, async () => {
-      const mockServer = createMockServer();
-      const pre = jest.fn().mockImplementation(preCheckLicenseImpl);
-      const mockCallWithRequest = jest.fn();
-
-      for (const impl of callWithRequestImpls) {
-        mockCallWithRequest.mockImplementationOnce(impl);
+      const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
+      for (const apiResponse of apiResponses) {
+        mockScopedClusterClient.callAsCurrentUser.mockImplementationOnce(apiResponse);
       }
 
-      initInvalidateApiKeysApi(mockServer, mockCallWithRequest, pre);
+      defineInvalidateApiKeysRoutes(mockRouteDefinitionParams);
+      const [[{ validate }, handler]] = mockRouteDefinitionParams.router.post.mock.calls;
 
-      const headers = {
-        authorization: 'foo',
-      };
-
-      const request = {
-        method: 'POST',
-        url: `${INTERNAL_API_BASE_PATH}/api_key/invalidate`,
+      const headers = { authorization: 'foo' };
+      const mockRequest = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: '/internal/security/api_key/invalidate',
+        body: payload !== undefined ? (validate as any).body.validate(payload) : undefined,
         headers,
-        payload,
-      };
+      });
+      const mockContext = ({
+        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
+      } as unknown) as RequestHandlerContext;
 
-      const { result, statusCode } = await mockServer.inject(request);
+      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      expect(response.status).toBe(asserts.statusCode);
+      expect(response.payload).toEqual(asserts.result);
 
-      expect(pre).toHaveBeenCalled();
-
-      if (asserts.callWithRequests) {
-        for (const args of asserts.callWithRequests) {
-          expect(mockCallWithRequest).toHaveBeenCalledWith(
-            expect.objectContaining({
-              headers: expect.objectContaining({
-                authorization: headers.authorization,
-              }),
-            }),
-            ...args
+      if (Array.isArray(asserts.apiArguments)) {
+        for (const apiArguments of asserts.apiArguments) {
+          expect(mockRouteDefinitionParams.clusterClient.asScoped).toHaveBeenCalledWith(
+            mockRequest
           );
+          expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(...apiArguments);
         }
       } else {
-        expect(mockCallWithRequest).not.toHaveBeenCalled();
+        expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
       }
-
-      expect(statusCode).toBe(asserts.statusCode);
-      expect(result).toEqual(asserts.result);
+      expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
     });
   };
 
-  describe('failure', () => {
-    postInvalidateTest('returns result of routePreCheckLicense', {
-      preCheckLicenseImpl: () => Boom.forbidden('test forbidden message'),
-      payload: {
-        apiKeys: [{ id: 'si8If24B1bKsmSLTAhJV', name: 'my-api-key' }],
-        isAdmin: true
-      },
-      asserts: {
-        statusCode: 403,
-        result: {
-          error: 'Forbidden',
-          statusCode: 403,
-          message: 'test forbidden message',
-        },
-      },
+  describe('request validation', () => {
+    let requestBodySchema: Type<any>;
+    beforeEach(() => {
+      const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+      defineInvalidateApiKeysRoutes(mockRouteDefinitionParams);
+
+      const [[{ validate }]] = mockRouteDefinitionParams.router.post.mock.calls;
+      requestBodySchema = (validate as any).body;
     });
 
-    postInvalidateTest('returns errors array from callWithRequest', {
-      callWithRequestImpls: [async () => {
-        throw Boom.notAcceptable('test not acceptable message');
-      }],
+    test('requires both isAdmin and apiKeys parameters', () => {
+      expect(() =>
+        requestBodySchema.validate({}, {}, 'request body')
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[request body.apiKeys]: expected value of type [array] but got [undefined]"`
+      );
+
+      expect(() =>
+        requestBodySchema.validate({ apiKeys: [] }, {}, 'request body')
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[request body.isAdmin]: expected value of type [boolean] but got [undefined]"`
+      );
+
+      expect(() =>
+        requestBodySchema.validate({ apiKeys: {}, isAdmin: true }, {}, 'request body')
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[request body.apiKeys]: expected value of type [array] but got [Object]"`
+      );
+
+      expect(() =>
+        requestBodySchema.validate(
+          {
+            apiKeys: [{ id: 'some-id', name: 'some-name', unknown: 'some-unknown' }],
+            isAdmin: true,
+          },
+          {},
+          'request body'
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[request body.apiKeys.0.unknown]: definition for this key is missing"`
+      );
+    });
+  });
+
+  describe('failure', () => {
+    postInvalidateTest('returns result of license checker', {
+      licenseCheckResult: { state: LICENSE_CHECK_STATE.Invalid, message: 'test forbidden message' },
+      payload: { apiKeys: [{ id: 'si8If24B1bKsmSLTAhJV', name: 'my-api-key' }], isAdmin: true },
+      asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
+    });
+
+    const error = Boom.notAcceptable('test not acceptable message');
+    postInvalidateTest('returns error from cluster client', {
+      apiResponses: [
+        async () => {
+          throw error;
+        },
+      ],
       payload: {
-        apiKeys: [{ id: 'si8If24B1bKsmSLTAhJV', name: 'my-api-key', }],
-        isAdmin: true
+        apiKeys: [{ id: 'si8If24B1bKsmSLTAhJV', name: 'my-api-key' }],
+        isAdmin: true,
       },
       asserts: {
-        callWithRequests: [
-          ['shield.invalidateAPIKey', {
-            body: {
-              id: 'si8If24B1bKsmSLTAhJV',
-            },
-          }],
-        ],
+        apiArguments: [['shield.invalidateAPIKey', { body: { id: 'si8If24B1bKsmSLTAhJV' } }]],
         statusCode: 200,
         result: {
           itemsInvalidated: [],
-          errors: [{
-            id: 'si8If24B1bKsmSLTAhJV',
-            name: 'my-api-key',
-            error: Boom.notAcceptable('test not acceptable message'),
-          }]
+          errors: [
+            {
+              id: 'si8If24B1bKsmSLTAhJV',
+              name: 'my-api-key',
+              error: Boom.notAcceptable('test not acceptable message'),
+            },
+          ],
         },
       },
     });
@@ -115,41 +151,30 @@ describe('POST invalidate', () => {
 
   describe('success', () => {
     postInvalidateTest('invalidates API keys', {
-      callWithRequestImpls: [async () => null],
+      apiResponses: [async () => null],
       payload: {
-        apiKeys: [{ id: 'si8If24B1bKsmSLTAhJV', name: 'my-api-key', }],
-        isAdmin: true
+        apiKeys: [{ id: 'si8If24B1bKsmSLTAhJV', name: 'my-api-key' }],
+        isAdmin: true,
       },
       asserts: {
-        callWithRequests: [
-          ['shield.invalidateAPIKey', {
-            body: {
-              id: 'si8If24B1bKsmSLTAhJV',
-            },
-          }],
-        ],
+        apiArguments: [['shield.invalidateAPIKey', { body: { id: 'si8If24B1bKsmSLTAhJV' } }]],
         statusCode: 200,
         result: {
-          itemsInvalidated: [{ id: 'si8If24B1bKsmSLTAhJV', name: 'my-api-key', }],
+          itemsInvalidated: [{ id: 'si8If24B1bKsmSLTAhJV', name: 'my-api-key' }],
           errors: [],
         },
       },
     });
 
     postInvalidateTest('adds "owner" to body if isAdmin=false', {
-      callWithRequestImpls: [async () => null],
+      apiResponses: [async () => null],
       payload: {
-        apiKeys: [{ id: 'si8If24B1bKsmSLTAhJV', name: 'my-api-key', }],
-        isAdmin: false
+        apiKeys: [{ id: 'si8If24B1bKsmSLTAhJV', name: 'my-api-key' }],
+        isAdmin: false,
       },
       asserts: {
-        callWithRequests: [
-          ['shield.invalidateAPIKey', {
-            body: {
-              id: 'si8If24B1bKsmSLTAhJV',
-              owner: true,
-            },
-          }],
+        apiArguments: [
+          ['shield.invalidateAPIKey', { body: { id: 'si8If24B1bKsmSLTAhJV', owner: true } }],
         ],
         statusCode: 200,
         result: {
@@ -160,39 +185,34 @@ describe('POST invalidate', () => {
     });
 
     postInvalidateTest('returns only successful invalidation requests', {
-      callWithRequestImpls: [
+      apiResponses: [
         async () => null,
         async () => {
           throw Boom.notAcceptable('test not acceptable message');
-        }],
+        },
+      ],
       payload: {
         apiKeys: [
           { id: 'si8If24B1bKsmSLTAhJV', name: 'my-api-key1' },
-          { id: 'ab8If24B1bKsmSLTAhNC', name: 'my-api-key2' }
+          { id: 'ab8If24B1bKsmSLTAhNC', name: 'my-api-key2' },
         ],
-        isAdmin: true
+        isAdmin: true,
       },
       asserts: {
-        callWithRequests: [
-          ['shield.invalidateAPIKey', {
-            body: {
-              id: 'si8If24B1bKsmSLTAhJV',
-            },
-          }],
-          ['shield.invalidateAPIKey', {
-            body: {
-              id: 'ab8If24B1bKsmSLTAhNC',
-            },
-          }],
+        apiArguments: [
+          ['shield.invalidateAPIKey', { body: { id: 'si8If24B1bKsmSLTAhJV' } }],
+          ['shield.invalidateAPIKey', { body: { id: 'ab8If24B1bKsmSLTAhNC' } }],
         ],
         statusCode: 200,
         result: {
           itemsInvalidated: [{ id: 'si8If24B1bKsmSLTAhJV', name: 'my-api-key1' }],
-          errors: [{
-            id: 'ab8If24B1bKsmSLTAhNC',
-            name: 'my-api-key2',
-            error: Boom.notAcceptable('test not acceptable message'),
-          }]
+          errors: [
+            {
+              id: 'ab8If24B1bKsmSLTAhNC',
+              name: 'my-api-key2',
+              error: Boom.notAcceptable('test not acceptable message'),
+            },
+          ],
         },
       },
     });

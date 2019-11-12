@@ -4,257 +4,199 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import Boom from 'boom';
-import Joi from 'joi';
-import sinon from 'sinon';
+import { Type } from '@kbn/config-schema';
+import {
+  IRouter,
+  kibanaResponseFactory,
+  RequestHandler,
+  RequestHandlerContext,
+  RouteConfig,
+} from '../../../../../../src/core/server';
+import { LICENSE_CHECK_STATE } from '../../../../licensing/server';
+import { Authentication, DeauthenticationResult } from '../../authentication';
+import { ConfigType } from '../../config';
+import { LegacyAPI } from '../../plugin';
+import { defineCommonRoutes } from './common';
 
-import { serverFixture } from '../../../../lib/__tests__/__fixtures__/server';
-import { requestFixture } from '../../../../lib/__tests__/__fixtures__/request';
-import { AuthenticationResult, DeauthenticationResult } from '../../../../../../../../plugins/security/server';
-import { initAuthenticateApi } from '../authenticate';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  httpServiceMock,
+  loggingServiceMock,
+} from '../../../../../../src/core/server/mocks';
+import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import { authenticationMock } from '../../authentication/index.mock';
+import { authorizationMock } from '../../authorization/index.mock';
 
-describe('Authentication routes', () => {
-  let serverStub;
-  let hStub;
-  let loginStub;
-  let logoutStub;
-
+describe('Common authentication routes', () => {
+  let router: jest.Mocked<IRouter>;
+  let authc: jest.Mocked<Authentication>;
+  let mockContext: RequestHandlerContext;
   beforeEach(() => {
-    serverStub = serverFixture();
-    hStub = {
-      authenticated: sinon.stub(),
-      continue: 'blah',
-      redirect: sinon.stub(),
-      response: sinon.stub()
-    };
-    loginStub = sinon.stub();
-    logoutStub = sinon.stub();
+    router = httpServiceMock.createRouter();
+    authc = authenticationMock.create();
 
-    initAuthenticateApi({
-      authc: { login: loginStub, logout: logoutStub },
-      __legacyCompat: { config: { authc: { providers: ['basic'] } } },
-    }, serverStub);
-  });
+    mockContext = ({
+      licensing: {
+        license: { check: jest.fn().mockReturnValue({ check: LICENSE_CHECK_STATE.Valid }) },
+      },
+    } as unknown) as RequestHandlerContext;
 
-  describe('login', () => {
-    let loginRoute;
-    let request;
-
-    beforeEach(() => {
-      loginRoute = serverStub.route
-        .withArgs(sinon.match({ path: '/api/security/v1/login' }))
-        .firstCall
-        .args[0];
-
-      request = requestFixture({
-        headers: {},
-        payload: { username: 'user', password: 'password' }
-      });
+    defineCommonRoutes({
+      router,
+      clusterClient: elasticsearchServiceMock.createClusterClient(),
+      basePath: httpServiceMock.createBasePath(),
+      logger: loggingServiceMock.create().get(),
+      config: { authc: { providers: ['saml'] } } as ConfigType,
+      authc,
+      authz: authorizationMock.create(),
+      getLegacyAPI: () => ({ cspRules: 'test-csp-rule' } as LegacyAPI),
     });
-
-    it('correctly defines route.', async () => {
-      expect(loginRoute.method).to.be('POST');
-      expect(loginRoute.path).to.be('/api/security/v1/login');
-      expect(loginRoute.handler).to.be.a(Function);
-      expect(loginRoute.config).to.eql({
-        auth: false,
-        validate: {
-          payload: Joi.object({
-            username: Joi.string().required(),
-            password: Joi.string().required()
-          })
-        },
-        response: {
-          emptyStatusCode: 204,
-        }
-      });
-    });
-
-    it('returns 500 if authentication throws unhandled exception.', async () => {
-      const unhandledException = new Error('Something went wrong.');
-      loginStub.throws(unhandledException);
-
-      return loginRoute
-        .handler(request, hStub)
-        .catch((response) => {
-          expect(response.isBoom).to.be(true);
-          expect(response.output.payload).to.eql({
-            statusCode: 500,
-            error: 'Internal Server Error',
-            message: 'An internal server error occurred'
-          });
-        });
-    });
-
-    it('returns 401 if authentication fails.', async () => {
-      const failureReason = new Error('Something went wrong.');
-      loginStub.resolves(AuthenticationResult.failed(failureReason));
-
-      return loginRoute
-        .handler(request, hStub)
-        .catch((response) => {
-          expect(response.isBoom).to.be(true);
-          expect(response.message).to.be(failureReason.message);
-          expect(response.output.statusCode).to.be(401);
-        });
-    });
-
-    it('returns 401 if authentication is not handled.', async () => {
-      loginStub.resolves(AuthenticationResult.notHandled());
-
-      return loginRoute
-        .handler(request, hStub)
-        .catch((response) => {
-          expect(response.isBoom).to.be(true);
-          expect(response.message).to.be('Unauthorized');
-          expect(response.output.statusCode).to.be(401);
-        });
-    });
-
-    describe('authentication succeeds', () => {
-
-      it(`returns user data`, async () => {
-        loginStub.resolves(AuthenticationResult.succeeded({ username: 'user' }));
-
-        await loginRoute.handler(request, hStub);
-
-        sinon.assert.calledOnce(hStub.response);
-        sinon.assert.calledOnce(loginStub);
-        sinon.assert.calledWithExactly(
-          loginStub,
-          sinon.match.instanceOf(KibanaRequest),
-          { provider: 'basic', value: { username: 'user', password: 'password' } }
-        );
-      });
-    });
-
   });
 
   describe('logout', () => {
-    let logoutRoute;
+    let routeHandler: RequestHandler<any, any, any>;
+    let routeConfig: RouteConfig<any, any, any, any>;
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      body: { username: 'user', password: 'password' },
+    });
 
     beforeEach(() => {
-      serverStub.config.returns({
-        get: sinon.stub().withArgs('server.basePath').returns('/test-base-path')
-      });
+      const [loginRouteConfig, loginRouteHandler] = router.get.mock.calls.find(
+        ([{ path }]) => path === '/api/security/logout'
+      )!;
 
-      logoutRoute = serverStub.route
-        .withArgs(sinon.match({ path: '/api/security/v1/logout' }))
-        .firstCall
-        .args[0];
+      routeConfig = loginRouteConfig;
+      routeHandler = loginRouteHandler;
     });
 
     it('correctly defines route.', async () => {
-      expect(logoutRoute.method).to.be('GET');
-      expect(logoutRoute.path).to.be('/api/security/v1/logout');
-      expect(logoutRoute.handler).to.be.a(Function);
-      expect(logoutRoute.config).to.eql({ auth: false });
+      expect(routeConfig.options).toEqual({ authRequired: false });
+      expect(routeConfig.validate).toEqual({
+        body: undefined,
+        query: expect.any(Type),
+        params: undefined,
+      });
+
+      const queryValidator = (routeConfig.validate as any).query as Type<any>;
+      expect(queryValidator.validate({ someRandomField: 'some-random' })).toEqual({
+        someRandomField: 'some-random',
+      });
+      expect(queryValidator.validate({})).toEqual({});
+      expect(queryValidator.validate(undefined)).toEqual({});
     });
 
     it('returns 500 if deauthentication throws unhandled exception.', async () => {
-      const request = requestFixture();
-
       const unhandledException = new Error('Something went wrong.');
-      logoutStub.rejects(unhandledException);
+      authc.logout.mockRejectedValue(unhandledException);
 
-      return logoutRoute
-        .handler(request, hStub)
-        .catch((response) => {
-          expect(response).to.be(Boom.boomify(unhandledException));
-          sinon.assert.notCalled(hStub.redirect);
-        });
+      const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
+
+      expect(response.status).toBe(500);
+      expect(response.payload).toEqual(unhandledException);
+      expect(authc.logout).toHaveBeenCalledWith(mockRequest);
     });
 
     it('returns 500 if authenticator fails to logout.', async () => {
-      const request = requestFixture();
+      const failureReason = new Error('Something went wrong.');
+      authc.logout.mockResolvedValue(DeauthenticationResult.failed(failureReason));
 
-      const failureReason = Boom.forbidden();
-      logoutStub.resolves(DeauthenticationResult.failed(failureReason));
+      const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 
-      return logoutRoute
-        .handler(request, hStub)
-        .catch((response) => {
-          expect(response).to.be(Boom.boomify(failureReason));
-          sinon.assert.notCalled(hStub.redirect);
-          sinon.assert.calledOnce(logoutStub);
-          sinon.assert.calledWithExactly(
-            logoutStub,
-            sinon.match.instanceOf(KibanaRequest)
-          );
-        });
+      expect(response.status).toBe(500);
+      expect(response.payload).toEqual(failureReason);
+      expect(authc.logout).toHaveBeenCalledWith(mockRequest);
     });
 
     it('returns 400 for AJAX requests that can not handle redirect.', async () => {
-      const request = requestFixture({ headers: { 'kbn-xsrf': 'xsrf' } });
+      const mockAjaxRequest = httpServerMock.createKibanaRequest({
+        headers: { 'kbn-xsrf': 'xsrf' },
+      });
 
-      return logoutRoute
-        .handler(request, hStub)
-        .catch((response) => {
-          expect(response.isBoom).to.be(true);
-          expect(response.message).to.be('Client should be able to process redirect response.');
-          expect(response.output.statusCode).to.be(400);
-          sinon.assert.notCalled(hStub.redirect);
-        });
+      const response = await routeHandler(mockContext, mockAjaxRequest, kibanaResponseFactory);
+
+      expect(response.status).toBe(400);
+      expect(response.payload).toEqual('Client should be able to process redirect response.');
+      expect(authc.logout).not.toHaveBeenCalled();
     });
 
     it('redirects user to the URL returned by authenticator.', async () => {
-      const request = requestFixture();
+      authc.logout.mockResolvedValue(DeauthenticationResult.redirectTo('https://custom.logout'));
 
-      logoutStub.resolves(DeauthenticationResult.redirectTo('https://custom.logout'));
+      const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 
-      await logoutRoute.handler(request, hStub);
-
-      sinon.assert.calledOnce(hStub.redirect);
-      sinon.assert.calledWithExactly(hStub.redirect, 'https://custom.logout');
+      expect(response.status).toBe(302);
+      expect(response.payload).toBeUndefined();
+      expect(response.options).toEqual({ headers: { location: 'https://custom.logout' } });
+      expect(authc.logout).toHaveBeenCalledWith(mockRequest);
     });
 
     it('redirects user to the base path if deauthentication succeeds.', async () => {
-      const request = requestFixture();
+      authc.logout.mockResolvedValue(DeauthenticationResult.succeeded());
 
-      logoutStub.resolves(DeauthenticationResult.succeeded());
+      const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 
-      await logoutRoute.handler(request, hStub);
-
-      sinon.assert.calledOnce(hStub.redirect);
-      sinon.assert.calledWithExactly(hStub.redirect, '/test-base-path/');
+      expect(response.status).toBe(302);
+      expect(response.payload).toBeUndefined();
+      expect(response.options).toEqual({ headers: { location: '/mock-server-basepath/' } });
+      expect(authc.logout).toHaveBeenCalledWith(mockRequest);
     });
 
     it('redirects user to the base path if deauthentication is not handled.', async () => {
-      const request = requestFixture();
+      authc.logout.mockResolvedValue(DeauthenticationResult.notHandled());
 
-      logoutStub.resolves(DeauthenticationResult.notHandled());
+      const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 
-      await logoutRoute.handler(request, hStub);
-
-      sinon.assert.calledOnce(hStub.redirect);
-      sinon.assert.calledWithExactly(hStub.redirect, '/test-base-path/');
+      expect(response.status).toBe(302);
+      expect(response.payload).toBeUndefined();
+      expect(response.options).toEqual({ headers: { location: '/mock-server-basepath/' } });
+      expect(authc.logout).toHaveBeenCalledWith(mockRequest);
     });
   });
 
   describe('me', () => {
-    let meRoute;
+    let routeHandler: RequestHandler<any, any, any>;
+    let routeConfig: RouteConfig<any, any, any, any>;
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      body: { username: 'user', password: 'password' },
+    });
 
     beforeEach(() => {
-      meRoute = serverStub.route
-        .withArgs(sinon.match({ path: '/api/security/v1/me' }))
-        .firstCall
-        .args[0];
+      const [loginRouteConfig, loginRouteHandler] = router.get.mock.calls.find(
+        ([{ path }]) => path === '/internal/security/me'
+      )!;
+
+      routeConfig = loginRouteConfig;
+      routeHandler = loginRouteHandler;
     });
 
     it('correctly defines route.', async () => {
-      expect(meRoute.method).to.be('GET');
-      expect(meRoute.path).to.be('/api/security/v1/me');
-      expect(meRoute.handler).to.be.a(Function);
-      expect(meRoute.config).to.be(undefined);
+      expect(routeConfig.options).toBeUndefined();
+      expect(routeConfig.validate).toBe(false);
     });
 
-    it('returns user from the authenticated request property.', async () => {
-      const request = { auth: { credentials: { username: 'user' } } };
-      const response = await meRoute.handler(request, hStub);
+    it('returns 500 if cannot retrieve current user due to unhandled exception.', async () => {
+      const unhandledException = new Error('Something went wrong.');
+      authc.getCurrentUser.mockRejectedValue(unhandledException);
 
-      expect(response).to.eql({ username: 'user' });
+      const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
+
+      expect(response.status).toBe(500);
+      expect(response.payload).toEqual(unhandledException);
+      expect(authc.getCurrentUser).toHaveBeenCalledWith(mockRequest);
+    });
+
+    it('returns current user.', async () => {
+      const mockUser = mockAuthenticatedUser();
+      authc.getCurrentUser.mockResolvedValue(mockUser);
+
+      const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
+
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual(mockUser);
+      expect(authc.getCurrentUser).toHaveBeenCalledWith(mockRequest);
     });
   });
 });

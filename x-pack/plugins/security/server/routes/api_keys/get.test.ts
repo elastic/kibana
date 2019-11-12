@@ -3,162 +3,156 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Hapi from 'hapi';
+
+import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../src/core/server';
+import { LICENSE_CHECK_STATE, LicenseCheck } from '../../../../licensing/server';
+import { defineGetApiKeysRoutes } from './get';
+
+import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import { routeDefinitionParamsMock } from '../index.mock';
 import Boom from 'boom';
 
-import { initGetApiKeysApi } from './get';
-import { INTERNAL_API_BASE_PATH } from '../../../../../common/constants';
+interface TestOptions {
+  isAdmin?: boolean;
+  licenseCheckResult?: LicenseCheck;
+  apiResponse?: () => Promise<unknown>;
+  asserts: { statusCode: number; result?: Record<string, any> };
+}
 
-const createMockServer = () => new Hapi.Server({ debug: false, port: 8080 });
-
-describe('GET API keys', () => {
+describe('Get API keys', () => {
   const getApiKeysTest = (
-    description,
+    description: string,
     {
-      preCheckLicenseImpl = () => null,
-      callWithRequestImpl,
+      licenseCheckResult = { state: LICENSE_CHECK_STATE.Valid },
+      apiResponse,
       asserts,
       isAdmin = true,
-    }
+    }: TestOptions
   ) => {
     test(description, async () => {
-      const mockServer = createMockServer();
-      const pre = jest.fn().mockImplementation(preCheckLicenseImpl);
-      const mockCallWithRequest = jest.fn();
+      const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
 
-      if (callWithRequestImpl) {
-        mockCallWithRequest.mockImplementation(callWithRequestImpl);
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
+      if (apiResponse) {
+        mockScopedClusterClient.callAsCurrentUser.mockImplementation(apiResponse);
       }
 
-      initGetApiKeysApi(mockServer, mockCallWithRequest, pre);
+      defineGetApiKeysRoutes(mockRouteDefinitionParams);
+      const [[, handler]] = mockRouteDefinitionParams.router.get.mock.calls;
 
-      const headers = {
-        authorization: 'foo',
-      };
-
-      const request = {
-        method: 'GET',
-        url: `${INTERNAL_API_BASE_PATH}/api_key?isAdmin=${isAdmin}`,
+      const headers = { authorization: 'foo' };
+      const mockRequest = httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: '/internal/security/api_key',
+        query: { isAdmin: isAdmin.toString() },
         headers,
-      };
+      });
+      const mockContext = ({
+        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
+      } as unknown) as RequestHandlerContext;
 
-      const { result, statusCode } = await mockServer.inject(request);
+      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      expect(response.status).toBe(asserts.statusCode);
+      expect(response.payload).toEqual(asserts.result);
 
-      expect(pre).toHaveBeenCalled();
-
-      if (callWithRequestImpl) {
-        expect(mockCallWithRequest).toHaveBeenCalledWith(
-          expect.objectContaining({
-            headers: expect.objectContaining({
-              authorization: headers.authorization,
-            }),
-          }),
+      if (apiResponse) {
+        expect(mockRouteDefinitionParams.clusterClient.asScoped).toHaveBeenCalledWith(mockRequest);
+        expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
           'shield.getAPIKeys',
-          {
-            owner: !isAdmin,
-          },
+          { owner: !isAdmin }
         );
       } else {
-        expect(mockCallWithRequest).not.toHaveBeenCalled();
+        expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
       }
-
-      expect(statusCode).toBe(asserts.statusCode);
-      expect(result).toEqual(asserts.result);
+      expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
     });
   };
 
   describe('failure', () => {
-    getApiKeysTest('returns result of routePreCheckLicense', {
-      preCheckLicenseImpl: () => Boom.forbidden('test forbidden message'),
-      asserts: {
-        statusCode: 403,
-        result: {
-          error: 'Forbidden',
-          statusCode: 403,
-          message: 'test forbidden message',
-        },
-      },
+    getApiKeysTest('returns result of license checker', {
+      licenseCheckResult: { state: LICENSE_CHECK_STATE.Invalid, message: 'test forbidden message' },
+      asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
 
-    getApiKeysTest('returns error from callWithRequest', {
-      callWithRequestImpl: async () => {
-        throw Boom.notAcceptable('test not acceptable message');
+    const error = Boom.notAcceptable('test not acceptable message');
+    getApiKeysTest('returns error from cluster client', {
+      apiResponse: async () => {
+        throw error;
       },
-      asserts: {
-        statusCode: 406,
-        result: {
-          error: 'Not Acceptable',
-          statusCode: 406,
-          message: 'test not acceptable message',
-        },
-      },
+      asserts: { statusCode: 406, result: error },
     });
   });
 
   describe('success', () => {
     getApiKeysTest('returns API keys', {
-      callWithRequestImpl: async () => ({
-        api_keys:
-          [{
+      apiResponse: async () => ({
+        api_keys: [
+          {
             id: 'YCLV7m0BJ3xI4hhWB648',
             name: 'test-api-key',
             creation: 1571670001452,
             expiration: 1571756401452,
             invalidated: false,
             username: 'elastic',
-            realm: 'reserved'
-          }]
+            realm: 'reserved',
+          },
+        ],
       }),
       asserts: {
         statusCode: 200,
         result: {
-          apiKeys:
-            [{
+          apiKeys: [
+            {
               id: 'YCLV7m0BJ3xI4hhWB648',
               name: 'test-api-key',
               creation: 1571670001452,
               expiration: 1571756401452,
               invalidated: false,
               username: 'elastic',
-              realm: 'reserved'
-            }]
+              realm: 'reserved',
+            },
+          ],
         },
       },
     });
     getApiKeysTest('returns only valid API keys', {
-      callWithRequestImpl: async () => ({
-        api_keys:
-          [{
+      apiResponse: async () => ({
+        api_keys: [
+          {
             id: 'YCLV7m0BJ3xI4hhWB648',
             name: 'test-api-key1',
             creation: 1571670001452,
             expiration: 1571756401452,
             invalidated: true,
             username: 'elastic',
-            realm: 'reserved'
-          }, {
+            realm: 'reserved',
+          },
+          {
             id: 'YCLV7m0BJ3xI4hhWB648',
             name: 'test-api-key2',
             creation: 1571670001452,
             expiration: 1571756401452,
             invalidated: false,
             username: 'elastic',
-            realm: 'reserved'
-          }],
+            realm: 'reserved',
+          },
+        ],
       }),
       asserts: {
         statusCode: 200,
         result: {
-          apiKeys:
-            [{
+          apiKeys: [
+            {
               id: 'YCLV7m0BJ3xI4hhWB648',
               name: 'test-api-key2',
               creation: 1571670001452,
               expiration: 1571756401452,
               invalidated: false,
               username: 'elastic',
-              realm: 'reserved'
-            }]
+              realm: 'reserved',
+            },
+          ],
         },
       },
     });

@@ -4,211 +4,204 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import Joi from 'joi';
-import sinon from 'sinon';
+import { ObjectType } from '@kbn/config-schema';
+import {
+  IClusterClient,
+  IRouter,
+  IScopedClusterClient,
+  kibanaResponseFactory,
+  RequestHandler,
+  RequestHandlerContext,
+  RouteConfig,
+} from '../../../../../../src/core/server';
+import { LICENSE_CHECK_STATE } from '../../../../licensing/server';
+import { Authentication, AuthenticationResult } from '../../authentication';
+import { ConfigType } from '../../config';
+import { LegacyAPI } from '../../plugin';
+import { defineChangeUserPasswordRoutes } from './change_password';
 
-import { serverFixture } from '../../../../lib/__tests__/__fixtures__/server';
-import { requestFixture } from '../../../../lib/__tests__/__fixtures__/request';
-import { AuthenticationResult } from '../../../../../../../../plugins/security/server';
-import { initUsersApi } from '../users';
-import * as ClientShield from '../../../../../../../server/lib/get_client_shield';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
+import {
+  elasticsearchServiceMock,
+  loggingServiceMock,
+  httpServiceMock,
+  httpServerMock,
+} from '../../../../../../src/core/server/mocks';
+import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import { authorizationMock } from '../../authorization/index.mock';
+import { authenticationMock } from '../../authentication/index.mock';
 
-describe('User routes', () => {
-  const sandbox = sinon.createSandbox();
+describe('Change password', () => {
+  let router: jest.Mocked<IRouter>;
+  let authc: jest.Mocked<Authentication>;
+  let mockClusterClient: jest.Mocked<IClusterClient>;
+  let mockScopedClusterClient: jest.Mocked<IScopedClusterClient>;
+  let routeHandler: RequestHandler<any, any, any>;
+  let routeConfig: RouteConfig<any, any, any, any>;
+  let mockContext: RequestHandlerContext;
 
-  let clusterStub;
-  let serverStub;
-  let loginStub;
+  function checkPasswordChangeAPICall(
+    username: string,
+    request: ReturnType<typeof httpServerMock.createKibanaRequest>
+  ) {
+    expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
+    expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
+    expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+    expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
+      'shield.changePassword',
+      { username, body: { password: 'new-password' } }
+    );
+  }
 
   beforeEach(() => {
-    serverStub = serverFixture();
-    loginStub = sinon.stub();
+    router = httpServiceMock.createRouter();
+    authc = authenticationMock.create();
 
-    // Cluster is returned by `getClient` function that is wrapped into `once` making cluster
-    // a static singleton, so we should use sandbox to set/reset its behavior between tests.
-    clusterStub = sinon.stub({ callWithRequest() {} });
-    sandbox.stub(ClientShield, 'getClient').returns(clusterStub);
+    authc.getCurrentUser.mockResolvedValue(mockAuthenticatedUser({ username: 'user' }));
+    authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockAuthenticatedUser()));
 
-    initUsersApi({ authc: { login: loginStub }, __legacyCompat: { config: { authc: { providers: ['basic'] } } } }, serverStub);
+    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockClusterClient = elasticsearchServiceMock.createClusterClient();
+    mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
+
+    mockContext = ({
+      licensing: {
+        license: { check: jest.fn().mockReturnValue({ check: LICENSE_CHECK_STATE.Valid }) },
+      },
+    } as unknown) as RequestHandlerContext;
+
+    defineChangeUserPasswordRoutes({
+      router,
+      clusterClient: mockClusterClient,
+      basePath: httpServiceMock.createBasePath(),
+      logger: loggingServiceMock.create().get(),
+      config: { authc: { providers: ['saml'] } } as ConfigType,
+      authc,
+      authz: authorizationMock.create(),
+      getLegacyAPI: () => ({ cspRules: 'test-csp-rule' } as LegacyAPI),
+    });
+
+    const [changePasswordRouteConfig, changePasswordRouteHandler] = router.post.mock.calls[0];
+    routeConfig = changePasswordRouteConfig;
+    routeHandler = changePasswordRouteHandler;
   });
 
-  afterEach(() => sandbox.restore());
+  it('correctly defines route.', async () => {
+    expect(routeConfig.path).toBe('/internal/security/users/{username}/password');
 
-  describe('change password', () => {
-    let changePasswordRoute;
-    let request;
+    const paramsSchema = (routeConfig.validate as any).params as ObjectType;
+    expect(() => paramsSchema.validate({})).toThrowErrorMatchingInlineSnapshot(
+      `"[username]: expected value of type [string] but got [undefined]"`
+    );
+    expect(() => paramsSchema.validate({ username: '' })).toThrowErrorMatchingInlineSnapshot(
+      `"[username]: value is [] but it must have a minimum length of [1]."`
+    );
+    expect(() =>
+      paramsSchema.validate({ username: 'a'.repeat(1025) })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[username]: value is [aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] but it must have a maximum length of [1024]."`
+    );
 
-    beforeEach(() => {
-      changePasswordRoute = serverStub.route
-        .withArgs(sinon.match({ path: '/api/security/v1/users/{username}/password' }))
-        .firstCall
-        .args[0];
+    const bodySchema = (routeConfig.validate as any).body as ObjectType;
+    expect(() => bodySchema.validate({})).toThrowErrorMatchingInlineSnapshot(
+      `"[newPassword]: expected value of type [string] but got [undefined]"`
+    );
+    expect(() => bodySchema.validate({ newPassword: '' })).toThrowErrorMatchingInlineSnapshot(
+      `"[newPassword]: value is [] but it must have a minimum length of [1]."`
+    );
+    expect(() =>
+      bodySchema.validate({ newPassword: '123456', password: '' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[password]: value is [] but it must have a minimum length of [1]."`
+    );
+  });
 
-      request = requestFixture({
-        headers: {},
-        auth: { credentials: { username: 'user' } },
-        params: { username: 'target-user' },
-        payload: { password: 'old-password', newPassword: 'new-password' }
-      });
+  describe('own password', () => {
+    const username = 'user';
+    const mockRequest = httpServerMock.createKibanaRequest({
+      params: { username },
+      body: { password: 'old-password', newPassword: 'new-password' },
     });
 
-    it('correctly defines route.', async () => {
-      expect(changePasswordRoute.method).to.be('POST');
-      expect(changePasswordRoute.path).to.be('/api/security/v1/users/{username}/password');
-      expect(changePasswordRoute.handler).to.be.a(Function);
+    it('returns 403 if old password is wrong.', async () => {
+      const loginFailureReason = new Error('Something went wrong.');
+      authc.login.mockResolvedValue(AuthenticationResult.failed(loginFailureReason));
 
-      expect(changePasswordRoute.config).to.not.have.property('auth');
-      expect(changePasswordRoute.config).to.have.property('pre');
-      expect(changePasswordRoute.config.pre).to.have.length(1);
-      expect(changePasswordRoute.config.validate).to.eql({
-        payload: Joi.object({
-          password: Joi.string(),
-          newPassword: Joi.string().required()
-        })
-      });
+      const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
+
+      expect(response.status).toBe(403);
+      expect(response.payload).toEqual(loginFailureReason);
+      expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
     });
 
-    describe('own password', () => {
-      beforeEach(() => {
-        request.params.username = request.auth.credentials.username;
-        loginStub = loginStub
-          .withArgs(
-            sinon.match.instanceOf(KibanaRequest),
-            { provider: 'basic', value: { username: 'user', password: 'old-password' }, stateless: true }
-          )
-          .resolves(AuthenticationResult.succeeded({}));
+    it(`returns 401 if user can't authenticate with new password.`, async () => {
+      const loginFailureReason = new Error('Something went wrong.');
+      authc.login.mockImplementation(async (request, attempt) => {
+        const credentials = attempt.value as { username: string; password: string };
+        if (credentials.username === 'user' && credentials.password === 'new-password') {
+          return AuthenticationResult.failed(loginFailureReason);
+        }
+
+        return AuthenticationResult.succeeded(mockAuthenticatedUser());
       });
 
-      it('returns 403 if old password is wrong.', async () => {
-        loginStub.resolves(AuthenticationResult.failed(new Error('Something went wrong.')));
+      const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 
-        const response = await changePasswordRoute.handler(request);
+      expect(response.status).toBe(401);
+      expect(response.payload).toEqual(loginFailureReason);
 
-        sinon.assert.notCalled(clusterStub.callWithRequest);
-        expect(response.isBoom).to.be(true);
-        expect(response.output.payload).to.eql({
-          statusCode: 403,
-          error: 'Forbidden',
-          message: 'Something went wrong.'
-        });
-      });
-
-      it(`returns 401 if user can't authenticate with new password.`, async () => {
-        loginStub
-          .withArgs(
-            sinon.match.instanceOf(KibanaRequest),
-            { provider: 'basic', value: { username: 'user', password: 'new-password' } }
-          )
-          .resolves(AuthenticationResult.failed(new Error('Something went wrong.')));
-
-        const response = await changePasswordRoute.handler(request);
-
-        sinon.assert.calledOnce(clusterStub.callWithRequest);
-        sinon.assert.calledWithExactly(
-          clusterStub.callWithRequest,
-          sinon.match.same(request),
-          'shield.changePassword',
-          { username: 'user', body: { password: 'new-password' } }
-        );
-
-        expect(response.isBoom).to.be(true);
-        expect(response.output.payload).to.eql({
-          statusCode: 401,
-          error: 'Unauthorized',
-          message: 'Something went wrong.'
-        });
-      });
-
-      it('returns 500 if password update request fails.', async () => {
-        clusterStub.callWithRequest
-          .withArgs(
-            sinon.match.same(request),
-            'shield.changePassword',
-            { username: 'user', body: { password: 'new-password' } }
-          )
-          .rejects(new Error('Request failed.'));
-
-        const response = await changePasswordRoute.handler(request);
-
-        expect(response.isBoom).to.be(true);
-        expect(response.output.payload).to.eql({
-          statusCode: 500,
-          error: 'Internal Server Error',
-          message: 'An internal server error occurred'
-        });
-      });
-
-      it('successfully changes own password if provided old password is correct.', async () => {
-        loginStub
-          .withArgs(
-            sinon.match.instanceOf(KibanaRequest),
-            { provider: 'basic', value: { username: 'user', password: 'new-password' } }
-          )
-          .resolves(AuthenticationResult.succeeded({}));
-
-        const hResponseStub = { code: sinon.stub() };
-        const hStub = { response: sinon.stub().returns(hResponseStub) };
-
-        await changePasswordRoute.handler(request, hStub);
-
-        sinon.assert.calledOnce(clusterStub.callWithRequest);
-        sinon.assert.calledWithExactly(
-          clusterStub.callWithRequest,
-          sinon.match.same(request),
-          'shield.changePassword',
-          { username: 'user', body: { password: 'new-password' } }
-        );
-
-        sinon.assert.calledWithExactly(hStub.response);
-        sinon.assert.calledWithExactly(hResponseStub.code, 204);
-      });
+      checkPasswordChangeAPICall(username, mockRequest);
     });
 
-    describe('other user password', () => {
-      it('returns 500 if password update request fails.', async () => {
-        clusterStub.callWithRequest
-          .withArgs(
-            sinon.match.same(request),
-            'shield.changePassword',
-            { username: 'target-user', body: { password: 'new-password' } }
-          )
-          .returns(Promise.reject(new Error('Request failed.')));
+    it('returns 500 if password update request fails.', async () => {
+      const failureReason = new Error('Request failed.');
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
 
-        const response = await changePasswordRoute.handler(request);
+      const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 
-        sinon.assert.notCalled(serverStub.plugins.security.getUser);
-        sinon.assert.notCalled(loginStub);
+      expect(response.status).toBe(500);
+      expect(response.payload).toEqual(failureReason);
 
-        expect(response.isBoom).to.be(true);
-        expect(response.output.payload).to.eql({
-          statusCode: 500,
-          error: 'Internal Server Error',
-          message: 'An internal server error occurred'
-        });
-      });
+      checkPasswordChangeAPICall(username, mockRequest);
+    });
 
-      it('successfully changes user password.', async () => {
-        const hResponseStub = { code: sinon.stub() };
-        const hStub = { response: sinon.stub().returns(hResponseStub) };
+    it('successfully changes own password if provided old password is correct.', async () => {
+      const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 
-        await changePasswordRoute.handler(request, hStub);
+      expect(response.status).toBe(204);
+      expect(response.payload).toBeUndefined();
 
-        sinon.assert.notCalled(serverStub.plugins.security.getUser);
-        sinon.assert.notCalled(loginStub);
+      checkPasswordChangeAPICall(username, mockRequest);
+    });
+  });
 
-        sinon.assert.calledOnce(clusterStub.callWithRequest);
-        sinon.assert.calledWithExactly(
-          clusterStub.callWithRequest,
-          sinon.match.same(request),
-          'shield.changePassword',
-          { username: 'target-user', body: { password: 'new-password' } }
-        );
+  describe('other user password', () => {
+    const username = 'target-user';
+    const mockRequest = httpServerMock.createKibanaRequest({
+      params: { username },
+      body: { newPassword: 'new-password' },
+    });
 
-        sinon.assert.calledWithExactly(hStub.response);
-        sinon.assert.calledWithExactly(hResponseStub.code, 204);
-      });
+    it('returns 500 if password update request fails.', async () => {
+      const failureReason = new Error('Request failed.');
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
+
+      const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
+
+      expect(response.status).toBe(500);
+      expect(response.payload).toEqual(failureReason);
+      expect(authc.login).not.toHaveBeenCalled();
+
+      checkPasswordChangeAPICall(username, mockRequest);
+    });
+
+    it('successfully changes user password.', async () => {
+      const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
+
+      expect(response.status).toBe(204);
+      expect(response.payload).toBeUndefined();
+      expect(authc.login).not.toHaveBeenCalled();
+
+      checkPasswordChangeAPICall(username, mockRequest);
     });
   });
 });

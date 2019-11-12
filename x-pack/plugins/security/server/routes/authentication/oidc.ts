@@ -4,224 +4,261 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import Joi from 'joi';
 import { schema } from '@kbn/config-schema';
-import { canRedirectRequest, wrapError, OIDCAuthenticationFlow } from '../../../../../../../plugins/security/server';
-import { KibanaRequest } from '../../../../../../../../src/core/server';
-import { createCSPRuleString } from '../../../../../../../../src/legacy/server/csp';
+import { KibanaRequest, KibanaResponseFactory } from '../../../../../../src/core/server';
+import { OIDCAuthenticationFlow } from '../../authentication';
+import { createCustomResourceResponse } from '.';
+import { createLicensedRouteHandler } from '../licensed_route_handler';
+import { wrapIntoCustomErrorResponse } from '../../errors';
+import { ProviderLoginAttempt } from '../../authentication/providers/oidc';
+import { RouteDefinitionParams } from '..';
 
-export function initAuthenticateApi({ authc: { login, logout }, __legacyCompat: { config } }, server) {
-  function prepareCustomResourceResponse(response, contentType) {
-    return response
-      .header('cache-control', 'private, no-cache, no-store')
-      .header('content-security-policy', createCSPRuleString(server.config().get('csp.rules')))
-      .type(contentType);
-  }
-
-  server.route({
-    method: 'POST',
-    path: '/api/security/v1/login',
-    config: {
-      auth: false,
-      validate: {
-        payload: Joi.object({
-          username: Joi.string().required(),
-          password: Joi.string().required()
-        })
+/**
+ * Defines routes required for SAML authentication.
+ */
+export function defineOIDCRoutes({
+  router,
+  logger,
+  authc,
+  getLegacyAPI,
+  basePath,
+}: RouteDefinitionParams) {
+  // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
+  for (const path of ['/api/security/oidc/implicit', '/api/security/v1/oidc/implicit']) {
+    /**
+     * The route should be configured as a redirect URI in OP when OpenID Connect implicit flow
+     * is used, so that we can extract authentication response from URL fragment and send it to
+     * the `/api/security/oidc` route.
+     */
+    router.get(
+      {
+        path,
+        validate: false,
+        options: { authRequired: false },
       },
-      response: {
-        emptyStatusCode: 204,
-      }
-    },
-    async handler(request, h) {
-      const { username, password } = request.payload;
-
-      try {
-        // We should prefer `token` over `basic` if possible.
-        const providerToLoginWith = config.authc.providers.includes('token')
-          ? 'token'
-          : 'basic';
-        const authenticationResult = await login(KibanaRequest.from(request), {
-          provider: providerToLoginWith,
-          value: { username, password }
-        });
-
-        if (!authenticationResult.succeeded()) {
-          throw Boom.unauthorized(authenticationResult.error);
+      (context, request, response) => {
+        const serverBasePath = basePath.serverBasePath;
+        if (path === '/api/security/v1/oidc/implicit') {
+          logger.warn(
+            `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${serverBasePath}/api/security/oidc/implicit" URL instead.`,
+            { tags: ['deprecation'] }
+          );
         }
-
-        return h.response();
-      } catch(err) {
-        throw wrapError(err);
-      }
-    }
-  });
-
-  /**
-   * The route should be configured as a redirect URI in OP when OpenID Connect implicit flow
-   * is used, so that we can extract authentication response from URL fragment and send it to
-   * the `/api/security/v1/oidc` route.
-   */
-  server.route({
-    method: 'GET',
-    path: '/api/security/v1/oidc/implicit',
-    config: { auth: false },
-    async handler(request, h) {
-      return prepareCustomResourceResponse(
-        h.response(`
+        return response.custom(
+          createCustomResourceResponse(
+            `
           <!DOCTYPE html>
           <title>Kibana OpenID Connect Login</title>
-          <script src="${server.config().get('server.basePath')}/api/security/v1/oidc/implicit.js"></script>
-        `),
-        'text/html'
-      );
-    }
-  });
+          <link rel="icon" href="data:,">
+          <script src="${serverBasePath}/internal/security/oidc/implicit.js"></script>
+        `,
+            'text/html',
+            getLegacyAPI().cspRules
+          )
+        );
+      }
+    );
+  }
 
   /**
-   * The route that accompanies `/api/security/v1/oidc/implicit` and renders a JavaScript snippet
-   * that extracts fragment part from the URL and send it to the `/api/security/v1/oidc` route.
+   * The route that accompanies `/api/security/oidc/implicit` and renders a JavaScript snippet
+   * that extracts fragment part from the URL and send it to the `/api/security/oidc` route.
    * We need this separate endpoint because of default CSP policy that forbids inline scripts.
    */
-  server.route({
-    method: 'GET',
-    path: '/api/security/v1/oidc/implicit.js',
-    config: { auth: false },
-    async handler(request, h) {
-      return prepareCustomResourceResponse(
-        h.response(`
+  router.get(
+    {
+      path: '/internal/security/oidc/implicit.js',
+      validate: false,
+      options: { authRequired: false },
+    },
+    (context, request, response) => {
+      const serverBasePath = basePath.serverBasePath;
+      return response.custom(
+        createCustomResourceResponse(
+          `
           window.location.replace(
-            '${server.config().get('server.basePath')}/api/security/v1/oidc?authenticationResponseURI=' + 
-              encodeURIComponent(window.location.href)
+            '${serverBasePath}/api/security/oidc?authenticationResponseURI=' + encodeURIComponent(window.location.href)
           );
-        `),
-        'text/javascript'
+        `,
+          'text/javascript',
+          getLegacyAPI().cspRules
+        )
       );
     }
-  });
+  );
 
-  server.route({
-    // POST is only allowed for Third Party initiated authentication
-    // Consider splitting this route into two (GET and POST) when it's migrated to New Platform.
-    method: ['GET', 'POST'],
-    path: '/api/security/v1/oidc',
-    config: {
-      auth: false,
-      validate: {
-        query: Joi.object().keys({
-          iss: Joi.string().uri({ scheme: 'https' }),
-          login_hint: Joi.string(),
-          target_link_uri: Joi.string().uri(),
-          code: Joi.string(),
-          error: Joi.string(),
-          error_description: Joi.string(),
-          error_uri: Joi.string().uri(),
-          state: Joi.string(),
-          authenticationResponseURI: Joi.string(),
-        }).unknown(),
-      }
-    },
-    async handler(request, h) {
-      try {
-        const query = request.query || {};
-        const payload = request.payload || {};
+  // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
+  for (const path of ['/api/security/oidc', '/api/security/v1/oidc']) {
+    router.get(
+      {
+        path,
+        validate: {
+          query: schema.object(
+            {
+              authenticationResponseURI: schema.maybe(schema.string({ minLength: 1 })),
+              code: schema.maybe(schema.string()),
+              error: schema.maybe(schema.string()),
+              error_description: schema.maybe(schema.string()),
+              error_uri: schema.maybe(schema.uri()),
+              iss: schema.maybe(schema.uri({ scheme: ['https'] })),
+              login_hint: schema.maybe(schema.string()),
+              target_link_uri: schema.maybe(schema.uri()),
+              state: schema.maybe(schema.string()),
+            },
+            { allowUnknowns: true }
+          ),
+        },
+        options: { authRequired: false },
+      },
+      createLicensedRouteHandler(async (context, request, response) => {
+        const serverBasePath = basePath.serverBasePath;
 
         // An HTTP GET request with a query parameter named `authenticationResponseURI` that includes URL fragment OpenID
         // Connect Provider sent during implicit authentication flow to the Kibana own proxy page that extracted that URL
         // fragment and put it into `authenticationResponseURI` query string parameter for this endpoint. See more details
         // at https://openid.net/specs/openid-connect-core-1_0.html#ImplicitFlowAuth
-        let loginAttempt;
-        if (query.authenticationResponseURI) {
+        let loginAttempt: ProviderLoginAttempt | undefined;
+        if (request.query.authenticationResponseURI) {
           loginAttempt = {
             flow: OIDCAuthenticationFlow.Implicit,
-            authenticationResponseURI: query.authenticationResponseURI,
+            authenticationResponseURI: request.query.authenticationResponseURI,
           };
-        } else if (query.code || query.error) {
+        } else if (request.query.code || request.query.error) {
+          if (path === '/api/security/v1/oidc') {
+            logger.warn(
+              `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${serverBasePath}/api/security/oidc" URL instead.`,
+              { tags: ['deprecation'] }
+            );
+          }
+
           // An HTTP GET request with a query parameter named `code` (or `error`) as the response to a successful (or
           // failed) authentication from an OpenID Connect Provider during authorization code authentication flow.
           // See more details at https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth.
           loginAttempt = {
             flow: OIDCAuthenticationFlow.AuthorizationCode,
             //  We pass the path only as we can't be sure of the full URL and Elasticsearch doesn't need it anyway.
-            authenticationResponseURI: request.url.path,
+            authenticationResponseURI: request.url.path!,
           };
-        } else if (query.iss || payload.iss) {
-          // An HTTP GET request with a query parameter named `iss` or an HTTP POST request with the same parameter in the
-          // payload as part of a 3rd party initiated authentication. See more details at
-          // https://openid.net/specs/openid-connect-core-1_0.html#ThirdPartyInitiatedLogin
+        } else if (request.query.iss) {
+          logger.warn(
+            `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${serverBasePath}/api/security/oidc/initiate_login" URL for Third-Party Initiated login instead.`,
+            { tags: ['deprecation'] }
+          );
+          // An HTTP GET request with a query parameter named `iss` as part of a 3rd party initiated authentication.
+          // See more details at https://openid.net/specs/openid-connect-core-1_0.html#ThirdPartyInitiatedLogin
           loginAttempt = {
             flow: OIDCAuthenticationFlow.InitiatedBy3rdParty,
-            iss: query.iss || payload.iss,
-            loginHint: query.login_hint || payload.login_hint,
+            iss: request.query.iss,
+            loginHint: request.query.login_hint,
           };
         }
 
         if (!loginAttempt) {
-          throw Boom.badRequest('Unrecognized login attempt.');
+          return response.badRequest({ body: 'Unrecognized login attempt.' });
         }
 
-        // We handle the fact that the user might get redirected to Kibana while already having an session
-        // Return an error notifying the user they are already logged in.
-        const authenticationResult = await login(KibanaRequest.from(request), {
-          provider: 'oidc',
-          value: loginAttempt
-        });
-        if (authenticationResult.succeeded()) {
-          return Boom.forbidden(
-            'Sorry, you already have an active Kibana session. ' +
-            'If you want to start a new one, please logout from the existing session first.'
+        return performOIDCLogin(request, response, loginAttempt);
+      })
+    );
+  }
+
+  // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
+  for (const path of ['/api/security/oidc/initiate_login', '/api/security/v1/oidc']) {
+    /**
+     * An HTTP POST request with the payload parameter named `iss` as part of a 3rd party initiated authentication.
+     * See more details at https://openid.net/specs/openid-connect-core-1_0.html#ThirdPartyInitiatedLogin
+     */
+    router.post(
+      {
+        path,
+        validate: {
+          body: schema.object(
+            {
+              iss: schema.uri({ scheme: ['https'] }),
+              login_hint: schema.maybe(schema.string()),
+              target_link_uri: schema.maybe(schema.uri()),
+            },
+            { allowUnknowns: true }
+          ),
+        },
+        options: { authRequired: false },
+      },
+      createLicensedRouteHandler(async (context, request, response) => {
+        const serverBasePath = basePath.serverBasePath;
+        if (path === '/api/security/v1/oidc') {
+          logger.warn(
+            `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${serverBasePath}/api/security/oidc/initiate_login" URL for Third-Party Initiated login instead.`,
+            { tags: ['deprecation'] }
           );
         }
 
-        if (authenticationResult.redirected()) {
-          return h.redirect(authenticationResult.redirectURL);
-        }
+        return performOIDCLogin(request, response, {
+          flow: OIDCAuthenticationFlow.InitiatedBy3rdParty,
+          iss: request.body.iss,
+          loginHint: request.body.login_hint,
+        });
+      })
+    );
+  }
 
-        throw Boom.unauthorized(authenticationResult.error);
-      } catch (err) {
-        throw wrapError(err);
-      }
-    }
-  });
-
-  server.route({
-    method: 'GET',
-    path: '/api/security/v1/logout',
-    config: {
-      auth: false
+  /**
+   * An HTTP GET request with the query string parameter named `iss` as part of a 3rd party initiated authentication.
+   * See more details at https://openid.net/specs/openid-connect-core-1_0.html#ThirdPartyInitiatedLogin
+   */
+  router.get(
+    {
+      path: '/api/security/oidc/initiate_login',
+      validate: {
+        query: schema.object(
+          {
+            iss: schema.uri({ scheme: ['https'] }),
+            login_hint: schema.maybe(schema.string()),
+            target_link_uri: schema.maybe(schema.uri()),
+          },
+          { allowUnknowns: true }
+        ),
+      },
+      options: { authRequired: false },
     },
-    async handler(request, h) {
-      if (!canRedirectRequest(KibanaRequest.from(request))) {
-        throw Boom.badRequest('Client should be able to process redirect response.');
+    createLicensedRouteHandler(async (context, request, response) => {
+      return performOIDCLogin(request, response, {
+        flow: OIDCAuthenticationFlow.InitiatedBy3rdParty,
+        iss: request.query.iss,
+        loginHint: request.query.login_hint,
+      });
+    })
+  );
+
+  async function performOIDCLogin(
+    request: KibanaRequest,
+    response: KibanaResponseFactory,
+    loginAttempt: ProviderLoginAttempt
+  ) {
+    try {
+      // We handle the fact that the user might get redirected to Kibana while already having an session
+      // Return an error notifying the user they are already logged in.
+      const authenticationResult = await authc.login(request, {
+        provider: 'oidc',
+        value: loginAttempt,
+      });
+
+      if (authenticationResult.succeeded()) {
+        return response.forbidden({
+          body:
+            'Sorry, you already have an active Kibana session. ' +
+            'If you want to start a new one, please logout from the existing session first.',
+        });
       }
 
-      try {
-        const deauthenticationResult = await logout(
-          // Allow unknown query parameters as this endpoint can be hit by the 3rd-party with any
-          // set of query string parameters (e.g. SAML/OIDC logout request parameters).
-          KibanaRequest.from(request, {
-            query: schema.object({}, { allowUnknowns: true }),
-          })
-        );
-        if (deauthenticationResult.failed()) {
-          throw wrapError(deauthenticationResult.error);
-        }
-
-        return h.redirect(
-          deauthenticationResult.redirectURL || `${server.config().get('server.basePath')}/`
-        );
-      } catch (err) {
-        throw wrapError(err);
+      if (authenticationResult.redirected()) {
+        return response.redirected({
+          headers: { location: authenticationResult.redirectURL! },
+        });
       }
-    }
-  });
 
-  server.route({
-    method: 'GET',
-    path: '/api/security/v1/me',
-    handler(request) {
-      return request.auth.credentials;
+      return response.unauthorized({ body: authenticationResult.error });
+    } catch (error) {
+      return response.customError(wrapIntoCustomErrorResponse(error));
     }
-  });
+  }
 }

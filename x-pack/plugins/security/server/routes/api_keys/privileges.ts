@@ -4,72 +4,46 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { wrapError } from '../../../../../../../../plugins/security/server';
-import { INTERNAL_API_BASE_PATH } from  '../../../../../common/constants';
+import { wrapIntoCustomErrorResponse } from '../../errors';
+import { createLicensedRouteHandler } from '../licensed_route_handler';
+import { RouteDefinitionParams } from '..';
 
-export function initCheckPrivilegesApi(server, callWithRequest, routePreCheckLicenseFn) {
-  server.route({
-    method: 'GET',
-    path: `${INTERNAL_API_BASE_PATH}/api_key/privileges`,
-    async handler(request) {
+export function defineCheckPrivilegesRoutes({ router, clusterClient }: RouteDefinitionParams) {
+  router.get(
+    {
+      path: '/internal/security/api_key/privileges',
+      validate: false,
+    },
+    createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const result = await Promise.all([
-          callWithRequest(
-            request,
-            'shield.hasPrivileges',
-            {
-              body: {
-                cluster: [
-                  'manage_security',
-                  'manage_api_key',
-                ],
-              },
-            }
-          ),
-          new Promise(async (resolve, reject) => {
-            try {
-              const result = await callWithRequest(
-                request,
-                'shield.getAPIKeys',
-                {
-                  owner: true
-                }
-              );
-              //  If the API returns a truthy result that means it's enabled.
-              resolve({ areApiKeysEnabled: !!result });
-            } catch (e) {
-              // This is a brittle dependency upon message. Tracked by https://github.com/elastic/elasticsearch/issues/47759.
-              if (e.message.includes('api keys are not enabled')) {
-                return resolve({ areApiKeysEnabled: false });
-              }
+        const scopedClusterClient = clusterClient.asScoped(request);
 
-              // It's a real error, so rethrow it.
-              reject(e);
-            }
+        const [
+          {
+            cluster: { manage_security: manageSecurity, manage_api_key: manageApiKey },
+          },
+          { areApiKeysEnabled },
+        ] = await Promise.all([
+          scopedClusterClient.callAsCurrentUser('shield.hasPrivileges', {
+            body: { cluster: ['manage_security', 'manage_api_key'] },
           }),
+          scopedClusterClient.callAsCurrentUser('shield.getAPIKeys', { owner: true }).then(
+            //  If the API returns a truthy result that means it's enabled.
+            result => ({ areApiKeysEnabled: !!result }),
+            // This is a brittle dependency upon message. Tracked by https://github.com/elastic/elasticsearch/issues/47759.
+            e =>
+              e.message.includes('api keys are not enabled')
+                ? Promise.resolve({ areApiKeysEnabled: false })
+                : Promise.reject(e)
+          ),
         ]);
 
-        const [{
-          cluster: {
-            manage_security: manageSecurity,
-            manage_api_key: manageApiKey,
-          }
-        }, {
-          areApiKeysEnabled,
-        }] = result;
-
-        const isAdmin = manageSecurity || manageApiKey;
-
-        return {
-          areApiKeysEnabled,
-          isAdmin,
-        };
+        return response.ok({
+          body: { areApiKeysEnabled, isAdmin: manageSecurity || manageApiKey },
+        });
       } catch (error) {
-        return wrapError(error);
+        return response.customError(wrapIntoCustomErrorResponse(error));
       }
-    },
-    config: {
-      pre: [routePreCheckLicenseFn]
-    }
-  });
+    })
+  );
 }

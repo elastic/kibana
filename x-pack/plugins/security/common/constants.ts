@@ -7,4 +7,3 @@
 export const GLOBAL_RESOURCE = '*';
 export const APPLICATION_PREFIX = 'kibana-';
 export const RESERVED_PRIVILEGES_APPLICATION_WILDCARD = 'kibana-*';
-export const INTERNAL_API_BASE_PATH = '/internal/security';

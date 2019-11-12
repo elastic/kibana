@@ -4,17 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getClient } from '../../../../../../../server/lib/get_client_shield';
-import { routePreCheckLicense } from '../../../../lib/route_pre_check_license';
-import { initCheckPrivilegesApi } from './privileges';
-import { initGetApiKeysApi } from './get';
-import { initInvalidateApiKeysApi } from './invalidate';
+import { defineGetApiKeysRoutes } from './get';
+import { defineCheckPrivilegesRoutes } from './privileges';
+import { defineInvalidateApiKeysRoutes } from './invalidate';
+import { RouteDefinitionParams } from '..';
 
-export function initApiKeysApi(server) {
-  const callWithRequest = getClient(server).callWithRequest;
-  const routePreCheckLicenseFn = routePreCheckLicense(server);
-
-  initCheckPrivilegesApi(server, callWithRequest, routePreCheckLicenseFn);
-  initGetApiKeysApi(server, callWithRequest, routePreCheckLicenseFn);
-  initInvalidateApiKeysApi(server, callWithRequest, routePreCheckLicenseFn);
+export function defineApiKeysRoutes(params: RouteDefinitionParams) {
+  defineGetApiKeysRoutes(params);
+  defineCheckPrivilegesRoutes(params);
+  defineInvalidateApiKeysRoutes(params);
 }
