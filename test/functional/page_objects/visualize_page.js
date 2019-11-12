@@ -1029,6 +1029,16 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await testSubjects.click('isFilteredByCollarCheckbox');
     }
 
+    async setIsFilteredByCollarCheckbox(value = true) {
+      await retry.try(async () => {
+        const isChecked = await this.isChecked('isFilteredByCollarCheckbox');
+        if (isChecked !== value) {
+          await testSubjects.click('isFilteredByCollarCheckbox');
+          throw new Error('isFilteredByCollar not set correctly');
+        }
+      });
+    }
+
     async getMarkdownData() {
       const markdown = await retry.try(async () => find.byCssSelector('visualize'));
       return await markdown.getVisibleText();

@@ -1,6 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`TelemetryForm renders as expected 1`] = `
+exports[`TelemetryForm doesn't render form when not allowed to change optIn status 1`] = `""`;
+
+exports[`TelemetryForm renders as expected when allows to change optIn status 1`] = `
 <Fragment>
   <EuiPanel
     paddingSize="l"
