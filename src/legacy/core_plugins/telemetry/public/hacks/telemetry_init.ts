@@ -27,6 +27,7 @@ import { Telemetry } from './telemetry';
 import { fetchTelemetry } from './fetch_telemetry';
 // @ts-ignore
 import { isOptInHandleOldSettings } from './welcome_banner/handle_old_settings';
+import { TelemetryOptInProvider } from '../services';
 
 function telemetryInit($injector: any) {
   const $http = $injector.get('$http');
