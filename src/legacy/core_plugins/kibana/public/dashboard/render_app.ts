@@ -77,7 +77,6 @@ export interface RenderDeps {
   dashboardConfig: any;
   savedDashboards: any;
   dashboardCapabilities: any;
-  docTitle: any;
   uiSettings: UiSettingsClientContract;
   chrome: ChromeStart;
   addBasePath: (path: string) => string;

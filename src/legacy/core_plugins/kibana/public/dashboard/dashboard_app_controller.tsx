@@ -115,8 +115,6 @@ export class DashboardAppController {
     savedQueryService,
     embeddables,
     dashboardCapabilities,
-    docTitle,
-    dataStart,
     npDataStart: {
       query: {
         filterManager,
@@ -136,7 +134,7 @@ export class DashboardAppController {
 
     const dash = ($scope.dash = $route.current.locals.dash);
     if (dash.id) {
-      docTitle.change(dash.title);
+      chrome.docTitle.change(dash.title);
     }
 
     const dashboardStateManager = new DashboardStateManager({
@@ -635,7 +633,7 @@ export class DashboardAppController {
             if (dash.id !== $routeParams.id) {
               kbnUrl.change(createDashboardEditUrl(dash.id));
             } else {
-              docTitle.change(dash.lastSavedTitle);
+              chrome.docTitle.change(dash.lastSavedTitle);
               updateViewMode(ViewMode.VIEW);
             }
           }

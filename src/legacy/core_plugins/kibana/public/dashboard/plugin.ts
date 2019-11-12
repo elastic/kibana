@@ -57,8 +57,6 @@ export interface DashboardPluginSetupDependencies {
   __LEGACY: {
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
     localApplicationService: LocalApplicationService;
-    FeatureCatalogueRegistryProvider: any;
-    docTitle: any;
   };
   feature_catalogue: FeatureCatalogueSetup;
 }
@@ -75,12 +73,7 @@ export class DashboardPlugin implements Plugin {
   public setup(
     core: CoreSetup,
     {
-      __LEGACY: {
-        localApplicationService,
-        getAngularDependencies,
-        FeatureCatalogueRegistryProvider,
-        ...legacyServices
-      },
+      __LEGACY: { localApplicationService, getAngularDependencies, ...legacyServices },
       feature_catalogue,
     }: DashboardPluginSetupDependencies
   ) {
