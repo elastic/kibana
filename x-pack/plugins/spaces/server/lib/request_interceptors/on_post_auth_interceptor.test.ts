@@ -27,9 +27,8 @@ import { SpacesAuditLogger } from '../audit_logger';
 import { convertSavedObjectToSpace } from '../../routes/lib';
 import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
 import { Feature } from '../../../../features/server';
-import { OptionalPlugin } from '../../../../../legacy/server/lib/optional_plugin';
-import { SecurityPlugin } from '../../../../../legacy/plugins/security';
 import { spacesConfig } from '../__fixtures__';
+import { securityMock } from '../../../../security/server/mocks';
 
 describe('onPostAuthInterceptor', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;
@@ -170,7 +169,7 @@ describe('onPostAuthInterceptor', () => {
     const spacesService = await service.setup({
       http: (http as unknown) as CoreSetup['http'],
       elasticsearch: elasticsearchServiceMock.createSetupContract(),
-      getSecurity: () => ({} as OptionalPlugin<SecurityPlugin>),
+      authorization: securityMock.createSetup().authz,
       getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
       config$: Rx.of(spacesConfig),
     });

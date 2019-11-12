@@ -128,18 +128,8 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            className="euiFormRow"
+            className="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--compressed"
           >
-            <div
-              className="euiFormRow__labelWrapper"
-            >
-              <label
-                className="euiFormLabel euiFormRow__label"
-                htmlFor="generated-id"
-              >
-                 
-              </label>
-            </div>
             <div
               className="euiFormRow__fieldWrapper"
             >
@@ -303,18 +293,8 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            className="euiFormRow"
+            className="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--compressed"
           >
-            <div
-              className="euiFormRow__labelWrapper"
-            >
-              <label
-                className="euiFormLabel euiFormRow__label"
-                htmlFor="generated-id"
-              >
-                 
-              </label>
-            </div>
             <div
               className="euiFormRow__fieldWrapper"
             >
@@ -478,18 +458,8 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            className="euiFormRow"
+            className="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--compressed"
           >
-            <div
-              className="euiFormRow__labelWrapper"
-            >
-              <label
-                className="euiFormLabel euiFormRow__label"
-                htmlFor="generated-id"
-              >
-                 
-              </label>
-            </div>
             <div
               className="euiFormRow__fieldWrapper"
             >

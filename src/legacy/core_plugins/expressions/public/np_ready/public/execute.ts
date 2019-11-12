@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { fromExpression } from '@kbn/interpreter/target/common';
+import { fromExpression, toExpression } from '@kbn/interpreter/target/common';
 import { DataAdapter, RequestAdapter, Adapters } from '../../../../../../plugins/inspector/public';
 import { getInterpreter } from './services';
 import { ExpressionAST, IExpressionLoaderParams, IInterpreterResult } from './types';
@@ -38,17 +38,18 @@ export class ExpressionDataHandler {
   private inspectorAdapters: Adapters;
   private promise: Promise<IInterpreterResult>;
 
+  public isPending: boolean = true;
   constructor(expression: string | ExpressionAST, params: IExpressionLoaderParams) {
     if (typeof expression === 'string') {
       this.expression = expression;
       this.ast = fromExpression(expression) as ExpressionAST;
     } else {
       this.ast = expression;
-      this.expression = '';
+      this.expression = toExpression(this.ast);
     }
 
     this.abortController = new AbortController();
-    this.inspectorAdapters = this.getActiveInspectorAdapters();
+    this.inspectorAdapters = params.inspectorAdapters || this.getActiveInspectorAdapters();
 
     const getInitialContext = () => ({
       type: 'kibana_context',
@@ -58,11 +59,21 @@ export class ExpressionDataHandler {
     const defaultContext = { type: 'null' };
 
     const interpreter = getInterpreter();
-    this.promise = interpreter.interpretAst(this.ast, params.context || defaultContext, {
-      getInitialContext,
-      inspectorAdapters: this.inspectorAdapters,
-      abortSignal: this.abortController.signal,
-    });
+    this.promise = interpreter
+      .interpretAst(this.ast, params.context || defaultContext, {
+        getInitialContext,
+        inspectorAdapters: this.inspectorAdapters,
+        abortSignal: this.abortController.signal,
+      })
+      .then(
+        (v: IInterpreterResult) => {
+          this.isPending = false;
+          return v;
+        },
+        () => {
+          this.isPending = false;
+        }
+      );
   }
 
   cancel = () => {
