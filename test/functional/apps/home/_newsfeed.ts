@@ -18,9 +18,9 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: any) {
+export default function({ getService, getPageObjects }: FtrProviderContext) {
   const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common', 'newsfeed']);
 
@@ -55,9 +55,5 @@ export default function({ getService, getPageObjects }: any) {
       const isOpen = await PageObjects.newsfeed.openNewsfeedPanel();
       expect(isOpen).to.be(false);
     });
-
-    // TODO: test for empty newsfeed
-
-    // TODO: test for loading
   });
 }

@@ -17,8 +17,9 @@
  * under the License.
  */
 
-export function NewsfeedPageProvider({ getService, getPageObjects }: any) {
-  const config = getService('config');
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export function NewsfeedPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const flyout = getService('flyout');
@@ -31,7 +32,9 @@ export function NewsfeedPageProvider({ getService, getPageObjects }: any) {
       await retry.waitFor('newsfeed flyout', async () => {
         if (await testSubjects.exists('NewsfeedFlyout')) {
           await testSubjects.click('NewsfeedFlyout > euiFlyoutCloseButton');
-        } else return true;
+          return false;
+        }
+        return true;
       });
     }
 
@@ -54,13 +57,6 @@ export function NewsfeedPageProvider({ getService, getPageObjects }: any) {
       }
 
       return objects;
-    }
-
-    async getEmptyList() {
-      config.kbnTestServer.serverArgs.replace({
-        '_newsfeed-FTS-external-service-simulators/kibana/v{VERSION}.json':
-          'empty/kibana/v{VERSION}.json',
-      });
     }
 
     async openNewsfeedEmptyPanel() {
