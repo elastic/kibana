@@ -25,8 +25,14 @@ export function shareableWorkpads(route: CoreSetup['http']['route']) {
   route({
     method: 'GET',
     path: API_ROUTE_SHAREABLE_RUNTIME,
+
     handler: {
-      file: SHAREABLE_RUNTIME_FILE,
+      file: {
+        path: SHAREABLE_RUNTIME_FILE,
+        // The option setting is not for typical use.  We're using it here to avoid
+        // problems in Cloud environments.  See elastic/kibana#47405.
+        confine: false,
+      },
     },
   });
 
@@ -34,9 +40,12 @@ export function shareableWorkpads(route: CoreSetup['http']['route']) {
   route({
     method: 'GET',
     path: API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD,
+
     handler(_request, handler) {
+      // The option setting is not for typical use.  We're using it here to avoid
+      // problems in Cloud environments.  See elastic/kibana#47405.
       // @ts-ignore No type for inert Hapi handler
-      const file = handler.file(SHAREABLE_RUNTIME_FILE);
+      const file = handler.file(SHAREABLE_RUNTIME_FILE, { confine: false });
       file.type('application/octet-stream');
       return file;
     },

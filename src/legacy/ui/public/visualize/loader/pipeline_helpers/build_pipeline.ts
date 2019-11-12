@@ -24,7 +24,7 @@ import { SearchSource } from 'ui/courier';
 import { AggConfig, Vis, VisParams, VisState } from 'ui/vis';
 import { isDateHistogramBucketAggConfig } from 'ui/agg_types/buckets/date_histogram';
 import moment from 'moment';
-import { SerializedFieldFormat } from 'src/plugins/expressions/common/expressions/types/common';
+import { SerializedFieldFormat } from 'src/plugins/expressions/public';
 import { createFormat } from './utilities';
 
 interface SchemaConfigParams {
@@ -34,6 +34,7 @@ interface SchemaConfigParams {
 
 export interface SchemaConfig {
   accessor: number;
+  label: string;
   format: SerializedFieldFormat;
   params: SchemaConfigParams;
   aggType: string;
@@ -106,10 +107,13 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
       params.useGeocentroid = agg.params.useGeocentroid;
     }
 
+    const label = agg.makeLabel && agg.makeLabel();
+
     return {
       accessor,
       format,
       params,
+      label,
       aggType: agg.type.name,
     };
   };

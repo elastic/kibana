@@ -5,7 +5,7 @@
  */
 
 import { resolve } from 'path';
-import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
+import { PLUGIN_ID, BROWSER_TYPE, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { registerRoutes } from './server/routes';
 import {
@@ -16,13 +16,8 @@ import {
   runValidations,
 } from './server/lib';
 import { config as appConfig } from './server/config/config';
-import {
-  CHROMIUM,
-  createBrowserDriverFactory,
-  getDefaultChromiumSandboxDisabled,
-} from './server/browsers';
+import { createBrowserDriverFactory, getDefaultChromiumSandboxDisabled } from './server/browsers';
 import { logConfiguration } from './log_configuration';
-
 import { getReportingUsageCollector } from './server/usage';
 import { i18n } from '@kbn/i18n';
 
@@ -116,7 +111,7 @@ export const reporting = (kibana) => {
           settleTime: Joi.number().integer().default(1000), //deprecated
           concurrency: Joi.number().integer().default(appConfig.concurrency), //deprecated
           browser: Joi.object({
-            type: Joi.any().valid(CHROMIUM).default(CHROMIUM),
+            type: Joi.any().valid(BROWSER_TYPE).default(BROWSER_TYPE),
             autoDownload: Joi.boolean().when('$dist', {
               is: true,
               then: Joi.default(false),
@@ -182,22 +177,23 @@ export const reporting = (kibana) => {
       }).default();
     },
 
+    // TODO: Decouple Hapi: Build a server facade object based on the server to
+    // pass through to the libs. Do not pass server directly
     init: async function (server) {
       let isCollectorReady = false;
       const isReady = () => isCollectorReady;
       // Register a function with server to manage the collection of usage stats
       server.usage.collectorSet.register(getReportingUsageCollector(server, isReady));
 
-      const logger = LevelLogger.createForServer(server, [PLUGIN_ID], true);
+      const logger = LevelLogger.createForServer(server, [PLUGIN_ID]);
       const [exportTypesRegistry, browserFactory] = await Promise.all([
         exportTypesRegistryFactory(server),
         createBrowserDriverFactory(server),
       ]);
       server.expose('exportTypesRegistry', exportTypesRegistry);
 
-      const config = server.config();
-      logConfiguration(config, logger);
-      runValidations(server, config, logger, browserFactory);
+      logConfiguration(server, logger);
+      runValidations(server, logger, browserFactory);
 
       const { xpack_main: xpackMainPlugin } = server.plugins;
       mirrorPluginStatus(xpackMainPlugin, this);

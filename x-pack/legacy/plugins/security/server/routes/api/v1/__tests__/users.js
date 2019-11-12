@@ -81,7 +81,7 @@ describe('User routes', () => {
           .resolves(AuthenticationResult.succeeded({}));
       });
 
-      it('returns 401 if old password is wrong.', async () => {
+      it('returns 403 if old password is wrong.', async () => {
         loginStub.resolves(AuthenticationResult.failed(new Error('Something went wrong.')));
 
         const response = await changePasswordRoute.handler(request);
@@ -89,13 +89,13 @@ describe('User routes', () => {
         sinon.assert.notCalled(clusterStub.callWithRequest);
         expect(response.isBoom).to.be(true);
         expect(response.output.payload).to.eql({
-          statusCode: 401,
+          statusCode: 403,
           error: 'Unauthorized',
           message: 'Something went wrong.'
         });
       });
 
-      it('returns 401 if user can authenticate with new password.', async () => {
+      it(`returns 401 if user can't authenticate with new password.`, async () => {
         loginStub
           .withArgs(
             sinon.match.instanceOf(KibanaRequest),

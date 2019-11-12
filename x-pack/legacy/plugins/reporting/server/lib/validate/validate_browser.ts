@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Browser } from 'puppeteer';
-import { KbnServer, Logger } from '../../../types';
-import { CHROMIUM } from '../../browsers/browser_types';
+import { BROWSER_TYPE } from '../../../common/constants';
+import { ServerFacade, Logger } from '../../../types';
 import { HeadlessChromiumDriverFactory } from '../../browsers/chromium/driver_factory';
 
 /*
@@ -13,11 +13,11 @@ import { HeadlessChromiumDriverFactory } from '../../browsers/chromium/driver_fa
  * to the locally running Kibana instance.
  */
 export const validateBrowser = async (
-  server: KbnServer,
+  server: ServerFacade,
   browserFactory: HeadlessChromiumDriverFactory,
   logger: Logger
 ) => {
-  if (browserFactory.type === CHROMIUM) {
+  if (browserFactory.type === BROWSER_TYPE) {
     return browserFactory
       .test({ viewport: { width: 800, height: 600 } }, logger)
       .then((browser: Browser | null) => {

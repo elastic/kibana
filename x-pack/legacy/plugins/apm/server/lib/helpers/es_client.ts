@@ -9,27 +9,19 @@ import {
   SearchParams,
   IndexDocumentParams,
   IndicesDeleteParams,
-  IndicesCreateParams,
-  AggregationSearchResponseWithTotalHitsAsObject
+  IndicesCreateParams
 } from 'elasticsearch';
 import { Legacy } from 'kibana';
-import { cloneDeep, has, isString, set } from 'lodash';
+import { cloneDeep, has, isString, set, pick } from 'lodash';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
-import { StringMap } from '../../../typings/common';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
+import {
+  ESSearchResponse,
+  ESSearchRequest
+} from '../../../typings/elasticsearch';
 
 // `type` was deprecated in 7.0
 export type APMIndexDocumentParams<T> = Omit<IndexDocumentParams<T>, 'type'>;
-
-function getApmIndices(config: Legacy.KibanaConfig) {
-  return [
-    config.get<string>('apm_oss.errorIndices'),
-    config.get<string>('apm_oss.metricsIndices'),
-    config.get<string>('apm_oss.onboardingIndices'),
-    config.get<string>('apm_oss.sourcemapIndices'),
-    config.get<string>('apm_oss.spanIndices'),
-    config.get<string>('apm_oss.transactionIndices')
-  ];
-}
 
 export function isApmIndex(
   apmIndices: string[],
@@ -73,10 +65,23 @@ async function getParamsForSearchRequest(
   params: SearchParams,
   apmOptions?: APMOptions
 ) {
-  const config = req.server.config();
   const uiSettings = req.getUiSettingsService();
-  const apmIndices = getApmIndices(config);
-  const includeFrozen = await uiSettings.get('search:includeFrozen');
+  const [indices, includeFrozen] = await Promise.all([
+    getApmIndices(req.server),
+    uiSettings.get('search:includeFrozen')
+  ]);
+
+  // Get indices for legacy data filter (only those which apply)
+  const apmIndices: string[] = Object.values(
+    pick(indices, [
+      'apm_oss.sourcemapIndices',
+      'apm_oss.errorIndices',
+      'apm_oss.onboardingIndices',
+      'apm_oss.spanIndices',
+      'apm_oss.transactionIndices',
+      'apm_oss.metricsIndices'
+    ])
+  );
   return {
     ...addFilterForLegacyData(apmIndices, params, apmOptions), // filter out pre-7.0 data
     ignore_throttled: !includeFrozen // whether to query frozen indices or not
@@ -89,13 +94,16 @@ interface APMOptions {
 
 export function getESClient(req: Legacy.Request) {
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
-  const query = req.query as StringMap;
+  const query = req.query as Record<string, unknown>;
 
   return {
-    search: async <Hits = unknown, U extends SearchParams = {}>(
-      params: U,
+    search: async <
+      TDocument = unknown,
+      TSearchRequest extends ESSearchRequest = {}
+    >(
+      params: TSearchRequest,
       apmOptions?: APMOptions
-    ): Promise<AggregationSearchResponseWithTotalHitsAsObject<Hits, U>> => {
+    ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
       const nextParams = await getParamsForSearchRequest(
         req,
         params,
@@ -117,9 +125,7 @@ export function getESClient(req: Legacy.Request) {
         req,
         'search',
         nextParams
-      ) as unknown) as Promise<
-        AggregationSearchResponseWithTotalHitsAsObject<Hits, U>
-      >;
+      ) as unknown) as Promise<ESSearchResponse<TDocument, TSearchRequest>>;
     },
     index: <Body>(params: APMIndexDocumentParams<Body>) => {
       return cluster.callWithRequest(req, 'index', params);

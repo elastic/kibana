@@ -76,6 +76,8 @@ export const StepCreateForm: SFC<Props> = React.memo(
 
     useEffect(() => {
       onChange({ created, started, indexPatternId });
+      // custom comparison
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [created, started, indexPatternId]);
 
     const api = useApi();
@@ -88,7 +90,17 @@ export const StepCreateForm: SFC<Props> = React.memo(
       setCreated(true);
 
       try {
-        await api.createTransform(transformId, transformConfig);
+        const resp = await api.createTransform(transformId, transformConfig);
+        if (resp.errors !== undefined && Array.isArray(resp.errors)) {
+          if (resp.errors.length === 1) {
+            throw resp.errors[0];
+          }
+
+          if (resp.errors.length > 1) {
+            throw resp.errors;
+          }
+        }
+
         toastNotifications.addSuccess(
           i18n.translate('xpack.transform.stepCreateForm.createTransformSuccessMessage', {
             defaultMessage: 'Request to create transform {transformId} acknowledged.',

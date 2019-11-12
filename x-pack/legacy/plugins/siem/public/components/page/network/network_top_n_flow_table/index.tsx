@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isEqual, last } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
@@ -87,26 +87,29 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
     type,
     updateNetworkTable,
   }) => {
-    const onChange = (criteria: Criteria, tableType: networkModel.TopNTableType) => {
-      if (criteria.sort != null) {
-        const splitField = criteria.sort.field.split('.');
-        const field = last(splitField);
-        const newSortDirection = field !== sort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
-        const newTopNFlowSort: NetworkTopTablesSortField = {
-          field: field as NetworkTopTablesFields,
-          direction: newSortDirection,
-        };
-        if (!isEqual(newTopNFlowSort, sort)) {
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: {
-              sort: newTopNFlowSort,
-            },
-          });
+    const onChange = useCallback(
+      (criteria: Criteria, tableType: networkModel.TopNTableType) => {
+        if (criteria.sort != null) {
+          const splitField = criteria.sort.field.split('.');
+          const field = last(splitField);
+          const newSortDirection = field !== sort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
+          const newTopNFlowSort: NetworkTopTablesSortField = {
+            field: field as NetworkTopTablesFields,
+            direction: newSortDirection,
+          };
+          if (!isEqual(newTopNFlowSort, sort)) {
+            updateNetworkTable({
+              networkType: type,
+              tableType,
+              updates: {
+                sort: newTopNFlowSort,
+              },
+            });
+          }
         }
-      }
-    };
+      },
+      [sort, type]
+    );
 
     let tableType: networkModel.TopNTableType;
     const headerTitle: string =

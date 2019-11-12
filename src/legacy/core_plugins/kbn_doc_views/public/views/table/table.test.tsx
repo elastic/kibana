@@ -65,7 +65,7 @@ const indexPattern = {
   },
   metaFields: ['_index', '_score'],
   flattenHit: undefined,
-  formatHit: jest.fn(hit => hit),
+  formatHit: jest.fn(hit => hit._source),
 } as IndexPattern;
 
 indexPattern.flattenHit = flattenHitWrapper(indexPattern, indexPattern.metaFields);

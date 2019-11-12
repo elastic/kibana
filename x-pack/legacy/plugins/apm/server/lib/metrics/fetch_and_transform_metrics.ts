@@ -4,20 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Unionize } from 'utility-types';
 import { Setup } from '../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../helpers/metrics';
 import { ChartBase } from './types';
 import { transformDataToMetricsChart } from './transform_metrics_chart';
 import { getMetricsProjection } from '../../../common/projections/metrics';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
 
 interface Aggs {
-  [key: string]: {
-    min?: any;
-    max?: any;
-    sum?: any;
-    avg?: any;
-  };
+  [key: string]: Unionize<{
+    min: AggregationOptionsByType['min'];
+    max: AggregationOptionsByType['max'];
+    sum: AggregationOptionsByType['sum'];
+    avg: AggregationOptionsByType['avg'];
+  }>;
 }
 
 interface Filter {

@@ -121,6 +121,8 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
         }
       }
     })();
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kibanaContext.initialized]);
 
   if (!isKibanaContextInitialized(kibanaContext)) {
@@ -169,6 +171,8 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
       touched: true,
       valid,
     });
+    // custom comparison
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, [
     continuousModeDateField,
     continuousModeDelay,
@@ -178,6 +182,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     transformDescription,
     destinationIndex,
     valid,
+    /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 
   return (

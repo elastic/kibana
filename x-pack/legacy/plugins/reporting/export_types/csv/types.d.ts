@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
-import { JobDocPayload, JobParamPostPayload, ConditionalHeaders } from '../../types';
+import { JobDocPayload, JobParamPostPayload, ConditionalHeaders, RequestFacade } from '../../types';
 
 export interface JobParamPostPayloadDiscoverCsv extends JobParamPostPayload {
   state?: {
@@ -30,5 +29,5 @@ export interface JobDocPayloadDiscoverCsv extends JobDocPayload {
 export type ESQueueCreateJobFnDiscoverCsv = (
   jobParams: JobParamsDiscoverCsv,
   headers: ConditionalHeaders,
-  request: Request
+  request: RequestFacade
 ) => Promise<JobParamsDiscoverCsv>;

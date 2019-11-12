@@ -9,6 +9,7 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { EmbeddedMap } from './embedded_map';
 import { SetQuery } from './types';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
 
 jest.mock('../search_bar', () => ({
   siemFilterManager: {
@@ -16,28 +17,18 @@ jest.mock('../search_bar', () => ({
   },
 }));
 
-jest.mock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      injectedMetadata: {
-        getKibanaVersion: () => '8.0.0',
-      },
-    },
-    plugins: {
-      uiActions: require('../../../../../../../src/plugins/ui_actions/public/mocks').uiActionsPluginMock.createSetupContract(),
-    },
+const mockUseKibanaCore = useKibanaCore as jest.Mock;
+jest.mock('../../lib/compose/kibana_core');
+mockUseKibanaCore.mockImplementation(() => ({
+  uiSettings: {
+    get$: () => 'world',
   },
-  npSetup: {
-    core: {
-      uiSettings: {
-        get$: () => 'world',
-      },
-    },
-    plugins: {
-      uiActions: require('../../../../../../../src/plugins/ui_actions/public/mocks').uiActionsPluginMock.createStartContract(),
-    },
+  injectedMetadata: {
+    getKibanaVersion: () => '8.0.0',
   },
 }));
+
+jest.mock('../../lib/compose/kibana_plugins');
 
 describe('EmbeddedMap', () => {
   let setQuery: SetQuery;

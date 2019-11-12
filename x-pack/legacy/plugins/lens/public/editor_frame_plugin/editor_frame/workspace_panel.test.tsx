@@ -5,8 +5,6 @@
  */
 
 import React from 'react';
-
-import { buildExistsFilter } from '@kbn/es-query';
 import { ExpressionRendererProps } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import { Visualization, FramePublicAPI, TableSuggestion } from '../../types';
 import {
@@ -22,6 +20,7 @@ import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../drag_drop';
 import { Ast } from '@kbn/interpreter/common';
 import { coreMock } from 'src/core/public/mocks';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
@@ -382,7 +381,7 @@ describe('workspace_panel', () => {
     instance.setProps({
       framePublicAPI: {
         ...framePublicAPI,
-        filters: [buildExistsFilter({ name: 'myfield' }, { id: 'index1' })],
+        filters: [esFilters.buildExistsFilter({ name: 'myfield' }, { id: 'index1' })],
       },
     });
 
@@ -392,190 +391,135 @@ describe('workspace_panel', () => {
     expect(expressionRendererMock).toHaveBeenCalledTimes(2);
   });
 
-  describe('expression failures', () => {
-    it('should show an error message if the expression fails to parse', () => {
-      mockDatasource.toExpression.mockReturnValue('|||');
-      mockDatasource.getLayers.mockReturnValue(['first']);
-      const framePublicAPI = createMockFramePublicAPI();
-      framePublicAPI.datasourceLayers = {
-        first: mockDatasource.publicAPIMock,
-      };
+  it('should show an error message if the expression fails to parse', () => {
+    mockDatasource.toExpression.mockReturnValue('|||');
+    mockDatasource.getLayers.mockReturnValue(['first']);
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
 
-      instance = mount(
-        <InnerWorkspacePanel
-          activeDatasourceId={'mock'}
-          datasourceStates={{
-            mock: {
-              state: {},
-              isLoading: false,
-            },
-          }}
-          datasourceMap={{
-            mock: mockDatasource,
-          }}
-          framePublicAPI={framePublicAPI}
-          activeVisualizationId="vis"
-          visualizationMap={{
-            vis: { ...mockVisualization, toExpression: () => 'vis' },
-          }}
-          visualizationState={{}}
-          dispatch={() => {}}
-          ExpressionRenderer={expressionRendererMock}
-          core={coreMock.createSetup()}
-        />
-      );
+    instance = mount(
+      <InnerWorkspacePanel
+        activeDatasourceId={'mock'}
+        datasourceStates={{
+          mock: {
+            state: {},
+            isLoading: false,
+          },
+        }}
+        datasourceMap={{
+          mock: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        activeVisualizationId="vis"
+        visualizationMap={{
+          vis: { ...mockVisualization, toExpression: () => 'vis' },
+        }}
+        visualizationState={{}}
+        dispatch={() => {}}
+        ExpressionRenderer={expressionRendererMock}
+        core={coreMock.createSetup()}
+      />
+    );
 
-      expect(instance.find('[data-test-subj="expression-failure"]').first()).toBeTruthy();
-      expect(instance.find(expressionRendererMock)).toHaveLength(0);
+    expect(instance.find('[data-test-subj="expression-failure"]').first()).toBeTruthy();
+    expect(instance.find(expressionRendererMock)).toHaveLength(0);
+  });
+
+  it('should not attempt to run the expression again if it does not change', async () => {
+    mockDatasource.toExpression.mockReturnValue('datasource');
+    mockDatasource.getLayers.mockReturnValue(['first']);
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+
+    instance = mount(
+      <InnerWorkspacePanel
+        activeDatasourceId={'mock'}
+        datasourceStates={{
+          mock: {
+            state: {},
+            isLoading: false,
+          },
+        }}
+        datasourceMap={{
+          mock: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        activeVisualizationId="vis"
+        visualizationMap={{
+          vis: { ...mockVisualization, toExpression: () => 'vis' },
+        }}
+        visualizationState={{}}
+        dispatch={() => {}}
+        ExpressionRenderer={expressionRendererMock}
+        core={coreMock.createSetup()}
+      />
+    );
+
+    // "wait" for the expression to execute
+    await waitForPromises();
+
+    instance.update();
+
+    expect(expressionRendererMock).toHaveBeenCalledTimes(1);
+
+    instance.update();
+
+    expect(expressionRendererMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should attempt to run the expression again if it changes', async () => {
+    mockDatasource.toExpression.mockReturnValue('datasource');
+    mockDatasource.getLayers.mockReturnValue(['first']);
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+
+    instance = mount(
+      <InnerWorkspacePanel
+        activeDatasourceId={'mock'}
+        datasourceStates={{
+          mock: {
+            state: {},
+            isLoading: false,
+          },
+        }}
+        datasourceMap={{
+          mock: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        activeVisualizationId="vis"
+        visualizationMap={{
+          vis: { ...mockVisualization, toExpression: () => 'vis' },
+        }}
+        visualizationState={{}}
+        dispatch={() => {}}
+        ExpressionRenderer={expressionRendererMock}
+        core={coreMock.createSetup()}
+      />
+    );
+
+    // "wait" for the expression to execute
+    await waitForPromises();
+
+    instance.update();
+
+    expect(expressionRendererMock).toHaveBeenCalledTimes(1);
+
+    expressionRendererMock.mockImplementation(_ => {
+      return <span />;
     });
 
-    it('should show an error message if the expression fails to render', async () => {
-      mockDatasource.toExpression.mockReturnValue('datasource');
-      mockDatasource.getLayers.mockReturnValue(['first']);
-      const framePublicAPI = createMockFramePublicAPI();
-      framePublicAPI.datasourceLayers = {
-        first: mockDatasource.publicAPIMock,
-      };
-      expressionRendererMock = jest.fn(({ onRenderFailure }) => {
-        Promise.resolve().then(() => onRenderFailure!({ type: 'error' }));
-        return <span />;
-      });
+    instance.setProps({ visualizationState: {} });
+    instance.update();
 
-      instance = mount(
-        <InnerWorkspacePanel
-          activeDatasourceId={'mock'}
-          datasourceStates={{
-            mock: {
-              state: {},
-              isLoading: false,
-            },
-          }}
-          datasourceMap={{
-            mock: mockDatasource,
-          }}
-          framePublicAPI={framePublicAPI}
-          activeVisualizationId="vis"
-          visualizationMap={{
-            vis: { ...mockVisualization, toExpression: () => 'vis' },
-          }}
-          visualizationState={{}}
-          dispatch={() => {}}
-          ExpressionRenderer={expressionRendererMock}
-          core={coreMock.createSetup()}
-        />
-      );
+    expect(expressionRendererMock).toHaveBeenCalledTimes(2);
 
-      // "wait" for the expression to execute
-      await waitForPromises();
-
-      instance.update();
-
-      expect(instance.find('EuiFlexItem[data-test-subj="expression-failure"]')).toHaveLength(1);
-      expect(instance.find(expressionRendererMock)).toHaveLength(0);
-    });
-
-    it('should not attempt to run the expression again if it does not change', async () => {
-      mockDatasource.toExpression.mockReturnValue('datasource');
-      mockDatasource.getLayers.mockReturnValue(['first']);
-      const framePublicAPI = createMockFramePublicAPI();
-      framePublicAPI.datasourceLayers = {
-        first: mockDatasource.publicAPIMock,
-      };
-      expressionRendererMock = jest.fn(({ onRenderFailure }) => {
-        Promise.resolve().then(() => onRenderFailure!({ type: 'error' }));
-        return <span />;
-      });
-
-      instance = mount(
-        <InnerWorkspacePanel
-          activeDatasourceId={'mock'}
-          datasourceStates={{
-            mock: {
-              state: {},
-              isLoading: false,
-            },
-          }}
-          datasourceMap={{
-            mock: mockDatasource,
-          }}
-          framePublicAPI={framePublicAPI}
-          activeVisualizationId="vis"
-          visualizationMap={{
-            vis: { ...mockVisualization, toExpression: () => 'vis' },
-          }}
-          visualizationState={{}}
-          dispatch={() => {}}
-          ExpressionRenderer={expressionRendererMock}
-          core={coreMock.createSetup()}
-        />
-      );
-
-      // "wait" for the expression to execute
-      await waitForPromises();
-
-      instance.update();
-
-      expect(expressionRendererMock).toHaveBeenCalledTimes(1);
-
-      instance.update();
-
-      expect(expressionRendererMock).toHaveBeenCalledTimes(1);
-    });
-
-    it('should attempt to run the expression again if changes after an error', async () => {
-      mockDatasource.toExpression.mockReturnValue('datasource');
-      mockDatasource.getLayers.mockReturnValue(['first']);
-      const framePublicAPI = createMockFramePublicAPI();
-      framePublicAPI.datasourceLayers = {
-        first: mockDatasource.publicAPIMock,
-      };
-      expressionRendererMock = jest.fn(({ onRenderFailure }) => {
-        Promise.resolve().then(() => onRenderFailure!({ type: 'error' }));
-        return <span />;
-      });
-
-      instance = mount(
-        <InnerWorkspacePanel
-          activeDatasourceId={'mock'}
-          datasourceStates={{
-            mock: {
-              state: {},
-              isLoading: false,
-            },
-          }}
-          datasourceMap={{
-            mock: mockDatasource,
-          }}
-          framePublicAPI={framePublicAPI}
-          activeVisualizationId="vis"
-          visualizationMap={{
-            vis: { ...mockVisualization, toExpression: () => 'vis' },
-          }}
-          visualizationState={{}}
-          dispatch={() => {}}
-          ExpressionRenderer={expressionRendererMock}
-          core={coreMock.createSetup()}
-        />
-      );
-
-      // "wait" for the expression to execute
-      await waitForPromises();
-
-      instance.update();
-
-      expect(expressionRendererMock).toHaveBeenCalledTimes(1);
-
-      expressionRendererMock.mockImplementation(_ => {
-        return <span />;
-      });
-
-      instance.setProps({ visualizationState: {} });
-      instance.update();
-
-      expect(expressionRendererMock).toHaveBeenCalledTimes(2);
-
-      expect(instance.find(expressionRendererMock)).toHaveLength(1);
-    });
+    expect(instance.find(expressionRendererMock)).toHaveLength(1);
   });
 
   describe('suggestions from dropping in workspace panel', () => {
@@ -629,6 +573,7 @@ describe('workspace_panel', () => {
         {
           state: {},
           table: expectedTable,
+          keptLayerIds: [],
         },
       ]);
       mockVisualization.getSuggestions.mockReturnValueOnce([
@@ -668,6 +613,7 @@ describe('workspace_panel', () => {
             columns: [],
             changeType: 'unchanged',
           },
+          keptLayerIds: [],
         },
       ]);
       mockVisualization.getSuggestions.mockReturnValueOnce([
@@ -694,6 +640,7 @@ describe('workspace_panel', () => {
             columns: [],
             changeType: 'unchanged',
           },
+          keptLayerIds: [],
         },
       ]);
       mockVisualization2.getSuggestions.mockReturnValueOnce([
@@ -720,6 +667,7 @@ describe('workspace_panel', () => {
             columns: [],
             changeType: 'unchanged',
           },
+          keptLayerIds: [],
         },
       ]);
       mockVisualization.getSuggestions.mockReturnValueOnce([
@@ -749,6 +697,7 @@ describe('workspace_panel', () => {
             layerId: '1',
             changeType: 'unchanged',
           },
+          keptLayerIds: [],
         },
         {
           state: {},
@@ -758,6 +707,7 @@ describe('workspace_panel', () => {
             layerId: '1',
             changeType: 'unchanged',
           },
+          keptLayerIds: [],
         },
       ]);
       mockVisualization.getSuggestions.mockReturnValueOnce([

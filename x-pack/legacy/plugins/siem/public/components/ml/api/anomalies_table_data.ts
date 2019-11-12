@@ -6,8 +6,6 @@
 
 import chrome from 'ui/chrome';
 
-import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
-import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 import { Anomalies, InfluencerInput, CriteriaFields } from '../types';
 import { throwIfNotOk } from '../../../hooks/api/api';
 export interface Body {
@@ -25,10 +23,9 @@ export interface Body {
 
 export const anomaliesTableData = async (
   body: Body,
-  headers: Record<string, string>,
+  kbnVersion: string,
   signal: AbortSignal
 ): Promise<Anomalies> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(`${chrome.getBasePath()}/api/ml/results/anomalies_table_data`, {
     method: 'POST',
     credentials: 'same-origin',
@@ -37,7 +34,7 @@ export const anomaliesTableData = async (
       'kbn-system-api': 'true',
       'content-Type': 'application/json',
       'kbn-xsrf': kbnVersion,
-      ...headers,
+      'kbn-version': kbnVersion,
     },
     signal,
   });

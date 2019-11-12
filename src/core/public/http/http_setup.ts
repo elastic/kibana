@@ -36,6 +36,7 @@ import { HttpInterceptController } from './http_intercept_controller';
 import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
 import { BasePath } from './base_path_service';
+import { AnonymousPaths } from './anonymous_paths';
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const NDJSON_CONTENT = /^(application\/ndjson)(;.*)?$/;
@@ -57,6 +58,7 @@ export const setup = (
   const interceptors = new Set<HttpInterceptor>();
   const kibanaVersion = injectedMetadata.getKibanaVersion();
   const basePath = new BasePath(injectedMetadata.getBasePath());
+  const anonymousPaths = new AnonymousPaths(basePath);
 
   function intercept(interceptor: HttpInterceptor) {
     interceptors.add(interceptor);
@@ -318,6 +320,7 @@ export const setup = (
   return {
     stop,
     basePath,
+    anonymousPaths,
     intercept,
     removeAllInterceptors,
     fetch,

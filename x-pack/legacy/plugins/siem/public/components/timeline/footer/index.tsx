@@ -18,7 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
@@ -182,14 +182,14 @@ export const Footer = React.memo<FooterProps>(
     const [paginationLoading, setPaginationLoading] = useState(false);
     const [updatedAt, setUpdatedAt] = useState<number | null>(null);
 
-    const loadMore = () => {
+    const loadMore = useCallback(() => {
       setPaginationLoading(true);
       onLoadMore(nextCursor, tieBreaker);
-    };
+    }, [nextCursor, tieBreaker, onLoadMore]);
 
-    const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
+    const onButtonClick = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
 
-    const closePopover = () => setIsPopoverOpen(false);
+    const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
     useEffect(() => {
       if (paginationLoading && !isLoading) {

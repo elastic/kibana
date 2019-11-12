@@ -9,7 +9,6 @@ import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
-import { InjectedData } from './util/injected_data';
 import {
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   SOURCE_DATA_ID_ORIGIN
@@ -32,11 +31,6 @@ export class AbstractLayer {
     } else {
       this._dataRequests = [];
     }
-    if (this._descriptor.__injectedData) {
-      this._injectedData = new InjectedData(this._descriptor.__injectedData);
-    } else {
-      this._injectedData = null;
-    }
   }
 
   static getBoundDataForSource(mbMap, sourceId) {
@@ -48,7 +42,6 @@ export class AbstractLayer {
     const layerDescriptor = { ...options };
 
     layerDescriptor.__dataRequests = _.get(options, '__dataRequests', []);
-    layerDescriptor.__injectedData = _.get(options, '__injectedData', null);
     layerDescriptor.id = _.get(options, 'id', uuid());
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
     layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
@@ -287,10 +280,6 @@ export class AbstractLayer {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === id);
   }
 
-  getInjectedData() {
-    return this._injectedData ? this._injectedData.getData() : null;
-  }
-
   isLayerLoading() {
     return this._dataRequests.some(dataRequest => dataRequest.isLoading());
   }
@@ -405,12 +394,20 @@ export class AbstractLayer {
     return [];
   }
 
-  async getOrdinalFields() {
+  async getDateFields() {
+    return [];
+  }
+
+  async getNumberFields() {
     return [];
   }
 
   syncVisibilityWithMb(mbMap, mbLayerId) {
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+  }
+
+  getType() {
+    return this._descriptor.type;
   }
 
 }

@@ -32,6 +32,23 @@ export enum SOURCE_INDEX_STATUS {
   ERROR,
 }
 
+interface ErrorResponse {
+  error: {
+    body: string;
+    msg: string;
+    path: string;
+    query: any;
+    response: string;
+    statusCode: number;
+  };
+}
+
+const isErrorResponse = (arg: any): arg is ErrorResponse => {
+  return arg.error !== undefined;
+};
+
+type SourceIndexSearchResponse = ErrorResponse | SearchResponse<any>;
+
 export interface UseSourceIndexDataReturnType {
   errorMessage: string;
   status: SOURCE_INDEX_STATUS;
@@ -54,12 +71,16 @@ export const useSourceIndexData = (
     setStatus(SOURCE_INDEX_STATUS.LOADING);
 
     try {
-      const resp: SearchResponse<any> = await api.esSearch({
+      const resp: SourceIndexSearchResponse = await api.esSearch({
         index: indexPattern.title,
         size: SEARCH_SIZE,
         // Instead of using the default query (`*`), fall back to a more efficient `match_all` query.
         body: { query: isDefaultQuery(query) ? { match_all: {} } : query },
       });
+
+      if (isErrorResponse(resp)) {
+        throw resp.error;
+      }
 
       const docs = resp.hits.hits;
 
@@ -101,7 +122,7 @@ export const useSourceIndexData = (
       if (e.message !== undefined) {
         setErrorMessage(e.message);
       } else {
-        setErrorMessage(JSON.stringify(e));
+        setErrorMessage(JSON.stringify(e, null, 2));
       }
       setTableItems([]);
       setStatus(SOURCE_INDEX_STATUS.ERROR);
@@ -110,6 +131,8 @@ export const useSourceIndexData = (
 
   useEffect(() => {
     getSourceIndexData();
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexPattern.title, JSON.stringify(query)]);
   return { errorMessage, status, tableItems };
 };
