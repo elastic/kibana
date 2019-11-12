@@ -33,8 +33,6 @@ import {
   Start as InspectorStart,
   Setup as InspectorSetup,
 } from '../../../../../../plugins/inspector/public';
-import { ExpressionInterpreter } from './types';
-import { setInterpreter, setInspector, setRenderersRegistry } from './services';
 // eslint-disable-next-line
 import { ExpressionRendererImplementation } from '../../../../../../plugins/expressions/public/expression_renderer';
 // eslint-disable-next-line
@@ -61,29 +59,10 @@ export class ExpressionsPublicPlugin
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: ExpressionsSetupDeps): ExpressionsSetup {
-    setRenderersRegistry(npSetup.plugins.expressions.__LEGACY.renderers);
-
-    // eslint-disable-next-line
-    const { getInterpreter } = require('../../../../interpreter/public/interpreter');
-    getInterpreter()
-      .then(({ interpreter }: { interpreter: ExpressionInterpreter }) => {
-        setInterpreter(interpreter);
-      })
-      .catch((e: Error) => {
-        throw new Error('interpreter is not initialized');
-      });
-
-    return {
-      registerType: npSetup.plugins.expressions.registerType,
-      registerFunction: npSetup.plugins.expressions.registerFunction,
-      registerRenderer: npSetup.plugins.expressions.registerRenderer,
-      __LEGACY: npSetup.plugins.expressions.__LEGACY,
-    };
+    return npSetup.plugins.expressions;
   }
 
   public start(core: CoreStart, { inspector }: ExpressionsStartDeps) {
-    setInspector(inspector);
-
     return {
       execute,
       render,
