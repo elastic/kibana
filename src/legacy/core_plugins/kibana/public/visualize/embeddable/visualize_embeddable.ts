@@ -18,30 +18,32 @@
  */
 
 import _ from 'lodash';
+import { StaticIndexPattern } from 'ui/index_patterns';
+import { PersistedState } from 'ui/persisted_state';
+import { VisualizeLoader } from 'ui/visualize/loader';
 import { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize_handler';
+import { AppState } from 'ui/state_management/app_state';
+import {
+  VisSavedObject,
+  VisualizeLoaderParams,
+  VisualizeUpdateParams,
+} from 'ui/visualize/loader/types';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
+import { Query } from '../../../../data/public';
+import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+
 import {
   TimeRange,
   onlyDisabledFiltersChanged,
   esFilters,
 } from '../../../../../../plugins/data/public';
-import { Query } from '../../../../data/public';
-import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-
 import {
-  AppState,
-  Container,
-  Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
-  PersistedState,
-  StaticIndexPattern,
-  VisSavedObject,
-  VisualizeLoader,
-  VisualizeLoaderParams,
-  VisualizeUpdateParams,
-} from '../kibana_services';
+  Embeddable,
+  Container,
+} from '../../../../../../plugins/embeddable/public';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 

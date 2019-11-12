@@ -23,46 +23,42 @@ import { i18n } from '@kbn/i18n';
 import '../saved_visualizations/saved_visualizations';
 import './visualization_editor';
 import './visualization';
+import 'ui/vis/editors/default/sidebar';
+import 'ui/visualize';
+import 'ui/collapsible_sidebar';
+import 'ui/directives/storage';
 
+import { capabilities } from 'ui/capabilities';
+import chrome from 'ui/chrome';
 import React from 'react';
+import angular from 'angular';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { toastNotifications } from 'ui/notify';
+import { docTitle } from 'ui/doc_title';
+import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
+import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { migrateAppState } from './lib';
+import uiRoutes from 'ui/routes';
+import { uiModules } from 'ui/modules';
 import editorTemplate from './editor.html';
 import { DashboardConstants } from '../../dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
+import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
+import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
+import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
+import { timefilter } from 'ui/timefilter';
+import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
+import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
+import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { extractTimeFilter, changeTimeFilter } from '../../../../../../plugins/data/public';
+import { npStart } from 'ui/new_platform';
+import { start as data } from '../../../../data/public/legacy';
+import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
+
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
-
-import {
-  getServices,
-  angular,
-  absoluteToParsedUrl,
-  getUnhashableStatesProvider,
-  KibanaParsedUrl,
-  migrateLegacyQuery,
-  SavedObjectSaveModal,
-  showShareContextMenu,
-  showSaveModal,
-  stateMonitorFactory,
-  subscribeWithScope,
-} from '../kibana_services';
-
-const {
-  capabilities,
-  chrome,
-  chromeLegacy,
-  data,
-  docTitle,
-  FilterBarQueryFilterProvider,
-  getBasePath,
-  ShareContextMenuExtensionsRegistryProvider,
-  toastNotifications,
-  timefilter,
-  uiModules,
-  uiRoutes,
-  visualizations,
-} = getServices();
 
 const { savedQueryService } = data.search.services;
 
@@ -105,7 +101,7 @@ uiRoutes
       savedVis: function (savedVisualizations, redirectWhenMissing, $route) {
         return savedVisualizations.get($route.current.params.id)
           .then((savedVis) => {
-            chrome.recentlyAccessed.add(
+            npStart.core.chrome.recentlyAccessed.add(
               savedVis.getFullPath(),
               savedVis.title,
               savedVis.id);
@@ -173,7 +169,7 @@ function VisEditor(
     dirty: !savedVis.id
   };
 
-  $scope.topNavMenu = [...(capabilities.visualize.save ? [{
+  $scope.topNavMenu = [...(capabilities.get().visualize.save ? [{
     id: 'save',
     label: i18n.translate('kbn.topNavMenu.saveVisualizationButtonLabel', { defaultMessage: 'save' }),
     description: i18n.translate('kbn.visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
@@ -242,7 +238,7 @@ function VisEditor(
       showShareContextMenu({
         anchorElement,
         allowEmbed: true,
-        allowShortUrl: capabilities.visualize.createShortUrl,
+        allowShortUrl: capabilities.get().visualize.createShortUrl,
         getUnhashableStates,
         objectId: savedVis.id,
         objectType: 'visualization',
@@ -359,9 +355,9 @@ function VisEditor(
     }
   });
 
-  $scope.showSaveQuery = capabilities.visualize.saveQuery;
+  $scope.showSaveQuery = capabilities.get().visualize.saveQuery;
 
-  $scope.$watch(() => capabilities.visualize.saveQuery, (newCapability) => {
+  $scope.$watch(() => capabilities.get().visualize.saveQuery, (newCapability) => {
     $scope.showSaveQuery = newCapability;
   });
 
@@ -582,7 +578,7 @@ function VisEditor(
 
             if ($scope.isAddToDashMode()) {
               const savedVisualizationParsedUrl = new KibanaParsedUrl({
-                basePath: getBasePath(),
+                basePath: chrome.getBasePath(),
                 appId: kbnBaseUrl.slice('/app/'.length),
                 appPath: kbnUrl.eval(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id }),
               });
@@ -591,15 +587,15 @@ function VisEditor(
               // Since we aren't reloading the page, only inserting a new browser history item, we need to manually update
               // the last url for this app, so directly clicking on the Visualize tab will also bring the user to the saved
               // url, not the unsaved one.
-              chromeLegacy.trackSubUrlForApp('kibana:visualize', savedVisualizationParsedUrl);
+              chrome.trackSubUrlForApp('kibana:visualize', savedVisualizationParsedUrl);
 
-              const lastDashboardAbsoluteUrl = chrome.navLinks.get('kibana:dashboard').url;
-              const dashboardParsedUrl = absoluteToParsedUrl(lastDashboardAbsoluteUrl, getBasePath());
+              const lastDashboardAbsoluteUrl = npStart.core.chrome.navLinks.get('kibana:dashboard').url;
+              const dashboardParsedUrl = absoluteToParsedUrl(lastDashboardAbsoluteUrl, chrome.getBasePath());
               dashboardParsedUrl.addQueryParameter(DashboardConstants.NEW_VISUALIZATION_ID_PARAM, savedVis.id);
               kbnUrl.change(dashboardParsedUrl.appPath);
             } else if (savedVis.id === $route.current.params.id) {
               docTitle.change(savedVis.lastSavedTitle);
-              chrome.setBreadcrumbs($injector.invoke(getEditBreadcrumbs));
+              chrome.breadcrumbs.set($injector.invoke(getEditBreadcrumbs));
               savedVis.vis.title = savedVis.title;
               savedVis.vis.description = savedVis.description;
               // it's needed to save the state to update url string

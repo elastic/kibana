@@ -19,8 +19,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-
-import { Embeddable, EmbeddableOutput } from '../kibana_services';
+import { Embeddable, EmbeddableOutput } from '../../../../../../plugins/embeddable/public';
 import { DisabledLabVisualization } from './disabled_lab_visualization';
 import { VisualizeInput } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';

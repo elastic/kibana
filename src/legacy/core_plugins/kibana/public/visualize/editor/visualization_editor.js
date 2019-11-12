@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { getServices, VisEditorTypesRegistryProvider } from '../kibana_services';
-
-const { uiModules } = getServices();
+import { uiModules } from 'ui/modules';
+import 'angular-sanitize';
+import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])

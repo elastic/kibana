@@ -20,9 +20,8 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { EuiText, EuiButton } from '@elastic/eui';
+import chrome from 'ui/chrome';
 import { VisTypeAliasListEntry } from './type_selection';
-
-import { getServices } from '../../kibana_services';
 
 interface Props {
   promotedTypes: VisTypeAliasListEntry[];
@@ -43,7 +42,7 @@ export function NewVisHelp(props: Props) {
             <strong>{t.promotion!.description}</strong>
           </p>
           <EuiButton
-            href={getServices().addBasePath(t.aliasUrl)}
+            href={chrome.addBasePath(t.aliasUrl)}
             fill
             size="s"
             iconType="popout"

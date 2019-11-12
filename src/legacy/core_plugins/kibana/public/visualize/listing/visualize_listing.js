@@ -17,26 +17,20 @@
  * under the License.
  */
 
+import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
+import 'ui/directives/kbn_href';
+import { uiModules } from 'ui/modules';
+import { timefilter } from 'ui/timefilter';
+import chrome from 'ui/chrome';
+import { wrapInI18nContext } from 'ui/i18n';
+import { toastNotifications } from 'ui/notify';
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
 import { VisualizeConstants } from '../visualize_constants';
+import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 import { i18n } from '@kbn/i18n';
-
-import { getServices } from '../kibana_services';
-
-const {
-  addBasePath,
-  chrome,
-  chromeLegacy,
-  SavedObjectRegistryProvider,
-  SavedObjectsClientProvider,
-  timefilter,
-  toastNotifications,
-  uiModules,
-  wrapInI18nContext,
-  visualizations,
-} = getServices();
 
 const app = uiModules.get('app/visualize', ['ngRoute', 'react']);
 app.directive('visualizeListingTable', reactDirective =>
@@ -61,11 +55,11 @@ export function VisualizeListingController($injector, createNewVis) {
 
   this.editItem = ({ editUrl }) => {
     // for visualizations the edit and view URLs are the same
-    window.location.href = addBasePath(editUrl);
+    window.location = chrome.addBasePath(editUrl);
   };
 
   this.getViewUrl = ({ editUrl }) => {
-    return addBasePath(editUrl);
+    return chrome.addBasePath(editUrl);
   };
 
   this.closeNewVisModal = () => {
@@ -107,7 +101,7 @@ export function VisualizeListingController($injector, createNewVis) {
       })
     )
       .then(() => {
-        chromeLegacy.untrackNavLinksForDeletedSavedObjects(selectedItems.map(item => item.id));
+        chrome.untrackNavLinksForDeletedSavedObjects(selectedItems.map(item => item.id));
       })
       .catch(error => {
         toastNotifications.addError(error, {
@@ -118,7 +112,7 @@ export function VisualizeListingController($injector, createNewVis) {
       });
   };
 
-  chrome.setBreadcrumbs([
+  chrome.breadcrumbs.set([
     {
       text: i18n.translate('kbn.visualize.visualizeListingBreadcrumbsTitle', {
         defaultMessage: 'Visualize',

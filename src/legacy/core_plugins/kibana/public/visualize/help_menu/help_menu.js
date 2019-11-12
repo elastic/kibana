@@ -20,10 +20,7 @@
 import React, { Fragment, PureComponent } from 'react';
 import { EuiButton, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { getServices } from '../kibana_services';
-
-const { docLinks } = getServices();
+import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
 export class HelpMenu extends PureComponent {
   render() {
@@ -34,7 +31,7 @@ export class HelpMenu extends PureComponent {
         <EuiButton
           fill
           iconType="popout"
-          href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/visualize.html`}
+          href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/visualize.html`}
           target="_blank"
         >
           <FormattedMessage id="kbn.visualize.helpMenu.docLabel" defaultMessage="Visualize documentation" />
