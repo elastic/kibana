@@ -54,6 +54,7 @@ export interface MlInfoResponse {
     version: string;
   };
   upgrade_mode: boolean;
+  cloudId?: string;
 }
 
 declare interface Ml {
