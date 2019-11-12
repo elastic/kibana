@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Legacy } from 'kibana';
+import { SavedObjectsClientContract } from 'kibana/server';
 import { ServerRoute } from 'hapi';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
@@ -31,5 +32,5 @@ export interface RequestShim {
   headers: { [key: string]: string };
   payload: any;
   params: any;
-  getSavedObjectsClient: any;
+  getSavedObjectsClient: (() => SavedObjectsClientContract) | null;
 }

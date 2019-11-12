@@ -12,6 +12,6 @@ export const createRequestShim = (req: Request): RequestShim => {
     headers: req.headers,
     payload: req.payload,
     params: req.params,
-    getSavedObjectsClient: req.getSavedObjectsClient.bind(req),
+    getSavedObjectsClient: req.getSavedObjectsClient ? req.getSavedObjectsClient.bind(req) : null,
   };
 };
