@@ -55,9 +55,6 @@ export interface NewsfeedItem {
   hash: string;
 }
 
-/* TODO: FetchResult needs fields to identify corner-cases:
-/* - pending response
-/* - failed response */
 export interface FetchResult {
   kibanaVersion: string;
   hasNew: boolean;

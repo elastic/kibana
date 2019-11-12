@@ -24,7 +24,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common', 'newsfeed']);
 
-  describe('Newsfeed icon button', () => {
+  describe('Newsfeed', () => {
     before(async () => {
       await PageObjects.newsfeed.resetPage();
     });

@@ -60,11 +60,7 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
 
     return getApi(http, config, this.kibanaVersion).pipe(
       takeUntil(this.stop$), // stop the interval when stop method is called
-      catchError(() => {
-        // show a message to try again later?
-        // do not throw error
-        return Rx.of(null);
-      })
+      catchError(() => Rx.of(null)) // do not throw error
     );
   }
 
