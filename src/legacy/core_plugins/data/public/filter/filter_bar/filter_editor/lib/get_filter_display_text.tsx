@@ -19,11 +19,11 @@
 
 import React, { Fragment } from 'react';
 import { EuiTextColor } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { existsOperator, isOneOfOperator } from './filter_operators';
+import { esFilters } from '../../../../../../../../plugins/data/public';
 
-export function getFilterDisplayText(filter: Filter, filterDisplayName: string) {
+export function getFilterDisplayText(filter: esFilters.Filter, filterDisplayName: string) {
   const prefixText = filter.meta.negate
     ? ` ${i18n.translate('data.filter.filterBar.negatedFilterPrefix', {
         defaultMessage: 'NOT ',

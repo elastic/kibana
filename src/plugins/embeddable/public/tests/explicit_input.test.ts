@@ -18,7 +18,6 @@
  */
 
 import { skip } from 'rxjs/operators';
-import { Filter, FilterStateStore } from '@kbn/es-query';
 import { testPlugin } from './test_plugin';
 import {
   FILTERABLE_EMBEDDABLE,
@@ -34,6 +33,7 @@ import { isErrorEmbeddable } from '../lib';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
 // eslint-disable-next-line
 import { coreMock } from '../../../../core/public/mocks';
+import { esFilters } from '../../../../plugins/data/public';
 
 const { setup, doStart, coreStart, uiActions } = testPlugin(
   coreMock.createSetup(),
@@ -50,8 +50,8 @@ setup.registerEmbeddableFactory(CONTACT_CARD_EMBEDDABLE, factory);
 setup.registerEmbeddableFactory(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
 
 test('Explicit embeddable input mapped to undefined will default to inherited', async () => {
-  const derivedFilter: Filter = {
-    $state: { store: FilterStateStore.APP_STATE },
+  const derivedFilter: esFilters.Filter = {
+    $state: { store: esFilters.FilterStateStore.APP_STATE },
     meta: { disabled: false, alias: 'name', negate: false },
     query: { match: {} },
   };

@@ -7,7 +7,7 @@
 import { defaults } from 'lodash/fp';
 import { AlertAction } from '../../../../../alerting/server/types';
 import { readSignals } from './read_signals';
-import { SignalParams } from './types';
+import { UpdateSignalParams } from './types';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -19,6 +19,25 @@ export const calculateInterval = (
     return signalInterval;
   } else {
     return '5m';
+  }
+};
+
+export const calculateName = ({
+  updatedName,
+  originalName,
+}: {
+  updatedName: string | undefined;
+  originalName: string | undefined;
+}): string => {
+  if (updatedName != null) {
+    return updatedName;
+  } else if (originalName != null) {
+    return originalName;
+  } else {
+    // You really should never get to this point. This is a fail safe way to send back
+    // the name of "untitled" just in case a signal rule name became null or undefined at
+    // some point since TypeScript allows it.
+    return 'untitled';
   }
 };
 
@@ -42,7 +61,7 @@ export const updateSignal = async ({
   to,
   type,
   references,
-}: SignalParams) => {
+}: UpdateSignalParams) => {
   // TODO: Error handling and abstraction. Right now if this is an error then what happens is we get the error of
   // "message": "Saved object [alert/{id}] not found"
   const signal = await readSignals({ alertsClient, id });
@@ -67,7 +86,6 @@ export const updateSignal = async ({
       filters,
       index,
       maxSignals,
-      name,
       severity,
       to,
       type,
@@ -84,7 +102,7 @@ export const updateSignal = async ({
   return alertsClient.update({
     id: signal.id,
     data: {
-      name: 'SIEM Alert',
+      name: calculateName({ updatedName: name, originalName: signal.name }),
       interval: calculateInterval(interval, signal.interval),
       actions,
       alertTypeParams: nextAlertTypeParams,

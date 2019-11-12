@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { ExistsFilter, FilterStateStore } from '@kbn/es-query';
+import { esFilters } from '../../../../../../../../../plugins/data/public';
 
-export const existsFilter: ExistsFilter = {
+export const existsFilter: esFilters.ExistsFilter = {
   meta: {
     index: 'logstash-*',
     negate: false,
@@ -29,6 +29,6 @@ export const existsFilter: ExistsFilter = {
     alias: null,
   },
   $state: {
-    store: FilterStateStore.APP_STATE,
+    store: esFilters.FilterStateStore.APP_STATE,
   },
 };
