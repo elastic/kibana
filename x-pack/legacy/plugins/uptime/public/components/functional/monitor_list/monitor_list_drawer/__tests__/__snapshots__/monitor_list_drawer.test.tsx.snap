@@ -3,12 +3,12 @@
 exports[`MonitorListDrawer component renders a MonitorListDrawer when there are many checks 1`] = `
 <styled.div>
   <EuiFlexGroup>
-    <EuiFlexItem>
+    <EuiFlexItem
+      grow={true}
+    >
       <EuiLink
-        color="primary"
         href="https://expired.badssl.com"
         target="_blank"
-        type="button"
       >
         https://expired.badssl.com
         <EuiIcon
@@ -73,12 +73,12 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there are 
 exports[`MonitorListDrawer component renders a MonitorListDrawer when there is only one check 1`] = `
 <styled.div>
   <EuiFlexGroup>
-    <EuiFlexItem>
+    <EuiFlexItem
+      grow={true}
+    >
       <EuiLink
-        color="primary"
         href="https://expired.badssl.com"
         target="_blank"
-        type="button"
       >
         https://expired.badssl.com
         <EuiIcon
