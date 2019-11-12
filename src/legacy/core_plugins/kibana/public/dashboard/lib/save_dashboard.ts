@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { Timefilter } from 'src/plugins/data/public';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
-import { Timefilter } from 'ui/timefilter';
 import { updateSavedDashboard } from './update_saved_dashboard';
 import { DashboardStateManager } from '../dashboard_state_manager';
 

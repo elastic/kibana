@@ -38,13 +38,11 @@ import { State } from 'ui/state_management/state';
 import { AppStateClass as TAppStateClass } from 'ui/state_management/app_state';
 
 import { KbnUrl } from 'ui/url/kbn_url';
-import { IndexPattern } from 'ui/index_patterns';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
 import { Subscription } from 'rxjs';
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import { extractTimeFilter, changeTimeFilter, Query } from '../../../../../plugins/data/public';
 import { esFilters } from '../../../../../plugins/data/public';
-import { FilterStateManager } from '../../../data/public';
+import { FilterStateManager, IndexPattern } from '../../../data/public';
 import { SavedQuery } from '../../../data/public';
 
 import {
@@ -61,6 +59,7 @@ import {
   openAddPanelFlyout,
 } from '../../../embeddable_api/public/np_ready/public';
 import { DashboardAppState, NavAction, ConfirmModalFn, SavedDashboardPanel } from './types';
+import { SavedObjectFinder } from '../../../../../plugins/kibana_react/public';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
 import { DashboardSaveModal } from './top_nav/save_modal';
