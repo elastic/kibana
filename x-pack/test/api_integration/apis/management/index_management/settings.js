@@ -57,7 +57,6 @@ export default function ({ getService }) {
         'priority',
         'codec',
         'max_rescore_window',
-        'max_adjacency_matrix_filters',
         'analyze',
         'gc_deletes',
         'max_ngram_diff',
