@@ -49,9 +49,9 @@ describe('legacy/core_plugins/kibana/server/lib', function () {
       config = kbnServer.server.config();
     });
 
-    after(() => {
-      esServer.stop();
-      kbn.stop();
+    after(async function () {
+      await esServer.stop();
+      await kbn.stop();
     });
 
     it('ensure config uuid is validated as a guid', async function () {
