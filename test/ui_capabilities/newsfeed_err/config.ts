@@ -27,15 +27,19 @@ export default async ({ readConfigFile }: FtrConfigProviderContext) => {
 
   return {
     ...functionalConfig,
-    junit: {
-      reportName: 'UI Feature Capabilities: Newsfeed Service Error Handling',
-    },
+
+    testFiles: [require.resolve('./test')],
+
     kbnTestServer: {
       ...functionalConfig.kbnTestServer,
       serverArgs: [
         ...functionalConfig.kbnTestServer.serverArgs,
         `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/kibana/crash.json`,
       ],
+    },
+
+    junit: {
+      reportName: 'Newsfeed Error Handling',
     },
   };
 };

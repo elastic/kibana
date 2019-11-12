@@ -17,7 +17,42 @@
  * under the License.
  */
 
-import { FtrProviderContext } from './ftr_provider_context';
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function uiCapabilitiesTests({ loadTestFile, getService }: FtrProviderContext) {}
+export default function uiCapabilitiesTests({ getService, getPageObjects }: FtrProviderContext) {
+  const globalNav = getService('globalNav');
+  const PageObjects = getPageObjects(['common', 'newsfeed']);
+
+  describe('Newsfeed icon button', () => {
+    before(async () => {
+      await PageObjects.newsfeed.resetPage();
+    });
+
+    it('clicking on newsfeed icon should open you empty newsfeed', async () => {
+      await globalNav.clickNewsfeed();
+      const isOpen = await PageObjects.newsfeed.openNewsfeedPanel();
+      expect(isOpen).to.be(true);
+
+      const hasNewsfeedEmptyPanel = await PageObjects.newsfeed.openNewsfeedEmptyPanel();
+      expect(hasNewsfeedEmptyPanel).to.be(true);
+    });
+
+    it('no red icon', async () => {
+      const hasCheckedNews = await PageObjects.newsfeed.getRedButtonSign();
+      expect(hasCheckedNews).to.be(false);
+    });
+
+    it('shows empty panel due to error response', async () => {
+      const objects = await PageObjects.newsfeed.getNewsfeedList();
+      expect(objects).to.eql([]);
+    });
+
+    it('clicking on newsfeed icon should close opened newsfeed', async () => {
+      await globalNav.clickNewsfeed();
+      const isOpen = await PageObjects.newsfeed.openNewsfeedPanel();
+      expect(isOpen).to.be(false);
+    });
+  });
+}
