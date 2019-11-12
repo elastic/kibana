@@ -25,12 +25,17 @@ import { isUnauthenticated } from '../services';
 import { Telemetry } from './telemetry';
 // @ts-ignore
 import { fetchTelemetry } from './fetch_telemetry';
+// @ts-ignore
+import { isOptInHandleOldSettings } from './welcome_banner/handle_old_settings';
 
 function telemetryInit($injector: any) {
   const $http = $injector.get('$http');
+  const Private = $injector.get('Private');
+  const config = $injector.get('config');
+  const telemetryOptInProvider = Private(TelemetryOptInProvider);
 
   const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
-  const telemetryOptedIn = npStart.core.injectedMetadata.getInjectedVar('telemetryOptedIn');
+  const telemetryOptedIn = isOptInHandleOldSettings(config, telemetryOptInProvider);
   const sendUsageFrom = npStart.core.injectedMetadata.getInjectedVar('telemetrySendUsageFrom');
 
   if (telemetryEnabled && telemetryOptedIn && sendUsageFrom === 'browser') {
