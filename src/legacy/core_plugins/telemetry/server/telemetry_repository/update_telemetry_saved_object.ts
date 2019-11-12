@@ -28,11 +28,7 @@ export async function updateTelemetrySavedObject(
     return await savedObjectsClient.update('telemetry', 'telemetry', savedObjectAttributes);
   } catch (err) {
     if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-      const savedObjectAttributesWithDefaults = {
-        enabled: null,
-        ...savedObjectAttributes,
-      };
-      return await savedObjectsClient.create('telemetry', savedObjectAttributesWithDefaults, {
+      return await savedObjectsClient.create('telemetry', savedObjectAttributes, {
         id: 'telemetry',
         overwrite: true,
       });
