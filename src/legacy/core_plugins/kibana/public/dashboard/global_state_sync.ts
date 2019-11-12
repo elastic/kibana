@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { State } from 'ui/state_management/state';
+import { State } from './legacy_imports';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
 
 /**

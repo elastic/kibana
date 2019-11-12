@@ -1,3 +1,21 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 /**
  * The imports in this file are static functions and types which still live in legacy folders and are used
@@ -25,15 +43,26 @@ export { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_sa
 export { showShareContextMenu } from 'ui/share';
 export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 export { KbnUrl } from 'ui/url/kbn_url';
-import { IPrivate } from 'ui/private';
-import { GlobalStateProvider } from 'ui/state_management/global_state';
-import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
-import { AppStateProvider } from 'ui/state_management/app_state';
-import { PrivateProvider } from 'ui/private/private';
-import { EventsProvider } from 'ui/events';
-import { PersistedState } from 'ui/persisted_state';
-import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
-import { PromiseServiceCreator } from 'ui/promises/promises';
-import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
-import { confirmModalFactory } from 'ui/modals/confirm_modal';
-import { configureAppAngularModule } from 'ui/legacy_compat';
+// @ts-ignore
+export { GlobalStateProvider } from 'ui/state_management/global_state';
+// @ts-ignore
+export { StateManagementConfigProvider } from 'ui/state_management/config_provider';
+// @ts-ignore
+export { AppStateProvider } from 'ui/state_management/app_state';
+// @ts-ignore
+export { PrivateProvider } from 'ui/private/private';
+// @ts-ignore
+export { EventsProvider } from 'ui/events';
+export { PersistedState } from 'ui/persisted_state';
+// @ts-ignore
+export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
+// @ts-ignore
+export { PromiseServiceCreator } from 'ui/promises/promises';
+// @ts-ignore
+export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
+// @ts-ignore
+export { confirmModalFactory } from 'ui/modals/confirm_modal';
+export { configureAppAngularModule } from 'ui/legacy_compat';
+export { stateMonitorFactory, StateMonitor } from 'ui/state_management/state_monitor_factory';
+export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
+export { IInjector } from 'ui/chrome';

@@ -18,12 +18,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { wrapInI18nContext } from 'ui/i18n';
-import { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 
 import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
 
+import { ensureDefaultIndexPattern } from './legacy_imports';
 import { initDashboardAppDirective } from './dashboard_app';
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 import {
@@ -39,7 +38,7 @@ export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
 
   app.directive('dashboardListing', function (reactDirective) {
-    return reactDirective(wrapInI18nContext(DashboardListing));
+    return reactDirective(DashboardListing);
   });
 
   function createNewDashboardCtrl($scope) {
@@ -175,7 +174,7 @@ export function initDashboardApp(app, deps) {
           dash: function ($rootScope, $route, redirectWhenMissing, kbnUrl, AppState) {
             const id = $route.current.params.id;
 
-            return ensureDefaultIndexPattern(deps.core, data, $rootScope, kbnUrl)
+            return ensureDefaultIndexPattern(deps.core, deps.dataStart, $rootScope, kbnUrl)
               .then(() => {
                 return deps.savedDashboards.get(id);
               })

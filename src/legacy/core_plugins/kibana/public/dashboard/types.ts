@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { AppState } from 'ui/state_management/app_state';
 import { Query } from 'src/legacy/core_plugins/data/public';
-import { AppState as TAppState } from 'ui/state_management/app_state';
 import { ViewMode } from 'src/plugins/embeddable/public';
+import { AppState } from './legacy_imports';
 import {
   RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel610,
@@ -154,5 +153,5 @@ export type AddFilterFn = (
     operator: string;
     index: string;
   },
-  appState: TAppState
+  appState: AppState
 ) => void;

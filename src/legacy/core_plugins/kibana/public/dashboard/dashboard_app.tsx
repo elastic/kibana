@@ -17,18 +17,17 @@
  * under the License.
  */
 
-import { IInjector } from 'ui/chrome';
-
-import {
-  AppStateClass as TAppStateClass,
-  AppState as TAppState,
-} from 'ui/state_management/app_state';
-
-import { KbnUrl } from 'ui/url/kbn_url';
 import { TimeRange } from 'src/plugins/data/public';
 import { StaticIndexPattern, Query, SavedQuery } from 'plugins/data';
 import moment from 'moment';
 import { Subscription } from 'rxjs';
+
+import {
+  AppStateClass as TAppStateClass,
+  AppState as TAppState,
+  IInjector,
+  KbnUrl,
+} from './legacy_imports';
 
 import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
 import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';

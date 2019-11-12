@@ -23,23 +23,20 @@ import React from 'react';
 import angular from 'angular';
 import { uniq } from 'lodash';
 
-import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-
-// @ts-ignore
-import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
-
-import { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
-
-import { showShareContextMenu } from 'ui/share';
-import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-
-import { State } from 'ui/state_management/state';
-
-import { AppStateClass as TAppStateClass } from 'ui/state_management/app_state';
-
-import { KbnUrl } from 'ui/url/kbn_url';
-import { SaveOptions } from 'ui/saved_objects/saved_object';
 import { Subscription } from 'rxjs';
+
+import {
+  subscribeWithScope,
+  ConfirmationButtonTypes,
+  showSaveModal,
+  SaveResult,
+  showShareContextMenu,
+  migrateLegacyQuery,
+  State,
+  AppStateClass as TAppStateClass,
+  KbnUrl,
+  SaveOptions,
+} from './legacy_imports';
 import { extractTimeFilter, changeTimeFilter, Query } from '../../../../../plugins/data/public';
 import { esFilters } from '../../../../../plugins/data/public';
 import { FilterStateManager, IndexPattern } from '../../../data/public';
