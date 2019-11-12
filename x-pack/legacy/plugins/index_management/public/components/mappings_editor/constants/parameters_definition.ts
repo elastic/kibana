@@ -450,4 +450,9 @@ export const PARAMETERS_DEFINITION = {
       ],
     },
   },
+  enable_position_increments: {
+    fieldConfig: {
+      defaultValue: true,
+    },
+  },
 };

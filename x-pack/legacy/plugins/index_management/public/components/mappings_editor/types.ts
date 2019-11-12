@@ -96,7 +96,8 @@ export type ParameterName =
   | 'normalizer'
   | 'ignore_above'
   | 'split_queries_on_whitespace'
-  | 'scaling_factor';
+  | 'scaling_factor'
+  | 'enable_position_increments';
 
 export interface Parameter {
   fieldConfig: FieldConfig;
