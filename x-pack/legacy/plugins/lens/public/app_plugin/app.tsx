@@ -72,8 +72,8 @@ export function App({
     indexPatternsForTopNav: [],
     query: { query: '', language },
     dateRange: {
-      fromDate: dataShim.timefilter.timefilter.getTime().from,
-      toDate: dataShim.timefilter.timefilter.getTime().to,
+      fromDate: data.query.timefilter.timefilter.getTime().from,
+      toDate: data.query.timefilter.timefilter.getTime().to,
     },
     filters: [],
   });
@@ -204,7 +204,7 @@ export function App({
                   trackUiEvent('app_query_change');
                 }
 
-                dataShim.timefilter.timefilter.setTime(dateRange);
+                data.query.timefilter.timefilter.setTime(dateRange);
 
                 setState(s => ({
                   ...s,
