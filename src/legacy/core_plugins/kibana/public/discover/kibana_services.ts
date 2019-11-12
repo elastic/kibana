@@ -114,7 +114,7 @@ export { tabifyAggResponse } from 'ui/agg_response/tabify';
 export { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 
 // EXPORT types
-export { VisProvider } from 'ui/vis';
+export { Vis } from 'ui/vis';
 export { StaticIndexPattern, IndexPatterns, IndexPattern, FieldType } from 'ui/index_patterns';
 export { SearchSource } from 'ui/courier';
 export { ElasticSearchHit } from 'ui/registry/doc_views_types';
