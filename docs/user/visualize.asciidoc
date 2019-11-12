@@ -3,21 +3,13 @@
 
 [partintro]
 --
-_Visualize_ enables you to create visualizations of the data in your
-Elasticsearch indices. You can then build <<dashboard, dashboards>> that
-display related visualizations.
+_Visualize_ enables you to create visualizations of the data from your Elasticsearch indices, which you can then add to dashboards for analysis.
 
-Kibana visualizations are based on Elasticsearch queries. By using a
-series of Elasticsearch {ref}/search-aggregations.html[aggregations]
-to extract and process your data, you can create charts that show
-you the trends, spikes, and dips you need to know about.
-
-You can create visualizations from a search saved from <<discover, Discover>>
-or start from an <<index-patterns, index pattern>>.
+{kib} visualizations are based on Elasticsearch queries. By using a series of {es} {ref}/search-aggregations.html[aggregations] to extract and process your data, you can create charts that show you the trends, spikes, and dips you need to know about.
 
 [float]
 [[create-a-visualization]]
-== Create a visualization
+== Create visualizations
 
 . Open *Visualize*.
 . Click *Create new visualization*.
@@ -25,7 +17,7 @@ or start from an <<index-patterns, index pattern>>.
 +
 * *<<most-frequent,Most frequently used visualizations>>*
 [horizontal]
-Line&comma; area and bar charts:: Compare different series in X/Y charts.
+Line&comma; area, and bar charts:: Compare different series in X/Y charts.
 Pie chart:: Display each source contribution to a total.
 Data table:: Flattens aggregations into table format.
 Metric:: Display a single number.
@@ -36,7 +28,7 @@ Tag cloud:: Display words in a cloud, where the size of the word corresponds to 
 [horizontal]
 <<TSVB,TSVB>>:: Visualize time series data using pipeline aggregations.
 <<timelion,_Timelion_>>:: Compute and combine data from multiple time series
-data sets. Hidden by default.
+data sets.
 * *Maps*
 [horizontal]
 <<maps, Elastic maps>>:: The most powerful way of visualizing map data in {kib}.
@@ -65,8 +57,7 @@ visualization. To disable automatic updates, you can disconnect a visualization
 from the saved search.
 
 --
-
-include::{kib-repo-dir}/visualize/saving.asciidoc[]
+include::{kib-repo-dir}/visualize/visualize_rollup_data.asciidoc[]
 
 include::{kib-repo-dir}/visualize/most-frequent.asciidoc[]
 
@@ -88,6 +79,6 @@ include::{kib-repo-dir}/visualize/for-dashboard.asciidoc[]
 
 include::{kib-repo-dir}/visualize/vega.asciidoc[]
 
-include::{kib-repo-dir}/visualize/inspector.asciidoc[]
+include::{kib-repo-dir}/visualize/saving.asciidoc[]
 
-include::{kib-repo-dir}/visualize/visualize_rollup_data.asciidoc[]
+include::{kib-repo-dir}/visualize/inspector.asciidoc[]
