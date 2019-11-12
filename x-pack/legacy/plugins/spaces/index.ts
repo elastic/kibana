@@ -10,13 +10,11 @@ import { Legacy } from 'kibana';
 import { KibanaRequest } from '../../../../src/core/server';
 import { SpacesServiceSetup } from '../../../plugins/spaces/server/spaces_service/spaces_service';
 import { SpacesPluginSetup } from '../../../plugins/spaces/server';
-import { createOptionalPlugin } from '../../server/lib/optional_plugin';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 import mappings from './mappings.json';
 import { wrapError } from './server/lib/errors';
 import { migrateToKibana660 } from './server/lib/migrations';
-import { SecurityPlugin } from '../security';
 // @ts-ignore
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { initSpaceSelectorView, initEnterSpaceView } from './server/routes/views';
@@ -139,12 +137,6 @@ export const spaces = (kibana: Record<string, any>) =>
           create: (pluginId: string) =>
             new AuditLogger(server, pluginId, server.config(), server.plugins.xpack_main.info),
         },
-        security: createOptionalPlugin<SecurityPlugin>(
-          server.config(),
-          'xpack.security',
-          server.plugins,
-          'security'
-        ),
         xpackMain: server.plugins.xpack_main,
       });
 

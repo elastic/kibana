@@ -42,7 +42,7 @@ import { timefilter } from 'ui/timefilter';
 // Saved objects
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 // @ts-ignore
-import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
+import { SavedObject, SavedObjectProvider } from 'ui/saved_objects/saved_object';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 
 import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
@@ -105,7 +105,6 @@ export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-export { getVisualizeLoader } from 'ui/visualize/loader';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 export {
   Container,
@@ -121,12 +120,8 @@ export { METRIC_TYPE };
 export { StaticIndexPattern } from 'ui/index_patterns';
 export { AppState } from 'ui/state_management/app_state';
 export { VisType } from 'ui/vis';
-export { VisualizeLoader } from 'ui/visualize/loader';
-export {
-  VisSavedObject,
-  VisualizeLoaderParams,
-  VisualizeUpdateParams,
-} from 'ui/visualize/loader/types';
 
 // export const
 export { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+
+export { VisSavedObject } from './embeddable/visualize_embeddable';
