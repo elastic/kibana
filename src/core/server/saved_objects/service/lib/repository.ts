@@ -255,10 +255,10 @@ export class SavedObjectsRepository {
   ): Promise<SavedObjectsBulkResponse<T>> {
     const { namespace, overwrite = false, refresh = DEFAULT_REFRESH_SETTING } = options;
     const time = this._getCurrentTime();
-    const bulkCreateParams: object[] = [];
 
-    let requestIndexCounter = 0;
-    const expectedResults: Array<Either<any, any>> = objects.map(object => {
+    let bulkGetRequestIndexCounter = 0;
+    const bulkGetDocs: object[] = [];
+    const expectedBulkGetResults: Array<Either<any, any>> = objects.map(object => {
       if (!this._allowedTypes.includes(object.type)) {
         return {
           tag: 'Left' as 'Left',
@@ -270,47 +270,122 @@ export class SavedObjectsRepository {
         };
       }
 
-      const method = object.id && !overwrite ? 'create' : 'index';
+      // This used to be using `method = object.id && !overwrite ? 'create' : 'index'`;
+      // This meant that when we were generating the IDs ourselves using uuid.v1(), that if
+      // there was a conflict for some reason, we'd be hiding it and not throwing a Conflict.
+      // We can leave it the old way, it just feels wrong because now we could potentially
+      // be overwriting a saved-object which exists in another namespace
+      //
+      // ID      |   overwrite | old operation | new operation
+      // null        true        index           create
+      // null        false       index           create
+      // something   true        index           index
+      // something   false       create          create
+      const method = object.id && overwrite ? 'index' : 'create';
+      if (method === 'create') {
+        return {
+          tag: 'Right' as 'Right',
+          value: {
+            method,
+            object,
+          },
+        };
+      }
+
       const expectedResult = {
-        esRequestIndex: requestIndexCounter++,
-        requestedId: object.id,
-        rawMigratedDoc: this._serializer.savedObjectToRaw(this._migrator.migrateDocument({
-          id: object.id,
-          type: object.type,
-          attributes: object.attributes,
-          migrationVersion: object.migrationVersion,
-          namespace,
-          updated_at: time,
-          references: object.references || [],
-        }) as SanitizedSavedObjectDoc),
+        esRequestIndex: bulkGetRequestIndexCounter++,
+        method,
+        object,
       };
 
-      bulkCreateParams.push(
-        {
-          [method]: {
-            _id: expectedResult.rawMigratedDoc._id,
-            _index: this.getIndexForType(object.type),
-          },
-        },
-        expectedResult.rawMigratedDoc._source
-      );
+      bulkGetDocs.push({
+        _id: this._serializer.generateRawId(namespace, object.type, object.id),
+        _index: this.getIndexForType(object.type),
+        _source: ['type', 'namespace'],
+      });
 
       return { tag: 'Right' as 'Right', value: expectedResult };
     });
 
-    const esResponse = await this._writeToCluster('bulk', {
+    const bulkGetResponse = bulkGetDocs.length
+      ? await this._callCluster('mget', {
+          body: {
+            docs: bulkGetDocs,
+          },
+          ignore: [404],
+        })
+      : undefined;
+
+    let bulkRequestIndexCounter = 0;
+    const bulkCreateParams: object[] = [];
+    const expectedBulkResults: Array<Either<any, any>> = expectedBulkGetResults.map(
+      expectedBulkGetResult => {
+        if (isLeft(expectedBulkGetResult)) {
+          return expectedBulkGetResult;
+        }
+
+        const { esRequestIndex, object, method } = expectedBulkGetResult.value;
+        if (esRequestIndex !== undefined) {
+          // TODO: When switching from namespace to namespaces, we'll want to use the namespaces returned
+          // from this to ensure we aren't dropping an existing namespace. However, it's somewhat awkward that
+          // a create with overwrite=true would maintain existing spaces it's been shared to.
+          const indexFound = bulkGetResponse.status !== 404;
+          const actualResult = indexFound ? bulkGetResponse.docs[esRequestIndex] : undefined;
+          const docFound = indexFound && actualResult.found === true;
+          if (indexFound && docFound && !this._rawInNamespace(actualResult, namespace)) {
+            const { id, type } = object;
+            return {
+              tag: 'Left' as 'Left',
+              error: {
+                id,
+                type,
+                error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload,
+              },
+            };
+          }
+        }
+
+        const expectedResult = {
+          esRequestIndex: bulkRequestIndexCounter++,
+          requestedId: object.id,
+          rawMigratedDoc: this._serializer.savedObjectToRaw(this._migrator.migrateDocument({
+            id: object.id,
+            type: object.type,
+            attributes: object.attributes,
+            migrationVersion: object.migrationVersion,
+            namespace,
+            updated_at: time,
+            references: object.references || [],
+          }) as SanitizedSavedObjectDoc),
+        };
+
+        bulkCreateParams.push(
+          {
+            [method]: {
+              _id: expectedResult.rawMigratedDoc._id,
+              _index: this.getIndexForType(object.type),
+            },
+          },
+          expectedResult.rawMigratedDoc._source
+        );
+
+        return { tag: 'Right' as 'Right', value: expectedResult };
+      }
+    );
+
+    const bulkResponse = await this._writeToCluster('bulk', {
       refresh,
       body: bulkCreateParams,
     });
 
     return {
-      saved_objects: expectedResults.map(expectedResult => {
+      saved_objects: expectedBulkResults.map(expectedResult => {
         if (isLeft(expectedResult)) {
           return expectedResult.error;
         }
 
         const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
-        const response = esResponse.items[esRequestIndex];
+        const response = bulkResponse.items[esRequestIndex];
         const {
           error,
           _id: responseId,
@@ -816,6 +891,7 @@ export class SavedObjectsRepository {
       body: {
         docs: bulkGetDocs,
       },
+      ignore: [404],
     });
 
     let bulkUpdateRequestIndexCounter = 0;
@@ -826,9 +902,11 @@ export class SavedObjectsRepository {
           return expectedBulkGetResult;
         }
 
-        const { id, type, version, documentToSave } = expectedBulkGetResult.value;
-        const actualResult = bulkGetResponse.docs[expectedBulkGetResult.value.esRequestIndex];
-        if (!actualResult.found || !this._rawInNamespace(actualResult, namespace)) {
+        const { esRequestIndex, id, type, version, documentToSave } = expectedBulkGetResult.value;
+        const indexFound = bulkGetResponse.status !== 404;
+        const actualResult = indexFound ? bulkGetResponse.docs[esRequestIndex] : undefined;
+        const docFound = indexFound && actualResult.found === true;
+        if (!indexFound || !docFound || !this._rawInNamespace(actualResult, namespace)) {
           return {
             tag: 'Left' as 'Left',
             error: {
