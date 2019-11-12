@@ -67,7 +67,7 @@ describe('execute helper function', () => {
 });
 
 describe('ExpressionLoader', () => {
-  const expressionString = 'test';
+  const expressionString = 'demodata';
 
   describe('constructor', () => {
     it('accepts expression string', () => {
@@ -134,6 +134,8 @@ describe('ExpressionLoader', () => {
     (ExpressionDataHandler as jest.Mock).mockImplementationOnce(() => ({
       getData: () => true,
       cancel: cancelMock,
+      isPending: () => true,
+      inspect: () => {},
     }));
 
     const expressionLoader = new ExpressionLoader(element, expressionString, {});
@@ -160,10 +162,15 @@ describe('ExpressionLoader', () => {
     (ExpressionDataHandler as jest.Mock).mockImplementationOnce(() => ({
       getData,
       cancel: cancelMock,
+      isPending: () => true,
+      inspect: () => {},
     }));
+
     (ExpressionDataHandler as jest.Mock).mockImplementationOnce(() => ({
       getData,
       cancel: cancelMock,
+      isPending: () => true,
+      inspect: () => {},
     }));
 
     const expressionLoader = new ExpressionLoader(element, expressionString, {});
@@ -193,6 +200,8 @@ describe('ExpressionLoader', () => {
     (ExpressionDataHandler as jest.Mock).mockImplementationOnce(() => ({
       getData,
       cancel: cancelMock,
+      isPending: () => true,
+      inspect: () => {},
     }));
 
     const expressionLoader = new ExpressionLoader(element, expressionString, {});
