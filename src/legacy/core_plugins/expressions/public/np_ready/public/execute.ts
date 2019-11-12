@@ -38,6 +38,7 @@ export class ExpressionDataHandler {
   private inspectorAdapters: Adapters;
   private promise: Promise<IInterpreterResult>;
 
+  public isPending: boolean = true;
   constructor(expression: string | ExpressionAST, params: IExpressionLoaderParams) {
     if (typeof expression === 'string') {
       this.expression = expression;
@@ -58,20 +59,25 @@ export class ExpressionDataHandler {
     const defaultContext = { type: 'null' };
 
     const interpreter = getInterpreter();
-    this.promise = interpreter.interpretAst(this.ast, params.context || defaultContext, {
-      getInitialContext,
-      inspectorAdapters: this.inspectorAdapters,
-      abortSignal: this.abortController.signal,
-    });
+    this.promise = interpreter
+      .interpretAst(this.ast, params.context || defaultContext, {
+        getInitialContext,
+        inspectorAdapters: this.inspectorAdapters,
+        abortSignal: this.abortController.signal,
+      })
+      .then(
+        (v: IInterpreterResult) => {
+          this.isPending = false;
+          return v;
+        },
+        () => {
+          this.isPending = false;
+        }
+      );
   }
 
   cancel = () => {
     this.abortController.abort();
-  };
-
-  isPending = () => {
-    // @ts-ignore
-    return this.promise.isResolved;
   };
 
   getData = async () => {

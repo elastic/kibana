@@ -132,7 +132,7 @@ export class ExpressionLoader {
     expression: string | ExpressionAST,
     params: IExpressionLoaderParams
   ): Promise<void> => {
-    if (this.dataHandler && this.dataHandler.isPending()) {
+    if (this.dataHandler && this.dataHandler.isPending) {
       this.ignoreNextResponse = true;
       this.dataHandler.cancel();
     }
