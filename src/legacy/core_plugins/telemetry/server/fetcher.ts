@@ -61,7 +61,7 @@ export class FetcherTask {
         allowChangingOptInStatus,
         configTelemetryOptIn,
       }),
-      telemetryUsageFetcher: getTelemetryUsageFetcher({
+      telemetrySendUsageFrom: getTelemetryUsageFetcher({
         telemetrySavedObject,
         configTelemetrySendUsageFrom,
       }),
@@ -77,8 +77,8 @@ export class FetcherTask {
     });
   };
 
-  private shouldSendReport = ({ telemetryOptIn, telemetryUsageFetcher }: any) => {
-    if (telemetryOptIn && telemetryUsageFetcher === 'server') {
+  private shouldSendReport = ({ telemetryOptIn, telemetrySendUsageFrom }: any) => {
+    if (telemetryOptIn && telemetrySendUsageFrom === 'server') {
       if (!this.lastReported || Date.now() - this.lastReported > REPORT_INTERVAL_MS) {
         return true;
       }

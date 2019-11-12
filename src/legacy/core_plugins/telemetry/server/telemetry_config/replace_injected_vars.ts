@@ -53,13 +53,13 @@ export async function replaceTelemetryInjectedVars(request: any) {
     currentKibanaVersion,
   });
 
-  const telemetryUsageFetcher = getTelemetryUsageFetcher({
+  const telemetrySendUsageFrom = getTelemetryUsageFetcher({
     configTelemetrySendUsageFrom,
     telemetrySavedObject,
   });
 
   return {
     telemetryOptedIn,
-    telemetryUsageFetcher,
+    telemetrySendUsageFrom,
   };
 }
