@@ -5,12 +5,12 @@
  */
 
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
 import React from 'react';
 import styled from 'styled-components';
 
 import { WithHoverActions } from '../../with_hover_actions';
 import { siemFilterManager } from '../../search_bar';
+import { esFilters } from '../../../../../../../../src/plugins/data/public';
 
 import * as i18n from './translations';
 
@@ -18,7 +18,7 @@ export * from './helpers';
 
 interface OwnProps {
   children: JSX.Element;
-  filter: Filter;
+  filter: esFilters.Filter;
   onFilterAdded?: () => void;
 }
 
