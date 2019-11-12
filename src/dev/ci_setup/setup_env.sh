@@ -43,8 +43,6 @@ kbnBranch="$(jq -r .branch "$KIBANA_DIR/package.json")"
 export KIBANA_PKG_BRANCH="$kbnBranch"
 
 
-export KBN_ES_SNAPSHOT_URL="https://snapshots.elastic.co/8.0.0-4b028b4b/downloads/elasticsearch/{name}-8.0.0-SNAPSHOT-{os}-x86_64.{ext}"
-
 ###
 ### download node
 ###
