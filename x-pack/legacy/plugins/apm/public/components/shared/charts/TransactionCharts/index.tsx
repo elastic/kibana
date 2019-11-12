@@ -203,12 +203,12 @@ export class TransactionCharts extends Component<TransactionChartProps> {
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGrid>
-        {transactionType === TRANSACTION_PAGE_LOAD ? (
+        {transactionType === TRANSACTION_PAGE_LOAD && (
           <>
             <EuiSpacer size="s" />
             <DurationByCountryMap />
           </>
-        ) : null}
+        )}
       </>
     );
   }
