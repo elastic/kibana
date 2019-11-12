@@ -33,8 +33,7 @@ import { PersistedState } from '../../persisted_state';
 
 import { start as visualizations } from '../../../../core_plugins/visualizations/public/np_ready/public/legacy';
 
-
-export function VisProvider(indexPatterns, getAppState) {
+export function VisProvider(getAppState) {
   const visTypes = visualizations.types;
 
   class Vis extends EventEmitter {

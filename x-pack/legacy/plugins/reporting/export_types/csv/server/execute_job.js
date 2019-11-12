@@ -53,6 +53,16 @@ function executeJobFn(server) {
       // We use the basePath from the saved job, which we'll have post spaces being implemented;
       // or we use the server base path, which uses the default space
       getBasePath: () => basePath || serverBasePath,
+      path: '/',
+      route: { settings: {} },
+      url: {
+        href: '/',
+      },
+      raw: {
+        req: {
+          url: '/',
+        },
+      },
     };
 
     const callEndpoint = (endpoint, clientParams = {}, options = {}) => {
