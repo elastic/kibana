@@ -43,14 +43,14 @@ export const getTelemetryOptIn: GetTelemetryOptIn = ({
     return false;
   }
 
-  if (telemetrySavedObject === null || telemetrySavedObject.enabled === null) {
+  if (telemetrySavedObject === null || typeof telemetrySavedObject.enabled !== 'boolean') {
     return null;
   }
 
-  const enabled = !!telemetrySavedObject.enabled;
+  const savedOptIn = telemetrySavedObject.enabled;
 
   // if enabled is true, return it
-  if (enabled === true) return enabled;
+  if (savedOptIn === true) return savedOptIn;
 
   // Additional check if they've already opted out (enabled: false):
   // - if the Kibana version has changed by at least a minor version,
@@ -62,7 +62,7 @@ export const getTelemetryOptIn: GetTelemetryOptIn = ({
   if (typeof lastKibanaVersion !== 'string') return null;
 
   // if version hasn't changed, just return enabled value
-  if (lastKibanaVersion === currentKibanaVersion) return enabled;
+  if (lastKibanaVersion === currentKibanaVersion) return savedOptIn;
 
   const lastSemver = parseSemver(lastKibanaVersion);
   const currentSemver = parseSemver(currentKibanaVersion);
@@ -77,7 +77,7 @@ export const getTelemetryOptIn: GetTelemetryOptIn = ({
   }
 
   // current version X.Y is not greater than last version X.Y, return enabled
-  return enabled;
+  return savedOptIn;
 };
 
 function parseSemver(version: string): semver.SemVer | null {
