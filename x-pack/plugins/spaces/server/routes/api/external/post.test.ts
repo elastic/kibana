@@ -19,13 +19,13 @@ import {
   httpServiceMock,
 } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
-import { createOptionalPlugin } from '../../../../../../legacy/server/lib/optional_plugin';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { initPostSpacesApi } from './post';
 import { RouteSchemas } from 'src/core/server/http/router/route';
 import { ObjectType } from '@kbn/config-schema';
 import { spacesConfig } from '../../../lib/__fixtures__';
+import { securityMock } from '../../../../../security/server/mocks';
 
 describe('Spaces Public API', () => {
   const spacesSavedObjects = createSpaces();
@@ -45,8 +45,7 @@ describe('Spaces Public API', () => {
     const spacesService = await service.setup({
       http: (httpService as unknown) as CoreSetup['http'],
       elasticsearch: elasticsearchServiceMock.createSetupContract(),
-      getSecurity: () =>
-        createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
+      authorization: securityMock.createSetup().authz,
       getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
       config$: Rx.of(spacesConfig),
     });
