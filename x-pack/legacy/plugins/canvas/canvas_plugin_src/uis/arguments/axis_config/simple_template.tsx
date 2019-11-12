@@ -20,7 +20,7 @@ export const SimpleTemplate: FunctionComponent<Props> = ({ onValueChange, argVal
       checked={Boolean(argValue)}
       onChange={() => onValueChange(!Boolean(argValue))}
       showLabel={false}
-      label="" // TODO: Add label for a11y
+      label=""
     />
   );
 };

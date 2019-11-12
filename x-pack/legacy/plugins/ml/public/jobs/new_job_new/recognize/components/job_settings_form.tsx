@@ -248,7 +248,9 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
                   });
                 }}
                 showLabel={false}
-                label="" // TODO: Add label for a11y
+                label={i18n.translate('xpack.ml.newJob.recognize.useDedicatedIndexLabel', {
+                  defaultMessage: 'Use dedicated index',
+                })}
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>

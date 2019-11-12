@@ -60,7 +60,7 @@ export const JobSwitch = React.memo<JobSwitchProps>(
                 onJobStateChange(job, job.latestTimestampMs || 0, e.target.checked);
               }}
               showLabel={false}
-              label="" // TODO: Add label for a11y
+              label=""
             />
           )}
         </EuiFlexItem>
