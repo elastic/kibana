@@ -38,18 +38,14 @@ import { State } from 'ui/state_management/state';
 import { AppStateClass as TAppStateClass } from 'ui/state_management/app_state';
 
 import { KbnUrl } from 'ui/url/kbn_url';
-import { Filter } from '@kbn/es-query';
 import { IndexPattern } from 'ui/index_patterns';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
 import { Subscription } from 'rxjs';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
-import {
-  extractTimeFilter,
-  changeTimeFilter,
-  FilterStateManager,
-  Query,
-  SavedQuery,
-} from '../../../data/public';
+import { extractTimeFilter, changeTimeFilter, Query } from '../../../../../plugins/data/public';
+import { esFilters } from '../../../../../plugins/data/public';
+import { FilterStateManager } from '../../../data/public';
+import { SavedQuery } from '../../../data/public';
 
 import {
   DashboardContainer,
@@ -120,14 +116,17 @@ export class DashboardAppController {
     embeddables,
     dashboardCapabilities,
     docTitle,
-    dataStart: {
-      timefilter: { timefilter },
+    dataStart,
+    npDataStart: {
+      query: {
+        filterManager,
+        timefilter: { timefilter },
+      },
     },
-    npDataStart,
     core: { notifications, overlays, chrome, injectedMetadata },
   }: DashboardAppControllerDependencies) {
-    new FilterStateManager(globalState, getAppState, npDataStart.query.filterManager);
-    const queryFilter = npDataStart.query.filterManager;
+    new FilterStateManager(globalState, getAppState, filterManager);
+    const queryFilter = filterManager;
 
     function getUnhashableStates(): State[] {
       return [getAppState(), globalState].filter(Boolean);
@@ -511,7 +510,7 @@ export class DashboardAppController {
       }
     );
 
-    $scope.$watch('appState.$newFilters', (filters: Filter[] = []) => {
+    $scope.$watch('appState.$newFilters', (filters: esFilters.Filter[] = []) => {
       if (filters.length === 1) {
         $scope.onApplyFilters(filters);
       }

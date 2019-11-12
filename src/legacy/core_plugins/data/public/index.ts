@@ -72,12 +72,3 @@ export {
   createApplyFiltersPopoverDirective,
   createApplyFiltersPopoverHelper,
 } from './shim/legacy_module';
-
-export {
-  TimeHistoryContract,
-  TimefilterContract,
-  getTime,
-  InputTimeRange,
-  extractTimeFilter,
-  changeTimeFilter,
-} from './timefilter';

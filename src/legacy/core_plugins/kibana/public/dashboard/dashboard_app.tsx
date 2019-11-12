@@ -25,7 +25,6 @@ import {
 } from 'ui/state_management/app_state';
 
 import { KbnUrl } from 'ui/url/kbn_url';
-import { Filter } from '@kbn/es-query';
 import { TimeRange } from 'src/plugins/data/public';
 import { StaticIndexPattern, Query, SavedQuery } from 'plugins/data';
 import moment from 'moment';
@@ -34,6 +33,7 @@ import { Subscription } from 'rxjs';
 import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
 import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
 import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn } from './types';
+import { esFilters } from '../../../../../../src/plugins/data/public';
 
 import { DashboardAppController } from './dashboard_app_controller';
 import { RenderDeps } from './render_app';
@@ -44,7 +44,7 @@ export interface DashboardAppScope extends ng.IScope {
   screenTitle: string;
   model: {
     query: Query;
-    filters: Filter[];
+    filters: esFilters.Filter[];
     timeRestore: boolean;
     title: string;
     description: string;
@@ -70,9 +70,9 @@ export interface DashboardAppScope extends ng.IScope {
     isPaused: boolean;
     refreshInterval: any;
   }) => void;
-  onFiltersUpdated: (filters: Filter[]) => void;
+  onFiltersUpdated: (filters: esFilters.Filter[]) => void;
   onCancelApplyFilters: () => void;
-  onApplyFilters: (filters: Filter[]) => void;
+  onApplyFilters: (filters: esFilters.Filter[]) => void;
   onQuerySaved: (savedQuery: SavedQuery) => void;
   onSavedQueryUpdated: (savedQuery: SavedQuery) => void;
   onClearSavedQuery: () => void;
