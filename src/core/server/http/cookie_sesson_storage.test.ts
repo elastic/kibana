@@ -80,6 +80,7 @@ interface User {
 interface Storage {
   value: User;
   expires: number;
+  path: string;
 }
 
 function retrieveSessionCookie(cookies: string) {
@@ -92,13 +93,18 @@ function retrieveSessionCookie(cookies: string) {
 
 const userData = { id: '42' };
 const sessionDurationMs = 1000;
+const path = '/';
+const sessVal = () => ({ value: userData, expires: Date.now() + sessionDurationMs, path });
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 const cookieOptions = {
   name: 'sid',
   encryptionKey: 'something_at_least_32_characters',
-  validate: (session: Storage) => session.expires > Date.now(),
+  validate: (session: Storage) => {
+    const isValid = session.path === path && session.expires > Date.now();
+    return { isValid, path: session.path, isSecure: false };
+  },
   isSecure: false,
-  path: '/',
+  path,
 };
 
 describe('Cookie based SessionStorage', () => {
@@ -107,9 +113,9 @@ describe('Cookie based SessionStorage', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
+      router.get({ path, validate: false }, (context, req, res) => {
         const sessionStorage = factory.asScoped(req);
-        sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
+        sessionStorage.set(sessVal());
         return res.ok({});
       });
 
@@ -136,6 +142,7 @@ describe('Cookie based SessionStorage', () => {
       expect(sessionCookie.httpOnly).toBe(true);
     });
   });
+
   describe('#get()', () => {
     it('reads from session storage', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
@@ -145,7 +152,7 @@ describe('Cookie based SessionStorage', () => {
         const sessionStorage = factory.asScoped(req);
         const sessionValue = await sessionStorage.get();
         if (!sessionValue) {
-          sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
+          sessionStorage.set(sessVal());
           return res.ok();
         }
         return res.ok({ body: { value: sessionValue.value } });
@@ -173,6 +180,7 @@ describe('Cookie based SessionStorage', () => {
         .set('Cookie', `${sessionCookie.key}=${sessionCookie.value}`)
         .expect(200, { value: userData });
     });
+
     it('returns null for empty session', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
 
@@ -198,7 +206,7 @@ describe('Cookie based SessionStorage', () => {
       expect(cookies).not.toBeDefined();
     });
 
-    it('returns null for invalid session & clean cookies', async () => {
+    it('returns null for invalid session (expired) & clean cookies', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
 
       const router = createRouter('');
@@ -208,7 +216,7 @@ describe('Cookie based SessionStorage', () => {
         const sessionStorage = factory.asScoped(req);
         if (!setOnce) {
           setOnce = true;
-          sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
+          sessionStorage.set(sessVal());
           return res.ok({ body: { value: userData } });
         }
         const sessionValue = await sessionStorage.get();
@@ -242,6 +250,50 @@ describe('Cookie based SessionStorage', () => {
         'sid=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Path=/',
       ]);
     });
+
+    it('returns null for invalid session (incorrect path) & clean cookies accurately', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+
+      const router = createRouter('');
+
+      let setOnce = false;
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        const sessionStorage = factory.asScoped(req);
+        if (!setOnce) {
+          setOnce = true;
+          sessionStorage.set({ ...sessVal(), path: '/foo' });
+          return res.ok({ body: { value: userData } });
+        }
+        const sessionValue = await sessionStorage.get();
+        return res.ok({ body: { value: sessionValue } });
+      });
+
+      const factory = await createCookieSessionStorageFactory(
+        logger.get(),
+        innerServer,
+        cookieOptions
+      );
+      await server.start();
+
+      const response = await supertest(innerServer.listener)
+        .get('/')
+        .expect(200, { value: userData });
+
+      const cookies = response.get('set-cookie');
+      expect(cookies).toBeDefined();
+
+      const sessionCookie = retrieveSessionCookie(cookies[0]);
+      const response2 = await supertest(innerServer.listener)
+        .get('/')
+        .set('Cookie', `${sessionCookie.key}=${sessionCookie.value}`)
+        .expect(200, { value: null });
+
+      const cookies2 = response2.get('set-cookie');
+      expect(cookies2).toEqual([
+        'sid=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Path=/foo',
+      ]);
+    });
+
     // use mocks to simplify test setup
     it('returns null if multiple session cookies are detected.', async () => {
       const mockServer = {
@@ -342,7 +394,7 @@ describe('Cookie based SessionStorage', () => {
           sessionStorage.clear();
           return res.ok({});
         }
-        sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
+        sessionStorage.set(sessVal());
         return res.ok({});
       });
 

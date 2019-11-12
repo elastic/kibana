@@ -65,18 +65,42 @@ export async function setupAuthentication({
       .callAsCurrentUser('shield.authenticate')) as AuthenticatedUser;
   };
 
+  const isValid = (sessionValue: ProviderSession) => {
+    // ensure that this cookie was created with the current Kibana configuration
+    if (sessionValue.path !== (http.basePath.serverBasePath || '/')) {
+      authLogger.debug(`Outdated session value with path "${sessionValue.path}"`);
+      return false;
+    } else if (sessionValue.secure !== config.secureCookies) {
+      authLogger.debug(`Outdated session value with secure "${sessionValue.secure}"`);
+      return false;
+    }
+    // ensure that this cookie is not expired
+    return !(sessionValue.expires && sessionValue.expires < Date.now());
+  };
+
   const authenticator = new Authenticator({
     clusterClient,
     basePath: http.basePath,
-    config: { sessionTimeout: config.sessionTimeout, authc: config.authc },
+    config: {
+      sessionTimeout: config.sessionTimeout,
+      authc: config.authc,
+      secureCookies: config.secureCookies,
+    },
     isSystemAPIRequest: (request: KibanaRequest) => getLegacyAPI().isSystemAPIRequest(request),
     loggers,
     sessionStorageFactory: await http.createCookieSessionStorageFactory({
       encryptionKey: config.encryptionKey,
       isSecure: config.secureCookies,
       name: config.cookieName,
-      validate: (sessionValue: ProviderSession) =>
-        !(sessionValue.expires && sessionValue.expires < Date.now()),
+      validate: (session: ProviderSession) => {
+        const array: ProviderSession[] = Array.isArray(session) ? session : [session];
+        for (const sess of array) {
+          if (!isValid(sess)) {
+            return { isValid: false, path: sess.path, isSecure: sess.secure };
+          }
+        }
+        return { isValid: true };
+      },
     }),
   });
 

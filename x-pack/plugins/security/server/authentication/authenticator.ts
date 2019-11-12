@@ -52,6 +52,16 @@ export interface ProviderSession {
    * entirely determined by the authentication provider that owns the current session.
    */
   state: unknown;
+
+  /**
+   * Cookie "Secure" attribute that is validated against the current Kibana server configuration.
+   */
+  secure: boolean;
+
+  /**
+   * Cookie "Path" attribute that is validated against the current Kibana server configuration.
+   */
+  path: string;
 }
 
 /**
@@ -77,7 +87,7 @@ export interface ProviderLoginAttempt {
 }
 
 export interface AuthenticatorOptions {
-  config: Pick<ConfigType, 'sessionTimeout' | 'authc'>;
+  config: Pick<ConfigType, 'sessionTimeout' | 'authc' | 'secureCookies'>;
   basePath: HttpServiceSetup['basePath'];
   loggers: LoggerFactory;
   clusterClient: IClusterClient;
@@ -153,6 +163,16 @@ export class Authenticator {
   private readonly providers: Map<string, BaseAuthenticationProvider>;
 
   /**
+   * Whether or not cookies will use the "Secure" attribute.
+   */
+  private readonly secureCookies: boolean;
+
+  /**
+   * Which base path the HTTP server is hosted on.
+   */
+  private readonly serverBasePath: string;
+
+  /**
    * Session duration in ms. If `null` session will stay active until the browser is closed.
    */
   private readonly ttl: number | null = null;
@@ -201,6 +221,8 @@ export class Authenticator {
         ] as [string, BaseAuthenticationProvider];
       })
     );
+    this.secureCookies = this.options.config.secureCookies;
+    this.serverBasePath = this.options.basePath.serverBasePath || '/';
 
     this.ttl = this.options.config.sessionTimeout;
   }
@@ -261,6 +283,8 @@ export class Authenticator {
         state: authenticationResult.state,
         provider: attempt.provider,
         expires: this.ttl && Date.now() + this.ttl,
+        secure: this.secureCookies,
+        path: this.serverBasePath,
       });
     }
 
@@ -416,6 +440,8 @@ export class Authenticator {
           : existingSession!.state,
         provider: providerType,
         expires: this.ttl && Date.now() + this.ttl,
+        secure: this.secureCookies,
+        path: this.serverBasePath,
       });
     }
   }

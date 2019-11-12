@@ -114,6 +114,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsResolveImportErrorsOptions](./kibana-plugin-server.savedobjectsresolveimporterrorsoptions.md) | Options to control the "resolve import" operation. |
 |  [SavedObjectsUpdateOptions](./kibana-plugin-server.savedobjectsupdateoptions.md) |  |
 |  [SavedObjectsUpdateResponse](./kibana-plugin-server.savedobjectsupdateresponse.md) |  |
+|  [SessionCookieValidationResult](./kibana-plugin-server.sessioncookievalidationresult.md) | Return type from a function to validate cookie contents. |
 |  [SessionStorage](./kibana-plugin-server.sessionstorage.md) | Provides an interface to store and retrieve data across requests. |
 |  [SessionStorageCookieOptions](./kibana-plugin-server.sessionstoragecookieoptions.md) | Configuration used to create HTTP session storage based on top of cookie mechanism. |
 |  [SessionStorageFactory](./kibana-plugin-server.sessionstoragefactory.md) | SessionStorage factory to bind one to an incoming request |

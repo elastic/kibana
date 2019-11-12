@@ -4,7 +4,7 @@
 
 ## SessionStorageCookieOptions.encryptionKey property
 
-A key used to encrypt a cookie value. Should be at least 32 characters long.
+A key used to encrypt a cookie's value. Should be at least 32 characters long.
 
 <b>Signature:</b>
 
