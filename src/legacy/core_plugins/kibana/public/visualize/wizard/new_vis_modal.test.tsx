@@ -24,29 +24,7 @@ import { NewVisModal } from './new_vis_modal';
 import { VisType } from 'ui/vis';
 import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
 
-jest.mock('../kibana_services', () => {
-  const mock = {
-    addBasePath: jest.fn(path => `root${path}`),
-    uiSettings: { get: jest.fn() },
-    createUiStatsReporter: () => jest.fn(),
-  };
-
-  return {
-    getServices: () => mock,
-    VisType: {},
-    METRIC_TYPE: 'metricType',
-  };
-});
-
-import { getServices } from '../kibana_services';
-
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
 describe('NewVisModal', () => {
-  const settingsGet = getServices().uiSettings!.get as jest.Mock;
-
   const defaultVisTypeParams = {
     hidden: false,
     visualization: class Controller {
@@ -76,17 +54,36 @@ describe('NewVisModal', () => {
     },
     getAliases: () => [],
   };
+  const addBasePath = (url: string) => `testbasepath${url}`;
+  const settingsGet = jest.fn();
+  const uiSettings: any = { get: settingsGet };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('should render as expected', () => {
     const wrapper = mountWithIntl(
-      <NewVisModal isOpen={true} onClose={() => null} visTypesRegistry={visTypes} />
+      <NewVisModal
+        isOpen={true}
+        onClose={() => null}
+        visTypesRegistry={visTypes}
+        addBasePath={addBasePath}
+        uiSettings={uiSettings}
+      />
     );
     expect(wrapper).toMatchSnapshot();
   });
 
   it('should show a button for regular visualizations', () => {
     const wrapper = mountWithIntl(
-      <NewVisModal isOpen={true} onClose={() => null} visTypesRegistry={visTypes} />
+      <NewVisModal
+        isOpen={true}
+        onClose={() => null}
+        visTypesRegistry={visTypes}
+        addBasePath={addBasePath}
+        uiSettings={uiSettings}
+      />
     );
     expect(wrapper.find('[data-test-subj="visType-vis"]').exists()).toBe(true);
   });
@@ -95,7 +92,13 @@ describe('NewVisModal', () => {
     it('should open the editor for visualizations without search', () => {
       window.location.assign = jest.fn();
       const wrapper = mountWithIntl(
-        <NewVisModal isOpen={true} onClose={() => null} visTypesRegistry={visTypes} />
+        <NewVisModal
+          isOpen={true}
+          onClose={() => null}
+          visTypesRegistry={visTypes}
+          addBasePath={addBasePath}
+          uiSettings={uiSettings}
+        />
       );
       const visButton = wrapper.find('button[data-test-subj="visType-vis"]');
       visButton.simulate('click');
@@ -110,6 +113,8 @@ describe('NewVisModal', () => {
           onClose={() => null}
           visTypesRegistry={visTypes}
           editorParams={['foo=true', 'bar=42']}
+          addBasePath={addBasePath}
+          uiSettings={uiSettings}
         />
       );
       const visButton = wrapper.find('button[data-test-subj="visType-vis"]');
@@ -121,7 +126,13 @@ describe('NewVisModal', () => {
   describe('filter for visualization types', () => {
     it('should render as expected', () => {
       const wrapper = mountWithIntl(
-        <NewVisModal isOpen={true} onClose={() => null} visTypesRegistry={visTypes} />
+        <NewVisModal
+          isOpen={true}
+          onClose={() => null}
+          visTypesRegistry={visTypes}
+          addBasePath={addBasePath}
+          uiSettings={uiSettings}
+        />
       );
       const searchBox = wrapper.find('input[data-test-subj="filterVisType"]');
       searchBox.simulate('change', { target: { value: 'with' } });
@@ -133,7 +144,13 @@ describe('NewVisModal', () => {
     it('should not show experimental visualizations if visualize:enableLabs is false', () => {
       settingsGet.mockReturnValue(false);
       const wrapper = mountWithIntl(
-        <NewVisModal isOpen={true} onClose={() => null} visTypesRegistry={visTypes} />
+        <NewVisModal
+          isOpen={true}
+          onClose={() => null}
+          visTypesRegistry={visTypes}
+          addBasePath={addBasePath}
+          uiSettings={uiSettings}
+        />
       );
       expect(wrapper.find('[data-test-subj="visType-visExp"]').exists()).toBe(false);
     });
@@ -141,7 +158,13 @@ describe('NewVisModal', () => {
     it('should show experimental visualizations if visualize:enableLabs is true', () => {
       settingsGet.mockReturnValue(true);
       const wrapper = mountWithIntl(
-        <NewVisModal isOpen={true} onClose={() => null} visTypesRegistry={visTypes} />
+        <NewVisModal
+          isOpen={true}
+          onClose={() => null}
+          visTypesRegistry={visTypes}
+          addBasePath={addBasePath}
+          uiSettings={uiSettings}
+        />
       );
       expect(wrapper.find('[data-test-subj="visType-visExp"]').exists()).toBe(true);
     });
