@@ -24,8 +24,8 @@ import { getTelemetryAllowChangingOptInStatus } from './get_telemetry_allow_chan
 
 export async function replaceTelemetryInjectedVars(request: any) {
   const config = request.server.config();
-  const configTelemetrySendUsageFrom = config().get('telemetry.sendUsageFrom');
-  const configTelemetryOptIn = config().get('telemetry.optIn');
+  const configTelemetrySendUsageFrom = config.get('telemetry.sendUsageFrom');
+  const configTelemetryOptIn = config.get('telemetry.optIn');
   const configTelemetryAllowChangingOptInStatus = config().get(
     'telemetry.allowChangingOptInStatus'
   );
@@ -38,7 +38,7 @@ export async function replaceTelemetryInjectedVars(request: any) {
     };
   }
 
-  const currentKibanaVersion = config().get('pkg.version');
+  const currentKibanaVersion = config.get('pkg.version');
   const savedObjectsClient = request.getSavedObjectsClient();
   const telemetrySavedObject = await getTelemetrySavedObject(savedObjectsClient);
   const allowChangingOptInStatus = getTelemetryAllowChangingOptInStatus({
