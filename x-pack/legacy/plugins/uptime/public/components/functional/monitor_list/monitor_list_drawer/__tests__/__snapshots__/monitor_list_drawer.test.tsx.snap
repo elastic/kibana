@@ -24,7 +24,12 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there are 
       <EuiButton
         size="s"
       >
-        Actions
+        <FormattedMessage
+          defaultMessage="Actions"
+          description="Monitor actions button"
+          id="xpack.uptime.monitorList.drawer.actions.label"
+          values={Object {}}
+        />
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -94,7 +99,12 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there is o
       <EuiButton
         size="s"
       >
-        Actions
+        <FormattedMessage
+          defaultMessage="Actions"
+          description="Monitor actions button"
+          id="xpack.uptime.monitorList.drawer.actions.label"
+          values={Object {}}
+        />
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
