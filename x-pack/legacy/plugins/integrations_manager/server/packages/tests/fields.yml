@@ -1,0 +1,21 @@
+- name: log.file.path
+  type: keyword
+  required: false
+  description: >
+    The file from which the line was read. This field contains the absolute path to the file.
+    For example: `/var/log/system.log`.
+- name: log.source.address
+  type: keyword
+  required: false
+  description: >
+    Source address from which the log event was read / sent from.
+- name: log.offset
+  type: long
+  required: false
+  description: >
+    The file offset the reported line starts at.
+- name: stream
+  type: keyword
+  required: false
+  description: >
+    Log stream when reading container logs, can be 'stdout' or 'stderr'
