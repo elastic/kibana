@@ -25,6 +25,8 @@ import {
   updateTelemetrySavedObject,
 } from '../telemetry_repository';
 
+import { getTelemetryAllowChangingOptInStatus } from '../telemetry_config';
+
 interface RegisterOptInRoutesParams {
   core: CoreSetup;
   currentKibanaVersion: string;
@@ -76,7 +78,18 @@ export function registerTelemetryConfigRoutes({
           enabled: req.payload.enabled,
           lastVersionChecked: currentKibanaVersion,
         };
+        const config = req.server.config();
         const savedObjectsClient = req.getSavedObjectsClient();
+        const configTelemetryAllowChangingOptInStatus = config.get(
+          'telemetry.allowChangingOptInStatus'
+        );
+        const allowChangingOptInStatus = getTelemetryAllowChangingOptInStatus({
+          telemetrySavedObject: savedObjectsClient,
+          configTelemetryAllowChangingOptInStatus,
+        });
+        if (!allowChangingOptInStatus) {
+          return h.response({ error: 'Not allowed to change Opt-in Status.' }).code(400);
+        }
         await updateTelemetrySavedObject(savedObjectsClient, attributes);
       } catch (err) {
         return boomify(err);

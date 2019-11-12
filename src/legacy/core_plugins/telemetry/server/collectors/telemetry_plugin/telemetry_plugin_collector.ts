@@ -29,7 +29,9 @@ export interface TelemetryUsageStats {
 export function createCollectorFetch(server: any) {
   return async function fetchUsageStats(): Promise<TelemetryUsageStats> {
     const config = server.config();
-    const defaultTelemetryUsageFetcher = config.get('telemetry.usageFetcher');
+    const configTelemetryUsageFetcher = config.get('telemetry.usageFetcher');
+    const allowChangingOptInStatus = config.get('telemetry.allowChangingOptInStatus');
+    const configTelemetryOptIn = config.get('telemetry.optIn');
     const currentKibanaVersion = config.get('pkg.version');
 
     let telemetrySavedObject: TelemetrySavedObject = {};
@@ -44,11 +46,16 @@ export function createCollectorFetch(server: any) {
     }
 
     return {
-      opt_in_status: getTelemetryOptIn({ currentKibanaVersion, telemetrySavedObject }),
+      opt_in_status: getTelemetryOptIn({
+        currentKibanaVersion,
+        telemetrySavedObject,
+        allowChangingOptInStatus,
+        configTelemetryOptIn,
+      }),
       last_reported: telemetrySavedObject ? telemetrySavedObject.lastReported : undefined,
       usage_fetcher: getTelemetryUsageFetcher({
         telemetrySavedObject,
-        defaultTelemetryUsageFetcher,
+        configTelemetryUsageFetcher,
       }),
     };
   };

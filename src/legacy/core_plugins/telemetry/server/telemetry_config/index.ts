@@ -20,3 +20,4 @@
 export { replaceTelemetryInjectedVars } from './replace_injected_vars';
 export { getTelemetryOptIn } from './get_telemetry_opt_in';
 export { getTelemetryUsageFetcher } from './get_telemetry_usage_fetcher';
+export { getTelemetryAllowChangingOptInStatus } from './get_telemetry_allow_changing_opt_in_status';

@@ -23,6 +23,8 @@ import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_save
 interface GetTelemetryOptInConfig {
   telemetrySavedObject: TelemetrySavedObject;
   currentKibanaVersion: string;
+  allowChangingOptInStatus: boolean;
+  configTelemetryOptIn: boolean;
 }
 
 type GetTelemetryOptIn = (config: GetTelemetryOptInConfig) => null | boolean;
@@ -30,7 +32,13 @@ type GetTelemetryOptIn = (config: GetTelemetryOptInConfig) => null | boolean;
 export const getTelemetryOptIn: GetTelemetryOptIn = ({
   telemetrySavedObject,
   currentKibanaVersion,
+  allowChangingOptInStatus,
+  configTelemetryOptIn,
 }) => {
+  if (typeof configTelemetryOptIn === 'boolean' && !allowChangingOptInStatus) {
+    return configTelemetryOptIn;
+  }
+
   if (telemetrySavedObject === false) {
     return false;
   }

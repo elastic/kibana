@@ -19,20 +19,20 @@
 import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
 
 interface GetTelemetryUsageFetcherConfig {
-  defaultTelemetryUsageFetcher: 'browser' | 'server';
+  configTelemetryUsageFetcher: 'browser' | 'server';
   telemetrySavedObject: TelemetrySavedObject;
 }
 
 export function getTelemetryUsageFetcher({
   telemetrySavedObject,
-  defaultTelemetryUsageFetcher,
+  configTelemetryUsageFetcher,
 }: GetTelemetryUsageFetcherConfig) {
   if (!telemetrySavedObject) {
-    return defaultTelemetryUsageFetcher;
+    return configTelemetryUsageFetcher;
   }
 
   if (typeof telemetrySavedObject.usageFetcher === 'undefined') {
-    return defaultTelemetryUsageFetcher;
+    return configTelemetryUsageFetcher;
   }
 
   return telemetrySavedObject.usageFetcher;

@@ -28,10 +28,10 @@ const path = require('path');
 // this type of information. You usually will want to make any hand edits after
 // doing a search to KQL conversion before posting it as a signal or checking it
 // into another repository.
-const INTERVAL = '24h';
+const INTERVAL = '5m';
 const SEVERITY = 'low';
 const TYPE = 'query';
-const FROM = 'now-24h';
+const FROM = 'now-6m';
 const TO = 'now';
 const INDEX = ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
 

@@ -25,8 +25,8 @@ export interface UserAgentMetric {
 }
 
 export function trackUsageAgent(appName: string): UserAgentMetric {
-  const userAgent =
-    window && window.navigator && window.navigator.userAgent ? window.navigator.userAgent : '';
+  const userAgent = (window && window.navigator && window.navigator.userAgent) || '';
+
   return {
     type: METRIC_TYPE.USER_AGENT,
     appName,

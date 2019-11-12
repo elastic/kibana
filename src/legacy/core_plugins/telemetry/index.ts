@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import * as Rx from 'rxjs';
 import { resolve } from 'path';
 import JoiNamespace from 'joi';
 import { Server } from 'hapi';
@@ -46,6 +47,15 @@ const telemetry = (kibana: any) => {
     config(Joi: typeof JoiNamespace) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
+        allowChangingOptInStatus: Joi.boolean().default(true),
+        optIn: Joi.when('allowChangingOptInStatus', {
+          is: false,
+          then: Joi.valid(true).required(),
+          otherwise: Joi.boolean()
+            .allow(null)
+            .default(null),
+        }),
+
         // `config` is used internally and not intended to be set
         config: Joi.string().default(Joi.ref('$defaultConfigPath')),
         banner: Joi.boolean().default(true),
@@ -89,8 +99,11 @@ const telemetry = (kibana: any) => {
         return {
           telemetryEnabled: getXpackConfigWithDeprecated(config, 'telemetry.enabled'),
           telemetryUrl: getXpackConfigWithDeprecated(config, 'telemetry.url'),
-          telemetryBanner: getXpackConfigWithDeprecated(config, 'telemetry.banner'),
-          telemetryOptedIn: null,
+          telemetryBanner:
+            config.get('telemetry.allowChangingOptInStatus') !== false &&
+            getXpackConfigWithDeprecated(config, 'telemetry.banner'),
+          telemetryOptedIn: config.get('telemetry.optIn'),
+          allowChangingOptInStatus: config.get('telemetry.allowChangingOptInStatus'),
           telemetryUsageFetcher: config.get('telemetry.usageFetcher'),
         };
       },
@@ -108,6 +121,19 @@ const telemetry = (kibana: any) => {
             version: server.config().get('pkg.version'),
           },
         },
+        config: {
+          create() {
+            const config = server.config();
+            return Rx.of({
+              enabled: config.get('telemetry.enabled'),
+              optIn: config.get('telemetry.optIn'),
+              config: config.get('telemetry.config'),
+              banner: config.get('telemetry.banner'),
+              url: config.get('telemetry.url'),
+              allowChangingOptInStatus: config.get('telemetry.allowChangingOptInStatus'),
+            });
+          },
+        },
       } as PluginInitializerContext;
 
       const coreSetup = ({
@@ -116,6 +142,7 @@ const telemetry = (kibana: any) => {
       } as any) as CoreSetup;
 
       telemetryPlugin(initializerContext).setup(coreSetup);
+
       // register collectors
       server.usage.collectorSet.register(createTelemetryPluginUsageCollector(server));
       server.usage.collectorSet.register(createLocalizationUsageCollector(server));

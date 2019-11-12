@@ -25,4 +25,5 @@ export interface TelemetrySavedObjectAttributes {
   lastVersionChecked?: string;
   usageFetcher?: 'browser' | 'server';
   lastReported?: number;
+  telemetryAllowChangingOptInStatus?: boolean;
 }

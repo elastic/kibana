@@ -46,12 +46,12 @@ export type StatsGetter = (config: StatsGetterConfig) => Promise<any[]>;
 
 export const getStatsCollectionConfig = (
   config: StatsGetterConfig,
-  esClutser: string
+  esClustser: string
 ): StatsCollectionConfig => {
   const { start, end } = config;
   const server = config.unencrypted ? config.req.server : config.server;
   const { callWithRequest, callWithInternalUser } = server.plugins.elasticsearch.getCluster(
-    esClutser
+    esClustser
   );
   const callCluster = config.unencrypted
     ? (...args: any[]) => callWithRequest(config.req, ...args)

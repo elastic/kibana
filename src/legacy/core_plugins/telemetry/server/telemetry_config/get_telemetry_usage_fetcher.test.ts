@@ -58,14 +58,14 @@ describe('getTelemetryUsageFetcher', () => {
 interface CallGetTelemetryUsageFetcherParams {
   savedObjectNotFound?: boolean;
   savedObjectForbidden?: boolean;
-  savedUsageFetcher?: 'browser' | 'server' | undefined;
+  savedUsageFetcher?: 'browser' | 'server';
   configUsageFetcher: 'browser' | 'server';
 }
 
 function callGetTelemetryUsageFetcher(params: CallGetTelemetryUsageFetcherParams) {
   const telemetrySavedObject = getMockTelemetrySavedObject(params);
-  const defaultTelemetryUsageFetcher = params.configUsageFetcher;
-  return getTelemetryUsageFetcher({ defaultTelemetryUsageFetcher, telemetrySavedObject });
+  const configTelemetryUsageFetcher = params.configUsageFetcher;
+  return getTelemetryUsageFetcher({ configTelemetryUsageFetcher, telemetrySavedObject });
 }
 
 function getMockTelemetrySavedObject(

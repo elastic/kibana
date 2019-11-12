@@ -49,14 +49,21 @@ export class FetcherTask {
     const telemetrySavedObject = await getTelemetrySavedObject(internalRepository);
     const config = this.server.config();
     const currentKibanaVersion = config.get('pkg.version');
-    const defaultTelemetryUsageFetcher = config.get('telemetry.usageFetcher');
+    const configTelemetryUsageFetcher = config.get('telemetry.usageFetcher');
+    const allowChangingOptInStatus = config.get('telemetry.allowChangingOptInStatus');
+    const configTelemetryOptIn = config.get('telemetry.optIn');
     const telemetryUrl = getXpackConfigWithDeprecated(config, 'telemetry.url') as string;
 
     return {
-      telemetryOptIn: getTelemetryOptIn({ currentKibanaVersion, telemetrySavedObject }),
+      telemetryOptIn: getTelemetryOptIn({
+        currentKibanaVersion,
+        telemetrySavedObject,
+        allowChangingOptInStatus,
+        configTelemetryOptIn,
+      }),
       telemetryUsageFetcher: getTelemetryUsageFetcher({
         telemetrySavedObject,
-        defaultTelemetryUsageFetcher,
+        configTelemetryUsageFetcher,
       }),
       telemetryUrl,
     };
@@ -70,7 +77,7 @@ export class FetcherTask {
     });
   };
 
-  private checkReportStatus = ({ telemetryOptIn, telemetryUsageFetcher }: any) => {
+  private shouldSendReport = ({ telemetryOptIn, telemetryUsageFetcher }: any) => {
     if (telemetryOptIn && telemetryUsageFetcher === 'server') {
       if (!this.lastReported || Date.now() - this.lastReported > REPORT_INTERVAL_MS) {
         return true;
@@ -109,7 +116,7 @@ export class FetcherTask {
     }
     try {
       const telemetryConfig = await this.getCurrentConfigs();
-      if (!this.checkReportStatus(telemetryConfig)) {
+      if (!this.shouldSendReport(telemetryConfig)) {
         return;
       }
 
