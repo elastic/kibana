@@ -37,6 +37,7 @@ import { Toast } from 'src/core/public';
 import {
   AutocompleteSuggestion,
   AutocompleteSuggestionType,
+  PersistedLog,
 } from '../../../../../../../plugins/data/public';
 import {
   withKibana,
@@ -47,7 +48,6 @@ import { Query, getQueryLog } from '../index';
 import { fromUser, matchPairs, toUser } from '../lib';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
-import { PersistedLog } from '../../persisted_log';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 import { IDataPluginServices } from '../../../types';
 

@@ -57,46 +57,10 @@ describe('<VisualizationChart/>', () => {
     expect(wrapper.text()).toBe('Test Visualization visualization, not yet accessible');
   });
 
-  it('should emit render start and render end', async () => {
-    const renderStart = jest.fn();
-    const renderComplete = jest.fn();
-    const domNode = document.createElement('div');
-    domNode.addEventListener('renderStart', renderStart);
-    domNode.addEventListener('renderComplete', renderComplete);
-
-    mount(<VisualizationChart vis={vis} />, {
-      attachTo: domNode
-    });
-
-    jest.runAllTimers();
-    await renderPromise;
-    expect(renderStart).toHaveBeenCalledTimes(1);
-    expect(renderComplete).toHaveBeenCalledTimes(1);
-
-  });
-
   it('should render visualization', async () => {
     const wrapper = mount(<VisualizationChart vis={vis} />);
     jest.runAllTimers();
     await renderPromise;
     expect(wrapper.find('.visChart').text()).toMatch(/markdown/);
-  });
-
-  it('should re-render on param change', async () => {
-    const renderComplete = jest.fn();
-    const wrapper = mount(<VisualizationChart vis={vis} />);
-    const domNode = wrapper.getDOMNode();
-    domNode.addEventListener('renderComplete', renderComplete);
-    jest.runAllTimers();
-    await renderPromise;
-    expect(renderComplete).toHaveBeenCalledTimes(1);
-
-    vis.params.markdown = 'new text';
-    wrapper.setProps({ vis });
-    jest.runAllTimers();
-    await renderPromise;
-
-    expect(wrapper.find('.visChart').text()).toBe('new text');
-    expect(renderComplete).toHaveBeenCalledTimes(2);
   });
 });
