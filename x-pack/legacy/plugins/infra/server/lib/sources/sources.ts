@@ -65,7 +65,7 @@ export class InfraSources {
           : Promise.reject(err)
       )
       .catch(err =>
-        this.libs.savedObjects.SavedObjectsClient.errors.isNotFoundError(err)
+        requestContext.core.savedObjects.client.errors.isNotFoundError(err)
           ? Promise.resolve({
               id: sourceId,
               version: undefined,
@@ -106,13 +106,11 @@ export class InfraSources {
     );
 
     const createdSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
-      await this.libs.savedObjects
-        .getScopedSavedObjectsClient(requestContext)
-        .create(
-          infraSourceConfigurationSavedObjectType,
-          pickSavedSourceConfiguration(newSourceConfiguration) as any,
-          { id: sourceId }
-        )
+      await requestContext.core.savedObjects.client.create(
+        infraSourceConfigurationSavedObjectType,
+        pickSavedSourceConfiguration(newSourceConfiguration) as any,
+        { id: sourceId }
+      )
     );
 
     return {
@@ -125,9 +123,10 @@ export class InfraSources {
   }
 
   public async deleteSourceConfiguration(requestContext: RequestHandlerContext, sourceId: string) {
-    await this.libs.savedObjects
-      .getScopedSavedObjectsClient(requestContext)
-      .delete(infraSourceConfigurationSavedObjectType, sourceId);
+    await requestContext.core.savedObjects.client.delete(
+      infraSourceConfigurationSavedObjectType,
+      sourceId
+    );
   }
 
   public async updateSourceConfiguration(
@@ -145,16 +144,14 @@ export class InfraSources {
     );
 
     const updatedSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
-      await this.libs.savedObjects
-        .getScopedSavedObjectsClient(requestContext)
-        .update(
-          infraSourceConfigurationSavedObjectType,
-          sourceId,
-          pickSavedSourceConfiguration(updatedSourceConfigurationAttributes) as any,
-          {
-            version,
-          }
-        )
+      await requestContext.core.savedObjects.client.update(
+        infraSourceConfigurationSavedObjectType,
+        sourceId,
+        pickSavedSourceConfiguration(updatedSourceConfigurationAttributes) as any,
+        {
+          version,
+        }
+      )
     );
 
     return {
@@ -205,9 +202,7 @@ export class InfraSources {
     requestContext: RequestHandlerContext,
     sourceId: string
   ) {
-    const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(requestContext);
-
-    const savedObject = await savedObjectsClient.get(
+    const savedObject = await requestContext.core.savedObjects.client.get(
       infraSourceConfigurationSavedObjectType,
       sourceId
     );
@@ -216,9 +211,7 @@ export class InfraSources {
   }
 
   private async getAllSavedSourceConfigurations(requestContext: RequestHandlerContext) {
-    const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(requestContext);
-
-    const savedObjects = await savedObjectsClient.find({
+    const savedObjects = await requestContext.core.savedObjects.client.find({
       type: infraSourceConfigurationSavedObjectType,
     });
 

@@ -78,7 +78,7 @@ export class KibanaFramework {
             ? (request.body as Record<string, any>)
             : (request.query as Record<string, any>);
 
-        const gqlResponse = await runHttpQuery([request], {
+        const gqlResponse = await runHttpQuery([context], {
           method: request.route.method.toUpperCase(),
           options: (req: Legacy.Request) => ({
             context: { req },
