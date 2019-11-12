@@ -53,22 +53,7 @@ declare module '@elastic/eui' {
     sizes: EuiSizesResponsive[];
   };
 
-  type EuiInMemoryTableProps = CommonProps & {
-    items?: any;
-    columns?: any;
-    sorting?: any;
-    search?: any;
-    selection?: any;
-    pagination?: any;
-    itemId?: any;
-    isSelectable?: any;
-    loading?: any;
-    hasActions?: any;
-    message?: any;
-    rowProps?: any;
-    cellProps?: any;
-    responsive?: boolean;
-    itemIdToExpandedRowMap?: any;
-  };
-  export const EuiInMemoryTable: React.FC<EuiInMemoryTableProps>;
+  export const EuiHideFor: React.SFC<EuiResponsiveProps>;
+
+  export const EuiShowFor: React.SFC<EuiResponsiveProps>;
 }
