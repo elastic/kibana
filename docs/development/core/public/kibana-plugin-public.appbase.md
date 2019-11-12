@@ -16,7 +16,6 @@ export interface AppBase
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [capabilities](./kibana-plugin-public.appbase.capabilities.md) | <code>Partial&lt;Capabilities&gt;</code> | Custom capabilities defined by the app. |
-|  [chromeless](./kibana-plugin-public.appbase.chromeless.md) | <code>boolean</code> | Hide the UI chrome when the application is mounted. Defaults to <code>false</code>. |
 |  [euiIconType](./kibana-plugin-public.appbase.euiicontype.md) | <code>string</code> | A EUI iconType that will be used for the app's icon. This icon takes precendence over the <code>icon</code> property. |
 |  [icon](./kibana-plugin-public.appbase.icon.md) | <code>string</code> | A URL to an image file used as an icon. Used as a fallback if <code>euiIconType</code> is not provided. |
 |  [id](./kibana-plugin-public.appbase.id.md) | <code>string</code> |  |

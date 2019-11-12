@@ -16,13 +16,13 @@ import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/type
 
 // @public
 export interface App extends AppBase {
+    chromeless?: boolean;
     mount: (context: AppMountContext, params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
 }
 
 // @public (undocumented)
 export interface AppBase {
     capabilities?: Partial<Capabilities>;
-    chromeless?: boolean;
     euiIconType?: string;
     icon?: string;
     // (undocumented)

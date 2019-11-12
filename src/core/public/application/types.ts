@@ -66,12 +66,6 @@ export interface AppBase {
    * Custom capabilities defined by the app.
    */
   capabilities?: Partial<Capabilities>;
-
-  /**
-   * Hide the UI chrome when the application is mounted. Defaults to `false`.
-   * Takes precedence over chrome service visibility settings.
-   */
-  chromeless?: boolean;
 }
 
 /**
@@ -86,6 +80,12 @@ export interface App extends AppBase {
    * @returns An unmounting function that will be called to unmount the application.
    */
   mount: (context: AppMountContext, params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
+
+  /**
+   * Hide the UI chrome when the application is mounted. Defaults to `false`.
+   * Takes precedence over chrome service visibility settings.
+   */
+  chromeless?: boolean;
 }
 
 /** @internal */
