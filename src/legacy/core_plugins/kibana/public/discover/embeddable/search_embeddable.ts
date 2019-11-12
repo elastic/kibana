@@ -21,10 +21,14 @@ import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
-import { TimeRange, onlyDisabledFiltersChanged } from '../../../../../../plugins/data/public';
-import { setup as data } from '../../../../data/public/legacy';
-import { Query, getTime } from '../../../../data/public';
-import { esFilters } from '../../../../../../plugins/data/public';
+import { npStart } from 'ui/new_platform';
+import {
+  esFilters,
+  TimeRange,
+  onlyDisabledFiltersChanged,
+  getTime,
+} from '../../../../../../plugins/data/public';
+import { Query } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
   Container,
@@ -48,6 +52,8 @@ import {
   SearchSource,
 } from '../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
+
+const { data } = npStart.plugins;
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
@@ -136,9 +142,9 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       requests: new RequestAdapter(),
     };
     this.initializeSearchScope();
-    this.autoRefreshFetchSubscription = data.timefilter.timefilter
-      .getAutoRefreshFetch$()
-      .subscribe(this.fetch);
+    const { timefilter } = data.query.timefilter;
+
+    this.autoRefreshFetchSubscription = timefilter.getAutoRefreshFetch$().subscribe(this.fetch);
 
     this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
       this.panelTitle = this.output.title || '';
