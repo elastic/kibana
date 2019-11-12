@@ -25,4 +25,8 @@ export class AbstractStyleProperty {
   getOptions() {
     return this._options || {};
   }
+
+  renderHeader() {
+    return null;
+  }
 }

@@ -10,10 +10,11 @@ import PropTypes from 'prop-types';
 import { styleOptionShapes, rangeShape } from '../style_option_shapes';
 import { StylePropertyLegendRow } from './style_property_legend_row';
 
-export function VectorStyleLegend({ getFieldLabel, getFieldFormatter, styleProperties }) {
+export function VectorStyleLegend({ getFieldLabel, getFieldFormatter, styleProperties, stylesWithRanges }) {
   return styleProperties.map(styleProperty => {
     return (
       <StylePropertyLegendRow
+        style={styleProperty.style}
         key={styleProperty.name}
         name={styleProperty.name}
         type={styleProperty.type}

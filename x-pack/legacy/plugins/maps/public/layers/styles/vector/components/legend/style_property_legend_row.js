@@ -9,12 +9,12 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import { styleOptionShapes, rangeShape } from '../style_option_shapes';
-import { VectorStyle } from '../../vector_style';
 import { ColorGradient } from '../../../components/color_gradient';
 import { CircleIcon } from './circle_icon';
 import { getVectorStyleLabel } from '../get_vector_style_label';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { StyleLegendRow } from '../../../components/style_legend_row';
+import { vectorStyles } from '../../vector_style_defaults';
 
 function getLineWidthIcons() {
   const defaultStyle = {
@@ -32,7 +32,6 @@ function getLineWidthIcons() {
 function getSymbolSizeIcons() {
   const defaultStyle = {
     stroke: 'grey',
-    strokeWidth: 'none',
     fill: 'grey',
   };
   return [
@@ -121,8 +120,7 @@ export class StylePropertyLegendRow extends Component {
   }
 
   _isStatic() {
-    return this.props.type === VectorStyle.STYLE_TYPE.STATIC ||
-        !this.props.options.field || !this.props.options.field.name;
+    return !this.props.style.isDynamic() || !this.props.style.getField() || !this.props.style.getField().getName();
   }
 
   _formatValue = value => {
@@ -134,17 +132,18 @@ export class StylePropertyLegendRow extends Component {
   }
 
   render() {
-    const { name, options, range } = this.props;
+
+    const { options, range, style } = this.props;
     if (this._isStatic()) {
       return null;
     }
 
     let header;
     if (options.color) {
-      header = <ColorGradient colorRampName={options.color}/>;
-    } else if (name === 'lineWidth') {
+      header = style.renderHeader();
+    } else if (style.getStyleName() === vectorStyles.LINE_WIDTH) {
       header = renderHeaderWithIcons(getLineWidthIcons());
-    } else if (name === 'iconSize') {
+    } else if (style.getStyleName() === vectorStyles.ICON_SIZE) {
       header = renderHeaderWithIcons(getSymbolSizeIcons());
     }
 
@@ -153,7 +152,7 @@ export class StylePropertyLegendRow extends Component {
         header={header}
         minLabel={this._formatValue(_.get(range, 'min', EMPTY_VALUE))}
         maxLabel={this._formatValue(_.get(range, 'max', EMPTY_VALUE))}
-        propertyLabel={getVectorStyleLabel(name)}
+        propertyLabel={getVectorStyleLabel(style.getStyleName())}
         fieldLabel={this.state.label}
       />
     );

@@ -84,6 +84,12 @@ export class AbstractESAggSource extends AbstractESSource {
     return metrics;
   }
 
+  _getRawFieldName(fieldName) {
+    console.log('rafin', fieldName);
+    const metricField = this.getMetricFields().find((esAggMetricField) => esAggMetricField.getName() === fieldName);
+    return metricField ? metricField.getESDocFieldName() : null;
+  }
+
   formatMetricKey(aggType, fieldName) {
     return aggType !== COUNT_AGG_TYPE ? `${aggType}${AGG_DELIMITER}${fieldName}` : COUNT_PROP_NAME;
   }

@@ -298,14 +298,15 @@ export class VectorStyle extends AbstractStyle {
   }
 
   renderLegendDetails(getFieldLabel, getFieldFormatter) {
-    const styles = this.getRawProperties();
-    const styleProperties = Object.keys(styles).map(styleName => {
-      const { type, options } = styles[styleName];
+    const styles = this._getAllStyleProperties();
+    const styleProperties = styles.map(style => {
+      const type = style.isDynamic() ? STYLE_TYPE.DYNAMIC : STYLE_TYPE.STATIC;
       return {
-        name: styleName,
+        name: style.getStyleName(),
         type,
-        options,
-        range: options && options.field && options.field.name ? this._getFieldRange(options.field.name) : null,
+        options: style.getOptions(),
+        range: style.isDynamic() && style.getField() && style.getField().getName() ? this._getFieldRange(style.getField().getName()) : null,
+        style: style
       };
     });
 
