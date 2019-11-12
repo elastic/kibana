@@ -14,24 +14,24 @@ interface GroupByEntry {
 }
 
 export default function({ getService }: FtrProviderContext) {
-  // const esArchiver = getService('esArchiver');
+  const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
   describe('creation', function() {
     this.tags(['smoke']);
-    // before(async () => {
-    //   await esArchiver.load('ml/ecommerce');
-    // });
+    before(async () => {
+      await esArchiver.load('ml/ecommerce');
+    });
 
-    // after(async () => {
-    //   await esArchiver.unload('ml/ecommerce');
-    //  await transform.api.cleanTransformIndices();
-    // });
+    after(async () => {
+      await esArchiver.unload('ml/ecommerce');
+      await transform.api.cleanTransformIndices();
+    });
 
     const testDataList = [
       {
         suiteTitle: 'batch transform with terms+date_histogram groups and avg agg',
-        source: 'kibana_sample_data_ecommerce',
+        source: 'ecommerce',
         groupByEntries: [
           {
             identifier: 'terms(category.keyword)',
@@ -67,9 +67,9 @@ export default function({ getService }: FtrProviderContext) {
 
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function() {
-        // after(async () => {
-        //   await transform.api.deleteIndices(testData.destinationIndex);
-        // });
+        after(async () => {
+          await transform.api.deleteIndices(testData.destinationIndex);
+        });
 
         it('loads the home page', async () => {
           await transform.navigation.navigateTo();
