@@ -42,6 +42,7 @@ import {
 import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats_bar';
 import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
 import { CreateAnalyticsButton } from '../create_analytics_button';
+import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 
 function getItemIdToExpandedRowMap(
   itemIds: DataFrameAnalyticsId[],
@@ -71,7 +72,7 @@ interface Props {
   isManagementTable?: boolean;
   isMlEnabledInSpace?: boolean;
   blockRefresh?: boolean;
-  createAnalyticsForm?: any;
+  createAnalyticsForm?: CreateAnalyticsFormProps;
 }
 export const DataFrameAnalyticsList: FC<Props> = ({
   isManagementTable = false,
@@ -226,7 +227,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
             </h2>
           }
           actions={
-            !isManagementTable
+            !isManagementTable && createAnalyticsForm
               ? [
                   <EuiButtonEmpty
                     onClick={createAnalyticsForm.actions.openModal}
@@ -339,7 +340,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
             <EuiFlexItem grow={false}>
               <RefreshAnalyticsListButton />
             </EuiFlexItem>
-            {!isManagementTable && (
+            {!isManagementTable && createAnalyticsForm && (
               <EuiFlexItem grow={false}>
                 <CreateAnalyticsButton {...createAnalyticsForm} />
               </EuiFlexItem>
