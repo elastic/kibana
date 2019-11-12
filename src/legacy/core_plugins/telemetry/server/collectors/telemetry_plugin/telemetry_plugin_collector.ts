@@ -29,7 +29,7 @@ export interface TelemetryUsageStats {
 export function createCollectorFetch(server: any) {
   return async function fetchUsageStats(): Promise<TelemetryUsageStats> {
     const config = server.config();
-    const configTelemetryUsageFetcher = config.get('telemetry.usageFetcher');
+    const configTelemetrySendUsageFrom = config.get('telemetry.sendUsageFrom');
     const allowChangingOptInStatus = config.get('telemetry.allowChangingOptInStatus');
     const configTelemetryOptIn = config.get('telemetry.optIn');
     const currentKibanaVersion = config.get('pkg.version');
@@ -55,7 +55,7 @@ export function createCollectorFetch(server: any) {
       last_reported: telemetrySavedObject ? telemetrySavedObject.lastReported : undefined,
       usage_fetcher: getTelemetryUsageFetcher({
         telemetrySavedObject,
-        configTelemetryUsageFetcher,
+        configTelemetrySendUsageFrom,
       }),
     };
   };

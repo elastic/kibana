@@ -104,7 +104,7 @@ const telemetry = (kibana: any) => {
             getXpackConfigWithDeprecated(config, 'telemetry.banner'),
           telemetryOptedIn: config.get('telemetry.optIn'),
           allowChangingOptInStatus: config.get('telemetry.allowChangingOptInStatus'),
-          telemetryUsageFetcher: config.get('telemetry.usageFetcher'),
+          telemetryUsageFetcher: config.get('telemetry.sendUsageFrom'),
         };
       },
       hacks: ['plugins/telemetry/hacks/telemetry_init', 'plugins/telemetry/hacks/telemetry_opt_in'],

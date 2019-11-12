@@ -24,7 +24,7 @@ describe('getTelemetryUsageFetcher', () => {
   it('returns kibana.yml config when saved object not found', () => {
     const params: CallGetTelemetryUsageFetcherParams = {
       savedObjectNotFound: true,
-      configUsageFetcher: 'browser',
+      configSendUsageFrom: 'browser',
     };
 
     const result = callGetTelemetryUsageFetcher(params);
@@ -35,7 +35,7 @@ describe('getTelemetryUsageFetcher', () => {
   it('returns kibana.yml config when saved object forbidden', () => {
     const params: CallGetTelemetryUsageFetcherParams = {
       savedObjectForbidden: true,
-      configUsageFetcher: 'browser',
+      configSendUsageFrom: 'browser',
     };
 
     const result = callGetTelemetryUsageFetcher(params);
@@ -45,8 +45,8 @@ describe('getTelemetryUsageFetcher', () => {
 
   it('returns kibana.yml config when saved object usageFetcher is undefined', () => {
     const params: CallGetTelemetryUsageFetcherParams = {
-      savedUsageFetcher: undefined,
-      configUsageFetcher: 'server',
+      savedSendUsagefrom: undefined,
+      configSendUsageFrom: 'server',
     };
 
     const result = callGetTelemetryUsageFetcher(params);
@@ -58,14 +58,14 @@ describe('getTelemetryUsageFetcher', () => {
 interface CallGetTelemetryUsageFetcherParams {
   savedObjectNotFound?: boolean;
   savedObjectForbidden?: boolean;
-  savedUsageFetcher?: 'browser' | 'server';
-  configUsageFetcher: 'browser' | 'server';
+  savedSendUsagefrom?: 'browser' | 'server';
+  configSendUsageFrom: 'browser' | 'server';
 }
 
 function callGetTelemetryUsageFetcher(params: CallGetTelemetryUsageFetcherParams) {
   const telemetrySavedObject = getMockTelemetrySavedObject(params);
-  const configTelemetryUsageFetcher = params.configUsageFetcher;
-  return getTelemetryUsageFetcher({ configTelemetryUsageFetcher, telemetrySavedObject });
+  const configTelemetrySendUsageFrom = params.configSendUsageFrom;
+  return getTelemetryUsageFetcher({ configTelemetrySendUsageFrom, telemetrySavedObject });
 }
 
 function getMockTelemetrySavedObject(
@@ -80,6 +80,6 @@ function getMockTelemetrySavedObject(
   }
 
   return {
-    usageFetcher: params.savedUsageFetcher,
+    usageFetcher: params.savedSendUsagefrom,
   };
 }
