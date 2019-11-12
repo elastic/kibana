@@ -377,61 +377,6 @@
             } }}"
           >{{mc.v2}}</small>
         </div>
-
-
-
-        <div class="gphSidebar__panel" ng-if="(detail.inferredEdge)">
-          <div class="gphSidebar__header">
-            <span class="kuiIcon fa-cog"></span>
-            {{ ::'xpack.graph.sidebar.similarLabelsTitle' | i18n: { defaultMessage: 'Similar labels' } }}
-          </div>
-
-          <div class="form-group form-group-sm gphFormGroup--small">
-            <div style="line-height: 24px;">
-              <button
-                tooltip="{{ ::'xpack.graph.sidebar.similarLabels.mergeTargetToSrcButtonTooltip' | i18n: {
-                  defaultMessage: 'Merge {targetLabel} into {srcLabel}',
-                  values: { targetLabel: detail.inferredEdge.topTarget.label, srcLabel: detail.inferredEdge.topSrc.label },
-                } }}"
-                type="button" style="vertical-align: top;" class="kuiButton kuiButton--basic kuiButton--small"
-                ng-click="performMerge(detail.inferredEdge.topTarget.id, detail.inferredEdge.topSrc.id)">
-                <span class="kui fa-chevron-circle-down"></span>
-              </button>
-              <svg width="24" height="24">
-                <circle class="gphNode__circle " r="10" cx="12" cy="12" ng-attr-style="fill:{{detail.inferredEdge.topSrc.color}}" />
-
-                <text ng-if="detail.inferredEdge.topSrc.icon" class="fa gphNode__text" text-anchor="middle" x="12" y="16">{{detail.inferredEdge.topSrc.icon.code}}</text>
-              </svg>
-              <span style="vertical-align: top;">{{detail.inferredEdge.topSrc.label}}</span>
-            </div>
-            <div style="line-height: 24px;">
-              <button
-                tooltip="{{ ::'xpack.graph.sidebar.similarLabels.mergeSrcToTargetButtonTooltip' | i18n: {
-                  defaultMessage: 'Merge {srcLabel} into {targetLabel}',
-                  values: { targetLabel: detail.inferredEdge.topTarget.label, srcLabel: detail.inferredEdge.topSrc.label },
-                } }}"
-                type="button" style="vertical-align: top;" class="kuiButton kuiButton--basic kuiButton--small"
-                ng-click="performMerge(detail.inferredEdge.topSrc.id, detail.inferredEdge.topTarget.id)">
-                <span class="kuiIcon fa-chevron-circle-up"></span>
-              </button>
-
-              <svg width="24" height="24">
-                <circle class="gphNode__circle " r="10" cx="12" cy="12" ng-attr-style="fill:{{detail.inferredEdge.topTarget.color}}" />
-
-                <text ng-if="detail.inferredEdge.topTarget.icon" class="fa gphNode__text" text-anchor="middle" x="12" y="16">{{detail.inferredEdge.topTarget.icon.code}}</text>
-              </svg>
-              <span style="vertical-align: top;">{{detail.inferredEdge.topTarget.label}}</span>
-
-            </div>
-
-            <div
-              class="col-sm-10"
-              i18n-id="xpack.graph.sidebar.similarLabels.keyTermsText"
-              i18n-default-message="Key terms: {inferredEdgeLabel}"
-              i18n-values="{ html_inferredEdgeLabel: '<small>' + detail.inferredEdge.label + '</small>' }"
-            ></div>
-          </div>
-        </div>
       </div>
       <!-- end edge-merge detail panel -->
 

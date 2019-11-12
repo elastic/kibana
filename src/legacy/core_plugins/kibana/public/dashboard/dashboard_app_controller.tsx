@@ -43,12 +43,12 @@ import { SaveOptions } from 'ui/saved_objects/saved_object';
 import { Subscription } from 'rxjs';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import {
-  extractTimeFilter,
-  changeTimeFilter,
   FilterStateManager,
   Query,
   SavedQuery,
-} from '../../../data/public';
+  extractTimeFilter,
+  changeTimeFilter,
+} from '../../../../../plugins/data/public';
 import { esFilters } from '../../../../../plugins/data/public';
 
 import {

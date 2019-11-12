@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { coreMock, elasticsearchServiceMock } from '../../../../src/core/server/mocks';
-
+import { of } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { Plugin } from './plugin';
 import { IClusterClient, CoreSetup } from '../../../../src/core/server';
+import { Plugin, PluginSetupDependencies } from './plugin';
+
+import { coreMock, elasticsearchServiceMock } from '../../../../src/core/server/mocks';
 
 describe('Security Plugin', () => {
   let plugin: Plugin;
   let mockCoreSetup: MockedKeys<CoreSetup>;
   let mockClusterClient: jest.Mocked<IClusterClient>;
+  let mockDependencies: PluginSetupDependencies;
   beforeEach(() => {
     plugin = new Plugin(
       coreMock.createPluginInitializerContext({
@@ -33,12 +35,33 @@ describe('Security Plugin', () => {
     mockCoreSetup.elasticsearch.createClient.mockReturnValue(
       (mockClusterClient as unknown) as jest.Mocked<IClusterClient>
     );
+
+    mockDependencies = { licensing: { license$: of({}) } } as PluginSetupDependencies;
   });
 
   describe('setup()', () => {
     it('exposes proper contract', async () => {
-      await expect(plugin.setup(mockCoreSetup)).resolves.toMatchInlineSnapshot(`
+      await expect(plugin.setup(mockCoreSetup, mockDependencies)).resolves.toMatchInlineSnapshot(`
               Object {
+                "__legacyCompat": Object {
+                  "config": Object {
+                    "authc": Object {
+                      "providers": Array [
+                        "saml",
+                        "token",
+                      ],
+                    },
+                    "cookieName": "sid",
+                    "secureCookies": true,
+                    "sessionTimeout": 1500,
+                  },
+                  "license": Object {
+                    "getFeatures": [Function],
+                    "isEnabled": [Function],
+                  },
+                  "registerLegacyAPI": [Function],
+                  "registerPrivilegesWithCluster": [Function],
+                },
                 "authc": Object {
                   "createAPIKey": [Function],
                   "getCurrentUser": [Function],
@@ -47,24 +70,40 @@ describe('Security Plugin', () => {
                   "login": [Function],
                   "logout": [Function],
                 },
-                "config": Object {
-                  "authc": Object {
-                    "providers": Array [
-                      "saml",
-                      "token",
-                    ],
+                "authz": Object {
+                  "actions": Actions {
+                    "allHack": "allHack:",
+                    "api": ApiActions {
+                      "prefix": "api:version:",
+                    },
+                    "app": AppActions {
+                      "prefix": "app:version:",
+                    },
+                    "login": "login:",
+                    "savedObject": SavedObjectActions {
+                      "prefix": "saved_object:version:",
+                    },
+                    "space": SpaceActions {
+                      "prefix": "space:version:",
+                    },
+                    "ui": UIActions {
+                      "prefix": "ui:version:",
+                    },
+                    "version": "version:version",
+                    "versionNumber": "version",
                   },
-                  "cookieName": "sid",
-                  "secureCookies": true,
-                  "sessionTimeout": 1500,
+                  "checkPrivilegesWithRequest": [Function],
+                  "mode": Object {
+                    "useRbacForRequest": [Function],
+                  },
                 },
-                "registerLegacyAPI": [Function],
+                "registerSpacesService": [Function],
               }
             `);
     });
 
     it('properly creates cluster client instance', async () => {
-      await plugin.setup(mockCoreSetup);
+      await plugin.setup(mockCoreSetup, mockDependencies);
 
       expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledTimes(1);
       expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledWith('security', {
@@ -74,7 +113,7 @@ describe('Security Plugin', () => {
   });
 
   describe('stop()', () => {
-    beforeEach(async () => await plugin.setup(mockCoreSetup));
+    beforeEach(async () => await plugin.setup(mockCoreSetup, mockDependencies));
 
     it('properly closes cluster client instance', async () => {
       expect(mockClusterClient.close).not.toHaveBeenCalled();
