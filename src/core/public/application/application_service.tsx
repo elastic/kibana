@@ -88,6 +88,7 @@ export class ApplicationService {
         const appBox: AppBox = {
           app: {
             ...app,
+            status: app.status !== undefined ? app.status : AppStatus.accessible,
             legacy: false,
           },
           mount: this.mountContext!.createHandler(plugin, app.mount),
@@ -103,6 +104,7 @@ export class ApplicationService {
         }
         this.apps.set(app.id, {
           ...app,
+          status: app.status !== undefined ? app.status : AppStatus.accessible,
           legacy: true,
         });
       },
@@ -172,6 +174,14 @@ export class ApplicationService {
       },
 
       navigateToApp: (appId, { path, state }: { path?: string; state?: any } = {}) => {
+        if (this.apps.get(appId) === undefined) {
+          throw new Error(`Trying to navigate to an unknown application: ${appId}`);
+        }
+        const app = availableApps$.value.get(appId);
+        if (app === undefined || app.status !== AppStatus.accessible) {
+          throw new Error(`Trying to navigate to an inaccessible application: ${appId}`);
+        }
+
         if (legacyMode) {
           // If we're in legacy mode, do a full page refresh to load the NP app.
           redirectTo(http.basePath.prepend(appPath(appId, { path })));

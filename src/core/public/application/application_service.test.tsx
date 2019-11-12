@@ -26,9 +26,9 @@ import { ApplicationService } from './application_service';
 import { contextServiceMock } from '../context/context_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { take } from 'rxjs/operators';
-import { BehaviorSubject } from 'rxjs';
-import { AppStatus, AppStatusUpdater } from './types';
-import { HttpSetup, ContextSetup } from 'kibana/public';
+import { BehaviorSubject, of } from 'rxjs';
+import { AppStatus, AppStatusUpdater, InternalApplicationSetup } from './types';
+import { ContextSetup, HttpSetup } from 'kibana/public';
 import { InjectedMetadataSetup } from '../injected_metadata';
 
 describe('ApplicationService', () => {
@@ -120,6 +120,7 @@ describe('ApplicationService', () => {
             "app2" => Object {
               "id": "app2",
               "legacy": false,
+              "status": 0,
             },
           }
         `);
@@ -148,6 +149,7 @@ describe('ApplicationService', () => {
             "app2" => Object {
               "id": "app2",
               "legacy": false,
+              "status": 0,
             },
           }
         `);
@@ -291,10 +293,12 @@ describe('ApplicationService', () => {
                 "app1" => Object {
                   "id": "app1",
                   "legacy": false,
+                  "status": 0,
                 },
                 "app2" => Object {
                   "id": "app2",
                   "legacy": true,
+                  "status": 0,
                 },
               }
             `);
@@ -307,7 +311,7 @@ describe('ApplicationService', () => {
       await service.start({ http, injectedMetadata });
 
       expect(MockCapabilitiesService.start).toHaveBeenCalledWith({
-        apps: new Map([['app1', { id: 'app1', legacy: false }]]),
+        apps: new Map([['app1', { id: 'app1', legacy: false, status: AppStatus.accessible }]]),
         injectedMetadata,
       });
     });
@@ -319,7 +323,9 @@ describe('ApplicationService', () => {
       await service.start({ http, injectedMetadata });
 
       expect(MockCapabilitiesService.start).toHaveBeenCalledWith({
-        apps: new Map([['legacyApp1', { id: 'legacyApp1', legacy: true }]]),
+        apps: new Map([
+          ['legacyApp1', { id: 'legacyApp1', legacy: true, status: AppStatus.accessible }],
+        ]),
         injectedMetadata,
       });
     });
@@ -334,9 +340,15 @@ describe('ApplicationService', () => {
     });
 
     describe('navigateToApp', () => {
-      it('changes the browser history to /app/:appId', async () => {
-        service.setup({ context });
+      let setup: InternalApplicationSetup;
 
+      beforeEach(() => {
+        setup = service.setup({ context });
+        setup.register(Symbol(), { id: 'myTestApp' } as any);
+        setup.register(Symbol(), { id: 'myOtherApp' } as any);
+      });
+
+      it('changes the browser history to /app/:appId', async () => {
         injectedMetadata.getLegacyMode.mockReturnValue(false);
         const start = await service.start({ http, injectedMetadata });
 
@@ -347,8 +359,6 @@ describe('ApplicationService', () => {
       });
 
       it('appends a path if specified', async () => {
-        service.setup({ context });
-
         injectedMetadata.getLegacyMode.mockReturnValue(false);
         const start = await service.start({ http, injectedMetadata });
 
@@ -360,8 +370,6 @@ describe('ApplicationService', () => {
       });
 
       it('includes state if specified', async () => {
-        service.setup({ context });
-
         injectedMetadata.getLegacyMode.mockReturnValue(false);
         const start = await service.start({ http, injectedMetadata });
 
@@ -370,13 +378,54 @@ describe('ApplicationService', () => {
       });
 
       it('redirects when in legacyMode', async () => {
-        service.setup({ context });
-
         injectedMetadata.getLegacyMode.mockReturnValue(true);
         const redirectTo = jest.fn();
         const start = await service.start({ http, injectedMetadata, redirectTo });
         start.navigateToApp('myTestApp');
         expect(redirectTo).toHaveBeenCalledWith('/app/myTestApp');
+      });
+
+      it('throws if application is unknown', async () => {
+        injectedMetadata.getLegacyMode.mockReturnValue(false);
+        const start = await service.start({ http, injectedMetadata });
+
+        expect(() => {
+          start.navigateToApp('unknownApp');
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"Trying to navigate to an unknown application: unknownApp"`
+        );
+      });
+
+      //
+      it('throws if application is inaccessible', async () => {
+        setup.registerAppStatusUpdater(
+          of(app => {
+            if (app.id === 'myTestApp') {
+              return {
+                status: AppStatus.inaccessible,
+              };
+            }
+            if (app.id === 'myOtherApp') {
+              return {
+                status: AppStatus.inaccessibleWithDisabledNavLink,
+              };
+            }
+          })
+        );
+
+        injectedMetadata.getLegacyMode.mockReturnValue(false);
+        const start = await service.start({ http, injectedMetadata });
+
+        expect(() => {
+          start.navigateToApp('myTestApp');
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"Trying to navigate to an inaccessible application: myTestApp"`
+        );
+        expect(() => {
+          start.navigateToApp('myOtherApp');
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"Trying to navigate to an inaccessible application: myOtherApp"`
+        );
       });
     });
   });
