@@ -33,7 +33,7 @@ import {
   UtilityBarGroup,
   UtilityBarSection,
   UtilityBarText,
-} from '../../../components/utility_bar';
+} from '../../../components/detection_engine/utility_bar';
 import { WrapperPage } from '../../../components/wrapper_page';
 import { SpyRoute } from '../../../utils/route/spy_routes';
 import * as i18n from './translations';
@@ -566,9 +566,9 @@ const AllRules = React.memo(() => {
     },
   ];
 
-  const [itemsTotalState, setItemsTotalState] = useState<number>(sampleTableData.length);
+  const [itemsTotalState] = useState<number>(sampleTableData.length);
   const [pageState, setPageState] = useState<PageTypes>({ index: 0, size: 20 });
-  const [selectedState, setSelectedState] = useState<ColumnTypes[]>([]);
+  // const [selectedState, setSelectedState] = useState<ColumnTypes[]>([]);
   const [sortState, setSortState] = useState<SortTypes>({ field: 'rule', direction: 'asc' });
 
   return (
@@ -622,7 +622,7 @@ const AllRules = React.memo(() => {
           selection={{
             selectable: () => true,
             onSelectionChange: (selectedItems: ColumnTypes[]) => {
-              setSelectedState(selectedItems);
+              // setSelectedState(selectedItems);
             },
           }}
           sorting={{
@@ -971,9 +971,9 @@ const ActivityMonitor = React.memo(() => {
     },
   ];
 
-  const [itemsTotalState, setItemsTotalState] = useState<number>(sampleTableData.length);
+  const [itemsTotalState] = useState<number>(sampleTableData.length);
   const [pageState, setPageState] = useState<PageTypes>({ index: 0, size: 20 });
-  const [selectedState, setSelectedState] = useState<ColumnTypes[]>([]);
+  // const [selectedState, setSelectedState] = useState<ColumnTypes[]>([]);
   const [sortState, setSortState] = useState<SortTypes>({ field: 'ran', direction: 'desc' });
 
   return (
@@ -1021,7 +1021,7 @@ const ActivityMonitor = React.memo(() => {
             selectableMessage: (selectable: boolean) =>
               selectable ? undefined : 'Completed runs cannot be acted upon',
             onSelectionChange: (selectedItems: ColumnTypes[]) => {
-              setSelectedState(selectedItems);
+              // setSelectedState(selectedItems);
             },
           }}
           sorting={{

@@ -11,7 +11,6 @@ import {
   EuiCallOut,
   EuiFilterButton,
   EuiFilterGroup,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -40,7 +39,7 @@ import {
   UtilityBarGroup,
   UtilityBarSection,
   UtilityBarText,
-} from '../../../components/utility_bar';
+} from '../../../components/detection_engine/utility_bar';
 import { WrapperPage } from '../../../components/wrapper_page';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../../containers/source';
 import { SpyRoute } from '../../../utils/route/spy_routes';
@@ -434,9 +433,9 @@ const ActivityMonitor = React.memo(() => {
     },
   ];
 
-  const [itemsTotalState, setItemsTotalState] = useState<number>(sampleTableData.length);
+  const [itemsTotalState] = useState<number>(sampleTableData.length);
   const [pageState, setPageState] = useState<PageTypes>({ index: 0, size: 20 });
-  const [selectedState, setSelectedState] = useState<ColumnTypes[]>([]);
+  // const [selectedState, setSelectedState] = useState<ColumnTypes[]>([]);
   const [sortState, setSortState] = useState<SortTypes>({ field: 'ran', direction: 'desc' });
 
   return (
@@ -484,7 +483,7 @@ const ActivityMonitor = React.memo(() => {
             selectableMessage: (selectable: boolean) =>
               selectable ? undefined : 'Completed runs cannot be acted upon',
             onSelectionChange: (selectedItems: ColumnTypes[]) => {
-              setSelectedState(selectedItems);
+              // setSelectedState(selectedItems);
             },
           }}
           sorting={{

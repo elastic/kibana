@@ -9,7 +9,7 @@ import React from 'react';
 import styled, { css } from 'styled-components';
 
 import { InspectButton } from '../inspect';
-import { Subtitle, SubtitleProps } from '../subtitle';
+import { Subtitle } from '../subtitle';
 
 interface HeaderProps {
   border?: boolean;
@@ -35,7 +35,7 @@ export interface HeaderSectionProps extends HeaderProps {
   children?: React.ReactNode;
   id?: string;
   split?: boolean;
-  subtitle?: SubtitleProps['text'];
+  subtitle?: string | React.ReactNode;
   showInspect?: boolean;
   title: string | React.ReactNode;
   tooltip?: string;

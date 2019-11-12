@@ -9,8 +9,8 @@ import toJson from 'enzyme-to-json';
 import 'jest-styled-components';
 import React from 'react';
 
-import '../../mock/ui_settings';
-import { TestProviders } from '../../mock';
+import '../../../mock/ui_settings';
+import { TestProviders } from '../../../mock';
 import { UtilityBarAction } from './index';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');

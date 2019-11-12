@@ -26,7 +26,7 @@ import {
   UtilityBarGroup,
   UtilityBarSection,
   UtilityBarText,
-} from '../../components/utility_bar';
+} from '../../components/detection_engine/utility_bar';
 import { WrapperPage } from '../../components/wrapper_page';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { SpyRoute } from '../../utils/route/spy_routes';

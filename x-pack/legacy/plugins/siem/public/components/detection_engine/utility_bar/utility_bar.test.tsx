@@ -10,8 +10,8 @@ import toJson from 'enzyme-to-json';
 import 'jest-styled-components';
 import React from 'react';
 
-import '../../mock/ui_settings';
-import { TestProviders } from '../../mock';
+import '../../../mock/ui_settings';
+import { TestProviders } from '../../../mock';
 import {
   UtilityBar,
   UtilityBarAction,
@@ -33,7 +33,7 @@ describe('UtilityBar', () => {
             </UtilityBarGroup>
 
             <UtilityBarGroup>
-              <UtilityBarAction popoverContent={<p>{'Test popover'}</p>}>
+              <UtilityBarAction iconType="" popoverContent={<p>{'Test popover'}</p>}>
                 {'Test action'}
               </UtilityBarAction>
             </UtilityBarGroup>
@@ -61,7 +61,7 @@ describe('UtilityBar', () => {
             </UtilityBarGroup>
 
             <UtilityBarGroup>
-              <UtilityBarAction popoverContent={<p>{'Test popover'}</p>}>
+              <UtilityBarAction iconType="" popoverContent={<p>{'Test popover'}</p>}>
                 {'Test action'}
               </UtilityBarAction>
             </UtilityBarGroup>
@@ -91,7 +91,7 @@ describe('UtilityBar', () => {
             </UtilityBarGroup>
 
             <UtilityBarGroup>
-              <UtilityBarAction popoverContent={<p>{'Test popover'}</p>}>
+              <UtilityBarAction iconType="" popoverContent={<p>{'Test popover'}</p>}>
                 {'Test action'}
               </UtilityBarAction>
             </UtilityBarGroup>
