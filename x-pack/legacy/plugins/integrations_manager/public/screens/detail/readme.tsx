@@ -9,6 +9,7 @@ import ReactMarkdown from 'react-markdown';
 import { getFileByPath } from '../../data';
 import { markdownRenderers } from './markdown_renderers';
 import { useLinks } from '../../hooks';
+import { ContentCollapse } from '../../components/content_collapse';
 
 export function Readme({
   readmePath,
@@ -40,11 +41,13 @@ export function Readme({
   return (
     <Fragment>
       {markdown !== undefined ? (
-        <ReactMarkdown
-          transformImageUri={handleImageUri}
-          renderers={markdownRenderers}
-          source={markdown}
-        />
+        <ContentCollapse>
+          <ReactMarkdown
+            transformImageUri={handleImageUri}
+            renderers={markdownRenderers}
+            source={markdown}
+          />
+        </ContentCollapse>
       ) : (
         <EuiText>
           {/* simulates a long page of text loading */}
