@@ -38,14 +38,14 @@ export default function(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> 
         enabled: Joi.boolean().default(true),
         service: Joi.object({
           pathTemplate: Joi.string().default(DEFAULT_SERVICE_PATH),
-          urlRoot: Joi.when('$dev', {
+          urlRoot: Joi.when('$prod', {
             is: true,
             then: Joi.string()
-              .default(DEV_SERVICE_URLROOT)
-              .regex(/[^\/]$/),
-            otherwise: Joi.string()
               .default(DEFAULT_SERVICE_URLROOT)
               .valid(DEFAULT_SERVICE_URLROOT),
+            otherwise: Joi.string()
+              .default(DEV_SERVICE_URLROOT)
+              .regex(/[^\/]$/),
           }), // urlRoot can only be changed from default when running in dev
         }).default(),
         defaultLanguage: Joi.string().default('en'),
