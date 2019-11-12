@@ -329,11 +329,13 @@ const makeMapStateToProps = () => {
     } = timeline;
     const kqlQueryExpression = getKqlQueryTimeline(state, id);
 
+    const timelineFilter = kqlMode === 'filter' ? filters || [] : [];
+
     return {
       columns,
       dataProviders,
       end: input.timerange.to,
-      filters: filters || [],
+      filters: timelineFilter,
       id,
       isLive: input.policy.kind === 'interval',
       itemsPerPage,
