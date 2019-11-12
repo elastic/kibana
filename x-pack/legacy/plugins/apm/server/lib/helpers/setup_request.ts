@@ -27,15 +27,8 @@ export interface APMRequestQuery {
   uiFilters?: string;
 }
 
-interface SetupOptions {
-  clientAsInternalUser?: boolean;
-}
-
 export type Setup = PromiseReturnType<typeof setupRequest>;
-export async function setupRequest(
-  req: Legacy.Request,
-  { clientAsInternalUser = false }: SetupOptions = {}
-) {
+export async function setupRequest(req: Legacy.Request) {
   const query = (req.query as unknown) as APMRequestQuery;
   const { server } = req;
   const config = server.config();
@@ -48,7 +41,8 @@ export async function setupRequest(
     start: moment.utc(query.start).valueOf(),
     end: moment.utc(query.end).valueOf(),
     uiFiltersES,
-    client: getESClient(req, { clientAsInternalUser }),
+    client: getESClient(req, { clientAsInternalUser: false }),
+    internalClient: getESClient(req, { clientAsInternalUser: true }),
     config,
     indices
   };
