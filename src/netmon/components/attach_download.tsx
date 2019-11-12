@@ -33,10 +33,11 @@ const useStyles = createUseStyles({
 export interface AttachDownloadProps {
   session: string;
   fileName: string;
+  captured: boolean;
 }
 
 const AttachDownload = (props: AttachDownloadProps) => {
-  const { session, fileName } = props;
+  const { session, fileName, captured } = props;
 
   const classes = useStyles();
 
@@ -80,6 +81,10 @@ const AttachDownload = (props: AttachDownloadProps) => {
       return;
     }
   };
+
+  if (!captured) {
+    return fileName;
+  }
 
   return (
     <>

@@ -72,10 +72,10 @@ const FileDownloadRow = (props: FileDownloadRowProps) => {
 
   const renderFileName = () => (
     <EuiTextColor color={fileStatus.status === 'failure' ? 'danger' : 'default'}>
-      {fileName.length < 38 && fileName}
-      {fileName.length >= 38 && (
+      {fileName.length < 42 && fileName}
+      {fileName.length >= 42 && (
         <EuiToolTip content={fileName}>
-          <div className={classes.tooltip}>{`${fileName.substr(0, 34)}...`}</div>
+          <div className={classes.tooltip}>{`${fileName.substr(0, 38)}...`}</div>
         </EuiToolTip>
       )}
     </EuiTextColor>

@@ -42,7 +42,7 @@ import FileDownloadRow from './file_download_row';
 
 const useStyles = createUseStyles({
   modal: {
-    width: '600px',
+    minWidth: '600px',
   },
   footer: {
     display: 'flex',
@@ -145,7 +145,7 @@ const FileDownloadModal = (props: FileDownloadModalProps) => {
                 <FileDownloadRow
                   key={`file_${f}`}
                   overallStatus={downloadStatus.overall}
-                  fileName={f}
+                  fileName={fileType === 'pcap' ? `${f}.pcap` : f}
                   fileStatus={downloadStatus.fileStatuses[f]}
                 />
               ))}
