@@ -125,6 +125,34 @@ describe('ApplicationService', () => {
         `);
       });
 
+      it('excludes applications that are inaccessible', async () => {
+        const setup = service.setup({ context });
+
+        const pluginId = Symbol('plugin');
+        setup.register(pluginId, { id: 'app1' } as any);
+        setup.register(pluginId, { id: 'app2' } as any);
+        setup.registerAppStatusUpdater(
+          new BehaviorSubject<AppStatusUpdater>(app => {
+            if (app.id === 'app1') {
+              return {
+                status: AppStatus.inaccessible,
+              };
+            }
+          })
+        );
+
+        const start = await service.start({ http, injectedMetadata });
+
+        expect(await start.availableApps$.pipe(take(1)).toPromise()).toMatchInlineSnapshot(`
+          Map {
+            "app2" => Object {
+              "id": "app2",
+              "legacy": false,
+            },
+          }
+        `);
+      });
+
       it('applies the most restrictive status in case of multiple updaters', async () => {
         const setup = service.setup({ context });
 
@@ -133,7 +161,7 @@ describe('ApplicationService', () => {
         setup.registerAppStatusUpdater(
           new BehaviorSubject<AppStatusUpdater>(app => {
             return {
-              status: AppStatus.inaccessible,
+              status: AppStatus.inaccessibleWithDisabledNavLink,
             };
           })
         );
@@ -152,7 +180,7 @@ describe('ApplicationService', () => {
             "app1" => Object {
               "id": "app1",
               "legacy": false,
-              "status": 2,
+              "status": 1,
             },
           }
         `);
@@ -166,7 +194,7 @@ describe('ApplicationService', () => {
 
         const statusUpdater = new BehaviorSubject<AppStatusUpdater>(app => {
           return {
-            status: AppStatus.inaccessible,
+            status: AppStatus.inaccessibleWithDisabledNavLink,
           };
         });
         setup.registerAppStatusUpdater(statusUpdater);
@@ -184,7 +212,7 @@ describe('ApplicationService', () => {
             "app1" => Object {
               "id": "app1",
               "legacy": false,
-              "status": 2,
+              "status": 1,
             },
           }
         `);

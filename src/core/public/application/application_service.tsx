@@ -31,6 +31,7 @@ import {
   App,
   AppBase,
   AppMounter,
+  AppStatus,
   AppStatusUpdater,
   AppUpdatableFields,
   InternalApplicationSetup,
@@ -153,6 +154,9 @@ export class ApplicationService {
       .pipe(
         map(([apps, statusUpdaters]) => {
           return new Map([...apps].map(([id, app]) => [id, updateStatus(app, statusUpdaters)]));
+        }),
+        map(apps => {
+          return new Map([...apps].filter(([id, app]) => app.status !== AppStatus.inaccessible));
         })
       )
       .subscribe(apps => availableApps$.next(apps));
