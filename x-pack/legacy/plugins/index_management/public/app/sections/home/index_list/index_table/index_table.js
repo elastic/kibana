@@ -219,7 +219,6 @@ export class IndexTable extends Component {
       return (
         <Fragment>
           <EuiLink
-            className="indTable__link"
             data-test-subj="indexTableIndexNameLink"
             onClick={() => {
               uiMetricService.trackMetric('click', UIM_SHOW_DETAILS_CLICK);
