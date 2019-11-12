@@ -30,9 +30,10 @@ function telemetryInit($injector: any) {
   const $http = $injector.get('$http');
 
   const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
+  const telemetryOptedIn = npStart.core.injectedMetadata.getInjectedVar('telemetryOptedIn');
   const sendUsageFrom = npStart.core.injectedMetadata.getInjectedVar('telemetrySendUsageFrom');
 
-  if (telemetryEnabled && sendUsageFrom === 'browser') {
+  if (telemetryEnabled && telemetryOptedIn && sendUsageFrom === 'browser') {
     // no telemetry for non-logged in users
     if (isUnauthenticated()) {
       return;
