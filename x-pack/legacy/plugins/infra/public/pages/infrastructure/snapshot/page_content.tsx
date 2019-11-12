@@ -22,7 +22,7 @@ export const SnapshotPageContent: React.SFC = () => (
           <WithWaffleFilter indexPattern={createDerivedIndexPattern('metrics')}>
             {({ filterQueryAsJson, applyFilterQuery }) => (
               <WithWaffleTime>
-                {({ currentTimeRange, isAutoReloading }) => (
+                {({ currentTime, isAutoReloading }) => (
                   <WithWaffleOptions>
                     {({
                       metric,
@@ -39,7 +39,7 @@ export const SnapshotPageContent: React.SFC = () => (
                         groupBy={groupBy}
                         nodeType={nodeType}
                         sourceId={sourceId}
-                        timerange={currentTimeRange}
+                        currentTime={currentTime}
                       >
                         {({ nodes, loading, refetch }) => (
                           <Layout
@@ -54,7 +54,7 @@ export const SnapshotPageContent: React.SFC = () => (
                             }}
                             reload={refetch}
                             onDrilldown={applyFilterQuery}
-                            timeRange={currentTimeRange}
+                            currentTime={currentTime}
                             view={view}
                             onViewChange={changeView}
                             autoBounds={autoBounds}

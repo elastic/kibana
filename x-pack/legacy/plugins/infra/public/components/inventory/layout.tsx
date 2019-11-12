@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { InfraWaffleMapOptions, InfraWaffleMapBounds } from '../../lib/lib';
-import { InfraNodeType, InfraSnapshotNode, InfraTimerangeInput } from '../../graphql/types';
+import { InfraNodeType, InfraSnapshotNode } from '../../graphql/types';
 import { KueryFilterQuery } from '../../store/local/waffle_filter';
 
 import { NodesOverview } from '../nodes_overview';
@@ -20,7 +20,7 @@ export interface LayoutProps {
   loading: boolean;
   reload: () => void;
   onDrilldown: (filter: KueryFilterQuery) => void;
-  timeRange: InfraTimerangeInput;
+  currentTime: number;
   onViewChange: (view: string) => void;
   view: string;
   boundsOverride: InfraWaffleMapBounds;

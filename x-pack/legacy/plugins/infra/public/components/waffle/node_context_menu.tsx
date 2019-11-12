@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { UICapabilities } from 'ui/capabilities';
 import { injectUICapabilities } from 'ui/capabilities/react';
-import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
+import { InfraNodeType } from '../../graphql/types';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../pages/link_to';
 import { createUptimeLink } from './lib/create_uptime_link';
@@ -23,7 +23,7 @@ import { findInventoryModel } from '../../../common/inventory_models';
 
 interface Props {
   options: InfraWaffleMapOptions;
-  timeRange: InfraTimerangeInput;
+  currentTime: number;
   children: any;
   node: InfraWaffleMapNode;
   nodeType: InfraNodeType;
@@ -36,7 +36,7 @@ interface Props {
 export const NodeContextMenu = injectUICapabilities(
   ({
     options,
-    timeRange,
+    currentTime,
     children,
     node,
     isPopoverOpen,
@@ -65,12 +65,12 @@ export const NodeContextMenu = injectUICapabilities(
       href: getNodeLogsUrl({
         nodeType,
         nodeId: node.id,
-        time: timeRange.to,
+        time: currentTime,
       }),
       'data-test-subj': 'viewLogsContextMenuItem',
     };
 
-    const nodeDetailFrom = timeRange.to - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
+    const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
     const nodeDetailMenuItem = {
       name: i18n.translate('xpack.infra.nodeContextMenu.viewMetricsName', {
         defaultMessage: 'View metrics',
@@ -79,7 +79,7 @@ export const NodeContextMenu = injectUICapabilities(
         nodeType,
         nodeId: node.id,
         from: nodeDetailFrom,
-        to: timeRange.to,
+        to: currentTime,
       }),
     };
 
