@@ -33,10 +33,10 @@ jest.mock('../kibana_services', () => ({
 }));
 
 test('should render a Welcome screen with the telemetry disclaimer', () => {
-  // @ts-ignore
-  const component = shallow((
+  const component = shallow(
+    // @ts-ignore
     <Welcome urlBase="/" onSkip={() => {}} showTelemetryDisclaimer={true} />
-  ) as any);
+  );
 
   expect(component).toMatchSnapshot();
 });
@@ -44,6 +44,7 @@ test('should render a Welcome screen with the telemetry disclaimer', () => {
 test('should render a Welcome screen with no telemetry disclaimer', () => {
   // @ts-ignore
   const component = shallow(
+    // @ts-ignore
     <Welcome urlBase="/" onSkip={() => {}} showTelemetryDisclaimer={false} />
   );
 
