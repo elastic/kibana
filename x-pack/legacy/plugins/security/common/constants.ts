@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const INTERNAL_API_BASE_PATH = '/internal/security';
+export { INTERNAL_API_BASE_PATH } from '../../../../plugins/security/common/constants';
