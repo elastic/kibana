@@ -22,7 +22,7 @@ import { markAppliedByAgent } from '../../lib/settings/agent_configuration/mark_
 export const agentConfigurationRoute = createRoute(core => ({
   path: '/api/apm/settings/agent-configuration',
   handler: async req => {
-    const setup = await setupRequest(req);
+    const setup = await setupRequest(req, { clientAsInternalUser: true });
     return await listConfigurations({ setup });
   }
 }));
@@ -31,13 +31,16 @@ export const agentConfigurationRoute = createRoute(core => ({
 export const deleteAgentConfigurationRoute = createRoute(() => ({
   method: 'DELETE',
   path: '/api/apm/settings/agent-configuration/{configurationId}',
+  options: {
+    tags: ['access:apm', 'access:apm_write']
+  },
   params: {
     path: t.type({
       configurationId: t.string
     })
   },
   handler: async (req, { path }) => {
-    const setup = await setupRequest(req);
+    const setup = await setupRequest(req, { clientAsInternalUser: true });
     const { configurationId } = path;
     return await deleteConfiguration({
       configurationId,
@@ -51,7 +54,7 @@ export const listAgentConfigurationServicesRoute = createRoute(() => ({
   method: 'GET',
   path: '/api/apm/settings/agent-configuration/services',
   handler: async req => {
-    const setup = await setupRequest(req);
+    const setup = await setupRequest(req, { clientAsInternalUser: true });
     return await getServiceNames({
       setup
     });
@@ -82,7 +85,7 @@ export const listAgentConfigurationEnvironmentsRoute = createRoute(() => ({
     query: t.partial({ serviceName: t.string })
   },
   handler: async (req, { query }) => {
-    const setup = await setupRequest(req);
+    const setup = await setupRequest(req, { clientAsInternalUser: true });
     const { serviceName } = query;
     return await getEnvironments({ serviceName, setup });
   }
@@ -95,7 +98,7 @@ export const agentConfigurationAgentNameRoute = createRoute(() => ({
     query: t.type({ serviceName: t.string })
   },
   handler: async (req, { query }) => {
-    const setup = await setupRequest(req);
+    const setup = await setupRequest(req, { clientAsInternalUser: true });
     const { serviceName } = query;
     const agentName = await getAgentNameByService({ serviceName, setup });
     return agentName;
@@ -108,8 +111,11 @@ export const createAgentConfigurationRoute = createRoute(() => ({
   params: {
     body: agentPayloadRt
   },
+  options: {
+    tags: ['access:apm', 'access:apm_write']
+  },
   handler: async (req, { body }) => {
-    const setup = await setupRequest(req);
+    const setup = await setupRequest(req, { clientAsInternalUser: true });
     return await createOrUpdateConfiguration({ configuration: body, setup });
   }
 }));
@@ -117,6 +123,9 @@ export const createAgentConfigurationRoute = createRoute(() => ({
 export const updateAgentConfigurationRoute = createRoute(() => ({
   method: 'PUT',
   path: '/api/apm/settings/agent-configuration/{configurationId}',
+  options: {
+    tags: ['access:apm', 'access:apm_write']
+  },
   params: {
     path: t.type({
       configurationId: t.string
@@ -124,7 +133,7 @@ export const updateAgentConfigurationRoute = createRoute(() => ({
     body: agentPayloadRt
   },
   handler: async (req, { path, body }) => {
-    const setup = await setupRequest(req);
+    const setup = await setupRequest(req, { clientAsInternalUser: true });
     const { configurationId } = path;
     return await createOrUpdateConfiguration({
       configurationId,
@@ -148,7 +157,7 @@ export const agentConfigurationSearchRoute = createRoute(core => ({
     })
   },
   handler: async (req, { body }, h) => {
-    const setup = await setupRequest(req);
+    const setup = await setupRequest(req, { clientAsInternalUser: true });
     const config = await searchConfigurations({
       serviceName: body.service.name,
       environment: body.service.environment,
