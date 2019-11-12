@@ -6,9 +6,10 @@
 
 import React, { useContext } from 'react';
 import { get } from 'lodash';
-import { EuiHealth, EuiSpacer } from '@elastic/eui';
+import { EuiHealth, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { Check } from '../../../../../common/graphql/types';
 import { UptimeSettingsContext } from '../../../../contexts';
+import { LocationLink } from './location_link';
 
 interface MonitorStatusListProps {
   /**
@@ -22,25 +23,41 @@ export const MonitorStatusList = ({ checks }: MonitorStatusListProps) => {
     colors: { success, danger },
   } = useContext(UptimeSettingsContext);
 
-  const upChecks: string[] = [];
-  const downChecks: string[] = [];
+  const upChecks: Set<string> = new Set();
+  const downChecks: Set<string> = new Set();
+
+  const UN_NAMED_LOCATION = 'unnamed-location';
 
   checks.forEach((check: Check) => {
-    const location = get<string>(check, 'observer.geo.name', 'unnamed-location');
+    let location = get<string>(check, 'observer.geo.name', UN_NAMED_LOCATION);
+
+    if (location === null) {
+      location = UN_NAMED_LOCATION;
+    }
 
     if (check.monitor.status === 'up') {
-      upChecks.push(location);
-    }
-    if (check.monitor.status === 'down') {
-      downChecks.push(location);
+      upChecks.add(location);
+    } else if (check.monitor.status === 'down') {
+      downChecks.add(location);
     }
   });
 
-  const displayMonitorStatus = (checksList: string[], color: string, titleTxt: string) => {
+  // if monitor is down in one dns, it will be considered down so removing it from up list
+
+  const absUpChecks: Set<string> = new Set([...upChecks].filter(item => !downChecks.has(item)));
+
+  const displayMonitorStatus = (checksList: Set<string>, color: string, titleTxt: string) => {
+    let checkListArray = [...checksList];
+    // If un-named location exists, move it to end
+    if (checksList.has(UN_NAMED_LOCATION)) {
+      checkListArray = checkListArray.filter(item => item !== UN_NAMED_LOCATION);
+      checkListArray.push(UN_NAMED_LOCATION);
+    }
+
     return (
       <>
         <EuiHealth color={color}>
-          {titleTxt} in {checksList.map((location, index) => (index ? ', ' : '') + location)}
+          {titleTxt} in {checkListArray.map((location, index) => (index ? ', ' : '') + location)}
         </EuiHealth>
         <EuiSpacer size="s" />
       </>
@@ -48,8 +65,16 @@ export const MonitorStatusList = ({ checks }: MonitorStatusListProps) => {
   };
   return (
     <>
-      {downChecks.length > 0 && displayMonitorStatus(downChecks, danger, 'Down')}
-      {upChecks.length > 0 && displayMonitorStatus(upChecks, success, 'Up')}
+      {downChecks.size > 0 && displayMonitorStatus(downChecks, danger, 'Down')}
+      {absUpChecks.size > 0 && displayMonitorStatus(upChecks, success, 'Up')}
+      {(downChecks.has(UN_NAMED_LOCATION) || upChecks.has(UN_NAMED_LOCATION)) && (
+        <EuiCallOut color="warning">
+          <p>
+            Some heartbeat instances do not have a location defined. <LocationLink /> to your
+            heartbeat configuration.
+          </p>
+        </EuiCallOut>
+      )}
     </>
   );
 };
