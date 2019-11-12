@@ -10,30 +10,24 @@ import { identity } from 'fp-ts/lib/function';
 import { kfetch } from 'ui/kfetch';
 
 import {
-  LOG_ANALYSIS_INDEX_PATTERNS_VALIDATE_PATH,
-  indexPatternsValidateRequestPayloadRT,
-  indexPatternsValidateResponsePayloadRT,
+  LOG_ANALYSIS_VALIDATION_INDICES_PATH,
+  validationIndicesRequestPayloadRT,
+  validationIndicesResponsePayloadRT,
 } from '../../../../../common/http_api';
 
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 
-export const callIndexPatternsValidate = async ({
-  timestamp,
-  indexPatternName,
-}: {
-  timestamp: string;
-  indexPatternName: string;
-}) => {
+export const callIndexPatternsValidate = async (timestamp: string, indices: string) => {
   const response = await kfetch({
     method: 'POST',
-    pathname: LOG_ANALYSIS_INDEX_PATTERNS_VALIDATE_PATH,
+    pathname: LOG_ANALYSIS_VALIDATION_INDICES_PATH,
     body: JSON.stringify(
-      indexPatternsValidateRequestPayloadRT.encode({ data: { timestamp, indexPatternName } })
+      validationIndicesRequestPayloadRT.encode({ data: { timestamp, indices } })
     ),
   });
 
   return pipe(
-    indexPatternsValidateResponsePayloadRT.decode(response),
+    validationIndicesResponsePayloadRT.decode(response),
     fold(throwErrors(createPlainError), identity)
   );
 };

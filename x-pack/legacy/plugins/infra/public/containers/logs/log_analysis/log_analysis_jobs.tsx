@@ -107,17 +107,14 @@ export const useLogAnalysisJobs = ({
         dispatch({ type: 'fetchingJobStatuses' });
         return Promise.all([
           callJobsSummaryAPI(spaceId, sourceId),
-          callIndexPatternsValidate({
-            timestamp: timeField,
-            indexPatternName: indexPattern,
-          }),
+          callIndexPatternsValidate(timeField, indexPattern),
         ]);
       },
       onResolve: ([jobResponse, validationResponse]) => {
         setAvailableIndices(
           indexPatterns.map<AvailableIndex>(pattern => {
             const indexValidation = validationResponse.data.errors.find(
-              err => err.indexPattern === pattern
+              err => err.index === pattern
             );
             return {
               indexPattern: pattern,

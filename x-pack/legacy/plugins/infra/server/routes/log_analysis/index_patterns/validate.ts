@@ -13,10 +13,10 @@ import { i18n } from '@kbn/i18n';
 
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
-  LOG_ANALYSIS_INDEX_PATTERNS_VALIDATE_PATH,
-  indexPatternsValidateRequestPayloadRT,
-  indexPatternsValidateResponsePayloadRT,
-  IndexPatternValidateError,
+  LOG_ANALYSIS_VALIDATION_INDICES_PATH,
+  validationIndicesRequestPayloadRT,
+  validationIndicesResponsePayloadRT,
+  ValidationIndicesError,
 } from '../../../../common/http_api';
 
 import { throwErrors } from '../../../../common/runtime_types';
@@ -24,45 +24,45 @@ import { throwErrors } from '../../../../common/runtime_types';
 export const initIndexPatternsValidateRoute = ({ framework }: InfraBackendLibs) => {
   framework.registerRoute({
     method: 'POST',
-    path: LOG_ANALYSIS_INDEX_PATTERNS_VALIDATE_PATH,
+    path: LOG_ANALYSIS_VALIDATION_INDICES_PATH,
     handler: async (req, res) => {
       const payload = pipe(
-        indexPatternsValidateRequestPayloadRT.decode(req.payload),
+        validationIndicesRequestPayloadRT.decode(req.payload),
         fold(throwErrors(Boom.badRequest), identity)
       );
 
-      const { timestamp, indexPatternName } = payload.data;
-      const indexPatterns = indexPatternName.split(',');
-      const errors: IndexPatternValidateError[] = [];
+      const { timestamp } = payload.data;
+      const indices = payload.data.indices.split(',');
+      const errors: ValidationIndicesError[] = [];
 
       // Query each pattern individually, to map correctly the errors
       await Promise.all(
-        indexPatterns.map(async indexPattern => {
-          const indices = await framework.callWithRequest(req, 'indices.get', {
-            index: indexPattern,
+        indices.map(async index => {
+          const esIndices = await framework.callWithRequest(req, 'indices.get', {
+            index,
           });
 
-          const indexNames = Object.keys(indices);
+          const indexNames = Object.keys(esIndices);
 
           if (indexNames.length === 0) {
             errors.push({
-              indexPattern,
+              index,
               error: 'INDEX_NOT_FOUND',
               message: i18n.translate('xpack.infra.mlValidation.noIndexFound', {
-                defaultMessage: 'No indices match the pattern `{indexPattern}`',
-                values: { indexPattern },
+                defaultMessage: 'No indices match the pattern `{index}`',
+                values: { index },
               }),
             });
             return;
           }
 
-          indexNames.forEach(index => {
-            const metadata = indices[index];
+          indexNames.forEach(indexName => {
+            const metadata = esIndices[indexName];
             const timestampProperty = metadata.mappings.properties[timestamp];
 
             if (!timestampProperty) {
               errors.push({
-                indexPattern,
+                index: indexName,
                 error: 'TIMESTAMP_NOT_FOUND',
                 message: i18n.translate('xpack.infra.mlValidation.noTimestampField', {
                   defaultMessage:
@@ -72,7 +72,7 @@ export const initIndexPatternsValidateRoute = ({ framework }: InfraBackendLibs) 
               });
             } else if (timestampProperty.type !== 'date') {
               errors.push({
-                indexPattern,
+                index: indexName,
                 error: 'TIMESTAMP_NOT_VALID',
                 message: i18n.translate('xpack.infra.mlValidation.invalidTimestampField', {
                   defaultMessage:
@@ -85,7 +85,7 @@ export const initIndexPatternsValidateRoute = ({ framework }: InfraBackendLibs) 
         })
       );
 
-      return res.response(indexPatternsValidateResponsePayloadRT.encode({ data: { errors } }));
+      return res.response(validationIndicesResponsePayloadRT.encode({ data: { errors } }));
     },
   });
 };
