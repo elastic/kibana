@@ -1583,7 +1583,7 @@ export interface NetworkDnsData {
 
   inspect?: Maybe<Inspect>;
 
-  histogram: MatrixOverOrdinalHistogramData[];
+  histogram?: Maybe<MatrixOverOrdinalHistogramData[]>;
 }
 
 export interface NetworkDnsEdges {
@@ -3234,7 +3234,7 @@ export namespace GetNetworkDnsQuery {
 
     inspect: Maybe<Inspect>;
 
-    histogram: Histogram[];
+    histogram: Maybe<Histogram[]>;
   };
 
   export type Edges = {

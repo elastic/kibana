@@ -156,7 +156,7 @@ export const networkSchema = gql`
     totalCount: Float!
     pageInfo: PageInfoPaginated!
     inspect: Inspect
-    histogram: [MatrixOverOrdinalHistogramData!]!
+    histogram: [MatrixOverOrdinalHistogramData!]
   }
 
   enum NetworkHttpFields {

@@ -10,6 +10,8 @@ import { ScaleType, niceTimeFormatter, Position } from '@elastic/charts';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiLoadingContent } from '@elastic/eui';
+import { get, groupBy, map, toPairs } from 'lodash/fp';
+import { AuthMatrixDataFields } from '../page/hosts/authentications_over_time/utils';
 import { BarChart } from '../charts/barchart';
 import { HeaderPanel } from '../header_panel';
 import { ChartSeriesData, UpdateDateRange } from '../charts/common';
@@ -19,22 +21,19 @@ import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { Loader } from '../loader';
 import { Panel } from '../panel';
 
-export interface MatrixHistogramBasicProps<T> {
+export interface MatrixHistogramProps<T> {
   id: string;
   data: T[];
-  loading: boolean;
-  startDate: number;
+  dataKey?: string;
   endDate: number;
-  updateDateRange: UpdateDateRange;
-  totalCount: number;
-}
-
-export interface MatrixHistogramProps<T> extends MatrixHistogramBasicProps<T> {
-  customChartData?: ChartSeriesData[];
-  title: string;
-  subtitle?: string;
-  dataKey: string;
+  loading: boolean;
+  mapping?: MatrixHistogramMappingTypes;
   scaleType?: ScaleType;
+  startDate: number;
+  subtitle?: string;
+  title?: string;
+  totalCount: number;
+  updateDateRange: UpdateDateRange;
 }
 
 const getBarchartConfigs = (
@@ -78,31 +77,54 @@ const getBarchartConfigs = (
   customHeight: 324,
 });
 
+const formatToChartDataItem = ([key, value]: [
+  string,
+  MatrixHistogramDataTypes[]
+]): ChartSeriesData => ({
+  key,
+  value,
+});
+
+const getCustomChartData = (
+  data: MatrixHistogramDataTypes[],
+  mapping?: MatrixHistogramMappingTypes
+): ChartSeriesData[] => {
+  const dataGroupedByEvent = groupBy('g', data);
+  const dataGroupedEntries = toPairs(dataGroupedByEvent);
+  const formattedChartData = map(formatToChartDataItem, dataGroupedEntries);
+
+  if (mapping)
+    return formattedChartData.map((item: ChartSeriesData) => {
+      const customColor = get(`${item.key}.color`, mapping);
+      item.color = customColor;
+      return item;
+    });
+  else return formattedChartData;
+};
+
+type MatrixHistogramDataTypes = MatrixOverTimeHistogramData | MatrixOverOrdinalHistogramData;
+type MatrixHistogramMappingTypes = AuthMatrixDataFields;
+
 export const MatrixHistogram = ({
-  customChartData,
-  id,
-  loading,
   data,
   dataKey,
   endDate,
-  updateDateRange,
-  startDate,
-  title,
-  subtitle,
-  totalCount,
+  id,
+  loading,
+  mapping,
   scaleType = ScaleType.Time,
-}: MatrixHistogramProps<MatrixOverTimeHistogramData | MatrixOverOrdinalHistogramData>) => {
+  startDate,
+  subtitle,
+  title,
+  totalCount,
+  updateDateRange,
+}: MatrixHistogramProps<MatrixHistogramDataTypes>) => {
   const barchartConfigs = getBarchartConfigs(startDate!, endDate!, updateDateRange, scaleType);
   const [showInspect, setShowInspect] = useState(false);
   const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
   const [loadingInitial, setLoadingInitial] = useState(false);
 
-  const barChartData: ChartSeriesData[] = customChartData || [
-    {
-      key: dataKey,
-      value: data,
-    },
-  ];
+  const barChartData: ChartSeriesData[] = getCustomChartData(data, mapping);
 
   useEffect(() => {
     if (totalCount >= 0 && loadingInitial) {

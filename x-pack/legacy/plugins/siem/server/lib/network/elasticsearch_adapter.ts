@@ -197,8 +197,10 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
   }
 }
 
-const getHistogramData = (data: NetworkDnsEdges[]): MatrixOverOrdinalHistogramData[] | null => {
-  if (!Array.isArray(data)) return null;
+const getHistogramData = (
+  data: NetworkDnsEdges[]
+): MatrixOverOrdinalHistogramData[] | undefined => {
+  if (!Array.isArray(data)) return undefined;
   return data.reduce((acc: MatrixOverOrdinalHistogramData[], { node: { dnsBytesOut, _id } }) => {
     if (_id && dnsBytesOut)
       return [

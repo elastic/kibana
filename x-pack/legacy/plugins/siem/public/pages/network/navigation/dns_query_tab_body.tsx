@@ -14,7 +14,7 @@ import { NetworkDnsQuery } from '../../../containers/network_dns';
 import { manageQuery } from '../../../components/page/manage_query';
 
 import { DnsQueryTabBodyProps } from './types';
-import { MatrixHistogram } from '../../../components/matrix_over_time';
+import { MatrixHistogram } from '../../../components/matrix_histogram';
 
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 const NetworkDnsHistogramManage = manageQuery(MatrixHistogram);

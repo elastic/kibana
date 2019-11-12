@@ -1585,7 +1585,7 @@ export interface NetworkDnsData {
 
   inspect?: Maybe<Inspect>;
 
-  histogram: MatrixOverOrdinalHistogramData[];
+  histogram?: Maybe<MatrixOverOrdinalHistogramData[]>;
 }
 
 export interface NetworkDnsEdges {
@@ -6872,7 +6872,7 @@ export namespace NetworkDnsDataResolvers {
 
     inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
 
-    histogram?: HistogramResolver<MatrixOverOrdinalHistogramData[], TypeParent, TContext>;
+    histogram?: HistogramResolver<Maybe<MatrixOverOrdinalHistogramData[]>, TypeParent, TContext>;
   }
 
   export type EdgesResolver<
@@ -6896,7 +6896,7 @@ export namespace NetworkDnsDataResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type HistogramResolver<
-    R = MatrixOverOrdinalHistogramData[],
+    R = Maybe<MatrixOverOrdinalHistogramData[]>,
     Parent = NetworkDnsData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
