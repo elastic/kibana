@@ -21,6 +21,7 @@ import { isSecurityDisabled } from '../lib/security_utils';
 export function systemRoutes({
   commonRouteConfig,
   elasticsearchPlugin,
+  config,
   route,
   xpackMainPlugin,
   spacesPlugin
@@ -168,10 +169,17 @@ export function systemRoutes({
   route({
     method: 'GET',
     path: '/api/ml/info',
-    handler(request) {
+    async handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return callWithRequest('ml.info')
-        .catch(resp => wrapError(resp));
+
+      try {
+        const info = await callWithRequest('ml.info');
+        const cloudIdKey = 'xpack.cloud.id';
+        const cloudId = config.has(cloudIdKey) && config.get(cloudIdKey);
+        return { ...info, cloudId };
+      } catch (error) {
+        return wrapError(error);
+      }
     },
     config: {
       ...commonRouteConfig
