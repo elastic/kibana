@@ -106,10 +106,10 @@ def main():
 
     es_ok = check_elasticsearch_health()
     if es_ok:
+        setup_config()
+
         # Load all the artifacts appropriately
         load_assets(resources)
-
-        setup_config()
     else:
       logger.error('elasticsearch is not ready\n')
       sys.exit(1)
