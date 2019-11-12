@@ -55,7 +55,7 @@ test('throws if config at path does not match schema', async () => {
   await expect(
     configService.setSchema('key', schema.string())
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"[key]: expected value of type [string] but got [number]"`
+    `"[config validation of [key]]: expected value of type [string] but got [number]"`
   );
 });
 
@@ -78,11 +78,11 @@ test('re-validate config when updated', async () => {
   config$.next(new ObjectToConfigAdapter({ key: 123 }));
 
   await expect(valuesReceived).toMatchInlineSnapshot(`
-Array [
-  "value",
-  [Error: [key]: expected value of type [string] but got [number]],
-]
-`);
+    Array [
+      "value",
+      [Error: [config validation of [key]]: expected value of type [string] but got [number]],
+    ]
+  `);
 });
 
 test("returns undefined if fetching optional config at a path that doesn't exist", async () => {
@@ -143,7 +143,7 @@ test("throws error if 'schema' is not defined for a key", async () => {
   const configs = configService.atPath('key');
 
   await expect(configs.pipe(first()).toPromise()).rejects.toMatchInlineSnapshot(
-    `[Error: No validation schema has been defined for key]`
+    `[Error: No validation schema has been defined for [key]]`
   );
 });
 
@@ -153,7 +153,7 @@ test("throws error if 'setSchema' called several times for the same key", async 
   const addSchema = async () => await configService.setSchema('key', schema.string());
   await addSchema();
   await expect(addSchema()).rejects.toMatchInlineSnapshot(
-    `[Error: Validation schema for key was already registered.]`
+    `[Error: Validation schema for [key] was already registered.]`
   );
 });
 

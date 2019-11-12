@@ -54,7 +54,7 @@ export class ConfigService {
   public async setSchema(path: ConfigPath, schema: Type<unknown>) {
     const namespace = pathToString(path);
     if (this.schemas.has(namespace)) {
-      throw new Error(`Validation schema for ${path} was already registered.`);
+      throw new Error(`Validation schema for [${path}] was already registered.`);
     }
 
     this.schemas.set(namespace, schema);
@@ -138,7 +138,7 @@ export class ConfigService {
     const namespace = pathToString(path);
     const schema = this.schemas.get(namespace);
     if (!schema) {
-      throw new Error(`No validation schema has been defined for ${namespace}`);
+      throw new Error(`No validation schema has been defined for [${namespace}]`);
     }
     return schema.validate(
       config,
@@ -147,7 +147,7 @@ export class ConfigService {
         prod: this.env.mode.prod,
         ...this.env.packageInfo,
       },
-      namespace
+      `config validation of [${namespace}]`
     );
   }
 
