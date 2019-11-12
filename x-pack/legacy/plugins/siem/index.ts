@@ -128,7 +128,6 @@ export const siem = (kibana: any) => {
         getInjectedUiAppVars,
         indexPatternsServiceFactory,
         injectUiAppVars,
-        log,
         newPlatform,
         plugins,
         register,
@@ -143,7 +142,6 @@ export const siem = (kibana: any) => {
         getInjectedUiAppVars,
         indexPatternsServiceFactory,
         injectUiAppVars,
-        log,
         newPlatform: {
           coreContext: { logger },
           env: newPlatform.env,

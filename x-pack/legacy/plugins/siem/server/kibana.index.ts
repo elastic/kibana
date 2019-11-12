@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
-import { createLogger } from './utils/logger';
 import {
   noteSavedObjectType,
   pinnedEventSavedObjectType,
@@ -29,19 +28,16 @@ const APP_ID = 'siem';
 export const amMocking = (): boolean => process.env.INGEST_MOCKS === 'true';
 
 export const initServerWithKibana = (kbnServer: ServerFacade) => {
+  const logger = kbnServer.newPlatform.coreContext.logger.get('plugins', APP_ID);
+  logger.info('Plugin initializing');
+
   if (kbnServer.plugins.alerting != null) {
-    const type = signalsAlertType({
-      logger: kbnServer.newPlatform.coreContext.logger.get('plugins', APP_ID),
-    });
+    const type = signalsAlertType({ logger });
     if (isAlertExecutor(type)) {
       kbnServer.plugins.alerting.setup.registerType(type);
     }
   }
   kbnServer.injectUiAppVars('siem', async () => kbnServer.getInjectedUiAppVars('kibana'));
-
-  // bind is so "this" binds correctly to the logger since hapi server does not auto-bind its methods
-  const logger = createLogger(kbnServer.log.bind(kbnServer));
-  logger.info('Plugin initializing');
 
   const mocking = amMocking();
   if (mocking) {

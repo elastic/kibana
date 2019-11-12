@@ -11,7 +11,6 @@ export interface ServerFacade {
   getInjectedUiAppVars: Legacy.Server['getInjectedUiAppVars'];
   indexPatternsServiceFactory: Legacy.Server['indexPatternsServiceFactory'];
   injectUiAppVars: Legacy.Server['injectUiAppVars'];
-  log: Legacy.Server['log'];
   newPlatform: {
     coreContext: {
       logger: Legacy.Server['newPlatform']['coreContext']['logger'];
