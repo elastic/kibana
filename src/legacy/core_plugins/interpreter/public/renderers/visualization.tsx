@@ -33,7 +33,6 @@ export const visualization = () => ({
     const visType = config.visType || visConfig.type;
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const $rootScope = $injector.get('$rootScope') as any;
-    const Private = $injector.get('Private') as any;
 
     if (handlers.vis) {
       // special case in visualize, we need to render first (without executing the expression), for maps to work
