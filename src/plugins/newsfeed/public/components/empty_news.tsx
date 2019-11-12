@@ -25,6 +25,7 @@ export const NewsEmptyPrompt = () => {
     <EuiEmptyPrompt
       iconType="documents"
       titleSize="s"
+      data-test-subj="emptyNewsfeed"
       title={
         <h2>
           <FormattedMessage id="newsfeed.emptyPrompt.noNewsTitle" defaultMessage="No news?" />

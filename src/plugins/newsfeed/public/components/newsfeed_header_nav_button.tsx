@@ -59,6 +59,7 @@ export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
     <NewsfeedContext.Provider value={{ setFlyoutVisible, newsFetchResult }}>
       <Fragment>
         <EuiHeaderSectionItemButton
+          data-test-subj="newsfeed"
           aria-controls="keyPadMenu"
           aria-expanded={flyoutVisible}
           aria-haspopup="true"
@@ -67,10 +68,12 @@ export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
         >
           <EuiIcon type="email" size="m" />
           {showBadge ? (
-            <EuiNotificationBadge className="euiHeaderNotification">&#9642;</EuiNotificationBadge>
+            <EuiNotificationBadge className="euiHeaderNotification" data-test-subj="showBadgeNews">
+              &#9642;
+            </EuiNotificationBadge>
           ) : null}
         </EuiHeaderSectionItemButton>
-         {flyoutVisible ? <NewsfeedFlyout /> : null}
+        {flyoutVisible ? <NewsfeedFlyout /> : null}
       </Fragment>
     </NewsfeedContext.Provider>
   );

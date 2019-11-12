@@ -48,6 +48,7 @@ export const NewsfeedFlyout = () => {
       size="s"
       aria-labelledby="flyoutSmallTitle"
       className="kbnNews__flyout"
+      data-test-subj="NewsfeedFlyout"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
@@ -66,6 +67,7 @@ export const NewsfeedFlyout = () => {
                 key={item.hash}
                 title={item.title}
                 text={item.description}
+                data-test-subj="newsHeadAlert"
                 action={
                   <EuiLink target="_blank" href={item.linkUrl}>
                     {item.linkText}
