@@ -5,7 +5,7 @@
  */
 import { merge, pick, omit, difference } from 'lodash';
 import Boom from 'boom';
-import { InternalCoreSetup } from 'src/core/server';
+import { CoreSetup } from 'src/core/server';
 import { Request, ResponseToolkit } from 'hapi';
 import * as t from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
@@ -18,6 +18,7 @@ import {
   Params
 } from '../typings';
 import { jsonRt } from '../../../common/runtime_types/json_rt';
+import { LegacySetup } from '../../new-platform/plugin';
 
 const debugRt = t.partial({ _debug: jsonRt.pipe(t.boolean) });
 
@@ -29,10 +30,10 @@ export function createApi() {
       factoryFns.push(fn);
       return this as any;
     },
-    init(core: InternalCoreSetup) {
-      const { server } = core.http;
+    init(core: CoreSetup, __LEGACY: LegacySetup) {
+      const { server } = __LEGACY;
       factoryFns.forEach(fn => {
-        const { params = {}, ...route } = fn(core) as Route<
+        const { params = {}, ...route } = fn(core, __LEGACY) as Route<
           string,
           HttpMethod,
           Params,
