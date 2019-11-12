@@ -4,8 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup, PluginInitializerContext, Logger } from 'src/core/server';
 
 export class Plugin {
-  public setup(core: CoreSetup, dependencies: {}) {}
+  name = 'siem';
+  private logger: Logger;
+
+  constructor({ logger }: Pick<PluginInitializerContext, 'logger'>) {
+    this.logger = logger.get('plugins', this.name);
+
+    this.logger.info('NP plugin initialized');
+  }
+
+  public setup(core: Partial<CoreSetup>, dependencies: {}) {
+    this.logger.info('NP plugin setup');
+  }
 }

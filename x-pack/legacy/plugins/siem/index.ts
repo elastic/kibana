@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { Server } from 'hapi';
 
+import { plugin } from './server';
 import { initServerWithKibana } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 
@@ -122,7 +123,40 @@ export const siem = (kibana: any) => {
       mappings: savedObjectMappings,
     },
     init(server: Server) {
-      initServerWithKibana(server);
+      const {
+        config,
+        getInjectedUiAppVars,
+        indexPatternsServiceFactory,
+        injectUiAppVars,
+        log,
+        newPlatform,
+        plugins,
+        register,
+        route,
+        savedObjects,
+      } = server;
+
+      const { logger } = newPlatform.coreContext;
+
+      const legacy = {
+        config,
+        getInjectedUiAppVars,
+        indexPatternsServiceFactory,
+        injectUiAppVars,
+        log,
+        newPlatform: {
+          coreContext: { logger },
+          env: newPlatform.env,
+        },
+        plugins: { alerting: plugins.alerting, xpack_main: plugins.xpack_main },
+        register: register.bind(server),
+        route,
+        savedObjects,
+      };
+
+      plugin({ logger }).setup({}, {});
+
+      initServerWithKibana(legacy);
     },
   });
 };

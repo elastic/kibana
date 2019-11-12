@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Server } from 'hapi';
 
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
@@ -23,12 +22,13 @@ import { readSignalsRoute } from './lib/detection_engine/routes/read_signals_rou
 import { findSignalsRoute } from './lib/detection_engine/routes/find_signals_route';
 import { deleteSignalsRoute } from './lib/detection_engine/routes/delete_signals_route';
 import { updateSignalsRoute } from './lib/detection_engine/routes/update_signals_route';
+import { ServerFacade } from './types';
 
 const APP_ID = 'siem';
 
 export const amMocking = (): boolean => process.env.INGEST_MOCKS === 'true';
 
-export const initServerWithKibana = (kbnServer: Server) => {
+export const initServerWithKibana = (kbnServer: ServerFacade) => {
   if (kbnServer.plugins.alerting != null) {
     const type = signalsAlertType({
       logger: kbnServer.newPlatform.coreContext.logger.get('plugins', APP_ID),
