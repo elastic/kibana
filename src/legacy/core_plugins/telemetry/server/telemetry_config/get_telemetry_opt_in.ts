@@ -43,7 +43,7 @@ export const getTelemetryOptIn: GetTelemetryOptIn = ({
     return false;
   }
 
-  if (telemetrySavedObject === null || telemetrySavedObject.enabled == null) {
+  if (telemetrySavedObject === null || telemetrySavedObject.enabled === null) {
     return null;
   }
 
