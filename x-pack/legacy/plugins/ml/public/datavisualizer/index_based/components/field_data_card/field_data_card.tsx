@@ -30,7 +30,11 @@ export interface FieldDataCardProps {
 }
 
 export const FieldDataCard: FC<FieldDataCardProps> = ({ config }) => {
-  const { fieldName, loading, type, existsInDocs } = config;
+  const { fieldName, loading, type, existsInDocs, stats } = config;
+
+  if (stats === undefined) {
+    return null;
+  }
 
   function getCardContent() {
     if (existsInDocs === false) {

@@ -6,21 +6,30 @@
 
 import { ServerInjectOptions } from 'hapi';
 import { ActionResult } from '../../../../../../actions/server/types';
+import { SignalAlertParamsRest } from '../../alerts/types';
+
+// The Omit of filter is because of a Hapi Server Typing issue that I am unclear
+// where it comes from. I would hope to remove the "filter" as an omit at some point
+// when we upgrade and Hapi Server is ok with the filter.
+export const typicalPayload = (): Partial<Omit<SignalAlertParamsRest, 'filter'>> => ({
+  id: 'rule-1',
+  description: 'Detecting root and admin users',
+  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  interval: '5m',
+  name: 'Detect Root/Admin Users',
+  type: 'query',
+  from: 'now-6m',
+  to: 'now',
+  severity: 'high',
+  query: 'user.name: root or user.name: admin',
+  language: 'kuery',
+});
 
 export const getUpdateRequest = (): ServerInjectOptions => ({
   method: 'PUT',
   url: '/api/siem/signals',
   payload: {
-    id: 'rule-1',
-    description: 'Detecting root and admin users',
-    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-    interval: '5m',
-    name: 'Detect Root/Admin Users',
-    severity: 'high',
-    type: 'kql',
-    from: 'now-6m',
-    to: 'now',
-    kql: 'user.name: root or user.name: admin',
+    ...typicalPayload(),
   },
 });
 
@@ -50,16 +59,7 @@ export const getCreateRequest = (): ServerInjectOptions => ({
   method: 'POST',
   url: '/api/siem/signals',
   payload: {
-    id: 'rule-1',
-    description: 'Detecting root and admin users',
-    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-    interval: '5m',
-    name: 'Detect Root/Admin Users',
-    severity: 'high',
-    type: 'kql',
-    from: 'now-6m',
-    to: 'now',
-    kql: 'user.name: root or user.name: admin',
+    ...typicalPayload(),
   },
 });
 
@@ -79,12 +79,13 @@ export const createAlertResult = () => ({
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
     from: 'now-6m',
     filter: null,
-    kql: 'user.name: root or user.name: admin',
+    query: 'user.name: root or user.name: admin',
     maxSignals: 100,
     name: 'Detect Root/Admin Users',
     severity: 'high',
     to: 'now',
-    type: 'kql',
+    type: 'query',
+    language: 'kuery',
     references: [],
   },
   interval: '5m',
@@ -133,12 +134,13 @@ export const updateAlertResult = () => ({
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
     from: 'now-6m',
     filter: null,
-    kql: 'user.name: root or user.name: admin',
+    query: 'user.name: root or user.name: admin',
     maxSignals: 100,
     name: 'Detect Root/Admin Users',
     severity: 'high',
     to: 'now',
-    type: 'kql',
+    type: 'query',
+    language: 'kuery',
     references: [],
   },
   interval: '5m',

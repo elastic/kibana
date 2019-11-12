@@ -8,6 +8,7 @@ import { getOperationTypesForField, getAvailableOperationsByMetadata, buildColum
 import { AvgIndexPatternColumn, MinIndexPatternColumn } from './definitions/metrics';
 import { CountIndexPatternColumn } from './definitions/count';
 import { IndexPatternPrivateState } from '../types';
+import { documentField } from '../document_field';
 
 jest.mock('ui/new_platform');
 jest.mock('../loader');
@@ -179,6 +180,7 @@ describe('getOperationTypesForField', () => {
         columns: state.layers.first.columns,
         suggestedPriority: 0,
         op: 'count',
+        field: documentField,
       });
       expect(column.operationType).toEqual('count');
     });
@@ -216,7 +218,7 @@ describe('getOperationTypesForField', () => {
         indexPattern: expectedIndexPatterns[1],
         columns: state.layers.first.columns,
         suggestedPriority: 0,
-        asDocumentOperation: true,
+        field: documentField,
       }) as CountIndexPatternColumn;
       expect(column.operationType).toEqual('count');
     });
@@ -295,10 +297,6 @@ describe('getOperationTypesForField', () => {
                 "field": "bytes",
                 "operationType": "sum",
                 "type": "field",
-              },
-              Object {
-                "operationType": "count",
-                "type": "document",
               },
             ],
           },
