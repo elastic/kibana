@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 import Joi from 'joi';
 import { isFunction } from 'lodash/fp';
 import { updateSignal } from '../alerts/update_signals';
-import { SignalsRequest } from '../alerts/types';
+import { UpdateSignalsRequest } from '../alerts/types';
 import { updateSignalSchema } from './schemas';
 
 export const createUpdateSignalsRoute: Hapi.ServerRoute = {
@@ -30,7 +30,7 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
       payload: updateSignalSchema,
     },
   },
-  async handler(request: SignalsRequest, headers) {
+  async handler(request: UpdateSignalsRequest, headers) {
     const {
       description,
       enabled,
@@ -48,18 +48,18 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
       max_signals: maxSignals,
       name,
       severity,
+      size,
       to,
       type,
       references,
     } = request.payload;
-    const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
 
+    const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
     const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
 
     if (!alertsClient || !actionsClient) {
       return headers.response().code(404);
     }
-
     return updateSignal({
       alertsClient,
       actionsClient,
@@ -77,6 +77,7 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
       maxSignals,
       name,
       severity,
+      size,
       to,
       type,
       references,

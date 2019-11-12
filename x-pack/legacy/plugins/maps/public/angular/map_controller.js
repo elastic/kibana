@@ -53,9 +53,9 @@ import {
   MAP_SAVED_OBJECT_TYPE,
   MAP_APP_PATH
 } from '../../common/constants';
-import { FilterStateStore } from '@kbn/es-query';
 import { start as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 import { npStart } from 'ui/new_platform';
+import { esFilters } from '../../../../../../src/plugins/data/public';
 
 const { savedQueryService } = data.search.services;
 
@@ -198,7 +198,7 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
     }
   });
   /* End of Saved Queries */
-  async function onQueryChange({ filters, query, time }) {
+  async function onQueryChange({ filters, query, time, refresh }) {
     if (filters) {
       filterManager.setFilters(filters); // Maps and merges filters
       $scope.filters = filterManager.getFilters();
@@ -210,22 +210,24 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
       $scope.time = time;
     }
     syncAppAndGlobalState();
-    dispatchSetQuery();
+    dispatchSetQuery(refresh);
   }
 
-  function dispatchSetQuery() {
+  function dispatchSetQuery(refresh) {
     store.dispatch(setQuery({
       filters: $scope.filters,
       query: $scope.query,
-      timeFilters: $scope.time
+      timeFilters: $scope.time,
+      refresh,
     }));
   }
 
   $scope.indexPatterns = [];
-  $scope.updateQueryAndDispatch = function ({ dateRange, query }) {
+  $scope.onQuerySubmit = function ({ dateRange, query }) {
     onQueryChange({
       query,
       time: dateRange,
+      refresh: true,
     });
   };
   $scope.updateFiltersAndDispatch = function (filters) {
@@ -245,7 +247,7 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
 
   function addFilters(newFilters) {
     newFilters.forEach(filter => {
-      filter.$state = FilterStateStore.APP_STATE;
+      filter.$state = esFilters.FilterStateStore.APP_STATE;
     });
     $scope.updateFiltersAndDispatch([...$scope.filters, ...newFilters]);
   }

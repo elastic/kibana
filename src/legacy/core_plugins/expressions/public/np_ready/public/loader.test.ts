@@ -23,7 +23,7 @@ import { ExpressionDataHandler } from './execute';
 import { fromExpression } from '@kbn/interpreter/common';
 import { IInterpreterRenderHandlers } from './types';
 import { Observable } from 'rxjs';
-import { ExpressionAST } from '../../../../../../plugins/expressions/common';
+import { ExpressionAST } from '../../../../../../plugins/expressions/public';
 
 const element: HTMLElement = null as any;
 

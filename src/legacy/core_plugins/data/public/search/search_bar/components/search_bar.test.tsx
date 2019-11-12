@@ -27,20 +27,24 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 const startMock = coreMock.createStart();
 
-import { timefilterServiceMock } from '../../../timefilter/timefilter_service.mock';
 import { mount } from 'enzyme';
-const timefilterSetupMock = timefilterServiceMock.createSetupContract();
+
+const mockTimeHistory = {
+  get: () => {
+    return [];
+  },
+};
 
 jest.mock('../../../../../data/public', () => {
   return {
-    FilterBar: () => <div className="filterBar"></div>,
-    QueryBarInput: () => <div className="queryBar"></div>,
+    FilterBar: () => <div className="filterBar" />,
+    QueryBarInput: () => <div className="queryBar" />,
   };
 });
 
 jest.mock('../../../query/query_bar', () => {
   return {
-    QueryBarTopRow: () => <div className="queryBar"></div>,
+    QueryBarTopRow: () => <div className="queryBar" />,
   };
 });
 
@@ -86,7 +90,7 @@ const kqlQuery = {
 function wrapSearchBarInContext(testProps: any) {
   const defaultOptions = {
     appName: 'test',
-    timeHistory: timefilterSetupMock.history,
+    timeHistory: mockTimeHistory,
     intl: null as any,
   };
 

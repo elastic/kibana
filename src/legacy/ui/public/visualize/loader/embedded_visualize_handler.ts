@@ -22,7 +22,6 @@ import { debounce, forEach, get, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { Filter } from '@kbn/es-query';
 import { toastNotifications } from 'ui/notify';
 // @ts-ignore untyped dependency
 import { AggConfigs } from 'ui/agg_types/agg_configs';
@@ -44,6 +43,7 @@ import { VisFiltersProvider } from '../../vis/vis_filters';
 import { PipelineDataLoader } from './pipeline_data_loader';
 import { visualizationLoader } from './visualization_loader';
 import { Query } from '../../../../core_plugins/data/public';
+import { esFilters } from '../../../../../plugins/data/public';
 
 import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
 
@@ -67,7 +67,7 @@ export interface RequestHandlerParams {
   aggs: AggConfigs;
   timeRange?: TimeRange;
   query?: Query;
-  filters?: Filter[];
+  filters?: esFilters.Filter[];
   forceFetch: boolean;
   queryFilter: QueryFilter;
   uiState?: PersistedState;
@@ -538,16 +538,16 @@ export class EmbeddedVisualizeHandler {
 
   private rendererProvider = (response: VisResponseData | null) => {
     const renderer = registries.renderers.get(get(response || {}, 'as', 'visualization'));
-    const args = [
-      this.element,
-      get(response, 'value', { visType: this.vis.type.name }),
-      this.handlers,
-    ];
 
     if (!renderer) {
       return null;
     }
 
-    return () => renderer.render(...args);
+    return () =>
+      renderer.render(
+        this.element,
+        get(response, 'value', { visType: this.vis.type.name }),
+        this.handlers
+      );
   };
 }

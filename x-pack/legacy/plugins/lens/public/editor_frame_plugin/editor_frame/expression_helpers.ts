@@ -6,9 +6,9 @@
 
 import { TimeRange } from 'src/plugins/data/public';
 import { Query } from 'src/legacy/core_plugins/data/public';
-import { Filter } from '@kbn/es-query';
 import { Ast, fromExpression, ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { Visualization, Datasource, FramePublicAPI } from '../../types';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 export function prependDatasourceExpression(
   visualizationExpression: Ast | string | null,
@@ -71,7 +71,7 @@ export function prependKibanaContext(
   }: {
     timeRange?: TimeRange;
     query?: Query;
-    filters?: Filter[];
+    filters?: esFilters.Filter[];
   }
 ): Ast {
   const parsedExpression = typeof expression === 'string' ? fromExpression(expression) : expression;
