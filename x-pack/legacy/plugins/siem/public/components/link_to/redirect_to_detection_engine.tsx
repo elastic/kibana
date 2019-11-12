@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from 'react-router-dom';
+
 import { RedirectWrapper } from './redirect_wrapper';
 
 export type DetectionEngineComponentProps = RouteComponentProps<{

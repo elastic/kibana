@@ -20,7 +20,7 @@ import {
   UtilityBarText,
 } from './index';
 
-jest.mock('../../lib/settings/use_kibana_ui_setting');
+jest.mock('../../../lib/settings/use_kibana_ui_setting');
 
 describe('UtilityBar', () => {
   test('it renders', () => {
