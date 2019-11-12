@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import * as Rx from 'rxjs';
 import { resolve } from 'path';
 import JoiNamespace from 'joi';
 import { Server } from 'hapi';
@@ -45,9 +46,20 @@ const telemetry = (kibana: any) => {
     config(Joi: typeof JoiNamespace) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
+        optIn: Joi.when('allowChangingOptInStatus', {
+          is: false,
+          then: Joi.valid(true),
+          otherwise: Joi.boolean()
+            .allow(null)
+            .default(null),
+        }),
+        allowChangingOptInStatus: Joi.boolean().default(true),
         // `config` is used internally and not intended to be set
         config: Joi.string().default(Joi.ref('$defaultConfigPath')),
         banner: Joi.boolean().default(true),
+        lastVersionChecked: Joi.string()
+          .allow('')
+          .default(''),
         url: Joi.when('$dev', {
           is: true,
           then: Joi.string().default(
@@ -77,7 +89,25 @@ const telemetry = (kibana: any) => {
         },
       },
       async replaceInjectedVars(originalInjectedVars: any, request: any) {
-        const telemetryOptedIn = await getTelemetryOptIn(request);
+        const config = request.server.config();
+        const optIn = config.get('telemetry.optIn');
+        const allowChangingOptInStatus = config.get('telemetry.allowChangingOptInStatus');
+        const currentKibanaVersion = getCurrentKibanaVersion(request.server);
+        let telemetryOptedIn: boolean | null;
+
+        if (typeof optIn === 'boolean' && !allowChangingOptInStatus) {
+          // When not allowed to change optIn status and an optIn value is set, we'll overwrite with that
+          telemetryOptedIn = optIn;
+        } else {
+          telemetryOptedIn = await getTelemetryOptIn({
+            request,
+            currentKibanaVersion,
+          });
+          if (telemetryOptedIn === null) {
+            // In the senario there's no value set in telemetryOptedIn, we'll return optIn value
+            telemetryOptedIn = optIn;
+          }
+        }
 
         return {
           ...originalInjectedVars,
@@ -89,22 +119,44 @@ const telemetry = (kibana: any) => {
         return {
           telemetryEnabled: getXpackConfigWithDeprecated(config, 'telemetry.enabled'),
           telemetryUrl: getXpackConfigWithDeprecated(config, 'telemetry.url'),
-          telemetryBanner: getXpackConfigWithDeprecated(config, 'telemetry.banner'),
-          telemetryOptedIn: null,
+          telemetryBanner:
+            config.get('telemetry.allowChangingOptInStatus') !== false &&
+            getXpackConfigWithDeprecated(config, 'telemetry.banner'),
+          telemetryOptedIn: config.get('telemetry.optIn'),
+          allowChangingOptInStatus: config.get('telemetry.allowChangingOptInStatus'),
         };
       },
       hacks: ['plugins/telemetry/hacks/telemetry_init', 'plugins/telemetry/hacks/telemetry_opt_in'],
       mappings,
     },
-    init(server: Server) {
-      const initializerContext = {} as PluginInitializerContext;
+    async init(server: Server) {
+      const initializerContext = {
+        env: {
+          packageInfo: {
+            version: getCurrentKibanaVersion(server),
+          },
+        },
+        config: {
+          create() {
+            const config = server.config();
+            return Rx.of({
+              enabled: config.get('telemetry.enabled'),
+              optIn: config.get('telemetry.optIn'),
+              config: config.get('telemetry.config'),
+              banner: config.get('telemetry.banner'),
+              url: config.get('telemetry.url'),
+              allowChangingOptInStatus: config.get('telemetry.allowChangingOptInStatus'),
+            });
+          },
+        },
+      } as PluginInitializerContext;
 
       const coreSetup = ({
         http: { server },
         log: server.log,
       } as any) as CoreSetup;
 
-      telemetryPlugin(initializerContext).setup(coreSetup);
+      await telemetryPlugin(initializerContext).setup(coreSetup);
 
       // register collectors
       server.usage.collectorSet.register(createLocalizationUsageCollector(server));
@@ -116,3 +168,7 @@ const telemetry = (kibana: any) => {
 
 // eslint-disable-next-line import/no-default-export
 export default telemetry;
+
+function getCurrentKibanaVersion(server: Server): string {
+  return server.config().get('pkg.version');
+}

@@ -18,21 +18,7 @@
  */
 
 import { NotificationsStart } from 'src/core/public';
-
-const createGetterSetter = <T extends object>(name: string): [() => T, (value: T) => void] => {
-  let value: T;
-
-  const get = (): T => {
-    if (!value) throw new Error(`${name} was not set`);
-    return value;
-  };
-
-  const set = (newValue: T) => {
-    value = newValue;
-  };
-
-  return [get, set];
-};
+import { createGetterSetter } from '../../../../../plugins/kibana_utils/public';
 
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
   'Notifications'

@@ -183,7 +183,7 @@ At this point, you're ready to use the Elasticsearch {ref}/docs-bulk.html[bulk]
 API to load the data sets:
 
 [source,shell]
-curl -u elastic -H 'Content-Type: application/x-ndjson' -XPOST '<host>:<port>/bank/account/_bulk?pretty' --data-binary @accounts.json
+curl -u elastic -H 'Content-Type: application/x-ndjson' -XPOST '<host>:<port>/bank/_bulk?pretty' --data-binary @accounts.json
 curl -u elastic -H 'Content-Type: application/x-ndjson' -XPOST '<host>:<port>/shakespeare/_bulk?pretty' --data-binary @shakespeare.json
 curl -u elastic -H 'Content-Type: application/x-ndjson' -XPOST '<host>:<port>/_bulk?pretty' --data-binary @logs.jsonl
 

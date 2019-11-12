@@ -1,7 +1,6 @@
 {
   "indices.get": {
     "url_params": {
-      "include_type_name": "__flag__",
       "local": "__flag__",
       "ignore_unavailable": "__flag__",
       "allow_no_indices": "__flag__",

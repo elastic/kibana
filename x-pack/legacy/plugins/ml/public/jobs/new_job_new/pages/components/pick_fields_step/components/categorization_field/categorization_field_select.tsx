@@ -8,8 +8,7 @@ import React, { FC, useContext } from 'react';
 import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
-import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../../../../../../../src/plugins/data/public';
+import { Field } from '../../../../../../../../common/types/fields';
 import {
   createFieldOptions,
   createScriptFieldOptions,
@@ -24,18 +23,14 @@ interface Props {
 export const CategorizationFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
   const { jobCreator } = useContext(JobCreatorContext);
   const options: EuiComboBoxOptionProps[] = [
-    ...createFieldOptions(
-      fields,
-      f => f.id !== EVENT_RATE_FIELD_ID && f.type === ES_FIELD_TYPES.KEYWORD
-    ),
+    ...createFieldOptions(fields),
     ...createScriptFieldOptions(jobCreator.scriptFields),
   ];
 
-  const selection: EuiComboBoxOptionProps[] = [
-    {
-      label: selectedField !== null ? selectedField : '',
-    },
-  ];
+  const selection: EuiComboBoxOptionProps[] = [];
+  if (selectedField !== null) {
+    selection.push({ label: selectedField });
+  }
 
   function onChange(selectedOptions: EuiComboBoxOptionProps[]) {
     const option = selectedOptions[0];

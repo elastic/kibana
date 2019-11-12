@@ -13,8 +13,8 @@ import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 
 import { mockFrameworks, TestProviders, MockFrameworks, getMockKibanaUiSetting } from '../../mock';
 
-import { PreferenceFormattedDate, FormattedDate } from '.';
-import { getEmptyValue } from '../empty_value';
+import { PreferenceFormattedDate, FormattedDate, FormattedRelativePreferenceDate } from '.';
+import { getEmptyString, getEmptyValue } from '../empty_value';
 
 const mockUseKibanaUiSetting: jest.Mock = useKibanaUiSetting as jest.Mock;
 jest.mock('../../lib/settings/use_kibana_ui_setting', () => ({
@@ -159,6 +159,47 @@ describe('formatted_date', () => {
           </TestProviders>
         );
         expect(wrapper.text()).toEqual('Rebecca Evan Braden');
+      });
+    });
+  });
+
+  describe('FormattedRelativePreferenceDate', () => {
+    describe('rendering', () => {
+      test('renders time over an hour correctly against snapshot', () => {
+        const isoDateString = '2019-02-25T22:27:05.000Z';
+        const wrapper = shallow(<FormattedRelativePreferenceDate value={isoDateString} />);
+        expect(wrapper.find('[data-test-subj="preference-time"]').exists()).toBe(true);
+      });
+      test('renders time under an hour correctly against snapshot', () => {
+        const timeTwelveMinutesAgo = new Date(new Date().getTime() - 12 * 60 * 1000).toISOString();
+        const wrapper = shallow(<FormattedRelativePreferenceDate value={timeTwelveMinutesAgo} />);
+        expect(wrapper.find('[data-test-subj="relative-time"]').exists()).toBe(true);
+      });
+      test('renders empty string value correctly', () => {
+        const wrapper = mount(
+          <TestProviders>
+            <FormattedRelativePreferenceDate value={''} />
+          </TestProviders>
+        );
+        expect(wrapper.text()).toBe(getEmptyString());
+      });
+
+      test('renders undefined value correctly', () => {
+        const wrapper = mount(
+          <TestProviders>
+            <FormattedRelativePreferenceDate />
+          </TestProviders>
+        );
+        expect(wrapper.text()).toBe(getEmptyValue());
+      });
+
+      test('renders null value correctly', () => {
+        const wrapper = mount(
+          <TestProviders>
+            <FormattedRelativePreferenceDate value={null} />
+          </TestProviders>
+        );
+        expect(wrapper.text()).toBe(getEmptyValue());
       });
     });
   });

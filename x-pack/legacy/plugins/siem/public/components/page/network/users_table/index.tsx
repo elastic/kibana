@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
@@ -78,22 +78,25 @@ const UsersTableComponent = React.memo<UsersTableProps>(
     updateNetworkTable,
     sort,
   }) => {
-    const onChange = (criteria: Criteria) => {
-      if (criteria.sort != null) {
-        const splitField = criteria.sort.field.split('.');
-        const newUsersSort: UsersSortField = {
-          field: getSortFromString(splitField[splitField.length - 1]),
-          direction: criteria.sort.direction,
-        };
-        if (!isEqual(newUsersSort, sort)) {
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: { sort: newUsersSort },
-          });
+    const onChange = useCallback(
+      (criteria: Criteria) => {
+        if (criteria.sort != null) {
+          const splitField = criteria.sort.field.split('.');
+          const newUsersSort: UsersSortField = {
+            field: getSortFromString(splitField[splitField.length - 1]),
+            direction: criteria.sort.direction,
+          };
+          if (!isEqual(newUsersSort, sort)) {
+            updateNetworkTable({
+              networkType: type,
+              tableType,
+              updates: { sort: newUsersSort },
+            });
+          }
         }
-      }
-    };
+      },
+      [sort, type]
+    );
 
     return (
       <PaginatedTable

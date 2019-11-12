@@ -5,7 +5,7 @@
  */
 
 import { Server } from 'hapi';
-import { ESFilter } from 'elasticsearch';
+import { ESFilter } from '../../../../typings/elasticsearch';
 import { UIFilters } from '../../../../typings/ui-filters';
 import { getEnvironmentUiFilterES } from './get_environment_ui_filter_es';
 import { getKueryUiFilterES } from './get_kuery_ui_filter_es';

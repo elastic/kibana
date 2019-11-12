@@ -19,7 +19,11 @@ jest.mock('ui/new_platform', () => ({
             res = [true, false];
           } else if (field.name === 'machine.os') {
             res = ['Windo"ws', 'Mac\'', 'Linux'];
-          } else {
+          }
+          else if (field.name === 'nestedField.child') {
+            res = ['foo'];
+          }
+          else {
             res = [];
           }
           return Promise.resolve(res);
@@ -65,6 +69,17 @@ describe('Kuery value suggestions', function () {
     expect(suggestions[0].type).toEqual('value');
     expect(suggestions[0].start).toEqual(start);
     expect(suggestions[0].end).toEqual(end);
+  });
+
+  test('should handle nested paths', async () => {
+    const suggestions = await getSuggestions({
+      fieldName: 'child',
+      nestedPath: 'nestedField',
+      prefix: '',
+      suffix: '',
+    });
+    expect(suggestions.length).toEqual(1);
+    expect(suggestions[0].text).toEqual('"foo" ');
   });
 
   describe('Boolean suggestions', function () {

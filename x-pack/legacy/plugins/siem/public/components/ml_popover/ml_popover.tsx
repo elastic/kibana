@@ -8,6 +8,8 @@ import { EuiButton, EuiCallOut, EuiPopover, EuiPopoverTitle, EuiSpacer } from '@
 import React, { useContext, useReducer, useState } from 'react';
 import styled from 'styled-components';
 import moment from 'moment';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } from 'ui/documentation_links';
 import * as i18n from './translations';
 import { JobsFilters, JobSummary, SiemJob } from './types';
 import { hasMlAdminPermissions } from '../ml/permissions/has_ml_admin_permissions';
@@ -216,7 +218,23 @@ export const MlPopover = React.memo(() => {
                 iconType="alert"
                 size="s"
               >
-                <p>{i18n.MODULE_NOT_COMPATIBLE_DESCRIPTION}</p>
+                <p>
+                  <FormattedMessage
+                    defaultMessage="We could not find any data, see {mlDocs} for more information on Machine Learning job requirements."
+                    id="xpack.siem.components.mlPopup.moduleNotCompatibleDescription"
+                    values={{
+                      mlDocs: (
+                        <a
+                          href={`${ELASTIC_WEBSITE_URL}guide/en/siem/guide/${DOC_LINK_VERSION}/machine-learning.html`}
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          {'Anomaly Detection with Machine Learning'}
+                        </a>
+                      ),
+                    }}
+                  />
+                </p>
               </EuiCallOut>
 
               <EuiSpacer size="m" />

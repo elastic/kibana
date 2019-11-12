@@ -34,7 +34,6 @@ export default async function ({ readConfigFile }) {
     //   require.resolve(__dirname, './apps/status_page'),
     //   require.resolve(__dirname, './apps/timelion'),
     //   require.resolve(__dirname, './apps/upgrade_assistant'),
-    //   require.resolve(__dirname, './apps/code'),
     //   require.resolve(__dirname, './apps/visualize'),
     //   require.resolve(__dirname, './apps/uptime'),
     //   require.resolve(__dirname, './apps/saved_objects_management'),

@@ -22,7 +22,6 @@ import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import { AddData } from './add_data';
 import { FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
 
 import {
   EuiButton,
@@ -40,6 +39,7 @@ import {
 
 import { Welcome } from './welcome';
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import { getServices } from '../kibana_services';
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
 
@@ -47,7 +47,10 @@ export class Home extends Component {
   constructor(props) {
     super(props);
 
-    const isWelcomeEnabled = !(chrome.getInjected('disableWelcomeScreen') || props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false');
+    const isWelcomeEnabled = !(
+      getServices().getInjected('disableWelcomeScreen') ||
+      props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false'
+    );
 
     this.state = {
       // If welcome is enabled, we wait for loading to complete
@@ -133,7 +136,7 @@ export class Home extends Component {
     const { apmUiEnabled, mlEnabled } = this.props;
 
     return (
-      <EuiPage restrictWidth={1200}>
+      <EuiPage restrictWidth={1200} data-test-subj="homeApp">
         <EuiPageBody className="eui-displayBlock">
 
           <EuiScreenReaderOnly>

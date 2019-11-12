@@ -19,17 +19,17 @@
 
 import { get, has } from 'lodash';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
 import { AggConfigs } from 'ui/agg_types/agg_configs';
 import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import chrome from 'ui/chrome';
 
-// need to get rid of angular from these
-// @ts-ignore
-import { TimeRange } from 'src/plugins/data/public';
+import { Query, TimeRange, esFilters } from 'src/plugins/data/public';
 import { SearchSource } from '../../../../ui/public/courier/search_source';
 // @ts-ignore
-import { FilterBarQueryFilterProvider } from '../../../../ui/public/filter_manager/query_filter';
+import {
+  FilterBarQueryFilterProvider,
+  QueryFilter,
+} from '../../../../ui/public/filter_manager/query_filter';
 
 import { buildTabularInspectorData } from '../../../../ui/public/inspector/build_tabular_inspector_data';
 import {
@@ -38,12 +38,30 @@ import {
 } from '../../../../ui/public/courier/utils/courier_inspector_utils';
 import { calculateObjectHash } from '../../../../ui/public/vis/lib/calculate_object_hash';
 import { getTime } from '../../../../ui/public/timefilter';
-import { RequestHandlerParams } from '../../../../ui/public/visualize/loader/embedded_visualize_handler';
+
+export interface RequestHandlerParams {
+  searchSource: SearchSource;
+  aggs: AggConfigs;
+  timeRange?: TimeRange;
+  query?: Query;
+  filters?: esFilters.Filter[];
+  forceFetch: boolean;
+  queryFilter: QueryFilter;
+  uiState?: PersistedState;
+  partialRows?: boolean;
+  inspectorAdapters: Adapters;
+  metricsAtAllLevels?: boolean;
+  visParams?: any;
+  abortSignal?: AbortSignal;
+}
+
 // @ts-ignore
 import { tabifyAggResponse } from '../../../../ui/public/agg_response/tabify/tabify';
 import { KibanaContext, KibanaDatatable } from '../../common';
 import { ExpressionFunction, KibanaDatatableColumn } from '../../types';
 import { start as data } from '../../../data/public/legacy';
+import { PersistedState } from '../../../../ui/public/persisted_state';
+import { Adapters } from '../../../../../plugins/inspector/public';
 
 const name = 'esaggs';
 

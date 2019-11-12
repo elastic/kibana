@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { PercentileRanksEditor } from '../../vis/editors/default/controls/percentile_ranks';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
-import { getResponseAggConfigClass, IResponseAggConfig } from './get_response_agg_config_class';
+import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
 
 import { getPercentileValue } from './percentiles_get_value';
 import { METRIC_TYPES } from './metric_agg_types';
@@ -30,7 +30,7 @@ import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 
 // required by the values editor
 
-type IPercentileRanksAggConfig = IResponseAggConfig;
+export type IPercentileRanksAggConfig = IResponseAggConfig;
 
 const valueProps = {
   makeLabel(this: IPercentileRanksAggConfig) {

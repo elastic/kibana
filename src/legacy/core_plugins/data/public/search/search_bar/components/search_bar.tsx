@@ -18,7 +18,6 @@
  */
 
 import { compact } from 'lodash';
-import { Filter } from '@kbn/es-query';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
@@ -26,6 +25,7 @@ import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
 
 import { TimeRange } from 'src/plugins/data/common/types';
+import { TimeHistoryContract } from 'src/plugins/data/public';
 import { IndexPattern, Query, FilterBar } from '../../../../../data/public';
 import { QueryBarTopRow } from '../../../query';
 import { SavedQuery, SavedQueryAttributes } from '../index';
@@ -33,20 +33,20 @@ import { SavedQueryMeta, SaveQueryForm } from './saved_query_management/save_que
 import { SavedQueryManagementComponent } from './saved_query_management/saved_query_management_component';
 import { SavedQueryService } from '../lib/saved_query_service';
 import { createSavedQueryService } from '../lib/saved_query_service';
-import { TimeHistoryContract } from '../../../timefilter';
 import {
   withKibana,
   KibanaReactContextValue,
 } from '../../../../../../../plugins/kibana_react/public';
 import { IDataPluginServices } from '../../../types';
+import { esFilters } from '../../../../../../../plugins/data/public';
 
 interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
   intl: InjectedIntl;
   timeHistory: TimeHistoryContract;
   // Filter bar
-  onFiltersUpdated?: (filters: Filter[]) => void;
-  filters?: Filter[];
+  onFiltersUpdated?: (filters: esFilters.Filter[]) => void;
+  filters?: esFilters.Filter[];
   // Date picker
   dateRangeFrom?: string;
   dateRangeTo?: string;
@@ -368,7 +368,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onLoad={this.onLoadSavedQuery}
         savedQueryService={this.savedQueryService}
         onClearSavedQuery={this.props.onClearSavedQuery}
-      ></SavedQueryManagementComponent>
+      />
     );
 
     let queryBar;

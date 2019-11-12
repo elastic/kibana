@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink } from '@elastic/eui';
+import { EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { px, units } from '../../../../../../../style/variables';
-import { Ellipsis } from '../../../../../../shared/Icons';
 
 const ToggleButtonContainer = styled.div`
   margin-top: ${px(units.half)};
@@ -55,7 +54,13 @@ export const TruncateHeightSection: React.SFC<Props> = ({
               setIsOpen(!isOpen);
             }}
           >
-            <Ellipsis horizontal={!isOpen} />{' '}
+            <EuiIcon
+              style={{
+                transition: 'transform 0.1s',
+                transform: `rotate(${isOpen ? 90 : 0}deg)`
+              }}
+              type="arrowRight"
+            />{' '}
             {isOpen
               ? i18n.translate('xpack.apm.toggleHeight.showLessButtonLabel', {
                   defaultMessage: 'Show fewer lines'

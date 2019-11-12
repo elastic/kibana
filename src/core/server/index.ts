@@ -49,7 +49,11 @@ import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plug
 import { ContextSetup } from './context';
 import { SavedObjectsServiceStart } from './saved_objects';
 
-import { InternalUiSettingsServiceSetup } from './ui_settings';
+import {
+  InternalUiSettingsServiceSetup,
+  IUiSettingsClient,
+  UiSettingsServiceSetup,
+} from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
 
 export { bootstrap } from './bootstrap';
@@ -139,6 +143,7 @@ export {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsClient,
@@ -166,6 +171,7 @@ export {
   SavedObjectsLegacyService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsDeleteOptions,
 } from './saved_objects';
 
 export {
@@ -173,6 +179,8 @@ export {
   UiSettingsParams,
   InternalUiSettingsServiceSetup,
   UiSettingsType,
+  UiSettingsServiceSetup,
+  UserProvidedValues,
 } from './ui_settings';
 
 export { RecursiveReadonly } from '../utils';
@@ -184,6 +192,7 @@ export {
   SavedObjectAttributeSingle,
   SavedObjectReference,
   SavedObjectsBaseOptions,
+  MutatingOperationRefreshSetting,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
@@ -213,6 +222,9 @@ export interface RequestHandlerContext {
       dataClient: IScopedClusterClient;
       adminClient: IScopedClusterClient;
     };
+    uiSettings: {
+      client: IUiSettingsClient;
+    };
   };
 }
 
@@ -228,6 +240,8 @@ export interface CoreSetup {
   elasticsearch: ElasticsearchServiceSetup;
   /** {@link HttpServiceSetup} */
   http: HttpServiceSetup;
+  /** {@link UiSettingsServiceSetup} */
+  uiSettings: UiSettingsServiceSetup;
 }
 
 /**

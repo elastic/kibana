@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { isEqual } from 'lodash/fp';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { Query } from 'src/plugins/data/common';
@@ -19,6 +18,7 @@ import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { Sort } from '../timeline/body/sort';
 import { OnChangeItemsPerPage } from '../timeline/events';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 import { EventsViewer } from './events_viewer';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -33,7 +33,7 @@ interface StateReduxProps {
   activePage?: number;
   columns: ColumnHeader[];
   dataProviders?: DataProvider[];
-  filters: Filter[];
+  filters: esFilters.Filter[];
   isLive: boolean;
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];
@@ -102,32 +102,40 @@ const StatefulEventsViewerComponent = React.memo<Props>(
       };
     }, []);
 
-    const onChangeItemsPerPage: OnChangeItemsPerPage = itemsChangedPerPage =>
-      updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage });
+    const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
+      itemsChangedPerPage => updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage }),
+      [id, updateItemsPerPage]
+    );
 
-    const toggleColumn = (column: ColumnHeader) => {
-      const exists = columns.findIndex(c => c.id === column.id) !== -1;
+    const toggleColumn = useCallback(
+      (column: ColumnHeader) => {
+        const exists = columns.findIndex(c => c.id === column.id) !== -1;
 
-      if (!exists && upsertColumn != null) {
-        upsertColumn({
-          column,
-          id,
-          index: 1,
-        });
-      }
+        if (!exists && upsertColumn != null) {
+          upsertColumn({
+            column,
+            id,
+            index: 1,
+          });
+        }
 
-      if (exists && removeColumn != null) {
-        removeColumn({
-          columnId: column.id,
-          id,
-        });
-      }
-    };
+        if (exists && removeColumn != null) {
+          removeColumn({
+            columnId: column.id,
+            id,
+          });
+        }
+      },
+      [columns, id, upsertColumn, removeColumn]
+    );
+
+    const handleOnMouseEnter = useCallback(() => setShowInspect(true), []);
+    const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);
 
     return (
       <WithSource sourceId="default">
         {({ indexPattern, browserFields }) => (
-          <div onMouseEnter={() => setShowInspect(true)} onMouseLeave={() => setShowInspect(false)}>
+          <div onMouseEnter={handleOnMouseEnter} onMouseLeave={handleOnMouseLeave}>
             <EventsViewer
               browserFields={browserFields}
               columns={columns}

@@ -14,7 +14,7 @@ import { getLogoutRequest, getSAMLRequestId, getSAMLResponse } from '../../fixtu
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {
-  const chance = getService('chance');
+  const randomness = getService('randomness');
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
 
@@ -23,7 +23,7 @@ export default function({ getService }: FtrProviderContext) {
   function createSAMLResponse(options = {}) {
     return getSAMLResponse({
       destination: `http://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
-      sessionIndex: chance.natural(),
+      sessionIndex: String(randomness.naturalNumber()),
       ...options,
     });
   }
@@ -365,7 +365,7 @@ export default function({ getService }: FtrProviderContext) {
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
         const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
 
-        idpSessionIndex = chance.natural();
+        idpSessionIndex = String(randomness.naturalNumber());
         const samlAuthenticationResponse = await supertest
           .post('/api/security/saml/callback')
           .set('kbn-xsrf', 'xxx')

@@ -77,10 +77,9 @@ export function getRichDetectors(
   });
 }
 
-export function createFieldOptions(fields: Field[], filterOverride?: (f: Field) => boolean) {
-  const filter = filterOverride || (f => f.id !== EVENT_RATE_FIELD_ID);
+export function createFieldOptions(fields: Field[]) {
   return fields
-    .filter(filter)
+    .filter(f => f.id !== EVENT_RATE_FIELD_ID)
     .map(f => ({
       label: f.name,
     }))

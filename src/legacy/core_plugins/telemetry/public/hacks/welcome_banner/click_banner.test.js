@@ -72,7 +72,7 @@ describe('click_banner', () => {
 
     const optIn = true;
     const bannerId = 'bruce-banner';
-    mockInjectedMetadata({ telemetryOptedIn: optIn });
+    mockInjectedMetadata({ telemetryOptedIn: optIn, allowChangingOptInStatus: true });
     const telemetryOptInProvider = getTelemetryOptInProvider();
 
     telemetryOptInProvider.setBannerId(bannerId);
@@ -92,7 +92,7 @@ describe('click_banner', () => {
       remove: sinon.spy()
     };
     const optIn = true;
-    mockInjectedMetadata({ telemetryOptedIn: null });
+    mockInjectedMetadata({ telemetryOptedIn: null, allowChangingOptInStatus: true });
     const telemetryOptInProvider = getTelemetryOptInProvider({ simulateFailure: true });
 
     await clickBanner(telemetryOptInProvider, optIn, { _banners: banners, _toastNotifications: toastNotifications });
@@ -110,7 +110,7 @@ describe('click_banner', () => {
       remove: sinon.spy()
     };
     const optIn = false;
-    mockInjectedMetadata({ telemetryOptedIn: null });
+    mockInjectedMetadata({ telemetryOptedIn: null, allowChangingOptInStatus: true });
     const telemetryOptInProvider = getTelemetryOptInProvider({ simulateError: true });
 
     await clickBanner(telemetryOptInProvider, optIn, { _banners: banners, _toastNotifications: toastNotifications });

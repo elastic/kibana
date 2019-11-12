@@ -19,6 +19,11 @@ exports[`Storyshots shareables/Footer/Title component 1`] = `
   >
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
+      style={
+        Object {
+          "flexShrink": 0,
+        }
+      }
     >
       <a
         className="euiLink euiLink--primary"
@@ -83,6 +88,11 @@ exports[`Storyshots shareables/Footer/Title contextual: austin 1`] = `
   >
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
+      style={
+        Object {
+          "flexShrink": 0,
+        }
+      }
     >
       <a
         className="euiLink euiLink--primary"
@@ -147,6 +157,11 @@ exports[`Storyshots shareables/Footer/Title contextual: hello 1`] = `
   >
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
+      style={
+        Object {
+          "flexShrink": 0,
+        }
+      }
     >
       <a
         className="euiLink euiLink--primary"
