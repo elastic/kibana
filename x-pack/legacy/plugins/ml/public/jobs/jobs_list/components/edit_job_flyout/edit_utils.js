@@ -7,7 +7,7 @@
 
 import { difference } from 'lodash';
 import chrome from 'ui/chrome';
-import { newJobLimits } from 'plugins/ml/jobs/new_job_new/utils/new_job_defaults';
+import { newJobLimits } from '../../../../services/ml_server_info';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { processCreatedBy } from '../../../../../common/util/job_utils';
 

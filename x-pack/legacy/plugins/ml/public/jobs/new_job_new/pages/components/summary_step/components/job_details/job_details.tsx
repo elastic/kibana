@@ -15,7 +15,7 @@ import {
   isPopulationJobCreator,
   isAdvancedJobCreator,
 } from '../../../../../common/job_creator';
-import { newJobDefaults } from '../../../../../utils/new_job_defaults';
+import { newJobDefaults } from '../../../../../../../services/ml_server_info';
 import { ListItems, falseLabel, trueLabel, defaultLabel, Italic } from '../common';
 import { useKibanaContext } from '../../../../../../../contexts/kibana';
 
