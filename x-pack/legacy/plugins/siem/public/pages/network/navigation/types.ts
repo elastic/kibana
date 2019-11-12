@@ -10,38 +10,33 @@ import { NavTab } from '../../../components/navigation/types';
 import { FlowTargetSourceDest } from '../../../graphql/types';
 import { networkModel } from '../../../store';
 import { ESTermQuery } from '../../../../common/typed_json';
-import { NarrowDateRange } from '../../../components/ml/types';
 import { GlobalTimeArgs } from '../../../containers/global_time';
 
 import { SetAbsoluteRangeDatePicker } from '../types';
 
-interface QueryTabBodyProps {
+interface QueryTabBodyProps extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
+  skip: boolean;
   type: networkModel.NetworkType;
+  startDate: number;
+  endDate: number;
   filterQuery?: string | ESTermQuery;
 }
 
-export type DnsQueryTabBodyProps = QueryTabBodyProps & GlobalTimeArgs;
+export type NetworkComponentQueryProps = QueryTabBodyProps;
 
-export type IPsQueryTabBodyProps = QueryTabBodyProps &
-  GlobalTimeArgs & {
-    indexPattern: StaticIndexPattern;
-    flowTarget: FlowTargetSourceDest;
-  };
+export type IPsQueryTabBodyProps = QueryTabBodyProps & {
+  indexPattern: StaticIndexPattern;
+  flowTarget: FlowTargetSourceDest;
+};
 
-export type TlsQueryTabBodyProps = QueryTabBodyProps &
-  GlobalTimeArgs & {
-    flowTarget: FlowTargetSourceDest;
-    ip?: string;
-  };
+export type TlsQueryTabBodyProps = QueryTabBodyProps & {
+  flowTarget: FlowTargetSourceDest;
+  ip?: string;
+};
 
-export type HttpQueryTabBodyProps = QueryTabBodyProps &
-  GlobalTimeArgs & {
-    ip?: string;
-  };
-export type AnomaliesQueryTabBodyProps = QueryTabBodyProps &
-  Pick<GlobalTimeArgs, 'to' | 'from' | 'isInitializing'> & {
-    narrowDateRange: NarrowDateRange;
-  };
+export type HttpQueryTabBodyProps = QueryTabBodyProps & {
+  ip?: string;
+};
 
 export type NetworkRoutesProps = GlobalTimeArgs & {
   networkPagePath: string;

@@ -11,24 +11,24 @@ import { NetworkDnsTable } from '../../../components/page/network/network_dns_ta
 import { NetworkDnsQuery } from '../../../containers/network_dns';
 import { manageQuery } from '../../../components/page/manage_query';
 
-import { DnsQueryTabBodyProps } from './types';
+import { NetworkComponentQueryProps } from './types';
 
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 
 export const DnsQueryTabBody = ({
-  to,
+  endDate,
   filterQuery,
-  isInitializing,
-  from,
+  skip,
+  startDate,
   setQuery,
   type,
-}: DnsQueryTabBodyProps) => (
+}: NetworkComponentQueryProps) => (
   <NetworkDnsQuery
-    endDate={to}
+    endDate={endDate}
     filterQuery={filterQuery}
-    skip={isInitializing}
+    skip={skip}
     sourceId="default"
-    startDate={from}
+    startDate={startDate}
     type={type}
   >
     {({

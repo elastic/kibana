@@ -9,37 +9,15 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
-import { inputsModel, State, inputsSelectors, hostsModel } from '../../../store';
-import { createFilter, getDefaultFetchPolicy } from '../../helpers';
-import { QueryTemplate, QueryTemplateProps } from '../../query_template';
+import { State, inputsSelectors } from '../../../store';
+import { getDefaultFetchPolicy } from '../../helpers';
+import { QueryTemplate } from '../../query_template';
 
 import { AnomaliesOverTimeGqlQuery } from './anomalies_over_time.gql_query';
-import { GetAnomaliesOverTimeQuery, MatrixOverTimeHistogramData } from '../../../graphql/types';
-import { getAnomaliesFilterQuery } from './utils';
+import { GetAnomaliesOverTimeQuery } from '../../../graphql/types';
+import { AnomaliesOverTimeProps, OwnProps } from './types';
 
 const ID = 'anomaliesOverTimeQuery';
-
-export interface AnomaliesArgs {
-  endDate: number;
-  anomaliesOverTime: MatrixOverTimeHistogramData[];
-  id: string;
-  inspect: inputsModel.InspectQuery;
-  loading: boolean;
-  refetch: inputsModel.Refetch;
-  startDate: number;
-  totalCount: number;
-}
-
-export interface OwnProps extends QueryTemplateProps {
-  children?: (args: AnomaliesArgs) => React.ReactNode;
-  type: hostsModel.HostsType;
-}
-
-export interface AnomaliesOverTimeComponentReduxProps {
-  isInspected: boolean;
-}
-
-type AnomaliesOverTimeProps = OwnProps & AnomaliesOverTimeComponentReduxProps;
 
 class AnomaliesOverTimeComponentQuery extends QueryTemplate<
   AnomaliesOverTimeProps,
@@ -57,19 +35,16 @@ class AnomaliesOverTimeComponentQuery extends QueryTemplate<
       startDate,
     } = this.props;
 
-    const filterQueryString = createFilter(filterQuery);
-    const anomaliesFilterQuery = getAnomaliesFilterQuery(filterQueryString);
-
     return (
       <Query<GetAnomaliesOverTimeQuery.Query, GetAnomaliesOverTimeQuery.Variables>
         query={AnomaliesOverTimeGqlQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         variables={{
-          filterQuery: anomaliesFilterQuery,
+          filterQuery,
           sourceId,
           timerange: {
-            interval: 'hour',
+            interval: 'day',
             from: startDate!,
             to: endDate!,
           },

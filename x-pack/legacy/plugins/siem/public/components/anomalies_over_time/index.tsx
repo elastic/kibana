@@ -7,7 +7,7 @@
 import React from 'react';
 
 import * as i18n from './translation';
-import { MatrixOverTimeHistogram, MatrixOverTimeBasicProps } from '../../../matrix_over_time';
+import { MatrixOverTimeHistogram, MatrixOverTimeBasicProps } from '../matrix_over_time';
 
 export const AnomaliesOverTimeHistogram = (props: MatrixOverTimeBasicProps) => {
   const dataKey = 'anomaliesOverTime';
