@@ -565,6 +565,22 @@ Default: `"hidden"`
 
 Returns whatever you pass into it. This can be useful when you need to use _context_ as argument to a function as a sub-expression.
 
+*Expression syntax*
+[source,js]
+----
+context
+----
+
+*Code example*
+[source,text]
+----
+date	
+| formatdate "LLLL"	
+| markdown "Last updated: " {context} 	
+| render
+----
+Using the `context` function allows us to pass the output, or _context_, of the previous function as a value to an argument in the next function. Here we get the formatted date string from the previous function and pass it as `content` for the markdown element.
+
 *Accepts:* `any`
 
 *Returns:* Depends on your input and arguments
