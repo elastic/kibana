@@ -55,7 +55,10 @@ function getTabs(isMlEnabledInSpace: boolean): Tab[] {
       content: (
         <Fragment>
           <EuiSpacer size="m" />
-          <DataFrameAnalyticsList allowCreate={false} isMlEnabledInSpace={isMlEnabledInSpace} />
+          <DataFrameAnalyticsList
+            isManagementTable={true}
+            isMlEnabledInSpace={isMlEnabledInSpace}
+          />
         </Fragment>
       ),
     },

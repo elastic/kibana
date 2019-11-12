@@ -68,13 +68,13 @@ function stringMatch(str: string | undefined, substr: string) {
 }
 
 interface Props {
-  allowCreate?: boolean;
+  isManagementTable?: boolean;
   isMlEnabledInSpace?: boolean;
   blockRefresh?: boolean;
   createAnalyticsForm?: any;
 }
 export const DataFrameAnalyticsList: FC<Props> = ({
-  allowCreate = true,
+  isManagementTable = false,
   isMlEnabledInSpace = true,
   blockRefresh = false,
   createAnalyticsForm,
@@ -226,7 +226,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
             </h2>
           }
           actions={
-            !allowCreate
+            !isManagementTable
               ? [
                   <EuiButtonEmpty
                     onClick={createAnalyticsForm.actions.openModal}
@@ -248,7 +248,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const columns = getColumns(
     expandedRowItemIds,
     setExpandedRowItemIds,
-    allowCreate,
+    isManagementTable,
     isMlEnabledInSpace
   );
 
@@ -339,7 +339,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
             <EuiFlexItem grow={false}>
               <RefreshAnalyticsListButton />
             </EuiFlexItem>
-            {allowCreate && (
+            {!isManagementTable && (
               <EuiFlexItem grow={false}>
                 <CreateAnalyticsButton {...createAnalyticsForm} />
               </EuiFlexItem>
