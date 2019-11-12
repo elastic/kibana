@@ -36,7 +36,7 @@ export interface DevToolsPluginStartDependencies {
 }
 
 export class DevToolsPlugin implements Plugin {
-  private getSortedDevTools: (() => DevTool[]) | null = null;
+  private getSortedDevTools: (() => readonly DevTool[]) | null = null;
 
   public setup(
     core: CoreSetup,
@@ -49,7 +49,7 @@ export class DevToolsPlugin implements Plugin {
         if (!this.getSortedDevTools) {
           throw new Error('not started yet');
         }
-        const { renderApp } = await import('./render_app');
+        const { renderApp } = await import('./application');
         return renderApp(
           params.element,
           appMountContext,
@@ -60,7 +60,7 @@ export class DevToolsPlugin implements Plugin {
     });
   }
 
-  start(core: CoreStart, { newPlatformDevTools }: DevToolsPluginStartDependencies) {
+  public start(core: CoreStart, { newPlatformDevTools }: DevToolsPluginStartDependencies) {
     this.getSortedDevTools = newPlatformDevTools.getSortedDevTools;
     if (this.getSortedDevTools().length === 0) {
       core.chrome.navLinks.update('kibana:dev_tools', {

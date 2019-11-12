@@ -43,7 +43,7 @@ export interface DevToolsStart {
    * becomes an implementation detail.
    * @deprecated
    */
-  getSortedDevTools: () => DevTool[];
+  getSortedDevTools: () => readonly DevTool[];
 }
 
 /**
@@ -87,21 +87,27 @@ export interface DevTool {
 }
 
 export class DevToolsPlugin implements Plugin<DevToolsSetup, DevToolsStart> {
-  private devTools: DevTool[] = [];
+  private readonly devTools = new Map<string, DevTool>();
 
-  private getSortedDevTools() {
-    return sortBy(this.devTools, 'order');
+  private getSortedDevTools(): readonly DevTool[] {
+    return sortBy([...this.devTools.values()], 'order');
   }
 
   public setup(core: CoreSetup) {
     return {
       register: (devTool: DevTool) => {
-        this.devTools.push(devTool);
+        if (this.devTools.has(devTool.id)) {
+          throw new Error(
+            `Dev tool with id [${devTool.id}] has already been registered. Use a unique id.`
+          );
+        }
+
+        this.devTools.set(devTool.id, devTool);
       },
     };
   }
 
-  start() {
+  public start() {
     return {
       getSortedDevTools: this.getSortedDevTools.bind(this),
     };

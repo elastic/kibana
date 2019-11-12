@@ -29,7 +29,7 @@ import { AppMountContext } from 'kibana/public';
 import { DevTool } from '../../../../../plugins/dev_tools/public';
 
 interface DevToolsWrapperProps {
-  devTools: DevTool[];
+  devTools: readonly DevTool[];
   activeDevTool: DevTool;
   appMountContext: AppMountContext;
   updateRoute: (newRoute: string) => void;
@@ -145,10 +145,10 @@ export function renderApp(
   element: HTMLElement,
   appMountContext: AppMountContext,
   basePath: string,
-  devTools: DevTool[]
+  devTools: readonly DevTool[]
 ) {
   if (redirectOnMissingCapabilities(appMountContext)) {
-    return;
+    return () => {};
   }
   setBadge(appMountContext);
   setBreadcrumbs(appMountContext);
