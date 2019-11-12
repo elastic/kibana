@@ -67,7 +67,7 @@ describe('execute helper function', () => {
 });
 
 describe('ExpressionLoader', () => {
-  const expressionString = '';
+  const expressionString = 'demodata';
 
   describe('constructor', () => {
     it('accepts expression string', () => {

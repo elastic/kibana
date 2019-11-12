@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { fromExpression } from '@kbn/interpreter/target/common';
+import { fromExpression, toExpression } from '@kbn/interpreter/target/common';
 import { DataAdapter, RequestAdapter, Adapters } from '../../../../../../plugins/inspector/public';
 import { getInterpreter } from './services';
 import { ExpressionAST, IExpressionLoaderParams, IInterpreterResult } from './types';
@@ -44,7 +44,7 @@ export class ExpressionDataHandler {
       this.ast = fromExpression(expression) as ExpressionAST;
     } else {
       this.ast = expression;
-      this.expression = '';
+      this.expression = toExpression(this.ast);
     }
 
     this.abortController = new AbortController();
