@@ -37,7 +37,8 @@ import { ExpressionInterpreter } from './types';
 import { setInterpreter, setInspector, setRenderersRegistry } from './services';
 import { ExpressionRendererImplementation } from './expression_renderer';
 import { ExpressionLoader, loader } from './loader';
-import { ExpressionDataHandler, execute } from './execute';
+// eslint-disable-next-line
+import { ExpressionDataHandler, execute } from '../../../../../../plugins/expressions/public/execute';
 // eslint-disable-next-line
 import { render, ExpressionRenderHandler } from '../../../../../../plugins/expressions/public/render';
 

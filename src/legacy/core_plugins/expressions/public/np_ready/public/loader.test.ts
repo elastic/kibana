@@ -19,7 +19,8 @@
 
 import { first } from 'rxjs/operators';
 import { loader, ExpressionLoader } from './loader';
-import { ExpressionDataHandler } from './execute';
+// eslint-disable-next-line
+import { ExpressionDataHandler } from '../../../../../../plugins/expressions/public/execute';
 import { fromExpression } from '@kbn/interpreter/common';
 import { IInterpreterRenderHandlers } from './types';
 import { Observable } from 'rxjs';

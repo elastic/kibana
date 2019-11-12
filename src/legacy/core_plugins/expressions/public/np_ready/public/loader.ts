@@ -20,7 +20,8 @@
 import { Observable, Subject } from 'rxjs';
 import { share } from 'rxjs/operators';
 import { Adapters, InspectorSession } from '../../../../../../plugins/inspector/public';
-import { ExpressionDataHandler } from './execute';
+// eslint-disable-next-line
+import { ExpressionDataHandler } from '../../../../../../plugins/expressions/public/execute';
 // eslint-disable-next-line
 import { ExpressionRenderHandler } from '../../../../../../plugins/expressions/public/render';
 import { Data, IExpressionLoaderParams, ExpressionAST } from './types';
