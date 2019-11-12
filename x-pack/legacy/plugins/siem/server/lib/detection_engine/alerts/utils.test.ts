@@ -286,18 +286,8 @@ describe('utils', () => {
   });
   describe('searchAfterAndBulkIndex', () => {
     test('if successful with empty search results', async () => {
-      const searchAfterSortId = '1234567891111';
       const sampleParams = sampleSignalAlertParams(undefined);
       const savedObjectsClient = savedObjectsClientMock.create();
-      const expectedSearchAfterQuery = buildEventsSearchQuery({
-        index: sampleParams.index,
-        from: sampleParams.from,
-        to: sampleParams.to,
-        filter: sampleParams.filter,
-        size: sampleParams.size ? sampleParams.size : 1,
-        searchAfterSortId,
-        maxDocs: undefined,
-      });
       const mockService: AlertServices = {
         callCluster: jest.fn(),
         alertInstanceFactory: jest.fn(),
