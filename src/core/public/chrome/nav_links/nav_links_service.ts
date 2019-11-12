@@ -95,6 +95,8 @@ export interface ChromeNavLinks {
   getForceAppSwitcherNavigation$(): Observable<boolean>;
 }
 
+type LinksUpdater = (navLinks: Map<string, NavLinkWrapper>) => Map<string, NavLinkWrapper>;
+
 export class NavLinksService {
   private readonly stop$ = new ReplaySubject(1);
 
@@ -118,13 +120,13 @@ export class NavLinksService {
         );
       })
     );
-
+    const linkUpdaters$ = new BehaviorSubject<LinksUpdater[]>([]);
     const navLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(new Map());
 
-    combineLatest([appLinks$])
+    combineLatest([appLinks$, linkUpdaters$])
       .pipe(
-        map(([appLinks]) => {
-          return new Map([...appLinks]);
+        map(([appLinks, linkUpdaters]) => {
+          return linkUpdaters.reduce((links, updater) => updater(links), appLinks);
         })
       )
       .subscribe(navlinks => {
@@ -158,23 +160,29 @@ export class NavLinksService {
         if (!this.has(id)) {
           return;
         }
-        navLinks$.next(new Map([...navLinks$.value.entries()].filter(([linkId]) => linkId === id)));
+
+        const updater: LinksUpdater = navLinks =>
+          new Map([...navLinks.entries()].filter(([linkId]) => linkId === id));
+
+        linkUpdaters$.next([...linkUpdaters$.value, updater]);
       },
 
       update(id: string, values: ChromeNavLinkUpdateableFields) {
         if (!this.has(id)) {
           return;
         }
-        navLinks$.next(
+
+        const updater: LinksUpdater = navLinks =>
           new Map(
-            [...navLinks$.value.entries()].map(([linkId, link]) => {
+            [...navLinks.entries()].map(([linkId, link]) => {
               return [linkId, link.id === id ? link.update(values) : link] as [
                 string,
                 NavLinkWrapper
               ];
             })
-          )
-        );
+          );
+
+        linkUpdaters$.next([...linkUpdaters$.value, updater]);
         return this.get(id);
       },
 
