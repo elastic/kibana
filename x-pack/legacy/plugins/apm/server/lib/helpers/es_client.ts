@@ -93,20 +93,20 @@ interface APMOptions {
 }
 
 interface ClientCreateOptions {
-  asInternalUser?: boolean;
+  clientAsInternalUser?: boolean;
 }
 
 export type ESClient = ReturnType<typeof getESClient>;
 
 export function getESClient(
   req: Legacy.Request,
-  { asInternalUser = false }: ClientCreateOptions = {}
+  { clientAsInternalUser = false }: ClientCreateOptions = {}
 ) {
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
   const query = req.query as Record<string, unknown>;
 
-  const callMethod = asInternalUser
-    ? cluster.callWithInternalUser
+  const callMethod = clientAsInternalUser
+    ? cluster.callWithInternalUser.bind(cluster)
     : cluster.callWithRequest.bind(cluster, req);
 
   return {
