@@ -10,7 +10,7 @@ import euiStyled from '../../../../common/eui_styled_components';
 const BottomFade = euiStyled.div`
 width: 100%;
 background: ${props =>
-  `linear-gradient(rgba(255, 255, 255, 0) 0%, ${props.theme.eui.euiColorGhost} 100%)`};
+  `linear-gradient(${props.theme.eui.euiColorEmptyShade}00 0%, ${props.theme.eui.euiColorEmptyShade} 100%)`};
 margin-top: -${props => parseInt(props.theme.eui.spacerSizes.xl, 10) * 2}px;
 height: ${props => parseInt(props.theme.eui.spacerSizes.xl, 10) * 2}px;
 position: absolute;
