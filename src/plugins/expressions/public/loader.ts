@@ -19,11 +19,9 @@
 
 import { Observable, Subject } from 'rxjs';
 import { share } from 'rxjs/operators';
-import { Adapters, InspectorSession } from '../../../../../../plugins/inspector/public';
-// eslint-disable-next-line
-import { ExpressionDataHandler } from '../../../../../../plugins/expressions/public/execute';
-// eslint-disable-next-line
-import { ExpressionRenderHandler } from '../../../../../../plugins/expressions/public/render';
+import { Adapters, InspectorSession } from '../../inspector/public';
+import { ExpressionDataHandler } from './execute';
+import { ExpressionRenderHandler } from './render';
 import { Data, IExpressionLoaderParams, ExpressionAST } from './types';
 import { getInspector } from './services';
 

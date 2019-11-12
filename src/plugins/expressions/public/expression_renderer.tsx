@@ -100,7 +100,10 @@ export const ExpressionRendererImplementation = ({
         }
       });
     }
+  /* eslint-disable */
+  // TODO: Replace mountpoint.current by something else.
   }, [mountpoint.current]);
+  /* eslint-enable */
 
   useEffect(() => {
     // We only want a clean up to run when the entire component is unloaded, not on every render

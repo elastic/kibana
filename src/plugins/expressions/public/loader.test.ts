@@ -17,14 +17,13 @@
  * under the License.
  */
 
+import { fromExpression } from '@kbn/interpreter/common';
 import { first } from 'rxjs/operators';
 import { loader, ExpressionLoader } from './loader';
-// eslint-disable-next-line
-import { ExpressionDataHandler } from '../../../../../../plugins/expressions/public/execute';
-import { fromExpression } from '@kbn/interpreter/common';
+import { ExpressionDataHandler } from './execute';
 import { IInterpreterRenderHandlers } from './types';
 import { Observable } from 'rxjs';
-import { ExpressionAST } from '../../../../../../plugins/expressions/public';
+import { ExpressionAST } from './types';
 
 const element: HTMLElement = null as any;
 

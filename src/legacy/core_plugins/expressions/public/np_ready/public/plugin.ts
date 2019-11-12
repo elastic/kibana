@@ -35,8 +35,10 @@ import {
 } from '../../../../../../plugins/inspector/public';
 import { ExpressionInterpreter } from './types';
 import { setInterpreter, setInspector, setRenderersRegistry } from './services';
-import { ExpressionRendererImplementation } from './expression_renderer';
-import { ExpressionLoader, loader } from './loader';
+// eslint-disable-next-line
+import { ExpressionRendererImplementation } from '../../../../../../plugins/expressions/public/expression_renderer';
+// eslint-disable-next-line
+import { ExpressionLoader, loader } from '../../../../../../plugins/expressions/public/loader';
 // eslint-disable-next-line
 import { ExpressionDataHandler, execute } from '../../../../../../plugins/expressions/public/execute';
 // eslint-disable-next-line
