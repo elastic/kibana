@@ -78,6 +78,10 @@ export class TelemetryForm extends Component {
       queryMatches,
     } = this.state;
 
+    if (!telemetryOptInProvider.canChangeOptInStatus()) {
+      return null;
+    }
+
     if (queryMatches !== null && !queryMatches) {
       return null;
     }

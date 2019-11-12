@@ -106,10 +106,10 @@ const allSavedObjects = [
   },
 ];
 
-const $http = () => {};
+const $http = () => { };
 $http.post = jest.fn().mockImplementation(() => []);
 const defaultProps = {
-  goInspectObject: () => {},
+  goInspectObject: () => { },
   confirmModalPromise: jest.fn(),
   savedObjectsClient: {
     find: jest.fn(),
@@ -256,7 +256,6 @@ describe('ObjectsTable', () => {
 
       const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
         _id: obj.id,
-        _type: obj._type,
         _source: {},
       }));
 
@@ -297,7 +296,6 @@ describe('ObjectsTable', () => {
 
       const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
         _id: obj.id,
-        _type: obj._type,
         _source: {},
       }));
 
