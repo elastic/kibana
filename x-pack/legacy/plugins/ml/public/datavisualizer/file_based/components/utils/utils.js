@@ -116,8 +116,12 @@ export function processResults(results) {
   };
 }
 
-// a check for the minimum privileges needed to create and ingest data into an index.
-// if called with no indexName, the check will just look for the minimum cluster privileges.
+/**
+ * A check for the minimum privileges needed to create and ingest data into an index.
+ * If called with no indexName, the check will just look for the minimum cluster privileges.
+ * @param {string} indexName
+ * @returns {Promise<boolean>}
+ */
 export async function hasImportPermission(indexName) {
   const priv = {
     cluster: [

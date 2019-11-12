@@ -19,6 +19,12 @@
 
 import sinon from 'sinon';
 
+const mockObservable = () => {
+  return {
+    subscribe: () => {}
+  };
+};
+
 export const npSetup = {
   core: {
     chrome: {}
@@ -44,8 +50,16 @@ export const npSetup = {
       },
     },
     data: {
+      autocomplete: {
+        addProvider: sinon.fake(),
+        getProvider: sinon.fake(),
+      },
       query: {
         filterManager: sinon.fake(),
+        timefilter: {
+          timefilter: sinon.fake(),
+          history: sinon.fake(),
+        }
       },
     },
     devTools: {
@@ -67,6 +81,10 @@ export const npSetup = {
   },
 };
 
+let refreshInterval = undefined;
+let isTimeRangeSelectorEnabled = true;
+let isAutoRefreshSelectorEnabled = true;
+
 export const npStart = {
   core: {
     chrome: {}
@@ -86,6 +104,9 @@ export const npStart = {
       getSortedDevTools: () => [],
     },
     data: {
+      autocomplete: {
+        getProvider: sinon.fake(),
+      },
       getSuggestions: sinon.fake(),
       query: {
         filterManager: {
@@ -97,12 +118,47 @@ export const npStart = {
           addFilters: sinon.fake(),
           setFilters: sinon.fake(),
           removeAll: sinon.fake(),
-          getUpdates$: () => {
-            return {
-              subscribe: () => {}
-            };
-          },
+          getUpdates$: mockObservable,
 
+        },
+        timefilter: {
+          timefilter: {
+            getFetch$: mockObservable,
+            getAutoRefreshFetch$: mockObservable,
+            getEnabledUpdated$: mockObservable,
+            getTimeUpdate$: mockObservable,
+            getRefreshIntervalUpdate$: mockObservable,
+            isTimeRangeSelectorEnabled: () => {
+              return isTimeRangeSelectorEnabled;
+            },
+            isAutoRefreshSelectorEnabled: () => {
+              return isAutoRefreshSelectorEnabled;
+            },
+            disableAutoRefreshSelector: () => {
+              isAutoRefreshSelectorEnabled = false;
+            },
+            enableAutoRefreshSelector: () => {
+              isAutoRefreshSelectorEnabled = true;
+            },
+            getRefreshInterval: () => {
+              return refreshInterval;
+            },
+            setRefreshInterval: (interval) => {
+              refreshInterval = interval;
+            },
+            enableTimeRangeSelector: () => {
+              isTimeRangeSelectorEnabled = true;
+            },
+            disableTimeRangeSelector: () => {
+              isTimeRangeSelectorEnabled = false;
+            },
+            getTime: sinon.fake(),
+            setTime: sinon.fake(),
+            getBounds: sinon.fake(),
+            calculateBounds: sinon.fake(),
+            createFilter: sinon.fake(),
+          },
+          history: sinon.fake(),
         },
       },
     },
