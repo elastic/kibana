@@ -49,7 +49,6 @@ describe('SavedObjectsRepository', () => {
       hits: [
         {
           _index: '.kibana',
-          _type: '_doc',
           _id: 'index-pattern:logstash-*',
           _score: 1,
           ...mockVersionProps,
@@ -65,7 +64,6 @@ describe('SavedObjectsRepository', () => {
         },
         {
           _index: '.kibana',
-          _type: '_doc',
           _id: 'config:6.0.0-alpha1',
           _score: 1,
           ...mockVersionProps,
@@ -80,7 +78,6 @@ describe('SavedObjectsRepository', () => {
         },
         {
           _index: '.kibana',
-          _type: '_doc',
           _id: 'index-pattern:stocks-*',
           _score: 1,
           ...mockVersionProps,
@@ -96,7 +93,6 @@ describe('SavedObjectsRepository', () => {
         },
         {
           _index: '.kibana',
-          _type: '_doc',
           _id: 'globaltype:something',
           _score: 1,
           ...mockVersionProps,
@@ -118,7 +114,6 @@ describe('SavedObjectsRepository', () => {
       hits: [
         {
           _index: '.kibana',
-          _type: '_doc',
           _id: 'foo-namespace:index-pattern:logstash-*',
           _score: 1,
           ...mockVersionProps,
@@ -135,7 +130,6 @@ describe('SavedObjectsRepository', () => {
         },
         {
           _index: '.kibana',
-          _type: '_doc',
           _id: 'foo-namespace:config:6.0.0-alpha1',
           _score: 1,
           ...mockVersionProps,
@@ -151,7 +145,6 @@ describe('SavedObjectsRepository', () => {
         },
         {
           _index: '.kibana',
-          _type: '_doc',
           _id: 'foo-namespace:index-pattern:stocks-*',
           _score: 1,
           ...mockVersionProps,
@@ -168,7 +161,6 @@ describe('SavedObjectsRepository', () => {
         },
         {
           _index: '.kibana',
-          _type: '_doc',
           _id: 'globaltype:something',
           _score: 1,
           ...mockVersionProps,
@@ -290,7 +282,6 @@ describe('SavedObjectsRepository', () => {
   describe('#create', () => {
     beforeEach(() => {
       callAdminCluster.mockImplementation((method, params) => ({
-        _type: '_doc',
         _id: params.id,
         ...mockVersionProps,
       }));
@@ -863,7 +854,6 @@ describe('SavedObjectsRepository', () => {
         items: [
           {
             create: {
-              _type: '_doc',
               _id: 'config:one',
               error: {
                 reason: 'type[config] missing',
@@ -872,7 +862,6 @@ describe('SavedObjectsRepository', () => {
           },
           {
             create: {
-              _type: '_doc',
               _id: 'index-pattern:two',
               ...mockVersionProps,
             },
@@ -910,14 +899,12 @@ describe('SavedObjectsRepository', () => {
         items: [
           {
             create: {
-              _type: '_doc',
               _id: 'config:one',
               ...mockVersionProps,
             },
           },
           {
             create: {
-              _type: '_doc',
               _id: 'index-pattern:two',
               ...mockVersionProps,
             },
@@ -962,7 +949,6 @@ describe('SavedObjectsRepository', () => {
         items: [
           {
             create: {
-              _type: '_doc',
               _id: 'foo-namespace:config:one',
               _index: '.kibana-test',
               _primary_term: 1,
@@ -971,7 +957,6 @@ describe('SavedObjectsRepository', () => {
           },
           {
             create: {
-              _type: '_doc',
               _id: 'foo-namespace:index-pattern:two',
               _primary_term: 1,
               _seq_no: 2,
@@ -1021,14 +1006,12 @@ describe('SavedObjectsRepository', () => {
         items: [
           {
             create: {
-              _type: '_doc',
               _id: 'config:one',
               ...mockVersionProps,
             },
           },
           {
             create: {
-              _type: '_doc',
               _id: 'index-pattern:two',
               ...mockVersionProps,
             },
@@ -1092,7 +1075,7 @@ describe('SavedObjectsRepository', () => {
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
     });
 
-    it('should return objects in the same order regardless of type', () => {});
+    it('should return objects in the same order regardless of type', () => { });
   });
 
   describe('#delete', () => {
@@ -1496,7 +1479,6 @@ describe('SavedObjectsRepository', () => {
   describe('#get', () => {
     const noNamespaceResult = {
       _id: 'index-pattern:logstash-*',
-      _type: '_doc',
       ...mockVersionProps,
       _source: {
         type: 'index-pattern',
@@ -1509,7 +1491,6 @@ describe('SavedObjectsRepository', () => {
     };
     const namespacedResult = {
       _id: 'foo-namespace:index-pattern:logstash-*',
-      _type: '_doc',
       ...mockVersionProps,
       _source: {
         namespace: 'foo-namespace',
@@ -1699,14 +1680,12 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.mockResolvedValue({
         docs: [
           {
-            _type: '_doc',
             _id: 'config:good',
             found: true,
             ...mockVersionProps,
             _source: { ...mockTimestampFields, config: { title: 'Test' } },
           },
           {
-            _type: '_doc',
             _id: 'config:bad',
             found: false,
           },
@@ -1728,14 +1707,12 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.mockResolvedValue({
         docs: [
           {
-            _type: '_doc',
             _id: 'config:good',
             found: true,
             ...mockVersionProps,
             _source: { ...mockTimestampFields, config: { title: 'Test' } },
           },
           {
-            _type: '_doc',
             _id: 'config:bad',
             found: false,
           },
@@ -1770,21 +1747,18 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.mockResolvedValue({
         docs: [
           {
-            _type: '_doc',
             _id: 'one',
             found: true,
             ...mockVersionProps,
             _source: { ...mockTimestampFields, config: { title: 'Test1' } },
           },
           {
-            _type: '_doc',
             _id: 'three',
             found: true,
             ...mockVersionProps,
             _source: { ...mockTimestampFields, config: { title: 'Test3' } },
           },
           {
-            _type: '_doc',
             _id: 'five',
             found: true,
             ...mockVersionProps,
@@ -1859,7 +1833,6 @@ describe('SavedObjectsRepository', () => {
     beforeEach(() => {
       callAdminCluster.mockResolvedValue({
         _id: `${type}:${id}`,
-        _type: '_doc',
         ...mockVersionProps,
         result: 'updated',
       });
@@ -2177,7 +2150,6 @@ describe('SavedObjectsRepository', () => {
         items: objects.map(items => ({
           update: {
             _id: `${items.type}:${items.id}`,
-            _type: '_doc',
             ...mockVersionProps,
             result: 'updated',
           }
@@ -2244,15 +2216,14 @@ describe('SavedObjectsRepository', () => {
 
       callAdminCluster.mockReturnValue({
         items: objects
-        // remove invalid from mocks
+          // remove invalid from mocks
           .filter(item => item.id !== 'invalid')
           .map(items => {
-            switch(items.id) {
+            switch (items.id) {
               case 'version_clash':
                 return ({
                   update: {
                     _id: `${items.type}:${items.id}`,
-                    _type: '_doc',
                     error: {
                       type: 'version_conflict_engine_exception'
                     }
@@ -2262,7 +2233,6 @@ describe('SavedObjectsRepository', () => {
                 return ({
                   update: {
                     _id: `${items.type}:${items.id}`,
-                    _type: '_doc',
                     ...mockVersionProps,
                     result: 'updated',
                   }
@@ -2353,7 +2323,7 @@ describe('SavedObjectsRepository', () => {
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
 
-      const [, { body: [{ update: firstUpdate },, { update: secondUpdate }] }] = callAdminCluster.mock.calls[0];
+      const [, { body: [{ update: firstUpdate }, , { update: secondUpdate }] }] = callAdminCluster.mock.calls[0];
 
       expect(firstUpdate).toMatchObject({
         if_seq_no: 100,
@@ -2407,7 +2377,7 @@ describe('SavedObjectsRepository', () => {
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
 
-      const [, { body: [, { doc }] } ] = callAdminCluster.mock.calls[0];
+      const [, { body: [, { doc }] }] = callAdminCluster.mock.calls[0];
 
       expect(doc).toMatchObject({
         references: [{
@@ -2434,7 +2404,7 @@ describe('SavedObjectsRepository', () => {
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
 
-      const [, { body: [, { doc }] } ] = callAdminCluster.mock.calls[0];
+      const [, { body: [, { doc }] }] = callAdminCluster.mock.calls[0];
 
       expect(doc).toMatchObject({
         references: [],
@@ -2637,7 +2607,6 @@ describe('SavedObjectsRepository', () => {
   describe('#incrementCounter', () => {
     beforeEach(() => {
       callAdminCluster.mockImplementation((method, params) => ({
-        _type: '_doc',
         _id: params.id,
         ...mockVersionProps,
         _index: '.kibana',
@@ -2657,7 +2626,6 @@ describe('SavedObjectsRepository', () => {
 
     it('formats Elasticsearch response', async () => {
       callAdminCluster.mockImplementation((method, params) => ({
-        _type: '_doc',
         _id: params.id,
         ...mockVersionProps,
         _index: '.kibana',
@@ -2776,7 +2744,6 @@ describe('SavedObjectsRepository', () => {
 
     it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
       callAdminCluster.mockImplementation((method, params) => ({
-        _type: '_doc',
         _id: params.id,
         ...mockVersionProps,
         _index: '.kibana',

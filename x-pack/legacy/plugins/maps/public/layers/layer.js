@@ -406,5 +406,9 @@ export class AbstractLayer {
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }
 
+  getType() {
+    return this._descriptor.type;
+  }
+
 }
 

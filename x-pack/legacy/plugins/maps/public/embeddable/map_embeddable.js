@@ -31,14 +31,14 @@ import {
   setOpenTOCDetails,
 } from '../actions/ui_actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
-import { getInspectorAdapters } from '../reducers/non_serializable_instances';
+import { getInspectorAdapters, setEventHandlers } from '../reducers/non_serializable_instances';
 import { getMapCenter, getMapZoom } from '../selectors/map_selectors';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 export class MapEmbeddable extends Embeddable {
   type = MAP_SAVED_OBJECT_TYPE;
 
-  constructor(config, initialInput, parent, renderTooltipContent) {
+  constructor(config, initialInput, parent, renderTooltipContent, eventHandlers) {
     super(
       initialInput,
       {
@@ -50,6 +50,7 @@ export class MapEmbeddable extends Embeddable {
       parent);
 
     this._renderTooltipContent = renderTooltipContent;
+    this._eventHandlers = eventHandlers;
     this._layerList = config.layerList;
     this._store = createMapStore();
 
@@ -98,6 +99,7 @@ export class MapEmbeddable extends Embeddable {
    * @param {ContainerState} containerState
    */
   render(domNode) {
+    this._store.dispatch(setEventHandlers(this._eventHandlers));
     this._store.dispatch(setReadOnly(true));
     this._store.dispatch(disableScrollZoom());
 

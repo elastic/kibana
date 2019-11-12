@@ -9,3 +9,4 @@ export { KpiNetworkComponent } from './kpi_network';
 export { NetworkDnsTable } from './network_dns_table';
 export { NetworkTopCountriesTable } from './network_top_countries_table';
 export { NetworkTopNFlowTable } from './network_top_n_flow_table';
+export { NetworkHttpTable } from './network_http_table';
