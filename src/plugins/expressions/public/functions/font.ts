@@ -57,7 +57,7 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
     name: 'font',
     aliases: [],
     type: 'style',
-    help: i18n.translate('expressions_np.functions.fontHelpText', {
+    help: i18n.translate('expressions.functions.fontHelpText', {
       defaultMessage: 'Create a font style.',
     }),
     context: {
@@ -66,21 +66,21 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
     args: {
       align: {
         default: 'left',
-        help: i18n.translate('expressions_np.functions.font.args.alignHelpText', {
+        help: i18n.translate('expressions.functions.font.args.alignHelpText', {
           defaultMessage: 'The horizontal text alignment.',
         }),
         options: Object.values(TextAlignment),
         types: ['string'],
       },
       color: {
-        help: i18n.translate('expressions_np.functions.font.args.colorHelpText', {
+        help: i18n.translate('expressions.functions.font.args.colorHelpText', {
           defaultMessage: 'The text color.',
         }),
         types: ['string'],
       },
       family: {
         default: `"${openSans.value}"`,
-        help: i18n.translate('expressions_np.functions.font.args.familyHelpText', {
+        help: i18n.translate('expressions.functions.font.args.familyHelpText', {
           defaultMessage: 'An acceptable {css} web font string',
           values: {
             css: 'CSS',
@@ -90,7 +90,7 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
       },
       italic: {
         default: false,
-        help: i18n.translate('expressions_np.functions.font.args.italicHelpText', {
+        help: i18n.translate('expressions.functions.font.args.italicHelpText', {
           defaultMessage: 'Italicize the text?',
         }),
         options: [true, false],
@@ -99,21 +99,21 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
       lHeight: {
         default: null,
         aliases: ['lineHeight'],
-        help: i18n.translate('expressions_np.functions.font.args.lHeightHelpText', {
+        help: i18n.translate('expressions.functions.font.args.lHeightHelpText', {
           defaultMessage: 'The line height in pixels',
         }),
         types: ['number', 'null'],
       },
       size: {
         default: 14,
-        help: i18n.translate('expressions_np.functions.font.args.sizeHelpText', {
+        help: i18n.translate('expressions.functions.font.args.sizeHelpText', {
           defaultMessage: 'The font size in pixels',
         }),
         types: ['number'],
       },
       underline: {
         default: false,
-        help: i18n.translate('expressions_np.functions.font.args.underlineHelpText', {
+        help: i18n.translate('expressions.functions.font.args.underlineHelpText', {
           defaultMessage: 'Underline the text?',
         }),
         options: [true, false],
@@ -121,7 +121,7 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
       },
       weight: {
         default: 'normal',
-        help: i18n.translate('expressions_np.functions.font.args.weightHelpText', {
+        help: i18n.translate('expressions.functions.font.args.weightHelpText', {
           defaultMessage: 'The font weight. For example, {list}, or {end}.',
           values: {
             list: Object.values(FontWeight)
@@ -138,7 +138,7 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
     fn: (_context, args) => {
       if (!Object.values(FontWeight).includes(args.weight!)) {
         throw new Error(
-          i18n.translate('expressions_np.functions.font.invalidFontWeightErrorMessage', {
+          i18n.translate('expressions.functions.font.invalidFontWeightErrorMessage', {
             defaultMessage: "Invalid font weight: '{weight}'",
             values: {
               weight: args.weight,
@@ -148,7 +148,7 @@ export function font(): ExpressionFunction<'font', null, Arguments, Style> {
       }
       if (!Object.values(TextAlignment).includes(args.align!)) {
         throw new Error(
-          i18n.translate('expressions_np.functions.font.invalidTextAlignmentErrorMessage', {
+          i18n.translate('expressions.functions.font.invalidTextAlignmentErrorMessage', {
             defaultMessage: "Invalid text alignment: '{align}'",
             values: {
               align: args.align,

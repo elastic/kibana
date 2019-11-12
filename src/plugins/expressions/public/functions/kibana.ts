@@ -36,7 +36,7 @@ export const kibana = (): ExpressionFunctionKibana => ({
     types: ['kibana_context', 'null'],
   },
 
-  help: i18n.translate('expressions_np.functions.kibana.help', {
+  help: i18n.translate('expressions.functions.kibana.help', {
     defaultMessage: 'Gets kibana global context',
   }),
   args: {},

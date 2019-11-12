@@ -33,7 +33,7 @@ export const number = (): ExpressionType<typeof name, number> => ({
       const value = Number(n);
       if (Number.isNaN(value)) {
         throw new Error(
-          i18n.translate('expressions_np.types.number.fromStringConversionErrorMessage', {
+          i18n.translate('expressions.types.number.fromStringConversionErrorMessage', {
             defaultMessage: 'Can\'t typecast "{string}" string to number',
             values: {
               string: n,
