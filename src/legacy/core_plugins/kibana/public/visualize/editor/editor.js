@@ -338,24 +338,7 @@ function VisEditor(
     queryFilter.setFilters(filters);
   };
 
-  $scope.onCancelApplyFilters = () => {
-    $scope.state.$newFilters = [];
-  };
-
-  $scope.onApplyFilters = filters => {
-    const { timeRangeFilter, restOfFilters } = extractTimeFilter($scope.indexPattern.timeFieldName, filters);
-    queryFilter.addFilters(restOfFilters);
-    if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
-    $scope.state.$newFilters = [];
-  };
-
-  $scope.$watch('state.$newFilters', (filters = []) => {
-    if (filters.length === 1) {
-      $scope.onApplyFilters(filters);
-    }
-  });
-
-  $scope.showSaveQuery = capabilities.get().visualize.saveQuery;
+  $scope.showSaveQuery = capabilities.visualize.saveQuery;
 
   $scope.$watch(() => capabilities.get().visualize.saveQuery, (newCapability) => {
     $scope.showSaveQuery = newCapability;
@@ -451,6 +434,12 @@ function VisEditor(
     }));
     subscriptions.add(subscribeWithScope($scope, queryFilter.getFetches$(), {
       next: $scope.fetch
+    }));
+
+    subscriptions.add(subscribeWithScope($scope, timefilter.getAutoRefreshFetch$(), {
+      next: () => {
+        $scope.vis.forceReload();
+      }
     }));
 
     $scope.$on('$destroy', function () {

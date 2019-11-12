@@ -18,11 +18,10 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { capabilities } from 'ui/capabilities';
-import { TableListView } from './../../table_list_view';
+import { TableListView } from '../../../../../../../src/plugins/kibana_react/public';
 
 import {
   EuiIcon,
@@ -31,15 +30,15 @@ import {
   EuiButton,
   EuiEmptyPrompt,
 } from '@elastic/eui';
+import { toastNotifications } from '../../../../../ui/public/notify/toasts';
+import { npStart } from 'ui/new_platform';
 
-class VisualizeListingTableUi extends Component {
-
+export class VisualizeListingTable extends Component {
   constructor(props) {
     super(props);
   }
 
   render() {
-    const { intl } = this.props;
     return (
       <TableListView
         // we allow users to create visualizations even if they can't save them
@@ -53,24 +52,17 @@ class VisualizeListingTableUi extends Component {
         selectable={item => item.canDelete}
         initialFilter={''}
         noItemsFragment={this.getNoItemsMessage()}
-        entityName={
-          intl.formatMessage({
-            id: 'kbn.visualize.listing.table.entityName',
-            defaultMessage: 'visualization',
-          })
-        }
-        entityNamePlural={
-          intl.formatMessage({
-            id: 'kbn.visualize.listing.table.entityNamePlural',
-            defaultMessage: 'visualizations',
-          })
-        }
-        tableListTitle={
-          intl.formatMessage({
-            id: 'kbn.visualize.listing.table.listTitle',
-            defaultMessage: 'Visualizations',
-          })
-        }
+        entityName={i18n.translate('kbn.visualize.listing.table.entityName', {
+          defaultMessage: 'visualization',
+        })}
+        entityNamePlural={i18n.translate('kbn.visualize.listing.table.entityNamePlural', {
+          defaultMessage: 'visualizations',
+        })}
+        tableListTitle={i18n.translate('kbn.visualize.listing.table.listTitle', {
+          defaultMessage: 'Visualizations',
+        })}
+        toastNotifications={toastNotifications}
+        uiSettings={npStart.core.uiSettings}
       />
     );
   }
@@ -244,14 +236,3 @@ class VisualizeListingTableUi extends Component {
     }
   }
 }
-
-VisualizeListingTableUi.propTypes = {
-  deleteItems: PropTypes.func.isRequired,
-  findItems: PropTypes.func.isRequired,
-  createItem: PropTypes.func.isRequired,
-  getViewUrl: PropTypes.func.isRequired,
-  editItem: PropTypes.func.isRequired,
-  listingLimit: PropTypes.number.isRequired,
-};
-
-export const VisualizeListingTable = injectI18n(VisualizeListingTableUi);
