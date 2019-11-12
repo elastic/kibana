@@ -13,6 +13,7 @@ import { NumericType } from './numeric_type';
 import { BooleanType } from './boolean_type';
 import { BinaryType } from './binary_type';
 import { RangeType } from './range_type';
+import { IpType } from './ip_type';
 
 const typeMapToParametersForm: { [key in DataType]?: ComponentType<any> } = {
   text: TextType,
@@ -21,6 +22,7 @@ const typeMapToParametersForm: { [key in DataType]?: ComponentType<any> } = {
   boolean: BooleanType,
   binary: BinaryType,
   range: RangeType,
+  ip: IpType,
 };
 
 export const getParametersFormForType = (
