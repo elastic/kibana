@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import '../services/telemetry_opt_in.test.mocks';
+import { mockInjectedMetadata } from '../services/telemetry_opt_in.test.mocks';
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { TelemetryForm } from './telemetry_form';
@@ -33,6 +33,8 @@ const buildTelemetryOptInProvider = () => {
       switch (key) {
         case '$http':
           return mockHttp;
+        case 'allowChangingOptInStatus':
+          return true;
         default:
           return null;
       }
@@ -47,7 +49,23 @@ const buildTelemetryOptInProvider = () => {
 };
 
 describe('TelemetryForm', () => {
-  it('renders as expected', () => {
+  it('renders as expected when allows to change optIn status', () => {
+    mockInjectedMetadata({ telemetryOptedIn: null, allowChangingOptInStatus: true });
+
+    expect(shallowWithIntl(
+      <TelemetryForm
+        spacesEnabled={false}
+        query={{ text: '' }}
+        onQueryMatchChange={jest.fn()}
+        telemetryOptInProvider={buildTelemetryOptInProvider()}
+        enableSaving={true}
+      />)
+    ).toMatchSnapshot();
+  });
+
+  it(`doesn't render form when not allowed to change optIn status`, () => {
+    mockInjectedMetadata({ telemetryOptedIn: null, allowChangingOptInStatus: false });
+
     expect(shallowWithIntl(
       <TelemetryForm
         spacesEnabled={false}

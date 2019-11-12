@@ -376,7 +376,6 @@ export const reindexServiceFactory = (
     // Delete the task from ES .tasks index
     const deleteTaskResp = await callCluster('delete', {
       index: '.tasks',
-      type: 'task',
       id: taskId,
     });
 

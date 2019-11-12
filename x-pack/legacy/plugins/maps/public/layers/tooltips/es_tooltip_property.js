@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { buildPhraseFilter } from '@kbn/es-query';
 import { TooltipProperty } from './tooltip_property';
 import _ from 'lodash';
-
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 export class ESTooltipProperty extends TooltipProperty {
 
   constructor(propertyKey, propertyName, rawValue, indexPattern) {
@@ -36,7 +35,7 @@ export class ESTooltipProperty extends TooltipProperty {
 
   async getESFilters() {
     return [
-      buildPhraseFilter(
+      esFilters.buildPhraseFilter(
         this._indexPattern.fields.getByName(this._propertyName),
         this._rawValue,
         this._indexPattern)
