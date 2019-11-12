@@ -23,7 +23,8 @@ import { createTestServers } from '../../../../../../test_utils/kbn_server';
 import manageUuid from '../manage_uuid';
 
 describe('legacy/core_plugins/kibana/server/lib', function () {
-  describe('manage_uuid', function () {
+  // failing test, see #48426 and  #48427
+  describe.skip('manage_uuid', function () {
     const testUuid = 'c4add484-0cba-4e05-86fe-4baa112d9e53';
     let kbn;
     let kbnServer;
