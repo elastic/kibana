@@ -42,7 +42,6 @@ export PARENT_DIR="$parentDir"
 kbnBranch="$(jq -r .branch "$KIBANA_DIR/package.json")"
 export KIBANA_PKG_BRANCH="$kbnBranch"
 
-
 ###
 ### download node
 ###
