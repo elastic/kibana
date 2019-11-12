@@ -18,7 +18,6 @@
  */
 
 import { State } from 'ui/state_management/state';
-import { DataStart } from '../../../data/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
 
 /**
@@ -35,7 +34,15 @@ import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/dat
  * one app to another - to migrate away from that it will become necessary to also write the current
  * state to local storage
  */
-export function syncOnMount(globalState: State, data: DataStart, npData: NpDataStart) {
+export function syncOnMount(
+  globalState: State,
+  {
+    query: {
+      filterManager,
+      timefilter: { timefilter },
+    },
+  }: NpDataStart
+) {
   // pull in global state information from the URL
   globalState.fetch();
   // remember whether there were info in the URL
@@ -43,13 +50,13 @@ export function syncOnMount(globalState: State, data: DataStart, npData: NpDataS
 
   // sync kibana platform state with the angular global state
   if (!globalState.time) {
-    globalState.time = data.timefilter.timefilter.getTime();
+    globalState.time = timefilter.getTime();
   }
   if (!globalState.refreshInterval) {
-    globalState.refreshInterval = data.timefilter.timefilter.getRefreshInterval();
+    globalState.refreshInterval = timefilter.getRefreshInterval();
   }
-  if (!globalState.filters && npData.query.filterManager.getGlobalFilters().length > 0) {
-    globalState.filters = npData.query.filterManager.getGlobalFilters();
+  if (!globalState.filters && filterManager.getGlobalFilters().length > 0) {
+    globalState.filters = filterManager.getGlobalFilters();
   }
   // only inject cross app global state if there is none in the url itself (that takes precedence)
   if (hasGlobalURLState) {

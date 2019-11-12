@@ -134,7 +134,6 @@ export class VisualizePlugin implements Plugin {
           queryFilter: npDataStart.query.filterManager,
           savedObjectsClient,
           savedQueryService: dataStart.search.services.savedQueryService,
-          sessionStorage: new Storage(sessionStorage),
           toastNotifications: contextCore.notifications.toasts,
           uiSettings: contextCore.uiSettings,
           visualizeCapabilities: contextCore.application.capabilities.visualize,

@@ -57,7 +57,6 @@ export interface VisualizeKibanaServices {
   savedObjectsClient: SavedObjectsClientContract;
   savedQueryService: SavedQueryService;
   savedVisualizations: SavedVisualizations;
-  sessionStorage: Storage;
   uiSettings: UiSettingsClientContract;
   visualizeCapabilities: any;
   visualizations: any;

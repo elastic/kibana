@@ -80,8 +80,11 @@ function VisualizeAppController(
     localStorage,
     visualizeCapabilities,
     shareContextMenuExtensions,
-    dataStart: {
-      timefilter: { timefilter },
+    npDataStart: {
+      query: {
+        filterManager,
+        timefilter: { timefilter },
+      },
     },
     toastNotifications,
     chromeLegacy,
@@ -89,12 +92,12 @@ function VisualizeAppController(
     docTitle,
     getBasePath,
     docLinks,
-    queryFilter,
     savedQueryService,
     uiSettings,
   } = getServices();
 
-  new FilterStateManager(globalState, getAppState, queryFilter);
+  new FilterStateManager(globalState, getAppState, filterManager);
+  const queryFilter = filterManager;
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
   // vis is instance of src/legacy/ui/public/vis/vis.js.

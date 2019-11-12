@@ -42,12 +42,12 @@ export function initVisualizeApp(app, deps) {
   initVisualizeAppDirective(app, deps);
 
   app.run(globalState => {
-    syncOnMount(globalState, deps.dataStart, deps.npDataStart);
+    syncOnMount(globalState, deps.npDataStart);
   });
 
   app.run((globalState, $rootScope) => {
     registerTimefilterWithGlobalStateFactory(
-      deps.dataStart.timefilter.timefilter,
+      deps.npDataStart.timefilter.timefilter,
       globalState,
       $rootScope
     );
@@ -83,7 +83,7 @@ export function initVisualizeApp(app, deps) {
         controllerAs: 'listingController',
         resolve: {
           createNewVis: () => false,
-          hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(deps.core, deps.dataStart, $rootScope, kbnUrl),
+          hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(deps.core, deps.npDataStart, $rootScope, kbnUrl),
         },
       })
       .when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
@@ -94,7 +94,7 @@ export function initVisualizeApp(app, deps) {
         controllerAs: 'listingController',
         resolve: {
           createNewVis: () => true,
-          hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(deps.core, deps.dataStart, $rootScope, kbnUrl),
+          hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(deps.core, deps.npDataStart, $rootScope, kbnUrl),
         },
       })
       .when(VisualizeConstants.CREATE_PATH, {
