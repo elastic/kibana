@@ -8871,7 +8871,6 @@
     "xpack.siem.formatted.duration.noDurationTooltip": "期間がありません",
     "xpack.siem.formatted.duration.zeroNanosecondsTooltip": "0ナノ秒",
     "xpack.siem.formattedDuration.tooltipLabel": "生",
-    "xpack.siem.global.addData": "データの投入",
     "xpack.siem.headerPage.pageSubtitle": "前回のイベント: {beat}",
     "xpack.siem.host.details.architectureLabel": "アーキテクチャー",
     "xpack.siem.host.details.firstSeenTitle": "初回の認識",
