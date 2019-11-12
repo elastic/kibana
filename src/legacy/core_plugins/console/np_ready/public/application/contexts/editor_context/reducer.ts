@@ -26,7 +26,7 @@ import { identity } from 'fp-ts/lib/function';
 //   sendCurrentRequestToES,
 //   EsRequestArgs,
 // } from '../legacy/console_editor/send_current_request_to_es';
-import { DevToolsSettings } from '../../../../services';
+import { DevToolsSettings } from '../../../services';
 
 export interface Store {
   ready: boolean;

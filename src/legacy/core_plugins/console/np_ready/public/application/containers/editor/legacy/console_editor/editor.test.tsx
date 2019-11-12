@@ -22,8 +22,8 @@ import { ReactWrapper, mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n/react';
 import * as sinon from 'sinon';
 
-import { EditorContextProvider } from '../../context';
-import { AppContextProvider } from '../../../../contexts';
+import { EditorContextProvider } from '../../../../contexts/editor_context';
+import { ServicesContextProvider } from '../../../../contexts';
 import { Editor } from './editor';
 
 jest.mock('../../../../components/editor_example.tsx', () => {});
@@ -70,11 +70,11 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
     };
     editor = mount(
       <I18nProvider>
-        <AppContextProvider value={mockedAppContextValue}>
+        <ServicesContextProvider value={mockedAppContextValue}>
           <EditorContextProvider settings={{} as any}>
             <Editor />
           </EditorContextProvider>
-        </AppContextProvider>
+        </ServicesContextProvider>
       </I18nProvider>
     );
   });

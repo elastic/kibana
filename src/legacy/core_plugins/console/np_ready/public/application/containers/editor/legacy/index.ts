@@ -18,5 +18,4 @@
  */
 
 export { Editor } from './console_editor';
-export { ConsoleHistory } from './console_history';
 export { getDocumentation, autoIndent } from './console_menu_actions';

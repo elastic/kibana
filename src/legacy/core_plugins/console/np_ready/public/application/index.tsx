@@ -19,10 +19,11 @@
 
 import React from 'react';
 import { NotificationsSetup } from '../../../../../../core/public';
-import { AppContextProvider } from './contexts';
-import { EditorContextProvider } from './containers/editor/context';
+import { ServicesContextProvider } from './contexts';
+import { EditorContextProvider } from './contexts/editor_context';
 import { Main } from './containers';
 import { createStorage, createHistory, createSettings, Settings } from '../services';
+import { RequestContextProvider } from './contexts/request_context';
 
 let settingsRef: Settings;
 export function legacyBackDoorToSettings() {
@@ -47,17 +48,19 @@ export function boot(deps: {
 
   return (
     <I18nContext>
-      <AppContextProvider
+      <ServicesContextProvider
         value={{
           docLinkVersion,
           services: { storage, history, settings, notifications },
           ResizeChecker,
         }}
       >
-        <EditorContextProvider settings={settings.toJSON()}>
-          <Main />
-        </EditorContextProvider>
-      </AppContextProvider>
+        <RequestContextProvider>
+          <EditorContextProvider settings={settings.toJSON()}>
+            <Main />
+          </EditorContextProvider>
+        </RequestContextProvider>
+      </ServicesContextProvider>
     </I18nContext>
   );
 }

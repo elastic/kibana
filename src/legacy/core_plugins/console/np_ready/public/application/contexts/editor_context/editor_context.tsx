@@ -19,8 +19,8 @@
 
 import React, { createContext, Dispatch, useReducer } from 'react';
 import { Action, reducer, Store, initialValue } from './reducer';
-import { DevToolsSettings } from '../../../../services';
-import { createUseContext } from '../../../contexts/create_use_context';
+import { DevToolsSettings } from '../../../services';
+import { createUseContext } from '../create_use_context';
 
 const EditorReadContext = createContext<Store>(null as any);
 const EditorActionContext = createContext<Dispatch<Action>>(null as any);

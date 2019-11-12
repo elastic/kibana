@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import $ from 'jquery';
 
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useAppContext } from '../../../../contexts';
+import { useServicesContext } from '../../../../contexts';
 import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
 import { ConsoleMenu } from '../../../../components';
 
@@ -37,7 +37,7 @@ import { initializeEditor } from '../../../../../../../public/quarantined/src/in
 // @ts-ignore
 import mappings from '../../../../../../../public/quarantined/src/mappings';
 
-import { useEditorActionContext, useEditorReadContext } from '../../context';
+import { useEditorActionContext, useEditorReadContext } from '../../../../contexts/editor_context';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { loadRemoteState } from './load_remote_editor_state';
 
@@ -65,7 +65,7 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
     services: { history, notifications },
     ResizeChecker,
     docLinkVersion,
-  } = useAppContext();
+  } = useServicesContext();
 
   const { settings } = useEditorReadContext();
   const dispatch = useEditorActionContext();

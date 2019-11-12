@@ -21,12 +21,13 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
-import { Editor, ConsoleHistory } from '../editor';
+import { ConsoleHistory } from '../console_history';
+import { Editor } from '../editor';
 import { Settings } from '../settings';
 
 import { TopNavMenu, WelcomePanel, HelpPanel } from '../../components';
 
-import { useAppContext } from '../../contexts';
+import { useServicesContext } from '../../contexts';
 
 import { getTopNavConfig } from './get_top_nav';
 import { useEditorReadContext } from '../editor';
@@ -34,7 +35,7 @@ import { useEditorReadContext } from '../editor';
 export function Main() {
   const {
     services: { storage },
-  } = useAppContext();
+  } = useServicesContext();
 
   const { editorsReady } = useEditorReadContext();
 

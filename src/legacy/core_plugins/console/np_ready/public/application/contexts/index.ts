@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { useAppContext, AppContextProvider } from './services_context';
+export { useServicesContext, ServicesContextProvider } from './services_context';

@@ -24,7 +24,7 @@ import * as store from '../stores/request';
 const RequestReadContext = createContext<store.Store>(null as any);
 const RequestActionContext = createContext<Dispatch<store.Actions>>(null as any);
 
-export function RequestContext({ children }: { children: React.ReactNode }) {
+export function RequestContextProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(store.reducer, undefined as any);
   return (
     <RequestReadContext.Provider value={state}>

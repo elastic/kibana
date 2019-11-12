@@ -24,7 +24,7 @@ import { Panel, PanelsContainer } from '../../components/split_panel';
 import { Editor as EditorUI } from './legacy/console_editor';
 import { Output } from './output';
 import { StorageKeys } from '../../../services';
-import { useAppContext } from '../../contexts';
+import { useServicesContext } from '../../contexts';
 
 const INITIAL_PANEL_WIDTH = 50;
 const PANEL_MIN_WIDTH = '100px';
@@ -32,7 +32,7 @@ const PANEL_MIN_WIDTH = '100px';
 export const Editor = () => {
   const {
     services: { storage },
-  } = useAppContext();
+  } = useServicesContext();
 
   const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [
     INITIAL_PANEL_WIDTH,

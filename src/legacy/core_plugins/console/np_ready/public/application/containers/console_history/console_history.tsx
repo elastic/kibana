@@ -32,9 +32,9 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-import { useAppContext } from '../../../../contexts';
+import { useServicesContext } from '../../contexts';
 import { HistoryViewer } from './history_viewer';
-import { useEditorActionContext, useEditorReadContext } from '../../context';
+import { useEditorActionContext, useEditorReadContext } from '../../contexts/editor_context';
 
 interface Props {
   close: () => void;
@@ -46,7 +46,7 @@ export function ConsoleHistory({ close }: Props) {
   const {
     services: { history },
     ResizeChecker,
-  } = useAppContext();
+  } = useServicesContext();
 
   const dispatch = useEditorActionContext();
   const { settings: readOnlySettings } = useEditorReadContext();
