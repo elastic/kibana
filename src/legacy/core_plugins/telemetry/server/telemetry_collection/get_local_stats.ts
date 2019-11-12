@@ -63,7 +63,6 @@ export const getLocalStats: StatsGetter = async (clustersDetails, config) => {
         getClusterStats(callCluster), // cluster stats (not to be confused with cluster _state_)
         getKibana(server, callCluster),
       ]);
-
       return handleLocalStats(server, clusterInfo, clusterStats, kibana);
     })
   );

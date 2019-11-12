@@ -36,5 +36,5 @@ export async function getClusterStats(callCluster: CallCluster) {
  */
 export const getClusterUuids: ClusterUuidsGetter = async ({ callCluster }) => {
   const result = await getClusterStats(callCluster);
-  return [result];
+  return [{ clusterUuid: result }];
 };

@@ -13,6 +13,7 @@ import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import {
   ClusterUuidsGetter,
   StatsCollectionConfig,
+  ClusterDetails,
 } from '../../../../../../src/legacy/core_plugins/telemetry/server/collection_manager';
 
 /**
@@ -55,8 +56,10 @@ export function fetchClusterUuids({ server, callCluster, start, end }: StatsColl
  * @param {Object} response The aggregation response
  * @return {Array} Strings; each representing a Cluster's UUID.
  */
-export function handleClusterUuidsResponse(response: any): string[] {
-  const uuidBuckets = get(response, 'aggregations.cluster_uuids.buckets', []);
+export function handleClusterUuidsResponse(response: any): ClusterDetails[] {
+  const uuidBuckets: any[] = get(response, 'aggregations.cluster_uuids.buckets', []);
 
-  return uuidBuckets.map(uuidBucket => uuidBucket.key);
+  return uuidBuckets.map(uuidBucket => ({
+    clusterUuid: uuidBucket.key as string,
+  }));
 }

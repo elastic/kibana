@@ -25,7 +25,9 @@ import { getHighLevelStats } from './get_high_level_stats';
  * @param {Date} end The ending range to request data
  * @return {Promise} The array of clusters joined with the Kibana and Logstash instances.
  */
-export async function getAllStats(clusterUuids, { server, callCluster, start, end }) {
+export async function getAllStats(clustersDetails, { server, callCluster, start, end }) {
+  const clusterUuids = clustersDetails.map(clusterDetails => clusterDetails.clusterUuid);
+
   const [esClusters, kibana, logstash, beats] = await Promise.all([
     getElasticsearchStats(server, callCluster, clusterUuids),           // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
     getKibanaStats(server, callCluster, clusterUuids, start, end),      // stack_stats.kibana

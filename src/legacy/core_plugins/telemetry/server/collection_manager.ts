@@ -35,7 +35,7 @@ export type UnencryptedStatsGetterConfig = { unencrypted: true } & {
 };
 
 export interface ClusterDetails {
-  cluster_uuid: string;
+  clusterUuid: string;
 }
 
 export interface StatsCollectionConfig {
@@ -91,7 +91,7 @@ export class TelemetryCollectionManager {
         throw Error('Cluser UUIds method is not set.');
       }
 
-      this.collections.push({
+      this.collections.unshift({
         statsGetter,
         clusterUuidsGetter,
         esCluster,
