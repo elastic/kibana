@@ -174,6 +174,7 @@ describe('TaskManager', () => {
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,
       beforeRun: async (runOpts: any) => runOpts,
+      beforeMarkRunning: async (runOpts: any) => runOpts,
     };
     expect(() => client.addMiddleware(middleware)).not.toThrow();
   });
@@ -183,6 +184,7 @@ describe('TaskManager', () => {
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,
       beforeRun: async (runOpts: any) => runOpts,
+      beforeMarkRunning: async (runOpts: any) => runOpts,
     };
 
     client.start();
@@ -241,7 +243,10 @@ describe('TaskManager', () => {
 
       claimAvailableTasks(claim, 10, logger);
 
-      sinon.assert.calledWithMatch(logger.warn, /inline scripts/);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn.mock.calls[0][0]).toMatchInlineSnapshot(
+        `"Task Manager cannot operate when inline scripts are disabled in Elasticsearch"`
+      );
     });
   });
 });
