@@ -29,36 +29,36 @@ export const NodeAvailableWarning: FC = () => {
         color="warning"
         iconType="alert"
       >
-        <p>
+        <div>
           <FormattedMessage
             id="xpack.ml.jobsList.nodeAvailableWarning.noMLNodesAvailableDescription"
             defaultMessage="There are no ML nodes available."
           />
-          <br />
+        </div>
+        <div>
           <FormattedMessage
             id="xpack.ml.jobsList.nodeAvailableWarning.unavailableCreateOrRunJobsDescription"
             defaultMessage="You will not be able to create or run jobs."
           />
-          {isCloud && id !== null && (
-            <Fragment>
-              <br />
-              <FormattedMessage
-                id="xpack.ml.jobsList.nodeAvailableWarning.linkToCloudDescription"
-                defaultMessage="Please edit your {link}. You may enable a free 1GB machine learning node or expand your existing ML configuration."
-                values={{
-                  link: (
-                    <EuiLink href={`https://cloud.elastic.co/deployments?q=${id}`}>
-                      <FormattedMessage
-                        id="xpack.ml.jobsList.nodeAvailableWarning.linkToCloud.hereLinkText"
-                        defaultMessage="Elastic Cloud deployment"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </Fragment>
-          )}
-        </p>
+        </div>
+        {isCloud && id !== null && (
+          <div>
+            <FormattedMessage
+              id="xpack.ml.jobsList.nodeAvailableWarning.linkToCloudDescription"
+              defaultMessage="Please edit your {link}. You may enable a free 1GB machine learning node or expand your existing ML configuration."
+              values={{
+                link: (
+                  <EuiLink href={`https://cloud.elastic.co/deployments?q=${id}`}>
+                    <FormattedMessage
+                      id="xpack.ml.jobsList.nodeAvailableWarning.linkToCloud.hereLinkText"
+                      defaultMessage="Elastic Cloud deployment"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </div>
+        )}
       </EuiCallOut>
       <EuiSpacer size="m" />
     </Fragment>

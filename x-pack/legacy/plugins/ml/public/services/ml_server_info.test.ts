@@ -33,10 +33,9 @@ describe('ml_server_info', () => {
   });
 
   describe('cloud information', () => {
-    it('can get could deployment id', async done => {
+    it('can get could deployment id', () => {
       expect(isCloud()).toBe(true);
       expect(cloudDeploymentId()).toBe('85d666f3350c469e8c3242d76a7f459c');
-      done();
     });
   });
 
