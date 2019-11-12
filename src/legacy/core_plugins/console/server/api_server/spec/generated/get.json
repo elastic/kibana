@@ -21,8 +21,7 @@
       "GET"
     ],
     "patterns": [
-      "{indices}/_doc/{id}",
-      "{indices}/{type}/{id}"
+      "{indices}/_doc/{id}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-get.html"
   }

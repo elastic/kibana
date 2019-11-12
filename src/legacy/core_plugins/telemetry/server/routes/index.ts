@@ -27,6 +27,6 @@ interface RegisterRoutesParams {
 }
 
 export function registerRoutes({ core, currentKibanaVersion }: RegisterRoutesParams) {
-  registerOptInRoutes({ core, currentKibanaVersion });
   registerTelemetryDataRoutes(core);
+  registerOptInRoutes({ core, currentKibanaVersion });
 }
