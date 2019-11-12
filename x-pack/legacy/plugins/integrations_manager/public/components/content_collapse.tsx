@@ -58,10 +58,12 @@ export const ContentCollapse = ({ children }: { children: React.ReactNode }) => 
   const collapsedHeight = 360;
 
   // if content is too small, don't collapse
-  useLayoutEffect(() =>
-    contentEl.current && contentEl.current.clientHeight < collapsedHeight
-      ? setCollapsible(false)
-      : setHeight(collapsedHeight)
+  useLayoutEffect(
+    () =>
+      contentEl.current && contentEl.current.clientHeight < collapsedHeight
+        ? setCollapsible(false)
+        : setHeight(collapsedHeight),
+    []
   );
 
   const clickOpen = useCallback(() => {
