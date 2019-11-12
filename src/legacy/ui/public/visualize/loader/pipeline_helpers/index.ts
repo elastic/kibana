@@ -18,4 +18,3 @@
  */
 
 export { buildPipeline } from './build_pipeline';
-export { runPipeline } from './run_pipeline';

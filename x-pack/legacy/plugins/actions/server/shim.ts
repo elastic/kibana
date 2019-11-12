@@ -42,7 +42,7 @@ export interface KibanaConfig {
  */
 export type TaskManagerStartContract = Pick<TaskManager, 'schedule' | 'fetch' | 'remove'>;
 export type XPackMainPluginSetupContract = Pick<XPackMainPlugin, 'registerFeature'>;
-export type SecurityPluginSetupContract = Pick<SecurityPlugin, 'config' | 'registerLegacyAPI'>;
+export type SecurityPluginSetupContract = Pick<SecurityPlugin, '__legacyCompat'>;
 export type SecurityPluginStartContract = Pick<SecurityPlugin, 'authc'>;
 export type TaskManagerSetupContract = Pick<
   TaskManager,
