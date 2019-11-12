@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PLUGIN = {
-  APP_ROOT_ID: 'react-uptime-root',
-  ID: 'uptime',
-  ROUTER_BASE_NAME: '/app/uptime#',
-  LOCAL_STORAGE_KEY: 'xpack.uptime',
-};
+/**
+ *  File data visualizer modes.
+ */
+export enum MODE {
+  READ,
+  IMPORT,
+}

@@ -6,6 +6,6 @@
     "patterns": [
       "{indices}/_ccr/forget_follower"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-post-forget-follower.html"
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current"
   }
 }
