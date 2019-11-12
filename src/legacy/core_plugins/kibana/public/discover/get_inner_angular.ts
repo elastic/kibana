@@ -79,8 +79,17 @@ import { IndexPatterns } from '../../../data/public/index_patterns/index_pattern
 // @ts-ignore
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationStart } from '../../../navigation/public';
+import { createDocTableDirective } from './angular/doc_table/doc_table';
+import { createTableHeaderDirective } from './angular/doc_table/components/table_header';
+import {
+  createToolBarPagerButtonsDirective,
+  createToolBarPagerTextDirective,
+} from './angular/doc_table/components/pager';
+import { createTableRowDirective } from './angular/doc_table/components/table_row';
+import { createPagerFactory } from './angular/doc_table/lib/pager/pager_factory';
+import { createInfiniteScrollDirective } from './angular/doc_table/infinite_scroll';
+import { createDocViewerDirective } from './angular/doc_viewer';
 
-export const moduleName = 'app/discover';
 const thirdPartyAngularDependencies = [
   'ngSanitize',
   'ngRoute',
@@ -89,10 +98,17 @@ const thirdPartyAngularDependencies = [
   'elasticsearch',
 ];
 
+export const moduleName = 'app/discover';
+
 export function getAngularModule(core: CoreStart, deps: any) {
-  const discoverUiModule = getInnerAngular(core, deps.navigation);
+  const discoverUiModule = getInnerAngular('app/discover', core, deps.navigation);
   configureAppAngularModule(discoverUiModule, core as LegacyCoreStart, true);
   setAngularModule(discoverUiModule);
+}
+
+export function getAngularModuleEmbeddable(name: string, core: CoreStart, deps: any) {
+  const discoverUiModule = getInnerAngular(name, core, deps.navigation, true);
+  configureAppAngularModule(discoverUiModule, core as LegacyCoreStart, true);
 }
 
 export const mainTemplate = (basePath: string) => `<div style="height: 100%">
@@ -101,7 +117,12 @@ export const mainTemplate = (basePath: string) => `<div style="height: 100%">
 </div>
 `;
 
-export function getInnerAngular(core: CoreStart, navigation: NavigationStart) {
+export function getInnerAngular(
+  name = 'app/discover',
+  core: CoreStart,
+  navigation: NavigationStart,
+  embeddable = false
+) {
   createLocalI18nModule();
   createLocalPrivateModule();
   createLocalPromiseModule();
@@ -114,9 +135,11 @@ export function getInnerAngular(core: CoreStart, navigation: NavigationStart) {
   createLocalStorageModule();
   createElasticSearchModule();
   createIndexPatternsModule();
+  createPagerFactoryModule();
+  createDocTableModule();
 
   return angular
-    .module(moduleName, [
+    .module(name, [
       ...thirdPartyAngularDependencies,
       'discoverI18n',
       'discoverPrivate',
@@ -127,6 +150,8 @@ export function getInnerAngular(core: CoreStart, navigation: NavigationStart) {
       'discoverLocalStorageProvider',
       'discoverIndexPatterns',
       'discoverEs',
+      'discoverDocTable',
+      'discoverPagerFactory',
     ])
     .config(watchMultiDecorator)
     .run(registerListenEventListener)
@@ -257,4 +282,27 @@ function createElasticSearchModule() {
 
 function createIndexPatternsModule() {
   angular.module('discoverIndexPatterns', []).service('indexPatterns', IndexPatterns);
+}
+
+function createPagerFactoryModule() {
+  angular.module('discoverPagerFactory', []).factory('pagerFactory', createPagerFactory);
+}
+
+function createDocTableModule() {
+  angular
+    .module('discoverDocTable', [
+      'discoverKbnUrl',
+      'discoverConfig',
+      'discoverAppState',
+      'discoverPagerFactory',
+      'react',
+    ])
+    .directive('docTable', createDocTableDirective)
+    .directive('kbnTableHeader', createTableHeaderDirective)
+    .directive('toolBarPagerText', createToolBarPagerTextDirective)
+    .directive('toolBarPagerText', createToolBarPagerTextDirective)
+    .directive('kbnTableRow', createTableRowDirective)
+    .directive('toolBarPagerButtons', createToolBarPagerButtonsDirective)
+    .directive('kbnInfiniteScroll', createInfiniteScrollDirective)
+    .directive('docViewer', createDocViewerDirective);
 }

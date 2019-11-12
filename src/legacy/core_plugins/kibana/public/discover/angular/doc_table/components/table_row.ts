@@ -19,32 +19,30 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
+// @ts-ignore
 import rison from 'rison-node';
+// @ts-ignore
+import { disableFilter } from '@kbn/es-query';
 import '../../doc_viewer';
+// @ts-ignore
 import { noWhiteSpace } from '../../../../../common/utils/no_white_space';
 
 import openRowHtml from './table_row/open.html';
 import detailsHtml from './table_row/details.html';
-import { getAngularModule } from '../../../kibana_services';
-import { disableFilter } from '@kbn/es-query';
+
 import { dispatchRenderComplete } from '../../../../../../../../plugins/kibana_utils/public';
 import cellTemplateHtml from '../components/table_row/cell.html';
 import truncateByHeightTemplateHtml from '../components/table_row/truncate_by_height.html';
 
-const module = getAngularModule();
-
 // guesstimate at the minimum number of chars wide cells in the table should be
 const MIN_LINE_LENGTH = 20;
 
-/**
- * kbnTableRow directive
- *
- * Display a row in the table
- * ```
- * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
- * ```
- */
-module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl, config) {
+export function createTableRowDirective(
+  $compile: any,
+  $httpParamSerializer: any,
+  kbnUrl: any,
+  config: any
+) {
   const cellTemplate = _.template(noWhiteSpace(cellTemplateHtml));
   const truncateByHeightTemplate = _.template(noWhiteSpace(truncateByHeightTemplateHtml));
 
@@ -59,18 +57,18 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
       onAddColumn: '=?',
       onRemoveColumn: '=?',
     },
-    link: function ($scope, $el) {
+    link: ($scope: any, $el: any) => {
       $el.after('<tr data-test-subj="docTableDetailsRow" class="kbnDocTableDetails__row">');
       $el.empty();
 
       // when we compile the details, we use this $scope
-      let $detailsScope;
+      let $detailsScope: any;
 
       // when we compile the toggle button in the summary, we use this $scope
       let $toggleScope;
 
       // toggle display of the rows details, a full list of the fields from each row
-      $scope.toggleRow = function () {
+      $scope.toggleRow = () => {
         const $detailsTr = $el.next();
 
         $scope.open = !$scope.open;
@@ -99,11 +97,11 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
         $compile($detailsTr)($detailsScope);
       };
 
-      $scope.$watchMulti(['indexPattern.timeFieldName', 'row.highlight', '[]columns'], function () {
-        createSummaryRow($scope.row, $scope.row._id);
+      $scope.$watchMulti(['indexPattern.timeFieldName', 'row.highlight', '[]columns'], () => {
+        createSummaryRow($scope.row);
       });
 
-      $scope.inlineFilter = function inlineFilter($event, type) {
+      $scope.inlineFilter = function inlineFilter($event: any, type: string) {
         const column = $($event.target).data().column;
         const field = $scope.indexPattern.fields.getByName(column);
         $scope.filter(field, $scope.flattenedRow[column], type);
@@ -124,7 +122,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
       };
 
       // create a tr element that lists the value for each *column*
-      function createSummaryRow(row) {
+      function createSummaryRow(row: any) {
         const indexPattern = $scope.indexPattern;
         $scope.flattenedRow = indexPattern.flattenHit(row);
 
@@ -145,7 +143,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
           );
         }
 
-        $scope.columns.forEach(function (column) {
+        $scope.columns.forEach(function(column: any) {
           const isFilterable =
             $scope.flattenedRow[column] !== undefined &&
             mapping(column) &&
@@ -164,11 +162,11 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
         });
 
         let $cells = $el.children();
-        newHtmls.forEach(function (html, i) {
+        newHtmls.forEach(function(html, i) {
           const $cell = $cells.eq(i);
           if ($cell.data('discover:html') === html) return;
 
-          const reuse = _.find($cells.slice(i + 1), function (cell) {
+          const reuse = _.find($cells.slice(i + 1), function(cell: any) {
             return $.data(cell, 'discover:html') === html;
           });
 
@@ -202,7 +200,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
       /**
        * Fill an element with the value of a field
        */
-      function _displayField(row, fieldName, truncate) {
+      function _displayField(row: any, fieldName: string, truncate = false) {
         const indexPattern = $scope.indexPattern;
         const text = indexPattern.formatField(row, fieldName);
 
@@ -216,4 +214,4 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
       }
     },
   };
-});
+}

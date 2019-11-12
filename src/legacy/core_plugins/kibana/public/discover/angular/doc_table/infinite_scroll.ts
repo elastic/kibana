@@ -18,30 +18,27 @@
  */
 
 import $ from 'jquery';
-import { getAngularModule } from '../../kibana_services';
 
-const module = getAngularModule();
-
-module.directive('kbnInfiniteScroll', function () {
+export function createInfiniteScrollDirective() {
   return {
     restrict: 'E',
     scope: {
-      more: '='
+      more: '=',
     },
-    link: function ($scope, $element) {
+    link: ($scope: any, $element: any) => {
       const $window = $(window);
-      let checkTimer;
+      let checkTimer: any;
 
       function onScroll() {
         if (!$scope.more) return;
 
-        const winHeight = $window.height();
-        const winBottom = winHeight + $window.scrollTop();
+        const winHeight = Number($window.height());
+        const winBottom = Number(winHeight) + Number($window.scrollTop());
         const elTop = $element.offset().top;
         const remaining = elTop - winBottom;
 
-        if (remaining <= winHeight * 0.50) {
-          $scope[$scope.$$phase ? '$eval' : '$apply'](function () {
+        if (remaining <= winHeight * 0.5) {
+          $scope[$scope.$$phase ? '$eval' : '$apply'](function() {
             $scope.more();
           });
         }
@@ -49,18 +46,18 @@ module.directive('kbnInfiniteScroll', function () {
 
       function scheduleCheck() {
         if (checkTimer) return;
-        checkTimer = setTimeout(function () {
+        checkTimer = setTimeout(function() {
           checkTimer = null;
           onScroll();
         }, 50);
       }
 
       $window.on('scroll', scheduleCheck);
-      $scope.$on('$destroy', function () {
+      $scope.$on('$destroy', function() {
         clearTimeout(checkTimer);
         $window.off('scroll', scheduleCheck);
       });
       scheduleCheck();
-    }
+    },
   };
-});
+}

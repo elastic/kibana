@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { getServices } from '../../../../kibana_services';
+import { ToolBarPagerText } from './tool_bar_pager_text';
+import { ToolBarPagerButtons } from './tool_bar_pager_buttons';
 
-import { getAngularModule } from '../../../../kibana_services';
-import { Pager } from './pager';
+const { wrapInI18nContext } = getServices();
 
-const app = getAngularModule();
+export function createToolBarPagerTextDirective(reactDirective: any) {
+  return reactDirective(wrapInI18nContext(ToolBarPagerText));
+}
 
-app.factory('pagerFactory', () => {
-  return {
-    create(...args) {
-      return new Pager(...args);
-    }
-  };
-});
+export function createToolBarPagerButtonsDirective(reactDirective: any) {
+  return reactDirective(wrapInI18nContext(ToolBarPagerButtons));
+}

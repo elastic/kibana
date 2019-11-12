@@ -17,10 +17,9 @@
  * under the License.
  */
 import { wrapInI18nContext } from 'ui/i18n';
-import { getAngularModule } from '../../../kibana_services';
 import { TableHeader } from './table_header/table_header';
 
-getAngularModule().directive('kbnTableHeader', function(reactDirective: any, config: any) {
+export function createTableHeaderDirective(reactDirective: any, config: any) {
   return reactDirective(
     wrapInI18nContext(TableHeader),
     [
@@ -39,4 +38,4 @@ getAngularModule().directive('kbnTableHeader', function(reactDirective: any, con
       isShortDots: config.get('shortDots:enable'),
     }
   );
-});
+}

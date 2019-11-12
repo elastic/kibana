@@ -39,10 +39,3 @@ function mountDiscoverApp(appBasePath: string, element: HTMLElement) {
   element.appendChild(mountpoint);
   return $injector;
 }
-
-export function getEmbeddableInjector() {
-  const mountpoint = document.createElement('div');
-  // eslint-disable-next-line
-  mountpoint.innerHTML = '<div></div>';
-  return angular.bootstrap(mountpoint, [moduleName]);
-}

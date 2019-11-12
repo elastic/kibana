@@ -18,18 +18,18 @@
  */
 import { i18n } from '@kbn/i18n';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
-import '../angular/doc_table';
+import { IInjector } from 'ui/chrome';
 import { getServices } from '../kibana_services';
 import {
   EmbeddableFactory,
   ErrorEmbeddable,
   Container,
 } from '../../../../../../plugins/embeddable/public';
+
 import { TimeRange } from '../../../../../../plugins/data/public';
 import { SearchEmbeddable } from './search_embeddable';
 import { SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
-import { getEmbeddableInjector } from '../render_app';
 
 export class SearchEmbeddableFactory extends EmbeddableFactory<
   SearchInput,
@@ -37,8 +37,9 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
   SearchEmbeddable
 > {
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
+  private $injector: IInjector | null;
 
-  constructor(private readonly executeTriggerActions: TExecuteTriggerActions) {
+  constructor(private readonly executeTriggerActions: TExecuteTriggerActions, $injector: any) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('kbn.discover.savedSearch.savedObjectName', {
@@ -48,6 +49,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
         getIconForSavedObject: () => 'search',
       },
     });
+    this.$injector = $injector;
   }
 
   public isEditable() {
@@ -69,7 +71,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
     input: Partial<SearchInput> & { id: string; timeRange: TimeRange },
     parent?: Container
   ): Promise<SearchEmbeddable | ErrorEmbeddable> {
-    const $injector = getEmbeddableInjector();
+    const $injector = this.$injector as IInjector;
 
     const $compile = $injector.get<ng.ICompileService>('$compile');
     const $rootScope = $injector.get<ng.IRootScopeService>('$rootScope');

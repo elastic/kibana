@@ -77,6 +77,7 @@ import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
 import { start as data } from '../../../../data/public/legacy';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
+import { registerTimefilterWithGlobalStateFactory } from '../../../../../ui/public/timefilter/setup_router';
 
 const { savedQueryService } = data.search.services;
 
@@ -87,6 +88,14 @@ const fetchStatuses = {
 };
 
 const app = getAngularModule();
+app.run((globalState, $rootScope) => {
+  registerTimefilterWithGlobalStateFactory(
+    timefilter,
+    globalState,
+    $rootScope
+  );
+});
+
 app.config($routeProvider => {
   const defaults = {
     requireDefaultIndex: true,

@@ -17,11 +17,9 @@
  * under the License.
  */
 
-// @ts-ignore
-import { getAngularModule } from '../kibana_services';
 import { DocViewer } from '../doc_viewer/doc_viewer';
 
-getAngularModule().directive('docViewer', (reactDirective: any) => {
+export function createDocViewerDirective(reactDirective: any) {
   return reactDirective(
     DocViewer,
     [
@@ -44,4 +42,4 @@ getAngularModule().directive('docViewer', (reactDirective: any) => {
       },
     }
   );
-});
+}

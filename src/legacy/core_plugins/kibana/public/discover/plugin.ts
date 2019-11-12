@@ -18,6 +18,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
+import angular from 'angular';
 import { IUiActionsStart } from 'src/plugins/ui_actions/public';
 import { registerFeature } from './helpers/register_feature';
 import './kibana_services';
@@ -25,9 +26,10 @@ import {
   Start as EmbeddableStart,
   Setup as EmbeddableSetup,
 } from '../../../../../plugins/embeddable/public';
+
 import { LocalApplicationService } from '../local_application_service';
 import { getGlobalAngular } from './get_global_angular';
-import { getAngularModule } from './get_inner_angular';
+import { getAngularModule, getAngularModuleEmbeddable } from './get_inner_angular';
 import { setServices } from './kibana_services';
 import { NavigationStart } from '../../../navigation/public';
 
@@ -68,7 +70,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
     this.bootstrapAngular(core, plugins);
-    this.registerEmbeddable(plugins);
+    this.registerEmbeddable(core, plugins);
   }
 
   stop() {}
@@ -82,9 +84,17 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
     }
   }
 
-  private async registerEmbeddable(plugins: DiscoverStartPlugins) {
+  private async registerEmbeddable(core: CoreStart, plugins: DiscoverStartPlugins) {
+    const name = 'app/discoverEmbeddable';
+    getAngularModuleEmbeddable(name, core, plugins);
     const { SearchEmbeddableFactory } = await import('./embeddable');
-    const factory = new SearchEmbeddableFactory(plugins.uiActions.executeTriggerActions);
+
+    const mountpoint = document.createElement('div');
+    // eslint-disable-next-line
+    mountpoint.innerHTML = '<div></div>';
+    const injector = angular.bootstrap(mountpoint, [name]);
+
+    const factory = new SearchEmbeddableFactory(plugins.uiActions.executeTriggerActions, injector);
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 }
