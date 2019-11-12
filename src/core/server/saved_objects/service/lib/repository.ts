@@ -765,10 +765,11 @@ export class SavedObjectsRepository {
     options: SavedObjectsBulkUpdateOptions = {}
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
     const time = this._getCurrentTime();
-    const bulkUpdateParams: object[] = [];
+    const { namespace } = options;
 
-    let requestIndexCounter = 0;
-    const expectedResults: Array<Either<any, any>> = objects.map(object => {
+    let bulkGetRequestIndexCounter = 0;
+    const bulkGetDocs: object[] = [];
+    const expectedBulkGetResults: Array<Either<any, any>> = objects.map(object => {
       const { type, id } = object;
 
       if (!this._allowedTypes.includes(type)) {
@@ -783,7 +784,6 @@ export class SavedObjectsRepository {
       }
 
       const { attributes, references, version } = object;
-      const { namespace } = options;
 
       const documentToSave = {
         [type]: attributes,
@@ -798,26 +798,71 @@ export class SavedObjectsRepository {
       const expectedResult = {
         type,
         id,
-        esRequestIndex: requestIndexCounter++,
+        version,
+        esRequestIndex: bulkGetRequestIndexCounter++,
         documentToSave,
       };
 
-      bulkUpdateParams.push(
-        {
-          update: {
-            _id: this._serializer.generateRawId(namespace, type, id),
-            _index: this.getIndexForType(type),
-            ...(version && decodeRequestVersion(version)),
-          },
-        },
-        { doc: documentToSave }
-      );
+      bulkGetDocs.push({
+        _id: this._serializer.generateRawId(namespace, type, id),
+        _index: this.getIndexForType(type),
+        _source: ['type', 'namespace'],
+      });
 
       return { tag: 'Right' as 'Right', value: expectedResult };
     });
 
+    const bulkGetResponse = await this._callCluster('mget', {
+      body: {
+        docs: bulkGetDocs,
+      },
+    });
+
+    let bulkUpdateRequestIndexCounter = 0;
+    const bulkUpdateParams: object[] = [];
+    const expectedBulkUpdateResults: Array<Either<any, any>> = expectedBulkGetResults.map(
+      expectedBulkGetResult => {
+        if (isLeft(expectedBulkGetResult)) {
+          return expectedBulkGetResult;
+        }
+
+        const { id, type, version, documentToSave } = expectedBulkGetResult.value;
+        const actualResult = bulkGetResponse.docs[expectedBulkGetResult.value.esRequestIndex];
+        if (!actualResult.found || !this._rawInNamespace(actualResult, namespace)) {
+          return {
+            tag: 'Left' as 'Left',
+            error: {
+              id,
+              type,
+              error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload,
+            },
+          };
+        }
+
+        const expectedResult = {
+          type,
+          id,
+          esRequestIndex: bulkUpdateRequestIndexCounter++,
+          documentToSave: expectedBulkGetResult.value.documentToSave,
+        };
+
+        bulkUpdateParams.push(
+          {
+            update: {
+              _id: this._serializer.generateRawId(namespace, type, id),
+              _index: this.getIndexForType(type),
+              ...(version && decodeRequestVersion(version)),
+            },
+          },
+          { doc: documentToSave }
+        );
+
+        return { tag: 'Right' as 'Right', value: expectedResult };
+      }
+    );
+
     const { refresh = DEFAULT_REFRESH_SETTING } = options;
-    const esResponse = bulkUpdateParams.length
+    const bulkUpdateResponse = bulkUpdateParams.length
       ? await this._writeToCluster('bulk', {
           refresh,
           body: bulkUpdateParams,
@@ -825,13 +870,13 @@ export class SavedObjectsRepository {
       : {};
 
     return {
-      saved_objects: expectedResults.map(expectedResult => {
+      saved_objects: expectedBulkUpdateResults.map(expectedResult => {
         if (isLeft(expectedResult)) {
           return expectedResult.error;
         }
 
         const { type, id, documentToSave, esRequestIndex } = expectedResult.value;
-        const response = esResponse.items[esRequestIndex];
+        const response = bulkUpdateResponse.items[esRequestIndex];
         const { error, _seq_no: seqNo, _primary_term: primaryTerm } = Object.values(
           response
         )[0] as any;
