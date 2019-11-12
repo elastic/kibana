@@ -92,7 +92,7 @@ const telemetry = (kibana: any) => {
       },
       async replaceInjectedVars(originalInjectedVars: any, request: any) {
         const telemetryInjectedVars = await replaceTelemetryInjectedVars(request);
-        return Object.assign(originalInjectedVars, telemetryInjectedVars);
+        return Object.assign({}, originalInjectedVars, telemetryInjectedVars);
       },
       injectDefaultVars(server: Server) {
         const config = server.config();
