@@ -25,23 +25,29 @@ import { keyCodes } from '@elastic/eui';
 import { Vis, VisState } from 'ui/vis';
 import { PersistedState } from 'ui/persisted_state';
 import { DefaultEditorNavBar, OptionTab } from './navbar';
-import { setStateParamValue, EditorAction } from '../../state/actions';
+import { setStateParamValue, EditorAction, SetValidity, SetTouched } from '../../state';
 import { AggGroupNames } from '../../agg_groups';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
 
 interface DefaultEditorSideBarProps {
-  dispatch: React.Dispatch<EditorAction>;
   applyChanges(): void;
+  dispatch: React.Dispatch<EditorAction>;
+  formIsTouched: boolean;
   optionTabs: OptionTab[];
+  setTouched: SetTouched;
+  setValidity: SetValidity;
   state: VisState;
   uiState: PersistedState;
   vis: Vis;
 }
 
 function DefaultEditorSideBar({
-  dispatch,
   applyChanges,
+  dispatch,
+  formIsTouched,
   optionTabs,
+  setTouched,
+  setValidity,
   state,
   uiState,
   vis,
@@ -57,8 +63,9 @@ function DefaultEditorSideBar({
     responseAggs,
   ]);
 
-  const setValidity = () => {};
-  const setTouched = () => {};
+  const setStateValidity = useCallback((value: boolean) => {
+    setValidity('visOptions', value);
+  }, []);
 
   const setStateValue: DefaultEditorAggCommonProps['setStateParamValue'] = useCallback(
     (paramName, value) => {
@@ -85,6 +92,7 @@ function DefaultEditorSideBar({
 
   const dataTabProps = {
     dispatch,
+    formIsTouched,
     metricAggs,
     state,
     schemas: vis.type.schemas,
@@ -100,7 +108,7 @@ function DefaultEditorSideBar({
     vis,
     uiState,
     setValue: setStateValue,
-    setValidity,
+    setValidity: setStateValidity,
     setTouched,
   };
 

@@ -35,22 +35,24 @@ import {
   setAggParamValue,
   changeAggType,
   toggleEnabledAgg,
-} from '../../state/actions';
+} from '../../state';
 import { ISchemas } from '../../schemas';
 import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from '../agg_common_props';
 
 export interface DefaultEditorDataTabProps {
   dispatch: React.Dispatch<EditorAction>;
+  formIsTouched: boolean;
   metricAggs: AggConfig[];
   schemas: ISchemas;
   state: VisState;
   setTouched(isTouched: boolean): void;
-  setValidity(isValid: boolean): void;
+  setValidity(modelName: string, value: boolean): void;
   setStateValue: DefaultEditorAggCommonProps['setStateParamValue'];
 }
 
 function DefaultEditorDataTab({
   dispatch,
+  formIsTouched,
   metricAggs,
   schemas,
   state,
@@ -96,6 +98,7 @@ function DefaultEditorDataTab({
 
   const commonProps = {
     addSchema,
+    formIsTouched,
     lastParentPipelineAggTitle,
     metricAggs,
     state,
@@ -113,7 +116,6 @@ function DefaultEditorDataTab({
     <>
       <DefaultEditorAggGroup
         data-test-subj="metricsAggGroup"
-        formIsTouched={false}
         groupName={AggGroupNames.Metrics}
         schemas={schemas.metrics}
         {...commonProps}
@@ -123,7 +125,6 @@ function DefaultEditorDataTab({
 
       <DefaultEditorAggGroup
         data-test-subj="bucketsAggGroup"
-        formIsTouched={false}
         groupName={AggGroupNames.Buckets}
         schemas={schemas.buckets}
         {...commonProps}

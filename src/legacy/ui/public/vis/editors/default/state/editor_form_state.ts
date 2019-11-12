@@ -17,29 +17,41 @@
  * under the License.
  */
 
-import { useReducer, useCallback } from 'react';
-import { Vis, VisState } from 'ui/vis';
-import { editorStateReducer, initEditorState } from './reducers';
-import { EditorStateActionTypes } from './constants';
-import { EditorAction } from './actions';
+import { useState, useCallback } from 'react';
 
-export * from './editor_state_context';
-export * from './editor_form_state';
-export * from './actions';
+export type SetValidity = (modelName: string, value: boolean) => void;
+export type SetTouched = (value: boolean) => void;
 
-export function useEditorReducer(vis: Vis): [VisState, React.Dispatch<EditorAction>] {
-  const [state, dispatch] = useReducer(editorStateReducer, vis, initEditorState);
+function useEditorFormState() {
+  const [formState, setFormState] = useState({
+    validity: {},
+    touched: false,
+  });
 
-  const wrappedDispatch = useCallback(
-    (action: EditorAction) => {
-      vis.emit('dirtyStateChange', {
-        isDirty: action.type !== EditorStateActionTypes.DISCARD_CHANGES,
-      });
+  const setValidity: SetValidity = useCallback((modelName, value) => {
+    setFormState(model => ({
+      ...model,
+      validity: {
+        ...model.validity,
+        [modelName]: value,
+      },
+    }));
+  }, []);
 
-      dispatch(action);
-    },
-    [vis]
+  const setTouched = useCallback(
+    (touched: boolean) =>
+      setFormState(model => ({
+        ...model,
+        touched,
+      })),
+    []
   );
 
-  return [state, wrappedDispatch];
+  return {
+    formState,
+    setValidity,
+    setTouched,
+  };
 }
+
+export { useEditorFormState };

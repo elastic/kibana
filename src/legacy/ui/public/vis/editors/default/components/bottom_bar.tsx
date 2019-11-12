@@ -22,7 +22,7 @@ import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } fr
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Vis } from 'ui/vis';
-import { discardChanges, EditorAction } from '../state/actions';
+import { discardChanges, EditorAction } from '../state';
 
 interface DefaultEditorBottomBarProps {
   applyChanges(): void;

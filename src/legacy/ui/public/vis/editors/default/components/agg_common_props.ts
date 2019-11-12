@@ -44,5 +44,4 @@ export interface DefaultEditorAggCommonProps {
   onToggleEnableAgg: (aggId: AggId, isEnable: boolean) => void;
   removeAgg: (aggId: AggId) => void;
   setTouched: (isTouched: boolean) => void;
-  setValidity: (isValid: boolean) => void;
 }

@@ -48,6 +48,7 @@ export interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps 
   schemas: Schema[];
   addSchema: AddSchema;
   reorderAggs: ReorderAggs;
+  setValidity(modelName: string, value: boolean): void;
 }
 
 function DefaultEditorAggGroup({
@@ -119,7 +120,7 @@ function DefaultEditorAggGroup({
   }, [formIsTouched]);
 
   useEffect(() => {
-    setValidity(isGroupValid);
+    setValidity(`aggGroup__${groupName}`, isGroupValid);
   }, [isGroupValid]);
 
   const onDragEnd: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {

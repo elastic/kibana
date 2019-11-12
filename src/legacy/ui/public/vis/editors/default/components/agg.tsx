@@ -41,6 +41,7 @@ export interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
   isDraggable: boolean;
   isLastBucket: boolean;
   isRemovable: boolean;
+  setValidity: (isValid: boolean) => void;
 }
 
 function DefaultEditorAgg({

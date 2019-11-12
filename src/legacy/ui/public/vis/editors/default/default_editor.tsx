@@ -25,7 +25,7 @@ import { EditorRenderProps } from 'src/legacy/core_plugins/kibana/public/visuali
 
 import { DefaultEditorSideBar } from './components/sidebar';
 import { DefaultEditorBottomBar } from './components/bottom_bar';
-import { useEditorReducer, useEditorContext } from './state';
+import { useEditorReducer, useEditorContext, useEditorFormState } from './state';
 import { DefaultEditorControllerState } from './default_editor_controller';
 
 const sidebarClassName = 'visEditor__collapsibleSidebar';
@@ -44,6 +44,7 @@ function DefaultEditor({
   const { vis } = savedObj;
   const { isDirty, setDirty } = useEditorContext();
   const [state, dispatch] = useEditorReducer(vis);
+  const { formState, setTouched, setValidity } = useEditorFormState();
 
   useEffect(() => {
     async function visualize() {
@@ -85,6 +86,7 @@ function DefaultEditor({
       isDirty: false,
     });
     setDirty(false);
+    setTouched(true);
   }, [vis, state]);
 
   return (
@@ -110,11 +112,14 @@ function DefaultEditor({
         ref={sidebarRef}
       >
         <DefaultEditorSideBar
-          dispatch={dispatch}
-          optionTabs={optionTabs}
           applyChanges={applyChanges}
-          vis={vis}
+          dispatch={dispatch}
+          formIsTouched={formState.touched}
+          optionTabs={optionTabs}
+          setTouched={setTouched}
+          setValidity={setValidity}
           state={state}
+          vis={vis}
           uiState={uiState}
         />
       </div>

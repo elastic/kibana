@@ -125,6 +125,7 @@ export class AggConfig {
   public enabled: boolean;
   public params: any;
   public parent?: AggConfigs;
+  public brandNew?: boolean;
 
   private __schema: Schema;
   private __type: AggType;
