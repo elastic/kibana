@@ -5,7 +5,7 @@ Kibana configuration entries providing developers with a fully typed model of th
 
 ## Table of Contents
 
-- [Why `@kbn/config-schema`](#why-kbnconfig-schema)
+- [Why `@kbn/config-schema`?](#why-kbnconfig-schema)
 - [Schema building blocks](#schema-building-blocks)
   - [Basic types](#basic-types)
     - [`schema.string()`](#schemastring)
@@ -39,10 +39,10 @@ Validation of the externally supplied data is very important for Kibana. Especia
 
 There are a number of reasons why we decided to roll our own solution for the configuration validation:
 
-* Limited API surface - having a future rich library is awesome, but it's a really hard task to audit such library and make sure everything is sane and secure enough. As everyone knows complexity is the enemy of security and hence we'd like to have a full control over what exactly we expose and commit to maintain.
-* Custom error messages - detailed validation error messages are a great help to developers, but at the same time they can contain an information that's a way too sensitive to expose to everyone. We'd like to control these messages and make them only as much detailed as really needed.
-* Type information - having a run-time guarantees is great, but additionally having a compile-time guarantees is even better. We'd like to provide developers with a fully typed model of the validate data so that it's harder to misuse it _after_ validation.
-* Upgradability - no matter how well validation library is implemented it will have bugs and may need to be improved at some point anyway. Some external libraries are very well supported, some aren't or won't be in the future. It's always a risk to depend on the external party with their own release cadence when you need to quickly fix a security vulnerability in a patch version. We'd like to have a better control over lifecycle of such an important piece of our codebase. 
+* **Limited API surface** - having a future rich library is awesome, but it's a really hard task to audit such library and make sure everything is sane and secure enough. As everyone knows complexity is the enemy of security and hence we'd like to have a full control over what exactly we expose and commit to maintain.
+* **Custom error messages** - detailed validation error messages are a great help to developers, but at the same time they can contain an information that's a way too sensitive to expose to everyone. We'd like to control these messages and make them only as much detailed as really needed.
+* **Type information** - having a run-time guarantees is great, but additionally having a compile-time guarantees is even better. We'd like to provide developers with a fully typed model of the validate data so that it's harder to misuse it _after_ validation.
+* **Upgradability** - no matter how well validation library is implemented it will have bugs and may need to be improved at some point anyway. Some external libraries are very well supported, some aren't or won't be in the future. It's always a risk to depend on the external party with their own release cadence when you need to quickly fix a security vulnerability in a patch version. We'd like to have a better control over lifecycle of such an important piece of our codebase. 
 
 ## Schema building blocks
 
@@ -163,8 +163,8 @@ const valueSchema  = schema.object({
 ```
 
 __Notes:__
-* Using of `allowUnknowns` option is discouraged and should only be used in a handful of special cases. Consider using `schema.recordOf` instead.
-* Currently `schema.object` always has a default value of `{}`, but this may change in the near future. Try to not rely on this behaviour and specify default value explicitly or use `schema.maybe` if the value is optional.
+* Using of `allowUnknowns` option is discouraged and should only be used in a handful of special cases. Consider using `schema.recordOf()` instead.
+* Currently `schema.object()` always has a default value of `{}`, but this may change in the near future. Try to not rely on this behaviour and specify default value explicitly or use `schema.maybe()` if the value is optional.
 
 #### `schema.recordOf()`
 
@@ -277,7 +277,7 @@ const valueSchema  = schema.never();
 ```
 
 __Notes:__
-* The `schema.never()` has a very limited application and usually used within conditional schemas to fully or partially forbid input data.
+* The `schema.never()` has a very limited application and usually used within [conditional schemas](#schemaconditional) to fully or partially forbid input data.
 
 #### `schema.uri()`
 
@@ -372,7 +372,7 @@ __Notes:__
 
 #### `schema.contextRef()`
 
-Defines a reference to the value specified through validation context. Context reference is only used a part of conditional schema or as a default value for any other schema.
+Defines a reference to the value specified through validation context. Context reference is only used a part of [conditional schema](#schemaconditional) or as a default value for any other schema.
 
 __Output type:__ `TReferenceValue`
 
@@ -390,7 +390,7 @@ __Notes:__
 
 #### `schema.siblingRef()`
 
-Defines a reference to the value of the sibling key. Sibling reference is only used a part of conditional schema or as a default value for any other schema.
+Defines a reference to the value of the sibling key. Sibling reference is only used a part of [conditional schema](#schemaconditional) or as a default value for any other schema.
 
 __Output type:__ `TReferenceValue`
 
@@ -448,7 +448,7 @@ const schema = gesSchema('some-random-run-time-data');
 If you have an optional config field that you can have a default value for you may want to consider using dedicated `defaultValue` option to not
 deal with "defined or undefined"-like checks all over the place in your code. You have three options to provide a default value for the almost any schema primitive:
 
-* plain value that's know at the compile time
+* plain value that's known at the compile time
 * [reference](#references) to a value that will be "dereferenced" at the validation time
 * function that is invoked at the validation time and returns a plain value
 
