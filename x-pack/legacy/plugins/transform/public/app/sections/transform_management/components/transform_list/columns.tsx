@@ -87,15 +87,15 @@ export const getColumns = (
   }
 
   const columns: [
-    ExpanderColumnType,
-    FieldDataColumnType,
-    FieldDataColumnType,
-    FieldDataColumnType,
-    FieldDataColumnType,
-    ComputedColumnType,
-    ComputedColumnType,
-    ComputedColumnType,
-    ActionsColumnType
+    ExpanderColumnType<TransformListRow>,
+    FieldDataColumnType<TransformListRow>,
+    FieldDataColumnType<TransformListRow>,
+    FieldDataColumnType<TransformListRow>,
+    FieldDataColumnType<TransformListRow>,
+    ComputedColumnType<TransformListRow>,
+    ComputedColumnType<TransformListRow>,
+    ComputedColumnType<TransformListRow>,
+    ActionsColumnType<TransformListRow>
   ] = [
     {
       align: RIGHT_ALIGNMENT,

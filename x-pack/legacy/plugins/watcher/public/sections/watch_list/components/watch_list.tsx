@@ -371,7 +371,7 @@ export const WatchList = () => {
           ? i18n.translate('xpack.watcher.sections.watchList.watchTable.disabledWatchTooltipText', {
               defaultMessage: 'This watch is read-only',
             })
-          : undefined,
+          : '',
     };
 
     const searchConfig = {

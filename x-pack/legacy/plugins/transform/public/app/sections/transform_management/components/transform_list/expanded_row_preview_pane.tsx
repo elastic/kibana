@@ -7,6 +7,7 @@
 import React, { FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
+import { Direction } from '@elastic/eui';
 import { SortDirection, SORT_DIRECTION, FieldDataColumnType } from '../../../../../shared_imports';
 
 import { useApi } from '../../../../hooks/use_api';
@@ -68,11 +69,13 @@ function getDataFromTransform(
 
 export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
   const [previewData, setPreviewData] = useState([]);
-  const [columns, setColumns] = useState<FieldDataColumnType[] | []>([]);
+  const [columns, setColumns] = useState<
+    Array<FieldDataColumnType<typeof previewData[number]>> | []
+  >([]);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState<string>('');
-  const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
+  const [sortDirection, setSortDirection] = useState<SortDirection | Direction>(SORT_DIRECTION.ASC);
+  const [sortField, setSortField] = useState<keyof typeof previewData[number] | ''>('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const api = useApi();
@@ -97,8 +100,10 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
           const columnKeys = getFlattenedFields(resp.preview[0]);
           columnKeys.sort(sortColumns(groupByArr));
 
-          const tableColumns: FieldDataColumnType[] = columnKeys.map(k => {
-            const column: FieldDataColumnType = {
+          const tableColumns: Array<
+            FieldDataColumnType<typeof previewData[number]>
+          > = columnKeys.map(k => {
+            const column: FieldDataColumnType<typeof previewData[number]> = {
               field: k,
               name: k,
               sortable: true,
@@ -170,7 +175,7 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
 
   const sorting = {
     sort: {
-      field: sortField,
+      field: sortField as string,
       direction: sortDirection,
     },
   };
@@ -179,8 +184,8 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
     page = { index: 0, size: 10 },
     sort = { field: columns[0].field, direction: SORT_DIRECTION.ASC },
   }: {
-    page: { index: number; size: number };
-    sort: { field: string; direction: SortDirection };
+    page?: { index: number; size: number };
+    sort?: { field: keyof typeof previewData[number]; direction: SortDirection | Direction };
   }) => {
     const { index, size } = page;
     setPageIndex(index);

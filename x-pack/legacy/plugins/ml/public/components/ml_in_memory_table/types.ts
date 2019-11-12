@@ -4,86 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Component, HTMLAttributes, ReactElement, ReactNode } from 'react';
+import { Component, ReactNode } from 'react';
 
-import { CommonProps, EuiInMemoryTable } from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  Direction,
+  EuiTableActionsColumnType,
+  EuiTableComputedColumnType,
+  EuiTableFieldDataColumnType,
+} from '@elastic/eui';
 
 // At some point this could maybe solved with a generic <T>.
 type Item = any;
 
-// Not using an enum here because the original HorizontalAlignment is also a union type of string.
-type HorizontalAlignment = 'left' | 'center' | 'right';
+export type FieldDataColumnType<T> = EuiTableFieldDataColumnType<T>;
 
-type SortableFunc = (item: Item) => any;
-type Sortable = boolean | SortableFunc;
-type DATA_TYPES = any;
-type FooterFunc = (payload: { items: Item[]; pagination: any }) => ReactNode;
-type RenderFunc = (value: any, record?: any) => ReactNode;
-export interface FieldDataColumnType {
-  field: string;
-  name: ReactNode;
-  description?: string;
-  dataType?: DATA_TYPES;
-  width?: string;
-  sortable?: Sortable;
-  align?: HorizontalAlignment;
-  truncateText?: boolean;
-  render?: RenderFunc;
-  footer?: string | ReactElement | FooterFunc;
-  textOnly?: boolean;
-  'data-test-subj'?: string;
+export type ComputedColumnType<T> = EuiTableComputedColumnType<T>;
+
+export interface ExpanderColumnType<T> extends ComputedColumnType<T> {
+  isExpander: true;
 }
 
-export interface ComputedColumnType {
-  render: RenderFunc;
-  name?: ReactNode;
-  description?: string;
-  sortable?: (item: Item) => any;
-  width?: string;
-  truncateText?: boolean;
-  'data-test-subj'?: string;
-}
-
-type ICON_TYPES = any;
-type IconTypesFunc = (item: Item) => ICON_TYPES; // (item) => oneOf(ICON_TYPES)
-type BUTTON_ICON_COLORS = any;
-type ButtonIconColorsFunc = (item: Item) => BUTTON_ICON_COLORS; // (item) => oneOf(ICON_BUTTON_COLORS)
-interface DefaultItemActionType {
-  type?: 'icon' | 'button';
-  name: string;
-  description: string;
-  onClick?(item: Item): void;
-  href?: string;
-  target?: string;
-  available?(item: Item): boolean;
-  enabled?(item: Item): boolean;
-  isPrimary?: boolean;
-  icon?: ICON_TYPES | IconTypesFunc; // required when type is 'icon'
-  color?: BUTTON_ICON_COLORS | ButtonIconColorsFunc;
-}
-
-interface CustomItemActionType {
-  render(item: Item, enabled: boolean): ReactNode;
-  available?(item: Item): boolean;
-  enabled?(item: Item): boolean;
-  isPrimary?: boolean;
-}
-
-export interface ExpanderColumnType {
-  align?: HorizontalAlignment;
-  width?: string;
-  isExpander: boolean;
-  render: RenderFunc;
-}
-
-type SupportedItemActionType = DefaultItemActionType | CustomItemActionType;
-
-export interface ActionsColumnType {
-  actions: SupportedItemActionType[];
-  name?: ReactNode;
-  description?: string;
-  width?: string;
-}
+export type ActionsColumnType<T> = EuiTableActionsColumnType<T>;
 
 export type ColumnType =
   | ActionsColumnType
@@ -147,18 +89,23 @@ export enum SORT_DIRECTION {
   DESC = 'desc',
 }
 export type SortDirection = SORT_DIRECTION.ASC | SORT_DIRECTION.DESC;
-export interface Sorting {
-  sort: {
-    field: string;
-    direction: SortDirection;
-  };
+interface SortFields {
+  field: string;
+  direction: SortDirection | Direction;
 }
-export type SortingPropType = boolean | Sorting;
+export interface Sorting {
+  sort?: SortFields;
+}
+export type SortingPropType =
+  | boolean
+  | {
+      sort: SortFields;
+    };
 
 type SelectionType = any;
 
 export interface OnTableChangeArg extends Sorting {
-  page: { index: number; size: number };
+  page?: { index: number; size: number };
 }
 
 type ItemIdTypeFunc = (item: Item) => string;
@@ -166,34 +113,8 @@ type ItemIdType =
   | string // the name of the item id property
   | ItemIdTypeFunc;
 
-export type EuiInMemoryTableProps = CommonProps & {
-  columns: ColumnType[];
-  hasActions?: boolean;
-  isExpandable?: boolean;
-  isSelectable?: boolean;
-  items?: Item[];
-  loading?: boolean;
-  message?: HTMLAttributes<HTMLDivElement>;
-  error?: string;
-  compressed?: boolean;
-  search?: SearchType;
-  pagination?: PaginationProp;
-  sorting?: SortingPropType;
-  // Set `allowNeutralSort` to false to force column sorting. Defaults to true.
-  allowNeutralSort?: boolean;
-  responsive?: boolean;
-  selection?: SelectionType;
-  itemId?: ItemIdType;
-  itemIdToExpandedRowMap?: Record<string, Item>;
-  rowProps?: (item: Item) => void | Record<string, any>;
-  cellProps?: () => void | Record<string, any>;
-  onTableChange?: (arg: OnTableChangeArg) => void;
-};
-
 interface ComponentWithConstructor<T> extends Component {
   new (): Component<T>;
 }
 
-export const MlInMemoryTableBasic = (EuiInMemoryTable as any) as ComponentWithConstructor<
-  EuiInMemoryTableProps
->;
+export const MlInMemoryTableBasic: typeof EuiInMemoryTable = EuiInMemoryTable;

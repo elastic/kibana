@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiTitle,
+  Direction,
 } from '@elastic/eui';
 
 import { OnTableChangeArg, SortDirection, SORT_DIRECTION } from '../../../../../shared_imports';
@@ -97,7 +98,7 @@ export const TransformList: FC<Props> = ({
   const [pageSize, setPageSize] = useState(10);
 
   const [sortField, setSortField] = useState<string>(TRANSFORM_LIST_COLUMN.ID);
-  const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
+  const [sortDirection, setSortDirection] = useState<SortDirection | Direction>(SORT_DIRECTION.ASC);
 
   const { capabilities } = useContext(AuthorizationContext);
   const disabled =
@@ -329,10 +330,10 @@ export const TransformList: FC<Props> = ({
     },
     filters: [
       {
-        type: 'field_value_selection',
+        type: 'field_value_selection' as const,
         field: 'state.state',
         name: i18n.translate('xpack.transform.statusFilter', { defaultMessage: 'Status' }),
-        multiSelect: 'or',
+        multiSelect: 'or' as const,
         options: Object.values(TRANSFORM_STATE).map(val => ({
           value: val,
           name: val,
@@ -340,7 +341,7 @@ export const TransformList: FC<Props> = ({
         })),
       },
       {
-        type: 'field_value_selection',
+        type: 'field_value_selection' as const,
         field: 'mode',
         name: i18n.translate('xpack.transform.modeFilter', { defaultMessage: 'Mode' }),
         multiSelect: false,

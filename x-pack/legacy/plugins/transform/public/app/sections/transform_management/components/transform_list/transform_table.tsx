@@ -73,7 +73,7 @@ const getInitialSorting = (columns: any, sorting: any) => {
   };
 };
 
-export class TransformTable extends MlInMemoryTableBasic {
+export class TransformTable<T> extends MlInMemoryTableBasic<T> {
   static getDerivedStateFromProps(nextProps: any, prevState: any) {
     const derivedState = {
       ...prevState.prevProps,
