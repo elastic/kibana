@@ -29,7 +29,13 @@ export function initListingDirective(app, deps) {
   app.directive('visualizeListingTable', reactDirective =>
     reactDirective(deps.wrapInI18nContext(VisualizeListingTable))
   );
-  app.directive('newVisModal', reactDirective => reactDirective(deps.wrapInI18nContext(NewVisModal)));
+  app.directive('newVisModal', reactDirective => reactDirective(deps.wrapInI18nContext(NewVisModal), [
+    ['visTypesRegistry', { watchDepth: 'collection' }],
+    ['onClose', { watchDepth: 'reference' }],
+    ['addBasePath', { watchDepth: 'reference' }],
+    ['uiSettings', { watchDepth: 'reference' }],
+    'isOpen',
+  ]));
 }
 
 export function VisualizeListingController($injector, createNewVis) {
@@ -53,6 +59,8 @@ export function VisualizeListingController($injector, createNewVis) {
   timefilter.disableTimeRangeSelector();
 
   this.showNewVisModal = false;
+  this.addBasePath = addBasePath;
+  this.uiSettings = uiSettings;
 
   this.createNewVis = () => {
     this.showNewVisModal = true;

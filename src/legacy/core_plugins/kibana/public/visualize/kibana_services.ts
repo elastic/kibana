@@ -84,7 +84,6 @@ export function clearServices() {
 
 // export types
 export { DocTitle } from 'ui/doc_title/doc_title';
-export { VisType } from 'ui/vis';
 export { VisSavedObject } from 'ui/visualize/loader/types';
 export { EmbeddableFactory, ErrorEmbeddable } from '../../../../../plugins/embeddable/public';
 
@@ -99,4 +98,3 @@ export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 export { getVisualizeLoader } from 'ui/visualize/loader';
-export { METRIC_TYPE, createUiStatsReporter } from '../../../ui_metric/public';

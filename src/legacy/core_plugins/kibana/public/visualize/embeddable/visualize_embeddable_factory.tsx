@@ -196,9 +196,14 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
     if (this.visTypes) {
-      showNewVisModal(this.visTypes, {
-        editorParams: ['addToDashboard'],
-      });
+      showNewVisModal(
+        this.visTypes,
+        {
+          editorParams: ['addToDashboard'],
+        },
+        chrome.addBasePath,
+        chrome.getUiSettingsClient()
+      );
     }
     return undefined;
   }
