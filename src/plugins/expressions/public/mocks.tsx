@@ -18,7 +18,11 @@
  */
 
 import * as React from 'react';
-import { ExpressionsSetup, ExpressionsStart } from '.';
+import { ExpressionsSetup, ExpressionsStart, plugin as pluginInitializer } from '.';
+/* eslint-disable */
+import { coreMock } from '../../../core/public/mocks';
+import { inspectorPluginMock } from '../../inspector/public/mocks';
+/* eslint-enable */
 
 export type Setup = jest.Mocked<ExpressionsSetup>;
 export type Start = jest.Mocked<ExpressionsStart>;
@@ -60,7 +64,30 @@ const createStartContract = (): Start => {
   };
 };
 
+const createPlugin = async () => {
+  const pluginInitializerContext = coreMock.createPluginInitializerContext();
+  const coreSetup = coreMock.createSetup();
+  const coreStart = coreMock.createStart();
+  const plugin = pluginInitializer(pluginInitializerContext);
+  const setup = await plugin.setup(coreSetup, {
+    inspector: inspectorPluginMock.createSetupContract(),
+  });
+
+  return {
+    pluginInitializerContext,
+    coreSetup,
+    coreStart,
+    plugin,
+    setup,
+    doStart: async () =>
+      await plugin.start(coreStart, {
+        inspector: inspectorPluginMock.createStartContract(),
+      }),
+  };
+};
+
 export const expressionsPluginMock = {
   createSetupContract,
   createStartContract,
+  createPlugin,
 };
