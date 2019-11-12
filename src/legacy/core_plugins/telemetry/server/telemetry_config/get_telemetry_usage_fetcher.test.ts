@@ -43,7 +43,7 @@ describe('getTelemetryUsageFetcher', () => {
     expect(result).toBe('browser');
   });
 
-  it('returns kibana.yml config when saved object usageFetcher is undefined', () => {
+  it('returns kibana.yml config when saved object sendUsageFrom is undefined', () => {
     const params: CallGetTelemetryUsageFetcherParams = {
       savedSendUsagefrom: undefined,
       configSendUsageFrom: 'server',
@@ -80,6 +80,6 @@ function getMockTelemetrySavedObject(
   }
 
   return {
-    usageFetcher: params.savedSendUsagefrom,
+    sendUsageFrom: params.savedSendUsagefrom,
   };
 }

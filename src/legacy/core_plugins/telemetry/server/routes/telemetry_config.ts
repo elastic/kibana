@@ -20,12 +20,11 @@
 import Joi from 'joi';
 import { boomify } from 'boom';
 import { CoreSetup } from 'src/core/server';
+import { getTelemetryAllowChangingOptInStatus } from '../telemetry_config';
 import {
   TelemetrySavedObjectAttributes,
   updateTelemetrySavedObject,
 } from '../telemetry_repository';
-
-import { getTelemetryAllowChangingOptInStatus } from '../telemetry_config';
 
 interface RegisterOptInRoutesParams {
   core: CoreSetup;
@@ -37,30 +36,6 @@ export function registerTelemetryConfigRoutes({
   currentKibanaVersion,
 }: RegisterOptInRoutesParams) {
   const { server } = core.http as any;
-
-  server.route({
-    method: 'POST',
-    path: '/api/telemetry/v2/usageFetcher',
-    options: {
-      validate: {
-        payload: Joi.object({
-          usageFetcher: Joi.string()
-            .allow(['browser', 'server'])
-            .required(),
-        }),
-      },
-    },
-    handler: async (req: any, h: any) => {
-      try {
-        const attributes: TelemetrySavedObjectAttributes = req.payload;
-        const savedObjectsClient = req.getSavedObjectsClient();
-        await updateTelemetrySavedObject(savedObjectsClient, attributes);
-      } catch (err) {
-        return boomify(err);
-      }
-      return h.response({}).code(200);
-    },
-  });
 
   server.route({
     method: 'POST',

@@ -31,9 +31,9 @@ export function getTelemetryUsageFetcher({
     return configTelemetrySendUsageFrom;
   }
 
-  if (typeof telemetrySavedObject.usageFetcher === 'undefined') {
+  if (typeof telemetrySavedObject.sendUsageFrom === 'undefined') {
     return configTelemetrySendUsageFrom;
   }
 
-  return telemetrySavedObject.usageFetcher;
+  return telemetrySavedObject.sendUsageFrom;
 }

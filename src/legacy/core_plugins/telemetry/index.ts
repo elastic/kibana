@@ -68,7 +68,7 @@ const telemetry = (kibana: any) => {
             `https://telemetry.elastic.co/xpack/${ENDPOINT_VERSION}/send`
           ),
         }),
-        usageFetcher: Joi.string()
+        sendUsageFrom: Joi.string()
           .allow(['server', 'browser'])
           .default('browser'),
       }).default();
