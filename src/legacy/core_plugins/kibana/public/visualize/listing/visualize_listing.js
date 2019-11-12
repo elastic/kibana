@@ -29,13 +29,15 @@ export function initListingDirective(app, deps) {
   app.directive('visualizeListingTable', reactDirective =>
     reactDirective(deps.wrapInI18nContext(VisualizeListingTable))
   );
-  app.directive('newVisModal', reactDirective => reactDirective(deps.wrapInI18nContext(NewVisModal), [
-    ['visTypesRegistry', { watchDepth: 'collection' }],
-    ['onClose', { watchDepth: 'reference' }],
-    ['addBasePath', { watchDepth: 'reference' }],
-    ['uiSettings', { watchDepth: 'reference' }],
-    'isOpen',
-  ]));
+  app.directive('newVisModal', reactDirective =>
+    reactDirective(deps.wrapInI18nContext(NewVisModal), [
+      ['visTypesRegistry', { watchDepth: 'collection' }],
+      ['onClose', { watchDepth: 'reference' }],
+      ['addBasePath', { watchDepth: 'reference' }],
+      ['uiSettings', { watchDepth: 'reference' }],
+      'isOpen',
+    ])
+  );
 }
 
 export function VisualizeListingController($injector, createNewVis) {
@@ -45,8 +47,10 @@ export function VisualizeListingController($injector, createNewVis) {
     chromeLegacy,
     savedObjectRegistry,
     savedObjectClient,
-    dataStart: {
-      timefilter: { timefilter },
+    npDataStart: {
+      query: {
+        timefilter: { timefilter },
+      },
     },
     toastNotifications,
     uiSettings,

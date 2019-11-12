@@ -28,8 +28,9 @@ import { migrateAppState } from './lib';
 import { DashboardConstants } from '../../dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from '../breadcrumbs';
-import { extractTimeFilter, changeTimeFilter, FilterStateManager } from '../../../../../../plugins/data/public';
+import { extractTimeFilter, changeTimeFilter } from '../../../../../../plugins/data/public';
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
+import { FilterStateManager } from '../../../../data/public';
 
 import { initVisEditorDirective } from './visualization_editor';
 import { initVisualizationDirective } from './visualization';

@@ -55,7 +55,7 @@ export function initDashboardApp(app, deps) {
 
   app.run((globalState, $rootScope) => {
     registerTimefilterWithGlobalStateFactory(
-      deps.npDataStart.timefilter.timefilter,
+      deps.npDataStart.query.timefilter.timefilter,
       globalState,
       $rootScope
     );
