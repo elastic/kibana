@@ -6,10 +6,10 @@
 
 import {
   loadMlServerInfo,
-  cloudDeploymentId,
+  getCloudDeploymentId,
   isCloud,
-  newJobDefaults,
-  newJobLimits,
+  getNewJobDefaults,
+  getNewJobLimits,
 } from './ml_server_info';
 import mockMlInfoResponse from './__mocks__/ml_info_response.json';
 
@@ -22,7 +22,7 @@ jest.mock('./ml_api_service', () => ({
 describe('ml_server_info initial state', () => {
   it('server info not loaded ', () => {
     expect(isCloud()).toBe(false);
-    expect(cloudDeploymentId()).toBe(null);
+    expect(getCloudDeploymentId()).toBe(null);
   });
 });
 
@@ -35,13 +35,13 @@ describe('ml_server_info', () => {
   describe('cloud information', () => {
     it('can get could deployment id', () => {
       expect(isCloud()).toBe(true);
-      expect(cloudDeploymentId()).toBe('85d666f3350c469e8c3242d76a7f459c');
+      expect(getCloudDeploymentId()).toBe('85d666f3350c469e8c3242d76a7f459c');
     });
   });
 
   describe('defaults', () => {
     it('can get defaults', async done => {
-      const defaults = newJobDefaults();
+      const defaults = getNewJobDefaults();
 
       expect(defaults.anomaly_detectors.model_memory_limit).toBe('128mb');
       expect(defaults.anomaly_detectors.categorization_examples_limit).toBe(4);
@@ -53,7 +53,7 @@ describe('ml_server_info', () => {
 
   describe('limits', () => {
     it('can get limits', async done => {
-      const limits = newJobLimits();
+      const limits = getNewJobLimits();
 
       expect(limits.max_model_memory_limit).toBe('128mb');
       done();

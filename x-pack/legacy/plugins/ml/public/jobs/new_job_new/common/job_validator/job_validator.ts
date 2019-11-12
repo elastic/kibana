@@ -6,7 +6,7 @@
 
 import { ReactElement } from 'react';
 import { basicJobValidation, basicDatafeedValidation } from '../../../../../common/util/job_utils';
-import { newJobLimits } from '../../../../services/ml_server_info';
+import { getNewJobLimits } from '../../../../services/ml_server_info';
 import { JobCreatorType } from '../job_creator';
 import { populateValidationMessages, checkForExistingJobAndGroupIds } from './util';
 import { ExistingJobsAndGroups } from '../../../../services/job_service';
@@ -111,7 +111,7 @@ export class JobValidator {
 
     const jobConfig = this._jobCreator.jobConfig;
     const datafeedConfig = this._jobCreator.datafeedConfig;
-    const limits = newJobLimits();
+    const limits = getNewJobLimits();
 
     // run standard basic validation
     const basicJobResults = basicJobValidation(jobConfig, undefined, limits);

@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { BasicValidations } from './job_validator';
 import { Job, Datafeed } from '../job_creator/configs';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../../../../../common/constants/validation';
-import { newJobLimits } from '../../../../services/ml_server_info';
+import { getNewJobLimits } from '../../../../services/ml_server_info';
 import { ValidationResults, ValidationMessage } from '../../../../../common/util/job_utils';
 import { ExistingJobsAndGroups } from '../../../../services/job_service';
 
@@ -18,7 +18,7 @@ export function populateValidationMessages(
   jobConfig: Job,
   datafeedConfig: Datafeed
 ) {
-  const limits = newJobLimits();
+  const limits = getNewJobLimits();
 
   if (validationResults.contains('job_id_empty')) {
     basicValidations.jobId.valid = false;

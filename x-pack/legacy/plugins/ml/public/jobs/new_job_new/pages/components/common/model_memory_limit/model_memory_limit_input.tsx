@@ -6,7 +6,7 @@
 
 import React, { FC, useState, useContext, useEffect } from 'react';
 import { EuiFieldText } from '@elastic/eui';
-import { newJobDefaults } from '../../../../../../services/ml_server_info';
+import { getNewJobDefaults } from '../../../../../../services/ml_server_info';
 import { JobCreatorContext } from '../../job_creator_context';
 import { Description } from './description';
 
@@ -23,7 +23,7 @@ export const ModelMemoryLimitInput: FC = () => {
     jobCreator.modelMemoryLimit === null ? '' : jobCreator.modelMemoryLimit
   );
 
-  const { anomaly_detectors: anomalyDetectors } = newJobDefaults();
+  const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
   const { model_memory_limit: modelMemoryLimitDefault } = anomalyDetectors;
 
   useEffect(() => {
