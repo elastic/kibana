@@ -4,19 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { http } from './http_service';
-import chrome from 'ui/chrome';
-import { i18n } from '@kbn/i18n';
+import { http as httpService } from './http_service';
 import { indexPatternService } from '../kibana_services';
 import { getGeoJsonIndexingDetails } from './geo_processing';
 import { sizeLimitedChunking } from './size_limited_chunking';
+import { i18n } from '@kbn/i18n';
 
-const basePath = chrome.addBasePath('/api/fileupload');
 const fileType = 'json';
 
 let savedObjectsClient;
-export function initResources(soClient) {
-  savedObjectsClient = soClient;
+let apiBasePath;
+
+export function initResources(savedObjects, http) {
+  savedObjectsClient = savedObjects.client;
+  apiBasePath = http.basePath.prepend('/api');
 }
 
 export async function indexData(parsedFile, transformDetails, indexName, dataType, appName) {
@@ -24,7 +25,6 @@ export async function indexData(parsedFile, transformDetails, indexName, dataTyp
     throw(i18n.translate('xpack.fileUpload.indexingService.noFileImported', {
       defaultMessage: 'No file imported.'
     }));
-    return;
   }
 
   // Perform any processing required on file prior to indexing
@@ -134,8 +134,8 @@ async function writeToIndex(indexingDetails) {
     ingestPipeline
   } = indexingDetails;
 
-  return await http({
-    url: `${basePath}/import${paramString}`,
+  return await httpService({
+    url: `${apiBasePath}/fileupload/import${paramString}`,
     method: 'POST',
     data: {
       index,
@@ -241,9 +241,8 @@ async function getIndexPatternId(name) {
 }
 
 export const getExistingIndexNames = async () => {
-  const basePath = chrome.addBasePath('/api');
-  const indexes = await http({
-    url: `${basePath}/index_management/indices`,
+  const indexes = await httpService({
+    url: `${apiBasePath}/index_management/indices`,
     method: 'GET',
   });
   return indexes
