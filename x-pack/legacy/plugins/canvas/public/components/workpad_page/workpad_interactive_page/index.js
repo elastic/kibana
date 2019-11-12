@@ -58,6 +58,8 @@ const configuration = {
   tooltipZ: 1100,
 };
 
+// Polyfill for browsers (IE11) that don't have element.closest
+// From: https://developer.mozilla.org/en-US/docs/Web/API/Element/closest
 function closest(s) {
   let el = this;
   const matchFn = el.matches ? 'matches' : 'msMatchesSelector';
