@@ -5,12 +5,14 @@
  */
 import * as t from 'io-ts';
 
+// IO type for validation
 export const ErrorType = t.partial({
   code: t.number,
   message: t.string,
   type: t.string,
 });
 
+// Typescript type for type checking
 export type Error = t.TypeOf<typeof ErrorType>;
 
 export const MonitorDetailsType = t.intersection([

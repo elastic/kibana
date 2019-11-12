@@ -7,6 +7,7 @@
 import React, { useContext } from 'react';
 import { get } from 'lodash';
 import { EuiHealth, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { Check } from '../../../../../common/graphql/types';
 import { UptimeSettingsContext } from '../../../../contexts';
 import { LocationLink } from './location_link';
@@ -69,10 +70,13 @@ export const MonitorStatusList = ({ checks }: MonitorStatusListProps) => {
       {absUpChecks.size > 0 && displayMonitorStatus(upChecks, success, 'Up')}
       {(downChecks.has(UN_NAMED_LOCATION) || upChecks.has(UN_NAMED_LOCATION)) && (
         <EuiCallOut color="warning">
-          <p>
-            Some heartbeat instances do not have a location defined. <LocationLink /> to your
-            heartbeat configuration.
-          </p>
+          {i18n.translate('xpack.uptime.monitorList.drawer.missingLocation.description', {
+            defaultMessage: `Some heartbeat instances do not have a location defined.`,
+          })}
+          <LocationLink />{' '}
+          {i18n.translate('xpack.uptime.monitorList.drawer.missingLocation.toLocationDocsLink', {
+            defaultMessage: `to your heartbeat configuration.`,
+          })}
         </EuiCallOut>
       )}
     </>

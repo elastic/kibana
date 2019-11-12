@@ -11,10 +11,10 @@ import {
   FETCH_MONITOR_DETAILS_SUCCESS,
   FETCH_MONITOR_DETAILS_FAIL,
 } from '../actions/monitor';
-import { fetchMonitorDetails } from '../api/monitor';
+import { fetchMonitorDetails } from '../api';
 import { getBasePath } from '../selectors';
 
-function* monitorDetailsSaga(action: Action<any>) {
+function* monitorDetailsEffect(action: Action<any>) {
   const monitorId: string = action.payload;
   try {
     const basePath = yield select(getBasePath);
@@ -25,6 +25,6 @@ function* monitorDetailsSaga(action: Action<any>) {
   }
 }
 
-export function* fetchMonitorDetailsSaga() {
-  yield takeLatest(FETCH_MONITOR_DETAILS, monitorDetailsSaga);
+export function* fetchMonitorDetailsEffect() {
+  yield takeLatest(FETCH_MONITOR_DETAILS, monitorDetailsEffect);
 }

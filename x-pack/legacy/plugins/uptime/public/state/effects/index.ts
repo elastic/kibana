@@ -5,8 +5,8 @@
  */
 
 import { fork } from 'redux-saga/effects';
-import { fetchMonitorDetailsSaga } from './monitor';
+import { fetchMonitorDetailsEffect } from './monitor';
 
-export function* rootSaga() {
-  yield fork(fetchMonitorDetailsSaga);
+export function* rootEffect() {
+  yield fork(fetchMonitorDetailsEffect);
 }
