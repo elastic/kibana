@@ -96,8 +96,8 @@ export interface TutorialSchema {
 
 export class TutorialsRegistry {
   public setup(core: CoreSetup) {
-    const tutorialProviders: Array<(tutorialProvider: TutorialSchema) => void>;
-    const scopedTutorialContextFactories: Array<(scopedTutorialContextFactory: any) => void>;
+    const tutorialProviders: Array<(tutorialProvider: TutorialSchema) => void> = [];
+    const scopedTutorialContextFactories: Array<(scopedTutorialContextFactory: any) => void> = [];
     core.http.registerRouteHandlerContext('getTutorials', (request: any) => {
       const intitialContext = new Map<string, TutorialSchema>();
       const scopedContext = scopedTutorialContextFactories.reduce(
