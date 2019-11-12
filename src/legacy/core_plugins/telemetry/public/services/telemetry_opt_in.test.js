@@ -34,7 +34,7 @@ describe('TelemetryOptInProvider', () => {
       addBasePath: (url) => url
     };
 
-    mockInjectedMetadata({ telemetryOptedIn: optedIn });
+    mockInjectedMetadata({ telemetryOptedIn: optedIn, allowChangingOptInStatus: true });
 
     const mockInjector = {
       get: (key) => {
