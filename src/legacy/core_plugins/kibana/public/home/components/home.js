@@ -48,7 +48,7 @@ export class Home extends Component {
     super(props);
 
     const isWelcomeEnabled = !(chrome.getInjected('disableWelcomeScreen') || props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false');
-    const showTelemetryDisclaimer = chrome().getInjected('allowChangingOptInStatus');
+    const showTelemetryDisclaimer = chrome.getInjected('allowChangingOptInStatus');
     this.state = {
       // If welcome is enabled, we wait for loading to complete
       // before rendering. This prevents an annoying flickering

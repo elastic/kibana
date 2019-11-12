@@ -41,6 +41,8 @@ import { banners } from 'ui/notify';
 import { FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 import { SampleDataCard } from './sample_data';
+// @ts-ignore
+import { trackUiMetric, METRIC_TYPE } from '../kibana_services';
 
 interface Props {
   urlBasePath: string;
@@ -52,8 +54,6 @@ interface Props {
  * Shows a full-screen welcome page that gives helpful quick links to beginners.
  */
 export class Welcome extends React.Component<Props> {
-  private services = getServices();
-
   private hideOnEsc = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
       this.props.onSkip();
@@ -76,7 +76,7 @@ export class Welcome extends React.Component<Props> {
   };
 
   componentDidMount() {
-    this.services.trackUiMetric(this.services.METRIC_TYPE.LOADED, 'welcomeScreenMount');
+    trackUiMetric(METRIC_TYPE.LOADED, 'welcomeScreenMount');
     document.addEventListener('keydown', this.hideOnEsc);
   }
 
