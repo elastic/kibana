@@ -19,20 +19,32 @@ export interface MlServerLimits {
   max_model_memory_limit?: string;
 }
 
+export interface CloudInfo {
+  cloudId: string | null;
+  isCloud: boolean;
+}
+
 let defaults: MlServerDefaults = {
   anomaly_detectors: {},
   datafeeds: {},
 };
 let limits: MlServerLimits = {};
 
+const cloudInfo: CloudInfo = {
+  cloudId: null,
+  isCloud: false,
+};
+
 export async function loadNewJobDefaults() {
   try {
     const resp = await ml.mlInfo();
     defaults = resp.defaults;
     limits = resp.limits;
-    return { defaults, limits };
+    cloudInfo.cloudId = resp.cloudId || null;
+    cloudInfo.isCloud = resp.cloudId !== undefined;
+    return { defaults, limits, cloudId: cloudInfo };
   } catch (error) {
-    return { defaults, limits };
+    return { defaults, limits, cloudId: cloudInfo };
   }
 }
 
@@ -42,4 +54,25 @@ export function newJobDefaults(): MlServerDefaults {
 
 export function newJobLimits(): MlServerLimits {
   return limits;
+}
+
+export function cloudId(): string | null {
+  return cloudInfo.cloudId;
+}
+
+export function isCloud(): boolean {
+  return cloudInfo.isCloud;
+}
+
+export function cloudDeploymentId(): string | null {
+  if (cloudInfo.cloudId === null) {
+    return null;
+  }
+  const tempCloudId = cloudInfo.cloudId.replace(/^.+:/, '');
+  try {
+    const matches = atob(tempCloudId).match(/^.+\$(.+)(?=\$)/);
+    return matches !== null && matches.length === 2 ? matches[1] : null;
+  } catch (error) {
+    return null;
+  }
 }
