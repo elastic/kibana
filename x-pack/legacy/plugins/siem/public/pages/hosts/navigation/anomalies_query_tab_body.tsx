@@ -5,8 +5,14 @@
  */
 
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { AnomaliesQueryTabBodyProps } from './types';
+import { manageQuery } from '../../../components/page/manage_query';
 import { AnomaliesHostTable } from '../../../components/ml/tables/anomalies_host_table';
+import { AnomaliesOverTimeHistogram } from '../../../components/page/hosts/anomalies_over_time';
+import { AnomaliesOverTimeQuery } from '../../../containers/anomalies/anomalies_over_time';
+
+const AnomaliesOverTimeManage = manageQuery(AnomaliesOverTimeHistogram);
 
 export const AnomaliesQueryTabBody = ({
   endDate,
@@ -15,15 +21,43 @@ export const AnomaliesQueryTabBody = ({
   type,
   narrowDateRange,
   hostName,
+  setQuery,
+  filterQuery,
+  updateDateRange = () => {},
 }: AnomaliesQueryTabBodyProps) => (
-  <AnomaliesHostTable
-    startDate={startDate}
-    endDate={endDate}
-    skip={skip}
-    type={type}
-    hostName={hostName}
-    narrowDateRange={narrowDateRange}
-  />
+  <>
+    <AnomaliesOverTimeQuery
+      endDate={endDate}
+      filterQuery={filterQuery}
+      sourceId="default"
+      startDate={startDate}
+      type={type}
+    >
+      {({ anomaliesOverTime, loading, id, inspect, refetch, totalCount }) => (
+        <AnomaliesOverTimeManage
+          data={anomaliesOverTime!}
+          endDate={endDate}
+          id={id}
+          inspect={inspect}
+          loading={loading}
+          refetch={refetch}
+          setQuery={setQuery}
+          startDate={startDate}
+          totalCount={totalCount}
+          updateDateRange={updateDateRange}
+        />
+      )}
+    </AnomaliesOverTimeQuery>
+    <EuiSpacer size="l" />
+    <AnomaliesHostTable
+      startDate={startDate}
+      endDate={endDate}
+      skip={skip}
+      type={type}
+      hostName={hostName}
+      narrowDateRange={narrowDateRange}
+    />
+  </>
 );
 
 AnomaliesQueryTabBody.displayName = 'AnomaliesQueryTabBody';

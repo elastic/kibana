@@ -3,22 +3,36 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { createQueryFilterClauses, calculateTimeseriesInterval } from '../../utils/build_query';
 import { RequestBasicOptions } from '../framework';
+import { useKibanaUiSetting } from '../../../public/lib/settings/use_kibana_ui_setting';
+import { DEFAULT_ANOMALY_SCORE } from '../../../common/constants';
 
-export const buildEventsOverTimeQuery = ({
+export const buildAnomaliesOverTimeQuery = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,
-  sourceConfiguration: {
-    fields: { timestamp },
-  },
 }: RequestBasicOptions) => {
+  const [anomalyScore] = useKibanaUiSetting(DEFAULT_ANOMALY_SCORE);
+
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
+      match_phrase: {
+        result_type: 'record',
+      },
+    },
+    {
       range: {
-        [timestamp]: {
+        record_score: {
+          gte: anomalyScore,
+        },
+      },
+    },
+    {
+      range: {
+        timestamp: {
           gte: from,
           lte: to,
         },
@@ -28,7 +42,7 @@ export const buildEventsOverTimeQuery = ({
 
   const getHistogramAggregation = () => {
     const interval = calculateTimeseriesInterval(from, to);
-    const histogramTimestampField = '@timestamp';
+    const histogramTimestampField = 'timestamp';
     const dateHistogram = {
       date_histogram: {
         field: histogramTimestampField,
@@ -42,17 +56,16 @@ export const buildEventsOverTimeQuery = ({
       },
     };
     return {
-      eventActionGroup: {
+      anomalyActionGroup: {
         terms: {
-          field: 'event.action',
-          missing: 'All others',
+          field: 'job_id',
           order: {
             _count: 'desc',
           },
           size: 10,
         },
         aggs: {
-          events: interval ? dateHistogram : autoDateHistogram,
+          anomalies: interval ? dateHistogram : autoDateHistogram,
         },
       },
     };
@@ -63,7 +76,7 @@ export const buildEventsOverTimeQuery = ({
     allowNoIndices: true,
     ignoreUnavailable: true,
     body: {
-      aggregations: getHistogramAggregation(),
+      aggs: getHistogramAggregation(),
       query: {
         bool: {
           filter,
