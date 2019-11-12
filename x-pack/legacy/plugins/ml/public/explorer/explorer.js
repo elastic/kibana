@@ -90,7 +90,6 @@ import {
 
 import {
   DRAG_SELECT_ACTION,
-  APP_STATE_ACTION,
   EXPLORER_ACTION,
   FILTER_ACTION,
   SWIMLANE_TYPE,
@@ -136,7 +135,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
   class Explorer extends React.Component {
     static propTypes = {
       annotationsRefresh: PropTypes.bool,
-      appStateHandler: PropTypes.func.isRequired,
       componentDidMountCallback: PropTypes.func.isRequired,
       dateFormatTz: PropTypes.string.isRequired,
       explorer: PropTypes.object.isRequired,
@@ -270,8 +268,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     previousTableSeverity = severity$.getValue().val;
     async componentDidUpdate() {
       if (this.props.explorer !== null && this.props.explorer.action !== EXPLORER_ACTION.IDLE) {
-        explorerAction$.next({ action: EXPLORER_ACTION.IDLE });
-
         const { action, payload } = this.props.explorer;
 
         if (action === EXPLORER_ACTION.INITIALIZE) {
@@ -303,6 +299,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           stateUpdate.indexPattern = indexPattern;
 
           this.updateExplorer(stateUpdate, true);
+          explorerAction$.next({ action: EXPLORER_ACTION.IDLE });
           return;
         }
 
@@ -314,11 +311,11 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             selectedJobs,
           };
 
-          this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
+          explorerAction$.next({ action: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
           Object.assign(stateUpdate, getClearedSelectedAnomaliesState());
           // clear filter if selected jobs have no influencers
           if (stateUpdate.noInfluencersConfigured === true) {
-            this.props.appStateHandler(APP_STATE_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS);
+            explorerAction$.next({ action: EXPLORER_ACTION.APP_STATE_CLEAR_INFLUENCER_FILTER_SETTINGS });
             const noFilterState = {
               filterActive: false,
               filteredFields: [],
@@ -337,10 +334,10 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           }
 
           if (selectedJobs.length > 1) {
-            this.props.appStateHandler(
-              APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
-              { swimlaneViewByFieldName: VIEW_BY_JOB_LABEL },
-            );
+            explorerAction$.next({
+              action: EXPLORER_ACTION.APP_STATE_SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
+              payload: { swimlaneViewByFieldName: VIEW_BY_JOB_LABEL }
+            });
             stateUpdate.swimlaneViewByFieldName = VIEW_BY_JOB_LABEL;
             // enforce a state update for swimlaneViewByFieldName
             this.setState({ swimlaneViewByFieldName: VIEW_BY_JOB_LABEL }, () => {
@@ -348,28 +345,29 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             });
             return;
           }
-
           this.updateExplorer(stateUpdate, true);
+          explorerAction$.next({ action: EXPLORER_ACTION.IDLE });
+
           return;
         }
 
         // RELOAD reloads full Anomaly Explorer and clears the selection.
         if (action === EXPLORER_ACTION.RELOAD) {
-          this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
+          explorerAction$.next({ action: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
           this.updateExplorer({ ...payload, ...getClearedSelectedAnomaliesState() }, true);
+          explorerAction$.next({ action: EXPLORER_ACTION.IDLE });
           return;
         }
 
         // REDRAW reloads Anomaly Explorer and tries to retain the selection.
         if (action === EXPLORER_ACTION.REDRAW) {
           this.updateExplorer({}, false);
+          explorerAction$.next({ action: EXPLORER_ACTION.IDLE });
           return;
         }
-
-        return;
       } else if (this.previousSwimlaneLimit !== this.props.swimlaneLimit) {
         this.previousSwimlaneLimit = this.props.swimlaneLimit;
-        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
+        explorerAction$.next({ action: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
         this.updateExplorer(getClearedSelectedAnomaliesState(), false);
       } else if (this.previousTableInterval !== this.props.tableInterval) {
         this.previousTableInterval = this.props.tableInterval;
@@ -833,7 +831,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       }
 
       if (clearSelection === true) {
-        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
+        explorerAction$.next({ action: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
         Object.assign(stateUpdate, getClearedSelectedAnomaliesState());
       }
 
@@ -935,8 +933,11 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           this.state.filteredFields.includes(swimlaneViewByFieldName) === false);
       }
 
-      this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
-      this.props.appStateHandler(APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME, { swimlaneViewByFieldName });
+      explorerAction$.next({ action: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
+      explorerAction$.next({
+        action: EXPLORER_ACTION.APP_STATE_SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
+        payload: { swimlaneViewByFieldName }
+      });
       this.setState({ swimlaneViewByFieldName, maskAll }, () => {
         this.updateExplorer({
           swimlaneViewByFieldName,
@@ -981,7 +982,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       // If selectedCells is an empty object we clear any existing selection,
       // otherwise we save the new selection in AppState and update the Explorer.
       if (Object.keys(swimlaneSelectedCells).length === 0) {
-        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
+        explorerAction$.next({ action: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
 
         const stateUpdate = getClearedSelectedAnomaliesState();
         this.updateExplorer(stateUpdate, false);
@@ -1000,7 +1001,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           swimlaneSelectedCells.showTopFieldValues = true;
         }
 
-        this.props.appStateHandler(APP_STATE_ACTION.SAVE_SELECTION, { swimlaneSelectedCells });
+        explorerAction$.next({ action: EXPLORER_ACTION.APP_STATE_SAVE_SELECTION, payload: { swimlaneSelectedCells } });
         this.updateExplorer({ selectedCells: swimlaneSelectedCells }, false);
       }
     }
@@ -1051,8 +1052,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       let selectedViewByFieldName = swimlaneViewByFieldName;
 
       if (influencersFilterQuery.match_all && Object.keys(influencersFilterQuery.match_all).length === 0) {
-        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS);
-        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
+        explorerAction$.next({ action: EXPLORER_ACTION.APP_STATE_CLEAR_INFLUENCER_FILTER_SETTINGS });
+        explorerAction$.next({ action: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
         const stateUpdate = {
           filterActive: false,
           filteredFields: [],
@@ -1069,10 +1070,10 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         // if it's an AND filter set view by swimlane to job ID as the others will have no results
         if (isAndOperator && selectedCells === null) {
           selectedViewByFieldName = VIEW_BY_JOB_LABEL;
-          this.props.appStateHandler(
-            APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
-            { swimlaneViewByFieldName: selectedViewByFieldName },
-          );
+          explorerAction$.next({
+            action: EXPLORER_ACTION.APP_STATE_SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
+            payload: { swimlaneViewByFieldName: selectedViewByFieldName },
+          });
         } else {
         // Set View by dropdown to first relevant fieldName based on incoming filter if there's no cell selection already
         // or if selected cell is from overall swimlane as this won't include an additional influencer filter
@@ -1080,17 +1081,19 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             if (viewBySwimlaneOptions.includes(filteredFields[i]) &&
                 ((selectedCells === null || (selectedCells && selectedCells.type === 'overall')))) {
               selectedViewByFieldName = filteredFields[i];
-              this.props.appStateHandler(
-                APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
-                { swimlaneViewByFieldName: selectedViewByFieldName },
-              );
+              explorerAction$.next({
+                action: EXPLORER_ACTION.APP_STATE_SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
+                payload: { swimlaneViewByFieldName: selectedViewByFieldName },
+              });
               break;
             }
           }
         }
 
-        this.props.appStateHandler(APP_STATE_ACTION.SAVE_INFLUENCER_FILTER_SETTINGS,
-          { influencersFilterQuery, filterActive: true, filteredFields, queryString, tableQueryString, isAndOperator });
+        explorerAction$.next({
+          action: EXPLORER_ACTION.APP_STATE_SAVE_INFLUENCER_FILTER_SETTINGS,
+          payload: { influencersFilterQuery, filterActive: true, filteredFields, queryString, tableQueryString, isAndOperator },
+        });
 
         this.updateExplorer({
           filterActive: true,

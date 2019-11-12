@@ -8,13 +8,15 @@
  * AngularJS directive wrapper for rendering Anomaly Explorer's React component.
  */
 
+import { isEqual, merge } from 'lodash';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 
 import moment from 'moment-timezone';
 
 import { from, of, Subscription } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, distinctUntilChanged, map } from 'rxjs/operators';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -33,8 +35,8 @@ import { showCharts$ } from '../components/controls/checkbox_showcharts';
 import { subscribeAppStateToObservable } from '../util/app_state_utils';
 
 import { Explorer } from './explorer';
-import { APP_STATE_ACTION, EXPLORER_ACTION } from './explorer_constants';
-import { explorerAction$ } from './explorer_dashboard_service';
+import { EXPLORER_ACTION } from './explorer_constants';
+import { explorerAction$, explorerState$ } from './explorer_dashboard_service';
 import { createJobs } from './explorer_utils';
 
 module.directive('mlExplorerDirective', function (config, globalState, $rootScope, $timeout, AppState) {
@@ -47,52 +49,6 @@ module.directive('mlExplorerDirective', function (config, globalState, $rootScop
     const tzConfig = config.get('dateFormat:tz');
     const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
 
-    $scope.appStateHandler = ((action, payload) => {
-      $scope.appState.fetch();
-
-      if (action === APP_STATE_ACTION.CLEAR_SELECTION) {
-        delete $scope.appState.mlExplorerSwimlane.selectedType;
-        delete $scope.appState.mlExplorerSwimlane.selectedLanes;
-        delete $scope.appState.mlExplorerSwimlane.selectedTimes;
-        delete $scope.appState.mlExplorerSwimlane.showTopFieldValues;
-      }
-
-      if (action === APP_STATE_ACTION.SAVE_SELECTION) {
-        const swimlaneSelectedCells = payload.swimlaneSelectedCells;
-        $scope.appState.mlExplorerSwimlane.selectedType = swimlaneSelectedCells.type;
-        $scope.appState.mlExplorerSwimlane.selectedLanes = swimlaneSelectedCells.lanes;
-        $scope.appState.mlExplorerSwimlane.selectedTimes = swimlaneSelectedCells.times;
-        $scope.appState.mlExplorerSwimlane.showTopFieldValues = swimlaneSelectedCells.showTopFieldValues;
-        $scope.appState.mlExplorerSwimlane.viewByFieldName = swimlaneSelectedCells.viewByFieldName;
-
-      }
-
-      if (action === APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME) {
-        $scope.appState.mlExplorerSwimlane.viewByFieldName = payload.swimlaneViewByFieldName;
-      }
-
-      if (action === APP_STATE_ACTION.SAVE_INFLUENCER_FILTER_SETTINGS) {
-        $scope.appState.mlExplorerFilter.influencersFilterQuery = payload.influencersFilterQuery;
-        $scope.appState.mlExplorerFilter.filterActive = payload.filterActive;
-        $scope.appState.mlExplorerFilter.filteredFields = payload.filteredFields;
-        $scope.appState.mlExplorerFilter.queryString = payload.queryString;
-      }
-
-      if (action === APP_STATE_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS) {
-        delete $scope.appState.mlExplorerFilter.influencersFilterQuery;
-        delete $scope.appState.mlExplorerFilter.filterActive;
-        delete $scope.appState.mlExplorerFilter.filteredFields;
-        delete $scope.appState.mlExplorerFilter.queryString;
-      }
-
-      $scope.appState.save();
-      $scope.$applyAsync();
-    });
-
-    subscriptions.add(subscribeAppStateToObservable(AppState, 'mlShowCharts', showCharts$, () => $rootScope.$applyAsync()));
-    subscriptions.add(subscribeAppStateToObservable(AppState, 'mlSelectInterval', interval$, () => $rootScope.$applyAsync()));
-    subscriptions.add(subscribeAppStateToObservable(AppState, 'mlSelectSeverity', severity$, () => $rootScope.$applyAsync()));
-
     // Initialize the AppState in which to store swimlane settings.
     // AppState is used to store state in the URL.
     $scope.appState = new AppState({
@@ -100,10 +56,25 @@ module.directive('mlExplorerDirective', function (config, globalState, $rootScop
       mlExplorerFilter: {}
     });
 
+    subscriptions.add(
+      explorerState$.pipe(
+        map(state => state.appState),
+        distinctUntilChanged(isEqual),
+      ).subscribe(appState => {
+        $scope.appState.fetch();
+        $scope.appState = merge($scope.appState, appState);
+        $scope.appState.save();
+        $scope.$applyAsync();
+      })
+    );
+
+    subscriptions.add(subscribeAppStateToObservable(AppState, 'mlShowCharts', showCharts$, () => $rootScope.$applyAsync()));
+    subscriptions.add(subscribeAppStateToObservable(AppState, 'mlSelectInterval', interval$, () => $rootScope.$applyAsync()));
+    subscriptions.add(subscribeAppStateToObservable(AppState, 'mlSelectSeverity', severity$, () => $rootScope.$applyAsync()));
+
     ReactDOM.render(
       <I18nContext>
         <Explorer {...{
-          appStateHandler: $scope.appStateHandler,
           componentDidMountCallback,
           dateFormatTz,
           globalState,

@@ -11,6 +11,8 @@
  * components in the Explorer dashboard.
  */
 
+import { cloneDeep } from 'lodash';
+
 import { from, isObservable, BehaviorSubject, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, flatMap, map, scan } from 'rxjs/operators';
 
@@ -46,6 +48,10 @@ export function getExplorerDefaultState() {
   return {
     annotationsData: [],
     anomalyChartRecords: [],
+    appState: {
+      mlExplorerSwimlane: {},
+      mlExplorerFilter: {}
+    },
     chartsData: getDefaultChartsData(),
     fieldFormatsLoading: false,
     filterActive: false,
@@ -103,6 +109,45 @@ const initialize = (state, payload) => {
   return { ...state, stateUpdate };
 };
 
+const appStateClearSelection = appState => {
+  delete appState.mlExplorerSwimlane.selectedType;
+  delete appState.mlExplorerSwimlane.selectedLanes;
+  delete appState.mlExplorerSwimlane.selectedTimes;
+  delete appState.mlExplorerSwimlane.showTopFieldValues;
+  return appState;
+};
+
+const appStateSaveSelection = (appState, payload) => {
+  const swimlaneSelectedCells = payload.swimlaneSelectedCells;
+  appState.mlExplorerSwimlane.selectedType = swimlaneSelectedCells.type;
+  appState.mlExplorerSwimlane.selectedLanes = swimlaneSelectedCells.lanes;
+  appState.mlExplorerSwimlane.selectedTimes = swimlaneSelectedCells.times;
+  appState.mlExplorerSwimlane.showTopFieldValues = swimlaneSelectedCells.showTopFieldValues;
+  appState.mlExplorerSwimlane.viewByFieldName = swimlaneSelectedCells.viewByFieldName;
+  return appState;
+};
+
+const appStateSaveSwimlaneViewByFieldName = (appState, payload) => {
+  appState.mlExplorerSwimlane.viewByFieldName = payload.swimlaneViewByFieldName;
+  return appState;
+};
+
+const appStateSaveInfluencerFilterSettings = (appState, payload) => {
+  appState.mlExplorerFilter.influencersFilterQuery = payload.influencersFilterQuery;
+  appState.mlExplorerFilter.filterActive = payload.filterActive;
+  appState.mlExplorerFilter.filteredFields = payload.filteredFields;
+  appState.mlExplorerFilter.queryString = payload.queryString;
+  return appState;
+};
+
+const appStateClearInfluencerFilterSettings = appState => {
+  delete appState.mlExplorerFilter.influencersFilterQuery;
+  delete appState.mlExplorerFilter.filterActive;
+  delete appState.mlExplorerFilter.filteredFields;
+  delete appState.mlExplorerFilter.queryString;
+  return appState;
+};
+
 const reducer = (state, nextAction) => {
   if (nextAction === null) {
     return state;
@@ -120,6 +165,21 @@ const reducer = (state, nextAction) => {
     case EXPLORER_ACTION.FIELD_FORMATS_LOADED:
       return { ...state, fieldFormatsLoading: false };
 
+    case EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION:
+      return { ...state, appState: appStateClearSelection(cloneDeep(state.appState)) };
+
+    case EXPLORER_ACTION.APP_STATE_SAVE_SELECTION:
+      return { ...state, appState: appStateSaveSelection(cloneDeep(state.appState), payload) };
+
+    case EXPLORER_ACTION.APP_STATE_SAVE_SWIMLANE_VIEW_BY_FIELD_NAME:
+      return { ...state, appState: appStateSaveSwimlaneViewByFieldName(cloneDeep(state.appState), payload) };
+
+    case EXPLORER_ACTION.APP_STATE_SAVE_INFLUENCER_FILTER_SETTINGS:
+      return { ...state, appState: appStateSaveInfluencerFilterSettings(cloneDeep(state.appState), payload) };
+
+    case EXPLORER_ACTION.APP_STATE_CLEAR_INFLUENCER_FILTER_SETTINGS:
+      return { ...state, appState: appStateClearInfluencerFilterSettings(cloneDeep(state.appState)) };
+
     default:
       return state;
   }
@@ -136,13 +196,34 @@ const triggerSideEffect = nextAction => {
 
 const filterSideEffect = nextAction => nextAction === null || !isObservable(nextAction.payload);
 
-export const explorer$ = explorerAction$.pipe(
+export const explorerFilteredAction$ = explorerAction$.pipe(
   flatMap((action) => isObservable(action) ? action : from([action])),
   map(triggerSideEffect),
   filter(filterSideEffect),
   distinctUntilChanged(((prev, curr) => (prev !== null && curr !== null && prev.action === curr.action)))
 );
 
-export const explorerState$ = explorer$.pipe(
+// filter events which should not be propagated to the Explorer react component.
+export const explorer$ = explorerFilteredAction$.pipe(
+  filter(action => {
+    if (action === null) {
+      return true;
+    }
+
+    switch(action.action) {
+      case EXPLORER_ACTION.IDLE:
+      case EXPLORER_ACTION.INITIALIZE:
+      case EXPLORER_ACTION.JOB_SELECTION_CHANGE:
+      case EXPLORER_ACTION.REDRAW:
+      case EXPLORER_ACTION.RELOAD:
+        return true;
+      default:
+        return false;
+    }
+  }),
+  distinctUntilChanged(((prev, curr) => (prev !== null && curr !== null && prev.action === curr.action)))
+);
+
+export const explorerState$ = explorerFilteredAction$.pipe(
   scan(reducer, getExplorerDefaultState())
 );
