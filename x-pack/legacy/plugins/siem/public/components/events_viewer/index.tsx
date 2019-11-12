@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { isEqual } from 'lodash/fp';
 import React, { useEffect, useState, useCallback } from 'react';
 import { connect } from 'react-redux';
@@ -19,6 +18,7 @@ import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { Sort } from '../timeline/body/sort';
 import { OnChangeItemsPerPage } from '../timeline/events';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 import { EventsViewer } from './events_viewer';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -33,7 +33,7 @@ interface StateReduxProps {
   activePage?: number;
   columns: ColumnHeader[];
   dataProviders?: DataProvider[];
-  filters: Filter[];
+  filters: esFilters.Filter[];
   isLive: boolean;
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];

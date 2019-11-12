@@ -289,7 +289,6 @@ const EXPECTED_DATA: DetailItem[] = [
     values: ['filebeat-7.0.0-iot-2019.06'],
     originalValue: 'filebeat-7.0.0-iot-2019.06',
   },
-  { field: '_type', values: ['_doc'], originalValue: '_doc' },
   {
     field: '_id',
     values: ['QRhG1WgBqd-n62SwZYDT'],

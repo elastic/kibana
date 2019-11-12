@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Filter, buildPhraseFilter, buildPhrasesFilter, buildExistsFilter } from '@kbn/es-query';
 import { IBucketAggConfig } from '../_bucket_agg_type';
+import { esFilters } from '../../../../../../plugins/data/public';
 
 export const createFilterTerms = (aggConfig: IBucketAggConfig, key: string, params: any) => {
   const field = aggConfig.params.field;
@@ -27,20 +27,20 @@ export const createFilterTerms = (aggConfig: IBucketAggConfig, key: string, para
   if (key === '__other__') {
     const terms = params.terms;
 
-    const phraseFilter = buildPhrasesFilter(field, terms, indexPattern);
+    const phraseFilter = esFilters.buildPhrasesFilter(field, terms, indexPattern);
     phraseFilter.meta.negate = true;
 
-    const filters: Filter[] = [phraseFilter];
+    const filters: esFilters.Filter[] = [phraseFilter];
 
     if (terms.some((term: string) => term === '__missing__')) {
-      filters.push(buildExistsFilter(field, indexPattern));
+      filters.push(esFilters.buildExistsFilter(field, indexPattern));
     }
 
     return filters;
   } else if (key === '__missing__') {
-    const existsFilter = buildExistsFilter(field, indexPattern);
+    const existsFilter = esFilters.buildExistsFilter(field, indexPattern);
     existsFilter.meta.negate = true;
     return existsFilter;
   }
-  return buildPhraseFilter(field, key, indexPattern);
+  return esFilters.buildPhraseFilter(field, key, indexPattern);
 };
