@@ -23,20 +23,19 @@ import {
 import { useForm, Form, FormDataProvider } from '../../../../shared_imports';
 import { useDispatch } from '../../../../mappings_state';
 import { TYPE_DEFINITION } from '../../../../constants';
-import { Field, NormalizedField, MainType, SubType } from '../../../../types';
+import { Field, NormalizedField, NormalizedFields, MainType, SubType } from '../../../../types';
 import { fieldSerializer, fieldDeserializer, getTypeDocLink } from '../../../../lib';
 import { getParametersFormForType } from '../field_types';
 import { UpdateFieldProvider, UpdateFieldFunc } from './update_field_provider';
 import { EditFieldHeaderForm } from './edit_field_header_form';
 import { EditFieldSection } from './edit_field_section';
 
-const formWrapper = (props: any) => <form {...props} />;
-
 interface Props {
   field: NormalizedField;
+  allFields: NormalizedFields['byId'];
 }
 
-export const EditField = React.memo(({ field }: Props) => {
+export const EditField = React.memo(({ field, allFields }: Props) => {
   const { form } = useForm<Field>({
     defaultValue: { ...field.source },
     serializer: fieldSerializer,
@@ -77,12 +76,7 @@ export const EditField = React.memo(({ field }: Props) => {
   return (
     <UpdateFieldProvider>
       {updateField => (
-        <Form
-          form={form}
-          style={{ padding: '20px 0' }}
-          FormWrapper={formWrapper}
-          onSubmit={getSubmitForm(updateField)}
-        >
+        <Form form={form} style={{ padding: '20px 0' }} onSubmit={getSubmitForm(updateField)}>
           <FormDataProvider pathsToWatch={['type', 'subType']}>
             {({ type, subType }) => {
               const typeDefinition = TYPE_DEFINITION[type as MainType];
@@ -106,7 +100,7 @@ export const EditField = React.memo(({ field }: Props) => {
                 >
                   <EuiFlyoutHeader>
                     <EuiTitle size="m">
-                      <h2>Edit field '{field.source.name}'</h2>
+                      <h2>Edit field &apos;{field.source.name}&apos;</h2>
                     </EuiTitle>
                     <EuiCode>{field.path}</EuiCode>
                     <EuiSpacer size="s" />
@@ -142,7 +136,7 @@ export const EditField = React.memo(({ field }: Props) => {
                       />
                     </EditFieldSection>
 
-                    {ParametersForm && <ParametersForm field={field} />}
+                    {ParametersForm && <ParametersForm field={field} allFields={allFields} />}
                   </EuiFlyoutBody>
 
                   <EuiFlyoutFooter>

@@ -58,7 +58,7 @@ export const DocumentFields = () => {
       return null;
     }
     const field = byId[fieldToEdit!];
-    return <EditField field={field} />;
+    return <EditField field={field} allFields={byId} />;
   };
 
   return (

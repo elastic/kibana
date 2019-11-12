@@ -12,6 +12,7 @@ import {
   fieldFormatters,
 } from '../shared_imports';
 import { INDEX_DEFAULT } from '../constants';
+import { AliasOption } from '../types';
 
 const { toInt } = fieldFormatters;
 const { emptyField, containsCharsField } = fieldValidators;
@@ -284,6 +285,19 @@ export const PARAMETERS_DEFINITION = {
       type: FIELD_TYPES.SELECT,
       defaultValue: 'no',
     },
+  },
+  path: {
+    fieldConfig: {
+      type: FIELD_TYPES.COMBO_BOX,
+      label: 'Field path',
+      helpText: 'The path of the field you want to point the alias to.',
+      validations: [
+        {
+          validator: emptyField('Select a field to point the alias to.'),
+        },
+      ],
+      serializer: (value: AliasOption[]) => (value.length === 0 ? '' : value[0].id),
+    } as FieldConfig<any, string>,
   },
   position_increment_gap: {
     fieldConfig: {

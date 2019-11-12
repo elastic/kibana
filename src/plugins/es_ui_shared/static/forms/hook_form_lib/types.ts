@@ -113,12 +113,12 @@ export interface FieldHook {
   __serializeOutput: (rawValue?: unknown) => unknown;
 }
 
-export interface FieldConfig<T extends object = any> {
+export interface FieldConfig<T extends object = any, ValueType = unknown> {
   readonly path?: string;
   readonly label?: string;
   readonly helpText?: string | ReactNode;
   readonly type?: HTMLInputElement['type'];
-  readonly defaultValue?: unknown;
+  readonly defaultValue?: ValueType;
   readonly validations?: Array<ValidationConfig<T>>;
   readonly formatters?: FormatterFunc[];
   readonly deserializer?: SerializerFunc;

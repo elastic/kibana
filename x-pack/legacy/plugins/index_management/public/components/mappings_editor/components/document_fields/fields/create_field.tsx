@@ -17,15 +17,10 @@ import {
 
 import { useForm, Form, FormDataProvider, SelectField, UseField } from '../../../shared_imports';
 
-import {
-  TYPE_DEFINITION,
-  FIELD_TYPES_OPTIONS,
-  MULTIFIELD_TYPES_OPTIONS,
-  EUI_SIZE,
-} from '../../../constants';
+import { TYPE_DEFINITION, FIELD_TYPES_OPTIONS, EUI_SIZE } from '../../../constants';
 
 import { useDispatch } from '../../../mappings_state';
-import { fieldSerializer, getFieldConfig } from '../../../lib';
+import { fieldSerializer, getFieldConfig, filterTypesForMultiField } from '../../../lib';
 import { Field, MainType } from '../../../types';
 import { NameParameter } from '../field_parameters';
 
@@ -90,6 +85,8 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
   const renderFormFields = (type: MainType) => {
     const typeDefinition = TYPE_DEFINITION[type];
+    const hasSubType = typeDefinition && typeDefinition.subTypes !== undefined;
+
     const subTypeOptions =
       typeDefinition && typeDefinition.subTypes
         ? typeDefinition.subTypes.types
@@ -112,14 +109,16 @@ export const CreateField = React.memo(function CreateFieldComponent({
             component={SelectField}
             componentProps={{
               euiFieldProps: {
-                options: isMultiField ? MULTIFIELD_TYPES_OPTIONS : FIELD_TYPES_OPTIONS,
+                options: isMultiField
+                  ? filterTypesForMultiField(FIELD_TYPES_OPTIONS)
+                  : FIELD_TYPES_OPTIONS,
               },
             }}
           />
         </EuiFlexItem>
 
         {/* Field sub type (if any) */}
-        {subTypeOptions && (
+        {hasSubType && (
           <EuiFlexItem grow={false}>
             <UseField
               path="subType"
@@ -131,7 +130,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
               component={SelectField}
               componentProps={{
                 euiFieldProps: {
-                  options: subTypeOptions,
+                  options: isMultiField
+                    ? filterTypesForMultiField(subTypeOptions!)
+                    : subTypeOptions,
                   hasNoInitialSelection: false,
                 },
               }}

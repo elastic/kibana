@@ -5,11 +5,11 @@
  */
 
 import React, { useState, Fragment } from 'react';
-import { EuiConfirmModal, EuiOverlayMask, EuiBadge } from '@elastic/eui';
+import { EuiConfirmModal, EuiOverlayMask, EuiBadge, EuiCode } from '@elastic/eui';
 
 import { useMappingsState, useDispatch } from '../../../mappings_state';
 import { NormalizedField } from '../../../types';
-import { buildFieldTreeFromIds } from '../../../lib';
+import { buildFieldTreeFromIds, getAllDescendantAliases } from '../../../lib';
 import { FieldsTree } from '../../fields_tree';
 
 type DeleteFieldFunc = (property: NormalizedField) => void;
@@ -21,24 +21,28 @@ interface Props {
 interface State {
   isModalOpen: boolean;
   field: NormalizedField | undefined;
+  aliases: string[];
 }
 
 export const DeleteFieldProvider = ({ children }: Props) => {
-  const [state, setState] = useState<State>({ isModalOpen: false, field: undefined });
+  const [state, setState] = useState<State>({ isModalOpen: false, field: undefined, aliases: [] });
   const dispatch = useDispatch();
-  const {
-    fields: { byId },
-  } = useMappingsState();
+  const { fields } = useMappingsState();
+  const { byId } = fields;
 
   const closeModal = () => {
-    setState({ isModalOpen: false, field: undefined });
+    setState({ isModalOpen: false, field: undefined, aliases: [] });
   };
 
   const deleteField: DeleteFieldFunc = field => {
     const { hasChildFields, hasMultiFields } = field;
+    const aliases = getAllDescendantAliases(field, fields)
+      .map(id => byId[id].path)
+      .sort();
+    const hasAliases = Boolean(aliases.length);
 
-    if (hasChildFields || hasMultiFields) {
-      setState({ isModalOpen: true, field });
+    if (hasChildFields || hasMultiFields || hasAliases) {
+      setState({ isModalOpen: true, field, aliases });
     } else {
       dispatch({ type: 'field.remove', value: field.id });
     }
@@ -51,23 +55,24 @@ export const DeleteFieldProvider = ({ children }: Props) => {
 
   const renderModal = () => {
     const field = state.field!;
-    const title = `Remove property '${field.source.name}'?`;
+    const { isMultiField, childFields } = field;
 
-    const fieldsTree = buildFieldTreeFromIds(
-      field.childFields!,
-      byId,
-      (fieldItem: NormalizedField) => (
-        <>
-          {fieldItem.source.name}
-          {fieldItem.isMultiField && (
+    const title = `Remove ${isMultiField ? 'multi-field' : 'field'} '${field.source.name}'?`;
+
+    const fieldsTree =
+      childFields && childFields.length
+        ? buildFieldTreeFromIds(childFields, byId, (fieldItem: NormalizedField) => (
             <>
-              {' '}
-              <EuiBadge color="hollow">multi-field</EuiBadge>
+              {fieldItem.source.name}
+              {fieldItem.isMultiField && (
+                <>
+                  {' '}
+                  <EuiBadge color="hollow">multi-field</EuiBadge>
+                </>
+              )}
             </>
-          )}
-        </>
-      )
-    );
+          ))
+        : null;
 
     return (
       <EuiOverlayMask>
@@ -79,10 +84,26 @@ export const DeleteFieldProvider = ({ children }: Props) => {
           buttonColor="danger"
           confirmButtonText="Remove"
         >
-          <Fragment>
-            <p>This will also delete the following fields.</p>
-            <FieldsTree fields={fieldsTree} />
-          </Fragment>
+          <>
+            {fieldsTree && (
+              <>
+                <p>This will also delete the following fields.</p>
+                <FieldsTree fields={fieldsTree} />
+              </>
+            )}
+            {Boolean(state.aliases.length) && (
+              <>
+                <p>The following aliases will also be deleted</p>
+                <ul>
+                  {state.aliases.map(path => (
+                    <li key={path}>
+                      <EuiCode>{path}</EuiCode>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </>
         </EuiConfirmModal>
       </EuiOverlayMask>
     );
