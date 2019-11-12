@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }) {
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
       expect(rowData).to
-        .be('customer_ssn:444.555.6666 customer_name:ABC Company customer_region:WEST _id:2 _type:_doc _index:flstest _score:0');
+        .be('customer_ssn:444.555.6666 customer_name:ABC Company customer_region:WEST _id:2 _type: - _index:flstest _score:0');
     });
 
     it('user customer2 should not see ssn', async function () {
@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }) {
         expect(hitCount).to.be('2');
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
-      expect(rowData).to.be('customer_name:ABC Company customer_region:WEST _id:2 _type:_doc _index:flstest _score:0');
+      expect(rowData).to.be('customer_name:ABC Company customer_region:WEST _id:2 _type: - _index:flstest _score:0');
     });
 
     after(async function () {
