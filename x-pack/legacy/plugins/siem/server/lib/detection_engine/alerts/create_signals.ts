@@ -57,10 +57,12 @@ export const updateIfIdExists = async ({
     });
     return signal;
   } catch (err) {
-    // This happens when we cannot get a saved object back from reading a signal.
-    // So we continue normally as we have nothing we can upsert.
+    if (err.output.statusCode === 404) {
+      return null;
+    } else {
+      return err;
+    }
   }
-  return null;
 };
 
 export const createSignals = async ({
@@ -124,7 +126,7 @@ export const createSignals = async ({
 
     return alertsClient.create({
       data: {
-        name: 'SIEM Alert',
+        name,
         alertTypeId: SIGNALS_ID,
         alertTypeParams: {
           description,
@@ -137,7 +139,6 @@ export const createSignals = async ({
           savedId,
           filters,
           maxSignals,
-          name,
           severity,
           to,
           type,

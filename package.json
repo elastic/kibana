@@ -106,7 +106,7 @@
   "dependencies": {
     "@babel/core": "^7.5.5",
     "@babel/register": "^7.5.5",
-    "@elastic/charts": "^13.5.12",
+    "@elastic/charts": "^14.0.0",
     "@elastic/datemath": "5.0.2",
     "@elastic/ems-client": "1.0.5",
     "@elastic/eui": "14.8.0",
@@ -362,7 +362,7 @@
     "chance": "1.0.18",
     "cheerio": "0.22.0",
     "chokidar": "3.2.1",
-    "chromedriver": "^78.0.1",
+    "chromedriver": "^77.0.0",
     "classnames": "2.2.6",
     "dedent": "^0.7.0",
     "delete-empty": "^2.0.0",
