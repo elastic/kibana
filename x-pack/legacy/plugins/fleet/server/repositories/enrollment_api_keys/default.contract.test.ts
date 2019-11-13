@@ -60,7 +60,7 @@ describe('Enrollment api key Repository', () => {
       soAdapter = new MemorizeSODatabaseAdapter(baseAdapter);
 
       const baseEncyrptedSOAdapter = new EncryptedSavedObjects(
-        servers.kbnServer.plugins.encrypted_saved_objects
+        servers.kbnServer.newPlatform.start.plugins.encryptedSavedObjects
       );
 
       encryptedSavedObject = (new MemorizeEncryptedSavedObjects(

@@ -10,9 +10,9 @@ exports['ApiKeys Lib verifyAccessApiKey should verify a valid api key - find:"en
 
 exports['ApiKeys Lib verifyAccessApiKey should verify a valid api key - createApiKey (2)'] = {
   "results": {
-    "id": "LYGwYW4BRqAA7lA4uxwZ",
-    "name": "TEST API KEY: a2d68f4e-d39b-418f-b7c6-5d394e05e793",
-    "api_key": "KWweDwVmQYiGXuJaOrcsZw"
+    "id": "r7NDZW4B4KwD6w8o_-VN",
+    "name": "TEST API KEY: 4aae3a09-e9d1-4a12-8a57-0206ba925049",
+    "api_key": "xO4Ms-OZRWWtE61N8MWqLw"
   }
 }
 
@@ -62,23 +62,23 @@ exports['ApiKeys Lib verifyEnrollmentApiKey should verify a valid api key - find
 
 exports['ApiKeys Lib verifyEnrollmentApiKey should verify a valid api key - createApiKey (2)'] = {
   "results": {
-    "id": "LoGwYW4BRqAA7lA4vRzu",
-    "name": "TEST API KEY: a80931d8-45ab-4470-ad58-aa77b22b0da5",
-    "api_key": "KroDUH-EQoGe2Nba2lwIgg"
+    "id": "sLNEZW4B4KwD6w8oAeXf",
+    "name": "TEST API KEY: cac73ad9-e757-49e2-9bd9-40fbdce6bf99",
+    "api_key": "77eOdCJnRWOegQ1iIjGnDg"
   }
 }
 
 exports['ApiKeys Lib verifyEnrollmentApiKey should verify a valid api key - create:enrollment_api_keys (3)'] = {
   "results": {
     "type": "enrollment_api_keys",
-    "id": "8079d061-ae22-4d38-b833-7ccfa8e6123e",
+    "id": "6850373a-bb23-4f02-bb21-c0acbafcd3d8",
     "attributes": {
       "active": true,
-      "api_key_id": "LoGwYW4BRqAA7lA4vRzu"
+      "api_key_id": "sLNEZW4B4KwD6w8oAeXf"
     },
     "references": [],
-    "updated_at": "2019-11-12T22:16:44.203Z",
-    "version": "WzU2LDFd"
+    "updated_at": "2019-11-13T14:56:27.037Z",
+    "version": "WzMxMiwxXQ=="
   }
 }
 
@@ -111,30 +111,30 @@ exports['ApiKeys Lib verifyEnrollmentApiKey should verify a valid api key - find
     "saved_objects": [
       {
         "type": "enrollment_api_keys",
-        "id": "8079d061-ae22-4d38-b833-7ccfa8e6123e",
+        "id": "6850373a-bb23-4f02-bb21-c0acbafcd3d8",
         "attributes": {
           "active": true,
-          "api_key_id": "LoGwYW4BRqAA7lA4vRzu",
-          "api_key": "uSHMysdxzn1+tLY/0nLa98gd3GUd0IKPL4mGZD/foQoXqMBds/3fbTuPVQZSLefXJC7VyAejcguA9PHs9Cv5MSWmhQYJ37XowvqlyjJXmj26+en64wS6a3ARnbJW82enVZMQTK4d1gFDs26/dVQTLGOZDjodwUY4ITfHLuomZ8NjJdmYN7bEWgwSBI71yZXmmg5pdgPMcbOB3Q=="
+          "api_key_id": "sLNEZW4B4KwD6w8oAeXf",
+          "api_key": "y7Zz4tVm3miSfv1W1rd9zAROGpHBVtGKScnQvnDikCWUo1X3DUFTNnOI99B0H4gngrSvq1U8DKofCF7hP0jrGSJqLmuntGss5hES2DvO7/5djsCVf3kva+uTwW18gGsWTP707l7TCMfewDCETNtKBIwxt8w4/j/FfOXxusi1W1PebmiQFspZZTQ30dWKXZ9yzjs6VXqwpIF3Sw=="
         },
         "references": [],
-        "updated_at": "2019-11-12T22:16:44.203Z",
-        "version": "WzU2LDFd"
+        "updated_at": "2019-11-13T14:56:27.037Z",
+        "version": "WzMxMiwxXQ=="
       }
     ]
   }
 }
 
-exports['ApiKeys Lib verifyEnrollmentApiKey should verify a valid api key - getDecryptedAsInternalUser:enrollment_api_keys:8079d061-ae22-4d38-b833-7ccfa8e6123e (6)'] = {
+exports['ApiKeys Lib verifyEnrollmentApiKey should verify a valid api key - getDecryptedAsInternalUser:enrollment_api_keys:6850373a-bb23-4f02-bb21-c0acbafcd3d8 (6)'] = {
   "results": {
-    "id": "8079d061-ae22-4d38-b833-7ccfa8e6123e",
+    "id": "6850373a-bb23-4f02-bb21-c0acbafcd3d8",
     "type": "enrollment_api_keys",
-    "updated_at": "2019-11-12T22:16:44.203Z",
-    "version": "WzU2LDFd",
+    "updated_at": "2019-11-13T14:56:27.037Z",
+    "version": "WzMxMiwxXQ==",
     "attributes": {
       "active": true,
-      "api_key_id": "LoGwYW4BRqAA7lA4vRzu",
-      "api_key": "TG9Hd1lXNEJScUFBN2xBNHZSenU6S3JvRFVILUVRb0dlMk5iYTJsd0lnZw=="
+      "api_key_id": "sLNEZW4B4KwD6w8oAeXf",
+      "api_key": "c0xORVpXNEI0S3dENnc4b0FlWGY6NzdlT2RDSm5SV09lZ1ExaUlqR25EZw=="
     },
     "references": []
   }
@@ -148,14 +148,14 @@ exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive enrolle
     "saved_objects": [
       {
         "type": "enrollment_api_keys",
-        "id": "8079d061-ae22-4d38-b833-7ccfa8e6123e",
+        "id": "6850373a-bb23-4f02-bb21-c0acbafcd3d8",
         "attributes": {
           "active": true,
-          "api_key_id": "LoGwYW4BRqAA7lA4vRzu"
+          "api_key_id": "sLNEZW4B4KwD6w8oAeXf"
         },
         "references": [],
-        "updated_at": "2019-11-12T22:16:44.203Z",
-        "version": "WzU2LDFd"
+        "updated_at": "2019-11-13T14:56:27.037Z",
+        "version": "WzMxMiwxXQ=="
       }
     ]
   }
@@ -167,23 +167,23 @@ exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive enrolle
 
 exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive enrollemnt api key - createApiKey (3)'] = {
   "results": {
-    "id": "L4GwYW4BRqAA7lA4xhxO",
-    "name": "TEST API KEY: d0399733-6375-4452-a144-a6c361bf4729",
-    "api_key": "yrgengviTC6Kvpuoeo9Aag"
+    "id": "sbNEZW4B4KwD6w8oDOXF",
+    "name": "TEST API KEY: c0120d29-ef06-45e8-9649-431939f26e59",
+    "api_key": "m07xSOsSSk6qroc-hM0gnw"
   }
 }
 
 exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive enrollemnt api key - create:enrollment_api_keys (4)'] = {
   "results": {
     "type": "enrollment_api_keys",
-    "id": "da8f4486-f7c2-421d-814e-9d6145a4e554",
+    "id": "340f1199-6036-47e0-9b94-a69516fe4629",
     "attributes": {
       "active": false,
-      "api_key_id": "L4GwYW4BRqAA7lA4xhxO"
+      "api_key_id": "sbNEZW4B4KwD6w8oDOXF"
     },
     "references": [],
-    "updated_at": "2019-11-12T22:16:46.241Z",
-    "version": "WzU4LDFd"
+    "updated_at": "2019-11-13T14:56:29.059Z",
+    "version": "WzMxNCwxXQ=="
   }
 }
 
@@ -216,30 +216,30 @@ exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive enrolle
     "saved_objects": [
       {
         "type": "enrollment_api_keys",
-        "id": "da8f4486-f7c2-421d-814e-9d6145a4e554",
+        "id": "340f1199-6036-47e0-9b94-a69516fe4629",
         "attributes": {
           "active": false,
-          "api_key_id": "L4GwYW4BRqAA7lA4xhxO",
-          "api_key": "1zSIPopNRW+24TPjMx11TX7pJP3J28xlmYD4V6FYhv4jnJkSfZycEaOj2sUwVF4qPrf680AdPgKyPXK62F3ggZhpu2d6LmQlDtErdSmZn7JVMNzws0QuVGuvZ9U15VUWVq2XXaLgVI77uHNX4YL+Y0BtadX3tvbCsNYu0dBZKBpv7GgVBj0cQiz2ygnLroh0r7QMEtCcvvpooA=="
+          "api_key_id": "sbNEZW4B4KwD6w8oDOXF",
+          "api_key": "5y+RPHiBwUF0Kt8g/uJXlZ8OzR2oQSju6Btm+yv5px5CrhjA1575pQpSW+2kW/MZdmkev9fY+8VMLaGsM4pGoYQfh0PlbkZQ3XQW+mvFvrhMvFX+gZfvS+0AQE27dhRm6qvj091N/gmDGkfm4JZD8kE9CznyZSEmnmNtTeqt/XnuHTRg609J5EPkGtyw8WpA2DohNtzQUiFGiQ=="
         },
         "references": [],
-        "updated_at": "2019-11-12T22:16:46.241Z",
-        "version": "WzU4LDFd"
+        "updated_at": "2019-11-13T14:56:29.059Z",
+        "version": "WzMxNCwxXQ=="
       }
     ]
   }
 }
 
-exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive enrollemnt api key - getDecryptedAsInternalUser:enrollment_api_keys:da8f4486-f7c2-421d-814e-9d6145a4e554 (7)'] = {
+exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive enrollemnt api key - getDecryptedAsInternalUser:enrollment_api_keys:340f1199-6036-47e0-9b94-a69516fe4629 (7)'] = {
   "results": {
-    "id": "da8f4486-f7c2-421d-814e-9d6145a4e554",
+    "id": "340f1199-6036-47e0-9b94-a69516fe4629",
     "type": "enrollment_api_keys",
-    "updated_at": "2019-11-12T22:16:46.241Z",
-    "version": "WzU4LDFd",
+    "updated_at": "2019-11-13T14:56:29.059Z",
+    "version": "WzMxNCwxXQ==",
     "attributes": {
       "active": false,
-      "api_key_id": "L4GwYW4BRqAA7lA4xhxO",
-      "api_key": "TDRHd1lXNEJScUFBN2xBNHhoeE86eXJnZW5ndmlUQzZLdnB1b2VvOUFhZw=="
+      "api_key_id": "sbNEZW4B4KwD6w8oDOXF",
+      "api_key": "c2JORVpXNEI0S3dENnc4b0RPWEY6bTA3eFNPc1NTazZxcm9jLWhNMGdudw=="
     },
     "references": []
   }
@@ -253,14 +253,14 @@ exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive an enro
     "saved_objects": [
       {
         "type": "enrollment_api_keys",
-        "id": "da8f4486-f7c2-421d-814e-9d6145a4e554",
+        "id": "340f1199-6036-47e0-9b94-a69516fe4629",
         "attributes": {
           "active": false,
-          "api_key_id": "L4GwYW4BRqAA7lA4xhxO"
+          "api_key_id": "sbNEZW4B4KwD6w8oDOXF"
         },
         "references": [],
-        "updated_at": "2019-11-12T22:16:46.241Z",
-        "version": "WzU4LDFd"
+        "updated_at": "2019-11-13T14:56:29.059Z",
+        "version": "WzMxNCwxXQ=="
       }
     ]
   }
@@ -272,9 +272,9 @@ exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive an enro
 
 exports['ApiKeys Lib verifyEnrollmentApiKey should not verify a inactive an enrollemnt api key not persisted - createApiKey (3)'] = {
   "results": {
-    "id": "MIGwYW4BRqAA7lA4zhw6",
-    "name": "TEST API KEY: 7aa86980-2436-40d7-a27c-374f89bbd5ef",
-    "api_key": "pLD6RAYQQEu7dtUjtJrnYw"
+    "id": "srNEZW4B4KwD6w8oFOWo",
+    "name": "TEST API KEY: d7b015ad-ed9e-4bdc-a4e7-db6449d69f44",
+    "api_key": "rfo24UgTQ9ecyZZ-erxfkQ"
   }
 }
 
@@ -333,26 +333,26 @@ exports['ApiKeys Lib generateEnrollmentApiKey should generate a valid ApiKey - f
 
 exports['ApiKeys Lib generateEnrollmentApiKey should generate a valid ApiKey - createApiKey (2)'] = {
   "results": {
-    "id": "MYGwYW4BRqAA7lA40Ry1",
-    "name": "Fleet:EnrollmentApiKey:518531f3-388b-498b-b6c3-31fb97be0abd:policy1",
-    "api_key": "4TERXBlWSh2zG7-sP7Chng"
+    "id": "s7NEZW4B4KwD6w8oFeVt",
+    "name": "Fleet:EnrollmentApiKey:294002ed-c668-4970-9fcf-f516341673fa:policy1",
+    "api_key": "9sWTYpGNTCilNbYkl9lNFg"
   }
 }
 
 exports['ApiKeys Lib generateEnrollmentApiKey should generate a valid ApiKey - create:enrollment_api_keys (3)'] = {
   "results": {
     "type": "enrollment_api_keys",
-    "id": "d014427e-f847-477f-ba03-5726bd0139ba",
+    "id": "dca6bb47-53d6-4317-99e5-30760483bbbe",
     "attributes": {
-      "created_at": "2019-11-12T22:16:49.260Z",
-      "api_key_id": "MYGwYW4BRqAA7lA40Ry1",
+      "created_at": "2019-11-13T14:56:32.063Z",
+      "api_key_id": "s7NEZW4B4KwD6w8oFeVt",
       "policy_id": "policy1",
       "active": true,
       "enrollment_rules": [],
-      "name": "Fleet:EnrollmentApiKey:518531f3-388b-498b-b6c3-31fb97be0abd:policy1"
+      "name": "Fleet:EnrollmentApiKey:294002ed-c668-4970-9fcf-f516341673fa:policy1"
     },
     "references": [],
-    "updated_at": "2019-11-12T22:16:49.276Z",
-    "version": "WzYwLDFd"
+    "updated_at": "2019-11-13T14:56:32.078Z",
+    "version": "WzMxNiwxXQ=="
   }
 }
