@@ -31,7 +31,7 @@ const testPaths = [
 ];
 
 test('testPathParts', () => {
-  testPaths.forEach(value => {
+  for (const value of testPaths) {
     expect(pathParts(value.path)).toStrictEqual(value.assetParts as AssetParts);
-  });
+  }
 });
