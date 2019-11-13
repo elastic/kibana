@@ -83,7 +83,7 @@ export function clearServices() {
 
 // export types
 export { DocTitle } from 'ui/doc_title/doc_title';
-export { VisSavedObject } from 'ui/visualize/loader/types';
+export { VisSavedObject } from './embeddable/visualize_embeddable';
 export { EmbeddableFactory, ErrorEmbeddable } from '../../../../../plugins/embeddable/public';
 
 // export legacy static dependencies
@@ -96,4 +96,3 @@ export { showShareContextMenu } from 'ui/share';
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-export { getVisualizeLoader } from 'ui/visualize/loader';

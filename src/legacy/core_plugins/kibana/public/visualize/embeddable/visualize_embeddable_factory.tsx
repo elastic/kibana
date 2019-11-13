@@ -42,7 +42,6 @@ import { Legacy } from 'kibana';
 import { capabilities } from 'ui/capabilities';
 
 import chrome from 'ui/chrome';
-import { getVisualizeLoader } from 'ui/visualize/loader';
 
 import { SavedObjectAttributes } from 'kibana/server';
 import {
@@ -56,10 +55,14 @@ import { showNewVisModal } from '../wizard';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getIndexPattern } from './get_index_pattern';
-import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualize_embeddable';
+import {
+  VisualizeEmbeddable,
+  VisualizeInput,
+  VisualizeOutput,
+  VisSavedObject,
+} from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
-import { VisSavedObject } from '../../../../../ui/public/visualize/loader/types';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;

@@ -142,7 +142,7 @@ export class VisualizePlugin implements Plugin {
         };
         setServices(deps);
 
-        const { renderApp } = await import('./render_app');
+        const { renderApp } = await import('./application');
         return renderApp(params.element, params.appBasePath, deps);
       },
     };
@@ -164,7 +164,7 @@ export class VisualizePlugin implements Plugin {
     VisEditorTypesRegistryProvider.register(defaultEditor);
   }
 
-  async start(
+  public start(
     { savedObjects: { client: savedObjectsClient } }: CoreStart,
     { dataStart, embeddables, navigation, visualizations, npData }: VisualizePluginStartDependencies
   ) {
