@@ -30,7 +30,6 @@ import uiRoutes from 'ui/routes';
 import { DOC_LINK_VERSION } from 'ui/documentation_links';
 import { I18nContext } from 'ui/i18n';
 import { ResizeChecker } from 'ui/resize_checker';
-import 'ui/autoload/styles';
 import 'ui/capabilities/route_setup';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 

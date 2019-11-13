@@ -24,7 +24,7 @@ export function getTransactionsProjection({
   transactionName?: string;
   transactionType?: string;
 }) {
-  const { start, end, uiFiltersES, config } = setup;
+  const { start, end, uiFiltersES, indices } = setup;
 
   const transactionNameFilter = transactionName
     ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
@@ -48,7 +48,7 @@ export function getTransactionsProjection({
   };
 
   return {
-    index: config.get<string>('apm_oss.transactionIndices'),
+    index: indices['apm_oss.transactionIndices'],
     body: {
       query: {
         bool

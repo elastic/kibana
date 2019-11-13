@@ -24,8 +24,8 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { getFilterGenerator } from '..';
 import { FilterBarQueryFilterProvider } from '../../filter_manager/query_filter';
-import { uniqFilters } from '../../../../core_plugins/data/public/filter/filter_manager/lib/uniq_filters';
-import { getPhraseScript } from '@kbn/es-query';
+import { uniqFilters, esFilters } from '../../../../../plugins/data/public';
+
 let queryFilter;
 let filterGen;
 let appState;
@@ -137,14 +137,14 @@ describe('Filter Manager', function () {
     filterGen.add(scriptedField, 1, '+', 'myIndex');
     checkAddFilters(1, [{
       meta: { index: 'myIndex', negate: false, field: 'scriptedField' },
-      script: getPhraseScript(scriptedField, 1)
+      script: esFilters.getPhraseScript(scriptedField, 1)
     }], 4);
     expect(appState.filters).to.have.length(3);
 
     filterGen.add(scriptedField, 1, '-', 'myIndex');
     checkAddFilters(1, [{
       meta: { index: 'myIndex', negate: true, disabled: false, field: 'scriptedField' },
-      script: getPhraseScript(scriptedField, 1)
+      script: esFilters.getPhraseScript(scriptedField, 1)
     }], 5);
     expect(appState.filters).to.have.length(3);
   });

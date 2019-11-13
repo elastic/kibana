@@ -5,7 +5,7 @@
  */
 
 import { EuiAvatar, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import styled, { injectGlobal } from 'styled-components';
 
 import { Note } from '../../../lib/note';
@@ -113,18 +113,28 @@ export const Properties = React.memo<Props>(
   }) => {
     const [showActions, setShowActions] = useState(false);
     const [showNotes, setShowNotes] = useState(false);
+    const [showTimelineModal, setShowTimelineModal] = useState(false);
 
-    const onButtonClick = () => {
+    const onButtonClick = useCallback(() => {
       setShowActions(!showActions);
-    };
+    }, [showActions]);
 
-    const onToggleShowNotes = () => {
+    const onToggleShowNotes = useCallback(() => {
       setShowNotes(!showNotes);
-    };
+    }, [showNotes]);
 
-    const onClosePopover = () => {
+    const onClosePopover = useCallback(() => {
       setShowActions(false);
-    };
+    }, []);
+
+    const onOpenTimelineModal = useCallback(() => {
+      onClosePopover();
+      setShowTimelineModal(true);
+    }, []);
+
+    const onCloseTimelineModal = useCallback(() => {
+      setShowTimelineModal(false);
+    }, []);
 
     const datePickerWidth =
       width -
@@ -173,11 +183,14 @@ export const Properties = React.memo<Props>(
           noteIds={noteIds}
           onButtonClick={onButtonClick}
           onClosePopover={onClosePopover}
+          onCloseTimelineModal={onCloseTimelineModal}
+          onOpenTimelineModal={onOpenTimelineModal}
           onToggleShowNotes={onToggleShowNotes}
           showActions={showActions}
           showDescription={width < showDescriptionThreshold}
           showNotes={showNotes}
           showNotesFromWidth={width < showNotesThreshold}
+          showTimelineModal={showTimelineModal}
           showUsersView={title.length > 0}
           timelineId={timelineId}
           updateDescription={updateDescription}

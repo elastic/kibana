@@ -69,7 +69,7 @@ describe('UiExports', function () {
     sandbox
       .stub(getUiSettingsServiceForRequestNS, 'getUiSettingsServiceForRequest')
       .returns({
-        getDefaults: noop,
+        getRegistered: noop,
         getUserProvided: noop
       });
   });

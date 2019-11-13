@@ -66,7 +66,7 @@ window.TextEncoder = null;
 let component;
 const activatePhase = (rendered, phase) => {
   const testSubject = `enablePhaseSwitch-${phase}`;
-  findTestSubject(rendered, testSubject).simulate('change', { target: { checked: true } });
+  findTestSubject(rendered, testSubject).simulate('click');
   rendered.update();
 };
 const expectedErrorMessages = (rendered, expectedErrorMessages) => {
@@ -83,7 +83,7 @@ const expectedErrorMessages = (rendered, expectedErrorMessages) => {
   });
 };
 const noRollover = (rendered) => {
-  findTestSubject(rendered, 'rolloverSwitch').simulate('change', { target: { checked: false } });
+  findTestSubject(rendered, 'rolloverSwitch').simulate('click');
   rendered.update();
 };
 const getNodeAttributeSelect = (rendered, phase) => {
@@ -155,7 +155,7 @@ describe('edit policy', () => {
         </Provider>
       );
       const rendered = mountWithIntl(component);
-      findTestSubject(rendered, 'saveAsNewSwitch').simulate('change', { target: { checked: true } });
+      findTestSubject(rendered, 'saveAsNewSwitch').simulate('click');
       rendered.update();
       setPolicyName(rendered, 'testy0');
       save(rendered);
@@ -275,7 +275,7 @@ describe('edit policy', () => {
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       activatePhase(rendered, 'warm');
-      findTestSubject(rendered, 'shrinkSwitch').simulate('change', { target: { checked: true } });
+      findTestSubject(rendered, 'shrinkSwitch').simulate('click');
       rendered.update();
       setPhaseAfter(rendered, 'warm', 1);
       const shrinkInput = rendered.find('input#warm-selectedPrimaryShardCount');
@@ -290,7 +290,7 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', 1);
-      findTestSubject(rendered, 'shrinkSwitch').simulate('change', { target: { checked: true } });
+      findTestSubject(rendered, 'shrinkSwitch').simulate('click');
       rendered.update();
       const shrinkInput = rendered.find('input#warm-selectedPrimaryShardCount');
       shrinkInput.simulate('change', { target: { value: '-1' } });
@@ -304,7 +304,7 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', 1);
-      findTestSubject(rendered, 'forceMergeSwitch').simulate('change', { target: { checked: true } });
+      findTestSubject(rendered, 'forceMergeSwitch').simulate('click');
       rendered.update();
       const shrinkInput = rendered.find('input#warm-selectedForceMergeSegments');
       shrinkInput.simulate('change', { target: { value: '0' } });
@@ -318,7 +318,7 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', 1);
-      findTestSubject(rendered, 'forceMergeSwitch').simulate('change', { target: { checked: true } });
+      findTestSubject(rendered, 'forceMergeSwitch').simulate('click');
       rendered.update();
       const shrinkInput = rendered.find('input#warm-selectedForceMergeSegments');
       shrinkInput.simulate('change', { target: { value: '-1' } });

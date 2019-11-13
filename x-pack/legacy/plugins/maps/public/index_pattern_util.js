@@ -28,6 +28,7 @@ export function getTermsFields(fields) {
 export function getSourceFields(fields) {
   return fields.filter(field => {
     // Multi fields are not stored in _source and only exist in index.
-    return field.subType !== 'multi';
+    const isMultiField = field.subType && field.subType.multi;
+    return !isMultiField;
   });
 }

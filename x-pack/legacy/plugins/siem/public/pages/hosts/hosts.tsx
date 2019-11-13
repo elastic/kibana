@@ -5,63 +5,54 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import { Filter, getEsQueryConfig } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/es-query';
 import * as React from 'react';
-import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
-import { ActionCreator } from 'typescript-fsa';
-import { Query } from 'src/plugins/data/common';
+import { compose } from 'redux';
 
 import { FiltersGlobal } from '../../components/filters_global';
-import { GlobalTimeArgs } from '../../containers/global_time';
 import { HeaderPage } from '../../components/header_page';
-import { KpiHostsQuery } from '../../containers/kpi_hosts';
 import { LastEventTime } from '../../components/last_event_time';
+import { hasMlUserPermissions } from '../../components/ml/permissions/has_ml_user_permissions';
+import { MlCapabilitiesContext } from '../../components/ml/permissions/ml_capabilities_provider';
 import { SiemNavigation } from '../../components/navigation';
 import { KpiHostsComponent } from '../../components/page/hosts';
 import { manageQuery } from '../../components/page/manage_query';
-import { hasMlUserPermissions } from '../../components/ml/permissions/has_ml_user_permissions';
-import { MlCapabilitiesContext } from '../../components/ml/permissions/ml_capabilities_provider';
 import { SiemSearchBar } from '../../components/search_bar';
+import { WrapperPage } from '../../components/wrapper_page';
+import { GlobalTimeArgs } from '../../containers/global_time';
+import { KpiHostsQuery } from '../../containers/kpi_hosts';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { LastEventIndexKey } from '../../graphql/types';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { convertToBuildEsQuery } from '../../lib/keury';
-import { inputsSelectors, State } from '../../store';
+import { inputsSelectors, State, hostsModel } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
-import { InputsModelId } from '../../store/inputs/constants';
 import { SpyRoute } from '../../utils/route/spy_routes';
-
 import { HostsEmptyPage } from './hosts_empty_page';
+import { HostsTabs } from './hosts_tabs';
 import { navTabsHosts } from './nav_tabs';
 import * as i18n from './translations';
-import { useKibanaCore } from '../../lib/compose/kibana_core';
+import { HostsComponentProps, HostsComponentReduxProps } from './types';
 
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
-interface HostsComponentReduxProps {
-  query: Query;
-  filters: Filter[];
-}
-
-interface HostsComponentDispatchProps {
-  setAbsoluteRangeDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: number;
-    to: number;
-  }>;
-}
-
-export type HostsQueryProps = { timezone?: string } & GlobalTimeArgs;
-
-export type HostsComponentProps = HostsComponentReduxProps &
-  HostsComponentDispatchProps &
-  HostsQueryProps;
-
 const HostsComponent = React.memo<HostsComponentProps>(
-  ({ isInitializing, filters, from, query, setAbsoluteRangeDatePicker, setQuery, to }) => {
+  ({
+    deleteQuery,
+    isInitializing,
+    filters,
+    from,
+    query,
+    setAbsoluteRangeDatePicker,
+    setQuery,
+    to,
+    hostsPagePath,
+  }) => {
     const capabilities = React.useContext(MlCapabilitiesContext);
     const core = useKibanaCore();
+
     return (
       <>
         <WithSource sourceId="default">
@@ -78,11 +69,13 @@ const HostsComponent = React.memo<HostsComponentProps>(
                   <SiemSearchBar indexPattern={indexPattern} id="global" />
                 </FiltersGlobal>
 
-                <HeaderPage
-                  subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
-                  title={i18n.PAGE_TITLE}
-                />
-                <>
+                <WrapperPage>
+                  <HeaderPage
+                    border
+                    subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
+                    title={i18n.PAGE_TITLE}
+                  />
+
                   <KpiHostsQuery
                     endDate={to}
                     filterQuery={filterQuery}
@@ -106,29 +99,42 @@ const HostsComponent = React.memo<HostsComponentProps>(
                       />
                     )}
                   </KpiHostsQuery>
+
                   <EuiSpacer />
-                  <SiemNavigation
-                    navTabs={navTabsHosts(hasMlUserPermissions(capabilities))}
-                    display="default"
-                    showBorder={true}
+
+                  <SiemNavigation navTabs={navTabsHosts(hasMlUserPermissions(capabilities))} />
+
+                  <EuiSpacer />
+
+                  <HostsTabs
+                    deleteQuery={deleteQuery}
+                    to={to}
+                    filterQuery={filterQuery}
+                    isInitializing={isInitializing}
+                    setQuery={setQuery}
+                    from={from}
+                    type={hostsModel.HostsType.page}
+                    indexPattern={indexPattern}
+                    setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+                    hostsPagePath={hostsPagePath}
                   />
-                  <EuiSpacer />
-                </>
+                </WrapperPage>
               </StickyContainer>
             ) : (
-              <>
-                <HeaderPage title={i18n.PAGE_TITLE} />
+              <WrapperPage>
+                <HeaderPage border title={i18n.PAGE_TITLE} />
+
                 <HostsEmptyPage />
-              </>
+              </WrapperPage>
             );
           }}
         </WithSource>
+
         <SpyRoute />
       </>
     );
   }
 );
-
 HostsComponent.displayName = 'HostsComponent';
 
 const makeMapStateToProps = () => {
@@ -142,12 +148,13 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
+interface HostsProps extends GlobalTimeArgs {
+  hostsPagePath: string;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const Hosts = compose<React.ComponentClass<GlobalTimeArgs>>(
-  connect(
-    makeMapStateToProps,
-    {
-      setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-    }
-  )
+export const Hosts = compose<React.ComponentClass<HostsProps>>(
+  connect(makeMapStateToProps, {
+    setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
+  })
 )(HostsComponent);

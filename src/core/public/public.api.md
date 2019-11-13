@@ -11,9 +11,12 @@ import React from 'react';
 import * as Rx from 'rxjs';
 import { ShallowPromise } from '@kbn/utility-types';
 import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
+import { UiSettingsParams as UiSettingsParams_2 } from 'src/core/server/types';
+import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @public
 export interface App extends AppBase {
+    chromeless?: boolean;
     mount: (context: AppMountContext, params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
 }
 
@@ -105,6 +108,16 @@ export interface ChromeBrand {
 // @public (undocumented)
 export type ChromeBreadcrumb = Breadcrumb;
 
+// @public
+export interface ChromeDocTitle {
+    // @internal (undocumented)
+    __legacy: {
+        setBaseTitle(baseTitle: string): void;
+    };
+    change(newTitle: string | string[]): void;
+    reset(): void;
+}
+
 // @public (undocumented)
 export type ChromeHelpExtension = (element: HTMLDivElement) => () => void;
 
@@ -186,6 +199,7 @@ export interface ChromeRecentlyAccessedHistoryItem {
 // @public
 export interface ChromeStart {
     addApplicationClass(className: string): void;
+    docTitle: ChromeDocTitle;
     getApplicationClasses$(): Observable<string[]>;
     getBadge$(): Observable<ChromeBadge | undefined>;
     getBrand$(): Observable<ChromeBrand>;
@@ -946,7 +960,7 @@ export class UiSettingsClient {
     constructor(params: UiSettingsClientParams);
     get$(key: string, defaultOverride?: any): Rx.Observable<any>;
     get(key: string, defaultOverride?: any): any;
-    getAll(): UiSettingsState;
+    getAll(): Record<string, UiSettingsParams_2 & UserProvidedValues_2<any>>;
     getSaved$(): Rx.Observable<{
         key: string;
         newValue: any;
@@ -968,16 +982,13 @@ export class UiSettingsClient {
     stop(): void;
     }
 
-// @public (undocumented)
+// @public
 export type UiSettingsClientContract = PublicMethodsOf<UiSettingsClient>;
 
 // @public (undocumented)
 export interface UiSettingsState {
-    // Warning: (ae-forgotten-export) The symbol "InjectedUiSettingsDefault" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "InjectedUiSettingsUser" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
-    [key: string]: InjectedUiSettingsDefault & InjectedUiSettingsUser;
+    [key: string]: UiSettingsParams_2 & UserProvidedValues_2;
 }
 
 

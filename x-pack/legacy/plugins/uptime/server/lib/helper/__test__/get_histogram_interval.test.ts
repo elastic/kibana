@@ -5,29 +5,16 @@
  */
 
 import { getHistogramInterval } from '../get_histogram_interval';
+import { assertCloseTo } from '../assert_close_to';
 
 describe('getHistogramInterval', () => {
   it('specifies the interval necessary to divide a given timespan into equal buckets, rounded to the nearest integer, expressed in ms', () => {
-    const result = getHistogramInterval('now-15m', 'now', 10);
-    /**
-     * These assertions were verbatim comparisons but that introduced
-     * some flakiness at the ms resolution, sometimes values like "9001ms"
-     * are returned.
-     */
-    expect(result.startsWith('9000')).toBeTruthy();
-    expect(result.endsWith('ms')).toBeTruthy();
-    expect(result).toHaveLength(7);
+    const interval = getHistogramInterval('now-15m', 'now', 10);
+    assertCloseTo(interval, 90000, 10);
   });
 
   it('will supply a default constant value for bucketCount when none is provided', () => {
-    const result = getHistogramInterval('now-15m', 'now');
-    /**
-     * These assertions were verbatim comparisons but that introduced
-     * some flakiness at the ms resolution, sometimes values like "9001ms"
-     * are returned.
-     */
-    expect(result.startsWith('3600')).toBeTruthy();
-    expect(result.endsWith('ms')).toBeTruthy();
-    expect(result).toHaveLength(7);
+    const interval = getHistogramInterval('now-15m', 'now');
+    assertCloseTo(interval, 36000, 10);
   });
 });

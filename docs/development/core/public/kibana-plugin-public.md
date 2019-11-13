@@ -32,6 +32,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [Capabilities](./kibana-plugin-public.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
 |  [ChromeBadge](./kibana-plugin-public.chromebadge.md) |  |
 |  [ChromeBrand](./kibana-plugin-public.chromebrand.md) |  |
+|  [ChromeDocTitle](./kibana-plugin-public.chromedoctitle.md) | APIs for accessing and updating the document title. |
 |  [ChromeNavControl](./kibana-plugin-public.chromenavcontrol.md) |  |
 |  [ChromeNavControls](./kibana-plugin-public.chromenavcontrols.md) | [APIs](./kibana-plugin-public.chromenavcontrols.md) for registering new controls to be displayed in the navigation bar. |
 |  [ChromeNavLink](./kibana-plugin-public.chromenavlink.md) |  |
@@ -120,5 +121,5 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ToastInputFields](./kibana-plugin-public.toastinputfields.md) | Allowed fields for [ToastInput](./kibana-plugin-public.toastinput.md)<!-- -->. |
 |  [ToastsSetup](./kibana-plugin-public.toastssetup.md) | [IToasts](./kibana-plugin-public.itoasts.md) |
 |  [ToastsStart](./kibana-plugin-public.toastsstart.md) | [IToasts](./kibana-plugin-public.itoasts.md) |
-|  [UiSettingsClientContract](./kibana-plugin-public.uisettingsclientcontract.md) | [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |
+|  [UiSettingsClientContract](./kibana-plugin-public.uisettingsclientcontract.md) | Client-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |
 

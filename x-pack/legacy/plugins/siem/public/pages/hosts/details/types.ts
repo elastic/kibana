@@ -4,24 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
+import { StaticIndexPattern } from 'ui/index_patterns';
 import { ActionCreator } from 'typescript-fsa';
-import { Query } from 'src/plugins/data/common';
+import { Query, esFilters } from 'src/plugins/data/public';
 
 import { InputsModelId } from '../../../store/inputs/constants';
 import { HostComponentProps } from '../../../components/link_to/redirect_to_hosts';
 import { HostsTableType } from '../../../store/hosts/model';
-import { HostsQueryProps } from '../hosts';
+import { HostsQueryProps } from '../types';
 import { NavTab } from '../../../components/navigation/types';
-import {
-  AnomaliesChildren,
-  CommonChildren,
-  KeyHostsNavTabWithoutMlPermission,
-} from '../navigation/types';
+import { KeyHostsNavTabWithoutMlPermission } from '../navigation/types';
+import { hostsModel } from '../../../store';
 
 interface HostDetailsComponentReduxProps {
   query: Query;
-  filters: Filter[];
+  filters: esFilters.Filter[];
 }
 
 interface HostBodyComponentDispatchProps {
@@ -31,24 +28,22 @@ interface HostBodyComponentDispatchProps {
     to: number;
   }>;
   detailName: string;
+  hostDetailsPagePath: string;
 }
 
 interface HostDetailsComponentDispatchProps extends HostBodyComponentDispatchProps {
   setHostDetailsTablesActivePageToZero: ActionCreator<null>;
 }
 
-export interface HostDetailsBodyProps extends HostsQueryProps {
-  children: CommonChildren | AnomaliesChildren;
+export interface HostDetailsProps extends HostsQueryProps {
+  detailName: string;
+  hostDetailsPagePath: string;
 }
 
 export type HostDetailsComponentProps = HostDetailsComponentReduxProps &
   HostDetailsComponentDispatchProps &
   HostComponentProps &
   HostsQueryProps;
-
-export type HostDetailsBodyComponentProps = HostDetailsComponentReduxProps &
-  HostBodyComponentDispatchProps &
-  HostDetailsBodyProps;
 
 type KeyHostDetailsNavTabWithoutMlPermission = HostsTableType.authentications &
   HostsTableType.uncommonProcesses &
@@ -62,3 +57,16 @@ type KeyHostDetailsNavTab =
   | KeyHostDetailsNavTabWithMlPermission;
 
 export type HostDetailsNavTab = Record<KeyHostDetailsNavTab, NavTab>;
+
+export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
+  HostsQueryProps & {
+    indexPattern: StaticIndexPattern;
+    type: hostsModel.HostsType;
+    filterQuery: string;
+  };
+
+export type SetAbsoluteRangeDatePicker = ActionCreator<{
+  id: InputsModelId;
+  from: number;
+  to: number;
+}>;
