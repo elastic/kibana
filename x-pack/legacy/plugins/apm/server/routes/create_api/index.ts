@@ -33,12 +33,11 @@ export function createApi() {
     init(core: CoreSetup, __LEGACY: LegacySetup) {
       const { server } = __LEGACY;
       factoryFns.forEach(fn => {
-        const { params = {}, ...route } = fn(core, __LEGACY) as Route<
-          string,
-          HttpMethod,
-          Params,
-          any
-        >;
+        const {
+          params = {},
+          options = { tags: ['access:apm'] },
+          ...route
+        } = fn(core, __LEGACY) as Route<string, HttpMethod, Params, any>;
 
         const bodyRt = params.body;
         const fallbackBodyRt = bodyRt || t.null;
@@ -55,9 +54,7 @@ export function createApi() {
         server.route(
           merge(
             {
-              options: {
-                tags: ['access:apm']
-              },
+              options,
               method: 'GET'
             },
             route,

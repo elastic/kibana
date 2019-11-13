@@ -41,7 +41,8 @@ export async function setupRequest(req: Legacy.Request) {
     start: moment.utc(query.start).valueOf(),
     end: moment.utc(query.end).valueOf(),
     uiFiltersES,
-    client: getESClient(req),
+    client: getESClient(req, { clientAsInternalUser: false }),
+    internalClient: getESClient(req, { clientAsInternalUser: true }),
     config,
     indices
   };
