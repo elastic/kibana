@@ -5,7 +5,6 @@
  */
 import expect from '@kbn/expect';
 
-import { isEmpty } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function TransformAPIProvider({ getService }: FtrProviderContext) {
@@ -16,7 +15,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
   return {
     async deleteIndices(indices: string) {
       log.debug(`Deleting indices: '${indices}'...`);
-      if ((await es.indices.exists({ index: indices })) === false) {
+      if ((await es.indices.exists({ index: indices, allowNoIndices: false })) === false) {
         log.debug(`Indices '${indices}' don't exist. Nothing to delete.`);
         return;
       }
@@ -29,11 +28,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
         .eql(true, 'Response for delete request should be acknowledged');
 
       await retry.waitForWithTimeout(`'${indices}' indices to be deleted`, 30 * 1000, async () => {
-        const getRepsonse = await es.indices.get({
-          index: indices,
-        });
-
-        if (isEmpty(getRepsonse)) {
+        if ((await es.indices.exists({ index: indices, allowNoIndices: false })) === false) {
           return true;
         } else {
           throw new Error(`expected indices '${indices}' to be deleted`);
