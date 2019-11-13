@@ -51,6 +51,7 @@ interface SavedObjectDoc {
   id?: string; // NOTE: SavedObjectDoc is used for uncreated objects where `id` is optional
   type: string;
   namespace?: string;
+  namespaces?: Array<string | null>;
   migrationVersion?: SavedObjectsMigrationVersion;
   version?: string;
   updated_at?: string;
@@ -91,8 +92,7 @@ export class SavedObjectsSerializer {
    */
   public isRawSavedObject(rawDoc: RawDoc) {
     const { type, namespace } = rawDoc._source;
-    const namespacePrefix =
-      namespace && this.schema.isNamespaceIsolated(type) ? `${namespace}:` : '';
+    const namespacePrefix = namespace && this.schema.isNamespace(type) ? `${namespace}:` : '';
     return (
       type &&
       rawDoc._id.startsWith(`${namespacePrefix}${type}:`) &&
@@ -107,7 +107,7 @@ export class SavedObjectsSerializer {
    */
   public rawToSavedObject(doc: RawDoc): SanitizedSavedObjectDoc {
     const { _id, _source, _seq_no, _primary_term } = doc;
-    const { type, namespace } = _source;
+    const { type, namespace, namespaces } = _source;
 
     const version =
       _seq_no != null || _primary_term != null
@@ -117,7 +117,8 @@ export class SavedObjectsSerializer {
     return {
       type,
       id: this.trimIdPrefix(namespace, type, _id),
-      ...(namespace && this.schema.isNamespaceIsolated(type) && { namespace }),
+      ...(namespace && this.schema.isNamespace(type) && { namespace }),
+      ...(namespaces && this.schema.isNamespaces(type) && { namespaces }),
       attributes: _source[type],
       references: _source.references || [],
       ...(_source.migrationVersion && { migrationVersion: _source.migrationVersion }),
@@ -146,7 +147,11 @@ export class SavedObjectsSerializer {
       [type]: attributes,
       type,
       references,
-      ...(namespace && this.schema.isNamespaceIsolated(type) && { namespace }),
+      ...(namespace && this.schema.isNamespace(type) && { namespace }),
+      ...(namespace &&
+        this.schema.isNamespaces(type) && {
+          namespaces: [namespace === undefined ? null : namespace],
+        }),
       ...(migrationVersion && { migrationVersion }),
       ...(updated_at && { updated_at }),
     };
@@ -166,8 +171,7 @@ export class SavedObjectsSerializer {
    * @param {string} id - The id of the saved object
    */
   public generateRawId(namespace: string | undefined, type: string, id?: string) {
-    const namespacePrefix =
-      namespace && this.schema.isNamespaceIsolated(type) ? `${namespace}:` : '';
+    const namespacePrefix = namespace && this.schema.isNamespace(type) ? `${namespace}:` : '';
     return `${namespacePrefix}${type}:${id || uuid.v1()}`;
   }
 
@@ -175,8 +179,7 @@ export class SavedObjectsSerializer {
     assertNonEmptyString(id, 'document id');
     assertNonEmptyString(type, 'saved object type');
 
-    const namespacePrefix =
-      namespace && this.schema.isNamespaceIsolated(type) ? `${namespace}:` : '';
+    const namespacePrefix = namespace && this.schema.isNamespace(type) ? `${namespace}:` : '';
     const prefix = `${namespacePrefix}${type}:`;
 
     if (!id.startsWith(prefix)) {

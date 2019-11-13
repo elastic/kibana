@@ -497,7 +497,7 @@ export class SavedObjectsRepository {
 
     const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
 
-    const typesToDelete = allTypes.filter(type => this._schema.isNamespaceIsolated(type));
+    const typesToDelete = allTypes.filter(type => this._schema.isNamespace(type));
 
     const esOptions = {
       index: this.getIndicesForTypes(typesToDelete),
@@ -1117,10 +1117,7 @@ export class SavedObjectsRepository {
 
     // if the type is namespace isolated, or namespace agnostic, we can continue to rely on the guarantees
     // of the document ID format and don't need to check this
-    if (
-      this._schema.isNamespaceIsolated(rawDocType) ||
-      this._schema.isNamespaceAgnostic(rawDocType)
-    ) {
+    if (this._schema.isNamespace(rawDocType) || this._schema.isNamespaceAgnostic(rawDocType)) {
       return true;
     }
 

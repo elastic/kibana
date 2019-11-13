@@ -76,7 +76,7 @@ export class SavedObjectsSchema {
     return Boolean(typeSchema.isNamespaceAgnostic);
   }
 
-  public isNamespaceIsolated(type: string) {
+  public isNamespace(type: string) {
     // if no plugins have registered a uiExports.savedObjectSchemas,
     // this.schema will be undefined, and all types are namespace isolated
     if (!this.definition) {
@@ -88,5 +88,19 @@ export class SavedObjectsSchema {
       return true;
     }
     return !Boolean(typeSchema.isNamespaceAgnostic) && !Boolean(typeSchema.namespaces);
+  }
+
+  public isNamespaces(type: string) {
+    // if no plugins have registered a uiExports.savedObjectSchemas,
+    // this.schema will be undefined, and all types are namespace isolated
+    if (!this.definition) {
+      return true;
+    }
+
+    const typeSchema = this.definition[type];
+    if (!typeSchema) {
+      return true;
+    }
+    return !Boolean(typeSchema.isNamespaceAgnostic) && Boolean(typeSchema.namespaces);
   }
 }

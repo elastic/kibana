@@ -47,10 +47,10 @@ describe('#isNamespaceAgnostic', () => {
   });
 });
 
-describe('#isNamespaceIsolated', () => {
+describe('#isNamespace', () => {
   it(`returns true for unknown types`, () => {
     const schema = new SavedObjectsSchema();
-    const result = schema.isNamespaceIsolated('bar');
+    const result = schema.isNamespace('bar');
     expect(result).toBe(true);
   });
 
@@ -60,7 +60,7 @@ describe('#isNamespaceIsolated', () => {
         isNamespaceAgnostic: true,
       },
     });
-    const result = schema.isNamespaceIsolated('foo');
+    const result = schema.isNamespace('foo');
     expect(result).toBe(false);
   });
 
@@ -70,7 +70,7 @@ describe('#isNamespaceIsolated', () => {
         isNamespaceAgnostic: false,
       },
     });
-    const result = schema.isNamespaceIsolated('foo');
+    const result = schema.isNamespace('foo');
     expect(result).toBe(true);
   });
 
@@ -80,7 +80,7 @@ describe('#isNamespaceIsolated', () => {
         namespaces: true,
       },
     });
-    const result = schema.isNamespaceIsolated('foo');
+    const result = schema.isNamespace('foo');
     expect(result).toBe(false);
   });
 
@@ -90,7 +90,7 @@ describe('#isNamespaceIsolated', () => {
         namespaces: false,
       },
     });
-    const result = schema.isNamespaceIsolated('foo');
+    const result = schema.isNamespace('foo');
     expect(result).toBe(true);
   });
 });
