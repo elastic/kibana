@@ -267,15 +267,12 @@ export class UrlPanelContent extends Component<Props, State> {
           {
             useShortUrl: false,
             isCreatingShortUrl: false,
-            shortUrlErrorMsg: i18n.translate(
-              'common.ui.share.urlPanel.unableCreateShortUrlErrorMessage',
-              {
-                defaultMessage: 'Unable to create short URL. Error: {errorMessage}',
-                values: {
-                  errorMessage: fetchError.message,
-                },
-              }
-            ),
+            shortUrlErrorMsg: i18n.translate('share.urlPanel.unableCreateShortUrlErrorMessage', {
+              defaultMessage: 'Unable to create short URL. Error: {errorMessage}',
+              values: {
+                errorMessage: fetchError.message,
+              },
+            }),
           },
           this.setUrl
         );
