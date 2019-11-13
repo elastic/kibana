@@ -7,3 +7,11 @@
 import { start as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
 
 export const indexPatternService = data.indexPatterns.indexPatterns;
+
+export let savedObjectsClient;
+export let apiBasePath;
+
+export const initServicesAndConstants = ({ savedObjects, http }) => {
+  savedObjectsClient = savedObjects.client;
+  apiBasePath = http.basePath.prepend('/api');
+};

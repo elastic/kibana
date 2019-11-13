@@ -29,7 +29,10 @@ export class FileUploadPlugin implements Plugin<FileUploadPluginSetup, FileUploa
 
   public start(core: CoreStart) {
     const { savedObjects, http } = core;
-    initResources(savedObjects, http);
+    Object.assign(JsonUploadAndParse.defaultProps, {
+      savedObjects,
+      http,
+    });
     return {
       JsonUploadAndParse,
     };

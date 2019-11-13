@@ -5,20 +5,16 @@
  */
 
 import { http as httpService } from './http_service';
-import { indexPatternService } from '../kibana_services';
+import {
+  indexPatternService,
+  apiBasePath,
+  savedObjectsClient
+} from '../kibana_services';
 import { getGeoJsonIndexingDetails } from './geo_processing';
 import { sizeLimitedChunking } from './size_limited_chunking';
 import { i18n } from '@kbn/i18n';
 
 const fileType = 'json';
-
-let savedObjectsClient;
-let apiBasePath;
-
-export function initResources(savedObjects, http) {
-  savedObjectsClient = savedObjects.client;
-  apiBasePath = http.basePath.prepend('/api');
-}
 
 export async function indexData(parsedFile, transformDetails, indexName, dataType, appName) {
   if (!parsedFile) {
