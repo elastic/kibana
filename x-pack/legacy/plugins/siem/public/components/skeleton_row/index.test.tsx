@@ -51,9 +51,8 @@ describe('SkeletonRow', () => {
     expect(siemSkeletonRow).toHaveStyleRule('padding', '10px');
     expect(siemSkeletonRow.props().style!.width).toBe('auto');
     expect(siemSkeletonRowCell).toHaveStyleRule('background-color', 'red');
-    // FIXME: doesn't work with current version of styled-component
-    // expect(siemSkeletonRowCell).toHaveStyleRule('margin-left', '10px', {
-    //   modifier: '& + &',
-    // });
+    expect(siemSkeletonRowCell).toHaveStyleRule('margin-left', '10px', {
+      modifier: '& + &',
+    });
   });
 });
