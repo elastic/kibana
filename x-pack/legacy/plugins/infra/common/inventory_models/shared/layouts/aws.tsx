@@ -3,28 +3,30 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { InventoryDetailLayoutCreator } from '../../types';
+import { LayoutPropsWithTheme } from '../../../../public/pages/metrics/types';
+import { Section } from '../../../../public/pages/metrics/components/section';
+import { SubSection } from '../../../../public/pages/metrics/components/sub_section';
+import { GaugesSectionVis } from '../../../../public/pages/metrics/components/gauges_section_vis';
+import { ChartSectionVis } from '../../../../public/pages/metrics/components/chart_section_vis';
+import { withTheme } from '../../../../../../common/eui_styled_components';
 
-export const awsLayoutCreator: InventoryDetailLayoutCreator = theme => [
-  {
-    id: 'awsOverview',
-    label: 'AWS',
-    sections: [
-      {
-        id: 'awsOverview',
-        linkToId: 'awsOverview',
-        label: i18n.translate(
-          'xpack.infra.metricDetailPage.awsMetricsLayout.overviewSection.sectionLabel',
-          {
-            defaultMessage: 'Overview',
-          }
-        ),
-        requires: ['aws.ec2'],
-        type: 'gauges',
-        visConfig: {
-          seriesOverrides: {
+export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
+  <React.Fragment>
+    <Section
+      navLabel="AWS"
+      sectionLabel={i18n.translate(
+        'xpack.infra.metricDetailPage.awsMetricsLayout.overviewSection.sectionLabel',
+        {
+          defaultMessage: 'AWS Overview',
+        }
+      )}
+      metrics={metrics}
+    >
+      <SubSection id="awsOverview">
+        <GaugesSectionVis
+          seriesOverrides={{
             'cpu-util': {
               name: i18n.translate(
                 'xpack.infra.metricDetailPage.awsMetricsLayout.overviewSection.cpuUtilizationSeriesLabel',
@@ -65,23 +67,22 @@ export const awsLayoutCreator: InventoryDetailLayoutCreator = theme => [
               color: theme.eui.euiColorFullShade,
               formatter: 'number',
             },
-          },
-        },
-      },
-      {
-        id: 'awsCpuUtilization',
-        label: i18n.translate(
+          }}
+        />
+      </SubSection>
+      <SubSection
+        id="awsCpuUtilization"
+        label={i18n.translate(
           'xpack.infra.metricDetailPage.awsMetricsLayout.cpuUtilSection.sectionLabel',
           {
             defaultMessage: 'CPU Utilization',
           }
-        ),
-        requires: ['aws.ec2'],
-        type: 'chart',
-        visConfig: {
-          type: 'area',
-          formatter: 'number',
-          seriesOverrides: {
+        )}
+      >
+        <ChartSectionVis
+          type="area"
+          formatter="number"
+          seriesOverrides={{
             'cpu-util': {
               color: theme.eui.euiColorVis1,
               name: i18n.translate(
@@ -91,24 +92,23 @@ export const awsLayoutCreator: InventoryDetailLayoutCreator = theme => [
                 }
               ),
             },
-          },
-        },
-      },
-      {
-        id: 'awsNetworkBytes',
-        label: i18n.translate(
+          }}
+        />
+      </SubSection>
+      <SubSection
+        id="awsNetworkBytes"
+        label={i18n.translate(
           'xpack.infra.metricDetailPage.awsMetricsLayout.networkBytesSection.sectionLabel',
           {
             defaultMessage: 'Network Traffic',
           }
-        ),
-        requires: ['aws.ec2'],
-        type: 'chart',
-        visConfig: {
-          type: 'area',
-          formatter: 'bits',
-          formatterTemplate: '{{value}}/s',
-          seriesOverrides: {
+        )}
+      >
+        <ChartSectionVis
+          type="area"
+          formatter="bits"
+          formatterTemplate="{{value}}/s"
+          seriesOverrides={{
             tx: {
               color: theme.eui.euiColorVis1,
               name: i18n.translate(
@@ -127,23 +127,22 @@ export const awsLayoutCreator: InventoryDetailLayoutCreator = theme => [
                 }
               ),
             },
-          },
-        },
-      },
-      {
-        id: 'awsNetworkPackets',
-        label: i18n.translate(
+          }}
+        />
+      </SubSection>
+      <SubSection
+        id="awsNetworkPackets"
+        label={i18n.translate(
           'xpack.infra.metricDetailPage.awsMetricsLayout.networkPacketsSection.sectionLabel',
           {
             defaultMessage: 'Network Packets (Average)',
           }
-        ),
-        requires: ['aws.ec2'],
-        type: 'chart',
-        visConfig: {
-          type: 'area',
-          formatter: 'number',
-          seriesOverrides: {
+        )}
+      >
+        <ChartSectionVis
+          type="area"
+          formatter="number"
+          seriesOverrides={{
             'packets-out': {
               color: theme.eui.euiColorVis1,
               name: i18n.translate(
@@ -162,23 +161,22 @@ export const awsLayoutCreator: InventoryDetailLayoutCreator = theme => [
                 }
               ),
             },
-          },
-        },
-      },
-      {
-        id: 'awsDiskioOps',
-        label: i18n.translate(
+          }}
+        />
+      </SubSection>
+      <SubSection
+        id="awsDiskioOps"
+        label={i18n.translate(
           'xpack.infra.metricDetailPage.awsMetricsLayout.diskioOperationsSection.sectionLabel',
           {
             defaultMessage: 'Disk I/O Operations',
           }
-        ),
-        requires: ['aws.ec2'],
-        type: 'chart',
-        visConfig: {
-          type: 'area',
-          formatter: 'number',
-          seriesOverrides: {
+        )}
+      >
+        <ChartSectionVis
+          type="area"
+          formatter="number"
+          seriesOverrides={{
             writes: {
               color: theme.eui.euiColorVis1,
               name: i18n.translate(
@@ -197,23 +195,22 @@ export const awsLayoutCreator: InventoryDetailLayoutCreator = theme => [
                 }
               ),
             },
-          },
-        },
-      },
-      {
-        id: 'awsDiskioBytes',
-        label: i18n.translate(
+          }}
+        />
+      </SubSection>
+      <SubSection
+        id="awsDiskioBytes"
+        label={i18n.translate(
           'xpack.infra.metricDetailPage.awsMetricsLayout.diskioBytesSection.sectionLabel',
           {
             defaultMessage: 'Disk I/O Bytes',
           }
-        ),
-        requires: ['aws.ec2'],
-        type: 'chart',
-        visConfig: {
-          type: 'area',
-          formatter: 'number',
-          seriesOverrides: {
+        )}
+      >
+        <ChartSectionVis
+          type="area"
+          formatter="number"
+          seriesOverrides={{
             writes: {
               color: theme.eui.euiColorVis1,
               name: i18n.translate(
@@ -232,9 +229,9 @@ export const awsLayoutCreator: InventoryDetailLayoutCreator = theme => [
                 }
               ),
             },
-          },
-        },
-      },
-    ],
-  },
-];
+          }}
+        />
+      </SubSection>
+    </Section>
+  </React.Fragment>
+));

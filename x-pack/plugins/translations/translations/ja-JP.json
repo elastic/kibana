@@ -4929,7 +4929,6 @@
     "xpack.infra.metrics.emptyViewTitle": "表示するデータがありません。",
     "xpack.infra.metrics.invalidNodeErrorDescription": "構成をよく確認してください",
     "xpack.infra.metrics.invalidNodeErrorTitle": "{nodeName} がメトリックデータを収集していないようです",
-    "xpack.infra.metrics.layoutLabelOverviewTitle": "{layoutLabel} 概要",
     "xpack.infra.metrics.loadingNodeDataText": "データを読み込み中",
     "xpack.infra.metrics.refetchButtonLabel": "新規データを確認",
     "xpack.infra.metricsExplorer.actionsLabel.aria": "{grouping} のアクション",

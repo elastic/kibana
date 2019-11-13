@@ -3,33 +3,34 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { InventoryDetailLayoutCreator } from '../types';
+import { LayoutPropsWithTheme } from '../../../public/pages/metrics/types';
+import { Section } from '../../../public/pages/metrics/components/section';
+import { SubSection } from '../../../public/pages/metrics/components/sub_section';
+import { GaugesSectionVis } from '../../../public/pages/metrics/components/gauges_section_vis';
+import { ChartSectionVis } from '../../../public/pages/metrics/components/chart_section_vis';
+import { withTheme } from '../../../../../common/eui_styled_components';
+import * as Aws from '../shared/layouts/aws';
+import * as Ngnix from '../shared/layouts/nginx';
 
-import { nginxLayoutCreator } from '../shared/layouts/nginx';
-import { awsLayoutCreator } from '../shared/layouts/aws';
-
-export const layout: InventoryDetailLayoutCreator = theme => [
-  {
-    id: 'hostOverview',
-    label: i18n.translate('xpack.infra.metricDetailPage.hostMetricsLayout.layoutLabel', {
-      defaultMessage: 'Host',
-    }),
-    sections: [
-      {
-        id: 'hostSystemOverview',
-        linkToId: 'hostOverview',
-        label: i18n.translate(
-          'xpack.infra.metricDetailPage.hostMetricsLayout.overviewSection.sectionLabel',
-          {
-            defaultMessage: 'Overview',
-          }
-        ),
-        requires: ['system.cpu', 'system.load', 'system.memory', 'system.network'],
-        type: 'gauges',
-        visConfig: {
-          seriesOverrides: {
+export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
+  <React.Fragment>
+    <Section
+      navLabel={i18n.translate('xpack.infra.metricDetailPage.hostMetricsLayout.layoutLabel', {
+        defaultMessage: 'Host',
+      })}
+      sectionLabel={i18n.translate(
+        'xpack.infra.metricDetailPage.hostMetricsLayout.overviewSection.sectionLabel',
+        {
+          defaultMessage: 'Host Overview',
+        }
+      )}
+      metrics={metrics}
+    >
+      <SubSection id="hostSystemOverview">
+        <GaugesSectionVis
+          seriesOverrides={{
             cpu: {
               name: i18n.translate(
                 'xpack.infra.metricDetailPage.hostMetricsLayout.overviewSection.cpuUsageSeriesLabel',
@@ -83,24 +84,23 @@ export const layout: InventoryDetailLayoutCreator = theme => [
               formatter: 'bits',
               formatterTemplate: '{{value}}/s',
             },
-          },
-        },
-      },
-      {
-        id: 'hostCpuUsage',
-        label: i18n.translate(
+          }}
+        />
+      </SubSection>
+      <SubSection
+        id="hostCpuUsage"
+        label={i18n.translate(
           'xpack.infra.metricDetailPage.hostMetricsLayout.cpuUsageSection.sectionLabel',
           {
             defaultMessage: 'CPU Usage',
           }
-        ),
-        requires: ['system.cpu'],
-        type: 'chart',
-        visConfig: {
-          stacked: true,
-          type: 'area',
-          formatter: 'percent',
-          seriesOverrides: {
+        )}
+      >
+        <ChartSectionVis
+          stacked={true}
+          type="area"
+          formatter="percent"
+          seriesOverrides={{
             user: { color: theme.eui.euiColorVis0 },
             system: { color: theme.eui.euiColorVis2 },
             steal: { color: theme.eui.euiColorVis9 },
@@ -108,21 +108,20 @@ export const layout: InventoryDetailLayoutCreator = theme => [
             softirq: { color: theme.eui.euiColorVis6 },
             iowait: { color: theme.eui.euiColorVis7 },
             nice: { color: theme.eui.euiColorVis5 },
-          },
-        },
-      },
-      {
-        id: 'hostLoad',
-        label: i18n.translate(
+          }}
+        />
+      </SubSection>
+      <SubSection
+        id="hostLoad"
+        label={i18n.translate(
           'xpack.infra.metricDetailPage.hostMetricsLayout.loadSection.sectionLabel',
           {
             defaultMessage: 'Load',
           }
-        ),
-        requires: ['system.load'],
-        type: 'chart',
-        visConfig: {
-          seriesOverrides: {
+        )}
+      >
+        <ChartSectionVis
+          seriesOverrides={{
             load_1m: {
               color: theme.eui.euiColorVis0,
               name: i18n.translate(
@@ -150,45 +149,43 @@ export const layout: InventoryDetailLayoutCreator = theme => [
                 }
               ),
             },
-          },
-        },
-      },
-      {
-        id: 'hostMemoryUsage',
-        label: i18n.translate(
+          }}
+        />
+      </SubSection>
+      <SubSection
+        id="hostMemoryUsage"
+        label={i18n.translate(
           'xpack.infra.metricDetailPage.hostMetricsLayout.memoryUsageSection.sectionLabel',
           {
             defaultMessage: 'Memory Usage',
           }
-        ),
-        requires: ['system.memory'],
-        type: 'chart',
-        visConfig: {
-          stacked: true,
-          formatter: 'bytes',
-          type: 'area',
-          seriesOverrides: {
+        )}
+      >
+        <ChartSectionVis
+          stacked={true}
+          formatter="bytes"
+          type="area"
+          seriesOverrides={{
             used: { color: theme.eui.euiColorVis2 },
             free: { color: theme.eui.euiColorVis0 },
             cache: { color: theme.eui.euiColorVis1 },
-          },
-        },
-      },
-      {
-        id: 'hostNetworkTraffic',
-        label: i18n.translate(
+          }}
+        />
+      </SubSection>
+      <SubSection
+        id="hostNetworkTraffic"
+        label={i18n.translate(
           'xpack.infra.metricDetailPage.hostMetricsLayout.networkTrafficSection.sectionLabel',
           {
             defaultMessage: 'Network Traffic',
           }
-        ),
-        requires: ['system.network'],
-        type: 'chart',
-        visConfig: {
-          formatter: 'bits',
-          formatterTemplate: '{{value}}/s',
-          type: 'area',
-          seriesOverrides: {
+        )}
+      >
+        <ChartSectionVis
+          formatter="bits"
+          formatterTemplate="{{value}}/s"
+          type="area"
+          seriesOverrides={{
             rx: {
               color: theme.eui.euiColorVis1,
               name: i18n.translate(
@@ -207,28 +204,23 @@ export const layout: InventoryDetailLayoutCreator = theme => [
                 }
               ),
             },
-          },
-        },
-      },
-    ],
-  },
-  {
-    id: 'k8sOverview',
-    label: 'Kubernetes',
-    sections: [
-      {
-        id: 'hostK8sOverview',
-        linkToId: 'k8sOverview',
-        label: i18n.translate(
-          'xpack.infra.metricDetailPage.kubernetesMetricsLayout.overviewSection.sectionLabel',
-          {
-            defaultMessage: 'Overview',
-          }
-        ),
-        requires: ['kubernetes.node'],
-        type: 'gauges',
-        visConfig: {
-          seriesOverrides: {
+          }}
+        />
+      </SubSection>
+    </Section>
+    <Section
+      navLabel="Kubernetes"
+      sectionLabel={i18n.translate(
+        'xpack.infra.metricDetailPage.kubernetesMetricsLayout.overviewSection.sectionLabel',
+        {
+          defaultMessage: 'Kubernetes Overview',
+        }
+      )}
+      metrics={metrics}
+    >
+      <SubSection id="hostK8sOverview">
+        <GaugesSectionVis
+          seriesOverrides={{
             cpucap: {
               name: i18n.translate(
                 'xpack.infra.metricDetailPage.kubernetesMetricsLayout.overviewSection.cpuUsageSeriesLabel',
@@ -282,83 +274,79 @@ export const layout: InventoryDetailLayoutCreator = theme => [
               formatter: 'percent',
               gaugeMax: 1,
             },
-          },
-        },
-      },
-      {
-        id: 'hostK8sCpuCap',
-        label: i18n.translate(
+          }}
+        />
+      </SubSection>
+      <SubSection
+        id="hostK8sCpuCap"
+        label={i18n.translate(
           'xpack.infra.metricDetailPage.kubernetesMetricsLayout.nodeCpuCapacitySection.sectionLabel',
           {
             defaultMessage: 'Node CPU Capacity',
           }
-        ),
-        requires: ['kubernetes.node'],
-        type: 'chart',
-        visConfig: {
-          formatter: 'abbreviatedNumber',
-          seriesOverrides: {
+        )}
+      >
+        <ChartSectionVis
+          formatter="abbreviatedNumber"
+          seriesOverrides={{
             capacity: { color: theme.eui.euiColorVis2 },
             used: { color: theme.eui.euiColorVis1, type: 'area' },
-          },
-        },
-      },
-      {
-        id: 'hostK8sMemoryCap',
-        label: i18n.translate(
+          }}
+        />
+      </SubSection>
+      <SubSection
+        id="hostK8sMemoryCap"
+        label={i18n.translate(
           'xpack.infra.metricDetailPage.kubernetesMetricsLayout.nodeMemoryCapacitySection.sectionLabel',
           {
             defaultMessage: 'Node Memory Capacity',
           }
-        ),
-        requires: ['kubernetes.node'],
-        type: 'chart',
-        visConfig: {
-          formatter: 'bytes',
-          seriesOverrides: {
+        )}
+      >
+        <ChartSectionVis
+          formatter="bytes"
+          seriesOverrides={{
             capacity: { color: theme.eui.euiColorVis2 },
             used: { color: theme.eui.euiColorVis1, type: 'area' },
-          },
-        },
-      },
-      {
-        id: 'hostK8sDiskCap',
-        label: i18n.translate(
+          }}
+        />
+      </SubSection>
+      <SubSection
+        id="hostK8sDiskCap"
+        label={i18n.translate(
           'xpack.infra.metricDetailPage.kubernetesMetricsLayout.nodeDiskCapacitySection.sectionLabel',
           {
             defaultMessage: 'Node Disk Capacity',
           }
-        ),
-        requires: ['kubernetes.node'],
-        type: 'chart',
-        visConfig: {
-          formatter: 'bytes',
-          seriesOverrides: {
+        )}
+      >
+        <ChartSectionVis
+          formatter="bytes"
+          seriesOverrides={{
             capacity: { color: theme.eui.euiColorVis2 },
             used: { color: theme.eui.euiColorVis1, type: 'area' },
-          },
-        },
-      },
-      {
-        id: 'hostK8sPodCap',
-        label: i18n.translate(
+          }}
+        />
+      </SubSection>
+      <SubSection
+        id="hostK8sPodCap"
+        label={i18n.translate(
           'xpack.infra.metricDetailPage.kubernetesMetricsLayout.nodePodCapacitySection.sectionLabel',
           {
             defaultMessage: 'Node Pod Capacity',
           }
-        ),
-        requires: ['kubernetes.node'],
-        type: 'chart',
-        visConfig: {
-          formatter: 'number',
-          seriesOverrides: {
+        )}
+      >
+        <ChartSectionVis
+          formatter="number"
+          seriesOverrides={{
             capacity: { color: theme.eui.euiColorVis2 },
             used: { color: theme.eui.euiColorVis1, type: 'area' },
-          },
-        },
-      },
-    ],
-  },
-  ...nginxLayoutCreator(theme),
-  ...awsLayoutCreator(theme),
-];
+          }}
+        />
+      </SubSection>
+    </Section>
+    <Aws.Layout metrics={metrics} />
+    <Ngnix.Layout metrics={metrics} />
+  </React.Fragment>
+));

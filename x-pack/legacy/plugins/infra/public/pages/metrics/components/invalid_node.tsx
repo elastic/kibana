@@ -8,12 +8,12 @@ import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/e
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import euiStyled from '../../../../../common/eui_styled_components';
-import { WithKibanaChrome } from '../../containers/with_kibana_chrome';
+import euiStyled from '../../../../../../common/eui_styled_components';
+import { WithKibanaChrome } from '../../../containers/with_kibana_chrome';
 import {
   ViewSourceConfigurationButton,
   ViewSourceConfigurationButtonHrefBase,
-} from '../../components/source_configuration';
+} from '../../../components/source_configuration';
 
 interface InvalidNodeErrorProps {
   nodeName: string;

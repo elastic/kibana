@@ -631,10 +631,7 @@ describe('getApi', () => {
         .mockImplementationOnce(getHttpMockWithItems(successItems));
 
       getApi(httpMock, configMock.newsfeed, '6.8.2')
-        .pipe(
-          take(4),
-          toArray()
-        )
+        .pipe(take(4), toArray())
         .subscribe(result => {
           expect(result).toMatchInlineSnapshot(`
             Array [

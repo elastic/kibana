@@ -13,9 +13,9 @@ import {
   InfraNodeType,
   MetricsQuery,
   InfraTimerangeInput,
-} from '../../graphql/types';
+} from '../../../graphql/types';
 import { metricsQuery } from './metrics.gql_query';
-import { InventoryDetailLayout, InventoryMetric } from '../../../common/inventory_models/types';
+import { InventoryMetric, InventoryMetricRT } from '../../../../common/inventory_models/types';
 
 interface WithMetricsArgs {
   metrics: InfraMetricData[];
@@ -26,7 +26,7 @@ interface WithMetricsArgs {
 
 interface WithMetricsProps {
   children: (args: WithMetricsArgs) => React.ReactNode;
-  layouts: InventoryDetailLayout[];
+  requiredMetrics: InventoryMetric[];
   nodeType: InfraNodeType;
   nodeId: string;
   cloudId: string;
@@ -35,23 +35,19 @@ interface WithMetricsProps {
 }
 
 const isInfraMetrics = (subject: any[]): subject is InfraMetric[] => {
-  return subject.every(s => !!InfraMetric[s]);
+  return subject.every(s => InventoryMetricRT.is(s));
 };
 
 export const WithMetrics = ({
   children,
-  layouts,
+  requiredMetrics,
   sourceId,
   timerange,
   nodeType,
   nodeId,
   cloudId,
 }: WithMetricsProps) => {
-  const metrics = layouts.reduce((acc, item) => {
-    return acc.concat(item.sections.map(s => s.id));
-  }, [] as InventoryMetric[]);
-
-  if (!isInfraMetrics(metrics)) {
+  if (!isInfraMetrics(requiredMetrics)) {
     throw new Error(
       i18n.translate('xpack.infra.invalidInventoryMetricsError', {
         defaultMessage: 'One of the InfraMetric is invalid',
@@ -66,7 +62,7 @@ export const WithMetrics = ({
       notifyOnNetworkStatusChange
       variables={{
         sourceId,
-        metrics,
+        metrics: requiredMetrics,
         nodeType,
         nodeId,
         cloudId,
