@@ -55,6 +55,7 @@ export interface VisualizeKibanaServices {
   queryFilter: any;
   toastNotifications: ToastsStart;
   savedObjectsClient: SavedObjectsClientContract;
+  savedObjectRegistry: any;
   savedQueryService: SavedQueryService;
   savedVisualizations: SavedVisualizations;
   uiSettings: UiSettingsClientContract;

@@ -26,9 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { getServices } from '../kibana_services';
 
 export function initListingDirective(app) {
-  app.directive('visualizeListingTable', reactDirective =>
-    reactDirective(VisualizeListingTable)
-  );
+  app.directive('visualizeListingTable', reactDirective => reactDirective(VisualizeListingTable));
   app.directive('newVisModal', reactDirective =>
     reactDirective(NewVisModal, [
       ['visTypesRegistry', { watchDepth: 'collection' }],
@@ -46,7 +44,7 @@ export function VisualizeListingController($injector, createNewVis) {
     chrome,
     chromeLegacy,
     savedObjectRegistry,
-    savedObjectClient,
+    savedObjectsClient,
     npDataStart: {
       query: {
         timefilter: { timefilter },
@@ -114,7 +112,7 @@ export function VisualizeListingController($injector, createNewVis) {
   this.deleteSelectedItems = function deleteSelectedItems(selectedItems) {
     return Promise.all(
       selectedItems.map(item => {
-        return savedObjectClient.delete(item.savedObjectType, item.id);
+        return savedObjectsClient.delete(item.savedObjectType, item.id);
       })
     )
       .then(() => {

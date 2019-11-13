@@ -28,7 +28,6 @@ import {
   npSetup,
   npStart,
   SavedObjectRegistryProvider,
-  SavedObjectsClientProvider,
   ShareContextMenuExtensionsRegistryProvider,
   VisEditorTypesRegistryProvider,
 } from './legacy_imports';
@@ -48,17 +47,14 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
 
   const Private = injector.get<IPrivate>('Private');
 
-  const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
-  const savedObjectRegistry = Private(SavedObjectRegistryProvider);
-  const savedObjectClient = Private(SavedObjectsClientProvider);
   const editorTypes = Private(VisEditorTypesRegistryProvider);
+  const savedObjectRegistry = Private(SavedObjectRegistryProvider);
+  const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
 
   return {
     chromeLegacy: legacyChrome,
     editorTypes,
-    savedObjectClient,
     savedObjectRegistry,
-    savedDashboards: injector.get('savedDashboards'),
     savedVisualizations: injector.get('savedVisualizations'),
     shareContextMenuExtensions,
   };

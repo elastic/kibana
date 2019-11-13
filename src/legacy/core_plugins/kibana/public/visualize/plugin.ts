@@ -44,15 +44,14 @@ import {
   FeatureCatalogueSetup,
 } from '../../../../../plugins/feature_catalogue/public';
 import { defaultEditor } from './legacy_imports';
+import { SavedVisualizations } from './types';
 
 export interface LegacyAngularInjectedDependencies {
   chromeLegacy: any;
   editorTypes: any;
   shareContextMenuExtensions: any;
   savedObjectRegistry: any;
-  savedObjectClient: any;
-  savedDashboards: any;
-  savedVisualizations: any;
+  savedVisualizations: SavedVisualizations;
 }
 
 export interface VisualizePluginStartDependencies {

@@ -43,7 +43,7 @@ import { createFilterBarDirective, createFilterBarHelper } from '../../../data/p
 import { NavigationStart } from '../../../navigation/public';
 
 // @ts-ignore
-import { initVisualizeApp } from './app';
+import { initVisualizeApp } from './legacy_app';
 import { VisualizeKibanaServices } from './kibana_services';
 
 let angularModuleInstance: IModule | null = null;

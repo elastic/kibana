@@ -46,7 +46,7 @@ import {
 } from './legacy_imports';
 
 // @ts-ignore
-import { initDashboardApp } from './app';
+import { initDashboardApp } from './legacy_app';
 import { createFilterBarDirective, createFilterBarHelper, DataStart } from '../../../data/public';
 import { SavedQueryService } from '../../../data/public/search/search_bar/lib/saved_query_service';
 import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
