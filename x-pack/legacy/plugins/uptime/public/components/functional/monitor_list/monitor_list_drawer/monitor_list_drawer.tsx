@@ -5,11 +5,10 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiLink, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton, EuiIcon } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { get } from 'lodash';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { MonitorSummary } from '../../../../../common/graphql/types';
 import { AppState } from '../../../../state';
 import { fetchMonitorDetails } from '../../../../state/actions/monitor';
@@ -65,15 +64,6 @@ export function MonitorListDrawerComponent({
             {monitorUrl}
             <EuiIcon size="s" type="popout" color="subbdued" />
           </EuiLink>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton size="s">
-            <FormattedMessage
-              defaultMessage="Actions"
-              description="Monitor actions button"
-              id="xpack.uptime.monitorList.drawer.actions.label"
-            />
-          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />

@@ -18,20 +18,6 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there are 
         />
       </EuiLink>
     </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiButton
-        size="s"
-      >
-        <FormattedMessage
-          defaultMessage="Actions"
-          description="Monitor actions button"
-          id="xpack.uptime.monitorList.drawer.actions.label"
-          values={Object {}}
-        />
-      </EuiButton>
-    </EuiFlexItem>
   </EuiFlexGroup>
   <EuiSpacer
     size="s"
@@ -92,20 +78,6 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there is o
           type="popout"
         />
       </EuiLink>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiButton
-        size="s"
-      >
-        <FormattedMessage
-          defaultMessage="Actions"
-          description="Monitor actions button"
-          id="xpack.uptime.monitorList.drawer.actions.label"
-          values={Object {}}
-        />
-      </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiSpacer
