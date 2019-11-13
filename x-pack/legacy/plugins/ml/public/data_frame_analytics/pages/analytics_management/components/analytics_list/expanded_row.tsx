@@ -28,7 +28,6 @@ import {
 import { isCompletedAnalyticsJob } from './common';
 import { isRegressionAnalysis } from '../../../../common/analytics';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
-// import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 
 function getItemDescription(value: any) {
   if (typeof value === 'object') {
