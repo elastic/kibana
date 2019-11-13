@@ -36,10 +36,7 @@ export const initIndexPatternsValidateRoute = ({ framework }: InfraBackendLibs) 
       // Query each pattern individually, to map correctly the errors
       await Promise.all(
         indices.map(async index => {
-          const esIndices = await framework.callWithRequest(req, 'indices.get', {
-            index,
-          });
-
+          const esIndices = await framework.callWithRequest(req, 'indices.get', { index });
           const indexNames = Object.keys(esIndices);
 
           if (indexNames.length === 0) {
@@ -57,13 +54,13 @@ export const initIndexPatternsValidateRoute = ({ framework }: InfraBackendLibs) 
             if (!timestampProperty) {
               errors.push({
                 error: 'TIMESTAMP_NOT_FOUND',
-                index: indexName,
+                index,
                 timestamp,
               });
             } else if (timestampProperty.type !== 'date') {
               errors.push({
                 error: 'TIMESTAMP_NOT_VALID',
-                index: indexName,
+                index,
                 timestamp,
               });
             }
