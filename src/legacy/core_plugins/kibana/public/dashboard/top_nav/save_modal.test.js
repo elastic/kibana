@@ -22,7 +22,7 @@ import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
 import { DashboardSaveModal } from './save_modal';
 
-test('renders DashboardSaveModal', () => {
+test.skip('renders DashboardSaveModal', () => {
   const component = shallowWithI18nProvider(
     <DashboardSaveModal
       onSave={() => {}}

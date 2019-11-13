@@ -25,7 +25,6 @@ import { uniq } from 'lodash';
 
 import { Subscription } from 'rxjs';
 
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import {
   subscribeWithScope,
   ConfirmationButtonTypes,
@@ -56,6 +55,7 @@ import {
   openAddPanelFlyout,
 } from '../../../embeddable_api/public/np_ready/public';
 import { DashboardAppState, NavAction, ConfirmModalFn, SavedDashboardPanel } from './types';
+import { SavedObjectFinder } from '../../../../../plugins/kibana_react/public';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
 import { DashboardSaveModal } from './top_nav/save_modal';
@@ -116,7 +116,7 @@ export class DashboardAppController {
         timefilter: { timefilter },
       },
     },
-    core: { notifications, overlays, chrome, injectedMetadata },
+    core: { notifications, overlays, chrome, uiSettings, injectedMetadata },
   }: DashboardAppControllerDependencies) {
     new FilterStateManager(globalState, getAppState, filterManager);
     const queryFilter = filterManager;
@@ -729,6 +729,7 @@ export class DashboardAppController {
           getFactory: embeddables.getEmbeddableFactory,
           notifications,
           overlays,
+          uiSettings,
           SavedObjectFinder,
         });
       }

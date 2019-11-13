@@ -20,9 +20,16 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-import { NewVisModal } from './new_vis_modal';
 import { VisType } from 'ui/vis';
 import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
+
+jest.mock('../legacy_imports', () => ({
+  memoizeLast: jest.requireActual('ui/utils/memoize').memoizeLast,
+  State: () => null,
+  AppState: () => null,
+}));
+
+import { NewVisModal } from './new_vis_modal';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {
