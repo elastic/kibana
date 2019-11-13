@@ -19,15 +19,16 @@ import { useForm, Form, FormDataProvider, SelectField, UseField } from '../../..
 
 import { TYPE_DEFINITION, FIELD_TYPES_OPTIONS, EUI_SIZE } from '../../../../constants';
 
-import { useDispatch, useMappingsState } from '../../../../mappings_state';
+import { useDispatch } from '../../../../mappings_state';
 import { fieldSerializer, getFieldConfig, filterTypesForMultiField } from '../../../../lib';
-import { Field, MainType } from '../../../../types';
+import { Field, MainType, NormalizedFields } from '../../../../types';
 import { NameParameter } from '../../field_parameters';
 import { getParametersFormForType } from './required_parameters_forms';
 
 const formWrapper = (props: any) => <form {...props} />;
 
 interface Props {
+  allFields: NormalizedFields['byId'];
   isMultiField?: boolean;
   paddingLeft?: number;
   isCancelable?: boolean;
@@ -35,16 +36,15 @@ interface Props {
 }
 
 export const CreateField = React.memo(function CreateFieldComponent({
+  allFields,
   isMultiField,
   paddingLeft,
   isCancelable,
   maxNestedDepth,
 }: Props) {
-  const { form } = useForm<Field>({ serializer: fieldSerializer });
-  const {
-    fields: { byId },
-  } = useMappingsState();
   const dispatch = useDispatch();
+
+  const { form } = useForm<Field>({ serializer: fieldSerializer });
 
   useEffect(() => {
     const subscription = form.subscribe(updatedFieldForm => {
@@ -199,7 +199,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
                 const ParametersForm = getParametersFormForType(type, subType);
                 return ParametersForm ? (
                   <div className="mappings-editor__create-field-required-props">
-                    <ParametersForm allFields={byId} />
+                    <ParametersForm allFields={allFields} />
                   </div>
                 ) : null;
               }}

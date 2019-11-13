@@ -38,7 +38,7 @@ export const DocumentFields = () => {
       return null;
     }
 
-    return <CreateField isCancelable={fields.length > 0} />;
+    return <CreateField isCancelable={fields.length > 0} allFields={byId} />;
   };
 
   const renderAddFieldButton = () => {

@@ -240,10 +240,17 @@ export function useForm<T extends object = FormData>(
    * Reset all the fields of the form to their default values
    * and reset all the states to their original value.
    */
-  const reset: FormHook<T>['reset'] = () => {
+  const reset: FormHook<T>['reset'] = (resetOptions = { resetValues: true }) => {
+    const { resetValues = true } = resetOptions;
+    const currentFormData = { ...formData$.current.value } as FormData;
     Object.entries(fieldsRefs.current).forEach(([path, field]) => {
-      field.reset();
+      const fieldValue = field.reset({ resetValue: resetValues });
+      currentFormData[path] = fieldValue;
     });
+    if (resetValues) {
+      formData$.current.next(currentFormData as T);
+    }
+
     setIsSubmitted(false);
     setSubmitting(false);
     setIsValid(undefined);

@@ -56,6 +56,7 @@ export const FieldsListItemContainer = ({ fieldId, treeDepth, isLastItem }: Prop
   return (
     <FieldsListItem
       field={field}
+      allFields={byId}
       treeDepth={treeDepth}
       isHighlighted={isHighlighted}
       isDimmed={isDimmed}
