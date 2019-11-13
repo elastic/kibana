@@ -729,6 +729,7 @@ export class DashboardAppController {
           getFactory: embeddables.getEmbeddableFactory,
           notifications,
           overlays,
+          // @ts-ignore
           uiSettings,
           SavedObjectFinder,
         });
