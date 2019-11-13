@@ -18,7 +18,7 @@
  */
 
 import { CoreSetup } from 'src/core/server';
-import { registerOptInRoutes } from './opt_in';
+import { registerTelemetryConfigRoutes } from './telemetry_config';
 import { registerTelemetryDataRoutes } from './telemetry_stats';
 
 interface RegisterRoutesParams {
@@ -27,6 +27,6 @@ interface RegisterRoutesParams {
 }
 
 export function registerRoutes({ core, currentKibanaVersion }: RegisterRoutesParams) {
+  registerTelemetryConfigRoutes({ core, currentKibanaVersion });
   registerTelemetryDataRoutes(core);
-  registerOptInRoutes({ core, currentKibanaVersion });
 }

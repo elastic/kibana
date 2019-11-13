@@ -60,6 +60,12 @@ export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/telemetry-pri
 export const KIBANA_LOCALIZATION_STATS_TYPE = 'localization';
 
 /**
+ * The type name used to publish telemetry plugin stats.
+ * @type {string}
+ */
+export const TELEMETRY_STATS_TYPE = 'telemetry';
+
+/**
  * UI metric usage type
  * @type {string}
  */
