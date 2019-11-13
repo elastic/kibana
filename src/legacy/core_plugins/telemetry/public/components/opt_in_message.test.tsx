@@ -16,8 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { renderTelemetryOptInCard, Props } from './telemetry_opt_in_card';
+import React from 'react';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { OptInMessage } from './opt_in_message';
 
-export const TelemetryOptInCard = (props: Props) => {
-  return renderTelemetryOptInCard(props);
-};
+describe('OptInMessage', () => {
+  it('renders as expected', () => {
+    expect(
+      shallowWithIntl(<OptInMessage fetchTelemetry={jest.fn(async () => [])} />)
+    ).toMatchSnapshot();
+  });
+});
