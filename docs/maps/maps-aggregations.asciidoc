@@ -7,7 +7,7 @@ Use {ref}/search-aggregations.html[aggregations] to plot large data sets without
 Aggregations group your documents into buckets and calculate metrics for each bucket.
 Your documents stay in Elasticsearch and only the metrics for each group are returned to your computer.
 
-Use aggregated layers in conjunction with document layers to show aggregated views when the map shows larger amounts of the globe and individual documents when the  map shows smaller regions. See <<maps-add-elasticsearch-layer, gettig started>> tutorial for more details.
+Use aggregated layers with document layers to show aggregated views when the map shows larger amounts of the globe and individual documents when the  map shows smaller regions. See the <<maps-add-elasticsearch-layer, Getting started>> tutorial for more details.
 
 
 [role="xpack"]
