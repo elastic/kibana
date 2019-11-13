@@ -14,9 +14,11 @@ import { UseField, Field } from '../../../shared_imports';
 
 interface Props {
   defaultToggleValue: boolean;
+  description?: string;
+  children?: React.ReactNode;
 }
 
-export const NullValueParameter = ({ defaultToggleValue }: Props) => (
+export const NullValueParameter = ({ defaultToggleValue, description, children }: Props) => (
   <EditFieldFormRow
     title={
       <h3>
@@ -25,11 +27,20 @@ export const NullValueParameter = ({ defaultToggleValue }: Props) => (
         })}
       </h3>
     }
-    description={i18n.translate('xpack.idxMgmt.mappingsEditor.nullValueFieldDescription', {
-      defaultMessage: 'Accepts a string value which is substituted for any explicit null values.',
-    })}
+    description={
+      description
+        ? description
+        : i18n.translate('xpack.idxMgmt.mappingsEditor.nullValueFieldDescription', {
+            defaultMessage:
+              'Accepts a string value which is substituted for any explicit null values.',
+          })
+    }
     toggleDefaultValue={defaultToggleValue}
   >
-    <UseField path="null_value" config={getFieldConfig('null_value')} component={Field} />
+    {children ? (
+      children
+    ) : (
+      <UseField path="null_value" config={getFieldConfig('null_value')} component={Field} />
+    )}
   </EditFieldFormRow>
 );

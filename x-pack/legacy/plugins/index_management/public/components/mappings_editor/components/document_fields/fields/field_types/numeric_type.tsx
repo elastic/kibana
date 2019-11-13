@@ -16,6 +16,7 @@ import {
   DocValuesParameter,
   BoostParameter,
   NullValueParameter,
+  CoerceParameter,
 } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 
@@ -97,20 +98,7 @@ export const NumericType = ({ field }: Props) => {
           />
 
           {/* coerce */}
-          <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.coerceFieldTitle', {
-                  defaultMessage: 'Coerce to number',
-                })}
-              </h3>
-            }
-            description={i18n.translate('xpack.idxMgmt.mappingsEditor.coerceDescription', {
-              defaultMessage:
-                'Whether to try to convert strings to numbers and truncate fractions for integers.',
-            })}
-            formFieldPath="coerce"
-          />
+          <CoerceParameter />
 
           {/* ignore_malformed */}
           <UseField path="ignore_malformed">
