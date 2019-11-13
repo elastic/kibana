@@ -91,6 +91,7 @@ export interface IExpressionLoaderParams {
   customFunctions?: [];
   customRenderers?: [];
   extraHandlers?: Record<string, any>;
+  inspectorAdapters?: Adapters;
 }
 
 export interface IInterpreterHandlers {
