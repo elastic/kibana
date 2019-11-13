@@ -17,11 +17,13 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { Status } from '../legacy/update_status';
+import { Vis } from '../../../../../../ui/public/vis';
+export { VisType } from '../../..';
 
-// TODO: should it be here or in vis filters (only place where it's used).
-// $newFilters is not defined by filter_bar as well.
-export function pushFilterBarFilters($state, filters) {
-  if (!_.isObject($state)) throw new Error('pushFilters requires a state object');
-  $state.$newFilters = filters;
+export declare class VisualizationController {
+  constructor(element: HTMLElement, vis: Vis);
+  public render(visData: any, visParams: any, update: { [key in Status]: boolean }): Promise<void>;
+  public destroy(): void;
+  public isLoaded?(): Promise<void> | void;
 }

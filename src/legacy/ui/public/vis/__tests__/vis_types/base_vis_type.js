@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { BaseVisType } from '../../vis_types/base_vis_type';
+import { BaseVisType } from '../../../../../core_plugins/visualizations/public/np_ready/public/types/base_vis_type';
 
 describe('Base Vis Type', function () {
   beforeEach(ngMock.module('kibana'));

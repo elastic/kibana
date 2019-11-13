@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { PersistedState } from '../persisted_state';
-import { calculateObjectHash } from './lib/calculate_object_hash';
-import { Vis } from './vis';
+import { PersistedState } from '../../../../../../ui/public/persisted_state';
+import { calculateObjectHash } from './calculate_object_hash';
+import { Vis } from '../vis';
 
 enum Status {
   AGGS = 'aggs',

@@ -19,8 +19,8 @@
 
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
-import { SearchError } from '../../courier';
-import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
+import { SearchError } from 'src/legacy/ui/public/courier';
+import { dispatchRenderComplete } from '../../../../../../../plugins/kibana_utils/public';
 
 interface VisualizationRequestErrorProps {
   onInit?: () => void;

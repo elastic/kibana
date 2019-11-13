@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { ReactVisType } from '../../vis_types/react_vis_type';
+import { ReactVisType } from '../../../../../core_plugins/visualizations/public/np_ready/public/types/react_vis_type';
 
 describe('React Vis Type', function () {
 

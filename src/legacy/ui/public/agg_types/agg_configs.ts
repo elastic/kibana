@@ -28,7 +28,7 @@
 
 import _ from 'lodash';
 import { TimeRange } from 'src/plugins/data/public';
-import { Schemas } from '../visualize/loader/pipeline_helpers/build_pipeline';
+import { Schemas } from '../../../core_plugins/visualizations/public/np_ready/public/legacy/build_pipeline';
 import { Schema } from '../vis/editors/default/schemas';
 import { AggConfig, AggConfigOptions } from './agg_config';
 import { AggGroupNames } from '../vis/editors/default/agg_groups';

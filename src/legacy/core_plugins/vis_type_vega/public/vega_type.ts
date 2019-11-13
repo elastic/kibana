@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Status } from 'ui/vis/update_status';
+import { Status } from 'ui/../../visualizations/public/np_ready/public/legacy/update_status';
 // @ts-ignore
 import { DefaultEditorSize } from 'ui/vis/editor_size';
 // @ts-ignore

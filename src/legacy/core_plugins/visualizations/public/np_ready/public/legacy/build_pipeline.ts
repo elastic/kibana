@@ -19,13 +19,13 @@
 
 import { cloneDeep, get } from 'lodash';
 // @ts-ignore
-import { setBounds } from 'ui/agg_types';
-import { AggConfig, Vis, VisParams, VisState } from 'ui/vis';
-import { isDateHistogramBucketAggConfig } from 'ui/agg_types/buckets/date_histogram';
+import { setBounds } from 'src/legacy/ui/public/agg_types';
+import { SearchSourceContract } from 'src/legacy/ui/public/courier';
+import { AggConfig, Vis, VisParams, VisState } from 'src/legacy/ui/public/vis';
+import { isDateHistogramBucketAggConfig } from 'src/legacy/ui/public/agg_types/buckets/date_histogram';
 import moment from 'moment';
 import { SerializedFieldFormat } from 'src/plugins/expressions/public';
-import { SearchSourceContract } from '../../../courier/types';
-import { createFormat } from './utilities';
+import { createFormat } from '../../../../../../ui/public/visualize/loader/pipeline_helpers/utilities';
 
 interface SchemaConfigParams {
   precision?: number;

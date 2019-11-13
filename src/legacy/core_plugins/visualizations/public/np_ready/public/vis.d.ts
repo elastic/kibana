@@ -17,4 +17,26 @@
  * under the License.
  */
 
-export { VisFiltersProvider, createFilter, createFiltersFromEvent, onBrushEvent } from './vis_filters';
+import { VisType } from './types/vis_type';
+import { AggConfigs } from '../../../../../ui/public/agg_types/agg_configs';
+
+export interface Vis {
+  type: VisType;
+
+  // Since we haven't typed everything here yet, we basically "any" the rest
+  // of that interface. This should be removed as soon as this type definition
+  // has been completed. But that way we at least have typing for a couple of
+  // properties on that type.
+  [key: string]: any;
+}
+
+export interface VisParams {
+  [key: string]: any;
+}
+
+export interface VisState {
+  title: string;
+  type: VisType;
+  params: VisParams;
+  aggs: AggConfigs;
+}

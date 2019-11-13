@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { Vis } from 'ui/vis';
 // @ts-ignore
-import { visFactory } from 'ui/vis/vis_factory';
+import { visFactory } from 'ui/../../visualizations/public/np_ready/public/legacy/vis_factory';
 
 // @ts-ignore
 import { Schemas } from 'ui/vis/editors/default/schemas';

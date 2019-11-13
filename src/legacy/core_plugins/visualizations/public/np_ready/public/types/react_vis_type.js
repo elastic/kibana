@@ -19,8 +19,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import chrome from '../../chrome';
-import { I18nContext } from '../../i18n';
+import chrome from '../../../../../../ui/public/chrome';
+import { I18nContext } from '../../../../../../ui/public/i18n';
 import { BaseVisType } from './base_vis_type';
 
 

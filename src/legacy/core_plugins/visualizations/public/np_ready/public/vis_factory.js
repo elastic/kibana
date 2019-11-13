@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BaseVisType, ReactVisType } from './vis_types';
+import { BaseVisType, ReactVisType } from '../../../../../ui/public/vis/vis_types';
 
 export const visFactory = {
   createBaseVisualization: (config) => {

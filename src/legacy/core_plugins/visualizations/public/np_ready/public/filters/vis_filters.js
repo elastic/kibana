@@ -18,9 +18,9 @@
  */
 
 import _ from 'lodash';
-import { pushFilterBarFilters } from '../push_filters';
+import { pushFilterBarFilters } from '../../../../../../ui/public/vis/push_filters';
 import { onBrushEvent } from './brush_event';
-import { uniqFilters, esFilters } from '../../../../../plugins/data/public';
+import { uniqFilters, esFilters } from '../../../../../../../plugins/data/public';
 
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter

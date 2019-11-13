@@ -26,7 +26,7 @@
 // @ts-ignore Used only by tsvb, vega, input control vis
 export { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 // @ts-ignore
-export { visFactory } from 'ui/vis/vis_factory';
+export { visFactory } from 'ui/np_ready/public/legacy/vis_factory';
 // @ts-ignore
 export { DefaultEditorSize } from 'ui/vis/editor_size';
 
@@ -36,12 +36,12 @@ export { DefaultEditorSize } from 'ui/vis/editor_size';
  *
  * @public
  */
-import * as types from 'ui/vis/vis';
+import * as types from 'ui/np_ready/public/legacy/vis';
 export type Vis = types.Vis;
 export type VisParams = types.VisParams;
 export type VisState = types.VisState;
-export { VisualizationController } from 'ui/vis/vis_types/vis_type';
-export { Status } from 'ui/vis/update_status';
+export { VisualizationController } from 'ui/np_ready/public/types/vis_type';
+export { Status } from 'ui/np_ready/public/legacy/update_status';
 
 /**
  * Static np-ready code, re-exported here so consumers can import from
