@@ -143,6 +143,21 @@ export const PARAMETERS_DEFINITION = {
       ],
     },
   },
+  max_input_length: {
+    fieldConfig: {
+      defaultValue: 50,
+      type: FIELD_TYPES.NUMBER,
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate('xpack.idxMgmt.mappingsEditor.maxInputLengthFieldRequiredErrorMessage', {
+              defaultMessage: 'Specify a max input length.',
+            })
+          ),
+        },
+      ],
+    },
+  },
   boost: {
     fieldConfig: {
       defaultValue: 1.0,
@@ -351,6 +366,16 @@ export const PARAMETERS_DEFINITION = {
   index_phrases: {
     fieldConfig: {
       defaultValue: false,
+    },
+  },
+  preserve_separators: {
+    fieldConfig: {
+      defaultValue: true,
+    },
+  },
+  preserve_position_increments: {
+    fieldConfig: {
+      defaultValue: true,
     },
   },
   norms: {

@@ -144,7 +144,11 @@ export const TextType = React.memo(({ field }: Props) => {
 
       <AdvancedSettingsWrapper>
         {/* Analyzers */}
-        <EditFieldSection title="Analysers">
+        <EditFieldSection
+          title={i18n.translate('xpack.idxMgmt.mappingsEditor.textAnalyzersTitle', {
+            defaultMessage: 'Analyzers',
+          })}
+        >
           <EditFieldFormRow
             title={
               <h3>

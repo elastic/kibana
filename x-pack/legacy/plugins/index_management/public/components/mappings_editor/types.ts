@@ -97,6 +97,9 @@ export type ParameterName =
   | 'ignore_above'
   | 'split_queries_on_whitespace'
   | 'scaling_factor'
+  | 'max_input_length'
+  | 'preserve_separators'
+  | 'preserve_position_increments'
   | 'enable_position_increments';
 
 export interface Parameter {
