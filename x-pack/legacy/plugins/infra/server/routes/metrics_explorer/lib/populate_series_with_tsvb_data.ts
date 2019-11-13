@@ -63,7 +63,14 @@ export const populateSeriesWithTSVBData = (
       timestampField: options.timerange.field,
       timerange: options.timerange,
     },
-    model.requires
+    options.metrics
+      .filter(metric => metric.field)
+      .map(metric => {
+        return metric
+          .field!.split(/\./)
+          .slice(0, 2)
+          .join('.');
+      })
   );
 
   if (calculatedInterval) {
