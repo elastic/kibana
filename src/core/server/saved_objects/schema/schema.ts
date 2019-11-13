@@ -21,7 +21,7 @@ import { Config } from '../../config';
 
 interface SavedObjectsSchemaTypeDefinition {
   isNamespaceAgnostic?: boolean;
-  isNamespaces?: boolean;
+  namespaces?: boolean;
   hidden?: boolean;
   indexPattern?: ((config: Config) => string) | string;
   convertToAliasScript?: string;
@@ -87,6 +87,6 @@ export class SavedObjectsSchema {
     if (!typeSchema) {
       return true;
     }
-    return !Boolean(typeSchema.isNamespaceAgnostic) && !Boolean(typeSchema.isNamespaces);
+    return !Boolean(typeSchema.isNamespaceAgnostic) && !Boolean(typeSchema.namespaces);
   }
 }

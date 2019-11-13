@@ -18,6 +18,7 @@ interface GetTests {
   spaceAware: GetTest;
   notSpaceAware: GetTest;
   hiddenType: GetTest;
+  sharedType: GetTest;
   doesntExist: GetTest;
 }
 
@@ -30,6 +31,7 @@ interface GetTestDefinition {
 
 const spaceAwareId = 'dd7caf20-9efd-11e7-acb3-3dab96693fab';
 const notSpaceAwareId = '8121a00-8efd-21e7-1cb3-34ab966434445';
+const sharedTypeId = 'all_spaces';
 const doesntExistId = 'foobar';
 
 export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
@@ -71,6 +73,19 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
       version: resp.body.version,
       attributes: {
         name: 'My favorite global object',
+      },
+      references: [],
+    });
+  };
+
+  const expectSharedTypeResults = (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      id: `${sharedTypeId}`,
+      type: 'sharedtype',
+      updated_at: '2017-09-21T18:59:16.270Z',
+      version: resp.body.version,
+      attributes: {
+        name: 'A shared saved-object in all spaces',
       },
       references: [],
     });
@@ -151,6 +166,14 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
           .then(tests.notSpaceAware.response);
       });
 
+      it(`should return ${tests.sharedType.statusCode} when getting a sharedtype doc`, async () => {
+        await supertest
+          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/sharedtype/${sharedTypeId}`)
+          .auth(user.username, user.password)
+          .expect(tests.sharedType.statusCode)
+          .then(tests.sharedType.response);
+      });
+
       it(`should return ${tests.hiddenType.statusCode} when getting a hiddentype doc`, async () => {
         await supertest
           .get(`${getUrlPrefix(spaceId)}/api/saved_objects/hiddentype/hiddentype_1`)
@@ -185,6 +208,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     createExpectNotSpaceAwareResults,
     createExpectSpaceAwareNotFound,
     createExpectSpaceAwareResults,
+    expectSharedTypeResults,
     expectHiddenTypeNotFound,
     expectSpaceAwareRbacForbidden,
     expectNotSpaceAwareRbacForbidden,

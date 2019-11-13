@@ -17,6 +17,7 @@ export default function({ getService }: FtrProviderContext) {
     createExpectSpaceAwareNotFound,
     createExpectSpaceAwareResults,
     createExpectNotSpaceAwareResults,
+    expectSharedTypeResults,
     expectHiddenTypeNotFound: expectHiddenTypeNotFound,
     getTest,
   } = getTestSuiteFactory(esArchiver, supertest);
@@ -32,6 +33,10 @@ export default function({ getService }: FtrProviderContext) {
         notSpaceAware: {
           statusCode: 200,
           response: createExpectNotSpaceAwareResults(SPACES.DEFAULT.spaceId),
+        },
+        sharedType: {
+          statusCode: 200,
+          response: expectSharedTypeResults,
         },
         hiddenType: {
           statusCode: 404,
@@ -55,6 +60,10 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 200,
           response: createExpectNotSpaceAwareResults(SPACES.SPACE_1.spaceId),
         },
+        sharedType: {
+          statusCode: 200,
+          response: expectSharedTypeResults,
+        },
         hiddenType: {
           statusCode: 404,
           response: expectHiddenTypeNotFound,
@@ -66,27 +75,34 @@ export default function({ getService }: FtrProviderContext) {
       },
     });
 
-    getTest(`can't access space aware objects belonging to another space (space_1)`, {
-      spaceId: SPACES.DEFAULT.spaceId,
-      otherSpaceId: SPACES.SPACE_1.spaceId,
-      tests: {
-        spaceAware: {
-          statusCode: 404,
-          response: createExpectSpaceAwareNotFound(SPACES.SPACE_1.spaceId),
+    getTest(
+      `unless shared, can't access space aware objects belonging to another space (space_1)`,
+      {
+        spaceId: SPACES.DEFAULT.spaceId,
+        otherSpaceId: SPACES.SPACE_1.spaceId,
+        tests: {
+          spaceAware: {
+            statusCode: 404,
+            response: createExpectSpaceAwareNotFound(SPACES.SPACE_1.spaceId),
+          },
+          notSpaceAware: {
+            statusCode: 200,
+            response: createExpectNotSpaceAwareResults(SPACES.SPACE_1.spaceId),
+          },
+          sharedType: {
+            statusCode: 200,
+            response: expectSharedTypeResults,
+          },
+          hiddenType: {
+            statusCode: 404,
+            response: expectHiddenTypeNotFound,
+          },
+          doesntExist: {
+            statusCode: 404,
+            response: createExpectDoesntExistNotFound(SPACES.SPACE_1.spaceId),
+          },
         },
-        notSpaceAware: {
-          statusCode: 200,
-          response: createExpectNotSpaceAwareResults(SPACES.SPACE_1.spaceId),
-        },
-        hiddenType: {
-          statusCode: 404,
-          response: expectHiddenTypeNotFound,
-        },
-        doesntExist: {
-          statusCode: 404,
-          response: createExpectDoesntExistNotFound(SPACES.SPACE_1.spaceId),
-        },
-      },
-    });
+      }
+    );
   });
 }

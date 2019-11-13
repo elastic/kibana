@@ -152,6 +152,9 @@
           "namespace": {
             "type": "keyword"
           },
+          "namespaces": {
+            "type": "keyword"
+          },
           "search": {
             "properties": {
               "columns": {
@@ -185,6 +188,19 @@
             "properties": {
               "uuid": {
                 "type": "keyword"
+              }
+            }
+          },
+          "sharedtype": {
+            "properties": {
+              "name": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 2048
+                  }
+                }
               }
             }
           },

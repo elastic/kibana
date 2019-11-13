@@ -150,6 +150,9 @@ function defaultMapping(): IndexMapping {
       namespace: {
         type: 'keyword',
       },
+      namespaces: {
+        type: 'keyword',
+      },
       updated_at: {
         type: 'date',
       },

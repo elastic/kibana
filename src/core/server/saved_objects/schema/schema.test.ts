@@ -77,7 +77,7 @@ describe('#isNamespaceIsolated', () => {
   it(`returns false for explicitly namespaces`, () => {
     const schema = new SavedObjectsSchema({
       foo: {
-        isNamespaces: true,
+        namespaces: true,
       },
     });
     const result = schema.isNamespaceIsolated('foo');
@@ -87,7 +87,7 @@ describe('#isNamespaceIsolated', () => {
   it(`returns true for explicitly not namespaces type`, () => {
     const schema = new SavedObjectsSchema({
       foo: {
-        isNamespaces: false,
+        namespaces: false,
       },
     });
     const result = schema.isNamespaceIsolated('foo');

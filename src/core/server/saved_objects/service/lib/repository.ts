@@ -201,7 +201,7 @@ export class SavedObjectsRepository {
 
       const docFound = response.found === true;
       const indexFound = response.status !== 404;
-      if (docFound && indexFound && !this._rawInNamespace(response, options.namespace)) {
+      if (docFound && indexFound && !this._rawInNamespaces(response, options.namespace)) {
         throw SavedObjectsErrorHelpers.createConflictError(type, id!);
       }
     }
@@ -332,7 +332,7 @@ export class SavedObjectsRepository {
           const indexFound = bulkGetResponse.status !== 404;
           const actualResult = indexFound ? bulkGetResponse.docs[esRequestIndex] : undefined;
           const docFound = indexFound && actualResult.found === true;
-          if (indexFound && docFound && !this._rawInNamespace(actualResult, namespace)) {
+          if (indexFound && docFound && !this._rawInNamespaces(actualResult, namespace)) {
             const { id, type } = object;
             return {
               tag: 'Left' as 'Left',
@@ -445,7 +445,7 @@ export class SavedObjectsRepository {
     if (
       getDocNotFound ||
       getIndexNotFound ||
-      !this._rawInNamespace(getResponse, options.namespace)
+      !this._rawInNamespaces(getResponse, options.namespace)
     ) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
@@ -681,7 +681,7 @@ export class SavedObjectsRepository {
         .map((doc, i) => {
           const { id, type } = supportedTypeObjects[i];
 
-          if (!doc.found || !this._rawInNamespace(doc, namespace)) {
+          if (!doc.found || !this._rawInNamespaces(doc, namespace)) {
             return ({
               id,
               type,
@@ -732,7 +732,7 @@ export class SavedObjectsRepository {
 
     const docNotFound = response.found === false;
     const indexNotFound = response.status === 404;
-    if (docNotFound || indexNotFound || !this._rawInNamespace(response, namespace)) {
+    if (docNotFound || indexNotFound || !this._rawInNamespaces(response, namespace)) {
       // see "404s from missing index" above
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
@@ -785,7 +785,7 @@ export class SavedObjectsRepository {
     if (
       getDocNotFound ||
       getIndexNotFound ||
-      !this._rawInNamespace(getResponse, options.namespace)
+      !this._rawInNamespaces(getResponse, options.namespace)
     ) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
@@ -906,7 +906,7 @@ export class SavedObjectsRepository {
         const indexFound = bulkGetResponse.status !== 404;
         const actualResult = indexFound ? bulkGetResponse.docs[esRequestIndex] : undefined;
         const docFound = indexFound && actualResult.found === true;
-        if (!indexFound || !docFound || !this._rawInNamespace(actualResult, namespace)) {
+        if (!indexFound || !docFound || !this._rawInNamespaces(actualResult, namespace)) {
           return {
             tag: 'Left' as 'Left',
             error: {
@@ -1112,18 +1112,20 @@ export class SavedObjectsRepository {
     return omit(savedObject, 'namespace');
   }
 
-  private _rawInNamespace(raw: RawDoc, namespace?: string) {
-    const rawDocType = raw._source.type;
-    const rawDocNamespace = raw._source.namespace;
-    if (this._schema.isNamespaceAgnostic(rawDocType)) {
-      if (rawDocNamespace !== undefined) {
-        throw new Error('Found a document for a space-agnostic type, which has a namespace');
-      }
+  private _rawInNamespaces(raw: RawDoc, namespace?: string) {
+    const rawDocType = raw._source.type as string;
 
+    // if the type is namespace isolated, or namespace agnostic, we can continue to rely on the guarantees
+    // of the document ID format and don't need to check this
+    if (
+      this._schema.isNamespaceIsolated(rawDocType) ||
+      this._schema.isNamespaceAgnostic(rawDocType)
+    ) {
       return true;
     }
 
-    return rawDocNamespace === namespace;
+    const namespaces = raw._source.namespaces as string[];
+    return namespaces.includes(namespace === undefined ? 'default' : namespace);
   }
 }
 
