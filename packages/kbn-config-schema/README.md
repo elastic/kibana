@@ -91,7 +91,9 @@ expect(() =>
 );
 ```
 
-Note that when you retrieve configuration within a Kibana plugin `validate` function is called by the Core automatically providing appropriate namespace and context variables (environment name, package info etc.).
+__Notes:__
+* `validate` method throws as soon as the first schema violation is encountered, no further validation is performed.
+* when you retrieve configuration within a Kibana plugin `validate` function is called by the Core automatically providing appropriate namespace and context variables (environment name, package info etc.).
 
 ### Basic types
 
@@ -505,4 +507,5 @@ const valueSchemaWithReferencedValueDefault = schema.string({ defaultValue: sche
 const valueSchemaWithFunctionEvaluatedDefault = schema.string({ defaultValue: () => Math.random().toString() });
 ```
 
-__NOTE:__ `@kbn/config-schema` neither validates nor coerces default value and developer is responsible for making sure that it has the appropriate type.
+__Notes:__
+* `@kbn/config-schema` neither validates nor coerces default value and developer is responsible for making sure that it has the appropriate type.
