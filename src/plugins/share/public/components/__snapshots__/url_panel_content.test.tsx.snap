@@ -15,7 +15,7 @@ exports[`render 1`] = `
       helpText={
         <FormattedMessage
           defaultMessage="Can't share as saved object until the {objectType} has been saved."
-          id="common.ui.share.urlPanel.canNotShareAsSavedObjectHelpText"
+          id="share.urlPanel.canNotShareAsSavedObjectHelpText"
           values={
             Object {
               "objectType": "dashboard",
@@ -26,7 +26,7 @@ exports[`render 1`] = `
       label={
         <FormattedMessage
           defaultMessage="Generate the link as"
-          id="common.ui.share.urlPanel.generateLinkAsLabel"
+          id="share.urlPanel.generateLinkAsLabel"
           values={Object {}}
         />
       }
@@ -47,7 +47,7 @@ exports[`render 1`] = `
                 <EuiFlexItem>
                   <FormattedMessage
                     defaultMessage="Snapshot"
-                    id="common.ui.share.urlPanel.snapshotLabel"
+                    id="share.urlPanel.snapshotLabel"
                     values={Object {}}
                   />
                 </EuiFlexItem>
@@ -58,7 +58,7 @@ exports[`render 1`] = `
                     content={
                       <FormattedMessage
                         defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself. Edits to the saved {objectType} won't be visible via this URL."
-                        id="common.ui.share.urlPanel.snapshotDescription"
+                        id="share.urlPanel.snapshotDescription"
                         values={
                           Object {
                             "objectType": "dashboard",
@@ -82,7 +82,7 @@ exports[`render 1`] = `
                 <EuiFlexItem>
                   <FormattedMessage
                     defaultMessage="Saved object"
-                    id="common.ui.share.urlPanel.savedObjectLabel"
+                    id="share.urlPanel.savedObjectLabel"
                     values={Object {}}
                   />
                 </EuiFlexItem>
@@ -93,7 +93,7 @@ exports[`render 1`] = `
                     content={
                       <FormattedMessage
                         defaultMessage="You can share this URL with people to let them load the most recent saved version of this {objectType}."
-                        id="common.ui.share.urlPanel.savedObjectDescription"
+                        id="share.urlPanel.savedObjectDescription"
                         values={
                           Object {
                             "objectType": "dashboard",
@@ -130,7 +130,7 @@ exports[`render 1`] = `
             label={
               <FormattedMessage
                 defaultMessage="Short URL"
-                id="common.ui.share.urlPanel.shortUrlLabel"
+                id="share.urlPanel.shortUrlLabel"
                 values={Object {}}
               />
             }
@@ -144,7 +144,7 @@ exports[`render 1`] = `
             content={
               <FormattedMessage
                 defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great."
-                id="common.ui.share.urlPanel.shortUrlHelpText"
+                id="share.urlPanel.shortUrlHelpText"
                 values={Object {}}
               />
             }
@@ -182,7 +182,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
       label={
         <FormattedMessage
           defaultMessage="Generate the link as"
-          id="common.ui.share.urlPanel.generateLinkAsLabel"
+          id="share.urlPanel.generateLinkAsLabel"
           values={Object {}}
         />
       }
@@ -203,7 +203,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
                 <EuiFlexItem>
                   <FormattedMessage
                     defaultMessage="Snapshot"
-                    id="common.ui.share.urlPanel.snapshotLabel"
+                    id="share.urlPanel.snapshotLabel"
                     values={Object {}}
                   />
                 </EuiFlexItem>
@@ -214,7 +214,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
                     content={
                       <FormattedMessage
                         defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself. Edits to the saved {objectType} won't be visible via this URL."
-                        id="common.ui.share.urlPanel.snapshotDescription"
+                        id="share.urlPanel.snapshotDescription"
                         values={
                           Object {
                             "objectType": "dashboard",
@@ -238,7 +238,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
                 <EuiFlexItem>
                   <FormattedMessage
                     defaultMessage="Saved object"
-                    id="common.ui.share.urlPanel.savedObjectLabel"
+                    id="share.urlPanel.savedObjectLabel"
                     values={Object {}}
                   />
                 </EuiFlexItem>
@@ -249,7 +249,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
                     content={
                       <FormattedMessage
                         defaultMessage="You can share this URL with people to let them load the most recent saved version of this {objectType}."
-                        id="common.ui.share.urlPanel.savedObjectDescription"
+                        id="share.urlPanel.savedObjectDescription"
                         values={
                           Object {
                             "objectType": "dashboard",
@@ -286,7 +286,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
             label={
               <FormattedMessage
                 defaultMessage="Short URL"
-                id="common.ui.share.urlPanel.shortUrlLabel"
+                id="share.urlPanel.shortUrlLabel"
                 values={Object {}}
               />
             }
@@ -300,7 +300,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
             content={
               <FormattedMessage
                 defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great."
-                id="common.ui.share.urlPanel.shortUrlHelpText"
+                id="share.urlPanel.shortUrlHelpText"
                 values={Object {}}
               />
             }
@@ -338,7 +338,7 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
       label={
         <FormattedMessage
           defaultMessage="Generate the link as"
-          id="common.ui.share.urlPanel.generateLinkAsLabel"
+          id="share.urlPanel.generateLinkAsLabel"
           values={Object {}}
         />
       }
@@ -359,7 +359,7 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
                 <EuiFlexItem>
                   <FormattedMessage
                     defaultMessage="Snapshot"
-                    id="common.ui.share.urlPanel.snapshotLabel"
+                    id="share.urlPanel.snapshotLabel"
                     values={Object {}}
                   />
                 </EuiFlexItem>
@@ -370,7 +370,7 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
                     content={
                       <FormattedMessage
                         defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself. Edits to the saved {objectType} won't be visible via this URL."
-                        id="common.ui.share.urlPanel.snapshotDescription"
+                        id="share.urlPanel.snapshotDescription"
                         values={
                           Object {
                             "objectType": "dashboard",
@@ -394,7 +394,7 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
                 <EuiFlexItem>
                   <FormattedMessage
                     defaultMessage="Saved object"
-                    id="common.ui.share.urlPanel.savedObjectLabel"
+                    id="share.urlPanel.savedObjectLabel"
                     values={Object {}}
                   />
                 </EuiFlexItem>
@@ -405,7 +405,7 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
                     content={
                       <FormattedMessage
                         defaultMessage="You can share this URL with people to let them load the most recent saved version of this {objectType}."
-                        id="common.ui.share.urlPanel.savedObjectDescription"
+                        id="share.urlPanel.savedObjectDescription"
                         values={
                           Object {
                             "objectType": "dashboard",

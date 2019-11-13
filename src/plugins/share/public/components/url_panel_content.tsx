@@ -119,12 +119,12 @@ export class UrlPanelContent extends Component<Props, State> {
               >
                 {this.props.isEmbedded ? (
                   <FormattedMessage
-                    id="common.ui.share.urlPanel.copyIframeCodeButtonLabel"
+                    id="share.urlPanel.copyIframeCodeButtonLabel"
                     defaultMessage="Copy iFrame code"
                   />
                 ) : (
                   <FormattedMessage
-                    id="common.ui.share.urlPanel.copyLinkButtonLabel"
+                    id="share.urlPanel.copyLinkButtonLabel"
                     defaultMessage="Copy link"
                   />
                 )}
@@ -288,12 +288,9 @@ export class UrlPanelContent extends Component<Props, State> {
       {
         id: ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
         label: this.renderWithIconTip(
+          <FormattedMessage id="share.urlPanel.snapshotLabel" defaultMessage="Snapshot" />,
           <FormattedMessage
-            id="common.ui.share.urlPanel.snapshotLabel"
-            defaultMessage="Snapshot"
-          />,
-          <FormattedMessage
-            id="common.ui.share.urlPanel.snapshotDescription"
+            id="share.urlPanel.snapshotDescription"
             defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself.
             Edits to the saved {objectType} won't be visible via this URL."
             values={{ objectType: this.props.objectType }}
@@ -305,12 +302,9 @@ export class UrlPanelContent extends Component<Props, State> {
         id: ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT,
         disabled: this.isNotSaved(),
         label: this.renderWithIconTip(
+          <FormattedMessage id="share.urlPanel.savedObjectLabel" defaultMessage="Saved object" />,
           <FormattedMessage
-            id="common.ui.share.urlPanel.savedObjectLabel"
-            defaultMessage="Saved object"
-          />,
-          <FormattedMessage
-            id="common.ui.share.urlPanel.savedObjectDescription"
+            id="share.urlPanel.savedObjectDescription"
             defaultMessage="You can share this URL with people to let them load the most recent saved version of this {objectType}."
             values={{ objectType: this.props.objectType }}
           />
@@ -334,7 +328,7 @@ export class UrlPanelContent extends Component<Props, State> {
   private renderExportAsRadioGroup = () => {
     const generateLinkAsHelp = this.isNotSaved() ? (
       <FormattedMessage
-        id="common.ui.share.urlPanel.canNotShareAsSavedObjectHelpText"
+        id="share.urlPanel.canNotShareAsSavedObjectHelpText"
         defaultMessage="Can't share as saved object until the {objectType} has been saved."
         values={{ objectType: this.props.objectType }}
       />
@@ -345,7 +339,7 @@ export class UrlPanelContent extends Component<Props, State> {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="common.ui.share.urlPanel.generateLinkAsLabel"
+            id="share.urlPanel.generateLinkAsLabel"
             defaultMessage="Generate the link as"
           />
         }
@@ -368,7 +362,7 @@ export class UrlPanelContent extends Component<Props, State> {
       return;
     }
     const shortUrlLabel = (
-      <FormattedMessage id="common.ui.share.urlPanel.shortUrlLabel" defaultMessage="Short URL" />
+      <FormattedMessage id="share.urlPanel.shortUrlLabel" defaultMessage="Short URL" />
     );
     const switchLabel = this.state.isCreatingShortUrl ? (
       <span>
@@ -387,7 +381,7 @@ export class UrlPanelContent extends Component<Props, State> {
     );
     const tipContent = (
       <FormattedMessage
-        id="common.ui.share.urlPanel.shortUrlHelpText"
+        id="share.urlPanel.shortUrlHelpText"
         defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility.
         Internet Explorer has URL length restrictions,
         and some wiki and markup parsers don't do well with the full-length version of the snapshot URL,

@@ -62,7 +62,7 @@ export class ShareContextMenu extends Component<Props> {
 
     const permalinkPanel = {
       id: panels.length + 1,
-      title: i18n.translate('common.ui.share.contextMenu.permalinkPanelTitle', {
+      title: i18n.translate('share.contextMenu.permalinkPanelTitle', {
         defaultMessage: 'Permalink',
       }),
       content: (
@@ -77,7 +77,7 @@ export class ShareContextMenu extends Component<Props> {
       ),
     };
     menuItems.push({
-      name: i18n.translate('common.ui.share.contextMenu.permalinksLabel', {
+      name: i18n.translate('share.contextMenu.permalinksLabel', {
         defaultMessage: 'Permalinks',
       }),
       icon: 'link',
@@ -89,7 +89,7 @@ export class ShareContextMenu extends Component<Props> {
     if (this.props.allowEmbed) {
       const embedPanel = {
         id: panels.length + 1,
-        title: i18n.translate('common.ui.share.contextMenu.embedCodePanelTitle', {
+        title: i18n.translate('share.contextMenu.embedCodePanelTitle', {
           defaultMessage: 'Embed Code',
         }),
         content: (
@@ -106,7 +106,7 @@ export class ShareContextMenu extends Component<Props> {
       };
       panels.push(embedPanel);
       menuItems.push({
-        name: i18n.translate('common.ui.share.contextMenu.embedCodeLabel', {
+        name: i18n.translate('share.contextMenu.embedCodeLabel', {
           defaultMessage: 'Embed code',
         }),
         icon: 'console',
@@ -130,7 +130,7 @@ export class ShareContextMenu extends Component<Props> {
     if (menuItems.length > 1) {
       const topLevelMenuPanel = {
         id: panels.length + 1,
-        title: i18n.translate('common.ui.share.contextMenuTitle', {
+        title: i18n.translate('share.contextMenuTitle', {
           defaultMessage: 'Share this {objectType}',
           values: {
             objectType: this.props.objectType,
