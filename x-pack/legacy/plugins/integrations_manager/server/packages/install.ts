@@ -71,13 +71,12 @@ export async function saveInstallationReferences(options: {
   };
 
   const toInstall = toSave.reduce(mergeRefsReducer, savedRefs || []);
-  const results = await savedObjectsClient.create<InstallationAttributes>(
+
+  return savedObjectsClient.create<InstallationAttributes>(
     SAVED_OBJECT_TYPE,
     { installed: toInstall },
     { id: pkgkey, overwrite: true }
   );
-
-  return results;
 }
 
 async function installKibanaSavedObjects({

@@ -46,20 +46,16 @@ export async function handleGetCategories(req: Request, extra: Extra) {
 
 export async function handleGetList(req: ListPackagesRequest, extra: Extra) {
   const savedObjectsClient = getClient(req);
-  const packageList = await getPackages({
+  return getPackages({
     savedObjectsClient,
     category: req.query.category,
   });
-
-  return packageList;
 }
 
 export async function handleGetInfo(req: PackageInfoRequest, extra: Extra) {
   const { pkgkey } = req.params;
   const savedObjectsClient = getClient(req);
-  const packageInfo = await getPackageInfo({ savedObjectsClient, pkgkey });
-
-  return packageInfo;
+  return getPackageInfo({ savedObjectsClient, pkgkey });
 }
 
 export const handleGetFile = async (req: Request, extra: Extra) => {
@@ -79,7 +75,7 @@ export const handleGetFile = async (req: Request, extra: Extra) => {
 export async function handleRequestInstall(req: InstallDeletePackageRequest, extra: Extra) {
   const { pkgkey } = req.params;
   const savedObjectsClient = getClient(req);
-  return await installPackage({
+  return installPackage({
     savedObjectsClient,
     pkgkey,
   });
@@ -89,7 +85,5 @@ export async function handleRequestDelete(req: InstallDeletePackageRequest, extr
   const { pkgkey } = req.params;
   const savedObjectsClient = getClient(req);
   const callCluster = getClusterAccessor(extra.context.esClient, req);
-  const deleted = await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
-
-  return deleted;
+  return removeInstallation({ savedObjectsClient, pkgkey, callCluster });
 }

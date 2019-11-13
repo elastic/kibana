@@ -31,17 +31,13 @@ export function setClient(client: HttpHandler): void {
 
 export async function getCategories(): Promise<CategorySummaryList> {
   const path = getCategoriesPath();
-  const list: CategorySummaryList = await _fetch(path);
-
-  return list;
+  return _fetch(path);
 }
 
 export async function getPackages(params?: ListParams): Promise<PackageList> {
   const path = getListPath();
   const options = params ? { query: { ...params } } : undefined;
-  const list: PackageList = await _fetch(path, options);
-
-  return list;
+  return _fetch(path, options);
 }
 
 export async function getPackagesGroupedByStatus() {
@@ -66,9 +62,7 @@ export async function getPackagesGroupedByStatus() {
 
 export async function getPackageInfoByKey(pkgkey: string): Promise<PackageInfo> {
   const path = getInfoPath(pkgkey);
-  const info: PackageInfo = await _fetch(path);
-
-  return info;
+  return _fetch(path);
 }
 
 export async function installPackage(pkgkey: string) {
