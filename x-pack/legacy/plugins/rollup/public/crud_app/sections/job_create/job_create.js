@@ -133,7 +133,6 @@ export class JobCreateUi extends Component {
     const indexPattern = this.getIndexPattern();
     if (indexPattern !== this.getIndexPattern(prevState)) {
 
-
       // If the user hasn't entered anything, then skip validation.
       if (!indexPattern || !indexPattern.trim()) {
         this.setState({
@@ -268,7 +267,6 @@ export class JobCreateUi extends Component {
       indexPatternDateFields.sort();
 
       if (resetDefaults) {
-        const { indexPatternDateFields } = this.state;
         // Whenever the index pattern changes we default to the first date field if there is one.
         this.onFieldsChange(
           {
