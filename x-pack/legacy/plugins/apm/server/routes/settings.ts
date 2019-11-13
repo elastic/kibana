@@ -31,6 +31,9 @@ export const agentConfigurationRoute = createRoute(core => ({
 export const deleteAgentConfigurationRoute = createRoute(() => ({
   method: 'DELETE',
   path: '/api/apm/settings/agent-configuration/{configurationId}',
+  options: {
+    tags: ['access:apm', 'access:apm_write']
+  },
   params: {
     path: t.type({
       configurationId: t.string
@@ -108,6 +111,9 @@ export const createAgentConfigurationRoute = createRoute(() => ({
   params: {
     body: agentPayloadRt
   },
+  options: {
+    tags: ['access:apm', 'access:apm_write']
+  },
   handler: async (req, { body }) => {
     const setup = await setupRequest(req);
     return await createOrUpdateConfiguration({ configuration: body, setup });
@@ -117,6 +123,9 @@ export const createAgentConfigurationRoute = createRoute(() => ({
 export const updateAgentConfigurationRoute = createRoute(() => ({
   method: 'PUT',
   path: '/api/apm/settings/agent-configuration/{configurationId}',
+  options: {
+    tags: ['access:apm', 'access:apm_write']
+  },
   params: {
     path: t.type({
       configurationId: t.string
