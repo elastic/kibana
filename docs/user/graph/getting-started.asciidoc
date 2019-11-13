@@ -57,7 +57,7 @@ image:user/graph/images/graph-redo-button.png[Redo].
 [role="screenshot"]
 image::user/graph/images/graph-add-query.png["Adding networks"]
 
-. Save your graph.
+. *Save* your graph.
 
 [float]
 [[style-vertex-properties]]
@@ -80,7 +80,7 @@ in the control bar on the right.
 By default, *Graph* is configured to tune out noise in your data. 
 If this isn't a good fit for your data, use *Settings > Advanced settings*
 to adjust the way *Graph* queries your data. You can tune the graph to show 
-just the results relevant to you and to improve performance.  
+only the results relevant to you and to improve performance.  
 For more information, see <<graph-troubleshooting, Graph troubleshooting>>. 
 
 You can configure the number of vertices that a search or 
@@ -102,9 +102,9 @@ For a list of blocked terms, go to *Settings > Blocked terms*.
 [float]
 [[graph-drill-down]]
 === Drill down into raw documents
-With drilldowns, you can to display additional information about a 
+With drilldowns, you can display additional information about a 
 selected vertex in a new browser window. For example, you might 
-configure a drill down URL to perform a web search for the selected vertex term.  
+configure a drilldown URL to perform a web search for the selected vertex term.  
 
 Use the drilldown icon image:user/graph/images/graph-info-icon.png[Drilldown selection] 
 in the control panel to show the drilldown buttons for the selected vertices.
