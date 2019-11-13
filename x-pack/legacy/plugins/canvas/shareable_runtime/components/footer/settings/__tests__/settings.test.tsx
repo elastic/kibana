@@ -60,7 +60,7 @@ describe('<Settings />', () => {
     expect(popover(wrapper).prop('isOpen')).toEqual(false);
   });
 
-  test('can navigate Autoplay Settings', async () => {
+  test.skip('can navigate Autoplay Settings', async () => {
     trigger(wrapper).simulate('click');
     expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
     await tick(20);
