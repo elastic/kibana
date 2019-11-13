@@ -753,6 +753,7 @@ export class SavedObjectsRepository {
     return {
       id,
       type,
+      ...(this._schema.isNamespaces(type) && { namespaces: response._source.namespace }),
       ...(updatedAt && { updated_at: updatedAt }),
       version: encodeHitVersion(response),
       attributes: response._source[type],

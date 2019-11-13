@@ -18,7 +18,7 @@ interface GetTests {
   spaceAware: GetTest;
   notSpaceAware: GetTest;
   hiddenType: GetTest;
-  sharedType: GetTest;
+  sharedTypeOnlySpace1: GetTest;
   doesntExist: GetTest;
 }
 
@@ -31,7 +31,7 @@ interface GetTestDefinition {
 
 const spaceAwareId = 'dd7caf20-9efd-11e7-acb3-3dab96693fab';
 const notSpaceAwareId = '8121a00-8efd-21e7-1cb3-34ab966434445';
-const sharedTypeId = 'default_and_space_1';
+const sharedTypeOnlySpace1Id = 'only_space_1';
 const doesntExistId = 'foobar';
 
 export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
@@ -53,6 +53,12 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     'hiddentype',
     'hiddentype_1',
     DEFAULT_SPACE_ID
+  );
+
+  const expectSharedTypeOnlyInSpace1NotFound = createExpectNotFound(
+    'sharedtype',
+    'only_space_1',
+    undefined
   );
 
   const createExpectNotSpaceAwareRbacForbidden = () => (resp: { [key: string]: any }) => {
@@ -78,14 +84,14 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     });
   };
 
-  const expectSharedTypeResults = (resp: { [key: string]: any }) => {
+  const expectSharedTypeOnlyInSpace1Results = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
-      id: `${sharedTypeId}`,
+      id: sharedTypeOnlySpace1Id,
       type: 'sharedtype',
       updated_at: '2017-09-21T18:59:16.270Z',
       version: resp.body.version,
       attributes: {
-        name: 'A shared saved-object in all spaces',
+        name: 'A shared saved-object only in space_1',
       },
       references: [],
     });
@@ -166,12 +172,12 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
           .then(tests.notSpaceAware.response);
       });
 
-      it(`should return ${tests.sharedType.statusCode} when getting a sharedtype doc`, async () => {
+      it(`should return ${tests.sharedTypeOnlySpace1.statusCode} when getting a sharedtype doc`, async () => {
         await supertest
-          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/sharedtype/${sharedTypeId}`)
+          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/sharedtype/${sharedTypeOnlySpace1Id}`)
           .auth(user.username, user.password)
-          .expect(tests.sharedType.statusCode)
-          .then(tests.sharedType.response);
+          .expect(tests.sharedTypeOnlySpace1.statusCode)
+          .then(tests.sharedTypeOnlySpace1.response);
       });
 
       it(`should return ${tests.hiddenType.statusCode} when getting a hiddentype doc`, async () => {
@@ -208,8 +214,9 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     createExpectNotSpaceAwareResults,
     createExpectSpaceAwareNotFound,
     createExpectSpaceAwareResults,
-    expectSharedTypeResults,
+    expectSharedTypeOnlyInSpace1Results,
     expectHiddenTypeNotFound,
+    expectSharedTypeOnlyInSpace1NotFound,
     expectSpaceAwareRbacForbidden,
     expectNotSpaceAwareRbacForbidden,
     expectDoesntExistRbacForbidden,
