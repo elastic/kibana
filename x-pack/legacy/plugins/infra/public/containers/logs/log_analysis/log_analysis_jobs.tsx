@@ -5,22 +5,15 @@
  */
 
 import createContainer from 'constate';
-import { useMemo, useCallback, useEffect, useState } from 'react';
+import { useMemo, useCallback, useEffect } from 'react';
 
 import { callGetMlModuleAPI } from './api/ml_get_module';
 import { bucketSpan, getJobId } from '../../../../common/log_analysis';
-import { ValidationIndicesError } from '../../../../common/http_api';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callJobsSummaryAPI } from './api/ml_get_jobs_summary_api';
 import { callSetupMlModuleAPI, SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
 import { useLogAnalysisCleanup } from './log_analysis_cleanup';
 import { useStatusState } from './log_analysis_status_state';
-import { callIndexPatternsValidate } from './api/index_patterns_validate';
-
-export interface AvailableIndex {
-  index: string;
-  validation?: ValidationIndicesError;
-}
 
 const MODULE_ID = 'logs_ui_analysis';
 
@@ -94,31 +87,14 @@ export const useLogAnalysisJobs = ({
     [spaceId, sourceId, timeField, bucketSpan]
   );
 
-  const indexPatterns = indexPattern.split(',');
-
-  const [availableIndices, setAvailableIndices] = useState<AvailableIndex[]>(
-    indexPatterns.map<AvailableIndex>(pattern => ({ index: pattern }))
-  );
-
   const [fetchJobStatusRequest, fetchJobStatus] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
         dispatch({ type: 'fetchingJobStatuses' });
-        return Promise.all([
-          callJobsSummaryAPI(spaceId, sourceId),
-          callIndexPatternsValidate(timeField, indexPattern),
-        ]);
+        return await callJobsSummaryAPI(spaceId, sourceId);
       },
-      onResolve: ([jobResponse, validationResponse]) => {
-        setAvailableIndices(
-          indexPatterns.map<AvailableIndex>(pattern => {
-            const indexValidation = validationResponse.data.errors.find(
-              err => err.index === pattern
-            );
-            return { index: pattern, validation: indexValidation };
-          })
-        );
+      onResolve: jobResponse => {
         dispatch({ type: 'fetchedJobStatuses', payload: jobResponse, spaceId, sourceId });
       },
       onReject: err => {
@@ -133,6 +109,8 @@ export const useLogAnalysisJobs = ({
       fetchJobStatusRequest.state === 'pending' || fetchModuleDefinitionRequest.state === 'pending',
     [fetchJobStatusRequest.state, fetchModuleDefinitionRequest.state]
   );
+
+  const availableIndices = useMemo(() => indexPattern.split(','), [indexPattern]);
 
   const viewResults = useCallback(() => {
     dispatch({ type: 'viewedResults' });

@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiCheckboxGroup, EuiCode, EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+import {
+  EuiCheckboxGroup,
+  EuiCode,
+  EuiDescribedFormGroup,
+  EuiFormRow,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
@@ -51,19 +57,23 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
         />
       }
     >
-      <EuiFormRow
-        describedByIds={['indices']}
-        fullWidth
-        isInvalid={!valid}
-        label={indicesSelectionLabel}
-        labelType="legend"
-      >
-        <EuiCheckboxGroup
-          options={choices}
-          idToSelectedMap={indices}
-          onChange={handleCheckboxGroupChange}
-        />
-      </EuiFormRow>
+      {choices.length > 0 ? (
+        <EuiFormRow
+          describedByIds={['indices']}
+          fullWidth
+          isInvalid={!valid}
+          label={indicesSelectionLabel}
+          labelType="legend"
+        >
+          <EuiCheckboxGroup
+            options={choices}
+            idToSelectedMap={indices}
+            onChange={handleCheckboxGroupChange}
+          />
+        </EuiFormRow>
+      ) : (
+        <EuiLoadingSpinner size="m" />
+      )}
     </EuiDescribedFormGroup>
   );
 };

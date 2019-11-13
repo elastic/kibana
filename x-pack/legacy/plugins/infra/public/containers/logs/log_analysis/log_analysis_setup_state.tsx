@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 
 import { isExampleDataIndex } from '../../../../common/log_analysis';
-import { AvailableIndex } from './log_analysis_jobs';
 import { ValidationIndicesUIError } from '../../../pages/logs/analysis/setup/initial_configuration_step';
+import { ValidationIndicesError } from '../../../../common/http_api';
+import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { callIndexPatternsValidate } from './api/index_patterns_validate';
 
 type SetupHandler = (
   indices: string[],
@@ -16,8 +18,13 @@ type SetupHandler = (
   endTime: number | undefined
 ) => void;
 
+interface ValidatedIndex {
+  index: string;
+  validation?: ValidationIndicesError;
+}
+
 interface AnalysisSetupStateArguments {
-  availableIndices: AvailableIndex[];
+  availableIndices: string[];
   cleanupAndSetupModule: SetupHandler;
   setupModule: SetupHandler;
 }
@@ -34,15 +41,45 @@ export const useAnalysisSetupState = ({
   const [startTime, setStartTime] = useState<number | undefined>(Date.now() - fourWeeksInMs);
   const [endTime, setEndTime] = useState<number | undefined>(undefined);
 
-  const [selectedIndices, setSelectedIndices] = useState<IndicesSelection>(
-    availableIndices.reduce(
-      (indexMap, entry) => ({
-        ...indexMap,
-        [entry.index]: !(availableIndices.length > 1 && isExampleDataIndex(entry.index)),
-      }),
-      {}
-    )
+  const [selectedIndices, setSelectedIndices] = useState<IndicesSelection>({});
+
+  // Prepare the validation
+  const [validatedIndices, setValidatedIndices] = useState<ValidatedIndex[]>([]);
+  const [, validateIndices] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'resolution',
+      createPromise: async () => {
+        return await callIndexPatternsValidate('@timestamp', availableIndices.join(','));
+      },
+      onResolve: ({ data }) => {
+        setValidatedIndices(
+          availableIndices.map(index => ({
+            index,
+            validation: data.errors.find(error => error.index === index),
+          }))
+        );
+
+        // By default select only indices that have no errors
+        setSelectedIndices(
+          availableIndices.reduce<IndicesSelection>(
+            (map, index) => ({
+              ...map,
+              [index]:
+                !data.errors.some(error => error.index === index) && !isExampleDataIndex(index),
+            }),
+            {}
+          )
+        );
+      },
+      onReject: () => {},
+    },
+    [availableIndices, timestampField]
   );
+
+  useEffect(() => {
+    validateIndices();
+  }, [availableIndices]);
+
   const selectedIndexNames = useMemo(
     () =>
       Object.entries(selectedIndices)
@@ -60,11 +97,15 @@ export const useAnalysisSetupState = ({
   }, [cleanupAndSetupModule, selectedIndexNames, startTime, endTime]);
 
   const validationErrors = useMemo<ValidationIndicesUIError[]>(() => {
+    if (validatedIndices.length === 0) {
+      return [];
+    }
+
     if (selectedIndexNames.length === 0) {
       return [{ error: 'TOO_FEW_SELECTED_INDICES' }];
     }
 
-    const indicesWithErrors = availableIndices.filter(
+    const indicesWithErrors = validatedIndices.filter(
       index => selectedIndexNames.includes(index.index) && index.validation !== undefined
     );
 
@@ -73,7 +114,7 @@ export const useAnalysisSetupState = ({
     }
 
     return [];
-  }, [selectedIndexNames, availableIndices]);
+  }, [selectedIndexNames, validatedIndices]);
 
   return {
     cleanupAndSetup,
