@@ -6,7 +6,6 @@
 import React, { useCallback } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import {
   Axis,
   Chart,
@@ -16,10 +15,8 @@ import {
   Settings,
   TooltipValue,
 } from '@elastic/charts';
-import { EuiPageContentBody, EuiTitle } from '@elastic/eui';
-import { InfraMetricData } from '../../../graphql/types';
-import { getChartTheme } from '../../metrics_explorer/helpers/get_chart_theme';
-import { InfraFormatterType } from '../../../lib/lib';
+import { EuiPageContentBody } from '@elastic/eui';
+import { getChartTheme } from '../../../components/metrics_explorer/helpers/get_chart_theme';
 import { SeriesChart } from './series_chart';
 import {
   getFormatter,
@@ -31,28 +28,24 @@ import {
 } from './helpers';
 import { ErrorMessage } from './error_message';
 import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
-import { MetricsTimeInput } from '../../../containers/metrics/with_metrics_time';
-import { InventoryDetailSection } from '../../../../common/inventory_models/types';
+import { VisSectionProps } from '../types';
 
-interface Props {
-  section: InventoryDetailSection;
-  metric: InfraMetricData;
-  onChangeRangeTime?: (time: MetricsTimeInput) => void;
-  isLiveStreaming?: boolean;
-  stopLiveStreaming?: () => void;
-}
-
-export const ChartSection = ({
+export const ChartSectionVis = ({
+  id,
   onChangeRangeTime,
-  section,
   metric,
   stopLiveStreaming,
   isLiveStreaming,
-}: Props) => {
-  const { visConfig } = section;
+  formatter,
+  formatterTemplate,
+  stacked,
+  seriesOverrides,
+  type,
+}: VisSectionProps) => {
+  if (!metric || !id) {
+    return null;
+  }
   const [dateFormat] = useKibanaUiSetting('dateFormat');
-  const formatter = get(visConfig, 'formatter', InfraFormatterType.number);
-  const formatterTemplate = get(visConfig, 'formatterTemplate', '{{value}}');
   const valueFormatter = useCallback(getFormatter(formatter, formatterTemplate), [
     formatter,
     formatterTemplate,
@@ -108,9 +101,6 @@ export const ChartSection = ({
 
   return (
     <EuiPageContentBody>
-      <EuiTitle size="xs">
-        <h3 id={section.id}>{section.label}</h3>
-      </EuiTitle>
       <div className="infrastructureChart" style={{ height: 250, marginBottom: 16 }}>
         <Chart>
           <Axis
@@ -123,13 +113,13 @@ export const ChartSection = ({
           {metric &&
             metric.series.map(series => (
               <SeriesChart
-                key={`series-${section.id}-${series.id}`}
-                id={`series-${section.id}-${series.id}`}
+                key={`series-${id}-${series.id}`}
+                id={`series-${id}-${series.id}`}
                 series={series}
-                name={getChartName(section, series.id, series.id)}
-                type={getChartType(section, series.id)}
-                color={getChartColor(section, series.id)}
-                stack={visConfig.stacked}
+                name={getChartName(seriesOverrides, series.id, series.id)}
+                type={getChartType(seriesOverrides, type, series.id)}
+                color={getChartColor(seriesOverrides, series.id)}
+                stack={stacked}
               />
             ))}
           <Settings

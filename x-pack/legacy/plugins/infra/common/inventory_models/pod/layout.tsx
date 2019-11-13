@@ -3,30 +3,33 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { InventoryDetailLayoutCreator } from '../types';
-import { nginxLayoutCreator } from '../shared/layouts/nginx';
+import { LayoutPropsWithTheme } from '../../../public/pages/metrics/types';
+import { Section } from '../../../public/pages/metrics/components/section';
+import { SubSection } from '../../../public/pages/metrics/components/sub_section';
+import { GaugesSectionVis } from '../../../public/pages/metrics/components/gauges_section_vis';
+import { ChartSectionVis } from '../../../public/pages/metrics/components/chart_section_vis';
+import { withTheme } from '../../../../../common/eui_styled_components';
+import * as Nginx from '../shared/layouts/nginx';
 
-export const layout: InventoryDetailLayoutCreator = theme => [
-  {
-    id: 'podOverview',
-    label: i18n.translate('xpack.infra.metricDetailPage.podMetricsLayout.layoutLabel', {
-      defaultMessage: 'Pod',
-    }),
-    sections: [
-      {
-        id: 'podOverview',
-        label: i18n.translate(
-          'xpack.infra.metricDetailPage.podMetricsLayout.overviewSection.sectionLabel',
-          {
-            defaultMessage: 'Overview',
-          }
-        ),
-        requires: ['kubernetes.pod'],
-        type: 'gauges',
-        visConfig: {
-          seriesOverrides: {
+export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
+  <React.Fragment>
+    <Section
+      navLabel={i18n.translate('xpack.infra.metricDetailPage.podMetricsLayout.layoutLabel', {
+        defaultMessage: 'Pod',
+      })}
+      sectionLabel={i18n.translate(
+        'xpack.infra.metricDetailPage.podMetricsLayout.overviewSection.sectionLabel',
+        {
+          defaultMessage: 'Pod Overview',
+        }
+      )}
+      metrics={metrics}
+    >
+      <SubSection id="podOverview">
+        <GaugesSectionVis
+          seriesOverrides={{
             cpu: {
               name: i18n.translate(
                 'xpack.infra.metricDetailPage.podMetricsLayout.overviewSection.cpuUsageSeriesLabel',
@@ -71,61 +74,59 @@ export const layout: InventoryDetailLayoutCreator = theme => [
               formatter: 'bits',
               formatterTemplate: '{{value}}/s',
             },
-          },
-        },
-      },
-      {
-        id: 'podCpuUsage',
-        label: i18n.translate(
+          }}
+        />
+      </SubSection>
+      <SubSection
+        id="podCpuUsage"
+        label={i18n.translate(
           'xpack.infra.metricDetailPage.podMetricsLayout.cpuUsageSection.sectionLabel',
           {
             defaultMessage: 'CPU Usage',
           }
-        ),
-        requires: ['kubernetes.pod'],
-        type: 'chart',
-        visConfig: {
-          formatter: 'percent',
-          seriesOverrides: {
-            cpu: { color: theme.eui.euiColorVis1, type: 'area' },
-          },
-        },
-      },
-      {
-        id: 'podMemoryUsage',
-        label: i18n.translate(
+        )}
+      >
+        <ChartSectionVis
+          formatter="percent"
+          type="area"
+          seriesOverrides={{
+            cpu: { color: theme.eui.euiColorVis1 },
+          }}
+        />
+      </SubSection>
+      <SubSection
+        id="podMemoryUsage"
+        label={i18n.translate(
           'xpack.infra.metricDetailPage.podMetricsLayout.memoryUsageSection.sectionLabel',
           {
             defaultMessage: 'Memory Usage',
           }
-        ),
-        requires: ['kubernetes.pod'],
-        type: 'chart',
-        visConfig: {
-          formatter: 'percent',
-          seriesOverrides: {
+        )}
+      >
+        <ChartSectionVis
+          type="area"
+          formatter="percent"
+          seriesOverrides={{
             memory: {
               color: theme.eui.euiColorVis1,
-              type: 'area',
             },
-          },
-        },
-      },
-      {
-        id: 'podNetworkTraffic',
-        label: i18n.translate(
+          }}
+        />
+      </SubSection>
+      <SubSection
+        id="podNetworkTraffic"
+        label={i18n.translate(
           'xpack.infra.metricDetailPage.podMetricsLayout.networkTrafficSection.sectionLabel',
           {
             defaultMessage: 'Network Traffic',
           }
-        ),
-        requires: ['kubernetes.pod'],
-        type: 'chart',
-        visConfig: {
-          formatter: 'bits',
-          formatterTemplate: '{{value}}/s',
-          type: 'area',
-          seriesOverrides: {
+        )}
+      >
+        <ChartSectionVis
+          formatter="bits"
+          formatterTemplate="{{value}}/s"
+          type="area"
+          seriesOverrides={{
             rx: {
               color: theme.eui.euiColorVis1,
               name: i18n.translate(
@@ -144,10 +145,10 @@ export const layout: InventoryDetailLayoutCreator = theme => [
                 }
               ),
             },
-          },
-        },
-      },
-    ],
-  },
-  ...nginxLayoutCreator(theme),
-];
+          }}
+        />
+      </SubSection>
+    </Section>
+    <Nginx.Layout metrics={metrics} />
+  </React.Fragment>
+));

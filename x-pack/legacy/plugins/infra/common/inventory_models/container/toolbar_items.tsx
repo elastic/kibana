@@ -6,13 +6,16 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
-import { ToolbarProps } from './toolbar';
-import { WaffleMetricControls } from '../../waffle/waffle_metric_controls';
-import { WaffleGroupByControls } from '../../waffle/waffle_group_by_controls';
-import { InfraSnapshotMetricType } from '../../../graphql/types';
-import { toGroupByOpt, toMetricOpt } from './toolbar_wrapper';
+import { ToolbarProps } from '../../../public/components/inventory/toolbars/toolbar';
+import { WaffleMetricControls } from '../../../public/components/waffle/waffle_metric_controls';
+import { WaffleGroupByControls } from '../../../public/components/waffle/waffle_group_by_controls';
+import { InfraSnapshotMetricType } from '../../../public/graphql/types';
+import {
+  toMetricOpt,
+  toGroupByOpt,
+} from '../../../public/components/inventory/toolbars/toolbar_wrapper';
 
-export const PodToolbarItems = (props: ToolbarProps) => {
+export const ContainerToolbarItems = (props: ToolbarProps) => {
   const options = useMemo(
     () =>
       [
@@ -25,10 +28,17 @@ export const PodToolbarItems = (props: ToolbarProps) => {
   );
 
   const groupByOptions = useMemo(
-    () => ['kubernetes.namespace', 'kubernetes.node.name', 'service.type'].map(toGroupByOpt),
+    () =>
+      [
+        'host.name',
+        'cloud.availability_zone',
+        'cloud.machine.type',
+        'cloud.project.id',
+        'cloud.provider',
+        'service.type',
+      ].map(toGroupByOpt),
     []
   );
-
   return (
     <>
       <EuiFlexItem grow={false}>
