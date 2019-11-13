@@ -17,9 +17,8 @@
  * under the License.
  */
 
-export { TutorialsSetup, TutorialsStart } from './plugin'; // types
-import { TutorialsPlugin } from './plugin'; // the actual plugin class
-// also export other relevant subtypes
+export { HomePluginSetup, HomePluginStart } from './plugin';
+export { TutorialProvider } from './services';
+import { HomePlugin } from './plugin';
 
-export const plugin = () => new TutorialsPlugin();
-// export const config = () => new TutorialsConfig(); optional, only if needed
+export const plugin = () => new HomePlugin();

@@ -19,9 +19,5 @@
 // provided to other plugins as APIs
 // should model the plugin lifecycle
 
-export {
-  TutorialsRegistry,
-  TutorialsRegistrySetup,
-  TutorialsRegistryStart,
-  TutorialSchema,
-} from './tutorials_registry';
+export * from './tutorials_registry';
+export * from './tutorials_registry_types';

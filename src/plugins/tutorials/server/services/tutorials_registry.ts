@@ -17,145 +17,72 @@
  * under the License.
  */
 
-import { IconType } from '@elastic/eui';
+import Joi from 'joi';
 import { CoreSetup } from 'src/core/server';
-/** @public */
-export enum TutorialsCategory {
-  LOGGING = 'logging',
-  SIEM = 'siem',
-  METRICS = 'metrics',
-  OTHER = 'other',
-}
-export interface ParamTypes {
-  NUMBER: string;
-  STRING: string;
-}
-export interface InstructionSetSchema {
-  readonly title: string;
-  readonly callOut: {
-    title: string;
-    message: string;
-    iconType: IconType;
-  };
-}
-export interface ParamsSchema {
-  defaultValue: any;
-  id: string;
-  label: string;
-  type: ParamTypes;
-}
-export interface InstructionsSchema {
-  readonly instructionSets: InstructionSetSchema[];
-  readonly params: ParamsSchema[];
-}
-export interface DashboardSchema {
-  id: string;
-  linkLabel?: {
-    is: boolean;
-    then: any;
-  };
-  isOverview: boolean;
-}
-export interface ArtifactsSchema {
-  readonly exportedFields: {
-    documentationUrl: string;
-  };
-  readonly dashboards: DashboardSchema[];
-  readonly application: {
-    path: string;
-    label: string;
-  };
-}
-export interface TutorialSchema {
-  id: string;
-  category: TutorialsCategory;
-  name: string;
-  isBeta: boolean;
-  shortDescription: string;
-  euiIconType: IconType; // EUI icon type string, one of https://elastic.github.io/eui/#/icon;
-  longDescription: string;
-  completionTimeMinutes: number;
-  previewImagePath: string;
-
-  // kibana and elastic cluster running on prem
-  onPrem: InstructionsSchema;
-
-  // kibana and elastic cluster running in elastic's cloud
-  elasticCloud: InstructionsSchema;
-
-  // kibana running on prem and elastic cluster running in elastic's cloud
-  onPremElasticCloud: InstructionsSchema;
-
-  // Elastic stack artifacts produced by product when it is setup and run.
-  artifacts: ArtifactsSchema;
-
-  // saved objects used by data module.
-  savedObjects: any[];
-  savedObjectsInstallMsg: string;
-}
+import {
+  TutorialProvider,
+  TutorialContextFactory,
+  ScopedTutorialContextFactory,
+} from './tutorials_registry_types';
+import { tutorialSchema } from './tutorial_schema';
 
 export class TutorialsRegistry {
-  public setup(core: CoreSetup) {
-    const tutorialProviders: Array<(tutorialProvider: TutorialSchema) => void> = [];
-    const scopedTutorialContextFactories: Array<(scopedTutorialContextFactory: any) => void> = [];
-    core.http.registerRouteHandlerContext('getTutorials', (request: any) => {
-      const intitialContext = new Map<string, TutorialSchema>();
-      const scopedContext = scopedTutorialContextFactories.reduce(
-        (accumulatedContext, contextFactory) => {
-          return { ...accumulatedContext, ...contextFactory(request) };
-        },
-        intitialContext
-      );
-      return tutorialProviders.map(tutorialProvider => {
-        return tutorialProvider(scopedContext);
-      });
-    });
+  private readonly tutorialProviders: TutorialProvider[] = []; // pre-register all the tutorials we know we want in here
+  private readonly scopedTutorialContextFactories: TutorialContextFactory[] = [];
 
+  public async setup(core: CoreSetup) {
+    const router = core.http.createRouter();
+    router.get(
+      { path: '/api/kibana/home/NP_tutorials', validate: false },
+      async (context, req, res) => {
+        const initialContext = {};
+        const scopedContext = this.scopedTutorialContextFactories.reduce(
+          (accumulatedContext, contextFactory) => {
+            return { ...accumulatedContext, ...contextFactory(req) };
+          },
+          initialContext
+        );
+
+        return res.ok({
+          body: this.tutorialProviders.map(tutorialProvider => {
+            return tutorialProvider(scopedContext); // All the tutorialProviders need to be refactored so that they don't need the server.
+          }),
+        });
+      }
+    );
     return {
-      register: () => {},
-    };
-  }
-
-  public start() {
-    return {
-      get: () => {},
-    };
-  }
-}
-
-export type TutorialsRegistrySetup = ReturnType<TutorialsRegistry['setup']>;
-export type TutorialsRegistryStart = ReturnType<TutorialsRegistry['start']>;
-
-// from Josh Dover: (this should actually be the TutorialsRegistry)
-/*
-class TutorialsPlugin {
-  setup(core) {
-    const tutorialProviders = [];
-    const scopedTutorialContextFactories = [];
-
-    core.http.registerRouteHandlerContext('getTutorials', (request) => {
-      const initialContext = {};
-      const scopedContext = scopedTutorialContextFactories.reduce((accumulatedContext, contextFactory) => {
-        return { ...accumulatedContext, ...contextFactory(request) };
-      }, initialContext);
-
-      return tutorialProviders.map((tutorialProvider) => {
-        return tutorialProvider(server, scopedContext);
-      });
-    });
-
-    return {
-      registerTutorial(specProvider) { // specProvider should implement TutorialSchema
+      registerTutorial: (specProvider: TutorialProvider) => {
         const emptyContext = {};
-        const { error } = Joi.validate(specProvider(server, emptyContext), tutorialSchema); // the tutorialSchema's been typed in TutorialSchema
+        const { error } = Joi.validate(specProvider(emptyContext), tutorialSchema);
 
         if (error) {
           throw new Error(`Unable to register tutorial spec because its invalid. ${error}`);
         }
 
-        tutorialProviders.push(specProvider);
-      }
+        this.tutorialProviders.push(specProvider);
+      },
+
+      addScopedTutorialContextFactory: (
+        scopedTutorialContextFactory: ScopedTutorialContextFactory
+      ) => {
+        if (typeof scopedTutorialContextFactory !== 'function') {
+          throw new Error(
+            `Unable to add scoped(request) context factory because you did not provide a function`
+          );
+        }
+
+        this.scopedTutorialContextFactories.push(scopedTutorialContextFactory);
+      },
     };
   }
+
+  public start() {
+    return {};
+  }
 }
-*/
+
+/** @public */
+export type TutorialsRegistrySetup = ReturnType<TutorialsRegistry['setup']>;
+
+/** @public */
+export type TutorialsRegistryStart = ReturnType<TutorialsRegistry['start']>;
