@@ -5,7 +5,7 @@
 ++++
 
 This page discusses the breaking changes that you need to be aware of when migrating
-your application to Kibana 7.5.
+your application to {kib} 7.5.
 
 //See also <<release-highlights-7.5.0, release highlights>> and <<release-notes-7.5.0, release notes>>.
 
@@ -17,6 +17,7 @@ The following section is re-used in the Installation and Upgrade Guide
 [[breaking_70_notable]]
 === Notable breaking changes
 ////
+
 // tag::notable-breaking-changes[]
 
 [float]

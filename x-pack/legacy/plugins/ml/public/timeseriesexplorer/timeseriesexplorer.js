@@ -1052,7 +1052,6 @@ export class TimeSeriesExplorer extends React.Component {
 
     return (
       <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps} loading={loading} resizeRef={this.resizeRef}>
-        <ChartTooltip />
         <div className="series-controls" data-test-subj="mlSingleMetricViewerSeriesControls">
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
