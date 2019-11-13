@@ -17,11 +17,7 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('@kbn/test').runTestsCli([
-  require.resolve('../test/functional/config.js'),
-  require.resolve('../test/api_integration/config.js'),
-  require.resolve('../test/plugin_functional/config.js'),
-  require.resolve('../test/interpreter_functional/config.js'),
-  require.resolve('../test/ui_capabilities/newsfeed_err/config.ts'),
-]);
+export const PLUGIN_ID = 'newsfeed';
+export const DEFAULT_SERVICE_URLROOT = 'https://feeds.elastic.co';
+export const DEV_SERVICE_URLROOT = 'https://feeds-staging.elastic.co';
+export const DEFAULT_SERVICE_PATH = '/kibana/v{VERSION}.json';
