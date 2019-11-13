@@ -35,7 +35,7 @@ interface WithMetricsProps {
 }
 
 const isInfraMetrics = (subject: any[]): subject is InfraMetric[] => {
-  return subject.every(s => !!InfraMetric[s]);
+  return subject.every(s => s in InfraMetric);
 };
 
 export const WithMetrics = ({
