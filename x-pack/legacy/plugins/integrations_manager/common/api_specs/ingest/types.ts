@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/array-type */
-
 /**
  * The entire config for the Beats agent, including all assigned data source config outputs
  * along with agent-wide configuration values
  */
 export interface Policy {
-  datasources?: Array<Datasource>;
+  datasources?: Datasource[];
   description?: string;
   id: string;
   name?: string;
@@ -34,7 +32,7 @@ export interface Datasource {
   name: string;
   package: Package;
   read_alias?: string;
-  streams: Array<Stream>;
+  streams: Stream[];
 }
 
 /**
@@ -42,7 +40,7 @@ export interface Datasource {
  * Kibana assets, ES assets, data source configuration templates, manual install steps, etc.
  */
 export interface Package {
-  assets: Array<Asset>;
+  assets: Asset[];
   description?: string;
   name: string;
   title?: string;
@@ -78,7 +76,7 @@ export interface Stream {
   id: string;
   input: Input;
   output: Output;
-  processors?: Array<string>;
+  processors?: string[];
 }
 
 /**
@@ -97,7 +95,7 @@ export interface Input {
    * Need a distinction for "main" ingest pipeline. Should be handled during install. Likely
    * by package/manifest format
    */
-  ingest_pipelines?: Array<string>;
+  ingest_pipelines?: string[];
   type: InputType;
 }
 
