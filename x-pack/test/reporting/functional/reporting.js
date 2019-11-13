@@ -296,6 +296,8 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('becomes available when saved', async () => {
+          this.timeout(360000);
+
           await PageObjects.reporting.setTimepickerInDataRange();
           await PageObjects.visualize.clickBucket('X-axis');
           await PageObjects.visualize.selectAggregation('Date Histogram');

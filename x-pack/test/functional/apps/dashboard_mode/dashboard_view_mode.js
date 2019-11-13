@@ -32,6 +32,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('Dashboard View Mode', function () {
     this.tags(['skipFirefox']);
+    this.timeout(20000);
 
     before('initialize tests', async () => {
       log.debug('Dashboard View Mode:initTests');
