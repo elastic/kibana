@@ -7,7 +7,8 @@
 import { resolve as resolvePath } from 'path';
 import { existsSync } from 'fs';
 
-import { BROWSERS_BY_TYPE, BrowserType } from '../browsers';
+import { chromium } from '../index';
+import { BrowserType } from '../types';
 
 import { md5 } from './checksum';
 import { asyncMap } from './util';
@@ -21,7 +22,7 @@ import { clean } from './clean';
  * @return {Promise<undefined>}
  */
 export async function ensureBrowserDownloaded(browserType: BrowserType) {
-  await ensureDownloaded([BROWSERS_BY_TYPE[browserType]]);
+  await ensureDownloaded([chromium]);
 }
 
 /**
@@ -29,7 +30,7 @@ export async function ensureBrowserDownloaded(browserType: BrowserType) {
  * @return {Promise<undefined>}
  */
 export async function ensureAllBrowsersDownloaded() {
-  await ensureDownloaded(Object.values(BROWSERS_BY_TYPE));
+  await ensureDownloaded([chromium]);
 }
 
 /**

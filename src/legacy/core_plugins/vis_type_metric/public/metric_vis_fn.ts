@@ -171,7 +171,7 @@ export const createMetricVisFn = (): ExpressionFunction<
       throw new Error('colorRange must be provided when using percentage');
     }
 
-    const fontSize = Number.parseInt(args.font.spec.fontSize, 10);
+    const fontSize = Number.parseInt(args.font.spec.fontSize || '', 10);
 
     return {
       type: 'render',

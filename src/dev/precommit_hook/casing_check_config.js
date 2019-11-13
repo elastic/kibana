@@ -43,8 +43,9 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/docs/**/*',
   'src/legacy/ui/public/assets/fonts/**/*',
   'packages/kbn-utility-types/test-d/**/*',
-  'Jenkinsfile',
+  '**/Jenkinsfile*',
   'Dockerfile*',
+  'vars/*',
 
   // Files in this directory must match a pre-determined name in some cases.
   'x-pack/legacy/plugins/canvas/.storybook/*',
@@ -106,7 +107,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
 export const TEMPORARILY_IGNORED_PATHS = [
   'src/legacy/core_plugins/console/public/src/directives/helpExample.txt',
   'src/legacy/core_plugins/console/public/src/sense_editor/theme-sense-dark.js',
-  'src/legacy/core_plugins/kibana/public/assets/play-circle.svg',
   'src/legacy/core_plugins/tests_bundle/webpackShims/angular-mocks.js',
   'src/legacy/core_plugins/tile_map/public/__tests__/scaledCircleMarkers.png',
   'src/legacy/core_plugins/tile_map/public/__tests__/shadedCircleMarkers.png',

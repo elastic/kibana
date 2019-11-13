@@ -54,9 +54,9 @@ export const renameColumns: ExpressionFunction<
 
         Object.entries(row).forEach(([id, value]) => {
           if (id in idMap) {
-            mappedRow[idMap[id].id] = value;
+            mappedRow[idMap[id].id] = sanitizeValue(value);
           } else {
-            mappedRow[id] = value;
+            mappedRow[id] = sanitizeValue(value);
           }
         });
 
@@ -90,4 +90,14 @@ function getColumnName(originalColumn: OriginalColumn, newColumn: KibanaDatatabl
   }
 
   return originalColumn.label;
+}
+
+function sanitizeValue(value: unknown) {
+  if (value === '') {
+    return i18n.translate('xpack.lens.indexpattern.emptyTextColumnValue', {
+      defaultMessage: '(empty)',
+    });
+  }
+
+  return value;
 }

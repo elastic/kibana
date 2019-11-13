@@ -113,7 +113,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
           <h1>
             <FormattedMessage
               id="xpack.snapshotRestore.policyList.emptyPromptTitle"
-              defaultMessage="You don't have any snapshot policies yet"
+              defaultMessage="Create your first snapshot policy"
             />
           </h1>
         }
@@ -122,7 +122,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
             <p>
               <FormattedMessage
                 id="xpack.snapshotRestore.policyList.emptyPromptDescription"
-                defaultMessage="Create a policy to automatically back up your cluster."
+                defaultMessage="A policy automates the creation and deletion of snapshots."
               />
             </p>
           </Fragment>

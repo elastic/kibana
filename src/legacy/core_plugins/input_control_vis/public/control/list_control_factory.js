@@ -26,6 +26,7 @@ import {
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { i18n } from '@kbn/i18n';
+import { npStart } from 'ui/new_platform';
 import chrome from 'ui/chrome';
 import { start as data } from '../../../../core_plugins/data/public/legacy';
 
@@ -116,7 +117,7 @@ class ListControl extends Control {
       query
     });
     const searchSource = createSearchSource(
-      this.kbnApi,
+      this.SearchSource,
       initialSearchSourceState,
       indexPattern,
       aggs,
@@ -169,7 +170,7 @@ class ListControl extends Control {
   }
 }
 
-export async function listControlFactory(controlParams, kbnApi, useTimeFilter) {
+export async function listControlFactory(controlParams, useTimeFilter, SearchSource) {
   let indexPattern;
   try {
     indexPattern = await data.indexPatterns.indexPatterns.get(controlParams.indexPattern);
@@ -187,10 +188,11 @@ export async function listControlFactory(controlParams, kbnApi, useTimeFilter) {
     // ignore not found error and return control so it can be displayed in disabled state.
   }
 
+  const { filterManager } = npStart.plugins.data.query;
   return new ListControl(
     controlParams,
-    new PhraseFilterManager(controlParams.id, controlParams.fieldName, indexPattern, data.filter.filterManager),
-    kbnApi,
-    useTimeFilter
+    new PhraseFilterManager(controlParams.id, controlParams.fieldName, indexPattern, filterManager),
+    useTimeFilter,
+    SearchSource,
   );
 }

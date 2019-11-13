@@ -389,7 +389,6 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
             Object {
               "allowLogin": true,
               "layout": "form",
-              "loginMessage": "",
             }
           }
           next=""

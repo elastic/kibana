@@ -136,6 +136,16 @@ describe('CoordinateMapsVisualizationTest', function () {
         legendPosition: 'bottomright',
         mapZoom: 2,
         mapCenter: [0, 0],
+        dimensions: {
+          metric: {
+            accessor: 1,
+            label: 'test',
+            format: { id: 'string' }
+          },
+          bucket: {
+            accessor: 0
+          }
+        }
       };
       const mockAggs = {
         byType: type => {

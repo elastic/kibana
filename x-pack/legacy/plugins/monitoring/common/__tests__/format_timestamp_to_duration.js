@@ -23,22 +23,22 @@ describe('formatTimestampToDuration', () => {
       expect(formatTimestampToDuration(fiftyNineSeconds, CALCULATE_DURATION_SINCE, getTestTime())).to.be('59 seconds');
 
       const fiveMins = getTestTime().subtract(5, 'minutes').subtract(30, 'seconds');
-      expect(formatTimestampToDuration(fiveMins, CALCULATE_DURATION_SINCE, getTestTime())).to.be('5 min');
+      expect(formatTimestampToDuration(fiveMins, CALCULATE_DURATION_SINCE, getTestTime())).to.be('6 mins');
 
       const sixHours = getTestTime().subtract(6, 'hours').subtract(30, 'minutes');
-      expect(formatTimestampToDuration(sixHours, CALCULATE_DURATION_SINCE, getTestTime())).to.be('6 hrs 30 min');
+      expect(formatTimestampToDuration(sixHours, CALCULATE_DURATION_SINCE, getTestTime())).to.be('6 hrs 30 mins');
 
       const sevenDays = getTestTime().subtract(7, 'days').subtract(6, 'hours').subtract(18, 'minutes');
-      expect(formatTimestampToDuration(sevenDays, CALCULATE_DURATION_SINCE, getTestTime())).to.be('7 days 6 hrs 18 min');
+      expect(formatTimestampToDuration(sevenDays, CALCULATE_DURATION_SINCE, getTestTime())).to.be('7 days 6 hrs 18 mins');
 
       const eightWeeks = getTestTime().subtract(8, 'weeks').subtract(7, 'days').subtract(6, 'hours').subtract(18, 'minutes');
       expect(formatTimestampToDuration(eightWeeks, CALCULATE_DURATION_SINCE, getTestTime())).to.be('2 months 2 days');
 
       const oneHour = getTestTime().subtract(1, 'hour'); // should trim 0 min
-      expect(formatTimestampToDuration(oneHour, CALCULATE_DURATION_SINCE, getTestTime())).to.be('1 hrs');
+      expect(formatTimestampToDuration(oneHour, CALCULATE_DURATION_SINCE, getTestTime())).to.be('1 hr');
 
       const oneDay = getTestTime().subtract(1, 'day'); // should trim 0 hrs
-      expect(formatTimestampToDuration(oneDay, CALCULATE_DURATION_SINCE, getTestTime())).to.be('1 days');
+      expect(formatTimestampToDuration(oneDay, CALCULATE_DURATION_SINCE, getTestTime())).to.be('1 day');
 
       const twoMonths = getTestTime().subtract(2, 'month'); // should trim 0 days
       expect(formatTimestampToDuration(twoMonths, CALCULATE_DURATION_SINCE, getTestTime())).to.be('2 months');
@@ -52,22 +52,22 @@ describe('formatTimestampToDuration', () => {
       expect(formatTimestampToDuration(fiftyNineSeconds, CALCULATE_DURATION_UNTIL, getTestTime())).to.be('59 seconds');
 
       const fiveMins = getTestTime().add(10, 'minutes');
-      expect(formatTimestampToDuration(fiveMins, CALCULATE_DURATION_UNTIL, getTestTime())).to.be('10 min');
+      expect(formatTimestampToDuration(fiveMins, CALCULATE_DURATION_UNTIL, getTestTime())).to.be('10 mins');
 
       const sixHours = getTestTime().add(6, 'hours').add(30, 'minutes');
-      expect(formatTimestampToDuration(sixHours, CALCULATE_DURATION_UNTIL, getTestTime())).to.be('6 hrs 30 min');
+      expect(formatTimestampToDuration(sixHours, CALCULATE_DURATION_UNTIL, getTestTime())).to.be('6 hrs 30 mins');
 
       const sevenDays = getTestTime().add(7, 'days').add(6, 'hours').add(18, 'minutes');
-      expect(formatTimestampToDuration(sevenDays, CALCULATE_DURATION_UNTIL, getTestTime())).to.be('7 days 6 hrs 18 min');
+      expect(formatTimestampToDuration(sevenDays, CALCULATE_DURATION_UNTIL, getTestTime())).to.be('7 days 6 hrs 18 mins');
 
       const eightWeeks = getTestTime().add(8, 'weeks').add(7, 'days').add(6, 'hours').add(18, 'minutes');
       expect(formatTimestampToDuration(eightWeeks, CALCULATE_DURATION_UNTIL, getTestTime())).to.be('2 months 2 days');
 
       const oneHour = getTestTime().add(1, 'hour'); // should trim 0 min
-      expect(formatTimestampToDuration(oneHour, CALCULATE_DURATION_UNTIL, getTestTime())).to.be('1 hrs');
+      expect(formatTimestampToDuration(oneHour, CALCULATE_DURATION_UNTIL, getTestTime())).to.be('1 hr');
 
       const oneDay = getTestTime().add(1, 'day'); // should trim 0 hrs
-      expect(formatTimestampToDuration(oneDay, CALCULATE_DURATION_UNTIL, getTestTime())).to.be('1 days');
+      expect(formatTimestampToDuration(oneDay, CALCULATE_DURATION_UNTIL, getTestTime())).to.be('1 day');
 
       const twoMonths = getTestTime().add(2, 'month'); // should trim 0 days
       expect(formatTimestampToDuration(twoMonths, CALCULATE_DURATION_UNTIL, getTestTime())).to.be('2 months');

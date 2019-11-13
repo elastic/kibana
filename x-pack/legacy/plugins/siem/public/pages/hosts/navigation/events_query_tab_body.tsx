@@ -18,9 +18,9 @@ const EventsOverTimeManage = manageQuery(EventsOverTimeHistogram);
 
 export const EventsQueryTabBody = ({
   endDate,
-  startDate,
-  setQuery,
   filterQuery,
+  setQuery,
+  startDate,
   updateDateRange = () => {},
 }: HostsComponentsQueryProps) => {
   return (

@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { getConvertedValueForField } from '../filters';
+import { getConvertedValueForField } from '../utils/filters';
 
 export function migrateFilter(filter, indexPattern) {
   if (filter.match) {

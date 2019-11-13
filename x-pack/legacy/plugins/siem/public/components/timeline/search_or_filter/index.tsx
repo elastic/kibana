@@ -5,7 +5,7 @@
  */
 
 import { getOr } from 'lodash/fp';
-import * as React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
@@ -56,26 +56,32 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     timelineId,
     updateKqlMode,
   }) => {
-    const applyFilterQueryFromKueryExpression = (expression: string) =>
-      applyKqlFilterQuery({
-        id: timelineId,
-        filterQuery: {
-          kuery: {
+    const applyFilterQueryFromKueryExpression = useCallback(
+      (expression: string) =>
+        applyKqlFilterQuery({
+          id: timelineId,
+          filterQuery: {
+            kuery: {
+              kind: 'kuery',
+              expression,
+            },
+            serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
+          },
+        }),
+      [indexPattern, timelineId]
+    );
+
+    const setFilterQueryDraftFromKueryExpression = useCallback(
+      (expression: string) =>
+        setKqlFilterQueryDraft({
+          id: timelineId,
+          filterQueryDraft: {
             kind: 'kuery',
             expression,
           },
-          serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
-        },
-      });
-
-    const setFilterQueryDraftFromKueryExpression = (expression: string) =>
-      setKqlFilterQueryDraft({
-        id: timelineId,
-        filterQueryDraft: {
-          kind: 'kuery',
-          expression,
-        },
-      });
+        }),
+      [timelineId]
+    );
 
     return (
       <SearchOrFilter
@@ -108,11 +114,8 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const StatefulSearchOrFilter = connect(
-  makeMapStateToProps,
-  {
-    applyKqlFilterQuery: timelineActions.applyKqlFilterQuery,
-    setKqlFilterQueryDraft: timelineActions.setKqlFilterQueryDraft,
-    updateKqlMode: timelineActions.updateKqlMode,
-  }
-)(StatefulSearchOrFilterComponent);
+export const StatefulSearchOrFilter = connect(makeMapStateToProps, {
+  applyKqlFilterQuery: timelineActions.applyKqlFilterQuery,
+  setKqlFilterQueryDraft: timelineActions.setKqlFilterQueryDraft,
+  updateKqlMode: timelineActions.updateKqlMode,
+})(StatefulSearchOrFilterComponent);

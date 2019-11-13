@@ -37,7 +37,6 @@ export default function fitsFixture() {
     return {
       _score: 1,
       _id: 1000 + i,
-      _type: 'test',
       _index: 'test-index',
       _source: {
         '@timestamp': row[0],

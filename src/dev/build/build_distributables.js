@@ -45,7 +45,6 @@ import {
   ExtractNodeBuildsTask,
   InstallDependenciesTask,
   OptimizeBuildTask,
-  PatchNativeModulesTask,
   RemovePackageJsonDepsTask,
   RemoveWorkspacesTask,
   TranspileBabelTask,
@@ -131,7 +130,6 @@ export async function buildDistributables(options) {
    * directories and perform platform-specific steps
    */
   await run(CreateArchivesSourcesTask);
-  await run(PatchNativeModulesTask);
   await run(CleanExtraBinScriptsTask);
   await run(CleanExtraBrowsersTask);
   await run(CleanNodeBuildsTask);

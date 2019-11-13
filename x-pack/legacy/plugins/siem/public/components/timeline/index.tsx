@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
@@ -159,79 +159,84 @@ const StatefulTimelineComponent = React.memo<Props>(
     updateItemsPerPage,
     upsertColumn,
   }) => {
-    const onDataProviderRemoved: OnDataProviderRemoved = (
-      providerId: string,
-      andProviderId?: string
-    ) => removeProvider!({ id, providerId, andProviderId });
+    const onDataProviderRemoved: OnDataProviderRemoved = useCallback(
+      (providerId: string, andProviderId?: string) =>
+        removeProvider!({ id, providerId, andProviderId }),
+      [id]
+    );
 
-    const onToggleDataProviderEnabled: OnToggleDataProviderEnabled = ({
-      providerId,
-      enabled,
-      andProviderId,
-    }) =>
-      updateDataProviderEnabled!({
-        id,
-        enabled,
-        providerId,
-        andProviderId,
-      });
-
-    const onToggleDataProviderExcluded: OnToggleDataProviderExcluded = ({
-      providerId,
-      excluded,
-      andProviderId,
-    }) =>
-      updateDataProviderExcluded!({
-        id,
-        excluded,
-        providerId,
-        andProviderId,
-      });
-
-    const onDataProviderEditedLocal: OnDataProviderEdited = ({
-      andProviderId,
-      excluded,
-      field,
-      operator,
-      providerId,
-      value,
-    }) =>
-      onDataProviderEdited!({
-        andProviderId,
-        excluded,
-        field,
-        id,
-        operator,
-        providerId,
-        value,
-      });
-    const onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery = ({ providerId, kqlQuery }) =>
-      updateDataProviderKqlQuery!({ id, kqlQuery, providerId });
-
-    const onChangeItemsPerPage: OnChangeItemsPerPage = itemsChangedPerPage =>
-      updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage });
-
-    const onChangeDroppableAndProvider: OnChangeDroppableAndProvider = providerId =>
-      updateHighlightedDropAndProviderId!({ id, providerId });
-
-    const toggleColumn = (column: ColumnHeader) => {
-      const exists = columns.findIndex(c => c.id === column.id) !== -1;
-
-      if (!exists && upsertColumn != null) {
-        upsertColumn({
-          column,
+    const onToggleDataProviderEnabled: OnToggleDataProviderEnabled = useCallback(
+      ({ providerId, enabled, andProviderId }) =>
+        updateDataProviderEnabled!({
           id,
-          index: 1,
-        });
-      }
+          enabled,
+          providerId,
+          andProviderId,
+        }),
+      [id]
+    );
 
-      if (exists && removeColumn != null) {
-        removeColumn({
-          columnId: column.id,
+    const onToggleDataProviderExcluded: OnToggleDataProviderExcluded = useCallback(
+      ({ providerId, excluded, andProviderId }) =>
+        updateDataProviderExcluded!({
           id,
-        });
-      }
-    };
+          excluded,
+          providerId,
+          andProviderId,
+        }),
+      [id]
+    );
+
+    const onDataProviderEditedLocal: OnDataProviderEdited = useCallback(
+      ({ andProviderId, excluded, field, operator, providerId, value }) =>
+        onDataProviderEdited!({
+          andProviderId,
+          excluded,
+          field,
+          id,
+          operator,
+          providerId,
+          value,
+        }),
+      [id]
+    );
+
+    const onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery = useCallback(
+      ({ providerId, kqlQuery }) => updateDataProviderKqlQuery!({ id, kqlQuery, providerId }),
+      [id]
+    );
+
+    const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
+      itemsChangedPerPage => updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage }),
+      [id]
+    );
+
+    const onChangeDroppableAndProvider: OnChangeDroppableAndProvider = useCallback(
+      providerId => updateHighlightedDropAndProviderId!({ id, providerId }),
+      [id]
+    );
+
+    const toggleColumn = useCallback(
+      (column: ColumnHeader) => {
+        const exists = columns.findIndex(c => c.id === column.id) !== -1;
+
+        if (!exists && upsertColumn != null) {
+          upsertColumn({
+            column,
+            id,
+            index: 1,
+          });
+        }
+
+        if (exists && removeColumn != null) {
+          removeColumn({
+            columnId: column.id,
+            id,
+          });
+        }
+      },
+      [columns, id]
+    );
 
     useEffect(() => {
       if (createTimeline != null) {
@@ -336,22 +341,19 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const StatefulTimeline = connect(
-  makeMapStateToProps,
-  {
-    addProvider: timelineActions.addProvider,
-    createTimeline: timelineActions.createTimeline,
-    onDataProviderEdited: timelineActions.dataProviderEdited,
-    removeColumn: timelineActions.removeColumn,
-    removeProvider: timelineActions.removeProvider,
-    updateColumns: timelineActions.updateColumns,
-    updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
-    updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,
-    updateDataProviderKqlQuery: timelineActions.updateDataProviderKqlQuery,
-    updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
-    updateItemsPerPage: timelineActions.updateItemsPerPage,
-    updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
-    updateSort: timelineActions.updateSort,
-    upsertColumn: timelineActions.upsertColumn,
-  }
-)(StatefulTimelineComponent);
+export const StatefulTimeline = connect(makeMapStateToProps, {
+  addProvider: timelineActions.addProvider,
+  createTimeline: timelineActions.createTimeline,
+  onDataProviderEdited: timelineActions.dataProviderEdited,
+  removeColumn: timelineActions.removeColumn,
+  removeProvider: timelineActions.removeProvider,
+  updateColumns: timelineActions.updateColumns,
+  updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
+  updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,
+  updateDataProviderKqlQuery: timelineActions.updateDataProviderKqlQuery,
+  updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
+  updateItemsPerPage: timelineActions.updateItemsPerPage,
+  updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
+  updateSort: timelineActions.updateSort,
+  upsertColumn: timelineActions.upsertColumn,
+})(StatefulTimelineComponent);

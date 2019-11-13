@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { FilterStateStore, PhrasesFilter } from '@kbn/es-query';
+import { esFilters } from '../../../../../../../../../plugins/data/public';
 
-export const phrasesFilter: PhrasesFilter = {
+export const phrasesFilter: esFilters.PhrasesFilter = {
   meta: {
     index: 'logstash-*',
     type: 'phrases',
@@ -31,6 +31,6 @@ export const phrasesFilter: PhrasesFilter = {
     alias: null,
   },
   $state: {
-    store: FilterStateStore.APP_STATE,
+    store: esFilters.FilterStateStore.APP_STATE,
   },
 };

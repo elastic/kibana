@@ -23,6 +23,7 @@ import { createApi } from './api';
 
 export interface IUiActionsSetup {
   attachAction: IUiActionsApi['attachAction'];
+  detachAction: IUiActionsApi['detachAction'];
   registerAction: IUiActionsApi['registerAction'];
   registerTrigger: IUiActionsApi['registerTrigger'];
 }
@@ -43,6 +44,7 @@ export class UiActionsPlugin implements Plugin<IUiActionsSetup, IUiActionsStart>
       registerTrigger: this.api.registerTrigger,
       registerAction: this.api.registerAction,
       attachAction: this.api.attachAction,
+      detachAction: this.api.detachAction,
     };
   }
 
@@ -50,5 +52,8 @@ export class UiActionsPlugin implements Plugin<IUiActionsSetup, IUiActionsStart>
     return this.api;
   }
 
-  public stop() {}
+  public stop() {
+    this.actions.clear();
+    this.triggers.clear();
+  }
 }

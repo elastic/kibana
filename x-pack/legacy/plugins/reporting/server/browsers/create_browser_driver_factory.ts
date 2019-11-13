@@ -4,44 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BROWSERS_BY_TYPE, BrowserType } from './browsers';
 import { ensureBrowserDownloaded } from './download';
 import { installBrowser } from './install';
 import { LevelLogger } from '../lib/level_logger';
-import { KbnServer } from '../../types';
-import { PLUGIN_ID } from '../../common/constants';
+import { ServerFacade, CaptureConfig } from '../../types';
+import { PLUGIN_ID, BROWSER_TYPE } from '../../common/constants';
+import { chromium } from './index';
 import { HeadlessChromiumDriverFactory } from './chromium/driver_factory';
 
 export async function createBrowserDriverFactory(
-  server: KbnServer
+  server: ServerFacade
 ): Promise<HeadlessChromiumDriverFactory> {
   const config = server.config();
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'browser-driver']);
 
-  const DATA_DIR = config.get('path.data');
-  const CAPTURE_CONFIG = config.get('xpack.reporting.capture');
-  const BROWSER_TYPE: BrowserType = CAPTURE_CONFIG.browser.type;
-  const BROWSER_AUTO_DOWNLOAD = CAPTURE_CONFIG.browser.autoDownload;
-  const BROWSER_CONFIG = CAPTURE_CONFIG.browser[BROWSER_TYPE];
-  const NETWORK_POLICY = CAPTURE_CONFIG.networkPolicy;
-  const REPORTING_TIMEOUT = config.get('xpack.reporting.queue.timeout');
+  const dataDir: string = config.get('path.data');
+  const captureConfig: CaptureConfig = config.get('xpack.reporting.capture');
+  const browserType = captureConfig.browser.type;
+  const browserAutoDownload = captureConfig.browser.autoDownload;
+  const browserConfig = captureConfig.browser[BROWSER_TYPE];
+  const networkPolicy = captureConfig.networkPolicy;
+  const reportingTimeout: number = config.get('xpack.reporting.queue.timeout');
 
-  if (BROWSER_CONFIG.disableSandbox) {
+  if (browserConfig.disableSandbox) {
     logger.warning(`Enabling the Chromium sandbox provides an additional layer of protection.`);
   }
-  if (BROWSER_AUTO_DOWNLOAD) {
-    await ensureBrowserDownloaded(BROWSER_TYPE);
+  if (browserAutoDownload) {
+    await ensureBrowserDownloaded(browserType);
   }
 
   try {
-    const browser = BROWSERS_BY_TYPE[BROWSER_TYPE]; // NOTE: unecessary indirection: this is always a Chromium browser object, as of PhantomJS removal
-    const { binaryPath } = await installBrowser(logger, browser, DATA_DIR);
-    return browser.createDriverFactory(
+    const { binaryPath } = await installBrowser(logger, chromium, dataDir);
+    return chromium.createDriverFactory(
       binaryPath,
       logger,
-      BROWSER_CONFIG,
-      REPORTING_TIMEOUT,
-      NETWORK_POLICY
+      browserConfig,
+      reportingTimeout,
+      networkPolicy
     );
   } catch (error) {
     if (error.cause && ['EACCES', 'EEXIST'].includes(error.cause.code)) {

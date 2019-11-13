@@ -57,7 +57,8 @@ export function getTpmBuckets(
       });
 
       // Handle empty string result keys
-      const key = resultKey === '' ? NOT_AVAILABLE_LABEL : resultKey;
+      const key =
+        resultKey === '' ? NOT_AVAILABLE_LABEL : (resultKey as string);
 
       return { key, dataPoints };
     }
@@ -65,7 +66,7 @@ export function getTpmBuckets(
 
   return sortBy(
     buckets,
-    bucket => bucket.key.replace(/^HTTP (\d)xx$/, '00$1') // ensure that HTTP 3xx are sorted at the top
+    bucket => bucket.key.toString().replace(/^HTTP (\d)xx$/, '00$1') // ensure that HTTP 3xx are sorted at the top
   );
 }
 

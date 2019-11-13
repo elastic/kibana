@@ -45,7 +45,7 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: NetworkTopTablesFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_in,
           direction: Direction.desc,
         },
       },
@@ -57,6 +57,13 @@ export const initialNetworkState: NetworkState = {
           direction: Direction.desc,
         },
         isPtrIncluded: false,
+      },
+      [NetworkTableType.http]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          direction: Direction.desc,
+        },
       },
       [NetworkTableType.tls]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
@@ -78,7 +85,7 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: NetworkTopTablesFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_in,
           direction: Direction.desc,
         },
       },
@@ -86,6 +93,13 @@ export const initialNetworkState: NetworkState = {
   },
   details: {
     queries: {
+      [IpDetailsTableType.http]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          direction: Direction.desc,
+        },
+      },
       [IpDetailsTableType.topCountriesSource]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
@@ -98,7 +112,7 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: NetworkTopTablesFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_in,
           direction: Direction.desc,
         },
       },
@@ -114,7 +128,7 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: NetworkTopTablesFields.bytes_out,
+          field: NetworkTopTablesFields.bytes_in,
           direction: Direction.desc,
         },
       },

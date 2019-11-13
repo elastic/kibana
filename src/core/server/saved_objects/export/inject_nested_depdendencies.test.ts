@@ -18,7 +18,7 @@
  */
 
 import { SavedObject } from '../types';
-import { SavedObjectsClientMock } from '../../mocks';
+import { savedObjectsClientMock } from '../../mocks';
 import { getObjectReferencesToFetch, fetchNestedDependencies } from './inject_nested_depdendencies';
 
 describe('getObjectReferencesToFetch()', () => {
@@ -109,7 +109,7 @@ describe('getObjectReferencesToFetch()', () => {
 });
 
 describe('injectNestedDependencies', () => {
-  const savedObjectsClient = SavedObjectsClientMock.create();
+  const savedObjectsClient = savedObjectsClientMock.create();
 
   afterEach(() => {
     jest.resetAllMocks();

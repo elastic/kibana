@@ -24,6 +24,27 @@ import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Doc, DocProps } from './doc';
 
+jest.mock('../doc_viewer/doc_viewer', () => ({
+  DocViewer: 'test',
+}));
+
+jest.mock('../kibana_services', () => {
+  return {
+    getServices: () => ({
+      metadata: {
+        branch: 'test',
+      },
+      getDocViewsSorted: () => {
+        return [];
+      },
+    }),
+  };
+});
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 // Suppress warnings about "act" until we use React 16.9
 /* eslint-disable no-console */
 const originalError = console.error;
@@ -68,30 +89,30 @@ async function mountDoc(search: () => void, update = false, indexPatternGetter: 
 }
 
 describe('Test of <Doc /> of Discover', () => {
-  it('renders loading msg', async () => {
+  test('renders loading msg', async () => {
     const comp = await mountDoc(jest.fn());
     expect(findTestSubject(comp, 'doc-msg-loading').length).toBe(1);
   });
 
-  it('renders IndexPattern notFound msg', async () => {
+  test('renders IndexPattern notFound msg', async () => {
     const indexPatternGetter = jest.fn(() => Promise.reject({ savedObjectId: '007' }));
     const comp = await mountDoc(jest.fn(), true, indexPatternGetter);
     expect(findTestSubject(comp, 'doc-msg-notFoundIndexPattern').length).toBe(1);
   });
 
-  it('renders notFound msg', async () => {
+  test('renders notFound msg', async () => {
     const search = jest.fn(() => Promise.reject({ status: 404 }));
     const comp = await mountDoc(search, true);
     expect(findTestSubject(comp, 'doc-msg-notFound').length).toBe(1);
   });
 
-  it('renders error msg', async () => {
+  test('renders error msg', async () => {
     const search = jest.fn(() => Promise.reject('whatever'));
     const comp = await mountDoc(search, true);
     expect(findTestSubject(comp, 'doc-msg-error').length).toBe(1);
   });
 
-  it('renders elasticsearch hit ', async () => {
+  test('renders elasticsearch hit ', async () => {
     const hit = { hits: { total: 1, hits: [{ _id: 1, _source: { test: 1 } }] } };
     const search = jest.fn(() => Promise.resolve(hit));
     const comp = await mountDoc(search, true);

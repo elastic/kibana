@@ -18,6 +18,7 @@
  */
 
 import {
+  auto,
   ICompileProvider,
   IHttpProvider,
   IHttpService,
@@ -47,6 +48,12 @@ import { toastNotifications } from '../notify';
 import { isSystemApiRequest } from '../system_api';
 
 const URL_LIMIT_WARN_WITHIN = 1000;
+
+function isDummyWrapperRoute($route: any) {
+  return (
+    $route.current && $route.current.$$route && $route.current.$$route.outerAngularWrapperRoute
+  );
+}
 
 export const configureAppAngularModule = (angularModule: IModule) => {
   const newPlatform = npStart.core;
@@ -187,6 +194,9 @@ const $setupBreadcrumbsAutoClear = (newPlatform: CoreStart) => (
   });
 
   $rootScope.$on('$routeChangeSuccess', () => {
+    if (isDummyWrapperRoute($route)) {
+      return;
+    }
     const current = $route.current || {};
 
     if (breadcrumbSetSinceRouteChange || (current.$$route && current.$$route.redirectTo)) {
@@ -226,6 +236,9 @@ const $setupBadgeAutoClear = (newPlatform: CoreStart) => (
   });
 
   $rootScope.$on('$routeChangeSuccess', () => {
+    if (isDummyWrapperRoute($route)) {
+      return;
+    }
     const current = $route.current || {};
 
     if (badgeSetSinceRouteChange || (current.$$route && current.$$route.redirectTo)) {
@@ -270,10 +283,16 @@ const $setupHelpExtensionAutoClear = (newPlatform: CoreStart) => (
   const $route = $injector.has('$route') ? $injector.get('$route') : {};
 
   $rootScope.$on('$routeChangeStart', () => {
+    if (isDummyWrapperRoute($route)) {
+      return;
+    }
     helpExtensionSetSinceRouteChange = false;
   });
 
   $rootScope.$on('$routeChangeSuccess', () => {
+    if (isDummyWrapperRoute($route)) {
+      return;
+    }
     const current = $route.current || {};
 
     if (helpExtensionSetSinceRouteChange || (current.$$route && current.$$route.redirectTo)) {
@@ -287,13 +306,16 @@ const $setupHelpExtensionAutoClear = (newPlatform: CoreStart) => (
 const $setupUrlOverflowHandling = (newPlatform: CoreStart) => (
   $location: ILocationService,
   $rootScope: IRootScopeService,
-  Private: any,
-  config: any
+  $injector: auto.IInjectorService
 ) => {
+  const $route = $injector.has('$route') ? $injector.get('$route') : {};
   const urlOverflow = new UrlOverflowService();
   const check = () => {
+    if (isDummyWrapperRoute($route)) {
+      return;
+    }
     // disable long url checks when storing state in session storage
-    if (config.get('state:storeInSessionStorage')) {
+    if (newPlatform.uiSettings.get('state:storeInSessionStorage')) {
       return;
     }
 

@@ -7,31 +7,30 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiForm, EuiFormRow, EuiRange, EuiSwitch } from '@elastic/eui';
+
+// TODO: make this new-platform compatible
+import { isValidInterval } from 'ui/agg_types/utils';
+
+import {
+  EuiForm,
+  EuiFormRow,
+  EuiSwitch,
+  EuiSwitchEvent,
+  EuiFieldNumber,
+  EuiSelect,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiTextColor,
+  EuiSpacer,
+} from '@elastic/eui';
 import { updateColumnParam } from '../../state_helpers';
 import { OperationDefinition } from '.';
 import { FieldBasedIndexPatternColumn } from './column_types';
-import { IndexPattern } from '../../types';
-
-type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
+import { autoIntervalFromDateRange } from '../../auto_date';
+import { AggregationRestrictions } from '../../types';
 
 const autoInterval = 'auto';
-const supportedIntervals = ['M', 'w', 'd', 'h'];
-const defaultCustomInterval = supportedIntervals[2];
-
-// Add ticks to EuiRange component props
-const FixedEuiRange = (EuiRange as unknown) as React.ComponentType<
-  PropType<typeof EuiRange> & {
-    ticks?: Array<{
-      label: string;
-      value: number;
-    }>;
-  }
->;
-
-function supportsAutoInterval(fieldName: string, indexPattern: IndexPattern): boolean {
-  return indexPattern.timeFieldName ? indexPattern.timeFieldName === fieldName : false;
-}
+const calendarOnlyIntervals = new Set(['w', 'M', 'q', 'y']);
 
 export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'date_histogram';
@@ -59,12 +58,11 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       };
     }
   },
-  buildColumn({ suggestedPriority, field, indexPattern }) {
+  buildColumn({ suggestedPriority, field }) {
     let interval = autoInterval;
     let timeZone: string | undefined;
     if (field.aggregationRestrictions && field.aggregationRestrictions.date_histogram) {
-      interval = (field.aggregationRestrictions.date_histogram.calendar_interval ||
-        field.aggregationRestrictions.date_histogram.fixed_interval) as string;
+      interval = restrictedInterval(field.aggregationRestrictions) as string;
       timeZone = field.aggregationRestrictions.date_histogram.time_zone;
     }
     return {
@@ -99,6 +97,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       newField.aggregationRestrictions.date_histogram
     ) {
       const restrictions = newField.aggregationRestrictions.date_histogram;
+
       return {
         ...column,
         params: {
@@ -108,38 +107,18 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
           // the restricted interval, we could carry it over directly. However as the current
           // UI does not allow to select multiples of an interval anyway, this is not included yet.
           // If the UI allows to pick more complicated intervals, this should be re-visited.
-          interval: (newField.aggregationRestrictions.date_histogram.calendar_interval ||
-            newField.aggregationRestrictions.date_histogram.fixed_interval) as string,
-        },
-      };
-    } else {
-      return {
-        ...column,
-        params: {
-          ...column.params,
-          // TODO remove this once it's possible to specify free intervals instead of picking from a list
-          interval: supportedIntervals.includes(column.params.interval)
-            ? column.params.interval
-            : supportedIntervals[0],
-          timeZone: undefined,
+          interval: restrictedInterval(newField.aggregationRestrictions) as string,
         },
       };
     }
+
+    return column;
   },
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {
       ...oldColumn,
       label: field.name,
       sourceField: field.name,
-      params: {
-        ...oldColumn.params,
-        // If we have an "auto" interval but the field we're switching to doesn't support auto intervals
-        // we use the default custom interval instead
-        interval:
-          oldColumn.params.interval === 'auto' && !supportsAutoInterval(field.name, indexPattern)
-            ? defaultCustomInterval
-            : oldColumn.params.interval,
-      },
     };
   },
   toEsAggsConfig: (column, columnId) => ({
@@ -157,7 +136,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       extended_bounds: {},
     },
   }),
-  paramEditor: ({ state, setState, currentColumn: currentColumn, layerId }) => {
+  paramEditor: ({ state, setState, currentColumn: currentColumn, layerId, dateRange }) => {
     const field =
       currentColumn &&
       state.indexPatterns[state.layers[layerId].indexPatternId].fields.find(
@@ -166,20 +145,35 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     const intervalIsRestricted =
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
 
-    function intervalToNumeric(interval: string) {
-      return supportedIntervals.indexOf(interval);
+    const interval = parseInterval(currentColumn.params.interval);
+
+    // We force the interval value to 1 if it's empty, since that is the ES behavior,
+    // and the isValidInterval function doesn't handle the empty case properly. Fixing
+    // isValidInterval involves breaking changes in other areas.
+    const isValid = isValidInterval(
+      `${interval.value === '' ? '1' : interval.value}${interval.unit}`,
+      restrictedInterval(field!.aggregationRestrictions)
+    );
+
+    function onChangeAutoInterval(ev: EuiSwitchEvent) {
+      const value = ev.target.checked ? autoIntervalFromDateRange(dateRange) : autoInterval;
+      setState(updateColumnParam({ state, layerId, currentColumn, paramName: 'interval', value }));
     }
 
-    function numericToInterval(i: number) {
-      return supportedIntervals[i];
-    }
+    const setInterval = (newInterval: typeof interval) => {
+      const isCalendarInterval = calendarOnlyIntervals.has(newInterval.unit);
+      const value = `${isCalendarInterval ? '1' : newInterval.value}${newInterval.unit || 'd'}`;
 
-    function onChangeAutoInterval(ev: React.ChangeEvent<HTMLInputElement>) {
-      const interval = ev.target.checked ? defaultCustomInterval : autoInterval;
       setState(
-        updateColumnParam({ state, layerId, currentColumn, paramName: 'interval', value: interval })
+        updateColumnParam({
+          state,
+          layerId,
+          currentColumn,
+          value,
+          paramName: 'interval',
+        })
       );
-    }
+    };
 
     return (
       <EuiForm>
@@ -187,7 +181,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
           <EuiFormRow>
             <EuiSwitch
               label={i18n.translate('xpack.lens.indexPattern.dateHistogram.autoInterval', {
-                defaultMessage: 'Customize time intervals',
+                defaultMessage: 'Customize time interval',
               })}
               checked={currentColumn.params.interval !== autoInterval}
               onChange={onChangeAutoInterval}
@@ -196,8 +190,8 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
         )}
         {currentColumn.params.interval !== autoInterval && (
           <EuiFormRow
-            label={i18n.translate('xpack.lens.indexPattern.dateHistogram.interval', {
-              defaultMessage: 'Time intervals',
+            label={i18n.translate('xpack.lens.indexPattern.dateHistogram.minimumInterval', {
+              defaultMessage: 'Minimum interval',
             })}
           >
             {intervalIsRestricted ? (
@@ -209,33 +203,101 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                 }}
               />
             ) : (
-              <FixedEuiRange
-                min={0}
-                max={supportedIntervals.length - 1}
-                step={1}
-                value={intervalToNumeric(currentColumn.params.interval)}
-                showTicks
-                ticks={supportedIntervals.map((interval, index) => ({
-                  label: interval,
-                  value: index,
-                }))}
-                onChange={(
-                  e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>
-                ) =>
-                  setState(
-                    updateColumnParam({
-                      state,
-                      layerId,
-                      currentColumn,
-                      paramName: 'interval',
-                      value: numericToInterval(Number((e.target as HTMLInputElement).value)),
-                    })
-                  )
-                }
-                aria-label={i18n.translate('xpack.lens.indexPattern.dateHistogram.interval', {
-                  defaultMessage: 'Time intervals',
-                })}
-              />
+              <>
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiFieldNumber
+                      data-test-subj="lensDateHistogramValue"
+                      value={interval.value}
+                      disabled={calendarOnlyIntervals.has(interval.unit)}
+                      isInvalid={!isValid}
+                      onChange={e => {
+                        setInterval({
+                          ...interval,
+                          value: e.target.value,
+                        });
+                      }}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiSelect
+                      data-test-subj="lensDateHistogramUnit"
+                      value={interval.unit}
+                      onChange={e => {
+                        setInterval({
+                          ...interval,
+                          unit: e.target.value,
+                        });
+                      }}
+                      isInvalid={!isValid}
+                      options={[
+                        {
+                          value: 'ms',
+                          text: i18n.translate(
+                            'xpack.lens.indexPattern.dateHistogram.milliseconds',
+                            {
+                              defaultMessage: 'milliseconds',
+                            }
+                          ),
+                        },
+                        {
+                          value: 's',
+                          text: i18n.translate('xpack.lens.indexPattern.dateHistogram.seconds', {
+                            defaultMessage: 'seconds',
+                          }),
+                        },
+                        {
+                          value: 'm',
+                          text: i18n.translate('xpack.lens.indexPattern.dateHistogram.minutes', {
+                            defaultMessage: 'minutes',
+                          }),
+                        },
+                        {
+                          value: 'h',
+                          text: i18n.translate('xpack.lens.indexPattern.dateHistogram.hours', {
+                            defaultMessage: 'hours',
+                          }),
+                        },
+                        {
+                          value: 'd',
+                          text: i18n.translate('xpack.lens.indexPattern.dateHistogram.days', {
+                            defaultMessage: 'days',
+                          }),
+                        },
+                        {
+                          value: 'w',
+                          text: i18n.translate('xpack.lens.indexPattern.dateHistogram.week', {
+                            defaultMessage: 'week',
+                          }),
+                        },
+                        {
+                          value: 'M',
+                          text: i18n.translate('xpack.lens.indexPattern.dateHistogram.month', {
+                            defaultMessage: 'month',
+                          }),
+                        },
+                        // Quarterly intervals appear to be unsupported by esaggs
+                        {
+                          value: 'y',
+                          text: i18n.translate('xpack.lens.indexPattern.dateHistogram.year', {
+                            defaultMessage: 'year',
+                          }),
+                        },
+                      ]}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                {!isValid && (
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiTextColor color="danger" data-test-subj="lensDateHistogramError">
+                      {i18n.translate('xpack.lens.indexPattern.invalidInterval', {
+                        defaultMessage: 'Invalid interval value',
+                      })}
+                    </EuiTextColor>
+                  </>
+                )}
+              </>
             )}
           </EuiFormRow>
         )}
@@ -243,3 +305,26 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     );
   },
 };
+
+function parseInterval(currentInterval: string) {
+  const interval = currentInterval || '';
+  const valueMatch = interval.match(/[\d]+/) || [];
+  const unitMatch = interval.match(/[\D]+/) || [];
+  const result = parseInt(valueMatch[0] || '', 10);
+
+  return {
+    value: isNaN(result) ? '' : result,
+    unit: unitMatch[0] || 'h',
+  };
+}
+
+function restrictedInterval(aggregationRestrictions?: AggregationRestrictions) {
+  if (!aggregationRestrictions || !aggregationRestrictions.date_histogram) {
+    return;
+  }
+
+  return (
+    aggregationRestrictions.date_histogram.calendar_interval ||
+    aggregationRestrictions.date_histogram.fixed_interval
+  );
+}

@@ -28,7 +28,11 @@ interface Props {
 export const ModalWrapper: FC<Props> = ({ onCreateClick, closeModal, saveEnabled, children }) => {
   return (
     <EuiOverlayMask>
-      <EuiModal onClose={closeModal} maxWidth={MAX_MODAL_WIDTH}>
+      <EuiModal
+        onClose={closeModal}
+        maxWidth={MAX_MODAL_WIDTH}
+        data-test-subj="mlCreateDetectorModal"
+      >
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <FormattedMessage
@@ -41,14 +45,19 @@ export const ModalWrapper: FC<Props> = ({ onCreateClick, closeModal, saveEnabled
         <EuiModalBody>{children}</EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={closeModal}>
+          <EuiButtonEmpty onClick={closeModal} data-test-subj="mlCreateDetectorModalCancelButton">
             <FormattedMessage
               id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.cancelButton"
               defaultMessage="Cancel"
             />
           </EuiButtonEmpty>
 
-          <EuiButton onClick={onCreateClick} isDisabled={saveEnabled === false} fill>
+          <EuiButton
+            onClick={onCreateClick}
+            isDisabled={saveEnabled === false}
+            fill
+            data-test-subj="mlCreateDetectorModalSaveButton"
+          >
             <FormattedMessage
               id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.saveButton"
               defaultMessage="Save"

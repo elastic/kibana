@@ -19,12 +19,11 @@
 
 import sinon from 'sinon';
 
-import { FilterStateStore } from '@kbn/es-query';
 import { FilterStateManager } from './filter_state_manager';
 
 import { StubState } from './test_helpers/stub_state';
 import { getFilter } from './test_helpers/get_stub_filter';
-import { FilterManager } from './filter_manager';
+import { FilterManager, esFilters } from '../../../../../../plugins/data/public';
 
 import { coreMock } from '../../../../../../core/public/mocks';
 const setupMock = coreMock.createSetup();
@@ -59,7 +58,7 @@ describe('filter_state_manager', () => {
     });
 
     test('should NOT watch state until both app and global state are defined', done => {
-      const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
+      const f1 = getFilter(esFilters.FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
       globalStateStub.filters.push(f1);
 
       setTimeout(() => {
@@ -72,8 +71,8 @@ describe('filter_state_manager', () => {
       appStateStub.save = sinon.stub();
       globalStateStub.save = sinon.stub();
 
-      const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
-      const f2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
+      const f1 = getFilter(esFilters.FilterStateStore.APP_STATE, false, false, 'age', 34);
+      const f2 = getFilter(esFilters.FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
 
       filterManager.setFilters([f1, f2]);
 
@@ -101,33 +100,37 @@ describe('filter_state_manager', () => {
     });
 
     test('should update filter manager global filters', done => {
-      const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
-      globalStateStub.filters.push(f1);
-
-      setTimeout(() => {
+      const updateSubscription = filterManager.getUpdates$().subscribe(() => {
         expect(filterManager.getGlobalFilters()).toHaveLength(1);
+        if (updateSubscription) {
+          updateSubscription.unsubscribe();
+        }
         done();
-      }, 100);
+      });
+
+      const f1 = getFilter(esFilters.FilterStateStore.GLOBAL_STATE, true, true, 'age', 34);
+      globalStateStub.filters.push(f1);
     });
 
-    test('should update filter manager app filters', done => {
-      expect(filterManager.getAppFilters()).toHaveLength(0);
-
-      const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
-      appStateStub.filters.push(f1);
-
-      setTimeout(() => {
+    test('should update filter manager app filter', done => {
+      const updateSubscription = filterManager.getUpdates$().subscribe(() => {
         expect(filterManager.getAppFilters()).toHaveLength(1);
+        if (updateSubscription) {
+          updateSubscription.unsubscribe();
+        }
         done();
-      }, 100);
+      });
+
+      const f1 = getFilter(esFilters.FilterStateStore.APP_STATE, false, false, 'age', 34);
+      appStateStub.filters.push(f1);
     });
 
     test('should update URL when filter manager filters are set', () => {
       appStateStub.save = sinon.stub();
       globalStateStub.save = sinon.stub();
 
-      const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
-      const f2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
+      const f1 = getFilter(esFilters.FilterStateStore.APP_STATE, false, false, 'age', 34);
+      const f2 = getFilter(esFilters.FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
 
       filterManager.setFilters([f1, f2]);
 
@@ -139,8 +142,8 @@ describe('filter_state_manager', () => {
       appStateStub.save = sinon.stub();
       globalStateStub.save = sinon.stub();
 
-      const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
-      const f2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
+      const f1 = getFilter(esFilters.FilterStateStore.APP_STATE, false, false, 'age', 34);
+      const f2 = getFilter(esFilters.FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
 
       filterManager.addFilters([f1, f2]);
 
@@ -156,7 +159,7 @@ describe('filter_state_manager', () => {
      ** And triggers *another* filter manager update.
      */
     test('should NOT re-trigger filter manager', done => {
-      const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
+      const f1 = getFilter(esFilters.FilterStateStore.APP_STATE, false, false, 'age', 34);
       filterManager.setFilters([f1]);
       const setFiltersSpy = sinon.spy(filterManager, 'setFilters');
 

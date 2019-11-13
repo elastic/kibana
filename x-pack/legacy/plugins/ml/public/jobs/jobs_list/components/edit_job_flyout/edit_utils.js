@@ -7,7 +7,7 @@
 
 import { difference } from 'lodash';
 import chrome from 'ui/chrome';
-import { newJobLimits } from 'plugins/ml/jobs/new_job_new/utils/new_job_defaults';
+import { getNewJobLimits } from '../../../../services/ml_server_info';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { processCreatedBy } from '../../../../../common/util/job_utils';
 
@@ -157,7 +157,7 @@ function extractGroups(job, newJobData) {
 }
 
 function extractMML(job, newJobData) {
-  const jobLimits = newJobLimits();
+  const jobLimits = getNewJobLimits();
   const mmlData = {};
   // if the job's model_memory_limit has changed, add it to the jobData json
   if (job.analysis_limits.model_memory_limit !== undefined) {

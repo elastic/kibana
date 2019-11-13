@@ -17,27 +17,15 @@
  * under the License.
  */
 
-import { IInterpreter } from './types';
+import { ExpressionInterpreter } from './types';
+import { createGetterSetter } from '../../../../../../plugins/kibana_utils/public';
 import { Start as IInspector } from '../../../../../../plugins/inspector/public';
 import { ExpressionsSetup } from './plugin';
 
-const createGetterSetter = <T extends object>(name: string): [() => T, (value: T) => void] => {
-  let value: T;
-
-  const get = (): T => {
-    if (!value) throw new Error(`${name} was not set`);
-    return value;
-  };
-
-  const set = (newValue: T) => {
-    value = newValue;
-  };
-
-  return [get, set];
-};
-
 export const [getInspector, setInspector] = createGetterSetter<IInspector>('Inspector');
-export const [getInterpreter, setInterpreter] = createGetterSetter<IInterpreter>('Interpreter');
+export const [getInterpreter, setInterpreter] = createGetterSetter<ExpressionInterpreter>(
+  'Interpreter'
+);
 export const [getRenderersRegistry, setRenderersRegistry] = createGetterSetter<
   ExpressionsSetup['__LEGACY']['renderers']
 >('Renderers registry');

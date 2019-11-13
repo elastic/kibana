@@ -19,8 +19,7 @@
 
 import { find, get } from 'lodash';
 
-import { Field, FieldType } from './fields';
-import { StaticIndexPattern } from './index_patterns';
+import { Field } from './fields';
 import { getFilterableKbnTypeNames } from '../../../../../plugins/data/public';
 
 import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
@@ -139,69 +138,3 @@ export function getRoutes() {
     sourceFilters: '/management/kibana/index_patterns/{{id}}?_a=(tab:sourceFilters)',
   };
 }
-
-export const mockFields: FieldType[] = [
-  {
-    name: 'machine.os',
-    esTypes: ['text'],
-    type: 'string',
-    aggregatable: false,
-    searchable: false,
-    filterable: true,
-  },
-  {
-    name: 'machine.os.raw',
-    type: 'string',
-    esTypes: ['keyword'],
-    aggregatable: true,
-    searchable: true,
-    filterable: true,
-  },
-  {
-    name: 'not.filterable',
-    type: 'string',
-    esTypes: ['text'],
-    aggregatable: true,
-    searchable: false,
-    filterable: false,
-  },
-  {
-    name: 'bytes',
-    type: 'number',
-    esTypes: ['long'],
-    aggregatable: true,
-    searchable: true,
-    filterable: true,
-  },
-  {
-    name: '@timestamp',
-    type: 'date',
-    esTypes: ['date'],
-    aggregatable: true,
-    searchable: true,
-    filterable: true,
-  },
-  {
-    name: 'clientip',
-    type: 'ip',
-    esTypes: ['ip'],
-    aggregatable: true,
-    searchable: true,
-    filterable: true,
-  },
-  {
-    name: 'bool.field',
-    type: 'boolean',
-    esTypes: ['boolean'],
-    aggregatable: true,
-    searchable: true,
-    filterable: true,
-  },
-];
-
-export const mockIndexPattern: StaticIndexPattern = {
-  id: 'logstash-*',
-  fields: mockFields,
-  title: 'logstash-*',
-  timeFieldName: '@timestamp',
-};
