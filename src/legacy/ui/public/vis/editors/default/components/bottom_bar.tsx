@@ -18,7 +18,14 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiBottomBar,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiToolTip,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Vis } from 'ui/vis';
@@ -27,6 +34,8 @@ import { discardChanges, EditorAction } from '../state';
 interface DefaultEditorBottomBarProps {
   applyChanges(): void;
   isDirty: boolean;
+  isInvalid: boolean;
+  isTouched: boolean;
   dispatch: React.Dispatch<EditorAction>;
   vis: Vis;
 }
@@ -34,6 +43,8 @@ interface DefaultEditorBottomBarProps {
 function DefaultEditorBottomBar({
   applyChanges,
   isDirty,
+  isInvalid,
+  isTouched,
   dispatch,
   vis,
 }: DefaultEditorBottomBarProps) {
@@ -71,25 +82,50 @@ function DefaultEditorBottomBar({
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    aria-label={i18n.translate(
-                      'common.ui.vis.editors.sidebar.applyChangesAriaLabel',
-                      {
-                        defaultMessage: 'Update the visualization with your changes',
-                      }
-                    )}
-                    color="ghost"
-                    disabled={!isDirty || enableAutoApply}
-                    fill
-                    iconType="play"
-                    onClick={applyChanges}
-                    size="s"
-                  >
-                    <FormattedMessage
-                      id="common.ui.vis.editors.sidebar.updateChartButtonLabel"
-                      defaultMessage="Update chart"
-                    />
-                  </EuiButton>
+                  {isInvalid && isTouched ? (
+                    <EuiToolTip
+                      content={i18n.translate('common.ui.vis.editors.sidebar.errorButtonTooltip', {
+                        defaultMessage: 'Errors in the highlighted fields need to be resolved.',
+                      })}
+                    >
+                      <EuiButton
+                        aria-label={i18n.translate(
+                          'common.ui.vis.editors.sidebar.errorButtonAriaLabel',
+                          {
+                            defaultMessage: 'Errors in the highlighted fields need to be resolved.',
+                          }
+                        )}
+                        color="danger"
+                        iconType="alert"
+                        size="s"
+                      >
+                        <FormattedMessage
+                          id="common.ui.vis.editors.sidebar.updateChartButtonLabel"
+                          defaultMessage="Update chart"
+                        />
+                      </EuiButton>
+                    </EuiToolTip>
+                  ) : (
+                    <EuiButton
+                      aria-label={i18n.translate(
+                        'common.ui.vis.editors.sidebar.applyChangesAriaLabel',
+                        {
+                          defaultMessage: 'Update the visualization with your changes',
+                        }
+                      )}
+                      color="ghost"
+                      disabled={!isDirty || enableAutoApply}
+                      fill
+                      iconType="play"
+                      onClick={applyChanges}
+                      size="s"
+                    >
+                      <FormattedMessage
+                        id="common.ui.vis.editors.sidebar.updateChartButtonLabel"
+                        defaultMessage="Update chart"
+                      />
+                    </EuiButton>
+                  )}
                 </EuiFlexItem>
               </>
             )}

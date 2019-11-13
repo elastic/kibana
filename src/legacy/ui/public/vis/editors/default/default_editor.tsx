@@ -23,6 +23,7 @@ import { getVisualizeLoader } from 'ui/visualize';
 import { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize_handler';
 import { EditorRenderProps } from 'src/legacy/core_plugins/kibana/public/visualize/types';
 
+import './vis_type_agg_filter';
 import { DefaultEditorSideBar } from './components/sidebar';
 import { DefaultEditorBottomBar } from './components/bottom_bar';
 import { useEditorReducer, useEditorContext, useEditorFormState } from './state';
@@ -80,14 +81,19 @@ function DefaultEditor({
   }, [vis]);
 
   const applyChanges = useCallback(() => {
+    setTouched(true);
+
+    if (formState.invalid) {
+      return;
+    }
+
     vis.setCurrentState(state);
     vis.updateState();
     vis.emit('dirtyStateChange', {
       isDirty: false,
     });
     setDirty(false);
-    setTouched(true);
-  }, [vis, state]);
+  }, [vis, state, formState.invalid, setDirty, setTouched]);
 
   return (
     <div className="visEditor--default">
@@ -128,6 +134,8 @@ function DefaultEditor({
         applyChanges={applyChanges}
         dispatch={dispatch}
         isDirty={isDirty}
+        isTouched={formState.touched}
+        isInvalid={formState.invalid}
         vis={vis}
       />
     </div>

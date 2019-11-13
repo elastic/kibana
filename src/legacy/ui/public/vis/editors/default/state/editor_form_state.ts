@@ -26,26 +26,30 @@ function useEditorFormState() {
   const [formState, setFormState] = useState({
     validity: {},
     touched: false,
+    invalid: false,
   });
 
   const setValidity: SetValidity = useCallback((modelName, value) => {
-    setFormState(model => ({
-      ...model,
-      validity: {
+    setFormState(model => {
+      const validity = {
         ...model.validity,
         [modelName]: value,
-      },
-    }));
+      };
+
+      return {
+        ...model,
+        validity,
+        invalid: Object.values(validity).some(valid => !valid),
+      };
+    });
   }, []);
 
-  const setTouched = useCallback(
-    (touched: boolean) =>
-      setFormState(model => ({
-        ...model,
-        touched,
-      })),
-    []
-  );
+  const setTouched = useCallback((touched: boolean) => {
+    setFormState(model => ({
+      ...model,
+      touched,
+    }));
+  }, []);
 
   return {
     formState,
