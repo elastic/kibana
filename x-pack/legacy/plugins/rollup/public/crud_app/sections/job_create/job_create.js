@@ -132,6 +132,15 @@ export class JobCreateUi extends Component {
   componentDidUpdate(prevProps, prevState) {
     const indexPattern = this.getIndexPattern();
     if (indexPattern !== this.getIndexPattern(prevState)) {
+      const { indexPatternDateFields } = this.state;
+      // Whenever the index pattern changes we re-select the first date field.
+      this.onFieldsChange(
+        {
+          dateHistogramField: indexPatternDateFields.length ? indexPatternDateFields[0] : undefined,
+        },
+        STEP_DATE_HISTOGRAM
+      );
+
       // If the user hasn't entered anything, then skip validation.
       if (!indexPattern || !indexPattern.trim()) {
         this.setState({
@@ -273,16 +282,6 @@ export class JobCreateUi extends Component {
         indexPatternMetricsFields,
         isValidatingIndexPattern: false,
       });
-
-      if (!jobToClone) {
-        // Select first time field by default.
-        this.onFieldsChange(
-          {
-            dateHistogramField: indexPatternDateFields.length ? indexPatternDateFields[0] : null,
-          },
-          STEP_DATE_HISTOGRAM
-        );
-      }
     }).catch(error => {
       // We don't need to do anything if this component has been unmounted.
       if (!this._isMounted) {
