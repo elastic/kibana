@@ -8,12 +8,12 @@ import React from 'react';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
 import chrome from 'ui/chrome';
-import { Storage } from 'ui/storage';
 import { CoreSetup, CoreStart } from 'src/core/public';
 import { npSetup, npStart } from 'ui/new_platform';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { DataStart } from '../../../../../../src/legacy/core_plugins/data/public';
 import { start as dataShimStart } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { editorFrameSetup, editorFrameStart, editorFrameStop } from '../editor_frame_plugin';
 import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from '../indexpattern_plugin';
 import { SavedObjectIndexStore } from '../persistence';
@@ -84,7 +84,7 @@ export class AppPlugin {
           data={data}
           dataShim={dataShim}
           editorFrame={this.instance!}
-          store={new Storage(localStorage)}
+          storage={new Storage(localStorage)}
           docId={routeProps.match.params.id}
           docStorage={store}
           redirectTo={id => {

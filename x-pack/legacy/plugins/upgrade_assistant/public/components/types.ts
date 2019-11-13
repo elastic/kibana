@@ -21,6 +21,7 @@ export interface UpgradeAssistantTabProps {
   setSelectedTabIndex: (tabIndex: number) => void;
 }
 
+// eslint-disable-next-line react/prefer-stateless-function
 export class UpgradeAssistantTabComponent<
   T extends UpgradeAssistantTabProps = UpgradeAssistantTabProps,
   S = {}

@@ -5,10 +5,10 @@
  */
 
 import Hapi from 'hapi';
-import Joi from 'joi';
 import { isFunction } from 'lodash/fp';
 import { findSignals } from '../alerts/find_signals';
 import { FindSignalsRequest } from '../alerts/types';
+import { findSignalsSchema } from './schemas';
 
 export const createFindSignalRoute: Hapi.ServerRoute = {
   method: 'GET',
@@ -19,20 +19,7 @@ export const createFindSignalRoute: Hapi.ServerRoute = {
       options: {
         abortEarly: false,
       },
-      query: Joi.object()
-        .keys({
-          per_page: Joi.number()
-            .min(0)
-            .default(20),
-          page: Joi.number()
-            .min(1)
-            .default(1),
-          sort_field: Joi.string(),
-          fields: Joi.array()
-            .items(Joi.string())
-            .single(),
-        })
-        .default(),
+      query: findSignalsSchema,
     },
   },
   async handler(request: FindSignalsRequest, headers) {

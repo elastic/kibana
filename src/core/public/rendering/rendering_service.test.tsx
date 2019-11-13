@@ -34,7 +34,7 @@ describe('RenderingService#start', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getHeaderComponent.mockReturnValue(<div>Hello chrome!</div>);
     const overlays = overlayServiceMock.createStartContract();
-    overlays.banners.getComponent.mockReturnValue(<div>I'm a banner!</div>);
+    overlays.banners.getComponent.mockReturnValue(<div>I&apos;m a banner!</div>);
 
     const injectedMetadata = injectedMetadataServiceMock.createStartContract();
     injectedMetadata.getLegacyMode.mockReturnValue(legacyMode);
