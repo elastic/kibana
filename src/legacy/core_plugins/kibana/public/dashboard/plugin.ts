@@ -26,7 +26,7 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { RenderDeps } from './render_app';
+import { RenderDeps } from './application';
 import { LocalApplicationService } from '../local_application_service';
 import { DataStart } from '../../../data/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';

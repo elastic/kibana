@@ -25,6 +25,7 @@ import { uniq } from 'lodash';
 
 import { Subscription } from 'rxjs';
 
+import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import {
   subscribeWithScope,
   ConfirmationButtonTypes,
@@ -55,7 +56,6 @@ import {
   openAddPanelFlyout,
 } from '../../../embeddable_api/public/np_ready/public';
 import { DashboardAppState, NavAction, ConfirmModalFn, SavedDashboardPanel } from './types';
-import { SavedObjectFinder } from '../../../../../plugins/kibana_react/public';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
 import { DashboardSaveModal } from './top_nav/save_modal';
@@ -69,7 +69,7 @@ import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize/embeddable';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
-import { RenderDeps } from './render_app';
+import { RenderDeps } from './application';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;

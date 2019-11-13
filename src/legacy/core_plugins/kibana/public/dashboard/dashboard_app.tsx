@@ -35,7 +35,7 @@ import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn } from './types'
 import { esFilters } from '../../../../../../src/plugins/data/public';
 
 import { DashboardAppController } from './dashboard_app_controller';
-import { RenderDeps } from './render_app';
+import { RenderDeps } from './application';
 
 export interface DashboardAppScope extends ng.IScope {
   dash: SavedObjectDashboard;

@@ -20,7 +20,6 @@
 import { IAngularStatic } from 'angular';
 import {
   ChromeStart,
-  DocLinksStart,
   LegacyCoreStart,
   SavedObjectsClientContract,
   ToastsStart,
@@ -40,19 +39,16 @@ export interface VisualizeKibanaServices {
   addBasePath: (url: string) => string;
   angular: IAngularStatic;
   chrome: ChromeStart;
-  chromeLegacy: any;
+  legacyChrome: any;
   core: LegacyCoreStart;
   dataStart: DataStart;
   editorTypes: any;
   npDataStart: NpDataStart;
-  docLinks: DocLinksStart;
   embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
   getBasePath: () => string;
-  getInjected: (name: string, defaultValue?: any) => unknown;
   indexPatterns: any;
   localStorage: Storage;
   navigation: NavigationStart;
-  queryFilter: any;
   toastNotifications: ToastsStart;
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectRegistry: any;

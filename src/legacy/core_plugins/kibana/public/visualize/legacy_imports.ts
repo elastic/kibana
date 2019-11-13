@@ -35,11 +35,10 @@ export { AppStateProvider } from 'ui/state_management/app_state';
 export { npSetup, npStart } from 'ui/new_platform';
 export { SavedObjectRegistryProvider, SavedObjectsClientProvider } from 'ui/saved_objects';
 export { IPrivate } from 'ui/private';
-export { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
+export { ShareContextMenuExtensionsRegistryProvider, showShareContextMenu } from 'ui/share';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-export { showShareContextMenu } from 'ui/share';
 export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 // @ts-ignore
 export { GlobalStateProvider } from 'ui/state_management/global_state';
@@ -73,3 +72,4 @@ export { defaultEditor } from 'ui/vis/editors/default/default';
 export { VisType } from 'ui/vis';
 export { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 export { memoizeLast } from 'ui/utils/memoize';
+export { wrapInI18nContext } from 'ui/i18n';

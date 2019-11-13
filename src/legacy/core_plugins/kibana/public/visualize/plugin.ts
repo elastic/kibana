@@ -47,7 +47,7 @@ import { defaultEditor } from './legacy_imports';
 import { SavedVisualizations } from './types';
 
 export interface LegacyAngularInjectedDependencies {
-  chromeLegacy: any;
+  legacyChrome: any;
   editorTypes: any;
   shareContextMenuExtensions: any;
   savedObjectRegistry: any;
@@ -55,7 +55,7 @@ export interface LegacyAngularInjectedDependencies {
 }
 
 export interface VisualizePluginStartDependencies {
-  dataStart: DataStart;
+  data: DataStart;
   npData: NpDataStart;
   embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
   navigation: NavigationStart;
@@ -68,8 +68,8 @@ export interface VisualizePluginSetupDependencies {
     angular: IAngularStatic;
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
     localApplicationService: LocalApplicationService;
-    VisEditorTypesRegistryProvider: any;
   };
+  VisEditorTypesRegistryProvider: any;
 }
 
 export class VisualizePlugin implements Plugin {
@@ -86,12 +86,8 @@ export class VisualizePlugin implements Plugin {
     core: CoreSetup,
     {
       feature_catalogue,
-      __LEGACY: {
-        localApplicationService,
-        getAngularDependencies,
-        VisEditorTypesRegistryProvider,
-        ...legacyServices
-      },
+      VisEditorTypesRegistryProvider,
+      __LEGACY: { localApplicationService, getAngularDependencies, ...legacyServices },
     }: VisualizePluginSetupDependencies
   ) {
     const app: App = {
@@ -120,14 +116,11 @@ export class VisualizePlugin implements Plugin {
           chrome: contextCore.chrome,
           dataStart,
           npDataStart,
-          docLinks: contextCore.docLinks,
           embeddables,
           getBasePath: core.http.basePath.get,
-          getInjected: core.injectedMetadata.getInjectedVar,
           indexPatterns: dataStart.indexPatterns.indexPatterns,
           localStorage: new Storage(localStorage),
           navigation,
-          queryFilter: npDataStart.query.filterManager,
           savedObjectsClient,
           savedQueryService: dataStart.search.services.savedQueryService,
           toastNotifications: contextCore.notifications.toasts,
@@ -142,6 +135,8 @@ export class VisualizePlugin implements Plugin {
       },
     };
 
+    localApplicationService.register({ ...app, id: 'visualize' });
+
     feature_catalogue.register({
       id: 'visualize',
       title: 'Visualize',
@@ -155,13 +150,18 @@ export class VisualizePlugin implements Plugin {
       category: FeatureCatalogueCategory.DATA,
     });
 
-    localApplicationService.register({ ...app, id: 'visualize' });
     VisEditorTypesRegistryProvider.register(defaultEditor);
   }
 
   public start(
     { savedObjects: { client: savedObjectsClient } }: CoreStart,
-    { dataStart, embeddables, navigation, visualizations, npData }: VisualizePluginStartDependencies
+    {
+      data: dataStart,
+      embeddables,
+      navigation,
+      visualizations,
+      npData,
+    }: VisualizePluginStartDependencies
   ) {
     this.startDependencies = {
       dataStart,

@@ -24,11 +24,12 @@ import { VisualizeConstants } from '../visualize_constants';
 import { i18n } from '@kbn/i18n';
 
 import { getServices } from '../kibana_services';
+import { wrapInI18nContext } from '../legacy_imports';
 
 export function initListingDirective(app) {
-  app.directive('visualizeListingTable', reactDirective => reactDirective(VisualizeListingTable));
+  app.directive('visualizeListingTable', reactDirective => reactDirective(wrapInI18nContext(VisualizeListingTable)));
   app.directive('newVisModal', reactDirective =>
-    reactDirective(NewVisModal, [
+    reactDirective(wrapInI18nContext(NewVisModal), [
       ['visTypesRegistry', { watchDepth: 'collection' }],
       ['onClose', { watchDepth: 'reference' }],
       ['addBasePath', { watchDepth: 'reference' }],
@@ -42,7 +43,7 @@ export function VisualizeListingController($injector, createNewVis) {
   const {
     addBasePath,
     chrome,
-    chromeLegacy,
+    legacyChrome,
     savedObjectRegistry,
     savedObjectsClient,
     npDataStart: {
@@ -53,7 +54,7 @@ export function VisualizeListingController($injector, createNewVis) {
     toastNotifications,
     uiSettings,
     visualizations,
-    docLinks,
+    core: { docLinks },
   } = getServices();
   const kbnUrl = $injector.get('kbnUrl');
 
@@ -116,7 +117,7 @@ export function VisualizeListingController($injector, createNewVis) {
       })
     )
       .then(() => {
-        chromeLegacy.untrackNavLinksForDeletedSavedObjects(selectedItems.map(item => item.id));
+        legacyChrome.untrackNavLinksForDeletedSavedObjects(selectedItems.map(item => item.id));
       })
       .catch(error => {
         toastNotifications.addError(error, {
