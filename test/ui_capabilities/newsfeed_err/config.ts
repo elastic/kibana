@@ -17,11 +17,29 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('@kbn/test').runTestsCli([
-  require.resolve('../test/functional/config.js'),
-  require.resolve('../test/api_integration/config.js'),
-  require.resolve('../test/plugin_functional/config.js'),
-  require.resolve('../test/interpreter_functional/config.js'),
-  require.resolve('../test/ui_capabilities/newsfeed_err/config.ts'),
-]);
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+// @ts-ignore untyped module
+import getFunctionalConfig from '../../functional/config';
+
+// eslint-disable-next-line import/no-default-export
+export default async ({ readConfigFile }: FtrConfigProviderContext) => {
+  const functionalConfig = await getFunctionalConfig({ readConfigFile });
+
+  return {
+    ...functionalConfig,
+
+    testFiles: [require.resolve('./test')],
+
+    kbnTestServer: {
+      ...functionalConfig.kbnTestServer,
+      serverArgs: [
+        ...functionalConfig.kbnTestServer.serverArgs,
+        `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/kibana/crash.json`,
+      ],
+    },
+
+    junit: {
+      reportName: 'Newsfeed Error Handling',
+    },
+  };
+};

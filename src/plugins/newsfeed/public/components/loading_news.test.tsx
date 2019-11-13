@@ -17,11 +17,16 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('@kbn/test').runTestsCli([
-  require.resolve('../test/functional/config.js'),
-  require.resolve('../test/api_integration/config.js'),
-  require.resolve('../test/plugin_functional/config.js'),
-  require.resolve('../test/interpreter_functional/config.js'),
-  require.resolve('../test/ui_capabilities/newsfeed_err/config.ts'),
-]);
+import * as React from 'react';
+import { shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
+import { NewsLoadingPrompt } from './loading_news';
+
+describe('news_loading', () => {
+  describe('rendering', () => {
+    it('renders the default News Loading', () => {
+      const wrapper = shallow(<NewsLoadingPrompt />);
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
+  });
+});

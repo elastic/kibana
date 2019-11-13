@@ -17,11 +17,17 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('@kbn/test').runTestsCli([
-  require.resolve('../test/functional/config.js'),
-  require.resolve('../test/api_integration/config.js'),
-  require.resolve('../test/plugin_functional/config.js'),
-  require.resolve('../test/interpreter_functional/config.js'),
-  require.resolve('../test/ui_capabilities/newsfeed_err/config.ts'),
-]);
+import Hapi from 'hapi';
+import { initPlugin as initNewsfeed } from './newsfeed_simulation';
+
+const NAME = 'newsfeed-FTS-external-service-simulators';
+
+// eslint-disable-next-line import/no-default-export
+export default function(kibana: any) {
+  return new kibana.Plugin({
+    name: NAME,
+    init: (server: Hapi.Server) => {
+      initNewsfeed(server, `/api/_${NAME}`);
+    },
+  });
+}
