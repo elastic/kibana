@@ -19,7 +19,6 @@
 
 import { IAngularStatic } from 'angular';
 import { i18n } from '@kbn/i18n';
-import { wrapInI18nContext } from 'ui/i18n';
 
 // @ts-ignore
 import { defaultEditor } from 'ui/vis/editors/default/default';
@@ -138,7 +137,6 @@ export class VisualizePlugin implements Plugin {
           uiSettings: contextCore.uiSettings,
           visualizeCapabilities: contextCore.application.capabilities.visualize,
           visualizations,
-          wrapInI18nContext,
         };
         setServices(deps);
 

@@ -25,12 +25,12 @@ import { i18n } from '@kbn/i18n';
 
 import { getServices } from '../kibana_services';
 
-export function initListingDirective(app, deps) {
+export function initListingDirective(app) {
   app.directive('visualizeListingTable', reactDirective =>
-    reactDirective(deps.wrapInI18nContext(VisualizeListingTable))
+    reactDirective(VisualizeListingTable)
   );
   app.directive('newVisModal', reactDirective =>
-    reactDirective(deps.wrapInI18nContext(NewVisModal), [
+    reactDirective(NewVisModal, [
       ['visTypesRegistry', { watchDepth: 'collection' }],
       ['onClose', { watchDepth: 'reference' }],
       ['addBasePath', { watchDepth: 'reference' }],

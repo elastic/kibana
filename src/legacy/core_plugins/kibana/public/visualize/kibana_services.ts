@@ -60,7 +60,6 @@ export interface VisualizeKibanaServices {
   uiSettings: UiSettingsClientContract;
   visualizeCapabilities: any;
   visualizations: any;
-  wrapInI18nContext: any;
 }
 
 let services: VisualizeKibanaServices | null = null;
