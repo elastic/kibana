@@ -82,8 +82,8 @@ export const updateSetupModeData = async (uuid, fetchWithoutClusterUuid = false)
   const oldData = setupModeState.data;
   const data = await fetchCollectionData(uuid, fetchWithoutClusterUuid);
   setupModeState.data = data;
-  if (chrome.getInjected('isOnCloud') || !data.hasPermissions) {
-    const text = !data.hasPermissions
+  if (chrome.getInjected('isOnCloud') || !data._meta.hasPermissions) {
+    const text = !data._meta.hasPermissions
       ? i18n.translate('xpack.monitoring.setupMode.notAvailablePermissions', {
         defaultMessage: 'You do not have the necessary permissions to do this.'
       })
