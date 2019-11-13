@@ -7,15 +7,24 @@
 export function MonitoringPageProvider({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'header', 'shield', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
+  const security = getService('security');
 
   return new class MonitoringPage {
-    async navigateTo() {
-      await PageObjects.common.navigateToApp('login');
-      await PageObjects.shield.login(
-        'monitoring_user',
-        'monitoring_user-password'
-      );
-      await PageObjects.spaceSelector.clickSpaceAvatar('default');
+    async navigateTo(useSuperUser = false) {
+      // always create this because our tear down tries to delete it
+      await security.user.create('basic_monitoring_user', {
+        password: 'monitoring_user_password',
+        roles: ['monitoring_user', 'kibana_user'],
+        full_name: 'basic monitoring',
+      });
+
+      if (!useSuperUser) {
+        await PageObjects.common.navigateToApp('login');
+        await PageObjects.shield.login(
+          'basic_monitoring_user',
+          'monitoring_user_password'
+        );
+      }
       await PageObjects.common.navigateToApp('monitoring');
     }
 
