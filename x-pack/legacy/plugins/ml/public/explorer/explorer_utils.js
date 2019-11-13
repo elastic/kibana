@@ -589,3 +589,32 @@ export async function loadTopInfluencers(
     }
   });
 }
+
+export function restoreAppState(appState) {
+  // Select any jobs set in the global state (i.e. passed in the URL).
+  let selectedCells;
+  let filterData = {};
+
+  // keep swimlane selection, restore selectedCells from AppState
+  if (appState.mlExplorerSwimlane.selectedType !== undefined) {
+    selectedCells = {
+      type: appState.mlExplorerSwimlane.selectedType,
+      lanes: appState.mlExplorerSwimlane.selectedLanes,
+      times: appState.mlExplorerSwimlane.selectedTimes,
+      showTopFieldValues: appState.mlExplorerSwimlane.showTopFieldValues,
+      viewByFieldName: appState.mlExplorerSwimlane.viewByFieldName,
+    };
+  }
+
+  // keep influencers filter selection, restore from AppState
+  if (appState.mlExplorerFilter.influencersFilterQuery !== undefined) {
+    filterData = {
+      influencersFilterQuery: appState.mlExplorerFilter.influencersFilterQuery,
+      filterActive: appState.mlExplorerFilter.filterActive,
+      filteredFields: appState.mlExplorerFilter.filteredFields,
+      queryString: appState.mlExplorerFilter.queryString,
+    };
+  }
+
+  return { selectedCells, filterData };
+}

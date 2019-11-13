@@ -11,9 +11,9 @@
  * components in the Explorer dashboard.
  */
 
-import { cloneDeep } from 'lodash';
+import { isEqual, cloneDeep } from 'lodash';
 
-import { from, isObservable, BehaviorSubject, Subject } from 'rxjs';
+import { from, isObservable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, flatMap, map, scan } from 'rxjs/operators';
 
 import { ML_RESULTS_INDEX_PATTERN } from '../../common/constants/index_patterns';
@@ -25,7 +25,7 @@ import { getDefaultViewBySwimlaneData, getInfluencers } from './explorer_utils';
 export const ALLOW_CELL_RANGE_SELECTION = true;
 
 export const dragSelect$ = new Subject();
-export const explorerAction$ = new BehaviorSubject(null);
+export const explorerAction$ = new Subject();
 
 // Creates index pattern in the format expected by the kuery bar/kuery autocomplete provider
 // Field objects required fields: name, type, aggregatable, searchable
@@ -43,15 +43,18 @@ function getIndexPattern(selectedJobs) {
   return indexPattern;
 }
 
+export function getExplorerDefaultAppState() {
+  return {
+    mlExplorerSwimlane: {},
+    mlExplorerFilter: {}
+  };
+}
 
 export function getExplorerDefaultState() {
   return {
     annotationsData: [],
     anomalyChartRecords: [],
-    appState: {
-      mlExplorerSwimlane: {},
-      mlExplorerFilter: {}
-    },
+    appState: getExplorerDefaultAppState(),
     chartsData: getDefaultChartsData(),
     fieldFormatsLoading: false,
     filterActive: false,
@@ -165,6 +168,9 @@ const reducer = (state, nextAction) => {
     case EXPLORER_ACTION.FIELD_FORMATS_LOADED:
       return { ...state, fieldFormatsLoading: false };
 
+    case EXPLORER_ACTION.APP_STATE_INIT:
+      return { ...state, appState: payload };
+
     case EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION:
       return { ...state, appState: appStateClearSelection(cloneDeep(state.appState)) };
 
@@ -183,7 +189,6 @@ const reducer = (state, nextAction) => {
     default:
       return state;
   }
-
 };
 
 const triggerSideEffect = nextAction => {
@@ -221,9 +226,14 @@ export const explorer$ = explorerFilteredAction$.pipe(
         return false;
     }
   }),
-  distinctUntilChanged(((prev, curr) => (prev !== null && curr !== null && prev.action === curr.action)))
+  distinctUntilChanged(((prev, curr) => (prev !== null && curr !== null && prev.action === curr.action))),
 );
 
 export const explorerState$ = explorerFilteredAction$.pipe(
   scan(reducer, getExplorerDefaultState())
+);
+
+export const explorerAppState$ = explorerState$.pipe(
+  map(state => state.appState),
+  distinctUntilChanged(isEqual),
 );

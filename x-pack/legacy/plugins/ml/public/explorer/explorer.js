@@ -47,8 +47,9 @@ import {
   getExplorerDefaultState,
   explorer$,
   explorerAction$,
+  explorerAppState$,
 } from './explorer_dashboard_service';
-import { mlResultsService } from 'plugins/ml/services/results_service';
+import { mlResultsService } from '../services/results_service';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { NavigationMenu } from '../components/navigation_menu';
 import { CheckboxShowCharts, showCharts$ } from '../components/controls/checkbox_showcharts';
@@ -64,7 +65,9 @@ import {
   escapeParens,
   escapeDoubleQuotes
 } from '../components/kql_filter_bar/utils';
+import { mlJobService } from '../services/job_service';
 
+import { jobSelectionActionCreator } from './explorer_actions';
 import {
   getClearedSelectedAnomaliesState,
   getDefaultViewBySwimlaneData,
@@ -126,6 +129,7 @@ const ExplorerPage = ({ children, jobSelectorProps, resizeRef }) => (
 export const Explorer = injectI18n(injectObservablesAsProps(
   {
     annotationsRefresh: annotationsRefresh$,
+    appState: explorerAppState$,
     explorer: explorer$,
     showCharts: showCharts$,
     swimlaneLimit: limit$.pipe(map(d => d.val)),
@@ -135,11 +139,11 @@ export const Explorer = injectI18n(injectObservablesAsProps(
   class Explorer extends React.Component {
     static propTypes = {
       annotationsRefresh: PropTypes.bool,
-      componentDidMountCallback: PropTypes.func.isRequired,
+      appState: PropTypes.object.isRequired,
       dateFormatTz: PropTypes.string.isRequired,
       explorer: PropTypes.object.isRequired,
       globalState: PropTypes.object.isRequired,
-      jobSelectService: PropTypes.object.isRequired,
+      jobSelectService$: PropTypes.object.isRequired,
       showCharts: PropTypes.bool.isRequired,
       swimlaneLimit: PropTypes.number.isRequired,
       tableInterval: PropTypes.string.isRequired,
@@ -201,7 +205,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     resizeRef = createRef();
     resizeChecker = undefined;
     resizeHandler = () => {
-      explorerAction$.next({ action: EXPLORER_ACTION.REDRAW });
+      // console.warn('resize handler');
+      // explorerAction$.next({ action: EXPLORER_ACTION.REDRAW });
     }
 
     subscriptions = new Subscription();
@@ -241,7 +246,31 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       });
       this.resizeHandler();
 
-      this.props.componentDidMountCallback();
+      // restore state stored in URL via AppState and subscribe to
+      // job updates via job selector.
+      console.warn('this.props.appState', this.props.appState);
+      if (mlJobService.jobs.length > 0) {
+        let initialized = false;
+
+        this.subscriptions.add(this.props.jobSelectService$.subscribe(({ selection }) => {
+          if (selection !== undefined) {
+            const actionName = initialized ? EXPLORER_ACTION.JOB_SELECTION_CHANGE : EXPLORER_ACTION.INITIALIZE;
+            explorerAction$.next(jobSelectionActionCreator(actionName, selection, this.props.appState));
+
+            initialized = true;
+          }
+
+        }));
+
+      } else {
+        explorerAction$.next({
+          action: EXPLORER_ACTION.RELOAD,
+          payload: {
+            loading: false,
+            noJobsFound: true,
+          }
+        });
+      }
     }
 
     componentWillUnmount() {
@@ -379,7 +408,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         annotationsRefresh$.next(false);
         // clear the annotations cache and trigger an update
         this.annotationsTablePreviousArgs = null;
-        this.annotationsTablePreviousData = null;
+        this.annotationsTablePreviousData = [];
         this.updateExplorer();
       }
     }
@@ -684,7 +713,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     anomaliesTablePreviousArgs = null;
     anomaliesTablePreviousData = null;
     annotationsTablePreviousArgs = null;
-    annotationsTablePreviousData = null;
+    annotationsTablePreviousData = [];
     async updateExplorer(stateUpdate = {}, showOverallLoadingIndicator = true) {
       const {
         filterActive,
@@ -787,7 +816,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         Object.assign(
           stateUpdate,
           await this.loadViewBySwimlane(
-            topFieldValues,
+            topFieldValues || [],
             overallSwimlaneData,
             selectedJobs,
             viewBySwimlaneOptions.swimlaneViewByFieldName,
@@ -1114,7 +1143,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         dateFormatTz,
         globalState,
         intl,
-        jobSelectService,
+        jobSelectService$,
         TimeBuckets,
       } = this.props;
 
@@ -1149,7 +1178,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       const jobSelectorProps = {
         dateFormatTz,
         globalState,
-        jobSelectService,
+        jobSelectService$,
         selectedJobIds,
         selectedGroups,
       };

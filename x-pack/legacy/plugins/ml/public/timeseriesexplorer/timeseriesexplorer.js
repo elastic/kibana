@@ -166,8 +166,8 @@ export class TimeSeriesExplorer extends React.Component {
 
   constructor(props) {
     super(props);
-    const { jobSelectService, unsubscribeFromGlobalState } = jobSelectServiceFactory(props.globalState);
-    this.jobSelectService = jobSelectService;
+    const { jobSelectService$, unsubscribeFromGlobalState } = jobSelectServiceFactory(props.globalState);
+    this.jobSelectService$ = jobSelectService$;
     this.unsubscribeFromGlobalState = unsubscribeFromGlobalState;
   }
 
@@ -880,7 +880,7 @@ export class TimeSeriesExplorer extends React.Component {
     }));
 
     // Listen for changes to job selection.
-    this.subscriptions.add(this.jobSelectService.subscribe(({ selection: selectedJobIds }) => {
+    this.subscriptions.add(this.jobSelectService$.subscribe(({ selection: selectedJobIds }) => {
       const jobs = createTimeSeriesJobData(mlJobService.jobs);
 
       this.contextChartSelectedInitCallDone = false;
@@ -919,7 +919,7 @@ export class TimeSeriesExplorer extends React.Component {
           );
 
           setGlobalState(globalState, { selectedIds: [selectedJobIds[0]] });
-          this.jobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
+          this.jobSelectService$.next({ selection: [selectedJobIds[0]], resetSelection: true });
         } else {
           // if a group has been loaded
           if (selectedJobIds.length > 0) {
@@ -931,12 +931,12 @@ export class TimeSeriesExplorer extends React.Component {
             );
 
             setGlobalState(globalState, { selectedIds: [selectedJobIds[0]] });
-            this.jobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
+            this.jobSelectService$.next({ selection: [selectedJobIds[0]], resetSelection: true });
           } else if (jobs.length > 0) {
             // if there are no valid jobs in the group but there are valid jobs
             // in the list of all jobs, select the first
             setGlobalState(globalState, { selectedIds: [jobs[0].id] });
-            this.jobSelectService.next({ selection: [jobs[0].id], resetSelection: true });
+            this.jobSelectService$.next({ selection: [jobs[0].id], resetSelection: true });
           } else {
             // if there are no valid jobs left.
             this.setState({ loading: false });
@@ -946,7 +946,7 @@ export class TimeSeriesExplorer extends React.Component {
         // if some ids have been filtered out because they were invalid.
         // refresh the URL with the first valid id
         setGlobalState(globalState, { selectedIds: [selectedJobIds[0]] });
-        this.jobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
+        this.jobSelectService$.next({ selection: [selectedJobIds[0]], resetSelection: true });
       } else if (selectedJobIds.length > 0) {
         // normal behavior. a job ID has been loaded from the URL
         if (this.state.selectedJob !== undefined && selectedJobIds[0] !== this.state.selectedJob.job_id) {
@@ -959,7 +959,7 @@ export class TimeSeriesExplorer extends React.Component {
           // no jobs were loaded from the URL, so add the first job
           // from the full jobs list.
           setGlobalState(globalState, { selectedIds: [jobs[0].id] });
-          this.jobSelectService.next({ selection: [jobs[0].id], resetSelection: true });
+          this.jobSelectService$.next({ selection: [jobs[0].id], resetSelection: true });
         } else {
           // Jobs exist, but no time series jobs.
           this.setState({ loading: false });
@@ -1057,7 +1057,7 @@ export class TimeSeriesExplorer extends React.Component {
     const jobSelectorProps = {
       dateFormatTz,
       globalState,
-      jobSelectService: this.jobSelectService,
+      jobSelectService$: this.jobSelectService$,
       selectedJobIds,
       selectedGroups,
       singleSelection: true,
