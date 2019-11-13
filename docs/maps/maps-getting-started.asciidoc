@@ -84,7 +84,7 @@ the {es} index `kibana_sample_data_logs` on the shared key iso2 = geo.src.
 . Set *Right source* to *kibana_sample_data_logs*.
 . Set *Right field* to *geo.src*.
 
-===== Set the vector style
+===== Set the layer style
 
 All of the world countries are still a single color because the layer is using <<maps-vector-style-static, static styling>>.
 To shade the world countries based on which country is sending the most requests, you'll need to use <<maps-vector-style-data-driven, data driven styling>>.
@@ -162,9 +162,9 @@ image::maps/images/grid_metrics_both.png[]
 . Select *Sum* in the aggregation select.
 . Select *bytes* in the field select.
 
-===== Set the vector style
+===== Set the layer style
 
-. In *Vector style*, change *Symbol size*:
+. In *Layer style*, change *Symbol size*:
   .. Set *Min size* to 1.
   .. Set *Max size* to 25.
   .. In the field select, select *sum of bytes*.

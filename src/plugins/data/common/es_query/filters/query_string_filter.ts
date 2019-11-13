@@ -18,7 +18,7 @@
  */
 
 import { Filter, FilterMeta } from './meta_filter';
-import { IndexPattern } from './types';
+import { IndexPattern } from '../../types';
 
 export type QueryStringFilterMeta = FilterMeta;
 

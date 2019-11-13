@@ -33,7 +33,6 @@ export const esResponse = {
               hits: [
                 {
                   _index: 'apm-7.0.0-alpha1-error-2018.04.25',
-                  _type: 'doc',
                   _id: 'qH7C_WIBcmGuKeCHJvvT',
                   _score: null,
                   _source: {
@@ -61,7 +60,6 @@ export const esResponse = {
               hits: [
                 {
                   _index: 'apm-7.0.0-alpha1-error-2018.04.25',
-                  _type: 'doc',
                   _id: '_3_D_WIBcmGuKeCHFwOW',
                   _score: null,
                   _source: {
@@ -93,7 +91,6 @@ export const esResponse = {
               hits: [
                 {
                   _index: 'apm-7.0.0-alpha1-error-2018.04.25',
-                  _type: 'doc',
                   _id: 'dn_D_WIBcmGuKeCHQgXJ',
                   _score: null,
                   _source: {
@@ -125,7 +122,6 @@ export const esResponse = {
               hits: [
                 {
                   _index: 'apm-7.0.0-alpha1-error-2018.04.25',
-                  _type: 'doc',
                   _id: 'dX_D_WIBcmGuKeCHQgXJ',
                   _score: null,
                   _source: {
