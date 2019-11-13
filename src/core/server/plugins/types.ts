@@ -24,7 +24,12 @@ import { ConfigPath, EnvironmentMode, PackageInfo } from '../config';
 import { LoggerFactory } from '../logging';
 import { CoreSetup, CoreStart } from '..';
 
-export type PluginConfigSchema = Type<unknown> | null;
+export type PluginConfigSchema<T = unknown> = Type<T>;
+
+export interface PluginConfigDescriptor<T = any> {
+  exposeToBrowser?: Array<keyof T>;
+  schema: PluginConfigSchema<T>;
+}
 
 /**
  * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays
