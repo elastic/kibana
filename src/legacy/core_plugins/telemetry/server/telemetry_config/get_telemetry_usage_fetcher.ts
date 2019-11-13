@@ -16,15 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
 
-import { PluginInitializerContext } from 'src/core/server';
-import { TelemetryPlugin } from './plugin';
-import * as constants from '../common/constants';
+interface GetTelemetryUsageFetcherConfig {
+  configTelemetrySendUsageFrom: 'browser' | 'server';
+  telemetrySavedObject: TelemetrySavedObject;
+}
 
-export { FetcherTask } from './fetcher';
-export { replaceTelemetryInjectedVars } from './telemetry_config';
-export { telemetryCollectionManager } from './collection_manager';
+export function getTelemetryUsageFetcher({
+  telemetrySavedObject,
+  configTelemetrySendUsageFrom,
+}: GetTelemetryUsageFetcherConfig) {
+  if (!telemetrySavedObject) {
+    return configTelemetrySendUsageFrom;
+  }
 
-export const telemetryPlugin = (initializerContext: PluginInitializerContext) =>
-  new TelemetryPlugin(initializerContext);
-export { constants };
+  if (typeof telemetrySavedObject.sendUsageFrom === 'undefined') {
+    return configTelemetrySendUsageFrom;
+  }
+
+  return telemetrySavedObject.sendUsageFrom;
+}

@@ -17,14 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
-import { TelemetryPlugin } from './plugin';
-import * as constants from '../common/constants';
-
-export { FetcherTask } from './fetcher';
-export { replaceTelemetryInjectedVars } from './telemetry_config';
-export { telemetryCollectionManager } from './collection_manager';
-
-export const telemetryPlugin = (initializerContext: PluginInitializerContext) =>
-  new TelemetryPlugin(initializerContext);
-export { constants };
+export { replaceTelemetryInjectedVars } from './replace_injected_vars';
+export { getTelemetryOptIn } from './get_telemetry_opt_in';
+export { getTelemetryUsageFetcher } from './get_telemetry_usage_fetcher';
+export { getTelemetryAllowChangingOptInStatus } from './get_telemetry_allow_changing_opt_in_status';

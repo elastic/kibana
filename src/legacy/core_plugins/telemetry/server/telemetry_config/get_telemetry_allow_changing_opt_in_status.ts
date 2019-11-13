@@ -16,15 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
 
-import { PluginInitializerContext } from 'src/core/server';
-import { TelemetryPlugin } from './plugin';
-import * as constants from '../common/constants';
+interface GetTelemetryAllowChangingOptInStatus {
+  configTelemetryAllowChangingOptInStatus: boolean;
+  telemetrySavedObject: TelemetrySavedObject;
+}
 
-export { FetcherTask } from './fetcher';
-export { replaceTelemetryInjectedVars } from './telemetry_config';
-export { telemetryCollectionManager } from './collection_manager';
+export function getTelemetryAllowChangingOptInStatus({
+  telemetrySavedObject,
+  configTelemetryAllowChangingOptInStatus,
+}: GetTelemetryAllowChangingOptInStatus) {
+  if (!telemetrySavedObject) {
+    return configTelemetryAllowChangingOptInStatus;
+  }
 
-export const telemetryPlugin = (initializerContext: PluginInitializerContext) =>
-  new TelemetryPlugin(initializerContext);
-export { constants };
+  if (typeof telemetrySavedObject.telemetryAllowChangingOptInStatus === 'undefined') {
+    return configTelemetryAllowChangingOptInStatus;
+  }
+
+  return telemetrySavedObject.telemetryAllowChangingOptInStatus;
+}

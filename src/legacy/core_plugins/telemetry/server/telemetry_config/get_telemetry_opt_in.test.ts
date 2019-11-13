@@ -18,72 +18,47 @@
  */
 
 import { getTelemetryOptIn } from './get_telemetry_opt_in';
+import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
 
-describe('get_telemetry_opt_in', () => {
-  it('returns false when request path is not /app*', async () => {
-    const params = getCallGetTelemetryOptInParams({
-      requestPath: '/foo/bar',
-    });
-
-    const result = await callGetTelemetryOptIn(params);
-
-    expect(result).toBe(false);
-  });
-
-  it('returns null when saved object not found', async () => {
+describe('getTelemetryOptIn', () => {
+  it('returns null when saved object not found', () => {
     const params = getCallGetTelemetryOptInParams({
       savedObjectNotFound: true,
     });
 
-    const result = await callGetTelemetryOptIn(params);
+    const result = callGetTelemetryOptIn(params);
 
     expect(result).toBe(null);
   });
 
-  it('returns false when saved object forbidden', async () => {
+  it('returns false when saved object forbidden', () => {
     const params = getCallGetTelemetryOptInParams({
       savedObjectForbidden: true,
     });
 
-    const result = await callGetTelemetryOptIn(params);
+    const result = callGetTelemetryOptIn(params);
 
     expect(result).toBe(false);
   });
 
-  it('throws an error on unexpected saved object error', async () => {
-    const params = getCallGetTelemetryOptInParams({
-      savedObjectOtherError: true,
-    });
-
-    let threw = false;
-    try {
-      await callGetTelemetryOptIn(params);
-    } catch (err) {
-      threw = true;
-      expect(err.message).toBe(SavedObjectOtherErrorMessage);
-    }
-
-    expect(threw).toBe(true);
-  });
-
-  it('returns null if enabled is null or undefined', async () => {
+  it('returns null if enabled is null or undefined', () => {
     for (const enabled of [null, undefined]) {
       const params = getCallGetTelemetryOptInParams({
         enabled,
       });
 
-      const result = await callGetTelemetryOptIn(params);
+      const result = callGetTelemetryOptIn(params);
 
       expect(result).toBe(null);
     }
   });
 
-  it('returns true when enabled is true', async () => {
+  it('returns true when enabled is true', () => {
     const params = getCallGetTelemetryOptInParams({
       enabled: true,
     });
 
-    const result = await callGetTelemetryOptIn(params);
+    const result = callGetTelemetryOptIn(params);
 
     expect(result).toBe(true);
   });
@@ -146,24 +121,24 @@ describe('get_telemetry_opt_in', () => {
 });
 
 interface CallGetTelemetryOptInParams {
-  requestPath: string;
   savedObjectNotFound: boolean;
   savedObjectForbidden: boolean;
-  savedObjectOtherError: boolean;
-  enabled: boolean | null | undefined;
   lastVersionChecked?: any; // should be a string, but test with non-strings
   currentKibanaVersion: string;
   result?: boolean | null;
+  enabled: boolean | null | undefined;
+  configTelemetryOptIn: boolean | null;
+  allowChangingOptInStatus: boolean;
 }
 
 const DefaultParams = {
-  requestPath: '/app/something',
   savedObjectNotFound: false,
   savedObjectForbidden: false,
-  savedObjectOtherError: false,
   enabled: true,
   lastVersionChecked: '8.0.0',
   currentKibanaVersion: '8.0.0',
+  configTelemetryOptIn: null,
+  allowChangingOptInStatus: true,
 };
 
 function getCallGetTelemetryOptInParams(
@@ -172,43 +147,28 @@ function getCallGetTelemetryOptInParams(
   return { ...DefaultParams, ...overrides };
 }
 
-async function callGetTelemetryOptIn(params: CallGetTelemetryOptInParams): Promise<boolean | null> {
-  const { currentKibanaVersion } = params;
-  const request = getMockRequest(params);
-  return await getTelemetryOptIn({ request, currentKibanaVersion });
+function callGetTelemetryOptIn(params: CallGetTelemetryOptInParams) {
+  const { currentKibanaVersion, configTelemetryOptIn, allowChangingOptInStatus } = params;
+  const telemetrySavedObject = getMockTelemetrySavedObject(params);
+  return getTelemetryOptIn({
+    currentKibanaVersion,
+    telemetrySavedObject,
+    allowChangingOptInStatus,
+    configTelemetryOptIn,
+  });
 }
 
-function getMockRequest(params: CallGetTelemetryOptInParams): any {
+function getMockTelemetrySavedObject(params: CallGetTelemetryOptInParams): TelemetrySavedObject {
+  const { savedObjectNotFound, savedObjectForbidden } = params;
+  if (savedObjectForbidden) {
+    return false;
+  }
+  if (savedObjectNotFound) {
+    return null;
+  }
+
   return {
-    path: params.requestPath,
-    getSavedObjectsClient() {
-      return getMockSavedObjectsClient(params);
-    },
-  };
-}
-
-const SavedObjectNotFoundMessage = 'savedObjectNotFound';
-const SavedObjectForbiddenMessage = 'savedObjectForbidden';
-const SavedObjectOtherErrorMessage = 'savedObjectOtherError';
-
-function getMockSavedObjectsClient(params: CallGetTelemetryOptInParams) {
-  return {
-    async get(type: string, id: string) {
-      if (params.savedObjectNotFound) throw new Error(SavedObjectNotFoundMessage);
-      if (params.savedObjectForbidden) throw new Error(SavedObjectForbiddenMessage);
-      if (params.savedObjectOtherError) throw new Error(SavedObjectOtherErrorMessage);
-
-      const enabled = params.enabled;
-      const lastVersionChecked = params.lastVersionChecked;
-      return { attributes: { enabled, lastVersionChecked } };
-    },
-    errors: {
-      isNotFoundError(error: any) {
-        return error.message === SavedObjectNotFoundMessage;
-      },
-      isForbiddenError(error: any) {
-        return error.message === SavedObjectForbiddenMessage;
-      },
-    },
+    enabled: params.enabled,
+    lastVersionChecked: params.lastVersionChecked,
   };
 }
