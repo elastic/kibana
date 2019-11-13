@@ -16,33 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { OptInMessage } from './opt_in_message';
 
-import { dataPluginMock } from '../../../../core_plugins/data/public/mocks';
-
-const dataSetup = dataPluginMock.createSetup();
-
-// mocks for stateful code
-export const { FieldImpl } = dataSetup.indexPatterns!.__LEGACY;
-export const {
-  FieldList,
-  flattenHitWrapper,
-  formatHitProvider,
-  indexPatterns,
-} = dataSetup.indexPatterns!;
-
-// static code
-export {
-  CONTAINS_SPACES,
-  getFromSavedObject,
-  getRoutes,
-  isFilterable,
-  IndexPatternSelect,
-  validateIndexPattern,
-  ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  IndexPatternAlreadyExists,
-  IndexPatternMissingIndices,
-  NoDefaultIndexPattern,
-  NoDefinedIndexPatterns,
-} from '../../../../core_plugins/data/public';
+describe('OptInMessage', () => {
+  it('renders as expected', () => {
+    expect(
+      shallowWithIntl(<OptInMessage fetchTelemetry={jest.fn(async () => [])} />)
+    ).toMatchSnapshot();
+  });
+});
