@@ -21,3 +21,9 @@ export * from './field_formats/types';
 export * from './timefilter/types';
 export * from './query/types';
 export * from './kbn_field_types/types';
+
+// We can't import the real types from the data plugin, so need to either duplicate
+// them here or figure out another solution, perhaps housing them in this package
+// will be replaces after Fieds / IndexPattern will be moved into new platform
+export type Field = any;
+export type IndexPattern = any;
