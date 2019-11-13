@@ -146,11 +146,7 @@ const mergeProps = (
 });
 
 export const InteractivePage = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withState('aeroStore', 'setAeroStore'),
   withProps(componentLayoutState),
   withProps(({ aeroStore, updateGlobalState }) => ({

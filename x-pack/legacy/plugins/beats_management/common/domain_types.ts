@@ -13,9 +13,9 @@ export const OutputTypesArray = ['elasticsearch', 'logstash', 'kafka', 'redis'];
 // We can also pass in optional params to create spacific runtime checks that
 // can be used to validate blocs on the API and UI
 export const createConfigurationBlockInterface = (
-  configType: t.LiteralType<string> | t.KeyofC<Record<string, null>> = t.keyof(Object.fromEntries(
-    configBlockSchemas.map(s => [s.id, null])
-  ) as Record<string, null>),
+  configType: t.LiteralType<string> | t.KeyofC<Record<string, null>> = t.keyof(
+    Object.fromEntries(configBlockSchemas.map(s => [s.id, null])) as Record<string, null>
+  ),
   beatConfigInterface: t.Mixed = t.Dictionary
 ) =>
   t.interface(
