@@ -19,7 +19,8 @@ import {
   Position,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
+import { ExpressionFunction, KibanaDatatable } from 'src/legacy/core_plugins/interpreter/types';
+import { IInterpreterRenderHandlers } from 'src/legacy/core_plugins/expressions/public';
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -104,12 +105,14 @@ export const getXyChartRenderer = (dependencies: {
   }),
   validate: () => {},
   reuseDomNode: true,
-  render: async (domNode: Element, config: XYChartProps, _handlers: unknown) => {
+  render: (domNode: Element, config: XYChartProps, handlers: IInterpreterRenderHandlers) => {
+    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     ReactDOM.render(
       <I18nProvider>
         <XYChartReportable {...config} {...dependencies} />
       </I18nProvider>,
-      domNode
+      domNode,
+      () => handlers.done()
     );
   },
 });
@@ -121,16 +124,18 @@ function getIconForSeriesType(seriesType: SeriesType): IconType {
 const MemoizedChart = React.memo(XYChart);
 
 export function XYChartReportable(props: XYChartRenderProps) {
-  const [isReady, setIsReady] = useState(false);
+  const [state, setState] = useState({
+    isReady: false,
+  });
 
   // It takes a cycle for the XY chart to render. This prevents
   // reporting from printing a blank chart placeholder.
   useEffect(() => {
-    setIsReady(true);
+    setState({ isReady: true });
   }, []);
 
   return (
-    <VisualizationContainer className="lnsXyExpression__container" isReady={isReady}>
+    <VisualizationContainer className="lnsXyExpression__container" isReady={state.isReady}>
       <MemoizedChart {...props} />
     </VisualizationContainer>
   );
@@ -229,38 +234,33 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
           },
           index
         ) => {
-          if (!data.tables[layerId] || data.tables[layerId].rows.length === 0) {
+          if (
+            !data.tables[layerId] ||
+            data.tables[layerId].rows.length === 0 ||
+            data.tables[layerId].rows.every(row => typeof row[xAccessor] === 'undefined')
+          ) {
             return;
           }
 
           const columnToLabelMap = columnToLabel ? JSON.parse(columnToLabel) : {};
-
-          const rows = data.tables[layerId].rows.map(row => {
-            const newRow: typeof row = {};
-
-            // Remap data to { 'Count of records': 5 }
-            Object.keys(row).forEach(key => {
-              if (columnToLabelMap[key]) {
-                newRow[columnToLabelMap[key]] = row[key];
-              } else {
-                newRow[key] = row[key];
-              }
-            });
-            return newRow;
-          });
-
           const splitAccessorLabel = columnToLabelMap[splitAccessor];
           const yAccessors = accessors.map(accessor => columnToLabelMap[accessor] || accessor);
           const idForLegend = splitAccessorLabel || yAccessors;
+          const sanitized = sanitizeRows({
+            splitAccessor,
+            formatFactory,
+            columnToLabelMap,
+            table: data.tables[layerId],
+          });
 
           const seriesProps = {
             key: index,
-            splitSeriesAccessors: [splitAccessorLabel || splitAccessor],
+            splitSeriesAccessors: sanitized.splitAccessor ? [sanitized.splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
             id: getSpecId(idForLegend),
             xAccessor,
             yAccessors,
-            data: rows,
+            data: sanitized.rows,
             xScaleType,
             yScaleType,
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
@@ -281,4 +281,41 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
       )}
     </Chart>
   );
+}
+
+/**
+ * Renames the columns to match the user-configured accessors in
+ * columnToLabelMap. If a splitAccessor is provided, formats the
+ * values in that column.
+ */
+function sanitizeRows({
+  splitAccessor,
+  table,
+  formatFactory,
+  columnToLabelMap,
+}: {
+  splitAccessor?: string;
+  table: KibanaDatatable;
+  formatFactory: FormatFactory;
+  columnToLabelMap: Record<string, string | undefined>;
+}) {
+  const column = table.columns.find(c => c.id === splitAccessor);
+  const formatter = formatFactory(column && column.formatHint);
+
+  return {
+    splitAccessor: column && column.id,
+    rows: table.rows.map(r => {
+      const newRow: typeof r = {};
+
+      if (column) {
+        newRow[column.id] = formatter.convert(r[column.id]);
+      }
+
+      Object.keys(r).forEach(key => {
+        const newKey = columnToLabelMap[key] || key;
+        newRow[newKey] = r[key];
+      });
+      return newRow;
+    }),
+  };
 }

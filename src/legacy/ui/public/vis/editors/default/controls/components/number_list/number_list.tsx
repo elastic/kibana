@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect, useMemo, useCallback } from 'react';
 
 import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFormErrorText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -34,16 +34,15 @@ import {
   getUpdatedModels,
   hasInvalidValues,
 } from './utils';
+import { useValidation } from '../../agg_utils';
 
-interface NumberListProps {
+export interface NumberListProps {
   labelledbyId: string;
   numberArray: Array<number | undefined>;
   range?: string;
   showValidation: boolean;
   unitName: string;
   validateAscendingOrder?: boolean;
-  onBlur?(): void;
-  onFocus?(): void;
   onChange(list: Array<number | undefined>): void;
   setTouched(): void;
   setValidity(isValid: boolean): void;
@@ -56,81 +55,84 @@ function NumberList({
   showValidation,
   unitName,
   validateAscendingOrder = true,
-  onBlur,
-  onFocus,
   onChange,
   setTouched,
   setValidity,
 }: NumberListProps) {
-  const numberRange = getRange(range);
+  const numberRange = useMemo(() => getRange(range), [range]);
   const [models, setModels] = useState(getInitModelList(numberArray));
   const [ascendingError, setAscendingError] = useState(EMPTY_STRING);
 
-  // responsible for discarding changes
+  // set up validity for each model
   useEffect(() => {
-    const updatedModels = getUpdatedModels(numberArray, models, numberRange);
+    let id: number | undefined;
     if (validateAscendingOrder) {
-      const isOrderValid = validateOrder(updatedModels);
+      const { isValidOrder, modelIndex } = validateOrder(numberArray);
+      id = isValidOrder ? undefined : modelIndex;
       setAscendingError(
-        isOrderValid
-          ? i18n.translate('common.ui.aggTypes.numberList.invalidAscOrderErrorMessage', {
+        isValidOrder
+          ? EMPTY_STRING
+          : i18n.translate('common.ui.aggTypes.numberList.invalidAscOrderErrorMessage', {
               defaultMessage: 'The values should be in ascending order.',
             })
-          : EMPTY_STRING
       );
     }
-    setModels(updatedModels);
-  }, [numberArray]);
+    setModels(state => getUpdatedModels(numberArray, state, numberRange, id));
+  }, [numberArray, numberRange, validateAscendingOrder]);
 
+  // responsible for setting up an initial value ([0]) when there is no default value
   useEffect(() => {
-    setValidity(!hasInvalidValues(models));
-  }, [models]);
-
-  // resposible for setting up an initial value ([0]) when there is no default value
-  useEffect(() => {
-    onChange(models.map(({ value }) => (value === EMPTY_STRING ? undefined : value)));
+    if (!numberArray.length) {
+      onChange([models[0].value as number]);
+    }
   }, []);
 
-  const onChangeValue = ({ id, value }: { id: string; value: string }) => {
-    const parsedValue = parse(value);
-    const { isValid, errors } = validateValue(parsedValue, numberRange);
-    setValidity(isValid);
+  const isValid = !hasInvalidValues(models);
+  useValidation(setValidity, isValid);
 
-    const currentModel = models.find(model => model.id === id);
-    if (currentModel) {
-      currentModel.value = parsedValue;
-      currentModel.isInvalid = !isValid;
-      currentModel.errors = errors;
-    }
+  const onUpdate = useCallback(
+    (modelList: NumberRowModel[]) => {
+      setModels(modelList);
+      onChange(modelList.map(({ value }) => (value === EMPTY_STRING ? undefined : value)));
+    },
+    [onChange]
+  );
 
-    onUpdate(models);
-  };
+  const onChangeValue = useCallback(
+    ({ id, value }: { id: string; value: string }) => {
+      const parsedValue = parse(value);
+
+      onUpdate(
+        models.map(model => {
+          if (model.id === id) {
+            const { isInvalid, error } = validateValue(parsedValue, numberRange);
+            return {
+              id,
+              value: parsedValue,
+              isInvalid,
+              error,
+            };
+          }
+          return model;
+        })
+      );
+    },
+    [numberRange, models, onUpdate]
+  );
 
   // Add an item to the end of the list
-  const onAdd = () => {
+  const onAdd = useCallback(() => {
     const newArray = [...models, getNextModel(models, numberRange)];
     onUpdate(newArray);
-  };
+  }, [models, numberRange, onUpdate]);
 
-  const onDelete = (id: string) => {
-    const newArray = models.filter(model => model.id !== id);
-    onUpdate(newArray);
-  };
-
-  const onBlurFn = (model: NumberRowModel) => {
-    if (model.value === EMPTY_STRING) {
-      model.isInvalid = true;
-    }
-    setTouched();
-    if (onBlur) {
-      onBlur();
-    }
-  };
-
-  const onUpdate = (modelList: NumberRowModel[]) => {
-    setModels(modelList);
-    onChange(modelList.map(({ value }) => (value === EMPTY_STRING ? undefined : value)));
-  };
+  const onDelete = useCallback(
+    (id: string) => {
+      const newArray = models.filter(model => model.id !== id);
+      onUpdate(newArray);
+    },
+    [models, onUpdate]
+  );
 
   return (
     <>
@@ -143,13 +145,12 @@ function NumberList({
             labelledbyId={labelledbyId}
             range={numberRange}
             onDelete={onDelete}
-            onFocus={onFocus}
             onChange={onChangeValue}
-            onBlur={() => onBlurFn(model)}
+            onBlur={setTouched}
             autoFocus={models.length !== 1 && arrayIndex === models.length - 1}
           />
-          {showValidation && model.isInvalid && model.errors && model.errors.length > 0 && (
-            <EuiFormErrorText>{model.errors.join('\n')}</EuiFormErrorText>
+          {showValidation && model.isInvalid && model.error && (
+            <EuiFormErrorText>{model.error}</EuiFormErrorText>
           )}
           {models.length - 1 !== arrayIndex && <EuiSpacer size="s" />}
         </Fragment>

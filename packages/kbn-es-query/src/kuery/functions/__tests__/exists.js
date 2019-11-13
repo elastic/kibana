@@ -72,6 +72,21 @@ describe('kuery functions', function () {
         expect(exists.toElasticsearchQuery)
           .withArgs(existsNode, indexPattern).to.throwException(/Exists query does not support scripted fields/);
       });
+
+      it('should use a provided nested context to create a full field name', function () {
+        const expected = {
+          exists: { field: 'nestedField.response' }
+        };
+
+        const existsNode = nodeTypes.function.buildNode('exists', 'response');
+        const result = exists.toElasticsearchQuery(
+          existsNode,
+          indexPattern,
+          {},
+          { nested: { path: 'nestedField' } }
+        );
+        expect(_.isEqual(expected, result)).to.be(true);
+      });
     });
   });
 });

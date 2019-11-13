@@ -17,28 +17,9 @@
  * under the License.
  */
 
-// properties that come from legacyInjectedMetadata.uiSettings.defaults
-interface InjectedUiSettingsDefault {
-  name?: string;
-  value?: any;
-  description?: string;
-  category?: string[];
-  type?: string;
-  readOnly?: boolean;
-  options?: string[] | { [key: string]: any };
-  /**
-   * Whether a change in that setting will only take affect after a page reload.
-   */
-  requiresPageReload?: boolean;
-}
-
-// properties that come from legacyInjectedMetadata.uiSettings.user
-interface InjectedUiSettingsUser {
-  userValue?: any;
-  isOverridden?: boolean;
-}
+import { UiSettingsParams, UserProvidedValues } from 'src/core/server/types';
 
 /** @public */
 export interface UiSettingsState {
-  [key: string]: InjectedUiSettingsDefault & InjectedUiSettingsUser;
+  [key: string]: UiSettingsParams & UserProvidedValues;
 }

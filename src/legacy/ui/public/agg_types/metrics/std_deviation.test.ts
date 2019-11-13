@@ -18,8 +18,8 @@
  */
 
 import { IStdDevAggConfig, stdDeviationMetricAgg } from './std_deviation';
-import { AggConfigs } from 'ui/agg_types';
-import { METRIC_TYPES } from 'ui/agg_types/metrics/metric_agg_types';
+import { AggConfigs } from '../agg_configs';
+import { METRIC_TYPES } from './metric_agg_types';
 
 jest.mock('ui/new_platform');
 

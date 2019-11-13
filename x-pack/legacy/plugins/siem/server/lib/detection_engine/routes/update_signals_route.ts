@@ -8,7 +8,8 @@ import Hapi from 'hapi';
 import Joi from 'joi';
 import { isFunction } from 'lodash/fp';
 import { updateSignal } from '../alerts/update_signals';
-import { SignalsRequest } from '../alerts/types';
+import { UpdateSignalsRequest } from '../alerts/types';
+import { updateSignalSchema } from './schemas';
 
 export const createUpdateSignalsRoute: Hapi.ServerRoute = {
   method: 'PUT',
@@ -26,31 +27,20 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
           otherwise: Joi.string().required(),
         }),
       },
-      payload: Joi.object({
-        description: Joi.string(),
-        enabled: Joi.boolean(),
-        filter: Joi.object(),
-        from: Joi.string(),
-        id: Joi.string(),
-        index: Joi.array(),
-        interval: Joi.string(),
-        kql: Joi.string(),
-        max_signals: Joi.number().default(100),
-        name: Joi.string(),
-        severity: Joi.string(),
-        to: Joi.string(),
-        type: Joi.string().valid('filter', 'kql'),
-        references: Joi.array().default([]),
-      }).nand('filter', 'kql'),
+      payload: updateSignalSchema,
     },
   },
-  async handler(request: SignalsRequest, headers) {
+  async handler(request: UpdateSignalsRequest, headers) {
     const {
       description,
       enabled,
       filter,
-      kql,
       from,
+      query,
+      language,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      saved_id: savedId,
+      filters,
       id,
       index,
       interval,
@@ -58,18 +48,18 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
       max_signals: maxSignals,
       name,
       severity,
+      size,
       to,
       type,
       references,
     } = request.payload;
-    const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
 
+    const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
     const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
 
     if (!alertsClient || !actionsClient) {
       return headers.response().code(404);
     }
-
     return updateSignal({
       alertsClient,
       actionsClient,
@@ -77,13 +67,17 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
       enabled,
       filter,
       from,
+      query,
+      language,
+      savedId,
+      filters,
       id: request.params.id ? request.params.id : id,
       index,
       interval,
-      kql,
       maxSignals,
       name,
       severity,
+      size,
       to,
       type,
       references,

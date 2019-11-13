@@ -23,7 +23,7 @@ import { setBounds } from 'ui/agg_types';
 import { AggConfig, Vis, VisParams, VisState } from 'ui/vis';
 import { isDateHistogramBucketAggConfig } from 'ui/agg_types/buckets/date_histogram';
 import moment from 'moment';
-import { SerializedFieldFormat } from 'src/plugins/expressions/common/expressions/types/common';
+import { SerializedFieldFormat } from 'src/plugins/expressions/public';
 import { SearchSourceContract } from '../../../courier/types';
 import { createFormat } from './utilities';
 

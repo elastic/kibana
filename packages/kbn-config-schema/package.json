@@ -14,7 +14,7 @@
   },
   "peerDependencies": {
     "joi": "^13.5.2",
-    "moment": "^2.20.1",
+    "moment": "^2.24.0",
     "type-detect": "^4.0.8"
   }
 }

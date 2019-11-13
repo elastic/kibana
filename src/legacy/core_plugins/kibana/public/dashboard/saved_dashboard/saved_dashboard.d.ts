@@ -21,7 +21,7 @@ import { SearchSourceContract } from 'ui/courier';
 import { SavedObject } from 'ui/saved_objects/saved_object';
 import { RefreshInterval } from 'src/plugins/data/public';
 import { Query } from 'src/legacy/core_plugins/data/public';
-import { Filter } from '@kbn/es-query';
+import { esFilters } from '../../../../../../plugins/data/public';
 
 export interface SavedObjectDashboard extends SavedObject {
   id?: string;
@@ -40,5 +40,5 @@ export interface SavedObjectDashboard extends SavedObject {
   destroy: () => void;
   refreshInterval?: RefreshInterval;
   getQuery(): Query;
-  getFilters(): Filter[];
+  getFilters(): esFilters.Filter[];
 }

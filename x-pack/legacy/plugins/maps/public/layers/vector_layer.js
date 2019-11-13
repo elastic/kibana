@@ -7,7 +7,7 @@
 import turf from 'turf';
 import React from 'react';
 import { AbstractLayer } from './layer';
-import { VectorStyle } from './styles/vector_style';
+import { VectorStyle } from './styles/vector/vector_style';
 import { InnerJoin } from './joins/inner_join';
 import {
   GEO_JSON_TYPE,
@@ -130,18 +130,6 @@ export class VectorLayer extends AbstractLayer {
     }
 
     return true;
-  }
-
-  getInjectedData() {
-    const featureCollection = super.getInjectedData();
-    if (!featureCollection) {
-      return null;
-    }
-    // Set default visible property on data
-    featureCollection.features.forEach(
-      feature => _.set(feature, `properties.${FEATURE_VISIBLE_PROPERTY_NAME}`, true)
-    );
-    return featureCollection;
   }
 
   getCustomIconAndTooltipContent() {
@@ -510,16 +498,7 @@ export class VectorLayer extends AbstractLayer {
     startLoading, stopLoading, onLoadError, registerCancelCallback, dataFilters
   }) {
 
-    if (this._source.isInjectedData()) {
-      const featureCollection = this.getInjectedData();
-      return {
-        refreshed: false,
-        featureCollection
-      };
-    }
-
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
-
     const searchFilters = this._getSearchFilters(dataFilters);
     const canSkip = await this._canSkipSourceUpdate(this._source, SOURCE_DATA_ID_ORIGIN, searchFilters);
     if (canSkip) {
@@ -594,12 +573,8 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _getSourceFeatureCollection() {
-    if (this._source.isInjectedData()) {
-      return this.getInjectedData();
-    } else {
-      const sourceDataRequest = this.getSourceDataRequest();
-      return sourceDataRequest ? sourceDataRequest.getData() : null;
-    }
+    const sourceDataRequest = this.getSourceDataRequest();
+    return sourceDataRequest ? sourceDataRequest.getData() : null;
   }
 
   _syncFeatureCollectionWithMb(mbMap) {

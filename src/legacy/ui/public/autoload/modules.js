@@ -27,7 +27,6 @@ import '../promises';
 import '../modals';
 import '../state_management/app_state';
 import '../state_management/global_state';
-import '../storage';
 import '../style_compile';
 import '../url';
 import '../directives/watch_multi';

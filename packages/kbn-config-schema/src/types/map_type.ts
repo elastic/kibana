@@ -50,7 +50,7 @@ export class MapOfType<K, V> extends Type<Map<K, V>> {
         return `expected value of type [Map] or [object] but got [${typeDetect(value)}]`;
       case 'map.key':
       case 'map.value':
-        const childPathWithIndex = reason.path.slice();
+        const childPathWithIndex = path.slice();
         childPathWithIndex.splice(
           path.length,
           0,

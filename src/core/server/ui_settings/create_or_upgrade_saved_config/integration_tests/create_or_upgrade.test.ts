@@ -18,28 +18,31 @@
  */
 
 import expect from '@kbn/expect';
-import { UnwrapPromise } from '@kbn/utility-types';
 import { SavedObjectsClientContract } from 'src/core/server';
 
-import KbnServer from '../../../../../legacy/server/kbn_server';
-import { createTestServers } from '../../../../../test_utils/kbn_server';
+import {
+  createTestServers,
+  TestElasticsearchUtils,
+  TestKibanaUtils,
+  TestUtils,
+} from '../../../../../test_utils/kbn_server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 import { loggingServiceMock } from '../../../logging/logging_service.mock';
 
 const logger = loggingServiceMock.create().get();
 describe('createOrUpgradeSavedConfig()', () => {
   let savedObjectsClient: SavedObjectsClientContract;
-  let kbnServer: KbnServer;
-  let servers: ReturnType<typeof createTestServers>;
-  let esServer: UnwrapPromise<ReturnType<typeof servers['startES']>>;
-  let kbn: UnwrapPromise<ReturnType<typeof servers['startKibana']>>;
+  let servers: TestUtils;
+  let esServer: TestElasticsearchUtils;
+  let kbn: TestKibanaUtils;
+
+  let kbnServer: TestKibanaUtils['kbnServer'];
 
   beforeAll(async function() {
     servers = createTestServers({
       adjustTimeout: t => {
         jest.setTimeout(t);
       },
-      settings: {},
     });
     esServer = await servers.startES();
     kbn = await servers.startKibana();
@@ -90,6 +93,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       version: '5.4.0',
       buildNum: 54099,
       log: logger,
+      handleWriteErrors: false,
     });
 
     const config540 = await savedObjectsClient.get('config', '5.4.0');
@@ -116,6 +120,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       version: '5.4.1',
       buildNum: 54199,
       log: logger,
+      handleWriteErrors: false,
     });
 
     const config541 = await savedObjectsClient.get('config', '5.4.1');
@@ -142,6 +147,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       version: '7.0.0-rc1',
       buildNum: 70010,
       log: logger,
+      handleWriteErrors: false,
     });
 
     const config700rc1 = await savedObjectsClient.get('config', '7.0.0-rc1');
@@ -169,6 +175,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       version: '7.0.0',
       buildNum: 70099,
       log: logger,
+      handleWriteErrors: false,
     });
 
     const config700 = await savedObjectsClient.get('config', '7.0.0');
@@ -197,6 +204,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       version: '6.2.3-rc1',
       buildNum: 62310,
       log: logger,
+      handleWriteErrors: false,
     });
 
     const config623rc1 = await savedObjectsClient.get('config', '6.2.3-rc1');

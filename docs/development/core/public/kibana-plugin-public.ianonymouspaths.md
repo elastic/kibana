@@ -16,6 +16,6 @@ export interface IAnonymousPaths
 
 |  Method | Description |
 |  --- | --- |
-|  [isAnonymous(path)](./kibana-plugin-public.ianonymouspaths.isanonymous.md) | Determines whether the provided path doesn't require authentication |
-|  [register(path)](./kibana-plugin-public.ianonymouspaths.register.md) | Register <code>path</code> as not requiring authentication |
+|  [isAnonymous(path)](./kibana-plugin-public.ianonymouspaths.isanonymous.md) | Determines whether the provided path doesn't require authentication. <code>path</code> should include the current basePath. |
+|  [register(path)](./kibana-plugin-public.ianonymouspaths.register.md) | Register <code>path</code> as not requiring authentication. <code>path</code> should not include the current basePath. |
 

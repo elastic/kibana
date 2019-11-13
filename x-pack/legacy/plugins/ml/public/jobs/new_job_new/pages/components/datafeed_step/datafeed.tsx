@@ -37,7 +37,7 @@ export const DatafeedStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =
       {isCurrentStep && (
         <Fragment>
           <EuiFlexGroup gutterSize="xl">
-            <EuiFlexItem>
+            <EuiFlexItem data-test-subj="mlAdvancedDatafeedQueryEditor">
               <QueryInput setIsValidQuery={setIsValidQuery} />
             </EuiFlexItem>
             <EuiFlexItem>

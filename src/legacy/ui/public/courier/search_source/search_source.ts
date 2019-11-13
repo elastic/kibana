@@ -70,14 +70,14 @@
  */
 
 import _ from 'lodash';
-import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
+import { getEsQueryConfig, buildEsQuery } from '@kbn/es-query';
 
 import { npSetup } from 'ui/new_platform';
 import { normalizeSortRequest } from './normalize_sort_request';
 
 import { fetchSoon } from '../fetch';
 import { fieldWildcardFilter } from '../../field_wildcard';
-import { getHighlightRequest } from '../../../../../plugins/data/common/field_formats';
+import { getHighlightRequest } from '../../../../../plugins/data/public';
 import chrome from '../../chrome';
 import { RequestFailure } from '../fetch/errors';
 import { filterDocvalueFields } from './filter_docvalue_fields';
