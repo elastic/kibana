@@ -21,7 +21,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
-import { Role } from '../../../../../common/model/role';
+import { Role } from '../../../../../common/model';
 import { isRoleEnabled, isReadOnlyRole, isReservedRole } from '../../../../lib/role_utils';
 import { RolesApi } from '../../../../lib/roles_api';
 import { ConfirmDelete } from './confirm_delete';
