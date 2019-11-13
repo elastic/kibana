@@ -9,6 +9,14 @@ Since there is no UI yet and a lot of backend areas that are not created, you
 should install the kbn-action and kbn-alert project from here:
 https://github.com/pmuellr/kbn-action
 
+The scripts rely on CURL and jq, ensure both of these are installed:
+
+```sh
+brew update
+brew install curl
+brew install jq
+```
+
 Open up your .zshrc/.bashrc and add these lines with the variables filled in:
 ```
 export ELASTICSEARCH_USERNAME=${user}
