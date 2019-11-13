@@ -18,6 +18,7 @@
  */
 import { CoreSetup, Plugin } from 'src/core/server';
 import { TutorialsRegistry, TutorialsRegistrySetup, TutorialsRegistryStart } from './services';
+
 export class HomePlugin implements Plugin<TutorialsRegistrySetup, TutorialsRegistryStart> {
   private readonly tutorialsRegistry = new TutorialsRegistry();
 
