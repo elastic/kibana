@@ -9,7 +9,7 @@ import { takeUntil, tap } from 'rxjs/operators';
 
 import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
 
-import { ILicense, LicensingPluginSetup } from '../server/types';
+import { ILicense, LicensingPluginSetup } from '../common/types';
 import { createLicenseUpdate } from '../common/license_update';
 import { License } from '../common/license';
 

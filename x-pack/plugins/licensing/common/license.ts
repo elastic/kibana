@@ -12,7 +12,7 @@ import {
   LICENSE_CHECK_STATE,
   LICENSE_TYPE,
   PublicLicense,
-} from '../server/types';
+} from './types';
 
 /**
  * @public

@@ -18,16 +18,13 @@ import {
   IClusterClient,
 } from 'src/core/server';
 
-import { ILicense, RawLicense, PublicLicense, LicensingPluginSetup } from './types';
+import { ILicense, LicensingPluginSetup, PublicLicense } from '../common/types';
 import { License } from '../common/license';
 import { createLicenseUpdate } from '../common/license_update';
 
+import { ElasticsearchError, RawLicense } from './types';
 import { LicenseConfigType } from './licensing_config';
 import { createRouteHandlerContext } from './licensing_route_handler_context';
-
-export interface ElasticsearchError extends Error {
-  status?: number;
-}
 
 function normalizeServerLicense(license: RawLicense): PublicLicense['license'] {
   return {

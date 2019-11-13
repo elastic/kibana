@@ -6,7 +6,7 @@
 
 import { take } from 'rxjs/operators';
 
-import { LicenseType } from '../server/types';
+import { LicenseType } from '../common/types';
 import { LicensingPlugin, licensingSessionStorageKey } from './plugin';
 
 import { License } from '../common/license';

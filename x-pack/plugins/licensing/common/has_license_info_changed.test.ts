@@ -5,7 +5,7 @@
  */
 
 import { License } from './license';
-import { PublicLicense } from '../server/types';
+import { PublicLicense } from './types';
 import { hasLicenseInfoChanged } from './has_license_info_changed';
 
 function license({ error, ...customLicense }: { error?: string; [key: string]: any } = {}) {

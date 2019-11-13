@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILicense } from '../server/types';
+import { ILicense } from './types';
 
 /**
  * Check if 2 potential license instances have changes between them

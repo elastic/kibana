@@ -9,5 +9,5 @@ import { LicensingPlugin } from './plugin';
 
 export const plugin = (context: PluginInitializerContext) => new LicensingPlugin(context);
 
-export * from './types';
+export * from '../common/types';
 export { config } from './licensing_config';

@@ -6,8 +6,9 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { take, toArray } from 'rxjs/operators';
-import { RawLicense, LicenseType } from './types';
-import { LicensingPlugin, ElasticsearchError } from './plugin';
+import { LicenseType } from '../common/types';
+import { ElasticsearchError, RawLicense } from './types';
+import { LicensingPlugin } from './plugin';
 import {
   coreMock,
   elasticsearchServiceMock,

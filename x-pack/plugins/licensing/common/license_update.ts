@@ -7,7 +7,7 @@ import { ConnectableObservable, Observable, from, merge } from 'rxjs';
 
 import { filter, map, pairwise, switchMap, publishReplay } from 'rxjs/operators';
 import { hasLicenseInfoChanged } from './has_license_info_changed';
-import { ILicense } from '../server/types';
+import { ILicense } from './types';
 
 export function createLicenseUpdate(
   trigger$: Observable<unknown>,

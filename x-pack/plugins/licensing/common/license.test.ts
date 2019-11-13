@@ -5,7 +5,7 @@
  */
 
 import { License } from './license';
-import { LICENSE_CHECK_STATE } from '../server/types';
+import { LICENSE_CHECK_STATE } from './types';
 import { licenseMock } from './license.mock';
 
 describe('License', () => {
