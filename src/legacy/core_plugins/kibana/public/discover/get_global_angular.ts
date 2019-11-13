@@ -46,16 +46,14 @@ export async function getGlobalAngular(): Promise<AngularGlobalInjectedDependenc
   const getUnhashableStates = Private(getUnhashableStatesProvider);
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
   const State = Private(StateProvider);
+  const SavedSearch = createSavedSearchFactory(Private);
+  const service = createSavedSearchesService(Private, SavedSearch, kbnUrl, chromeLegacy);
 
   return {
     getSavedSearchById: async (id: string) => {
-      const SavedSearch = createSavedSearchFactory(Private);
-      const service = createSavedSearchesService(Private, SavedSearch, kbnUrl, chromeLegacy);
       return service.get(id);
     },
     getSavedSearchUrlById: async (id: string) => {
-      const SavedSearch = createSavedSearchFactory(Private);
-      const service = createSavedSearchesService(Private, SavedSearch, kbnUrl, chromeLegacy);
       return service.urlFor(id);
     },
     getUnhashableStates,

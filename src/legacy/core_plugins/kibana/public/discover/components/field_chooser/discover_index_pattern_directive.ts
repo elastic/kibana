@@ -17,17 +17,15 @@
  * under the License.
  */
 // @ts-ignore
-import { getAngularModule, getServices } from '../../kibana_services';
+import { getServices } from '../../kibana_services';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 
 const { wrapInI18nContext } = getServices();
 
-const app = getAngularModule();
-
-app.directive('discoverIndexPatternSelect', function(reactDirective: any) {
+export function createIndexPatternSelectDirective(reactDirective: any) {
   return reactDirective(wrapInI18nContext(DiscoverIndexPattern), [
     ['indexPatternList', { watchDepth: 'reference' }],
     ['selectedIndexPattern', { watchDepth: 'reference' }],
     ['setIndexPattern', { watchDepth: 'reference' }],
   ]);
-});
+}

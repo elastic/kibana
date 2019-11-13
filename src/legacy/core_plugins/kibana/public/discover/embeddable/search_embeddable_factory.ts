@@ -38,8 +38,12 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
 > {
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private $injector: IInjector | null;
+  private getInjector: () => Promise<IInjector> | null;
 
-  constructor(private readonly executeTriggerActions: TExecuteTriggerActions, $injector: any) {
+  constructor(
+    private readonly executeTriggerActions: TExecuteTriggerActions,
+    getInjector: () => Promise<IInjector>
+  ) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('kbn.discover.savedSearch.savedObjectName', {
@@ -49,7 +53,8 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
         getIconForSavedObject: () => 'search',
       },
     });
-    this.$injector = $injector;
+    this.$injector = null;
+    this.getInjector = getInjector;
   }
 
   public isEditable() {
@@ -71,6 +76,9 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
     input: Partial<SearchInput> & { id: string; timeRange: TimeRange },
     parent?: Container
   ): Promise<SearchEmbeddable | ErrorEmbeddable> {
+    if (!this.$injector) {
+      this.$injector = await this.getInjector();
+    }
     const $injector = this.$injector as IInjector;
 
     const $compile = $injector.get<ng.ICompileService>('$compile');

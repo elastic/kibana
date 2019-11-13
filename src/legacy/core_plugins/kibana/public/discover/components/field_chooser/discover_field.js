@@ -20,15 +20,15 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { getAngularModule, getServices } from '../../kibana_services';
+import {  getServices } from '../../kibana_services';
 import html from './discover_field.html';
 import 'ui/directives/css_truncate';
 import 'ui/directives/field_name';
 import './string_progress_bar';
 import detailsHtml from './lib/detail_views/string.html';
-const app = getAngularModule();
 
-app.directive('discoverField', function ($compile) {
+
+export function createDiscoverFieldDirective($compile) {
   return {
     restrict: 'E',
     template: html,
@@ -134,4 +134,5 @@ app.directive('discoverField', function ($compile) {
       init();
     }
   };
-});
+}
+

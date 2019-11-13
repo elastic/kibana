@@ -29,14 +29,14 @@ export const plugin: PluginInitializer<DiscoverSetup, DiscoverStart> = (
 ) => {
   return new DiscoverPlugin(initializerContext);
 };
-
-const pluginInstance = plugin({} as PluginInitializerContext);
+// export is needed for legacy tests to work (to bootstrap angular)
+export const pluginInstance = plugin({} as PluginInitializerContext);
 (async () => {
-  await pluginInstance.setup(npSetup.core, {
+  pluginInstance.setup(npSetup.core, {
     ...npSetup.plugins,
     ...{ localApplicationService },
   });
-  await pluginInstance.start(npStart.core, { ...npStart.plugins, ...{ navigation } });
+  pluginInstance.start(npStart.core, { ...npStart.plugins, ...{ navigation } });
 })();
 
 SavedObjectRegistryProvider.register((savedSearches: any) => {

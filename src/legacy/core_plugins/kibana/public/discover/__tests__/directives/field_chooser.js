@@ -23,8 +23,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import $ from 'jquery';
-import 'plugins/kibana/discover/index';
-import 'plugins/kibana/discover/angular';
+import { pluginInstance } from 'plugins/kibana/discover/index';
 import FixturesHitsProvider from 'fixtures/hits';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { SimpleSavedObject } from '../../../../../../../core/public';
@@ -71,6 +70,7 @@ describe('discover field chooser directives', function () {
       on-remove-field="removeField"
     ></disc-field-chooser>
   `);
+  beforeEach(() => pluginInstance.bootstrapInnerAngular());
 
   beforeEach(ngMock.module('app/discover', ($provide) => {
     $provide.decorator('config', ($delegate) => {

@@ -17,19 +17,17 @@
  * under the License.
  */
 import React from 'react';
-import { getAngularModule, getServices } from '../../kibana_services';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiProgress,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText, EuiToolTip } from '@elastic/eui';
+import { getServices } from '../../kibana_services';
 
 const { wrapInI18nContext } = getServices();
-const module = getAngularModule();
 
-function StringFieldProgressBar(props) {
+interface Props {
+  percent: number;
+  count: number;
+}
+
+function StringFieldProgressBar(props: Props) {
   return (
     <EuiToolTip
       anchorClassName="dscProgressBarTooltip__anchor"
@@ -37,9 +35,7 @@ function StringFieldProgressBar(props) {
       delay="regular"
       position="right"
     >
-      <EuiFlexGroup
-        alignItems="center"
-      >
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <EuiProgress
             value={props.percent}
@@ -50,17 +46,13 @@ function StringFieldProgressBar(props) {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText
-            size="xs"
-          >
-            {props.percent}%
-          </EuiText>
+          <EuiText size="xs">{props.percent}%</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiToolTip>
   );
 }
 
-module.directive('stringFieldProgressBar', function (reactDirective) {
+export function createStringFieldProgressBarDirective(reactDirective: any) {
   return reactDirective(wrapInI18nContext(StringFieldProgressBar));
-});
+}

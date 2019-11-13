@@ -50,9 +50,15 @@ interface DiscoverStartPlugins {
   embeddable: EmbeddableStart;
   navigation: NavigationStart;
 }
+const innerAngularName = 'app/discover';
 
 export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
-  private innerAngular: any;
+  private globalAngularBootstrapped: boolean = false;
+  private innerAngularBootstrapped: boolean = false;
+  /**
+   * why is this public? it's still needed for some tests, remove once all is jest
+   */
+  public bootstrapInnerAngular?: () => void;
   constructor(initializerContext: PluginInitializerContext) {}
   setup(core: CoreSetup, plugins: DiscoverSetupPlugins): DiscoverSetup {
     registerFeature();
@@ -62,39 +68,56 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
       order: -1004,
       euiIconType: 'discoverApp',
       mount: async (context, params) => {
+        await this.bootstrapGlobalAngular();
+        if (!this.bootstrapInnerAngular) {
+          // TODO to be improved
+          throw Error('Discover plugin bootstrapInnerAngular is undefined');
+        }
+        if (!this.innerAngularBootstrapped) {
+          await this.bootstrapInnerAngular();
+        }
         const { renderApp } = await import('./render_app');
-        return renderApp(params.element, params.appBasePath);
+        return renderApp(innerAngularName, params.element);
       },
     });
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
-    this.bootstrapAngular(core, plugins);
+    this.bootstrapInnerAngular = async () => {
+      // this is used by application mount and tests
+      // don't add 'bootstrapGlobalAngular' here, or mocha tests will fail
+      if (!this.innerAngularBootstrapped) {
+        getAngularModule(innerAngularName, core, plugins);
+        this.innerAngularBootstrapped = true;
+      }
+    };
     this.registerEmbeddable(core, plugins);
   }
 
-  stop() {}
-
-  private async bootstrapAngular(core: CoreStart, plugins: DiscoverStartPlugins) {
-    if (!this.innerAngular) {
-      const innerAngular = getAngularModule(core, plugins);
+  private async bootstrapGlobalAngular() {
+    if (!this.globalAngularBootstrapped) {
       const angularDeps = await getGlobalAngular();
       setServices(angularDeps);
-      this.innerAngular = innerAngular;
+      this.globalAngularBootstrapped = true;
     }
+    return true;
   }
 
   private async registerEmbeddable(core: CoreStart, plugins: DiscoverStartPlugins) {
-    const name = 'app/discoverEmbeddable';
-    getAngularModuleEmbeddable(name, core, plugins);
     const { SearchEmbeddableFactory } = await import('./embeddable');
+    // bootstrap inner Angular for embeddable, return injector
+    const getInjector = async () => {
+      await this.bootstrapGlobalAngular();
+      const name = 'app/discoverEmbeddable';
+      getAngularModuleEmbeddable(name, core, plugins);
+      const mountpoint = document.createElement('div');
+      return angular.bootstrap(mountpoint, [name]);
+    };
 
-    const mountpoint = document.createElement('div');
-    // eslint-disable-next-line
-    mountpoint.innerHTML = '<div></div>';
-    const injector = angular.bootstrap(mountpoint, [name]);
-
-    const factory = new SearchEmbeddableFactory(plugins.uiActions.executeTriggerActions, injector);
+    const factory = new SearchEmbeddableFactory(
+      plugins.uiActions.executeTriggerActions,
+      getInjector
+    );
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 }

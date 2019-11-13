@@ -18,19 +18,17 @@
  */
 
 import angular from 'angular';
-import { mainTemplate, moduleName } from './get_inner_angular';
 
-export async function renderApp(element: HTMLElement, appBasePath: string) {
+export async function renderApp(moduleName: string, element: HTMLElement) {
   require('./angular');
-  const $injector = mountDiscoverApp(appBasePath, element);
+  const $injector = mountDiscoverApp(moduleName, element);
   return () => $injector.get('$rootScope').$destroy();
 }
 
-function mountDiscoverApp(appBasePath: string, element: HTMLElement) {
-  const mountpoint = document.createElement('div');
-  mountpoint.setAttribute('style', 'height: 100%');
+function mountDiscoverApp(moduleName: string, element: HTMLElement) {
+  const mountpoint = document.createElement('span');
   // eslint-disable-next-line
-  mountpoint.innerHTML = mainTemplate(appBasePath);
+  mountpoint.innerHTML = `<span ng-view></span>`;
   // bootstrap angular into detached element and attach it later to
   // make angular-within-angular possible
   const $injector = angular.bootstrap(mountpoint, [moduleName]);

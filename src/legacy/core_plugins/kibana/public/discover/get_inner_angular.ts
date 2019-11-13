@@ -89,6 +89,15 @@ import { createTableRowDirective } from './angular/doc_table/components/table_ro
 import { createPagerFactory } from './angular/doc_table/lib/pager/pager_factory';
 import { createInfiniteScrollDirective } from './angular/doc_table/infinite_scroll';
 import { createDocViewerDirective } from './angular/doc_viewer';
+import { createFieldSearchDirective } from './components/field_chooser/discover_field_search_directive';
+import { createIndexPatternSelectDirective } from './components/field_chooser/discover_index_pattern_directive';
+import { createStringFieldProgressBarDirective } from './components/field_chooser/string_progress_bar';
+// @ts-ignore
+import { createFieldChooserDirective } from './components/field_chooser/field_chooser';
+// import { createFetchErrorDirective } from './components/fetch_error/fetch_error';
+
+// @ts-ignore
+import { createDiscoverFieldDirective } from './components/field_chooser/discover_field';
 
 const thirdPartyAngularDependencies = [
   'ngSanitize',
@@ -98,10 +107,8 @@ const thirdPartyAngularDependencies = [
   'elasticsearch',
 ];
 
-export const moduleName = 'app/discover';
-
-export function getAngularModule(core: CoreStart, deps: any) {
-  const discoverUiModule = getInnerAngular('app/discover', core, deps.navigation);
+export function getAngularModule(name = 'app/discover', core: CoreStart, deps: any) {
+  const discoverUiModule = getInnerAngular(name, core, deps.navigation);
   configureAppAngularModule(discoverUiModule, core as LegacyCoreStart, true);
   setAngularModule(discoverUiModule);
 }
@@ -110,12 +117,6 @@ export function getAngularModuleEmbeddable(name: string, core: CoreStart, deps: 
   const discoverUiModule = getInnerAngular(name, core, deps.navigation, true);
   configureAppAngularModule(discoverUiModule, core as LegacyCoreStart, true);
 }
-
-export const mainTemplate = (basePath: string) => `<div style="height: 100%">
-  <base href="${basePath}" />
-  <div ng-view style="height: 100%; display:flex; justify-content: center;"></div>
-</div>
-`;
 
 let initialized = false;
 
@@ -165,6 +166,7 @@ export function getInnerAngular(
   return angular
     .module(name, [
       ...thirdPartyAngularDependencies,
+      'discoverConfig',
       'discoverI18n',
       'discoverPrivate',
       'discoverPersistedState',
@@ -190,6 +192,11 @@ export function getInnerAngular(
     .directive('applyFiltersPopover', createApplyFiltersPopoverDirective)
     .directive('applyFiltersPopoverHelper', createApplyFiltersPopoverHelper)
     .directive('renderComplete', createRenderCompleteDirective)
+    .directive('discoverFieldSearch', createFieldSearchDirective)
+    .directive('discoverIndexPatternSelect', createIndexPatternSelectDirective)
+    .directive('stringFieldProgressBar', createStringFieldProgressBarDirective)
+    .directive('discoverField', createDiscoverFieldDirective)
+    .directive('discFieldChooser', createFieldChooserDirective)
     .service('debounce', ['$timeout', DebounceProviderTimeout])
     .service('queryFilter', function(Private: any) {
       return Private(FilterBarQueryFilterProvider);
