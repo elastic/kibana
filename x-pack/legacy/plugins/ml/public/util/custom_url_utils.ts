@@ -129,21 +129,22 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
     encodeURIComponent
   );
 
-  const replaceSingleTokenValues = (str: string) =>
-    str.replace(/\$([^?&$\'"]+)\$/g, (match, name: string) => {
+  const replaceSingleTokenValues = (str: string) => {
+    const getResultTokenValue: GetResultTokenValue = flow(
+      // Special characters inside of the filter should not be escaped for Lucene query language.
+      isLuceneQueryLanguage ? <T>(v: T) => v : queryLanguageEscapeCallback,
+      commonEscapeCallback
+    );
+
+    return str.replace(/\$([^?&$\'"]+)\$/g, (match, name: string) => {
       // Use lodash get to allow nested JSON fields to be retrieved.
       let tokenValue: string | string[] | undefined = get(record, name);
       tokenValue = Array.isArray(tokenValue) ? tokenValue[0] : tokenValue;
 
-      const getResultTokenValue: GetResultTokenValue = flow(
-        // Special characters inside of the filter should not be escaped for Lucene query language.
-        isLuceneQueryLanguage ? <T>(v: T) => v : queryLanguageEscapeCallback,
-        commonEscapeCallback
-      );
-
       // If property not found string is not replaced.
       return tokenValue === undefined ? match : getResultTokenValue(tokenValue);
     });
+  };
 
   return flow(
     (str: string) => str.replace('$earliest$', record.earliest).replace('$latest$', record.latest),
