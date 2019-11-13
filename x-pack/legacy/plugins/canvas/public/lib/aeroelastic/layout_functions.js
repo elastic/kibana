@@ -62,17 +62,46 @@ const resizeVertexTuples = [
 ];
 
 const connectorVertices = [
-  [[-1, -1], [0, -1]],
-  [[0, -1], [1, -1]],
-  [[1, -1], [1, 0]],
-  [[1, 0], [1, 1]],
-  [[1, 1], [0, 1]],
-  [[0, 1], [-1, 1]],
-  [[-1, 1], [-1, 0]],
-  [[-1, 0], [-1, -1]],
+  [
+    [-1, -1],
+    [0, -1],
+  ],
+  [
+    [0, -1],
+    [1, -1],
+  ],
+  [
+    [1, -1],
+    [1, 0],
+  ],
+  [
+    [1, 0],
+    [1, 1],
+  ],
+  [
+    [1, 1],
+    [0, 1],
+  ],
+  [
+    [0, 1],
+    [-1, 1],
+  ],
+  [
+    [-1, 1],
+    [-1, 0],
+  ],
+  [
+    [-1, 0],
+    [-1, -1],
+  ],
 ];
 
-const cornerVertices = [[-1, -1], [1, -1], [-1, 1], [1, 1]];
+const cornerVertices = [
+  [-1, -1],
+  [1, -1],
+  [-1, 1],
+  [1, 1],
+];
 
 const resizeMultiplierHorizontal = { left: -1, center: 0, right: 1 };
 const resizeMultiplierVertical = { top: -1, center: 0, bottom: 1 };
@@ -91,7 +120,10 @@ const bidirectionalCursors = {
   '315': 'nwse-resize',
 };
 
-const identityAABB = () => [[Infinity, Infinity], [-Infinity, -Infinity]];
+const identityAABB = () => [
+  [Infinity, Infinity],
+  [-Infinity, -Infinity],
+];
 
 const extend = ([[xMin, yMin], [xMax, yMax]], [x0, y0], [x1, y1]) => [
   [Math.min(xMin, x0, x1), Math.min(yMin, y0, y1)],
@@ -547,14 +579,18 @@ export const applyLocalTransforms = (shapes, transformIntents) => {
 // eslint-disable-next-line
 const getUpstreamTransforms = (shapes, shape) =>
   shape.parent
-    ? getUpstreamTransforms(shapes, shapes.find(s => s.id === shape.parent)).concat([
-        shape.localTransformMatrix,
-      ])
+    ? getUpstreamTransforms(
+        shapes,
+        shapes.find(s => s.id === shape.parent)
+      ).concat([shape.localTransformMatrix])
     : [shape.localTransformMatrix];
 
 const getUpstreams = (shapes, shape) =>
   shape.parent
-    ? getUpstreams(shapes, shapes.find(s => s.id === shape.parent)).concat([shape])
+    ? getUpstreams(
+        shapes,
+        shapes.find(s => s.id === shape.parent)
+      ).concat([shape])
     : [shape];
 
 const snappedA = shape => shape.a + (shape.snapResizeVector ? shape.snapResizeVector[0] : 0);
@@ -877,7 +913,12 @@ function resizeAnnotation(config, shapes, selectedShapes, shape) {
   const b = snappedB(properShape);
   const allowResize =
     properShape.type !== 'group' ||
-    (config.groupResize && magic(config, properShape, shapes.filter(s => s.type !== 'annotation')));
+    (config.groupResize &&
+      magic(
+        config,
+        properShape,
+        shapes.filter(s => s.type !== 'annotation')
+      ));
   const resizeVertices = allowResize ? resizeVertexTuples : [];
   const resizePoints = resizeVertices.map(resizePointAnnotations(config, shape, a, b));
   const connectors = connectorVertices.map(resizeEdgeAnnotations(config, shape, a, b));
@@ -1235,7 +1276,10 @@ export const getGrouping = (config, shapes, selectedShapes, groupAction, tuple) 
     return config.groupResize
       ? {
           shapes: [
-            ...resizeGroup(shapes.filter(s => s.type !== 'annotation'), elements[0]),
+            ...resizeGroup(
+              shapes.filter(s => s.type !== 'annotation'),
+              elements[0]
+            ),
             ...shapes.filter(s => s.type === 'annotation'),
           ],
           selectedShapes,
