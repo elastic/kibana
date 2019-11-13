@@ -13,6 +13,7 @@ import {
 } from '../../../lib/adapters/framework';
 import { InfraSourceConfiguration } from '../../../lib/sources';
 import { findInventoryFields } from '../../../../common/inventory_models';
+import { InventoryItemType } from '../../../../common/inventory_models/types';
 
 export interface InfraMetricsAdapterResponse {
   id: string;
@@ -25,7 +26,7 @@ export const getMetricMetadata = async (
   req: InfraFrameworkRequest,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
-  nodeType: 'host' | 'pod' | 'container'
+  nodeType: InventoryItemType
 ): Promise<InfraMetricsAdapterResponse> => {
   const fields = findInventoryFields(nodeType, sourceConfiguration.fields);
   const metricQuery = {

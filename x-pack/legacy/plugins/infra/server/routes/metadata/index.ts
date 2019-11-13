@@ -74,6 +74,9 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
           fold(throwErrors(Boom.badImplementation), identity)
         );
       } catch (error) {
+        if (error.isBoom) {
+          throw error;
+        }
         throw boomify(error);
       }
     },

@@ -10,13 +10,14 @@ import {
 } from '../../../lib/adapters/framework';
 import { InfraSourceConfiguration } from '../../../lib/sources';
 import { findInventoryFields } from '../../../../common/inventory_models';
+import { InventoryItemType } from '../../../../common/inventory_models/types';
 
 export const hasAPMData = async (
   framework: InfraBackendFrameworkAdapter,
   req: InfraFrameworkRequest,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
-  nodeType: 'host' | 'pod' | 'container'
+  nodeType: InventoryItemType
 ) => {
   const config = framework.config(req);
   const apmIndex = config.get('apm_oss.transactionIndices') || 'apm-*';
