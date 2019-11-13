@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import createContainer from 'constate-latest';
+import createContainer from 'constate';
 import React, { useContext, useState, useMemo, useCallback } from 'react';
 import { isNumber } from 'lodash';
 import moment from 'moment';

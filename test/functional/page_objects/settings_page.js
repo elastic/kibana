@@ -239,8 +239,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async setScriptedFieldLanguageFilter(language) {
       await find.clickByCssSelector(
         'select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[label="' +
-            language +
-            '"]'
+        language +
+        '"]'
       );
     }
 
@@ -287,9 +287,14 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await indexLink.click();
     }
 
+    async getIndexPatternList() {
+      await testSubjects.existOrFail('indexPatternTable', { timeout: 5000 });
+      return await find.allByCssSelector('[data-test-subj="indexPatternTable"] .euiTable a');
+    }
+
     async isIndexPatternListEmpty() {
       await testSubjects.existOrFail('indexPatternTable', { timeout: 5000 });
-      const indexPatternList = await find.allByCssSelector('[data-test-subj="indexPatternTable"] .euiTable a');
+      const indexPatternList = await this.getIndexPatternList();
       return indexPatternList.length === 0;
     }
 
@@ -300,13 +305,16 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async createIndexPattern(indexPatternName, timefield = '@timestamp') {
+    async createIndexPattern(indexPatternName, timefield = '@timestamp', isStandardIndexPattern = true) {
       await retry.try(async () => {
         await this.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickKibanaIndexPatterns();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickOptionalAddNewButton();
+        if (!isStandardIndexPattern) {
+          await this.clickCreateNewRollupButton();
+        }
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async () => {
           await this.setIndexPatternField({ indexPatternName });
@@ -338,6 +346,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       if (await testSubjects.isDisplayed('createIndexPatternButton')) {
         await testSubjects.click('createIndexPatternButton');
       }
+    }
+
+    async clickCreateNewRollupButton() {
+      await testSubjects.click('createRollupIndexPatternButton');
     }
 
     async getIndexPatternIdFromUrl() {
@@ -593,6 +605,26 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
       // Wait for all the saves to happen
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async checkImportSucceeded() {
+      await testSubjects.existOrFail('importSavedObjectsSuccess', { timeout: 20000 });
+    }
+
+    async checkNoneImported() {
+      await testSubjects.existOrFail('importSavedObjectsSuccessNoneImported', { timeout: 20000 });
+    }
+
+    async checkImportConflictsWarning() {
+      await testSubjects.existOrFail('importSavedObjectsConflictsWarning', { timeout: 20000 });
+    }
+
+    async checkImportLegacyWarning() {
+      await testSubjects.existOrFail('importSavedObjectsLegacyWarning', { timeout: 20000 });
+    }
+
+    async checkImportFailedWarning() {
+      await testSubjects.existOrFail('importSavedObjectsFailedWarning', { timeout: 20000 });
     }
 
     async clickImportDone() {

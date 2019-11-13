@@ -5,59 +5,41 @@
  */
 
 import Hapi from 'hapi';
-import Joi from 'joi';
 import { isFunction } from 'lodash/fp';
 import { findSignals } from '../alerts/find_signals';
+import { FindSignalsRequest } from '../alerts/types';
+import { findSignalsSchema } from './schemas';
 
-interface FindSignalsRequest extends Omit<Hapi.Request, 'query'> {
-  query: {
-    per_page: number;
-    page: number;
-    search?: string;
-    sort_field?: string;
-    fields?: string[];
-  };
-}
+export const createFindSignalRoute: Hapi.ServerRoute = {
+  method: 'GET',
+  path: '/api/siem/signals/_find',
+  options: {
+    tags: ['access:signals-all'],
+    validate: {
+      options: {
+        abortEarly: false,
+      },
+      query: findSignalsSchema,
+    },
+  },
+  async handler(request: FindSignalsRequest, headers) {
+    const { query } = request;
+    const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
+    const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
+
+    if (!alertsClient || !actionsClient) {
+      return headers.response().code(404);
+    }
+
+    return findSignals({
+      alertsClient,
+      perPage: query.per_page,
+      page: query.page,
+      sortField: query.sort_field,
+    });
+  },
+};
 
 export const findSignalsRoute = (server: Hapi.Server) => {
-  server.route({
-    method: 'GET',
-    path: '/api/siem/signals/_find',
-    options: {
-      tags: ['access:signals-all'],
-      validate: {
-        options: {
-          abortEarly: false,
-        },
-        query: Joi.object()
-          .keys({
-            per_page: Joi.number()
-              .min(0)
-              .default(20),
-            page: Joi.number()
-              .min(1)
-              .default(1),
-            sort_field: Joi.string(),
-            fields: Joi.array()
-              .items(Joi.string())
-              .single(),
-          })
-          .default(),
-      },
-    },
-    async handler(request: FindSignalsRequest, headers) {
-      const { query } = request;
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      if (alertsClient == null) {
-        return headers.response().code(404);
-      }
-
-      return findSignals({
-        alertsClient,
-        perPage: query.per_page,
-        page: query.page,
-        sortField: query.sort_field,
-      });
-    },
-  });
+  server.route(createFindSignalRoute);
 };

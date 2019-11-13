@@ -11,6 +11,7 @@ import { QueryString } from 'ui/utils/query_string';
 import { addEntitiesToKql } from './add_entities_to_kql';
 import { replaceKQLParts } from './replace_kql_parts';
 import { emptyEntity, getMultipleEntities, multipleEntities } from './entity_helpers';
+import { SiemPageName } from '../../../pages/home/types';
 
 interface QueryStringType {
   '?_g': string;
@@ -34,7 +35,7 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
           queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
         }
         const reEncoded = QueryString.encode(queryStringDecoded);
-        return <Redirect to={`/network?${reEncoded}`} />;
+        return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
       }}
     />
     <Route
@@ -53,7 +54,7 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
         }
         if (emptyEntity(ip)) {
           const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/network?${reEncoded}`} />;
+          return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
         } else if (multipleEntities(ip)) {
           const ips: string[] = getMultipleEntities(ip);
           queryStringDecoded.query = addEntitiesToKql(
@@ -62,10 +63,10 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
             queryStringDecoded.query || ''
           );
           const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/network?${reEncoded}`} />;
+          return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
         } else {
           const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/network/ip/${ip}?${reEncoded}`} />;
+          return <Redirect to={`/${SiemPageName.network}/ip/${ip}?${reEncoded}`} />;
         }
       }}
     />

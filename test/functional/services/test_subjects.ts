@@ -27,8 +27,9 @@ interface ExistsOptions {
   allowHidden?: boolean;
 }
 
-interface ClearOptions {
-  withKeyboard: boolean;
+interface SetValueOptions {
+  clearWithKeyboard?: boolean;
+  typeCharByChar?: boolean;
 }
 
 export function TestSubjectsProvider({ getService }: FtrProviderContext) {
@@ -179,21 +180,22 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
     public async setValue(
       selector: string,
       text: string,
-      options: ClearOptions = { withKeyboard: false }
+      options: SetValueOptions = {}
     ): Promise<void> {
       return await retry.try(async () => {
+        const { clearWithKeyboard = false, typeCharByChar = false } = options;
         log.debug(`TestSubjects.setValue(${selector}, ${text})`);
         await this.click(selector);
         // in case the input element is actually a child of the testSubject, we
         // call clearValue() and type() on the element that is focused after
         // clicking on the testSubject
         const input = await find.activeElement();
-        if (options.withKeyboard === true) {
+        if (clearWithKeyboard === true) {
           await input.clearValueWithKeyboard();
         } else {
           await input.clearValue();
         }
-        await input.type(text);
+        await input.type(text, { charByChar: typeCharByChar });
       });
     }
 

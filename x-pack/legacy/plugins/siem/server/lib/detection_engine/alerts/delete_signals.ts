@@ -6,13 +6,8 @@
 
 import { AlertAction } from '../../../../../alerting/server/types';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
-import { AlertsClient } from '../../../../../alerting/server/alerts_client';
-
-export interface DeleteSignalParams {
-  alertsClient: AlertsClient;
-  actionsClient: ActionsClient;
-  id: string;
-}
+import { readSignals } from './read_signals';
+import { DeleteSignalParams } from './types';
 
 export const deleteAllSignalActions = async (
   actionsClient: ActionsClient,
@@ -27,14 +22,14 @@ export const deleteAllSignalActions = async (
 };
 
 export const deleteSignals = async ({ alertsClient, actionsClient, id }: DeleteSignalParams) => {
-  const alert = await alertsClient.get({ id });
+  const signal = await readSignals({ alertsClient, id });
 
   // TODO: Remove this as cast as soon as signal.actions TypeScript bug is fixed
   // where it is trying to return AlertAction[] or RawAlertAction[]
-  const actions = (alert.actions as (AlertAction[] | undefined)) || [];
+  const actions = (signal.actions as (AlertAction[] | undefined)) || [];
 
   const actionsErrors = await deleteAllSignalActions(actionsClient, actions);
-  const deletedAlert = await alertsClient.delete({ id });
+  const deletedAlert = await alertsClient.delete({ id: signal.id });
   if (actionsErrors != null) {
     throw actionsErrors;
   } else {

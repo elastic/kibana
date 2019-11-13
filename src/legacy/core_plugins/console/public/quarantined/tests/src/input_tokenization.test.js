@@ -21,7 +21,7 @@ import './setup_mocks';
 import ace from 'brace';
 import 'brace/mode/json';
 import $ from 'jquery';
-import { initializeInput } from '../../src/input';
+import { initializeEditor } from '../../src/input';
 
 const tokenIterator = ace.acequire('ace/token_iterator');
 
@@ -36,20 +36,14 @@ describe('Input Tokenization', () => {
         <div id="ConCopyAsCurl" />
       </div>`;
 
-    input = initializeInput(
+    input = initializeEditor(
       $('#ConAppEditor'),
       $('#ConAppEditorActions'),
-      {},
-      { applyCurrentSettings: () => {} },
-      null
     );
 
-    input = initializeInput(
+    input = initializeEditor(
       $('#ConAppEditor'),
       $('#ConAppEditorActions'),
-      {},
-      { applyCurrentSettings: () => {} },
-      null
     );
     input.$el.show();
     input.autocomplete._test.removeChangeListener();
@@ -257,10 +251,10 @@ describe('Input Tokenization', () => {
       'paren.lparen', '{', 'paren.rparen', '}', 'paren.rparen', '}'
     ],
     'POST _search\n' +
-  '{\n' +
-  '  "q": {}\n' +
-  '  \n' +
-  '}'
+    '{\n' +
+    '  "q": {}\n' +
+    '  \n' +
+    '}'
   );
 
   tokenTest(
@@ -269,10 +263,10 @@ describe('Input Tokenization', () => {
       'paren.rparen', '}', 'paren.rparen', '}'
     ],
     'POST _search\n' +
-  '{\n' +
-  '  "q": { "s": {}}\n' +
-  '  \n' +
-  '}'
+    '{\n' +
+    '  "q": { "s": {}}\n' +
+    '  \n' +
+    '}'
   );
 
   function statesAsList() {
@@ -311,44 +305,44 @@ describe('Input Tokenization', () => {
   statesTest(
     ['start', 'json', 'json', 'start'],
     'POST _search\n' +
-  '{\n' +
-  '  "query": { "match_all": {} }\n' +
-  '}'
+    '{\n' +
+    '  "query": { "match_all": {} }\n' +
+    '}'
   );
 
   statesTest(
     ['start', 'json', ['json', 'json'], ['json', 'json'], 'json', 'start'],
     'POST _search\n' +
-  '{\n' +
-  '  "query": { \n' +
-  '  "match_all": {} \n' +
-  '  }\n' +
-  '}'
+    '{\n' +
+    '  "query": { \n' +
+    '  "match_all": {} \n' +
+    '  }\n' +
+    '}'
   );
 
   statesTest(
     ['start', 'json', 'json', 'start'],
     'POST _search\n' +
-  '{\n' +
-  '  "script": { "source": "" }\n' +
-  '}'
+    '{\n' +
+    '  "script": { "source": "" }\n' +
+    '}'
   );
 
   statesTest(
     ['start', 'json', 'json', 'start'],
     'POST _search\n' +
-  '{\n' +
-  '  "script": ""\n' +
-  '}'
+    '{\n' +
+    '  "script": ""\n' +
+    '}'
   );
 
   statesTest(
     ['start', 'json', ['json', 'json'], 'json', 'start'],
     'POST _search\n' +
-  '{\n' +
-  '  "script": {\n' +
-  '   }\n' +
-  '}'
+    '{\n' +
+    '  "script": {\n' +
+    '   }\n' +
+    '}'
   );
 
 
@@ -356,41 +350,41 @@ describe('Input Tokenization', () => {
     ['start', 'json', ['script-start', 'json', 'json', 'json'], ['script-start', 'json', 'json', 'json'],
       ['json', 'json'], 'json', 'start'],
     'POST _search\n' +
-  '{\n' +
-  '  "test": { "script": """\n' +
-  '  test script\n' +
-  ' """\n' +
-  ' }\n' +
-  '}'
+    '{\n' +
+    '  "test": { "script": """\n' +
+    '  test script\n' +
+    ' """\n' +
+    ' }\n' +
+    '}'
   );
 
   statesTest(
     ['start', 'json', ['script-start', 'json'], ['script-start', 'json'], 'json', 'start'],
     'POST _search\n' +
-  '{\n' +
-  '  "script": """\n' +
-  '  test script\n' +
-  ' """,\n' +
-  '}'
+    '{\n' +
+    '  "script": """\n' +
+    '  test script\n' +
+    ' """,\n' +
+    '}'
   );
 
   statesTest(
     ['start', 'json', 'json', 'start'],
     'POST _search\n' +
-  '{\n' +
-  '  "script": """test script""",\n' +
-  '}'
+    '{\n' +
+    '  "script": """test script""",\n' +
+    '}'
   );
 
 
   statesTest(
     ['start', 'json', ['string_literal', 'json'], ['string_literal', 'json'], 'json', 'start'],
     'POST _search\n' +
-  '{\n' +
-  '  "something": """\n' +
-  '  test script\n' +
-  ' """,\n' +
-  '}'
+    '{\n' +
+    '  "something": """\n' +
+    '  test script\n' +
+    ' """,\n' +
+    '}'
   );
 
   statesTest(
@@ -398,21 +392,21 @@ describe('Input Tokenization', () => {
       ['json', 'json'], ['json', 'json'],
       'json', 'start'],
     'POST _search\n' +
-  '{\n' +
-  '  "something": { "f" : """\n' +
-  '  test script\n' +
-  ' """,\n' +
-  ' "g": 1\n' +
-  ' }\n' +
-  '}'
+    '{\n' +
+    '  "something": { "f" : """\n' +
+    '  test script\n' +
+    ' """,\n' +
+    ' "g": 1\n' +
+    ' }\n' +
+    '}'
   );
 
   statesTest(
     ['start', 'json', 'json', 'start'],
     'POST _search\n' +
-  '{\n' +
-  '  "something": """test script""",\n' +
-  '}'
+    '{\n' +
+    '  "something": """test script""",\n' +
+    '}'
   );
 });
 

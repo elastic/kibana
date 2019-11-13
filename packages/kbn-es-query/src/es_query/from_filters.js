@@ -60,6 +60,7 @@ const cleanFilter = function (filter) {
 };
 
 export function buildQueryFromFilters(filters = [], indexPattern, ignoreFilterIfFieldNotInIndex) {
+  filters = filters.filter(filter => filter && !_.get(filter, ['meta', 'disabled']));
   return {
     must: [],
     filter: filters

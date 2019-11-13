@@ -9,7 +9,7 @@ import React from 'react';
 
 import { DnsRequestEventDetails } from '../dns/dns_request_event_details';
 import { EndgameSecurityEventDetails } from '../endgame/endgame_security_event_details';
-import { isFimEvent, isNillEmptyOrNotFinite } from '../helpers';
+import { isFileEvent, isNillEmptyOrNotFinite } from '../helpers';
 import { RowRenderer, RowRendererContainer } from '../row_renderer';
 
 import { SystemGenericDetails } from './generic_details';
@@ -95,7 +95,7 @@ export const createFimRowRenderer = ({
     const category: string | null | undefined = get('event.category[0]', ecs);
     const dataset: string | null | undefined = get('event.dataset[0]', ecs);
     return (
-      isFimEvent({ eventCategory: category, eventDataset: dataset }) &&
+      isFileEvent({ eventCategory: category, eventDataset: dataset }) &&
       action != null &&
       action.toLowerCase() === actionName
     );

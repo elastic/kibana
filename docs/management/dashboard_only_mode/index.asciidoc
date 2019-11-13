@@ -58,7 +58,7 @@ does not provide access to data indices.
 You must also assign the user a role that grants `read` access
 to each index you are using. Use *Management > Security > Roles* to create or edit a 
 role and assign index privileges.
-For information on roles and privileges, see {stack-ov}/authorization.html[User authorization].
+For information on roles and privileges, see {ref}/authorization.html[User authorization].
 
 [role="screenshot"]
 image:management/dashboard_only_mode/images/custom_dashboard_mode_role.png["Dashboard Only mode has no editing controls"]

@@ -8,8 +8,6 @@ import { PluginInitializerContext } from 'src/core/server';
 import { CodeConfigSchema } from './config';
 import { CodePlugin } from './plugin';
 
-export { PluginSetupContract } from './plugin';
-
 export const config = { schema: CodeConfigSchema };
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new CodePlugin(initializerContext);

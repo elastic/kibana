@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { calculateInterval, calculateKqlAndFilter } from './update_signals';
+import { calculateInterval, calculateName } from './update_signals';
 
 describe('update_signals', () => {
   describe('#calculateInterval', () => {
@@ -24,29 +24,25 @@ describe('update_signals', () => {
     });
   });
 
-  describe('#calculateKqlAndFilter', () => {
-    test('given a undefined kql filter it returns a null kql', () => {
-      const kqlFilter = calculateKqlAndFilter(undefined, {});
-      expect(kqlFilter).toEqual({
-        filter: {},
-        kql: null,
-      });
+  describe('#calculateName', () => {
+    test('should return the updated name when it and originalName is there', () => {
+      const name = calculateName({ updatedName: 'updated', originalName: 'original' });
+      expect(name).toEqual('updated');
     });
 
-    test('given a undefined filter it returns a null filter', () => {
-      const kqlFilter = calculateKqlAndFilter('some kql string', undefined);
-      expect(kqlFilter).toEqual({
-        filter: null,
-        kql: 'some kql string',
-      });
+    test('should return the updated name when originalName is undefined', () => {
+      const name = calculateName({ updatedName: 'updated', originalName: undefined });
+      expect(name).toEqual('updated');
     });
 
-    test('given both a undefined filter and undefined kql it returns both as undefined', () => {
-      const kqlFilter = calculateKqlAndFilter(undefined, undefined);
-      expect(kqlFilter).toEqual({
-        filter: undefined,
-        kql: undefined,
-      });
+    test('should return the original name when updatedName is undefined', () => {
+      const name = calculateName({ updatedName: undefined, originalName: 'original' });
+      expect(name).toEqual('original');
+    });
+
+    test('should return untitled when both updatedName and originalName is undefined', () => {
+      const name = calculateName({ updatedName: undefined, originalName: undefined });
+      expect(name).toEqual('untitled');
     });
   });
 });

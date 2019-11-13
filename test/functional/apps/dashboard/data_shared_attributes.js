@@ -21,13 +21,21 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const PageObjects = getPageObjects(['dashboard', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
 
   describe('dashboard data-shared attributes', function describeIndexTests() {
     let originalPanelTitles;
 
     before(async () => {
+      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.uiSettings.replace({
+        'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('dashboard with everything');
       await PageObjects.dashboard.waitForRenderComplete();
     });

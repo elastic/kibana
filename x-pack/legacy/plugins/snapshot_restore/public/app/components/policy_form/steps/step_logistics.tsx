@@ -476,12 +476,12 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <h3>
+            <h2>
               <FormattedMessage
                 id="xpack.snapshotRestore.policyForm.stepLogisticsTitle"
                 defaultMessage="Logistics"
               />
-            </h3>
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
 

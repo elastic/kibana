@@ -7,7 +7,6 @@
 jest.mock('ui/new_platform');
 jest.mock('ui/index_patterns');
 
-import { FEATURE_ID_PROPERTY_NAME } from '../common/constants';
 import {
   hitsToGeoJson,
   geoPointToGeometry,
@@ -39,35 +38,24 @@ const flattenHitMock = hit => {
     }
   }
   properties._id = hit._id;
+  properties._index = hit._index;
 
   return properties;
 };
 
 describe('hitsToGeoJson', () => {
-  it('Should set FEATURE_ID_PROPERTY_NAME to _id', () => {
-    const docId = 'if3mu20BBQNX22Q14Ppm';
-    const hits = [
-      {
-        _id: docId,
-        fields: {
-          [geoFieldName]: '20,100'
-        }
-      }
-    ];
-    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point');
-    expect(geojson.type).toBe('FeatureCollection');
-    expect(geojson.features.length).toBe(1);
-    expect(geojson.features[0].properties[FEATURE_ID_PROPERTY_NAME]).toBe(docId);
-  });
-
   it('Should convert elasitcsearch hits to geojson', () => {
     const hits = [
       {
-        _source: {
+        _id: 'doc1',
+        _index: 'index1',
+        fields: {
           [geoFieldName]: '20,100'
         }
       },
       {
+        _id: 'doc2',
+        _index: 'index1',
         _source: {
           [geoFieldName]: '30,110'
         }
@@ -81,7 +69,11 @@ describe('hitsToGeoJson', () => {
         coordinates: [100, 20],
         type: 'Point',
       },
-      properties: {},
+      properties: {
+        __kbn__feature_id__: 'index1:doc1:0',
+        _id: 'doc1',
+        _index: 'index1',
+      },
       type: 'Feature',
     });
   });
@@ -123,6 +115,8 @@ describe('hitsToGeoJson', () => {
   it('Should create feature per item when geometry value is an array', () => {
     const hits = [
       {
+        _id: 'doc1',
+        _index: 'index1',
         _source: {
           [geoFieldName]: [
             '20,100',
@@ -141,6 +135,9 @@ describe('hitsToGeoJson', () => {
         type: 'Point',
       },
       properties: {
+        __kbn__feature_id__: 'index1:doc1:0',
+        _id: 'doc1',
+        _index: 'index1',
         myField: 8
       },
       type: 'Feature',
@@ -151,6 +148,9 @@ describe('hitsToGeoJson', () => {
         type: 'Point',
       },
       properties: {
+        __kbn__feature_id__: 'index1:doc1:1',
+        _id: 'doc1',
+        _index: 'index1',
         myField: 8
       },
       type: 'Feature',
@@ -183,13 +183,9 @@ describe('hitsToGeoJson', () => {
         }
       ];
       const geojson = hitsToGeoJson(hits, indexPatternFlattenHit, 'my.location', 'geo_point');
-      expect(geojson.features[0]).toEqual({
-        geometry: {
-          coordinates: [100, 20],
-          type: 'Point',
-        },
-        properties: {},
-        type: 'Feature',
+      expect(geojson.features[0].geometry).toEqual({
+        coordinates: [100, 20],
+        type: 'Point',
       });
     });
 
@@ -202,13 +198,9 @@ describe('hitsToGeoJson', () => {
         }
       ];
       const geojson = hitsToGeoJson(hits, indexPatternFlattenHit, 'my.location', 'geo_point');
-      expect(geojson.features[0]).toEqual({
-        geometry: {
-          coordinates: [100, 20],
-          type: 'Point',
-        },
-        properties: {},
-        type: 'Feature',
+      expect(geojson.features[0].geometry).toEqual({
+        coordinates: [100, 20],
+        type: 'Point',
       });
     });
   });

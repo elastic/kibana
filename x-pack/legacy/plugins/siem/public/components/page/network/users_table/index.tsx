@@ -5,9 +5,9 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
-import { ActionCreator } from 'redux';
+import { ActionCreator } from 'typescript-fsa';
 
 import { networkActions } from '../../../../store/network';
 import { FlowTarget, UsersEdges, UsersFields, UsersSortField } from '../../../../graphql/types';
@@ -35,21 +35,14 @@ interface OwnProps {
 interface UsersTableReduxProps {
   activePage: number;
   limit: number;
-  usersSortField: UsersSortField;
+  sort: UsersSortField;
 }
 
 interface UsersTableDispatchProps {
-  updateTableActivePage: ActionCreator<{
-    activePage: number;
-    tableType: networkModel.IpDetailsTableType;
-  }>;
-  updateUsersLimit: ActionCreator<{
-    limit: number;
+  updateNetworkTable: ActionCreator<{
     networkType: networkModel.NetworkType;
-  }>;
-  updateUsersSort: ActionCreator<{
-    usersSort: UsersSortField;
-    networkType: networkModel.NetworkType;
+    tableType: networkModel.AllNetworkTables;
+    updates: networkModel.TableUpdates;
   }>;
 }
 
@@ -68,25 +61,42 @@ const rowItems: ItemsPerRow[] = [
 
 export const usersTableId = 'users-table';
 
-class UsersTableComponent extends React.PureComponent<UsersTableProps> {
-  public render() {
-    const {
-      activePage,
-      data,
-      fakeTotalCount,
-      flowTarget,
-      id,
-      isInspect,
-      limit,
-      loading,
-      loadPage,
-      showMorePagesIndicator,
-      totalCount,
-      type,
-      updateTableActivePage,
-      updateUsersLimit,
-      usersSortField,
-    } = this.props;
+const UsersTableComponent = React.memo<UsersTableProps>(
+  ({
+    activePage,
+    data,
+    fakeTotalCount,
+    flowTarget,
+    id,
+    isInspect,
+    limit,
+    loading,
+    loadPage,
+    showMorePagesIndicator,
+    totalCount,
+    type,
+    updateNetworkTable,
+    sort,
+  }) => {
+    const onChange = useCallback(
+      (criteria: Criteria) => {
+        if (criteria.sort != null) {
+          const splitField = criteria.sort.field.split('.');
+          const newUsersSort: UsersSortField = {
+            field: getSortFromString(splitField[splitField.length - 1]),
+            direction: criteria.sort.direction,
+          };
+          if (!isEqual(newUsersSort, sort)) {
+            updateNetworkTable({
+              networkType: type,
+              tableType,
+              updates: { sort: newUsersSort },
+            });
+          }
+        }
+      },
+      [sort, type]
+    );
 
     return (
       <PaginatedTable
@@ -103,37 +113,30 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
         limit={limit}
         loading={loading}
         loadPage={newActivePage => loadPage(newActivePage)}
-        onChange={this.onChange}
+        onChange={onChange}
         pageOfItems={data}
-        sorting={getSortField(usersSortField)}
+        sorting={getSortField(sort)}
         totalCount={fakeTotalCount}
         updateActivePage={newPage =>
-          updateTableActivePage({
-            activePage: newPage,
+          updateNetworkTable({
+            networkType: type,
             tableType,
+            updates: { activePage: newPage },
           })
         }
-        updateLimitPagination={newLimit => updateUsersLimit({ limit: newLimit, networkType: type })}
+        updateLimitPagination={newLimit =>
+          updateNetworkTable({
+            networkType: type,
+            tableType,
+            updates: { limit: newLimit },
+          })
+        }
       />
     );
   }
+);
 
-  private onChange = (criteria: Criteria) => {
-    if (criteria.sort != null) {
-      const splitField = criteria.sort.field.split('.');
-      const newUsersSort: UsersSortField = {
-        field: getSortFromString(splitField[splitField.length - 1]),
-        direction: criteria.sort.direction,
-      };
-      if (!isEqual(newUsersSort, this.props.usersSortField)) {
-        this.props.updateUsersSort({
-          usersSortField: newUsersSort,
-          networkType: this.props.type,
-        });
-      }
-    }
-  };
-}
+UsersTableComponent.displayName = 'UsersTableComponent';
 
 const makeMapStateToProps = () => {
   const getUsersSelector = networkSelectors.usersSelector();
@@ -145,9 +148,7 @@ const makeMapStateToProps = () => {
 export const UsersTable = connect(
   makeMapStateToProps,
   {
-    updateTableActivePage: networkActions.updateIpDetailsTableActivePage,
-    updateUsersLimit: networkActions.updateUsersLimit,
-    updateUsersSort: networkActions.updateUsersSort,
+    updateNetworkTable: networkActions.updateNetworkTable,
   }
 )(UsersTableComponent);
 

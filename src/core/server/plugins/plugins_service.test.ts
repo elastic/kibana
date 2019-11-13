@@ -25,15 +25,13 @@ import { schema } from '@kbn/config-schema';
 
 import { Config, ConfigPath, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
-import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
-import { httpServiceMock } from '../http/http_service.mock';
+import { coreMock } from '../mocks';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { PluginDiscoveryError } from './discovery';
 import { PluginWrapper } from './plugin';
 import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
 import { config } from './plugins_config';
-import { contextServiceMock } from '../context/context_service.mock';
 
 const MockPluginsSystem: jest.Mock<PluginsSystem> = PluginsSystem as any;
 
@@ -42,11 +40,7 @@ let configService: ConfigService;
 let coreId: symbol;
 let env: Env;
 let mockPluginSystem: jest.Mocked<PluginsSystem>;
-const setupDeps = {
-  context: contextServiceMock.createSetupContract(),
-  elasticsearch: elasticsearchServiceMock.createSetupContract(),
-  http: httpServiceMock.createSetupContract(),
-};
+const setupDeps = coreMock.createInternalSetup();
 const logger = loggingServiceMock.create();
 
 ['path-1', 'path-2', 'path-3', 'path-4', 'path-5'].forEach(path => {

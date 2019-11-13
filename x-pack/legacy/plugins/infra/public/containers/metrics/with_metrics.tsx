@@ -6,6 +6,7 @@
 import { ApolloError } from 'apollo-client';
 import React from 'react';
 import { Query } from 'react-apollo';
+import { i18n } from '@kbn/i18n';
 import {
   InfraMetric,
   InfraMetricData,
@@ -13,8 +14,8 @@ import {
   MetricsQuery,
   InfraTimerangeInput,
 } from '../../graphql/types';
-import { InfraMetricLayout } from '../../pages/metrics/layouts/types';
 import { metricsQuery } from './metrics.gql_query';
+import { InventoryDetailLayout, InventoryMetric } from '../../../common/inventory_models/types';
 
 interface WithMetricsArgs {
   metrics: InfraMetricData[];
@@ -25,13 +26,17 @@ interface WithMetricsArgs {
 
 interface WithMetricsProps {
   children: (args: WithMetricsArgs) => React.ReactNode;
-  layouts: InfraMetricLayout[];
+  layouts: InventoryDetailLayout[];
   nodeType: InfraNodeType;
   nodeId: string;
   cloudId: string;
   sourceId: string;
   timerange: InfraTimerangeInput;
 }
+
+const isInfraMetrics = (subject: any[]): subject is InfraMetric[] => {
+  return subject.every(s => !!InfraMetric[s]);
+};
 
 export const WithMetrics = ({
   children,
@@ -46,8 +51,16 @@ export const WithMetrics = ({
     (acc, item) => {
       return acc.concat(item.sections.map(s => s.id));
     },
-    [] as InfraMetric[]
+    [] as InventoryMetric[]
   );
+
+  if (!isInfraMetrics(metrics)) {
+    throw new Error(
+      i18n.translate('xpack.infra.invalidInventoryMetricsError', {
+        defaultMessage: 'One of the InfraMetric is invalid',
+      })
+    );
+  }
 
   return (
     <Query<MetricsQuery.Query, MetricsQuery.Variables>

@@ -15,7 +15,7 @@ You can also use {kib} to
 <<monitoring-data,visualize monitoring data from across the {stack}>>.
 
 To learn about monitoring in general, see 
-{stack-ov}/xpack-monitoring.html[Monitoring the {stack}]. 
+{ref}/monitor-elasticsearch-cluster.html[Monitor a cluster].
 
 include::monitoring-kibana.asciidoc[]
 include::monitoring-metricbeat.asciidoc[]

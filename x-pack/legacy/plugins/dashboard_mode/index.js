@@ -61,7 +61,7 @@ export function dashboardMode(kibana) {
             description: i18n.translate('xpack.dashboardMode.dashboardViewer.dashboardDescription', {
               defaultMessage: 'Dashboard Viewer'
             }),
-            icon: 'plugins/kibana/assets/dashboard.svg',
+            icon: 'plugins/kibana/dashboard/assets/dashboard.svg',
           }
         ],
       },

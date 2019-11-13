@@ -6,7 +6,7 @@
 
 import React, { FC, useState, useContext, useEffect } from 'react';
 import { EuiFieldNumber } from '@elastic/eui';
-import { newJobDefaults } from '../../../../../../new_job_new/utils/new_job_defaults';
+import { newJobDefaults } from '../../../../../utils/new_job_defaults';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 

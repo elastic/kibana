@@ -7,14 +7,37 @@
 import React, { FC } from 'react';
 import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
 import { metadata } from 'ui/metadata';
 
 const createJobLink = '#/jobs/new_job/step/index_or_search';
 // metadata.branch corresponds to the version used in documentation links.
 const docsLink = `https://www.elastic.co/guide/en/kibana/${metadata.branch}/xpack-ml.html`;
 const feedbackLink = 'https://www.elastic.co/community/';
+const transformsLink = `${chrome.getBasePath()}/app/kibana#/management/elasticsearch/transform`;
+const whatIsMachineLearningLink = 'https://www.elastic.co/what-is/elasticsearch-machine-learning';
 
-export const OverviewSideBar: FC = () => (
+interface Props {
+  createAnomalyDetectionJobDisabled: boolean;
+}
+
+function getCreateJobLink(createAnomalyDetectionJobDisabled: boolean) {
+  return createAnomalyDetectionJobDisabled === true ? (
+    <FormattedMessage
+      id="xpack.ml.overview.gettingStartedSectionCreateJob"
+      defaultMessage="creating a new job"
+    />
+  ) : (
+    <EuiLink href={createJobLink} target="blank">
+      <FormattedMessage
+        id="xpack.ml.overview.gettingStartedSectionCreateJob"
+        defaultMessage="creating a new job"
+      />
+    </EuiLink>
+  );
+}
+
+export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }) => (
   <EuiFlexItem grow={1}>
     <EuiText className="mlOverview__sidebar">
       <h2>
@@ -27,7 +50,8 @@ export const OverviewSideBar: FC = () => (
         <FormattedMessage
           id="xpack.ml.overview.gettingStartedSectionText"
           defaultMessage="Welcome to Machine Learning. Get started by reviewing our {docs} or {createJob}.
-          For information about upcoming features and tutorials be sure to check out our solutions page."
+          For more information about machine learning in the Elastic stack please  see {whatIsMachineLearning}.
+          We recommend using {transforms} to create feature indices for analytics jobs."
           values={{
             docs: (
               <EuiLink href={docsLink} target="blank">
@@ -37,11 +61,20 @@ export const OverviewSideBar: FC = () => (
                 />
               </EuiLink>
             ),
-            createJob: (
-              <EuiLink href={createJobLink} target="blank">
+            createJob: getCreateJobLink(createAnomalyDetectionJobDisabled),
+            transforms: (
+              <EuiLink href={transformsLink} target="blank">
                 <FormattedMessage
-                  id="xpack.ml.overview.gettingStartedSectionCreateJob"
-                  defaultMessage="creating a new job"
+                  id="xpack.ml.overview.gettingStartedSectionTransforms"
+                  defaultMessage="Elasticsearch's transforms"
+                />
+              </EuiLink>
+            ),
+            whatIsMachineLearning: (
+              <EuiLink href={whatIsMachineLearningLink} target="blank">
+                <FormattedMessage
+                  id="xpack.ml.overview.gettingStartedSectionWhatIsMachineLearning"
+                  defaultMessage="here"
                 />
               </EuiLink>
             ),

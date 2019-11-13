@@ -11,6 +11,8 @@ import React from 'react';
 import * as Rx from 'rxjs';
 import { ShallowPromise } from '@kbn/utility-types';
 import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
+import { UiSettingsParams as UiSettingsParams_2 } from 'src/core/server/types';
+import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @public
 export interface App extends AppBase {
@@ -105,6 +107,16 @@ export interface ChromeBrand {
 // @public (undocumented)
 export type ChromeBreadcrumb = Breadcrumb;
 
+// @public
+export interface ChromeDocTitle {
+    // @internal (undocumented)
+    __legacy: {
+        setBaseTitle(baseTitle: string): void;
+    };
+    change(newTitle: string | string[]): void;
+    reset(): void;
+}
+
 // @public (undocumented)
 export type ChromeHelpExtension = (element: HTMLDivElement) => () => void;
 
@@ -186,6 +198,7 @@ export interface ChromeRecentlyAccessedHistoryItem {
 // @public
 export interface ChromeStart {
     addApplicationClass(className: string): void;
+    docTitle: ChromeDocTitle;
     getApplicationClasses$(): Observable<string[]>;
     getBadge$(): Observable<ChromeBadge | undefined>;
     getBrand$(): Observable<ChromeBrand>;
@@ -426,15 +439,9 @@ export interface HttpErrorRequest {
 }
 
 // @public (undocumented)
-export interface HttpErrorResponse {
-    // (undocumented)
-    body?: HttpBody;
+export interface HttpErrorResponse extends HttpResponse {
     // (undocumented)
     error: Error | IHttpFetchError;
-    // (undocumented)
-    request?: Request;
-    // (undocumented)
-    response?: Response;
 }
 
 // @public
@@ -463,8 +470,8 @@ export interface HttpHeadersInit {
 export interface HttpInterceptor {
     request?(request: Request, controller: IHttpInterceptController): Promise<Request> | Request | void;
     requestError?(httpErrorRequest: HttpErrorRequest, controller: IHttpInterceptController): Promise<Request> | Request | void;
-    response?(httpResponse: HttpResponse, controller: IHttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
-    responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
+    response?(httpResponse: HttpResponse, controller: IHttpInterceptController): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
+    responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
 }
 
 // @public
@@ -486,18 +493,15 @@ export interface HttpRequestInit {
 }
 
 // @public (undocumented)
-export interface HttpResponse {
+export interface HttpResponse extends InterceptedHttpResponse {
     // (undocumented)
-    body?: HttpBody;
-    // (undocumented)
-    request?: Request;
-    // (undocumented)
-    response?: Response;
+    request: Readonly<Request>;
 }
 
 // @public (undocumented)
 export interface HttpServiceBase {
     addLoadingCount(countSource$: Observable<number>): void;
+    anonymousPaths: IAnonymousPaths;
     basePath: IBasePath;
     delete: HttpHandler;
     fetch: HttpHandler;
@@ -527,6 +531,14 @@ export interface I18nStart {
     }) => JSX.Element;
 }
 
+// Warning: (ae-missing-release-tag) "IAnonymousPaths" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public
+export interface IAnonymousPaths {
+    isAnonymous(path: string): boolean;
+    register(path: string): void;
+}
+
 // @public
 export interface IBasePath {
     get: () => string;
@@ -547,8 +559,12 @@ export type IContextProvider<THandler extends HandlerFunction<any>, TContextName
 export interface IHttpFetchError extends Error {
     // (undocumented)
     readonly body?: any;
+    // @deprecated (undocumented)
+    readonly req: Request;
     // (undocumented)
     readonly request: Request;
+    // @deprecated (undocumented)
+    readonly res?: Response;
     // (undocumented)
     readonly response?: Response;
 }
@@ -557,6 +573,14 @@ export interface IHttpFetchError extends Error {
 export interface IHttpInterceptController {
     halt(): void;
     halted: boolean;
+}
+
+// @public (undocumented)
+export interface InterceptedHttpResponse {
+    // (undocumented)
+    body?: HttpBody;
+    // (undocumented)
+    response?: Response;
 }
 
 // @public
@@ -935,7 +959,7 @@ export class UiSettingsClient {
     constructor(params: UiSettingsClientParams);
     get$(key: string, defaultOverride?: any): Rx.Observable<any>;
     get(key: string, defaultOverride?: any): any;
-    getAll(): UiSettingsState;
+    getAll(): Record<string, UiSettingsParams_2 & UserProvidedValues_2<any>>;
     getSaved$(): Rx.Observable<{
         key: string;
         newValue: any;
@@ -957,16 +981,13 @@ export class UiSettingsClient {
     stop(): void;
     }
 
-// @public (undocumented)
+// @public
 export type UiSettingsClientContract = PublicMethodsOf<UiSettingsClient>;
 
 // @public (undocumented)
 export interface UiSettingsState {
-    // Warning: (ae-forgotten-export) The symbol "InjectedUiSettingsDefault" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "InjectedUiSettingsUser" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
-    [key: string]: InjectedUiSettingsDefault & InjectedUiSettingsUser;
+    [key: string]: UiSettingsParams_2 & UserProvidedValues_2;
 }
 
 

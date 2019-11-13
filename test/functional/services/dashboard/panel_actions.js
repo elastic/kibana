@@ -19,6 +19,7 @@
 
 const REMOVE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-deletePanel';
 const EDIT_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-editPanel';
+const REPLACE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-replacePanel';
 const TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-togglePanel';
 const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-CUSTOMIZE_PANEL_ACTION_ID';
 const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'embeddablePanelToggleMenuIcon';
@@ -87,6 +88,16 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       await testSubjects.click(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
     }
 
+    async replacePanelByTitle(title) {
+      log.debug(`replacePanel(${title})`);
+      let panelOptions = null;
+      if (title) {
+        panelOptions = await this.getPanelHeading(title);
+      }
+      await this.openContextMenu(panelOptions);
+      await testSubjects.click(REPLACE_PANEL_DATA_TEST_SUBJ);
+    }
+
     async openInspectorByTitle(title) {
       const header = await this.getPanelHeading(title);
       await this.openInspector(header);
@@ -112,9 +123,19 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       await testSubjects.existOrFail(EDIT_PANEL_DATA_TEST_SUBJ);
     }
 
+    async expectExistsReplacePanelAction() {
+      log.debug('expectExistsEditPanelAction');
+      await testSubjects.existOrFail(REPLACE_PANEL_DATA_TEST_SUBJ);
+    }
+
     async expectMissingEditPanelAction() {
       log.debug('expectMissingEditPanelAction');
       await testSubjects.missingOrFail(EDIT_PANEL_DATA_TEST_SUBJ);
+    }
+
+    async expectMissingReplacePanelAction() {
+      log.debug('expectMissingEditPanelAction');
+      await testSubjects.missingOrFail(REPLACE_PANEL_DATA_TEST_SUBJ);
     }
 
     async expectExistsToggleExpandAction() {

@@ -24,6 +24,7 @@ import fetchMock from 'fetch-mock/es5/client';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { setup, SetupTap } from '../../../test_utils/public/http_test_setup';
+import { HttpResponse } from './types';
 
 function delay<T>(duration: number) {
   return new Promise<T>(r => setTimeout(r, duration));
@@ -394,12 +395,12 @@ describe('interception', () => {
 
     const unusedSpy = jest.fn();
 
-    http.intercept({ response: unusedSpy });
     http.intercept({
       responseError(response, controller) {
         controller.halt();
       },
     });
+    http.intercept({ response: unusedSpy, responseError: unusedSpy });
 
     http.post('/my/path').then(unusedSpy, unusedSpy);
     await delay(1000);
@@ -416,21 +417,21 @@ describe('interception', () => {
       request: unusedSpy,
       requestError: usedSpy,
       response: unusedSpy,
-      responseError: usedSpy,
+      responseError: unusedSpy,
     });
     http.intercept({
       request() {
         throw new Error('Interception Error');
       },
       response: unusedSpy,
-      responseError: usedSpy,
+      responseError: unusedSpy,
     });
-    http.intercept({ request: usedSpy, response: unusedSpy, responseError: usedSpy });
+    http.intercept({ request: usedSpy, response: unusedSpy, responseError: unusedSpy });
 
     await expect(http.fetch('/my/path')).rejects.toThrow(/Interception Error/);
     expect(fetchMock.called()).toBe(false);
     expect(unusedSpy).toHaveBeenCalledTimes(0);
-    expect(usedSpy).toHaveBeenCalledTimes(5);
+    expect(usedSpy).toHaveBeenCalledTimes(2);
   });
 
   it('should succeed if request throws but caught by interceptor', async () => {
@@ -458,26 +459,76 @@ describe('interception', () => {
     expect(usedSpy).toHaveBeenCalledTimes(4);
   });
 
-  describe('request availability during interception', () => {
-    it('should not be available to responseError when request throws', async () => {
-      expect.assertions(3);
+  it('should accumulate request information', async () => {
+    const routes = ['alpha', 'beta', 'gamma'];
+    const createRequest = jest.fn(
+      (request: Request) => new Request(`/api/${routes.shift()}`, request)
+    );
 
-      let spiedRequest: Request | undefined;
-
-      http.intercept({
-        request() {
-          throw new Error('Internal Server Error');
-        },
-        responseError({ request }) {
-          spiedRequest = request;
-        },
-      });
-
-      await expect(http.fetch('/my/path')).rejects.toThrow();
-      expect(fetchMock.called()).toBe(false);
-      expect(spiedRequest).toBeUndefined();
+    http.intercept({
+      request: createRequest,
+    });
+    http.intercept({
+      requestError(httpErrorRequest) {
+        return httpErrorRequest.request;
+      },
+    });
+    http.intercept({
+      request(request) {
+        throw new Error('Invalid');
+      },
+    });
+    http.intercept({
+      request: createRequest,
+    });
+    http.intercept({
+      request: createRequest,
     });
 
+    await expect(http.fetch('/my/route')).resolves.toEqual({ foo: 'bar' });
+    expect(fetchMock.called()).toBe(true);
+    expect(routes.length).toBe(0);
+    expect(createRequest.mock.calls[0][0].url).toContain('/my/route');
+    expect(createRequest.mock.calls[1][0].url).toContain('/api/alpha');
+    expect(createRequest.mock.calls[2][0].url).toContain('/api/beta');
+    expect(fetchMock.lastCall()!.request.url).toContain('/api/gamma');
+  });
+
+  it('should accumulate response information', async () => {
+    const bodies = ['alpha', 'beta', 'gamma'];
+    const createResponse = jest.fn((httpResponse: HttpResponse) => ({
+      body: bodies.shift(),
+    }));
+
+    http.intercept({
+      response: createResponse,
+    });
+    http.intercept({
+      response: createResponse,
+    });
+    http.intercept({
+      response(httpResponse) {
+        throw new Error('Invalid');
+      },
+    });
+    http.intercept({
+      responseError({ error, ...httpResponse }) {
+        return httpResponse;
+      },
+    });
+    http.intercept({
+      response: createResponse,
+    });
+
+    await expect(http.fetch('/my/route')).resolves.toEqual('gamma');
+    expect(fetchMock.called()).toBe(true);
+    expect(bodies.length).toBe(0);
+    expect(createResponse.mock.calls[0][0].body).toEqual({ foo: 'bar' });
+    expect(createResponse.mock.calls[1][0].body).toBe('alpha');
+    expect(createResponse.mock.calls[2][0].body).toBe('beta');
+  });
+
+  describe('request availability during interception', () => {
     it('should be available to responseError when response throws', async () => {
       let spiedRequest: Request | undefined;
 
@@ -513,22 +564,6 @@ describe('interception', () => {
 
       await expect(http.fetch('/my/path')).rejects.toThrow();
       expect(spiedResponse).toBeDefined();
-    });
-
-    it('should not be available to responseError when request throws', async () => {
-      let spiedResponse: Response | undefined;
-
-      http.intercept({
-        request() {
-          throw new Error('Internal Server Error');
-        },
-        responseError({ response }) {
-          spiedResponse = response;
-        },
-      });
-
-      await expect(http.fetch('/my/path')).rejects.toThrow();
-      expect(spiedResponse).toBeUndefined();
     });
   });
 

@@ -115,10 +115,10 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
       }),
       scope: true,
       template: `
-        <div
+        <main
           id="${ROOT_ELEMENT_ID}"
           class="infReactRoot"
-        ></div>
+        ></main>
       `,
     }));
 

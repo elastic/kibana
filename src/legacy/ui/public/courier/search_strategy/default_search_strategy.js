@@ -19,48 +19,13 @@
 
 import { addSearchStrategy } from './search_strategy_registry';
 import { isDefaultTypeIndexPattern } from './is_default_type_index_pattern';
-import { SearchError } from './search_error';
-import { getSearchParams, getMSearchParams } from '../fetch/get_search_params';
-
-function getAllFetchParams(searchRequests, Promise) {
-  return Promise.map(searchRequests, (searchRequest) => {
-    return Promise.try(searchRequest.getFetchParams, void 0, searchRequest)
-      .then((fetchParams) => {
-        return (searchRequest.fetchParams = fetchParams);
-      })
-      .then(value => ({ resolved: value }))
-      .catch(error => ({ rejected: error }));
-  });
-}
-
-async function serializeAllFetchParams(fetchParams, searchRequests, serializeFetchParams) {
-  const searchRequestsWithFetchParams = [];
-  const failedSearchRequests = [];
-
-  // Gather the fetch param responses from all the successful requests.
-  fetchParams.forEach((result, index) => {
-    if (result.resolved) {
-      searchRequestsWithFetchParams.push(result.resolved);
-    } else {
-      const searchRequest = searchRequests[index];
-
-      searchRequest.handleFailure(result.rejected);
-      failedSearchRequests.push(searchRequest);
-    }
-  });
-
-  return {
-    serializedFetchParams: await serializeFetchParams(searchRequestsWithFetchParams),
-    failedSearchRequests,
-  };
-}
+import { getSearchParams, getMSearchParams, getPreference, getTimeout } from '../fetch/get_search_params';
 
 export const defaultSearchStrategy = {
   id: 'default',
 
   search: params => {
-    const { config } = params;
-    return config.get('courier:batchSearches') ? msearch(params) : search(params);
+    return params.config.get('courier:batchSearches') ? msearch(params) : search(params);
   },
 
   isViable: (indexPattern) => {
@@ -72,79 +37,42 @@ export const defaultSearchStrategy = {
   },
 };
 
-async function msearch({ searchRequests, es, Promise, serializeFetchParams, config }) {
-  // Flatten the searchSource within each searchRequest to get the fetch params,
-  // e.g. body, filters, index pattern, query.
-  const allFetchParams = await getAllFetchParams(searchRequests, Promise);
-
-  // Serialize the fetch params into a format suitable for the body of an ES query.
-  const {
-    serializedFetchParams,
-    failedSearchRequests,
-  } = await serializeAllFetchParams(allFetchParams, searchRequests, serializeFetchParams);
-
-  if (serializedFetchParams.trim() === '') {
-    return {
-      failedSearchRequests,
+function msearch({ searchRequests, es, config, esShardTimeout }) {
+  const inlineRequests = searchRequests.map(({ index, body, search_type: searchType }) => {
+    const inlineHeader = {
+      index: index.title || index,
+      search_type: searchType,
+      ignore_unavailable: true,
+      preference: getPreference(config)
     };
-  }
-  const msearchParams = {
+    const inlineBody = {
+      ...body,
+      timeout: getTimeout(esShardTimeout)
+    };
+    return `${JSON.stringify(inlineHeader)}\n${JSON.stringify(inlineBody)}`;
+  });
+
+  const searching = es.msearch({
     ...getMSearchParams(config),
-    body: serializedFetchParams,
-  };
-
-  const searching = es.msearch(msearchParams);
-
+    body: `${inlineRequests.join('\n')}\n`,
+  });
   return {
-    // Munge data into shape expected by consumer.
-    searching: new Promise((resolve, reject) => {
-      // Unwrap the responses object returned by the ES client.
-      searching.then(({ responses }) => {
-        resolve(responses);
-      }).catch(error => {
-        // Format ES client error as a SearchError.
-        const { statusCode, displayName, message, path } = error;
-
-        const searchError = new SearchError({
-          status: statusCode,
-          title: displayName,
-          message,
-          path,
-        });
-
-        reject(searchError);
-      });
-    }),
-    abort: searching.abort,
-    failedSearchRequests,
+    searching: searching.then(({ responses }) => responses),
+    abort: searching.abort
   };
 }
 
-function search({ searchRequests, es, Promise, config, sessionId, esShardTimeout }) {
-  const failedSearchRequests = [];
+function search({ searchRequests, es, config, esShardTimeout }) {
   const abortController = new AbortController();
-  const searchParams = getSearchParams(config, sessionId, esShardTimeout);
-  const promises = searchRequests.map(async searchRequest => {
-    return searchRequest.getFetchParams()
-      .then(fetchParams => {
-        const { index, body } = searchRequest.fetchParams = fetchParams;
-        const promise = es.search({ index: index.title || index, body, ...searchParams });
-        abortController.signal.addEventListener('abort', promise.abort);
-        return promise;
-      }, error => {
-        searchRequest.handleFailure(error);
-        failedSearchRequests.push(searchRequest);
-      })
-      .catch(({ response }) => {
-        // Copying the _msearch behavior where the errors for individual requests are returned
-        // instead of thrown
-        return JSON.parse(response);
-      });
+  const searchParams = getSearchParams(config, esShardTimeout);
+  const promises = searchRequests.map(({ index, body }) => {
+    const searching = es.search({ index: index.title || index, body, ...searchParams });
+    abortController.signal.addEventListener('abort', searching.abort);
+    return searching.catch(({ response }) => JSON.parse(response));
   });
   return {
     searching: Promise.all(promises),
     abort: () => abortController.abort(),
-    failedSearchRequests
   };
 }
 

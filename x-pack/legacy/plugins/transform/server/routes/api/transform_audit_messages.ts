@@ -8,7 +8,7 @@ import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 
 import { AuditMessage } from '../../../common/types/messages';
 
-const ML_DF_NOTIFICATION_INDEX_PATTERN = '.data-frame-notifications-1';
+const ML_DF_NOTIFICATION_INDEX_PATTERN = '.transform-notifications-read';
 const SIZE = 500;
 
 interface BoolQuery {

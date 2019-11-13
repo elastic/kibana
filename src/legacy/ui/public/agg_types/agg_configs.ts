@@ -307,12 +307,10 @@ export class AggConfigs {
     return _.find(reqAgg.getResponseAggs(), { id });
   }
 
-  onSearchRequestStart(searchSource: any, searchRequest: any) {
+  onSearchRequestStart(searchSource: any, options: any) {
     return Promise.all(
       // @ts-ignore
-      this.getRequestAggs().map((agg: AggConfig) =>
-        agg.onSearchRequestStart(searchSource, searchRequest)
-      )
+      this.getRequestAggs().map((agg: AggConfig) => agg.onSearchRequestStart(searchSource, options))
     );
   }
 }

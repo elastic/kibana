@@ -8,8 +8,9 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
-
+import { compose } from 'redux';
 import chrome from 'ui/chrome';
+
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   FlowTargetSourceDest,
@@ -50,7 +51,7 @@ export interface NetworkTopNFlowComponentReduxProps {
   activePage: number;
   isInspected: boolean;
   limit: number;
-  topNFlowSort: NetworkTopTablesSortField;
+  sort: NetworkTopTablesSortField;
 }
 
 type NetworkTopNFlowProps = OwnProps & NetworkTopNFlowComponentReduxProps;
@@ -74,7 +75,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
       skip,
       sourceId,
       startDate,
-      topNFlowSort,
+      sort,
     } = this.props;
     const variables: GetNetworkTopNFlowQuery.Variables = {
       defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
@@ -83,7 +84,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
       inspect: isInspected,
       ip,
       pagination: generateTablePaginationOptions(activePage, limit),
-      sort: topNFlowSort,
+      sort,
       sourceId,
       timerange: {
         interval: '12h',
@@ -140,17 +141,18 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
   }
 }
 
-const mapStateToProps = (
-  state: State,
-  { flowTarget, id = `${ID}-${flowTarget}`, type }: OwnProps
-) => {
-  const getNetworkTopNFlowSelector = networkSelectors.topNFlowSelector(flowTarget, type);
+const makeMapStateToProps = () => {
+  const getTopNFlowSelector = networkSelectors.topNFlowSelector();
   const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const { isInspected } = getQuery(state, id);
-  return {
-    ...getNetworkTopNFlowSelector(state),
-    isInspected,
+  return (state: State, { flowTarget, id = `${ID}-${flowTarget}`, type }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      ...getTopNFlowSelector(state, type, flowTarget),
+      isInspected,
+    };
   };
 };
 
-export const NetworkTopNFlowQuery = connect(mapStateToProps)(NetworkTopNFlowComponentQuery);
+export const NetworkTopNFlowQuery = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps)
+)(NetworkTopNFlowComponentQuery);

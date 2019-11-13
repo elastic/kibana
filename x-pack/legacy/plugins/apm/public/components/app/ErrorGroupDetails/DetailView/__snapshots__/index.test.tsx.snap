@@ -46,7 +46,7 @@ exports[`DetailView should render TabContent 1`] = `
   currentTab={
     Object {
       "key": "exception_stacktrace",
-      "label": "Exception stacktrace",
+      "label": "Exception stack trace",
     }
   }
   error={
@@ -71,7 +71,7 @@ exports[`DetailView should render tabs 1`] = `
     key="exception_stacktrace"
     onClick={[Function]}
   >
-    Exception stacktrace
+    Exception stack trace
   </EuiTab>
   <EuiTab
     isSelected={false}

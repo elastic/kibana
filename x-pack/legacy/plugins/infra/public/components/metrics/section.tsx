@@ -6,12 +6,12 @@
 
 import React from 'react';
 import { InfraMetricData } from '../../graphql/types';
-import { InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
 import { sections } from './sections';
 import { MetricsTimeInput } from '../../containers/metrics/with_metrics_time';
+import { InventoryDetailSection } from '../../../common/inventory_models/types';
 
 interface Props {
-  section: InfraMetricLayoutSection;
+  section: InventoryDetailSection;
   metrics: InfraMetricData[];
   onChangeRangeTime?: (time: MetricsTimeInput) => void;
   crosshairValue?: number;

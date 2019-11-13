@@ -274,8 +274,7 @@ function compileCondition(description, compiledObject) {
   if (description.lines_regex) {
     return new ConditionalProxy(function (context, editor) {
       const lines = editor
-        .getSession()
-        .getLines(context.requestStartRow, editor.getCursorPosition().row)
+        .getLines(context.requestStartRow, editor.getCurrentPosition().lineNumber)
         .join('\n');
       return new RegExp(description.lines_regex, 'm').test(lines);
     }, compiledObject);

@@ -34,7 +34,7 @@ in an `up` or `down` state are displayed, based on the last check reported by He
 for each monitor.
 
 Next to the counts, there is a histogram displaying the change over time throughout the
-selected date range. 
+selected date range.
 
 [float]
 === Monitor list
@@ -56,7 +56,7 @@ ID and URL, its IP address, and a dedicated sparkline showing its check status o
 image::uptime/images/observability_integrations.png[Observability integrations]
 
 The Monitor list also contains a menu of possible integrations. If Uptime detects Kubernetes or
-Docker related host information, it will provide links to open the Metrics UI or Logs UI pre-filtered
+Docker related host information, it will provide links to open the Metrics app or Logs app pre-filtered
 for this host. Additionally, this feature supplies links to simply filter the other views on the host's
 IP address, to help you quickly determine if these other solutions contain data relevant to your current
 interest.

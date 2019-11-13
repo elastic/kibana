@@ -5,26 +5,14 @@
  */
 
 import { SIGNALS_ID } from '../../../../common/constants';
-import { AlertsClient } from '../../../../../alerting/server/alerts_client';
+import { FindSignalParams } from './types';
 
-export interface GetSignalParams {
-  alertsClient: AlertsClient;
-  perPage?: number;
-  page?: number;
-  sortField?: string;
-  fields?: string[];
-}
-
-// TODO: Change this from a search to a filter once this ticket is solved:
-// https://github.com/elastic/kibana/projects/26#card-27462236
-export const findSignals = async ({ alertsClient, perPage, page, fields }: GetSignalParams) => {
-  return alertsClient.find({
+export const findSignals = async ({ alertsClient, perPage, page, fields }: FindSignalParams) =>
+  alertsClient.find({
     options: {
       fields,
       page,
       perPage,
-      searchFields: ['alertTypeId'],
-      search: SIGNALS_ID,
+      filter: `alert.attributes.alertTypeId: ${SIGNALS_ID}`,
     },
   });
-};

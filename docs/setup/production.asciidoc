@@ -23,8 +23,8 @@ and an Elasticsearch client node on the same machine. For more information, see
 [[configuring-kibana-shield]]
 === Using {stack} {security-features}
 
-You can use {stack-ov}/elasticsearch-security.html[{stack} {security-features}] 
-to control what {es} data users can access through Kibana.
+You can use {stack} {security-features} to control what {es} data users can
+access through Kibana.
 
 When {security-features} are enabled, Kibana users have to log in. They need to
 have a role granting <<kibana-privileges, Kibana privileges>> as well as access 

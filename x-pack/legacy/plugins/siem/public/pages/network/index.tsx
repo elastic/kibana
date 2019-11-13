@@ -13,12 +13,13 @@ import { hasMlUserPermissions } from '../../components/ml/permissions/has_ml_use
 import { IPDetails } from './ip_details';
 import { Network } from './network';
 import { GlobalTime } from '../../containers/global_time';
+import { SiemPageName } from '../home/types';
 import { getNetworkRoutePath } from './navigation';
 import { NetworkRouteType } from './navigation/types';
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
-const networkPagePath = `/:pageName(network)`;
+const networkPagePath = `/:pageName(${SiemPageName.network})`;
 const ipDetailsPagePath = `${networkPagePath}/ip/:detailName`;
 
 export const NetworkContainer = React.memo<Props>(() => {
@@ -66,9 +67,9 @@ export const NetworkContainer = React.memo<Props>(() => {
             )}
           />
           <Route
-            path="/network/"
+            path={`/${SiemPageName.network}/`}
             render={({ location: { search = '' } }) => (
-              <Redirect from="/network/" to={`/network/${NetworkRouteType.ips}${search}`} />
+              <Redirect to={`/${SiemPageName.network}/${NetworkRouteType.flows}${search}`} />
             )}
           />
         </Switch>

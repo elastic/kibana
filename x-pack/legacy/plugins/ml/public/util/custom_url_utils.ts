@@ -103,8 +103,8 @@ function isKibanaUrl(urlConfig: UrlConfig) {
 /**
  * Escape any double quotes in the value for correct use in KQL.
  */
-function escapeForKQL(value: string): string {
-  return value.replace(/\"/g, '\\"');
+function escapeForKQL(value: string | number): string {
+  return String(value).replace(/\"/g, '\\"');
 }
 
 // Builds a Kibana dashboard or Discover URL from the supplied config, with any
@@ -127,7 +127,7 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
   );
 
   const replaceSingleTokenValues = (str: string) =>
-    str.replace(/\$(\w+)\$/g, (match, name: string) => {
+    str.replace(/\$([^?&$\'"]+)\$/g, (match, name: string) => {
       // Use lodash get to allow nested JSON fields to be retrieved.
       let tokenValue: string | string[] | undefined = get(record, name);
       tokenValue = Array.isArray(tokenValue) ? tokenValue[0] : tokenValue;

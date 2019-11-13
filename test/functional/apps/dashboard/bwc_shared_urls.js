@@ -52,6 +52,7 @@ export default function ({ getService, getPageObjects }) {
   describe('bwc shared urls', function describeIndexTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
+      await PageObjects.dashboard.preserveCrossAppState();
 
       const currentUrl = await browser.getCurrentUrl();
       kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 const { readdirSync } = require('fs');
 const { resolve } = require('path');
 
@@ -36,6 +55,193 @@ module.exports = {
   extends: ['@elastic/eslint-config-kibana', 'plugin:@elastic/eui/recommended'],
 
   overrides: [
+    /**
+     * Temporarily disable some react rules for specific plugins, remove in separate PRs
+     */
+    {
+      files: ['packages/kbn-ui-framework/**/*.{js,ts,tsx}'],
+      rules: {
+        'jsx-a11y/no-onchange': 'off',
+      },
+    },
+    {
+      files: ['src/core/public/application/**/*.{js,ts,tsx}'],
+      rules: {
+        'react/no-danger': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/core_plugins/console/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/core_plugins/data/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/core_plugins/expressions/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/core_plugins/kbn_vislib_vis_types/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/core_plugins/kibana/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/rules-of-hooks': 'off',
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/core_plugins/tile_map/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/core_plugins/vis_type_markdown/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/core_plugins/vis_type_metric/**/*.{js,ts,tsx}'],
+      rules: {
+        'jsx-a11y/click-events-have-key-events': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/core_plugins/vis_type_table/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/core_plugins/vis_type_vega/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/legacy/ui/public/vis/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/plugins/es_ui_shared/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/plugins/eui_utils/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/plugins/kibana_react/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/rules-of-hooks': 'off',
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['src/plugins/kibana_utils/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/canvas/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+        'jsx-a11y/click-events-have-key-events': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/cross_cluster_replication/**/*.{js,ts,tsx}'],
+      rules: {
+        'jsx-a11y/click-events-have-key-events': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/graph/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/index_management/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+        'react-hooks/rules-of-hooks': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/infra/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+        'react-hooks/rules-of-hooks': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/lens/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+        'react-hooks/rules-of-hooks': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/ml/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/monitoring/**/*.{js,ts,tsx}'],
+      rules: {
+        'jsx-a11y/click-events-have-key-events': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/siem/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+        'react-hooks/rules-of-hooks': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/snapshot_restore/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/uptime/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+        'react-hooks/rules-of-hooks': 'off',
+      },
+    },
+    {
+      files: ['x-pack/legacy/plugins/watcher/**/*.{js,ts,tsx}'],
+      rules: {
+        'react-hooks/rules-of-hooks': 'off',
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
+
     /**
      * Prettier
      */
@@ -156,10 +362,10 @@ module.exports = {
                   '!src/core/server/*.test.mocks.ts',
 
                   'src/plugins/**/public/**/*',
-                  '!src/plugins/**/public/index*',
+                  '!src/plugins/**/public/index.{js,ts,tsx}',
 
                   'src/plugins/**/server/**/*',
-                  '!src/plugins/**/server/index*',
+                  '!src/plugins/**/server/index.{js,ts,tsx}',
                 ],
                 allowSameFolder: true,
               },
@@ -194,6 +400,7 @@ module.exports = {
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/legacy/plugins/apm/**/*.js',
         'test/*/config.ts',
+        'test/*/{tests,test_suites,apis,apps}/**/*',
         'test/visual_regression/tests/**/*',
         'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
         'x-pack/test/*/*config.*ts',
@@ -622,7 +829,6 @@ module.exports = {
         // will introduced after the other warns are fixed
         // 'react/sort-comp': 'error',
         'react/void-dom-elements-no-children': 'error',
-        'react/jsx-boolean-value': ['error', 'warn'],
         // will introduced after the other warns are fixed
         // 'react/jsx-no-bind': 'error',
         'react/jsx-no-comment-textnodes': 'error',

@@ -46,7 +46,7 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
     function createJavascriptElement(path) {
       var dom = document.createElement('script');
 
-      dom.setAttribute('async', '');
+      dom.setAttribute('defer', 'defer');
       dom.addEventListener('error', failure);
       dom.setAttribute('src', file);
       dom.addEventListener('load', next);

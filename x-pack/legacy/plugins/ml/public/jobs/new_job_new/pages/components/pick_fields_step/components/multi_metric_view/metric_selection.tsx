@@ -33,7 +33,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
   const jobCreator = jc as MultiMetricJobCreator;
 
   const { fields } = newJobCapsService;
-  const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([{ label: '' }]);
+  const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([]);
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>(
     jobCreator.aggFieldPairs
   );
@@ -57,7 +57,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
       if (typeof option !== 'undefined') {
         const newPair = { agg: option.agg, field: option.field };
         setAggFieldPairList([...aggFieldPairList, newPair]);
-        setSelectedOptions([{ label: '' }]);
+        setSelectedOptions([]);
       } else {
         setAggFieldPairList([]);
       }

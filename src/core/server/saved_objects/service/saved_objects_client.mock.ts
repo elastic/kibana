@@ -33,4 +33,4 @@ const create = () =>
     update: jest.fn(),
   } as unknown) as jest.Mocked<SavedObjectsClientContract>);
 
-export const SavedObjectsClientMock = { create };
+export const savedObjectsClientMock = { create };

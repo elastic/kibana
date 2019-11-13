@@ -4,31 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
 import uuid from 'uuid';
 import React from 'react';
-import { npStart } from 'ui/new_platform';
 import { OutPortal, PortalNode } from 'react-reverse-portal';
 import { Query } from 'src/plugins/data/common';
+import { PluginsStart } from 'ui/new_platform/new_platform';
 
 import { ActionToaster, AppToast } from '../toasters';
-import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import {
-  APPLY_FILTER_TRIGGER,
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
-  APPLY_FILTER_ACTION,
   ViewMode,
 } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import {
-  APPLY_SIEM_FILTER_ACTION_ID,
-  ApplySiemFilterAction,
-} from './actions/apply_siem_filter_action';
-import { IndexPatternMapping, MapEmbeddable, RenderTooltipContentParams, SetQuery } from './types';
+  IndexPatternMapping,
+  MapEmbeddable,
+  RenderTooltipContentParams,
+  SetQuery,
+  EmbeddableApi,
+} from './types';
 import { getLayerList } from './map_config';
 // @ts-ignore Missing type defs as maps moves to Typescript
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../maps/common/constants';
 import * as i18n from './translations';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 /**
  * Displays an error toast for the provided title and message
@@ -59,23 +58,14 @@ export const displayErrorToast = (
  * Temporary Embeddables API configuration override until ability to edit actions is addressed:
  * https://github.com/elastic/kibana/issues/43643
  *
- * @param applyFilterQueryFromKueryExpression function for updating KQL as provided by NetworkFilter
+ * @param plugins new platform plugins
  *
- * @throws Error if action is already registered
+ * @throws Error if trigger/action doesn't exist
  */
-export const setupEmbeddablesAPI = () => {
+export const setupEmbeddablesAPI = (plugins: PluginsStart) => {
   try {
-    const actions = npStart.plugins.uiActions.getTriggerActions(APPLY_FILTER_TRIGGER);
-    const actionLoaded = actions.some(a => a.id === APPLY_SIEM_FILTER_ACTION_ID);
-    if (!actionLoaded) {
-      const siemFilterAction = new ApplySiemFilterAction();
-      npStart.plugins.uiActions.registerAction(siemFilterAction);
-      npStart.plugins.uiActions.attachAction(APPLY_FILTER_TRIGGER, siemFilterAction.id);
-
-      npStart.plugins.uiActions.detachAction(CONTEXT_MENU_TRIGGER, 'CUSTOM_TIME_RANGE');
-      npStart.plugins.uiActions.detachAction(PANEL_BADGE_TRIGGER, 'CUSTOM_TIME_RANGE_BADGE');
-      npStart.plugins.uiActions.detachAction(APPLY_FILTER_TRIGGER, APPLY_FILTER_ACTION);
-    }
+    plugins.uiActions.detachAction(CONTEXT_MENU_TRIGGER, 'CUSTOM_TIME_RANGE');
+    plugins.uiActions.detachAction(PANEL_BADGE_TRIGGER, 'CUSTOM_TIME_RANGE_BADGE');
   } catch (e) {
     throw e;
   }
@@ -84,25 +74,28 @@ export const setupEmbeddablesAPI = () => {
 /**
  * Creates MapEmbeddable with provided initial configuration
  *
+ * @param filters any existing global filters
  * @param indexPatterns list of index patterns to configure layers for
  * @param query initial query constraints as Query
  * @param startDate
  * @param endDate
  * @param setQuery function as provided by the GlobalTime component for reacting to refresh
  * @param portalNode wrapper for MapToolTip so it is not rendered in the embeddables component tree
+ * @param embeddableApi
  *
  * @throws Error if EmbeddableFactory does not exist
  */
 export const createEmbeddable = async (
-  filters: Filter[],
+  filters: esFilters.Filter[],
   indexPatterns: IndexPatternMapping[],
   query: Query,
   startDate: number,
   endDate: number,
   setQuery: SetQuery,
-  portalNode: PortalNode
+  portalNode: PortalNode,
+  embeddableApi: EmbeddableApi
 ): Promise<MapEmbeddable> => {
-  const factory = start.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
+  const factory = embeddableApi.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
   const state = {
     layerList: getLayerList(indexPatterns),

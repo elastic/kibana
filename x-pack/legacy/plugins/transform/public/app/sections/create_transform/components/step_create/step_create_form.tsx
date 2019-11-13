@@ -29,6 +29,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { ToastNotificationText } from '../../../../components';
 import { useApi } from '../../../../hooks/use_api';
 import { isKibanaContextInitialized, KibanaContext } from '../../../../lib/kibana';
 import { RedirectToTransformManagement } from '../../../../common/navigation';
@@ -75,6 +76,8 @@ export const StepCreateForm: SFC<Props> = React.memo(
 
     useEffect(() => {
       onChange({ created, started, indexPatternId });
+      // custom comparison
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [created, started, indexPatternId]);
 
     const api = useApi();
@@ -87,7 +90,17 @@ export const StepCreateForm: SFC<Props> = React.memo(
       setCreated(true);
 
       try {
-        await api.createTransform(transformId, transformConfig);
+        const resp = await api.createTransform(transformId, transformConfig);
+        if (resp.errors !== undefined && Array.isArray(resp.errors)) {
+          if (resp.errors.length === 1) {
+            throw resp.errors[0];
+          }
+
+          if (resp.errors.length > 1) {
+            throw resp.errors;
+          }
+        }
+
         toastNotifications.addSuccess(
           i18n.translate('xpack.transform.stepCreateForm.createTransformSuccessMessage', {
             defaultMessage: 'Request to create transform {transformId} acknowledged.',
@@ -96,12 +109,13 @@ export const StepCreateForm: SFC<Props> = React.memo(
         );
       } catch (e) {
         setCreated(false);
-        toastNotifications.addDanger(
-          i18n.translate('xpack.transform.stepCreateForm.createTransformErrorMessage', {
-            defaultMessage: 'An error occurred creating the transform {transformId}: {error}',
-            values: { transformId, error: JSON.stringify(e) },
-          })
-        );
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.transform.stepCreateForm.createTransformErrorMessage', {
+            defaultMessage: 'An error occurred creating the transform {transformId}:',
+            values: { transformId },
+          }),
+          text: <ToastNotificationText text={e} />,
+        });
         return false;
       }
 
@@ -125,12 +139,13 @@ export const StepCreateForm: SFC<Props> = React.memo(
         );
       } catch (e) {
         setStarted(false);
-        toastNotifications.addDanger(
-          i18n.translate('xpack.transform.stepCreateForm.startTransformErrorMessage', {
-            defaultMessage: 'An error occurred starting the transform {transformId}: {error}',
-            values: { transformId, error: JSON.stringify(e) },
-          })
-        );
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.transform.stepCreateForm.startTransformErrorMessage', {
+            defaultMessage: 'An error occurred starting the transform {transformId}:',
+            values: { transformId },
+          }),
+          text: <ToastNotificationText text={e} />,
+        });
       }
     }
 
@@ -182,13 +197,14 @@ export const StepCreateForm: SFC<Props> = React.memo(
         setIndexPatternId(id);
         return true;
       } catch (e) {
-        toastNotifications.addDanger(
-          i18n.translate('xpack.transform.stepCreateForm.createIndexPatternErrorMessage', {
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.transform.stepCreateForm.createIndexPatternErrorMessage', {
             defaultMessage:
-              'An error occurred creating the Kibana index pattern {indexPatternName}: {error}',
-            values: { indexPatternName, error: JSON.stringify(e) },
-          })
-        );
+              'An error occurred creating the Kibana index pattern {indexPatternName}:',
+            values: { indexPatternName },
+          }),
+          text: <ToastNotificationText text={e} />,
+        });
         return false;
       }
     };
@@ -214,12 +230,12 @@ export const StepCreateForm: SFC<Props> = React.memo(
               }
             }
           } catch (e) {
-            toastNotifications.addDanger(
-              i18n.translate('xpack.transform.stepCreateForm.progressErrorMessage', {
-                defaultMessage: 'An error occurred getting the progress percentage: {error}',
-                values: { error: JSON.stringify(e) },
-              })
-            );
+            toastNotifications.addDanger({
+              title: i18n.translate('xpack.transform.stepCreateForm.progressErrorMessage', {
+                defaultMessage: 'An error occurred getting the progress percentage:',
+              }),
+              text: <ToastNotificationText text={e} />,
+            });
             clearInterval(interval);
           }
         }, PROGRESS_REFRESH_INTERVAL_MS);
@@ -230,11 +246,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
     }
 
     function getTransformConfigDevConsoleStatement() {
-      return `PUT _data_frame/transforms/${transformId}\n${JSON.stringify(
-        transformConfig,
-        null,
-        2
-      )}\n\n`;
+      return `PUT _transform/${transformId}\n${JSON.stringify(transformConfig, null, 2)}\n\n`;
     }
 
     // TODO move this to SASS
