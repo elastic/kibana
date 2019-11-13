@@ -82,7 +82,7 @@
     "**/@types/react": "16.8.3",
     "**/@types/hapi": "^17.0.18",
     "**/@types/angular": "^1.6.56",
-    "**/typescript": "3.7.0-beta",
+    "**/typescript": "3.7.2",
     "**/graphql-toolkit/lodash": "^4.17.13",
     "**/isomorphic-git/**/base64-js": "^1.2.1",
     "**/image-diff/gm/debug": "^2.6.9"
@@ -444,7 +444,7 @@
     "supertest": "^3.1.0",
     "supertest-as-promised": "^4.0.2",
     "tree-kill": "^1.2.1",
-    "typescript": "3.7.0-beta",
+    "typescript": "3.7.2",
     "typings-tester": "^0.3.2",
     "vinyl-fs": "^3.0.3",
     "xml2js": "^0.4.22",

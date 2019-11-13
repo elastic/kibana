@@ -171,7 +171,7 @@
     "tmp": "0.1.0",
     "tree-kill": "^1.2.1",
     "ts-loader": "^6.0.4",
-    "typescript": "3.7.0-beta",
+    "typescript": "3.7.2",
     "vinyl-fs": "^3.0.3",
     "whatwg-fetch": "^3.0.0",
     "xml-crypto": "^1.4.0",
