@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { mockFields, mockIndexPattern } from '../../../../index_patterns';
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+import { stubIndexPattern, stubFields } from '../../../../../../../../plugins/data/public/stubs';
 import { IndexPattern, Field } from '../../../../index';
 import {
   buildFilter,
@@ -45,8 +46,8 @@ import { esFilters } from '../../../../../../../../plugins/data/public';
 
 jest.mock('ui/new_platform');
 
-const mockedFields = mockFields as Field[];
-const mockedIndexPattern = mockIndexPattern as IndexPattern;
+const mockedFields = stubFields as Field[];
+const mockedIndexPattern = stubIndexPattern as IndexPattern;
 
 describe('Filter editor utils', () => {
   describe('getQueryDslFromFilter', () => {
@@ -171,14 +172,14 @@ describe('Filter editor utils', () => {
 
   describe('getOperatorOptions', () => {
     it('returns range for number fields', () => {
-      const [field] = mockFields.filter(({ type }) => type === 'number');
+      const [field] = stubFields.filter(({ type }) => type === 'number');
       const operatorOptions = getOperatorOptions(field as Field);
       const rangeOperator = operatorOptions.find(operator => operator.type === 'range');
       expect(rangeOperator).not.toBeUndefined();
     });
 
     it('does not return range for string fields', () => {
-      const [field] = mockFields.filter(({ type }) => type === 'string');
+      const [field] = stubFields.filter(({ type }) => type === 'string');
       const operatorOptions = getOperatorOptions(field as Field);
       const rangeOperator = operatorOptions.find(operator => operator.type === 'range');
       expect(rangeOperator).toBeUndefined();
