@@ -110,6 +110,7 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
        */
       toMatchScreenshot: async () => {
         const pipelineResponse = await handler.getResponse();
+        log.debug('starting to render');
         const result = await browser.executeAsync((context, done) => {
           window.renderPipelineResponse(context).then(result => {
             done(result);

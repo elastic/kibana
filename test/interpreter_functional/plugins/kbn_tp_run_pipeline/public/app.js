@@ -25,6 +25,7 @@ import chrome from 'ui/chrome';
 
 import { RequestAdapter, DataAdapter } from 'ui/inspector/adapters';
 import { registries } from 'plugins/interpreter/registries';
+import { start as expressions } from 'plugins/expressions/legacy';
 
 // This is required so some default styles and required scripts/Angular modules are loaded,
 // or the timezone setting is correctly applied.
@@ -55,17 +56,6 @@ app.config(stateManagementConfigProvider =>
   stateManagementConfigProvider.disable()
 );
 
-import { fromExpression } from '@kbn/interpreter/common';
-import { getInterpreter } from '../../../../../src/legacy/core_plugins/interpreter/public/interpreter';
-
-const runPipeline = async (expression, context, handlers) => {
-  const ast = fromExpression(expression);
-  const { interpreter } = await getInterpreter();
-  const pipelineResponse = await interpreter.interpretAst(ast, context, handlers);
-  return pipelineResponse;
-};
-
-
 function RootController($scope, $element) {
   const domNode = $element[0];
 
@@ -73,7 +63,7 @@ function RootController($scope, $element) {
   render(<Main
     RequestAdapter={RequestAdapter}
     DataAdapter={DataAdapter}
-    runPipeline={runPipeline}
+    expressions={expressions}
     registries={registries}
   />, domNode);
 
