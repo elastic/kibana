@@ -11,7 +11,7 @@ import { createQuery } from './create_query';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 
 import {
-  ClusterUuidsGetter,
+  ClusterDetailsGetter,
   StatsCollectionConfig,
   ClusterDetails,
 } from '../../../../../../src/legacy/core_plugins/telemetry/server/collection_manager';
@@ -19,7 +19,7 @@ import {
 /**
  * Get a list of Cluster UUIDs that exist within the specified timespan.
  */
-export const getClusterUuids: ClusterUuidsGetter = async config => {
+export const getClusterUuids: ClusterDetailsGetter = async config => {
   const response = await fetchClusterUuids(config);
   return handleClusterUuidsResponse(response);
 };

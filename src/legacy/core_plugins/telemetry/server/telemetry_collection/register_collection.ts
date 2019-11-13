@@ -46,6 +46,6 @@ export function registerCollection() {
     title: 'local',
     priority: 0,
     statsGetter: getLocalStats,
-    clusterUuidsGetter: getClusterUuids,
+    clusterDetailsGetter: getClusterUuids,
   });
 }

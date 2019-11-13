@@ -14,6 +14,6 @@ export function registerMonitoringCollection() {
     title: 'local_xpack',
     priority: 1,
     statsGetter: getStatsWithXpack,
-    clusterUuidsGetter: getClusterUuids,
+    clusterDetailsGetter: getClusterUuids,
   });
 }

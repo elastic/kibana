@@ -19,7 +19,7 @@
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { TIMEOUT } from './constants';
-import { ClusterUuidsGetter } from '../collection_manager';
+import { ClusterDetailsGetter } from '../collection_manager';
 /**
  * Get the cluster stats from the connected cluster.
  *
@@ -34,7 +34,7 @@ export async function getClusterStats(callCluster: CallCluster) {
 /**
  * Get the cluster uuids from the connected cluster.
  */
-export const getClusterUuids: ClusterUuidsGetter = async ({ callCluster }) => {
+export const getClusterUuids: ClusterDetailsGetter = async ({ callCluster }) => {
   const result = await getClusterStats(callCluster);
-  return [{ clusterUuid: result }];
+  return [{ clusterUuid: result.cluster_uuid }];
 };

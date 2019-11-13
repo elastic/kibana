@@ -18,11 +18,11 @@
  */
 
 import Joi from 'joi';
+import moment from 'moment';
 import { boomify } from 'boom';
 import { CoreSetup } from 'src/core/server';
-// @ts-ignore
-import fetch from 'node-fetch';
 import { getTelemetryAllowChangingOptInStatus } from '../telemetry_config';
+import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
 
 import {
   TelemetrySavedObjectAttributes,
@@ -32,28 +32,6 @@ import {
 interface RegisterOptInRoutesParams {
   core: CoreSetup;
   currentKibanaVersion: string;
-}
-
-async function sendTelemetryChangeOptInStatus({
-  server,
-  newOptInStatus,
-}: {
-  server: any;
-  newOptInStatus: boolean;
-}) {
-  const optInStatusUrl = config.get('telemetry.optInStatusUrl');
-  server.log(
-    ['debug', 'telemetry', 'optin'],
-    `Sending change in opt-in status to the telemetry cluser.`
-  );
-  await fetch(optInStatusUrl, {
-    method: 'post',
-    body: JSON.stringify({
-      // cluster_uuid: get(clusterInfo, 'cluster_uuid'),
-      // cluser_uuid:  '',
-      opt_in_status: newOptInStatus,
-    }),
-  });
 }
 
 export function registerTelemetryOptInRoutes({
@@ -93,12 +71,20 @@ export function registerTelemetryOptInRoutes({
           return h.response({ error: 'Not allowed to change Opt-in Status.' }).code(400);
         }
 
-        const usageFetcher = config.get('telemetry.usageFetcher');
-        if (usageFetcher === 'server') {
-          await sendTelemetryChangeOptInStatus({
-            server: req.server,
-            newOptInStatus,
-          });
+        const sendUsageFrom = config.get('telemetry.sendUsageFrom');
+        if (sendUsageFrom === 'server') {
+          const optInStatusUrl = config.get('telemetry.optInStatusUrl');
+          await sendTelemetryOptInStatus(
+            { optInStatusUrl, newOptInStatus },
+            {
+              start: moment()
+                .subtract(20, 'minutes')
+                .toISOString(),
+              end: moment().toISOString(),
+              server: req.server,
+              unencrypted: false,
+            }
+          );
         }
 
         await updateTelemetrySavedObject(savedObjectsClient, attributes);

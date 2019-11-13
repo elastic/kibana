@@ -87,8 +87,6 @@ export class FetcherTask {
   };
 
   private fetchTelemetry = async () => {
-    const config = this.server.config();
-
     return await telemetryCollectionManager.getStats({
       unencrypted: false,
       server: this.server,
@@ -96,7 +94,6 @@ export class FetcherTask {
         .subtract(20, 'minutes')
         .toISOString(),
       end: moment().toISOString(),
-      isDev: config.get('env.dev'),
     });
   };
 

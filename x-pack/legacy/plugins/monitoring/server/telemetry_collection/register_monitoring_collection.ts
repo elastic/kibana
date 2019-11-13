@@ -15,6 +15,6 @@ export function registerMonitoringCollection() {
     title: 'monitoring',
     priority: 2,
     statsGetter: getAllStats,
-    clusterUuidsGetter: getClusterUuids,
+    clusterDetailsGetter: getClusterUuids,
   });
 }

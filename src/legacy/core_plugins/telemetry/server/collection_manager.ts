@@ -22,16 +22,14 @@ import { CallCluster } from '../../elasticsearch';
 
 export type EncryptedStatsGetterConfig = { unencrypted: false } & {
   server: any;
-  start: any;
-  end: any;
-  isDev: boolean;
+  start: string;
+  end: string;
 };
 
 export type UnencryptedStatsGetterConfig = { unencrypted: true } & {
   req: any;
-  start: any;
-  end: any;
-  isDev: boolean;
+  start: string;
+  end: string;
 };
 
 export interface ClusterDetails {
@@ -41,12 +39,12 @@ export interface ClusterDetails {
 export interface StatsCollectionConfig {
   callCluster: CallCluster;
   server: any;
-  start: any;
-  end: any;
+  start: string;
+  end: string;
 }
 
 export type StatsGetterConfig = UnencryptedStatsGetterConfig | EncryptedStatsGetterConfig;
-export type ClusterUuidsGetter = (config: StatsCollectionConfig) => Promise<ClusterDetails[]>;
+export type ClusterDetailsGetter = (config: StatsCollectionConfig) => Promise<ClusterDetails[]>;
 export type StatsGetter = (
   clustersDetails: ClusterDetails[],
   config: StatsCollectionConfig
@@ -57,11 +55,11 @@ interface CollectionConfig {
   priority: number;
   esCluster: string;
   statsGetter: StatsGetter;
-  clusterUuidsGetter: ClusterUuidsGetter;
+  clusterDetailsGetter: ClusterDetailsGetter;
 }
 interface Collection {
   statsGetter: StatsGetter;
-  clusterUuidsGetter: ClusterUuidsGetter;
+  clusterDetailsGetter: ClusterDetailsGetter;
   esCluster: string;
   title: string;
 }
@@ -71,7 +69,7 @@ export class TelemetryCollectionManager {
   private collections: Collection[] = [];
 
   public setCollection = (collectionConfig: CollectionConfig) => {
-    const { title, priority, esCluster, statsGetter, clusterUuidsGetter } = collectionConfig;
+    const { title, priority, esCluster, statsGetter, clusterDetailsGetter } = collectionConfig;
 
     if (typeof priority !== 'number') {
       throw new Error('priority must be set.');
@@ -87,13 +85,13 @@ export class TelemetryCollectionManager {
       if (!esCluster) {
         throw Error('esCluster name must be set for the getCluster method.');
       }
-      if (!clusterUuidsGetter) {
+      if (!clusterDetailsGetter) {
         throw Error('Cluser UUIds method is not set.');
       }
 
       this.collections.unshift({
         statsGetter,
-        clusterUuidsGetter,
+        clusterDetailsGetter,
         esCluster,
         title,
       });
@@ -117,11 +115,23 @@ export class TelemetryCollectionManager {
     return { server, callCluster, start, end };
   };
 
+  private getOptInStatsForCollection = async (
+    collection: Collection,
+    optInStatus: boolean,
+    statsCollectionConfig: StatsCollectionConfig
+  ) => {
+    const clustersDetails = await collection.clusterDetailsGetter(statsCollectionConfig);
+    return clustersDetails.map(({ clusterUuid }) => ({
+      cluster_uuid: clusterUuid,
+      opt_in_status: optInStatus,
+    }));
+  };
+
   private getUsageForCollection = async (
     collection: Collection,
     statsCollectionConfig: StatsCollectionConfig
   ) => {
-    const clustersDetails = await collection.clusterUuidsGetter(statsCollectionConfig);
+    const clustersDetails = await collection.clusterDetailsGetter(statsCollectionConfig);
 
     if (clustersDetails.length === 0) {
       // don't bother doing a further lookup, try next collection.
@@ -129,6 +139,38 @@ export class TelemetryCollectionManager {
     }
 
     return await collection.statsGetter(clustersDetails, statsCollectionConfig);
+  };
+
+  public getOptInStats = async (optInStatus: boolean, config: StatsGetterConfig) => {
+    for (const collection of this.collections) {
+      const statsCollectionConfig = await this.getStatsCollectionConfig(collection, config);
+      try {
+        const optInStats = await this.getOptInStatsForCollection(
+          collection,
+          optInStatus,
+          statsCollectionConfig
+        );
+        if (optInStats && optInStats.length) {
+          statsCollectionConfig.server.log(
+            ['debug', 'telemetry', 'collection'],
+            `Got Opt In stats using ${collection.title} collection.`
+          );
+          if (config.unencrypted) {
+            return optInStats;
+          }
+          const isDev = statsCollectionConfig.server.config().get('env.dev');
+          return encryptTelemetry(optInStats, isDev);
+        }
+      } catch (err) {
+        statsCollectionConfig.server.log(
+          ['debu', 'telemetry', 'collection'],
+          `Failed to collect any opt in stats with registered collections.`
+        );
+        // swallow error to try next collection;
+      }
+    }
+
+    return [];
   };
   public getStats = async (config: StatsGetterConfig) => {
     for (const collection of this.collections) {
@@ -143,7 +185,8 @@ export class TelemetryCollectionManager {
           if (config.unencrypted) {
             return usageData;
           }
-          return encryptTelemetry(usageData, config.isDev);
+          const isDev = statsCollectionConfig.server.config().get('env.dev');
+          return encryptTelemetry(usageData, isDev);
         }
       } catch (err) {
         statsCollectionConfig.server.log(
