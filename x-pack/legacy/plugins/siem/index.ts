@@ -137,7 +137,7 @@ export const siem = (kibana: any) => {
 
       const { logger } = newPlatform.coreContext;
 
-      const legacy = {
+      const serverFacade = {
         config,
         getInjectedUiAppVars,
         indexPatternsServiceFactory,
@@ -148,13 +148,13 @@ export const siem = (kibana: any) => {
         },
         plugins: { alerting: plugins.alerting, xpack_main: plugins.xpack_main },
         register: register.bind(server),
-        route,
+        route: route.bind(server),
         savedObjects,
       };
 
       plugin({ logger }).setup({}, {});
 
-      initServerWithKibana(legacy);
+      initServerWithKibana(serverFacade);
     },
   });
 };
