@@ -159,9 +159,6 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const Network = connect(
-  makeMapStateToProps,
-  {
-    setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-  }
-)(NetworkComponent);
+export const Network = connect(makeMapStateToProps, {
+  setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
+})(NetworkComponent);

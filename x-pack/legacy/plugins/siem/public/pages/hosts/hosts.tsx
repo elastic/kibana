@@ -153,10 +153,7 @@ interface HostsProps extends GlobalTimeArgs {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const Hosts = compose<React.ComponentClass<HostsProps>>(
-  connect(
-    makeMapStateToProps,
-    {
-      setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-    }
-  )
+  connect(makeMapStateToProps, {
+    setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
+  })
 )(HostsComponent);

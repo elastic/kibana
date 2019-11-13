@@ -250,7 +250,9 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       // user usually doesn't have `cluster:admin/xpack/security/oidc/prepare`.
       const { state, nonce, redirect } = await this.options.client.callAsInternalUser(
         'shield.oidcPrepare',
-        { body: oidcPrepareParams }
+        {
+          body: oidcPrepareParams,
+        }
       );
 
       this.logger.debug('Redirecting to OpenID Connect Provider with authentication request.');
