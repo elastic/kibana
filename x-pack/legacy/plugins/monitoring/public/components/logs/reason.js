@@ -139,7 +139,7 @@ export const Reason = ({ reason }) => {
         values={{
           link: (
             <EuiLink target="_blank" href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`}>
-              {i18n.translate('xpack.monitoring.logs.reason.noNodeLink', {
+              {i18n.translate('xpack.monitoring.logs.reason.noIndexLink', {
                 defaultMessage: 'setup'
               })}
             </EuiLink>
@@ -159,7 +159,7 @@ export const Reason = ({ reason }) => {
         values={{
           link: (
             <EuiLink target="_blank" href="https://github.com/elastic/kibana/issues/48533#issuecomment-545031647">
-              {i18n.translate('xpack.monitoring.logs.reason.noNodeLink', {
+              {i18n.translate('xpack.monitoring.logs.reason.correctIndexNameLink', {
                 defaultMessage: 'this issue'
               })}
             </EuiLink>
