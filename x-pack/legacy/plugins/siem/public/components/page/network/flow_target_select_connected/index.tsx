@@ -63,9 +63,6 @@ const makeMapStateToProps = () => {
   };
 };
 
-export const FlowTargetSelectConnected = connect(
-  makeMapStateToProps,
-  {
-    updateIpDetailsFlowTarget: networkActions.updateIpDetailsFlowTarget,
-  }
-)(FlowTargetSelectComponent);
+export const FlowTargetSelectConnected = connect(makeMapStateToProps, {
+  updateIpDetailsFlowTarget: networkActions.updateIpDetailsFlowTarget,
+})(FlowTargetSelectComponent);

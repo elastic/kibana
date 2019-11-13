@@ -135,7 +135,12 @@ export const globalStateUpdater = (dispatch, globalState) => state => {
 
   if (elementsToRemove.length) {
     // remove elements for groups that were ungrouped
-    dispatch(removeElements(elementsToRemove.map(e => e.id), page));
+    dispatch(
+      removeElements(
+        elementsToRemove.map(e => e.id),
+        page
+      )
+    );
   }
 
   // set the selected element on the global store, if one element is selected
