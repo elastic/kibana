@@ -29,8 +29,6 @@ export interface TimerangeInput {
   to: number;
   /** The beginning of the timerange */
   from: number;
-  /** The default browser set time zone */
-  timezone?: Maybe<string>;
 }
 
 export interface PaginationInputPaginated {
@@ -86,6 +84,10 @@ export interface NetworkTopTablesSortField {
 export interface NetworkDnsSortField {
   field: NetworkDnsFields;
 
+  direction: Direction;
+}
+
+export interface NetworkHttpSortField {
   direction: Direction;
 }
 
@@ -298,6 +300,16 @@ export enum NetworkDirectionEcs {
   unknown = 'unknown',
 }
 
+export enum NetworkHttpFields {
+  domains = 'domains',
+  lastHost = 'lastHost',
+  lastSourceIp = 'lastSourceIp',
+  methods = 'methods',
+  path = 'path',
+  requestCount = 'requestCount',
+  statuses = 'statuses',
+}
+
 export enum FlowDirection {
   uniDirectional = 'uniDirectional',
   biDirectional = 'biDirectional',
@@ -405,6 +417,8 @@ export interface Source {
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
 
+  AuthenticationsOverTime: AuthenticationsOverTimeData;
+
   Timeline: TimelineData;
 
   TimelineDetails: TimelineDetailsData;
@@ -434,6 +448,8 @@ export interface Source {
   NetworkTopNFlow: NetworkTopNFlowData;
 
   NetworkDns: NetworkDnsData;
+
+  NetworkHttp: NetworkHttpData;
 
   OverviewNetwork?: Maybe<OverviewNetworkData>;
 
@@ -636,6 +652,22 @@ export interface Inspect {
   dsl: string[];
 
   response: string[];
+}
+
+export interface AuthenticationsOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  authenticationsOverTime: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface MatrixOverTimeHistogramData {
+  x: number;
+
+  y: number;
+
+  g: string;
 }
 
 export interface TimelineData {
@@ -1222,14 +1254,6 @@ export interface EventsOverTimeData {
   totalCount: number;
 }
 
-export interface MatrixOverTimeHistogramData {
-  x: number;
-
-  y: number;
-
-  g: string;
-}
-
 export interface HostsData {
   edges: HostsEdges[];
 
@@ -1580,6 +1604,40 @@ export interface NetworkDnsItem {
   queryCount?: Maybe<number>;
 
   uniqueDomains?: Maybe<number>;
+}
+
+export interface NetworkHttpData {
+  edges: NetworkHttpEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface NetworkHttpEdges {
+  node: NetworkHttpItem;
+
+  cursor: CursorType;
+}
+
+export interface NetworkHttpItem {
+  _id?: Maybe<string>;
+
+  domains: string[];
+
+  lastHost?: Maybe<string>;
+
+  lastSourceIp?: Maybe<string>;
+
+  methods: string[];
+
+  path?: Maybe<string>;
+
+  requestCount?: Maybe<number>;
+
+  statuses: string[];
 }
 
 export interface OverviewNetworkData {
@@ -1982,6 +2040,13 @@ export interface AuthenticationsSourceArgs {
 
   defaultIndex: string[];
 }
+export interface AuthenticationsOverTimeSourceArgs {
+  timerange: TimerangeInput;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
 export interface TimelineSourceArgs {
   pagination: PaginationInput;
 
@@ -2144,6 +2209,21 @@ export interface NetworkDnsSourceArgs {
   pagination: PaginationInputPaginated;
 
   sort: NetworkDnsSortField;
+
+  timerange: TimerangeInput;
+
+  defaultIndex: string[];
+}
+export interface NetworkHttpSourceArgs {
+  id?: Maybe<string>;
+
+  filterQuery?: Maybe<string>;
+
+  ip?: Maybe<string>;
+
+  pagination: PaginationInputPaginated;
+
+  sort: NetworkHttpSortField;
 
   timerange: TimerangeInput;
 
@@ -2588,6 +2668,12 @@ export namespace SourceResolvers {
     /** Gets Authentication success and failures based on a timerange */
     Authentications?: AuthenticationsResolver<AuthenticationsData, TypeParent, TContext>;
 
+    AuthenticationsOverTime?: AuthenticationsOverTimeResolver<
+      AuthenticationsOverTimeData,
+      TypeParent,
+      TContext
+    >;
+
     Timeline?: TimelineResolver<TimelineData, TypeParent, TContext>;
 
     TimelineDetails?: TimelineDetailsResolver<TimelineDetailsData, TypeParent, TContext>;
@@ -2621,6 +2707,8 @@ export namespace SourceResolvers {
     NetworkTopNFlow?: NetworkTopNFlowResolver<NetworkTopNFlowData, TypeParent, TContext>;
 
     NetworkDns?: NetworkDnsResolver<NetworkDnsData, TypeParent, TContext>;
+
+    NetworkHttp?: NetworkHttpResolver<NetworkHttpData, TypeParent, TContext>;
 
     OverviewNetwork?: OverviewNetworkResolver<Maybe<OverviewNetworkData>, TypeParent, TContext>;
 
@@ -2657,6 +2745,19 @@ export namespace SourceResolvers {
     timerange: TimerangeInput;
 
     pagination: PaginationInputPaginated;
+
+    filterQuery?: Maybe<string>;
+
+    defaultIndex: string[];
+  }
+
+  export type AuthenticationsOverTimeResolver<
+    R = AuthenticationsOverTimeData,
+    Parent = Source,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext, AuthenticationsOverTimeArgs>;
+  export interface AuthenticationsOverTimeArgs {
+    timerange: TimerangeInput;
 
     filterQuery?: Maybe<string>;
 
@@ -2916,6 +3017,27 @@ export namespace SourceResolvers {
     pagination: PaginationInputPaginated;
 
     sort: NetworkDnsSortField;
+
+    timerange: TimerangeInput;
+
+    defaultIndex: string[];
+  }
+
+  export type NetworkHttpResolver<
+    R = NetworkHttpData,
+    Parent = Source,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext, NetworkHttpArgs>;
+  export interface NetworkHttpArgs {
+    id?: Maybe<string>;
+
+    filterQuery?: Maybe<string>;
+
+    ip?: Maybe<string>;
+
+    pagination: PaginationInputPaginated;
+
+    sort: NetworkHttpSortField;
 
     timerange: TimerangeInput;
 
@@ -3617,6 +3739,62 @@ export namespace InspectResolvers {
     Parent,
     TContext
   >;
+}
+
+export namespace AuthenticationsOverTimeDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = AuthenticationsOverTimeData> {
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+
+    authenticationsOverTime?: AuthenticationsOverTimeResolver<
+      MatrixOverTimeHistogramData[],
+      TypeParent,
+      TContext
+    >;
+
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
+  }
+
+  export type InspectResolver<
+    R = Maybe<Inspect>,
+    Parent = AuthenticationsOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type AuthenticationsOverTimeResolver<
+    R = MatrixOverTimeHistogramData[],
+    Parent = AuthenticationsOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = AuthenticationsOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace MatrixOverTimeHistogramDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = MatrixOverTimeHistogramData> {
+    x?: XResolver<number, TypeParent, TContext>;
+
+    y?: YResolver<number, TypeParent, TContext>;
+
+    g?: GResolver<string, TypeParent, TContext>;
+  }
+
+  export type XResolver<
+    R = number,
+    Parent = MatrixOverTimeHistogramData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type YResolver<
+    R = number,
+    Parent = MatrixOverTimeHistogramData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type GResolver<
+    R = string,
+    Parent = MatrixOverTimeHistogramData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
 }
 
 export namespace TimelineDataResolvers {
@@ -5569,32 +5747,6 @@ export namespace EventsOverTimeDataResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
-export namespace MatrixOverTimeHistogramDataResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = MatrixOverTimeHistogramData> {
-    x?: XResolver<number, TypeParent, TContext>;
-
-    y?: YResolver<number, TypeParent, TContext>;
-
-    g?: GResolver<string, TypeParent, TContext>;
-  }
-
-  export type XResolver<
-    R = number,
-    Parent = MatrixOverTimeHistogramData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type YResolver<
-    R = number,
-    Parent = MatrixOverTimeHistogramData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type GResolver<
-    R = string,
-    Parent = MatrixOverTimeHistogramData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
 export namespace HostsDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = HostsData> {
     edges?: EdgesResolver<HostsEdges[], TypeParent, TContext>;
@@ -6795,6 +6947,119 @@ export namespace NetworkDnsItemResolvers {
   export type UniqueDomainsResolver<
     R = Maybe<number>,
     Parent = NetworkDnsItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace NetworkHttpDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = NetworkHttpData> {
+    edges?: EdgesResolver<NetworkHttpEdges[], TypeParent, TContext>;
+
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
+
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
+
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+  }
+
+  export type EdgesResolver<
+    R = NetworkHttpEdges[],
+    Parent = NetworkHttpData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = NetworkHttpData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type PageInfoResolver<
+    R = PageInfoPaginated,
+    Parent = NetworkHttpData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type InspectResolver<
+    R = Maybe<Inspect>,
+    Parent = NetworkHttpData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace NetworkHttpEdgesResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = NetworkHttpEdges> {
+    node?: NodeResolver<NetworkHttpItem, TypeParent, TContext>;
+
+    cursor?: CursorResolver<CursorType, TypeParent, TContext>;
+  }
+
+  export type NodeResolver<
+    R = NetworkHttpItem,
+    Parent = NetworkHttpEdges,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type CursorResolver<
+    R = CursorType,
+    Parent = NetworkHttpEdges,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace NetworkHttpItemResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = NetworkHttpItem> {
+    _id?: _IdResolver<Maybe<string>, TypeParent, TContext>;
+
+    domains?: DomainsResolver<string[], TypeParent, TContext>;
+
+    lastHost?: LastHostResolver<Maybe<string>, TypeParent, TContext>;
+
+    lastSourceIp?: LastSourceIpResolver<Maybe<string>, TypeParent, TContext>;
+
+    methods?: MethodsResolver<string[], TypeParent, TContext>;
+
+    path?: PathResolver<Maybe<string>, TypeParent, TContext>;
+
+    requestCount?: RequestCountResolver<Maybe<number>, TypeParent, TContext>;
+
+    statuses?: StatusesResolver<string[], TypeParent, TContext>;
+  }
+
+  export type _IdResolver<
+    R = Maybe<string>,
+    Parent = NetworkHttpItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type DomainsResolver<
+    R = string[],
+    Parent = NetworkHttpItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type LastHostResolver<
+    R = Maybe<string>,
+    Parent = NetworkHttpItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type LastSourceIpResolver<
+    R = Maybe<string>,
+    Parent = NetworkHttpItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type MethodsResolver<
+    R = string[],
+    Parent = NetworkHttpItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type PathResolver<
+    R = Maybe<string>,
+    Parent = NetworkHttpItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type RequestCountResolver<
+    R = Maybe<number>,
+    Parent = NetworkHttpItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type StatusesResolver<
+    R = string[],
+    Parent = NetworkHttpItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -8112,6 +8377,8 @@ export type IResolvers<TContext = SiemContext> = {
   CursorType?: CursorTypeResolvers.Resolvers<TContext>;
   PageInfoPaginated?: PageInfoPaginatedResolvers.Resolvers<TContext>;
   Inspect?: InspectResolvers.Resolvers<TContext>;
+  AuthenticationsOverTimeData?: AuthenticationsOverTimeDataResolvers.Resolvers<TContext>;
+  MatrixOverTimeHistogramData?: MatrixOverTimeHistogramDataResolvers.Resolvers<TContext>;
   TimelineData?: TimelineDataResolvers.Resolvers<TContext>;
   TimelineEdges?: TimelineEdgesResolvers.Resolvers<TContext>;
   TimelineItem?: TimelineItemResolvers.Resolvers<TContext>;
@@ -8163,7 +8430,6 @@ export type IResolvers<TContext = SiemContext> = {
   DetailItem?: DetailItemResolvers.Resolvers<TContext>;
   LastEventTimeData?: LastEventTimeDataResolvers.Resolvers<TContext>;
   EventsOverTimeData?: EventsOverTimeDataResolvers.Resolvers<TContext>;
-  MatrixOverTimeHistogramData?: MatrixOverTimeHistogramDataResolvers.Resolvers<TContext>;
   HostsData?: HostsDataResolvers.Resolvers<TContext>;
   HostsEdges?: HostsEdgesResolvers.Resolvers<TContext>;
   HostItem?: HostItemResolvers.Resolvers<TContext>;
@@ -8200,6 +8466,9 @@ export type IResolvers<TContext = SiemContext> = {
   NetworkDnsData?: NetworkDnsDataResolvers.Resolvers<TContext>;
   NetworkDnsEdges?: NetworkDnsEdgesResolvers.Resolvers<TContext>;
   NetworkDnsItem?: NetworkDnsItemResolvers.Resolvers<TContext>;
+  NetworkHttpData?: NetworkHttpDataResolvers.Resolvers<TContext>;
+  NetworkHttpEdges?: NetworkHttpEdgesResolvers.Resolvers<TContext>;
+  NetworkHttpItem?: NetworkHttpItemResolvers.Resolvers<TContext>;
   OverviewNetworkData?: OverviewNetworkDataResolvers.Resolvers<TContext>;
   OverviewHostData?: OverviewHostDataResolvers.Resolvers<TContext>;
   TlsData?: TlsDataResolvers.Resolvers<TContext>;

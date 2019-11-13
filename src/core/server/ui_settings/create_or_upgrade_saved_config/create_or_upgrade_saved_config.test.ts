@@ -20,6 +20,8 @@
 import sinon from 'sinon';
 import Chance from 'chance';
 
+import { SavedObjectsErrorHelpers } from '../../saved_objects';
+
 import { loggingServiceMock } from '../../logging/logging_service.mock';
 import * as getUpgradeableConfigNS from './get_upgradeable_config';
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
@@ -50,6 +52,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
         version,
         buildNum,
         log: logger.get(),
+        handleWriteErrors: false,
         ...options,
       });
 
@@ -173,85 +176,64 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
     });
   });
 
-  describe('onWriteError()', () => {
-    it('is called with error and attributes when savedObjectsClient.create rejects', async () => {
-      const { run, savedObjectsClient } = setup();
-
-      const error = new Error('foo');
-      savedObjectsClient.create.callsFake(async () => {
-        throw error;
-      });
-
-      const onWriteError = sinon.stub();
-      await run({ onWriteError });
-      sinon.assert.calledOnce(onWriteError);
-      sinon.assert.calledWithExactly(onWriteError, error, {
-        buildNum,
-      });
-    });
-
-    it('resolves with the return value of onWriteError()', async () => {
-      const { run, savedObjectsClient } = setup();
-
-      savedObjectsClient.create.callsFake(async () => {
-        throw new Error('foo');
-      });
-
-      const result = await run({ onWriteError: () => 123 });
-      expect(result).toBe(123);
-    });
-
-    it('rejects with the error from onWriteError() if it rejects', async () => {
-      const { run, savedObjectsClient } = setup();
-
-      savedObjectsClient.create.callsFake(async () => {
-        throw new Error('foo');
-      });
-
-      try {
-        await run({
-          onWriteError: (error: Error) => Promise.reject(new Error(`${error.message} bar`)),
+  describe('handleWriteErrors', () => {
+    describe('handleWriteErrors: false', () => {
+      it('throws write errors', async () => {
+        const { run, savedObjectsClient } = setup();
+        const error = new Error('foo');
+        savedObjectsClient.create.callsFake(async () => {
+          throw error;
         });
-        throw new Error('expected run() to reject');
-      } catch (error) {
-        expect(error.message).toBe('foo bar');
-      }
+
+        await expect(run({ handleWriteErrors: false })).rejects.toThrowError(error);
+      });
     });
+    describe('handleWriteErrors:true', () => {
+      it('returns undefined for ConflictError', async () => {
+        const { run, savedObjectsClient } = setup();
+        const error = new Error('foo');
+        savedObjectsClient.create.throws(SavedObjectsErrorHelpers.decorateConflictError(error));
 
-    it('rejects with the error from onWriteError() if it throws sync', async () => {
-      const { run, savedObjectsClient } = setup();
-
-      savedObjectsClient.create.callsFake(async () => {
-        throw new Error('foo');
+        expect(await run({ handleWriteErrors: true })).toBe(undefined);
       });
 
-      try {
-        await run({
-          onWriteError: (error: Error) => {
-            throw new Error(`${error.message} bar`);
-          },
+      it('returns config attributes for NotAuthorizedError', async () => {
+        const { run, savedObjectsClient } = setup();
+        const error = new Error('foo');
+        savedObjectsClient.create.throws(
+          SavedObjectsErrorHelpers.decorateNotAuthorizedError(error)
+        );
+
+        expect(await run({ handleWriteErrors: true })).toEqual({
+          buildNum,
         });
-        throw new Error('expected run() to reject');
-      } catch (error) {
-        expect(error.message).toBe('foo bar');
-      }
-    });
-
-    it('rejects with the writeError if onWriteError() is undefined', async () => {
-      const { run, savedObjectsClient } = setup();
-
-      savedObjectsClient.create.callsFake(async () => {
-        throw new Error('foo');
       });
 
-      try {
-        await run({
-          onWriteError: undefined,
+      it('returns config attributes for ForbiddenError', async () => {
+        const { run, savedObjectsClient } = setup();
+        const error = new Error('foo');
+        savedObjectsClient.create.throws(SavedObjectsErrorHelpers.decorateForbiddenError(error));
+
+        expect(await run({ handleWriteErrors: true })).toEqual({
+          buildNum,
         });
-        throw new Error('expected run() to reject');
-      } catch (error) {
-        expect(error.message).toBe('foo');
-      }
+      });
+
+      it('throws error for other SavedObjects exceptions', async () => {
+        const { run, savedObjectsClient } = setup();
+        const error = new Error('foo');
+        savedObjectsClient.create.throws(SavedObjectsErrorHelpers.decorateGeneralError(error));
+
+        await expect(run({ handleWriteErrors: true })).rejects.toThrowError(error);
+      });
+
+      it('throws error for all other exceptions', async () => {
+        const { run, savedObjectsClient } = setup();
+        const error = new Error('foo');
+        savedObjectsClient.create.throws(error);
+
+        await expect(run({ handleWriteErrors: true })).rejects.toThrowError(error);
+      });
     });
   });
 });

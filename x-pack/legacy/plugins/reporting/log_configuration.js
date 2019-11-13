@@ -9,7 +9,9 @@ import { promisify } from 'util';
 
 const getos = promisify(getosSync);
 
-export async function logConfiguration(config, logger) {
+export async function logConfiguration(server, logger) {
+  const config = server.config();
+
   const browserType = config.get('xpack.reporting.capture.browser.type');
   logger.debug(`Browser type: ${browserType}`);
 

@@ -27,11 +27,10 @@ export const SummaryCountFieldSelect: FC<Props> = ({ fields, changeHandler, sele
     ...createScriptFieldOptions(jobCreator.scriptFields),
   ];
 
-  const selection: EuiComboBoxOptionProps[] = [
-    {
-      label: selectedField !== null ? selectedField : '',
-    },
-  ];
+  const selection: EuiComboBoxOptionProps[] = [];
+  if (selectedField !== null) {
+    selection.push({ label: selectedField });
+  }
 
   function onChange(selectedOptions: EuiComboBoxOptionProps[]) {
     const option = selectedOptions[0];

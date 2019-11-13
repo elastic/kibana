@@ -31,7 +31,8 @@ type FunctionName =
   | 'range'
   | 'exists'
   | 'geoBoundingBox'
-  | 'geoPolygon';
+  | 'geoPolygon'
+  | 'nested';
 
 interface FunctionTypeBuildNode {
   type: 'function';

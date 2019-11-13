@@ -28,28 +28,28 @@ describe('read_signals', () => {
   });
 
   describe('status codes with actionClient and alertClient', () => {
-    it('returns 200 when deleting a single signal with a valid actionClient and alertClient', async () => {
+    test('returns 200 when reading a single signal with a valid actionClient and alertClient', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       const { statusCode } = await server.inject(getReadRequest());
       expect(statusCode).toBe(200);
     });
 
-    it('returns 404 if actionClient is not available on the route', async () => {
+    test('returns 404 if actionClient is not available on the route', async () => {
       const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
       readSignalsRoute(serverWithoutActionClient);
       const { statusCode } = await serverWithoutActionClient.inject(getReadRequest());
       expect(statusCode).toBe(404);
     });
 
-    it('returns 404 if alertClient is not available on the route', async () => {
+    test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
       readSignalsRoute(serverWithoutAlertClient);
       const { statusCode } = await serverWithoutAlertClient.inject(getReadRequest());
       expect(statusCode).toBe(404);
     });
 
-    it('returns 404 if alertClient and actionClient are both not available on the route', async () => {
+    test('returns 404 if alertClient and actionClient are both not available on the route', async () => {
       const {
         serverWithoutActionOrAlertClient,
       } = createMockServerWithoutActionOrAlertClientDecoration();
@@ -60,7 +60,7 @@ describe('read_signals', () => {
   });
 
   describe('validation', () => {
-    it('returns 404 if given a non-existent id', async () => {
+    test('returns 404 if given a non-existent id', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.delete.mockResolvedValue({});

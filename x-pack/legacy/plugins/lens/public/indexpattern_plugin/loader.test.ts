@@ -14,6 +14,7 @@ import {
   syncExistingFields,
 } from './loader';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
+import { documentField } from './document_field';
 
 // TODO: This should not be necessary
 jest.mock('ui/new_platform');
@@ -63,6 +64,7 @@ const sampleIndexPatterns = {
         searchable: true,
         esTypes: ['keyword'],
       },
+      documentField,
     ],
   },
   b: {
@@ -121,6 +123,7 @@ const sampleIndexPatterns = {
         },
         esTypes: ['keyword'],
       },
+      documentField,
     ],
   },
 };
@@ -133,7 +136,7 @@ function indexPatternSavedObject({ id }: { id: keyof typeof sampleIndexPatterns 
     attributes: {
       title: pattern.title,
       timeFieldName: pattern.timeFieldName,
-      fields: JSON.stringify(pattern.fields),
+      fields: JSON.stringify(pattern.fields.filter(f => f.type !== 'document')),
     },
   };
 }

@@ -549,7 +549,7 @@ export class JobCreateUi extends Component {
       <Fragment>
         <EuiPageContent>
           <EuiPageContentHeader>
-            <EuiTitle size="m">
+            <EuiTitle size="l">
               <h1>
                 <FormattedMessage
                   id="xpack.rollupJobs.createTitle"

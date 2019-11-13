@@ -29,7 +29,7 @@ export const WatchActionsPanel: React.FunctionComponent<Props> = ({ actionErrors
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h3>
+            <h2>
               {i18n.translate('xpack.watcher.sections.watchEdit.actions.title', {
                 defaultMessage:
                   'Perform {watchActionsCount, plural, one{# action} other {# actions}} when condition is met',
@@ -37,7 +37,7 @@ export const WatchActionsPanel: React.FunctionComponent<Props> = ({ actionErrors
                   watchActionsCount: watch.actions.length,
                 },
               })}
-            </h3>
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem className="watcherThresholdWatchActionDropdownContainer">

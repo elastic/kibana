@@ -17,7 +17,27 @@ const feedbackLink = 'https://www.elastic.co/community/';
 const transformsLink = `${chrome.getBasePath()}/app/kibana#/management/elasticsearch/transform`;
 const whatIsMachineLearningLink = 'https://www.elastic.co/what-is/elasticsearch-machine-learning';
 
-export const OverviewSideBar: FC = () => (
+interface Props {
+  createAnomalyDetectionJobDisabled: boolean;
+}
+
+function getCreateJobLink(createAnomalyDetectionJobDisabled: boolean) {
+  return createAnomalyDetectionJobDisabled === true ? (
+    <FormattedMessage
+      id="xpack.ml.overview.gettingStartedSectionCreateJob"
+      defaultMessage="creating a new job"
+    />
+  ) : (
+    <EuiLink href={createJobLink} target="blank">
+      <FormattedMessage
+        id="xpack.ml.overview.gettingStartedSectionCreateJob"
+        defaultMessage="creating a new job"
+      />
+    </EuiLink>
+  );
+}
+
+export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }) => (
   <EuiFlexItem grow={1}>
     <EuiText className="mlOverview__sidebar">
       <h2>
@@ -41,14 +61,7 @@ export const OverviewSideBar: FC = () => (
                 />
               </EuiLink>
             ),
-            createJob: (
-              <EuiLink href={createJobLink} target="blank">
-                <FormattedMessage
-                  id="xpack.ml.overview.gettingStartedSectionCreateJob"
-                  defaultMessage="creating a new job"
-                />
-              </EuiLink>
-            ),
+            createJob: getCreateJobLink(createAnomalyDetectionJobDisabled),
             transforms: (
               <EuiLink href={transformsLink} target="blank">
                 <FormattedMessage

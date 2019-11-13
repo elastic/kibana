@@ -138,7 +138,6 @@ describe('serialize', () => {
 
     // A <-> C
     appState.workspace.edges.push({
-      inferred: false,
       label: '',
       source: appState.workspace.nodes[2],
       target: appState.workspace.nodes[0],
@@ -148,7 +147,6 @@ describe('serialize', () => {
 
     // C <-> E
     appState.workspace.edges.push({
-      inferred: false,
       label: '',
       source: appState.workspace.nodes[2],
       target: appState.workspace.nodes[4],
@@ -187,7 +185,6 @@ describe('serialize', () => {
         "indexPattern": "Testindexpattern",
         "links": Array [
           Object {
-            "inferred": false,
             "label": "",
             "source": 2,
             "target": 0,
@@ -195,7 +192,6 @@ describe('serialize', () => {
             "width": 5,
           },
           Object {
-            "inferred": false,
             "label": "",
             "source": 2,
             "target": 4,

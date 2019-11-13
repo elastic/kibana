@@ -31,7 +31,6 @@ export function getFakeRow(id, mapping) {
     _id: id,
     _index: 'test',
     _source: getFakeRowVals('original', id, mapping),
-    _type: 'doc',
     sort: [id],
   };
 }

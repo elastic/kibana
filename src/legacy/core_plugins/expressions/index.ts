@@ -34,6 +34,7 @@ export default function DataExpressionsPlugin(kibana: any) {
     init: (server: Legacy.Server) => ({}),
     uiExports: {
       injectDefaultVars: () => ({}),
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
   };
 

@@ -85,7 +85,7 @@ export function DocViewTableRow({
         </td>
       )}
       <td className="kbnDocViewer__field">
-        <FieldName field={fieldMapping} fieldName={field}></FieldName>
+        <FieldName field={fieldMapping} fieldName={field} />
       </td>
       <td>
         {isCollapsible && (
@@ -93,9 +93,16 @@ export function DocViewTableRow({
         )}
         {displayUnderscoreWarning && <DocViewTableRowIconUnderscore />}
         {displayNoMappingWarning && <DocViewTableRowIconNoMapping />}
-        <div className={valueClassName} data-test-subj={`tableDocViewRow-${field}-value`}>
-          {value}
-        </div>
+        <div
+          className={valueClassName}
+          data-test-subj={`tableDocViewRow-${field}-value`}
+          /*
+           * Justification for dangerouslySetInnerHTML:
+           * We just use values encoded by our field formatters
+           */
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: value as string }}
+        />
       </td>
     </tr>
   );

@@ -49,7 +49,7 @@ export async function getMlBucketSize({
   };
 
   try {
-    const resp = await client.search<ESResponse>(params);
+    const resp = await client.search<ESResponse, typeof params>(params);
     return idx(resp, _ => _.hits.hits[0]._source.bucket_span) || 0;
   } catch (err) {
     const isHttpError = 'statusCode' in err;

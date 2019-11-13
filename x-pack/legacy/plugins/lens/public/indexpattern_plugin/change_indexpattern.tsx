@@ -5,8 +5,15 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { EuiButtonEmpty, EuiPopover, EuiSelectable, EuiButtonEmptyProps } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
+  EuiButtonEmptyProps,
+} from '@elastic/eui';
 import { EuiSelectableProps } from '@elastic/eui/src/components/selectable/selectable';
 import { IndexPatternRef } from './types';
 import { trackUiEvent } from '../lens_ui_telemetry';
@@ -62,6 +69,11 @@ export function ChangeIndexPattern({
         ownFocus
       >
         <div style={{ width: 320 }}>
+          <EuiPopoverTitle>
+            {i18n.translate('xpack.lens.indexPattern.changeIndexPatternTitle', {
+              defaultMessage: 'Change index pattern',
+            })}
+          </EuiPopoverTitle>
           <EuiSelectable
             {...selectableProps}
             searchable

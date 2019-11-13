@@ -114,29 +114,28 @@ interface ProgressEntryProps {
   isLoading: boolean;
 }
 
-class ProgressEntry extends React.PureComponent<ProgressEntryProps, {}> {
-  public render() {
-    const { alignment, children, className, color, isLoading } = this.props;
-    // NOTE: styled-components seems to make all props in EuiProgress required, so this
-    // style attribute hacking replaces styled-components here for now until that can be fixed
-    // see: https://github.com/elastic/eui/issues/1655
-    const alignmentStyle =
-      alignment === 'top' ? { top: 0, bottom: 'initial' } : { top: 'initial', bottom: 0 };
+const ProgressEntry: React.SFC<ProgressEntryProps> = props => {
+  const { alignment, children, className, color, isLoading } = props;
 
-    return (
-      <ProgressEntryWrapper className={className}>
-        <EuiProgress
-          style={alignmentStyle}
-          color={color}
-          size="xs"
-          position="absolute"
-          {...(!isLoading ? { max: 1, value: 1 } : {})}
-        />
-        {children}
-      </ProgressEntryWrapper>
-    );
-  }
-}
+  // NOTE: styled-components seems to make all props in EuiProgress required, so this
+  // style attribute hacking replaces styled-components here for now until that can be fixed
+  // see: https://github.com/elastic/eui/issues/1655
+  const alignmentStyle =
+    alignment === 'top' ? { top: 0, bottom: 'initial' } : { top: 'initial', bottom: 0 };
+
+  return (
+    <ProgressEntryWrapper className={className}>
+      <EuiProgress
+        style={alignmentStyle}
+        color={color}
+        size="xs"
+        position="absolute"
+        {...(!isLoading ? { max: 1, value: 1 } : {})}
+      />
+      {children}
+    </ProgressEntryWrapper>
+  );
+};
 
 const ProgressEntryWrapper = euiStyled.div`
   align-items: center;

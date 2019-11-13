@@ -1,7 +1,9 @@
 [role="xpack"]
 [[xpack-graph]]
-== Graph data connections
+= Graph data connections
 
+[partintro]
+--
 The {graph-features} enable you to discover how items in an
 Elasticsearch index are related. You can explore the connections between
 indexed terms and see which connections are the most meaningful. This can be
@@ -17,9 +19,9 @@ and an interactive graph visualization tool for Kibana. Both work out of the
 box with existing Elasticsearch indices--you don't need to store any
 additional data to use these features.
 
+[discrete]
 [[how-graph-works]]
-[float]
-=== How Graph works
+== How Graph works
 The graph API provides an alternative way to extract and summarize information
 about the documents and terms in your Elasticsearch index. A _graph_ is really
 just a network of related items. In our case, this means a network of related
@@ -62,6 +64,7 @@ multi-node clusters and scales with your Elasticsearch deployment.
 Advanced options let you control how your data is sampled and summarized.
 You can also set timeouts to prevent graph queries from adversely
 affecting the cluster.
+--
 
 include::getting-started.asciidoc[]
 

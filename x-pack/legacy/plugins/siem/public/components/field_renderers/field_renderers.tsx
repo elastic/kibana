@@ -11,17 +11,11 @@ import React, { Fragment, useState } from 'react';
 import { pure } from 'recompose';
 
 import styled from 'styled-components';
-import {
-  AutonomousSystem,
-  FlowTarget,
-  HostEcsFields,
-  IpOverviewData,
-  Overview,
-} from '../../graphql/types';
+import { AutonomousSystem, FlowTarget, HostEcsFields, IpOverviewData } from '../../graphql/types';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { DefaultDraggable } from '../draggables';
 import { getEmptyTagValue } from '../empty_value';
-import { FormattedDate } from '../formatted_date';
+import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { HostDetailsLink, ReputationLink, VirusTotalLink, WhoIsLink } from '../links';
 import { Spacer } from '../page';
 import * as i18n from '../page/network/ip_overview/translations';
@@ -58,8 +52,8 @@ export const locationRenderer = (fieldNames: string[], data: IpOverviewData): Re
     getEmptyTagValue()
   );
 
-export const dateRenderer = (fieldName: string, data: Overview): React.ReactElement => (
-  <FormattedDate value={getOr(null, fieldName, data)} fieldName={fieldName} />
+export const dateRenderer = (timestamp?: string | null): React.ReactElement => (
+  <FormattedRelativePreferenceDate value={timestamp} />
 );
 
 export const autonomousSystemRenderer = (
@@ -277,7 +271,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
               rowItems={rowItems}
               moreMaxHeight={moreMaxHeight}
               overflowIndexStart={overflowIndexStart}
-            ></MoreContainer>
+            />
           </EuiPopover>
         )}
       </EuiFlexItem>
