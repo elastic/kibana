@@ -81,9 +81,9 @@ function DefaultEditor({
   }, [vis]);
 
   const applyChanges = useCallback(() => {
-    setTouched(true);
-
     if (formState.invalid) {
+      setTouched(true);
+
       return;
     }
 
@@ -93,6 +93,7 @@ function DefaultEditor({
       isDirty: false,
     });
     setDirty(false);
+    setTouched(false);
   }, [vis, state, formState.invalid, setDirty, setTouched]);
 
   return (
