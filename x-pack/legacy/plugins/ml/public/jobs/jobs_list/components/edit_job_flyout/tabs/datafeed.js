@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { calculateDatafeedFrequencyDefaultSeconds } from 'plugins/ml/../common/util/job_utils';
-import { newJobDefaults } from 'plugins/ml/jobs/new_job_new/utils/new_job_defaults';
+import { getNewJobDefaults } from '../../../../../services/ml_server_info';
 import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
 import { MLJobEditor } from '../../ml_job_editor';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -47,7 +47,7 @@ export class Datafeed extends Component {
         frequency: '',
         scrollSize: 0,
       },
-      jobDefaults: newJobDefaults()
+      jobDefaults: getNewJobDefaults()
     };
 
     this.setDatafeed = props.setDatafeed;

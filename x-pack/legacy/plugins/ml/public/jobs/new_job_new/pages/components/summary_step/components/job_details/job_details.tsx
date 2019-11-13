@@ -15,7 +15,7 @@ import {
   isPopulationJobCreator,
   isAdvancedJobCreator,
 } from '../../../../../common/job_creator';
-import { newJobDefaults } from '../../../../../utils/new_job_defaults';
+import { getNewJobDefaults } from '../../../../../../../services/ml_server_info';
 import { ListItems, falseLabel, trueLabel, defaultLabel, Italic } from '../common';
 import { useKibanaContext } from '../../../../../../../contexts/kibana';
 
@@ -23,7 +23,7 @@ export const JobDetails: FC = () => {
   const { jobCreator } = useContext(JobCreatorContext);
   const kibanaContext = useKibanaContext();
   const dateFormat: string = kibanaContext.kibanaConfig.get('dateFormat');
-  const { anomaly_detectors: anomalyDetectors } = newJobDefaults();
+  const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
 
   const isAdvanced = isAdvancedJobCreator(jobCreator);
 
