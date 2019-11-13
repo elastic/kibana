@@ -23,15 +23,14 @@ export class FileUploadPlugin implements Plugin<FileUploadPluginSetup, FileUploa
   public setup() {
     // kick off your plugin here...
     // const { routing, http, savedObjects, chrome, notification, documentation, docTitle } = core;
-    // const fileUploadBasePath = chrome.addBasePath('/api/fileupload');
-    // const apiBasePath = chrome.addBasePath('/api');
   }
 
   public start(core: CoreStart) {
-    const { savedObjects, http } = core;
+    const { savedObjects, http, injectedMetadata } = core;
     Object.assign(JsonUploadAndParse.defaultProps, {
       savedObjects,
       http,
+      injectedMetadata,
     });
     return {
       JsonUploadAndParse,
