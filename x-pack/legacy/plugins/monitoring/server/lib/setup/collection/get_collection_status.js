@@ -246,7 +246,8 @@ async function hasNecessaryPermissions(req) {
       cluster: ['monitor'],
     }
   });
-  return get(response, 'has_all_requested', true);
+  // If there is some problem, assume they do not have access
+  return get(response, 'has_all_requested', false);
 }
 
 /**
