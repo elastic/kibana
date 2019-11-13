@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
 import ApolloClient from 'apollo-client';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { Query } from 'src/plugins/data/common';
+import { Query, esFilters } from 'src/plugins/data/public';
 
 import { UrlInputsModel } from '../../store/inputs/model';
 import { RouteSpyState } from '../../utils/route/types';
@@ -26,6 +25,7 @@ export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
 ];
 
 export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
+  'detection-engine': [],
   host: [
     CONSTANTS.appQuery,
     CONSTANTS.filters,
@@ -40,15 +40,16 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.timerange,
     CONSTANTS.timeline,
   ],
-  timeline: [CONSTANTS.timeline, CONSTANTS.timerange],
   overview: [CONSTANTS.timeline, CONSTANTS.timerange],
+  timeline: [CONSTANTS.timeline, CONSTANTS.timerange],
 };
 
 export type LocationTypes =
-  | CONSTANTS.networkDetails
-  | CONSTANTS.networkPage
+  | CONSTANTS.detectionEnginePage
   | CONSTANTS.hostsDetails
   | CONSTANTS.hostsPage
+  | CONSTANTS.networkDetails
+  | CONSTANTS.networkPage
   | CONSTANTS.overviewPage
   | CONSTANTS.timelinePage
   | CONSTANTS.unknown;
@@ -60,7 +61,7 @@ export interface Timeline {
 
 export interface UrlState {
   [CONSTANTS.appQuery]?: Query;
-  [CONSTANTS.filters]?: Filter[];
+  [CONSTANTS.filters]?: esFilters.Filter[];
   [CONSTANTS.savedQuery]?: string;
   [CONSTANTS.timerange]: UrlInputsModel;
   [CONSTANTS.timeline]: Timeline;
