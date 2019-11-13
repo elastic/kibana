@@ -87,7 +87,7 @@ export const apm: LegacyPluginInitializer = kibana => {
         catalogue: ['apm'],
         privileges: {
           all: {
-            api: ['apm'],
+            api: ['apm', 'apm_write'],
             catalogue: ['apm'],
             savedObject: {
               all: [],
