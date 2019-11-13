@@ -357,7 +357,7 @@
         "name": "A shared saved-object in all spaces"
       },
       "type": "sharedtype",
-      "namespaces": ["default", "space-1", "space-2"],
+      "namespaces": [null, "space-1", "space-2"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"

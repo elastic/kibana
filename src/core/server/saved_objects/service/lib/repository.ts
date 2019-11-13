@@ -1124,8 +1124,8 @@ export class SavedObjectsRepository {
       return true;
     }
 
-    const namespaces = raw._source.namespaces as string[];
-    return namespaces.includes(namespace === undefined ? 'default' : namespace);
+    const namespaces = raw._source.namespaces as Array<string | null>;
+    return namespaces.includes(namespace === undefined ? null : namespace);
   }
 }
 
