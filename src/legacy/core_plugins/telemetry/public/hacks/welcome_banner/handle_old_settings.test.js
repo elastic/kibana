@@ -52,7 +52,7 @@ const getTelemetryOptInProvider = (enabled, { simulateFailure = false } = {}) =>
   return new TelemetryOptInProvider($injector, chrome);
 };
 
-describe('handle_old_settings', () => {
+describe.skip('handle_old_settings', () => {
 
   it('re-uses old "allowReport" setting and stays opted in', async () => {
     const config = {
