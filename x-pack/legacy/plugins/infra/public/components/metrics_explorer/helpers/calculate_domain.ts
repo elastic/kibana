@@ -13,21 +13,18 @@ export const calculateDomain = (
   stacked = false
 ): { min: number; max: number } => {
   const values = series.rows
-    .reduce(
-      (acc, row) => {
-        const rowValues = metrics
-          .map((m, index) => {
-            return (row[`metric_${index}`] as number) || null;
-          })
-          .filter(v => v);
-        const minValue = min(rowValues);
-        // For stacked domains we want to add 10% head room so the charts have
-        // enough room to draw the 2 pixel line as well.
-        const maxValue = stacked ? sum(rowValues) * 1.1 : max(rowValues);
-        return acc.concat([minValue || null, maxValue || null]);
-      },
-      [] as Array<number | null>
-    )
+    .reduce((acc, row) => {
+      const rowValues = metrics
+        .map((m, index) => {
+          return (row[`metric_${index}`] as number) || null;
+        })
+        .filter(v => v);
+      const minValue = min(rowValues);
+      // For stacked domains we want to add 10% head room so the charts have
+      // enough room to draw the 2 pixel line as well.
+      const maxValue = stacked ? sum(rowValues) * 1.1 : max(rowValues);
+      return acc.concat([minValue || null, maxValue || null]);
+    }, [] as Array<number | null>)
     .filter(v => v);
   return { min: min(values) || 0, max: max(values) || 0 };
 };
