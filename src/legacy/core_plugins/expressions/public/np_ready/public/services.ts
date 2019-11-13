@@ -17,13 +17,15 @@
  * under the License.
  */
 
+import { ExpressionInterpreter } from './types';
 import { createGetterSetter } from '../../../../../../plugins/kibana_utils/public';
-import { IInterpreter } from './types';
 import { Start as IInspector } from '../../../../../../plugins/inspector/public';
 import { ExpressionsSetup } from './plugin';
 
 export const [getInspector, setInspector] = createGetterSetter<IInspector>('Inspector');
-export const [getInterpreter, setInterpreter] = createGetterSetter<IInterpreter>('Interpreter');
+export const [getInterpreter, setInterpreter] = createGetterSetter<ExpressionInterpreter>(
+  'Interpreter'
+);
 export const [getRenderersRegistry, setRenderersRegistry] = createGetterSetter<
   ExpressionsSetup['__LEGACY']['renderers']
 >('Renderers registry');

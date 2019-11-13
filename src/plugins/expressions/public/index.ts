@@ -26,4 +26,9 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export { ExpressionsPublicPlugin as Plugin };
 
-export * from '../common';
+export * from './plugin';
+export * from './types';
+export { Type, getType } from './interpreter';
+export { interpreterProvider, ExpressionInterpret } from './interpreter_provider';
+export * from './serialize_provider';
+export * from './expression_types';

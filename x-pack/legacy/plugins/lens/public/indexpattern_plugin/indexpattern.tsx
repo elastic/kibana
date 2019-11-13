@@ -28,7 +28,7 @@ import {
   getDatasourceSuggestionsFromCurrentState,
 } from './indexpattern_suggestions';
 
-import { isDraggedField } from './utils';
+import { isDraggedField, normalizeOperationDataType } from './utils';
 import { LayerPanel } from './layerpanel';
 import { IndexPatternColumn } from './operations';
 import {
@@ -51,7 +51,7 @@ export interface DraggedField {
 export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: string): Operation {
   const { dataType, label, isBucketed, scale } = column;
   return {
-    dataType,
+    dataType: normalizeOperationDataType(dataType),
     isBucketed,
     scale,
     label: uniqueLabel || label,
@@ -260,6 +260,7 @@ export function getIndexPatternDatasource({
                   state,
                   layerId: props.layerId,
                   onError: onIndexPatternLoadError,
+                  replaceIfPossible: true,
                 });
               }}
               {...props}

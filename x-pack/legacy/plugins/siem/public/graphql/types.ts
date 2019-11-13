@@ -85,6 +85,10 @@ export interface NetworkDnsSortField {
   direction: Direction;
 }
 
+export interface NetworkHttpSortField {
+  direction: Direction;
+}
+
 export interface TlsSortField {
   field: TlsFields;
 
@@ -294,6 +298,16 @@ export enum NetworkDirectionEcs {
   unknown = 'unknown',
 }
 
+export enum NetworkHttpFields {
+  domains = 'domains',
+  lastHost = 'lastHost',
+  lastSourceIp = 'lastSourceIp',
+  methods = 'methods',
+  path = 'path',
+  requestCount = 'requestCount',
+  statuses = 'statuses',
+}
+
 export enum FlowDirection {
   uniDirectional = 'uniDirectional',
   biDirectional = 'biDirectional',
@@ -432,6 +446,8 @@ export interface Source {
   NetworkTopNFlow: NetworkTopNFlowData;
 
   NetworkDns: NetworkDnsData;
+
+  NetworkHttp: NetworkHttpData;
 
   OverviewNetwork?: Maybe<OverviewNetworkData>;
 
@@ -1588,6 +1604,40 @@ export interface NetworkDnsItem {
   uniqueDomains?: Maybe<number>;
 }
 
+export interface NetworkHttpData {
+  edges: NetworkHttpEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface NetworkHttpEdges {
+  node: NetworkHttpItem;
+
+  cursor: CursorType;
+}
+
+export interface NetworkHttpItem {
+  _id?: Maybe<string>;
+
+  domains: string[];
+
+  lastHost?: Maybe<string>;
+
+  lastSourceIp?: Maybe<string>;
+
+  methods: string[];
+
+  path?: Maybe<string>;
+
+  requestCount?: Maybe<number>;
+
+  statuses: string[];
+}
+
 export interface OverviewNetworkData {
   auditbeatSocket?: Maybe<number>;
 
@@ -2157,6 +2207,21 @@ export interface NetworkDnsSourceArgs {
   pagination: PaginationInputPaginated;
 
   sort: NetworkDnsSortField;
+
+  timerange: TimerangeInput;
+
+  defaultIndex: string[];
+}
+export interface NetworkHttpSourceArgs {
+  id?: Maybe<string>;
+
+  filterQuery?: Maybe<string>;
+
+  ip?: Maybe<string>;
+
+  pagination: PaginationInputPaginated;
+
+  sort: NetworkHttpSortField;
 
   timerange: TimerangeInput;
 
@@ -3182,6 +3247,95 @@ export namespace GetNetworkDnsQuery {
     queryCount: Maybe<number>;
 
     uniqueDomains: Maybe<number>;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: Maybe<string>;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfoPaginated';
+
+    activePage: number;
+
+    fakeTotalCount: number;
+
+    showMorePagesIndicator: boolean;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
+export namespace GetNetworkHttpQuery {
+  export type Variables = {
+    sourceId: string;
+    ip?: Maybe<string>;
+    filterQuery?: Maybe<string>;
+    pagination: PaginationInputPaginated;
+    sort: NetworkHttpSortField;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    NetworkHttp: NetworkHttp;
+  };
+
+  export type NetworkHttp = {
+    __typename?: 'NetworkHttpData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type Edges = {
+    __typename?: 'NetworkHttpEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'NetworkHttpItem';
+
+    domains: string[];
+
+    lastHost: Maybe<string>;
+
+    lastSourceIp: Maybe<string>;
+
+    methods: string[];
+
+    path: Maybe<string>;
+
+    requestCount: Maybe<number>;
+
+    statuses: string[];
   };
 
   export type Cursor = {

@@ -5,8 +5,6 @@
  */
 
 import React from 'react';
-
-import { buildExistsFilter } from '@kbn/es-query';
 import { ExpressionRendererProps } from '../../../../../../../src/legacy/core_plugins/expressions/public';
 import { Visualization, FramePublicAPI, TableSuggestion } from '../../types';
 import {
@@ -22,6 +20,7 @@ import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../drag_drop';
 import { Ast } from '@kbn/interpreter/common';
 import { coreMock } from 'src/core/public/mocks';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
@@ -382,7 +381,7 @@ describe('workspace_panel', () => {
     instance.setProps({
       framePublicAPI: {
         ...framePublicAPI,
-        filters: [buildExistsFilter({ name: 'myfield' }, { id: 'index1' })],
+        filters: [esFilters.buildExistsFilter({ name: 'myfield' }, { id: 'index1' })],
       },
     });
 
@@ -574,6 +573,7 @@ describe('workspace_panel', () => {
         {
           state: {},
           table: expectedTable,
+          keptLayerIds: [],
         },
       ]);
       mockVisualization.getSuggestions.mockReturnValueOnce([
@@ -613,6 +613,7 @@ describe('workspace_panel', () => {
             columns: [],
             changeType: 'unchanged',
           },
+          keptLayerIds: [],
         },
       ]);
       mockVisualization.getSuggestions.mockReturnValueOnce([
@@ -639,6 +640,7 @@ describe('workspace_panel', () => {
             columns: [],
             changeType: 'unchanged',
           },
+          keptLayerIds: [],
         },
       ]);
       mockVisualization2.getSuggestions.mockReturnValueOnce([
@@ -665,6 +667,7 @@ describe('workspace_panel', () => {
             columns: [],
             changeType: 'unchanged',
           },
+          keptLayerIds: [],
         },
       ]);
       mockVisualization.getSuggestions.mockReturnValueOnce([
@@ -694,6 +697,7 @@ describe('workspace_panel', () => {
             layerId: '1',
             changeType: 'unchanged',
           },
+          keptLayerIds: [],
         },
         {
           state: {},
@@ -703,6 +707,7 @@ describe('workspace_panel', () => {
             layerId: '1',
             changeType: 'unchanged',
           },
+          keptLayerIds: [],
         },
       ]);
       mockVisualization.getSuggestions.mockReturnValueOnce([

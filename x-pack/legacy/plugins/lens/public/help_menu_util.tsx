@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Chrome } from 'ui/chrome';
 
-const docsPage = undefined;
+const docsPage = 'lens';
 
 export function addHelpMenuToAppChrome(chrome: Chrome) {
   chrome.helpExtension.set(domElement => {

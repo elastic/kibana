@@ -153,6 +153,14 @@
             }
           }
         },
+        "nestedField": {
+          "type": "nested",
+          "properties": {
+            "child": {
+              "type": "keyword"
+            }
+          }
+        },
         "phpmemory": {
           "type": "long"
         },
@@ -518,6 +526,14 @@
             }
           }
         },
+        "nestedField": {
+          "type": "nested",
+          "properties": {
+            "child": {
+              "type": "keyword"
+            }
+          }
+        },
         "phpmemory": {
           "type": "long"
         },
@@ -880,6 +896,14 @@
                   "type": "integer"
                 }
               }
+            }
+          }
+        },
+        "nestedField": {
+          "type": "nested",
+          "properties": {
+            "child": {
+              "type": "keyword"
             }
           }
         },

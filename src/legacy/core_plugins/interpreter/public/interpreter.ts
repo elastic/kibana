@@ -20,38 +20,42 @@
 import 'uiExports/interpreter';
 // @ts-ignore
 import { register, registryFactory } from '@kbn/interpreter/common';
-import {
-  initializeExecutor,
-  ExpressionExecutor,
-  ExpressionInterpretWithHandlers,
-} from './lib/interpreter';
+import { npSetup } from 'ui/new_platform';
 import { registries } from './registries';
-import { functions } from './functions';
 import { visualization } from './renderers/visualization';
-import { typeSpecs } from '../../../../plugins/expressions/common';
+import {
+  ExpressionInterpretWithHandlers,
+  ExpressionExecutor,
+} from '../../../../plugins/expressions/public';
+import { esaggs as esaggsFn } from './functions/esaggs';
+import { visualization as visualizationFn } from './functions/visualization';
 
 // Expose kbnInterpreter.register(specs) and kbnInterpreter.registries() globally so that plugins
 // can register without a transpile step.
+// TODO: This will be left behind in then legacy platform?
 (global as any).kbnInterpreter = Object.assign(
   (global as any).kbnInterpreter || {},
   registryFactory(registries)
 );
 
-register(registries, {
-  types: typeSpecs,
-  browserFunctions: functions,
-  renderers: [visualization],
-});
+// TODO: This needs to be moved to `data` plugin Search service.
+registries.browserFunctions.register(esaggsFn);
 
+// TODO: This needs to be moved to `visualizations` plugin.
+registries.browserFunctions.register(visualizationFn);
+registries.renderers.register(visualization);
+
+// TODO: This function will be left behind in the legacy platform.
 let executorPromise: Promise<ExpressionExecutor> | undefined;
-
 export const getInterpreter = async () => {
   if (!executorPromise) {
-    executorPromise = initializeExecutor();
+    const executor = npSetup.plugins.expressions.__LEGACY.getExecutor();
+    executorPromise = Promise.resolve(executor);
   }
   return await executorPromise;
 };
 
+// TODO: This function will be left behind in the legacy platform.
 export const interpretAst: ExpressionInterpretWithHandlers = async (ast, context, handlers) => {
   const { interpreter } = await getInterpreter();
   return await interpreter.interpretAst(ast, context, handlers);

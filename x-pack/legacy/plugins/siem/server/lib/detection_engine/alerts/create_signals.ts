@@ -27,6 +27,7 @@ export const updateIfIdExists = async ({
   maxSignals,
   name,
   severity,
+  size,
   to,
   type,
   references,
@@ -49,16 +50,19 @@ export const updateIfIdExists = async ({
       maxSignals,
       name,
       severity,
+      size,
       to,
       type,
       references,
     });
     return signal;
   } catch (err) {
-    // This happens when we cannot get a saved object back from reading a signal.
-    // So we continue normally as we have nothing we can upsert.
+    if (err.output.statusCode === 404) {
+      return null;
+    } else {
+      return err;
+    }
   }
-  return null;
 };
 
 export const createSignals = async ({
@@ -78,6 +82,7 @@ export const createSignals = async ({
   maxSignals,
   name,
   severity,
+  size,
   to,
   type,
   references,
@@ -100,6 +105,7 @@ export const createSignals = async ({
     maxSignals,
     name,
     severity,
+    size,
     to,
     type,
     references,
@@ -120,6 +126,7 @@ export const createSignals = async ({
 
     return alertsClient.create({
       data: {
+        name,
         alertTypeId: SIGNALS_ID,
         alertTypeParams: {
           description,
@@ -132,7 +139,6 @@ export const createSignals = async ({
           savedId,
           filters,
           maxSignals,
-          name,
           severity,
           to,
           type,
