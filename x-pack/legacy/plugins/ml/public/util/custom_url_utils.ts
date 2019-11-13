@@ -107,20 +107,23 @@ function escapeForKQL(value: string | number): string {
   return String(value).replace(/\"/g, '\\"');
 }
 
-// Builds a Kibana dashboard or Discover URL from the supplied config, with any
-// dollar delimited tokens substituted from the supplied anomaly record.
+type GetResultTokenValue = (v: string) => string;
+
+/**
+ * Builds a Kibana dashboard or Discover URL from the supplied config, with any
+ * dollar delimited tokens substituted from the supplied anomaly record.
+ */
 function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc) {
   const urlValue = urlConfig.url_value;
   const URL_LENGTH_LIMIT = 2000;
 
-  const isLuceneQuery = urlValue.includes('language:lucene');
-  const queryLanguageEscapeCallback = isLuceneQuery ? escapeForElasticsearchQuery : escapeForKQL;
+  const isLuceneQueryLanguage = urlValue.includes('language:lucene');
 
-  type GetResultTokenValue = (v: string) => string;
+  const queryLanguageEscapeCallback = isLuceneQueryLanguage
+    ? escapeForElasticsearchQuery
+    : escapeForKQL;
 
-  // Compose callback for characters escaping and encoding.
-  const getResultTokenValue: GetResultTokenValue = flow(
-    queryLanguageEscapeCallback,
+  const commonEscapeCallback = flow(
     // Kibana URLs used rison encoding, so escape with ! any ! or ' characters
     (v: string): string => v.replace(/[!']/g, '!$&'),
     encodeURIComponent
@@ -131,6 +134,13 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
       // Use lodash get to allow nested JSON fields to be retrieved.
       let tokenValue: string | string[] | undefined = get(record, name);
       tokenValue = Array.isArray(tokenValue) ? tokenValue[0] : tokenValue;
+
+      const getResultTokenValue: GetResultTokenValue = flow(
+        // Special characters inside of the filter should not be escaped for Lucene query language.
+        isLuceneQueryLanguage ? <T>(v: T) => v : queryLanguageEscapeCallback,
+        commonEscapeCallback
+      );
+
       // If property not found string is not replaced.
       return tokenValue === undefined ? match : getResultTokenValue(tokenValue);
     });
@@ -138,8 +148,12 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
   return flow(
     (str: string) => str.replace('$earliest$', record.earliest).replace('$latest$', record.latest),
     // Process query string content of the URL
-    (str: string) =>
-      str.replace(
+    (str: string) => {
+      const getResultTokenValue: GetResultTokenValue = flow(
+        queryLanguageEscapeCallback,
+        commonEscapeCallback
+      );
+      return str.replace(
         /(.+query:')([^']*)('.+)/,
         (fullMatch, prefix: string, queryString: string, postfix: string) => {
           const [resultPrefix, resultPostfix] = [prefix, postfix].map(replaceSingleTokenValues);
@@ -184,7 +198,8 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
 
           return `${resultPrefix}${resultQuery}${resultPostfix}`;
         }
-      ),
+      );
+    },
     replaceSingleTokenValues
   )(urlValue);
 }
