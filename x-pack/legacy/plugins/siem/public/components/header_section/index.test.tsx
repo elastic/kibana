@@ -10,17 +10,17 @@ import toJson from 'enzyme-to-json';
 import 'jest-styled-components';
 import React from 'react';
 
-import '../../mock/ui_settings';
 import { TestProviders } from '../../mock';
-import { HeaderPanel } from './index';
+import '../../mock/ui_settings';
+import { HeaderSection } from './index';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
-describe('HeaderPanel', () => {
+describe('HeaderSection', () => {
   test('it renders', () => {
     const wrapper = shallow(
       <TestProviders>
-        <HeaderPanel title="Test title" />
+        <HeaderSection title="Test title" />
       </TestProviders>
     );
 
@@ -30,13 +30,13 @@ describe('HeaderPanel', () => {
   test('it renders the title', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderPanel title="Test title" />
+        <HeaderSection title="Test title" />
       </TestProviders>
     );
 
     expect(
       wrapper
-        .find('[data-test-subj="header-panel-title"]')
+        .find('[data-test-subj="header-section-title"]')
         .first()
         .exists()
     ).toBe(true);
@@ -45,13 +45,13 @@ describe('HeaderPanel', () => {
   test('it renders the subtitle when provided', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderPanel subtitle="Test subtitle" title="Test title" />
+        <HeaderSection subtitle="Test subtitle" title="Test title" />
       </TestProviders>
     );
 
     expect(
       wrapper
-        .find(`[data-test-subj="header-panel-subtitle"]`)
+        .find('[data-test-subj="header-section-subtitle"]')
         .first()
         .exists()
     ).toBe(true);
@@ -60,13 +60,13 @@ describe('HeaderPanel', () => {
   test('it DOES NOT render the subtitle when not provided', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderPanel title="Test title" />
+        <HeaderSection title="Test title" />
       </TestProviders>
     );
 
     expect(
       wrapper
-        .find(`[data-test-subj="header-panel-subtitle"]`)
+        .find('[data-test-subj="header-section-subtitle"]')
         .first()
         .exists()
     ).toBe(false);
@@ -75,13 +75,13 @@ describe('HeaderPanel', () => {
   test('it renders a transparent inspect button when showInspect is false', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderPanel title="Test title" id="test" showInspect={false} />
+        <HeaderSection title="Test title" id="test" showInspect={false} />
       </TestProviders>
     );
 
     expect(
       wrapper
-        .find(`[data-test-subj="transparent-inspect-container"]`)
+        .find('[data-test-subj="transparent-inspect-container"]')
         .first()
         .exists()
     ).toBe(true);
@@ -90,13 +90,13 @@ describe('HeaderPanel', () => {
   test('it renders an opaque inspect button when showInspect is true', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderPanel title="Test title" id="test" showInspect={true} />
+        <HeaderSection title="Test title" id="test" showInspect={true} />
       </TestProviders>
     );
 
     expect(
       wrapper
-        .find(`[data-test-subj="opaque-inspect-container"]`)
+        .find('[data-test-subj="opaque-inspect-container"]')
         .first()
         .exists()
     ).toBe(true);
@@ -105,15 +105,15 @@ describe('HeaderPanel', () => {
   test('it renders supplements when children provided', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderPanel title="Test title">
+        <HeaderSection title="Test title">
           <p>{'Test children'}</p>
-        </HeaderPanel>
+        </HeaderSection>
       </TestProviders>
     );
 
     expect(
       wrapper
-        .find('[data-test-subj="header-panel-supplements"]')
+        .find('[data-test-subj="header-section-supplements"]')
         .first()
         .exists()
     ).toBe(true);
@@ -122,13 +122,13 @@ describe('HeaderPanel', () => {
   test('it DOES NOT render supplements when children not provided', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderPanel title="Test title" />
+        <HeaderSection title="Test title" />
       </TestProviders>
     );
 
     expect(
       wrapper
-        .find('[data-test-subj="header-panel-supplements"]')
+        .find('[data-test-subj="header-section-supplements"]')
         .first()
         .exists()
     ).toBe(false);
@@ -137,24 +137,58 @@ describe('HeaderPanel', () => {
   test('it applies border styles when border is true', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderPanel border title="Test title" />
+        <HeaderSection border title="Test title" />
       </TestProviders>
     );
-    const siemHeaderPanel = wrapper.find('.siemHeaderPanel').first();
+    const siemHeaderSection = wrapper.find('.siemHeaderSection').first();
 
-    expect(siemHeaderPanel).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemHeaderPanel).toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
+    expect(siemHeaderSection).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
+    expect(siemHeaderSection).toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
   });
 
   test('it DOES NOT apply border styles when border is false', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderPanel title="Test title" />
+        <HeaderSection title="Test title" />
       </TestProviders>
     );
-    const siemHeaderPanel = wrapper.find('.siemHeaderPanel').first();
+    const siemHeaderSection = wrapper.find('.siemHeaderSection').first();
 
-    expect(siemHeaderPanel).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemHeaderPanel).not.toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
+    expect(siemHeaderSection).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
+    expect(siemHeaderSection).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+  });
+
+  test('it splits the title and supplement areas evenly when split is true', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection split title="Test title">
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect(
+      wrapper
+        .find('.euiFlexItem--flexGrowZero[data-test-subj="header-section-supplements"]')
+        .first()
+        .exists()
+    ).toBe(false);
+  });
+
+  test('it DOES NOT split the title and supplement areas evenly when split is false', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection title="Test title">
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect(
+      wrapper
+        .find('.euiFlexItem--flexGrowZero[data-test-subj="header-section-supplements"]')
+        .first()
+        .exists()
+    ).toBe(true);
   });
 });
