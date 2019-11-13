@@ -24,6 +24,9 @@ interface CreateTests {
   spaceAware: CreateTest;
   notSpaceAware: CreateTest;
   hiddenType: CreateTest;
+  sharedType: CreateTest;
+  sharedTypeOverwriting: CreateTest;
+  sharedTypeOverwritingConflict: CreateTest;
   custom?: CreateCustomTest;
 }
 
@@ -35,6 +38,7 @@ interface CreateTestDefinition {
 
 const spaceAwareType = 'visualization';
 const notSpaceAwareType = 'globaltype';
+const sharedType = 'sharedtype';
 
 export function createTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
   const createExpectRbacForbidden = (type: string) => (resp: { [key: string]: any }) => {
@@ -134,6 +138,84 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
 
   const expectHiddenTypeRbacForbidden = createExpectRbacForbidden('hiddentype');
 
+  const createExpectSharedTypeResults = (spaceId = DEFAULT_SPACE_ID) => async (resp: {
+    [key: string]: any;
+  }) => {
+    expect(resp.body)
+      .to.have.property('id')
+      .match(/^[0-9a-f-]{36}$/);
+
+    // loose ISO8601 UTC time with milliseconds validation
+    expect(resp.body)
+      .to.have.property('updated_at')
+      .match(/^[\d-]{10}T[\d:\.]{12}Z$/);
+
+    expect(resp.body).to.eql({
+      id: resp.body.id,
+      type: sharedType,
+      namespaces: [spaceId === DEFAULT_SPACE_ID ? null : spaceId],
+      updated_at: resp.body.updated_at,
+      version: resp.body.version,
+      attributes: {
+        name: `Can be shared in spaces`,
+      },
+      references: [],
+    });
+
+    // query ES directory to ensure namespaces was specified correctly
+    const { _source } = await es.get({
+      id: `${sharedType}:${resp.body.id}`,
+      type: '_doc',
+      index: '.kibana',
+    });
+
+    const { namespaces: namespaces } = _source;
+
+    expect(namespaces).to.eql([spaceId === DEFAULT_SPACE_ID ? null : spaceId]);
+  };
+
+  const createExpectSharedTypeOverwritingResults = (spaceId = DEFAULT_SPACE_ID) => async (resp: {
+    [key: string]: any;
+  }) => {
+    expect(resp.body).to.have.property('id', 'default_and_space_1');
+
+    // loose ISO8601 UTC time with milliseconds validation
+    expect(resp.body)
+      .to.have.property('updated_at')
+      .match(/^[\d-]{10}T[\d:\.]{12}Z$/);
+
+    expect(resp.body).to.eql({
+      id: resp.body.id,
+      type: sharedType,
+      namespaces: [null, 'space_1'],
+      updated_at: resp.body.updated_at,
+      version: resp.body.version,
+      attributes: {
+        name: `Can be saved in all spaces`,
+      },
+      references: [],
+    });
+
+    // query ES directory to ensure namespaces was specified correctly
+    const { _source } = await es.get({
+      id: `${sharedType}:${resp.body.id}`,
+      type: '_doc',
+      index: '.kibana',
+    });
+
+    const { namespaces: namespaces } = _source;
+
+    expect(namespaces).to.eql([null, 'space_1']);
+  };
+
+  const expectSharedTypeOverwritingConflict = async (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      statusCode: 409,
+      error: 'Conflict',
+      message: 'Saved object [sharedtype/only_space_2] conflict',
+    });
+  };
+
   const makeCreateTest = (describeFn: DescribeFn) => (
     description: string,
     definition: CreateTestDefinition
@@ -181,6 +263,49 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
           .then(tests.hiddenType.response);
       });
 
+      it(`should return ${tests.sharedType.statusCode} for the sharedType`, async () => {
+        await supertest
+          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/sharedtype`)
+          .auth(user.username, user.password)
+          .send({
+            attributes: {
+              name: `Can be shared in spaces`,
+            },
+          })
+          .expect(tests.sharedType.statusCode)
+          .then(tests.sharedType.response);
+      });
+
+      it(`should return ${tests.sharedTypeOverwriting.statusCode} for the sharedType`, async () => {
+        await supertest
+          .post(
+            `${getUrlPrefix(
+              spaceId
+            )}/api/saved_objects/sharedtype/default_and_space_1?overwrite=true`
+          )
+          .auth(user.username, user.password)
+          .send({
+            attributes: {
+              name: `Can be saved in all spaces`,
+            },
+          })
+          .expect(tests.sharedTypeOverwriting.statusCode)
+          .then(tests.sharedTypeOverwriting.response);
+      });
+
+      it(`should return ${tests.sharedTypeOverwritingConflict.statusCode} for the sharedType`, async () => {
+        await supertest
+          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/sharedtype/only_space_2?overwrite=true`)
+          .auth(user.username, user.password)
+          .send({
+            attributes: {
+              name: `Can't be saved in other spaces`,
+            },
+          })
+          .expect(tests.sharedTypeOverwritingConflict.statusCode)
+          .then(tests.sharedTypeOverwritingConflict.response);
+      });
+
       if (tests.custom) {
         it(tests.custom.description, async () => {
           await supertest
@@ -199,10 +324,13 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
   createTest.only = makeCreateTest(describe.only);
 
   return {
+    createExpectSharedTypeOverwritingResults,
+    createExpectSharedTypeResults,
     createExpectSpaceAwareResults,
     createTest,
     expectNotSpaceAwareRbacForbidden,
     expectNotSpaceAwareResults,
+    expectSharedTypeOverwritingConflict,
     expectSpaceAwareRbacForbidden,
     expectBadRequestForHiddenType,
     expectHiddenTypeRbacForbidden,

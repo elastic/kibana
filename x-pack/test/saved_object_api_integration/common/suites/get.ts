@@ -31,7 +31,7 @@ interface GetTestDefinition {
 
 const spaceAwareId = 'dd7caf20-9efd-11e7-acb3-3dab96693fab';
 const notSpaceAwareId = '8121a00-8efd-21e7-1cb3-34ab966434445';
-const sharedTypeId = 'all_spaces';
+const sharedTypeId = 'default_and_space_1';
 const doesntExistId = 'foobar';
 
 export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {

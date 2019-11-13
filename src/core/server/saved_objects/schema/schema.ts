@@ -94,12 +94,12 @@ export class SavedObjectsSchema {
     // if no plugins have registered a uiExports.savedObjectSchemas,
     // this.schema will be undefined, and all types are namespace isolated
     if (!this.definition) {
-      return true;
+      return false;
     }
 
     const typeSchema = this.definition[type];
     if (!typeSchema) {
-      return true;
+      return false;
     }
     return !Boolean(typeSchema.isNamespaceAgnostic) && Boolean(typeSchema.namespaces);
   }

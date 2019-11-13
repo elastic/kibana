@@ -350,14 +350,31 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:all-spaces",
+    "id": "sharedtype:default_and_space_1",
     "index": ".kibana",
     "source": {
       "globaltype": {
         "name": "A shared saved-object in all spaces"
       },
       "type": "sharedtype",
-      "namespaces": [null, "space-1", "space-2"],
+      "namespaces": [null, "space_1"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:only_space_2",
+    "index": ".kibana",
+    "source": {
+      "globaltype": {
+        "name": "A shared saved-object only in space 3"
+      },
+      "type": "sharedtype",
+      "namespaces": ["space_3"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"

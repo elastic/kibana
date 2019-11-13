@@ -166,7 +166,6 @@ export class SavedObjectsRepository {
       id,
       migrationVersion,
       overwrite = false,
-      namespace,
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
     } = options;
@@ -188,21 +187,32 @@ export class SavedObjectsRepository {
     // something   false       create          create
     const method = id && overwrite ? 'index' : 'create';
     const time = this._getCurrentTime();
+    let savedObjectNamespace;
+    let savedObjectNamespaces;
 
-    if (method === 'index') {
-      // TODO: When switching from namespace to namespaces, we'll want to use the namespaces returned
-      // from this to ensure we aren't dropping an existing namespace. However, it's somewhat awkward that
-      // a create with overwrite=true would maintain existing spaces it's been shared to.
-      const response = await this._callCluster('get', {
-        id: this._serializer.generateRawId(namespace, type, id),
-        index: this.getIndexForType(type),
-        ignore: [404],
-      });
+    if (this._schema.isNamespace(type) && options.namespace) {
+      savedObjectNamespace = options.namespace;
+    } else if (this._schema.isNamespaces(type)) {
+      if (method === 'index') {
+        // TODO: When switching from namespace to namespaces, we'll want to use the namespaces returned
+        // from this to ensure we aren't dropping an existing namespace. However, it's somewhat awkward that
+        // a create with overwrite=true would maintain existing spaces it's been shared to.
+        const response = await this._callCluster('get', {
+          id: this._serializer.generateRawId(undefined, type, id),
+          index: this.getIndexForType(type),
+          ignore: [404],
+        });
 
-      const docFound = response.found === true;
-      const indexFound = response.status !== 404;
-      if (docFound && indexFound && !this._rawInNamespaces(response, options.namespace)) {
-        throw SavedObjectsErrorHelpers.createConflictError(type, id!);
+        const docFound = response.found === true;
+        const indexFound = response.status !== 404;
+        if (docFound && indexFound && !this._rawInNamespaces(response, options.namespace)) {
+          throw SavedObjectsErrorHelpers.createConflictError(type, id!);
+        }
+        savedObjectNamespaces = docFound
+          ? response._source.namespaces
+          : [options.namespace === undefined ? null : options.namespace];
+      } else {
+        savedObjectNamespaces = [options.namespace === undefined ? null : options.namespace];
       }
     }
 
@@ -210,7 +220,8 @@ export class SavedObjectsRepository {
       const migrated = this._migrator.migrateDocument({
         id,
         type,
-        namespace,
+        ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+        ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
         attributes,
         migrationVersion,
         updated_at: time,

@@ -27,10 +27,13 @@ export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   const {
-    createTest,
+    createExpectSharedTypeOverwritingResults,
+    createExpectSharedTypeResults,
     createExpectSpaceAwareResults,
-    expectNotSpaceAwareResults,
+    createTest,
     expectBadRequestForHiddenType,
+    expectNotSpaceAwareResults,
+    expectSharedTypeOverwritingConflict,
   } = createTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
 
   describe('create', () => {
@@ -48,6 +51,18 @@ export default function({ getService }: FtrProviderContext) {
         hiddenType: {
           statusCode: 400,
           response: expectBadRequestForHiddenType,
+        },
+        sharedType: {
+          statusCode: 200,
+          response: createExpectSharedTypeResults(SPACES.SPACE_1.spaceId),
+        },
+        sharedTypeOverwriting: {
+          statusCode: 200,
+          response: createExpectSharedTypeOverwritingResults(SPACES.SPACE_1.spaceId),
+        },
+        sharedTypeOverwritingConflict: {
+          statusCode: 409,
+          response: expectSharedTypeOverwritingConflict,
         },
         custom: {
           description: 'when a namespace is specified on the saved object',
@@ -78,6 +93,18 @@ export default function({ getService }: FtrProviderContext) {
         hiddenType: {
           statusCode: 400,
           response: expectBadRequestForHiddenType,
+        },
+        sharedType: {
+          statusCode: 200,
+          response: createExpectSharedTypeResults(SPACES.DEFAULT.spaceId),
+        },
+        sharedTypeOverwriting: {
+          statusCode: 200,
+          response: createExpectSharedTypeOverwritingResults(SPACES.DEFAULT.spaceId),
+        },
+        sharedTypeOverwritingConflict: {
+          statusCode: 409,
+          response: expectSharedTypeOverwritingConflict,
         },
         custom: {
           description: 'when a namespace is specified on the saved object',

@@ -137,6 +137,7 @@ export class SavedObjectsSerializer {
       id,
       type,
       namespace,
+      namespaces,
       attributes,
       migrationVersion,
       updated_at,
@@ -147,11 +148,8 @@ export class SavedObjectsSerializer {
       [type]: attributes,
       type,
       references,
-      ...(namespace && this.schema.isNamespace(type) && { namespace }),
-      ...(namespace &&
-        this.schema.isNamespaces(type) && {
-          namespaces: [namespace === undefined ? null : namespace],
-        }),
+      ...(namespace && { namespace }),
+      ...(namespaces && { namespaces }),
       ...(migrationVersion && { migrationVersion }),
       ...(updated_at && { updated_at }),
     };
