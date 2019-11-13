@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { createReporter, Reporter, UiStatsMetricType } from '@kbn/analytics';
+import { Reporter, UiStatsMetricType } from '@kbn/analytics';
+// @ts-ignore
+import { addSystemApiHeader } from 'ui/system_api';
 
 let telemetryReporter: Reporter;
 
@@ -39,28 +41,36 @@ export const createUiStatsReporter = (appName: string) => (
   }
 };
 
+export const trackUserAgent = (appName: string) => {
+  if (telemetryReporter) {
+    return telemetryReporter.reportUserAgent(appName);
+  }
+};
+
 interface AnalyicsReporterConfig {
   localStorage: any;
-  basePath: string;
   debug: boolean;
-  $http: ng.IHttpService;
+  kfetch: any;
 }
 
 export function createAnalyticsReporter(config: AnalyicsReporterConfig) {
-  const { localStorage, basePath, debug } = config;
+  const { localStorage, debug, kfetch } = config;
 
-  return createReporter({
+  return new Reporter({
     debug,
     storage: localStorage,
     async http(report) {
-      const url = `${basePath}/api/telemetry/report`;
-      await fetch(url, {
+      const response = await kfetch({
         method: 'POST',
-        headers: {
-          'kbn-xsrf': 'true',
-        },
-        body: JSON.stringify({ report }),
+        pathname: '/api/telemetry/report',
+        body: JSON.stringify(report),
+        headers: addSystemApiHeader({}),
       });
+
+      if (response.status !== 'ok') {
+        throw Error('Unable to store report.');
+      }
+      return response;
     },
   });
 }
