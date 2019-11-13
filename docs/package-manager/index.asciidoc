@@ -1,0 +1,5 @@
+[role="xpack"]
+[[epm]]
+== Elastic Package Manager
+
+These are the docs for the Elastic Package Manager (EPM).
