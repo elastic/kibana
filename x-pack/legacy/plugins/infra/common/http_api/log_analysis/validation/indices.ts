@@ -23,16 +23,28 @@ export type ValidationIndicesRequestPayload = rt.TypeOf<typeof validationIndices
 /**
  * Response types
  * */
-export const validationIndicesError = rt.type({
-  index: rt.string,
-  error: rt.keyof({ INDEX_NOT_FOUND: null, TIMESTAMP_NOT_FOUND: null, TIMESTAMP_NOT_VALID: null }),
-  message: rt.string,
-});
-export type ValidationIndicesError = rt.TypeOf<typeof validationIndicesError>;
+export const validationIndicesErrorRT = rt.union([
+  rt.type({
+    error: rt.literal('INDEX_NOT_FOUND'),
+    index: rt.string,
+  }),
+  rt.type({
+    error: rt.literal('TIMESTAMP_NOT_FOUND'),
+    index: rt.string,
+    timestamp: rt.string,
+  }),
+  rt.type({
+    error: rt.literal('TIMESTAMP_NOT_VALID'),
+    index: rt.string,
+    timestamp: rt.string,
+  }),
+]);
+
+export type ValidationIndicesError = rt.TypeOf<typeof validationIndicesErrorRT>;
 
 export const validationIndicesResponsePayloadRT = rt.type({
   data: rt.type({
-    errors: rt.array(validationIndicesError),
+    errors: rt.array(validationIndicesErrorRT),
   }),
 });
 

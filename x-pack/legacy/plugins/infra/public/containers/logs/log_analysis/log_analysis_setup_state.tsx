@@ -5,10 +5,10 @@
  */
 
 import { useState, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 
 import { isExampleDataIndex } from '../../../../common/log_analysis';
 import { AvailableIndex } from './log_analysis_jobs';
+import { ValidationIndicesUIError } from '../../../pages/logs/analysis/setup/initial_configuration_step';
 
 type SetupHandler = (
   indices: string[],
@@ -38,9 +38,7 @@ export const useAnalysisSetupState = ({
     availableIndices.reduce(
       (indexMap, entry) => ({
         ...indexMap,
-        [entry.indexPattern]: !(
-          availableIndices.length > 1 && isExampleDataIndex(entry.indexPattern)
-        ),
+        [entry.index]: !(availableIndices.length > 1 && isExampleDataIndex(entry.index)),
       }),
       {}
     )
@@ -61,26 +59,17 @@ export const useAnalysisSetupState = ({
     return cleanupAndSetupModule(selectedIndexNames, startTime, endTime);
   }, [cleanupAndSetupModule, selectedIndexNames, startTime, endTime]);
 
-  const validationErrors = useMemo<string[]>(() => {
+  const validationErrors = useMemo<ValidationIndicesUIError[]>(() => {
     if (selectedIndexNames.length === 0) {
-      return [
-        i18n.translate(
-          'xpack.infra.analysisSetup.indicesSelectionTooFewSelectedIndicesDescription',
-          {
-            defaultMessage: 'Select at least one index name.',
-          }
-        ),
-      ];
+      return [{ error: 'TOO_FEW_SELECTED_INDICES' }];
     }
 
     const indicesWithErrors = availableIndices.filter(
-      index => selectedIndexNames.includes(index.indexPattern) && !index.valid
+      index => selectedIndexNames.includes(index.index) && index.validation !== undefined
     );
 
     if (indicesWithErrors.length > 0) {
-      return indicesWithErrors
-        .map(index => index.errorMessage!)
-        .filter(message => message !== undefined);
+      return indicesWithErrors.map(index => index.validation!);
     }
 
     return [];

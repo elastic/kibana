@@ -9,6 +9,7 @@ import { useMemo, useCallback, useEffect, useState } from 'react';
 
 import { callGetMlModuleAPI } from './api/ml_get_module';
 import { bucketSpan, getJobId } from '../../../../common/log_analysis';
+import { ValidationIndicesError } from '../../../../common/http_api';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callJobsSummaryAPI } from './api/ml_get_jobs_summary_api';
 import { callSetupMlModuleAPI, SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
@@ -17,9 +18,8 @@ import { useStatusState } from './log_analysis_status_state';
 import { callIndexPatternsValidate } from './api/index_patterns_validate';
 
 export interface AvailableIndex {
-  indexPattern: string;
-  valid: boolean;
-  errorMessage?: string;
+  index: string;
+  validation?: ValidationIndicesError;
 }
 
 const MODULE_ID = 'logs_ui_analysis';
@@ -97,7 +97,7 @@ export const useLogAnalysisJobs = ({
   const indexPatterns = indexPattern.split(',');
 
   const [availableIndices, setAvailableIndices] = useState<AvailableIndex[]>(
-    indexPatterns.map<AvailableIndex>(pattern => ({ indexPattern: pattern, valid: false }))
+    indexPatterns.map<AvailableIndex>(pattern => ({ index: pattern }))
   );
 
   const [fetchJobStatusRequest, fetchJobStatus] = useTrackedPromise(
@@ -116,11 +116,7 @@ export const useLogAnalysisJobs = ({
             const indexValidation = validationResponse.data.errors.find(
               err => err.index === pattern
             );
-            return {
-              indexPattern: pattern,
-              valid: indexValidation === undefined,
-              errorMessage: indexValidation ? indexValidation.message : undefined,
-            };
+            return { index: pattern, validation: indexValidation };
           })
         );
         dispatch({ type: 'fetchedJobStatuses', payload: jobResponse, spaceId, sourceId });

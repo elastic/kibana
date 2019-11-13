@@ -9,8 +9,6 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { i18n } from '@kbn/i18n';
-
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
   LOG_ANALYSIS_VALIDATION_INDICES_PATH,
@@ -46,12 +44,8 @@ export const initIndexPatternsValidateRoute = ({ framework }: InfraBackendLibs) 
 
           if (indexNames.length === 0) {
             errors.push({
-              index,
               error: 'INDEX_NOT_FOUND',
-              message: i18n.translate('xpack.infra.mlValidation.noIndexFound', {
-                defaultMessage: 'No indices match the pattern `{index}`',
-                values: { index },
-              }),
+              index,
             });
             return;
           }
@@ -62,23 +56,15 @@ export const initIndexPatternsValidateRoute = ({ framework }: InfraBackendLibs) 
 
             if (!timestampProperty) {
               errors.push({
-                index: indexName,
                 error: 'TIMESTAMP_NOT_FOUND',
-                message: i18n.translate('xpack.infra.mlValidation.noTimestampField', {
-                  defaultMessage:
-                    'Index `{index}` has no field `{timestamp}`. Ensure the "Timestamp" field in your settings exists in all indices.',
-                  values: { index, timestamp },
-                }),
+                index: indexName,
+                timestamp,
               });
             } else if (timestampProperty.type !== 'date') {
               errors.push({
-                index: indexName,
                 error: 'TIMESTAMP_NOT_VALID',
-                message: i18n.translate('xpack.infra.mlValidation.invalidTimestampField', {
-                  defaultMessage:
-                    'Field `{timestamp}` in index `{index}` is not of type `date`. Ensure the "Timestamp" field in your settings has `date` type.',
-                  values: { index, timestamp },
-                }),
+                index: indexName,
+                timestamp,
               });
             }
           });

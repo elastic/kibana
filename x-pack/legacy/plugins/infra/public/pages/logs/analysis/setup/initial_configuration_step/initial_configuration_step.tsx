@@ -8,8 +8,15 @@ import { EuiSpacer, EuiForm, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
+import { ValidationIndicesError } from '../../../../../../common/http_api';
 import { AnalysisSetupIndicesForm, IndicesSelection } from './analysis_setup_indices_form';
 import { AnalysisSetupTimerangeForm } from './analysis_setup_timerange_form';
+
+export type ValidationIndicesUIError =
+  | ValidationIndicesError
+  | {
+      error: 'TOO_FEW_SELECTED_INDICES';
+    };
 
 interface InitialConfigurationStepProps {
   setStartTime: (startTime: number | undefined) => void;
@@ -18,7 +25,7 @@ interface InitialConfigurationStepProps {
   endTime: number | undefined;
   selectedIndices: IndicesSelection;
   setSelectedIndices: (selectedIndices: IndicesSelection) => void;
-  validationErrors?: string[];
+  validationErrors?: ValidationIndicesUIError[];
 }
 
 export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurationStepProps> = ({
@@ -43,10 +50,10 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
         <AnalysisSetupIndicesForm
           indices={selectedIndices}
           onChangeSelectedIndices={setSelectedIndices}
-          validationErrors={validationErrors}
+          valid={validationErrors.length === 0}
         />
 
-        <ValidationErrors messages={validationErrors} />
+        <ValidationErrors errors={validationErrors} />
       </EuiForm>
     </>
   );
@@ -59,8 +66,8 @@ const errorCalloutTitle = i18n.translate(
   }
 );
 
-const ValidationErrors: React.FC<{ messages: string[] }> = ({ messages }) => {
-  if (messages.length === 0) {
+const ValidationErrors: React.FC<{ errors: ValidationIndicesUIError[] }> = ({ errors }) => {
+  if (errors.length === 0) {
     return null;
   }
 
@@ -68,8 +75,8 @@ const ValidationErrors: React.FC<{ messages: string[] }> = ({ messages }) => {
     <>
       <EuiCallOut color="danger" iconType="alert" title={errorCalloutTitle}>
         <ul>
-          {messages.map((message, i) => (
-            <li key={i}>{message}</li>
+          {errors.map((error, i) => (
+            <li key={i}>{errorToI18n(error)}</li>
           ))}
         </ul>
       </EuiCallOut>
@@ -77,3 +84,34 @@ const ValidationErrors: React.FC<{ messages: string[] }> = ({ messages }) => {
     </>
   );
 };
+
+function errorToI18n(error: ValidationIndicesUIError): string {
+  switch (error.error) {
+    case 'TOO_FEW_SELECTED_INDICES':
+      return i18n.translate(
+        'xpack.infra.analysisSetup.indicesSelectionTooFewSelectedIndicesDescription',
+        {
+          defaultMessage: 'Select at least one index name.',
+        }
+      );
+    case 'INDEX_NOT_FOUND':
+      return i18n.translate('xpack.infra.mlValidation.noIndexFound', {
+        defaultMessage: 'No indices match the pattern `{index}`',
+        values: { index: error.index },
+      });
+    case 'TIMESTAMP_NOT_FOUND':
+      return i18n.translate('xpack.infra.mlValidation.noTimestampField', {
+        defaultMessage:
+          'Index `{index}` has no field `{timestamp}`. Ensure the "Timestamp" field in your settings exists in all indices.',
+        values: { index: error.index, timestamp: error.timestamp },
+      });
+    case 'TIMESTAMP_NOT_VALID':
+      return i18n.translate('xpack.infra.mlValidation.invalidTimestampField', {
+        defaultMessage:
+          'Field `{timestamp}` in index `{index}` is not of type `date`. Ensure the "Timestamp" field in your settings has `date` type.',
+        values: { index: error.index, timestamp: error.timestamp },
+      });
+    default:
+      return '';
+  }
+}

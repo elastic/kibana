@@ -14,8 +14,8 @@ export type IndicesSelection = Record<string, boolean>;
 export const AnalysisSetupIndicesForm: React.FunctionComponent<{
   indices: IndicesSelection;
   onChangeSelectedIndices: (selectedIndices: IndicesSelection) => void;
-  validationErrors?: string[];
-}> = ({ indices, onChangeSelectedIndices, validationErrors = [] }) => {
+  valid: boolean;
+}> = ({ indices, onChangeSelectedIndices, valid }) => {
   const choices = useMemo(
     () =>
       Object.keys(indices).map(indexName => ({
@@ -54,7 +54,7 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
       <EuiFormRow
         describedByIds={['indices']}
         fullWidth
-        isInvalid={validationErrors.length > 0}
+        isInvalid={!valid}
         label={indicesSelectionLabel}
         labelType="legend"
       >
