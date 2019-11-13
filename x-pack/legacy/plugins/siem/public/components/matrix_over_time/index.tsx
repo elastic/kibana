@@ -12,7 +12,7 @@ import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiLoadingContent } from '@elastic/eui';
 import { BarChart } from '../charts/barchart';
-import { HeaderPanel } from '../header_panel';
+import { HeaderSection } from '../header_section';
 import { ChartSeriesData, UpdateDateRange } from '../charts/common';
 import { MatrixOverTimeHistogramData } from '../../graphql/types';
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
@@ -113,7 +113,7 @@ export const MatrixOverTimeHistogram = ({
       onMouseEnter={() => setShowInspect(true)}
       onMouseLeave={() => setShowInspect(false)}
     >
-      <HeaderPanel
+      <HeaderSection
         id={id}
         title={title}
         showInspect={!loadingInitial && showInspect}
