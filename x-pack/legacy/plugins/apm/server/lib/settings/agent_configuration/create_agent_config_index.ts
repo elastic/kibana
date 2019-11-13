@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InternalCoreSetup } from 'src/core/server';
+import { CoreSetup } from 'src/core/server';
 import { CallCluster } from '../../../../../../../../src/legacy/core_plugins/elasticsearch';
 import { getApmIndices } from '../apm_indices/get_apm_indices';
+import { LegacySetup } from '../../../new-platform/plugin';
 
 export async function createApmAgentConfigurationIndex(
-  core: InternalCoreSetup
+  core: CoreSetup,
+  { server }: LegacySetup
 ) {
   try {
-    const { server } = core.http;
     const indices = await getApmIndices(server);
     const index = indices['apm_oss.apmAgentConfigurationIndex'];
     const { callWithInternalUser } = server.plugins.elasticsearch.getCluster(
