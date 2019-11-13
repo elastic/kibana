@@ -17,14 +17,23 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
-import { TelemetryPlugin } from './plugin';
-import * as constants from '../common/constants';
+import { InternalElasticsearchServiceSetup } from './elasticsearch';
+import { InternalHttpServiceSetup } from './http';
+import { InternalUiSettingsServiceSetup } from './ui_settings';
+import { ContextSetup } from './context';
+import { SavedObjectsServiceStart } from './saved_objects';
 
-export { FetcherTask } from './fetcher';
-export { replaceTelemetryInjectedVars } from './telemetry_config';
-export { telemetryCollectionManager } from './collection_manager';
+/** @internal */
+export interface InternalCoreSetup {
+  context: ContextSetup;
+  http: InternalHttpServiceSetup;
+  elasticsearch: InternalElasticsearchServiceSetup;
+  uiSettings: InternalUiSettingsServiceSetup;
+}
 
-export const telemetryPlugin = (initializerContext: PluginInitializerContext) =>
-  new TelemetryPlugin(initializerContext);
-export { constants };
+/**
+ * @internal
+ */
+export interface InternalCoreStart {
+  savedObjects: SavedObjectsServiceStart;
+}
