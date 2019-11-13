@@ -16,15 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { METRIC_TYPE } from './';
 
-import { PluginInitializerContext } from 'src/core/server';
-import { TelemetryPlugin } from './plugin';
-import * as constants from '../common/constants';
+export interface UserAgentMetric {
+  type: METRIC_TYPE.USER_AGENT;
+  appName: string;
+  userAgent: string;
+}
 
-export { FetcherTask } from './fetcher';
-export { replaceTelemetryInjectedVars } from './telemetry_config';
-export { telemetryCollectionManager } from './collection_manager';
+export function trackUsageAgent(appName: string): UserAgentMetric {
+  const userAgent = (window && window.navigator && window.navigator.userAgent) || '';
 
-export const telemetryPlugin = (initializerContext: PluginInitializerContext) =>
-  new TelemetryPlugin(initializerContext);
-export { constants };
+  return {
+    type: METRIC_TYPE.USER_AGENT,
+    appName,
+    userAgent,
+  };
+}

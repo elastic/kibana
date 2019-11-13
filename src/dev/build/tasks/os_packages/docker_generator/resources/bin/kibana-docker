@@ -185,6 +185,7 @@ kibana_vars=(
     xpack.security.public.hostname
     xpack.security.public.port
     telemetry.enabled
+    telemetry.sendUsageFrom
 )
 
 longopts=''

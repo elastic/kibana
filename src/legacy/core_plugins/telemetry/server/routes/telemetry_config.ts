@@ -20,18 +20,21 @@
 import Joi from 'joi';
 import { boomify } from 'boom';
 import { CoreSetup } from 'src/core/server';
+import { getTelemetryAllowChangingOptInStatus } from '../telemetry_config';
+import {
+  TelemetrySavedObjectAttributes,
+  updateTelemetrySavedObject,
+} from '../telemetry_repository';
 
 interface RegisterOptInRoutesParams {
   core: CoreSetup;
   currentKibanaVersion: string;
 }
 
-export interface SavedObjectAttributes {
-  enabled?: boolean;
-  lastVersionChecked: string;
-}
-
-export function registerOptInRoutes({ core, currentKibanaVersion }: RegisterOptInRoutesParams) {
+export function registerTelemetryConfigRoutes({
+  core,
+  currentKibanaVersion,
+}: RegisterOptInRoutesParams) {
   const { server } = core.http as any;
 
   server.route({
@@ -45,17 +48,24 @@ export function registerOptInRoutes({ core, currentKibanaVersion }: RegisterOptI
       },
     },
     handler: async (req: any, h: any) => {
-      const savedObjectsClient = req.getSavedObjectsClient();
-      const savedObject: SavedObjectAttributes = {
-        enabled: req.payload.enabled,
-        lastVersionChecked: currentKibanaVersion,
-      };
-      const options = {
-        id: 'telemetry',
-        overwrite: true,
-      };
       try {
-        await savedObjectsClient.create('telemetry', savedObject, options);
+        const attributes: TelemetrySavedObjectAttributes = {
+          enabled: req.payload.enabled,
+          lastVersionChecked: currentKibanaVersion,
+        };
+        const config = req.server.config();
+        const savedObjectsClient = req.getSavedObjectsClient();
+        const configTelemetryAllowChangingOptInStatus = config.get(
+          'telemetry.allowChangingOptInStatus'
+        );
+        const allowChangingOptInStatus = getTelemetryAllowChangingOptInStatus({
+          telemetrySavedObject: savedObjectsClient,
+          configTelemetryAllowChangingOptInStatus,
+        });
+        if (!allowChangingOptInStatus) {
+          return h.response({ error: 'Not allowed to change Opt-in Status.' }).code(400);
+        }
+        await updateTelemetrySavedObject(savedObjectsClient, attributes);
       } catch (err) {
         return boomify(err);
       }

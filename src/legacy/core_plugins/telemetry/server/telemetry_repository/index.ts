@@ -17,14 +17,13 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
-import { TelemetryPlugin } from './plugin';
-import * as constants from '../common/constants';
+export { getTelemetrySavedObject, TelemetrySavedObject } from './get_telemetry_saved_object';
+export { updateTelemetrySavedObject } from './update_telemetry_saved_object';
 
-export { FetcherTask } from './fetcher';
-export { replaceTelemetryInjectedVars } from './telemetry_config';
-export { telemetryCollectionManager } from './collection_manager';
-
-export const telemetryPlugin = (initializerContext: PluginInitializerContext) =>
-  new TelemetryPlugin(initializerContext);
-export { constants };
+export interface TelemetrySavedObjectAttributes {
+  enabled?: boolean | null;
+  lastVersionChecked?: string;
+  sendUsageFrom?: 'browser' | 'server';
+  lastReported?: number;
+  telemetryAllowChangingOptInStatus?: boolean;
+}
