@@ -52,7 +52,7 @@ exports[`TelemetryForm renders as expected when allows to change optIn status 1`
               </p>
               <p>
                 <ForwardRef
-                  href="https://www.elastic.co/legal/telemetry-privacy-statement"
+                  href="https://www.elastic.co/legal/privacy-statement"
                   target="_blank"
                 >
                   <FormattedMessage
