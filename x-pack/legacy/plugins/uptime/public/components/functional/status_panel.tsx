@@ -15,6 +15,8 @@ interface StatusPanelProps {
   sharedProps: { [key: string]: any };
 }
 
+const STATUS_CHART_HEIGHT = '160px';
+
 export const StatusPanel = ({
   absoluteDateRangeStart,
   absoluteDateRangeEnd,
@@ -23,13 +25,13 @@ export const StatusPanel = ({
   <EuiPanel>
     <EuiFlexGroup gutterSize="l">
       <EuiFlexItem grow={2}>
-        <Snapshot variables={sharedProps} />
+        <Snapshot variables={sharedProps} height={STATUS_CHART_HEIGHT} />
       </EuiFlexItem>
       <EuiFlexItem grow={10}>
         <SnapshotHistogram
           absoluteStartDate={absoluteDateRangeStart}
           absoluteEndDate={absoluteDateRangeEnd}
-          height="160px"
+          height={STATUS_CHART_HEIGHT}
           isResponsive={true}
           variables={sharedProps}
         />

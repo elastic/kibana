@@ -30,12 +30,7 @@ describe('licensing plugin', () => {
     clusterClient.callAsInternalUser.mockRejectedValue(new Error('test'));
 
     const { license$ } = await plugin.setup(coreSetup);
-    const finalLicense = await license$
-      .pipe(
-        skip(1),
-        take(1)
-      )
-      .toPromise();
+    const finalLicense = await license$.pipe(skip(1), take(1)).toPromise();
 
     expect(finalLicense).toBeInstanceOf(License);
   });

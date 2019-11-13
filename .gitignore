@@ -45,3 +45,5 @@ package-lock.json
 npm-debug.log*
 .tern-project
 .nyc_output
+x-pack/legacy/plugins/apm/tsconfig.json
+apm.tsconfig.json

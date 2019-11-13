@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { RefreshInterval, TimeRange } from 'src/plugins/data/public';
 import { Query } from '../../query/query_bar';
+import { esFilters } from '../../../../../../plugins/data/public';
 
 export * from './components';
 
@@ -36,6 +36,6 @@ export interface SavedQueryAttributes {
   title: string;
   description: string;
   query: Query;
-  filters?: Filter[];
+  filters?: esFilters.Filter[];
   timefilter?: SavedQueryTimeFilter;
 }
