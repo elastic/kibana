@@ -9,6 +9,9 @@
  */
 
 import { chain, each, get, union, uniq } from 'lodash';
+import moment from 'moment-timezone';
+
+import { npStart } from 'ui/new_platform';
 
 import { getEntityFieldList } from '../../common/util/anomaly_utils';
 import { isSourceDataChartableForDetector, isModelPlotEnabled } from '../../common/util/job_utils';
@@ -129,6 +132,14 @@ export function getInfluencers(selectedJobs = []) {
     }
   });
   return influencers;
+}
+
+export function getDateFormatTz() {
+  const config = npStart.core.uiSettings;
+  // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
+  const tzConfig = config.get('dateFormat:tz');
+  const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
+  return dateFormatTz;
 }
 
 export function getFieldsByJob() {

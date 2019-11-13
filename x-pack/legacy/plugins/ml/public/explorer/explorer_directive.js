@@ -13,8 +13,6 @@ import { merge } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import moment from 'moment-timezone';
-
 import { Subscription } from 'rxjs';
 
 import { uiModules } from 'ui/modules';
@@ -35,20 +33,15 @@ import { Explorer } from './explorer';
 import { EXPLORER_ACTION } from './explorer_constants';
 import { getExplorerDefaultAppState, explorerAction$, explorerAppState$ } from './explorer_dashboard_service';
 
-module.directive('mlExplorerDirective', function (config, globalState, $rootScope, $timeout, AppState) {
+module.directive('mlExplorerDirective', function (globalState, $rootScope, AppState) {
   function link($scope, element) {
     const subscriptions = new Subscription();
 
     const { jobSelectService$, unsubscribeFromGlobalState } = jobSelectServiceFactory(globalState);
 
-    // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
-    const tzConfig = config.get('dateFormat:tz');
-    const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
-
     ReactDOM.render(
       <I18nContext>
         <Explorer {...{
-          dateFormatTz,
           globalState,
           jobSelectService$,
           TimeBuckets,
@@ -61,16 +54,14 @@ module.directive('mlExplorerDirective', function (config, globalState, $rootScop
     // Initialize the AppState in which to store swimlane and filter settings.
     // AppState is used to store state in the URL.
     $scope.appState = new AppState(getExplorerDefaultAppState());
+    const { mlExplorerFilter, mlExplorerSwimlane } = $scope.appState;
 
     // Pass the current URL AppState on to anomaly explorer's reactive state.
     // After this hand-off, the appState stored in explorerState$ is the single
     // source of truth.
     explorerAction$.next({
       action: EXPLORER_ACTION.APP_STATE_SET,
-      payload: {
-        mlExplorerSwimlane: $scope.appState.mlExplorerSwimlane,
-        mlExplorerFilter: $scope.appState.mlExplorerFilter,
-      }
+      payload: { mlExplorerSwimlane, mlExplorerFilter }
     });
 
     // This is temporary and can be removed once explorer.js migrated fully

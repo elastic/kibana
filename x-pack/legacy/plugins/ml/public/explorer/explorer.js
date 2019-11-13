@@ -70,6 +70,7 @@ import { mlJobService } from '../services/job_service';
 import { jobSelectionActionCreator } from './explorer_actions';
 import {
   getClearedSelectedAnomaliesState,
+  getDateFormatTz,
   getDefaultViewBySwimlaneData,
   getFilteredTopInfluencers,
   getSelectionInfluencers,
@@ -140,7 +141,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     static propTypes = {
       annotationsRefresh: PropTypes.bool,
       appState: PropTypes.object.isRequired,
-      dateFormatTz: PropTypes.string.isRequired,
       explorer: PropTypes.object,
       globalState: PropTypes.object.isRequired,
       jobSelectService$: PropTypes.object.isRequired,
@@ -745,8 +745,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         return;
       }
 
-      const { dateFormatTz } = this.props;
-
       const jobIds = (selectedCells !== null && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL)
         ? selectedCells.lanes
         : selectedJobs.map(d => d.id);
@@ -920,6 +918,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       }
 
       const { tableInterval, tableSeverity } = this.props;
+      const dateFormatTz = getDateFormatTz();
+
       const anomaliesTableCompareArgs = {
         selectedCells,
         selectedJobs,
@@ -1139,7 +1139,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
     render() {
       const {
-        dateFormatTz,
         globalState,
         intl,
         jobSelectService$,
@@ -1175,7 +1174,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       const { jobIds: selectedJobIds, selectedGroups } = getSelectedJobIds(globalState);
       const jobSelectorProps = {
-        dateFormatTz,
+        dateFormatTz: getDateFormatTz(),
         globalState,
         jobSelectService$,
         selectedJobIds,
