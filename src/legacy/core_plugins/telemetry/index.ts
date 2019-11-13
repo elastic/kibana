@@ -50,10 +50,8 @@ const telemetry = (kibana: any) => {
         allowChangingOptInStatus: Joi.boolean().default(true),
         optIn: Joi.when('allowChangingOptInStatus', {
           is: false,
-          then: Joi.valid(true).required(),
-          otherwise: Joi.boolean()
-            .allow(null)
-            .default(null),
+          then: Joi.valid(true).default(true),
+          otherwise: Joi.boolean().default(true),
         }),
 
         // `config` is used internally and not intended to be set
