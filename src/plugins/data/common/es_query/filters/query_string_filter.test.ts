@@ -18,7 +18,7 @@
  */
 
 import { buildQueryFilter } from './query_string_filter';
-import { IndexPattern } from './types';
+import { IndexPattern } from '../../types';
 
 describe('Phrase filter builder', () => {
   let indexPattern: IndexPattern;

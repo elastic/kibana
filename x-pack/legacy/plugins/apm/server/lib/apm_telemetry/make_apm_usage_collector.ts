@@ -4,26 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InternalCoreSetup } from 'src/core/server';
+import { CoreSetup } from 'src/core/server';
 import { getSavedObjectsClient } from '../helpers/saved_objects_client';
 import { APM_TELEMETRY_DOC_ID, createApmTelementry } from './apm_telemetry';
+import { LegacySetup } from '../../new-platform/plugin';
 
-export interface CoreSetupWithUsageCollector extends InternalCoreSetup {
-  http: InternalCoreSetup['http'] & {
-    server: {
-      usage: {
-        collectorSet: {
-          makeUsageCollector: (options: unknown) => unknown;
-          register: (options: unknown) => unknown;
-        };
+export interface LegacySetupWithUsageCollector extends LegacySetup {
+  server: LegacySetup['server'] & {
+    usage: {
+      collectorSet: {
+        makeUsageCollector: (options: unknown) => unknown;
+        register: (options: unknown) => unknown;
       };
     };
   };
 }
 
-export function makeApmUsageCollector(core: CoreSetupWithUsageCollector) {
-  const { server } = core.http;
-
+export function makeApmUsageCollector(
+  core: CoreSetup,
+  { server }: LegacySetupWithUsageCollector
+) {
   const apmUsageCollector = server.usage.collectorSet.makeUsageCollector({
     type: 'apm',
     fetch: async () => {
