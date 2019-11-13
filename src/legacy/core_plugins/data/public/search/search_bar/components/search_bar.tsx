@@ -25,6 +25,7 @@ import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
 
 import { TimeRange } from 'src/plugins/data/common/types';
+import { TimeHistoryContract } from 'src/plugins/data/public';
 import { IndexPattern, Query, FilterBar } from '../../../../../data/public';
 import { QueryBarTopRow } from '../../../query';
 import { SavedQuery, SavedQueryAttributes } from '../index';
@@ -32,7 +33,6 @@ import { SavedQueryMeta, SaveQueryForm } from './saved_query_management/save_que
 import { SavedQueryManagementComponent } from './saved_query_management/saved_query_management_component';
 import { SavedQueryService } from '../lib/saved_query_service';
 import { createSavedQueryService } from '../lib/saved_query_service';
-import { TimeHistoryContract } from '../../../timefilter';
 import {
   withKibana,
   KibanaReactContextValue,

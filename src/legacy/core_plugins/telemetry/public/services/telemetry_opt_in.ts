@@ -28,15 +28,22 @@ let currentOptInStatus = false;
 
 export function TelemetryOptInProvider($injector: any, chrome: any) {
   currentOptInStatus = npStart.core.injectedMetadata.getInjectedVar('telemetryOptedIn') as boolean;
+  const allowChangingOptInStatus = npStart.core.injectedMetadata.getInjectedVar(
+    'allowChangingOptInStatus'
+  ) as boolean;
 
   setCanTrackUiMetrics(currentOptInStatus);
   const provider = {
     getBannerId: () => bannerId,
     getOptIn: () => currentOptInStatus,
+    canChangeOptInStatus: () => allowChangingOptInStatus,
     setBannerId(id: string) {
       bannerId = id;
     },
     setOptIn: async (enabled: boolean) => {
+      if (!allowChangingOptInStatus) {
+        return;
+      }
       setCanTrackUiMetrics(enabled);
       const $http = $injector.get('$http');
 
