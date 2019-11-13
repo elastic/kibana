@@ -21,7 +21,7 @@ export async function searchConfigurations({
   environment?: string;
   setup: Setup;
 }) {
-  const { client, config } = setup;
+  const { internalClient, config } = setup;
 
   // sorting order
   // 1. exact match: service.name AND service.environment (eg. opbeans-node / production)
@@ -50,7 +50,7 @@ export async function searchConfigurations({
     }
   };
 
-  const resp = await client.search<AgentConfiguration>(params);
+  const resp = await internalClient.search<AgentConfiguration>(params);
   const { hits } = resp.hits;
 
   const exactMatch = hits.find(

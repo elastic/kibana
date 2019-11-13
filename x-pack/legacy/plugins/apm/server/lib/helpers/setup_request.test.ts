@@ -10,6 +10,7 @@ import { uiSettingsServiceMock } from 'src/core/server/mocks';
 
 function getMockRequest() {
   const callWithRequestSpy = jest.fn();
+  const callWithInternalUserSpy = jest.fn();
   const mockRequest = ({
     params: {},
     query: {},
@@ -17,14 +18,17 @@ function getMockRequest() {
       config: () => ({ get: () => 'apm-*' }),
       plugins: {
         elasticsearch: {
-          getCluster: () => ({ callWithRequest: callWithRequestSpy })
+          getCluster: () => ({
+            callWithRequest: callWithRequestSpy,
+            callWithInternalUser: callWithInternalUserSpy
+          })
         }
       }
     },
     getUiSettingsService: () => ({ get: async () => false })
   } as any) as Legacy.Request;
 
-  return { callWithRequestSpy, mockRequest };
+  return { callWithRequestSpy, callWithInternalUserSpy, mockRequest };
 }
 
 describe('setupRequest', () => {
@@ -33,6 +37,27 @@ describe('setupRequest', () => {
     const { client } = await setupRequest(mockRequest);
     await client.search({ index: 'apm-*', body: { foo: 'bar' } });
     expect(callWithRequestSpy).toHaveBeenCalledWith(mockRequest, 'search', {
+      index: 'apm-*',
+      body: {
+        foo: 'bar',
+        query: {
+          bool: {
+            filter: [{ range: { 'observer.version_major': { gte: 7 } } }]
+          }
+        }
+      },
+      ignore_throttled: true
+    });
+  });
+
+  it('should call callWithInternalUser with default args', async () => {
+    const { mockRequest, callWithInternalUserSpy } = getMockRequest();
+    const { internalClient } = await setupRequest(mockRequest);
+    await internalClient.search({
+      index: 'apm-*',
+      body: { foo: 'bar' }
+    } as any);
+    expect(callWithInternalUserSpy).toHaveBeenCalledWith('search', {
       index: 'apm-*',
       body: {
         foo: 'bar',

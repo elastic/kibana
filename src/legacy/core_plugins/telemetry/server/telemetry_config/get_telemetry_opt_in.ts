@@ -18,67 +18,51 @@
  */
 
 import semver from 'semver';
+import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
 
-import { SavedObjectAttributes } from './routes/opt_in';
-
-interface GetTelemetryOptIn {
-  request: any;
+interface GetTelemetryOptInConfig {
+  telemetrySavedObject: TelemetrySavedObject;
   currentKibanaVersion: string;
+  allowChangingOptInStatus: boolean;
+  configTelemetryOptIn: boolean | null;
 }
 
-// Returns whether telemetry has been opt'ed into or not.
-// Returns null not set, meaning Kibana should prompt in the UI.
-export async function getTelemetryOptIn({
-  request,
-  currentKibanaVersion,
-}: GetTelemetryOptIn): Promise<boolean | null> {
-  const isRequestingApplication = request.path.startsWith('/app');
+type GetTelemetryOptIn = (config: GetTelemetryOptInConfig) => null | boolean;
 
-  // Prevent interstitial screens (such as the space selector) from prompting for telemetry
-  if (!isRequestingApplication) {
+export const getTelemetryOptIn: GetTelemetryOptIn = ({
+  telemetrySavedObject,
+  currentKibanaVersion,
+  allowChangingOptInStatus,
+  configTelemetryOptIn,
+}) => {
+  if (typeof configTelemetryOptIn === 'boolean' && !allowChangingOptInStatus) {
+    return configTelemetryOptIn;
+  }
+
+  if (telemetrySavedObject === false) {
     return false;
   }
 
-  const savedObjectsClient = request.getSavedObjectsClient();
-
-  let savedObject;
-  try {
-    savedObject = await savedObjectsClient.get('telemetry', 'telemetry');
-  } catch (error) {
-    if (savedObjectsClient.errors.isNotFoundError(error)) {
-      return null;
-    }
-
-    // if we aren't allowed to get the telemetry document, we can assume that we won't
-    // be able to opt into telemetry either, so we're returning `false` here instead of null
-    if (savedObjectsClient.errors.isForbiddenError(error)) {
-      return false;
-    }
-
-    throw error;
+  if (telemetrySavedObject === null || typeof telemetrySavedObject.enabled !== 'boolean') {
+    return null;
   }
 
-  const { attributes }: { attributes: SavedObjectAttributes } = savedObject;
-
-  // if enabled is already null, return null
-  if (attributes.enabled == null) return null;
-
-  const enabled = !!attributes.enabled;
+  const savedOptIn = telemetrySavedObject.enabled;
 
   // if enabled is true, return it
-  if (enabled === true) return enabled;
+  if (savedOptIn === true) return savedOptIn;
 
   // Additional check if they've already opted out (enabled: false):
   // - if the Kibana version has changed by at least a minor version,
   //   return null to re-prompt.
 
-  const lastKibanaVersion = attributes.lastVersionChecked;
+  const lastKibanaVersion = telemetrySavedObject.lastVersionChecked;
 
   // if the last kibana version isn't set, or is somehow not a string, return null
   if (typeof lastKibanaVersion !== 'string') return null;
 
   // if version hasn't changed, just return enabled value
-  if (lastKibanaVersion === currentKibanaVersion) return enabled;
+  if (lastKibanaVersion === currentKibanaVersion) return savedOptIn;
 
   const lastSemver = parseSemver(lastKibanaVersion);
   const currentSemver = parseSemver(currentKibanaVersion);
@@ -93,8 +77,8 @@ export async function getTelemetryOptIn({
   }
 
   // current version X.Y is not greater than last version X.Y, return enabled
-  return enabled;
-}
+  return savedOptIn;
+};
 
 function parseSemver(version: string): semver.SemVer | null {
   // semver functions both return nulls AND throw exceptions: "it depends!"
