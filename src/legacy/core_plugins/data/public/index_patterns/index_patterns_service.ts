@@ -25,11 +25,11 @@ import {
 } from 'src/core/public';
 import { FieldFormatRegisty } from '../../../../../plugins/data/public';
 import { Field, FieldList, FieldListInterface, FieldType } from './fields';
-import { createFlattenHitWrapper } from './index_patterns';
 import { createIndexPatternSelect } from './components';
 import { setNotifications, setFieldFormats } from './services';
 
 import {
+  createFlattenHitWrapper,
   formatHitProvider,
   IndexPattern,
   IndexPatterns,
@@ -101,8 +101,6 @@ export {
   INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
   isFilterable,
   validateIndexPattern,
-  mockFields,
-  mockIndexPattern,
 } from './utils';
 
 /** @public */
