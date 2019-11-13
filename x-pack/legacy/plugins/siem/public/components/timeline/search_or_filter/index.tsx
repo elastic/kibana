@@ -114,11 +114,8 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const StatefulSearchOrFilter = connect(
-  makeMapStateToProps,
-  {
-    applyKqlFilterQuery: timelineActions.applyKqlFilterQuery,
-    setKqlFilterQueryDraft: timelineActions.setKqlFilterQueryDraft,
-    updateKqlMode: timelineActions.updateKqlMode,
-  }
-)(StatefulSearchOrFilterComponent);
+export const StatefulSearchOrFilter = connect(makeMapStateToProps, {
+  applyKqlFilterQuery: timelineActions.applyKqlFilterQuery,
+  setKqlFilterQueryDraft: timelineActions.setKqlFilterQueryDraft,
+  updateKqlMode: timelineActions.updateKqlMode,
+})(StatefulSearchOrFilterComponent);

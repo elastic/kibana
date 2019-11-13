@@ -72,7 +72,10 @@ describe('Range Agg', () => {
           schema: 'segment',
           params: {
             field: 'bytes',
-            ranges: [{ from: 0, to: 1000 }, { from: 1000, to: 2000 }],
+            ranges: [
+              { from: 0, to: 1000 },
+              { from: 1000, to: 2000 },
+            ],
           },
         },
       ],
