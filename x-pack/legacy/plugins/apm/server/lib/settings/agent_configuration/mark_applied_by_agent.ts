@@ -16,7 +16,7 @@ export async function markAppliedByAgent({
   body: AgentConfiguration;
   setup: Setup;
 }) {
-  const { client, indices } = setup;
+  const { internalClient, indices } = setup;
 
   const params = {
     index: indices['apm_oss.apmAgentConfigurationIndex'],
@@ -27,5 +27,5 @@ export async function markAppliedByAgent({
     }
   };
 
-  return client.index<AgentConfiguration>(params);
+  return internalClient.index<AgentConfiguration>(params);
 }

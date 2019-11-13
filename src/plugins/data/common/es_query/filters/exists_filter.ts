@@ -18,7 +18,7 @@
  */
 
 import { Filter, FilterMeta } from './meta_filter';
-import { IndexPattern, Field } from './types';
+import { IndexPattern, Field } from '../../types';
 
 export type ExistsFilterMeta = FilterMeta;
 

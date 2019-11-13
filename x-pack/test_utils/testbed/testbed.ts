@@ -174,7 +174,13 @@ export const registerTestBed = <T extends string = string>(
         checkBox.simulate('change', { target: { checked: isChecked } });
       };
 
-      const toggleEuiSwitch: TestBed<T>['form']['toggleEuiSwitch'] = selectCheckBox; // Same API as "selectCheckBox"
+      const toggleEuiSwitch: TestBed<T>['form']['toggleEuiSwitch'] = testSubject => {
+        const checkBox = find(testSubject);
+        if (!checkBox.length) {
+          throw new Error(`"${testSubject}" was not found.`);
+        }
+        checkBox.simulate('click');
+      };
 
       const setComboBoxValue: TestBed<T>['form']['setComboBoxValue'] = (
         comboBoxTestSubject,
