@@ -44,7 +44,7 @@ function getDocumentPayloadFn(server: ServerFacade) {
   function encodeContent(content: string | null, exportType: ExportTypeDefinition) {
     switch (exportType.jobContentEncoding) {
       case 'base64':
-        return content ? Buffer.from(content, 'base64') : content;
+        return content ? Buffer.from(content, 'base64') : content; // Buffer.from rejects null
       default:
         return content;
     }
