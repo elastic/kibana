@@ -28,7 +28,7 @@ import { PluginWrapper } from './plugin';
 import { DiscoveredPlugin, DiscoveredPluginInternal, PluginName } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
-import { InternalCoreSetup } from '../internal_setup';
+import { InternalCoreSetup } from '../internal_types';
 
 /** @public */
 export interface PluginsServiceSetup {

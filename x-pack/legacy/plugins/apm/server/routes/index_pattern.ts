@@ -16,7 +16,7 @@ export const indexPatternRoute = createRoute((core, { server }) => ({
   }
 }));
 
-export const kueryBarIndexPatternRoute = createRoute(core => ({
+export const kueryBarIndexPatternRoute = createRoute(() => ({
   path: '/api/apm/kuery_bar_index_pattern',
   params: {
     query: t.partial({
@@ -29,9 +29,7 @@ export const kueryBarIndexPatternRoute = createRoute(core => ({
   },
   handler: async (request, { query }) => {
     const { processorEvent } = query;
-
     const setup = await setupRequest(request);
-
     return getKueryBarIndexPattern({ request, processorEvent, setup });
   }
 }));
