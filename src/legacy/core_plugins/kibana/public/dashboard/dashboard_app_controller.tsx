@@ -23,27 +23,22 @@ import React from 'react';
 import angular from 'angular';
 import { uniq } from 'lodash';
 
-import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-
-// @ts-ignore
-import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
-
-import { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
-
-import { showShareContextMenu } from 'ui/share';
-import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-
-import { State } from 'ui/state_management/state';
-
-import { AppStateClass as TAppStateClass } from 'ui/state_management/app_state';
-
-import { KbnUrl } from 'ui/url/kbn_url';
-import { IndexPattern } from 'ui/index_patterns';
-import { SaveOptions } from 'ui/saved_objects/saved_object';
 import { Subscription } from 'rxjs';
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
+
+import {
+  subscribeWithScope,
+  ConfirmationButtonTypes,
+  showSaveModal,
+  SaveResult,
+  showShareContextMenu,
+  migrateLegacyQuery,
+  State,
+  AppStateClass as TAppStateClass,
+  KbnUrl,
+  SaveOptions,
+} from './legacy_imports';
 import { Query } from '../../../../../plugins/data/public';
-import { FilterStateManager } from '../../../data/public';
+import { FilterStateManager, IndexPattern } from '../../../data/public';
 import { SavedQuery } from '../../../data/public';
 
 import {
@@ -60,6 +55,7 @@ import {
   openAddPanelFlyout,
 } from '../../../embeddable_api/public/np_ready/public';
 import { DashboardAppState, NavAction, ConfirmModalFn, SavedDashboardPanel } from './types';
+import { SavedObjectFinder } from '../../../../../plugins/kibana_react/public';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
 import { DashboardSaveModal } from './top_nav/save_modal';
@@ -114,8 +110,6 @@ export class DashboardAppController {
     savedQueryService,
     embeddables,
     dashboardCapabilities,
-    docTitle,
-    dataStart,
     npDataStart: {
       query: {
         filterManager,
@@ -135,7 +129,7 @@ export class DashboardAppController {
 
     const dash = ($scope.dash = $route.current.locals.dash);
     if (dash.id) {
-      docTitle.change(dash.title);
+      chrome.docTitle.change(dash.title);
     }
 
     const dashboardStateManager = new DashboardStateManager({
@@ -603,7 +597,7 @@ export class DashboardAppController {
             if (dash.id !== $routeParams.id) {
               kbnUrl.change(createDashboardEditUrl(dash.id));
             } else {
-              docTitle.change(dash.lastSavedTitle);
+              chrome.docTitle.change(dash.lastSavedTitle);
               updateViewMode(ViewMode.VIEW);
             }
           }

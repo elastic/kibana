@@ -20,15 +20,20 @@
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 
-import { stateMonitorFactory, StateMonitor } from 'ui/state_management/state_monitor_factory';
-import { Timefilter } from 'ui/timefilter';
-import { AppStateClass as TAppStateClass } from 'ui/state_management/app_state';
-import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { Moment } from 'moment';
 
 import { DashboardContainer } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
-import { esFilters } from '../../../../../../src/plugins/data/public';
+import {
+  esFilters,
+  TimefilterContract as Timefilter,
+} from '../../../../../../src/plugins/data/public';
+import {
+  stateMonitorFactory,
+  StateMonitor,
+  AppStateClass as TAppStateClass,
+  migrateLegacyQuery,
+} from './legacy_imports';
 import { Query } from '../../../data/public';
 
 import { getAppStateDefaults, migrateAppState } from './lib';

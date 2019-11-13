@@ -21,26 +21,6 @@ import { EuiConfirmModal } from '@elastic/eui';
 import angular, { IModule } from 'angular';
 import { IPrivate } from 'ui/private';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-// @ts-ignore
-import { GlobalStateProvider } from 'ui/state_management/global_state';
-// @ts-ignore
-import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
-// @ts-ignore
-import { AppStateProvider } from 'ui/state_management/app_state';
-// @ts-ignore
-import { PrivateProvider } from 'ui/private/private';
-// @ts-ignore
-import { EventsProvider } from 'ui/events';
-// @ts-ignore
-import { PersistedState } from 'ui/persisted_state';
-// @ts-ignore
-import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
-// @ts-ignore
-import { PromiseServiceCreator } from 'ui/promises/promises';
-// @ts-ignore
-import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
-// @ts-ignore
-import { confirmModalFactory } from 'ui/modals/confirm_modal';
 import {
   AppMountContext,
   ChromeStart,
@@ -48,8 +28,22 @@ import {
   SavedObjectsClientContract,
   UiSettingsClientContract,
 } from 'kibana/public';
-import { configureAppAngularModule } from 'ui/legacy_compat';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
+import {
+  GlobalStateProvider,
+  StateManagementConfigProvider,
+  AppStateProvider,
+  PrivateProvider,
+  EventsProvider,
+  PersistedState,
+  createTopNavDirective,
+  createTopNavHelper,
+  PromiseServiceCreator,
+  KbnUrlProvider,
+  RedirectWhenMissingProvider,
+  confirmModalFactory,
+  configureAppAngularModule,
+} from './legacy_imports';
 
 // @ts-ignore
 import { initDashboardApp } from './app';
@@ -71,7 +65,6 @@ export interface RenderDeps {
   dashboardConfig: any;
   savedDashboards: any;
   dashboardCapabilities: any;
-  docTitle: any;
   uiSettings: UiSettingsClientContract;
   chrome: ChromeStart;
   addBasePath: (path: string) => string;

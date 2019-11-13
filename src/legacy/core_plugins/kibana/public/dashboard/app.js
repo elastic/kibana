@@ -18,12 +18,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { wrapInI18nContext } from 'ui/i18n';
-import { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 
 import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
 
+import { ensureDefaultIndexPattern } from './legacy_imports';
 import { initDashboardAppDirective } from './dashboard_app';
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 import {
@@ -39,7 +38,7 @@ export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
 
   app.directive('dashboardListing', function (reactDirective) {
-    return reactDirective(wrapInI18nContext(DashboardListing));
+    return reactDirective(DashboardListing);
   });
 
   function createNewDashboardCtrl($scope) {
@@ -55,7 +54,7 @@ export function initDashboardApp(app, deps) {
 
   app.run((globalState, $rootScope) => {
     registerTimefilterWithGlobalStateFactory(
-      deps.npDataStart.query.timefilter.timefilter,
+      deps.npDataStart.timefilter.timefilter,
       globalState,
       $rootScope
     );
