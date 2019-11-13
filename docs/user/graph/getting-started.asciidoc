@@ -83,6 +83,12 @@ to adjust the way *Graph* queries your data. You can tune the graph to show
 just the results relevant to you and to improve performance.  
 For more information, see <<graph-troubleshooting, Graph troubleshooting>>. 
 
+You can configure the number of vertices that a search or 
+expand operation adds to the graph.
+By default, only the five most relevant terms for any given field are added 
+at a time. This keeps the graph from overflowing. To increase this number, click 
+a field below the search bar, select *Edit Settings*, and change *Terms per hop*.  
+
 [float]
 [[graph-block-terms]]
 === Block terms from the graph
