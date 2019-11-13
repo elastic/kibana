@@ -45,9 +45,11 @@ export const uiFiltersEnvironmentsRoute = createRoute(() => ({
 const filterNamesRt = t.type({
   filterNames: jsonRt.pipe(
     t.array(
-      t.keyof(Object.fromEntries(
-        localUIFilterNames.map(filterName => [filterName, null])
-      ) as Record<LocalUIFilterName, null>)
+      t.keyof(
+        Object.fromEntries(
+          localUIFilterNames.map(filterName => [filterName, null])
+        ) as Record<LocalUIFilterName, null>
+      )
     )
   )
 });

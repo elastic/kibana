@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { getOr, isEqual, set } from 'lodash/fp';
 import React, { memo, useEffect, useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
@@ -37,11 +36,11 @@ import {
   toStrSelector,
 } from './selectors';
 import { timelineActions, hostsActions, networkActions } from '../../store/actions';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 const {
   ui: { SearchBar },
   search,
-  timefilter,
 } = data;
 
 export const siemFilterManager = npStart.plugins.data.query.filterManager;
@@ -67,7 +66,7 @@ interface SiemSearchBarDispatch {
     id: InputsModelId;
     savedQuery: SavedQuery | undefined;
   }) => void;
-  setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: Filter[] }) => void;
+  setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: esFilters.Filter[] }) => void;
 }
 
 interface SiemSearchBarProps {
@@ -99,10 +98,11 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
     toStr,
     updateSearch,
   }) => {
+    const { timefilter } = npStart.plugins.data.query.timefilter;
     if (fromStr != null && toStr != null) {
-      timefilter.timefilter.setTime({ from: fromStr, to: toStr });
+      timefilter.setTime({ from: fromStr, to: toStr });
     } else if (start != null && end != null) {
-      timefilter.timefilter.setTime({
+      timefilter.setTime({
         from: new Date(start).toISOString(),
         to: new Date(end).toISOString(),
       });
@@ -313,7 +313,7 @@ SearchBarComponent.displayName = 'SiemSearchBar';
 
 interface UpdateReduxSearchBar extends OnTimeChangeProps {
   id: InputsModelId;
-  filters?: Filter[];
+  filters?: esFilters.Filter[];
   query?: Query;
   savedQuery?: SavedQuery;
   resetSavedQuery?: boolean;
@@ -397,11 +397,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateSearch: dispatchUpdateSearch(dispatch),
   setSavedQuery: ({ id, savedQuery }: { id: InputsModelId; savedQuery: SavedQuery | undefined }) =>
     dispatch(inputsActions.setSavedQuery({ id, savedQuery })),
-  setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: Filter[] }) =>
+  setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: esFilters.Filter[] }) =>
     dispatch(inputsActions.setSearchBarFilter({ id, filters })),
 });
 
-export const SiemSearchBar = connect(
-  makeMapStateToProps,
-  mapDispatchToProps
-)(SearchBarComponent);
+export const SiemSearchBar = connect(makeMapStateToProps, mapDispatchToProps)(SearchBarComponent);

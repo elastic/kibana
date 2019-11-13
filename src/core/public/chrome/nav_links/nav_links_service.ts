@@ -130,10 +130,7 @@ export class NavLinksService {
 
     return {
       getNavLinks$: () => {
-        return navLinks$.pipe(
-          map(sortNavLinks),
-          takeUntil(this.stop$)
-        );
+        return navLinks$.pipe(map(sortNavLinks), takeUntil(this.stop$));
       },
 
       get(id: string) {
@@ -192,7 +189,10 @@ export class NavLinksService {
 }
 
 function sortNavLinks(navLinks: ReadonlyMap<string, NavLinkWrapper>) {
-  return sortBy([...navLinks.values()].map(link => link.properties), 'order');
+  return sortBy(
+    [...navLinks.values()].map(link => link.properties),
+    'order'
+  );
 }
 
 function relativeToAbsolute(url: string) {

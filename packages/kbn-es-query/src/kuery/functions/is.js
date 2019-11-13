@@ -21,7 +21,7 @@ import _ from 'lodash';
 import * as ast from '../ast';
 import * as literal from '../node_types/literal';
 import * as wildcard from '../node_types/wildcard';
-import { getPhraseScript } from '../../filters';
+import { getPhraseScript } from '../../utils/filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings } from '../../utils/get_time_zone_from_settings';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
