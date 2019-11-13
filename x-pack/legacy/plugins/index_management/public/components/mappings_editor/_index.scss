@@ -88,6 +88,12 @@
     position: relative;
   }
 
+  &__create-field-required-props {
+    margin-top: $euiSizeL;
+    padding-top: $euiSize;
+    border-top: 1px solid $euiColorLightShade;
+  }
+
   &__edit-field {
     min-width: 680px;
 

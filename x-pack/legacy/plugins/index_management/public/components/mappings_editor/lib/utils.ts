@@ -204,46 +204,56 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
     isMultiField: boolean = false,
     parentId?: string
   ): Record<string, any> =>
-    Object.entries(props).reduce((acc, [propName, value]) => {
-      const id = getUniqueId();
-      arrayToKeepRef.push(id);
-      const field = { name: propName, ...value } as Field;
-      const meta = getFieldMeta(field, isMultiField);
-      const { childFieldsName, hasChildFields, hasMultiFields } = meta;
+    Object.entries(props)
+      .sort(([a], [b]) => (a > b ? 1 : a < b ? -1 : 0))
+      .reduce((acc, [propName, value]) => {
+        const id = getUniqueId();
+        arrayToKeepRef.push(id);
+        const field = { name: propName, ...value } as Field;
 
-      if (hasChildFields || hasMultiFields) {
-        const nextDepth =
-          meta.canHaveChildFields || meta.canHaveMultiFields ? nestedDepth + 1 : nestedDepth;
-        meta.childFields = [];
-        maxNestedDepth = Math.max(maxNestedDepth, nextDepth);
+        // In some cases for object, the "type" is not defined but the field
+        // has properties defined. The mappings editor requires a "type" to be defined
+        // so we add it here.
+        if (field.type === undefined && field.properties !== undefined) {
+          field.type = 'object';
+        }
 
-        normalizeFields(
-          field[childFieldsName!]!,
-          to,
-          [...paths, propName],
-          meta.childFields,
-          nextDepth,
-          meta.canHaveMultiFields,
-          id
-        );
-      }
+        const meta = getFieldMeta(field, isMultiField);
+        const { childFieldsName, hasChildFields, hasMultiFields } = meta;
 
-      const { properties, fields, ...rest } = field;
+        if (hasChildFields || hasMultiFields) {
+          const nextDepth =
+            meta.canHaveChildFields || meta.canHaveMultiFields ? nestedDepth + 1 : nestedDepth;
+          meta.childFields = [];
+          maxNestedDepth = Math.max(maxNestedDepth, nextDepth);
 
-      const normalizedField: NormalizedField = {
-        id,
-        parentId,
-        nestedDepth,
-        isMultiField,
-        path: paths.length ? `${paths.join('.')}.${propName}` : propName,
-        source: rest,
-        ...meta,
-      };
+          normalizeFields(
+            field[childFieldsName!]!,
+            to,
+            [...paths, propName],
+            meta.childFields,
+            nextDepth,
+            meta.canHaveMultiFields,
+            id
+          );
+        }
 
-      acc[id] = normalizedField;
+        const { properties, fields, ...rest } = field;
 
-      return acc;
-    }, to);
+        const normalizedField: NormalizedField = {
+          id,
+          parentId,
+          nestedDepth,
+          isMultiField,
+          path: paths.length ? `${paths.join('.')}.${propName}` : propName,
+          source: rest,
+          ...meta,
+        };
+
+        acc[id] = normalizedField;
+
+        return acc;
+      }, to);
 
   const rootLevelFields: string[] = [];
   const { byId, aliases } = replaceAliasPathByAliasId(

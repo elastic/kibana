@@ -15,14 +15,15 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import { useForm, Form, FormDataProvider, SelectField, UseField } from '../../../shared_imports';
+import { useForm, Form, FormDataProvider, SelectField, UseField } from '../../../../shared_imports';
 
-import { TYPE_DEFINITION, FIELD_TYPES_OPTIONS, EUI_SIZE } from '../../../constants';
+import { TYPE_DEFINITION, FIELD_TYPES_OPTIONS, EUI_SIZE } from '../../../../constants';
 
-import { useDispatch } from '../../../mappings_state';
-import { fieldSerializer, getFieldConfig, filterTypesForMultiField } from '../../../lib';
-import { Field, MainType } from '../../../types';
-import { NameParameter } from '../field_parameters';
+import { useDispatch, useMappingsState } from '../../../../mappings_state';
+import { fieldSerializer, getFieldConfig, filterTypesForMultiField } from '../../../../lib';
+import { Field, MainType } from '../../../../types';
+import { NameParameter } from '../../field_parameters';
+import { getParametersFormForType } from './required_parameters_forms';
 
 const formWrapper = (props: any) => <form {...props} />;
 
@@ -40,6 +41,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
   maxNestedDepth,
 }: Props) {
   const { form } = useForm<Field>({ serializer: fieldSerializer });
+  const {
+    fields: { byId },
+  } = useMappingsState();
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -189,6 +193,17 @@ export const CreateField = React.memo(function CreateFieldComponent({
               </FormDataProvider>
               <EuiFlexItem>{renderFormActions()}</EuiFlexItem>
             </EuiFlexGroup>
+
+            <FormDataProvider pathsToWatch={['type', 'subType']}>
+              {({ type, subType }) => {
+                const ParametersForm = getParametersFormForType(type, subType);
+                return ParametersForm ? (
+                  <div className="mappings-editor__create-field-required-props">
+                    <ParametersForm allFields={byId} />
+                  </div>
+                ) : null;
+              }}
+            </FormDataProvider>
           </div>
         </div>
       </Form>

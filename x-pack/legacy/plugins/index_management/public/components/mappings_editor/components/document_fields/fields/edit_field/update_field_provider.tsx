@@ -44,11 +44,6 @@ export const UpdateFieldProvider = ({ children }: Props) => {
   const updateField: UpdateFieldFunc = field => {
     const previousField = byId[field.id];
 
-    const aliases = getAllDescendantAliases(field, fields)
-      .map(id => byId[id].path)
-      .sort();
-    const hasAliases = Boolean(aliases.length);
-
     const showConfirmationAfterTypeChanged = (oldType: DataType, newType: DataType): boolean => {
       const { hasChildFields, hasMultiFields } = field;
 
@@ -60,7 +55,12 @@ export const UpdateFieldProvider = ({ children }: Props) => {
       return shouldDeleteChildFieldsAfterTypeChange(oldType, newType);
     };
 
-    if (field.source.type !== previousField.source.type || hasAliases) {
+    if (field.source.type !== previousField.source.type) {
+      const aliases = getAllDescendantAliases(field, fields)
+        .map(id => byId[id].path)
+        .sort();
+      const hasAliases = Boolean(aliases.length);
+
       // We need to check if, by changing the type, we will also
       // delete possible child properties ("fields" or "properties").
       // If we will, we need to warn the user about it.

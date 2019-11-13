@@ -65,22 +65,25 @@ export type Action =
 export type Dispatch = (action: Action) => void;
 
 export const addFieldToState = (field: Field, state: State): State => {
+  const updatedFields = { ...state.fields };
   const id = getUniqueId();
   const { fieldToAddFieldTo } = state.documentFields;
   const addToRootLevel = fieldToAddFieldTo === undefined;
-  const parentField = addToRootLevel ? undefined : state.fields.byId[fieldToAddFieldTo!];
+  const parentField = addToRootLevel ? undefined : updatedFields.byId[fieldToAddFieldTo!];
   const isMultiField = parentField ? parentField.canHaveMultiFields : false;
 
-  const rootLevelFields = addToRootLevel
-    ? [...state.fields.rootLevelFields, id]
-    : [...state.fields.rootLevelFields];
+  updatedFields.byId = { ...updatedFields.byId };
+  updatedFields.rootLevelFields = addToRootLevel
+    ? [...updatedFields.rootLevelFields, id]
+    : updatedFields.rootLevelFields;
 
   const nestedDepth =
     parentField && (parentField.canHaveChildFields || parentField.canHaveMultiFields)
       ? parentField.nestedDepth + 1
       : 0;
 
-  const maxNestedDepth = Math.max(state.fields.maxNestedDepth, nestedDepth);
+  updatedFields.maxNestedDepth = Math.max(updatedFields.maxNestedDepth, nestedDepth);
+
   const { name } = field;
   const path = parentField ? `${parentField.path}.${name}` : name;
 
@@ -94,13 +97,13 @@ export const addFieldToState = (field: Field, state: State): State => {
     ...getFieldMeta(field, isMultiField),
   };
 
-  state.fields.byId[id] = newField;
+  updatedFields.byId[id] = newField;
 
   if (parentField) {
     const childFields = parentField.childFields || [];
 
     // Update parent field with new children
-    state.fields.byId[fieldToAddFieldTo!] = {
+    updatedFields.byId[fieldToAddFieldTo!] = {
       ...parentField,
       childFields: [...childFields, id],
       hasChildFields: parentField.canHaveChildFields,
@@ -109,10 +112,14 @@ export const addFieldToState = (field: Field, state: State): State => {
     };
   }
 
+  if (newField.source.type === 'alias') {
+    updatedFields.aliases = updateAliasesReferences(newField, updatedFields);
+  }
+
   return {
     ...state,
     isValid: isStateValid(state),
-    fields: { ...state.fields, rootLevelFields, maxNestedDepth },
+    fields: updatedFields,
   };
 };
 
@@ -358,11 +365,23 @@ export const reducer = (state: State, action: Action): State => {
           newField.source.type
         );
 
-        const aliases = getAllDescendantAliases(previousField, updatedFields);
-        if (shouldDeleteChildFields && Boolean(aliases.length)) {
-          aliases.forEach(aliasId => {
-            updatedFields = removeFieldFromMap(aliasId, updatedFields);
-          });
+        if (previousField.source.type === 'alias' && previousField.source.path) {
+          // The field was previously an alias, now that it is not an alias anymore
+          // We need to remove its reference from our state.aliases map
+          updatedFields.aliases = {
+            ...updatedFields.aliases,
+            [previousField.source.path]: updatedFields.aliases[previousField.source.path].filter(
+              aliasId => aliasId !== fieldToEdit
+            ),
+          };
+        } else {
+          const aliases = getAllDescendantAliases(previousField, updatedFields);
+
+          if (shouldDeleteChildFields && Boolean(aliases.length)) {
+            aliases.forEach(aliasId => {
+              updatedFields = removeFieldFromMap(aliasId, updatedFields);
+            });
+          }
         }
 
         if (shouldDeleteChildFields && previousField.childFields) {

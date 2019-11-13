@@ -21,3 +21,5 @@ export * from './eager_global_ordinals_parameter';
 export * from './norms_parameter';
 
 export * from './similarity_parameter';
+
+export * from './path_parameter';
