@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { take, tap, toArray } from 'rxjs/operators';
+import { mapTo, take, tap, toArray } from 'rxjs/operators';
 import { interval, race } from 'rxjs';
 import sinon, { stub } from 'sinon';
 import moment from 'moment';
@@ -683,7 +683,7 @@ describe('getApi', () => {
       configMock.newsfeed.mainInterval = 10; // fast retry for testing
       mockHttpGet.mockImplementation(getHttpMockWithItems(successItems));
 
-      const timeout$ = interval(1000); // lets us capture some results after a short time
+      const timeout$ = interval(1000).pipe(mapTo(undefined)); // lets us capture some results after a short time
       let timesFetched = 0;
 
       const get$ = getApi(httpMock, configMock.newsfeed, '6.8.2').pipe(
