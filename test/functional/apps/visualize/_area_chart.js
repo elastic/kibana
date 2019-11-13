@@ -168,7 +168,7 @@ export default function ({ getService, getPageObjects }) {
         await inspector.close();
       });
 
-      it('scales when enabled count agg', async () => {
+      it.skip('scales when enabled count agg', async () => {
         const expectedTableData = [
           [ '2015-09-20 00:00', '0.002' ],
           [ '2015-09-20 01:00', '0.003' ],
@@ -200,7 +200,7 @@ export default function ({ getService, getPageObjects }) {
         await inspector.close();
       });
 
-      it('does not scale top hit agg', async () => {
+      it.skip('does not scale top hit agg', async () => {
         const expectedTableData = [
           [ '2015-09-20 00:00', '6', '9.035KB' ],
           [ '2015-09-20 01:00', '9', '5.854KB' ],
