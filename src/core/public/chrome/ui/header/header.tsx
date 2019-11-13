@@ -179,6 +179,7 @@ interface Props {
   basePath: HttpStart['basePath'];
   isLocked?: boolean;
   onIsLockedUpdate?: (isLocked: boolean) => void;
+  isCloudEnabled: boolean;
 }
 
 interface State {
@@ -296,6 +297,7 @@ class HeaderUI extends Component<Props, State> {
       kibanaVersion,
       onIsLockedUpdate,
       legacyMode,
+      isCloudEnabled,
     } = this.props;
     const {
       appTitle,
@@ -394,7 +396,9 @@ class HeaderUI extends Component<Props, State> {
 
           <EuiHeaderSection side="right">
             <EuiHeaderSectionItem>
-              <HeaderHelpMenu {...{ helpExtension$, kibanaDocLink, kibanaVersion }} />
+              <HeaderHelpMenu
+                {...{ isCloudEnabled, helpExtension$, kibanaDocLink, kibanaVersion }}
+              />
             </EuiHeaderSectionItem>
 
             <HeaderNavControls side="right" navControls={navControlsRight} />
