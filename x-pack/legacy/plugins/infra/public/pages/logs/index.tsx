@@ -21,7 +21,7 @@ import { Source, useSource } from '../../containers/source';
 import { StreamPage } from './stream';
 import { SettingsPage } from '../shared/settings';
 import { AppNavigation } from '../../components/navigation/app_navigation';
-import { AnalysisPage } from './analysis';
+import { LogEntryRatePage } from './log_entry_rate';
 import {
   useLogAnalysisCapabilities,
   LogAnalysisCapabilities,
@@ -98,7 +98,7 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
 
               <Switch>
                 <Route path={streamTab.path} component={StreamPage} />
-                <Route path={logRateTab.path} component={AnalysisPage} />
+                <Route path={logRateTab.path} component={LogEntryRatePage} />
                 <Route path={settingsTab.path} component={SettingsPage} />
                 <RedirectWithQueryParams
                   from={`${match.path}/analysis`}

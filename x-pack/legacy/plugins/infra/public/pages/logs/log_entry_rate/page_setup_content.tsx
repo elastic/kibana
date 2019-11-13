@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { SetupStatus } from '../../../../common/log_analysis';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
-import { AnalysisSetupSteps } from './setup';
+import { LogEntryRateSetupSteps } from './setup';
 
 type SetupHandler = (
   indices: string[],
@@ -28,7 +28,7 @@ type SetupHandler = (
   endTime: number | undefined
 ) => void;
 
-interface AnalysisSetupContentProps {
+interface LogEntryRateSetupContentProps {
   availableIndices: string[];
   cleanupAndSetup: SetupHandler;
   errorMessages: string[];
@@ -37,7 +37,7 @@ interface AnalysisSetupContentProps {
   viewResults: () => void;
 }
 
-export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentProps> = ({
+export const LogEntryRateSetupContent: React.FunctionComponent<LogEntryRateSetupContentProps> = ({
   availableIndices,
   cleanupAndSetup,
   errorMessages,
@@ -49,9 +49,9 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup', delay: 15000 });
 
   return (
-    <AnalysisSetupPage>
+    <LogEntryRateSetupPage>
       <EuiPageBody>
-        <AnalysisPageContent
+        <LogEntryRateSetupPageContent
           verticalPosition="center"
           horizontalPosition="center"
           data-test-subj="analysisSetupContent"
@@ -76,7 +76,7 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
               />
             </EuiText>
             <EuiSpacer />
-            <AnalysisSetupSteps
+            <LogEntryRateSetupSteps
               availableIndices={availableIndices}
               cleanupAndSetup={cleanupAndSetup}
               errorMessages={errorMessages}
@@ -85,17 +85,17 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
               viewResults={viewResults}
             />
           </EuiPageContentBody>
-        </AnalysisPageContent>
+        </LogEntryRateSetupPageContent>
       </EuiPageBody>
-    </AnalysisSetupPage>
+    </LogEntryRateSetupPage>
   );
 };
 
 // !important due to https://github.com/elastic/eui/issues/2232
-const AnalysisPageContent = euiStyled(EuiPageContent)`
+const LogEntryRateSetupPageContent = euiStyled(EuiPageContent)`
   max-width: 768px !important;
 `;
 
-const AnalysisSetupPage = euiStyled(EuiPage)`
+const LogEntryRateSetupPage = euiStyled(EuiPage)`
   height: 100%;
 `;

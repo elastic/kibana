@@ -7,15 +7,15 @@
 import React from 'react';
 
 import { ColumnarPage } from '../../../components/page';
-import { AnalysisPageContent } from './page_content';
-import { AnalysisPageProviders } from './page_providers';
+import { LogEntryRatePageContent } from './page_content';
+import { LogEntryRatePageProviders } from './page_providers';
 
-export const AnalysisPage = () => {
+export const LogEntryRatePage = () => {
   return (
-    <AnalysisPageProviders>
-      <ColumnarPage data-test-subj="infraLogsAnalysisPage">
-        <AnalysisPageContent />
+    <LogEntryRatePageProviders>
+      <ColumnarPage data-test-subj="logsLogEntryRatePage">
+        <LogEntryRatePageContent />
       </ColumnarPage>
-    </AnalysisPageProviders>
+    </LogEntryRatePageProviders>
   );
 };

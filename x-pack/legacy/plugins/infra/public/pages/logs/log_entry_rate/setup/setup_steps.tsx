@@ -19,7 +19,7 @@ type SetupHandler = (
   endTime: number | undefined
 ) => void;
 
-interface AnalysisSetupStepsProps {
+interface LogEntryRateSetupStepsProps {
   availableIndices: string[];
   cleanupAndSetup: SetupHandler;
   errorMessages: string[];
@@ -28,14 +28,14 @@ interface AnalysisSetupStepsProps {
   viewResults: () => void;
 }
 
-export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps> = ({
+export const LogEntryRateSetupSteps: React.FunctionComponent<LogEntryRateSetupStepsProps> = ({
   availableIndices,
   cleanupAndSetup: cleanupAndSetupModule,
   errorMessages,
   setup: setupModule,
   setupStatus,
   viewResults,
-}: AnalysisSetupStepsProps) => {
+}: LogEntryRateSetupStepsProps) => {
   const {
     setup,
     cleanupAndSetup,

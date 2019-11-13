@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 import euiStyled from '../../../../../../common/eui_styled_components';
 
-export const AnalysisUnavailableContent: React.FunctionComponent<{}> = () => (
+export const LogEntryRateUnavailableContent: React.FunctionComponent<{}> = () => (
   <EmptyPrompt
     title={
       <h2>

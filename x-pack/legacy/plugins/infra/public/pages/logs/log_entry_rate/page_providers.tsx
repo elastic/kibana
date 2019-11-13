@@ -10,7 +10,7 @@ import { LogAnalysisJobs } from '../../../containers/logs/log_analysis';
 import { Source } from '../../../containers/source';
 import { useKibanaSpaceId } from '../../../utils/use_kibana_space_id';
 
-export const AnalysisPageProviders: React.FunctionComponent = ({ children }) => {
+export const LogEntryRatePageProviders: React.FunctionComponent = ({ children }) => {
   const { sourceId, source } = useContext(Source.Context);
   const spaceId = useKibanaSpaceId();
 

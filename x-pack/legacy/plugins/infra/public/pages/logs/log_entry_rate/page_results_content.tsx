@@ -38,7 +38,7 @@ import { LogRateResults } from './sections/log_rate';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
-export const AnalysisResultsContent = ({
+export const LogEntryRateResultsContent = ({
   sourceId,
   isFirstUse,
 }: {
