@@ -2,7 +2,14 @@
 == Upgrading {kib}
 
 Depending on the {kib} version you're upgrading from, the upgrade process to 7.0
-varies.
+varies. 
+
+NOTE: {kib} upgrades automatically when starting a new version, as described in 
+<<upgrade-migrations, this document>>.
+Although you do not need to manually back up {kib} before upgrading, we recommend
+that you have a backup on hand. You can use the 
+<<snapshot-repositories, Snapshot and Restore>> UI to back up {kib}
+data by targeting `.kibana*` indices.
 
 [float]
 [[upgrade-before-you-begin]]
