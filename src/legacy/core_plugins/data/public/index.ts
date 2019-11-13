@@ -70,5 +70,4 @@ export {
   createFilterBarHelper,
   createFilterBarDirective,
   createApplyFiltersPopoverDirective,
-  createApplyFiltersPopoverHelper,
 } from './shim/legacy_module';
