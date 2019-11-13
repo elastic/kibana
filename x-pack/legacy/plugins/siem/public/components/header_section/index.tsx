@@ -4,51 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
 
 import { InspectButton } from '../inspect';
+import { Subtitle } from '../subtitle';
 
 interface HeaderProps {
   border?: boolean;
 }
 
 const Header = styled.header.attrs({
-  className: 'siemHeaderPanel',
+  className: 'siemHeaderSection',
 })<HeaderProps>`
-  ${props => css`
-    margin-bottom: ${props.theme.eui.euiSizeL};
+  ${({ border, theme }) => css`
+    margin-bottom: ${theme.eui.euiSizeL};
     user-select: text;
 
-    ${props.border &&
-      `
-      border-bottom: ${props.theme.eui.euiBorderThin};
-      padding-bottom: ${props.theme.eui.euiSizeL};
-    `}
+    ${border &&
+      css`
+        border-bottom: ${theme.eui.euiBorderThin};
+        padding-bottom: ${theme.eui.paddingSizes.l};
+      `}
   `}
 `;
-
 Header.displayName = 'Header';
 
-export interface HeaderPanelProps extends HeaderProps {
+export interface HeaderSectionProps extends HeaderProps {
   children?: React.ReactNode;
   id?: string;
+  split?: boolean;
   subtitle?: string | React.ReactNode;
   showInspect?: boolean;
   title: string | React.ReactNode;
   tooltip?: string;
 }
 
-export const HeaderPanel = React.memo<HeaderPanelProps>(
-  ({ border, children, id, showInspect = false, subtitle, title, tooltip }) => (
+export const HeaderSection = React.memo<HeaderSectionProps>(
+  ({ border, children, id, showInspect = false, split, subtitle, title, tooltip }) => (
     <Header border={border}>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" responsive={false}>
             <EuiFlexItem>
               <EuiTitle>
-                <h2 data-test-subj="header-panel-title">
+                <h2 data-test-subj="header-section-title">
                   {title}
                   {tooltip && (
                     <>
@@ -59,11 +60,7 @@ export const HeaderPanel = React.memo<HeaderPanelProps>(
                 </h2>
               </EuiTitle>
 
-              {subtitle && (
-                <EuiText color="subdued" data-test-subj="header-panel-subtitle" size="xs">
-                  <p>{subtitle}</p>
-                </EuiText>
-              )}
+              {subtitle && <Subtitle data-test-subj="header-section-subtitle" items={subtitle} />}
             </EuiFlexItem>
 
             {id && (
@@ -75,7 +72,7 @@ export const HeaderPanel = React.memo<HeaderPanelProps>(
         </EuiFlexItem>
 
         {children && (
-          <EuiFlexItem data-test-subj="header-panel-supplements" grow={false}>
+          <EuiFlexItem data-test-subj="header-section-supplements" grow={split ? true : false}>
             {children}
           </EuiFlexItem>
         )}
@@ -83,5 +80,4 @@ export const HeaderPanel = React.memo<HeaderPanelProps>(
     </Header>
   )
 );
-
-HeaderPanel.displayName = 'HeaderPanel';
+HeaderSection.displayName = 'HeaderSection';
