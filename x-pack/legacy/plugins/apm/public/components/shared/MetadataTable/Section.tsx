@@ -5,17 +5,18 @@
  */
 
 import React from 'react';
+import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { KeyValueTable } from '../KeyValueTable';
 import { KeyValuePair } from '../../../utils/flattenObject';
 
 interface Props {
-  keyValuePairs?: KeyValuePair[];
+  keyValuePairs: KeyValuePair[];
 }
 
 export function Section({ keyValuePairs }: Props) {
-  if (keyValuePairs && keyValuePairs.length > 0) {
+  if (!isEmpty(keyValuePairs)) {
     return <KeyValueTable keyValuePairs={keyValuePairs} />;
   }
   return (

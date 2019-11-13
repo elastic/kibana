@@ -11,9 +11,7 @@ import { expectTextsInDocument } from '../../../../utils/testHelpers';
 
 describe('Section', () => {
   it('shows "empty state message" if no data is available', () => {
-    const undefinedPropertyComponent = render(<Section />);
-    expectTextsInDocument(undefinedPropertyComponent, ['No data available']);
-    const emptyPropertyComponent = render(<Section keyValuePairs={[]} />);
-    expectTextsInDocument(emptyPropertyComponent, ['No data available']);
+    const component = render(<Section keyValuePairs={[]} />);
+    expectTextsInDocument(component, ['No data available']);
   });
 });
