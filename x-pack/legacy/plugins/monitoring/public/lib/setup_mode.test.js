@@ -132,6 +132,11 @@ describe('setup_mode', () => {
           }
         }
       }));
+      data = {
+        _meta: {
+          hasPermissions: true
+        }
+      };
       jest.doMock('ui/notify', () => ({
         toastNotifications: {
           addDanger,
@@ -159,7 +164,9 @@ describe('setup_mode', () => {
         }
       }));
       data = {
-        hasPermissions: false
+        _meta: {
+          hasPermissions: false
+        }
       };
       setModules();
       initSetupModeState(angularStateMock.scope, angularStateMock.injector);
@@ -179,7 +186,8 @@ describe('setup_mode', () => {
       const clusterUuid = '1ajy';
       data = {
         _meta: {
-          liveClusterUuid: clusterUuid
+          liveClusterUuid: clusterUuid,
+          hasPermissions: true
         },
         elasticsearch: {
           byUuid: {
@@ -201,7 +209,8 @@ describe('setup_mode', () => {
       const clusterUuid = '1ajy';
       data = {
         _meta: {
-          liveClusterUuid: clusterUuid
+          liveClusterUuid: clusterUuid,
+          hasPermissions: true
         },
         elasticsearch: {
           byUuid: {
