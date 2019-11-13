@@ -21,40 +21,44 @@ interface FormatterOptions {
 
 interface DurationTimeUnit {
   [timeUnit: string]: {
-    label: string;
-    defaultLabel: string;
+    translation: string;
     convert: (value: number) => string;
   };
 }
 
 const durationUnit: DurationTimeUnit = {
   hours: {
-    label: 'xpack.apm.formatters.hoursTimeUnitLabel',
-    defaultLabel: 'h',
+    translation: i18n.translate('xpack.apm.formatters.hoursTimeUnitLabel', {
+      defaultMessage: 'h'
+    }),
     convert: (value: number) =>
       asDecimal(moment.duration(value / 1000).asHours())
   },
   minutes: {
-    label: 'xpack.apm.formatters.minutesTimeUnitLabel',
-    defaultLabel: 'min',
+    translation: i18n.translate('xpack.apm.formatters.minutesTimeUnitLabel', {
+      defaultMessage: 'min'
+    }),
     convert: (value: number) =>
       asDecimal(moment.duration(value / 1000).asMinutes())
   },
   seconds: {
-    label: 'xpack.apm.formatters.secondsTimeUnitLabel',
-    defaultLabel: 's',
+    translation: i18n.translate('xpack.apm.formatters.secondsTimeUnitLabel', {
+      defaultMessage: 's'
+    }),
     convert: (value: number) =>
       asDecimal(moment.duration(value / 1000).asSeconds())
   },
   milliseconds: {
-    label: 'xpack.apm.formatters.millisTimeUnitLabel',
-    defaultLabel: 'ms',
+    translation: i18n.translate('xpack.apm.formatters.millisTimeUnitLabel', {
+      defaultMessage: 'ms'
+    }),
     convert: (value: number) =>
       asInteger(moment.duration(value / 1000).asMilliseconds())
   },
   microseconds: {
-    label: 'xpack.apm.formatters.microsTimeUnitLabel',
-    defaultLabel: 'μs',
+    translation: i18n.translate('xpack.apm.formatters.microsTimeUnitLabel', {
+      defaultMessage: 'μs'
+    }),
     convert: (value: number) => asInteger(value)
   }
 };
@@ -70,11 +74,7 @@ function convertTo(
     return defaultValue;
   }
 
-  const message =
-    SPACE +
-    i18n.translate(unit.label, {
-      defaultMessage: unit.defaultLabel
-    });
+  const message = SPACE + unit.translation;
 
   const convertedValue = unit.convert(value);
   return `${convertedValue}${withUnit ? message : ''}`;
