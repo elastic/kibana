@@ -48,15 +48,15 @@ export async function loadMlServerInfo() {
   }
 }
 
-export function newJobDefaults(): MlServerDefaults {
+export function getNewJobDefaults(): MlServerDefaults {
   return defaults;
 }
 
-export function newJobLimits(): MlServerLimits {
+export function getNewJobLimits(): MlServerLimits {
   return limits;
 }
 
-export function cloudId(): string | null {
+export function getCloudId(): string | null {
   return cloudInfo.cloudId;
 }
 
@@ -64,7 +64,7 @@ export function isCloud(): boolean {
   return cloudInfo.isCloud;
 }
 
-export function cloudDeploymentId(): string | null {
+export function getCloudDeploymentId(): string | null {
   if (cloudInfo.cloudId === null) {
     return null;
   }
