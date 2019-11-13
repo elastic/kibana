@@ -36,6 +36,7 @@ import {
   AppStateClass as TAppStateClass,
   KbnUrl,
   SaveOptions,
+  SavedObjectFinder,
 } from './legacy_imports';
 import { Query } from '../../../../../plugins/data/public';
 import { FilterStateManager, IndexPattern } from '../../../data/public';
@@ -55,7 +56,6 @@ import {
   openAddPanelFlyout,
 } from '../../../embeddable_api/public/np_ready/public';
 import { DashboardAppState, NavAction, ConfirmModalFn, SavedDashboardPanel } from './types';
-import { SavedObjectFinder } from '../../../../../plugins/kibana_react/public';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
 import { DashboardSaveModal } from './top_nav/save_modal';
@@ -729,8 +729,6 @@ export class DashboardAppController {
           getFactory: embeddables.getEmbeddableFactory,
           notifications,
           overlays,
-          savedObjects,
-          uiSettings,
           SavedObjectFinder,
         });
       }

@@ -19,7 +19,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { CoreSetup, SavedObjectsStart, UiSettingsClientContract } from 'src/core/public';
+import { CoreSetup } from 'src/core/public';
 
 import {
   EuiButton,
@@ -44,8 +44,6 @@ interface Props {
   getFactory: GetEmbeddableFactory;
   getAllFactories: GetEmbeddableFactories;
   notifications: CoreSetup['notifications'];
-  savedObjects: SavedObjectsStart;
-  uiSettings: UiSettingsClientContract;
   SavedObjectFinder: React.ComponentType<SavedObjectFinderProps>;
 }
 
@@ -148,8 +146,6 @@ export class AddPanelFlyout extends React.Component<Props, State> {
         noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
           defaultMessage: 'No matching objects found.',
         })}
-        savedObjects={this.props.savedObjects}
-        uiSettings={this.props.uiSettings}
       />
     );
 
