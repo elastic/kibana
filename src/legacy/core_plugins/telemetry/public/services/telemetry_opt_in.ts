@@ -55,7 +55,7 @@ async function sendOptInStatus($injector: any, chrome: any, enabled: boolean) {
     // swallow any errors
   }
 }
-export function TelemetryOptInProvider($injector: any, chrome: any) {
+export function TelemetryOptInProvider($injector: any, chrome: any, sendOptInStatusChange = true) {
   currentOptInStatus = npStart.core.injectedMetadata.getInjectedVar('telemetryOptedIn') as boolean;
   const allowChangingOptInStatus = npStart.core.injectedMetadata.getInjectedVar(
     'allowChangingOptInStatus'
@@ -78,7 +78,9 @@ export function TelemetryOptInProvider($injector: any, chrome: any) {
 
       try {
         await $http.post(chrome.addBasePath('/api/telemetry/v2/optIn'), { enabled });
-        await sendOptInStatus($injector, chrome, enabled);
+        if (sendOptInStatusChange) {
+          await sendOptInStatus($injector, chrome, enabled);
+        }
         currentOptInStatus = enabled;
       } catch (error) {
         toastNotifications.addError(error, {
