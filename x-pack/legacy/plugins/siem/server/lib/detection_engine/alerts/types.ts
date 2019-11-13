@@ -45,7 +45,10 @@ export interface SignalAlertParams {
   type: 'filter' | 'query' | 'saved_query';
 }
 
-export type SignalAlertParamsRest = Omit<SignalAlertParams, 'maxSignals' | 'saved_id'> & {
+export type SignalAlertParamsRest = Omit<
+  SignalAlertParams,
+  'falsePositives' | 'maxSignals' | 'saved_id'
+> & {
   false_positives: SignalAlertParams['falsePositives'];
   saved_id: SignalAlertParams['savedId'];
   max_signals: SignalAlertParams['maxSignals'];
