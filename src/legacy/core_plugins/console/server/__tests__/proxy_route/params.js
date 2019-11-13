@@ -61,7 +61,7 @@ describe('Console Proxy Route', () => {
 
           const { statusCode } = await server.inject({
             method: 'POST',
-            url: '/api/console/proxy?method=GET&path=/baz/type/id',
+            url: '/api/console/proxy?method=GET&path=/baz/id',
           });
 
           expect(statusCode).to.be(403);
@@ -79,7 +79,7 @@ describe('Console Proxy Route', () => {
 
           const { statusCode } = await server.inject({
             method: 'POST',
-            url: '/api/console/proxy?method=GET&path=/foo/type/id',
+            url: '/api/console/proxy?method=GET&path=/foo/id',
           });
 
           expect(statusCode).to.be(200);
@@ -98,7 +98,7 @@ describe('Console Proxy Route', () => {
 
           const { statusCode } = await server.inject({
             method: 'POST',
-            url: '/api/console/proxy?method=GET&path=/foo/type/id',
+            url: '/api/console/proxy?method=GET&path=/foo/id',
           });
 
           expect(statusCode).to.be(200);
@@ -116,7 +116,7 @@ describe('Console Proxy Route', () => {
         server.route(createProxyRoute({ baseUrl: 'http://localhost:9200', getConfigForReq }));
         await server.inject({
           method: 'POST',
-          url: '/api/console/proxy?method=HEAD&path=/index/type/id',
+          url: '/api/console/proxy?method=HEAD&path=/index/id',
         });
 
         sinon.assert.calledOnce(getConfigForReq);
@@ -125,8 +125,8 @@ describe('Console Proxy Route', () => {
         expect(args[0]).to.have.property('method', 'post');
         expect(args[0])
           .to.have.property('query')
-          .eql({ method: 'HEAD', path: '/index/type/id' });
-        expect(args[1]).to.be('http://localhost:9200/index/type/id?pretty=true');
+          .eql({ method: 'HEAD', path: '/index/id' });
+        expect(args[1]).to.be('http://localhost:9200/index/id?pretty=true');
       });
 
       it('sends the returned timeout, agent, and base headers to request', async () => {
@@ -154,7 +154,7 @@ describe('Console Proxy Route', () => {
 
         await server.inject({
           method: 'POST',
-          url: '/api/console/proxy?method=HEAD&path=/index/type/id',
+          url: '/api/console/proxy?method=HEAD&path=/index/id',
         });
 
         sinon.assert.calledOnce(requestModule.sendRequest);

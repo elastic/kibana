@@ -5,9 +5,8 @@
  */
 
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { Filter } from '@kbn/es-query';
 import { ActionCreator } from 'typescript-fsa';
-import { Query } from 'src/plugins/data/common';
+import { Query, esFilters } from 'src/plugins/data/public';
 
 import { InputsModelId } from '../../../store/inputs/constants';
 import { HostComponentProps } from '../../../components/link_to/redirect_to_hosts';
@@ -19,7 +18,7 @@ import { hostsModel } from '../../../store';
 
 interface HostDetailsComponentReduxProps {
   query: Query;
-  filters: Filter[];
+  filters: esFilters.Filter[];
 }
 
 interface HostBodyComponentDispatchProps {

@@ -24,10 +24,7 @@ import 'regenerator-runtime/runtime';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import {
-  Router,
-  hashHistory,
-} from 'react-router';
+import { Router, hashHistory } from 'react-router'; // eslint-disable-line
 
 // Store.
 import configureStore from './store/configure_store';
