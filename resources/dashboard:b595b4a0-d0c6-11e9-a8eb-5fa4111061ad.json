@@ -1,41 +1,41 @@
 {
    "migrationVersion": {
       "dashboard": "7.0.0"
-   }, 
+   },
    "references": [
       {
-         "type": "search", 
-         "name": "panel_0", 
+         "type": "search",
+         "name": "panel_0",
          "id": "Analyze-Table"
-      }, 
+      },
       {
-         "type": "visualization", 
-         "name": "panel_1", 
+         "type": "visualization",
+         "name": "panel_1",
          "id": "Top-Applications-By-Bandwidth-(histogram)"
-      }, 
+      },
       {
-         "type": "visualization", 
-         "name": "panel_2", 
+         "type": "visualization",
+         "name": "panel_2",
          "id": "Top-Applications-By-Packet-Count"
-      }, 
+      },
       {
-         "type": "visualization", 
-         "name": "panel_3", 
+         "type": "visualization",
+         "name": "panel_3",
          "id": "Top-Applications-By-Bandwidth-(pie)"
       }
-   ], 
-   "type": "dashboard", 
+   ],
+   "type": "dashboard",
    "dashboard": {
-      "hits": 0, 
-      "timeRestore": false, 
-      "description": "", 
-      "title": "Analyze Dashboard", 
-      "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":22,\"w\":48,\"h\":23,\"i\":\"4\"},\"panelIndex\":\"4\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":0,\"w\":36,\"h\":22,\"i\":\"5\"},\"panelIndex\":\"5\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":36,\"y\":11,\"w\":12,\"h\":11,\"i\":\"6\"},\"panelIndex\":\"6\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_2\"},{\"gridData\":{\"x\":36,\"y\":0,\"w\":12,\"h\":11,\"i\":\"7\"},\"version\":\"7.2.0\",\"panelIndex\":\"7\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"}]", 
-      "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}", 
-      "version": 1, 
+      "hits": 0,
+      "timeRestore": false,
+      "description": "",
+      "title": "Analyze Dashboard",
+      "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":22,\"w\":48,\"h\":23,\"i\":\"4\"},\"panelIndex\":\"4\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":0,\"w\":36,\"h\":22,\"i\":\"5\"},\"panelIndex\":\"5\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":36,\"y\":11,\"w\":12,\"h\":11,\"i\":\"6\"},\"panelIndex\":\"6\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_2\"},{\"gridData\":{\"x\":36,\"y\":0,\"w\":12,\"h\":11,\"i\":\"7\"},\"version\":\"7.2.0\",\"panelIndex\":\"7\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"}]",
+      "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+      "version": 1,
       "kibanaSavedObjectMeta": {
-         "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+         "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[]}"
       }
-   }, 
+   },
    "updated_at": "2019-09-16T21:36:20.181Z"
 }

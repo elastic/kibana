@@ -18,13 +18,13 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { createUseStyles } from 'react-jss';
+import { makeStyles } from '@material-ui/core/styles';
 import { EuiButtonIcon } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { startAttachmentDownload } from '@logrhythm/nm-web-shared/services/session_files';
 import FileDownloadModal from './file_download/file_download_modal';
 
-const useStyles = createUseStyles({
+const useStyles = makeStyles({
   buttonWrapper: {
     cursor: 'pointer',
   },
