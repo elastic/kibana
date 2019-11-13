@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { UseField, Field, FIELD_TYPES } from '../../../../shared_imports';
+import { UseField, SelectField } from '../../../../shared_imports';
 import {
   StoreParameter,
   IndexParameter,
@@ -32,36 +32,38 @@ const getDefaultValueToggle = (param: string, field: FieldType) => {
   }
 };
 
-interface Props {
-  field: NormalizedField;
-}
+const trueText = i18n.translate('xpack.idxMgmt.mappingsEditor.booleanTrueFieldDescription', {
+  defaultMessage: 'true',
+});
+
+const falseText = i18n.translate('xpack.idxMgmt.mappingsEditor.booleanFalseFieldDescription', {
+  defaultMessage: 'false',
+});
+
+const mapIndexToValue = ['true', true, 'false', false];
 
 const nullValueOptions = [
   {
-    value: '"true"',
-    text: i18n.translate('xpack.idxMgmt.mappingsEditor.stringTrueFieldDescription', {
-      defaultMessage: '"true"',
-    }),
+    value: 0,
+    text: `"${trueText}"`,
   },
   {
-    value: 'true',
-    text: i18n.translate('xpack.idxMgmt.mappingsEditor.booleanTrueFieldDescription', {
-      defaultMessage: 'true',
-    }),
+    value: 1,
+    text: trueText,
   },
   {
-    value: '"false"',
-    text: i18n.translate('xpack.idxMgmt.mappingsEditor.stringFalseFieldDescription', {
-      defaultMessage: '"false"',
-    }),
+    value: 2,
+    text: `"${falseText}"`,
   },
   {
-    value: 'false',
-    text: i18n.translate('xpack.idxMgmt.mappingsEditor.booleanFalseFieldDescription', {
-      defaultMessage: 'false',
-    }),
+    value: 3,
+    text: falseText,
   },
 ];
+
+interface Props {
+  field: NormalizedField;
+}
 
 export const BooleanType = ({ field }: Props) => {
   return (
@@ -90,21 +92,11 @@ export const BooleanType = ({ field }: Props) => {
             <UseField
               path="null_value"
               config={{
-                type: FIELD_TYPES.SELECT,
-                deserializer: (value: string | boolean) => {
-                  if (typeof value === 'boolean') {
-                    return value.toString();
-                  }
-                  return `"${value}"`;
-                },
-                serializer: (value: string) => {
-                  if (value.indexOf('"') > -1) {
-                    return value.slice(1, -1);
-                  }
-                  return value === 'true';
-                },
+                defaultValue: 'true',
+                deserializer: (value: string | boolean) => mapIndexToValue.indexOf(value),
+                serializer: (value: number) => mapIndexToValue[value],
               }}
-              component={Field}
+              component={SelectField}
               componentProps={{
                 euiFieldProps: {
                   options: nullValueOptions,
