@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
 import { merge } from 'lodash';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { getSavedObjectsClient } from '../../helpers/saved_objects_client';
-import { Setup } from '../../helpers/setup_request';
+import { Server } from 'hapi';
 import { PromiseReturnType } from '../../../../typings/common';
+import {
+  APM_INDICES_SAVED_OBJECT_TYPE,
+  APM_INDICES_SAVED_OBJECT_ID
+} from '../../../../common/apm_saved_object_constants';
 
 export interface ApmIndicesConfig {
   'apm_oss.sourcemapIndices': string;
@@ -23,11 +25,13 @@ export interface ApmIndicesConfig {
 
 export type ApmIndicesName = keyof ApmIndicesConfig;
 
-export const APM_INDICES_SAVED_OBJECT_TYPE = 'apm-indices';
-export const APM_INDICES_SAVED_OBJECT_ID = 'apm-indices';
+export type ScopedSavedObjectsClient = ReturnType<
+  Server['savedObjects']['getScopedSavedObjectsClient']
+>;
 
-async function getApmIndicesSavedObject(server: Server) {
-  const savedObjectsClient = getSavedObjectsClient(server, 'data');
+async function getApmIndicesSavedObject(
+  savedObjectsClient: ScopedSavedObjectsClient
+) {
   const apmIndices = await savedObjectsClient.get<Partial<ApmIndicesConfig>>(
     APM_INDICES_SAVED_OBJECT_TYPE,
     APM_INDICES_SAVED_OBJECT_ID
@@ -53,13 +57,21 @@ function getApmIndicesConfig(config: KibanaConfig): ApmIndicesConfig {
   };
 }
 
-export async function getApmIndices(server: Server) {
+export async function getApmIndices({
+  savedObjectsClient,
+  config
+}: {
+  savedObjectsClient: ScopedSavedObjectsClient;
+  config: KibanaConfig;
+}) {
   try {
-    const apmIndicesSavedObject = await getApmIndicesSavedObject(server);
-    const apmIndicesConfig = getApmIndicesConfig(server.config());
+    const apmIndicesSavedObject = await getApmIndicesSavedObject(
+      savedObjectsClient
+    );
+    const apmIndicesConfig = getApmIndicesConfig(config);
     return merge({}, apmIndicesConfig, apmIndicesSavedObject);
   } catch (error) {
-    return getApmIndicesConfig(server.config());
+    return getApmIndicesConfig(config);
   }
 }
 
@@ -74,16 +86,15 @@ const APM_UI_INDICES: ApmIndicesName[] = [
 ];
 
 export async function getApmIndexSettings({
-  setup,
-  server
+  config,
+  savedObjectsClient
 }: {
-  setup: Setup;
-  server: Server;
+  config: KibanaConfig;
+  savedObjectsClient: ScopedSavedObjectsClient;
 }) {
-  const { config } = setup;
   let apmIndicesSavedObject: PromiseReturnType<typeof getApmIndicesSavedObject>;
   try {
-    apmIndicesSavedObject = await getApmIndicesSavedObject(server);
+    apmIndicesSavedObject = await getApmIndicesSavedObject(savedObjectsClient);
   } catch (error) {
     if (error.output && error.output.statusCode === 404) {
       apmIndicesSavedObject = {};
