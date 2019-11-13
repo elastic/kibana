@@ -116,7 +116,7 @@ export class DashboardAppController {
         timefilter: { timefilter },
       },
     },
-    core: { notifications, overlays, chrome, injectedMetadata },
+    core: { notifications, overlays, chrome, savedObjects, uiSettings, injectedMetadata },
   }: DashboardAppControllerDependencies) {
     new FilterStateManager(globalState, getAppState, filterManager);
     const queryFilter = filterManager;
@@ -729,6 +729,8 @@ export class DashboardAppController {
           getFactory: embeddables.getEmbeddableFactory,
           notifications,
           overlays,
+          savedObjects,
+          uiSettings,
           SavedObjectFinder,
         });
       }

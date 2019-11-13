@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { NotificationsStart } from 'src/core/public';
+import { NotificationsStart, SavedObjectsStart, UiSettingsClientContract } from 'src/core/public';
 import { KibanaReactOverlays } from 'src/plugins/kibana_react/public';
 import { IContainer } from '../../../../containers';
 import { AddPanelFlyout } from './add_panel_flyout';
@@ -29,6 +29,8 @@ export async function openAddPanelFlyout(options: {
   getAllFactories: GetEmbeddableFactories;
   overlays: KibanaReactOverlays;
   notifications: NotificationsStart;
+  savedObjects: SavedObjectsStart;
+  uiSettings: UiSettingsClientContract;
   SavedObjectFinder: React.ComponentType<any>;
 }) {
   const {
@@ -37,6 +39,8 @@ export async function openAddPanelFlyout(options: {
     getAllFactories,
     overlays,
     notifications,
+    savedObjects,
+    uiSettings,
     SavedObjectFinder,
   } = options;
   const flyoutSession = overlays.openFlyout(
@@ -50,6 +54,8 @@ export async function openAddPanelFlyout(options: {
       getFactory={getFactory}
       getAllFactories={getAllFactories}
       notifications={notifications}
+      savedObjects={savedObjects}
+      uiSettings={uiSettings}
       SavedObjectFinder={SavedObjectFinder}
     />,
     {

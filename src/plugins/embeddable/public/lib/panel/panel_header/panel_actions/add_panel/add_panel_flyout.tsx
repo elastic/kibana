@@ -19,7 +19,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { CoreSetup } from 'src/core/public';
+import { CoreSetup, SavedObjectsStart, UiSettingsClientContract } from 'src/core/public';
 
 import {
   EuiButton,
@@ -36,6 +36,7 @@ import {
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
 import { GetEmbeddableFactories, GetEmbeddableFactory } from '../../../../types';
+import { SavedObjectFinderProps } from '../../../../../../../kibana_react/public';
 
 interface Props {
   onClose: () => void;
@@ -43,7 +44,9 @@ interface Props {
   getFactory: GetEmbeddableFactory;
   getAllFactories: GetEmbeddableFactories;
   notifications: CoreSetup['notifications'];
-  SavedObjectFinder: React.ComponentType<any>;
+  savedObjects: SavedObjectsStart;
+  uiSettings: UiSettingsClientContract;
+  SavedObjectFinder: React.ComponentType<SavedObjectFinderProps>;
 }
 
 interface State {
@@ -145,6 +148,8 @@ export class AddPanelFlyout extends React.Component<Props, State> {
         noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
           defaultMessage: 'No matching objects found.',
         })}
+        savedObjects={this.props.savedObjects}
+        uiSettings={this.props.uiSettings}
       />
     );
 
