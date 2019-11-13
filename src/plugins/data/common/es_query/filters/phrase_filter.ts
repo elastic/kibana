@@ -19,7 +19,7 @@
 
 import { get, isPlainObject } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
-import { Field, IndexPattern } from '../../types';
+import { IndexPattern, Field } from '../../types';
 
 export type PhraseFilterMeta = FilterMeta & {
   params?: {

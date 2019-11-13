@@ -19,7 +19,7 @@
 
 import { each } from 'lodash';
 import { buildRangeFilter, RangeFilter } from './range_filter';
-import { Field, IndexPattern } from '../../types';
+import { IndexPattern, Field } from '../../types';
 import { getField } from '../__tests__/fields_mock';
 
 describe('Range filter builder', () => {

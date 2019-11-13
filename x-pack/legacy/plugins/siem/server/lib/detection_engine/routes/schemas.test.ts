@@ -1153,7 +1153,9 @@ describe('update_signals', () => {
     });
 
     test('page validates', () => {
-      expect(findSignalsSchema.validate<Partial<FindParamsRest>>({ page: 5 }).error).toBeFalsy();
+      expect(
+        findSignalsSchema.validate<Partial<FindParamsRest>>({ page: 5 }).error
+      ).toBeFalsy();
     });
 
     test('sort_field validates', () => {

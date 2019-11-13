@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { Field } from '..';
 
 export type IGetSuggestions = (index: string, field: Field, query: string, boolFilter?: any) => any;

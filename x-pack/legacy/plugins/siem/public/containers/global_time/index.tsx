@@ -83,11 +83,8 @@ const mapStateToProps = (state: State) => {
   };
 };
 
-export const GlobalTime = connect(
-  mapStateToProps,
-  {
-    deleteAllQuery: inputsActions.deleteAllQuery,
-    deleteOneQuery: inputsActions.deleteOneQuery,
-    setGlobalQuery: inputsActions.setQuery,
-  }
-)(GlobalTimeComponent);
+export const GlobalTime = connect(mapStateToProps, {
+  deleteAllQuery: inputsActions.deleteAllQuery,
+  deleteOneQuery: inputsActions.deleteOneQuery,
+  setGlobalQuery: inputsActions.setQuery,
+})(GlobalTimeComponent);

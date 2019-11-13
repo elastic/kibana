@@ -29,10 +29,7 @@ import { first, ignoreElements, mergeMap } from 'rxjs/operators';
  */
 export function observeReadable(readable: Readable): Rx.Observable<never> {
   return Rx.race(
-    Rx.fromEvent(readable, 'end').pipe(
-      first(),
-      ignoreElements()
-    ),
+    Rx.fromEvent(readable, 'end').pipe(first(), ignoreElements()),
 
     Rx.fromEvent(readable, 'error').pipe(
       first(),
