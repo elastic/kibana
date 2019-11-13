@@ -76,7 +76,7 @@ export const calculateMetricInterval = async (
     return;
   }
 
-  return Math.max(...intervals);
+  return Math.max(...intervals) / 1000;
 };
 
 interface PeriodAggregationData {
