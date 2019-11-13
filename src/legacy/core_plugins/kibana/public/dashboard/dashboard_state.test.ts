@@ -32,6 +32,10 @@ jest.mock('ui/registry/field_formats', () => ({
   },
 }));
 
+jest.mock('ui/state_management/state', () => ({
+  State: {},
+}));
+
 describe('DashboardState', function() {
   let dashboardState: DashboardStateManager;
   const savedDashboard = getSavedDashboardMock();
