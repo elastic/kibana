@@ -41,6 +41,9 @@ export function TelemetryOptInProvider($injector: any, chrome: any) {
       bannerId = id;
     },
     setOptIn: async (enabled: boolean) => {
+      if (!allowChangingOptInStatus) {
+        return;
+      }
       setCanTrackUiMetrics(enabled);
       const $http = $injector.get('$http');
 
