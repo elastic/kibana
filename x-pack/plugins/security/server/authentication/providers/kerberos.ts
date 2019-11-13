@@ -54,7 +54,8 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     const authenticationScheme = getRequestAuthenticationScheme(request);
     if (
       authenticationScheme &&
-      (authenticationScheme !== 'negotiate' && authenticationScheme !== 'bearer')
+      authenticationScheme !== 'negotiate' &&
+      authenticationScheme !== 'bearer'
     ) {
       this.logger.debug(`Unsupported authentication scheme: ${authenticationScheme}`);
       return AuthenticationResult.notHandled();
