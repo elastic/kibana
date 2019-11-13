@@ -136,7 +136,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('axis scaling', () => {
-      it('does not scale by default', async () => {
+      it.skip('does not scale by default', async () => {
         const expectedTableData = [
           [ '2015-09-20 00:00', '6' ],
           [ '2015-09-20 01:00', '9' ],
