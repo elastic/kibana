@@ -36,9 +36,17 @@ describe('createApi', () => {
         },
         handler: async () => null
       }))
+      .add(() => ({
+        path: '/baz',
+        method: 'PUT',
+        options: {
+          tags: ['access:apm', 'access:apm_write']
+        },
+        handler: async () => null
+      }))
       .init(coreMock);
 
-    expect(coreMock.http.server.route).toHaveBeenCalledTimes(2);
+    expect(coreMock.http.server.route).toHaveBeenCalledTimes(3);
 
     const firstRoute = coreMock.http.server.route.mock.calls[0][0];
 
@@ -59,6 +67,17 @@ describe('createApi', () => {
         tags: ['access:apm']
       },
       path: '/bar',
+      handler: expect.any(Function)
+    });
+
+    const thirdRoute = coreMock.http.server.route.mock.calls[2][0];
+
+    expect(thirdRoute).toEqual({
+      method: 'PUT',
+      options: {
+        tags: ['access:apm', 'access:apm_write']
+      },
+      path: '/baz',
       handler: expect.any(Function)
     });
   });

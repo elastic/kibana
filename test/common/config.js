@@ -64,7 +64,6 @@ export default function () {
         `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/kibana/v{VERSION}.json`,
       ],
     },
-
     services
   };
 }
