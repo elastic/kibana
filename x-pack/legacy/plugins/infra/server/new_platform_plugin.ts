@@ -64,7 +64,6 @@ export class InfraServerPlugin {
     const framework = new KibanaFramework(core, this.config, plugins);
     const sources = new InfraSources({
       config: this.config,
-      savedObjects: plugins.savedObjects,
     });
     const sourceStatus = new InfraSourceStatus(
       new InfraElasticsearchSourceStatusAdapter(framework),

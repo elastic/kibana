@@ -20,7 +20,6 @@ export interface InfraServerPluginDeps {
   indexPatterns: {
     indexPatternsServiceFactory: any;
   };
-  savedObjects: any;
   features: any;
   apm: {
     getIndices: () => Promise<ApmIndices>;

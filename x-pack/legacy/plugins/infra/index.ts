@@ -92,7 +92,6 @@ export function infra(kibana: any) {
         },
         metrics: legacyServer.plugins.metrics,
         spaces: legacyServer.plugins.spaces,
-        savedObjects: legacyServer.savedObjects,
         features: plugins.features,
         apm: {
           getIndices: () => getApmIndices(legacyServer),

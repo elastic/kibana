@@ -24,7 +24,6 @@ export function compose(core: CoreSetup, config: InfraConfig, plugins: InfraServ
   const framework = new KibanaFramework(core, config, plugins);
   const sources = new InfraSources({
     config,
-    savedObjects: plugins.savedObjects,
   });
   const sourceStatus = new InfraSourceStatus(new InfraElasticsearchSourceStatusAdapter(framework), {
     sources,

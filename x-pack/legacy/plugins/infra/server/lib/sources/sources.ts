@@ -27,8 +27,6 @@ import { InfraConfig } from '../../../../../../plugins/infra/server';
 
 interface Libs {
   config: InfraConfig;
-  savedObjects: Pick<Legacy.SavedObjectsService, 'getScopedSavedObjectsClient'> &
-    Pick3<Legacy.SavedObjectsService, 'SavedObjectsClient', 'errors', 'isNotFoundError'>;
 }
 
 export class InfraSources {
