@@ -47,12 +47,9 @@ export const WithMetrics = ({
   nodeId,
   cloudId,
 }: WithMetricsProps) => {
-  const metrics = layouts.reduce(
-    (acc, item) => {
-      return acc.concat(item.sections.map(s => s.id));
-    },
-    [] as InventoryMetric[]
-  );
+  const metrics = layouts.reduce<InventoryMetric[]>((acc, item) => {
+    return acc.concat(item.sections.map(s => s.id));
+  }, []);
 
   if (!isInfraMetrics(metrics)) {
     throw new Error(
