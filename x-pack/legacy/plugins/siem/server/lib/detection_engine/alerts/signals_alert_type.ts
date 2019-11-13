@@ -46,11 +46,9 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
     async executor({ services, params }) {
       const {
         description,
-        falsePositives, // TODO: Use this by copying it into the rule
         filter,
         from,
         id,
-        immutable, // TODO: Use this by copying it into the rule
         index,
         filters,
         language,
@@ -60,7 +58,6 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         name,
         references,
         severity,
-        tags, // TODO: Use this by copying it into the rule
         to,
         type,
         size,
