@@ -601,6 +601,8 @@
     "core.ui.overlays.banner.closeButtonLabel": "閉じる",
     "core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel": "ホームページに移動",
     "core.ui.chrome.headerGlobalNav.helpMenuButtonAriaLabel": "ヘルプメニュー",
+    "core.ui.chrome.headerGlobalNav.helpMenuGoToDocumentation": "ドキュメントに移動",
+    "core.ui.chrome.headerGlobalNav.helpMenuHelpDescription": "不明な点、アップデートなどの情報はドキュメントをご覧ください。",
     "core.ui.chrome.headerGlobalNav.helpMenuTitle": "ヘルプ",
     "core.ui.chrome.headerGlobalNav.helpMenuVersion": "v {version}",
     "core.ui.chrome.sideGlobalNav.viewRecentItemsFlyoutTitle": "最近のアイテム",

@@ -17,29 +17,30 @@
  * under the License.
  */
 
-import * as Rx from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import * as Rx from 'rxjs';
+
 import {
-  EuiButtonEmpty,
+  // TODO: add type annotations
+  // @ts-ignore
+  EuiButton,
+  // @ts-ignore
   EuiFlexGroup,
+  // @ts-ignore
   EuiFlexItem,
+  // @ts-ignore
   EuiHeaderSectionItemButton,
   EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
 import { HeaderExtension } from './header_extension';
 import { ChromeHelpExtension } from '../../chrome_service';
-import {
-  ELASTIC_SUPPORT_LINK,
-  GITHUB_CREATE_ISSUE_LINK,
-  KIBANA_ASK_ELASTIC_LINK,
-  KIBANA_FEEDBACK_LINK,
-} from '../../constants';
 
 interface Props {
   helpExtension$: Rx.Observable<ChromeHelpExtension>;
@@ -47,7 +48,6 @@ interface Props {
   kibanaVersion: string;
   useDefaultContent?: boolean;
   kibanaDocLink: string;
-  isCloudEnabled: boolean;
 }
 
 interface State {
@@ -90,50 +90,23 @@ class HeaderHelpMenuUI extends Component<Props, State> {
 
     const defaultContent = useDefaultContent ? (
       <Fragment>
-        <EuiButtonEmpty href={kibanaDocLink} target="_blank" size="xs" flush="left">
+        <EuiText size="s">
+          <p>
+            <FormattedMessage
+              id="core.ui.chrome.headerGlobalNav.helpMenuHelpDescription"
+              defaultMessage="Get updates, information, and answers in our documentation."
+            />
+          </p>
+        </EuiText>
+
+        <EuiSpacer />
+
+        <EuiButton iconType="popout" href={kibanaDocLink} target="_blank">
           <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle"
-            defaultMessage="Kibana documentation"
+            id="core.ui.chrome.headerGlobalNav.helpMenuGoToDocumentation"
+            defaultMessage="Go to documentation"
           />
-        </EuiButtonEmpty>
-
-        <EuiSpacer size="xs" />
-
-        <EuiButtonEmpty
-          href={this.props.isCloudEnabled ? ELASTIC_SUPPORT_LINK : KIBANA_ASK_ELASTIC_LINK}
-          target="_blank"
-          size="xs"
-          flush="left"
-        >
-          <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle"
-            defaultMessage="Ask Elastic"
-          />
-        </EuiButtonEmpty>
-
-        <EuiSpacer size="xs" />
-
-        <EuiButtonEmpty href={KIBANA_FEEDBACK_LINK} target="_blank" size="xs" flush="left">
-          <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle"
-            defaultMessage="Give feedback"
-          />
-        </EuiButtonEmpty>
-
-        <EuiSpacer size="xs" />
-
-        <EuiButtonEmpty
-          href={GITHUB_CREATE_ISSUE_LINK}
-          target="_blank"
-          size="xs"
-          iconType="logoGithub"
-          flush="left"
-        >
-          <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle"
-            defaultMessage="Open an issue in GitHub"
-          />
-        </EuiButtonEmpty>
+        </EuiButton>
       </Fragment>
     ) : null;
 

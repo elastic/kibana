@@ -125,7 +125,6 @@ export class ChromeService {
           <LoadingIndicator loadingCount$={http.getLoadingCount$()} />
 
           <Header
-            isCloudEnabled={injectedMetadata.getInjectedVar('isCloudEnabled') as boolean}
             application={application}
             appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
             badge$={badge$.pipe(takeUntil(this.stop$))}
