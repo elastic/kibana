@@ -21,42 +21,42 @@ interface FormatterOptions {
 
 interface DurationTimeUnit {
   [timeUnit: string]: {
-    translation: string;
+    label: string;
     convert: (value: number) => string;
   };
 }
 
 const durationUnit: DurationTimeUnit = {
   hours: {
-    translation: i18n.translate('xpack.apm.formatters.hoursTimeUnitLabel', {
+    label: i18n.translate('xpack.apm.formatters.hoursTimeUnitLabel', {
       defaultMessage: 'h'
     }),
     convert: (value: number) =>
       asDecimal(moment.duration(value / 1000).asHours())
   },
   minutes: {
-    translation: i18n.translate('xpack.apm.formatters.minutesTimeUnitLabel', {
+    label: i18n.translate('xpack.apm.formatters.minutesTimeUnitLabel', {
       defaultMessage: 'min'
     }),
     convert: (value: number) =>
       asDecimal(moment.duration(value / 1000).asMinutes())
   },
   seconds: {
-    translation: i18n.translate('xpack.apm.formatters.secondsTimeUnitLabel', {
+    label: i18n.translate('xpack.apm.formatters.secondsTimeUnitLabel', {
       defaultMessage: 's'
     }),
     convert: (value: number) =>
       asDecimal(moment.duration(value / 1000).asSeconds())
   },
   milliseconds: {
-    translation: i18n.translate('xpack.apm.formatters.millisTimeUnitLabel', {
+    label: i18n.translate('xpack.apm.formatters.millisTimeUnitLabel', {
       defaultMessage: 'ms'
     }),
     convert: (value: number) =>
       asInteger(moment.duration(value / 1000).asMilliseconds())
   },
   microseconds: {
-    translation: i18n.translate('xpack.apm.formatters.microsTimeUnitLabel', {
+    label: i18n.translate('xpack.apm.formatters.microsTimeUnitLabel', {
       defaultMessage: 'μs'
     }),
     convert: (value: number) => asInteger(value)
@@ -74,7 +74,7 @@ function convertTo(
     return defaultValue;
   }
 
-  const message = SPACE + unit.translation;
+  const message = SPACE + unit.label;
 
   const convertedValue = unit.convert(value);
   return `${convertedValue}${withUnit ? message : ''}`;
