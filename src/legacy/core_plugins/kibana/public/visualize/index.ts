@@ -23,7 +23,6 @@ import 'ui/collapsible_sidebar'; // used in default editor
 import 'ui/vis/editors/default/sidebar';
 
 import chrome from 'ui/chrome';
-import { docTitle } from 'ui/doc_title/doc_title';
 import { npSetup, npStart } from 'ui/new_platform';
 import { IPrivate } from 'ui/private';
 // @ts-ignore
@@ -70,7 +69,6 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
     __LEGACY: {
       // angular is passed to kibana_services since it's used in editor.js
       angular,
-      docTitle,
       getAngularDependencies,
       localApplicationService,
       VisEditorTypesRegistryProvider,

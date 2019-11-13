@@ -40,7 +40,7 @@ import { LocalApplicationService } from '../local_application_service';
 import { VisualizeEmbeddableFactory } from './embeddable/visualize_embeddable_factory';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './embeddable/constants';
 import { VisualizeConstants } from './visualize_constants';
-import { setServices, VisualizeKibanaServices, DocTitle } from './kibana_services';
+import { setServices, VisualizeKibanaServices } from './kibana_services';
 import {
   FeatureCatalogueCategory,
   FeatureCatalogueSetup,
@@ -70,7 +70,6 @@ export interface VisualizePluginSetupDependencies {
     angular: IAngularStatic;
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
     localApplicationService: LocalApplicationService;
-    docTitle: DocTitle;
     VisEditorTypesRegistryProvider: any;
   };
 }

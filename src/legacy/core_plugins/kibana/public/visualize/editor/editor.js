@@ -90,7 +90,6 @@ function VisualizeAppController(
     toastNotifications,
     chromeLegacy,
     chrome,
-    docTitle,
     getBasePath,
     docLinks,
     savedQueryService,
@@ -231,7 +230,7 @@ function VisualizeAppController(
   let stateMonitor;
 
   if (savedVis.id) {
-    docTitle.change(savedVis.title);
+    chrome.docTitle.change(savedVis.title);
   }
 
   // Extract visualization state with filtered aggs. You can see these filtered aggs in the URL.
@@ -526,7 +525,7 @@ function VisualizeAppController(
               dashboardParsedUrl.addQueryParameter(DashboardConstants.NEW_VISUALIZATION_ID_PARAM, savedVis.id);
               kbnUrl.change(dashboardParsedUrl.appPath);
             } else if (savedVis.id === $route.current.params.id) {
-              docTitle.change(savedVis.lastSavedTitle);
+              chrome.docTitle.change(savedVis.lastSavedTitle);
               chrome.setBreadcrumbs($injector.invoke(getEditBreadcrumbs));
               savedVis.vis.title = savedVis.title;
               savedVis.vis.description = savedVis.description;

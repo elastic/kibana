@@ -81,7 +81,6 @@ export function clearServices() {
 }
 
 // export types
-export { DocTitle } from 'ui/doc_title/doc_title';
 export { VisSavedObject } from './embeddable/visualize_embeddable';
 export { EmbeddableFactory, ErrorEmbeddable } from '../../../../../plugins/embeddable/public';
 
