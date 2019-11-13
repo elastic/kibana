@@ -46,7 +46,7 @@ function getIndexPattern(selectedJobs) {
 export function getExplorerDefaultAppState() {
   return {
     mlExplorerSwimlane: {},
-    mlExplorerFilter: {}
+    mlExplorerFilter: {},
   };
 }
 
@@ -168,8 +168,8 @@ const reducer = (state, nextAction) => {
     case EXPLORER_ACTION.FIELD_FORMATS_LOADED:
       return { ...state, fieldFormatsLoading: false };
 
-    case EXPLORER_ACTION.APP_STATE_INIT:
-      return { ...state, appState: payload };
+    case EXPLORER_ACTION.APP_STATE_SET:
+      return { ...state, appState: { ...state.appState, ...payload } };
 
     case EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION:
       return { ...state, appState: appStateClearSelection(cloneDeep(state.appState)) };

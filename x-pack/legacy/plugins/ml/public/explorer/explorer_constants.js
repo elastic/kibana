@@ -17,7 +17,7 @@ export const DRAG_SELECT_ACTION = {
 };
 
 export const EXPLORER_ACTION = {
-  APP_STATE_INIT: 'appStateInit',
+  APP_STATE_SET: 'appStateSet',
   APP_STATE_CLEAR_INFLUENCER_FILTER_SETTINGS: 'appStateClearInfluencerFilterSettings',
   APP_STATE_CLEAR_SELECTION: 'appStateClearSelection',
   APP_STATE_SAVE_SELECTION: 'appStateSaveSelection',

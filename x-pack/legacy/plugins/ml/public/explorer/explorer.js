@@ -141,7 +141,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       annotationsRefresh: PropTypes.bool,
       appState: PropTypes.object.isRequired,
       dateFormatTz: PropTypes.string.isRequired,
-      explorer: PropTypes.object.isRequired,
+      explorer: PropTypes.object,
       globalState: PropTypes.object.isRequired,
       jobSelectService$: PropTypes.object.isRequired,
       showCharts: PropTypes.bool.isRequired,
@@ -248,7 +248,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       // restore state stored in URL via AppState and subscribe to
       // job updates via job selector.
-      console.warn('this.props.appState', this.props.appState);
       if (mlJobService.jobs.length > 0) {
         let initialized = false;
 

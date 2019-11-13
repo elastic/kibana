@@ -63,16 +63,23 @@ module.directive('mlExplorerDirective', function (config, globalState, $rootScop
     $scope.appState = new AppState(getExplorerDefaultAppState());
 
     // Pass the current URL AppState on to anomaly explorer's reactive state.
+    // After this hand-off, the appState stored in explorerState$ is the single
+    // source of truth.
     explorerAction$.next({
-      action: EXPLORER_ACTION.APP_STATE_INIT,
+      action: EXPLORER_ACTION.APP_STATE_SET,
       payload: {
         mlExplorerSwimlane: $scope.appState.mlExplorerSwimlane,
         mlExplorerFilter: $scope.appState.mlExplorerFilter,
       }
     });
+
+    // This is temporary and can be removed once explorer.js migrated fully
+    // from explorer$ to explorerState$. This needs to be done only once
+    // the original URL AppState has been passed on to the observable state above.
     explorerAction$.next(null);
 
-    // Subscribe updates to URL AppState via rxjs actions.
+    // Now that appState in explorerState$ is the single source of truth,
+    // subscribe to it and update the actual URL appState on changes.
     subscriptions.add(
       explorerAppState$.subscribe(appState => {
         $scope.appState.fetch();
