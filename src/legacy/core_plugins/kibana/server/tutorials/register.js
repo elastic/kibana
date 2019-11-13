@@ -80,7 +80,6 @@ import { consulMetricsSpecProvider } from './consul_metrics';
 import { cockroachdbMetricsSpecProvider } from './cockroachdb_metrics';
 
 export function registerTutorials(server) {
-  console.log('--> server.newPlatform.setup.plugins.home', server.newPlatform.setup.plugins.home);
   server.newPlatform.setup.plugins.home.registerTutorial(systemLogsSpecProvider);
   server.newPlatform.setup.plugins.home.registerTutorial(systemMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.registerTutorial(apacheLogsSpecProvider);

@@ -22,13 +22,13 @@ import { TutorialsRegistry, TutorialsRegistrySetup, TutorialsRegistryStart } fro
 export class HomePlugin implements Plugin<TutorialsRegistrySetup, TutorialsRegistryStart> {
   private readonly tutorialsRegistry = new TutorialsRegistry();
 
-  public async setup(core: CoreSetup) {
+  public setup(core: CoreSetup) {
     return {
       ...this.tutorialsRegistry.setup(core),
     };
   }
 
-  public async start() {
+  public start() {
     return {
       ...this.tutorialsRegistry.start(),
     };

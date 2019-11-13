@@ -30,7 +30,7 @@ export class TutorialsRegistry {
   private readonly tutorialProviders: TutorialProvider[] = []; // pre-register all the tutorials we know we want in here
   private readonly scopedTutorialContextFactories: TutorialContextFactory[] = [];
 
-  public async setup(core: CoreSetup) {
+  public setup(core: CoreSetup) {
     const router = core.http.createRouter();
     router.get(
       { path: '/api/kibana/home/NP_tutorials', validate: false },
