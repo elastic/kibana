@@ -35,15 +35,14 @@ import {
 import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
-import { TimeRange } from 'src/plugins/data/public';
+import { TimeRange, TimeHistoryContract } from 'src/plugins/data/public';
 import { useKibana } from '../../../../../../../plugins/kibana_react/public';
+import { PersistedLog } from '../../../../../../../plugins/data/public';
 
 import { IndexPattern } from '../../../index_patterns';
 import { QueryBarInput } from './query_bar_input';
 import { Query, getQueryLog } from '../index';
-import { TimeHistoryContract } from '../../../timefilter';
 import { IDataPluginServices } from '../../../types';
-import { PersistedLog } from '../../persisted_log';
 
 interface Props {
   query?: Query;

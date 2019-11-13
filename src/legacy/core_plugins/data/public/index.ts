@@ -58,15 +58,4 @@ export {
   IndexPatternMissingIndices,
   NoDefaultIndexPattern,
   NoDefinedIndexPatterns,
-  mockFields,
-  mockIndexPattern,
 } from './index_patterns';
-
-export {
-  TimeHistoryContract,
-  TimefilterContract,
-  getTime,
-  InputTimeRange,
-  extractTimeFilter,
-  changeTimeFilter,
-} from './timefilter';

@@ -43,8 +43,7 @@ export const singleBulkIndex = async (
   logger: Logger
 ): Promise<boolean> => {
   if (sr.hits.hits.length === 0) {
-    logger.warn('First search result yielded 0 documents');
-    return false;
+    return true;
   }
   const bulkBody = sr.hits.hits.flatMap(doc => [
     {
@@ -62,8 +61,8 @@ export const singleBulkIndex = async (
     body: bulkBody,
   });
   const time2 = performance.now();
-  logger.info(`individual bulk process time took: ${time2 - time1} milliseconds`);
-  logger.info(`took property says bulk took: ${firstResult.took} milliseconds`);
+  logger.debug(`individual bulk process time took: ${time2 - time1} milliseconds`);
+  logger.debug(`took property says bulk took: ${firstResult.took} milliseconds`);
   if (firstResult.errors) {
     logger.error(`[-] bulkResponse had errors: ${JSON.stringify(firstResult.errors, null, 2)}}`);
     return false;
@@ -105,20 +104,24 @@ export const searchAfterAndBulkIndex = async (
   service: AlertServices,
   logger: Logger
 ): Promise<boolean> => {
-  logger.info('[+] starting bulk insertion');
+  if (someResult.hits.hits.length === 0) {
+    return true;
+  }
+
+  logger.debug('[+] starting bulk insertion');
   const firstBulkIndexSuccess = await singleBulkIndex(someResult, params, service, logger);
   if (!firstBulkIndexSuccess) {
-    logger.warn('First bulk index was unsuccessful');
+    logger.error('First bulk index was unsuccessful');
     return false;
   }
 
   const totalHits =
     typeof someResult.hits.total === 'number' ? someResult.hits.total : someResult.hits.total.value;
   let size = someResult.hits.hits.length - 1;
-  logger.info(`first size: ${size}`);
+  logger.debug(`first size: ${size}`);
   let sortIds = someResult.hits.hits[0].sort;
   if (sortIds == null && totalHits > 0) {
-    logger.warn('sortIds was empty on first search but expected more ');
+    logger.error(`sortIds was empty on first search when encountering ${totalHits}`);
     return false;
   } else if (sortIds == null && totalHits === 0) {
     return true;
@@ -130,7 +133,7 @@ export const searchAfterAndBulkIndex = async (
   while (size < totalHits) {
     // utilize track_total_hits instead of true
     try {
-      logger.info(`sortIds: ${sortIds}`);
+      logger.debug(`sortIds: ${sortIds}`);
       const searchAfterResult: SignalSearchResponse = await singleSearchAfter(
         sortId,
         params,
@@ -138,24 +141,24 @@ export const searchAfterAndBulkIndex = async (
         logger
       );
       size += searchAfterResult.hits.hits.length - 1;
-      logger.info(`size: ${size}`);
+      logger.debug(`size adjusted: ${size}`);
       sortIds = searchAfterResult.hits.hits[0].sort;
       if (sortIds == null) {
-        logger.warn('sortIds was empty search');
+        logger.error('sortIds was empty search when running a signal rule');
         return false;
       }
       sortId = sortIds[0];
-      logger.info('next bulk index');
+      logger.debug('next bulk index');
       const bulkSuccess = await singleBulkIndex(searchAfterResult, params, service, logger);
-      logger.info('finished next bulk index');
+      logger.debug('finished next bulk index');
       if (!bulkSuccess) {
-        logger.error('[-] bulk index failed');
+        logger.error('[-] bulk index failed but continuing');
       }
     } catch (exc) {
       logger.error(`[-] search_after and bulk threw an error ${exc}`);
       return false;
     }
   }
-  logger.info(`[+] completed bulk index of ${totalHits}`);
+  logger.debug(`[+] completed bulk index of ${totalHits}`);
   return true;
 };

@@ -32,7 +32,7 @@ function getUniqueLayerCounts(layerCountsList, mapsCount) {
   }, {});
 }
 
-export function buildMapsTelemetry(savedObjects) {
+export function buildMapsTelemetry(savedObjects, settings) {
   const layerLists = savedObjects
     .map(savedMapObject =>
       JSON.parse(savedMapObject.attributes.layerListJSON));
@@ -57,7 +57,8 @@ export function buildMapsTelemetry(savedObjects) {
 
   const dataSourcesCountSum = _.sum(dataSourcesCount);
   const layersCountSum = _.sum(layersCount);
-  const mapsTelem = {
+  return {
+    settings,
     // Total count of maps
     mapsTotalCount: mapsCount,
     // Time of capture
@@ -85,7 +86,6 @@ export function buildMapsTelemetry(savedObjects) {
       }
     }
   };
-  return mapsTelem;
 }
 
 async function getSavedObjects(savedObjectsClient) {
@@ -98,7 +98,10 @@ async function getSavedObjects(savedObjectsClient) {
 export async function getMapsTelemetry(server, callCluster) {
   const savedObjectsClient = getSavedObjectsClient(server, callCluster);
   const savedObjects = await getSavedObjects(savedObjectsClient);
-  const mapsTelemetry = buildMapsTelemetry(savedObjects);
+  const settings = {
+    showMapVisualizationTypes: server.config().get('xpack.maps.showMapVisualizationTypes')
+  };
+  const mapsTelemetry = buildMapsTelemetry(savedObjects, settings);
 
   return await savedObjectsClient.create('maps-telemetry',
     mapsTelemetry, {
