@@ -46,7 +46,54 @@ There are a number of reasons why we decided to roll our own solution for the co
 
 ## Schema building blocks
 
-### Basic types  
+The schema is composed of one or more primitives depending on the shape of the data you'd like to validate.
+
+```typescript
+const simpleStringSchema = schema.string();
+const moreComplexObjectSchema = schema.object({ name: schema.string() });
+```
+
+Every schema instance has a `validate` method that is used to perform a validation of the data according to the schema. This method accepts three arguments:
+
+* `data: any` - **required**, data to be validated with the schema
+* `context: Record<string, any>` - **optional**, object whose properties can be referenced by the [context references](#schemacontextref)
+* `namespace: string` - **optional**, arbitrary string that is used to prefix every error message thrown during validation
+
+```typescript
+const valueSchema = schema.object({
+  isEnabled: schema.boolean(),
+  env: schema.string({ defaultValue: schema.contextRef('envName') }),
+});
+
+expect(valueSchema.validate({ isEnabled: true, env: 'prod' })).toEqual({
+  isEnabled: true,
+  env: 'prod',
+});
+
+// Use default value for `env` from context via reference
+expect(valueSchema.validate({ isEnabled: true }, { envName: 'staging' })).toEqual({
+  isEnabled: true,
+  env: 'staging',
+});
+
+// Fail because of type mismatch
+expect(() =>
+  valueSchema.validate({ isEnabled: 'non-bool' }, { envName: 'staging' })
+).toThrowError(
+  '[isEnabled]: expected value of type [boolean] but got [string]'
+);
+
+// Fail because of type mismatch and prefix error with a custom namespace
+expect(() =>
+  valueSchema.validate({ isEnabled: 'non-bool' }, { envName: 'staging' }, 'configuration')
+).toThrowError(
+  '[configuration.isEnabled]: expected value of type [boolean] but got [string]'
+);
+```
+
+Note that when you retrieve configuration within a Kibana plugin `validate` function is called by the Core automatically providing appropriate namespace and context variables (environment name, package info etc.).
+
+### Basic types
 
 #### `schema.string()`
 
@@ -63,7 +110,7 @@ __Options:__
 
 __Usage:__
 ```typescript
-const valueSchema  = schema.string({ maxLength: 10 });
+const valueSchema = schema.string({ maxLength: 10 });
 ```
 
 __Notes:__
@@ -84,7 +131,7 @@ __Options:__
 
 __Usage:__
 ```typescript
-const valueSchema  = schema.number({ max: 10 });
+const valueSchema = schema.number({ max: 10 });
 ```
 
 __Notes:__
@@ -102,12 +149,12 @@ __Options:__
 
 __Usage:__
 ```typescript
-const valueSchema  = schema.boolean({ defaultValue: false });
+const valueSchema = schema.boolean({ defaultValue: false });
 ```
 
 #### `schema.literal()`
 
-Validates input data as a literal.
+Validates input data as a [string](https://www.typescriptlang.org/docs/handbook/advanced-types.html#string-literal-types), [numeric](https://www.typescriptlang.org/docs/handbook/advanced-types.html#numeric-literal-types) or boolean literal.
 
 __Output type:__ `string`, `number` or `boolean` literals
 
@@ -117,14 +164,14 @@ __Options:__
 
 __Usage:__
 ```typescript
-const valueSchema  = [
+const valueSchema = [
   schema.literal('stringLiteral'),
   schema.literal(100500),
   schema.literal(false),
 ];
 ```
 
-### Composite types  
+### Composite types
 
 #### `schema.arrayOf()`
 
@@ -140,7 +187,7 @@ __Options:__
 
 __Usage:__
 ```typescript
-const valueSchema  = schema.arrayOf(schema.number());
+const valueSchema = schema.arrayOf(schema.number());
 ```
 
 #### `schema.object()`
@@ -156,7 +203,7 @@ __Options:__
 
 __Usage:__
 ```typescript
-const valueSchema  = schema.object({ 
+const valueSchema = schema.object({ 
   isEnabled: schema.boolean({ defaultValue: false }),
   name: schema.string({ minLength: 10 }),
 });
@@ -178,7 +225,7 @@ __Options:__
 
 __Usage:__
 ```typescript
-const valueSchema  = schema.recordOf(schema.string(), schema.number());
+const valueSchema = schema.recordOf(schema.string(), schema.number());
 ```
 
 __Notes:__
@@ -196,7 +243,7 @@ __Options:__
 
 __Usage:__
 ```typescript
-const valueSchema  = schema.mapOf(schema.string(), schema.number());
+const valueSchema = schema.mapOf(schema.string(), schema.number());
 ```
 
 ### Advanced types
@@ -213,7 +260,7 @@ __Options:__
 
 __Usage:__
 ```typescript
-const valueSchema  = schema.oneOf([schema.literal('∞'), schema.number()]);
+const valueSchema = schema.oneOf([schema.literal('∞'), schema.number()]);
 ```
 
 __Notes:__
@@ -231,7 +278,7 @@ __Options:__
 
 __Usage:__
 ```typescript
-const valueSchema  = schema.any();
+const valueSchema = schema.any();
 ```
 
 __Notes:__
@@ -245,7 +292,7 @@ __Output type:__ `T | undefined`
 
 __Usage:__
 ```typescript
-const valueSchema  = schema.maybe(schema.string());
+const valueSchema = schema.maybe(schema.string());
 ```
 
 __Notes:__
@@ -259,7 +306,7 @@ __Output type:__ `T | null`
 
 __Usage:__
 ```typescript
-const valueSchema  = schema.nullable(schema.string());
+const valueSchema = schema.nullable(schema.string());
 ```
 
 __Notes:__
@@ -273,7 +320,7 @@ __Output type:__ `never`
 
 __Usage:__
 ```typescript
-const valueSchema  = schema.never();
+const valueSchema = schema.never();
 ```
 
 __Notes:__
@@ -292,7 +339,7 @@ __Options:__
 
 __Usage:__
 ```typescript
-const valueSchema  = schema.uri({ scheme: 'https' });
+const valueSchema = schema.uri({ scheme: 'https' });
 ```
 
 __Notes:__
@@ -312,7 +359,7 @@ __Options:__
 
 __Usage:__
 ```typescript
-const valueSchema  = schema.byteSize({ min: '3kb' });
+const valueSchema = schema.byteSize({ min: '3kb' });
 ```
 
 __Notes:__
@@ -332,7 +379,7 @@ __Options:__
 
 __Usage:__
 ```typescript
-const valueSchema  = schema.duration({ defaultValue: '70ms' });
+const valueSchema = schema.duration({ defaultValue: '70ms' });
 ```
 
 __Notes:__
@@ -359,7 +406,7 @@ __Options:__
 
 __Usage:__
 ```typescript
-const valueSchema  = schema.object({
+const valueSchema = schema.object({
   key: schema.oneOf([schema.literal('number'), schema.literal('string')]),
   value: schema.conditional(schema.siblingRef('key'), 'number', schema.number(), schema.string()),
 });
