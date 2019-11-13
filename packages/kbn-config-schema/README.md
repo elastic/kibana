@@ -1,6 +1,6 @@
 # `@kbn/config-schema` — The Kibana config validation library
 
-`@kbn/config-schema` is a TypeScript library inspired by the Joi and designed to allow run-time validation of the
+`@kbn/config-schema` is a TypeScript library inspired by Joi and designed to allow run-time validation of the
 Kibana configuration entries providing developers with a fully typed model of the validated data.
 
 ## Table of Contents
@@ -35,14 +35,14 @@ Kibana configuration entries providing developers with a fully typed model of th
 
 ## Why `@kbn/config-schema`?
 
-Validation of the externally supplied data is very important for Kibana. Especially if this data is used to configure how it operates.
+Validation of externally supplied data is very important for Kibana. Especially if this data is used to configure how it operates.
 
 There are a number of reasons why we decided to roll our own solution for the configuration validation:
 
 * **Limited API surface** - having a future rich library is awesome, but it's a really hard task to audit such library and make sure everything is sane and secure enough. As everyone knows complexity is the enemy of security and hence we'd like to have a full control over what exactly we expose and commit to maintain.
-* **Custom error messages** - detailed validation error messages are a great help to developers, but at the same time they can contain an information that's a way too sensitive to expose to everyone. We'd like to control these messages and make them only as much detailed as really needed.
-* **Type information** - having a run-time guarantees is great, but additionally having a compile-time guarantees is even better. We'd like to provide developers with a fully typed model of the validate data so that it's harder to misuse it _after_ validation.
-* **Upgradability** - no matter how well validation library is implemented it will have bugs and may need to be improved at some point anyway. Some external libraries are very well supported, some aren't or won't be in the future. It's always a risk to depend on the external party with their own release cadence when you need to quickly fix a security vulnerability in a patch version. We'd like to have a better control over lifecycle of such an important piece of our codebase. 
+* **Custom error messages** - detailed validation error messages are a great help to developers, but at the same time they can contain information that's way too sensitive to expose to everyone. We'd like to control these messages and make them only as detailed as really needed. For example, we don't want validation error messages to contain the passwords for internal users to show-up in the logs. These logs are commonly ingested into Elasticsearch, and accessible to a large number of users which shouldn't have access to the internal user's password.
+* **Type information** - having run-time guarantees is great, but additionally having compile-time guarantees is even better. We'd like to provide developers with a fully typed model of the validated data so that it's harder to misuse it _after_ validation.
+* **Upgradability** - no matter how well a validation library is implemented, it will have bugs and may need to be improved at some point anyway. Some external libraries are very well supported, some aren't or won't be in the future. It's always a risk to depend on an external party with their own release cadence when you need to quickly fix a security vulnerability in a patch version. We'd like to have a better control over lifecycle of such an important piece of our codebase. 
 
 ## Schema building blocks
 
@@ -68,7 +68,7 @@ const valueSchema  = schema.string({ maxLength: 10 });
 
 __Notes:__
 * By default `schema.string()` allows empty strings, to prevent that use non-zero value for `minLength` option.
-* To validate string against a regular expression use a custom validator function, see [Custom validation](#custom-validation) section for more details.
+* To validate a string using a regular expression use a custom validator function, see [Custom validation](#custom-validation) section for more details.
 
 #### `schema.number()`
 
@@ -88,7 +88,7 @@ const valueSchema  = schema.number({ max: 10 });
 ```
 
 __Notes:__
-* The `schema.number()` also supports string as input if it can be safely coerced into number.
+* The `schema.number()` also supports a string as input if it can be safely coerced into number.
 
 #### `schema.boolean()`
 
@@ -117,7 +117,7 @@ __Options:__
 
 __Usage:__
 ```typescript
-const valueSchemaa  = [
+const valueSchema  = [
   schema.literal('stringLiteral'),
   schema.literal(100500),
   schema.literal(false),
@@ -163,7 +163,7 @@ const valueSchema  = schema.object({
 ```
 
 __Notes:__
-* Using of `allowUnknowns` option is discouraged and should only be used in a handful of special cases. Consider using `schema.recordOf()` instead.
+* Using `allowUnknowns` is discouraged and should only be used in exceptional circumstances. Consider using `schema.recordOf()` instead.
 * Currently `schema.object()` always has a default value of `{}`, but this may change in the near future. Try to not rely on this behaviour and specify default value explicitly or use `schema.maybe()` if the value is optional.
 
 #### `schema.recordOf()`
@@ -186,7 +186,7 @@ __Notes:__
 
 #### `schema.mapOf()`
 
-Validates input data as a map with the keys and values being validated against predefined schema.
+Validates input data as a map with the keys and values being validated against the predefined schema.
 
 __Output type:__ `Map<TKey, TValue>`
 
@@ -203,7 +203,7 @@ const valueSchema  = schema.mapOf(schema.string(), schema.number());
 
 #### `schema.oneOf()`
 
-Allows to specify a list of alternative schemas to validate input data against.
+Allows a list of alternative schemas to validate input data against.
 
 __Output type:__ `TValue1 | TValue2 | TValue3 | ..... as TUnion`
 
@@ -235,7 +235,7 @@ const valueSchema  = schema.any();
 ```
 
 __Notes:__
-* The `schema.any()` is essentially an escape hatch for the case when your data can __really__ have any type and should be avoided at all costs.
+* `schema.any()` is essentially an escape hatch for the case when your data can __really__ have any type and should be avoided at all costs.
 
 #### `schema.maybe()`
 
@@ -249,7 +249,7 @@ const valueSchema  = schema.maybe(schema.string());
 ```
 
 __Notes:__
-* Don't use `schema.maybe()` if nested type defines a default value.
+* Don't use `schema.maybe()` if a nested type defines a default value.
 
 #### `schema.nullable()`
 
@@ -263,7 +263,7 @@ const valueSchema  = schema.nullable(schema.string());
 ```
 
 __Notes:__
-* The `schema.nullable()` also treats explicitly specified `null` as a valid input.
+* `schema.nullable()` also treats explicitly specified `null` as a valid input.
 
 #### `schema.never()`
 
@@ -277,7 +277,7 @@ const valueSchema  = schema.never();
 ```
 
 __Notes:__
-* The `schema.never()` has a very limited application and usually used within [conditional schemas](#schemaconditional) to fully or partially forbid input data.
+* `schema.never()` has a very limited application and usually used within [conditional schemas](#schemaconditional) to fully or partially forbid input data.
 
 #### `schema.uri()`
 
@@ -341,7 +341,7 @@ __Notes:__
 
 #### `schema.conditional()`
 
-Allows to specify a condition that is evaluated _at the validation time_ and results into either one or another input validation schema.
+Allows a specified condition that is evaluated _at the validation time_ and results in either one or another input validation schema.
 
 The first argument is always a [reference](#references) while the second one can be:
 * another reference, in this cases both references are "dereferenced" and compared
@@ -372,7 +372,7 @@ __Notes:__
 
 #### `schema.contextRef()`
 
-Defines a reference to the value specified through validation context. Context reference is only used a part of [conditional schema](#schemaconditional) or as a default value for any other schema.
+Defines a reference to the value specified through the validation context. Context reference is only used as part of a [conditional schema](#schemaconditional) or as a default value for any other schema.
 
 __Output type:__ `TReferenceValue`
 
@@ -385,12 +385,12 @@ valueSchema.validate({}, { envName: 'dev' });
 ```
 
 __Notes:__
-* The `@kbn/config-schema` neither validates nor coerces "dereferenced" value and developer is responsible for making sure that it has the appropriate type.
+* The `@kbn/config-schema` neither validates nor coerces the "dereferenced" value and the developer is responsible for making sure that it has the appropriate type.
 * The root context that Kibana provides during config validation includes lots of useful properties like `environment name` that can be used to provide a strict schema for production and more relaxed one for development. 
 
 #### `schema.siblingRef()`
 
-Defines a reference to the value of the sibling key. Sibling reference is only used a part of [conditional schema](#schemaconditional) or as a default value for any other schema.
+Defines a reference to the value of the sibling key. Sibling references are only used a part of [conditional schema](#schemaconditional) or as a default value for any other schema.
 
 __Output type:__ `TReferenceValue`
 
@@ -403,11 +403,11 @@ const valueSchema = schema.object({
 ```
 
 __Notes:__
-* The `@kbn/config-schema` neither validates nor coerces "dereferenced" value and developer is responsible for making sure that it has the appropriate type.
+* The `@kbn/config-schema` neither validates nor coerces the "dereferenced" value and the developer is responsible for making sure that it has the appropriate type.
 
 ## Custom validation
 
-Using built-in schema primitives may not be enough in some scenarios or sometimes the attempt to model complex schema with built-in primitives only may result into unreadable piece of code.
+Using built-in schema primitives may not be enough in some scenarios or sometimes the attempt to model complex schemas with built-in primitives only may result in unreadable code.
 For these cases `@kbn/config-schema` provides a way to specify a custom validation function for almost any schema building block through the `validate` option.
 
 For example `@kbn/config-schema` doesn't have a dedicated primitive for the `RegExp` based validation currently, but you can easily do that with a custom `validate` function:
@@ -430,10 +430,10 @@ const regexSchema = (regex: RegExp) => schema.string({
 const valueSchema = regexSchema(/^[a-z0-9_-]+$/);
 ```
 
-Custom validation function is run _only after_ all built-in validations passed. It should either return `string` as an error message
+Custom validation function is run _only after_ all built-in validations passed. It should either return a `string` as an error message
 to denote the failed validation or not return anything at all (`void`) otherwise. Please also note that `validate` function is synchronous.
 
-Another use case for custom validation functions is when schema depends on some run-time data:
+Another use case for custom validation functions is when the schema depends on some run-time data:
 
 ```typescript
 const gesSchema = randomRunTimeSeed => schema.string({ 
@@ -446,7 +446,7 @@ const schema = gesSchema('some-random-run-time-data');
 ## Default values
 
 If you have an optional config field that you can have a default value for you may want to consider using dedicated `defaultValue` option to not
-deal with "defined or undefined"-like checks all over the place in your code. You have three options to provide a default value for the almost any schema primitive:
+deal with "defined or undefined"-like checks all over the place in your code. You have three options to provide a default value for almost any schema primitive:
 
 * plain value that's known at the compile time
 * [reference](#references) to a value that will be "dereferenced" at the validation time
