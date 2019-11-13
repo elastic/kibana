@@ -100,6 +100,7 @@ export type ParameterName =
   | 'max_input_length'
   | 'preserve_separators'
   | 'preserve_position_increments'
+  | 'ignore_z_value'
   | 'enable_position_increments';
 
 export interface Parameter {

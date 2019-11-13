@@ -17,6 +17,7 @@ import {
   BoostParameter,
   NullValueParameter,
   CoerceParameter,
+  IgnoreMalformedParameter,
 } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 
@@ -101,33 +102,9 @@ export const NumericType = ({ field }: Props) => {
           <CoerceParameter />
 
           {/* ignore_malformed */}
-          <UseField path="ignore_malformed">
-            {ignoreMalformedField => (
-              <EditFieldFormRow
-                title={
-                  <h3>
-                    {i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreMalformedFieldTitle', {
-                      defaultMessage: 'Reject malformed data',
-                    })}
-                  </h3>
-                }
-                description={i18n.translate(
-                  'xpack.idxMgmt.mappingsEditor.ignoredMalformedFieldDescription',
-                  {
-                    defaultMessage: 'Whether to ignore malformed numbers.',
-                  }
-                )}
-                toggleDefaultValue={getDefaultValueToggle('ignore_malformed', field.source)}
-              >
-                {isOn => {
-                  // As we labeled the field "Reject malformed" instead of "Ignore..."
-                  // we invert the value.
-                  ignoreMalformedField.setValue(!isOn);
-                  return null;
-                }}
-              </EditFieldFormRow>
-            )}
-          </UseField>
+          <IgnoreMalformedParameter
+            defaultToggleValue={getDefaultValueToggle('ignore_malformed', field.source)}
+          />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

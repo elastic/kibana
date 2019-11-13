@@ -378,6 +378,11 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: true,
     },
   },
+  ignore_z_value: {
+    fieldConfig: {
+      defaultValue: true,
+    },
+  },
   norms: {
     fieldConfig: {
       defaultValue: false,
