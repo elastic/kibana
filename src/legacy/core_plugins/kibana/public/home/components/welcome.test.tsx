@@ -22,14 +22,12 @@ import { shallow } from 'enzyme';
 import { Welcome } from './welcome';
 
 jest.mock('../kibana_services', () => ({
-  getServices: () => ({
-    addBasePath: (path: string) => `root${path}`,
-    trackUiMetric: () => {},
-    METRIC_TYPE: {
-      LOADED: 'loaded',
-      CLICK: 'click',
-    },
-  }),
+  addBasePath: (path: string) => `root${path}`,
+  trackUiMetric: () => {},
+  METRIC_TYPE: {
+    LOADED: 'loaded',
+    CLICK: 'click',
+  },
 }));
 
 test('should render a Welcome screen with the telemetry disclaimer', () => {
