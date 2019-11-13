@@ -32,7 +32,6 @@ function setupMockCallCluster(optCount, language) {
       if (optCount === null) {
         return Promise.resolve({
           _index: '.kibana_1',
-          _type: 'doc',
           _id: 'kql-telemetry:kql-telemetry',
           found: false,
         });
