@@ -54,7 +54,7 @@ export default function ({ getService }) {
         .send({ timeRange })
         .expect(200);
 
-      expect(body.hasPermissions).to.be(false);
+      expect(body._meta.hasPermissions).to.be(false);
     });
   });
 }

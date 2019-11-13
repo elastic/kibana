@@ -346,7 +346,9 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
   const hasPermissions = await hasNecessaryPermissions(req);
   if (!hasPermissions) {
     return {
-      hasPermissions: false
+      _meta: {
+        hasPermissions: false
+      }
     };
   }
   const liveClusterUuid = skipLiveData ? null : await getLiveElasticsearchClusterUuid(req);
@@ -580,6 +582,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
   status._meta = {
     secondsAgo: NUMBER_OF_SECONDS_AGO_TO_LOOK,
     liveClusterUuid,
+    hasPermissions,
   };
 
   return status;
