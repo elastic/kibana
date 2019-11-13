@@ -28,12 +28,6 @@ function filterGeoField({ type }) {
 
 const requestTypeOptions = [
   {
-    label: i18n.translate('xpack.maps.source.esGeoGrid.pointsDropdownOption', {
-      defaultMessage: 'points'
-    }),
-    value: RENDER_AS.POINT
-  },
-  {
     label: i18n.translate('xpack.maps.source.esGeoGrid.gridRectangleDropdownOption', {
       defaultMessage: 'grid rectangles'
     }),
@@ -44,6 +38,12 @@ const requestTypeOptions = [
       defaultMessage: 'heat map'
     }),
     value: RENDER_AS.HEATMAP
+  },
+  {
+    label: i18n.translate('xpack.maps.source.esGeoGrid.pointsDropdownOption', {
+      defaultMessage: 'points'
+    }),
+    value: RENDER_AS.POINT
   }
 ];
 
