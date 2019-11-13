@@ -15,7 +15,8 @@ describe('search configurations', () => {
       environment: 'production',
       setup: ({
         config: { get: () => '' },
-        client: { search: async () => searchMocks }
+        client: { search: async () => searchMocks },
+        internalClient: { search: async () => searchMocks }
       } as unknown) as Setup
     });
 
@@ -29,7 +30,8 @@ describe('search configurations', () => {
       environment: 'production',
       setup: ({
         config: { get: () => '' },
-        client: { search: async () => searchMocks }
+        client: { search: async () => searchMocks },
+        internalClient: { search: async () => searchMocks }
       } as unknown) as Setup
     });
 
