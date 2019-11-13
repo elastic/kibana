@@ -33,12 +33,11 @@ export function createApi() {
     init(core: CoreSetup, __LEGACY: LegacySetup) {
       const { server } = __LEGACY;
       factoryFns.forEach(fn => {
-        const { params = {}, ...route } = fn(core, __LEGACY) as Route<
-          string,
-          HttpMethod,
-          Params,
-          any
-        >;
+        const {
+          params = {},
+          options = { tags: ['access:apm'] },
+          ...route
+        } = fn(core, __LEGACY) as Route<string, HttpMethod, Params, any>;
 
         const bodyRt = params.body;
         const fallbackBodyRt = bodyRt || t.null;
@@ -55,9 +54,7 @@ export function createApi() {
         server.route(
           merge(
             {
-              options: {
-                tags: ['access:apm']
-              },
+              options,
               method: 'GET'
             },
             route,
@@ -71,41 +68,38 @@ export function createApi() {
 
                 const parsedParams = (Object.keys(rts) as Array<
                   keyof typeof rts
-                >).reduce(
-                  (acc, key) => {
-                    const codec = rts[key];
-                    const value = paramMap[key];
+                >).reduce((acc, key) => {
+                  const codec = rts[key];
+                  const value = paramMap[key];
 
-                    const result = codec.decode(value);
+                  const result = codec.decode(value);
 
-                    if (isLeft(result)) {
-                      throw Boom.badRequest(PathReporter.report(result)[0]);
-                    }
+                  if (isLeft(result)) {
+                    throw Boom.badRequest(PathReporter.report(result)[0]);
+                  }
 
-                    const strippedKeys = difference(
-                      Object.keys(value || {}),
-                      Object.keys(result.right || {})
+                  const strippedKeys = difference(
+                    Object.keys(value || {}),
+                    Object.keys(result.right || {})
+                  );
+
+                  if (strippedKeys.length) {
+                    throw Boom.badRequest(
+                      `Unknown keys specified: ${strippedKeys}`
                     );
+                  }
 
-                    if (strippedKeys.length) {
-                      throw Boom.badRequest(
-                        `Unknown keys specified: ${strippedKeys}`
-                      );
-                    }
+                  // hide _debug from route handlers
+                  const parsedValue =
+                    key === 'query'
+                      ? omit(result.right, '_debug')
+                      : result.right;
 
-                    // hide _debug from route handlers
-                    const parsedValue =
-                      key === 'query'
-                        ? omit(result.right, '_debug')
-                        : result.right;
-
-                    return {
-                      ...acc,
-                      [key]: parsedValue
-                    };
-                  },
-                  {} as Record<keyof typeof params, any>
-                );
+                  return {
+                    ...acc,
+                    [key]: parsedValue
+                  };
+                }, {} as Record<keyof typeof params, any>);
 
                 return route.handler(
                   request,

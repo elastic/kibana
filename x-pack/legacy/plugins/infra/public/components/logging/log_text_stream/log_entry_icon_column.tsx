@@ -29,11 +29,9 @@ export const LogEntryIconColumn: React.FunctionComponent<LogEntryIconColumnProps
   );
 };
 
-export const LogEntryDetailsIconColumn: React.FunctionComponent<
-  LogEntryIconColumnProps & {
-    openFlyout: () => void;
-  }
-> = ({ isHighlighted, isHovered, openFlyout }) => {
+export const LogEntryDetailsIconColumn: React.FunctionComponent<LogEntryIconColumnProps & {
+  openFlyout: () => void;
+}> = ({ isHighlighted, isHovered, openFlyout }) => {
   const label = i18n.translate('xpack.infra.logEntryItemView.viewDetailsToolTip', {
     defaultMessage: 'View Details',
   });

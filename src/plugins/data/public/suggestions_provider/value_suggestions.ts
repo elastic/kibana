@@ -20,7 +20,8 @@
 import { memoize } from 'lodash';
 
 import { UiSettingsClientContract, HttpServiceBase } from 'src/core/public';
-import { IGetSuggestions, Field } from './types';
+import { IGetSuggestions } from './types';
+import { Field } from '..';
 
 export function getSuggestionsProvider(
   uiSettings: UiSettingsClientContract,
