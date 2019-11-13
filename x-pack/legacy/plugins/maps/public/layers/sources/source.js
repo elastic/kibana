@@ -96,7 +96,6 @@ export class AbstractSource {
   }
 
   getApplyGlobalQuery() {
-    console.log(this._descriptor.applyGlobalQuery);
     return !!this._descriptor.applyGlobalQuery;
   }
 
