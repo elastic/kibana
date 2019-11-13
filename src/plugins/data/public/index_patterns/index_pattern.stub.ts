@@ -17,29 +17,12 @@
  * under the License.
  */
 
-import { Filter, FilterMeta } from './meta_filter';
-import { IndexPattern, Field } from '../../types';
+import { IndexPattern } from '../../common';
+import { stubFields } from './field.stub';
 
-export type ExistsFilterMeta = FilterMeta;
-
-export interface FilterExistsProperty {
-  field: any;
-}
-
-export type ExistsFilter = Filter & {
-  meta: ExistsFilterMeta;
-  exists?: FilterExistsProperty;
-};
-
-export const isExistsFilter = (filter: any): filter is ExistsFilter => filter && filter.exists;
-
-export const buildExistsFilter = (field: Field, indexPattern: IndexPattern) => {
-  return {
-    meta: {
-      index: indexPattern.id,
-    },
-    exists: {
-      field: field.name,
-    },
-  } as ExistsFilter;
+export const stubIndexPattern: IndexPattern = {
+  id: 'logstash-*',
+  fields: stubFields,
+  title: 'logstash-*',
+  timeFieldName: '@timestamp',
 };
