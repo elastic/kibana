@@ -70,7 +70,10 @@ test('injects legacy dependency to context#setup()', async () => {
 
   const pluginA = Symbol();
   const pluginB = Symbol();
-  const pluginDependencies = new Map<symbol, symbol[]>([[pluginA, []], [pluginB, [pluginA]]]);
+  const pluginDependencies = new Map<symbol, symbol[]>([
+    [pluginA, []],
+    [pluginB, [pluginA]],
+  ]);
   mockPluginsService.discover.mockResolvedValue(pluginDependencies);
 
   await server.setup();
