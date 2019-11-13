@@ -77,8 +77,7 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
       children: (
         <ProcessStep
           cleanupAndSetup={cleanupAndSetup}
-          setupErrorMessages={errorMessages}
-          validationErrors={validationErrors}
+          errorMessages={errorMessages}
           isConfigurationValid={validationErrors.length <= 0}
           setup={setup}
           setupStatus={setupStatus}

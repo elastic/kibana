@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer, EuiForm } from '@elastic/eui';
+import { EuiSpacer, EuiForm, EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import { AnalysisSetupIndicesForm, IndicesSelection } from './analysis_setup_indices_form';
@@ -44,7 +45,35 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
           onChangeSelectedIndices={setSelectedIndices}
           validationErrors={validationErrors}
         />
+
+        <ValidationErrors messages={validationErrors} />
       </EuiForm>
+    </>
+  );
+};
+
+const errorCalloutTitle = i18n.translate(
+  'xpack.infra.analysisSetup.steps.initialConfigurationStep.errorCalloutTitle',
+  {
+    defaultMessage: 'Your index configuration is not valid',
+  }
+);
+
+const ValidationErrors: React.FC<{ messages: string[] }> = ({ messages }) => {
+  if (messages.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiCallOut color="danger" iconType="alert" title={errorCalloutTitle}>
+        <ul>
+          {messages.map((message, i) => (
+            <li key={i}>{message}</li>
+          ))}
+        </ul>
+      </EuiCallOut>
+      <EuiSpacer />
     </>
   );
 };

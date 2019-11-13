@@ -24,8 +24,7 @@ import { RecreateMLJobsButton } from './recreate_ml_jobs_button';
 
 interface ProcessStepProps {
   cleanupAndSetup: () => void;
-  setupErrorMessages: string[];
-  validationErrors: string[];
+  errorMessages: string[];
   isConfigurationValid: boolean;
   setup: () => void;
   setupStatus: SetupStatus;
@@ -34,8 +33,7 @@ interface ProcessStepProps {
 
 export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({
   cleanupAndSetup,
-  setupErrorMessages,
-  validationErrors,
+  errorMessages,
   isConfigurationValid,
   setup,
   setupStatus,
@@ -62,7 +60,7 @@ export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({
             defaultMessage="Something went wrong creating the necessary ML jobs. Please ensure all selected log indices exist."
           />
           <EuiSpacer />
-          {setupErrorMessages.map((errorMessage, i) => (
+          {errorMessages.map((errorMessage, i) => (
             <EuiCallOut key={i} color="danger" iconType="alert" title={errorCalloutTitle}>
               <EuiCode transparentBackground>{errorMessage}</EuiCode>
             </EuiCallOut>
@@ -90,15 +88,9 @@ export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({
           </EuiButton>
         </>
       ) : setupStatus === 'requiredForUpdate' || setupStatus === 'requiredForReconfiguration' ? (
-        <>
-          <ValidationErrors messages={validationErrors} />
-          <RecreateMLJobsButton isDisabled={!isConfigurationValid} onClick={cleanupAndSetup} />
-        </>
+        <RecreateMLJobsButton isDisabled={!isConfigurationValid} onClick={cleanupAndSetup} />
       ) : (
-        <>
-          <ValidationErrors messages={validationErrors} />
-          <CreateMLJobsButton isDisabled={!isConfigurationValid} onClick={setup} />
-        </>
+        <CreateMLJobsButton isDisabled={!isConfigurationValid} onClick={setup} />
       )}
     </EuiText>
   );
@@ -110,22 +102,3 @@ const errorCalloutTitle = i18n.translate(
     defaultMessage: 'An error occurred',
   }
 );
-
-const ValidationErrors: React.FC<{ messages: string[] }> = ({ messages }) => {
-  if (messages.length === 0) {
-    return null;
-  }
-
-  return (
-    <>
-      <EuiCallOut color="danger" iconType="alert" title={errorCalloutTitle}>
-        <ul>
-          {messages.map((message, i) => (
-            <li key={i}>{message}</li>
-          ))}
-        </ul>
-      </EuiCallOut>
-      <EuiSpacer />
-    </>
-  );
-};
