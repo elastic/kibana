@@ -42,13 +42,6 @@
     index-patterns="indexPatterns"
   ></filter-bar>
 
-  <apply-filters-popover
-    filters="appState.$newFilters"
-    on-cancel="onCancelApplyFilters"
-    on-submit="onApplyFilters"
-    index-patterns="indexPatterns"
-  ></apply-filters-popover>
-
   <div ng-show="getShouldShowEditHelp() || getShouldShowViewHelp()" class="dshStartScreen">
     <div class="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--horizontalCenter">
       <icon type="'dashboardApp'" size="'xxl'" color="'subdued'"></icon>

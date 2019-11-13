@@ -23,8 +23,9 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { npStart } from 'ui/new_platform';
 
-import { TableListView } from './../../table_list_view';
+import { TableListView } from '../../../../../../../src/plugins/kibana_react/public';
 
 export const EMPTY_FILTER = '';
 
@@ -59,6 +60,8 @@ export class DashboardListing extends React.Component {
           tableListTitle={i18n.translate('kbn.dashboard.listing.dashboardsTitle', {
             defaultMessage: 'Dashboards',
           })}
+          toastNotifications={npStart.core.notifications.toasts}
+          uiSettings={npStart.core.uiSettings}
         />
       </I18nProvider>
     );
