@@ -6,7 +6,6 @@
 
 import { get } from 'lodash/fp';
 
-import Hapi from 'hapi';
 import { esFilters } from '../../../../../../../../src/plugins/data/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import {
@@ -17,6 +16,7 @@ import {
 } from '../../../../../alerting/server/types';
 import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
+import { RequestFacade } from '../../../types';
 import { SearchResponse } from '../../types';
 
 export type PartialFilter = Partial<esFilters.Filter>;
@@ -78,7 +78,7 @@ export type UpdateSignalParams = Partial<Omit<SignalAlertParams, 'id'>> & {
 
 export type DeleteSignalParams = Clients & { id: string };
 
-export interface FindSignalsRequest extends Omit<Hapi.Request, 'query'> {
+export interface FindSignalsRequest extends Omit<RequestFacade, 'query'> {
   query: {
     per_page: number;
     page: number;
@@ -106,11 +106,11 @@ export type SignalAlertType = Alert & {
   alertTypeParams: SignalAlertParams;
 };
 
-export interface SignalsRequest extends Hapi.Request {
+export interface SignalsRequest extends RequestFacade {
   payload: SignalAlertParamsRest;
 }
 
-export interface UpdateSignalsRequest extends Hapi.Request {
+export interface UpdateSignalsRequest extends RequestFacade {
   payload: UpdateSignalAlertParamsRest;
 }
 

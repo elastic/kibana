@@ -7,8 +7,7 @@
 import { GenericParams } from 'elasticsearch';
 import { EnvironmentMode } from 'kibana/public';
 import { GraphQLSchema } from 'graphql';
-import { Legacy } from 'kibana';
-import { ServerFacade } from '../../types';
+import { ServerFacade, RequestFacade } from '../../types';
 
 import {
   graphiqlHapi,
@@ -38,7 +37,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   }
 
   public async callWithRequest(
-    req: FrameworkRequest<Legacy.Request>,
+    req: FrameworkRequest,
     endpoint: string,
     params: CallWithRequestParams,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -82,7 +81,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
     this.server.register<HapiGraphQLPluginOptions>({
       options: {
-        graphqlOptions: (req: Legacy.Request) => ({
+        graphqlOptions: (req: RequestFacade) => ({
           context: { req: wrapRequest(req) },
           schema,
         }),
@@ -111,9 +110,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     }
   }
 
-  public getIndexPatternsService(
-    request: FrameworkRequest<Legacy.Request>
-  ): FrameworkIndexPatternsService {
+  public getIndexPatternsService(request: FrameworkRequest): FrameworkIndexPatternsService {
     return this.server.indexPatternsServiceFactory({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       callCluster: async (method: string, args: [GenericParams], ...rest: any[]) => {

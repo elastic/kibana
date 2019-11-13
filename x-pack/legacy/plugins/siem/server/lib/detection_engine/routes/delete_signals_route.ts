@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 
 import { deleteSignals } from '../alerts/delete_signals';
-import { ServerFacade } from '../../../types';
+import { RequestFacade, ServerFacade } from '../../../types';
 
 export const createDeleteSignalsRoute: Hapi.ServerRoute = {
   method: 'DELETE',
@@ -21,7 +21,7 @@ export const createDeleteSignalsRoute: Hapi.ServerRoute = {
       },
     },
   },
-  async handler(request: Hapi.Request, headers) {
+  async handler(request: RequestFacade, headers) {
     const { id } = request.params;
     const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
     const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;

@@ -25,3 +25,18 @@ export interface ServerFacade {
   route: Legacy.Server['route'];
   savedObjects: Legacy.Server['savedObjects'];
 }
+
+export interface RequestFacade {
+  auth: Legacy.Request['auth'];
+  getAlertsClient?: Legacy.Request['getAlertsClient'];
+  getActionsClient?: Legacy.Request['getActionsClient'];
+  getUiSettingsService: Legacy.Request['getUiSettingsService'];
+  headers: Legacy.Request['headers'];
+  params: Legacy.Request['params'];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload: any;
+  query: Legacy.Request['query'];
+  server: {
+    plugins: { elasticsearch: Legacy.Request['server']['plugins']['elasticsearch'] };
+  };
+}
