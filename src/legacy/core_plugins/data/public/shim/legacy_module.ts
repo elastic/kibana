@@ -24,7 +24,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
-import { FilterBar, ApplyFiltersPopover } from '../filter';
+import { FilterBar } from '../filter';
 import { IndexPatterns } from '../index_patterns/index_patterns';
 
 /** @internal */

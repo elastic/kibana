@@ -413,31 +413,6 @@ export class DashboardAppController {
       queryFilter.setFilters(filters);
     };
 
-    $scope.onCancelApplyFilters = () => {
-      $scope.appState.$newFilters = [];
-    };
-
-    $scope.onApplyFilters = filters => {
-      if (filters.length) {
-        // All filters originated from one visualization.
-        const indexPatternId = filters[0].meta.index;
-        const indexPattern = _.find(
-          $scope.indexPatterns,
-          (p: IndexPattern) => p.id === indexPatternId
-        );
-        if (indexPattern && indexPattern.timeFieldName) {
-          const { timeRangeFilter, restOfFilters } = extractTimeFilter(
-            indexPattern.timeFieldName,
-            filters
-          );
-          queryFilter.addFilters(restOfFilters);
-          if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
-        }
-      }
-
-      $scope.appState.$newFilters = [];
-    };
-
     $scope.onQuerySaved = savedQuery => {
       $scope.savedQuery = savedQuery;
     };
@@ -509,12 +484,6 @@ export class DashboardAppController {
         }
       }
     );
-
-    $scope.$watch('appState.$newFilters', (filters: esFilters.Filter[] = []) => {
-      if (filters.length === 1) {
-        $scope.onApplyFilters(filters);
-      }
-    });
 
     $scope.indexPatterns = [];
 
