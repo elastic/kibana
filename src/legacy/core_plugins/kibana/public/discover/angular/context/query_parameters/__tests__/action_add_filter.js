@@ -20,12 +20,14 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
+import { pluginInstance } from 'plugins/kibana/discover/index';
 import { FilterBarQueryFilterProvider } from '../../../../kibana_services';
 import { createStateStub } from './_utils';
 import { QueryParameterActionsProvider } from '../actions';
 
 
 describe('context app', function () {
+  beforeEach(() => pluginInstance.bootstrapInnerAngular());
   beforeEach(ngMock.module('app/discover'));
 
   describe('action addFilter', function () {

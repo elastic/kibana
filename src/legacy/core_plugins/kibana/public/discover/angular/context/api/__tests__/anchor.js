@@ -19,13 +19,14 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import 'plugins/kibana/discover/index';
+import { pluginInstance } from 'plugins/kibana/discover/index';
 
 import { createIndexPatternsStub, createSearchSourceStub } from './_stubs';
 
 import { fetchAnchorProvider } from '../anchor';
 
 describe('context app', function () {
+  beforeEach(() => pluginInstance.bootstrapInnerAngular());
   beforeEach(ngMock.module('app/discover'));
 
   describe('function fetchAnchor', function () {
