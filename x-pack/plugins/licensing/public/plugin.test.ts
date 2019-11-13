@@ -129,8 +129,7 @@ describe('licensing plugin', () => {
         const license = await license$.pipe(take(1)).toPromise();
 
         expect(license.isAvailable).toBe(false);
-        expect(license.error).toBeDefined();
-        expect(license.error!.message).toBe('reason');
+        expect(license.error).toBe('reason');
       });
 
       it('remove license saved in session storage when request failed', async () => {

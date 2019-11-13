@@ -135,7 +135,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
         signature: response.signature,
       });
     } catch (error) {
-      return new License({ error, signature: '' });
+      return new License({ error: error.message, signature: '' });
     }
   };
 }

@@ -8,7 +8,7 @@ import { License } from './license';
 import { PublicLicense } from '../server/types';
 import { hasLicenseInfoChanged } from './has_license_info_changed';
 
-function license({ error, ...customLicense }: { error?: Error; [key: string]: any } = {}) {
+function license({ error, ...customLicense }: { error?: string; [key: string]: any } = {}) {
   const defaultLicense: PublicLicense['license'] = {
     uid: 'uid-000000001234',
     status: 'active',
@@ -71,31 +71,22 @@ describe('has license info changed', () => {
 
   describe('error License', () => {
     test('License <-> error License', async () => {
-      expect(hasLicenseInfoChanged(license({ error: new Error('reason') }), license())).toBe(true);
-      expect(hasLicenseInfoChanged(license(), license({ error: new Error('reason') }))).toBe(true);
+      expect(hasLicenseInfoChanged(license({ error: 'reason' }), license())).toBe(true);
+      expect(hasLicenseInfoChanged(license(), license({ error: 'reason' }))).toBe(true);
     });
 
     test('error License <-> error License | matched messages', async () => {
       expect(
-        hasLicenseInfoChanged(
-          license({ error: new Error('reason-1') }),
-          license({ error: new Error('reason-1') })
-        )
+        hasLicenseInfoChanged(license({ error: 'reason-1' }), license({ error: 'reason-1' }))
       ).toBe(false);
     });
 
     test('error License <-> error License | mismatched messages', async () => {
       expect(
-        hasLicenseInfoChanged(
-          license({ error: new Error('reason-1') }),
-          license({ error: new Error('reason-2') })
-        )
+        hasLicenseInfoChanged(license({ error: 'reason-1' }), license({ error: 'reason-2' }))
       ).toBe(true);
       expect(
-        hasLicenseInfoChanged(
-          license({ error: new Error('reason-2') }),
-          license({ error: new Error('reason-1') })
-        )
+        hasLicenseInfoChanged(license({ error: 'reason-2' }), license({ error: 'reason-1' }))
       ).toBe(true);
     });
   });

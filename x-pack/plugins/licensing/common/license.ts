@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  ElasticsearchError,
   LicenseType,
   ILicense,
   LicenseStatus,
@@ -22,7 +21,7 @@ export class License implements ILicense {
   private readonly license?: PublicLicense['license'];
   private readonly features?: PublicLicense['features'];
 
-  public error?: ElasticsearchError;
+  public error?: string;
   public isActive: boolean;
   public isAvailable: boolean;
   public isBasic: boolean;
@@ -42,12 +41,7 @@ export class License implements ILicense {
     return new License(json);
   }
 
-  constructor({
-    license,
-    features,
-    signature,
-    error,
-  }: PublicLicense & { error?: ElasticsearchError }) {
+  constructor({ license, features, signature, error }: PublicLicense & { error?: string }) {
     this.isAvailable = Boolean(license);
     this.license = license;
     this.features = features;
@@ -75,15 +69,9 @@ export class License implements ILicense {
   }
 
   public getUnavailableReason() {
-    if (this.error) {
-      if (this.error.status === 400) {
-        return 'X-Pack plugin is not installed on the Elasticsearch cluster.';
-      }
-
-      return this.error;
-    }
+    if (this.error) return this.error;
     if (!this.isAvailable) {
-      return 'Elasticsearch cluster did not respond with license information.';
+      return 'X-Pack plugin is not installed on the Elasticsearch cluster.';
     }
   }
 

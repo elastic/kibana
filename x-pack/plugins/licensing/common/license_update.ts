@@ -27,10 +27,8 @@ export function createLicenseUpdate(
 
   const update$: Observable<ILicense> = merge(initialValues$, fetched$).pipe(
     pairwise(),
-    filter<[ILicense | undefined, ILicense]>(([previous, next]) =>
-      hasLicenseInfoChanged(previous, next)
-    ),
-    map(([, next]) => next)
+    filter(([previous, next]) => hasLicenseInfoChanged(previous, next!)),
+    map(([, next]) => next!)
   );
 
   return {

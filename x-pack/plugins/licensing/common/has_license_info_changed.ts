@@ -7,23 +7,15 @@
 import { ILicense } from '../server/types';
 
 /**
- * @internal
  * Check if 2 potential license instances have changes between them
+ * @internal
  */
 export function hasLicenseInfoChanged(currentLicense: ILicense | undefined, newLicense: ILicense) {
   if (currentLicense === newLicense) return false;
   if (!currentLicense) return true;
 
-  if (
-    (currentLicense.error && !newLicense.error) ||
-    (!currentLicense.error && newLicense.error) ||
-    (newLicense.error &&
-      currentLicense.error &&
-      newLicense.error.message !== currentLicense.error.message)
-  ) {
-    return true;
-  }
   return (
+    newLicense.error !== currentLicense.error ||
     newLicense.type !== currentLicense.type ||
     newLicense.status !== currentLicense.status ||
     newLicense.expiryDateInMillis !== currentLicense.expiryDateInMillis ||

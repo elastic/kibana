@@ -25,6 +25,10 @@ import { createLicenseUpdate } from '../common/license_update';
 import { LicenseConfigType } from './licensing_config';
 import { createRouteHandlerContext } from './licensing_route_handler_context';
 
+export interface ElasticsearchError extends Error {
+  status?: number;
+}
+
 function normalizeServerLicense(license: RawLicense): PublicLicense['license'] {
   return {
     uid: license.uid,
@@ -34,9 +38,12 @@ function normalizeServerLicense(license: RawLicense): PublicLicense['license'] {
   };
 }
 
-function sign(licenseJSON: Pick<PublicLicense, 'license' | 'features'>) {
+function sign(
+  licenseJSON: Partial<Pick<PublicLicense, 'license' | 'features'>>,
+  error: string = ''
+) {
   return createHash('md5')
-    .update(JSON.stringify(licenseJSON))
+    .update(JSON.stringify({ ...licenseJSON, error }))
     .digest('hex');
 }
 
@@ -121,13 +128,22 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
       this.logger.warn(
         `License information could not be obtained from Elasticsearch due to ${error} error`
       );
+      const errorMessage = this.getErrorMessage(error);
+      const signature = sign({}, errorMessage);
 
       return new License({
-        error,
-        signature: '',
+        error: this.getErrorMessage(error),
+        signature,
       });
     }
   };
+
+  private getErrorMessage(error: ElasticsearchError): string {
+    if (error.status === 400) {
+      return 'X-Pack plugin is not installed on the Elasticsearch cluster.';
+    }
+    return error.message;
+  }
 
   public async start(core: CoreStart) {}
 

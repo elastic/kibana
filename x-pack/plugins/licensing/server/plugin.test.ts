@@ -7,7 +7,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { take, toArray } from 'rxjs/operators';
 import { RawLicense, LicenseType } from './types';
-import { LicensingPlugin } from './plugin';
+import { LicensingPlugin, ElasticsearchError } from './plugin';
 import {
   coreMock,
   elasticsearchServiceMock,
@@ -94,6 +94,20 @@ describe('licensing plugin', () => {
         expect(license.error).toBeDefined();
       });
 
+      it('generate error message when x-pack plugin was not installed', async () => {
+        const dataClient = elasticsearchServiceMock.createClusterClient();
+        const error: ElasticsearchError = new Error('reason');
+        error.status = 400;
+        dataClient.callAsInternalUser.mockRejectedValue(error);
+        const coreSetup = coreMock.createSetup();
+        coreSetup.elasticsearch.dataClient$ = new BehaviorSubject(dataClient);
+
+        const { license$ } = await plugin.setup(coreSetup);
+        const license = await license$.pipe(take(1)).toPromise();
+        expect(license.isAvailable).toBe(false);
+        expect(license.error).toBe('X-Pack plugin is not installed on the Elasticsearch cluster.');
+      });
+
       it('polling continues even if there are errors', async () => {
         const error1 = new Error('reason-1');
         const error2 = new Error('reason-2');
@@ -116,8 +130,8 @@ describe('licensing plugin', () => {
           )
           .toPromise();
 
-        expect(first.error).toBe(error1);
-        expect(second.error).toBe(error2);
+        expect(first.error).toBe(error1.message);
+        expect(second.error).toBe(error2.message);
         expect(third.type).toBe('basic');
       });
 

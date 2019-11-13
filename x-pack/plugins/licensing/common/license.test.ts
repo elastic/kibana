@@ -5,7 +5,7 @@
  */
 
 import { License } from './license';
-import { LICENSE_CHECK_STATE, ElasticsearchError } from '../server/types';
+import { LICENSE_CHECK_STATE } from '../server/types';
 import { licenseMock } from './license.mock';
 
 describe('License', () => {
@@ -13,11 +13,8 @@ describe('License', () => {
   const basicExpiredLicense = licenseMock.create({ license: { status: 'expired' } });
   const goldLicense = licenseMock.create({ license: { type: 'gold' } });
 
-  const error = new Error('unavailable');
-  const errorLicense = new License({ error, signature: '' });
-  const errorNotInstalled: ElasticsearchError = new Error('x-pack not installed');
-  errorNotInstalled.status = 400;
-  const errorXpackNotInstalledLicense = new License({ error: errorNotInstalled, signature: '' });
+  const errorMessage = 'unavailable';
+  const errorLicense = new License({ error: errorMessage, signature: '' });
   const unavailableLicense = new License({ signature: '' });
 
   it('uid', () => {
@@ -82,12 +79,9 @@ describe('License', () => {
 
   it('getUnavailableReason', () => {
     expect(basicLicense.getUnavailableReason()).toBe(undefined);
-    expect(errorLicense.getUnavailableReason()).toBe(error);
-    expect(errorXpackNotInstalledLicense.getUnavailableReason()).toMatchInlineSnapshot(
-      `"X-Pack plugin is not installed on the Elasticsearch cluster."`
-    );
-    expect(unavailableLicense.getUnavailableReason()).toMatchInlineSnapshot(
-      `"Elasticsearch cluster did not respond with license information."`
+    expect(errorLicense.getUnavailableReason()).toBe(errorMessage);
+    expect(unavailableLicense.getUnavailableReason()).toBe(
+      'X-Pack plugin is not installed on the Elasticsearch cluster.'
     );
   });
 

@@ -21,11 +21,6 @@ export enum LICENSE_TYPE {
 }
 
 /** @public */
-export interface ElasticsearchError extends Error {
-  status?: number;
-}
-
-/** @public */
 export type LicenseType = keyof typeof LICENSE_TYPE;
 
 /** @public */
@@ -163,12 +158,12 @@ export interface ILicense {
   /**
    * A potential error denoting the failure of the license from being retrieved.
    */
-  error?: ElasticsearchError;
+  error?: string;
 
   /**
    * If the license is not available, provides a string or Error containing the reason.
    */
-  getUnavailableReason: () => string | ElasticsearchError | undefined;
+  getUnavailableReason: () => string | undefined;
 
   /**
    * Determine if the provided license types match against the license type.
