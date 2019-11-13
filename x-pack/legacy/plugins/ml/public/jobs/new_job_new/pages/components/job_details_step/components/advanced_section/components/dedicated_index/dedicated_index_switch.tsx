@@ -5,6 +5,7 @@
  */
 
 import React, { FC, useState, useContext, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiSwitch } from '@elastic/eui';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
@@ -29,6 +30,13 @@ export const DedicatedIndexSwitch: FC = () => {
         checked={useDedicatedIndex}
         onChange={toggleModelPlot}
         data-test-subj="mlJobWizardSwitchUseDedicatedIndex"
+        showLabel={false}
+        label={i18n.translate(
+          'xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.useDedicatedIndex.title',
+          {
+            defaultMessage: 'Use dedicated index',
+          }
+        )}
       />
     </Description>
   );
