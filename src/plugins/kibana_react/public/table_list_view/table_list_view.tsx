@@ -18,13 +18,12 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
-import { toastNotifications } from 'ui/notify';
+import { debounce, indexBy, sortBy, uniq } from 'lodash';
 import {
   EuiTitle,
+  // @ts-ignore
   EuiInMemoryTable,
   EuiPage,
   EuiPageBody,
@@ -38,26 +37,66 @@ import {
   EuiConfirmModal,
   EuiCallOut,
 } from '@elastic/eui';
-
-import { npStart } from 'ui/new_platform';
+import { ToastsStart, UiSettingsClientContract } from 'kibana/public';
 
 export const EMPTY_FILTER = '';
+
+interface Column {
+  name: string;
+  width?: string;
+  actions?: object[];
+}
+
+interface Item {
+  id?: string;
+}
+
+export interface TableListViewProps {
+  createItem?(): void;
+  deleteItems?(items: object[]): Promise<void>;
+  editItem?(item: object): void;
+  entityName: string;
+  entityNamePlural: string;
+  findItems(query: string): Promise<{ total: number; hits: object[] }>;
+  listingLimit: number;
+  initialFilter: string;
+  noItemsFragment: JSX.Element;
+  // update possible column types to something like (FieldDataColumn | ComputedColumn | ActionsColumn)[] when they have been added to EUI
+  tableColumns: Column[];
+  tableListTitle: string;
+  toastNotifications: ToastsStart;
+  uiSettings: UiSettingsClientContract;
+}
+
+export interface TableListViewState {
+  items: object[];
+  hasInitialFetchReturned: boolean;
+  isFetchingItems: boolean;
+  isDeletingItems: boolean;
+  showDeleteModal: boolean;
+  showLimitError: boolean;
+  filter: string;
+  selectedIds: string[];
+  totalItems: number;
+}
 
 // saved object client does not support sorting by title because title is only mapped as analyzed
 // the legacy implementation got around this by pulling `listingLimit` items and doing client side sorting
 // and not supporting server-side paging.
 // This component does not try to tackle these problems (yet) and is just feature matching the legacy component
 // TODO support server side sorting/paging once title and description are sortable on the server.
-class TableListViewUi extends React.Component {
+class TableListView extends React.Component<TableListViewProps, TableListViewState> {
+  private pagination = {};
+  private _isMounted = false;
 
-  constructor(props) {
+  constructor(props: TableListViewProps) {
     super(props);
 
-    const initialPageSize = npStart.core.uiSettings.get('savedObjects:perPage');
+    const initialPageSize = props.uiSettings.get('savedObjects:perPage');
     this.pagination = {
       initialPageIndex: 0,
       initialPageSize,
-      pageSizeOptions: _.uniq([10, 20, 50, initialPageSize]).sort(),
+      pageSizeOptions: uniq([10, 20, 50, initialPageSize]).sort(),
     };
     this.state = {
       items: [],
@@ -67,10 +106,9 @@ class TableListViewUi extends React.Component {
       isDeletingItems: false,
       showDeleteModal: false,
       showLimitError: false,
-      filter: this.props.initialFilter,
+      filter: props.initialFilter,
       selectedIds: [],
     };
-
   }
 
   componentWillMount() {
@@ -86,7 +124,7 @@ class TableListViewUi extends React.Component {
     this.fetchItems();
   }
 
-  debouncedFetch = _.debounce(async (filter) => {
+  debouncedFetch = debounce(async (filter: string) => {
     const response = await this.props.findItems(filter);
 
     if (!this._isMounted) {
@@ -100,7 +138,7 @@ class TableListViewUi extends React.Component {
       this.setState({
         hasInitialFetchReturned: true,
         isFetchingItems: false,
-        items: (!filter ? _.sortBy(response.hits, 'title') : response.hits),
+        items: !filter ? sortBy(response.hits, 'title') : response.hits,
         totalItems: response.total,
         showLimitError: response.total > this.props.listingLimit,
       });
@@ -108,26 +146,29 @@ class TableListViewUi extends React.Component {
   }, 300);
 
   fetchItems = () => {
-    this.setState({
-      isFetchingItems: true,
-    }, this.debouncedFetch.bind(null, this.state.filter));
-  }
+    this.setState(
+      {
+        isFetchingItems: true,
+      },
+      this.debouncedFetch.bind(null, this.state.filter)
+    );
+  };
 
   deleteSelectedItems = async () => {
-    if (this.state.isDeletingItems) {
+    if (this.state.isDeletingItems || !this.props.deleteItems) {
       return;
     }
     this.setState({
-      isDeletingItems: true
+      isDeletingItems: true,
     });
     try {
-      const itemsById = _.indexBy(this.state.items, 'id');
+      const itemsById = indexBy(this.state.items, 'id');
       await this.props.deleteItems(this.state.selectedIds.map(id => itemsById[id]));
     } catch (error) {
-      toastNotifications.addDanger({
+      this.props.toastNotifications.addDanger({
         title: (
           <FormattedMessage
-            id="kbn.table_list_view.listing.unableToDeleteDangerMessage"
+            id="kibana-react.tableListView.listing.unableToDeleteDangerMessage"
             defaultMessage="Unable to delete {entityName}(s)"
             values={{ entityName: this.props.entityName }}
           />
@@ -138,25 +179,28 @@ class TableListViewUi extends React.Component {
     this.fetchItems();
     this.setState({
       isDeletingItems: false,
-      selectedIds: []
+      selectedIds: [],
     });
     this.closeDeleteModal();
-  }
+  };
 
   closeDeleteModal = () => {
     this.setState({ showDeleteModal: false });
-  }
+  };
 
   openDeleteModal = () => {
     this.setState({ showDeleteModal: true });
-  }
+  };
 
-  setFilter(filter) {
+  setFilter({ queryText }: { queryText: string }) {
     // If the user is searching, we want to clear the sort order so that
     // results are ordered by Elasticsearch's relevance.
-    this.setState({
-      filter: filter.queryText,
-    }, this.fetchItems);
+    this.setState(
+      {
+        filter: queryText,
+      },
+      this.fetchItems
+    );
   }
 
   hasNoItems() {
@@ -170,14 +214,14 @@ class TableListViewUi extends React.Component {
   renderConfirmDeleteModal() {
     let deleteButton = (
       <FormattedMessage
-        id="kbn.table_list_view.listing.deleteSelectedItemsConfirmModal.confirmButtonLabel"
+        id="kibana-react.tableListView.listing.deleteSelectedItemsConfirmModal.confirmButtonLabel"
         defaultMessage="Delete"
       />
     );
     if (this.state.isDeletingItems) {
       deleteButton = (
         <FormattedMessage
-          id="kbn.table_list_view.listing.deleteSelectedItemsConfirmModal.confirmButtonLabelDeleting"
+          id="kibana-react.tableListView.listing.deleteSelectedItemsConfirmModal.confirmButtonLabelDeleting"
           defaultMessage="Deleting"
         />
       );
@@ -188,11 +232,14 @@ class TableListViewUi extends React.Component {
         <EuiConfirmModal
           title={
             <FormattedMessage
-              id="kbn.table_list_view.listing.deleteSelectedConfirmModal.title"
+              id="kibana-react.tableListView.listing.deleteSelectedConfirmModal.title"
               defaultMessage="Delete {itemCount} {entityName}?"
               values={{
                 itemCount: this.state.selectedIds.length,
-                entityName: (this.state.selectedIds.length === 1) ? this.props.entityName : this.props.entityNamePlural
+                entityName:
+                  this.state.selectedIds.length === 1
+                    ? this.props.entityName
+                    : this.props.entityNamePlural,
               }}
             />
           }
@@ -201,7 +248,7 @@ class TableListViewUi extends React.Component {
           onConfirm={this.deleteSelectedItems}
           cancelButtonText={
             <FormattedMessage
-              id="kbn.table_list_view.listing.deleteSelectedItemsConfirmModal.cancelButtonLabel"
+              id="kibana-react.tableListView.listing.deleteSelectedItemsConfirmModal.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           }
@@ -210,7 +257,7 @@ class TableListViewUi extends React.Component {
         >
           <p>
             <FormattedMessage
-              id="kbn.table_list_view.listing.deleteConfirmModalDescription"
+              id="kibana-react.tableListView.listing.deleteConfirmModalDescription"
               defaultMessage="You can't recover deleted {entityNamePlural}."
               values={{ entityNamePlural: this.props.entityNamePlural }}
             />
@@ -227,7 +274,7 @@ class TableListViewUi extends React.Component {
           <EuiCallOut
             title={
               <FormattedMessage
-                id="kbn.table_list_view.listing.listingLimitExceededTitle"
+                id="kibana-react.tableListView.listing.listingLimitExceededTitle"
                 defaultMessage="Listing limit exceeded"
               />
             }
@@ -236,26 +283,22 @@ class TableListViewUi extends React.Component {
           >
             <p>
               <FormattedMessage
-                id="kbn.table_list_view.listing.listingLimitExceededDescription"
+                id="kibana-react.tableListView.listing.listingLimitExceededDescription"
                 defaultMessage="You have {totalItems} {entityNamePlural}, but your {listingLimitText} setting prevents
                 the table below from displaying more than {listingLimitValue}. You can change this setting under {advancedSettingsLink}."
                 values={{
                   entityNamePlural: this.props.entityNamePlural,
                   totalItems: this.state.totalItems,
                   listingLimitValue: this.props.listingLimit,
-                  listingLimitText: (
-                    <strong>
-                      listingLimit
-                    </strong>
-                  ),
+                  listingLimitText: <strong>listingLimit</strong>,
                   advancedSettingsLink: (
                     <EuiLink href="#/management/kibana/settings">
                       <FormattedMessage
-                        id="kbn.table_list_view.listing.listingLimitExceeded.advancedSettingsLinkText"
+                        id="kibana-react.tableListView.listing.listingLimitExceeded.advancedSettingsLinkText"
                         defaultMessage="Advanced Settings"
                       />
                     </EuiLink>
-                  )
+                  ),
                 }}
               />
             </p>
@@ -268,18 +311,15 @@ class TableListViewUi extends React.Component {
 
   renderNoItemsMessage() {
     if (this.props.noItemsFragment) {
-      return (
-        this.props.noItemsFragment
-      );
+      return this.props.noItemsFragment;
     } else {
       return (
         <FormattedMessage
-          id="kbn.table_list_view.listing.noAvailableItemsMessage"
+          id="kibana-react.tableListView.listing.noAvailableItemsMessage"
           defaultMessage="No {entityNamePlural} available."
           values={{ entityNamePlural: this.props.entityNamePlural }}
         />
       );
-
     }
   }
 
@@ -302,11 +342,12 @@ class TableListViewUi extends React.Component {
         data-test-subj="deleteSelectedItems"
       >
         <FormattedMessage
-          id="kbn.table_list_view.listing.deleteButtonMessage"
+          id="kibana-react.tableListView.listing.deleteButtonMessage"
           defaultMessage="Delete {itemCount} {entityName}"
           values={{
             itemCount: selection.length,
-            entityName: (selection.length === 1) ? this.props.entityName : this.props.entityNamePlural
+            entityName:
+              selection.length === 1 ? this.props.entityName : this.props.entityNamePlural,
           }}
         />
       </EuiButton>
@@ -314,25 +355,34 @@ class TableListViewUi extends React.Component {
   }
 
   renderTable() {
-    const selection = this.props.deleteItems ? {
-      onSelectionChange: (selection) => {
-        this.setState({
-          selectedIds: selection.map(item => { return item.id; })
-        });
-      }
-    } : null;
+    const selection = this.props.deleteItems
+      ? {
+          onSelectionChange: (obj: Item[]) => {
+            this.setState({
+              selectedIds: obj
+                .map(item => item.id)
+                .filter((id: undefined | string): id is string => Boolean(id)),
+            });
+          },
+        }
+      : null;
 
-    const actions = [{
-      name: i18n.translate('kbn.table_list_view.listing.table.editActionName', {
-        defaultMessage: 'Edit'
-      }),
-      description: i18n.translate('kbn.table_list_view.listing.table.editActionDescription', {
-        defaultMessage: 'Edit'
-      }),
-      icon: 'pencil',
-      type: 'icon',
-      onClick: this.props.editItem
-    }];
+    const actions = [
+      {
+        name: i18n.translate('kibana-react.tableListView.listing.table.editActionName', {
+          defaultMessage: 'Edit',
+        }),
+        description: i18n.translate(
+          'kibana-react.tableListView.listing.table.editActionDescription',
+          {
+            defaultMessage: 'Edit',
+          }
+        ),
+        icon: 'pencil',
+        type: 'icon',
+        onClick: this.props.editItem,
+      },
+    ];
 
     const search = {
       onChange: this.setFilter.bind(this),
@@ -346,17 +396,17 @@ class TableListViewUi extends React.Component {
     const columns = this.props.tableColumns.slice();
     if (this.props.editItem) {
       columns.push({
-        name: i18n.translate('kbn.table_list_view.listing.table.actionTitle', {
-          defaultMessage: 'Actions'
+        name: i18n.translate('kibana-react.tableListView.listing.table.actionTitle', {
+          defaultMessage: 'Actions',
         }),
         width: '100px',
-        actions
+        actions,
       });
     }
 
     const noItemsMessage = (
       <FormattedMessage
-        id="kbn.table_list_view.listing.noMatchedItemsMessage"
+        id="kibana-react.tableListView.listing.noMatchedItemsMessage"
         defaultMessage="No {entityNamePlural} matched your search."
         values={{ entityNamePlural: this.props.entityNamePlural }}
       />
@@ -397,7 +447,7 @@ class TableListViewUi extends React.Component {
             fill
           >
             <FormattedMessage
-              id="kbn.table_list_view.listing.createNewItemButtonLabel"
+              id="kibana-react.tableListView.listing.createNewItemButtonLabel"
               defaultMessage="Create {entityName}"
               values={{ entityName: this.props.entityName }}
             />
@@ -412,14 +462,11 @@ class TableListViewUi extends React.Component {
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" data-test-subj="top-nav">
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
-              <h1>
-                {this.props.tableListTitle}
-              </h1>
+              <h1>{this.props.tableListTitle}</h1>
             </EuiTitle>
           </EuiFlexItem>
 
           {createButton}
-
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />
@@ -450,34 +497,10 @@ class TableListViewUi extends React.Component {
         className="itemListing__page"
         restrictWidth
       >
-        <EuiPageBody>
-          {this.renderPageContent()}
-        </EuiPageBody>
+        <EuiPageBody>{this.renderPageContent()}</EuiPageBody>
       </EuiPage>
     );
   }
 }
 
-TableListViewUi.propTypes = {
-  tableColumns: PropTypes.array.isRequired,
-
-  noItemsFragment: PropTypes.object,
-
-  findItems: PropTypes.func.isRequired,
-  deleteItems: PropTypes.func,
-  createItem: PropTypes.func,
-  editItem: PropTypes.func,
-
-  listingLimit: PropTypes.number,
-  initialFilter: PropTypes.string,
-
-  entityName: PropTypes.string.isRequired,
-  entityNamePlural: PropTypes.string.isRequired,
-  tableListTitle: PropTypes.string.isRequired,
-};
-
-TableListViewUi.defaultProps = {
-  initialFilter: EMPTY_FILTER,
-};
-
-export const TableListView = injectI18n(TableListViewUi);
+export { TableListView };
