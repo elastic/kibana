@@ -18,7 +18,8 @@
  */
 
 import React from 'react';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   KuiEmptyTablePrompt,
@@ -27,7 +28,7 @@ import {
   KuiButtonIcon,
 } from '@kbn/ui-framework/components';
 
-function NoVisualizationsPromptUi({ onCreateVis, intl }) {
+function NoVisualizationsPrompt({ onCreateVis }) {
   return (
     <KuiEmptyTablePromptPanel>
       <KuiEmptyTablePrompt
@@ -35,7 +36,7 @@ function NoVisualizationsPromptUi({ onCreateVis, intl }) {
           <KuiButton
             onClick={onCreateVis}
             buttonType="primary"
-            icon={<KuiButtonIcon type="create"/>}
+            icon={<KuiButtonIcon type="create" />}
           >
             <FormattedMessage
               id="kbn.visualize.listing.noVisualizations.createVisualizationButtonLabel"
@@ -43,8 +44,7 @@ function NoVisualizationsPromptUi({ onCreateVis, intl }) {
             />
           </KuiButton>
         }
-        message={intl.formatMessage({
-          id: 'kbn.visualize.listing.noVisualizationsText',
+        message={i18n.translate('kbn.visualize.listing.noVisualizationsText', {
           defaultMessage: `Looks like you don't have any visualizations. Let's create some!`,
         })}
       />
@@ -52,4 +52,4 @@ function NoVisualizationsPromptUi({ onCreateVis, intl }) {
   );
 }
 
-export const NoVisualizationsPrompt = injectI18n(NoVisualizationsPromptUi);
+export { NoVisualizationsPrompt };

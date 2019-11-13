@@ -39,6 +39,7 @@ export {
   SavedObjectsService,
   SavedObjectsServiceStart,
   SavedObjectsServiceSetup,
+  InternalSavedObjectsServiceSetup,
 } from './saved_objects_service';
 
 export { config } from './saved_objects_config';
