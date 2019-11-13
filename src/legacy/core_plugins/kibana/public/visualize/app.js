@@ -26,7 +26,7 @@ import visualizeListingTemplate from './listing/visualize_listing.html';
 import { initVisualizeAppDirective } from './visualize_app';
 import { VisualizeConstants } from './visualize_constants';
 import { VisualizeListingController } from './listing/visualize_listing';
-import { registerTimefilterWithGlobalStateFactory } from '../../../../ui/public/timefilter/setup_router';
+import { ensureDefaultIndexPattern, registerTimefilterWithGlobalStateFactory } from './legacy_imports';
 import { syncOnMount } from './global_state_sync';
 
 import {
@@ -35,8 +35,6 @@ import {
   getCreateBreadcrumbs,
   getEditBreadcrumbs
 } from './breadcrumbs';
-
-import { ensureDefaultIndexPattern } from './kibana_services';
 
 export function initVisualizeApp(app, deps) {
   initVisualizeAppDirective(app, deps);

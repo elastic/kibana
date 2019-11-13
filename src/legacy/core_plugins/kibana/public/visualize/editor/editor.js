@@ -36,7 +36,6 @@ import { initVisEditorDirective } from './visualization_editor';
 import { initVisualizationDirective } from './visualization';
 
 import {
-  getServices,
   absoluteToParsedUrl,
   KibanaParsedUrl,
   migrateLegacyQuery,
@@ -44,8 +43,10 @@ import {
   showShareContextMenu,
   showSaveModal,
   stateMonitorFactory,
-  subscribeWithScope,
-} from '../kibana_services';
+  subscribeWithScope
+} from '../legacy_imports';
+
+import { getServices } from '../kibana_services';
 
 export function initEditorDirective(app, deps) {
   app.directive('visualizeApp', function () {

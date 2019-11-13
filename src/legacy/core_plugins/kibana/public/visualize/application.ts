@@ -17,33 +17,28 @@
  * under the License.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
 import { IModule, IAngularStatic } from 'angular';
+import { EuiConfirmModal } from '@elastic/eui';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/src/angular';
 
-import { IPrivate } from 'ui/private';
-import { configureAppAngularModule } from 'ui/legacy_compat';
-// @ts-ignore
-import { GlobalStateProvider } from 'ui/state_management/global_state';
-// @ts-ignore
-import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
-// @ts-ignore
-import { AppStateProvider, AppState } from 'ui/state_management/app_state';
-// @ts-ignore
-import { PrivateProvider } from 'ui/private/private';
-// @ts-ignore
-import { EventsProvider } from 'ui/events';
-import { PersistedState } from 'ui/persisted_state';
-// @ts-ignore
-import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
-// @ts-ignore
-import { PromiseServiceCreator } from 'ui/promises/promises';
-// @ts-ignore
-import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
-// @ts-ignore
-import { confirmModalFactory } from 'ui/modals/confirm_modal';
-
 import { AppMountContext, LegacyCoreStart } from 'kibana/public';
+import {
+  AppStateProvider,
+  AppState,
+  configureAppAngularModule,
+  confirmModalFactory,
+  createTopNavDirective,
+  createTopNavHelper,
+  EventsProvider,
+  GlobalStateProvider,
+  KbnUrlProvider,
+  RedirectWhenMissingProvider,
+  IPrivate,
+  PersistedState,
+  PrivateProvider,
+  PromiseServiceCreator,
+  StateManagementConfigProvider,
+} from './legacy_imports';
 import { createFilterBarDirective, createFilterBarHelper } from '../../../data/public';
 import { NavigationStart } from '../../../navigation/public';
 

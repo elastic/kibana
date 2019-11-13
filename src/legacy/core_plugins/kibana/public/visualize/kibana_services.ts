@@ -83,14 +83,3 @@ export function clearServices() {
 // export types
 export { VisSavedObject } from './embeddable/visualize_embeddable';
 export { EmbeddableFactory, ErrorEmbeddable } from '../../../../../plugins/embeddable/public';
-
-// export legacy static dependencies
-export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
-export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
-export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
-export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
-export { showShareContextMenu } from 'ui/share';
-export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
-export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';

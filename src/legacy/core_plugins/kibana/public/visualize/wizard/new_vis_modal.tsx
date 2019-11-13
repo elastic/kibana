@@ -23,7 +23,7 @@ import { EuiModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { UiSettingsClientContract } from 'kibana/public';
-import { VisType } from 'ui/vis';
+import { VisType } from '../legacy_imports';
 import { VisualizeConstants } from '../visualize_constants';
 import { createUiStatsReporter, METRIC_TYPE } from '../../../../ui_metric/public';
 import { SearchSelection } from './search_selection';

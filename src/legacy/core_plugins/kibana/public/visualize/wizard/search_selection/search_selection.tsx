@@ -22,9 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import { VisType } from 'ui/vis';
-
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
+import { SavedObjectFinder, VisType } from '../../legacy_imports';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;

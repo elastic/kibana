@@ -20,8 +20,6 @@
 import { IAngularStatic } from 'angular';
 import { i18n } from '@kbn/i18n';
 
-// @ts-ignore
-import { defaultEditor } from 'ui/vis/editors/default/default';
 import {
   App,
   CoreSetup,
@@ -45,6 +43,7 @@ import {
   FeatureCatalogueCategory,
   FeatureCatalogueSetup,
 } from '../../../../../plugins/feature_catalogue/public';
+import { defaultEditor } from './legacy_imports';
 
 export interface LegacyAngularInjectedDependencies {
   chromeLegacy: any;
