@@ -25,10 +25,12 @@ import { AggConfig } from 'ui/vis';
 import { timefilter } from 'ui/timefilter';
 import { Vis } from '../../../vis';
 import { esFilters, Query } from '../../../../../../plugins/data/public';
+import { SearchSource } from '../../../courier';
 
 interface QueryGeohashBoundsParams {
   filters?: esFilters.Filter[];
   query?: Query;
+  searchSource?: SearchSource;
 }
 
 /**
@@ -46,7 +48,9 @@ export async function queryGeohashBounds(vis: Vis, params: QueryGeohashBoundsPar
   });
 
   if (agg) {
-    const searchSource = vis.searchSource.createChild();
+    const searchSource = params.searchSource
+      ? params.searchSource.createChild()
+      : new SearchSource();
     searchSource.setField('size', 0);
     searchSource.setField('aggs', () => {
       const geoBoundsAgg = vis.getAggConfig().createAggConfig(

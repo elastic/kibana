@@ -17,23 +17,6 @@ import { getKibanaStats } from './get_kibana_stats';
 import { getBeatsStats } from './get_beats_stats';
 import { getHighLevelStats } from './get_high_level_stats';
 
-
-/**
- * Get statistics for all products joined by Elasticsearch cluster.
- *
- * @param {Object} req The incoming request
- * @param {Date} start The starting range to request data
- * @param {Date} end The ending range to request data
- * @return {Promise} The array of clusters joined with the Kibana and Logstash instances.
- */
-export function getAllStats(req, start, end, { useInternalUser = false } = {}) {
-  const server = req.server;
-  const { callWithRequest, callWithInternalUser } = server.plugins.elasticsearch.getCluster('monitoring');
-  const callCluster = useInternalUser ? callWithInternalUser : (...args) => callWithRequest(req, ...args);
-
-  return getAllStatsWithCaller(server, callCluster, start, end);
-}
-
 /**
  * Get statistics for all products joined by Elasticsearch cluster.
  *
@@ -43,7 +26,7 @@ export function getAllStats(req, start, end, { useInternalUser = false } = {}) {
  * @param {Date} end The ending range to request data
  * @return {Promise} The array of clusters joined with the Kibana and Logstash instances.
  */
-function getAllStatsWithCaller(server, callCluster, start, end) {
+export function getAllStats({ server, callCluster, start, end } = {}) {
   return getClusterUuids(server, callCluster, start, end)
     .then(clusterUuids => {
     // don't bother doing a further lookup

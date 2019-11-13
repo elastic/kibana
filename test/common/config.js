@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import path from 'path';
 import { format as formatUrl } from 'url';
 import { OPTIMIZE_BUNDLE_DIR, esTestConfig, kbnTestConfig } from '@kbn/test';
 import { services } from './services';
@@ -57,9 +58,12 @@ export default function () {
         `--kibana.disableWelcomeScreen=true`,
         '--telemetry.banner=false',
         `--server.maxPayloadBytes=1679958`,
+        // newsfeed mock service
+        `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'newsfeed')}`,
+        `--newsfeed.service.urlRoot=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
+        `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/kibana/v{VERSION}.json`,
       ],
     },
-
     services
   };
 }

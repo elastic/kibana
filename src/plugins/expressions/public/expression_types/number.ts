@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ExpressionType } from '../types';
 import { Datatable } from './datatable';
 import { Render } from './render';
@@ -28,7 +29,20 @@ export const number = (): ExpressionType<typeof name, number> => ({
   from: {
     null: () => 0,
     boolean: b => Number(b),
-    string: n => Number(n),
+    string: n => {
+      const value = Number(n);
+      if (Number.isNaN(value)) {
+        throw new Error(
+          i18n.translate('expressions_np.types.number.fromStringConversionErrorMessage', {
+            defaultMessage: 'Can\'t typecast "{string}" string to number',
+            values: {
+              string: n,
+            },
+          })
+        );
+      }
+      return value;
+    },
   },
   to: {
     render: (value: number): Render<{ text: string }> => {
