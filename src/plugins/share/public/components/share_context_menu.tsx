@@ -37,7 +37,6 @@ interface Props {
   shareableUrl?: string;
   shareMenuItems: ShareMenuItem[];
   sharingData: any;
-  isDirty: boolean;
   onClose: () => void;
   basePath: string;
   post: HttpStart['post'];

@@ -58,7 +58,6 @@ export class ShareMenuManager {
     objectId,
     objectType,
     sharingData,
-    isDirty,
     menuItems,
     shareableUrl,
     post,
@@ -91,7 +90,6 @@ export class ShareMenuManager {
             shareMenuItems={menuItems}
             sharingData={sharingData}
             shareableUrl={shareableUrl}
-            isDirty={isDirty}
             onClose={this.onClose}
             post={post}
             basePath={basePath}

@@ -18,7 +18,13 @@
  */
 
 export { SharePluginSetup, SharePluginStart } from './plugin';
-export { ShareMenuItemProps, ShareMenuProvider, ShareMenuItem } from './types';
+export {
+  ShareMenuItemProps,
+  ShareMenuProvider,
+  ShareMenuItem,
+  ShowProps,
+  ShareContextMenuPanelItem,
+} from './types';
 import { SharePlugin } from './plugin';
 
 export const plugin = () => new SharePlugin();
