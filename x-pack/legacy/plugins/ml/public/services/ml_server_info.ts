@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ml } from '../../../services/ml_api_service';
+import { ml } from './ml_api_service';
 
 export interface MlServerDefaults {
   anomaly_detectors: {
@@ -35,7 +35,7 @@ const cloudInfo: CloudInfo = {
   isCloud: false,
 };
 
-export async function loadNewJobDefaults() {
+export async function loadMlServerInfo() {
   try {
     const resp = await ml.mlInfo();
     defaults = resp.defaults;
@@ -48,15 +48,15 @@ export async function loadNewJobDefaults() {
   }
 }
 
-export function newJobDefaults(): MlServerDefaults {
+export function getNewJobDefaults(): MlServerDefaults {
   return defaults;
 }
 
-export function newJobLimits(): MlServerLimits {
+export function getNewJobLimits(): MlServerLimits {
   return limits;
 }
 
-export function cloudId(): string | null {
+export function getCloudId(): string | null {
   return cloudInfo.cloudId;
 }
 
@@ -64,7 +64,7 @@ export function isCloud(): boolean {
   return cloudInfo.isCloud;
 }
 
-export function cloudDeploymentId(): string | null {
+export function getCloudDeploymentId(): string | null {
   if (cloudInfo.cloudId === null) {
     return null;
   }

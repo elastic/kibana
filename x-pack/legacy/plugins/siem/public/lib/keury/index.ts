@@ -61,12 +61,7 @@ const escapeAndOr = (val: string) => val.replace(/(\s+)(and|or)(\s+)/gi, '$1\\$2
 
 const escapeNot = (val: string) => val.replace(/not(\s+)/gi, '\\$&');
 
-export const escapeKuery = flow(
-  escapeSpecialCharacters,
-  escapeAndOr,
-  escapeNot,
-  escapeWhitespace
-);
+export const escapeKuery = flow(escapeSpecialCharacters, escapeAndOr, escapeNot, escapeWhitespace);
 
 export interface EsQueryConfig {
   allowLeadingWildcards: boolean;
@@ -88,10 +83,15 @@ export const convertToBuildEsQuery = ({
 }) => {
   try {
     return JSON.stringify(
-      buildEsQuery(indexPattern, queries, filters.filter(f => f.meta.disabled === false), {
-        ...config,
-        dateFormatTZ: null,
-      })
+      buildEsQuery(
+        indexPattern,
+        queries,
+        filters.filter(f => f.meta.disabled === false),
+        {
+          ...config,
+          dateFormatTZ: null,
+        }
+      )
     );
   } catch (exp) {
     return '';
