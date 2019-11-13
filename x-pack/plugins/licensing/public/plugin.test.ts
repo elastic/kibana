@@ -109,7 +109,7 @@ describe('licensing plugin', () => {
 
         expect(sessionStorage.setItem.mock.calls[0][0]).toBe(licensingSessionStorageKey);
         expect(sessionStorage.setItem.mock.calls[0][1]).toMatchInlineSnapshot(
-          `"{\\"license\\":{\\"uid\\":\\"fresh\\",\\"status\\":\\"active\\",\\"type\\":\\"basic\\",\\"expiryDateInMillis\\":5000},\\"features\\":{\\"ccr\\":{\\"enabled\\":true,\\"available\\":true},\\"ml\\":{\\"enabled\\":false,\\"available\\":true}},\\"signature\\":\\"xxxxxxxxx\\"}"`
+          `"{\\"license\\":{\\"uid\\":\\"fresh\\",\\"status\\":\\"active\\",\\"type\\":\\"basic\\",\\"expiryDateInMillis\\":5000},\\"features\\":{\\"ccr\\":{\\"isEnabled\\":true,\\"isAvailable\\":true},\\"ml\\":{\\"isEnabled\\":false,\\"isAvailable\\":true}},\\"signature\\":\\"xxxxxxxxx\\"}"`
         );
 
         const saved = JSON.parse(sessionStorage.setItem.mock.calls[0][1]);

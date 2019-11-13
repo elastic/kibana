@@ -136,8 +136,8 @@ export class License implements ILicense {
     }
 
     return {
-      available: false,
-      enabled: false,
+      isAvailable: false,
+      isEnabled: false,
     };
   }
 }

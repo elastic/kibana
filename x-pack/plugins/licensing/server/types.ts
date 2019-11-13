@@ -8,6 +8,22 @@ import { ILicense, LicenseStatus, LicenseType } from '../common/types';
 export interface ElasticsearchError extends Error {
   status?: number;
 }
+/**
+ * Result from remote request fetching raw feature set.
+ * @internal
+ */
+export interface RawFeature {
+  available: boolean;
+  enabled: boolean;
+}
+
+/**
+ * Results from remote request fetching raw feature sets.
+ * @internal
+ */
+export interface RawFeatures {
+  [key: string]: RawFeature;
+}
 
 /**
  * Results from remote request fetching a raw license.

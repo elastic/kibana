@@ -49,6 +49,7 @@ describe('licensing plugin', () => {
         const dataClient = elasticsearchServiceMock.createClusterClient();
         dataClient.callAsInternalUser.mockResolvedValue({
           license: buildRawLicense(),
+          features: {},
         });
         const coreSetup = coreMock.createSetup();
         coreSetup.elasticsearch.dataClient$ = new BehaviorSubject(dataClient);
@@ -65,6 +66,7 @@ describe('licensing plugin', () => {
         dataClient.callAsInternalUser.mockImplementation(() =>
           Promise.resolve({
             license: buildRawLicense({ type: types.shift() }),
+            features: {},
           })
         );
         const coreSetup = coreMock.createSetup();
@@ -118,7 +120,7 @@ describe('licensing plugin', () => {
         dataClient.callAsInternalUser
           .mockRejectedValueOnce(error1)
           .mockRejectedValueOnce(error2)
-          .mockResolvedValue({ license: buildRawLicense() });
+          .mockResolvedValue({ license: buildRawLicense(), features: {} });
 
         const coreSetup = coreMock.createSetup();
         coreSetup.elasticsearch.dataClient$ = new BehaviorSubject(dataClient);
@@ -140,6 +142,7 @@ describe('licensing plugin', () => {
         const dataClient = elasticsearchServiceMock.createClusterClient();
         dataClient.callAsInternalUser.mockResolvedValue({
           license: buildRawLicense(),
+          features: {},
         });
 
         const coreSetup = coreMock.createSetup();
@@ -154,6 +157,7 @@ describe('licensing plugin', () => {
         const dataClient = elasticsearchServiceMock.createClusterClient();
         dataClient.callAsInternalUser.mockResolvedValue({
           license: buildRawLicense(),
+          features: {},
         });
 
         const coreSetup = coreMock.createSetup();
@@ -182,6 +186,7 @@ describe('licensing plugin', () => {
         dataClient.callAsInternalUser.mockImplementation(() =>
           Promise.resolve({
             license: buildRawLicense({ type: types.shift() }),
+            features: {},
           })
         );
 
@@ -217,6 +222,7 @@ describe('licensing plugin', () => {
         const dataClient = elasticsearchServiceMock.createClusterClient();
         dataClient.callAsInternalUser.mockResolvedValue({
           license: buildRawLicense(),
+          features: {},
         });
         const coreSetup = coreMock.createSetup();
         coreSetup.elasticsearch.dataClient$ = new BehaviorSubject(dataClient);
@@ -291,6 +297,7 @@ describe('licensing plugin', () => {
       const dataClient = elasticsearchServiceMock.createClusterClient();
       dataClient.callAsInternalUser.mockResolvedValue({
         license: buildRawLicense(),
+        features: {},
       });
 
       const coreSetup = coreMock.createSetup();

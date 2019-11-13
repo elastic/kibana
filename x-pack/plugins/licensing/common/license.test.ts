@@ -86,10 +86,10 @@ describe('License', () => {
   });
 
   it('getFeature provides feature info', () => {
-    expect(basicLicense.getFeature('ml')).toEqual({ enabled: false, available: true });
-    expect(basicLicense.getFeature('unknown')).toEqual({ enabled: false, available: false });
-    expect(errorLicense.getFeature('ml')).toEqual({ enabled: false, available: false });
-    expect(unavailableLicense.getFeature('ml')).toEqual({ enabled: false, available: false });
+    expect(basicLicense.getFeature('ml')).toEqual({ isEnabled: false, isAvailable: true });
+    expect(basicLicense.getFeature('unknown')).toEqual({ isEnabled: false, isAvailable: false });
+    expect(errorLicense.getFeature('ml')).toEqual({ isEnabled: false, isAvailable: false });
+    expect(unavailableLicense.getFeature('ml')).toEqual({ isEnabled: false, isAvailable: false });
   });
 
   describe('check', () => {

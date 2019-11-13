@@ -26,21 +26,10 @@ export type LicenseType = keyof typeof LICENSE_TYPE;
 /** @public */
 export type LicenseStatus = 'active' | 'invalid' | 'expired';
 
-/**
- * @public
- * Result from remote request fetching raw feature set.
- */
-export interface Feature {
-  available: boolean;
-  enabled: boolean;
-}
-
-/**
- * @public
- * Results from remote request fetching raw feature sets.
- */
-export interface Features {
-  [key: string]: Feature;
+/** @public */
+export interface LicenseFeature {
+  isAvailable: boolean;
+  isEnabled: boolean;
 }
 
 /**
@@ -70,7 +59,7 @@ export interface PublicLicense {
      */
     type: LicenseType;
   };
-  features?: Features;
+  features?: Record<string, LicenseFeature>;
   signature: string;
 }
 
@@ -89,8 +78,6 @@ export interface LicenseCheck {
    */
   message?: string;
 }
-
-export type LicenseFeature = Feature;
 
 /** @public */
 export interface ILicense {

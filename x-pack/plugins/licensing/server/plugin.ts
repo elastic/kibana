@@ -22,7 +22,7 @@ import { ILicense, LicensingPluginSetup, PublicLicense } from '../common/types';
 import { License } from '../common/license';
 import { createLicenseUpdate } from '../common/license_update';
 
-import { ElasticsearchError, RawLicense } from './types';
+import { ElasticsearchError, RawLicense, RawFeatures } from './types';
 import { LicenseConfigType } from './licensing_config';
 import { createRouteHandlerContext } from './licensing_route_handler_context';
 
@@ -33,6 +33,17 @@ function normalizeServerLicense(license: RawLicense): PublicLicense['license'] {
     expiryDateInMillis: license.expiry_date_in_millis,
     status: license.status,
   };
+}
+
+function normalizeFeatures(rawFeatures: RawFeatures) {
+  const features: PublicLicense['features'] = {};
+  for (const [name, feature] of Object.entries(rawFeatures)) {
+    features[name] = {
+      isAvailable: feature.available,
+      isEnabled: feature.enabled,
+    };
+  }
+  return features;
 }
 
 function sign(
@@ -114,11 +125,12 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
       });
 
       const normalizedLicense = normalizeServerLicense(response.license);
-      const signature = sign({ license: normalizedLicense, features: response.features });
+      const normalizedFeatures = normalizeFeatures(response.features);
+      const signature = sign({ license: normalizedLicense, features: normalizedFeatures });
 
       return new License({
         license: normalizedLicense,
-        features: response.features,
+        features: normalizedFeatures,
         signature,
       });
     } catch (error) {

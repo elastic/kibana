@@ -24,12 +24,12 @@ function createLicense({
 
   const defaultFeatures = {
     ccr: {
-      enabled: true,
-      available: true,
+      isEnabled: true,
+      isAvailable: true,
     },
     ml: {
-      enabled: false,
-      available: true,
+      isEnabled: false,
+      isAvailable: true,
     },
   };
   return new License({
