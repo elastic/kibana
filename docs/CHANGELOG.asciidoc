@@ -77,14 +77,6 @@ Graph::
 * Kql support for query bar {pull}45364[#45364]
 * Field manager {pull}45384[#45384]
 * Empty workspace overlay {pull}45547[#45547]
-Metrics::
-* Add bar chart option to Metrics Explorer {pull}43728[#43728]
-* Display non-metric details on Node Detail page {pull}43551[#43551]
-* Add Docker section to node details page {pull}43627[#43627]
-* Add saved queries to maps {pull}44442[#44442]
-* Save and Load Views for Metrics Explorer and Inventory Page {pull}46713[#46713]
-* Convert button group to toggle. Refactor code structure for scalability. {pull}47083[#47083]
-* Always display loading indicator when new data is loading {pull}48038[#48038]
 Logs::
 * Adapt log entry rate data visualizations {pull}47558[#47558]
 * Ensure 'unknown' setupStatus is handled {pull}45887[#45887]
@@ -133,6 +125,14 @@ Maps::
 * Use field formatter to format value in legend {pull}48132[#48132]
 * Add support for date fields in dynamic styles {pull}47903[#47903]
 * Use vector tiles for rendering EMS basemap {pull}47867[#47867]
+Metrics::
+* Add bar chart option to Metrics Explorer {pull}43728[#43728]
+* Display non-metric details on Node Detail page {pull}43551[#43551]
+* Add Docker section to node details page {pull}43627[#43627]
+* Add saved queries to maps {pull}44442[#44442]
+* Save and Load Views for Metrics Explorer and Inventory Page {pull}46713[#46713]
+* Convert button group to toggle. Refactor code structure for scalability. {pull}47083[#47083]
+* Always display loading indicator when new data is loading {pull}48038[#48038]
 Monitoring::
 * Move to OSS {pull}45769[#45769]
 * Metricbeat Migration Wizard {pull}45799[#45799]
@@ -201,23 +201,14 @@ Discover::
 * Allow filter editor to open when selectedField is undefined {pull}45402[#45402]
 Graph::
 * Do not carry over diversity field when switching data source {pull}47560[#47560]
-Metrics::
-* Tweak the z-index inventory toolbars {pull}49642[#49642]
-* Convert node detail page time range to date strings {pull}43881[#43881]
-* Add legends and points to charts on node detail page {pull}43787[#43787]
-* Limit Metric Explorer fields {pull}43322[#43322]
-* Create robust ID for contextual menus for inventory view. {pull}46358[#46358]
-* Remove points from charts on Metrics Explorer and Detail Page {pull}49500[#49500]
-* Make sure that filter query bar can be set to null {pull}50070[#50070]
-* Use URL /infrastructure/metrics instead of /metrics {pull}44532[#44532]
-Logstash::
-* Remove formatted message component in favor of i18n translate function {pull}45658[#45658]
 Logs::
 * Use theme colors for the timeline background {pull}46213[#46213]
 * Address non-blocking nature of job deletion ML API {pull}46040[#46040]
 * Fix ML link for &quot;unknown&quot; partition {pull}48779[#48779]
 * Use full time range for the x-axis domain {pull}48754[#48754]
 * Fix initial accuracy of logs minimap click {pull}48826[#48826]
+Logstash::
+* Remove formatted message component in favor of i18n translate function {pull}45658[#45658]
 Machine Learning::
 * Set y-axis domain of the Single Metric Viewer according to the model plot  {pull}48411[#48411]
 * Fix partitioning field value update {pull}48655[#48655]
@@ -247,6 +238,15 @@ Maps::
 * Properly handle id collisions in Kibana index pattern {pull}48594[#48594]
 * Fix propType warnings for source with joins {pull}48905[#48905]
 * Ensure grid buckets are rendered correctly at high zoom levels {pull}44421[#44421]
+Metrics::
+* Tweak the z-index inventory toolbars {pull}49642[#49642]
+* Convert node detail page time range to date strings {pull}43881[#43881]
+* Add legends and points to charts on node detail page {pull}43787[#43787]
+* Limit Metric Explorer fields {pull}43322[#43322]
+* Create robust ID for contextual menus for inventory view. {pull}46358[#46358]
+* Remove points from charts on Metrics Explorer and Detail Page {pull}49500[#49500]
+* Make sure that filter query bar can be set to null {pull}50070[#50070]
+* Use URL /infrastructure/metrics instead of /metrics {pull}44532[#44532]
 Monitoring::
 * Ensure cloud cannot see setup mode {pull}49223[#49223]
 * Standarize on 'JVM Heap' phrase for heap metrics {pull}48093[#48093]
