@@ -4,35 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
-import mapboxgl from 'mapbox-gl';
-mapboxgl.accessToken =
-  'pk.eyJ1Ijoic2hhaHphZDMxIiwiYSI6ImNrMWtxODZxYzBwZDczZ3FuNmRrbGllbjYifQ.6oxF8wkVYCmJ7316snDQtg';
+import React from 'react';
+import styled from 'styled-components';
+import { EmbeddedMap } from '../embeddables/embedded_map';
+
+const MapPanel = styled.div`
+  height: 400px;
+  width: 520px;
+`;
+
 export const LocationMap = () => {
-  let mapContainer: any;
-  let map: any;
-
-  const bounds = [
-    [-85, -80], // Southwest coordinates
-    [180, 85], // Northeast coordinates
-  ];
-
-  useEffect(() => {
-    map = new mapboxgl.Map({
-      container: mapContainer,
-      style: 'mapbox://styles/mapbox/light-v10',
-      maxBounds: bounds,
-    });
-    // Perform cleanup
-    return () => {
-      map.remove();
-    };
-  }, []);
-
-  const style = {
-    width: '700px',
-    height: '500px',
-  };
-
-  return <div style={style} ref={el => (mapContainer = el)} />;
+  // return <div style={style} ref={el => (mapContainer = el)} />;
+  return (
+    <MapPanel>
+      <EmbeddedMap
+        endDate={new Date('2019-08-28T05:50:57.877Z').getTime()}
+        filters={[]}
+        query={{ query: '', language: 'kuery' }}
+        startDate={new Date('2019-08-28T05:50:47.877Z').getTime()}
+      />
+    </MapPanel>
+  );
 };
