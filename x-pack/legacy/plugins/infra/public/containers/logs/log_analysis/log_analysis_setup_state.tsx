@@ -27,6 +27,7 @@ interface AnalysisSetupStateArguments {
   availableIndices: string[];
   cleanupAndSetupModule: SetupHandler;
   setupModule: SetupHandler;
+  timestampField: string;
 }
 
 type IndicesSelection = Record<string, boolean>;
@@ -37,6 +38,7 @@ export const useAnalysisSetupState = ({
   availableIndices,
   cleanupAndSetupModule,
   setupModule,
+  timestampField,
 }: AnalysisSetupStateArguments) => {
   const [startTime, setStartTime] = useState<number | undefined>(Date.now() - fourWeeksInMs);
   const [endTime, setEndTime] = useState<number | undefined>(undefined);
@@ -49,7 +51,7 @@ export const useAnalysisSetupState = ({
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return await callIndexPatternsValidate('@timestamp', availableIndices.join(','));
+        return await callIndexPatternsValidate(timestampField, availableIndices.join(','));
       },
       onResolve: ({ data }) => {
         setValidatedIndices(

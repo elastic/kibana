@@ -158,6 +158,7 @@ export const useLogAnalysisJobs = ({
     setup: setupMlModule,
     setupMlModuleRequest,
     setupStatus: statusState.setupStatus,
+    timestampField: timeField,
     viewSetupForReconfiguration,
     viewSetupForUpdate,
     viewResults,

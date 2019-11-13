@@ -25,6 +25,7 @@ interface AnalysisSetupStepsProps {
   errorMessages: string[];
   setup: SetupHandler;
   setupStatus: SetupStatus;
+  timestampField: string;
   viewResults: () => void;
 }
 
@@ -34,6 +35,7 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
   errorMessages,
   setup: setupModule,
   setupStatus,
+  timestampField,
   viewResults,
 }: AnalysisSetupStepsProps) => {
   const {
@@ -50,6 +52,7 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
     availableIndices,
     setupModule,
     cleanupAndSetupModule,
+    timestampField,
   });
 
   const steps = [
