@@ -36,7 +36,6 @@ import {
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
 import { GetEmbeddableFactories, GetEmbeddableFactory } from '../../../../types';
-import { SavedObjectFinderProps } from '../../../../../../../kibana_react/public';
 
 interface Props {
   onClose: () => void;
@@ -44,7 +43,7 @@ interface Props {
   getFactory: GetEmbeddableFactory;
   getAllFactories: GetEmbeddableFactories;
   notifications: CoreSetup['notifications'];
-  SavedObjectFinder: React.ComponentType<SavedObjectFinderProps>;
+  SavedObjectFinder: React.ComponentType<any>;
 }
 
 interface State {
