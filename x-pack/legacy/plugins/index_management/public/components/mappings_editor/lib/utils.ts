@@ -321,7 +321,7 @@ export const deNormalize = ({ rootLevelFields, byId, aliases }: NormalizedFields
 export const updateFieldsPathAfterFieldNameChange = (
   field: NormalizedField,
   byId: NormalizedFields['byId']
-): { path: string; byId: NormalizedFields['byId'] } => {
+): { updatedFieldPath: string; updatedById: NormalizedFields['byId'] } => {
   const updatedById = { ...byId };
   const paths = field.parentId ? byId[field.parentId].path.split('.') : [];
 
@@ -345,7 +345,7 @@ export const updateFieldsPathAfterFieldNameChange = (
 
   updateFieldPath(field, paths);
 
-  return { path: updatedById[field.id].path, byId: updatedById };
+  return { updatedFieldPath: updatedById[field.id].path, updatedById };
 };
 
 /**
@@ -381,27 +381,30 @@ export const getAllChildFields = (
 export const getAllDescendantAliases = (
   field: NormalizedField,
   fields: NormalizedFields,
-  to: string[] = []
+  aliasesIds: string[] = []
 ): string[] => {
   const hasAliases = fields.aliases[field.id] && Boolean(fields.aliases[field.id].length);
 
   if (!hasAliases && !field.hasChildFields && !field.hasMultiFields) {
-    return to;
+    return aliasesIds;
   }
 
   if (hasAliases) {
     fields.aliases[field.id].forEach(id => {
-      to.push(id);
+      aliasesIds.push(id);
     });
   }
 
   if (field.childFields) {
     field.childFields.forEach(id => {
-      getAllDescendantAliases(fields.byId[id], fields, to);
+      if (!fields.byId[id]) {
+        return;
+      }
+      getAllDescendantAliases(fields.byId[id], fields, aliasesIds);
     });
   }
 
-  return to;
+  return aliasesIds;
 };
 
 export const filterTypesForMultiField = (options: SelectOption[]): SelectOption[] =>

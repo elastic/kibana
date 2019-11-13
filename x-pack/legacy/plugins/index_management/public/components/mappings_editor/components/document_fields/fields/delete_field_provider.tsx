@@ -20,18 +20,18 @@ interface Props {
 
 interface State {
   isModalOpen: boolean;
-  field: NormalizedField | undefined;
-  aliases: string[];
+  field?: NormalizedField;
+  aliases?: string[];
 }
 
 export const DeleteFieldProvider = ({ children }: Props) => {
-  const [state, setState] = useState<State>({ isModalOpen: false, field: undefined, aliases: [] });
+  const [state, setState] = useState<State>({ isModalOpen: false });
   const dispatch = useDispatch();
   const { fields } = useMappingsState();
   const { byId } = fields;
 
   const closeModal = () => {
-    setState({ isModalOpen: false, field: undefined, aliases: [] });
+    setState({ isModalOpen: false });
   };
 
   const deleteField: DeleteFieldFunc = field => {
@@ -42,7 +42,7 @@ export const DeleteFieldProvider = ({ children }: Props) => {
     const hasAliases = Boolean(aliases.length);
 
     if (hasChildFields || hasMultiFields || hasAliases) {
-      setState({ isModalOpen: true, field, aliases });
+      setState({ isModalOpen: true, field, aliases: hasAliases ? aliases : undefined });
     } else {
       dispatch({ type: 'field.remove', value: field.id });
     }
@@ -91,7 +91,7 @@ export const DeleteFieldProvider = ({ children }: Props) => {
                 <FieldsTree fields={fieldsTree} />
               </>
             )}
-            {Boolean(state.aliases.length) && (
+            {state.aliases && (
               <>
                 <p>The following aliases will also be deleted</p>
                 <ul>
