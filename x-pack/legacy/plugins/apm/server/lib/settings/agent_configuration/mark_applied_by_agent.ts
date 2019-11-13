@@ -16,7 +16,7 @@ export async function markAppliedByAgent({
   body: AgentConfiguration;
   setup: Setup;
 }) {
-  const { client, config } = setup;
+  const { internalClient, config } = setup;
 
   const params = {
     type: '_doc',
@@ -28,5 +28,5 @@ export async function markAppliedByAgent({
     }
   };
 
-  return client.index<AgentConfiguration>(params);
+  return internalClient.index<AgentConfiguration>(params);
 }
