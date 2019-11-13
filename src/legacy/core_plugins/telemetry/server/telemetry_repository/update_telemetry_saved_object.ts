@@ -17,14 +17,22 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
-import { TelemetryPlugin } from './plugin';
-import * as constants from '../common/constants';
+import { TelemetrySavedObjectAttributes } from './';
+import { SavedObjectsErrorHelpers } from '../../../../../core/server';
 
-export { FetcherTask } from './fetcher';
-export { replaceTelemetryInjectedVars } from './telemetry_config';
-export { telemetryCollectionManager } from './collection_manager';
-
-export const telemetryPlugin = (initializerContext: PluginInitializerContext) =>
-  new TelemetryPlugin(initializerContext);
-export { constants };
+export async function updateTelemetrySavedObject(
+  savedObjectsClient: any,
+  savedObjectAttributes: TelemetrySavedObjectAttributes
+) {
+  try {
+    return await savedObjectsClient.update('telemetry', 'telemetry', savedObjectAttributes);
+  } catch (err) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      return await savedObjectsClient.create('telemetry', savedObjectAttributes, {
+        id: 'telemetry',
+        overwrite: true,
+      });
+    }
+    throw err;
+  }
+}
