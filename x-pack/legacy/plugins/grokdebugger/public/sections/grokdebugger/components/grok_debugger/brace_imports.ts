@@ -5,4 +5,5 @@
  */
 
 import 'brace/mode/json';
+import 'brace/mode/text';
 import 'brace/theme/textmate';

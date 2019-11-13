@@ -29,6 +29,7 @@ export function EventInput({ value, onChange }) {
         <EuiCodeEditor
           width="100%"
           theme="textmate"
+          mode="text"
           value={value}
           onChange={onChange}
           setOptions={{

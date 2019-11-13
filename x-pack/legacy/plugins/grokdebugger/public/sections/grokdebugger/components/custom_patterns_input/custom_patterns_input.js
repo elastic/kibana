@@ -58,6 +58,7 @@ MSG message-id=<%{GREEDYDATA}>`;
           <EuiCodeEditor
             width="100%"
             theme="textmate"
+            mode="text"
             value={value}
             onChange={onChange}
             setOptions={{
