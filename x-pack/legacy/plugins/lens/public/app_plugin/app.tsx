@@ -8,7 +8,6 @@ import _ from 'lodash';
 import React, { useState, useEffect, useCallback } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { Storage } from 'ui/storage';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { CoreStart, NotificationsStart } from 'src/core/public';
@@ -19,13 +18,14 @@ import {
   SavedQuery,
   Query,
 } from 'src/legacy/core_plugins/data/public';
-import { Filter } from '@kbn/es-query';
-import { TopNavMenu } from '../../../../../../src/legacy/core_plugins/kibana_react/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { start as navigation } from '../../../../../../src/legacy/core_plugins/navigation/public/legacy';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
+import { esFilters } from '../../../../../../src/plugins/data/public';
 
 interface State {
   isLoading: boolean;
@@ -40,7 +40,7 @@ interface State {
     toDate: string;
   };
   query: Query;
-  filters: Filter[];
+  filters: esFilters.Filter[];
   savedQuery?: SavedQuery;
 }
 
@@ -49,7 +49,7 @@ export function App({
   data,
   dataShim,
   core,
-  store,
+  storage,
   docId,
   docStorage,
   redirectTo,
@@ -58,14 +58,14 @@ export function App({
   data: DataPublicPluginStart;
   core: CoreStart;
   dataShim: DataStart;
-  store: Storage;
+  storage: IStorageWrapper;
   docId?: string;
   docStorage: SavedObjectStore;
   redirectTo: (id?: string) => void;
 }) {
   const timeDefaults = core.uiSettings.get('timepicker:timeDefaults');
   const language =
-    store.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
+    storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
 
   const [state, setState] = useState<State>({
     isLoading: !!docId,
@@ -82,10 +82,9 @@ export function App({
   const { lastKnownDoc } = state;
 
   useEffect(() => {
-    const subscription = dataShim.filter.filterManager.getUpdates$().subscribe({
+    const subscription = data.query.filterManager.getUpdates$().subscribe({
       next: () => {
-        setState(s => ({ ...s, filters: dataShim.filter.filterManager.getFilters() }));
-
+        setState(s => ({ ...s, filters: data.query.filterManager.getFilters() }));
         trackUiEvent('app_filters_updated');
       },
     });
@@ -163,13 +162,15 @@ export function App({
     []
   );
 
+  const { TopNavMenu } = navigation.ui;
+
   return (
     <I18nProvider>
       <KibanaContextProvider
         services={{
           appName: 'lens',
           data,
-          store,
+          storage,
           ...core,
         }}
       >
@@ -225,9 +226,7 @@ export function App({
                 setState(s => ({ ...s, savedQuery }));
               }}
               onSavedQueryUpdated={savedQuery => {
-                dataShim.filter.filterManager.setFilters(
-                  savedQuery.attributes.filters || state.filters
-                );
+                data.query.filterManager.setFilters(savedQuery.attributes.filters || state.filters);
                 setState(s => ({
                   ...s,
                   savedQuery: { ...savedQuery }, // Shallow query for reference issues
@@ -240,7 +239,7 @@ export function App({
                 }));
               }}
               onClearSavedQuery={() => {
-                dataShim.filter.filterManager.removeAll();
+                data.query.filterManager.removeAll();
                 setState(s => ({
                   ...s,
                   savedQuery: undefined,
@@ -248,12 +247,14 @@ export function App({
                   query: {
                     query: '',
                     language:
-                      store.get('kibana.userQueryLanguage') ||
+                      storage.get('kibana.userQueryLanguage') ||
                       core.uiSettings.get('search:queryLanguage'),
                   },
                 }));
               }}
               query={state.query}
+              dateRangeFrom={state.dateRange.fromDate}
+              dateRangeTo={state.dateRange.toDate}
             />
           </div>
 

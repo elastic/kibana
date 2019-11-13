@@ -13,13 +13,13 @@ export async function deleteConfiguration({
   configurationId: string;
   setup: Setup;
 }) {
-  const { client, config } = setup;
+  const { internalClient, indices } = setup;
 
   const params = {
     refresh: 'wait_for',
-    index: config.get<string>('apm_oss.apmAgentConfigurationIndex'),
+    index: indices['apm_oss.apmAgentConfigurationIndex'],
     id: configurationId
   };
 
-  return client.delete(params);
+  return internalClient.delete(params);
 }

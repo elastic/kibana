@@ -143,7 +143,7 @@ NodeList [
   >
     <td
       class="euiTableRowCell"
-      width="40%"
+      style="width: 40%;"
     >
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -168,7 +168,7 @@ NodeList [
     </td>
     <td
       class="euiTableRowCell"
-      width="20%"
+      style="width: 20%;"
     >
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -241,7 +241,7 @@ NodeList [
   >
     <td
       class="euiTableRowCell"
-      width="40%"
+      style="width: 40%;"
     >
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -266,7 +266,7 @@ NodeList [
     </td>
     <td
       class="euiTableRowCell"
-      width="20%"
+      style="width: 20%;"
     >
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"

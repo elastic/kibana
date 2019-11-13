@@ -3,13 +3,25 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { Legacy } from 'kibana';
 import { setupRequest } from './setup_request';
 import { uiSettingsServiceMock } from 'src/core/server/mocks';
 
+jest.mock('../settings/apm_indices/get_apm_indices', () => ({
+  getApmIndices: async () => ({
+    'apm_oss.sourcemapIndices': 'apm-*',
+    'apm_oss.errorIndices': 'apm-*',
+    'apm_oss.onboardingIndices': 'apm-*',
+    'apm_oss.spanIndices': 'apm-*',
+    'apm_oss.transactionIndices': 'apm-*',
+    'apm_oss.metricsIndices': 'apm-*',
+    'apm_oss.apmAgentConfigurationIndex': 'apm-*'
+  })
+}));
+
 function getMockRequest() {
   const callWithRequestSpy = jest.fn();
+  const callWithInternalUserSpy = jest.fn();
   const mockRequest = ({
     params: {},
     query: {},
@@ -17,22 +29,46 @@ function getMockRequest() {
       config: () => ({ get: () => 'apm-*' }),
       plugins: {
         elasticsearch: {
-          getCluster: () => ({ callWithRequest: callWithRequestSpy })
+          getCluster: () => ({
+            callWithRequest: callWithRequestSpy,
+            callWithInternalUser: callWithInternalUserSpy
+          })
         }
       }
     },
     getUiSettingsService: () => ({ get: async () => false })
   } as any) as Legacy.Request;
 
-  return { callWithRequestSpy, mockRequest };
+  return { callWithRequestSpy, callWithInternalUserSpy, mockRequest };
 }
 
 describe('setupRequest', () => {
   it('should call callWithRequest with default args', async () => {
     const { mockRequest, callWithRequestSpy } = getMockRequest();
     const { client } = await setupRequest(mockRequest);
-    await client.search({ index: 'apm-*', body: { foo: 'bar' } });
+    await client.search({ index: 'apm-*', body: { foo: 'bar' } } as any);
     expect(callWithRequestSpy).toHaveBeenCalledWith(mockRequest, 'search', {
+      index: 'apm-*',
+      body: {
+        foo: 'bar',
+        query: {
+          bool: {
+            filter: [{ range: { 'observer.version_major': { gte: 7 } } }]
+          }
+        }
+      },
+      ignore_throttled: true
+    });
+  });
+
+  it('should call callWithInternalUser with default args', async () => {
+    const { mockRequest, callWithInternalUserSpy } = getMockRequest();
+    const { internalClient } = await setupRequest(mockRequest);
+    await internalClient.search({
+      index: 'apm-*',
+      body: { foo: 'bar' }
+    } as any);
+    expect(callWithInternalUserSpy).toHaveBeenCalledWith('search', {
       index: 'apm-*',
       body: {
         foo: 'bar',

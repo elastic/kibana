@@ -4,6 +4,9 @@
       "enabled": {
         "type": "boolean"
       },
+      "name": {
+        "type": "text"
+      },
       "alertTypeId": {
         "type": "keyword"
       },

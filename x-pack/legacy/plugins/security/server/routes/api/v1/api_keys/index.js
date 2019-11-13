@@ -14,10 +14,7 @@ export function initApiKeysApi(server) {
   const callWithRequest = getClient(server).callWithRequest;
   const routePreCheckLicenseFn = routePreCheckLicense(server);
 
-  const { authorization } = server.plugins.security;
-  const { application } = authorization;
-
-  initCheckPrivilegesApi(server, callWithRequest, routePreCheckLicenseFn, application);
-  initGetApiKeysApi(server, callWithRequest, routePreCheckLicenseFn, application);
-  initInvalidateApiKeysApi(server, callWithRequest, routePreCheckLicenseFn, application);
+  initCheckPrivilegesApi(server, callWithRequest, routePreCheckLicenseFn);
+  initGetApiKeysApi(server, callWithRequest, routePreCheckLicenseFn);
+  initInvalidateApiKeysApi(server, callWithRequest, routePreCheckLicenseFn);
 }

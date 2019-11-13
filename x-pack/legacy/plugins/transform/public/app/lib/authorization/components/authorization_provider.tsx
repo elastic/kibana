@@ -64,25 +64,25 @@ export const AuthorizationProvider = ({ privilegesEndpoint, children }: Props) =
   const hasPrivilege = hasPrivilegeFactory(value.privileges);
 
   value.capabilities.canGetTransform =
-    hasPrivilege(['cluster', 'cluster:monitor/data_frame/get']) &&
-    hasPrivilege(['cluster', 'cluster:monitor/data_frame/stats/get']);
+    hasPrivilege(['cluster', 'cluster:monitor/transform/get']) &&
+    hasPrivilege(['cluster', 'cluster:monitor/transform/stats/get']);
 
-  value.capabilities.canCreateTransform = hasPrivilege(['cluster', 'cluster:admin/data_frame/put']);
+  value.capabilities.canCreateTransform = hasPrivilege(['cluster', 'cluster:admin/transform/put']);
 
   value.capabilities.canDeleteTransform = hasPrivilege([
     'cluster',
-    'cluster:admin/data_frame/delete',
+    'cluster:admin/transform/delete',
   ]);
 
   value.capabilities.canPreviewTransform = hasPrivilege([
     'cluster',
-    'cluster:admin/data_frame/preview',
+    'cluster:admin/transform/preview',
   ]);
 
   value.capabilities.canStartStopTransform =
-    hasPrivilege(['cluster', 'cluster:admin/data_frame/start']) &&
-    hasPrivilege(['cluster', 'cluster:admin/data_frame/start_task']) &&
-    hasPrivilege(['cluster', 'cluster:admin/data_frame/stop']);
+    hasPrivilege(['cluster', 'cluster:admin/transform/start']) &&
+    hasPrivilege(['cluster', 'cluster:admin/transform/start_task']) &&
+    hasPrivilege(['cluster', 'cluster:admin/transform/stop']);
 
   return (
     <AuthorizationContext.Provider value={{ ...value }}>{children}</AuthorizationContext.Provider>

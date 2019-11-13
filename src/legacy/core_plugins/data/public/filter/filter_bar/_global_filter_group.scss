@@ -11,6 +11,10 @@
   margin-top: $euiSizeXS;
 }
 
+.globalFilterBar__addButton {
+  min-height: $euiSizeL + $euiSizeXS; // same height as the badges
+}
+
 // sass-lint:disable quotes
 .globalFilterGroup__branch {
   padding: $euiSizeS $euiSizeM 0 0;
@@ -40,4 +44,3 @@
     margin-top: $euiSize * -1;
   }
 }
-

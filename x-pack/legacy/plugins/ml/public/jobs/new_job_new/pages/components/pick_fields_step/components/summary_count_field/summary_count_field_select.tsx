@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useContext } from 'react';
 import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 
-import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../../../common/types/fields';
+import { JobCreatorContext } from '../../../job_creator_context';
+import { Field } from '../../../../../../../../common/types/fields';
+import {
+  createFieldOptions,
+  createScriptFieldOptions,
+} from '../../../../../common/job_creator/util/general';
 
 interface Props {
   fields: Field[];
@@ -16,18 +21,16 @@ interface Props {
 }
 
 export const SummaryCountFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
-  const options: EuiComboBoxOptionProps[] = fields
-    .filter(f => f.id !== EVENT_RATE_FIELD_ID)
-    .map(f => ({
-      label: f.name,
-    }))
-    .sort((a, b) => a.label.localeCompare(b.label));
-
-  const selection: EuiComboBoxOptionProps[] = [
-    {
-      label: selectedField !== null ? selectedField : '',
-    },
+  const { jobCreator } = useContext(JobCreatorContext);
+  const options: EuiComboBoxOptionProps[] = [
+    ...createFieldOptions(fields),
+    ...createScriptFieldOptions(jobCreator.scriptFields),
   ];
+
+  const selection: EuiComboBoxOptionProps[] = [];
+  if (selectedField !== null) {
+    selection.push({ label: selectedField });
+  }
 
   function onChange(selectedOptions: EuiComboBoxOptionProps[]) {
     const option = selectedOptions[0];

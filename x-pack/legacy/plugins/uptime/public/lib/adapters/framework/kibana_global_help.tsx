@@ -11,7 +11,7 @@ import React from 'react';
 
 export const renderUptimeKibanaGlobalHelp = (docsSiteUrl: string, docLinkVersion: string) => (
   <React.Fragment>
-    <EuiHorizontalRule margin="none"></EuiHorizontalRule>
+    <EuiHorizontalRule margin="none" />
     <EuiSpacer />
     <EuiText size="s">For Uptime specific information</EuiText>
     <EuiSpacer />

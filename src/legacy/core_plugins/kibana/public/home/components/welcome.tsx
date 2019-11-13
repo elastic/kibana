@@ -25,6 +25,8 @@
 
 import React from 'react';
 import {
+  EuiLink,
+  EuiTextColor,
   EuiTitle,
   EuiSpacer,
   EuiFlexGroup,
@@ -33,35 +35,22 @@ import {
   EuiIcon,
   EuiPortal,
 } from '@elastic/eui';
-// @ts-ignore
-import { banners } from 'ui/notify';
-
 import { FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
+import { getServices } from '../kibana_services';
+
 import { SampleDataCard } from './sample_data';
-import { TelemetryOptInCard } from './telemetry_opt_in';
-// @ts-ignore
-import { trackUiMetric, METRIC_TYPE } from '../kibana_services';
 
 interface Props {
   urlBasePath: string;
-  onSkip: () => {};
-  fetchTelemetry: () => Promise<any[]>;
-  setOptIn: (enabled: boolean) => Promise<boolean>;
-  getTelemetryBannerId: () => string;
-  shouldShowTelemetryOptIn: boolean;
-}
-interface State {
-  step: number;
+  onSkip: () => void;
+  showTelemetryDisclaimer: boolean;
 }
 
 /**
  * Shows a full-screen welcome page that gives helpful quick links to beginners.
  */
-export class Welcome extends React.PureComponent<Props, State> {
-  public readonly state: State = {
-    step: 0,
-  };
+export class Welcome extends React.Component<Props> {
+  private services = getServices();
 
   private hideOnEsc = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
@@ -70,32 +59,22 @@ export class Welcome extends React.PureComponent<Props, State> {
   };
 
   private redirecToSampleData() {
-    const path = chrome.addBasePath('#/home/tutorial_directory/sampleData');
+    const path = this.services.addBasePath('#/home/tutorial_directory/sampleData');
     window.location.href = path;
-  }
-  private async handleTelemetrySelection(confirm: boolean) {
-    const metricName = `telemetryOptIn${confirm ? 'Confirm' : 'Decline'}`;
-    trackUiMetric(METRIC_TYPE.CLICK, metricName);
-    await this.props.setOptIn(confirm);
-    const bannerId = this.props.getTelemetryBannerId();
-    banners.remove(bannerId);
-    this.setState(() => ({ step: 1 }));
   }
 
   private onSampleDataDecline = () => {
-    trackUiMetric(METRIC_TYPE.CLICK, 'sampleDataDecline');
+    this.services.trackUiMetric(this.services.METRIC_TYPE.CLICK, 'sampleDataDecline');
     this.props.onSkip();
   };
+
   private onSampleDataConfirm = () => {
-    trackUiMetric(METRIC_TYPE.CLICK, 'sampleDataConfirm');
+    this.services.trackUiMetric(this.services.METRIC_TYPE.CLICK, 'sampleDataConfirm');
     this.redirecToSampleData();
   };
 
   componentDidMount() {
-    trackUiMetric(METRIC_TYPE.LOADED, 'welcomeScreenMount');
-    if (this.props.shouldShowTelemetryOptIn) {
-      trackUiMetric(METRIC_TYPE.COUNT, 'welcomeScreenWithTelemetryOptIn');
-    }
+    this.services.trackUiMetric(this.services.METRIC_TYPE.LOADED, 'welcomeScreenMount');
     document.addEventListener('keydown', this.hideOnEsc);
   }
 
@@ -104,8 +83,7 @@ export class Welcome extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { urlBasePath, shouldShowTelemetryOptIn, fetchTelemetry } = this.props;
-    const { step } = this.state;
+    const { urlBasePath, showTelemetryDisclaimer } = this.props;
 
     return (
       <EuiPortal>
@@ -135,20 +113,39 @@ export class Welcome extends React.PureComponent<Props, State> {
           <div className="homWelcome__content homWelcome-body">
             <EuiFlexGroup gutterSize="l">
               <EuiFlexItem>
-                {shouldShowTelemetryOptIn && step === 0 && (
-                  <TelemetryOptInCard
-                    urlBasePath={urlBasePath}
-                    fetchTelemetry={fetchTelemetry}
-                    onConfirm={this.handleTelemetrySelection.bind(this, true)}
-                    onDecline={this.handleTelemetrySelection.bind(this, false)}
-                  />
-                )}
-                {(!shouldShowTelemetryOptIn || step === 1) && (
-                  <SampleDataCard
-                    urlBasePath={urlBasePath}
-                    onConfirm={this.onSampleDataConfirm}
-                    onDecline={this.onSampleDataDecline}
-                  />
+                <SampleDataCard
+                  urlBasePath={urlBasePath}
+                  onConfirm={this.onSampleDataConfirm}
+                  onDecline={this.onSampleDataDecline}
+                />
+                <EuiSpacer size="s" />
+                {showTelemetryDisclaimer && (
+                  <EuiTextColor className="euiText--small" color="subdued">
+                    <FormattedMessage
+                      id="kbn.home.dataManagementDisclaimerPrivacy"
+                      defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
+                    />
+                    <EuiLink
+                      href="https://www.elastic.co/legal/privacy-statement"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      <FormattedMessage
+                        id="kbn.home.dataManagementDisclaimerPrivacyLink"
+                        defaultMessage="Privacy Policy."
+                      />
+                    </EuiLink>
+                    <FormattedMessage
+                      id="kbn.home.dataManagementDisableCollection"
+                      defaultMessage=" To disable collection, "
+                    />
+                    <EuiLink href="#/management/kibana/settings">
+                      <FormattedMessage
+                        id="kbn.home.dataManagementDisableCollectionLink"
+                        defaultMessage="click here."
+                      />
+                    </EuiLink>
+                  </EuiTextColor>
                 )}
                 <EuiSpacer size="xs" />
               </EuiFlexItem>

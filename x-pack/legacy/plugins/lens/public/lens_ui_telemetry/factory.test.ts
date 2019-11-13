@@ -11,9 +11,9 @@ import {
   trackUiEvent,
   trackSuggestionEvent,
 } from './factory';
-import { Storage } from 'src/legacy/core_plugins/data/public/types';
 import { coreMock } from 'src/core/public/mocks';
 import { HttpServiceBase } from 'kibana/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 
 jest.useFakeTimers();
 
@@ -30,7 +30,7 @@ const createMockStorage = () => {
 };
 
 describe('Lens UI telemetry', () => {
-  let storage: jest.Mocked<Storage>;
+  let storage: jest.Mocked<IStorageWrapper>;
   let http: jest.Mocked<HttpServiceBase>;
   let dateSpy: jest.SpyInstance;
 
@@ -45,7 +45,6 @@ describe('Lens UI telemetry', () => {
     const fakeManager = new LensReportManager({
       http,
       storage,
-      basePath: '/basepath',
     });
     setReportManager(fakeManager);
   });
@@ -84,7 +83,7 @@ describe('Lens UI telemetry', () => {
 
     jest.runOnlyPendingTimers();
 
-    expect(http.post).toHaveBeenCalledWith(`/basepath/api/lens/telemetry`, {
+    expect(http.post).toHaveBeenCalledWith(`/api/lens/telemetry`, {
       body: JSON.stringify({
         events: {
           '2019-10-23': {

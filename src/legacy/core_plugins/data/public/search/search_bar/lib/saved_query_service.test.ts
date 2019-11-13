@@ -19,7 +19,7 @@
 
 import { SavedQueryAttributes } from '../index';
 import { createSavedQueryService } from './saved_query_service';
-import { FilterStateStore } from '@kbn/es-query';
+import { esFilters } from '../../../../../../../plugins/data/public';
 
 const savedQueryAttributes: SavedQueryAttributes = {
   title: 'foo',
@@ -43,7 +43,7 @@ const savedQueryAttributesWithFilters: SavedQueryAttributes = {
   filters: [
     {
       query: { match_all: {} },
-      $state: { store: FilterStateStore.APP_STATE },
+      $state: { store: esFilters.FilterStateStore.APP_STATE },
       meta: {
         disabled: false,
         negate: false,

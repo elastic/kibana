@@ -21,15 +21,14 @@ import { Observable } from 'rxjs';
 import { filter, first, map, mergeMap, tap, toArray } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
-import { InternalElasticsearchServiceSetup } from '../elasticsearch';
-import { InternalHttpServiceSetup } from '../http';
+
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
 import { DiscoveredPlugin, DiscoveredPluginInternal, PluginName } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
-import { ContextSetup } from '../context';
+import { InternalCoreSetup } from '../internal_types';
 
 /** @public */
 export interface PluginsServiceSetup {
@@ -46,11 +45,7 @@ export interface PluginsServiceStart {
 }
 
 /** @internal */
-export interface PluginsServiceSetupDeps {
-  context: ContextSetup;
-  elasticsearch: InternalElasticsearchServiceSetup;
-  http: InternalHttpServiceSetup;
-}
+export type PluginsServiceSetupDeps = InternalCoreSetup;
 
 /** @internal */
 export interface PluginsServiceStartDeps {} // eslint-disable-line @typescript-eslint/no-empty-interface

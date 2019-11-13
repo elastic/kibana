@@ -6,8 +6,6 @@
 
 import chrome from 'ui/chrome';
 
-import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
-import { DEFAULT_KBN_VERSION } from '../../../common/constants';
 import * as i18n from '../translations';
 import { parseJsonFromBody, ToasterErrors } from '../../components/ml/api/throw_if_not_ok';
 import { IndexPatternResponse, IndexPatternSavedObject } from '../types';
@@ -24,9 +22,8 @@ const emptyIndexPattern: IndexPatternSavedObject[] = [];
  */
 export const getIndexPatterns = async (
   signal: AbortSignal,
-  headers?: Record<string, string>
+  kbnVersion: string
 ): Promise<IndexPatternSavedObject[]> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(
     `${chrome.getBasePath()}/api/saved_objects/_find?type=index-pattern&fields=title&fields=type&per_page=10000`,
     {
@@ -37,7 +34,6 @@ export const getIndexPatterns = async (
         'kbn-xsrf': kbnVersion,
         'kbn-version': kbnVersion,
         'kbn-system-api': 'true',
-        ...headers,
       },
       signal,
     }

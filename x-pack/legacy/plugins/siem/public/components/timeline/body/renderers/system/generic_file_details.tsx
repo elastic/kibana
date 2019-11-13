@@ -17,7 +17,7 @@ import { OverflowField } from '../../../../tables/helpers';
 import * as i18n from './translations';
 import { NetflowRenderer } from '../netflow';
 import { UserHostWorkingDir } from '../user_host_working_dir';
-import { Details, showVia, TokensFlexItem } from '../helpers';
+import { Details, isProcessStoppedOrTerminationEvent, showVia, TokensFlexItem } from '../helpers';
 import { ProcessDraggableWithNonExistentProcess } from '../process_draggable';
 import { Args } from '../args';
 import { AuthSsh } from './auth_ssh';
@@ -26,7 +26,7 @@ import { FileDraggable } from '../file_draggable';
 import { Package } from './package';
 import { Badge } from '../../../../page';
 import { ParentProcessDraggable } from '../parent_process_draggable';
-import { ProcessHash } from '../process.hash';
+import { ProcessHash } from '../process_hash';
 
 interface Props {
   args: string[] | null | undefined;
@@ -144,14 +144,15 @@ export const SystemGenericFileLine = pure<Props>(
           eventId={id}
           text={i18n.WITH_EXIT_CODE}
         />
-        <ParentProcessDraggable
-          contextId={contextId}
-          endgameParentProcessName={endgameParentProcessName}
-          eventAction={eventAction}
-          eventId={id}
-          processPpid={processPpid}
-          text={i18n.VIA_PARENT_PROCESS}
-        />
+        {!isProcessStoppedOrTerminationEvent(eventAction) && (
+          <ParentProcessDraggable
+            contextId={contextId}
+            endgameParentProcessName={endgameParentProcessName}
+            eventId={id}
+            processPpid={processPpid}
+            text={i18n.VIA_PARENT_PROCESS}
+          />
+        )}
         {outcome != null && (
           <TokensFlexItem grow={false} component="span">
             {i18n.WITH_RESULT}

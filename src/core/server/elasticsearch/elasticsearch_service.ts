@@ -19,8 +19,9 @@
 
 import { ConnectableObservable, Observable, Subscription } from 'rxjs';
 import { filter, first, map, publishReplay, switchMap } from 'rxjs/operators';
-import { merge } from 'lodash';
+
 import { CoreService } from '../../types';
+import { merge } from '../../utils';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { ClusterClient } from './cluster_client';

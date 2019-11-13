@@ -444,8 +444,8 @@ export const ExplorerChartSingleMetric = injectI18n(class ExplorerChartSingleMet
       }
 
       mlChartTooltipService.show(tooltipData, circle, {
-        x: LINE_CHART_ANOMALY_RADIUS * 2,
-        y: 0
+        x: LINE_CHART_ANOMALY_RADIUS * 3,
+        y: LINE_CHART_ANOMALY_RADIUS * 2,
       });
     }
   }

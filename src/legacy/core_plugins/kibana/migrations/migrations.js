@@ -285,6 +285,50 @@ function transformFilterStringToQueryObject(doc) {
   }
   return newDoc;
 }
+function transformSplitFiltersStringToQueryObject(doc) {
+  // Migrate split_filters in TSVB objects that weren't migrated in 7.3
+  // If any filters exist and they are a string, we assume them to be lucene syntax and transform the filter into an object accordingly
+  const newDoc = cloneDeep(doc);
+  const visStateJSON = get(doc, 'attributes.visState');
+  if (visStateJSON) {
+    let visState;
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState) {
+      const visType = get(visState, 'params.type');
+      const tsvbTypes = ['metric', 'markdown', 'top_n', 'gauge', 'table', 'timeseries'];
+      if (tsvbTypes.indexOf(visType) === -1) {
+        // skip
+        return doc;
+      }
+      // migrate the series split_filter filters
+      const series = get(visState, 'params.series') || [];
+      series.forEach(item => {
+        // series item split filters filter
+        if (item.split_filters) {
+          const splitFilters = get(item, 'split_filters') || [];
+          if (splitFilters.length > 0) {
+            // only transform split_filter filters if we have filters
+            splitFilters.forEach(filter => {
+              if (typeof filter.filter === 'string') {
+                const filterfilterObject = {
+                  query: filter.filter,
+                  language: 'lucene',
+                };
+                filter.filter = filterfilterObject;
+              }
+            });
+          }
+        }
+      });
+      newDoc.attributes.visState = JSON.stringify(visState);
+    }
+  }
+  return newDoc;
+}
 
 function migrateFiltersAggQuery(doc) {
   const visStateJSON = get(doc, 'attributes.visState');
@@ -416,6 +460,31 @@ function migrateFiltersAggQueryStringQueries(doc) {
 
 }
 
+function migrateSubTypeAndParentFieldProperties(doc) {
+  if (!doc.attributes.fields) return doc;
+
+  const fieldsString = doc.attributes.fields;
+  const fields = JSON.parse(fieldsString);
+  const migratedFields = fields.map(field => {
+    if (field.subType === 'multi') {
+      return {
+        ...omit(field, 'parent'),
+        subType: { multi: { parent: field.parent } }
+      };
+    }
+
+    return field;
+  });
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      fields: JSON.stringify(migratedFields),
+    }
+  };
+}
+
 const executeMigrations720 = flow(
   migratePercentileRankAggregation,
   migrateDateHistogramAggregation
@@ -435,6 +504,10 @@ const executeSearchMigrations740 = flow(
   migrateSearchSortToNestedArray,
 );
 
+const executeMigrations742 = flow(
+  transformSplitFiltersStringToQueryObject
+);
+
 export const migrations = {
   'index-pattern': {
     '6.5.0': doc => {
@@ -442,6 +515,9 @@ export const migrations = {
       doc.attributes.typeMeta = doc.attributes.typeMeta || undefined;
       return doc;
     },
+    '7.6.0': flow(
+      migrateSubTypeAndParentFieldProperties
+    )
   },
   visualization: {
     /**
@@ -541,6 +617,8 @@ export const migrations = {
     '7.2.0': doc => executeMigrations720(doc),
     '7.3.0': executeMigrations730,
     '7.3.1': executeVisualizationMigrations731,
+    // migrate split_filters that were not migrated in 7.3.0 (transformFilterStringToQueryObject).
+    '7.4.2': executeMigrations742,
   },
   dashboard: {
     '7.0.0': doc => {

@@ -20,7 +20,7 @@
 import Hapi from 'hapi';
 import { createMockServer } from './_mock_server';
 import { createCreateRoute } from './create';
-import { SavedObjectsClientMock } from '../../../../core/server/mocks';
+import { savedObjectsClientMock } from '../../../../core/server/mocks';
 
 describe('POST /api/saved_objects/{type}', () => {
   let server: Hapi.Server;
@@ -32,7 +32,7 @@ describe('POST /api/saved_objects/{type}', () => {
     references: [],
     attributes: {},
   };
-  const savedObjectsClient = SavedObjectsClientMock.create();
+  const savedObjectsClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
     savedObjectsClient.create.mockImplementation(() => Promise.resolve(clientResponse));

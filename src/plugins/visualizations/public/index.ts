@@ -17,4 +17,13 @@
  * under the License.
  */
 
+import { PluginInitializerContext } from '../../../core/public';
+import { VisualizationsPublicPlugin } from './plugin';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new VisualizationsPublicPlugin(initializerContext);
+}
+
+export { VisualizationsPublicPlugin as Plugin };
+export * from './plugin';
 export * from './types';

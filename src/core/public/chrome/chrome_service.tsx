@@ -33,10 +33,11 @@ import { HttpStart } from '../http';
 import { ChromeNavLinks, NavLinksService } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { NavControlsService, ChromeNavControls } from './nav_controls';
+import { DocTitleService, ChromeDocTitle } from './doc_title';
 import { LoadingIndicator, HeaderWrapper as Header } from './ui';
 import { DocLinksStart } from '../doc_links';
 
-export { ChromeNavControls, ChromeRecentlyAccessed };
+export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
 const IS_COLLAPSED_KEY = 'core.chrome.isCollapsed';
 
@@ -82,6 +83,7 @@ export class ChromeService {
   private readonly navControls = new NavControlsService();
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
+  private readonly docTitle = new DocTitleService();
 
   constructor(private readonly params: ConstructorParams) {}
 
@@ -106,6 +108,7 @@ export class ChromeService {
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
+    const docTitle = this.docTitle.start({ document: window.document });
 
     if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning(
@@ -119,12 +122,14 @@ export class ChromeService {
       navControls,
       navLinks,
       recentlyAccessed,
+      docTitle,
 
       getHeaderComponent: () => (
         <React.Fragment>
           <LoadingIndicator loadingCount$={http.getLoadingCount$()} />
 
           <Header
+            isCloudEnabled={injectedMetadata.getInjectedVar('isCloudEnabled') as boolean}
             application={application}
             appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
             badge$={badge$.pipe(takeUntil(this.stop$))}
@@ -259,6 +264,8 @@ export interface ChromeStart {
   navControls: ChromeNavControls;
   /** {@inheritdoc ChromeRecentlyAccessed} */
   recentlyAccessed: ChromeRecentlyAccessed;
+  /** {@inheritdoc ChromeDocTitle} */
+  docTitle: ChromeDocTitle;
 
   /**
    * Sets the current app's title

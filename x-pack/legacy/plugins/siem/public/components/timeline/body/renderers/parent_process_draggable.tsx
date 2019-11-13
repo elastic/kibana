@@ -8,27 +8,19 @@ import * as React from 'react';
 
 import { DraggableBadge } from '../../../draggables';
 
-import {
-  isNillEmptyOrNotFinite,
-  isProcessStoppedOrTerminationEvent,
-  TokensFlexItem,
-} from './helpers';
+import { isNillEmptyOrNotFinite, TokensFlexItem } from './helpers';
 
 interface Props {
   contextId: string;
   endgameParentProcessName: string | null | undefined;
-  eventAction: string | null | undefined;
   eventId: string;
   processPpid: number | undefined | null;
   text: string | null | undefined;
 }
 
 export const ParentProcessDraggable = React.memo<Props>(
-  ({ contextId, endgameParentProcessName, eventAction, eventId, processPpid, text }) => {
-    if (
-      (isNillEmptyOrNotFinite(endgameParentProcessName) && isNillEmptyOrNotFinite(processPpid)) ||
-      isProcessStoppedOrTerminationEvent(eventAction)
-    ) {
+  ({ contextId, endgameParentProcessName, eventId, processPpid, text }) => {
+    if (isNillEmptyOrNotFinite(endgameParentProcessName) && isNillEmptyOrNotFinite(processPpid)) {
       return null;
     }
 

@@ -17,32 +17,17 @@
  * under the License.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiForm,
-  EuiFormRow,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiOverlayMask,
-  EuiSwitch,
-} from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiModal, EuiOverlayMask } from '@elastic/eui';
 import React, { Component } from 'react';
-import { IndexPattern } from '../../index_patterns';
-import { getDisplayValueFromFilter } from '../filter_bar/filter_editor/lib/filter_editor_utils';
-import { getFilterDisplayText } from '../filter_bar/filter_editor/lib/get_filter_display_text';
-import { mapAndFlattenFilters } from '../filter_manager/lib/map_and_flatten_filters';
+import { ApplyFiltersPopoverContent } from './apply_filter_popover_content';
+import { IndexPattern } from '../../index_patterns/index_patterns';
+import { esFilters } from '../../../../../../plugins/data/public';
 
 interface Props {
-  filters: Filter[];
-  indexPatterns: IndexPattern[];
+  filters: esFilters.Filter[];
   onCancel: () => void;
-  onSubmit: (filters: Filter[]) => void;
+  onSubmit: (filters: esFilters.Filter[]) => void;
+  indexPatterns: IndexPattern[];
 }
 
 interface State {
@@ -50,90 +35,40 @@ interface State {
 }
 
 export class ApplyFiltersPopover extends Component<Props, State> {
-  public static defaultProps = {
-    filters: [],
-  };
-
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      isFilterSelected: props.filters.map(() => true),
-    };
-  }
-
-  private getLabel(filter: Filter) {
-    const filterDisplayValue = getDisplayValueFromFilter(filter, this.props.indexPatterns);
-    return getFilterDisplayText(filter, filterDisplayValue);
-  }
-
   public render() {
-    if (this.props.filters.length === 0) {
+    if (!this.props.filters || this.props.filters.length === 0) {
       return '';
     }
-
-    const mappedFilters = mapAndFlattenFilters(this.props.filters);
-
-    const form = (
-      <EuiForm>
-        {mappedFilters.map((filter, i) => (
-          <EuiFormRow key={i}>
-            <EuiSwitch
-              label={this.getLabel(filter)}
-              checked={this.isFilterSelected(i)}
-              onChange={() => this.toggleFilterSelected(i)}
-            />
-          </EuiFormRow>
-        ))}
-      </EuiForm>
-    );
 
     return (
       <EuiOverlayMask>
         <EuiModal onClose={this.props.onCancel}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              <FormattedMessage
-                id="data.filter.applyFilters.popupHeader"
-                defaultMessage="Select filters to apply"
-              />
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-
-          <EuiModalBody>{form}</EuiModalBody>
-
-          <EuiModalFooter>
-            <EuiButtonEmpty onClick={this.props.onCancel}>
-              <FormattedMessage
-                id="data.filter.applyFiltersPopup.cancelButtonLabel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-            <EuiButton onClick={this.onSubmit} fill>
-              <FormattedMessage
-                id="data.filter.applyFiltersPopup.saveButtonLabel"
-                defaultMessage="Apply"
-              />
-            </EuiButton>
-          </EuiModalFooter>
+          <ApplyFiltersPopoverContent
+            filters={this.props.filters}
+            onCancel={this.props.onCancel}
+            onSubmit={this.props.onSubmit}
+            indexPatterns={this.props.indexPatterns}
+          />
         </EuiModal>
       </EuiOverlayMask>
     );
   }
-
-  private isFilterSelected = (i: number) => {
-    return this.state.isFilterSelected[i];
-  };
-
-  private toggleFilterSelected = (i: number) => {
-    const isFilterSelected = [...this.state.isFilterSelected];
-    isFilterSelected[i] = !isFilterSelected[i];
-    this.setState({ isFilterSelected });
-  };
-
-  private onSubmit = () => {
-    const selectedFilters = this.props.filters.filter(
-      (filter, i) => this.state.isFilterSelected[i]
-    );
-    this.props.onSubmit(selectedFilters);
-  };
 }
+
+type cancelFunction = () => void;
+type submitFunction = (filters: esFilters.Filter[]) => void;
+export const applyFiltersPopover = (
+  filters: esFilters.Filter[],
+  indexPatterns: IndexPattern[],
+  onCancel: cancelFunction,
+  onSubmit: submitFunction
+) => {
+  return (
+    <ApplyFiltersPopoverContent
+      indexPatterns={indexPatterns}
+      filters={filters}
+      onCancel={onCancel}
+      onSubmit={onSubmit}
+    />
+  );
+};
