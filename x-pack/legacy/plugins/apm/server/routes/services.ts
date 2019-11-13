@@ -16,7 +16,7 @@ import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getServiceMap } from '../lib/services/map';
 
-export const servicesRoute = createRoute(core => ({
+export const servicesRoute = createRoute((core, { server }) => ({
   path: '/api/apm/services',
   params: {
     query: t.intersection([uiFiltersRt, rangeRt])
@@ -24,7 +24,6 @@ export const servicesRoute = createRoute(core => ({
   handler: async req => {
     const setup = await setupRequest(req);
     const services = await getServices(setup);
-    const { server } = core.http;
 
     // Store telemetry data derived from services
     const agentNames = services.items.map(
