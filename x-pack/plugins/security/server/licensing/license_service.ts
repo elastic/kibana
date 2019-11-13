@@ -30,9 +30,7 @@ export class SecurityLicenseService {
 
           const securityFeature = rawLicense.getFeature('security');
           return (
-            securityFeature !== undefined &&
-            securityFeature.isAvailable &&
-            securityFeature.isEnabled
+            securityFeature !== undefined && securityFeature.available && securityFeature.enabled
           );
         },
 
