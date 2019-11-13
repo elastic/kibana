@@ -71,9 +71,6 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const TimelineKqlFetch = connect(
-  makeMapStateToProps,
-  {
-    setTimelineQuery: inputsActions.setQuery,
-  }
-)(TimelineKqlFetchComponent);
+export const TimelineKqlFetch = connect(makeMapStateToProps, {
+  setTimelineQuery: inputsActions.setQuery,
+})(TimelineKqlFetchComponent);

@@ -48,16 +48,13 @@ function getItemIdToExpandedRowMap(
   itemIds: DataFrameAnalyticsId[],
   dataFrameAnalytics: DataFrameAnalyticsListRow[]
 ): ItemIdToExpandedRowMap {
-  return itemIds.reduce(
-    (m: ItemIdToExpandedRowMap, analyticsId: DataFrameAnalyticsId) => {
-      const item = dataFrameAnalytics.find(analytics => analytics.config.id === analyticsId);
-      if (item !== undefined) {
-        m[analyticsId] = <ExpandedRow item={item} />;
-      }
-      return m;
-    },
-    {} as ItemIdToExpandedRowMap
-  );
+  return itemIds.reduce((m: ItemIdToExpandedRowMap, analyticsId: DataFrameAnalyticsId) => {
+    const item = dataFrameAnalytics.find(analytics => analytics.config.id === analyticsId);
+    if (item !== undefined) {
+      m[analyticsId] = <ExpandedRow item={item} />;
+    }
+    return m;
+  }, {} as ItemIdToExpandedRowMap);
 }
 
 function stringMatch(str: string | undefined, substr: string) {
