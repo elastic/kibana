@@ -216,17 +216,14 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const StatefulBody = connect(
-  makeMapStateToProps,
-  {
-    addNoteToEvent: timelineActions.addNoteToEvent,
-    applyDeltaToColumnWidth: timelineActions.applyDeltaToColumnWidth,
-    pinEvent: timelineActions.pinEvent,
-    removeColumn: timelineActions.removeColumn,
-    removeProvider: timelineActions.removeProvider,
-    unPinEvent: timelineActions.unPinEvent,
-    updateColumns: timelineActions.updateColumns,
-    updateNote: appActions.updateNote,
-    updateSort: timelineActions.updateSort,
-  }
-)(StatefulBodyComponent);
+export const StatefulBody = connect(makeMapStateToProps, {
+  addNoteToEvent: timelineActions.addNoteToEvent,
+  applyDeltaToColumnWidth: timelineActions.applyDeltaToColumnWidth,
+  pinEvent: timelineActions.pinEvent,
+  removeColumn: timelineActions.removeColumn,
+  removeProvider: timelineActions.removeProvider,
+  unPinEvent: timelineActions.unPinEvent,
+  updateColumns: timelineActions.updateColumns,
+  updateNote: appActions.updateNote,
+  updateSort: timelineActions.updateSort,
+})(StatefulBodyComponent);

@@ -433,7 +433,7 @@
     "pngjs": "^3.4.0",
     "postcss": "^7.0.5",
     "postcss-url": "^8.0.0",
-    "prettier": "^1.18.2",
+    "prettier": "^1.19.1",
     "proxyquire": "1.8.0",
     "regenerate": "^1.4.0",
     "sass-lint": "^1.12.1",
