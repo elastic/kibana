@@ -72,63 +72,11 @@ export const createFilterBarHelper = (reactDirective: any) => {
 };
 
 /** @internal */
-export const createApplyFiltersPopoverDirective = () => {
-  return {
-    restrict: 'E',
-    template: '',
-    compile: (elem: any) => {
-      const child = document.createElement('apply-filters-popover-helper');
-
-      // Copy attributes to the child directive
-      for (const attr of elem[0].attributes) {
-        child.setAttribute(attr.name, attr.value);
-      }
-
-      // Add a key attribute that will force a full rerender every time that
-      // a filter changes.
-      child.setAttribute('key', 'key');
-
-      // Append helper directive
-      elem.append(child);
-
-      const linkFn = ($scope: any, _: any, $attr: any) => {
-        // Watch only for filter changes to update key.
-        $scope.$watch(
-          () => {
-            return $scope.$eval($attr.filters) || [];
-          },
-          (newVal: any) => {
-            $scope.key = Date.now();
-          },
-          true
-        );
-      };
-
-      return linkFn;
-    },
-  };
-};
-
-/** @internal */
-export const createApplyFiltersPopoverHelper = (reactDirective: any) =>
-  reactDirective(wrapInI18nContext(ApplyFiltersPopover), [
-    ['filters', { watchDepth: 'collection' }],
-    ['onCancel', { watchDepth: 'reference' }],
-    ['onSubmit', { watchDepth: 'reference' }],
-    ['indexPatterns', { watchDepth: 'collection' }],
-
-    // Key is needed to trigger a full rerender of the component
-    'key',
-  ]);
-
-/** @internal */
 export const initLegacyModule = once((indexPatterns: IndexPatterns): void => {
   uiModules
     .get('app/kibana', ['react'])
     .directive('filterBar', createFilterBarDirective)
-    .directive('filterBarHelper', createFilterBarHelper)
-    .directive('applyFiltersPopover', createApplyFiltersPopoverDirective)
-    .directive('applyFiltersPopoverHelper', createApplyFiltersPopoverHelper);
+    .directive('filterBarHelper', createFilterBarHelper);
 
   uiModules.get('kibana/index_patterns').value('indexPatterns', indexPatterns);
 });

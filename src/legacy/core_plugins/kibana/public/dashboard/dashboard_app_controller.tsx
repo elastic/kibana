@@ -42,8 +42,7 @@ import { IndexPattern } from 'ui/index_patterns';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
 import { Subscription } from 'rxjs';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
-import { extractTimeFilter, changeTimeFilter, Query } from '../../../../../plugins/data/public';
-import { esFilters } from '../../../../../plugins/data/public';
+import { Query } from '../../../../../plugins/data/public';
 import { FilterStateManager } from '../../../data/public';
 import { SavedQuery } from '../../../data/public';
 

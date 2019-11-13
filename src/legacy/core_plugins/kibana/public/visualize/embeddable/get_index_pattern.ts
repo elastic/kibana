@@ -19,7 +19,7 @@
 
 import chrome from 'ui/chrome';
 import { StaticIndexPattern, getFromSavedObject } from 'ui/index_patterns';
-import { VisSavedObject } from 'ui/visualize/loader/types';
+import { VisSavedObject } from './visualize_embeddable';
 
 export async function getIndexPattern(
   savedVis: VisSavedObject

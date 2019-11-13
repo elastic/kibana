@@ -44,12 +44,7 @@ import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 import { confirmModalFactory } from 'ui/modals/confirm_modal';
 
 import { AppMountContext, LegacyCoreStart } from 'kibana/public';
-import {
-  createApplyFiltersPopoverDirective,
-  createApplyFiltersPopoverHelper,
-  createFilterBarDirective,
-  createFilterBarHelper,
-} from '../../../data/public';
+import { createFilterBarDirective, createFilterBarHelper } from '../../../data/public';
 import { NavigationStart } from '../../../navigation/public';
 
 // @ts-ignore
@@ -208,9 +203,7 @@ function createLocalFilterBarModule(angular: IAngularStatic) {
   angular
     .module('app/visualize/FilterBar', ['react'])
     .directive('filterBar', createFilterBarDirective)
-    .directive('filterBarHelper', createFilterBarHelper)
-    .directive('applyFiltersPopover', createApplyFiltersPopoverDirective)
-    .directive('applyFiltersPopoverHelper', createApplyFiltersPopoverHelper);
+    .directive('filterBarHelper', createFilterBarHelper);
 }
 
 function createLocalI18nModule(angular: IAngularStatic) {

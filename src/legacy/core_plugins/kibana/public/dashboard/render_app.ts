@@ -53,13 +53,7 @@ import { Storage } from '../../../../../plugins/kibana_utils/public';
 
 // @ts-ignore
 import { initDashboardApp } from './app';
-import {
-  createApplyFiltersPopoverDirective,
-  createApplyFiltersPopoverHelper,
-  createFilterBarDirective,
-  createFilterBarHelper,
-  DataStart,
-} from '../../../data/public';
+import { createFilterBarDirective, createFilterBarHelper, DataStart } from '../../../data/public';
 import { SavedQueryService } from '../../../data/public/search/search_bar/lib/saved_query_service';
 import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
 import { NavigationStart } from '../../../navigation/public';
@@ -230,9 +224,7 @@ function createLocalFilterBarModule() {
   angular
     .module('app/dashboard/FilterBar', ['react'])
     .directive('filterBar', createFilterBarDirective)
-    .directive('filterBarHelper', createFilterBarHelper)
-    .directive('applyFiltersPopover', createApplyFiltersPopoverDirective)
-    .directive('applyFiltersPopoverHelper', createApplyFiltersPopoverHelper);
+    .directive('filterBarHelper', createFilterBarHelper);
 }
 
 function createLocalI18nModule() {
