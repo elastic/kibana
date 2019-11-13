@@ -7,37 +7,24 @@
 // @ts-ignore
 import { getAllStats } from './get_all_stats';
 import { getStatsWithXpack } from '../../../xpack_main/server/telemetry_collection';
+import {
+  StatsGetter,
+  getStatsCollectionConfig,
+} from '../../../../../../src/legacy/core_plugins/telemetry/server/collection_manager';
 
-/**
- * Get the telemetry data.
- *
- * @param {Object} req The incoming request.
- * @param {Object} config Kibana config.
- * @param {String} start The start time of the request (likely 20m ago).
- * @param {String} end The end time of the request.
- * @param {Boolean} unencrypted Is the request payload going to be unencrypted.
- * @return {Promise} An array of telemetry objects.
- */
-export async function getStatsWithMonitoring(
-  req: any,
-  config: any,
-  start: string,
-  end: string,
-  unencrypted: boolean
-) {
+export const getStatsWithMonitoring: StatsGetter = async function(config) {
   let response = [];
-  const useInternalUser = !unencrypted;
 
   try {
-    // attempt to collect stats from multiple clusters in monitoring data
-    response = await getAllStats(req, start, end, { useInternalUser });
+    const { start, end, server, callCluster } = getStatsCollectionConfig(config, 'monitoring');
+    response = await getAllStats({ server, callCluster, start, end });
   } catch (err) {
     // no-op
   }
 
   if (!Array.isArray(response) || response.length === 0) {
-    response = await getStatsWithXpack(req, config, start, end, unencrypted);
+    response = await getStatsWithXpack(config);
   }
 
   return response;
-}
+};
