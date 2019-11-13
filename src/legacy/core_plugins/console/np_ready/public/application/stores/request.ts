@@ -25,12 +25,12 @@ import { ESRequestResult } from '../hooks/use_send_current_request_to_es/send_re
 
 export type Actions =
   | { type: 'sendRequest'; payload: undefined }
-  | { type: 'requestSuccess'; payload: { data: ESRequestResult[]; type: BaseResponseType } }
+  | { type: 'requestSuccess'; payload: { data: ESRequestResult[] } }
   | { type: 'requestFail'; payload: string };
 
 export interface Store {
   requestInFlight: boolean;
-  lastResult: { type: BaseResponseType; data: ESRequestResult[] | null; error?: string };
+  lastResult: { data: ESRequestResult[] | null; error?: string };
   error: string | null;
 }
 

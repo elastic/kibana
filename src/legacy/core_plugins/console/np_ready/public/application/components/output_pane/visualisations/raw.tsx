@@ -21,15 +21,26 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCodeBlock } from '@elastic/eui';
 import { OutputPaneVisualisationProps, OutputPaneVisualisationDescriptor } from '../types';
+import { ESRequestResult } from '../../../hooks/use_send_current_request_to_es/send_request_to_es';
 
 export const title = i18n.translate('console.visRawOutputPane.title', { defaultMessage: 'Raw' });
 
-export const isCompatible = (_: unknown) => true;
+export const isCompatible = (_: ESRequestResult) => true;
 
-export const Raw = ({ data }: OutputPaneVisualisationProps) => {
+export const Raw = ({ data, containerHeight, fontSize }: OutputPaneVisualisationProps) => {
   return (
-    <EuiCodeBlock paddingSize="none" isCopyable={true}>
-      {data.response.value}
+    <EuiCodeBlock
+      style={{ fontSize: fontSize + 'px' }}
+      overflowHeight={containerHeight}
+      paddingSize="none"
+      isCopyable={true}
+      inline={false}
+    >
+      {data
+        .map(({ response }) => {
+          return response.value;
+        })
+        .join('\n')}
     </EuiCodeBlock>
   );
 };

@@ -21,11 +21,18 @@ import React from 'react';
 import { OutputPane } from '../../components';
 
 import * as rawVis from '../../components/output_pane/visualisations/raw';
+import * as jsonVis from '../../components/output_pane/visualisations/json';
+import * as xJsonVis from '../../components/output_pane/visualisations/x_json';
+
 import { useRequestReadContext } from '../../contexts/request_context';
+import { useEditorReadContext } from '../../contexts/editor_context';
 
 export const Output = () => {
   const {
-    lastResult: { type, error, data },
+    settings: { fontSize },
+  } = useEditorReadContext();
+  const {
+    lastResult: { error, data },
   } = useRequestReadContext();
 
   if (!data) {
@@ -38,9 +45,9 @@ export const Output = () => {
 
   return (
     <OutputPane
-      visualisationDescriptors={[rawVis.descriptor]}
+      fontSize={fontSize}
+      visualisationDescriptors={[rawVis.descriptor, jsonVis.descriptor, xJsonVis.descriptor]}
       data={data}
-      type={type || 'unknown'}
     />
   );
 };

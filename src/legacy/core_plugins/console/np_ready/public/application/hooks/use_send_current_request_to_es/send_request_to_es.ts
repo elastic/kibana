@@ -21,6 +21,7 @@
 import utils from '../../../../../public/quarantined/src/utils';
 // @ts-ignore
 import * as es from '../../../../../public/quarantined/src/es';
+import { BaseResponseType } from '../../components/output_pane';
 
 export interface EsRequestArgs {
   requests: any;
@@ -33,8 +34,8 @@ export interface ESRequestResult {
     method: string;
   };
   response: {
-    contentType: string;
-    value: any;
+    contentType: BaseResponseType;
+    value: unknown;
   };
 }
 

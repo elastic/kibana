@@ -16,3 +16,47 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiCodeBlock } from '@elastic/eui';
+import { OutputPaneVisualisationProps, OutputPaneVisualisationDescriptor } from '../types';
+import { ESRequestResult } from '../../../hooks/use_send_current_request_to_es/send_request_to_es';
+
+export const title = i18n.translate('console.visJsonOutputPane.title', { defaultMessage: 'JSON' });
+
+export const isCompatible = ({ response: { value } }: ESRequestResult) => {
+  if (typeof value === 'string') {
+    try {
+      const valueTrimmed = value.trim();
+      return Boolean(valueTrimmed.startsWith('{') && JSON.parse(valueTrimmed));
+    } catch (e) {
+      return false;
+    }
+  }
+  return false;
+};
+
+export const Json = ({ data, containerHeight, fontSize }: OutputPaneVisualisationProps) => {
+  return (
+    <EuiCodeBlock
+      style={{ fontSize: fontSize + 'px' }}
+      language="json"
+      overflowHeight={containerHeight}
+      paddingSize="none"
+      isCopyable={true}
+    >
+      {data
+        .map(({ response }) => {
+          return response.value;
+        })
+        .join('\n')}
+    </EuiCodeBlock>
+  );
+};
+
+export const descriptor: OutputPaneVisualisationDescriptor = {
+  Component: Json,
+  isCompatible,
+  title,
+};

@@ -16,28 +16,3 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { FunctionComponent, ReactNode } from 'react';
-import { ESRequestResult } from '../../hooks/use_send_current_request_to_es/send_request_to_es';
-
-export type BaseResponseType =
-  | 'application/json'
-  | 'text/csv'
-  | 'text/tab-separated-values'
-  | 'text/plain'
-  | 'application/yaml'
-  | 'unknown';
-
-export interface OutputPaneVisualisationProps {
-  containerHeight: number;
-  data: ESRequestResult[];
-  fontSize: number;
-}
-
-export interface OutputPaneVisualisationDescriptor {
-  // i18n friendly name
-  title: string | ReactNode;
-  // A way to test if the visualisation is compatible with the data
-  isCompatible: (result: ESRequestResult) => boolean;
-  Component: FunctionComponent<OutputPaneVisualisationProps>;
-}

@@ -55,6 +55,7 @@ export function initializeEditor($el: JQuery<HTMLElement>, $actionsEl: JQuery<HT
   input.autocomplete = new (Autocomplete as any)(editorShim);
   input.setOptions({
     enableBasicAutocompletion: true,
+    fontFamily: '"Roboto Mono", Consolas, Menlo, Courier, monospace',
   });
   input.$blockScrolling = Infinity;
   input.$actions = $actionsEl;

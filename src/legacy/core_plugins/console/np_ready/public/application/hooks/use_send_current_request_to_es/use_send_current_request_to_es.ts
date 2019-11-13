@@ -21,7 +21,6 @@ import { instance as registry } from '../../contexts/editor_context/editor_regis
 import { useServicesContext } from '../../contexts';
 import { sendRequestToES } from './send_request_to_es';
 import { useRequestActionContext } from '../../contexts/request_context';
-import { BaseResponseType } from '../../components/output_pane';
 // @ts-ignore
 import mappings from '../../../../../public/quarantined/src/mappings';
 
@@ -65,7 +64,6 @@ export const useSendCurrentRequestToES = () => {
         type: 'requestSuccess',
         payload: {
           data: results,
-          type: results[0] ? (results[0].response.contentType as BaseResponseType) : 'unknown',
         },
       });
     } catch (e) {

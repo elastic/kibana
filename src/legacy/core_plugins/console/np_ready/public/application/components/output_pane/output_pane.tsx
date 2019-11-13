@@ -17,58 +17,62 @@
  * under the License.
  */
 
-import React, { useRef, useState } from 'react';
-import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { OutputPaneVisualisationDescriptor, BaseResponseType } from './types';
+import React, { useState } from 'react';
+import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiResizeObserver } from '@elastic/eui';
+import { OutputPaneVisualisationDescriptor } from './types';
 import { ESRequestResult } from '../../hooks/use_send_current_request_to_es/send_request_to_es';
 
 export interface Props {
-  type: BaseResponseType;
   data: ESRequestResult[];
   visualisationDescriptors: OutputPaneVisualisationDescriptor[];
+  fontSize: number;
 }
 
-export const OutputPane = ({ visualisationDescriptors, data, type }: Props) => {
-  const [currentVis, setCurrentVis] = useState<string | null>(null);
-  const containerRef = useRef<HTMLElement>(null as any);
-
-  const compatibleVisualisations = visualisationDescriptors.filter(vis =>
-    vis.isCompatible({ data, type })
-  );
+export const OutputPane = ({ visualisationDescriptors, data, fontSize }: Props) => {
+  const [currentVisIdx, setCurrentVisIdx] = useState<number>(-1);
+  const [currentHeight, setCurrentHeight] = useState<number>(0);
 
   const renderVis = () => {
-    const CurrentVis = currentVis
-      ? compatibleVisualisations.find(vis => vis.title === currentVis)!.Component
-      : null;
-
-    if (CurrentVis) {
-      return data.map((datum, idx) => {
-        return <CurrentVis key={idx} data={datum} />;
-      });
+    if (currentVisIdx > -1) {
+      const { Component: CurrentVis } = visualisationDescriptors[currentVisIdx];
+      return <CurrentVis fontSize={fontSize} containerHeight={currentHeight} data={data} />;
     }
     return null;
   };
 
   return (
-    <EuiFlexGroup
-      ref={containerRef}
-      className="outputPane__visContainer"
-      responsive={false}
-      gutterSize="none"
-      direction="column"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiTabs>
-          {compatibleVisualisations.map(({ title }) => {
-            return (
-              <EuiTab key={title} onClick={() => setCurrentVis(title)}>
-                {title}
-              </EuiTab>
-            );
-          })}
-        </EuiTabs>
-      </EuiFlexItem>
-      <EuiFlexItem grow={true}>{renderVis()}</EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiResizeObserver onResize={({ height }) => setCurrentHeight(height)}>
+      {ref => (
+        <EuiFlexGroup
+          className="outputPane__visContainer"
+          responsive={false}
+          gutterSize="none"
+          direction="column"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiTabs>
+              {visualisationDescriptors.map(({ title, isCompatible }, idx) => {
+                const disabled = !isCompatible(data[0]);
+                return (
+                  <EuiTab
+                    isSelected={idx === currentVisIdx}
+                    disabled={disabled}
+                    key={idx}
+                    onClick={() => setCurrentVisIdx(idx)}
+                  >
+                    {title}
+                  </EuiTab>
+                );
+              })}
+            </EuiTabs>
+          </EuiFlexItem>
+          <EuiFlexItem grow={true}>
+            <div className="outputPane__visContainer__vis" ref={ref}>
+              {renderVis()}
+            </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    </EuiResizeObserver>
   );
 };
