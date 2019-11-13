@@ -308,9 +308,10 @@ const getSetupStatus = (
     } else if (
       setupStatus === 'skippedButUpdatable' ||
       (jobDefinition &&
-        !isJobRevisionCurrent(jobId, jobDefinition.config.custom_settings.job_revision || 0)(
-          jobSummaries
-        ))
+        !isJobRevisionCurrent(
+          jobId,
+          jobDefinition.config.custom_settings.job_revision || 0
+        )(jobSummaries))
     ) {
       return 'skippedButUpdatable';
     } else if (

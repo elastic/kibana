@@ -233,11 +233,8 @@ export const makeMapStateToProps = () => {
 };
 
 export const HostDetails = compose<React.ComponentClass<HostDetailsProps>>(
-  connect(
-    makeMapStateToProps,
-    {
-      setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
-      setHostDetailsTablesActivePageToZero: dispatchHostDetailsTablesActivePageToZero,
-    }
-  )
+  connect(makeMapStateToProps, {
+    setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
+    setHostDetailsTablesActivePageToZero: dispatchHostDetailsTablesActivePageToZero,
+  })
 )(HostDetailsComponent);

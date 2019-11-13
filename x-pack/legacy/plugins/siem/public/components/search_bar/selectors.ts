@@ -24,14 +24,6 @@ export const getFilterQuery = (inputState: InputsRange): Query => inputState.que
 export const getSavedQuery = (inputState: InputsRange): SavedQuery | undefined =>
   inputState.savedQuery;
 
-export const filterQuerySelector = () =>
-  createSelector(
-    getFilterQuery,
-    filterQuery => filterQuery
-  );
+export const filterQuerySelector = () => createSelector(getFilterQuery, filterQuery => filterQuery);
 
-export const savedQuerySelector = () =>
-  createSelector(
-    getSavedQuery,
-    savedQuery => savedQuery
-  );
+export const savedQuerySelector = () => createSelector(getSavedQuery, savedQuery => savedQuery);
