@@ -6,35 +6,29 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
-import { ToolbarProps } from './toolbar';
-import { WaffleMetricControls } from '../../waffle/waffle_metric_controls';
-import { WaffleGroupByControls } from '../../waffle/waffle_group_by_controls';
-import { InfraSnapshotMetricType } from '../../../graphql/types';
-import { toGroupByOpt, toMetricOpt } from './toolbar_wrapper';
+import { ToolbarProps } from '../../../public/components/inventory/toolbars/toolbar';
+import { WaffleMetricControls } from '../../../public/components/waffle/waffle_metric_controls';
+import { WaffleGroupByControls } from '../../../public/components/waffle/waffle_group_by_controls';
+import { InfraSnapshotMetricType } from '../../../public/graphql/types';
+import {
+  toGroupByOpt,
+  toMetricOpt,
+} from '../../../public/components/inventory/toolbars/toolbar_wrapper';
 
-export const HostToolbarItems = (props: ToolbarProps) => {
-  const metricOptions = useMemo(
+export const PodToolbarItems = (props: ToolbarProps) => {
+  const options = useMemo(
     () =>
       [
         InfraSnapshotMetricType.cpu,
         InfraSnapshotMetricType.memory,
-        InfraSnapshotMetricType.load,
         InfraSnapshotMetricType.rx,
         InfraSnapshotMetricType.tx,
-        InfraSnapshotMetricType.logRate,
       ].map(toMetricOpt),
     []
   );
 
   const groupByOptions = useMemo(
-    () =>
-      [
-        'cloud.availability_zone',
-        'cloud.machine.type',
-        'cloud.project.id',
-        'cloud.provider',
-        'service.type',
-      ].map(toGroupByOpt),
+    () => ['kubernetes.namespace', 'kubernetes.node.name', 'service.type'].map(toGroupByOpt),
     []
   );
 
@@ -42,8 +36,8 @@ export const HostToolbarItems = (props: ToolbarProps) => {
     <>
       <EuiFlexItem grow={false}>
         <WaffleMetricControls
-          options={metricOptions}
           metric={props.metric}
+          options={options}
           onChange={props.changeMetric}
         />
       </EuiFlexItem>

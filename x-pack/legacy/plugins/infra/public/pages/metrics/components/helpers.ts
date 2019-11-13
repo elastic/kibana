@@ -7,19 +7,22 @@
 import { ReactText } from 'react';
 import Color from 'color';
 import { get, first, last, min, max } from 'lodash';
-import { InfraFormatterType } from '../../../../lib/lib';
-import { createFormatter } from '../../../../utils/formatters';
-import { InfraDataSeries, InfraMetricData } from '../../../../graphql/types';
+import { createFormatter } from '../../../utils/formatters';
+import { InfraDataSeries, InfraMetricData } from '../../../graphql/types';
 import {
-  InventoryDetailSection,
   InventoryVisTypeRT,
-} from '../../../../../common/inventory_models/types';
+  InventoryFormatterType,
+  InventoryVisType,
+} from '../../../../common/inventory_models/types';
+import { SeriesOverrides } from '../types';
 
 /**
  * Returns a formatter
  */
-export const getFormatter = (formatter: InfraFormatterType, template: string) => (val: ReactText) =>
-  val != null ? createFormatter(formatter, template)(val) : '';
+export const getFormatter = (
+  formatter: InventoryFormatterType = 'number',
+  template: string = '{{value}}'
+) => (val: ReactText) => (val != null ? createFormatter(formatter, template)(val) : '');
 
 /**
  * Does a series have more then two points?
@@ -47,16 +50,25 @@ export const getMaxMinTimestamp = (metric: InfraMetricData): [number, number] =>
  * Returns the chart name from the visConfig based on the series id, otherwise it
  * just returns the seriesId
  */
-export const getChartName = (section: InventoryDetailSection, seriesId: string, label: string) => {
-  return get(section, ['visConfig', 'seriesOverrides', seriesId, 'name'], label);
+export const getChartName = (
+  seriesOverrides: SeriesOverrides | undefined,
+  seriesId: string,
+  label: string
+) => {
+  if (!seriesOverrides) {
+    return label;
+  }
+  return get(seriesOverrides, [seriesId, 'name'], label);
 };
 
 /**
  * Returns the chart color from the visConfig based on the series id, otherwise it
  * just returns null if the color doesn't exists in the overrides.
  */
-export const getChartColor = (section: InventoryDetailSection, seriesId: string) => {
-  const rawColor: string | null = get(section, ['visConfig', 'seriesOverrides', seriesId, 'color']);
+export const getChartColor = (seriesOverrides: SeriesOverrides | undefined, seriesId: string) => {
+  const rawColor: string | null = seriesOverrides
+    ? get(seriesOverrides, [seriesId, 'color'])
+    : null;
   if (!rawColor) {
     return null;
   }
@@ -67,14 +79,20 @@ export const getChartColor = (section: InventoryDetailSection, seriesId: string)
 /**
  * Gets the chart type based on the section and seriesId
  */
-export const getChartType = (section: InventoryDetailSection, seriesId: string) => {
-  const value = get(section, ['visConfig', 'type']);
-  const overrideValue = get(section, ['visConfig', 'seriesOverrides', seriesId, 'type']);
+export const getChartType = (
+  seriesOverrides: SeriesOverrides | undefined,
+  type: InventoryVisType | undefined,
+  seriesId: string
+) => {
+  if (!seriesOverrides || !type) {
+    return 'line';
+  }
+  const overrideValue = get(seriesOverrides, [seriesId, 'type']);
   if (InventoryVisTypeRT.is(overrideValue)) {
     return overrideValue;
   }
-  if (InventoryVisTypeRT.is(value)) {
-    return value;
+  if (InventoryVisTypeRT.is(type)) {
+    return type;
   }
   return 'line';
 };

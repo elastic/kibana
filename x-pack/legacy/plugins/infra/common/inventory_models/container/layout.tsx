@@ -3,30 +3,32 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { InventoryDetailLayoutCreator } from '../types';
-import { nginxLayoutCreator } from '../shared/layouts/nginx';
+import { LayoutPropsWithTheme } from '../../../public/pages/metrics/types';
+import { Section } from '../../../public/pages/metrics/components/section';
+import { SubSection } from '../../../public/pages/metrics/components/sub_section';
+import { GaugesSectionVis } from '../../../public/pages/metrics/components/gauges_section_vis';
+import { ChartSectionVis } from '../../../public/pages/metrics/components/chart_section_vis';
+import { withTheme } from '../../../../../common/eui_styled_components';
 
-export const layout: InventoryDetailLayoutCreator = theme => [
-  {
-    id: 'containerOverview',
-    label: i18n.translate('xpack.infra.metricDetailPage.containerMetricsLayout.layoutLabel', {
-      defaultMessage: 'Container',
-    }),
-    sections: [
-      {
-        id: 'containerOverview',
-        label: i18n.translate(
-          'xpack.infra.metricDetailPage.containerMetricsLayout.overviewSection.sectionLabel',
-          {
-            defaultMessage: 'Overview',
-          }
-        ),
-        requires: ['docker.cpu', 'docker.memory', 'docker.network'],
-        type: 'gauges',
-        visConfig: {
-          seriesOverrides: {
+export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
+  <React.Fragment>
+    <Section
+      navLabel={i18n.translate('xpack.infra.metricDetailPage.containerMetricsLayout.layoutLabel', {
+        defaultMessage: 'Container',
+      })}
+      sectionLabel={i18n.translate(
+        'xpack.infra.metricDetailPage.containerMetricsLayout.overviewSection.sectionLabel',
+        {
+          defaultMessage: 'Container Overview',
+        }
+      )}
+      metrics={metrics}
+    >
+      <SubSection id="containerOverview">
+        <GaugesSectionVis
+          seriesOverrides={{
             cpu: {
               name: i18n.translate(
                 'xpack.infra.metricDetailPage.containerMetricsLayout.overviewSection.cpuUsageSeriesLabel',
@@ -71,62 +73,59 @@ export const layout: InventoryDetailLayoutCreator = theme => [
               formatter: 'bits',
               formatterTemplate: '{{value}}/s',
             },
-          },
-        },
-      },
-      {
-        id: 'containerCpuUsage',
-        label: i18n.translate(
+          }}
+        />
+      </SubSection>
+      <SubSection
+        id="containerCpuUsage"
+        label={i18n.translate(
           'xpack.infra.metricDetailPage.containerMetricsLayout.cpuUsageSection.sectionLabel',
           {
             defaultMessage: 'CPU Usage',
           }
-        ),
-        requires: ['docker.cpu'],
-        type: 'chart',
-        visConfig: {
-          stacked: true,
-          type: 'area',
-          formatter: 'percent',
-          seriesOverrides: {
+        )}
+      >
+        <ChartSectionVis
+          stacked={true}
+          type="area"
+          formatter="percent"
+          seriesOverrides={{
             cpu: { color: theme.eui.euiColorVis1 },
-          },
-        },
-      },
-      {
-        id: 'containerMemory',
-        label: i18n.translate(
+          }}
+        />
+      </SubSection>
+      <SubSection
+        id="containerMemory"
+        label={i18n.translate(
           'xpack.infra.metricDetailPage.containerMetricsLayout.memoryUsageSection.sectionLabel',
           {
             defaultMessage: 'Memory Usage',
           }
-        ),
-        requires: ['docker.memory'],
-        type: 'chart',
-        visConfig: {
-          stacked: true,
-          type: 'area',
-          formatter: 'percent',
-          seriesOverrides: {
+        )}
+      >
+        <ChartSectionVis
+          stacked={true}
+          type="area"
+          formatter="percent"
+          seriesOverrides={{
             memory: { color: theme.eui.euiColorVis1 },
-          },
-        },
-      },
-      {
-        id: 'containerNetworkTraffic',
-        label: i18n.translate(
+          }}
+        />
+      </SubSection>
+      <SubSection
+        id="containerNetworkTraffic"
+        label={i18n.translate(
           'xpack.infra.metricDetailPage.containerMetricsLayout.networkTrafficSection.sectionLabel',
           {
             defaultMessage: 'Network Traffic',
           }
-        ),
-        requires: ['docker.network'],
-        type: 'chart',
-        visConfig: {
-          formatter: 'bits',
-          formatterTemplate: '{{value}}/s',
-          type: 'area',
-          seriesOverrides: {
+        )}
+      >
+        <ChartSectionVis
+          formatter="bits"
+          formatterTemplate="{{value}}/s"
+          type="area"
+          seriesOverrides={{
             rx: {
               color: theme.eui.euiColorVis1,
               name: i18n.translate(
@@ -145,24 +144,23 @@ export const layout: InventoryDetailLayoutCreator = theme => [
                 }
               ),
             },
-          },
-        },
-      },
-      {
-        id: 'containerDiskIOOps',
-        label: i18n.translate(
+          }}
+        />
+      </SubSection>
+      <SubSection
+        id="containerDiskIOOps"
+        label={i18n.translate(
           'xpack.infra.metricDetailPage.containerMetricsLayout.diskIoOpsSection.sectionLabel',
           {
             defaultMessage: 'Disk IO (Ops)',
           }
-        ),
-        requires: ['docker.diskio'],
-        type: 'chart',
-        visConfig: {
-          formatter: 'number',
-          formatterTemplate: '{{value}}/s',
-          type: 'area',
-          seriesOverrides: {
+        )}
+      >
+        <ChartSectionVis
+          type="area"
+          formatterTemplate="{{value}}/s"
+          formatter="number"
+          seriesOverrides={{
             read: {
               color: theme.eui.euiColorVis1,
               name: i18n.translate(
@@ -181,24 +179,23 @@ export const layout: InventoryDetailLayoutCreator = theme => [
                 }
               ),
             },
-          },
-        },
-      },
-      {
-        id: 'containerDiskIOBytes',
-        label: i18n.translate(
+          }}
+        />
+      </SubSection>
+      <SubSection
+        id="containerDiskIOBytes"
+        label={i18n.translate(
           'xpack.infra.metricDetailPage.containerMetricsLayout.diskIoBytesSection.sectionLabel',
           {
             defaultMessage: 'Disk IO (Bytes)',
           }
-        ),
-        requires: ['docker.diskio'],
-        type: 'chart',
-        visConfig: {
-          formatter: 'bytes',
-          formatterTemplate: '{{value}}/s',
-          type: 'area',
-          seriesOverrides: {
+        )}
+      >
+        <ChartSectionVis
+          type="area"
+          formatter="bytes"
+          formatterTemplate="{{value}}/s"
+          seriesOverrides={{
             read: {
               color: theme.eui.euiColorVis1,
               name: i18n.translate(
@@ -217,10 +214,9 @@ export const layout: InventoryDetailLayoutCreator = theme => [
                 }
               ),
             },
-          },
-        },
-      },
-    ],
-  },
-  ...nginxLayoutCreator(theme),
-];
+          }}
+        />
+      </SubSection>
+    </Section>
+  </React.Fragment>
+));

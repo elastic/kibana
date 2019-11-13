@@ -8,8 +8,8 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { EuiButtonIcon, EuiFlexGrid, EuiFlexItem, EuiTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { InfraMetadata } from '../../../common/http_api';
-import euiStyled from '../../../../../common/eui_styled_components';
+import { InfraMetadata } from '../../../../common/http_api';
+import euiStyled from '../../../../../../common/eui_styled_components';
 
 interface Props {
   metadata?: InfraMetadata | null;
