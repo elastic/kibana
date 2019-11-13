@@ -115,7 +115,7 @@ export const initLegacyModule = once((indexPatterns: IndexPatterns): void => {
     .get('app/kibana', ['react'])
     .directive('filterBar', createFilterBarDirective)
     .directive('filterBarHelper', createFilterBarHelper)
-    .directive('applyFiltersPopover', createApplyFiltersPopoverDirective)
+    .directive('applyFiltersPopover', createApplyFiltersPopoverDirective);
 
   uiModules.get('kibana/index_patterns').value('indexPatterns', indexPatterns);
 });

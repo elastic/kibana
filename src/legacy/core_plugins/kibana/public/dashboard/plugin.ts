@@ -26,7 +26,7 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { RenderDeps } from './render_app';
+import { RenderDeps } from './application';
 import { LocalApplicationService } from '../local_application_service';
 import { DataStart } from '../../../data/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
@@ -109,7 +109,7 @@ export class DashboardPlugin implements Plugin {
           dashboardCapabilities: contextCore.application.capabilities.dashboard,
           localStorage: new Storage(localStorage),
         };
-        const { renderApp } = await import('./render_app');
+        const { renderApp } = await import('./application');
         return renderApp(params.element, params.appBasePath, deps);
       },
     };
