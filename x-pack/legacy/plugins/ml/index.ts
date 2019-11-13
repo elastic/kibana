@@ -38,7 +38,7 @@ export const ml = (kibana: any) => {
         }),
         icon: 'plugins/ml/ml.svg',
         euiIconType: 'machineLearningApp',
-        main: 'plugins/ml/app',
+        main: 'plugins/ml/index',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: ['plugins/ml/hacks/toggle_app_link_in_nav'],

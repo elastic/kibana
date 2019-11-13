@@ -6,7 +6,6 @@
 
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { KibanaConfigTypeFix } from '../../../contexts/kibana';
-import { InjectorService } from '../../../../common/types/angular';
 import { esQuery, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 export interface SearchItems {
@@ -18,55 +17,50 @@ export interface SearchItems {
 
 // Provider for creating the items used for searching and job creation.
 // Uses the $route object to retrieve the indexPattern and savedSearch from the url
-export function SearchItemsProvider($injector: InjectorService) {
-  const kibanaConfig = $injector.get<KibanaConfigTypeFix>('config');
-  const $route = $injector.get<any>('$route');
 
-  function createSearchItems() {
-    let indexPattern = $route.current.locals.indexPattern;
+export function createSearchItems(
+  kibanaConfig: KibanaConfigTypeFix,
+  indexPattern: any,
+  savedSearch: any
+) {
+  // query is only used by the data visualizer as it needs
+  // a lucene query_string.
+  // Using a blank query will cause match_all:{} to be used
+  // when passed through luceneStringToDsl
+  let query = {
+    query: '',
+    language: 'lucene',
+  };
 
-    // query is only used by the data visualizer as it needs
-    // a lucene query_string.
-    // Using a blank query will cause match_all:{} to be used
-    // when passed through luceneStringToDsl
-    let query = {
-      query: '',
-      language: 'lucene',
-    };
+  let combinedQuery: any = {
+    bool: {
+      must: [
+        {
+          match_all: {},
+        },
+      ],
+    },
+  };
 
-    let combinedQuery: any = {
-      bool: {
-        must: [
-          {
-            match_all: {},
-          },
-        ],
-      },
-    };
+  if (indexPattern.id === undefined && savedSearch.id !== undefined) {
+    const searchSource = savedSearch.searchSource;
+    indexPattern = searchSource.getField('index');
 
-    const savedSearch = $route.current.locals.savedSearch;
-    if (indexPattern.id === undefined && savedSearch.id !== undefined) {
-      const searchSource = savedSearch.searchSource;
-      indexPattern = searchSource.getField('index');
+    query = searchSource.getField('query');
+    const fs = searchSource.getField('filter');
 
-      query = searchSource.getField('query');
-      const fs = searchSource.getField('filter');
+    const filters = fs.length ? fs : [];
 
-      const filters = fs.length ? fs : [];
-
-      const esQueryConfigs = esQuery.getEsQueryConfig(kibanaConfig);
-      combinedQuery = esQuery.buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
-    }
-
-    return {
-      indexPattern,
-      savedSearch,
-      query,
-      combinedQuery,
-    };
+    const esQueryConfigs = esQuery.getEsQueryConfig(kibanaConfig);
+    combinedQuery = esQuery.buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
   }
 
-  return createSearchItems;
+  return {
+    indexPattern,
+    savedSearch,
+    query,
+    combinedQuery,
+  };
 }
 
 // Only model plot cardinality relevant
