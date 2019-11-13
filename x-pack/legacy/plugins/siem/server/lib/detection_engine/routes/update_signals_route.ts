@@ -34,7 +34,7 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
     const {
       description,
       enabled,
-      falsePositives,
+      false_positives: falsePositives,
       filter,
       from,
       immutable,
