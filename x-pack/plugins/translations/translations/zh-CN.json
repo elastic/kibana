@@ -9023,7 +9023,6 @@
     "xpack.siem.formatted.duration.noDurationTooltip": "无持续时间",
     "xpack.siem.formatted.duration.zeroNanosecondsTooltip": "零纳秒",
     "xpack.siem.formattedDuration.tooltipLabel": "原始",
-    "xpack.siem.global.addData": "添加数据",
     "xpack.siem.headerPage.pageSubtitle": "最后事件：{beat}",
     "xpack.siem.host.details.architectureLabel": "架构",
     "xpack.siem.host.details.firstSeenTitle": "首次看到时间",
