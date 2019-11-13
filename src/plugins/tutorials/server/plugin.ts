@@ -44,7 +44,7 @@ type ScopedTutorialContextFactory = (...args: any[]) => any;
 type AddScopedTutorialContextFactory = (arg0: ScopedTutorialContextFactory) => void;
 // following similar signature to the features_catalogue plugin
 export class TutorialsPlugin implements Plugin<TutorialsRegistrySetup, TutorialsRegistryStart> {
-  private readonly tutorialProviders: TutorialProvider[] = [];
+  private readonly tutorialProviders: TutorialProvider[] = []; // pre-register all the tutorials we know we want in here
   private readonly scopedTutorialContextFactories: TutorialContextFactory[] = [];
 
   public async setup(core: CoreSetup) {
