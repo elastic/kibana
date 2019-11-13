@@ -26,7 +26,7 @@ function isVersionFlag(a) {
 function getCustomSnapshotUrl() {
   // force use of manually created snapshots until live ones are available
   if (!process.env.KBN_ES_SNAPSHOT_URL && !process.argv.some(isVersionFlag)) {
-    return 'https://storage.googleapis.com/kibana-ci-tmp-artifacts/7.5.0-3c3b0b43/{name}-{version}-{os}-x86_64.{ext}';
+    return 'https://snapshots.elastic.co/7.5.0-3c3b0b43/downloads/elasticsearch/elasticsearch-7.5.0-SNAPSHOT-{os}-x86_64.{ext}';
   }
 
   if (process.env.KBN_ES_SNAPSHOT_URL && process.env.KBN_ES_SNAPSHOT_URL !== 'false') {
