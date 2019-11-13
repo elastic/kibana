@@ -135,10 +135,10 @@ export const getDurationFormatter: TimeFormatterBuilder = memoize(
   }
 );
 
-export function getDurationUnit(max: number) {
-  const toMicroseconds = (value: number, timeUnit: TimeUnit) =>
-    moment.duration(value, timeUnit).asMilliseconds() * 1000;
+export const toMicroseconds = (value: number, timeUnit: TimeUnit) =>
+  moment.duration(value, timeUnit).asMilliseconds() * 1000;
 
+export function getDurationUnit(max: number) {
   if (max > toMicroseconds(1, 'hours')) {
     return 'h';
   }
