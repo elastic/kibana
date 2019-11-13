@@ -103,9 +103,7 @@ export default function ({ getService, updateBaselines }) {
 
         const regionMapExpr =
           `regionmap visConfig='{"metric":{"accessor":1,"format":{"id":"number"}},"bucket":{"accessor":0}}'`;
-        await expectExpression('partial_test_3', regionMapExpr, context).toMatchSnapshot();
-        // todo: regionmap doesn't correctly signal when its done rendering (base layer might not yet be loaded)
-        // await (await expectExpression('partial_test_3', regionMapExpr, context).toMatchSnapshot()).toMatchScreenshot();
+        await (await expectExpression('partial_test_3', regionMapExpr, context).toMatchSnapshot()).toMatchScreenshot();
       });
     });
   });
