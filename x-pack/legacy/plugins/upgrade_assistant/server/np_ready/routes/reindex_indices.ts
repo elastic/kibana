@@ -73,12 +73,8 @@ export function registerReindexIndicesRoutes(
     },
     async handler(request) {
       const reqShim = createRequestShim(request);
-      if (!reqShim.getSavedObjectsClient) {
-        // May be null under certain conditions, probably in tests.
-        throw new Error('Could not find SavedObjectsClient getter.');
-      }
-      const client = reqShim.getSavedObjectsClient();
       const { indexName } = reqShim.params;
+      const client = reqShim.getSavedObjectsClient!();
       const callCluster = callWithRequest.bind(null, reqShim) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
       const reindexService = reindexServiceFactory(
@@ -127,7 +123,7 @@ export function registerReindexIndicesRoutes(
     },
     async handler(request) {
       const reqShim = createRequestShim(request);
-      const client = reqShim.getSavedObjectsClient();
+      const client = reqShim.getSavedObjectsClient!();
       const { indexName } = reqShim.params;
       const callCluster = callWithRequest.bind(null, reqShim) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
@@ -172,8 +168,8 @@ export function registerReindexIndicesRoutes(
     },
     async handler(request) {
       const reqShim = createRequestShim(request);
-      const client = reqShim.getSavedObjectsClient();
       const { indexName } = reqShim.params;
+      const client = reqShim.getSavedObjectsClient!();
       const callCluster = callWithRequest.bind(null, reqShim) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
       const reindexService = reindexServiceFactory(

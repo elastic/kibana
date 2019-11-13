@@ -32,5 +32,6 @@ export interface RequestShim {
   headers: { [key: string]: string };
   payload: any;
   params: any;
+  // May not exist in tests, flagging it as possible null here.
   getSavedObjectsClient: (() => SavedObjectsClientContract) | null;
 }
