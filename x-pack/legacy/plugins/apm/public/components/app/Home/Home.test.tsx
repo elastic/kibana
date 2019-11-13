@@ -7,9 +7,16 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { Home } from '../Home';
+import * as kibanaCore from '../../../../../observability/public/context/kibana_core';
+import { LegacyCoreStart } from 'kibana/public';
 
-jest.mock('ui/index_patterns');
-jest.mock('ui/new_platform');
+const coreMock = ({
+  injectedMetadata: {
+    getInjectedVar: () => false
+  }
+} as unknown) as LegacyCoreStart;
+
+jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
 
 describe('Home component', () => {
   it('should render services', () => {

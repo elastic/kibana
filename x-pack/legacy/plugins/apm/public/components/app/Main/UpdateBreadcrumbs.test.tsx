@@ -7,67 +7,64 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { UpdateBreadcrumbs } from '../UpdateBreadcrumbs';
-import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
+import { UpdateBreadcrumbs } from './UpdateBreadcrumbs';
+import * as kibanaCore from '../../../../../observability/public/context/kibana_core';
+import { LegacyCoreStart } from 'kibana/public';
 
-jest.mock('ui/index_patterns');
-jest.mock('ui/new_platform');
-
-const coreMock = {
+const coreMock = ({
   chrome: {
-    setBreadcrumbs: jest.fn()
+    setBreadcrumbs: () => {}
   }
-};
+} as unknown) as LegacyCoreStart;
 
 jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
+const setBreadcrumbs = jest.spyOn(coreMock.chrome, 'setBreadcrumbs');
 
-function expectBreadcrumbToMatchSnapshot(route, params = '') {
+function expectBreadcrumbToMatchSnapshot(route: string, params = '') {
   mount(
     <MemoryRouter initialEntries={[`${route}?kuery=myKuery&${params}`]}>
       <UpdateBreadcrumbs />
     </MemoryRouter>
   );
-  expect(coreMock.chrome.setBreadcrumbs).toHaveBeenCalledTimes(1);
-  expect(coreMock.chrome.setBreadcrumbs.mock.calls[0][0]).toMatchSnapshot();
+  expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
+  expect(setBreadcrumbs.mock.calls[0][0]).toMatchSnapshot();
 }
 
 describe('UpdateBreadcrumbs', () => {
-  let realDoc;
+  let originalTitle: string;
 
   beforeEach(() => {
-    realDoc = global.document;
-    global.document = {
-      title: 'Kibana'
-    };
-    coreMock.chrome.setBreadcrumbs.mockReset();
+    originalTitle = window.document.title;
+    window.document.title = 'Kibana';
+    setBreadcrumbs.mockReset();
   });
 
   afterEach(() => {
-    global.document = realDoc;
+    window.document.title = originalTitle;
   });
 
   it('Homepage', () => {
     expectBreadcrumbToMatchSnapshot('/');
-    expect(global.document.title).toMatchInlineSnapshot(`"APM"`);
+    expect(window.document.title).toMatchInlineSnapshot(`"APM"`);
   });
 
   it('/services/:serviceName/errors/:groupId', () => {
     expectBreadcrumbToMatchSnapshot('/services/opbeans-node/errors/myGroupId');
-    expect(global.document.title).toMatchInlineSnapshot(
+    expect(window.document.title).toMatchInlineSnapshot(
       `"myGroupId | Errors | opbeans-node | Services | APM"`
     );
   });
 
   it('/services/:serviceName/errors', () => {
     expectBreadcrumbToMatchSnapshot('/services/opbeans-node/errors');
-    expect(global.document.title).toMatchInlineSnapshot(
+    expect(window.document.title).toMatchInlineSnapshot(
       `"Errors | opbeans-node | Services | APM"`
     );
   });
 
   it('/services/:serviceName/transactions', () => {
     expectBreadcrumbToMatchSnapshot('/services/opbeans-node/transactions');
-    expect(global.document.title).toMatchInlineSnapshot(
+    expect(window.document.title).toMatchInlineSnapshot(
       `"Transactions | opbeans-node | Services | APM"`
     );
   });
@@ -77,7 +74,7 @@ describe('UpdateBreadcrumbs', () => {
       '/services/opbeans-node/transactions/view',
       'transactionName=my-transaction-name'
     );
-    expect(global.document.title).toMatchInlineSnapshot(
+    expect(window.document.title).toMatchInlineSnapshot(
       `"my-transaction-name | Transactions | opbeans-node | Services | APM"`
     );
   });

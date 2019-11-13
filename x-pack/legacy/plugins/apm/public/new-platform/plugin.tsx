@@ -8,7 +8,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
-import { LegacyCoreStart } from 'src/core/public';
+import {
+  FeatureCatalogueSetup,
+  FeatureCatalogueCategory
+} from 'src/plugins/feature_catalogue/public';
+import { LegacyCoreStart, LegacyCoreSetup } from 'src/core/public';
 import { KibanaCoreContextProvider } from '../../../observability/public';
 import { history } from '../utils/history';
 import { LocationProvider } from '../context/LocationContext';
@@ -21,6 +25,7 @@ import { routes } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
 import { useUpdateBadgeEffect } from '../components/app/Main/useUpdateBadgeEffect';
 import { MatchedRouteProvider } from '../context/MatchedRouteContext';
+import { i18n } from '@kbn/i18n';
 
 export const REACT_APP_ROOT_ID = 'react-apm-root';
 
@@ -53,18 +58,42 @@ const App = () => {
   );
 };
 
+interface ApmSetupPlugins {
+  feature_catalogue: FeatureCatalogueSetup;
+}
+
 export class Plugin {
-  public start(core: LegacyCoreStart) {
-    const { i18n } = core;
+  public setup(core: LegacyCoreSetup, plugins: ApmSetupPlugins) {
+    const apmUiEnabled = core.injectedMetadata.getInjectedVar('apmUiEnabled');
+
+    if (apmUiEnabled) {
+      plugins.feature_catalogue.register({
+        id: 'apm',
+        title: 'APM',
+        description: i18n.translate('xpack.apm.apmDescription', {
+          defaultMessage:
+            'Automatically collect in-depth performance metrics and ' +
+            'errors from inside your applications.'
+        }),
+        icon: 'apmApp',
+        path: '/app/apm',
+        showOnHomePage: true,
+        category: FeatureCatalogueCategory.DATA
+      });
+    }
+  }
+
+  public start(core: LegacyCoreStart, _plugins: {}) {
+    const { i18n: i18nCore } = core;
     ReactDOM.render(
       <KibanaCoreContextProvider core={core}>
-        <i18n.Context>
+        <i18nCore.Context>
           <Router history={history}>
             <LocationProvider>
               <App />
             </LocationProvider>
           </Router>
-        </i18n.Context>
+        </i18nCore.Context>
       </KibanaCoreContextProvider>,
       document.getElementById(REACT_APP_ROOT_ID)
     );

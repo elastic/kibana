@@ -6,7 +6,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { npStart } from 'ui/new_platform';
+import { npSetup, npStart } from 'ui/new_platform';
 import 'react-vis/dist/style.css';
 import 'ui/autoload/all';
 import chrome from 'ui/chrome';
@@ -19,12 +19,15 @@ import './style/global_overrides.css';
 import template from './templates/index.html';
 import { KibanaCoreContextProvider } from '../../observability/public';
 
-const { core } = npStart;
+const coreSetup = npSetup.core;
+const pluginsSetup = npSetup.plugins;
+const coreStart = npStart.core;
+const pluginsStart = npStart.plugins;
 
 // render APM feedback link in global help menu
-core.chrome.setHelpExtension(domElement => {
+coreStart.chrome.setHelpExtension(domElement => {
   ReactDOM.render(
-    <KibanaCoreContextProvider core={core}>
+    <KibanaCoreContextProvider core={coreStart}>
       <GlobalHelpExtension />
     </KibanaCoreContextProvider>,
     domElement
@@ -48,5 +51,7 @@ const checkForRoot = () => {
   });
 };
 checkForRoot().then(() => {
-  plugin().start(core);
+  const pluginInstance = plugin();
+  pluginInstance.setup(coreSetup, pluginsSetup);
+  pluginInstance.start(coreStart, pluginsStart);
 });

@@ -13,10 +13,10 @@ import {
   EuiSpacer
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { npStart } from 'ui/new_platform';
 import React from 'react';
 import { $ElementType } from 'utility-types';
 import { ApmHeader } from '../../shared/ApmHeader';
+import { useKibanaCore } from '../../../../../observability/public';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
@@ -27,43 +27,51 @@ import { SettingsLink } from '../../shared/Links/apm/SettingsLink';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 import { ServiceMap } from '../ServiceMap';
 
-const homeTabs = [
-  {
-    link: (
-      <ServiceOverviewLink>
-        {i18n.translate('xpack.apm.home.servicesTabLabel', {
-          defaultMessage: 'Services'
-        })}
-      </ServiceOverviewLink>
-    ),
-    render: () => <ServiceOverview />,
-    name: 'services'
-  },
-  {
-    link: (
-      <TraceOverviewLink>
-        {i18n.translate('xpack.apm.home.tracesTabLabel', {
-          defaultMessage: 'Traces'
-        })}
-      </TraceOverviewLink>
-    ),
-    render: () => <TraceOverview />,
-    name: 'traces'
-  }
-];
+function getHomeTabs({
+  apmServiceMapEnabled = false
+}: {
+  apmServiceMapEnabled: boolean;
+}) {
+  const homeTabs = [
+    {
+      link: (
+        <ServiceOverviewLink>
+          {i18n.translate('xpack.apm.home.servicesTabLabel', {
+            defaultMessage: 'Services'
+          })}
+        </ServiceOverviewLink>
+      ),
+      render: () => <ServiceOverview />,
+      name: 'services'
+    },
+    {
+      link: (
+        <TraceOverviewLink>
+          {i18n.translate('xpack.apm.home.tracesTabLabel', {
+            defaultMessage: 'Traces'
+          })}
+        </TraceOverviewLink>
+      ),
+      render: () => <TraceOverview />,
+      name: 'traces'
+    }
+  ];
 
-if (npStart.core.injectedMetadata.getInjectedVar('apmServiceMapEnabled')) {
-  homeTabs.push({
-    link: (
-      <ServiceMapLink>
-        {i18n.translate('xpack.apm.home.serviceMapTabLabel', {
-          defaultMessage: 'Service Map'
-        })}
-      </ServiceMapLink>
-    ),
-    render: () => <ServiceMap />,
-    name: 'service-map'
-  });
+  if (apmServiceMapEnabled) {
+    homeTabs.push({
+      link: (
+        <ServiceMapLink>
+          {i18n.translate('xpack.apm.home.serviceMapTabLabel', {
+            defaultMessage: 'Service Map'
+          })}
+        </ServiceMapLink>
+      ),
+      render: () => <ServiceMap />,
+      name: 'service-map'
+    });
+  }
+
+  return homeTabs;
 }
 
 const SETTINGS_LINK_LABEL = i18n.translate('xpack.apm.settingsLinkLabel', {
@@ -75,6 +83,11 @@ interface Props {
 }
 
 export function Home({ tab }: Props) {
+  const core = useKibanaCore();
+  const apmServiceMapEnabled: boolean = !!core.injectedMetadata.getInjectedVar(
+    'apmServiceMapEnabled'
+  );
+  const homeTabs = getHomeTabs({ apmServiceMapEnabled });
   const selectedTab = homeTabs.find(
     homeTab => homeTab.name === tab
   ) as $ElementType<typeof homeTabs, number>;

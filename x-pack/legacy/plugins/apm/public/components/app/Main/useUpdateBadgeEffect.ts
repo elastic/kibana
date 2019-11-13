@@ -6,16 +6,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { useEffect } from 'react';
-import { capabilities } from 'ui/capabilities';
 import { useKibanaCore } from '../../../../../observability/public';
 
 export const useUpdateBadgeEffect = () => {
-  const { chrome } = useKibanaCore();
+  const { chrome, application } = useKibanaCore();
+  const { capabilities } = application;
 
   useEffect(() => {
-    const uiCapabilities = capabilities.get();
     chrome.setBadge(
-      !uiCapabilities.apm.save
+      !capabilities.apm.save
         ? {
             text: i18n.translate('xpack.apm.header.badge.readOnly.text', {
               defaultMessage: 'Read only'
@@ -27,5 +26,5 @@ export const useUpdateBadgeEffect = () => {
           }
         : undefined
     );
-  }, [chrome]);
+  }, [capabilities, chrome]);
 };

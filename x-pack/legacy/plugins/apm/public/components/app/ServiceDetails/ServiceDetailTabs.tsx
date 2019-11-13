@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiTabs, EuiSpacer } from '@elastic/eui';
-import { npStart } from 'ui/new_platform';
+import { useKibanaCore } from '../../../../../observability/public';
 import { ErrorGroupOverview } from '../ErrorGroupOverview';
 import { TransactionOverview } from '../TransactionOverview';
 import { ServiceMetrics } from '../ServiceMetrics';
@@ -31,6 +31,7 @@ export function ServiceDetailTabs({ tab }: Props) {
   const { urlParams } = useUrlParams();
   const { serviceName } = urlParams;
   const { agentName } = useAgentName();
+  const { injectedMetadata } = useKibanaCore();
 
   if (!serviceName) {
     // this never happens, urlParams type is not accurate enough
@@ -105,7 +106,7 @@ export function ServiceDetailTabs({ tab }: Props) {
     name: 'service-map'
   };
 
-  if (npStart.core.injectedMetadata.getInjectedVar('apmServiceMapEnabled')) {
+  if (injectedMetadata.getInjectedVar('apmServiceMapEnabled')) {
     tabs.push(serviceMapTab);
   }
 
