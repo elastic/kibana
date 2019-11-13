@@ -23,6 +23,7 @@ export { updateTelemetrySavedObject } from './update_telemetry_saved_object';
 export interface TelemetrySavedObjectAttributes {
   enabled?: boolean | null;
   lastVersionChecked?: string;
-  usageFetcher?: 'browser' | 'server';
+  sendUsageFrom?: 'browser' | 'server';
   lastReported?: number;
+  telemetryAllowChangingOptInStatus?: boolean;
 }

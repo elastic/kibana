@@ -21,7 +21,7 @@ import moment from 'moment';
 // @ts-ignore
 import fetch from 'node-fetch';
 import { telemetryCollectionManager } from './collection_manager';
-import { getTelemetryOptIn, getTelemetryUsageFetcher } from './telemetry_config';
+import { getTelemetryOptIn, getTelemetrySendUsageFrom } from './telemetry_config';
 import { getTelemetrySavedObject, updateTelemetrySavedObject } from './telemetry_repository';
 import { REPORT_INTERVAL_MS } from '../common/constants';
 import { getXpackConfigWithDeprecated } from '../common/get_xpack_config_with_deprecated';
@@ -49,14 +49,21 @@ export class FetcherTask {
     const telemetrySavedObject = await getTelemetrySavedObject(internalRepository);
     const config = this.server.config();
     const currentKibanaVersion = config.get('pkg.version');
-    const defaultTelemetryUsageFetcher = config.get('telemetry.usageFetcher');
+    const configTelemetrySendUsageFrom = config.get('telemetry.sendUsageFrom');
+    const allowChangingOptInStatus = config.get('telemetry.allowChangingOptInStatus');
+    const configTelemetryOptIn = config.get('telemetry.optIn');
     const telemetryUrl = getXpackConfigWithDeprecated(config, 'telemetry.url') as string;
 
     return {
-      telemetryOptIn: getTelemetryOptIn({ currentKibanaVersion, telemetrySavedObject }),
-      telemetryUsageFetcher: getTelemetryUsageFetcher({
+      telemetryOptIn: getTelemetryOptIn({
+        currentKibanaVersion,
         telemetrySavedObject,
-        defaultTelemetryUsageFetcher,
+        allowChangingOptInStatus,
+        configTelemetryOptIn,
+      }),
+      telemetrySendUsageFrom: getTelemetrySendUsageFrom({
+        telemetrySavedObject,
+        configTelemetrySendUsageFrom,
       }),
       telemetryUrl,
     };
@@ -70,8 +77,8 @@ export class FetcherTask {
     });
   };
 
-  private checkReportStatus = ({ telemetryOptIn, telemetryUsageFetcher }: any) => {
-    if (telemetryOptIn && telemetryUsageFetcher === 'server') {
+  private shouldSendReport = ({ telemetryOptIn, telemetrySendUsageFrom }: any) => {
+    if (telemetryOptIn && telemetrySendUsageFrom === 'server') {
       if (!this.lastReported || Date.now() - this.lastReported > REPORT_INTERVAL_MS) {
         return true;
       }
@@ -107,7 +114,7 @@ export class FetcherTask {
     }
     try {
       const telemetryConfig = await this.getCurrentConfigs();
-      if (!this.checkReportStatus(telemetryConfig)) {
+      if (!this.shouldSendReport(telemetryConfig)) {
         return;
       }
 

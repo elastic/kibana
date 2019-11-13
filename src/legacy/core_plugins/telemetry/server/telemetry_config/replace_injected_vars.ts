@@ -19,11 +19,16 @@
 
 import { getTelemetrySavedObject } from '../telemetry_repository';
 import { getTelemetryOptIn } from './get_telemetry_opt_in';
-import { getTelemetryUsageFetcher } from './get_telemetry_usage_fetcher';
+import { getTelemetrySendUsageFrom } from './get_telemetry_send_usage_from';
+import { getTelemetryAllowChangingOptInStatus } from './get_telemetry_allow_changing_opt_in_status';
 
 export async function replaceTelemetryInjectedVars(request: any) {
-  const defaultTelemetryUsageFetcher = request.server.config().get('telemetry.usageFetcher');
+  const config = request.server.config();
+  const configTelemetrySendUsageFrom = config.get('telemetry.sendUsageFrom');
+  const configTelemetryOptIn = config.get('telemetry.optIn');
+  const configTelemetryAllowChangingOptInStatus = config.get('telemetry.allowChangingOptInStatus');
   const isRequestingApplication = request.path.startsWith('/app');
+
   // Prevent interstitial screens (such as the space selector) from prompting for telemetry
   if (!isRequestingApplication) {
     return {
@@ -31,21 +36,28 @@ export async function replaceTelemetryInjectedVars(request: any) {
     };
   }
 
-  const currentKibanaVersion = request.server.config().get('pkg.version');
+  const currentKibanaVersion = config.get('pkg.version');
   const savedObjectsClient = request.getSavedObjectsClient();
   const telemetrySavedObject = await getTelemetrySavedObject(savedObjectsClient);
+  const allowChangingOptInStatus = getTelemetryAllowChangingOptInStatus({
+    configTelemetryAllowChangingOptInStatus,
+    telemetrySavedObject,
+  });
+
   const telemetryOptedIn = getTelemetryOptIn({
+    configTelemetryOptIn,
+    allowChangingOptInStatus,
     telemetrySavedObject,
     currentKibanaVersion,
   });
 
-  const telemetryUsageFetcher = getTelemetryUsageFetcher({
+  const telemetrySendUsageFrom = getTelemetrySendUsageFrom({
+    configTelemetrySendUsageFrom,
     telemetrySavedObject,
-    defaultTelemetryUsageFetcher,
   });
 
   return {
     telemetryOptedIn,
-    telemetryUsageFetcher,
+    telemetrySendUsageFrom,
   };
 }

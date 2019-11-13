@@ -123,10 +123,12 @@ describe('getTelemetryOptIn', () => {
 interface CallGetTelemetryOptInParams {
   savedObjectNotFound: boolean;
   savedObjectForbidden: boolean;
-  enabled: boolean | null | undefined;
   lastVersionChecked?: any; // should be a string, but test with non-strings
   currentKibanaVersion: string;
   result?: boolean | null;
+  enabled: boolean | null | undefined;
+  configTelemetryOptIn: boolean | null;
+  allowChangingOptInStatus: boolean;
 }
 
 const DefaultParams = {
@@ -135,6 +137,8 @@ const DefaultParams = {
   enabled: true,
   lastVersionChecked: '8.0.0',
   currentKibanaVersion: '8.0.0',
+  configTelemetryOptIn: null,
+  allowChangingOptInStatus: true,
 };
 
 function getCallGetTelemetryOptInParams(
@@ -144,9 +148,14 @@ function getCallGetTelemetryOptInParams(
 }
 
 function callGetTelemetryOptIn(params: CallGetTelemetryOptInParams) {
-  const { currentKibanaVersion } = params;
+  const { currentKibanaVersion, configTelemetryOptIn, allowChangingOptInStatus } = params;
   const telemetrySavedObject = getMockTelemetrySavedObject(params);
-  return getTelemetryOptIn({ currentKibanaVersion, telemetrySavedObject });
+  return getTelemetryOptIn({
+    currentKibanaVersion,
+    telemetrySavedObject,
+    allowChangingOptInStatus,
+    configTelemetryOptIn,
+  });
 }
 
 function getMockTelemetrySavedObject(params: CallGetTelemetryOptInParams): TelemetrySavedObject {

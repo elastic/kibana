@@ -19,7 +19,7 @@
 
 import { TELEMETRY_STATS_TYPE } from '../../../common/constants';
 import { getTelemetrySavedObject, TelemetrySavedObject } from '../../telemetry_repository';
-import { getTelemetryOptIn, getTelemetryUsageFetcher } from '../../telemetry_config';
+import { getTelemetryOptIn, getTelemetrySendUsageFrom } from '../../telemetry_config';
 export interface TelemetryUsageStats {
   opt_in_status?: boolean | null;
   usage_fetcher?: 'browser' | 'server';
@@ -29,7 +29,9 @@ export interface TelemetryUsageStats {
 export function createCollectorFetch(server: any) {
   return async function fetchUsageStats(): Promise<TelemetryUsageStats> {
     const config = server.config();
-    const defaultTelemetryUsageFetcher = config.get('telemetry.usageFetcher');
+    const configTelemetrySendUsageFrom = config.get('telemetry.sendUsageFrom');
+    const allowChangingOptInStatus = config.get('telemetry.allowChangingOptInStatus');
+    const configTelemetryOptIn = config.get('telemetry.optIn');
     const currentKibanaVersion = config.get('pkg.version');
 
     let telemetrySavedObject: TelemetrySavedObject = {};
@@ -44,11 +46,16 @@ export function createCollectorFetch(server: any) {
     }
 
     return {
-      opt_in_status: getTelemetryOptIn({ currentKibanaVersion, telemetrySavedObject }),
-      last_reported: telemetrySavedObject ? telemetrySavedObject.lastReported : undefined,
-      usage_fetcher: getTelemetryUsageFetcher({
+      opt_in_status: getTelemetryOptIn({
+        currentKibanaVersion,
         telemetrySavedObject,
-        defaultTelemetryUsageFetcher,
+        allowChangingOptInStatus,
+        configTelemetryOptIn,
+      }),
+      last_reported: telemetrySavedObject ? telemetrySavedObject.lastReported : undefined,
+      usage_fetcher: getTelemetrySendUsageFrom({
+        telemetrySavedObject,
+        configTelemetrySendUsageFrom,
       }),
     };
   };

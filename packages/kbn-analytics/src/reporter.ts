@@ -60,6 +60,7 @@ export class Reporter {
   }
 
   private flushReport() {
+    this.retryCount = 0;
     this.reportManager.clearReport();
     this.storageManager.store(this.reportManager.report);
   }
@@ -110,11 +111,10 @@ export class Reporter {
       } catch (err) {
         this.retryCount = this.retryCount + 1;
         this.log(`Error Sending Metrics Report ${err}`);
-        if (this.retryCount > this.maxRetries) {
-          this.log(`Max retries reached; Flushing report.`);
-          this.flushReport();
-        } else if (this.reportManager.report.reportVersion !== ReportManager.REPORT_VERSION) {
-          this.log(`Report Version mismatch; Flushing report.`);
+        this.retryCount = this.retryCount + 1;
+        const versionMismatch =
+          this.reportManager.report.reportVersion !== ReportManager.REPORT_VERSION;
+        if (versionMismatch || this.retryCount > this.maxRetries) {
           this.flushReport();
         }
       }

@@ -95,7 +95,7 @@ export function registerUiMetricRoute(server: Server) {
         await storeReport(server, report);
         return { status: 'ok' };
       } catch (error) {
-        return h.response({ status: 'fail' }).code(200);
+        return { status: 'fail' };
       }
     },
   });
