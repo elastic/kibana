@@ -31,11 +31,13 @@ export const plugin: PluginInitializer<DiscoverSetup, DiscoverStart> = (
 };
 
 const pluginInstance = plugin({} as PluginInitializerContext);
-export const setup = pluginInstance.setup(npSetup.core, {
-  ...npSetup.plugins,
-  ...{ localApplicationService },
-});
-export const start = pluginInstance.start(npStart.core, { ...npStart.plugins, ...{ navigation } });
+(async () => {
+  await pluginInstance.setup(npSetup.core, {
+    ...npSetup.plugins,
+    ...{ localApplicationService },
+  });
+  await pluginInstance.start(npStart.core, { ...npStart.plugins, ...{ navigation } });
+})();
 
 SavedObjectRegistryProvider.register((savedSearches: any) => {
   return savedSearches;
