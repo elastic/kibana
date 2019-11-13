@@ -17,11 +17,6 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('@kbn/test').runTestsCli([
-  require.resolve('../test/functional/config.js'),
-  require.resolve('../test/api_integration/config.js'),
-  require.resolve('../test/plugin_functional/config.js'),
-  require.resolve('../test/interpreter_functional/config.js'),
-  require.resolve('../test/ui_capabilities/newsfeed_err/config.ts'),
-]);
+export const NEWSFEED_FALLBACK_LANGUAGE = 'en';
+export const NEWSFEED_LAST_FETCH_STORAGE_KEY = 'newsfeed.lastfetchtime';
+export const NEWSFEED_HASH_SET_STORAGE_KEY = 'newsfeed.hashes';

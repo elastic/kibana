@@ -21,6 +21,7 @@
     "visTypeMetric": "src/legacy/core_plugins/vis_type_metric",
     "visTypeVega": "src/legacy/core_plugins/vis_type_vega",
     "visTypeTable": "src/legacy/core_plugins/vis_type_table",
+    "newsfeed": "src/plugins/newsfeed",
     "regionMap": "src/legacy/core_plugins/region_map",
     "statusPage": "src/legacy/core_plugins/status_page",
     "tileMap": "src/legacy/core_plugins/tile_map",
