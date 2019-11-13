@@ -20,7 +20,7 @@
 import { FunctionComponent } from 'react';
 import { ESRequestResult } from '../../hooks/use_send_current_request_to_es/send_request_to_es';
 
-export type BaseResponseTypes =
+export type BaseResponseType =
   | 'application/json'
   | 'text/csv'
   | 'text/tab-separated-values'
@@ -36,6 +36,6 @@ export interface OutputPaneVisualisationDescriptor<T = ESRequestResult> {
   // i18n friendly name
   title: string;
   // A way to test if the visualisation is compatible with the data
-  isCompatible: (result: { data: unknown; type: BaseResponseTypes }) => boolean;
+  isCompatible: (result: { data: unknown[]; type: BaseResponseType }) => boolean;
   Component: FunctionComponent<OutputPaneVisualisationProps<T>>;
 }

@@ -18,21 +18,29 @@
  */
 
 import React from 'react';
-import { OutputPane, BaseResponseTypes } from '../../components';
+import { OutputPane } from '../../components';
 
 import * as rawVis from '../../components/output_pane/visualisations/raw';
 import { useRequestReadContext } from '../../contexts/request_context';
-import { ESRequestResult } from '../../hooks/use_send_current_request_to_es/send_request_to_es';
 
 export const Output = () => {
-  const { lastResult } = useRequestReadContext();
+  const {
+    lastResult: { type, error, data },
+  } = useRequestReadContext();
 
-  let data: ESRequestResult[] | null = null;
-  let type: BaseResponseTypes | null = null;
-  if (lastResult) {
-    data = lastResult.data;
-    type = lastResult.type;
+  if (!data) {
+    return <p>Empty!</p>;
   }
 
-  return <OutputPane visualisationDescriptors={[rawVis.descriptor]} data={data} type={type} />;
+  if (error) {
+    return <pre>Error! {error}</pre>;
+  }
+
+  return (
+    <OutputPane
+      visualisationDescriptors={[rawVis.descriptor]}
+      data={data}
+      type={type || 'unknown'}
+    />
+  );
 };

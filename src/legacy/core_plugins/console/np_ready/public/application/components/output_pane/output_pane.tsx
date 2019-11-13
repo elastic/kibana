@@ -19,12 +19,12 @@
 
 import React, { useRef, useState } from 'react';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { OutputPaneVisualisationDescriptor, BaseResponseTypes } from './types';
+import { OutputPaneVisualisationDescriptor, BaseResponseType } from './types';
 import { ESRequestResult } from '../../hooks/use_send_current_request_to_es/send_request_to_es';
 
 export interface Props {
-  type: BaseResponseTypes | null;
-  data: ESRequestResult[] | null;
+  type: BaseResponseType;
+  data: ESRequestResult[];
   visualisationDescriptors: OutputPaneVisualisationDescriptor[];
 }
 
@@ -32,16 +32,9 @@ export const OutputPane = ({ visualisationDescriptors, data, type }: Props) => {
   const [currentVis, setCurrentVis] = useState<string | null>(null);
   const containerRef = useRef<HTMLElement>(null as any);
 
-  if (!type) {
-    return <p>Empty!</p>;
-  }
   const compatibleVisualisations = visualisationDescriptors.filter(vis =>
     vis.isCompatible({ data, type })
   );
-
-  if (!data) {
-    return null;
-  }
 
   const renderVis = () => {
     const CurrentVis = currentVis
