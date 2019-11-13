@@ -51,7 +51,7 @@ export const LOCALSTORAGE_KEY = 'telemetry.data';
 /**
  * Link to the Elastic Telemetry privacy statement.
  */
-export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/telemetry-privacy-statement`;
+export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/privacy-statement`;
 
 /**
  * The type name used within the Monitoring index to publish localization stats.
