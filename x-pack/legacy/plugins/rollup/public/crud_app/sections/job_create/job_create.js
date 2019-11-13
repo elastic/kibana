@@ -125,21 +125,14 @@ export class JobCreateUi extends Component {
     const { clearCloneJob, jobToClone } = this.props;
     if (jobToClone) {
       clearCloneJob();
-      this.requestIndexPatternValidation();
+      this.requestIndexPatternValidation(false);
     }
   }
 
   componentDidUpdate(prevProps, prevState) {
     const indexPattern = this.getIndexPattern();
     if (indexPattern !== this.getIndexPattern(prevState)) {
-      const { indexPatternDateFields } = this.state;
-      // Whenever the index pattern changes we re-select the first date field.
-      this.onFieldsChange(
-        {
-          dateHistogramField: indexPatternDateFields.length ? indexPatternDateFields[0] : undefined,
-        },
-        STEP_DATE_HISTOGRAM
-      );
+
 
       // If the user hasn't entered anything, then skip validation.
       if (!indexPattern || !indexPattern.trim()) {
@@ -168,7 +161,7 @@ export class JobCreateUi extends Component {
     this.props.clearCreateJobErrors();
   }
 
-  requestIndexPatternValidation = debounce(() => {
+  requestIndexPatternValidation = debounce((resetDefaults = true) => {
     const indexPattern = this.getIndexPattern();
 
     const lastIndexPatternValidationTime = this.lastIndexPatternValidationTime = Date.now();
@@ -273,6 +266,17 @@ export class JobCreateUi extends Component {
       );
 
       indexPatternDateFields.sort();
+
+      if (resetDefaults) {
+        const { indexPatternDateFields } = this.state;
+        // Whenever the index pattern changes we default to the first date field if there is one.
+        this.onFieldsChange(
+          {
+            dateHistogramField: indexPatternDateFields.length ? indexPatternDateFields[0] : undefined,
+          },
+          STEP_DATE_HISTOGRAM
+        );
+      }
 
       this.setState({
         indexPatternAsyncErrors,
