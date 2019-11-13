@@ -13,6 +13,9 @@ function getSetup() {
     client: {
       search: jest.fn()
     } as any,
+    internalClient: {
+      search: jest.fn()
+    } as any,
     config: {
       get: jest.fn<any, string[]>((key: string) => {
         switch (key) {

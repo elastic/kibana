@@ -22,10 +22,7 @@ export function useMetadata(
   sourceId: string
 ) {
   const decodeResponse = (response: any) => {
-    return pipe(
-      InfraMetadataRT.decode(response),
-      fold(throwErrors(createPlainError), identity)
-    );
+    return pipe(InfraMetadataRT.decode(response), fold(throwErrors(createPlainError), identity));
   };
 
   const { error, loading, response, makeRequest } = useHTTPRequest<InfraMetadata>(

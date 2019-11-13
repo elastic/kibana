@@ -38,17 +38,11 @@ export const getMaxMinTimestamp = (metric: InfraMetricData): [number, number] =>
   if (metric.series.some(seriesHasLessThen2DataPoints)) {
     return [0, 0];
   }
-  const values = metric.series.reduce(
-    (acc, item) => {
-      const firstRow = first(item.data);
-      const lastRow = last(item.data);
-      return acc.concat([
-        (firstRow && firstRow.timestamp) || 0,
-        (lastRow && lastRow.timestamp) || 0,
-      ]);
-    },
-    [] as number[]
-  );
+  const values = metric.series.reduce((acc, item) => {
+    const firstRow = first(item.data);
+    const lastRow = last(item.data);
+    return acc.concat([(firstRow && firstRow.timestamp) || 0, (lastRow && lastRow.timestamp) || 0]);
+  }, [] as number[]);
   return [min(values), max(values)];
 };
 
