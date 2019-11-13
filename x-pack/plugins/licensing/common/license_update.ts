@@ -17,6 +17,8 @@ export function createLicenseUpdate(
   const fetched$ = trigger$.pipe(
     switchMap(fetcher),
     publishReplay(1)
+    // have to cast manually as pipe operator cannot return ConnectableObservable
+    // https://github.com/ReactiveX/rxjs/issues/2972
   ) as ConnectableObservable<ILicense>;
 
   const fetchSubscription = fetched$.connect();

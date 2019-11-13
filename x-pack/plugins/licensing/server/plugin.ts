@@ -5,7 +5,7 @@
  */
 
 import { Observable, Subject, Subscription, merge, timer } from 'rxjs';
-import { take, takeUntil, tap } from 'rxjs/operators';
+import { take, takeUntil } from 'rxjs/operators';
 import moment from 'moment';
 import { createHash } from 'crypto';
 
@@ -50,6 +50,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
   private readonly logger: Logger;
   private readonly config$: Observable<LicenseConfigType>;
   private licenseFetchSubscription?: Subscription;
+  private loggingSubscription?: Subscription;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
@@ -81,18 +82,15 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     );
 
     this.licenseFetchSubscription = fetchSubscription;
-
-    const license$ = update$.pipe(
-      tap(license => {
-        this.logger.debug(
-          'Imported license information from Elasticsearch:' +
-            [
-              `type: ${license.type}`,
-              `status: ${license.status}`,
-              `expiry date: ${moment(license.expiryDateInMillis, 'x').format()}`,
-            ].join(' | ')
-        );
-      })
+    this.loggingSubscription = update$.subscribe(license =>
+      this.logger.debug(
+        'Imported license information from Elasticsearch:' +
+          [
+            `type: ${license.type}`,
+            `status: ${license.status}`,
+            `expiry date: ${moment(license.expiryDateInMillis, 'x').format()}`,
+          ].join(' | ')
+      )
     );
 
     return {
@@ -100,7 +98,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
         this.logger.debug('Requesting Elasticsearch licensing API');
         manualRefresh$.next();
       },
-      license$,
+      license$: update$,
     };
   }
 
@@ -140,6 +138,11 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     if (this.licenseFetchSubscription !== undefined) {
       this.licenseFetchSubscription.unsubscribe();
       this.licenseFetchSubscription = undefined;
+    }
+
+    if (this.loggingSubscription !== undefined) {
+      this.loggingSubscription.unsubscribe();
+      this.loggingSubscription = undefined;
     }
   }
 }

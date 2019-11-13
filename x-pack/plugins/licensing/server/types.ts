@@ -32,8 +32,8 @@ export type LicenseType = keyof typeof LICENSE_TYPE;
 export type LicenseStatus = 'active' | 'invalid' | 'expired';
 
 /**
- * @internal
  * Results from remote request fetching a raw license.
+ * @internal
  */
 export interface RawLicense {
   uid: string;
@@ -59,7 +59,11 @@ export interface Features {
   [key: string]: Feature;
 }
 
-/** @public */
+/**
+ * Subset of license data considered as non-sensitive information.
+ * Can be passed to the client.
+ * @public
+ * */
 export interface PublicLicense {
   license?: {
     /**

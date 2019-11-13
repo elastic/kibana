@@ -8,7 +8,11 @@ import { BehaviorSubject } from 'rxjs';
 import { take, toArray } from 'rxjs/operators';
 import { RawLicense, LicenseType } from './types';
 import { LicensingPlugin } from './plugin';
-import { coreMock, elasticsearchServiceMock } from '../../../../src/core/server/mocks';
+import {
+  coreMock,
+  elasticsearchServiceMock,
+  loggingServiceMock,
+} from '../../../../src/core/server/mocks';
 
 function buildRawLicense(options: Partial<RawLicense> = {}): RawLicense {
   const defaultRawLicense: RawLicense = {
@@ -27,13 +31,13 @@ describe('licensing plugin', () => {
   describe('#setup', () => {
     describe('#license$', () => {
       let plugin: LicensingPlugin;
+      let pluginInitContextMock: ReturnType<typeof coreMock.createPluginInitializerContext>;
 
       beforeEach(() => {
-        plugin = new LicensingPlugin(
-          coreMock.createPluginInitializerContext({
-            pollingFrequency,
-          })
-        );
+        pluginInitContextMock = coreMock.createPluginInitializerContext({
+          pollingFrequency,
+        });
+        plugin = new LicensingPlugin(pluginInitContextMock);
       });
 
       afterEach(async () => {
@@ -91,18 +95,15 @@ describe('licensing plugin', () => {
       });
 
       it('polling continues even if there are errors', async () => {
-        const allErrors = [new Error('reason-1'), new Error('reason-2')];
-        const errors = [...allErrors];
+        const error1 = new Error('reason-1');
+        const error2 = new Error('reason-2');
 
         const dataClient = elasticsearchServiceMock.createClusterClient();
 
-        dataClient.callAsInternalUser.mockImplementation(() =>
-          errors.length > 0
-            ? Promise.reject(errors.shift())
-            : Promise.resolve({
-                license: buildRawLicense(),
-              })
-        );
+        dataClient.callAsInternalUser
+          .mockRejectedValueOnce(error1)
+          .mockRejectedValueOnce(error2)
+          .mockResolvedValue({ license: buildRawLicense() });
 
         const coreSetup = coreMock.createSetup();
         coreSetup.elasticsearch.dataClient$ = new BehaviorSubject(dataClient);
@@ -115,8 +116,8 @@ describe('licensing plugin', () => {
           )
           .toPromise();
 
-        expect(first.error).toBe(allErrors[0]);
-        expect(second.error).toBe(allErrors[1]);
+        expect(first.error).toBe(error1);
+        expect(second.error).toBe(error2);
         expect(third.type).toBe('basic');
       });
 
@@ -132,6 +133,31 @@ describe('licensing plugin', () => {
         await plugin.setup(coreSetup);
         await flushPromises();
         expect(dataClient.callAsInternalUser).toHaveBeenCalledTimes(1);
+      });
+
+      it('logs license details without subscriptions', async () => {
+        const dataClient = elasticsearchServiceMock.createClusterClient();
+        dataClient.callAsInternalUser.mockResolvedValue({
+          license: buildRawLicense(),
+        });
+
+        const coreSetup = coreMock.createSetup();
+        coreSetup.elasticsearch.dataClient$ = new BehaviorSubject(dataClient);
+
+        await plugin.setup(coreSetup);
+        await flushPromises();
+
+        expect(loggingServiceMock.collect(pluginInitContextMock.logger).debug)
+          .toMatchInlineSnapshot(`
+          Array [
+            Array [
+              "Setting up Licensing plugin",
+            ],
+            Array [
+              "Imported license information from Elasticsearch:type: basic | status: active | expiry date: 1970-01-01T01:00:01+01:00",
+            ],
+          ]
+        `);
       });
 
       it('generates signature based on fetched license content', async () => {
@@ -212,13 +238,13 @@ describe('licensing plugin', () => {
         await plugin.setup(coreSetup);
 
         expect(coreSetup.http.registerRouteHandlerContext.mock.calls).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "licensing",
-            [Function],
-          ],
-        ]
-      `);
+                  Array [
+                    Array [
+                      "licensing",
+                      [Function],
+                    ],
+                  ]
+              `);
       });
     });
   });
