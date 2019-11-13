@@ -1031,7 +1031,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async setIsFilteredByCollarCheckbox(value = true) {
       await retry.try(async () => {
-        const isChecked = await this.isChecked('isFilteredByCollarCheckbox');
+        const isChecked = await this.isSwitchChecked('isFilteredByCollarCheckbox');
         if (isChecked !== value) {
           await testSubjects.click('isFilteredByCollarCheckbox');
           throw new Error('isFilteredByCollar not set correctly');
