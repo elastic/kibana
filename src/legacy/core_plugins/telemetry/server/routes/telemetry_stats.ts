@@ -20,7 +20,6 @@
 import Joi from 'joi';
 import { boomify } from 'boom';
 import { CoreSetup } from 'src/core/server';
-import { encryptTelemetry } from '../collectors';
 import { telemetryCollectionManager } from '../collection_manager';
 
 export function registerTelemetryDataRoutes(core: CoreSetup) {
@@ -49,12 +48,16 @@ export function registerTelemetryDataRoutes(core: CoreSetup) {
 
       try {
         const { getStats, title } = telemetryCollectionManager.getStatsGetter();
-        server.log(['debug', 'telemetry'], `Using Stats Getter: ${title}`);
+        server.log(['debug', 'telemetry', 'fetcher'], `Fetching usage using ${title} getter.`);
 
-        const usageData = await getStats(req, config, start, end, unencrypted);
-
-        if (unencrypted) return usageData;
-        return encryptTelemetry(usageData, isDev);
+        return await getStats({
+          unencrypted,
+          server,
+          req,
+          start,
+          end,
+          isDev,
+        });
       } catch (err) {
         if (isDev) {
           // don't ignore errors when running in dev mode

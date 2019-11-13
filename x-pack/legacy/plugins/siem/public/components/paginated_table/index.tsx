@@ -35,7 +35,7 @@ import {
 import { TlsColumns } from '../page/network/tls_table/columns';
 import { UncommonProcessTableColumns } from '../page/hosts/uncommon_process_table';
 import { UsersColumns } from '../page/network/users_table/columns';
-import { HeaderPanel } from '../header_panel';
+import { HeaderSection } from '../header_section';
 import { Loader } from '../loader';
 import { useStateToaster } from '../toasters';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
@@ -234,7 +234,7 @@ export const PaginatedTable = memo<SiemTables>(
         onMouseEnter={() => setShowInspect(true)}
         onMouseLeave={() => setShowInspect(false)}
       >
-        <HeaderPanel
+        <HeaderSection
           id={id}
           showInspect={!loadingInitial && showInspect}
           subtitle={
@@ -245,7 +245,7 @@ export const PaginatedTable = memo<SiemTables>(
           tooltip={headerTooltip}
         >
           {!loadingInitial && headerSupplement}
-        </HeaderPanel>
+        </HeaderSection>
 
         {loadingInitial ? (
           <EuiLoadingContent data-test-subj="initialLoadingPanelPaginatedTable" lines={10} />

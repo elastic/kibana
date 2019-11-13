@@ -10,21 +10,20 @@ import { Sticky } from 'react-sticky';
 import { pure } from 'recompose';
 import styled, { css } from 'styled-components';
 
+import { gutterTimeline } from '../../lib/helpers';
+
 const offsetChrome = 49;
-const gutterTimeline = '70px'; // Temporary until timeline is moved - MichaelMarcialis
 
 const disableSticky = 'screen and (max-width: ' + euiLightVars.euiBreakpoints.s + ')';
 const disableStickyMq = window.matchMedia(disableSticky);
 
-const Aside = styled.aside<{ isSticky?: boolean }>`
+const Wrapper = styled.aside<{ isSticky?: boolean }>`
   position: relative;
   z-index: ${({ theme }) => theme.eui.euiZNavigation};
   background: ${({ theme }) => theme.eui.euiColorEmptyShade};
   border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
-  box-sizing: content-box;
-  margin: 0 -${gutterTimeline} 0 -${({ theme }) => theme.eui.euiSizeL};
-  padding: ${({ theme }) => theme.eui.euiSize} ${gutterTimeline} ${({ theme }) =>
-  theme.eui.euiSize} ${({ theme }) => theme.eui.euiSizeL};
+  padding: ${({ theme }) => theme.eui.paddingSizes.m} ${gutterTimeline} ${({ theme }) =>
+  theme.eui.paddingSizes.m} ${({ theme }) => theme.eui.paddingSizes.l};
 
   ${({ isSticky }) =>
     isSticky &&
@@ -37,8 +36,7 @@ const Aside = styled.aside<{ isSticky?: boolean }>`
     z-index: ${({ theme }) => theme.eui.euiZContent} !important;
   }
 `;
-
-Aside.displayName = 'Aside';
+Wrapper.displayName = 'Wrapper';
 
 export interface FiltersGlobalProps {
   children: React.ReactNode;
@@ -47,11 +45,10 @@ export interface FiltersGlobalProps {
 export const FiltersGlobal = pure<FiltersGlobalProps>(({ children }) => (
   <Sticky disableCompensation={disableStickyMq.matches} topOffset={-offsetChrome}>
     {({ style, isSticky }) => (
-      <Aside isSticky={isSticky} style={style}>
+      <Wrapper className="siemFiltersGlobal" isSticky={isSticky} style={style}>
         {children}
-      </Aside>
+      </Wrapper>
     )}
   </Sticky>
 ));
-
 FiltersGlobal.displayName = 'FiltersGlobal';
