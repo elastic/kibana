@@ -6,12 +6,12 @@
 
 import { memorize } from '@mattapperson/slapshot/lib/memorize';
 import { SavedObjectsBaseOptions, SavedObjectAttributes, SavedObject } from 'src/core/server';
-import { EncryptedSavedObjects } from './default';
+import { EncryptedSavedObjects } from './adapter_types';
 
 /**
  * Memorize adpater for test purpose only
  */
-export class MemorizeEncryptedSavedObjects {
+export class MemorizeEncryptedSavedObjects implements EncryptedSavedObjects {
   constructor(private readonly adapter?: EncryptedSavedObjects) {}
 
   public async getDecryptedAsInternalUser<T extends SavedObjectAttributes = any>(

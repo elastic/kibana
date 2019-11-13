@@ -63,7 +63,7 @@ export class ApiKeyLib {
     } catch (error) {
       return {
         valid: false,
-        reason: error.message,
+        reason: error.message || 'ApiKey is not valid',
       };
     }
   }
@@ -84,7 +84,7 @@ export class ApiKeyLib {
     } catch (error) {
       return {
         valid: false,
-        reason: error.message,
+        reason: error.message || 'ApiKey is not valid',
       };
     }
   }

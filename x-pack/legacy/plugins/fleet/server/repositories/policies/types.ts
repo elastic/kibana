@@ -13,5 +13,5 @@ export interface IngestPlugin {
 }
 
 export interface PoliciesRepository {
-  getFullPolicy(id: string): Promise<FullPolicyFile>;
+  getFullPolicy(id: string): Promise<FullPolicyFile | null>;
 }

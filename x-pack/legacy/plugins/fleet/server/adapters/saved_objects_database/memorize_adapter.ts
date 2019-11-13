@@ -49,7 +49,7 @@ export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
     options?: SavedObjectsCreateOptions
   ) {
     return Slapshot.memorize(
-      `bulkCreate:${JSON.stringify(objects)}:${JSON.stringify(options || {})}`,
+      `bulkCreate`,
       () => {
         if (!this.soAdadpter) {
           throw new Error('An adapter must be provided when running tests online');
@@ -67,7 +67,7 @@ export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
     options: SavedObjectsBaseOptions = {}
   ) {
     return Slapshot.memorize(
-      `delete:${type}:${id}:${JSON.stringify(options)}`,
+      `delete`,
       () => {
         if (!this.soAdadpter) {
           throw new Error('An adapter must be provided when running tests online');
@@ -100,7 +100,7 @@ export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
     return Slapshot.memorize(
-      `bulkCreate:${JSON.stringify(objects)}:${JSON.stringify(options || {})}`,
+      `bulkGet`,
       () => {
         if (!this.soAdadpter) {
           throw new Error('An adapter must be provided when running tests online');
@@ -118,7 +118,7 @@ export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObject<T> | null> {
     return Slapshot.memorize(
-      `get:${type}:${id}:${JSON.stringify(options)}`,
+      `get:${type}`,
       () => {
         if (!this.soAdadpter) {
           throw new Error('An adapter must be provided when running tests online');
@@ -137,7 +137,7 @@ export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
     options: SavedObjectsUpdateOptions = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
     return Slapshot.memorize(
-      `get:${type}:${id}:${JSON.stringify(attributes)}:${JSON.stringify(options)}`,
+      `update:${type}`,
       () => {
         if (!this.soAdadpter) {
           throw new Error('An adapter must be provided when running tests online');

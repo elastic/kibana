@@ -9,7 +9,7 @@ import { PoliciesRepository, FullPolicyFile } from '../repositories/policies/typ
 export class PolicyLib {
   constructor(private readonly policyAdapter: PoliciesRepository) {}
 
-  public async getFullPolicy(policyId: string): Promise<FullPolicyFile> {
+  public async getFullPolicy(policyId: string): Promise<FullPolicyFile | null> {
     return await this.policyAdapter.getFullPolicy(policyId);
   }
 }

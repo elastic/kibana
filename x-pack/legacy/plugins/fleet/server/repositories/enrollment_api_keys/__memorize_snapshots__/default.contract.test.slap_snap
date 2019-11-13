@@ -2,28 +2,28 @@
 exports['Enrollment api key Repository create allow to create an enrollment api key - create:enrollment_api_keys (1)'] = {
   "results": {
     "type": "enrollment_api_keys",
-    "id": "98565dd9-e74f-45c2-a972-a1520e7cd91b",
+    "id": "35ee683c-3364-4727-932f-69cc4c3936b1",
     "attributes": {
-      "created_at": "2019-10-29T14:14:55.616Z",
+      "created_at": "2019-11-13T14:50:40.104Z",
       "api_key_id": "key-id-123",
       "policy_id": "policyId",
       "active": true,
       "enrollment_rules": []
     },
     "references": [],
-    "updated_at": "2019-10-29T14:14:55.636Z",
-    "version": "WzI0MywxXQ=="
+    "updated_at": "2019-11-13T14:50:40.128Z",
+    "version": "WzIsMV0="
   }
 }
 
-exports['Enrollment api key Repository create allow to create an enrollment api key - get:enrollment_api_keys:98565dd9-e74f-45c2-a972-a1520e7cd91b:{} (2)'] = {
+exports['Enrollment api key Repository create allow to create an enrollment api key - get:enrollment_api_keys (2)'] = {
   "results": {
-    "id": "98565dd9-e74f-45c2-a972-a1520e7cd91b",
+    "id": "35ee683c-3364-4727-932f-69cc4c3936b1",
     "type": "enrollment_api_keys",
-    "updated_at": "2019-10-29T14:14:55.636Z",
-    "version": "WzI0MywxXQ==",
+    "updated_at": "2019-11-13T14:50:40.128Z",
+    "version": "WzIsMV0=",
     "attributes": {
-      "created_at": "2019-10-29T14:14:55.616Z",
+      "created_at": "2019-11-13T14:50:40.104Z",
       "api_key_id": "key-id-123",
       "policy_id": "policyId",
       "active": true,
@@ -41,58 +41,58 @@ exports['Enrollment api key Repository create allow to create an enrollment api 
     "saved_objects": [
       {
         "type": "enrollment_api_keys",
-        "id": "98565dd9-e74f-45c2-a972-a1520e7cd91b",
+        "id": "35ee683c-3364-4727-932f-69cc4c3936b1",
         "attributes": {
-          "created_at": "2019-10-29T14:14:55.616Z",
+          "created_at": "2019-11-13T14:50:40.104Z",
           "api_key_id": "key-id-123",
           "policy_id": "policyId",
           "active": true,
           "enrollment_rules": []
         },
         "references": [],
-        "updated_at": "2019-10-29T14:14:55.636Z",
-        "version": "WzI0MywxXQ=="
+        "updated_at": "2019-11-13T14:50:40.128Z",
+        "version": "WzIsMV0="
       }
     ]
   }
 }
 
-exports['Enrollment api key Repository create allow to create an enrollment api key - delete:enrollment_api_keys:98565dd9-e74f-45c2-a972-a1520e7cd91b:{} (4)'] = {
+exports['Enrollment api key Repository create allow to create an enrollment api key - delete (4)'] = {
   "results": {}
 }
 
 exports['Enrollment api key Repository update allow to update a key - create:enrollment_api_keys (1)'] = {
   "results": {
     "type": "enrollment_api_keys",
-    "id": "6ac9632a-295d-45f5-a2f5-79a27483ba77",
+    "id": "74d24a9f-78f9-49d0-9bfb-fcb235c33469",
     "attributes": {
       "active": true,
       "policy_id": "policyId"
     },
     "references": [],
-    "updated_at": "2019-10-29T14:14:57.178Z",
-    "version": "WzI0NSwxXQ=="
+    "updated_at": "2019-11-13T14:50:41.723Z",
+    "version": "WzQsMV0="
   }
 }
 
-exports['Enrollment api key Repository update allow to update a key - get:enrollment_api_keys:6ac9632a-295d-45f5-a2f5-79a27483ba77:{"active":false,"api_key":"notencryptedapikey"}:{} (2)'] = {
+exports['Enrollment api key Repository update allow to update a key - update:enrollment_api_keys (2)'] = {
   "results": {
-    "id": "6ac9632a-295d-45f5-a2f5-79a27483ba77",
+    "id": "74d24a9f-78f9-49d0-9bfb-fcb235c33469",
     "type": "enrollment_api_keys",
-    "updated_at": "2019-10-29T14:14:58.185Z",
-    "version": "WzI0NiwxXQ==",
+    "updated_at": "2019-11-13T14:50:42.735Z",
+    "version": "WzUsMV0=",
     "attributes": {
       "active": false
     }
   }
 }
 
-exports['Enrollment api key Repository update allow to update a key - get:enrollment_api_keys:6ac9632a-295d-45f5-a2f5-79a27483ba77:{} (3)'] = {
+exports['Enrollment api key Repository update allow to update a key - get:enrollment_api_keys (3)'] = {
   "results": {
-    "id": "6ac9632a-295d-45f5-a2f5-79a27483ba77",
+    "id": "74d24a9f-78f9-49d0-9bfb-fcb235c33469",
     "type": "enrollment_api_keys",
-    "updated_at": "2019-10-29T14:14:58.185Z",
-    "version": "WzI0NiwxXQ==",
+    "updated_at": "2019-11-13T14:50:42.735Z",
+    "version": "WzUsMV0=",
     "attributes": {
       "active": false,
       "policy_id": "policyId"
@@ -109,48 +109,48 @@ exports['Enrollment api key Repository update allow to update a key - find:"enro
     "saved_objects": [
       {
         "type": "enrollment_api_keys",
-        "id": "6ac9632a-295d-45f5-a2f5-79a27483ba77",
+        "id": "74d24a9f-78f9-49d0-9bfb-fcb235c33469",
         "attributes": {
           "active": false,
           "policy_id": "policyId"
         },
         "references": [],
-        "updated_at": "2019-10-29T14:14:58.185Z",
-        "version": "WzI0NiwxXQ=="
+        "updated_at": "2019-11-13T14:50:42.735Z",
+        "version": "WzUsMV0="
       }
     ]
   }
 }
 
-exports['Enrollment api key Repository update allow to update a key - delete:enrollment_api_keys:6ac9632a-295d-45f5-a2f5-79a27483ba77:{} (5)'] = {
+exports['Enrollment api key Repository update allow to update a key - delete (5)'] = {
   "results": {}
 }
 
 exports['Enrollment api key Repository getByApiKeyId allow to find a key - create:enrollment_api_keys (1)'] = {
   "results": {
     "type": "enrollment_api_keys",
-    "id": "5b943598-d218-4bd0-a5e9-ad2dd93d6031",
+    "id": "14be4e73-de40-4098-8025-242d6c10001d",
     "attributes": {
       "active": true,
       "api_key_id": "api-key-1"
     },
     "references": [],
-    "updated_at": "2019-10-29T14:15:00.207Z",
-    "version": "WzI0OCwxXQ=="
+    "updated_at": "2019-11-13T14:50:44.764Z",
+    "version": "WzcsMV0="
   }
 }
 
 exports['Enrollment api key Repository getByApiKeyId allow to find a key - create:enrollment_api_keys (2)'] = {
   "results": {
     "type": "enrollment_api_keys",
-    "id": "4ef59475-a86c-480e-8934-817ee67236c1",
+    "id": "14df091e-5c35-4522-bceb-da050432ec56",
     "attributes": {
       "active": true,
       "api_key_id": "api-key-2"
     },
     "references": [],
-    "updated_at": "2019-10-29T14:15:00.207Z",
-    "version": "WzI0OSwxXQ=="
+    "updated_at": "2019-11-13T14:50:44.765Z",
+    "version": "WzgsMV0="
   }
 }
 
@@ -162,25 +162,25 @@ exports['Enrollment api key Repository getByApiKeyId allow to find a key - find:
     "saved_objects": [
       {
         "type": "enrollment_api_keys",
-        "id": "4ef59475-a86c-480e-8934-817ee67236c1",
+        "id": "14df091e-5c35-4522-bceb-da050432ec56",
         "attributes": {
           "active": true,
           "api_key_id": "api-key-2"
         },
         "references": [],
-        "updated_at": "2019-10-29T14:15:00.207Z",
-        "version": "WzI0OSwxXQ=="
+        "updated_at": "2019-11-13T14:50:44.765Z",
+        "version": "WzgsMV0="
       }
     ]
   }
 }
 
-exports['Enrollment api key Repository getByApiKeyId allow to find a key - getDecryptedAsInternalUser:enrollment_api_keys:4ef59475-a86c-480e-8934-817ee67236c1 (4)'] = {
+exports['Enrollment api key Repository getByApiKeyId allow to find a key - getDecryptedAsInternalUser:enrollment_api_keys:14df091e-5c35-4522-bceb-da050432ec56 (4)'] = {
   "results": {
-    "id": "4ef59475-a86c-480e-8934-817ee67236c1",
+    "id": "14df091e-5c35-4522-bceb-da050432ec56",
     "type": "enrollment_api_keys",
-    "updated_at": "2019-10-29T14:15:00.207Z",
-    "version": "WzI0OSwxXQ==",
+    "updated_at": "2019-11-13T14:50:44.765Z",
+    "version": "WzgsMV0=",
     "attributes": {
       "active": true,
       "api_key_id": "api-key-2"
@@ -197,63 +197,63 @@ exports['Enrollment api key Repository getByApiKeyId allow to find a key - find:
     "saved_objects": [
       {
         "type": "enrollment_api_keys",
-        "id": "5b943598-d218-4bd0-a5e9-ad2dd93d6031",
+        "id": "14be4e73-de40-4098-8025-242d6c10001d",
         "attributes": {
           "active": true,
           "api_key_id": "api-key-1"
         },
         "references": [],
-        "updated_at": "2019-10-29T14:15:00.207Z",
-        "version": "WzI0OCwxXQ=="
+        "updated_at": "2019-11-13T14:50:44.764Z",
+        "version": "WzcsMV0="
       },
       {
         "type": "enrollment_api_keys",
-        "id": "4ef59475-a86c-480e-8934-817ee67236c1",
+        "id": "14df091e-5c35-4522-bceb-da050432ec56",
         "attributes": {
           "active": true,
           "api_key_id": "api-key-2"
         },
         "references": [],
-        "updated_at": "2019-10-29T14:15:00.207Z",
-        "version": "WzI0OSwxXQ=="
+        "updated_at": "2019-11-13T14:50:44.765Z",
+        "version": "WzgsMV0="
       }
     ]
   }
 }
 
-exports['Enrollment api key Repository getByApiKeyId allow to find a key - delete:enrollment_api_keys:5b943598-d218-4bd0-a5e9-ad2dd93d6031:{} (6)'] = {
+exports['Enrollment api key Repository getByApiKeyId allow to find a key - delete (6)'] = {
   "results": {}
 }
 
-exports['Enrollment api key Repository getByApiKeyId allow to find a key - delete:enrollment_api_keys:4ef59475-a86c-480e-8934-817ee67236c1:{} (7)'] = {
+exports['Enrollment api key Repository getByApiKeyId allow to find a key - delete (7)'] = {
   "results": {}
 }
 
 exports['Enrollment api key Repository getByApiKeyId return null if the key does not exists - create:enrollment_api_keys (1)'] = {
   "results": {
     "type": "enrollment_api_keys",
-    "id": "79551426-5c54-4937-bc0d-baa25a209c12",
+    "id": "c8ee74f7-f0ec-4086-85e3-db386515a5ee",
     "attributes": {
       "active": true,
       "api_key_id": "api-key-1"
     },
     "references": [],
-    "updated_at": "2019-10-29T14:15:03.244Z",
-    "version": "WzI1MiwxXQ=="
+    "updated_at": "2019-11-13T14:50:47.813Z",
+    "version": "WzExLDFd"
   }
 }
 
 exports['Enrollment api key Repository getByApiKeyId return null if the key does not exists - create:enrollment_api_keys (2)'] = {
   "results": {
     "type": "enrollment_api_keys",
-    "id": "0aa92e81-eabf-4f63-a8c9-aca8dd1d426e",
+    "id": "44b848c9-785f-4107-a5fa-1186af23746c",
     "attributes": {
       "active": true,
       "api_key_id": "api-key-2"
     },
     "references": [],
-    "updated_at": "2019-10-29T14:15:03.244Z",
-    "version": "WzI1MywxXQ=="
+    "updated_at": "2019-11-13T14:50:47.813Z",
+    "version": "WzEyLDFd"
   }
 }
 
@@ -274,57 +274,57 @@ exports['Enrollment api key Repository getByApiKeyId return null if the key does
     "saved_objects": [
       {
         "type": "enrollment_api_keys",
-        "id": "79551426-5c54-4937-bc0d-baa25a209c12",
+        "id": "c8ee74f7-f0ec-4086-85e3-db386515a5ee",
         "attributes": {
           "active": true,
           "api_key_id": "api-key-1"
         },
         "references": [],
-        "updated_at": "2019-10-29T14:15:03.244Z",
-        "version": "WzI1MiwxXQ=="
+        "updated_at": "2019-11-13T14:50:47.813Z",
+        "version": "WzExLDFd"
       },
       {
         "type": "enrollment_api_keys",
-        "id": "0aa92e81-eabf-4f63-a8c9-aca8dd1d426e",
+        "id": "44b848c9-785f-4107-a5fa-1186af23746c",
         "attributes": {
           "active": true,
           "api_key_id": "api-key-2"
         },
         "references": [],
-        "updated_at": "2019-10-29T14:15:03.244Z",
-        "version": "WzI1MywxXQ=="
+        "updated_at": "2019-11-13T14:50:47.813Z",
+        "version": "WzEyLDFd"
       }
     ]
   }
 }
 
-exports['Enrollment api key Repository getByApiKeyId return null if the key does not exists - delete:enrollment_api_keys:79551426-5c54-4937-bc0d-baa25a209c12:{} (5)'] = {
+exports['Enrollment api key Repository getByApiKeyId return null if the key does not exists - delete (5)'] = {
   "results": {}
 }
 
-exports['Enrollment api key Repository getByApiKeyId return null if the key does not exists - delete:enrollment_api_keys:0aa92e81-eabf-4f63-a8c9-aca8dd1d426e:{} (6)'] = {
+exports['Enrollment api key Repository getByApiKeyId return null if the key does not exists - delete (6)'] = {
   "results": {}
 }
 
 exports['Enrollment api key Repository delete allow to delete a enrollmentApiKey - create:enrollment_api_keys (1)'] = {
   "results": {
     "type": "enrollment_api_keys",
-    "id": "8eea627e-dd8c-4ff9-b4a4-dc80f183ba9a",
+    "id": "11206128-6a69-45a2-bc01-4dc2d27a0ca0",
     "attributes": {
       "active": true,
       "api_key_id": "qwerty"
     },
     "references": [],
-    "updated_at": "2019-10-29T14:15:06.272Z",
-    "version": "WzI1NiwxXQ=="
+    "updated_at": "2019-11-13T14:50:50.881Z",
+    "version": "WzE1LDFd"
   }
 }
 
-exports['Enrollment api key Repository delete allow to delete a enrollmentApiKey - delete:enrollment_api_keys:8eea627e-dd8c-4ff9-b4a4-dc80f183ba9a:{} (2)'] = {
+exports['Enrollment api key Repository delete allow to delete a enrollmentApiKey - delete (2)'] = {
   "results": {}
 }
 
-exports['Enrollment api key Repository delete allow to delete a enrollmentApiKey - get:enrollment_api_keys:8eea627e-dd8c-4ff9-b4a4-dc80f183ba9a:{} (3)'] = {
+exports['Enrollment api key Repository delete allow to delete a enrollmentApiKey - get:enrollment_api_keys (3)'] = {
   "results": null
 }
 

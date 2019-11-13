@@ -79,7 +79,7 @@ export class AgentLib {
     }
 
     const accessApiKey = await this.apiKeys.generateAccessApiKey(agent.id, policyId);
-    await this.agentsRepository.update(user, agent.id, {
+    await this.agentsRepository.update(internalUser, agent.id, {
       access_api_key_id: accessApiKey.id,
     });
 
