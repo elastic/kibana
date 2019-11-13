@@ -59,7 +59,6 @@ export default function () {
         `--server.maxPayloadBytes=1679958`,
       ],
     },
-
     services
   };
 }
