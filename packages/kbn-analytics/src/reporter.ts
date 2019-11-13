@@ -107,9 +107,7 @@ export class Reporter {
       try {
         await this.http(this.reportManager.report);
         this.flushReport();
-        this.retryCount = 0;
       } catch (err) {
-        this.retryCount = this.retryCount + 1;
         this.log(`Error Sending Metrics Report ${err}`);
         this.retryCount = this.retryCount + 1;
         const versionMismatch =
