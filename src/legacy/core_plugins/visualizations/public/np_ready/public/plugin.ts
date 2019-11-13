@@ -17,21 +17,7 @@
  * under the License.
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-
-import { FiltersService, FiltersSetup } from './filters';
 import { TypesService, TypesSetup, TypesStart } from './types';
-
-/**
- * Interface for any dependencies on other plugins' contracts.
- *
- * @internal
- */
-interface VisualizationsPluginSetupDependencies {
-  __LEGACY: {
-    VisFiltersProvider: any;
-    createFilter: any;
-  };
-}
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -39,7 +25,6 @@ interface VisualizationsPluginSetupDependencies {
  * @public
  */
 export interface VisualizationsSetup {
-  filters: FiltersSetup;
   types: TypesSetup;
 }
 
@@ -58,20 +43,14 @@ export interface VisualizationsStart {
  */
 export class VisualizationsPlugin
   implements
-    Plugin<VisualizationsSetup, VisualizationsStart, VisualizationsPluginSetupDependencies> {
-  private readonly filters: FiltersService = new FiltersService();
+    Plugin<VisualizationsSetup, VisualizationsStart> {
   private readonly types: TypesService = new TypesService();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { __LEGACY }: VisualizationsPluginSetupDependencies) {
-    const { VisFiltersProvider, createFilter } = __LEGACY;
+  public setup(core: CoreSetup) {
 
     return {
-      filters: this.filters.setup({
-        VisFiltersProvider,
-        createFilter,
-      }),
       types: this.types.setup(),
     };
   }
@@ -83,7 +62,6 @@ export class VisualizationsPlugin
   }
 
   public stop() {
-    this.filters.stop();
     this.types.stop();
   }
 }

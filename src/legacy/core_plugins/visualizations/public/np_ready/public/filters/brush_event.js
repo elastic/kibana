@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import { esFilters } from '../../../../../../../plugins/data/public';
+import { esFilters } from 'src/plugins/data/public';
 
 export function onBrushEvent(event) {
   const isNumber = event.data.ordered;

@@ -19,6 +19,7 @@
 
 import { VisType } from './types/vis_type';
 import { AggConfigs } from '../../../../../ui/public/agg_types/agg_configs';
+import { Status } from './legacy/update_status';
 
 export interface Vis {
   type: VisType;
@@ -39,4 +40,11 @@ export interface VisState {
   type: VisType;
   params: VisParams;
   aggs: AggConfigs;
+}
+
+export declare class VisualizationController {
+  constructor(element: HTMLElement, vis: Vis);
+  public render(visData: any, visParams: any, update: { [key in Status]: boolean }): Promise<void>;
+  public destroy(): void;
+  public isLoaded?(): Promise<void> | void;
 }

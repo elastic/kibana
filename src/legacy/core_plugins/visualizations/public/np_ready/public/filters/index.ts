@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './filters_service';
+export * from './vis_filters';

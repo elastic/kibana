@@ -26,7 +26,7 @@ import {
   SchemaConfig,
   Schemas,
 } from './build_pipeline';
-import { Vis, VisState } from 'ui/vis';
+import { Vis, VisState } from '..';
 import { AggConfig } from 'ui/agg_types/agg_config';
 import { searchSourceMock } from '../../../courier/search_source/mocks';
 

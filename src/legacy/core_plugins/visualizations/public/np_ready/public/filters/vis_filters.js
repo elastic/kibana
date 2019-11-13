@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { pushFilterBarFilters } from '../../../../../../ui/public/vis/push_filters';
 import { onBrushEvent } from './brush_event';
-import { uniqFilters, esFilters } from '../../../../../../../plugins/data/public';
+import { esFilters } from '../../../../../../../plugins/data/public';
 
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
@@ -104,20 +103,4 @@ const createFiltersFromEvent = (event) => {
   return filters;
 };
 
-const VisFiltersProvider = (getAppState, $timeout) => {
-
-  const pushFilters = (filters, simulate) => {
-    const appState = getAppState();
-    if (filters.length && !simulate) {
-      pushFilterBarFilters(appState, uniqFilters(filters));
-      // to trigger angular digest cycle, we can get rid of this once we have either new filterManager or actions API
-      $timeout(_.noop, 0);
-    }
-  };
-
-  return {
-    pushFilters,
-  };
-};
-
-export { VisFiltersProvider, createFilter, createFiltersFromEvent, onBrushEvent };
+export { createFilter, createFiltersFromEvent, onBrushEvent };

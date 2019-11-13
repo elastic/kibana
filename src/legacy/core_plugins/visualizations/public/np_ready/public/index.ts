@@ -43,4 +43,9 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 /** @public static code */
-// TODO once items are moved from ui/vis into this service
+export { visFactory } from './vis_factory';
+export { Vis, VisParams, VisState } from './vis';
+export * from './filters';
+
+export { Status } from './legacy/update_status';
+export { buildPipeline } from './legacy/build_pipeline';

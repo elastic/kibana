@@ -18,5 +18,4 @@
  */
 
 export { AggConfig } from '../agg_types/agg_config';
-export { Vis, VisParams, VisState } from '../../../core_plugins/visualizations/public/np_ready/public/vis';
-export { VisualizationController, VisType } from '../../../core_plugins/visualizations/public/np_ready/public/types/vis_type';
+export { Vis, VisParams, VisState, VisType } from '../../../core_plugins/visualizations/public';
