@@ -17,7 +17,7 @@ export interface Field {
 }
 
 test('test reading fields.yml', () => {
-  const yaml = readFileSync(__dirname + '/tests/fields.yml');
+  const yaml = readFileSync(path.join(__dirname, '/tests/fields.yml'));
   const data = safeLoad(yaml.toString());
 
   console.log(keyword());
