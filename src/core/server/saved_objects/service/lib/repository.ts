@@ -821,6 +821,7 @@ export class SavedObjectsRepository {
       body: {
         doc,
       },
+      ...(this._schema.isNamespaces(type) && { _sourceIncludes: ['namespaces'] }),
     });
 
     if (updateResponse.status === 404) {
@@ -833,6 +834,7 @@ export class SavedObjectsRepository {
       type,
       updated_at: time,
       version: encodeHitVersion(updateResponse),
+      ...(this._schema.isNamespaces(type) && { namespaces: updateResponse.get._source.namespaces }),
       references,
       attributes,
     };

@@ -130,6 +130,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql({
       id: 'default_and_space_1',
       type: 'sharedtype',
+      namespaces: [null, 'space_1'],
       updated_at: resp.body.updated_at,
       version: resp.body.version,
       attributes: {
