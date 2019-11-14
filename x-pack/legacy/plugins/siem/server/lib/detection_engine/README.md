@@ -9,6 +9,14 @@ Since there is no UI yet and a lot of backend areas that are not created, you
 should install the kbn-action and kbn-alert project from here:
 https://github.com/pmuellr/kbn-action
 
+The scripts rely on CURL and jq, ensure both of these are installed:
+
+```sh
+brew update
+brew install curl
+brew install jq
+```
+
 Open up your .zshrc/.bashrc and add these lines with the variables filled in:
 ```
 export ELASTICSEARCH_USERNAME=${user}
@@ -127,3 +135,18 @@ created which should update once every 5 minutes at this point.
 
 Also add the `.siem-signals-${your user id}` as a kibana index for Maps to be able to see the
 signals 
+
+Optionally you can add these debug statements to your `kibana.dev.yml` to see more information when running the detection
+engine
+
+```sh
+logging.verbose: true
+logging.events:
+  {
+    log: ['siem', 'info', 'warning', 'error', 'fatal'],
+    request: ['info', 'warning', 'error', 'fatal'],
+    error: '*',
+    ops: __no-ops__,
+  }
+```
+

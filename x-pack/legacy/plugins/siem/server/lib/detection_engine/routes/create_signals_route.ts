@@ -26,8 +26,11 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
     const {
       description,
       enabled,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      false_positives: falsePositives,
       filter,
       from,
+      immutable,
       query,
       language,
       // eslint-disable-next-line @typescript-eslint/camelcase
@@ -41,6 +44,7 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       name,
       severity,
       size,
+      tags,
       to,
       type,
       references,
@@ -58,8 +62,10 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       actionsClient,
       description,
       enabled,
+      falsePositives,
       filter,
       from,
+      immutable,
       query,
       language,
       savedId,
@@ -71,6 +77,7 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       name,
       severity,
       size,
+      tags,
       to,
       type,
       references,
