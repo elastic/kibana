@@ -100,7 +100,7 @@ describe('<App />', () => {
     expect(center(wrapper).text()).toEqual('Page 6 of 28');
   });
 
-  test('autohide footer functions on mouseEnter + Leave', async () => {
+  test.skip('autohide footer functions on mouseEnter + Leave', async () => {
     const wrapper = getWrapper();
     trigger(wrapper).simulate('click');
     await tick(20);
