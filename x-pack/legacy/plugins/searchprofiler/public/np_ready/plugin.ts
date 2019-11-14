@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   Plugin,
   CoreStart,
@@ -12,7 +13,7 @@ import {
   ToastsStart,
 } from 'src/core/public';
 
-import { boot } from './application/boot';
+import { DevToolsSetup } from '../../../../../../src/plugins/dev_tools/public';
 
 export class SearchProfilerUIPlugin implements Plugin {
   constructor(ctx: PluginInitializerContext) {}
@@ -25,22 +26,28 @@ export class SearchProfilerUIPlugin implements Plugin {
         licenseEnabled: boolean;
         notifications: ToastsStart;
         formatAngularHttpError: any;
-        el: HTMLElement;
       };
+      devTools: DevToolsSetup;
     }
   ) {
     const { http } = core;
     const {
-      __LEGACY: { I18nContext, licenseEnabled, notifications, formatAngularHttpError, el },
+      __LEGACY: { I18nContext, licenseEnabled, notifications, formatAngularHttpError },
+      devTools,
     } = plugins;
-    core.application.register({
+    devTools.register({
       id: 'searchprofiler',
-      title: 'SearchProfiler',
-      mount(ctx, params) {
+      title: i18n.translate('xpack.searchProfiler.pageDisplayName', {
+        defaultMessage: 'Search Profiler',
+      }),
+      order: 5,
+      enableRouting: false,
+      async mount(ctx, params) {
+        const { boot } = await import('./application/boot');
         return boot({
           http,
           licenseEnabled,
-          el,
+          el: params.element,
           I18nContext,
           notifications,
           formatAngularHttpError,

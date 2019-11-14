@@ -182,8 +182,8 @@ describe('index table', () => {
         )
         .map(span => span.text())
     );
-    const switchControl = rendered.find('.euiSwitch__input');
-    switchControl.simulate('change', { target: { checked: true } });
+    const switchControl = rendered.find('.euiSwitch__button');
+    switchControl.simulate('click');
     snapshot(
       rendered
         .find(
