@@ -19,7 +19,7 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = ({ jobId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  useEffect(async () => {
+  const fetchMessages = async () => {
     setIsLoading(true);
     try {
       setMessages(await ml.jobs.jobAuditMessages(jobId));
@@ -30,6 +30,10 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = ({ jobId }) => {
       // eslint-disable-next-line no-console
       console.log('Job messages could not be loaded', error);
     }
+  };
+
+  useEffect(() => {
+    fetchMessages();
   }, []);
 
   return <JobMessages messages={messages} loading={isLoading} error={errorMessage} />;
