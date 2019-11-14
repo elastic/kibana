@@ -8,6 +8,7 @@ import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
 import { IHttpFetchError } from 'src/core/public';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { LoadingIndicatorContext } from '../context/LoadingIndicatorContext';
 import { useComponentId } from './useComponentId';
 import { useKibanaCore } from '../../../observability/public';
@@ -92,7 +93,7 @@ export function useFetcher<TReturn>(
             title: i18n.translate('xpack.apm.fetcher.error.title', {
               defaultMessage: `Error while fetching resource`
             }),
-            text: (
+            text: toMountPoint(
               <div>
                 <h5>
                   {i18n.translate('xpack.apm.fetcher.error.status', {

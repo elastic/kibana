@@ -38,10 +38,9 @@ describe('Histogram', () => {
         formatYShort={t => `${asDecimal(t)} occ.`}
         formatYLong={t => `${asDecimal(t)} occurrences`}
         tooltipHeader={bucket =>
-          `${timeFormatter(bucket.x0, { withUnit: false })} - ${timeFormatter(
-            bucket.x,
-            { withUnit: false }
-          )} ${unit}`
+          `${timeFormatter(bucket.x0, {
+            withUnit: false
+          })} - ${timeFormatter(bucket.x, { withUnit: false })} ${unit}`
         }
         width={800}
       />

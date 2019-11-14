@@ -8,8 +8,8 @@ import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { TimeRange, esFilters } from 'src/plugins/data/public';
-import { Query, StaticIndexPattern } from 'src/legacy/core_plugins/data/public';
+import { Query, TimeRange, esFilters } from 'src/plugins/data/public';
+import { StaticIndexPattern } from 'src/legacy/core_plugins/data/public';
 import { ExpressionRenderer } from 'src/legacy/core_plugins/expressions/public';
 import { Subscription } from 'rxjs';
 import {

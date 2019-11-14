@@ -19,13 +19,13 @@ import {
   httpServerMock,
 } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
-import { createOptionalPlugin } from '../../../../../../legacy/server/lib/optional_plugin';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { initCopyToSpacesApi } from './copy_to_space';
 import { ObjectType } from '@kbn/config-schema';
 import { RouteSchemas } from 'src/core/server/http/router/route';
 import { spacesConfig } from '../../../lib/__fixtures__';
+import { securityMock } from '../../../../../security/server/mocks';
 
 describe('copy to space', () => {
   const spacesSavedObjects = createSpaces();
@@ -45,8 +45,7 @@ describe('copy to space', () => {
     const spacesService = await service.setup({
       http: (httpService as unknown) as CoreSetup['http'],
       elasticsearch: elasticsearchServiceMock.createSetupContract(),
-      getSecurity: () =>
-        createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
+      authorization: securityMock.createSetup().authz,
       getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
       config$: Rx.of(spacesConfig),
     });
@@ -173,7 +172,10 @@ describe('copy to space', () => {
     it(`requires objects to be unique`, async () => {
       const payload = {
         spaces: ['a-space'],
-        objects: [{ type: 'foo', id: 'bar' }, { type: 'foo', id: 'bar' }],
+        objects: [
+          { type: 'foo', id: 'bar' },
+          { type: 'foo', id: 'bar' },
+        ],
       };
 
       const { copyToSpace } = await setup();
@@ -186,7 +188,10 @@ describe('copy to space', () => {
     it('does not allow namespace agnostic types to be copied (via "supportedTypes" property)', async () => {
       const payload = {
         spaces: ['a-space'],
-        objects: [{ type: 'globalType', id: 'bar' }, { type: 'visualization', id: 'bar' }],
+        objects: [
+          { type: 'globalType', id: 'bar' },
+          { type: 'visualization', id: 'bar' },
+        ],
       };
 
       const { copyToSpace, legacyAPI } = await setup();
@@ -308,7 +313,10 @@ describe('copy to space', () => {
     it(`requires objects to be unique`, async () => {
       const payload = {
         retries: {},
-        objects: [{ type: 'foo', id: 'bar' }, { type: 'foo', id: 'bar' }],
+        objects: [
+          { type: 'foo', id: 'bar' },
+          { type: 'foo', id: 'bar' },
+        ],
       };
 
       const { resolveConflicts } = await setup();

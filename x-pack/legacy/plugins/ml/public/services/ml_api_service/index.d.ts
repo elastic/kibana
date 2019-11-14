@@ -9,8 +9,9 @@ import { AggFieldNamePair } from '../../../common/types/fields';
 import { ExistingJobsAndGroups } from '../job_service';
 import { PrivilegesResponse } from '../../../common/types/privileges';
 import { MlSummaryJobs } from '../../../common/types/jobs';
-import { MlServerDefaults, MlServerLimits } from '../../jobs/new_job_new/utils/new_job_defaults';
+import { MlServerDefaults, MlServerLimits } from '../../services/ml_server_info';
 import { ES_AGGREGATION } from '../../../common/constants/aggregation_types';
+import { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -65,7 +66,7 @@ declare interface Ml {
 
   dataFrameAnalytics: {
     getDataFrameAnalytics(analyticsId?: string): Promise<any>;
-    getDataFrameAnalyticsStats(analyticsId?: string): Promise<any>;
+    getDataFrameAnalyticsStats(analyticsId?: string): Promise<GetDataFrameAnalyticsStatsResponse>;
     createDataFrameAnalytics(analyticsId: string, analyticsConfig: any): Promise<any>;
     evaluateDataFrameAnalytics(evaluateConfig: any): Promise<any>;
     deleteDataFrameAnalytics(analyticsId: string): Promise<any>;
@@ -155,3 +156,19 @@ declare interface Ml {
 }
 
 declare const ml: Ml;
+
+export interface GetDataFrameAnalyticsStatsResponseOk {
+  node_failures?: object;
+  count: number;
+  data_frame_analytics: DataFrameAnalyticsStats[];
+}
+
+export interface GetDataFrameAnalyticsStatsResponseError {
+  statusCode: number;
+  error: string;
+  message: string;
+}
+
+export type GetDataFrameAnalyticsStatsResponse =
+  | GetDataFrameAnalyticsStatsResponseOk
+  | GetDataFrameAnalyticsStatsResponseError;
