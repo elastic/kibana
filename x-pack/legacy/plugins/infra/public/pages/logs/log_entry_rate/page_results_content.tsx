@@ -17,14 +17,13 @@ import {
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
 import { LoadingOverlayWrapper } from '../../../components/loading_overlay_wrapper';
 import {
-  LogAnalysisJobs,
   StringTimeRange,
   useLogAnalysisResults,
   useLogAnalysisResultsUrlState,
@@ -35,6 +34,7 @@ import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
 import { FirstUseCallout } from './first_use';
 import { AnomaliesResults } from './sections/anomalies';
 import { LogRateResults } from './sections/log_rate';
+import { useLogEntryRateJobsContext } from './use_log_entry_rate_jobs';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
@@ -145,7 +145,7 @@ export const LogEntryRateResultsContent = ({
     viewSetupForReconfiguration,
     viewSetupForUpdate,
     jobIds,
-  } = useContext(LogAnalysisJobs.Context);
+  } = useLogEntryRateJobsContext();
 
   useInterval(() => {
     fetchJobStatus();

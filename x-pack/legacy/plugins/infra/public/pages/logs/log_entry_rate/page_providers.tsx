@@ -4,24 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 
-import { LogAnalysisJobs } from '../../../containers/logs/log_analysis';
-import { Source } from '../../../containers/source';
+import { useSourceContext } from '../../../containers/source';
 import { useKibanaSpaceId } from '../../../utils/use_kibana_space_id';
+import { LogEntryRateJobsProvider } from './use_log_entry_rate_jobs';
 
 export const LogEntryRatePageProviders: React.FunctionComponent = ({ children }) => {
-  const { sourceId, source } = useContext(Source.Context);
+  const { sourceId, source } = useSourceContext();
   const spaceId = useKibanaSpaceId();
 
   return (
-    <LogAnalysisJobs.Provider
+    <LogEntryRateJobsProvider
       indexPattern={source ? source.configuration.logAlias : ''}
       sourceId={sourceId}
       spaceId={spaceId}
       timeField={source ? source.configuration.fields.timestamp : ''}
     >
       {children}
-    </LogAnalysisJobs.Provider>
+    </LogEntryRateJobsProvider>
   );
 };

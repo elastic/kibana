@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import createContainer from 'constate';
 import { useMemo, useCallback, useEffect } from 'react';
 
 import { callGetMlModuleAPI } from './api/ml_get_module';
@@ -15,15 +14,17 @@ import { callSetupMlModuleAPI, SetupMlModuleResponsePayload } from './api/ml_set
 import { useLogAnalysisCleanup } from './log_analysis_cleanup';
 import { useStatusState } from './log_analysis_status_state';
 
-const MODULE_ID = 'logs_ui_analysis';
-
-export const useLogAnalysisJobs = ({
+export const useLogAnalysisJobs = <JobType extends string>({
   indexPattern,
+  jobTypes,
+  moduleId,
   sourceId,
   spaceId,
   timeField,
 }: {
   indexPattern: string;
+  jobTypes: JobType[];
+  moduleId: string;
   sourceId: string;
   spaceId: string;
   timeField: string;
@@ -40,7 +41,7 @@ export const useLogAnalysisJobs = ({
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
         dispatch({ type: 'fetchingModuleDefinition' });
-        return await callGetMlModuleAPI(MODULE_ID);
+        return await callGetMlModuleAPI(moduleId);
       },
       onResolve: response => {
         dispatch({
@@ -67,7 +68,7 @@ export const useLogAnalysisJobs = ({
       ) => {
         dispatch({ type: 'startedSetup' });
         return await callSetupMlModuleAPI(
-          MODULE_ID,
+          moduleId,
           start,
           end,
           spaceId,
@@ -143,10 +144,14 @@ export const useLogAnalysisJobs = ({
   }, [fetchModuleDefinition]);
 
   const jobIds = useMemo(() => {
-    return {
-      'log-entry-rate': getJobId(spaceId, sourceId, 'log-entry-rate'),
-    };
-  }, [sourceId, spaceId]);
+    return jobTypes.reduce(
+      (accumulatedJobIds, jobType) => ({
+        ...accumulatedJobIds,
+        [jobType]: getJobId(spaceId, sourceId, jobType),
+      }),
+      {} as Record<JobType, string>
+    );
+  }, [jobTypes, sourceId, spaceId]);
 
   return {
     availableIndices,
@@ -164,5 +169,3 @@ export const useLogAnalysisJobs = ({
     jobIds,
   };
 };
-
-export const LogAnalysisJobs = createContainer(useLogAnalysisJobs);

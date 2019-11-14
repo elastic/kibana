@@ -4,17 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { JobType } from './log_analysis';
-
 export const bucketSpan = 900000;
 
 export const getJobIdPrefix = (spaceId: string, sourceId: string) =>
   `kibana-logs-ui-${spaceId}-${sourceId}-`;
 
-export const getJobId = (spaceId: string, sourceId: string, jobType: JobType) =>
+export const getJobId = (spaceId: string, sourceId: string, jobType: string) =>
   `${getJobIdPrefix(spaceId, sourceId)}${jobType}`;
 
-export const getDatafeedId = (spaceId: string, sourceId: string, jobType: JobType) =>
+export const getDatafeedId = (spaceId: string, sourceId: string, jobType: string) =>
   `datafeed-${getJobId(spaceId, sourceId, jobType)}`;
 
 export const getAllModuleJobIds = (spaceId: string, sourceId: string) => [
