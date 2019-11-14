@@ -16,24 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
 
-interface GetTelemetryUsageFetcherConfig {
-  configTelemetrySendUsageFrom: 'browser' | 'server';
-  telemetrySavedObject: TelemetrySavedObject;
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { TIMEOUT } from './constants';
+import { ClusterDetailsGetter } from '../collection_manager';
+/**
+ * Get the cluster stats from the connected cluster.
+ *
+ * This is the equivalent to GET /_cluster/stats?timeout=30s.
+ */
+export async function getClusterStats(callCluster: CallCluster) {
+  return await callCluster('cluster.stats', {
+    timeout: TIMEOUT,
+  });
 }
 
-export function getTelemetryUsageFetcher({
-  telemetrySavedObject,
-  configTelemetrySendUsageFrom,
-}: GetTelemetryUsageFetcherConfig) {
-  if (!telemetrySavedObject) {
-    return configTelemetrySendUsageFrom;
-  }
-
-  if (typeof telemetrySavedObject.sendUsageFrom === 'undefined') {
-    return configTelemetrySendUsageFrom;
-  }
-
-  return telemetrySavedObject.sendUsageFrom;
-}
+/**
+ * Get the cluster uuids from the connected cluster.
+ */
+export const getClusterUuids: ClusterDetailsGetter = async ({ callCluster }) => {
+  const result = await getClusterStats(callCluster);
+  return [{ clusterUuid: result.cluster_uuid }];
+};
