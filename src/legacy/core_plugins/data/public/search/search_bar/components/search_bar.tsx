@@ -36,7 +36,11 @@ import {
   KibanaReactContextValue,
 } from '../../../../../../../plugins/kibana_react/public';
 import { IDataPluginServices } from '../../../types';
-import { esFilters, TimeHistoryContract, TimeRange } from '../../../../../../../plugins/data/public';
+import {
+  esFilters,
+  TimeHistoryContract,
+  TimeRange,
+} from '../../../../../../../plugins/data/public';
 
 interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
