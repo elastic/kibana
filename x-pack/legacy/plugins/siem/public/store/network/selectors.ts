@@ -70,6 +70,21 @@ const selectTopCountriesByType = (
 export const topCountriesSelector = () =>
   createSelector(selectTopCountriesByType, topCountriesQueries => topCountriesQueries);
 
+const selectHttpByType = (state: State, networkType: NetworkType) => {
+  const httpType =
+    networkType === NetworkType.page ? NetworkTableType.http : IpDetailsTableType.http;
+  return (
+    get([networkType, 'queries', httpType], state.network) ||
+    get([networkType, 'queries', httpType], initialNetworkState)
+  );
+};
+
+export const httpSelector = () =>
+  createSelector(
+    selectHttpByType,
+    httpQueries => httpQueries
+  );
+
 // IP Details Selectors
 export const ipDetailsFlowTargetSelector = () =>
   createSelector(selectNetworkDetails, network => network.flowTarget);

@@ -38,6 +38,7 @@ export { getBreadcrumbs } from './utils';
 import { TlsQueryTable } from './tls_query_table';
 import { UsersQueryTable } from './users_query_table';
 import { NetworkTopNFlowQueryTable } from './network_top_n_flow_query_table';
+import { NetworkHttpQueryTable } from './network_http_query_table';
 import { NetworkTopCountriesQueryTable } from './network_top_countries_query_table';
 import { useKibanaCore } from '../../../lib/compose/kibana_core';
 
@@ -212,6 +213,18 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
                   endDate={to}
                   filterQuery={filterQuery}
                   flowTarget={flowTarget}
+                  ip={ip}
+                  skip={isInitializing}
+                  startDate={from}
+                  type={networkModel.NetworkType.details}
+                  setQuery={setQuery}
+                />
+
+                <EuiSpacer />
+
+                <NetworkHttpQueryTable
+                  endDate={to}
+                  filterQuery={filterQuery}
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
