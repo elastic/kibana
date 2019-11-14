@@ -18,7 +18,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { MountPoint } from '../types';
 
@@ -39,6 +39,6 @@ export const MountWrapper: React.FunctionComponent<{ mount: MountPoint }> = ({ m
 export const mountReactNode = (component: React.ReactNode): MountPoint => (
   element: HTMLElement
 ) => {
-  ReactDOM.render(<I18nProvider>{component}</I18nProvider>, element);
-  return () => ReactDOM.unmountComponentAtNode(element);
+  render(<I18nProvider>{component}</I18nProvider>, element);
+  return () => unmountComponentAtNode(element);
 };
