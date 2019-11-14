@@ -15,8 +15,8 @@ import {
 } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { start } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import * as i18n from './translations';
+// @ts-ignore
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../maps/common/constants';
-import { useKibanaCore } from '../../../lib/kibana_core';
 
 import { MapEmbeddable } from './types';
 import { getLayerList } from './map_config';
@@ -24,68 +24,61 @@ import { getLayerList } from './map_config';
 export interface EmbeddedMapProps {
   query: Query;
   filters: esFilters.Filter[];
-  startDate: number;
-  endDate: number;
 }
 
-export const EmbeddedMap = React.memo<EmbeddedMapProps>(
-  ({ endDate, filters, query, startDate }) => {
-    const [embeddable, setEmbeddable] = useState<MapEmbeddable | null>(null);
+export const EmbeddedMap = React.memo<EmbeddedMapProps>(({ filters, query }) => {
+  const [embeddable, setEmbeddable] = useState<MapEmbeddable | null>(null);
 
-    const core = useKibanaCore();
+  const factory = start.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
-    const factory = start.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
+  const state = {
+    layerList: getLayerList(),
+    title: i18n.MAP_TITLE,
+  };
+  const input = {
+    id: uuid.v4(),
+    filters,
+    hidePanelTitles: true,
+    query,
+    refreshConfig: { value: 0, pause: true },
+    viewMode: ViewMode.VIEW,
+    isLayerTOCOpen: false,
+    hideFilterActions: true,
+    mapCenter: { lon: 11, lat: 47, zoom: 0 },
+    disableZoom: true,
+    disableTooltipControl: true,
+    hideToolbarOverlay: true,
+    hideWidgetOverlay: true,
+  };
 
-    const state = {
-      layerList: getLayerList(),
-      title: i18n.MAP_TITLE,
-    };
-    const input = {
-      id: uuid.v4(),
-      filters,
-      hidePanelTitles: true,
-      query,
-      refreshConfig: { value: 0, pause: true },
-      timeRange: {
-        from: new Date(startDate).toISOString(),
-        to: new Date(endDate).toISOString(),
-      },
-      viewMode: ViewMode.VIEW,
-      isLayerTOCOpen: false,
-      openTOCDetails: [],
-      hideFilterActions: true,
-      mapCenter: { lon: -1.05469, lat: 15.96133, zoom: 0 },
-    };
+  useEffect(() => {
+    async function setupEmbeddable() {
+      // @ts-ignore
+      const embeddableObject = await factory.createFromState(state, input, undefined);
 
-    useEffect(() => {
-      async function setupEmbeddable() {
-        // @ts-ignore
-        const embeddableObject = await factory.createFromState(state, input, undefined);
-
-        setEmbeddable(embeddableObject);
-      }
-      setupEmbeddable();
-    }, []);
-    const getActions = () => {
-      return [];
-    };
-    return embeddable != null ? (
-      <EmbeddablePanel
-        data-test-subj="embeddable-panel"
-        embeddable={embeddable}
-        getActions={getActions}
-        getEmbeddableFactory={start.getEmbeddableFactory}
-        getAllEmbeddableFactories={start.getEmbeddableFactories}
-        notifications={core.notifications}
-        overlays={core.overlays}
-        inspector={{
-          isAvailable: () => false,
-          open: () => true,
-        }}
-        SavedObjectFinder={SavedObjectFinder}
-      />
-    ) : null;
-  }
-);
+      setEmbeddable(embeddableObject);
+    }
+    setupEmbeddable();
+  }, []);
+  const getActions = () => {
+    return [];
+  };
+  return embeddable != null ? (
+    <EmbeddablePanel
+      data-test-subj="embeddable-panel"
+      hideHeader={true}
+      embeddable={embeddable}
+      // @ts-ignore
+      getActions={getActions}
+      getEmbeddableFactory={start.getEmbeddableFactory}
+      getAllEmbeddableFactories={start.getEmbeddableFactories}
+      SavedObjectFinder={SavedObjectFinder}
+      inspector={{
+        isAvailable: () => false,
+        open: false,
+      }}
+    />
+  ) : null;
+});
 
 EmbeddedMap.displayName = 'EmbeddedMap';

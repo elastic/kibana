@@ -46,7 +46,7 @@ export const getLowPolyLayer = () => {
         lineWidth: {
           type: 'STATIC',
           options: {
-            size: 2,
+            size: 0,
           },
         },
         iconSize: {
