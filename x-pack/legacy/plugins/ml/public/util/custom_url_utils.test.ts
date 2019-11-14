@@ -306,6 +306,45 @@ describe('ML - custom URL utils', () => {
       ); // eslint-disable-line max-len
     });
 
+    test('does not escape special characters for Lucene query language inside of the filter', () => {
+      const testUrlLuceneFilters: KibanaUrlConfig = {
+        url_name: 'Lucene query with filters',
+        time_range: 'auto',
+        url_value:
+          "kibana#/dashboard/884c8780-0618-11ea-b671-c9c7e0ebf1f2?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'$earliest$',to:'$latest$'))&_a=(description:'',filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'7a0a6120-0612-11ea-b671-c9c7e0ebf1f2',key:'at@name',negate:!f,params:(query:'$at@name$'),type:phrase),query:(match_phrase:('at@name':'$at@name$')))),fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),panels:!((embeddableConfig:(),gridData:(h:15,i:f7ef89e3-62a6-42da-84b2-c815d8da8bb4,w:24,x:0,y:0),id:'19067710-0617-11ea-b671-c9c7e0ebf1f2',panelIndex:f7ef89e3-62a6-42da-84b2-c815d8da8bb4,type:visualization,version:'8.0.0')),query:(language:lucene,query:''),timeRestore:!f,title:special-lucine,viewMode:view)", // eslint-disable-line max-len
+      };
+
+      const testRecord = {
+        job_id: 'special-chars-job-1',
+        result_type: 'record',
+        probability: 0.01460073141268696,
+        multi_bucket_impact: -5,
+        record_score: 23.817016191989776,
+        initial_record_score: 23.817016191989776,
+        bucket_span: 900,
+        detector_index: 0,
+        is_interim: false,
+        timestamp: 1549548900000,
+        partition_field_name: 'at@name',
+        partition_field_value: 'contains\\ and a /',
+        function: 'mean',
+        function_description: 'mean',
+        typical: [998.382636366326],
+        actual: [903.4208848741321],
+        field_name: 'metric%$£&!{(]field',
+        earliest: '2017-02-09T15:10:00.000Z',
+        latest: '2017-02-09T17:15:00.000Z',
+        influencers: [
+          { influencer_field_name: 'at@name', influencer_field_values: ['contains\\ and a /'] },
+        ],
+        'at@name': ['contains\\ and a /'],
+      };
+
+      expect(getUrlForRecord(testUrlLuceneFilters, testRecord)).toBe(
+        "kibana#/dashboard/884c8780-0618-11ea-b671-c9c7e0ebf1f2?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'2017-02-09T15:10:00.000Z',to:'2017-02-09T17:15:00.000Z'))&_a=(description:'',filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'7a0a6120-0612-11ea-b671-c9c7e0ebf1f2',key:'at@name',negate:!f,params:(query:'contains%5C%20and%20a%20%2F'),type:phrase),query:(match_phrase:('at@name':'contains%5C%20and%20a%20%2F')))),fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),panels:!((embeddableConfig:(),gridData:(h:15,i:f7ef89e3-62a6-42da-84b2-c815d8da8bb4,w:24,x:0,y:0),id:'19067710-0617-11ea-b671-c9c7e0ebf1f2',panelIndex:f7ef89e3-62a6-42da-84b2-c815d8da8bb4,type:visualization,version:'8.0.0')),query:(language:lucene,query:''),timeRestore:!f,title:special-lucine,viewMode:view)"
+      ); // eslint-disable-line max-len
+    });
+
     test('returns expected URL for other type URL', () => {
       expect(getUrlForRecord(TEST_OTHER_URL, TEST_RECORD)).toBe(
         'http://airlinecodes.info/airline-code-AAL'
