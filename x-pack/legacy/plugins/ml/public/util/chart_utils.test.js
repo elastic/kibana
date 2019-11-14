@@ -14,19 +14,18 @@ jest.mock('ui/registry/field_formats', () => ({
 
 jest.mock('ui/timefilter', () => {
   const dateMath = require('@elastic/datemath');
-  const { dataPluginMock } = require('../../../../../../src/legacy/core_plugins/data/public/mocks');
-  const dataSetup = dataPluginMock.createSetup();
-  const { timefilter } = dataSetup.timefilter;
   let _time = undefined;
-  timefilter.setTime.mockImplementation((time) => {
-    _time = time;
-  });
-  timefilter.getActiveBounds.mockImplementation(() => {
-    return {
-      min: dateMath.parse(_time.from),
-      max: dateMath.parse(_time.to),
-    };
-  });
+  const timefilter = {
+    setTime: (time) => {
+      _time = time;
+    },
+    getActiveBounds: () => {
+      return {
+        min: dateMath.parse(_time.from),
+        max: dateMath.parse(_time.to),
+      };
+    }
+  };
   return {
     timefilter,
   };
