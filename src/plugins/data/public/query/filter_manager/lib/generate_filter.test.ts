@@ -19,7 +19,8 @@
 
 import { generateFilters } from './generate_filters';
 import { FilterManager } from '../filter_manager';
-import { esFilters, IFieldType, IIndexPattern } from '../../..';
+
+import { esFilters, IFieldType, IIndexPattern } from '../../../../common';
 
 const INDEX_NAME = 'my-index';
 const EXISTS_FIELD_NAME = '_exists_';

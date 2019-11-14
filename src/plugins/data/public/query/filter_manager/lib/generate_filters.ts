@@ -18,7 +18,8 @@
  */
 
 import _ from 'lodash';
-import { FilterManager, esFilters, IFieldType, IIndexPattern } from '../../..';
+import { esFilters, IFieldType, IIndexPattern } from '../../../../common';
+import { FilterManager } from '../filter_manager';
 
 function getExistingFilter(
   appFilters: esFilters.Filter[],
