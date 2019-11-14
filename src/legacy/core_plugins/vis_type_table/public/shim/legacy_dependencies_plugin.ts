@@ -23,7 +23,7 @@ import { initTableVisLegacyModule } from './table_vis_legacy_module';
 /** @internal */
 export class LegacyDependenciesPlugin implements Plugin {
   public setup() {
-    initTableVisLegacyModule();
+    // initTableVisLegacyModule();
   }
 
   public start(core: CoreStart) {
