@@ -6,6 +6,8 @@
 import React from 'react';
 import { EuiSpacer, EuiRange, EuiDualRange, EuiFormRow, EuiCallOut } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import {
   UseField,
@@ -87,12 +89,25 @@ export const TextType = React.memo(({ field }: Props) => {
 
         {/* fielddata */}
         <EditFieldFormRow
-          title={<h3>Fielddata</h3>}
-          description="This is description text."
+          title={
+            <h3>
+              {i18n.translate('xpack.idxMgmt.mappingsEditor.fielddataTitle', {
+                defaultMessage: 'Fielddata',
+              })}
+            </h3>
+          }
+          description={i18n.translate('xpack.idxMgmt.mappingsEditor.fielddataDescription', {
+            defaultMessage:
+              'Whether to use in-memory fielddata for sorting, aggregations, or scripting.',
+          })}
           formFieldPath="fielddata"
         >
           {/* fielddata_frequency_filter */}
-          <EuiFormRow label="Range (Min / Max %):">
+          <EuiFormRow
+            label={i18n.translate('xpack.idxMgmt.mappingsEditor.rangeFieldLabel', {
+              defaultMessage: 'Range (Min / Max %)',
+            })}
+          >
             <UseMultiFields
               fields={{
                 min: {
@@ -131,7 +146,13 @@ export const TextType = React.memo(({ field }: Props) => {
         {/* Analyzers */}
         <EditFieldSection title="Analysers">
           <EditFieldFormRow
-            title={<h3>Use different analyzers for index and searching</h3>}
+            title={
+              <h3>
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.indexAnalyzersFieldTitle', {
+                  defaultMessage: 'Use different analyzers for index and searching',
+                })}
+              </h3>
+            }
             sizeTitle={'xxs'}
             toggleDefaultValue={getDefaultValueToggle('analyzers', field.source)}
           >
@@ -140,7 +161,18 @@ export const TextType = React.memo(({ field }: Props) => {
                 <div>
                   <SelectWithCustom
                     path="analyzer"
-                    label={isOn ? 'Index analyzer' : 'Index + search analyzer'}
+                    label={
+                      isOn
+                        ? i18n.translate('xpack.idxMgmt.mappingsEditor.indexAnalyzerFieldLabel', {
+                            defaultMessage: 'Index analyzer',
+                          })
+                        : i18n.translate(
+                            'xpack.idxMgmt.mappingsEditor.indexSearchAnalyzerFieldLabel',
+                            {
+                              defaultMessage: 'Index + search analyzer',
+                            }
+                          )
+                    }
                     options={PARAMETERS_OPTIONS.analyzer!}
                     config={getFieldConfig('analyzer')}
                     defaultValue={field.source.analyzer}
@@ -182,18 +214,46 @@ export const TextType = React.memo(({ field }: Props) => {
 
           {/* index_phrases */}
           <EditFieldFormRow
-            title={<h3>Index phrases</h3>}
-            description="This is description text."
+            title={
+              <h3>
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.indexPhrasesFieldTitle', {
+                  defaultMessage: 'Index phrases',
+                })}
+              </h3>
+            }
+            description={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.indexPhrasesFieldDescription',
+              {
+                defaultMessage:
+                  'Whether to index two-term word combinations into a separate field.',
+              }
+            )}
             formFieldPath="index_phrases"
           />
 
           {/* index_prefixes */}
           <EditFieldFormRow
-            title={<h3>Set index prefixes</h3>}
-            description="This is description text."
+            title={
+              <h3>
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.indexPrefixesFieldTitle', {
+                  defaultMessage: 'Set index prefixes',
+                })}
+              </h3>
+            }
+            description={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.indexPrefixesFieldDescription',
+              {
+                defaultMessage:
+                  'Whether to index prefixes of 2 and 5 characters into a separate field.',
+              }
+            )}
             toggleDefaultValue={getDefaultValueToggle('indexPrefixes', field.source)}
           >
-            <EuiFormRow label="Range (Min / Max):">
+            <EuiFormRow
+              label={i18n.translate('xpack.idxMgmt.mappingsEditor.rangeFieldLabel', {
+                defaultMessage: 'Range (Min / Max)',
+              })}
+            >
               <UseMultiFields
                 fields={{
                   min: {
@@ -224,8 +284,20 @@ export const TextType = React.memo(({ field }: Props) => {
 
           {/* position_increment_gap */}
           <EditFieldFormRow
-            title={<h3>Set position increment gap</h3>}
-            description="This is description text."
+            title={
+              <h3>
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.positionIncrementGapFieldTitle', {
+                  defaultMessage: 'Set position increment gap',
+                })}
+              </h3>
+            }
+            description={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.positionIncrementGapFieldDescription',
+              {
+                defaultMessage:
+                  'The number of fake term positions which should be inserted between each element of an array of strings.',
+              }
+            )}
             toggleDefaultValue={getDefaultValueToggle('position_increment_gap', field.source)}
           >
             <FormDataProvider pathsToWatch="index_options">
@@ -250,10 +322,24 @@ export const TextType = React.memo(({ field }: Props) => {
                       formData.index_options !== 'offsets' && (
                         <>
                           <EuiSpacer size="s" />
-                          <EuiCallOut title="Postions not enabled." color="danger" iconType="alert">
+                          <EuiCallOut
+                            title={i18n.translate(
+                              'xpack.idxMgmt.mappingsEditor.positionsErrorMessage',
+                              {
+                                defaultMessage: 'Positions not enabled.',
+                              }
+                            )}
+                            color="danger"
+                            iconType="alert"
+                          >
                             <p>
-                              You need to set the index options to "positions" or "offsets" in order
-                              to be able to change the position increment gap.
+                              {i18n.translate(
+                                'xpack.idxMgmt.mappingsEditor.positionsErrorMessage',
+                                {
+                                  defaultMessage:
+                                    'You need to set the index options to "positions" or "offsets" in order to be able to change the position increment gap.',
+                                }
+                              )}
                             </p>
                           </EuiCallOut>
                         </>
@@ -273,8 +359,16 @@ export const TextType = React.memo(({ field }: Props) => {
 
           {/* term vector */}
           <EditFieldFormRow
-            title={<h3>Set term vector</h3>}
-            description="This is description text."
+            title={
+              <h3>
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.termVectorFieldTitle', {
+                  defaultMessage: 'Set term vector',
+                })}
+              </h3>
+            }
+            description={i18n.translate('xpack.idxMgmt.mappingsEditor.termVectorFieldDescription', {
+              defaultMessage: 'Whether term vectors should be stored for an analyzed field.',
+            })}
             direction="column"
             toggleDefaultValue={getDefaultValueToggle('term_vector', field.source)}
           >
@@ -292,7 +386,13 @@ export const TextType = React.memo(({ field }: Props) => {
                       <EuiSpacer size="s" />
                       <EuiCallOut color="warning">
                         <p>
-                          Setting "With positions offsets" will double the size of a field’s index.
+                          {i18n.translate(
+                            'xpack.idxMgmt.mappingsEditor.termVectorFieldWarningMessage',
+                            {
+                              defaultMessage:
+                                'Setting "With positions offsets" will double the size of a field’s index.',
+                            }
+                          )}
                         </p>
                       </EuiCallOut>
                     </>

@@ -81,8 +81,10 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
         }
       }
     );
-    const indexPatterns = (await Promise.all(promises)).filter(
-      (indexPattern: IndexPattern | null): indexPattern is IndexPattern => Boolean(indexPattern)
+    const indexPatterns = (
+      await Promise.all(promises)
+    ).filter((indexPattern: IndexPattern | null): indexPattern is IndexPattern =>
+      Boolean(indexPattern)
     );
 
     return new Embeddable(

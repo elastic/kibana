@@ -6,12 +6,25 @@
 
 import React from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { EditFieldFormRow } from '../fields/edit_field';
 
 export const EagerGlobalOrdinalsParameter = () => (
   <EditFieldFormRow
-    title={<h3>Use eager global ordinals</h3>}
-    description="This is description text."
+    title={
+      <h3>
+        {i18n.translate('xpack.idxMgmt.mappingsEditor.eagerGlobalOrdinalsFieldTitle', {
+          defaultMessage: 'Use eager global ordinals',
+        })}
+      </h3>
+    }
+    description={i18n.translate(
+      'xpack.idxMgmt.mappingsEditor.eagerGlobalOrdinalsFieldDescription',
+      {
+        defaultMessage: 'Whether to load global ordinals on refresh.',
+      }
+    )}
     formFieldPath="eager_global_ordinals"
   />
 );

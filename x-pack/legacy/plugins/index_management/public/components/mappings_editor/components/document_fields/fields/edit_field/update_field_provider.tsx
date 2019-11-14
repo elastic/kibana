@@ -6,6 +6,7 @@
 
 import React, { useState, Fragment } from 'react';
 import { EuiConfirmModal, EuiOverlayMask, EuiBadge, EuiCode } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { useMappingsState, useDispatch } from '../../../../mappings_state';
 import {
@@ -108,14 +109,28 @@ export const UpdateFieldProvider = ({ children }: Props) => {
           title={title}
           onCancel={closeModal}
           onConfirm={confirmTypeUpdate}
-          cancelButtonText="Cancel"
+          cancelButtonText={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.updateFieldCancelButtonLabel',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
           buttonColor="danger"
-          confirmButtonText="Confirm type change"
+          confirmButtonText={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.updateFieldConfirmDescription',
+            {
+              defaultMessage: 'Confirm type change',
+            }
+          )}
         >
           <>
             {fieldsTree && (
               <>
-                <p>This will delete the following fields.</p>
+                <p>
+                  {i18n.translate('xpack.idxMgmt.mappingsEditor.updateFieldDescription', {
+                    defaultMessage: 'This will delete the following fields.',
+                  })}
+                </p>
                 <FieldsTree fields={fieldsTree} />
               </>
             )}

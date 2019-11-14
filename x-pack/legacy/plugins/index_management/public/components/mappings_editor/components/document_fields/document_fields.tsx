@@ -6,6 +6,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { useMappingsState, useDispatch } from '../../mappings_state';
 import { FieldsList, CreateField, EditField } from './fields';
@@ -47,7 +48,9 @@ export const DocumentFields = () => {
       <>
         <EuiSpacer />
         <EuiButtonEmpty disabled={isDisabled} onClick={addField} iconType="plusInCircleFilled">
-          Add field
+          {i18n.translate('xpack.idxMgmt.mappingsEditor.addFieldButtonLabel', {
+            defaultMessage: 'Add field',
+          })}
         </EuiButtonEmpty>
       </>
     );

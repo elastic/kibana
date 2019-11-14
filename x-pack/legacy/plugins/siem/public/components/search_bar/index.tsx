@@ -41,7 +41,6 @@ import { esFilters } from '../../../../../../../src/plugins/data/public';
 const {
   ui: { SearchBar },
   search,
-  timefilter,
 } = data;
 
 export const siemFilterManager = npStart.plugins.data.query.filterManager;
@@ -99,10 +98,11 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
     toStr,
     updateSearch,
   }) => {
+    const { timefilter } = npStart.plugins.data.query.timefilter;
     if (fromStr != null && toStr != null) {
-      timefilter.timefilter.setTime({ from: fromStr, to: toStr });
+      timefilter.setTime({ from: fromStr, to: toStr });
     } else if (start != null && end != null) {
-      timefilter.timefilter.setTime({
+      timefilter.setTime({
         from: new Date(start).toISOString(),
         to: new Date(end).toISOString(),
       });
@@ -401,7 +401,4 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     dispatch(inputsActions.setSearchBarFilter({ id, filters })),
 });
 
-export const SiemSearchBar = connect(
-  makeMapStateToProps,
-  mapDispatchToProps
-)(SearchBarComponent);
+export const SiemSearchBar = connect(makeMapStateToProps, mapDispatchToProps)(SearchBarComponent);

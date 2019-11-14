@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { EditFieldFormRow } from '../fields/edit_field';
 import { PARAMETERS_OPTIONS } from '../../../constants';
@@ -19,8 +20,16 @@ interface Props {
 
 export const SimilarityParameter = ({ defaultToggleValue }: Props) => (
   <EditFieldFormRow
-    title={<h3>Set similarity</h3>}
-    description="This is description text."
+    title={
+      <h3>
+        {i18n.translate('xpack.idxMgmt.mappingsEditor.setSimilarityFieldTitle', {
+          defaultMessage: 'Set similarity',
+        })}
+      </h3>
+    }
+    description={i18n.translate('xpack.idxMgmt.mappingsEditor.setSimilarityFieldDescription', {
+      defaultMessage: 'Which scoring algorithm or similarity should be used.',
+    })}
     direction="column"
     toggleDefaultValue={defaultToggleValue}
   >
@@ -40,7 +49,9 @@ export const SimilarityParameter = ({ defaultToggleValue }: Props) => (
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText size="s" color="subdued">
-          This is description text.
+          {i18n.translate('xpack.idxMgmt.mappingsEditor.setSimilarityFieldDefaultDescription', {
+            defaultMessage: 'Defaults to BM25.',
+          })}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

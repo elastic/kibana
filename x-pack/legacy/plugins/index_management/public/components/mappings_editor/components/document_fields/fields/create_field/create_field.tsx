@@ -6,6 +6,8 @@
 import React, { useEffect } from 'react';
 import classNames from 'classnames';
 
+import { i18n } from '@kbn/i18n';
+
 import {
   EuiButtonEmpty,
   EuiButton,
@@ -151,12 +153,18 @@ export const CreateField = React.memo(function CreateFieldComponent({
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
       {isCancelable !== false && (
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={cancel}>Cancel</EuiButtonEmpty>
+          <EuiButtonEmpty onClick={cancel}>
+            {i18n.translate('xpack.idxMgmt.mappingsEditor.createFieldCancelButtonLabel', {
+              defaultMessage: 'Cancel',
+            })}
+          </EuiButtonEmpty>
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
         <EuiButton color="primary" fill onClick={submitForm} type="submit">
-          Add
+          {i18n.translate('xpack.idxMgmt.mappingsEditor.createFieldAddButtonLabel', {
+            defaultMessage: 'Add',
+          })}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

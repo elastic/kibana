@@ -5,6 +5,8 @@
  */
 import React, { useEffect } from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { useForm, getUseField, Form, OnFormUpdateArg } from '../../shared_imports';
 import { FormRow, Field } from '../../shared_imports';
 import { DYNAMIC_SETTING_OPTIONS } from '../../constants';
@@ -34,7 +36,14 @@ export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
 
   return (
     <Form form={form} className="mappings-editor__configuration">
-      <FormRow title="Configuration" description="Global settings for the index mappings">
+      <FormRow
+        title={i18n.translate('xpack.idxMgmt.mappingsEditor.configurationTitle', {
+          defaultMessage: 'Configuration',
+        })}
+        description={i18n.translate('xpack.idxMgmt.mappingsEditor.configurationDescription', {
+          defaultMessage: 'Global settings for the index mappings',
+        })}
+      >
         <UseField
           path="dynamic"
           componentProps={{

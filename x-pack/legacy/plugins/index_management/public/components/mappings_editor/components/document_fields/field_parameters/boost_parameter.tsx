@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { EuiRange } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { EditFieldFormRow } from '../fields/edit_field';
 import { getFieldConfig } from '../../../lib';
@@ -18,8 +19,16 @@ interface Props {
 
 export const BoostParameter = ({ defaultToggleValue }: Props) => (
   <EditFieldFormRow
-    title={<h3>Set boost level</h3>}
-    description="This is description text."
+    title={
+      <h3>
+        {i18n.translate('xpack.idxMgmt.mappingsEditor.boostFieldTitle', {
+          defaultMessage: 'Set boost level',
+        })}
+      </h3>
+    }
+    description={i18n.translate('xpack.idxMgmt.mappingsEditor.boostFieldDescription', {
+      defaultMessage: 'Mapping field-level query time boosting.',
+    })}
     toggleDefaultValue={defaultToggleValue}
   >
     {/* Boost level */}

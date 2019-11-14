@@ -7,17 +7,31 @@
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { EditFieldFormRow } from '../fields/edit_field';
 
 export const NormsParameter = () => (
   <EditFieldFormRow
-    title={<h3>Use norms</h3>}
-    description="This is description text."
+    title={
+      <h3>
+        {i18n.translate('xpack.idxMgmt.mappingsEditor.useNormsFieldTitle', {
+          defaultMessage: 'Use norms',
+        })}
+      </h3>
+    }
+    description={i18n.translate('xpack.idxMgmt.mappingsEditor.useNormsFieldDescription', {
+      defaultMessage: 'Whether field-length should be taken into account when scoring queries.',
+    })}
     formFieldPath="norms"
     direction="column"
   >
     <EuiCallOut color="warning">
-      <p>Enabling norms requires a lot of disk use.</p>
+      <p>
+        {i18n.translate('xpack.idxMgmt.mappingsEditor.useNormsFieldWarningMessage', {
+          defaultMessage: 'Enabling norms requires a lot of disk use.',
+        })}
+      </p>
     </EuiCallOut>
   </EditFieldFormRow>
 );

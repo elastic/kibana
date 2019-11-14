@@ -4,30 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useState, useEffect } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import { AnalyticsTable } from './table';
 import { getAnalyticsFactory } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
 import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { AnalyticStatsBarStats, StatsBar } from '../../../components/stats_bar';
 
 interface Props {
   jobCreationDisabled: boolean;
 }
 export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
+  const [analyticsStats, setAnalyticsStats] = useState<AnalyticStatsBarStats | undefined>(
+    undefined
+  );
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  const getAnalytics = getAnalyticsFactory(setAnalytics, setErrorMessage, setIsInitialized, false);
+  const getAnalytics = getAnalyticsFactory(
+    setAnalytics,
+    setAnalyticsStats,
+    setErrorMessage,
+    setIsInitialized,
+    false
+  );
 
   useEffect(() => {
     getAnalytics(true);
@@ -38,21 +52,19 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
   };
 
   const errorDisplay = (
-    <Fragment>
-      <EuiCallOut
-        title={i18n.translate('xpack.ml.overview.analyticsList.errorPromptTitle', {
-          defaultMessage: 'An error occurred getting the data frame analytics list.',
-        })}
-        color="danger"
-        iconType="alert"
-      >
-        <pre>
-          {errorMessage && errorMessage.message !== undefined
-            ? errorMessage.message
-            : JSON.stringify(errorMessage)}
-        </pre>
-      </EuiCallOut>
-    </Fragment>
+    <EuiCallOut
+      title={i18n.translate('xpack.ml.overview.analyticsList.errorPromptTitle', {
+        defaultMessage: 'An error occurred getting the data frame analytics list.',
+      })}
+      color="danger"
+      iconType="alert"
+    >
+      <pre>
+        {errorMessage && errorMessage.message !== undefined
+          ? errorMessage.message
+          : JSON.stringify(errorMessage)}
+      </pre>
+    </EuiCallOut>
   );
 
   const panelClass = isInitialized === false ? 'mlOverviewPanel__isLoading' : 'mlOverviewPanel';
@@ -75,13 +87,11 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
             </h2>
           }
           body={
-            <Fragment>
-              <p>
-                {i18n.translate('xpack.ml.overview.analyticsList.emptyPromptText', {
-                  defaultMessage: `Data frame analytics enable you to perform different analyses of your data and annotate it with the results. The analytics job stores the annotated data, as well as a copy of the source data, in a new index.`,
-                })}
-              </p>
-            </Fragment>
+            <p>
+              {i18n.translate('xpack.ml.overview.analyticsList.emptyPromptText', {
+                defaultMessage: `Data frame analytics enable you to perform different analyses of your data and annotate it with the results. The analytics job stores the annotated data, as well as a copy of the source data, in a new index.`,
+              })}
+            </p>
           }
           actions={
             <EuiButton
@@ -99,7 +109,24 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
         />
       )}
       {isInitialized === true && analytics.length > 0 && (
-        <Fragment>
+        <>
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiText size="m">
+                <h3>
+                  {i18n.translate('xpack.ml.overview.analyticsList.PanelTitle', {
+                    defaultMessage: 'Analytics',
+                  })}
+                </h3>
+              </EuiText>
+            </EuiFlexItem>
+            {analyticsStats !== undefined && (
+              <EuiFlexItem grow={false} className="mlOverviewPanel__statsBar">
+                <StatsBar stats={analyticsStats} dataTestSub={'mlOverviewAnalyticsStatsBar'} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          <EuiSpacer />
           <AnalyticsTable items={analytics} />
           <EuiSpacer size="m" />
           <div className="mlOverviewPanel__buttons">
@@ -114,7 +141,7 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
               })}
             </EuiButton>
           </div>
-        </Fragment>
+        </>
       )}
     </EuiPanel>
   );

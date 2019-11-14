@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { i18n } from '@kbn/i18n';
+
 import { FieldConfig } from 'src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import {
   FIELD_TYPES,
@@ -24,18 +26,32 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: '',
       validations: [
         {
-          validator: emptyField('Give a name to the field.'),
+          validator: emptyField(
+            i18n.translate('xpack.idxMgmt.mappingsEditor.fieldNameFieldRequiredErrorMessage', {
+              defaultMessage: 'Give a name to the field.',
+            })
+          ),
         },
         {
           validator: containsCharsField({
             chars: ' ',
-            message: 'Spaces are not allowed in the name.',
+            message: i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.fieldNameFieldSpacesValidationErrorMessage',
+              {
+                defaultMessage: 'Spaces are not allowed in the name.',
+              }
+            ),
           }),
         },
         {
           validator: fieldValidators.containsCharsField({
             chars: '.',
-            message: 'Cannot contain a dot (.)',
+            message: i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.fieldNameFieldDotValidationErrorMessage',
+              {
+                defaultMessage: 'Cannot contain a dot (.).',
+              }
+            ),
           }),
         },
       ],
@@ -94,7 +110,9 @@ export const PARAMETERS_DEFINITION = {
       min_segment_size: {
         fieldConfig: {
           type: FIELD_TYPES.NUMBER,
-          label: 'Minimum segment size:',
+          label: i18n.translate('xpack.idxMgmt.mappingsEditor.minSegmentSizeFieldLabel', {
+            defaultMessage: 'Minimum segment size',
+          }),
           defaultValue: 50,
           formatters: [toInt],
         },
@@ -117,7 +135,11 @@ export const PARAMETERS_DEFINITION = {
       type: FIELD_TYPES.TEXT,
       validations: [
         {
-          validator: emptyField('Specify a null value.'),
+          validator: emptyField(
+            i18n.translate('xpack.idxMgmt.mappingsEditor.nullValueFieldRequiredErrorMessage', {
+              defaultMessage: 'Specify a null value.',
+            })
+          ),
         },
       ],
     },
@@ -132,7 +154,12 @@ export const PARAMETERS_DEFINITION = {
           validator: ({ value }: ValidationFuncArg<any, number>) => {
             if (value < 0) {
               return {
-                message: 'The value must be greater or equal than 0.',
+                message: i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.boostFieldValidationErrorMessage',
+                  {
+                    defaultMessage: 'The value must be greater or equal to 0.',
+                  }
+                ),
               };
             }
           },
@@ -150,7 +177,12 @@ export const PARAMETERS_DEFINITION = {
           validator: ({ value }: ValidationFuncArg<any, number>) => {
             if (value < 0) {
               return {
-                message: 'The value must be greater or equal than 0.',
+                message: i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.scalingFactorFieldValidationErrorMessage',
+                  {
+                    defaultMessage: 'The value must be greater or equal to 0.',
+                  }
+                ),
               };
             }
           },
@@ -160,21 +192,27 @@ export const PARAMETERS_DEFINITION = {
   },
   dynamic: {
     fieldConfig: {
-      label: 'Dynamic',
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicFieldLabel', {
+        defaultMessage: 'Dynamic',
+      }),
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
   },
   enabled: {
     fieldConfig: {
-      label: 'Enabled',
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.enabledFieldLabel', {
+        defaultMessage: 'Enabled',
+      }),
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
   },
   locale: {
     fieldConfig: {
-      label: 'Locale',
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.localeFieldLabel', {
+        defaultMessage: 'Locale',
+      }),
       defaultValue: '',
     },
   },
@@ -195,12 +233,21 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: INDEX_DEFAULT,
       validations: [
         {
-          validator: emptyField('Give a name to the analyzer'),
+          validator: emptyField(
+            i18n.translate('xpack.idxMgmt.mappingsEditor.analyzerFieldRequiredErrorMessage', {
+              defaultMessage: 'Give a name to the analyzer.',
+            })
+          ),
         },
         {
           validator: containsCharsField({
             chars: ' ',
-            message: 'Spaces are not allowed in the analyzer.',
+            message: i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.analyzerFieldValidationErrorMessage',
+              {
+                defaultMessage: 'Spaces are not allowed.',
+              }
+            ),
           }),
         },
       ],
@@ -212,12 +259,21 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: INDEX_DEFAULT,
       validations: [
         {
-          validator: emptyField('Give a name to the analyzer'),
+          validator: emptyField(
+            i18n.translate('xpack.idxMgmt.mappingsEditor.searchAnalyzerFieldRequiredErrorMessage', {
+              defaultMessage: 'Give a name to the analyzer.',
+            })
+          ),
         },
         {
           validator: containsCharsField({
             chars: ' ',
-            message: 'Spaces are not allowed in the analyzer.',
+            message: i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.searchAnalyzerFieldValidationErrorMessage',
+              {
+                defaultMessage: 'Spaces are not allowed.',
+              }
+            ),
           }),
         },
       ],
@@ -229,12 +285,24 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: INDEX_DEFAULT,
       validations: [
         {
-          validator: emptyField('Give a name to the analyzer.'),
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.searchQuoteAnalyzerFieldRequiredErrorMessage',
+              {
+                defaultMessage: 'Give a name to the analyzer.',
+              }
+            )
+          ),
         },
         {
           validator: containsCharsField({
             chars: ' ',
-            message: 'Spaces are not allowed in the analyzer.',
+            message: i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.searchQuoteAnalyzerFieldValidationErrorMessage',
+              {
+                defaultMessage: 'Spaces are not allowed.',
+              }
+            ),
           }),
         },
       ],
@@ -247,12 +315,21 @@ export const PARAMETERS_DEFINITION = {
       type: FIELD_TYPES.TEXT,
       validations: [
         {
-          validator: emptyField('Give a name to the normalizer.'),
+          validator: emptyField(
+            i18n.translate('xpack.idxMgmt.mappingsEditor.normalizerFieldRequiredErrorMessage', {
+              defaultMessage: 'Give a name to the normalizer.',
+            })
+          ),
         },
         {
           validator: containsCharsField({
             chars: ' ',
-            message: 'Spaces are not allowed.',
+            message: i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.normalizerFieldValidationErrorMessage',
+              {
+                defaultMessage: 'Spaces are not allowed.',
+              }
+            ),
           }),
         },
       ],
@@ -260,7 +337,9 @@ export const PARAMETERS_DEFINITION = {
   },
   index_options: {
     fieldConfig: {
-      label: 'Index options',
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.indexOptionsLabel', {
+        defaultMessage: 'Index options',
+      }),
       defaultValue: 'docs',
       type: FIELD_TYPES.SELECT,
     },
@@ -306,13 +385,25 @@ export const PARAMETERS_DEFINITION = {
       formatters: [toInt],
       validations: [
         {
-          validator: emptyField('Set a position increment gap value.'),
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.positionIncrementGapFieldRequiredErrorMessage',
+              {
+                defaultMessage: 'Set a position increment gap value',
+              }
+            )
+          ),
         },
         {
           validator: (({ value }: ValidationFuncArg<any, number>) => {
             if (value < 0) {
               return {
-                message: 'The value must be greater or equal than 0.',
+                message: i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.positionIncrementGapFieldValidationErrorMessage',
+                  {
+                    defaultMessage: 'The value must be greater or equal to 0.',
+                  }
+                ),
               };
             }
           }) as ValidationFunc,
@@ -360,7 +451,12 @@ export const PARAMETERS_DEFINITION = {
           validator: (({ value }: ValidationFuncArg<any, number>) => {
             if ((value as number) < 0) {
               return {
-                message: 'The value must be greater or equal than 0.',
+                message: i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.ignoreAboveFieldErrorMessage',
+                  {
+                    defaultMessage: 'The value must be greater or equal to 0.',
+                  }
+                ),
               };
             }
           }) as ValidationFunc,

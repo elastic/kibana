@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import { EuiRange } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
@@ -15,6 +16,7 @@ import {
   DocValuesParameter,
   BoostParameter,
   NullValueParameter,
+  CoerceParameter,
 } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 
@@ -55,8 +57,19 @@ export const NumericType = ({ field }: Props) => {
             {formData =>
               formData.subType === 'scaled_float' ? (
                 <EditFieldFormRow
-                  title={<h3>Set scaling factor</h3>}
-                  description="This is description text."
+                  title={
+                    <h3>
+                      {i18n.translate('xpack.idxMgmt.mappingsEditor.scalingFactorFieldTitle', {
+                        defaultMessage: 'Set scaling factor',
+                      })}
+                    </h3>
+                  }
+                  description={i18n.translate(
+                    'xpack.idxMgmt.mappingsEditor.scalingFactorFieldDescription',
+                    {
+                      defaultMessage: 'The scaling factor to use when encoding values.',
+                    }
+                  )}
                   toggleDefaultValue={true}
                 >
                   {/* Boost level */}
@@ -85,18 +98,25 @@ export const NumericType = ({ field }: Props) => {
           />
 
           {/* coerce */}
-          <EditFieldFormRow
-            title={<h3>Coerce to number</h3>}
-            description="This is description text."
-            formFieldPath="coerce"
-          />
+          <CoerceParameter />
 
           {/* ignore_malformed */}
           <UseField path="ignore_malformed">
             {ignoreMalformedField => (
               <EditFieldFormRow
-                title={<h3>Reject malformed data</h3>}
-                description="This is description text."
+                title={
+                  <h3>
+                    {i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreMalformedFieldTitle', {
+                      defaultMessage: 'Reject malformed data',
+                    })}
+                  </h3>
+                }
+                description={i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.ignoredMalformedFieldDescription',
+                  {
+                    defaultMessage: 'Whether to ignore malformed numbers.',
+                  }
+                )}
                 toggleDefaultValue={getDefaultValueToggle('ignore_malformed', field.source)}
               >
                 {isOn => {
