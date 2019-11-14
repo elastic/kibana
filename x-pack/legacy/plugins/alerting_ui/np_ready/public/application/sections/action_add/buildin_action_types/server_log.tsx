@@ -9,7 +9,7 @@ import { ActionTypeModel, ValidationResult } from '../../../../types';
 export function getActionType(): ActionTypeModel {
   return {
     id: '.server-log',
-    iconClass: 'loggingApp',
+    iconClass: 'logsApp',
     selectMessage: i18n.translate(
       'xpack.alertingUI.sections.actionAdd.serverLogAction.selectMessageText',
       {
