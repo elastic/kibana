@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,6 +16,11 @@ import {
   IconType,
 } from '@elastic/eui';
 import styled from 'styled-components';
+// TODO: either
+// * import from a shared point
+// * duplicate inside our folder
+import { useTrackedPromise } from '../../../../infra/public/utils/use_tracked_promise';
+import { installPackage } from '../../data';
 import { PLUGIN } from '../../../common/constants';
 import { PackageInfo } from '../../../common/types';
 import { VersionBadge } from '../../components/version_badge';
@@ -87,14 +92,32 @@ function NavButtonBack() {
   );
 }
 
-function InstallationButton({ status }: PackageInfo) {
-  const isInstalled = status === 'installed';
-  const iconType = isInstalled ? '' : 'plusInCircle';
-  const buttonText = isInstalled ? 'Installed' : 'Add Package';
+const installedButton = (
+  <EuiButtonEmpty iconType="check" disabled>
+    This package is installed
+  </EuiButtonEmpty>
+);
 
-  return (
-    <EuiButton fill={!isInstalled} iconType={iconType}>
-      {buttonText}
+function InstallationButton(props: PackageInfo) {
+  const [isInstalled, setInstalled] = useState<boolean>(props.status === 'installed');
+  const [installationRequest, attemptInstallation] = useTrackedPromise(
+    {
+      createPromise: async () => {
+        const pkgkey = `${props.name}-${props.version}`;
+        return installPackage(pkgkey);
+      },
+      onResolve: (value: PackageInfo) => setInstalled(value.status === 'installed'),
+    },
+    [props.name, props.version, installPackage]
+  );
+  const isLoading = installationRequest.state === 'pending';
+  const handleClickInstall = useCallback(attemptInstallation, [attemptInstallation]);
+
+  const installButton = (
+    <EuiButton isLoading={isLoading} fill={true} onClick={handleClickInstall}>
+      {isLoading ? 'Installing' : 'Install package'}
     </EuiButton>
   );
+
+  return isInstalled ? installedButton : installButton;
 }
