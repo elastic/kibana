@@ -22,7 +22,7 @@ export class AbstractField {
     return !!this._fieldName;
   }
 
-  async getIndexPatternType() {
+  async getDataType() {
     return 'string';
   }
 

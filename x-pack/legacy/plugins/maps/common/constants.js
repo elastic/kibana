@@ -55,7 +55,7 @@ export const FIELD_ORIGIN = {
   UNDEFINED: 'undefined'
 };
 
-export const SOURCE_DATA_ID_ORIGIN = FIELD_ORIGIN.SOURCE;
+export const SOURCE_DATA_ID_ORIGIN = 'source';
 
 export const GEOJSON_FILE = 'GEOJSON_FILE';
 
@@ -116,6 +116,7 @@ export const COUNT_AGG_TYPE = METRIC_TYPE.COUNT;
 export const COUNT_PROP_LABEL = METRIC_TYPE.COUNT;
 export const COUNT_PROP_NAME = 'doc_count';
 
-export const STYLE_TYPE = { 'STATIC': 'STATIC', 'DYNAMIC': 'DYNAMIC' };
-
-
+export const STYLE_TYPE = {
+  'STATIC': 'STATIC',
+  'DYNAMIC': 'DYNAMIC'
+};

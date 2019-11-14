@@ -22,7 +22,7 @@ export class ESDocField extends AbstractField {
     return new ESTooltipProperty(this.getName(), this.getName(), value, indexPattern);
   }
 
-  async getIndexPatternType() {
+  async getDataType() {
     const field = await this._getField();
     return field.type;
   }

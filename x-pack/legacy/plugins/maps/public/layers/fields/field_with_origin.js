@@ -26,8 +26,8 @@ export class FieldWithOrigin extends AbstractField {
     return this._field.isValid();
   }
 
-  async getIndexPatternType() {
-    return await this._field.getIndexPatternType();
+  async getDataType() {
+    return await this._field.getDataType();
   }
 
   async getLabel() {

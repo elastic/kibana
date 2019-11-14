@@ -13,7 +13,7 @@ import { EMSFileCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { UpdateSourceEditor } from './update_source_editor';
-import { EMSRegionLayerField } from '../../fields/ems_region_field';
+import { EMSFileField } from '../../fields/ems_file_field';
 
 export class EMSFileSource extends AbstractVectorSource {
 
@@ -49,7 +49,7 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
   createField({ fieldName }) {
-    return new EMSRegionLayerField({
+    return new EMSFileField({
       fieldName,
       source: this
     });

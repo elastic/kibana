@@ -8,7 +8,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { TooltipSelector } from '../../../components/tooltip_selector';
 import { getEMSClient } from '../../../meta';
-import { EMSRegionLayerField } from '../../fields/ems_region_field';
+import { EMSFileField } from '../../fields/ems_file_field';
 
 export class UpdateSourceEditor extends Component {
 
@@ -38,7 +38,7 @@ export class UpdateSourceEditor extends Component {
       const emsFiles = await emsClient.getFileLayers();
       const emsFile = emsFiles.find((emsFile => emsFile.getId() === this.props.layerId));
       const emsFields = emsFile.getFieldsInLanguage();
-      fields = emsFields.map(field => new EMSRegionLayerField({
+      fields = emsFields.map(field => new EMSFileField({
         fieldName: field.name,
         source: this.props.source
       }));
