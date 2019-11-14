@@ -19,7 +19,7 @@ export async function getExistingEnvironmentsForService({
   serviceName: string | undefined;
   setup: Setup;
 }) {
-  const { client, indices } = setup;
+  const { internalClient, indices } = setup;
 
   const bool = serviceName
     ? { filter: [{ term: { [SERVICE_NAME]: serviceName } }] }
@@ -42,7 +42,7 @@ export async function getExistingEnvironmentsForService({
     }
   };
 
-  const resp = await client.search(params);
+  const resp = await internalClient.search(params);
   const buckets = idx(resp.aggregations, _ => _.environments.buckets) || [];
   return buckets.map(bucket => bucket.key as string);
 }

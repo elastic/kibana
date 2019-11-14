@@ -240,6 +240,10 @@ Kibana reads this url from an external metadata service, but users can still
 override this parameter to use their own Tile Map Service. For example:
 `"https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana"`
 
+`newsfeed.enabled:` :: *Default: `true`* Controls whether to enable the newsfeed
+system for the Kibana UI notification center. Set to `false` to disable the
+newsfeed system.
+
 `path.data:`:: *Default: `data`* The path where Kibana stores persistent data
 not saved in Elasticsearch.
 

@@ -48,16 +48,13 @@ function getItemIdToExpandedRowMap(
   itemIds: TransformId[],
   transforms: TransformListRow[]
 ): ItemIdToExpandedRowMap {
-  return itemIds.reduce(
-    (m: ItemIdToExpandedRowMap, transformId: TransformId) => {
-      const item = transforms.find(transform => transform.config.id === transformId);
-      if (item !== undefined) {
-        m[transformId] = <ExpandedRow item={item} />;
-      }
-      return m;
-    },
-    {} as ItemIdToExpandedRowMap
-  );
+  return itemIds.reduce((m: ItemIdToExpandedRowMap, transformId: TransformId) => {
+    const item = transforms.find(transform => transform.config.id === transformId);
+    if (item !== undefined) {
+      m[transformId] = <ExpandedRow item={item} />;
+    }
+    return m;
+  }, {} as ItemIdToExpandedRowMap);
 }
 
 function stringMatch(str: string | undefined, substr: string) {

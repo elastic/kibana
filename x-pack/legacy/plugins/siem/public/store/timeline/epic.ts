@@ -107,20 +107,11 @@ export const createTimelineEpic = <State>(): Epic<
   state$,
   { selectNotesByIdSelector, timelineByIdSelector, timelineTimeRangeSelector, apolloClient$ }
 ) => {
-  const timeline$ = state$.pipe(
-    map(timelineByIdSelector),
-    filter(isNotNull)
-  );
+  const timeline$ = state$.pipe(map(timelineByIdSelector), filter(isNotNull));
 
-  const notes$ = state$.pipe(
-    map(selectNotesByIdSelector),
-    filter(isNotNull)
-  );
+  const notes$ = state$.pipe(map(selectNotesByIdSelector), filter(isNotNull));
 
-  const timelineTimeRange$ = state$.pipe(
-    map(timelineTimeRangeSelector),
-    filter(isNotNull)
-  );
+  const timelineTimeRange$ = state$.pipe(map(timelineTimeRangeSelector), filter(isNotNull));
 
   return merge(
     action$.pipe(

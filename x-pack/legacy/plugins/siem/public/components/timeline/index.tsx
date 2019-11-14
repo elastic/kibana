@@ -341,22 +341,19 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const StatefulTimeline = connect(
-  makeMapStateToProps,
-  {
-    addProvider: timelineActions.addProvider,
-    createTimeline: timelineActions.createTimeline,
-    onDataProviderEdited: timelineActions.dataProviderEdited,
-    removeColumn: timelineActions.removeColumn,
-    removeProvider: timelineActions.removeProvider,
-    updateColumns: timelineActions.updateColumns,
-    updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
-    updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,
-    updateDataProviderKqlQuery: timelineActions.updateDataProviderKqlQuery,
-    updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
-    updateItemsPerPage: timelineActions.updateItemsPerPage,
-    updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
-    updateSort: timelineActions.updateSort,
-    upsertColumn: timelineActions.upsertColumn,
-  }
-)(StatefulTimelineComponent);
+export const StatefulTimeline = connect(makeMapStateToProps, {
+  addProvider: timelineActions.addProvider,
+  createTimeline: timelineActions.createTimeline,
+  onDataProviderEdited: timelineActions.dataProviderEdited,
+  removeColumn: timelineActions.removeColumn,
+  removeProvider: timelineActions.removeProvider,
+  updateColumns: timelineActions.updateColumns,
+  updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
+  updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,
+  updateDataProviderKqlQuery: timelineActions.updateDataProviderKqlQuery,
+  updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
+  updateItemsPerPage: timelineActions.updateItemsPerPage,
+  updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
+  updateSort: timelineActions.updateSort,
+  upsertColumn: timelineActions.upsertColumn,
+})(StatefulTimelineComponent);

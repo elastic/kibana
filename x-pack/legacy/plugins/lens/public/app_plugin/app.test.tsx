@@ -317,9 +317,9 @@ describe('Lens App', () => {
 
         instance.update();
 
-        const handler = instance.findWhere(el => el.prop('onSave')).prop('onSave') as ((
+        const handler = instance.findWhere(el => el.prop('onSave')).prop('onSave') as (
           p: unknown
-        ) => void);
+        ) => void;
         handler(saveProps);
       }
 
