@@ -27,8 +27,8 @@ import {
   TimeRange,
   onlyDisabledFiltersChanged,
   getTime,
+  Query,
 } from '../../../../../../plugins/data/public';
-import { Query } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
   Container,

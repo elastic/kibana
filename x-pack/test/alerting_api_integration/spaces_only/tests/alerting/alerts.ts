@@ -68,10 +68,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
       const response = await alertUtils.createAlwaysFiringAction({ reference });
 
       expect(response.statusCode).to.eql(200);
-      const alertTestRecord = (await esTestIndexTool.waitForDocs(
-        'alert:test.always-firing',
-        reference
-      ))[0];
+      const alertTestRecord = (
+        await esTestIndexTool.waitForDocs('alert:test.always-firing', reference)
+      )[0];
       expect(alertTestRecord._source).to.eql({
         source: 'alert:test.always-firing',
         reference,
@@ -81,10 +80,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
           reference,
         },
       });
-      const actionTestRecord = (await esTestIndexTool.waitForDocs(
-        'action:test.index-record',
-        reference
-      ))[0];
+      const actionTestRecord = (
+        await esTestIndexTool.waitForDocs('action:test.index-record', reference)
+      )[0];
       expect(actionTestRecord._source).to.eql({
         config: {
           unencrypted: `This value shouldn't get encrypted`,
@@ -207,10 +205,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       expect(response.statusCode).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
-      const alertTestRecord = (await esTestIndexTool.waitForDocs(
-        'alert:test.authorization',
-        reference
-      ))[0];
+      const alertTestRecord = (
+        await esTestIndexTool.waitForDocs('alert:test.authorization', reference)
+      )[0];
       expect(alertTestRecord._source.state).to.eql({
         callClusterSuccess: true,
         savedObjectsClientSuccess: false,
@@ -263,10 +260,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       expect(response.statusCode).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
-      const actionTestRecord = (await esTestIndexTool.waitForDocs(
-        'action:test.authorization',
-        reference
-      ))[0];
+      const actionTestRecord = (
+        await esTestIndexTool.waitForDocs('action:test.authorization', reference)
+      )[0];
       expect(actionTestRecord._source.state).to.eql({
         callClusterSuccess: true,
         savedObjectsClientSuccess: false,

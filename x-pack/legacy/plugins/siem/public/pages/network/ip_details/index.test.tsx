@@ -164,7 +164,7 @@ describe('Ip Details', () => {
     wrapper.update();
     expect(
       wrapper
-        .find('[data-test-subj="ip-details-headline"] [data-test-subj="page_headline_title"]')
+        .find('[data-test-subj="ip-details-headline"] [data-test-subj="header-page-title"]')
         .text()
     ).toEqual('fe80::24ce:f7ff:fede:a571');
   });
