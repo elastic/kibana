@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as _ from 'lodash';
 // @ts-ignore
 import contentDisposition from 'content-disposition';
 import {
