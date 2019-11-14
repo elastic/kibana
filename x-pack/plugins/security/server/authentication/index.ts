@@ -67,12 +67,13 @@ export async function setupAuthentication({
 
   const isValid = (sessionValue: ProviderSession) => {
     // ensure that this cookie was created with the current Kibana configuration
-    if (sessionValue.path !== (http.basePath.serverBasePath || '/')) {
+    const { path, expires } = sessionValue;
+    if (path !== undefined && path !== (http.basePath.serverBasePath || '/')) {
       authLogger.debug(`Outdated session value with path "${sessionValue.path}"`);
       return false;
     }
     // ensure that this cookie is not expired
-    return !(sessionValue.expires && sessionValue.expires < Date.now());
+    return !(expires && expires < Date.now());
   };
 
   const authenticator = new Authenticator({
