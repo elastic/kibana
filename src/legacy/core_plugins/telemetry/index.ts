@@ -55,7 +55,6 @@ const telemetry = (kibana: any) => {
             .allow(null)
             .default(null),
         }),
-
         // `config` is used internally and not intended to be set
         config: Joi.string().default(Joi.ref('$defaultConfigPath')),
         banner: Joi.boolean().default(true),
@@ -66,6 +65,15 @@ const telemetry = (kibana: any) => {
           ),
           otherwise: Joi.string().default(
             `https://telemetry.elastic.co/xpack/${ENDPOINT_VERSION}/send`
+          ),
+        }),
+        optInStatusUrl: Joi.when('$dev', {
+          is: true,
+          then: Joi.string().default(
+            `https://telemetry-staging.elastic.co/opt_in_status/${ENDPOINT_VERSION}/send`
+          ),
+          otherwise: Joi.string().default(
+            `https://telemetry.elastic.co/opt_in_status/${ENDPOINT_VERSION}/send`
           ),
         }),
         sendUsageFrom: Joi.string()
@@ -103,6 +111,7 @@ const telemetry = (kibana: any) => {
             config.get('telemetry.allowChangingOptInStatus') !== false &&
             getXpackConfigWithDeprecated(config, 'telemetry.banner'),
           telemetryOptedIn: config.get('telemetry.optIn'),
+          telemetryOptInStatusUrl: config.get('telemetry.optInStatusUrl'),
           allowChangingOptInStatus: config.get('telemetry.allowChangingOptInStatus'),
           telemetrySendUsageFrom: config.get('telemetry.sendUsageFrom'),
         };
@@ -142,7 +151,6 @@ const telemetry = (kibana: any) => {
       } as any) as CoreSetup;
 
       telemetryPlugin(initializerContext).setup(coreSetup);
-
       // register collectors
       server.usage.collectorSet.register(createTelemetryPluginUsageCollector(server));
       server.usage.collectorSet.register(createLocalizationUsageCollector(server));

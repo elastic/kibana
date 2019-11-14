@@ -22,7 +22,7 @@ import { boomify } from 'boom';
 import { CoreSetup } from 'src/core/server';
 import { telemetryCollectionManager } from '../collection_manager';
 
-export function registerTelemetryDataRoutes(core: CoreSetup) {
+export function registerTelemetryUsageStatsRoutes(core: CoreSetup) {
   const { server } = core.http as any;
 
   server.route({
@@ -44,21 +44,17 @@ export function registerTelemetryDataRoutes(core: CoreSetup) {
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;
       const unencrypted = req.payload.unencrypted;
-      const isDev = config.get('env.dev');
 
       try {
-        const { getStats, title } = telemetryCollectionManager.getStatsGetter();
-        server.log(['debug', 'telemetry', 'fetcher'], `Fetching usage using ${title} getter.`);
-
-        return await getStats({
+        return await telemetryCollectionManager.getStats({
           unencrypted,
           server,
           req,
           start,
           end,
-          isDev,
         });
       } catch (err) {
+        const isDev = config.get('env.dev');
         if (isDev) {
           // don't ignore errors when running in dev mode
           return boomify(err, { statusCode: err.status || 500 });
