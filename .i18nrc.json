@@ -8,6 +8,7 @@
     "embeddableApi": "src/plugins/embeddable",
     "esUi": "src/plugins/es_ui_shared",
     "expressions_np": "src/plugins/expressions",
+    "devTools": "src/plugins/devTools",
     "expressions": "src/legacy/core_plugins/expressions",
     "inputControl": "src/legacy/core_plugins/input_control_vis",
     "inspector": "src/plugins/inspector",
