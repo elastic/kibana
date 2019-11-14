@@ -419,7 +419,6 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "styledComponentId": "sc-fzXfLO",
                                   "target": "code",
                                   "toString": [Function],
-                                  "usesTheme": false,
                                   "warnTooManyClasses": [Function],
                                   "withComponent": [Function],
                                 }
@@ -457,7 +456,6 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "styledComponentId": "sc-AykKK",
                                   "target": "pre",
                                   "toString": [Function],
-                                  "usesTheme": false,
                                   "warnTooManyClasses": [Function],
                                   "withComponent": [Function],
                                 }
@@ -644,7 +642,6 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "styledComponentId": "sc-fzXfLO",
                                   "target": "code",
                                   "toString": [Function],
-                                  "usesTheme": false,
                                   "warnTooManyClasses": [Function],
                                   "withComponent": [Function],
                                 }
@@ -682,7 +679,6 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "styledComponentId": "sc-AykKK",
                                   "target": "pre",
                                   "toString": [Function],
-                                  "usesTheme": false,
                                   "warnTooManyClasses": [Function],
                                   "withComponent": [Function],
                                 }
@@ -870,7 +866,6 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "styledComponentId": "sc-fzXfLO",
                                   "target": "code",
                                   "toString": [Function],
-                                  "usesTheme": false,
                                   "warnTooManyClasses": [Function],
                                   "withComponent": [Function],
                                 }
@@ -908,7 +903,6 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "styledComponentId": "sc-AykKK",
                                   "target": "pre",
                                   "toString": [Function],
-                                  "usesTheme": false,
                                   "warnTooManyClasses": [Function],
                                   "withComponent": [Function],
                                 }
@@ -1106,7 +1100,6 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "styledComponentId": "sc-fzXfLO",
                                   "target": "code",
                                   "toString": [Function],
-                                  "usesTheme": false,
                                   "warnTooManyClasses": [Function],
                                   "withComponent": [Function],
                                 }
@@ -1144,7 +1137,6 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "styledComponentId": "sc-AykKK",
                                   "target": "pre",
                                   "toString": [Function],
-                                  "usesTheme": false,
                                   "warnTooManyClasses": [Function],
                                   "withComponent": [Function],
                                 }
@@ -1359,7 +1351,6 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "styledComponentId": "sc-fzXfLO",
                                   "target": "code",
                                   "toString": [Function],
-                                  "usesTheme": false,
                                   "warnTooManyClasses": [Function],
                                   "withComponent": [Function],
                                 }
@@ -1397,7 +1388,6 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                   "styledComponentId": "sc-AykKK",
                                   "target": "pre",
                                   "toString": [Function],
-                                  "usesTheme": false,
                                   "warnTooManyClasses": [Function],
                                   "withComponent": [Function],
                                 }
