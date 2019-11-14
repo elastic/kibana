@@ -10,5 +10,6 @@
 uiPlugins: {
         public: Map<PluginName, DiscoveredPlugin>;
         internal: Map<PluginName, DiscoveredPluginInternal>;
+        config: Map<PluginName, Observable<unknown> | null>;
     };
 ```

@@ -959,6 +959,21 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends obje
     stop?(): void;
 }
 
+// Warning: (ae-missing-release-tag) "PluginConfigDescriptor" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface PluginConfigDescriptor<T = any> {
+    // (undocumented)
+    exposeToBrowser?: Array<keyof T>;
+    // (undocumented)
+    schema: PluginConfigSchema<T>;
+}
+
+// Warning: (ae-missing-release-tag) "PluginConfigSchema" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export type PluginConfigSchema<T = unknown> = Type<T>;
+
 // @public
 export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
@@ -1006,6 +1021,7 @@ export interface PluginsServiceSetup {
     uiPlugins: {
         public: Map<PluginName, DiscoveredPlugin>;
         internal: Map<PluginName, DiscoveredPluginInternal>;
+        config: Map<PluginName, Observable<unknown> | null>;
     };
 }
 
@@ -1615,6 +1631,6 @@ export interface UserProvidedValues<T extends SavedObjectAttribute = any> {
 // Warnings were encountered during analysis:
 // 
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugins_service.ts:38:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugins_service.ts:45:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
 
 ```

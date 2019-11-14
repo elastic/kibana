@@ -701,7 +701,11 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends obje
 export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
-export interface PluginInitializerContext {
+export interface PluginInitializerContext<ConfigSchema = unknown> {
+    // (undocumented)
+    readonly config: {
+        create: <T = ConfigSchema>() => Observable<T>;
+    };
     // (undocumented)
     readonly env: {
         mode: Readonly<EnvironmentMode>;
