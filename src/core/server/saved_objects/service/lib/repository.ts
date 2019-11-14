@@ -194,9 +194,6 @@ export class SavedObjectsRepository {
       savedObjectNamespace = options.namespace;
     } else if (this._schema.isNamespaces(type)) {
       if (method === 'index') {
-        // TODO: When switching from namespace to namespaces, we'll want to use the namespaces returned
-        // from this to ensure we aren't dropping an existing namespace. However, it's somewhat awkward that
-        // a create with overwrite=true would maintain existing spaces it's been shared to.
         const response = await this._callCluster('get', {
           id: this._serializer.generateRawId(undefined, type, id),
           index: this.getIndexForType(type),
@@ -359,15 +356,17 @@ export class SavedObjectsRepository {
         const expectedResult = {
           esRequestIndex: bulkRequestIndexCounter++,
           requestedId: object.id,
-          rawMigratedDoc: this._serializer.savedObjectToRaw(this._migrator.migrateDocument({
-            id: object.id,
-            type: object.type,
-            attributes: object.attributes,
-            migrationVersion: object.migrationVersion,
-            namespace,
-            updated_at: time,
-            references: object.references || [],
-          }) as SanitizedSavedObjectDoc),
+          rawMigratedDoc: this._serializer.savedObjectToRaw(
+            this._migrator.migrateDocument({
+              id: object.id,
+              type: object.type,
+              attributes: object.attributes,
+              migrationVersion: object.migrationVersion,
+              namespace,
+              updated_at: time,
+              references: object.references || [],
+            }) as SanitizedSavedObjectDoc
+          ),
         };
 
         bulkCreateParams.push(
