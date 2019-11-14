@@ -537,7 +537,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               await alertUtils.disable(response.body.id);
               await taskManagerUtils.waitForIdle(testStart);
 
-              // Ensur eonly 2 actions with proper params exists
+              // Ensure only 2 actions with proper params exists
               const searchResult = await esTestIndexTool.search(
                 'action:test.index-record',
                 reference
