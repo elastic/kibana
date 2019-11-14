@@ -4,21 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import getosSync from 'getos';
+import getosSync, { LinuxOs } from 'getos';
 import { promisify } from 'util';
+import { ServerFacade, Logger } from './types';
 
 const getos = promisify(getosSync);
 
-export async function logConfiguration(server, logger) {
+export async function logConfiguration(server: ServerFacade, logger: Logger) {
   const config = server.config();
 
   const browserType = config.get('xpack.reporting.capture.browser.type');
   logger.debug(`Browser type: ${browserType}`);
 
   if (browserType === 'chromium') {
-    logger.debug(`Chromium sandbox disabled: ${config.get('xpack.reporting.capture.browser.chromium.disableSandbox')}`);
+    logger.debug(
+      `Chromium sandbox disabled: ${config.get(
+        'xpack.reporting.capture.browser.chromium.disableSandbox'
+      )}`
+    );
   }
 
   const os = await getos();
-  logger.debug(`Running on os "${os.os}", distribution "${os.dist}", release "${os.release}"`);
+  const { os: osName, dist, release } = os as LinuxOs;
+  if (dist) {
+    logger.debug(`Running on os "${osName}", distribution "${dist}", release "${release}"`);
+  } else {
+    logger.debug(`Running on os "${osName}"`);
+  }
 }

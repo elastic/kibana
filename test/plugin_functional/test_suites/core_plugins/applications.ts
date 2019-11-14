@@ -91,14 +91,18 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       await testSubjects.existOrFail('fooAppPageA');
     });
 
+    it('chromeless applications are not visible in apps list', async () => {
+      expect(await appsMenu.linkExists('Chromeless')).to.be(false);
+    });
+
     it('navigating to chromeless application hides chrome', async () => {
-      await appsMenu.clickLink('Chromeless');
+      await PageObjects.common.navigateToApp('chromeless');
       await loadingScreenNotShown();
       expect(await testSubjects.exists('headerGlobalNav')).to.be(false);
     });
 
     it('navigating away from chromeless application shows chrome', async () => {
-      await browser.goBack();
+      await PageObjects.common.navigateToApp('foo');
       await loadingScreenNotShown();
       expect(await testSubjects.exists('headerGlobalNav')).to.be(true);
     });
