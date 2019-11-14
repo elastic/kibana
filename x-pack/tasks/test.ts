@@ -25,15 +25,21 @@ export const testServerTask = async () => {
     );
   }
 
-  return gulp.src(testGlobs, { read: false }).pipe(
-    mocha({
-      ui: 'bdd',
-      require: require.resolve('../../src/setup_node_env'),
-      reporter: createAutoJUnitReporter({
-        reportName: 'X-Pack Mocha Tests',
-      }),
-    })
-  );
+  return new Promise((resolve, reject) => {
+    gulp
+      .src(testGlobs, { read: false })
+      .pipe(
+        mocha({
+          ui: 'bdd',
+          require: require.resolve('../../src/setup_node_env'),
+          reporter: createAutoJUnitReporter({
+            reportName: 'X-Pack Mocha Tests',
+          }),
+        })
+      )
+      .on('error', reject)
+      .on('end', resolve);
+  });
 };
 
 export const testBrowserTask = async () => {
