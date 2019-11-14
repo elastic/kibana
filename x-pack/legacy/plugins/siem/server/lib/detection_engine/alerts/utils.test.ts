@@ -78,34 +78,15 @@ describe('utils', () => {
     test('create successful bulk index', async () => {
       const sampleParams = sampleSignalAlertParams(undefined);
       const sampleSearchResult = sampleDocSearchResultsNoSortId;
-      const bulkBody = sampleDocSearchResultsNoSortId.hits.hits.flatMap(doc => [
-        {
-          index: {
-            _index: process.env.SIGNALS_INDEX || DEFAULT_SIGNALS_INDEX,
-            _id: doc._id,
+      mockService.callCluster.mockReturnValueOnce({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            fakeItemValue: 'fakeItemKey',
           },
-        },
-        buildBulkBody(doc, sampleParams),
-      ]);
-      mockService.callCluster.mockImplementation(
-        async (action: string, params: BulkIndexDocumentsParams) => {
-          expect(action).toEqual('bulk');
-          expect(params.index).toEqual(DEFAULT_SIGNALS_INDEX);
-
-          // timestamps are annoying...
-          (bulkBody[1] as SignalHit).signal['@timestamp'] = params.body[1].signal['@timestamp'];
-          expect(params.body).toEqual(bulkBody);
-          return {
-            took: 100,
-            errors: false,
-            items: [
-              {
-                fakeItemValue: 'fakeItemKey',
-              },
-            ],
-          };
-        }
-      );
+        ],
+      });
       const successfulSingleBulkIndex = await singleBulkIndex(
         sampleSearchResult,
         sampleParams,
