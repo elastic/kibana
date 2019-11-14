@@ -76,7 +76,7 @@ export class Field extends PureComponent {
     this.changeImageForm = null;
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     const { unsavedValue } = this.state;
     const { type, value, defVal } = nextProps.setting;
     const editableValue = this.getEditableValue(type, value, defVal);

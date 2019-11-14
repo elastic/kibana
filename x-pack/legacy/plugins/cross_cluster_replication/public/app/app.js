@@ -56,7 +56,7 @@ export class App extends Component {
     };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     routing.userHasLeftApp = false;
   }
 

@@ -36,7 +36,7 @@ export class GuideSection extends Component {
     this.props.openCodeViewer(this.props.source, this.props.title);
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.props.registerSection(this.getId(), this.props.title);
   }
 

@@ -75,7 +75,7 @@ export class StepIndexPattern extends Component {
     this.lastQuery = null;
   }
 
-  async componentWillMount() {
+  async UNSAFE_componentWillMount() {
     this.fetchExistingIndexPatterns();
     if (this.state.query) {
       this.lastQuery = this.state.query;

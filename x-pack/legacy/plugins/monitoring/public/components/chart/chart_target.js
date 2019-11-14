@@ -47,7 +47,7 @@ export class ChartTarget extends React.Component {
     return (_metric) => true;
   }
 
-  componentWillReceiveProps(newProps) {
+  UNSAFE_componentWillReceiveProps(newProps) {
     if (this.plot && !_.isEqual(newProps, this.props)) {
       const { series, timeRange } = newProps;
 

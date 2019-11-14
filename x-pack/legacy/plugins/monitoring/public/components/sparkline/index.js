@@ -22,7 +22,7 @@ export class Sparkline extends React.Component {
     };
   }
 
-  componentWillReceiveProps({ series, options }) {
+  UNSAFE_componentWillReceiveProps({ series, options }) {
     if (!isEqual(options, this.props.options)) {
       this.sparklineFlotChart.shutdown();
       this.makeSparklineFlotChart(options);

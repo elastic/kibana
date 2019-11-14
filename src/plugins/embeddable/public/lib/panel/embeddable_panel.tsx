@@ -100,7 +100,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     }
   }
 
-  public componentWillMount() {
+  public UNSAFE_componentWillMount() {
     this.mounted = true;
     const { embeddable } = this.props;
     const { parent } = embeddable;

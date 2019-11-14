@@ -35,7 +35,7 @@ class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
     }
   };
 
-  public componentWillMount() {
+  public UNSAFE_componentWillMount() {
     document.addEventListener('keydown', this.onKeyDown, false);
   }
 

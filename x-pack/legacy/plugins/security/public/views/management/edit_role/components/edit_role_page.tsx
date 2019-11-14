@@ -86,7 +86,7 @@ class EditRolePageUI extends Component<Props, State> {
     };
   }
 
-  public componentWillMount() {
+  public UNSAFE_componentWillMount() {
     if (this.props.action === 'clone' && isReservedRole(this.props.role)) {
       this.backToRoleList();
     }

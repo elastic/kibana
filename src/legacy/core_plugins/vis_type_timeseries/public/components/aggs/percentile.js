@@ -42,7 +42,7 @@ const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER];
 export class PercentileAgg extends Component {
   // eslint-disable-line react/no-multi-comp
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     if (!this.props.model.percentiles) {
       this.props.onChange(
         _.assign({}, this.props.model, {

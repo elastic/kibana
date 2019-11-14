@@ -111,7 +111,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this._isMounted = true;
   }
 

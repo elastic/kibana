@@ -290,6 +290,15 @@ module.exports = {
     {
       files: ['**/*.{js,ts,tsx}'],
       rules: {
+        camelcase: 'off',
+        '@typescript-eslint/camelcase': [
+          'error',
+          {
+            properties: 'never',
+            ignoreDestructuring: true,
+            allow: ['^[A-Z0-9_]+$', '^UNSAFE_'],
+          },
+        ],
         '@kbn/eslint/require-license-header': [
           'error',
           {

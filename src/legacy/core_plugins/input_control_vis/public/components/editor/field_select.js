@@ -49,7 +49,7 @@ class FieldSelectUi extends Component {
     this.loadFields(this.state.indexPatternId);
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.indexPatternId !== nextProps.indexPatternId) {
       this.loadFields(nextProps.indexPatternId);
     }

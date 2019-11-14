@@ -58,7 +58,7 @@ export class SourceFiltersTable extends Component {
     };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.updateFilters();
   }
 

@@ -20,7 +20,7 @@ export class Fullscreen extends React.Component {
     height: 0,
   };
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.win = getWindow();
     this.setState({
       width: this.win.innerWidth,

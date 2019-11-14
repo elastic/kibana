@@ -81,7 +81,7 @@ export class AppView extends Component {
     });
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // Only force the chrome to be hidden if we're navigating from a non-sandbox to a sandbox.
     if (!this.props.isSandbox && nextProps.isSandbox) {
       this.setState({

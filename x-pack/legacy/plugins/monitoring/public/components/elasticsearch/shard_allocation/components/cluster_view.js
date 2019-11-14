@@ -43,7 +43,7 @@ export class ClusterView extends React.Component {
     this.setState({ shardStats: stats });
   };
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.props.scope.$watch('showing', this.setShowing);
     this.props.scope.$watch(() => this.props.scope.pageData.shardStats, this.setShardStats);
   }

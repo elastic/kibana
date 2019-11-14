@@ -42,7 +42,7 @@ export class RenderWithFn extends React.Component {
     this.renderTarget = null;
   }
 
-  componentWillReceiveProps({ renderFn }) {
+  UNSAFE_componentWillReceiveProps({ renderFn }) {
     const newRenderFunction = renderFn !== this.props.renderFn;
 
     if (newRenderFunction) {

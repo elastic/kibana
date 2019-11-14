@@ -59,7 +59,7 @@ export class ScriptedFieldsTable extends Component {
     };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.fetchFields();
   }
 

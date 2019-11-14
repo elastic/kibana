@@ -48,7 +48,7 @@ export class TimePicker extends Component<Props, State> {
   };
 
   // TODO: Refactor to no longer use componentWillReceiveProps since it is being deprecated
-  componentWillReceiveProps({ from, to }: Props) {
+  UNSAFE_componentWillReceiveProps({ from, to }: Props) {
     if (from !== this.props.from || to !== this.props.to) {
       this.setState({
         range: { from, to },
