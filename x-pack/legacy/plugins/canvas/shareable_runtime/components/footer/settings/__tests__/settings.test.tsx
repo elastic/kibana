@@ -18,6 +18,11 @@ import { Settings } from '../settings';
 
 jest.mock('../../../../supported_renderers');
 jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
+jest.mock('@elastic/eui/lib/services/accessibility', () => {
+  return {
+    htmlIdGenerator: () => () => `generated-id`,
+  };
+});
 jest.mock('@elastic/eui/lib/components/portal/portal', () => {
   // eslint-disable-next-line no-shadow
   const React = require.requireActual('react');
@@ -80,8 +85,8 @@ describe('<Settings />', () => {
 
     // Click the Hide Toolbar switch
     portal(wrapper)
-      .find('input[data-test-subj="hideToolbarSwitch"]')
-      .simulate('change');
+      .find('button[data-test-subj="hideToolbarSwitch"]')
+      .simulate('click');
 
     // Wait for the animation and DOM update
     await tick(20);

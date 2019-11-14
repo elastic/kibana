@@ -11,7 +11,7 @@ import { container } from './container';
 import { InventoryItemType } from './types';
 export { metrics } from './metrics';
 
-export const inventoryModels = [host, pod, container];
+const inventoryModels = [host, pod, container];
 
 export const findInventoryModel = (type: InventoryItemType) => {
   const model = inventoryModels.find(m => m.id === type);

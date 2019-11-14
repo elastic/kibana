@@ -32,7 +32,7 @@ registerLanguage('ruby', ruby);
 
 const ContextContainer = styled.div`
   position: relative;
-  border-radius: 0 0 ${borderRadius} ${borderRadius};
+  border-radius: ${borderRadius};
 `;
 
 const LINE_HEIGHT = units.eighth * 9;
@@ -49,7 +49,7 @@ const LineNumberContainer = styled.div<{ isLibraryFrame: boolean }>`
   position: absolute;
   top: 0;
   left: 0;
-  border-radius: 0 0 0 ${borderRadius};
+  border-radius: ${borderRadius};
   background: ${props =>
     props.isLibraryFrame
       ? theme.euiColorEmptyShade

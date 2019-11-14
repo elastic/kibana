@@ -155,7 +155,7 @@ describe('index table', () => {
   });
   test('should show more when per page value is increased', () => {
     const rendered = mountWithIntl(component);
-    const perPageButton = rendered.find('#customizablePagination').find('button');
+    const perPageButton = rendered.find('EuiTablePagination EuiPopover').find('button');
     perPageButton.simulate('click');
     rendered.update();
     const fiftyButton = rendered.find('.euiContextMenuItem').at(1);
@@ -182,8 +182,8 @@ describe('index table', () => {
         )
         .map(span => span.text())
     );
-    const switchControl = rendered.find('.euiSwitch__input');
-    switchControl.simulate('change', { target: { checked: true } });
+    const switchControl = rendered.find('.euiSwitch__button');
+    switchControl.simulate('click');
     snapshot(
       rendered
         .find(

@@ -4,31 +4,68 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { FC, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
-  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { ModuleJobUI, SAVE_STATE } from '../page';
+import { JobOverrides, ModuleJobUI, SAVE_STATE } from '../page';
+import { JobItem } from './job_item';
+import { EditJob } from './edit_job';
+import { JobOverride } from '../../../../../common/types/modules';
 
 interface ModuleJobsProps {
   jobs: ModuleJobUI[];
   jobPrefix: string;
   saveState: SAVE_STATE;
+  existingGroupIds: string[];
+  jobOverrides: JobOverrides;
+  onJobOverridesChange: (job: JobOverride) => void;
 }
 
-const SETUP_RESULTS_WIDTH = '200px';
+export const SETUP_RESULTS_WIDTH = '200px';
 
-export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, saveState }) => {
+export const ModuleJobs: FC<ModuleJobsProps> = ({
+  jobs,
+  jobPrefix,
+  jobOverrides,
+  saveState,
+  existingGroupIds,
+  onJobOverridesChange,
+}) => {
   const isSaving = saveState === SAVE_STATE.SAVING;
+
+  const [jobToEdit, setJobToEdit] = useState<ModuleJobUI | null>(null);
+
+  const onFlyoutClose = (result: JobOverride | null) => {
+    setJobToEdit(null);
+
+    if (result === null) {
+      return;
+    }
+
+    onJobOverridesChange(result);
+  };
+
+  const getJobOverride = (job: ModuleJobUI): JobOverride | undefined => {
+    return jobOverrides[job.id];
+  };
+
+  const editJobFlyout =
+    jobToEdit !== null ? (
+      <EditJob
+        job={jobToEdit}
+        jobOverride={getJobOverride(jobToEdit)}
+        onClose={onFlyoutClose}
+        existingGroupIds={existingGroupIds}
+      />
+    ) : null;
+
   return (
     <>
       <EuiTitle size="s">
@@ -70,109 +107,26 @@ export const ModuleJobs: FC<ModuleJobsProps> = ({ jobs, jobPrefix, saveState }) 
       )}
 
       <ul>
-        {jobs.map(({ id, config: { description }, setupResult, datafeedResult }, i) => (
-          <li key={id}>
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="s"
-              justifyContent="spaceBetween"
-              responsive={false}
-            >
+        {jobs.map((job, i) => (
+          <li key={job.id}>
+            <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiText size="s" color="secondary">
-                  {jobPrefix}
-                  {id}
-                </EuiText>
-
-                <EuiText size="s" color="subdued">
-                  {description}
-                </EuiText>
-
-                {setupResult && setupResult.error && (
-                  <EuiText size="xs" color="danger">
-                    {setupResult.error.msg}
-                  </EuiText>
-                )}
-
-                {datafeedResult && datafeedResult.error && (
-                  <EuiText size="xs" color="danger">
-                    {datafeedResult.error.msg}
-                  </EuiText>
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} style={{ width: SETUP_RESULTS_WIDTH }}>
-                {isSaving && <EuiLoadingSpinner size="m" />}
-                {setupResult && datafeedResult && (
-                  <EuiFlexGroup
-                    gutterSize="s"
-                    wrap={false}
-                    responsive={false}
-                    justifyContent="spaceAround"
-                  >
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon
-                        type={setupResult.success ? 'check' : 'cross'}
-                        color={setupResult.success ? 'secondary' : 'danger'}
-                        size="m"
-                        aria-label={
-                          setupResult.success
-                            ? i18n.translate('xpack.ml.newJob.recognize.job.savedAriaLabel', {
-                                defaultMessage: 'Saved',
-                              })
-                            : i18n.translate('xpack.ml.newJob.recognize.job.saveFailedAriaLabel', {
-                                defaultMessage: 'Save failed',
-                              })
-                        }
-                      />
-                    </EuiFlexItem>
-
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon
-                        type={datafeedResult.success ? 'check' : 'cross'}
-                        color={datafeedResult.success ? 'secondary' : 'danger'}
-                        size="m"
-                        aria-label={
-                          setupResult.success
-                            ? i18n.translate('xpack.ml.newJob.recognize.datafeed.savedAriaLabel', {
-                                defaultMessage: 'Saved',
-                              })
-                            : i18n.translate(
-                                'xpack.ml.newJob.recognize.datafeed.saveFailedAriaLabel',
-                                {
-                                  defaultMessage: 'Save failed',
-                                }
-                              )
-                        }
-                      />
-                    </EuiFlexItem>
-
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon
-                        type={datafeedResult.started ? 'check' : 'cross'}
-                        color={datafeedResult.started ? 'secondary' : 'danger'}
-                        size="m"
-                        aria-label={
-                          setupResult.success
-                            ? i18n.translate('xpack.ml.newJob.recognize.running.startedAriaLabel', {
-                                defaultMessage: 'Started',
-                              })
-                            : i18n.translate(
-                                'xpack.ml.newJob.recognize.running.startFailedAriaLabel',
-                                {
-                                  defaultMessage: 'Start failed',
-                                }
-                              )
-                        }
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                )}
+                <JobItem
+                  jobPrefix={jobPrefix}
+                  job={job}
+                  jobOverride={getJobOverride(job)}
+                  isSaving={isSaving}
+                  onEditRequest={() => setJobToEdit(job)}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
+
             {i < jobs.length - 1 && <EuiHorizontalRule margin="s" />}
           </li>
         ))}
       </ul>
+
+      {editJobFlyout}
     </>
   );
 };

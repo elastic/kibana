@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
+import { toMountPoint } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { startMLJob } from '../../../../../services/rest/ml';
 import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
 import { MLJobLink } from '../../../../shared/Links/MachineLearningLinks/MLJobLink';
@@ -71,7 +72,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
           defaultMessage: 'Job creation failed'
         }
       ),
-      text: (
+      text: toMountPoint(
         <p>
           {i18n.translate(
             'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationText',
@@ -105,7 +106,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
           defaultMessage: 'Job successfully created'
         }
       ),
-      text: (
+      text: toMountPoint(
         <p>
           {i18n.translate(
             'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreatedNotificationText',
