@@ -21,7 +21,4 @@ const mapDispatchToProps = {
   onRemoveColor: removeColor,
 };
 
-export const WorkpadColorPicker = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Component);
+export const WorkpadColorPicker = connect(mapStateToProps, mapDispatchToProps)(Component);
