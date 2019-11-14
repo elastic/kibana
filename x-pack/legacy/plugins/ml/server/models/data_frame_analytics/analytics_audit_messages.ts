@@ -5,8 +5,8 @@
  */
 
 import { callWithRequestType } from '../../../common/types/kibana';
-import { AnalyticsMessage } from '../../../common/types/audit_message';
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import { JobMessage } from '../../../common/types/audit_message';
 
 const SIZE = 50;
 
@@ -15,7 +15,7 @@ interface Message {
   _type: string;
   _id: string;
   _score: null | number;
-  _source: AnalyticsMessage;
+  _source: JobMessage;
   sort?: any;
 }
 

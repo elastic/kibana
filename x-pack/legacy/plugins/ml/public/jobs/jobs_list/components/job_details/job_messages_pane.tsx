@@ -26,9 +26,9 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = ({ jobId }) => {
       setIsLoading(false);
     } catch (e) {
       setIsLoading(false);
-      setErrorMessage(error);
+      setErrorMessage(e);
       // eslint-disable-next-line no-console
-      console.log('Job messages could not be loaded', error);
+      console.error('Job messages could not be loaded', e);
     }
   };
 
