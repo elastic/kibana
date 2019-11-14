@@ -10,6 +10,18 @@ import Joi from 'joi';
  * Type definitions and validations for tasks.
  */
 
+/**
+ * Require
+ * @desc Create a Subtype of type T `T` such that the property under key `P` becomes required
+ * @example
+ *    type TaskInstance = {
+ *      id?: string;
+ *      name: string;
+ *    };
+ *
+ *    // This type is now defined as { id: string; name: string; }
+ *    type TaskInstanceWithId = Require<TaskInstance, 'id'>;
+ */
 type Require<T extends object, P extends keyof T> = Omit<T, P> & Required<Pick<T, P>>;
 
 /**
