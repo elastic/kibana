@@ -33,7 +33,7 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = ({ jobId }) => {
         // eslint-disable-next-line no-console
         console.log('Job messages could not be loaded', error);
       });
-  });
+  }, []);
 
   return <JobMessages messages={messages} loading={isLoading} error={errorMessage} />;
 };

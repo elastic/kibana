@@ -38,21 +38,21 @@ export const JobMessages: FC<JobMessagesProps> = ({ messages, loading, error }) 
     {
       name: '',
       render: (message: JobMessage) => <JobIcon message={message} />,
-      width: `${theme.euiSizeXL}`,
+      width: `${theme.euiSizeL}`,
     },
     {
       name: i18n.translate('xpack.ml.jobMessages.timeLabel', {
         defaultMessage: 'Time',
       }),
       render: (message: any) => formatDate(message.timestamp, TIME_FORMAT),
-      width: '150px',
+      width: '120px',
     },
     {
       field: 'node_name',
       name: i18n.translate('xpack.ml.jobMessages.nodeLabel', {
         defaultMessage: 'Node',
       }),
-      width: '120px',
+      width: '150px',
     },
     {
       field: 'message',
@@ -67,6 +67,7 @@ export const JobMessages: FC<JobMessagesProps> = ({ messages, loading, error }) 
     <>
       <EuiSpacer size="s" />
       <EuiBasicTable
+        className="job-messages-table"
         items={messages}
         columns={columns}
         compressed={true}
