@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiBottomBar,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonToggle,
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -49,7 +50,15 @@ function DefaultEditorBottomBar({
   vis,
 }: DefaultEditorBottomBarProps) {
   const { enableAutoApply } = vis.type.editorConfig;
+  const [autoApplyEnabled, setAutoApplyEnabled] = useState(false);
+  const toggleAutoApply = useCallback(e => setAutoApplyEnabled(e.target.checked), []);
   const onClickDiscard = useCallback(() => dispatch(discardChanges(vis)), [dispatch, vis]);
+
+  useEffect(() => {
+    if (autoApplyEnabled && isDirty) {
+      applyChanges();
+    }
+  }, [isDirty, autoApplyEnabled]);
 
   return (
     <EuiBottomBar>
@@ -57,7 +66,33 @@ function DefaultEditorBottomBar({
         <EuiFlexItem grow={false} />
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s">
-            {!enableAutoApply && (
+            {enableAutoApply && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate('common.ui.vis.editors.sidebar.autoApplyChangesTooltip', {
+                    defaultMessage: 'Auto apply editor changes.',
+                  })}
+                >
+                  <EuiButtonToggle
+                    aria-label={i18n.translate(
+                      'common.ui.vis.editors.sidebar.autoApplyChangesAriaLabel',
+                      {
+                        defaultMessage: 'Auto update the visualization on every change',
+                      }
+                    )}
+                    data-test-subj="visualizeEditorAutoButton"
+                    iconType="refresh"
+                    label={i18n.translate('common.ui.vis.editors.sidebar.autoApplyChangesLabel', {
+                      defaultMessage: 'Auto apply',
+                    })}
+                    fill={autoApplyEnabled}
+                    onChange={toggleAutoApply}
+                    isSelected={autoApplyEnabled}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            {!autoApplyEnabled && (
               <>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
@@ -114,7 +149,7 @@ function DefaultEditorBottomBar({
                         }
                       )}
                       color="ghost"
-                      disabled={!isDirty || enableAutoApply}
+                      disabled={!isDirty}
                       fill
                       iconType="play"
                       onClick={applyChanges}

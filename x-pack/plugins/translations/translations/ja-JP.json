@@ -535,8 +535,6 @@
     "common.ui.vis.editors.sidebar.applyChangesAriaLabel": "ビジュアライゼーションを変更と共に更新します",
     "common.ui.vis.editors.sidebar.applyChangesTooltip": "変更を適用",
     "common.ui.vis.editors.sidebar.autoApplyChangesAriaLabel": "変更されるごとにビジュアライゼーションを自動的に更新します",
-    "common.ui.vis.editors.sidebar.autoApplyChangesLabel": "自動適用",
-    "common.ui.vis.editors.sidebar.autoApplyChangesTooltip": "変更を自動適用",
     "common.ui.vis.editors.sidebar.discardChangesAriaLabel": "ビジュアライゼーションをリセット",
     "common.ui.vis.editors.sidebar.discardChangesTooltip": "変更を破棄",
     "common.ui.vis.editors.sidebar.tabs.dataLabel": "データ",

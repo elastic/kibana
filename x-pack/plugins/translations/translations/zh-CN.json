@@ -536,8 +536,6 @@
     "common.ui.vis.editors.sidebar.applyChangesAriaLabel": "使用您的更改更新可视化",
     "common.ui.vis.editors.sidebar.applyChangesTooltip": "应用更改",
     "common.ui.vis.editors.sidebar.autoApplyChangesAriaLabel": "每次更改时自动更新可视化",
-    "common.ui.vis.editors.sidebar.autoApplyChangesLabel": "自动应用",
-    "common.ui.vis.editors.sidebar.autoApplyChangesTooltip": "自动应用更改",
     "common.ui.vis.editors.sidebar.discardChangesAriaLabel": "重置可视化",
     "common.ui.vis.editors.sidebar.discardChangesTooltip": "放弃更改",
     "common.ui.vis.editors.sidebar.tabs.dataLabel": "数据",
