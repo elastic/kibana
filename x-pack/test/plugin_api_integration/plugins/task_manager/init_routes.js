@@ -32,21 +32,34 @@ export function initRoutes(server) {
     config: {
       validate: {
         payload: Joi.object({
-          taskType: Joi.string().required(),
-          interval: Joi.string().optional(),
-          params: Joi.object().required(),
-          state: Joi.object().optional(),
-          id: Joi.string().optional(),
+          task: Joi.object({
+            taskType: Joi.string().required(),
+            interval: Joi.string().optional(),
+            params: Joi.object().required(),
+            state: Joi.object().optional(),
+            id: Joi.string().optional()
+          }),
+          ensureScheduled: Joi.boolean()
+            .default(false)
+            .optional(),
         }),
       },
     },
     async handler(request) {
       try {
-        const task = await taskManager.schedule({
-          ...request.payload,
+        const { ensureScheduled = false, task: taskFields } = request.payload;
+        const task = {
+          ...taskFields,
           scope: [scope],
-        }, { request });
-        return task;
+        };
+
+        const taskResult = await (
+          ensureScheduled
+            ? taskManager.ensureScheduled(task, { request })
+            : taskManager.schedule(task, { request })
+        );
+
+        return taskResult;
       } catch (err) {
         return err;
       }
