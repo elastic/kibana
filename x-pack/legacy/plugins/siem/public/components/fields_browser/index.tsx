@@ -214,10 +214,7 @@ export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & Dis
 
 StatefulFieldsBrowserComponent.displayName = 'StatefulFieldsBrowserComponent';
 
-export const StatefulFieldsBrowser = connect(
-  null,
-  {
-    removeColumn: timelineActions.removeColumn,
-    upsertColumn: timelineActions.upsertColumn,
-  }
-)(StatefulFieldsBrowserComponent);
+export const StatefulFieldsBrowser = connect(null, {
+  removeColumn: timelineActions.removeColumn,
+  upsertColumn: timelineActions.upsertColumn,
+})(StatefulFieldsBrowserComponent);

@@ -63,8 +63,9 @@ describe('AggTypesMetricsPercentileRanksProvider class', function() {
   });
 
   it('uses the custom label if it is set', function() {
-    const responseAggs: any = percentileRanksMetricAgg.getResponseAggs(aggConfigs
-      .aggs[0] as IPercentileRanksAggConfig);
+    const responseAggs: any = percentileRanksMetricAgg.getResponseAggs(
+      aggConfigs.aggs[0] as IPercentileRanksAggConfig
+    );
 
     const percentileRankLabelFor5kBytes = responseAggs[0].makeLabel();
     const percentileRankLabelFor10kBytes = responseAggs[1].makeLabel();

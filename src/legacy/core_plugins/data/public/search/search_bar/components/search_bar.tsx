@@ -24,9 +24,8 @@ import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
 
-import { TimeRange } from 'src/plugins/data/common/types';
-import { TimeHistoryContract } from 'src/plugins/data/public';
-import { IndexPattern, Query, FilterBar } from '../../../../../data/public';
+import { TimeRange, Query, TimeHistoryContract } from 'src/plugins/data/public';
+import { IndexPattern, FilterBar } from '../../../../../data/public';
 import { QueryBarTopRow } from '../../../query';
 import { SavedQuery, SavedQueryAttributes } from '../index';
 import { SavedQueryMeta, SaveQueryForm } from './saved_query_management/save_query_form';
