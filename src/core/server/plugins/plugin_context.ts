@@ -124,7 +124,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       isTlsEnabled: deps.http.isTlsEnabled,
     },
     savedObjects: {
-      internalClient: deps.savedObjects.internalClient,
+      setClientFactory: deps.savedObjects.setClientFactory,
+      addClientWrapper: deps.savedObjects.addClientWrapper,
+      internalRepository: deps.savedObjects.internalRepository,
+      scopedRepository: deps.savedObjects.scopedRepository,
     },
     uiSettings: {
       register: deps.uiSettings.register,

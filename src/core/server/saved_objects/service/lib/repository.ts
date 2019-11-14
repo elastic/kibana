@@ -42,7 +42,6 @@ import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsDeleteOptions,
-  SavedObjectsDeleteByNamespaceOptions,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -85,14 +84,36 @@ export interface SavedObjectsRepositoryOptions {
   onBeforeWrite?: (...args: Parameters<CallCluster>) => Promise<void>;
 }
 
-export interface IncrementCounterOptions extends SavedObjectsBaseOptions {
+/**
+ * @public
+ */
+export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOptions {
   migrationVersion?: SavedObjectsMigrationVersion;
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
 }
 
 const DEFAULT_REFRESH_SETTING = 'wait_for';
 
+/**
+ * See {@link SavedObjectsRepository}
+ *
+ * @public
+ */
+export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
+
+/**
+ * @internal
+ */
 export class SavedObjectsRepository {
   private _migrator: KibanaMigrator;
   private _index: string;
@@ -803,7 +824,7 @@ export class SavedObjectsRepository {
     type: string,
     id: string,
     counterFieldName: string,
-    options: IncrementCounterOptions = {}
+    options: SavedObjectsIncrementCounterOptions = {}
   ) {
     if (typeof type !== 'string') {
       throw new Error('"type" argument must be a string');

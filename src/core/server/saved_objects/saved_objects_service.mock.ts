@@ -19,18 +19,20 @@
 
 import {
   SavedObjectsService,
-  SavedObjectsServiceStart,
   InternalSavedObjectsServiceSetup,
+  InternalSavedObjectsServiceStart,
 } from './saved_objects_service';
 import { mockKibanaMigrator } from './migrations/kibana/kibana_migrator.mock';
 import { savedObjectsClientProviderMock } from './service/lib/scoped_client_provider.mock';
+import { savedObjectsRepositoryMock } from './service/lib/repository.mock';
 import { savedObjectsClientMock } from './service/saved_objects_client.mock';
 
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<SavedObjectsServiceStart> = {
+  const startContract: jest.Mocked<InternalSavedObjectsServiceStart> = {
     clientProvider: savedObjectsClientProviderMock.create(),
+    scopedClient: jest.fn(),
     migrator: mockKibanaMigrator.create(),
   };
 
@@ -39,9 +41,16 @@ const createStartContractMock = () => {
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<InternalSavedObjectsServiceSetup> = {
-    clientProvider: savedObjectsClientProviderMock.create(),
-    internalClient: savedObjectsClientMock.create(),
+    scopedClient: jest.fn(),
+    setClientFactory: jest.fn(),
+    addClientWrapper: jest.fn(),
+    internalRepository: jest.fn(),
+    scopedRepository: jest.fn(),
   };
+
+  setupContract.scopedClient.mockReturnValue(savedObjectsClientMock.create());
+  setupContract.internalRepository.mockReturnValue(savedObjectsRepositoryMock.create());
+  setupContract.scopedRepository.mockReturnValue(savedObjectsRepositoryMock.create());
 
   return setupContract;
 };
@@ -53,10 +62,7 @@ const createsavedObjectsServiceMock = () => {
     stop: jest.fn(),
   };
 
-  mocked.setup.mockResolvedValue({
-    clientProvider: savedObjectsClientProviderMock.create(),
-    internalClient: savedObjectsClientMock.create(),
-  });
+  mocked.setup.mockResolvedValue(createSetupContractMock());
   mocked.start.mockResolvedValue(createStartContractMock());
   mocked.stop.mockResolvedValue();
   return mocked;

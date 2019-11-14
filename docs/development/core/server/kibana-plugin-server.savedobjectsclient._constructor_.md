@@ -9,12 +9,12 @@ Constructs a new instance of the `SavedObjectsClient` class
 <b>Signature:</b>
 
 ```typescript
-constructor(repository: SavedObjectsRepository);
+constructor(repository: ISavedObjectsRepository);
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  repository | <code>SavedObjectsRepository</code> |  |
+|  repository | <code>ISavedObjectsRepository</code> |  |
 

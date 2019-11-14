@@ -141,6 +141,7 @@ export {
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
+  SavedObjectsClientFactory,
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsExportOptions,
@@ -162,8 +163,13 @@ export {
   SavedObjectsLegacyService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsServiceStart,
   SavedObjectsServiceSetup,
   SavedObjectsDeleteOptions,
+  ISavedObjectsRepository,
+  SavedObjectsRepository,
+  SavedObjectsDeleteByNamespaceOptions,
+  SavedObjectsIncrementCounterOptions,
 } from './saved_objects';
 
 export {

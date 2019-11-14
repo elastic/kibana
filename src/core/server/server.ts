@@ -172,7 +172,7 @@ export class Server {
       async (context, req): Promise<RequestHandlerContext['core']> => {
         const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(take(1)).toPromise();
         const dataClient = await coreSetup.elasticsearch.dataClient$.pipe(take(1)).toPromise();
-        const savedObjectsClient = coreSetup.savedObjects.clientProvider.getClient(req);
+        const savedObjectsClient = coreSetup.savedObjects.scopedClient(req);
 
         return {
           savedObjects: {

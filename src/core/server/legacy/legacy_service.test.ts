@@ -43,8 +43,6 @@ import { BasePathProxyServer } from '../http';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { DiscoveredPlugin, DiscoveredPluginInternal } from '../plugins';
 
-import { KibanaMigrator } from '../saved_objects/migrations';
-import { ISavedObjectsClientProvider } from '../saved_objects';
 import { httpServiceMock } from '../http/http_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
@@ -94,10 +92,7 @@ beforeEach(() => {
 
   startDeps = {
     core: {
-      savedObjects: {
-        migrator: {} as KibanaMigrator,
-        clientProvider: {} as ISavedObjectsClientProvider,
-      },
+      savedObjects: savedObjectsServiceMock.createStartContract(),
       plugins: { contracts: new Map() },
     },
     plugins: {},
