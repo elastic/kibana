@@ -54,7 +54,7 @@ const getTelemetryOptInProvider = ({ simulateFailure = false, simulateError = fa
     addBasePath: (url) => url
   };
 
-  const provider = new TelemetryOptInProvider(injector, chrome);
+  const provider = new TelemetryOptInProvider(injector, chrome, false);
 
   if (simulateError) {
     provider.setOptIn = () => Promise.reject('unhandled error');

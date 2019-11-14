@@ -33,6 +33,7 @@ const SEVERITY = 'low';
 const TYPE = 'query';
 const FROM = 'now-6m';
 const TO = 'now';
+const IMMUTABLE = true;
 const INDEX = ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
 
 const walk = dir => {
@@ -119,6 +120,7 @@ async function main() {
         const outputMessage = {
           id: fileToWrite,
           description: description || title,
+          immutable: IMMUTABLE,
           index: INDEX,
           interval: INTERVAL,
           name: title,
