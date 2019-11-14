@@ -17,6 +17,9 @@
  * under the License.
  */
 
+// make sure all dev tools are loaded and registered.
+import 'uiExports/devTools';
+
 import { npStart } from 'ui/new_platform';
 
 if (npStart.plugins.devTools.getSortedDevTools().length === 0) {
