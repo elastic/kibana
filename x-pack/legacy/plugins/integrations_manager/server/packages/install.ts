@@ -45,7 +45,7 @@ export async function installAssets(options: {
 
   // Only install certain Kibana assets during package installation.
   // All other asset types need special handling
-  const typesToInstall = [AssetType.visualization, AssetType.dashboard, AssetType.search];
+  const typesToInstall: AssetType[] = ['visualization', 'dashboard', 'search'];
 
   const installationPromises = typesToInstall.map(async assetType =>
     installKibanaSavedObjects({ savedObjectsClient, pkgkey, assetType })
