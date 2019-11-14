@@ -222,6 +222,9 @@ The data stored for a task instance looks something like this:
 
 The task manager mixin exposes a taskManager object on the Kibana server which plugins can use to manage scheduled tasks. Each method takes an optional `scope` argument and ensures that only tasks with the specified scope(s) will be affected.
 
+### schedule
+Using `schedule` you can instruct TaskManger to schedule an instance of a TaskType at some point in the future.
+
 ```js
 const taskManager = server.plugins.task_manager;
 // Schedules a task. All properties are as documented in the previous
@@ -255,6 +258,14 @@ const results = await manager.find({ scope: 'my-fanci-app', searchAfter: ['ids']
   }]
 }
 ```
+
+### ensureScheduling
+When using the `schedule` api to schedule a Task you can provide a hard coded `id` on the Task. This tells TaskManager to use this `id` to identify the Task Instance rather than generate an `id` on its own.
+The danger is that in such a situation, a Task with that same `id` might already have been scheduled at some earlier point, and this would result in an error. In some cases, this is the expected behavior, but often you only care about ensuring the task has been _scheduled_ and don't need it to be scheduled a fresh.
+
+To achieve this you should use the `ensureScheduling` api which has the exact same behavior as `schedule`, except it allows the scheduling of a Task with an `id` that's already in assigned to another Task and it will assume that the existing Task is the one you wished to `schedule`, treating this as a successful operation.
+
+### more options
 
 More custom access to the tasks can be done directly via Elasticsearch, though that won't be officially supported, as we can change the document structure at any time.
 
