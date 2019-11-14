@@ -11,6 +11,7 @@ import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiLoadingContent } from '@elastic/eui';
 import { get, groupBy, map, toPairs } from 'lodash/fp';
+import numeral from '@elastic/numeral';
 import { AuthMatrixDataFields } from '../page/hosts/authentications_over_time/utils';
 import { BarChart } from '../charts/barchart';
 import { HeaderPanel } from '../header_panel';
@@ -37,14 +38,22 @@ export interface MatrixHistogramProps<T> extends MatrixHistogramBasicProps<T> {
   scaleType?: ScaleType;
   subtitle?: string;
   title?: string;
+  yTickFormatter?: (value: number) => string;
 }
 
-const getBarchartConfigs = (
-  from: number,
-  to: number,
-  onBrushEnd: UpdateDateRange,
-  scaleType: ScaleType
-) => ({
+const getBarchartConfigs = ({
+  from,
+  to,
+  scaleType,
+  onBrushEnd,
+  yTickFormatter,
+}: {
+  from: number;
+  to: number;
+  scaleType: ScaleType;
+  onBrushEnd: UpdateDateRange;
+  yTickFormatter?: (value: number) => string;
+}) => ({
   series: {
     xScaleType: scaleType || ScaleType.Time,
     yScaleType: ScaleType.Linear,
@@ -52,7 +61,10 @@ const getBarchartConfigs = (
   },
   axis: {
     xTickFormatter: scaleType === ScaleType.Time ? niceTimeFormatter([from, to]) : undefined,
-    yTickFormatter: (value: string | number): string => value.toLocaleString(),
+    yTickFormatter:
+      yTickFormatter != null
+        ? yTickFormatter
+        : (value: string | number): string => value.toLocaleString(),
     tickSize: 8,
   },
   settings: {
@@ -97,16 +109,20 @@ const getCustomChartData = (
   const formattedChartData = map(formatToChartDataItem, dataGroupedEntries);
 
   if (mapping)
-    return formattedChartData.map((item: ChartSeriesData) => {
+    return map((item: ChartSeriesData) => {
       const customColor = get(`${item.key}.color`, mapping);
       item.color = customColor;
       return item;
-    });
+    }, formattedChartData);
   else return formattedChartData;
 };
 
 type MatrixHistogramDataTypes = MatrixOverTimeHistogramData | MatrixOverOrdinalHistogramData;
 type MatrixHistogramMappingTypes = AuthMatrixDataFields;
+
+export const bytesFormatter = (value: number) => {
+  return numeral(value).format('0,0.[0]b');
+};
 
 export const MatrixHistogram = ({
   data,
@@ -121,8 +137,15 @@ export const MatrixHistogram = ({
   title,
   totalCount,
   updateDateRange,
+  yTickFormatter,
 }: MatrixHistogramProps<MatrixHistogramDataTypes>) => {
-  const barchartConfigs = getBarchartConfigs(startDate!, endDate!, updateDateRange, scaleType);
+  const barchartConfigs = getBarchartConfigs({
+    from: startDate,
+    to: endDate,
+    onBrushEnd: updateDateRange,
+    scaleType,
+    yTickFormatter,
+  });
   const [showInspect, setShowInspect] = useState(false);
   const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
   const [loadingInitial, setLoadingInitial] = useState(false);

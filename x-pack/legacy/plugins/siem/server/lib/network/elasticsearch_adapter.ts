@@ -201,18 +201,26 @@ const getHistogramData = (
   data: NetworkDnsEdges[]
 ): MatrixOverOrdinalHistogramData[] | undefined => {
   if (!Array.isArray(data)) return undefined;
-  return data.reduce((acc: MatrixOverOrdinalHistogramData[], { node: { dnsBytesOut, _id } }) => {
-    if (_id && dnsBytesOut)
-      return [
-        ...acc,
-        {
-          x: _id,
-          y: dnsBytesOut,
-          g: _id,
-        },
-      ];
-    return acc;
-  }, []);
+  return data.reduce(
+    (acc: MatrixOverOrdinalHistogramData[], { node: { dnsBytesOut, dnsBytesIn, _id } }) => {
+      if (_id != null && dnsBytesOut != null && dnsBytesIn != null)
+        return [
+          ...acc,
+          {
+            x: _id,
+            y: dnsBytesOut,
+            g: 'dnsBytesOut',
+          },
+          {
+            x: _id,
+            y: dnsBytesIn,
+            g: 'dnsBytesIn',
+          },
+        ];
+      return acc;
+    },
+    []
+  );
 };
 
 const getTopNFlowEdges = (

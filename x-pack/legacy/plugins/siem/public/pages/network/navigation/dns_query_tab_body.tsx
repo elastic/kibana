@@ -8,16 +8,15 @@ import React from 'react';
 import { getOr } from 'lodash/fp';
 
 import { EuiSpacer } from '@elastic/eui';
-import { ScaleType } from '@elastic/charts';
 import { NetworkDnsTable } from '../../../components/page/network/network_dns_table';
-import { NetworkDnsQuery } from '../../../containers/network_dns';
+import { NetworkDnsQuery, NetworkDnsHistogramQuery } from '../../../containers/network_dns';
 import { manageQuery } from '../../../components/page/manage_query';
 
 import { DnsQueryTabBodyProps } from './types';
-import { MatrixHistogram } from '../../../components/matrix_histogram';
+import { NetworkDnsHistogram } from '../../../components/page/network/dns_histogram';
 
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
-const NetworkDnsHistogramManage = manageQuery(MatrixHistogram);
+const NetworkDnsHistogramManage = manageQuery(NetworkDnsHistogram);
 
 export const DnsQueryTabBody = ({
   to,
@@ -28,42 +27,51 @@ export const DnsQueryTabBody = ({
   type,
   updateDateRange = () => {},
 }: DnsQueryTabBodyProps) => (
-  <NetworkDnsQuery
-    endDate={to}
-    filterQuery={filterQuery}
-    skip={isInitializing}
-    sourceId="default"
-    startDate={from}
-    type={type}
-  >
-    {({
-      histogram,
-      totalCount,
-      loading,
-      networkDns,
-      pageInfo,
-      loadPage,
-      id,
-      inspect,
-      isInspected,
-      refetch,
-    }) => (
-      <>
+  <>
+    <NetworkDnsHistogramQuery
+      endDate={to}
+      filterQuery={filterQuery}
+      skip={isInitializing}
+      sourceId="default"
+      startDate={from}
+      type={type}
+    >
+      {({ totalCount, loading, id, inspect, refetch, histogram }) => (
         <NetworkDnsHistogramManage
           id={id}
           loading={loading}
           data={histogram}
-          dataKey="histogram"
           endDate={to}
           startDate={from}
-          title="DNS bytes out by domain"
+          inspect={inspect}
           refetch={refetch}
           setQuery={setQuery}
-          scaleType={ScaleType.Ordinal}
           totalCount={totalCount}
           updateDateRange={updateDateRange}
         />
-        <EuiSpacer />
+      )}
+    </NetworkDnsHistogramQuery>
+    <EuiSpacer />
+    <NetworkDnsQuery
+      endDate={to}
+      filterQuery={filterQuery}
+      skip={isInitializing}
+      sourceId="default"
+      startDate={from}
+      type={type}
+    >
+      {({
+        totalCount,
+        loading,
+        networkDns,
+        pageInfo,
+        loadPage,
+        id,
+        inspect,
+        isInspected,
+        refetch,
+        histogram,
+      }) => (
         <NetworkDnsTableManage
           data={networkDns}
           fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
@@ -78,9 +86,9 @@ export const DnsQueryTabBody = ({
           totalCount={totalCount}
           type={type}
         />
-      </>
-    )}
-  </NetworkDnsQuery>
+      )}
+    </NetworkDnsQuery>
+  </>
 );
 
 DnsQueryTabBody.displayName = 'DNSQueryTabBody';
