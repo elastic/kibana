@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { getTelemetryUsageFetcher } from './get_telemetry_usage_fetcher';
+import { getTelemetrySendUsageFrom } from './get_telemetry_send_usage_from';
 import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
 
-describe('getTelemetryUsageFetcher', () => {
+describe('getTelemetrySendUsageFrom', () => {
   it('returns kibana.yml config when saved object not found', () => {
     const params: CallGetTelemetryUsageFetcherParams = {
       savedObjectNotFound: true,
@@ -65,7 +65,7 @@ interface CallGetTelemetryUsageFetcherParams {
 function callGetTelemetryUsageFetcher(params: CallGetTelemetryUsageFetcherParams) {
   const telemetrySavedObject = getMockTelemetrySavedObject(params);
   const configTelemetrySendUsageFrom = params.configSendUsageFrom;
-  return getTelemetryUsageFetcher({ configTelemetrySendUsageFrom, telemetrySavedObject });
+  return getTelemetrySendUsageFrom({ configTelemetrySendUsageFrom, telemetrySavedObject });
 }
 
 function getMockTelemetrySavedObject(
