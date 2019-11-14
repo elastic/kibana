@@ -16,8 +16,12 @@ export function rewriteIngestPipeline(
     const { source, target, templateFunction } = sub;
     // This fakes the use of the golang text/template expression {{SomeTemplateFunction 'some-param'}}
     // cf. https://github.com/elastic/beats/blob/master/filebeat/fileset/fileset.go#L294
+
+    // "Standard style" uses '{{' and '}}' as delimiters
     const matchStandardStyle = `{{\\s?${templateFunction}\\s+['"]${source}['"]\\s?}}`;
+    // "Beats style" uses '{<' and '>}' as delimiters because this is current practice in the beats project
     const matchBeatsStyle = `{<\\s?${templateFunction}\\s+['"]${source}['"]\\s?>}`;
+
     const regexStandardStyle = new RegExp(matchStandardStyle);
     const regexBeatsStyle = new RegExp(matchBeatsStyle);
     pipeline = pipeline.replace(regexStandardStyle, target).replace(regexBeatsStyle, target);
