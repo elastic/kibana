@@ -49,6 +49,7 @@ interface Props {
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
+  hideHeader: boolean;
 }
 
 interface State {
@@ -164,16 +165,18 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         role="figure"
         aria-labelledby={headerId}
       >
-        <PanelHeader
-          getActionContextMenuPanel={this.getActionContextMenuPanel}
-          hidePanelTitles={this.state.hidePanelTitles}
-          isViewMode={viewOnlyMode}
-          closeContextMenu={this.state.closeContextMenu}
-          title={title}
-          badges={this.state.badges}
-          embeddable={this.props.embeddable}
-          headerId={headerId}
-        />
+        {!this.props.hideHeader && (
+          <PanelHeader
+            getActionContextMenuPanel={this.getActionContextMenuPanel}
+            hidePanelTitles={this.state.hidePanelTitles}
+            isViewMode={viewOnlyMode}
+            closeContextMenu={this.state.closeContextMenu}
+            title={title}
+            badges={this.state.badges}
+            embeddable={this.props.embeddable}
+            headerId={headerId}
+          />
+        )}
         <div className="embPanel__content" ref={this.embeddableRoot} />
       </EuiPanel>
     );

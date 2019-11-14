@@ -41,6 +41,8 @@ import {
   SET_SCROLL_ZOOM,
   SET_MAP_INIT_ERROR,
   UPDATE_DRAW_STATE,
+  SET_ZOOM,
+  DISABLE_TOOLTIP_CONTROL
 } from '../actions/map_actions';
 
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
@@ -105,7 +107,9 @@ const INITIAL_STATE = {
     filters: [],
     refreshConfig: null,
     refreshTimerLastTriggeredAt: null,
-    drawState: null
+    drawState: null,
+    disableZoom: false,
+    disableTooltipControl: false,
   },
   selectedLayerId: null,
   __transientLayerId: null,
@@ -121,8 +125,8 @@ export function map(state = INITIAL_STATE, action) {
         ...state,
         mapState: {
           ...state.mapState,
-          drawState: action.drawState
-        }
+          drawState: action.drawState,
+        },
       };
     case REMOVE_TRACKED_LAYER_STATE:
       return removeTrackedLayerState(state, action.layerId);
@@ -133,7 +137,7 @@ export function map(state = INITIAL_STATE, action) {
     case SET_TOOLTIP_STATE:
       return {
         ...state,
-        tooltipState: action.tooltipState
+        tooltipState: action.tooltipState,
       };
     case SET_MOUSE_COORDINATES:
       return {
@@ -142,25 +146,25 @@ export function map(state = INITIAL_STATE, action) {
           ...state.mapState,
           mouseCoordinates: {
             lat: action.lat,
-            lon: action.lon
-          }
-        }
+            lon: action.lon,
+          },
+        },
       };
     case CLEAR_MOUSE_COORDINATES:
       return {
         ...state,
         mapState: {
           ...state.mapState,
-          mouseCoordinates: null
-        }
+          mouseCoordinates: null,
+        },
       };
     case SET_GOTO:
       return {
         ...state,
         goto: {
           center: action.center,
-          bounds: action.bounds
-        }
+          bounds: action.bounds,
+        },
       };
     case CLEAR_GOTO:
       return {
@@ -181,10 +185,10 @@ export function map(state = INITIAL_STATE, action) {
           {
             ...layerList[layerIdx],
             __isInErrorState: action.isInErrorState,
-            __errorMessage: action.errorMessage
+            __errorMessage: action.errorMessage,
           },
-          ...layerList.slice(layerIdx + 1)
-        ]
+          ...layerList.slice(layerIdx + 1),
+        ],
       };
     case UPDATE_SOURCE_DATA_REQUEST:
       return updateSourceDataRequest(state, action);
@@ -226,7 +230,7 @@ export function map(state = INITIAL_STATE, action) {
           query,
           timeFilters,
           filters,
-        }
+        },
       };
     case SET_REFRESH_CONFIG:
       const { isPaused, interval } = action;
@@ -237,16 +241,16 @@ export function map(state = INITIAL_STATE, action) {
           refreshConfig: {
             isPaused,
             interval,
-          }
-        }
+          },
+        },
       };
     case TRIGGER_REFRESH_TIMER:
       return {
         ...state,
         mapState: {
           ...state.mapState,
-          refreshTimerLastTriggeredAt: (new Date()).toISOString(),
-        }
+          refreshTimerLastTriggeredAt: new Date().toISOString(),
+        },
       };
     case SET_SELECTED_LAYER:
       const selectedMatch = state.layerList.find(layer => layer.id === action.selectedLayerId);
@@ -255,16 +259,23 @@ export function map(state = INITIAL_STATE, action) {
       const transientMatch = state.layerList.find(layer => layer.id === action.transientLayerId);
       return { ...state, __transientLayerId: transientMatch ? action.transientLayerId : null };
     case UPDATE_LAYER_ORDER:
-      return { ...state, layerList: action.newLayerOrder.map(layerNumber => state.layerList[layerNumber]) };
+      return {
+        ...state,
+        layerList: action.newLayerOrder.map(layerNumber => state.layerList[layerNumber]),
+      };
     case UPDATE_LAYER_PROP:
       return updateLayerInList(state, action.id, action.propName, action.newValue);
     case UPDATE_SOURCE_PROP:
       return updateLayerSourceDescriptorProp(state, action.layerId, action.propName, action.value);
     case SET_JOINS:
-      const layerDescriptor = state.layerList.find(descriptor => descriptor.id === action.layer.getId());
+      const layerDescriptor = state.layerList.find(
+        descriptor => descriptor.id === action.layer.getId()
+      );
       if (layerDescriptor) {
         const newLayerDescriptor = { ...layerDescriptor, joins: action.joins.slice() };
-        const index = state.layerList.findIndex(descriptor => descriptor.id === action.layer.getId());
+        const index = state.layerList.findIndex(
+          descriptor => descriptor.id === action.layer.getId()
+        );
         const newLayerList = state.layerList.slice();
         newLayerList[index] = newLayerDescriptor;
         return { ...state, layerList: newLayerList };
@@ -273,35 +284,28 @@ export function map(state = INITIAL_STATE, action) {
     case ADD_LAYER:
       return {
         ...state,
-        layerList: [
-          ...state.layerList,
-          action.layer
-        ]
+        layerList: [...state.layerList, action.layer],
       };
     case REMOVE_LAYER:
       return {
-        ...state, layerList: [...state.layerList.filter(
-          ({ id }) => id !== action.id)]
+        ...state,
+        layerList: [...state.layerList.filter(({ id }) => id !== action.id)],
       };
     case ADD_WAITING_FOR_MAP_READY_LAYER:
       return {
         ...state,
-        waitingForMapReadyLayerList: [
-          ...state.waitingForMapReadyLayerList,
-          action.layer
-        ]
+        waitingForMapReadyLayerList: [...state.waitingForMapReadyLayerList, action.layer],
       };
     case CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST:
       return {
         ...state,
-        waitingForMapReadyLayerList: []
+        waitingForMapReadyLayerList: [],
       };
     case TOGGLE_LAYER_VISIBLE:
       return updateLayerInList(state, action.layerId, 'visible');
     case UPDATE_LAYER_STYLE:
       const styleLayerId = action.layerId;
-      return updateLayerInList(state, styleLayerId, 'style',
-        { ...action.style });
+      return updateLayerInList(state, styleLayerId, 'style', { ...action.style });
     case SET_LAYER_STYLE_META:
       const { layerId, styleMeta } = action;
       const index = getLayerIndex(state.layerList, layerId);
@@ -309,19 +313,38 @@ export function map(state = INITIAL_STATE, action) {
         return state;
       }
 
-      return updateLayerInList(state, layerId, 'style', { ...state.layerList[index].style, __styleMeta: styleMeta });
+      return updateLayerInList(state, layerId, 'style', {
+        ...state.layerList[index].style,
+        __styleMeta: styleMeta,
+      });
     case SET_SCROLL_ZOOM:
       return {
         ...state,
         mapState: {
           ...state.mapState,
           scrollZoom: action.scrollZoom,
-        }
+        },
       };
     case SET_MAP_INIT_ERROR:
       return {
         ...state,
-        mapInitError: action.errorMessage
+        mapInitError: action.errorMessage,
+      };
+    case SET_ZOOM:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          disableZoom: action.disableZoom,
+        },
+      };
+    case DISABLE_TOOLTIP_CONTROL:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          disableTooltipControl: action.disableTooltipControl,
+        },
       };
     default:
       return state;

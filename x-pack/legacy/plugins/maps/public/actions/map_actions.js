@@ -67,6 +67,8 @@ export const SET_TOOLTIP_STATE = 'SET_TOOLTIP_STATE';
 export const UPDATE_DRAW_STATE = 'UPDATE_DRAW_STATE';
 export const SET_SCROLL_ZOOM = 'SET_SCROLL_ZOOM';
 export const SET_MAP_INIT_ERROR = 'SET_MAP_INIT_ERROR';
+export const SET_ZOOM = 'SET_ZOOM';
+export const DISABLE_TOOLTIP_CONTROL = 'DISABLE_TOOLTIP_CONTROL';
 
 function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
@@ -828,4 +830,12 @@ export function updateDrawState(drawState) {
       drawState: drawState
     });
   };
+}
+
+export function disableZoom() {
+  return { type: SET_ZOOM, disableZoom: true };
+}
+
+export function disableTooltipControl() {
+  return { type: DISABLE_TOOLTIP_CONTROL, disableTooltipControl: true };
 }
