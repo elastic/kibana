@@ -118,9 +118,12 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         modelMemoryLimit: resp.expected_memory_without_disk,
       });
     } catch (e) {
-      // TODO: If the endpoint is unavailable or the request fails, some constant default value may be put into model_memory_limit (e.g. 200MB)
-      // TODO: check for "0" return and set default
-      setFormState({ modelMemoryLimit: DEFAULT_MODEL_MEMORY_LIMIT.regression }); // jobType
+      setFormState({
+        modelMemoryLimit:
+          jobType !== undefined
+            ? DEFAULT_MODEL_MEMORY_LIMIT[jobType]
+            : DEFAULT_MODEL_MEMORY_LIMIT.outlier_detection,
+      });
     }
   };
 

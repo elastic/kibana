@@ -63,6 +63,8 @@ export const validateAdvancedEditor = (state: State): State => {
   const destinationIndexNameValid = isValidIndexName(destinationIndexName);
   const destinationIndexPatternTitleExists =
     state.indexPatternsMap[destinationIndexName] !== undefined;
+  const mml = jobConfig.model_memory_limit;
+  const modelMemoryLimitEmpty = mml === '';
 
   let dependentVariableEmpty = false;
   if (isRegressionAnalysis(jobConfig.analysis)) {
@@ -126,6 +128,18 @@ export const validateAdvancedEditor = (state: State): State => {
     });
   }
 
+  if (modelMemoryLimitEmpty) {
+    state.advancedEditorMessages.push({
+      error: i18n.translate(
+        'xpack.ml.dataframe.analytics.create.advancedEditorMessage.modelMemoryLimitEmpty',
+        {
+          defaultMessage: 'The model memory limit field must not be empty.',
+        }
+      ),
+      message: '',
+    });
+  }
+
   state.isValid =
     !jobIdEmpty &&
     jobIdValid &&
@@ -135,6 +149,7 @@ export const validateAdvancedEditor = (state: State): State => {
     !destinationIndexNameEmpty &&
     destinationIndexNameValid &&
     !dependentVariableEmpty &&
+    !modelMemoryLimitEmpty &&
     (!destinationIndexPatternTitleExists || !createIndexPattern);
 
   return state;
@@ -153,9 +168,11 @@ const validateForm = (state: State): State => {
     destinationIndexPatternTitleExists,
     createIndexPattern,
     dependentVariable,
+    modelMemoryLimit,
   } = state.form;
 
   const dependentVariableEmpty = jobType === JOB_TYPES.REGRESSION && dependentVariable === '';
+  const modelMemoryLimitEmpty = modelMemoryLimit === '';
 
   state.isValid =
     !jobIdEmpty &&
@@ -166,6 +183,7 @@ const validateForm = (state: State): State => {
     !destinationIndexNameEmpty &&
     destinationIndexNameValid &&
     !dependentVariableEmpty &&
+    !modelMemoryLimitEmpty &&
     (!destinationIndexPatternTitleExists || !createIndexPattern);
 
   return state;
