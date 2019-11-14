@@ -19,7 +19,6 @@
 
 import { omit } from 'lodash';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';

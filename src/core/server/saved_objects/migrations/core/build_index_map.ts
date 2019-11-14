@@ -39,6 +39,7 @@ export interface IndexMap {
  * This file contains logic to convert savedObjectSchemas into a dictonary of indexes and documents
  */
 export function createIndexMap({
+  /** @deprecated Remove once savedObjectsSchemas are exposed from Core */
   config,
   kibanaIndexName,
   schema,

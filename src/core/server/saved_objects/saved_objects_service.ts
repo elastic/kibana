@@ -22,13 +22,10 @@ import { first } from 'rxjs/operators';
 import {
   SavedObjectsClient,
   SavedObjectsSchema,
-  SavedObjectsRepository,
-  SavedObjectsSerializer,
   SavedObjectsClientProvider,
   ISavedObjectsClientProvider,
   SavedObjectsClientProviderOptions,
 } from './';
-import { getRootPropertiesObjects } from './mappings';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
 import { LegacyServiceDiscoverPlugins } from '../legacy/legacy_service';
@@ -43,6 +40,7 @@ import {
   SavedObjectsClientFactory,
   SavedObjectsClientWrapperFactory,
 } from './service/lib/scoped_client_provider';
+import { createRepository } from './service/lib/create_repository';
 import { Logger } from '..';
 
 /**
@@ -180,11 +178,13 @@ export class SavedObjectsService
     this.logger.debug('Setting up SavedObjects service');
 
     const {
-      savedObjectSchemas,
+      savedObjectSchemas: savedObjectsSchemasDefinition,
       savedObjectMappings,
       savedObjectMigrations,
       savedObjectValidations,
     } = setupDeps.legacyPlugins.uiExports;
+
+    const savedObjectSchemas = new SavedObjectsSchema(savedObjectsSchemasDefinition);
 
     const adminClient = await setupDeps.elasticsearch.adminClient$.pipe(first()).toPromise();
 
@@ -211,13 +211,7 @@ export class SavedObjectsService
       callCluster: retryCallCluster(adminClient.callAsInternalUser),
     }));
 
-    const mappings = this.migrator.getActiveMappings();
-    const allTypes = Object.keys(getRootPropertiesObjects(mappings));
-    const schema = new SavedObjectsSchema(savedObjectSchemas);
-    const serializer = new SavedObjectsSerializer(schema);
-    const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
-
-    const createRepository = (
+    const createSORepository = (
       callCluster: (
         endpoint: string,
         clientParams: Record<string, any>,
@@ -225,29 +219,19 @@ export class SavedObjectsService
       ) => Promise<any>,
       extraTypes: string[] = []
     ) => {
-      extraTypes.forEach(type => {
-        if (!allTypes.includes(type)) {
-          throw new Error(`Missing mappings for saved objects type '${type}'`);
-        }
-      });
-
-      const allowedTypes = [...new Set(visibleTypes.concat(extraTypes))];
-
-      return new SavedObjectsRepository({
-        index: kibanaConfig.index,
-        config: setupDeps.legacyPlugins.pluginExtendedConfig,
+      return createRepository(
         migrator,
-        mappings,
-        schema,
-        serializer,
-        allowedTypes,
-        callCluster: retryCallCluster(callCluster),
-      });
+        savedObjectSchemas,
+        setupDeps.legacyPlugins.pluginExtendedConfig,
+        kibanaConfig.index,
+        callCluster,
+        extraTypes
+      );
     };
 
     this.clientProvider = new SavedObjectsClientProvider<KibanaRequest>({
       defaultClientFactory({ request }) {
-        const repository = createRepository(adminClient.asScoped(request).callAsCurrentUser);
+        const repository = createSORepository(adminClient.asScoped(request).callAsCurrentUser);
         return new SavedObjectsClient(repository);
       },
     });
@@ -257,9 +241,9 @@ export class SavedObjectsService
       setClientFactory: this.clientProvider.setClientFactory,
       addClientWrapper: this.clientProvider.addClientWrapperFactory,
       internalRepository: (extraTypes?: string[]) =>
-        createRepository(adminClient.callAsInternalUser, extraTypes),
+        createSORepository(adminClient.callAsInternalUser, extraTypes),
       scopedRepository: (req: KibanaRequest, extraTypes?: string[]) =>
-        createRepository(adminClient.asScoped(req).callAsCurrentUser, extraTypes),
+        createSORepository(adminClient.asScoped(req).callAsCurrentUser, extraTypes),
     };
   }
 

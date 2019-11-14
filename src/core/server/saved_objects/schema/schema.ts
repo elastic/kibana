@@ -46,6 +46,7 @@ export class SavedObjectsSchema {
     return false;
   }
 
+  // TODO: Remove dependency on config when we move SavedObjectsSchema to NP
   public getIndexForType(config: Config, type: string): string | undefined {
     if (this.definition != null && this.definition.hasOwnProperty(type)) {
       const { indexPattern } = this.definition[type];
