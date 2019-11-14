@@ -53,9 +53,7 @@ import { DEMO_SEARCH_STRATEGY, IDemoResponse } from '../common';
  * @param context - context supplied by other plugins.
  * @param search - a search function to access other strategies that have already been registered.
  */
-export const demoClientSearchStrategyProvider: TSearchStrategyProvider<
-  typeof DEMO_SEARCH_STRATEGY
-> = (
+export const demoClientSearchStrategyProvider: TSearchStrategyProvider<typeof DEMO_SEARCH_STRATEGY> = (
   context: ISearchContext,
   search: ISearchGeneric
 ): ISearchStrategy<typeof DEMO_SEARCH_STRATEGY> => {
