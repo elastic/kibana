@@ -17,15 +17,11 @@
  * under the License.
  */
 
-import { npSetup, npStart } from 'ui/new_platform';
+import { PluginInitializerContext } from 'kibana/public';
+import { KibanaLegacyPlugin } from './plugin';
 
-import { DevToolsPlugin } from './plugin';
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new KibanaLegacyPlugin();
+}
 
-const instance = new DevToolsPlugin();
-
-instance.setup(npSetup.core, {
-  ...npSetup.plugins,
-});
-instance.start(npStart.core, {
-  newPlatformDevTools: npStart.plugins.devTools,
-});
+export * from './plugin';

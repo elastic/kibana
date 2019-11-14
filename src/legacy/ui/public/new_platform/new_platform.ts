@@ -33,6 +33,7 @@ import {
   FeatureCatalogueSetup,
   FeatureCatalogueStart,
 } from '../../../../plugins/feature_catalogue/public';
+import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
 
 export interface PluginsSetup {
   data: ReturnType<DataPlugin['setup']>;
@@ -42,6 +43,7 @@ export interface PluginsSetup {
   inspector: InspectorSetup;
   uiActions: IUiActionsSetup;
   devTools: DevToolsSetup;
+  kibana_legacy: KibanaLegacySetup;
 }
 
 export interface PluginsStart {
@@ -53,6 +55,7 @@ export interface PluginsStart {
   inspector: InspectorStart;
   uiActions: IUiActionsStart;
   devTools: DevToolsStart;
+  kibana_legacy: KibanaLegacyStart;
 }
 
 export const npSetup = {

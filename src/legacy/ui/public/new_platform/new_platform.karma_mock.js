@@ -65,6 +65,10 @@ export const npSetup = {
     devTools: {
       register: () => {},
     },
+    kibana_legacy: {
+      registerLegacyApp: () => {},
+      forwardApp: () => {},
+    },
     inspector: {
       registerView: () => undefined,
       __LEGACY: {
@@ -102,6 +106,10 @@ export const npStart = {
     },
     devTools: {
       getSortedDevTools: () => [],
+    },
+    kibana_legacy: {
+      getApps: () => [],
+      getForwards: () => [],
     },
     data: {
       autocomplete: {

@@ -21,9 +21,9 @@ import { CoreSetup, CoreStart, LegacyNavLink, Plugin, UiSettingsState } from 'ki
 import { UiStatsMetricType } from '@kbn/analytics';
 
 import { DataStart } from '../../../data/public';
-import { LocalApplicationService } from '../local_application_service';
 import { setServices } from './kibana_services';
 import { FeatureCatalogueEntry } from '../../../../../plugins/feature_catalogue/public';
+import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 
 export interface LegacyAngularInjectedDependencies {
   telemetryOptInProvider: any;
@@ -53,8 +53,8 @@ export interface HomePluginSetupDependencies {
     };
     getFeatureCatalogueEntries: () => Promise<readonly FeatureCatalogueEntry[]>;
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
-    localApplicationService: LocalApplicationService;
   };
+  kibana_legacy: KibanaLegacySetup;
 }
 
 export class HomePlugin implements Plugin {
@@ -64,10 +64,11 @@ export class HomePlugin implements Plugin {
   setup(
     core: CoreSetup,
     {
-      __LEGACY: { localApplicationService, getAngularDependencies, ...legacyServices },
+      kibana_legacy,
+      __LEGACY: { getAngularDependencies, ...legacyServices },
     }: HomePluginSetupDependencies
   ) {
-    localApplicationService.register({
+    kibana_legacy.registerLegacyApp({
       id: 'home',
       title: 'Home',
       mount: async ({ core: contextCore }, params) => {

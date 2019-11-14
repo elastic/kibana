@@ -22,13 +22,11 @@ import 'uiExports/devTools';
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 
-import { LocalApplicationService } from '../local_application_service';
 import { DevTool, DevToolsStart } from '../../../../../plugins/dev_tools/public';
+import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 
 export interface DevToolsPluginSetupDependencies {
-  __LEGACY: {
-    localApplicationService: LocalApplicationService;
-  };
+  kibana_legacy: KibanaLegacySetup;
 }
 
 export interface DevToolsPluginStartDependencies {
@@ -38,11 +36,8 @@ export interface DevToolsPluginStartDependencies {
 export class DevToolsPlugin implements Plugin {
   private getSortedDevTools: (() => readonly DevTool[]) | null = null;
 
-  public setup(
-    core: CoreSetup,
-    { __LEGACY: { localApplicationService } }: DevToolsPluginSetupDependencies
-  ) {
-    localApplicationService.register({
+  public setup(core: CoreSetup, { kibana_legacy }: DevToolsPluginSetupDependencies) {
+    kibana_legacy.registerLegacyApp({
       id: 'dev_tools',
       title: 'Dev Tools',
       mount: async (appMountContext, params) => {
