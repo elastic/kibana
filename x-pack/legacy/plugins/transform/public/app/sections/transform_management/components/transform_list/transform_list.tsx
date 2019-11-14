@@ -14,6 +14,8 @@ import {
   EuiButtonIcon,
   EuiCallOut,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPopover,
   EuiTitle,
 } from '@elastic/eui';
@@ -21,6 +23,7 @@ import {
 import { OnTableChangeArg, SortDirection, SORT_DIRECTION } from '../../../../../shared_imports';
 
 import {
+  useRefreshTransformList,
   TransformId,
   TransformListRow,
   TRANSFORM_MODE,
@@ -28,6 +31,9 @@ import {
   TRANSFORM_STATE,
 } from '../../../../common';
 import { AuthorizationContext } from '../../../../lib/authorization';
+
+import { CreateTransformButton } from '../create_transform_button';
+import { RefreshTransformListButton } from '../refresh_transform_list_button';
 import { getTaskStateBadge } from './columns';
 import { DeleteAction } from './action_delete';
 import { StartAction } from './action_start';
@@ -42,16 +48,13 @@ function getItemIdToExpandedRowMap(
   itemIds: TransformId[],
   transforms: TransformListRow[]
 ): ItemIdToExpandedRowMap {
-  return itemIds.reduce(
-    (m: ItemIdToExpandedRowMap, transformId: TransformId) => {
-      const item = transforms.find(transform => transform.config.id === transformId);
-      if (item !== undefined) {
-        m[transformId] = <ExpandedRow item={item} />;
-      }
-      return m;
-    },
-    {} as ItemIdToExpandedRowMap
-  );
+  return itemIds.reduce((m: ItemIdToExpandedRowMap, transformId: TransformId) => {
+    const item = transforms.find(transform => transform.config.id === transformId);
+    if (item !== undefined) {
+      m[transformId] = <ExpandedRow item={item} />;
+    }
+    return m;
+  }, {} as ItemIdToExpandedRowMap);
 }
 
 function stringMatch(str: string | undefined, substr: string) {
@@ -78,6 +81,8 @@ export const TransformList: FC<Props> = ({
   transformsLoading,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const { refresh } = useRefreshTransformList({ isLoading: setIsLoading });
+
   const [filterActive, setFilterActive] = useState(false);
 
   const [filteredTransforms, setFilteredTransforms] = useState<TransformListRow[]>([]);
@@ -300,8 +305,20 @@ export const TransformList: FC<Props> = ({
     ];
   };
 
+  const renderToolsRight = () => (
+    <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
+      <EuiFlexItem>
+        <RefreshTransformListButton onClick={refresh} isLoading={isLoading} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <CreateTransformButton onClick={onCreateTransform} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   const search = {
     toolsLeft: transformSelection.length > 0 ? renderToolsLeft() : undefined,
+    toolsRight: renderToolsRight(),
     onChange: onQueryChange,
     box: {
       incremental: true,

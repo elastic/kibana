@@ -269,6 +269,43 @@ describe('ML - custom URL utils', () => {
       ); // eslint-disable-line max-len
     });
 
+    test('replaces tokens with nesting', () => {
+      const testUrlApache: KibanaUrlConfig = {
+        url_name: 'Raw data',
+        time_range: 'auto',
+        url_value:
+          'kibana#/dashboard/ml_http_access_explorer_ecs?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(description:\u0027\u0027,filters:!((\u0027$state\u0027:(store:appState),meta:(alias:!n,disabled:!f,index:\u0027INDEX_PATTERN_ID\u0027,key:event.dataset,negate:!f,params:(query:\u0027apache.access\u0027),type:phrase,value:\u0027apache.access\u0027),query:(match:(event.dataset:(query:\u0027apache.access\u0027,type:phrase)))),(\u0027$state\u0027:(store:appState),meta:(alias:!n,disabled:!f,index:\u0027INDEX_PATTERN_ID\u0027,key:http.response.status_code,negate:!f,params:(query:\u0027$http.response.status_code$\u0027),type:phrase,value:\u0027$http.response.status_code$\u0027),query:(match:(http.response.status_code:(query:\u0027$http.response.status_code$\u0027,type:phrase))))),query:(language:kuery,query:\u0027\u0027))', // eslint-disable-line max-len
+      };
+
+      const testRecord = {
+        job_id: 'farequote',
+        result_type: 'record',
+        probability: 6.533287347648861e-45,
+        record_score: 93.84475,
+        initial_record_score: 94.867922946384,
+        bucket_span: 300,
+        detector_index: 0,
+        is_interim: false,
+        timestamp: 1486656600000,
+        function: 'mean',
+        function_description: 'mean',
+        typical: [99.2329899996025],
+        actual: [274.7279901504516],
+        field_name: 'responsetime',
+        earliest: '2017-02-09T15:10:00.000Z',
+        latest: '2017-02-09T17:15:00.000Z',
+        http: {
+          response: {
+            status_code: 403,
+          },
+        },
+      };
+
+      expect(getUrlForRecord(testUrlApache, testRecord)).toBe(
+        "kibana#/dashboard/ml_http_access_explorer_ecs?_g=(time:(from:'2017-02-09T15:10:00.000Z',mode:absolute,to:'2017-02-09T17:15:00.000Z'))&_a=(description:\u0027\u0027,filters:!((\u0027$state\u0027:(store:appState),meta:(alias:!n,disabled:!f,index:\u0027INDEX_PATTERN_ID\u0027,key:event.dataset,negate:!f,params:(query:\u0027apache.access\u0027),type:phrase,value:\u0027apache.access\u0027),query:(match:(event.dataset:(query:\u0027apache.access\u0027,type:phrase)))),(\u0027$state\u0027:(store:appState),meta:(alias:!n,disabled:!f,index:\u0027INDEX_PATTERN_ID\u0027,key:http.response.status_code,negate:!f,params:(query:\u0027403\u0027),type:phrase,value:\u0027403\u0027),query:(match:(http.response.status_code:(query:\u0027403\u0027,type:phrase))))),query:(language:kuery,query:\u0027\u0027))"
+      ); // eslint-disable-line max-len
+    });
+
     test('returns expected URL for other type URL', () => {
       expect(getUrlForRecord(TEST_OTHER_URL, TEST_RECORD)).toBe(
         'http://airlinecodes.info/airline-code-AAL'

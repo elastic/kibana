@@ -32,7 +32,7 @@ const { RuleTester } = require('eslint');
 const rule = require('../no_restricted_paths');
 
 const ruleTester = new RuleTester({
-  parser: 'babel-eslint',
+  parser: require.resolve('babel-eslint'),
   parserOptions: {
     sourceType: 'module',
     ecmaVersion: 2015,
@@ -167,6 +167,27 @@ ruleTester.run('@kbn/eslint/no-restricted-paths', rule, {
               allowSameFolder: true,
               target: 'files/no_restricted_paths/**/*',
               from: ['files/no_restricted_paths/**/*', '!files/no_restricted_paths/server/b*'],
+            },
+          ],
+        },
+      ],
+    },
+
+    {
+      // Check if dirs that start with 'index' work correctly.
+      code: 'import { X } from "./index_patterns"',
+      filename: path.join(__dirname, './files/no_restricted_paths/server/b.js'),
+      options: [
+        {
+          basePath: __dirname,
+          zones: [
+            {
+              target: ['files/no_restricted_paths/(public|server)/**/*'],
+              from: [
+                'files/no_restricted_paths/server/**/*',
+                '!files/no_restricted_paths/server/index.{ts,tsx}',
+              ],
+              allowSameFolder: true,
             },
           ],
         },
@@ -364,6 +385,35 @@ ruleTester.run('@kbn/eslint/no-restricted-paths', rule, {
       errors: [
         {
           message: 'Unexpected path "ui/kfetch/public/index" imported in restricted zone.',
+          line: 1,
+          column: 19,
+        },
+      ],
+    },
+
+    {
+      // Don't use index*.
+      // It won't work with dirs that start with 'index'.
+      code: 'import { X } from "./index_patterns"',
+      filename: path.join(__dirname, './files/no_restricted_paths/server/b.js'),
+      options: [
+        {
+          basePath: __dirname,
+          zones: [
+            {
+              target: ['files/no_restricted_paths/(public|server)/**/*'],
+              from: [
+                'files/no_restricted_paths/server/**/*',
+                '!files/no_restricted_paths/server/index*',
+              ],
+              allowSameFolder: true,
+            },
+          ],
+        },
+      ],
+      errors: [
+        {
+          message: 'Unexpected path "./index_patterns" imported in restricted zone.',
           line: 1,
           column: 19,
         },

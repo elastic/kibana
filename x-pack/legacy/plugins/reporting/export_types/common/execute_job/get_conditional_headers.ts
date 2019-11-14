@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ConditionalHeaders, ConfigObject, JobDocPayload, KbnServer } from '../../../types';
+import { ConditionalHeaders, JobDocPayload, ServerFacade } from '../../../types';
 
 export const getConditionalHeaders = ({
   job,
@@ -12,9 +12,9 @@ export const getConditionalHeaders = ({
 }: {
   job: JobDocPayload;
   filteredHeaders: Record<string, string>;
-  server: KbnServer;
+  server: ServerFacade;
 }) => {
-  const config: ConfigObject = server.config();
+  const config = server.config();
   const [hostname, port, basePath, protocol] = [
     config.get('xpack.reporting.kibanaServer.hostname') || config.get('server.host'),
     config.get('xpack.reporting.kibanaServer.port') || config.get('server.port'),

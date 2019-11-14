@@ -31,7 +31,7 @@ import { getWatchVisualizationData } from '../../../../lib/api';
 import { WatchContext } from '../../watch_context';
 import { aggTypes } from '../../../../models/watch/agg_types';
 import { comparators } from '../../../../models/watch/comparators';
-import { SectionError } from '../../../../components';
+import { SectionError, Error } from '../../../../components';
 
 const customTheme = () => {
   return {
@@ -181,7 +181,7 @@ export const WatchVisualization = () => {
               defaultMessage="Cannot load watch visualization"
             />
           }
-          error={error}
+          error={error as Error}
         />
         <EuiSpacer size="l" />
       </Fragment>

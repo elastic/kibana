@@ -5,12 +5,11 @@
  */
 
 import url from 'url';
-// @ts-ignore
 import { oncePerServer } from '../server/lib/once_per_server';
-import { ConfigObject, KbnServer } from '../types';
+import { ServerFacade } from '../types';
 
-function getAbsoluteUrlFn(server: KbnServer) {
-  const config: ConfigObject = server.config();
+function getAbsoluteUrlFn(server: ServerFacade) {
+  const config = server.config();
 
   return function getAbsoluteUrl({
     basePath = config.get('server.basePath'),

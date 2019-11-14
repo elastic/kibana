@@ -29,21 +29,17 @@ interface Props {
   expanded: boolean;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   isEventViewer?: boolean;
+  isEventPinned: boolean;
   loading: boolean;
   onColumnResized: OnColumnResized;
   onUnPinEvent: OnUnPinEvent;
-  pinnedEventIds: Readonly<Record<string, boolean>>;
   showNotes: boolean;
   timelineId: string;
   updateNote: UpdateNote;
-  onToggleExpanded: (eventId: string) => () => void;
-  onToggleShowNotes: (eventId: string) => () => void;
+  onToggleExpanded: () => void;
+  onToggleShowNotes: () => void;
   getNotesByIds: (noteIds: string[]) => Note[];
-  associateNote: (
-    eventId: string,
-    addNoteToEvent: AddNoteToEvent,
-    onPinEvent: OnPinEvent
-  ) => (noteId: string) => void;
+  associateNote: (noteId: string) => void;
 }
 
 export const getNewNoteId = (): string => uuid.v4();
@@ -64,11 +60,11 @@ export const StatefulEventChild = React.memo<Props>(
     eventIdToNoteIds,
     getNotesByIds,
     isEventViewer = false,
+    isEventPinned = false,
     loading,
     onColumnResized,
     onToggleExpanded,
     onUnPinEvent,
-    pinnedEventIds,
     showNotes,
     timelineId,
     onToggleShowNotes,
@@ -84,23 +80,23 @@ export const StatefulEventChild = React.memo<Props>(
         <EventColumnView
           id={id}
           actionsColumnWidth={actionsColumnWidth}
-          associateNote={associateNote(id, addNoteToEvent, onPinEvent)}
+          associateNote={associateNote}
           columnHeaders={columnHeaders}
           columnRenderers={columnRenderers}
           data={data}
           expanded={expanded}
           eventIdToNoteIds={eventIdToNoteIds}
           getNotesByIds={getNotesByIds}
+          isEventPinned={isEventPinned}
           isEventViewer={isEventViewer}
           loading={loading}
           onColumnResized={onColumnResized}
-          onEventToggled={onToggleExpanded(id)}
+          onEventToggled={onToggleExpanded}
           onPinEvent={onPinEvent}
           onUnPinEvent={onUnPinEvent}
-          pinnedEventIds={pinnedEventIds}
           showNotes={showNotes}
           timelineId={timelineId}
-          toggleShowNotes={onToggleShowNotes(id)}
+          toggleShowNotes={onToggleShowNotes}
           updateNote={updateNote}
         />
 
@@ -110,13 +106,13 @@ export const StatefulEventChild = React.memo<Props>(
           style={{ width: `${width - OFFSET_SCROLLBAR}px` }}
         >
           <NoteCards
-            associateNote={associateNote(id, addNoteToEvent, onPinEvent)}
+            associateNote={associateNote}
             data-test-subj="note-cards"
             getNewNoteId={getNewNoteId}
             getNotesByIds={getNotesByIds}
             noteIds={eventIdToNoteIds[id] || emptyNotes}
             showAddNote={showNotes}
-            toggleShowAddNote={onToggleShowNotes(id)}
+            toggleShowAddNote={onToggleShowNotes}
             updateNote={updateNote}
           />
         </EventsTrSupplement>

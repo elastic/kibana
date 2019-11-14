@@ -64,18 +64,20 @@ export interface SiemContext {
 
 export interface SignalHit {
   signal: {
+    '@timestamp': string;
     rule_revision: number;
-    rule_id: number;
+    rule_id: string;
     rule_type: string;
     parent: {
       id: string;
       type: string;
+      index: string;
       depth: number;
     };
     name: string;
-    severity: number;
+    severity: string;
     description: string;
-    time_detected: number;
+    original_time: string;
     index_patterns: string[];
     references: string[];
   };
@@ -189,6 +191,17 @@ export interface AggregationRequest {
         [aggType: string]: {
           field: string;
         };
+      };
+    };
+    top_hits?: {
+      size?: number;
+      sort?: Array<{
+        [aggSortField: string]: {
+          order: SortRequestDirection;
+        };
+      }>;
+      _source: {
+        includes: string[];
       };
     };
   };

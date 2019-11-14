@@ -28,9 +28,9 @@ export const PopulationView: FC<Props> = ({ isActive, setCanProceed }) => {
 
   return (
     <Fragment>
-      {isActive === false && <PopulationDetectorsSummary />}
-
-      {isActive === true && (
+      {isActive === false ? (
+        <PopulationDetectorsSummary />
+      ) : (
         <Fragment>
           <PopulationDetectors setIsValid={setMetricValid} />
           {metricsValid && (

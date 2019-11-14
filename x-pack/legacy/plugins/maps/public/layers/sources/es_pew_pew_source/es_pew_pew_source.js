@@ -8,38 +8,26 @@ import React from 'react';
 import uuid from 'uuid/v4';
 
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
-import { AbstractESSource } from '../es_source';
 import { VectorLayer } from '../../vector_layer';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
-import { VectorStyle } from '../../styles/vector_style';
-import { vectorStyles } from '../../styles/vector_style_defaults';
+import { VectorStyle } from '../../styles/vector/vector_style';
+import { vectorStyles } from '../../styles/vector/vector_style_defaults';
 import { i18n } from '@kbn/i18n';
 import { SOURCE_DATA_ID_ORIGIN, ES_PEW_PEW } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggConfigs } from 'ui/agg_types';
+import { AbstractESAggSource } from '../es_agg_source';
 
 const COUNT_PROP_LABEL = 'count';
 const COUNT_PROP_NAME = 'doc_count';
 const MAX_GEOTILE_LEVEL = 29;
 
-const aggSchemas = new Schemas([
-  {
-    group: 'metrics',
-    name: 'metric',
-    title: 'Value',
-    min: 1,
-    max: Infinity,
-    aggFilter: ['avg', 'count', 'max', 'min', 'sum'],
-    defaults: [
-      { schema: 'metric', type: 'count' }
-    ]
-  }
-]);
+const aggSchemas = new Schemas([AbstractESAggSource.METRIC_SCHEMA_CONFIG]);
 
-export class ESPewPewSource extends AbstractESSource {
+export class ESPewPewSource extends AbstractESAggSource {
 
   static type = ES_PEW_PEW;
   static title = i18n.translate('xpack.maps.source.pewPewTitle', {
@@ -94,12 +82,6 @@ export class ESPewPewSource extends AbstractESSource {
 
   isGeoGridPrecisionAware() {
     return true;
-  }
-
-  async getNumberFields() {
-    return this.getMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
-      return { label, name };
-    });
   }
 
   async getSupportedShapeTypes() {
@@ -185,19 +167,7 @@ export class ESPewPewSource extends AbstractESSource {
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this._getIndexPattern();
-    const metricAggConfigs = this.getMetricFields().map(metric => {
-      const metricAggConfig = {
-        id: metric.propertyKey,
-        enabled: true,
-        type: metric.type,
-        schema: 'metric',
-        params: {}
-      };
-      if (metric.type !== 'count') {
-        metricAggConfig.params = { field: metric.field };
-      }
-      return metricAggConfig;
-    });
+    const metricAggConfigs = this.createMetricAggConfigs();
     const aggConfigs = new AggConfigs(indexPattern, metricAggConfigs, aggSchemas.all);
 
     const searchSource  = await this._makeSearchSource(searchFilters, 0);
@@ -249,14 +219,6 @@ export class ESPewPewSource extends AbstractESSource {
         areResultsTrimmed: false
       }
     };
-  }
-
-  _formatMetricKey(metric) {
-    return metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME;
-  }
-
-  _formatMetricLabel(metric) {
-    return metric.type !== 'count' ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL;
   }
 
   async _getGeoField() {

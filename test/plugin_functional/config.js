@@ -19,6 +19,7 @@
 
 import path from 'path';
 import fs from 'fs';
+import { services } from './services';
 
 export default async function ({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
@@ -31,7 +32,6 @@ export default async function ({ readConfigFile }) {
     testFiles: [
       require.resolve('./test_suites/app_plugins'),
       require.resolve('./test_suites/custom_visualizations'),
-      require.resolve('./test_suites/embedding_visualizations'),
       require.resolve('./test_suites/panel_actions'),
       require.resolve('./test_suites/search'),
 
@@ -48,7 +48,10 @@ export default async function ({ readConfigFile }) {
 
       require.resolve('./test_suites/core_plugins'),
     ],
-    services: functionalConfig.get('services'),
+    services: {
+      ...functionalConfig.get('services'),
+      ...services,
+    },
     pageObjects: functionalConfig.get('pageObjects'),
     servers: functionalConfig.get('servers'),
     esTestCluster: functionalConfig.get('esTestCluster'),

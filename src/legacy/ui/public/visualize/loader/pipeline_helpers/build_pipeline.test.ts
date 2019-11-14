@@ -28,7 +28,7 @@ import {
 } from './build_pipeline';
 import { Vis, VisState } from 'ui/vis';
 import { AggConfig } from 'ui/agg_types/agg_config';
-import { SearchSource } from 'ui/courier';
+import { searchSourceMock } from 'ui/courier/search_source/mocks';
 
 jest.mock('ui/new_platform');
 jest.mock('ui/agg_types/buckets/date_histogram', () => ({
@@ -98,6 +98,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
 
       schemaConfig = {
         accessor: 0,
+        label: '',
         format: {},
         params: {},
         aggType: '',
@@ -171,7 +172,10 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         const visState = { ...visStateDef, params: { foo: 'bar' } };
         const schemas = {
           ...schemasDef,
-          metric: [{ ...schemaConfig, accessor: 0 }, { ...schemaConfig, accessor: 1 }],
+          metric: [
+            { ...schemaConfig, accessor: 0 },
+            { ...schemaConfig, accessor: 1 },
+          ],
         };
         const actual = buildPipelineVisFunction.table(visState, schemas, uiState);
         expect(actual).toMatchSnapshot();
@@ -191,7 +195,10 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         const visState = { ...visStateDef, params: { foo: 'bar' } };
         const schemas = {
           ...schemasDef,
-          metric: [{ ...schemaConfig, accessor: 0 }, { ...schemaConfig, accessor: 1 }],
+          metric: [
+            { ...schemaConfig, accessor: 0 },
+            { ...schemaConfig, accessor: 1 },
+          ],
           split_row: [2, 4],
           bucket: [3],
         };
@@ -249,7 +256,10 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         const visState = { ...visStateDef, params: { metric: {} } };
         const schemas = {
           ...schemasDef,
-          metric: [{ ...schemaConfig, accessor: 0 }, { ...schemaConfig, accessor: 1 }],
+          metric: [
+            { ...schemaConfig, accessor: 0 },
+            { ...schemaConfig, accessor: 1 },
+          ],
         };
         const actual = buildPipelineVisFunction.metric(visState, schemas, uiState);
         expect(actual).toMatchSnapshot();
@@ -259,7 +269,10 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         const visState = { ...visStateDef, params: { metric: {} } };
         const schemas = {
           ...schemasDef,
-          metric: [{ ...schemaConfig, accessor: 0 }, { ...schemaConfig, accessor: 1 }],
+          metric: [
+            { ...schemaConfig, accessor: 0 },
+            { ...schemaConfig, accessor: 1 },
+          ],
           group: [{ accessor: 2 }],
         };
         const actual = buildPipelineVisFunction.metric(visState, schemas, uiState);
@@ -348,10 +361,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
           toExpression: () => 'testing custom expressions',
         },
       };
-      const searchSource: SearchSource = {
-        getField: () => null,
-      };
-      const expression = await buildPipeline(vis, { searchSource });
+      const expression = await buildPipeline(vis, { searchSource: searchSourceMock });
       expect(expression).toMatchSnapshot();
     });
   });

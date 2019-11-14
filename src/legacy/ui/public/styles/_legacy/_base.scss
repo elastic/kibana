@@ -122,7 +122,8 @@ input[type='checkbox'],
 // A neccessary hack so that the above focus policy doesn't polute some EUI
 // entrenched inputs.
 .euiComboBox {
-  input:focus {
+  // :not() specificity needed to override the above
+  input:not([class^='eui']):focus {
     animation: none !important;
   }
 }

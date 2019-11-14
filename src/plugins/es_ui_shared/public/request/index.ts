@@ -21,6 +21,7 @@ export {
   SendRequestConfig,
   SendRequestResponse,
   UseRequestConfig,
+  UseRequestResponse,
   sendRequest,
   useRequest,
 } from './request';

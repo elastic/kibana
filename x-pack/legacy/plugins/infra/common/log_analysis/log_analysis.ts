@@ -54,3 +54,8 @@ export const isSetupStatusWithResults = (setupStatus: SetupStatus) =>
   ['skipped', 'hiddenAfterSuccess', 'skippedButReconfigurable', 'skippedButUpdatable'].includes(
     setupStatus
   );
+
+const KIBANA_SAMPLE_DATA_INDICES = ['kibana_sample_data_logs*'];
+
+export const isExampleDataIndex = (indexName: string) =>
+  KIBANA_SAMPLE_DATA_INDICES.includes(indexName);

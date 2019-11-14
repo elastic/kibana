@@ -18,11 +18,13 @@ import {
 import { FetchJobStatusResponsePayload, JobSummary } from './api/ml_get_jobs_summary_api';
 import { GetMlModuleResponsePayload, JobDefinition } from './api/ml_get_module';
 import { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
+import { MandatoryProperty } from '../../../../common/utility_types';
 
 interface StatusReducerState {
   jobDefinitions: JobDefinition[];
   jobStatus: Record<JobType, JobStatus>;
   jobSummaries: JobSummary[];
+  lastSetupErrorMessages: string[];
   setupStatus: SetupStatus;
   sourceConfiguration: JobSourceConfiguration;
 }
@@ -69,6 +71,7 @@ const createInitialState = (sourceConfiguration: JobSourceConfiguration): Status
     'log-entry-rate': 'unknown',
   },
   jobSummaries: [],
+  lastSetupErrorMessages: [],
   setupStatus: 'initializing',
   sourceConfiguration,
 });
@@ -101,9 +104,18 @@ function statusReducer(state: StatusReducerState, action: StatusReducerAction): 
       )
         ? 'succeeded'
         : 'failed';
+      const nextErrorMessages = [
+        ...Object.values(datafeeds)
+          .filter(hasError)
+          .map(datafeed => datafeed.error.msg),
+        ...Object.values(jobs)
+          .filter(hasError)
+          .map(job => job.error.msg),
+      ];
       return {
         ...state,
         jobStatus: nextJobStatus,
+        lastSetupErrorMessages: nextErrorMessages,
         setupStatus: nextSetupStatus,
       };
     }
@@ -244,7 +256,7 @@ const getJobStatus = (jobId: string) => (jobSummaries: FetchJobStatusResponsePay
     .filter(jobSummary => jobSummary.id === jobId)
     .map(
       (jobSummary): JobStatus => {
-        if (jobSummary.jobState === 'failed') {
+        if (jobSummary.jobState === 'failed' || jobSummary.datafeedState === '') {
           return 'failed';
         } else if (
           jobSummary.jobState === 'closed' &&
@@ -296,9 +308,10 @@ const getSetupStatus = (
     } else if (
       setupStatus === 'skippedButUpdatable' ||
       (jobDefinition &&
-        !isJobRevisionCurrent(jobId, jobDefinition.config.custom_settings.job_revision || 0)(
-          jobSummaries
-        ))
+        !isJobRevisionCurrent(
+          jobId,
+          jobDefinition.config.custom_settings.job_revision || 0
+        )(jobSummaries))
     ) {
       return 'skippedButUpdatable';
     } else if (
@@ -348,10 +361,21 @@ const isJobConfigurationConsistent = (
       return (
         jobConfiguration &&
         jobConfiguration.bucketSpan === sourceConfiguration.bucketSpan &&
-        jobConfiguration.indexPattern === sourceConfiguration.indexPattern &&
+        jobConfiguration.indexPattern &&
+        isIndexPatternSubset(jobConfiguration.indexPattern, sourceConfiguration.indexPattern) &&
         jobConfiguration.timestampField === sourceConfiguration.timestampField
       );
     });
+
+const isIndexPatternSubset = (indexPatternSubset: string, indexPatternSuperset: string) => {
+  const subsetSubPatterns = indexPatternSubset.split(',');
+  const supersetSubPatterns = new Set(indexPatternSuperset.split(','));
+
+  return subsetSubPatterns.every(subPattern => supersetSubPatterns.has(subPattern));
+};
+
+const hasError = <Value extends any>(value: Value): value is MandatoryProperty<Value, 'error'> =>
+  value.error != null;
 
 export const useStatusState = (sourceConfiguration: JobSourceConfiguration) => {
   return useReducer(statusReducer, sourceConfiguration, createInitialState);

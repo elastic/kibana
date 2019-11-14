@@ -142,7 +142,7 @@ export const PopoverForm: React.SFC<Props> = ({
       {isUnsupportedAgg && (
         <EuiCodeEditor
           mode="json"
-          theme="github"
+          theme="textmate"
           width="100%"
           height="200px"
           value={JSON.stringify(getEsAggFromAggConfig(defaultData), null, 2)}

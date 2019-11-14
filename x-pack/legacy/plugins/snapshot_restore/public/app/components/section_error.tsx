@@ -7,15 +7,17 @@
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
 
+export interface Error {
+  data: {
+    error: string;
+    cause?: string[];
+    message?: string;
+  };
+}
+
 interface Props {
   title: React.ReactNode;
-  error: {
-    data: {
-      error: string;
-      cause?: string[];
-      message?: string;
-    };
-  };
+  error: Error;
   actions?: JSX.Element;
 }
 

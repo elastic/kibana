@@ -11,9 +11,9 @@
 
 These {stack} features also have limitations that affect {kib}:
 
-* {stack-ov}/watcher-limitations.html[Alerting]
+* {ref}/watcher-limitations.html[Alerting]
 * {stack-ov}/ml-limitations.html[Machine learning]
-* {stack-ov}/security-limitations.html[Security]
+* {ref}/security-limitations.html[Security]
 
 --
 

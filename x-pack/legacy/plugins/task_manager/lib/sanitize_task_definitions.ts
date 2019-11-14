@@ -16,13 +16,10 @@ import { TaskDefinition, TaskDictionary, validateTaskDefinition } from '../task'
 export function sanitizeTaskDefinitions(
   taskDefinitions: TaskDictionary<TaskDefinition> = {}
 ): TaskDictionary<TaskDefinition> {
-  return Object.keys(taskDefinitions).reduce(
-    (acc, type) => {
-      const rawDefinition = taskDefinitions[type];
-      rawDefinition.type = type;
-      acc[type] = Joi.attempt(rawDefinition, validateTaskDefinition) as TaskDefinition;
-      return acc;
-    },
-    {} as TaskDictionary<TaskDefinition>
-  );
+  return Object.keys(taskDefinitions).reduce((acc, type) => {
+    const rawDefinition = taskDefinitions[type];
+    rawDefinition.type = type;
+    acc[type] = Joi.attempt(rawDefinition, validateTaskDefinition) as TaskDefinition;
+    return acc;
+  }, {} as TaskDictionary<TaskDefinition>);
 }

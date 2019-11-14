@@ -15,7 +15,7 @@ import { Description } from './description';
 export const TimeField: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator;
-  const { fields } = newJobCapsService;
+  const { dateFields } = newJobCapsService;
   const [timeFieldName, setTimeFieldName] = useState(jobCreator.timeFieldName);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export const TimeField: FC = () => {
   return (
     <Description>
       <TimeFieldSelect
-        fields={fields}
+        fields={dateFields}
         changeHandler={setTimeFieldName}
         selectedField={timeFieldName}
       />

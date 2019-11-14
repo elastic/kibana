@@ -38,11 +38,11 @@ const from = new Date('2019-06-15T06:00:00.000Z').valueOf();
 const to = new Date('2019-06-18T06:00:00.000Z').valueOf();
 
 jest.mock('../charts/areachart', () => {
-  return { AreaChart: () => <div className="areachart"></div> };
+  return { AreaChart: () => <div className="areachart" /> };
 });
 
 jest.mock('../charts/barchart', () => {
-  return { BarChart: () => <div className="barchart"></div> };
+  return { BarChart: () => <div className="barchart" /> };
 });
 
 describe('Stat Items Component', () => {

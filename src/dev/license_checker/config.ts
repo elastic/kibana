@@ -107,8 +107,5 @@ export const LICENSE_OVERRIDES = {
   // TODO can be removed once we upgrade the use of walk dependency past or equal to v2.3.14
   'walk@2.3.9': ['MIT'],
 
-  // TODO remove this once we upgrade past or equal to v1.0.2
-  'babel-plugin-mock-imports@1.0.1': ['MIT'],
-
   '@elastic/node-ctags@1.0.2': ['Nuclide software'],
 };

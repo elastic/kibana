@@ -47,8 +47,7 @@ export function buildNodeWithArgumentNodes(functionName, argumentNodes) {
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern, config = {}) {
+export function toElasticsearchQuery(node, indexPattern, config = {}, context = {}) {
   const kueryFunction = functions[node.function];
-  return kueryFunction.toElasticsearchQuery(node, indexPattern, config);
+  return kueryFunction.toElasticsearchQuery(node, indexPattern, config, context);
 }
-

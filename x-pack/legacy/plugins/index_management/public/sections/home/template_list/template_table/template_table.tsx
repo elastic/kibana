@@ -13,10 +13,11 @@ import { BASE_PATH, UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../commo
 import { TemplateDeleteModal } from '../../../../components';
 import { trackUiMetric, METRIC_TYPE } from '../../../../services/track_ui_metric';
 import { getTemplateDetailsLink } from '../../../../services/routing';
+import { SendRequestResponse } from '../../../../shared_imports';
 
 interface Props {
   templates: TemplateListItem[];
-  reload: () => Promise<void>;
+  reload: () => Promise<SendRequestResponse>;
   editTemplate: (name: Template['name']) => void;
   cloneTemplate: (name: Template['name']) => void;
 }
@@ -272,7 +273,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         message={
           <FormattedMessage
             id="xpack.idxMgmt.templateList.table.noIndexTemplatesMessage"
-            defaultMessage="No templates found"
+            defaultMessage="No index templates found"
           />
         }
       />

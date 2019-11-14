@@ -41,7 +41,7 @@ export const createIpDetailsResolvers = (
       const options: UsersRequestOptions = {
         ...createOptionsPaginated(source, args, info),
         ip: args.ip,
-        usersSortField: args.sort,
+        sort: args.sort,
         flowTarget: args.flowTarget,
       };
       return libs.ipDetails.getUsers(req, options);

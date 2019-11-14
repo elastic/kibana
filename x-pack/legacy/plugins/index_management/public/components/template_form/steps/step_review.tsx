@@ -188,13 +188,13 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
   return (
     <div data-test-subj="stepSummary">
       <EuiTitle>
-        <h3 data-test-subj="stepTitle">
+        <h2 data-test-subj="stepTitle">
           <FormattedMessage
             id="xpack.idxMgmt.templateForm.stepReview.stepTitle"
             defaultMessage="Review details for '{templateName}'"
             values={{ templateName: name }}
           />
-        </h3>
+        </h2>
       </EuiTitle>
 
       <EuiSpacer size="l" />

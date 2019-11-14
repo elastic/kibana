@@ -9,11 +9,8 @@
 set -e
 ./check_env_variables.sh
 
-# TODO: Since we only have GUID's at the moment, you have to use ./find_signals.sh and then copy and paste that
-# into the temp_update_1.json as your ID in order to run this script.
-
 # Uses a default if no argument is specified
-SIGNAL=${1:-./signals/temp_update_1.json}
+SIGNAL=${1:-./signals/root_or_admin_update_1.json}
 
 # Example: ./update_signal.sh {id} ./signals/root_or_admin_1.json
 curl -s -k \

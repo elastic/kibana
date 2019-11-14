@@ -59,11 +59,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         ]);
       });
 
-      it('shows infrastructure navlink', async () => {
+      it('shows metrics navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Infrastructure', 'Management']);
+        expect(navLinks).to.eql(['Metrics', 'Management']);
       });
 
       describe('infrastructure landing page without data', () => {
@@ -174,11 +174,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         ]);
       });
 
-      it('shows infrastructure navlink', async () => {
+      it('shows metrics navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Infrastructure', 'Management']);
+        expect(navLinks).to.eql(['Metrics', 'Management']);
       });
 
       describe('infrastructure landing page without data', () => {
@@ -416,11 +416,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_infrastructure_privileges_user');
       });
 
-      it(`doesn't show infrastructure navlink`, async () => {
+      it(`doesn't show metrics navlink`, async () => {
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.not.contain(['Infrastructure']);
+        expect(navLinks).to.not.contain(['Metrics']);
       });
 
       it(`infrastructure root renders not found page`, async () => {

@@ -155,7 +155,7 @@ describe('index table', () => {
   });
   test('should show more when per page value is increased', () => {
     const rendered = mountWithIntl(component);
-    const perPageButton = rendered.find('#customizablePagination').find('button');
+    const perPageButton = rendered.find('EuiTablePagination EuiPopover').find('button');
     perPageButton.simulate('click');
     rendered.update();
     const fiftyButton = rendered.find('.euiContextMenuItem').at(1);

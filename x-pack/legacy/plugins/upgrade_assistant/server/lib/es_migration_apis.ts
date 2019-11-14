@@ -66,24 +66,21 @@ const getCombinedIndexInfos = (
     Object.keys(deprecations.index_settings)
       // prevent APM indices from showing up for general re-indexing
       .filter(indexName => !apmIndices.has(indexName))
-      .reduce(
-        (indexDeprecations, indexName) => {
-          return indexDeprecations.concat(
-            deprecations.index_settings[indexName].map(
-              d =>
-                ({
-                  ...d,
-                  index: indexName,
-                  reindex: /Index created before/.test(d.message) && !apmIndices.has(indexName),
-                  needsDefaultFields: /Number of fields exceeds automatic field expansion limit/.test(
-                    d.message
-                  ),
-                } as EnrichedDeprecationInfo)
-            )
-          );
-        },
-        [] as EnrichedDeprecationInfo[]
-      )
+      .reduce((indexDeprecations, indexName) => {
+        return indexDeprecations.concat(
+          deprecations.index_settings[indexName].map(
+            d =>
+              ({
+                ...d,
+                index: indexName,
+                reindex: /Index created before/.test(d.message) && !apmIndices.has(indexName),
+                needsDefaultFields: /Number of fields exceeds automatic field expansion limit/.test(
+                  d.message
+                ),
+              } as EnrichedDeprecationInfo)
+          )
+        );
+      }, [] as EnrichedDeprecationInfo[])
       // Filter out warnings for system indices until we know more about what changes are required for the
       // next upgrade in a future minor version. Note, we're still including APM depercations below.
       .filter(deprecation => !isSystemIndex(deprecation.index!))

@@ -18,8 +18,9 @@
  */
 
 import _ from 'lodash';
-import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '@kbn/es-query';
+import { buildQueryFromFilters } from '@kbn/es-query';
 import { AggGroupNames } from '../../vis/editors/default/agg_groups';
+import { esFilters } from '../../../../../plugins/data/public';
 
 /**
  * walks the aggregation DSL and returns DSL starting at aggregation with id of startFromAggId
@@ -113,7 +114,7 @@ const getAggConfigResultMissingBuckets = (responseAggs, aggId) => {
 const getOtherAggTerms = (requestAgg, key, otherAgg) => {
   return requestAgg['other-filter'].filters.filters[key].bool.must_not
     .filter(filter => filter.match_phrase && filter.match_phrase[otherAgg.params.field.name])
-    .map(filter => filter.match_phrase[otherAgg.params.field.name].query);
+    .map(filter => filter.match_phrase[otherAgg.params.field.name]);
 };
 
 export const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
@@ -180,7 +181,7 @@ export const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) =>
       agg.buckets.some(bucket => bucket.key === '__missing__')
     ) {
       filters.push(
-        buildExistsFilter(
+        esFilters.buildExistsFilter(
           aggWithOtherBucket.params.field,
           aggWithOtherBucket.params.field.indexPattern
         )
@@ -232,7 +233,7 @@ export const mergeOtherBucketAggResponse = (
     );
     const requestFilterTerms = getOtherAggTerms(requestAgg, key, otherAgg);
 
-    const phraseFilter = buildPhrasesFilter(
+    const phraseFilter = esFilters.buildPhrasesFilter(
       otherAgg.params.field,
       requestFilterTerms,
       otherAgg.params.field.indexPattern
@@ -243,7 +244,7 @@ export const mergeOtherBucketAggResponse = (
 
     if (aggResultBuckets.some(bucket => bucket.key === '__missing__')) {
       bucket.filters.push(
-        buildExistsFilter(otherAgg.params.field, otherAgg.params.field.indexPattern)
+        esFilters.buildExistsFilter(otherAgg.params.field, otherAgg.params.field.indexPattern)
       );
     }
     aggResultBuckets.push(bucket);

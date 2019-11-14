@@ -28,9 +28,9 @@ export const MultiMetricView: FC<Props> = ({ isActive, setCanProceed }) => {
 
   return (
     <Fragment>
-      {isActive === false && <MultiMetricDetectorsSummary />}
-
-      {isActive === true && (
+      {isActive === false ? (
+        <MultiMetricDetectorsSummary />
+      ) : (
         <Fragment>
           <MultiMetricDetectors setIsValid={setMetricValid} />
 

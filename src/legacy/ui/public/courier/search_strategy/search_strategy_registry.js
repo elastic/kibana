@@ -19,7 +19,7 @@
 
 import { noOpSearchStrategy } from './no_op_search_strategy';
 
-const searchStrategies = [];
+export const searchStrategies = [];
 
 export const addSearchStrategy = searchStrategy => {
   if (searchStrategies.includes(searchStrategy)) {
@@ -29,28 +29,26 @@ export const addSearchStrategy = searchStrategy => {
   searchStrategies.push(searchStrategy);
 };
 
-const getSearchStrategyByViability = indexPattern => {
+export const getSearchStrategyByViability = indexPattern => {
   return searchStrategies.find(searchStrategy => {
     return searchStrategy.isViable(indexPattern);
   });
 };
 
-const getSearchStrategyById = searchStrategyId => {
+export const getSearchStrategyById = searchStrategyId => {
   return searchStrategies.find(searchStrategy => {
     return searchStrategy.id === searchStrategyId;
   });
 };
 
-const getSearchStrategyForSearchRequest = searchRequest => {
+export const getSearchStrategyForSearchRequest = (searchRequest, { searchStrategyId } = {}) => {
   // Allow the searchSource to declare the correct strategy with which to execute its searches.
-  const preferredSearchStrategyId = searchRequest.source.getPreferredSearchStrategyId();
-  if (preferredSearchStrategyId != null) {
-    return getSearchStrategyById(preferredSearchStrategyId);
+  if (searchStrategyId != null) {
+    return getSearchStrategyById(searchStrategyId);
   }
 
   // Otherwise try to match it to a strategy.
-  const indexPattern = searchRequest.source.getField('index');
-  const viableSearchStrategy = getSearchStrategyByViability(indexPattern);
+  const viableSearchStrategy = getSearchStrategyByViability(searchRequest.index);
 
   if (viableSearchStrategy) {
     return viableSearchStrategy;
@@ -58,47 +56,6 @@ const getSearchStrategyForSearchRequest = searchRequest => {
 
   // This search strategy automatically rejects with an error.
   return noOpSearchStrategy;
-};
-
-
-/**
- * Build a structure like this:
- *
- *   [{
- *     searchStrategy: rollupSearchStrategy,
- *     searchRequests: []<SearchRequest>,
- *   }, {
- *     searchStrategy: defaultSearchStrategy,
- *     searchRequests: []<SearchRequest>,
- *   }]
- *
- * We use an array of objects to preserve the order of the search requests, which we use to
- * deterministically associate each response with the originating request.
- */
-export const assignSearchRequestsToSearchStrategies = searchRequests => {
-  const searchStrategiesWithRequests = [];
-  const searchStrategyById = {};
-
-  searchRequests.forEach(searchRequest => {
-    const matchingSearchStrategy = getSearchStrategyForSearchRequest(searchRequest);
-    const { id } = matchingSearchStrategy;
-    let searchStrategyWithRequest = searchStrategyById[id];
-
-    // Create the data structure if we don't already have it.
-    if (!searchStrategyWithRequest) {
-      searchStrategyWithRequest = {
-        searchStrategy: matchingSearchStrategy,
-        searchRequests: [],
-      };
-
-      searchStrategyById[id] = searchStrategyWithRequest;
-      searchStrategiesWithRequests.push(searchStrategyWithRequest);
-    }
-
-    searchStrategyWithRequest.searchRequests.push(searchRequest);
-  });
-
-  return searchStrategiesWithRequests;
 };
 
 export const hasSearchStategyForIndexPattern = indexPattern => {

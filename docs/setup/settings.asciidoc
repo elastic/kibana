@@ -243,6 +243,10 @@ override this parameter to use their own Tile Map Service. For example:
 `ops.interval:`:: *Default: 5000* Set the interval in milliseconds to sample
 system and process performance metrics. The minimum value is 100.
 
+`newsfeed.enabled:` :: *Default: `true`* Controls whether to enable the newsfeed
+system for the Kibana UI notification center. Set to `false` to disable the
+newsfeed system.
+
 `path.data:`:: *Default: `data`* The path where Kibana stores persistent data
 not saved in Elasticsearch.
 
@@ -277,7 +281,7 @@ setting specifies the port to use.
 
 `server.rewriteBasePath:`:: *Default: false* Deprecated setting that specifies if Kibana should
 rewrite requests that are prefixed with `server.basePath`, or require that they
-are rewritten by your reverse proxy. 
+are rewritten by your reverse proxy.
 
 `server.socketTimeout:`:: *Default: "120000"* The number of milliseconds to wait before closing an
 inactive socket.
@@ -326,7 +330,6 @@ Rollup user interface.
 
 
 include::{docdir}/settings/apm-settings.asciidoc[]
-include::{docdir}/settings/code-settings.asciidoc[]
 include::{docdir}/settings/dev-settings.asciidoc[]
 include::{docdir}/settings/graph-settings.asciidoc[]
 include::{docdir}/settings/infrastructure-ui-settings.asciidoc[]

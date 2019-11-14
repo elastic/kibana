@@ -17,8 +17,6 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               'oss-ciGroup4': getOssCiGroupWorker(4),
               'oss-ciGroup5': getOssCiGroupWorker(5),
               'oss-ciGroup6': getOssCiGroupWorker(6),
-            ]),
-            'kibana-oss-agent2': withWorkers('kibana-oss-tests2', { buildOss() }, [
               'oss-ciGroup7': getOssCiGroupWorker(7),
               'oss-ciGroup8': getOssCiGroupWorker(8),
               'oss-ciGroup9': getOssCiGroupWorker(9),
@@ -26,7 +24,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               'oss-ciGroup11': getOssCiGroupWorker(11),
               'oss-ciGroup12': getOssCiGroupWorker(12),
               'oss-firefoxSmoke': getPostBuildWorker('firefoxSmoke', { runbld './test/scripts/jenkins_firefox_smoke.sh' }),
-              // 'oss-visualRegression': getPostBuildWorker('visualRegression', { runbld './test/scripts/jenkins_visual_regression.sh' }),
+              'oss-visualRegression': getPostBuildWorker('visualRegression', { runbld './test/scripts/jenkins_visual_regression.sh' }),
             ]),
             'kibana-xpack-agent': withWorkers('kibana-xpack-tests', { buildXpack() }, [
               'xpack-ciGroup1': getXpackCiGroupWorker(1),
@@ -34,15 +32,13 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               'xpack-ciGroup3': getXpackCiGroupWorker(3),
               'xpack-ciGroup4': getXpackCiGroupWorker(4),
               'xpack-ciGroup5': getXpackCiGroupWorker(5),
-            ]),
-            'kibana-xpack-agent2': withWorkers('kibana-xpack-tests2', { buildXpack() }, [
               'xpack-ciGroup6': getXpackCiGroupWorker(6),
               'xpack-ciGroup7': getXpackCiGroupWorker(7),
               'xpack-ciGroup8': getXpackCiGroupWorker(8),
               'xpack-ciGroup9': getXpackCiGroupWorker(9),
               'xpack-ciGroup10': getXpackCiGroupWorker(10),
               'xpack-firefoxSmoke': getPostBuildWorker('xpack-firefoxSmoke', { runbld './test/scripts/jenkins_xpack_firefox_smoke.sh' }),
-              // 'xpack-visualRegression': getPostBuildWorker('xpack-visualRegression', { runbld './test/scripts/jenkins_xpack_visual_regression.sh' }),
+              'xpack-visualRegression': getPostBuildWorker('xpack-visualRegression', { runbld './test/scripts/jenkins_xpack_visual_regression.sh' }),
             ]),
           ])
         }
@@ -60,7 +56,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
 
 def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
   return {
-    jobRunner('tests-xl') {
+    jobRunner('tests-xl', true) {
       try {
         doSetup()
         preWorkerClosure()
@@ -151,7 +147,7 @@ def legacyJobRunner(name) {
         withEnv([
           "JOB=${name}",
         ]) {
-          jobRunner('linux && immutable') {
+          jobRunner('linux && immutable', false) {
             try {
               runbld('.ci/run.sh', true)
             } finally {
@@ -172,8 +168,21 @@ def legacyJobRunner(name) {
   }
 }
 
-def jobRunner(label, closure) {
+def jobRunner(label, useRamDisk, closure) {
   node(label) {
+    if (useRamDisk) {
+      // Move to a temporary workspace, so that we can symlink the real workspace into /dev/shm
+      def originalWorkspace = env.WORKSPACE
+      ws('/tmp/workspace') {
+        sh """
+          mkdir -p /dev/shm/workspace
+          mkdir -p '${originalWorkspace}' # create all of the directories leading up to the workspace, if they don't exist
+          rm --preserve-root -rf '${originalWorkspace}' # then remove just the workspace, just in case there's stuff in it
+          ln -s /dev/shm/workspace '${originalWorkspace}'
+        """
+      }
+    }
+
     def scmVars = checkout scm
 
     withEnv([

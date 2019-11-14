@@ -27,7 +27,8 @@ export default function ({ getService, getPageObjects }) {
       await tearDown();
     });
 
-    it('should send another request when clicking Refresh', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/48910
+    it.skip('should send another request when clicking Refresh', async () => {
       await testSubjects.click('querySubmitButton');
       const isLoading = await PageObjects.header.isGlobalLoadingIndicatorVisible();
       expect(isLoading).to.be(true);

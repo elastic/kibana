@@ -1,7 +1,7 @@
 [[saved-objects-api-bulk-create]]
 === Bulk create saved objects API
 ++++
-<titleabbrev>Bulk create objects</titleabbrev>
+<titleabbrev>Bulk create saved objects</titleabbrev>
 ++++
 
 experimental[] Create multiple {kib} saved objects.

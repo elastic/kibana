@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import DragSelect from 'dragselect/dist/ds.min.js';
-import { map } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -99,6 +99,9 @@ import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 import { timefilter } from 'ui/timefilter';
 import { toastNotifications } from 'ui/notify';
 
+import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
+import { Subject } from 'rxjs';
+
 function getExplorerDefaultState() {
   return {
     annotationsData: [],
@@ -163,6 +166,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       TimeBuckets: PropTypes.func.isRequired,
     };
 
+    _unsubscribeAll = new Subject();
+
     state = getExplorerDefaultState();
 
     // make sure dragSelect is only available if the mouse pointer is actually over a swimlane
@@ -224,6 +229,24 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           }
         });
       });
+
+      mlTimefilterRefresh$.pipe(takeUntil(this._unsubscribeAll)).subscribe(() => {
+        this.resetCache();
+        this.updateExplorer();
+      });
+    }
+
+    componentWillUnmount() {
+      this._unsubscribeAll.next();
+      this._unsubscribeAll.complete();
+    }
+
+    resetCache() {
+      this.loadOverallDataPreviousArgs = null;
+      this.loadViewBySwimlanePreviousArgs = null;
+      this.topFieldsPreviousArgs = null;
+      this.annotationsTablePreviousArgs = null;
+      this.anomaliesTablePreviousArgs = null;
     }
 
     // based on the pattern described here:
@@ -1146,8 +1169,9 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       return (
         <ExplorerPage jobSelectorProps={jobSelectorProps}>
-          <ChartTooltip />
           <div className="results-container">
+            {/* Make sure ChartTooltip is inside this plain wrapping div so positioning can be infered correctly. */}
+            <ChartTooltip />
 
             {noInfluencersConfigured === false &&
             influencers !== undefined &&

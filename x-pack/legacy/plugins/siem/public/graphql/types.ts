@@ -401,6 +401,8 @@ export interface Source {
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
 
+  AuthenticationsOverTime: AuthenticationsOverTimeData;
+
   Timeline: TimelineData;
 
   TimelineDetails: TimelineDetailsData;
@@ -632,6 +634,22 @@ export interface Inspect {
   dsl: string[];
 
   response: string[];
+}
+
+export interface AuthenticationsOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  authenticationsOverTime: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface MatrixOverTimeHistogramData {
+  x: number;
+
+  y: number;
+
+  g: string;
 }
 
 export interface TimelineData {
@@ -1216,14 +1234,6 @@ export interface EventsOverTimeData {
   eventsOverTime: MatrixOverTimeHistogramData[];
 
   totalCount: number;
-}
-
-export interface MatrixOverTimeHistogramData {
-  x: number;
-
-  y: number;
-
-  g: string;
 }
 
 export interface HostsData {
@@ -1978,6 +1988,13 @@ export interface AuthenticationsSourceArgs {
 
   defaultIndex: string[];
 }
+export interface AuthenticationsOverTimeSourceArgs {
+  timerange: TimerangeInput;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
 export interface TimelineSourceArgs {
   pagination: PaginationInput;
 
@@ -2240,6 +2257,58 @@ export interface DeleteTimelineMutationArgs {
 // ====================================================
 // Documents
 // ====================================================
+
+export namespace GetAuthenticationsOverTimeQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    filterQuery?: Maybe<string>;
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    AuthenticationsOverTime: AuthenticationsOverTime;
+  };
+
+  export type AuthenticationsOverTime = {
+    __typename?: 'AuthenticationsOverTimeData';
+
+    authenticationsOverTime: _AuthenticationsOverTime[];
+
+    totalCount: number;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type _AuthenticationsOverTime = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+
+    g: string;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
 
 export namespace GetAuthenticationsQuery {
   export type Variables = {

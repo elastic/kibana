@@ -14,6 +14,10 @@ import {
 } from '../../../common/constants';
 
 export function checkLicense(pluginName, minimumLicenseRequired, xpackLicenseInfo) {
+  if (!minimumLicenseRequired) {
+    throw new Error(`Error checking license for plugin "${pluginName}". The minimum license required has not been provided.`);
+  }
+
   if(!RANKED_LICENSE_TYPES.includes(minimumLicenseRequired)) {
     throw new Error(`Invalid license type supplied to checkLicense: ${minimumLicenseRequired}`);
   }

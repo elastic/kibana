@@ -8,6 +8,7 @@ import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/type
 import { IndexPattern } from 'ui/index_patterns';
 import { IndexPatternTitle } from '../../../../../common/types/kibana';
 import { ML_JOB_AGGREGATION } from '../../../../../common/constants/aggregation_types';
+import { ES_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
 import { Job, Datafeed, Detector, JobId, DatafeedId, BucketSpan } from './configs';
 import { Aggregation, Field } from '../../../../../common/types/fields';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
@@ -33,6 +34,7 @@ export class JobCreator {
   protected _subscribers: ProgressSubscriber[] = [];
   protected _aggs: Aggregation[] = [];
   protected _fields: Field[] = [];
+  protected _scriptFields: Field[] = [];
   protected _sparseData: boolean = false;
   private _stopAllRefreshPolls: {
     stop: boolean;
@@ -413,6 +415,14 @@ export class JobCreator {
     }
   }
 
+  public get indices(): string[] {
+    return this._datafeed_config.indices;
+  }
+
+  public get scriptFields(): Field[] {
+    return this._scriptFields;
+  }
+
   public get subscribers(): ProgressSubscriber[] {
     return this._subscribers;
   }
@@ -549,5 +559,16 @@ export class JobCreator {
       this.useDedicatedIndex = true;
     }
     this._sparseData = isSparseDataJob(job, datafeed);
+
+    if (this._datafeed_config.script_fields !== undefined) {
+      this._scriptFields = Object.keys(this._datafeed_config.script_fields).map(f => ({
+        id: f,
+        name: f,
+        type: ES_FIELD_TYPES.KEYWORD,
+        aggregatable: true,
+      }));
+    } else {
+      this._scriptFields = [];
+    }
   }
 }

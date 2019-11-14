@@ -11,17 +11,16 @@ import { i18n } from '@kbn/i18n';
 
 import {
   EuiBetaBadge,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
   EuiOverlayMask,
-  EuiPage,
   EuiPageBody,
+  EuiPageContent,
   EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
-  EuiPanel,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -31,22 +30,19 @@ import { useGetTransforms } from '../../hooks';
 import { RedirectToCreateTransform } from '../../common/navigation';
 import { PrivilegesWrapper } from '../../lib/authorization';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
+import { documentationLinksService } from '../../services/documentation';
 
 import { useRefreshInterval } from './components/transform_list/use_refresh_interval';
-import { CreateTransformButton } from './components/create_transform_button';
-import { RefreshTransformListButton } from './components/refresh_transform_list_button';
 import { SearchSelection } from './components/search_selection';
 import { TransformList } from './components/transform_list';
 import { TransformStatsBar } from './components/transform_list/transforms_stats_bar';
 
 export const TransformManagement: FC = () => {
-  const [isLoading, setIsLoading] = useState(false);
   const [transformsLoading, setTransformsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [blockRefresh, setBlockRefresh] = useState(false);
   const [transforms, setTransforms] = useState<TransformListRow[]>([]);
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
-  const { refresh } = useRefreshTransformList({ isLoading: setIsLoading });
 
   const getTransforms = useGetTransforms(
     setTransforms,
@@ -78,12 +74,12 @@ export const TransformManagement: FC = () => {
 
   return (
     <Fragment>
-      <EuiPage data-test-subj="transformPageTransform">
-        <EuiPageBody>
-          <EuiPageContentHeader>
-            <EuiPageContentHeaderSection>
-              <EuiTitle>
-                <h1>
+      <EuiPageBody data-test-subj="transformPageTransformList">
+        <EuiPageContent>
+          <EuiTitle size="l">
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={true}>
+                <h1 data-test-subj="transformAppTitle">
                   <FormattedMessage
                     id="xpack.transform.transformList.transformTitle"
                     defaultMessage="Transforms"
@@ -101,37 +97,45 @@ export const TransformManagement: FC = () => {
                     )}
                   />
                 </h1>
-              </EuiTitle>
-            </EuiPageContentHeaderSection>
-            <EuiPageContentHeaderSection>
-              <EuiFlexGroup alignItems="center">
-                {/* grow={false} fixes IE11 issue with nested flex */}
-                <EuiFlexItem grow={false}>
-                  <RefreshTransformListButton onClick={refresh} isLoading={isLoading} />
-                </EuiFlexItem>
-                {/* grow={false} fixes IE11 issue with nested flex */}
-                <EuiFlexItem grow={false}>
-                  <CreateTransformButton onClick={onOpenModal} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPageContentHeaderSection>
-          </EuiPageContentHeader>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  href={documentationLinksService.getTransformsDocUrl()}
+                  target="_blank"
+                  iconType="help"
+                  data-test-subj="documentationLink"
+                >
+                  <FormattedMessage
+                    id="xpack.transform.transformList.transformDocsLinkText"
+                    defaultMessage="Transform docs"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiTitle size="s">
+            <EuiText color="subdued">
+              <FormattedMessage
+                id="xpack.transform.transformList.transformDescription"
+                defaultMessage="Use transforms to pivot existing Elasticsearch indices into summarized or entity-centric indices."
+              />
+            </EuiText>
+          </EuiTitle>
           <EuiPageContentBody>
             <EuiSpacer size="l" />
             <TransformStatsBar transformsList={transforms} />
             <EuiSpacer size="s" />
-            <EuiPanel>
-              <TransformList
-                errorMessage={errorMessage}
-                isInitialized={isInitialized}
-                onCreateTransform={onOpenModal}
-                transforms={transforms}
-                transformsLoading={transformsLoading}
-              />
-            </EuiPanel>
+            <TransformList
+              errorMessage={errorMessage}
+              isInitialized={isInitialized}
+              onCreateTransform={onOpenModal}
+              transforms={transforms}
+              transformsLoading={transformsLoading}
+            />
           </EuiPageContentBody>
-        </EuiPageBody>
-      </EuiPage>
+        </EuiPageContent>
+      </EuiPageBody>
       {isSearchSelectionVisible && (
         <EuiOverlayMask>
           <EuiModal onClose={onCloseModal} className="transformCreateTransformSearchDialog">

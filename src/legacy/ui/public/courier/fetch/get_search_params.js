@@ -17,6 +17,8 @@
  * under the License.
  */
 
+const sessionId = Date.now();
+
 export function getMSearchParams(config) {
   return {
     rest_total_hits_as_int: true,
@@ -25,13 +27,13 @@ export function getMSearchParams(config) {
   };
 }
 
-export function getSearchParams(config, sessionId, esShardTimeout) {
+export function getSearchParams(config, esShardTimeout) {
   return {
     rest_total_hits_as_int: true,
     ignore_unavailable: true,
     ignore_throttled: getIgnoreThrottled(config),
     max_concurrent_shard_requests: getMaxConcurrentShardRequests(config),
-    preference: getPreference(config, sessionId),
+    preference: getPreference(config),
     timeout: getTimeout(esShardTimeout),
   };
 }
@@ -45,7 +47,7 @@ export function getMaxConcurrentShardRequests(config) {
   return maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined;
 }
 
-export function getPreference(config, sessionId) {
+export function getPreference(config) {
   const setRequestPreference = config.get('courier:setRequestPreference');
   if (setRequestPreference === 'sessionId') return sessionId;
   return setRequestPreference === 'custom' ? config.get('courier:customRequestPreference') : undefined;

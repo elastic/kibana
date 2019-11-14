@@ -20,6 +20,8 @@
 import { render, ExpressionRenderHandler } from './render';
 import { Observable } from 'rxjs';
 import { IInterpreterRenderHandlers } from './types';
+import { getRenderersRegistry } from './services';
+import { first } from 'rxjs/operators';
 
 const element: HTMLElement = {} as HTMLElement;
 
@@ -31,10 +33,11 @@ jest.mock('./services', () => {
       },
     },
   };
+
   return {
-    getRenderersRegistry: () => ({
-      get: (id: string) => renderers[id],
-    }),
+    getRenderersRegistry: jest.fn(() => ({
+      get: jest.fn((id: string) => renderers[id]),
+    })),
   };
 });
 
@@ -46,8 +49,6 @@ describe('render helper function', () => {
 });
 
 describe('ExpressionRenderHandler', () => {
-  const data = { type: 'render', as: 'test' };
-
   it('constructor creates observers', () => {
     const expressionRenderHandler = new ExpressionRenderHandler(element);
     expect(expressionRenderHandler.events$).toBeInstanceOf(Observable);
@@ -61,27 +62,71 @@ describe('ExpressionRenderHandler', () => {
   });
 
   describe('render()', () => {
-    it('throws if invalid data is provided', async () => {
+    it('sends an observable error and keeps it open if invalid data is provided', async () => {
       const expressionRenderHandler = new ExpressionRenderHandler(element);
-      await expect(expressionRenderHandler.render({})).rejects.toThrow();
+      const promise1 = expressionRenderHandler.render$.pipe(first()).toPromise();
+      expressionRenderHandler.render(false);
+      await expect(promise1).resolves.toEqual({
+        type: 'error',
+        error: {
+          message: 'invalid data provided to the expression renderer',
+        },
+      });
+
+      const promise2 = expressionRenderHandler.render$.pipe(first()).toPromise();
+      expressionRenderHandler.render(false);
+      await expect(promise2).resolves.toEqual({
+        type: 'error',
+        error: {
+          message: 'invalid data provided to the expression renderer',
+        },
+      });
     });
 
-    it('throws if renderer does not exist', async () => {
+    it('sends an observable error if renderer does not exist', async () => {
       const expressionRenderHandler = new ExpressionRenderHandler(element);
-      await expect(
-        expressionRenderHandler.render({ type: 'render', as: 'something' })
-      ).rejects.toThrow();
+      const promise = expressionRenderHandler.render$.pipe(first()).toPromise();
+      expressionRenderHandler.render({ type: 'render', as: 'something' });
+      await expect(promise).resolves.toEqual({
+        type: 'error',
+        error: {
+          message: `invalid renderer id 'something'`,
+        },
+      });
     });
 
-    it('returns a promise', () => {
+    it('sends an observable error if the rendering function throws', async () => {
+      (getRenderersRegistry as jest.Mock).mockReturnValueOnce({ get: () => true });
+      (getRenderersRegistry as jest.Mock).mockReturnValueOnce({
+        get: () => ({
+          render: () => {
+            throw new Error('renderer error');
+          },
+        }),
+      });
+
       const expressionRenderHandler = new ExpressionRenderHandler(element);
-      expect(expressionRenderHandler.render(data)).toBeInstanceOf(Promise);
+      const promise = expressionRenderHandler.render$.pipe(first()).toPromise();
+      expressionRenderHandler.render({ type: 'render', as: 'something' });
+      await expect(promise).resolves.toEqual({
+        type: 'error',
+        error: {
+          message: 'renderer error',
+        },
+      });
     });
 
-    it('resolves a promise once rendering is complete', async () => {
+    it('sends a next observable once rendering is complete', () => {
       const expressionRenderHandler = new ExpressionRenderHandler(element);
-      const response = await expressionRenderHandler.render(data);
-      expect(response).toBe(1);
+      expect.assertions(1);
+      return new Promise(resolve => {
+        expressionRenderHandler.render$.subscribe(renderCount => {
+          expect(renderCount).toBe(1);
+          resolve();
+        });
+
+        expressionRenderHandler.render({ type: 'render', as: 'test' });
+      });
     });
   });
 });

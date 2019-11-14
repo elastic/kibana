@@ -45,6 +45,7 @@ import {
   ChromeNavLink,
   ChromeNavLinks,
   ChromeNavLinkUpdateableFields,
+  ChromeDocTitle,
   ChromeStart,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
@@ -80,6 +81,8 @@ export {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponsePublic,
   SavedObjectsUpdateOptions,
@@ -109,17 +112,13 @@ export {
   HttpHandler,
   HttpBody,
   IBasePath,
+  IAnonymousPaths,
   IHttpInterceptController,
   IHttpFetchError,
+  InterceptedHttpResponse,
 } from './http';
 
-export {
-  OverlayStart,
-  OverlayBannerMount,
-  OverlayBannerUnmount,
-  OverlayBannersStart,
-  OverlayRef,
-} from './overlays';
+export { OverlayStart, OverlayBannersStart, OverlayRef } from './overlays';
 
 export {
   Toast,
@@ -131,6 +130,8 @@ export {
   ToastsStart,
   ErrorToastOptions,
 } from './notifications';
+
+export { MountPoint, UnmountCallback } from './types';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -247,6 +248,7 @@ export {
   ChromeNavLink,
   ChromeNavLinks,
   ChromeNavLinkUpdateableFields,
+  ChromeDocTitle,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeStart,

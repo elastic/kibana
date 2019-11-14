@@ -23,6 +23,7 @@ import { VegaView } from './vega_view/vega_view';
 import { VegaMapView } from './vega_view/vega_map_view';
 import { timefilter } from 'ui/timefilter';
 import { start as data } from '../../../core_plugins/data/public/legacy';
+import { npStart } from 'ui/new_platform';
 
 import { findIndexPatternByTitle } from '../../data/public/index_patterns';
 
@@ -99,11 +100,12 @@ export const createVegaVisualization = ({ serviceSettings }) => class VegaVisual
         this._vegaView = null;
       }
 
+      const { filterManager } = npStart.plugins.data.query;
       const vegaViewParams = {
         parentEl: this._el,
         vegaParser,
         serviceSettings,
-        queryfilter: data.filter.filterManager,
+        queryfilter: filterManager,
         timefilter: timefilter,
         findIndex: this.findIndex.bind(this),
       };

@@ -6,7 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useMemo } from 'react';
+import React, { Fragment, useMemo } from 'react';
+import moment from 'moment';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { TextScale } from '../../../../common/log_text_scale';
@@ -26,6 +27,7 @@ import { MeasurableItemView } from './measurable_item_view';
 import { VerticalScrollPanel } from './vertical_scroll_panel';
 import { getColumnWidths, LogEntryColumnWidths } from './log_entry_column';
 import { useMeasuredCharacterDimensions } from './text_styles';
+import { LogDateRow } from './log_date_row';
 
 interface ScrollableLogTextStreamViewProps {
   columnConfigurations: LogColumnConfiguration[];
@@ -99,6 +101,14 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
         target: null,
         targetId: null,
         items: [],
+      };
+    } else if (
+      hasItems &&
+      (nextItems.length !== prevState.items.length || nextItems[0] !== prevState.items[0])
+    ) {
+      return {
+        ...prevState,
+        items: nextItems,
       };
     }
 
@@ -178,6 +188,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                         hideScrollbar={true}
                         data-test-subj={'logStream'}
                         isLocked={scrollLock.isEnabled}
+                        entriesCount={items.length}
                       >
                         {registerChild => (
                           <>
@@ -188,35 +199,47 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                               isStreaming={false}
                               lastStreamingUpdate={null}
                             />
-                            {items.map(item => (
-                              <MeasurableItemView
-                                register={registerChild}
-                                registrationKey={getStreamItemId(item)}
-                                key={getStreamItemId(item)}
-                              >
-                                {itemMeasureRef => (
-                                  <LogEntryRow
-                                    columnConfigurations={columnConfigurations}
-                                    columnWidths={columnWidths}
-                                    openFlyoutWithItem={this.handleOpenFlyout}
-                                    boundingBoxRef={itemMeasureRef}
-                                    logEntry={item.logEntry}
-                                    highlights={item.highlights}
-                                    isActiveHighlight={
-                                      !!currentHighlightKey &&
-                                      currentHighlightKey.gid === item.logEntry.gid
-                                    }
-                                    scale={scale}
-                                    wrap={wrap}
-                                    isHighlighted={
-                                      highlightedItem
-                                        ? item.logEntry.gid === highlightedItem
-                                        : false
-                                    }
-                                  />
-                                )}
-                              </MeasurableItemView>
-                            ))}
+                            {items.map((item, idx) => {
+                              const currentTimestamp = item.logEntry.key.time;
+                              let showDate = false;
+
+                              if (idx > 0) {
+                                const prevTimestamp = items[idx - 1].logEntry.key.time;
+                                showDate = !moment(currentTimestamp).isSame(prevTimestamp, 'day');
+                              }
+
+                              return (
+                                <Fragment key={getStreamItemId(item)}>
+                                  {showDate && <LogDateRow timestamp={currentTimestamp} />}
+                                  <MeasurableItemView
+                                    register={registerChild}
+                                    registrationKey={getStreamItemId(item)}
+                                  >
+                                    {itemMeasureRef => (
+                                      <LogEntryRow
+                                        columnConfigurations={columnConfigurations}
+                                        columnWidths={columnWidths}
+                                        openFlyoutWithItem={this.handleOpenFlyout}
+                                        boundingBoxRef={itemMeasureRef}
+                                        logEntry={item.logEntry}
+                                        highlights={item.highlights}
+                                        isActiveHighlight={
+                                          !!currentHighlightKey &&
+                                          currentHighlightKey.gid === item.logEntry.gid
+                                        }
+                                        scale={scale}
+                                        wrap={wrap}
+                                        isHighlighted={
+                                          highlightedItem
+                                            ? item.logEntry.gid === highlightedItem
+                                            : false
+                                        }
+                                      />
+                                    )}
+                                  </MeasurableItemView>
+                                </Fragment>
+                              );
+                            })}
                             <LogTextStreamLoadingItemView
                               alignment="top"
                               isLoading={isStreaming || isLoadingMore}
@@ -326,7 +349,7 @@ const WithColumnWidths: React.FunctionComponent<{
 }> = ({ children, columnConfigurations, scale }) => {
   const { CharacterDimensionsProbe, dimensions } = useMeasuredCharacterDimensions(scale);
   const referenceTime = useMemo(() => Date.now(), []);
-  const formattedCurrentDate = useFormattedTime(referenceTime);
+  const formattedCurrentDate = useFormattedTime(referenceTime, { format: 'time' });
   const columnWidths = useMemo(
     () => getColumnWidths(columnConfigurations, dimensions.width, formattedCurrentDate.length),
     [columnConfigurations, dimensions.width, formattedCurrentDate]

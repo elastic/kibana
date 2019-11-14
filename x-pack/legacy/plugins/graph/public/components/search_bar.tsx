@@ -33,7 +33,11 @@ export interface OuterSearchBarProps {
   initialQuery?: string;
   onQuerySubmit: (query: string) => void;
 
-  confirmWipeWorkspace: (onConfirm: () => void) => void;
+  confirmWipeWorkspace: (
+    onConfirm: () => void,
+    text?: string,
+    options?: { confirmButtonText: string; title: string }
+  ) => void;
   indexPatternProvider: IndexPatternProvider;
 }
 
@@ -118,11 +122,27 @@ export function SearchBarComponent(props: SearchBarProps) {
                   className="gphSearchBar__datasourceButton"
                   data-test-subj="graphDatasourceButton"
                   onClick={() => {
-                    confirmWipeWorkspace(() =>
-                      openSourceModal(
-                        { overlays, savedObjects, uiSettings },
-                        onIndexPatternSelected
-                      )
+                    confirmWipeWorkspace(
+                      () =>
+                        openSourceModal(
+                          { overlays, savedObjects, uiSettings },
+                          onIndexPatternSelected
+                        ),
+                      i18n.translate('xpack.graph.clearWorkspace.confirmText', {
+                        defaultMessage:
+                          'If you change data sources, your current fields and vertices will be reset.',
+                      }),
+                      {
+                        confirmButtonText: i18n.translate(
+                          'xpack.graph.clearWorkspace.confirmButtonLabel',
+                          {
+                            defaultMessage: 'Change data source',
+                          }
+                        ),
+                        title: i18n.translate('xpack.graph.clearWorkspace.modalTitle', {
+                          defaultMessage: 'Unsaved changes',
+                        }),
+                      }
                     );
                   }}
                 >

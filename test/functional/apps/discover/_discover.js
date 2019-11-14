@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
+  const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -105,9 +106,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.brushHistogram();
 
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-        expect(Math.round(newDurationHours)).to.be(108);
+        expect(Math.round(newDurationHours)).to.be(25);
         const rowData = await PageObjects.discover.getDocTableField(1);
-        expect(rowData).to.have.string('Sep 22, 2015 @ 23:50:13.253');
+        expect(Date.parse(rowData)).to.be.within(Date.parse('Sep 20, 2015 @ 22:00:00.000'), Date.parse('Sep 20, 2015 @ 23:30:00.000'));
       });
 
       it('should show correct initial chart interval of Auto', async function () {
@@ -151,6 +152,26 @@ export default function ({ getService, getPageObjects }) {
         const isVisible = await PageObjects.discover.hasNoResultsTimepicker();
         expect(isVisible).to.be(true);
       });
+    });
+
+    describe('nested query', () => {
+
+      before(async () => {
+        log.debug('setAbsoluteRangeForAnotherQuery');
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+      });
+
+      it('should support querying on nested fields', async function () {
+        await queryBar.setQuery('nestedField:{ child: nestedValue }');
+        await queryBar.submitQuery();
+        await retry.try(async function () {
+          expect(await PageObjects.discover.getHitCount()).to.be(
+            '1'
+          );
+        });
+      });
+
     });
 
     describe('filter editor', function () {
