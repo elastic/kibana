@@ -184,7 +184,7 @@
     "@elastic/ctags-langserver": "^0.1.11",
     "@elastic/datemath": "5.0.2",
     "@elastic/ems-client": "1.0.5",
-    "@elastic/eui": "14.8.0",
+    "@elastic/eui": "14.9.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/javascript-typescript-langserver": "^0.3.3",
     "@elastic/lsp-extension": "^0.1.2",
