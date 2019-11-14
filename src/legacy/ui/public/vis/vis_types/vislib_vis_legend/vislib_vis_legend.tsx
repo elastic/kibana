@@ -16,100 +16,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, useEffect, BaseSyntheticEvent, KeyboardEvent } from 'react';
+import React, { useState, useEffect, BaseSyntheticEvent, KeyboardEvent, memo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+
 import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon, keyCodes } from '@elastic/eui';
+
 import { getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
 
 // @ts-ignore
 import { Data } from '../../../vislib/lib/data';
 // @ts-ignore
 import { createFiltersFromEvent } from '../../vis_filters';
-
-export const CUSTOM_LEGEND_VIS_TYPES = ['heatmap', 'gauge'];
-
-const legendColors: string[] = [
-  '#3F6833',
-  '#967302',
-  '#2F575E',
-  '#99440A',
-  '#58140C',
-  '#052B51',
-  '#511749',
-  '#3F2B5B', // 6
-  '#508642',
-  '#CCA300',
-  '#447EBC',
-  '#C15C17',
-  '#890F02',
-  '#0A437C',
-  '#6D1F62',
-  '#584477', // 2
-  '#629E51',
-  '#E5AC0E',
-  '#64B0C8',
-  '#E0752D',
-  '#BF1B00',
-  '#0A50A1',
-  '#962D82',
-  '#614D93', // 4
-  '#7EB26D',
-  '#EAB839',
-  '#6ED0E0',
-  '#EF843C',
-  '#E24D42',
-  '#1F78C1',
-  '#BA43A9',
-  '#705DA0', // Normal
-  '#9AC48A',
-  '#F2C96D',
-  '#65C5DB',
-  '#F9934E',
-  '#EA6460',
-  '#5195CE',
-  '#D683CE',
-  '#806EB7', // 5
-  '#B7DBAB',
-  '#F4D598',
-  '#70DBED',
-  '#F9BA8F',
-  '#F29191',
-  '#82B5D8',
-  '#E5A8E2',
-  '#AEA2E0', // 3
-  '#E0F9D7',
-  '#FCEACA',
-  '#CFFAFF',
-  '#F9E2D2',
-  '#FCE2DE',
-  '#BADFF4',
-  '#F9D9F9',
-  '#DEDAF7', // 7
-];
+import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
+import { VisLegendItem } from './vislib_vis_legend_item';
 
 interface Props {
   vis: any;
-  refreshLegend: any;
   visData: any;
-  visParams: any;
   uiState: any;
-}
-
-interface LegendItem {
-  label: string;
-  values: any[];
+  refreshLegend: number;
 }
 
 let getColor: (label: string) => string;
 
-export const VisLegend = ({ vis, refreshLegend, visData, visParams, uiState }: Props) => {
+const VisLegendComponent = ({ vis, visData, uiState, refreshLegend }: Props) => {
   const [open, setOpen] = useState(uiState.get('vis.legendOpen', true));
   const [labels, setLabels] = useState<any[]>([]);
+  const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
   const [tableAggs, setTableAggs] = useState<any[]>([]);
-  const [shownDetails, setShownDetails] = useState<string | undefined>(undefined);
   const legendId = htmlIdGenerator()('legend');
 
   useEffect(() => {
@@ -147,35 +84,23 @@ export const VisLegend = ({ vis, refreshLegend, visData, visParams, uiState }: P
     vis.API.events.filter({ data, negate });
   };
 
-  const canFilter = (item: LegendItem) => {
+  const canFilter = (item: LegendItem): boolean => {
     if (CUSTOM_LEGEND_VIS_TYPES.includes(vis.vislibVis.visConfigArgs.type)) {
       return false;
     }
     const filters = createFiltersFromEvent({ aggConfigs: tableAggs, data: item.values });
-    return filters.length;
+    return Boolean(filters.length);
   };
 
-  const toggleDetails = (label: string) => (event: BaseSyntheticEvent) => {
-    if ((event as KeyboardEvent).keyCode && (event as KeyboardEvent).keyCode !== keyCodes.ENTER) {
+  const toggleDetails = (label: string | null) => (event?: BaseSyntheticEvent) => {
+    if (
+      event &&
+      (event as KeyboardEvent).keyCode &&
+      (event as KeyboardEvent).keyCode !== keyCodes.ENTER
+    ) {
       return;
     }
-    setShownDetails(shownDetails === label ? undefined : label);
-  };
-
-  const areDetailsVisible = (label: string) => {
-    return shownDetails === label;
-  };
-
-  /**
-   * Keydown listener for a legend entry.
-   * This will close the details panel of this legend entry when pressing Escape.
-   */
-  const onLegendEntryKeydown = (event: KeyboardEvent) => {
-    if (event.keyCode === keyCodes.ESCAPE) {
-      event.preventDefault();
-      event.stopPropagation();
-      setShownDetails(undefined);
-    }
+    setSelectedLabel(selectedLabel === label ? null : label);
   };
 
   function getSeriesLabels(data: any[]) {
@@ -236,7 +161,7 @@ export const VisLegend = ({ vis, refreshLegend, visData, visParams, uiState }: P
 
   const highlight = (event: BaseSyntheticEvent) => {
     const el = event.currentTarget;
-    const handler = vis.vislibVis.handler;
+    const handler = vis.vislibVis && vis.vislibVis.handler;
 
     // there is no guarantee that a Chart will set the highlight-function on its handler
     if (!handler || typeof handler.highlight !== 'function') {
@@ -247,7 +172,7 @@ export const VisLegend = ({ vis, refreshLegend, visData, visParams, uiState }: P
 
   const unhighlight = (event: BaseSyntheticEvent) => {
     const el = event.currentTarget;
-    const handler = vis.vislibVis.handler;
+    const handler = vis.vislibVis && vis.vislibVis.handler;
     // there is no guarantee that a Chart will set the unhighlight-function on its handler
     if (!handler || typeof handler.unHighlight !== 'function') {
       return;
@@ -255,113 +180,23 @@ export const VisLegend = ({ vis, refreshLegend, visData, visParams, uiState }: P
     handler.unHighlight.call(el, handler.el);
   };
 
-  const renderDetails = (item: LegendItem) => (
-    <div className="visLegend__valueDetails">
-      {canFilter(item) && renderFilterBar(item)}
-
-      <div className="visLegend__valueColorPicker" role="listbox">
-        <span id={`${legendId}ColorPickerDesc`} className="euiScreenReaderOnly">
-          {i18n.translate('common.ui.vis.visTypes.legend.setColorScreenReaderDescription', {
-            defaultMessage: `Set color for value ${item.label}`,
-          })}
-        </span>
-        {legendColors.map(color => (
-          <i
-            kbn-accessible-click="true"
-            role="option"
-            tabIndex={0}
-            key={color}
-            aria-label={color}
-            aria-describedby={`${legendId}ColorPickerDesc`}
-            aria-selected={color === getColor(item.label)}
-            onClick={setColor(item.label, color)}
-            onKeyPress={setColor(item.label, color)}
-            className={classNames([
-              'fa dot visLegend__valueColorPickerDot',
-              color === getColor(item.label) ? 'fa-circle-o' : 'fa-circle',
-            ])}
-            style={{ color }}
-            data-test-subj={`legendSelectColor-${color}`}
-          />
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderFilterBar = (item: LegendItem) => (
-    <div className="kuiButtonGroup kuiButtonGroup--united kuiButtonGroup--fullWidth">
-      <button
-        className="kuiButton kuiButton--basic kuiButton--small"
-        onClick={filter(item, false)}
-        aria-label={i18n.translate('common.ui.vis.visTypes.legend.filterForValueButtonAriaLabel', {
-          defaultMessage: 'Filter for value {legendDataLabel}',
-          values: { legendDataLabel: item.label },
-        })}
-        data-test-subj={`legend-${item.label}-filterIn`}
-      >
-        <span className="kuiIcon fa-search-plus" />
-      </button>
-
-      <button
-        className="kuiButton kuiButton--basic kuiButton--small"
-        onClick={filter(item, true)}
-        aria-label={i18n.translate('common.ui.vis.visTypes.legend.filterOutValueButtonAriaLabel', {
-          defaultMessage: 'Filter out value {legendDataLabel}',
-          values: { legendDataLabel: item.label },
-        })}
-        data-test-subj={`legend-${item.label}-filterOut`}
-      >
-        <span className="kuiIcon fa-search-minus" />
-      </button>
-    </div>
-  );
-
-  const renderLegendItem = (item: LegendItem) => (
-    <li key={item.label} className="visLegend__value color">
-      <div
-        onKeyDown={onLegendEntryKeydown}
-        onMouseEnter={highlight}
-        onFocus={highlight}
-        onMouseLeave={unhighlight}
-        onBlur={unhighlight}
-        data-label={item.label}
-      >
-        <div
-          kbn-accessible-click="true"
-          data-label={item.label}
-          onFocus={highlight}
-          onBlur={unhighlight}
-          onClick={toggleDetails(item.label)}
-          onKeyPress={toggleDetails(item.label)}
-          className={classNames([
-            'visLegend__valueTitle',
-            areDetailsVisible(item.label)
-              ? 'visLegend__valueTitle--full'
-              : 'visLegend__valueTitle--truncate',
-          ])}
-          title={item.label}
-          aria-label={i18n.translate('common.ui.vis.visTypes.legend.toggleOptionsButtonAriaLabel', {
-            defaultMessage: '{legendDataLabel}, toggle options',
-            values: { legendDataLabel: item.label },
-          })}
-          data-test-subj={`legend-${item.label}`}
-        >
-          <i
-            className="fa fa-circle"
-            style={{ color: getColor(item.label) }}
-            data-test-subj={`legendSelectedColor-${getColor(item.label)}`}
-          />
-          {item.label}
-        </div>
-
-        {areDetailsVisible(item.label) && renderDetails(item)}
-      </div>
-    </li>
-  );
-
   const renderLegend = () => (
     <ul className="visLegend__list" id={legendId}>
-      {labels.map(renderLegendItem)}
+      {labels.map(item => (
+        <VisLegendItem
+          item={item}
+          key={item.label}
+          selected={selectedLabel === item.label}
+          canFilter={canFilter(item)}
+          onFilter={filter}
+          onSelect={toggleDetails}
+          legendId={legendId}
+          setColor={setColor}
+          getColor={getColor}
+          highlight={highlight}
+          unhighlight={unhighlight}
+        />
+      ))}
     </ul>
   );
 
@@ -391,10 +226,15 @@ export const VisLegend = ({ vis, refreshLegend, visData, visParams, uiState }: P
   );
 };
 
-VisLegend.propTypes = {
+VisLegendComponent.propTypes = {
   vis: PropTypes.object,
-  refreshLegend: PropTypes.object,
   visData: PropTypes.object,
   visParams: PropTypes.object,
   uiState: PropTypes.object,
+  refreshLegend: PropTypes.number,
 };
+
+export const VisLegend = memo(
+  VisLegendComponent,
+  (prev, next) => prev.refreshLegend === next.refreshLegend
+);

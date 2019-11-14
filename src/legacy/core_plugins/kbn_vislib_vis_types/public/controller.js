@@ -20,12 +20,9 @@
 
 import $ from 'jquery';
 
-// import '../../../ui/public/vis/vis_types/vislib_vis_legend';
-import '../../../ui/public/vis/vis_types/vis_legend';
+import { CUSTOM_LEGEND_VIS_TYPES } from '../../../ui/public/vis/vis_types/vislib_vis_legend';
 import { VislibVisProvider } from '../../../ui/public/vislib/vis';
 import chrome from '../../../ui/public/chrome';
-
-export const CUSTOM_LEGEND_VIS_TYPES = ['heatmap', 'gauge'];
 
 const legendClassName = {
   top: 'visLib--legend-top',
