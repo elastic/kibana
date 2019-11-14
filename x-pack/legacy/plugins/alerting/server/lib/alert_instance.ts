@@ -69,7 +69,7 @@ export class AlertInstance {
   }
 
   scheduleActions(actionGroup: string, context: Context = {}) {
-    if (this.hasScheduledActions(null)) {
+    if (this.hasScheduledActions()) {
       throw new Error('Alert instance execution has already been scheduled, cannot schedule twice');
     }
     this.scheduledExecutionOptions = { actionGroup, context, state: this.state };
