@@ -36,10 +36,3 @@
 // Dashboard styles
 // MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS
 @import './dashboard/index';
-
-// helper class that hides elements when rendered in percy
-@media only percy {
-  .hideInPercy {
-    visibility: hidden;
-  }
-}

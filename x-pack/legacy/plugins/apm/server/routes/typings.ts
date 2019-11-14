@@ -33,6 +33,9 @@ export interface Route<
   path: TPath;
   method?: TMethod;
   params?: TParams;
+  options?: {
+    tags: Array<'access:apm' | 'access:apm_write'>;
+  };
   handler: (
     req: Request,
     params: DecodeParams<TParams>,
