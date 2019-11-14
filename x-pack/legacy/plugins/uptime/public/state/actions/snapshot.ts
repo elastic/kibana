@@ -55,3 +55,8 @@ export const fetchSnapshotCountFail = (error: Error): GetSnapshotCountFailAction
   type: FETCH_SNAPSHOT_COUNT_FAIL,
   payload: error,
 });
+
+export const fetchSnapshotCountSuccess = (snapshot: Snapshot) => ({
+  type: FETCH_SNAPSHOT_COUNT_SUCCESS,
+  payload: snapshot,
+});
