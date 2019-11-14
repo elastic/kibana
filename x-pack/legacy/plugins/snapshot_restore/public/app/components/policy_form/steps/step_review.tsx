@@ -362,12 +362,12 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
   return (
     <Fragment>
       <EuiTitle>
-        <h3>
+        <h2>
           <FormattedMessage
             id="xpack.snapshotRestore.policyForm.stepReviewTitle"
             defaultMessage="Review policy"
           />
-        </h3>
+        </h2>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiTabbedContent

@@ -224,6 +224,7 @@ export function SpanFlyout({
                 ),
                 content: (
                   <Fragment>
+                    <EuiSpacer size="m" />
                     <SpanMetadata span={span} />
                   </Fragment>
                 )

@@ -29,7 +29,7 @@ import { defaultIndexPattern } from './default_index_pattern';
 import { isAlertExecutor } from './server/lib/detection_engine/alerts/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function siem(kibana: any) {
+export const siem = (kibana: any) => {
   return new kibana.Plugin({
     id: APP_ID,
     configPrefix: 'xpack.siem',
@@ -138,4 +138,4 @@ export function siem(kibana: any) {
       initServerWithKibana(server);
     },
   });
-}
+};

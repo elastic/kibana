@@ -16,13 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Filter } from '@kbn/es-query';
-import { timefilter } from 'ui/timefilter';
-import { TimeRange } from 'src/plugins/data/public';
-import { Query } from 'src/legacy/core_plugins/data/public';
 
-// @ts-ignore
+import { timefilter } from 'ui/timefilter';
+
 import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
+import { esFilters, TimeRange, Query } from '../../../../plugins/data/public';
+
 // @ts-ignore
 import { VegaParser } from './data_model/vega_parser';
 // @ts-ignore
@@ -35,7 +34,7 @@ import { VisParams } from './vega_fn';
 
 interface VegaRequestHandlerParams {
   query: Query;
-  filters: Filter;
+  filters: esFilters.Filter;
   timeRange: TimeRange;
   visParams: VisParams;
 }

@@ -141,9 +141,7 @@ export default function ({ getService }) {
                         id: '91200a00-9efd-11e7-acb3-3dab96693fab',
                       }
                     ],
-                    migrationVersion: {
-                      visualization: '7.3.1',
-                    },
+                    migrationVersion: resp.body.saved_objects[0].migrationVersion,
                     updated_at: '2017-09-21T18:51:23.794Z',
                     version: 'WzIsMV0=',
                   },

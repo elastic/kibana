@@ -5,10 +5,8 @@
  */
 
 import boom from 'boom';
-import { RequestQuery } from 'hapi';
-import { Request, ResponseToolkit } from 'hapi';
 import { API_BASE_URL } from '../../common/constants';
-import { JobDoc, KbnServer } from '../../types';
+import { JobDoc, ServerFacade, RequestFacade, ReportingResponseToolkit } from '../../types';
 // @ts-ignore
 import { jobsQueryFactory } from '../lib/jobs_query';
 // @ts-ignore
@@ -20,13 +18,7 @@ import {
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
-type ListQuery = RequestQuery & {
-  page: string;
-  size: string;
-  ids?: string; // optional field forbids us from extending RequestQuery
-};
-
-export function registerJobs(server: KbnServer) {
+export function registerJobs(server: ServerFacade) {
   const jobsQuery = jobsQueryFactory(server);
   const getRouteConfig = getRouteConfigFactoryManagementPre(server);
   const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(server);
@@ -35,9 +27,9 @@ export function registerJobs(server: KbnServer) {
   server.route({
     path: `${MAIN_ENTRY}/list`,
     method: 'GET',
-    config: getRouteConfig(),
-    handler: (request: Request) => {
-      const { page: queryPage, size: querySize, ids: queryIds } = request.query as ListQuery;
+    options: getRouteConfig(),
+    handler: (request: RequestFacade) => {
+      const { page: queryPage, size: querySize, ids: queryIds } = request.query;
       const page = parseInt(queryPage, 10) || 0;
       const size = Math.min(100, parseInt(querySize, 10) || 10);
       const jobIds = queryIds ? queryIds.split(',') : null;
@@ -57,8 +49,8 @@ export function registerJobs(server: KbnServer) {
   server.route({
     path: `${MAIN_ENTRY}/count`,
     method: 'GET',
-    config: getRouteConfig(),
-    handler: (request: Request) => {
+    options: getRouteConfig(),
+    handler: (request: RequestFacade) => {
       const results = jobsQuery.count(request.pre.management.jobTypes, request.pre.user);
       return results;
     },
@@ -68,8 +60,8 @@ export function registerJobs(server: KbnServer) {
   server.route({
     path: `${MAIN_ENTRY}/output/{docId}`,
     method: 'GET',
-    config: getRouteConfig(),
-    handler: (request: Request) => {
+    options: getRouteConfig(),
+    handler: (request: RequestFacade) => {
       const { docId } = request.params;
 
       return jobsQuery.get(request.pre.user, docId, { includeContent: true }).then(
@@ -94,8 +86,8 @@ export function registerJobs(server: KbnServer) {
   server.route({
     path: `${MAIN_ENTRY}/info/{docId}`,
     method: 'GET',
-    config: getRouteConfig(),
-    handler: (request: Request) => {
+    options: getRouteConfig(),
+    handler: (request: RequestFacade) => {
       const { docId } = request.params;
 
       return jobsQuery.get(request.pre.user, docId).then(
@@ -127,8 +119,8 @@ export function registerJobs(server: KbnServer) {
   server.route({
     path: `${MAIN_ENTRY}/download/{docId}`,
     method: 'GET',
-    config: getRouteConfigDownload(),
-    handler: async (request: Request, h: ResponseToolkit) => {
+    options: getRouteConfigDownload(),
+    handler: async (request: RequestFacade, h: ReportingResponseToolkit) => {
       const { docId } = request.params;
 
       let response = await jobResponseHandler(

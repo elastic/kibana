@@ -25,6 +25,9 @@ import { EuiBasicTable, EuiFormRow } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 export class FormatEditorSamplesComponent extends PureComponent {
+  static defaultProps = {
+    sampleType: 'text'
+  };
   static propTypes = {
     samples: PropTypes.arrayOf(
       PropTypes.shape({
@@ -32,10 +35,11 @@ export class FormatEditorSamplesComponent extends PureComponent {
         output: PropTypes.any.isRequired,
       })
     ).isRequired,
+    sampleType: PropTypes.oneOf(['html', 'text']),
   };
 
   render() {
-    const { samples, intl } = this.props;
+    const { samples, intl, sampleType } = this.props;
 
     const columns = [
       {
@@ -55,15 +59,16 @@ export class FormatEditorSamplesComponent extends PureComponent {
           defaultMessage: 'Output',
         }),
         render: output => {
-          return (
-            <div
+          return sampleType === 'html' ?
+            (
+              <div
               /*
                * Justification for dangerouslySetInnerHTML:
                * Sample output may contain HTML tags, like URL image/audio format.
                */
-              dangerouslySetInnerHTML={{ __html: output }} //eslint-disable-line react/no-danger
-            />
-          );
+                dangerouslySetInnerHTML={{ __html: output }} //eslint-disable-line react/no-danger
+              />
+            ) : (<div>{output}</div>);
         },
       },
     ];

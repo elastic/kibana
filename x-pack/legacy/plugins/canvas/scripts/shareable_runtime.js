@@ -16,10 +16,10 @@ const execa = require('execa');
 const asyncPipeline = promisify(pipeline);
 
 const {
-  SHAREABLE_RUNTIME_SRC: RUNTIME_SRC,
+  SHAREABLE_RUNTIME_SRC,
   KIBANA_ROOT,
   STATS_OUTPUT,
-  SHAREABLE_RUNTIME_FILE: RUNTIME_FILE,
+  SHAREABLE_RUNTIME_FILE,
 } = require('../shareable_runtime/constants');
 
 run(
@@ -36,11 +36,11 @@ run(
       ...options,
     });
 
-    const webpackConfig = path.resolve(RUNTIME_SRC, 'webpack.config.js');
+    const webpackConfig = path.resolve(SHAREABLE_RUNTIME_SRC, 'webpack.config.js');
 
     const clean = () => {
       log.info('Deleting previous build.');
-      del.sync([RUNTIME_FILE], { force: true });
+      del.sync([SHAREABLE_RUNTIME_FILE], { force: true });
     };
 
     if (flags.clean) {
@@ -66,7 +66,7 @@ run(
           '--display-entrypoints',
           'false',
           '--content-base',
-          RUNTIME_SRC,
+          SHAREABLE_RUNTIME_SRC,
         ],
         options
       );
@@ -91,10 +91,20 @@ run(
 
     clean();
     log.info('Building Canvas Shareable Workpad Runtime...');
-    execa.sync('yarn', ['webpack', '--config', webpackConfig, '--hide-modules', '--progress'], {
-      ...options,
-      env,
-    });
+    execa.sync(
+      'yarn',
+      [
+        'webpack',
+        '--config',
+        webpackConfig,
+        '--hide-modules',
+        ...(process.stdout.isTTY ? ['--progress'] : []),
+      ],
+      {
+        ...options,
+        env,
+      }
+    );
     log.success('...runtime built!');
   },
   {

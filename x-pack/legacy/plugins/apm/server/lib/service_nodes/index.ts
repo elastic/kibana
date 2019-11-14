@@ -24,45 +24,45 @@ const getServiceNodes = async ({
 }) => {
   const { client } = setup;
 
-  const projection = mergeProjection(
-    getServiceNodesProjection({ setup, serviceName }),
-    {
-      body: {
-        aggs: {
-          nodes: {
-            terms: {
-              size: 10000,
-              missing: SERVICE_NODE_NAME_MISSING
+  const projection = getServiceNodesProjection({ setup, serviceName });
+
+  const params = mergeProjection(projection, {
+    body: {
+      aggs: {
+        nodes: {
+          terms: {
+            ...projection.body.aggs.nodes.terms,
+            size: 10000,
+            missing: SERVICE_NODE_NAME_MISSING
+          },
+          aggs: {
+            cpu: {
+              avg: {
+                field: METRIC_PROCESS_CPU_PERCENT
+              }
             },
-            aggs: {
-              cpu: {
-                avg: {
-                  field: METRIC_PROCESS_CPU_PERCENT
-                }
-              },
-              heapMemory: {
-                avg: {
-                  field: METRIC_JAVA_HEAP_MEMORY_USED
-                }
-              },
-              nonHeapMemory: {
-                avg: {
-                  field: METRIC_JAVA_NON_HEAP_MEMORY_USED
-                }
-              },
-              threadCount: {
-                max: {
-                  field: METRIC_JAVA_THREAD_COUNT
-                }
+            heapMemory: {
+              avg: {
+                field: METRIC_JAVA_HEAP_MEMORY_USED
+              }
+            },
+            nonHeapMemory: {
+              avg: {
+                field: METRIC_JAVA_NON_HEAP_MEMORY_USED
+              }
+            },
+            threadCount: {
+              max: {
+                field: METRIC_JAVA_THREAD_COUNT
               }
             }
           }
         }
       }
     }
-  );
+  });
 
-  const response = await client.search(projection);
+  const response = await client.search(params);
 
   if (!response.aggregations) {
     return [];
@@ -70,7 +70,7 @@ const getServiceNodes = async ({
 
   return response.aggregations.nodes.buckets.map(bucket => {
     return {
-      name: bucket.key,
+      name: bucket.key as string,
       cpu: bucket.cpu.value,
       heapMemory: bucket.heapMemory.value,
       nonHeapMemory: bucket.nonHeapMemory.value,

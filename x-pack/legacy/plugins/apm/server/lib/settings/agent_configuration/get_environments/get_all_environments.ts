@@ -20,7 +20,7 @@ export async function getAllEnvironments({
   serviceName: string | undefined;
   setup: Setup;
 }) {
-  const { client, config } = setup;
+  const { client, indices } = setup;
 
   // omit filter for service.name if "All" option is selected
   const serviceNameFilter = serviceName
@@ -29,9 +29,9 @@ export async function getAllEnvironments({
 
   const params = {
     index: [
-      config.get<string>('apm_oss.metricsIndices'),
-      config.get<string>('apm_oss.errorIndices'),
-      config.get<string>('apm_oss.transactionIndices')
+      indices['apm_oss.metricsIndices'],
+      indices['apm_oss.errorIndices'],
+      indices['apm_oss.transactionIndices']
     ],
     body: {
       size: 0,
@@ -58,6 +58,6 @@ export async function getAllEnvironments({
 
   const resp = await client.search(params);
   const buckets = idx(resp.aggregations, _ => _.environments.buckets) || [];
-  const environments = buckets.map(bucket => bucket.key);
+  const environments = buckets.map(bucket => bucket.key as string);
   return [ALL_OPTION_VALUE, ...environments];
 }

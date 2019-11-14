@@ -240,6 +240,10 @@ Kibana reads this url from an external metadata service, but users can still
 override this parameter to use their own Tile Map Service. For example:
 `"https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana"`
 
+`newsfeed.enabled:` :: *Default: `true`* Controls whether to enable the newsfeed
+system for the Kibana UI notification center. Set to `false` to disable the
+newsfeed system.
+
 `path.data:`:: *Default: `data`* The path where Kibana stores persistent data
 not saved in Elasticsearch.
 
@@ -277,8 +281,8 @@ setting specifies the port to use.
 
 `server.rewriteBasePath:`:: *Default: deprecated* Specifies whether Kibana should
 rewrite requests that are prefixed with `server.basePath` or require that they
-are rewritten by your reverse proxy. In Kibana 6.3 and earlier, the default is 
-`false`. In Kibana 7.x, the setting is deprecated. In Kibana 8.0 and later, the 
+are rewritten by your reverse proxy. In Kibana 6.3 and earlier, the default is
+`false`. In Kibana 7.x, the setting is deprecated. In Kibana 8.0 and later, the
 default is `true`.
 
 `server.socketTimeout:`:: *Default: "120000"* The number of milliseconds to wait before closing an
@@ -327,7 +331,6 @@ Rollup user interface.
 
 
 include::{docdir}/settings/apm-settings.asciidoc[]
-include::{docdir}/settings/code-settings.asciidoc[]
 include::{docdir}/settings/dev-settings.asciidoc[]
 include::{docdir}/settings/graph-settings.asciidoc[]
 include::{docdir}/settings/infrastructure-ui-settings.asciidoc[]

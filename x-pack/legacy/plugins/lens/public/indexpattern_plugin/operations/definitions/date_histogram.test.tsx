@@ -8,17 +8,37 @@ import React from 'react';
 import { DateHistogramIndexPatternColumn } from './date_histogram';
 import { dateHistogramOperation } from '.';
 import { shallow } from 'enzyme';
-import { EuiRange, EuiSwitch } from '@elastic/eui';
+import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import {
   UiSettingsClientContract,
   SavedObjectsClientContract,
   HttpServiceBase,
 } from 'src/core/public';
-import { Storage } from 'ui/storage';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { createMockedIndexPattern } from '../../mocks';
 import { IndexPatternPrivateState } from '../../types';
 
 jest.mock('ui/new_platform');
+jest.mock('ui/chrome', () => ({
+  getUiSettingsClient: () => ({
+    get(path: string) {
+      if (path === 'histogram:maxBars') {
+        return 10;
+      }
+    },
+  }),
+}));
+
+const defaultOptions = {
+  storage: {} as IStorageWrapper,
+  uiSettings: {} as UiSettingsClientContract,
+  savedObjectsClient: {} as SavedObjectsClientContract,
+  dateRange: {
+    fromDate: 'now-1y',
+    toDate: 'now',
+  },
+  http: {} as HttpServiceBase,
+};
 
 describe('date_histogram', () => {
   let state: IndexPatternPrivateState;
@@ -72,7 +92,7 @@ describe('date_histogram', () => {
               // Private
               operationType: 'date_histogram',
               params: {
-                interval: 'w',
+                interval: '42w',
               },
               sourceField: 'timestamp',
             },
@@ -117,6 +137,27 @@ describe('date_histogram', () => {
       },
     };
   });
+
+  function stateWithInterval(interval: string) {
+    return ({
+      ...state,
+      layers: {
+        ...state.layers,
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col1: {
+              ...state.layers.first.columns.col1,
+              params: {
+                interval,
+              },
+            },
+          },
+        },
+      },
+    } as unknown) as IndexPatternPrivateState;
+  }
 
   describe('buildColumn', () => {
     it('should create column object with auto interval for primary time field', () => {
@@ -188,7 +229,7 @@ describe('date_histogram', () => {
       expect(esAggsConfig).toEqual(
         expect.objectContaining({
           params: expect.objectContaining({
-            interval: 'w',
+            interval: '42w',
             field: 'timestamp',
           }),
         })
@@ -217,7 +258,7 @@ describe('date_histogram', () => {
       expect(column.label).toContain('start_date');
     });
 
-    it('should change interval from auto when switching to a non primary time field', () => {
+    it('should not change interval from auto when switching to a non primary time field', () => {
       const oldColumn: DateHistogramIndexPatternColumn = {
         operationType: 'date_histogram',
         sourceField: 'timestamp',
@@ -233,7 +274,7 @@ describe('date_histogram', () => {
 
       const column = dateHistogramOperation.onFieldChange(oldColumn, indexPattern, newDateField);
       expect(column).toHaveProperty('sourceField', 'start_date');
-      expect(column).toHaveProperty('params.interval', 'd');
+      expect(column).toHaveProperty('params.interval', 'auto');
       expect(column.label).toContain('start_date');
     });
   });
@@ -281,7 +322,7 @@ describe('date_histogram', () => {
       );
     });
 
-    it('should remove time zone param and normalize interval param', () => {
+    it('should retain interval', () => {
       const transferedColumn = dateHistogramOperation.transfer!(
         {
           dataType: 'date',
@@ -309,7 +350,7 @@ describe('date_histogram', () => {
       expect(transferedColumn).toEqual(
         expect.objectContaining({
           params: {
-            interval: 'M',
+            interval: '20s',
             timeZone: undefined,
           },
         })
@@ -322,55 +363,49 @@ describe('date_histogram', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultOptions}
           state={state}
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
           currentColumn={state.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          http={{} as HttpServiceBase}
         />
       );
 
-      expect(instance.find(EuiRange).prop('value')).toEqual(1);
+      expect(instance.find('[data-test-subj="lensDateHistogramValue"]').prop('value')).toEqual(42);
+      expect(instance.find('[data-test-subj="lensDateHistogramUnit"]').prop('value')).toEqual('w');
     });
 
     it('should render current value for other index pattern', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultOptions}
           state={state}
           setState={setStateSpy}
           columnId="col2"
           currentColumn={state.layers.second.columns.col2 as DateHistogramIndexPatternColumn}
           layerId="second"
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          http={{} as HttpServiceBase}
         />
       );
 
-      expect(instance.find(EuiRange).prop('value')).toEqual(2);
+      expect(instance.find('[data-test-subj="lensDateHistogramValue"]').prop('value')).toEqual('');
+      expect(instance.find('[data-test-subj="lensDateHistogramUnit"]').prop('value')).toEqual('d');
     });
 
-    it('should render disabled switch and no time intervals control for auto interval', () => {
+    it('should render disabled switch and no time interval control for auto interval', () => {
       const instance = shallow(
         <InlineOptions
+          {...defaultOptions}
           state={state}
           setState={jest.fn()}
           columnId="col1"
           currentColumn={state.layers.third.columns.col1 as DateHistogramIndexPatternColumn}
           layerId="third"
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          http={{} as HttpServiceBase}
         />
       );
-      expect(instance.find(EuiRange).exists()).toBe(false);
+      expect(instance.find('[data-test-subj="lensDateHistogramValue"]').exists()).toBeFalsy();
+      expect(instance.find('[data-test-subj="lensDateHistogramUnit"]').exists()).toBeFalsy();
       expect(instance.find(EuiSwitch).prop('checked')).toBe(false);
     });
 
@@ -378,73 +413,137 @@ describe('date_histogram', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultOptions}
           state={state}
           setState={setStateSpy}
           columnId="col1"
           layerId="third"
           currentColumn={state.layers.third.columns.col1 as DateHistogramIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          http={{} as HttpServiceBase}
         />
       );
       instance.find(EuiSwitch).prop('onChange')!({
         target: { checked: true },
-      } as React.ChangeEvent<HTMLInputElement>);
+      } as EuiSwitchEvent);
       expect(setStateSpy).toHaveBeenCalled();
       const newState = setStateSpy.mock.calls[0][0];
-      expect(newState).toHaveProperty('layers.third.columns.col1.params.interval', 'd');
+      expect(newState).toHaveProperty('layers.third.columns.col1.params.interval', '30d');
     });
 
-    it('should update state with the interval value', () => {
+    it('should force calendar values to 1', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultOptions}
           state={state}
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
           currentColumn={state.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          http={{} as HttpServiceBase}
         />
       );
-
-      instance.find(EuiRange).prop('onChange')!(
-        {
-          target: {
-            value: '2',
-          },
-        } as React.ChangeEvent<HTMLInputElement>,
-        true
-      );
-      expect(setStateSpy).toHaveBeenCalledWith({
-        ...state,
-        layers: {
-          ...state.layers,
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col1: {
-                ...state.layers.first.columns.col1,
-                params: {
-                  interval: 'd',
-                },
-              },
-            },
-          },
+      instance.find('[data-test-subj="lensDateHistogramValue"]').prop('onChange')!({
+        target: {
+          value: '2',
         },
-      });
+      } as React.ChangeEvent<HTMLInputElement>);
+      expect(setStateSpy).toHaveBeenCalledWith(stateWithInterval('1w'));
+    });
+
+    it('should display error if an invalid interval is specified', () => {
+      const setStateSpy = jest.fn();
+      const testState = stateWithInterval('4quid');
+      const instance = shallow(
+        <InlineOptions
+          {...defaultOptions}
+          state={testState}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          currentColumn={testState.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
+        />
+      );
+      expect(instance.find('[data-test-subj="lensDateHistogramError"]').exists()).toBeTruthy();
+    });
+
+    it('should not display error if interval value is blank', () => {
+      const setStateSpy = jest.fn();
+      const testState = stateWithInterval('d');
+      const instance = shallow(
+        <InlineOptions
+          {...defaultOptions}
+          state={testState}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          currentColumn={testState.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
+        />
+      );
+      expect(instance.find('[data-test-subj="lensDateHistogramError"]').exists()).toBeFalsy();
+    });
+
+    it('should display error if interval value is 0', () => {
+      const setStateSpy = jest.fn();
+      const testState = stateWithInterval('0d');
+      const instance = shallow(
+        <InlineOptions
+          {...defaultOptions}
+          state={testState}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          currentColumn={testState.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
+        />
+      );
+      expect(instance.find('[data-test-subj="lensDateHistogramError"]').exists()).toBeTruthy();
+    });
+
+    it('should update the unit', () => {
+      const setStateSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultOptions}
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          currentColumn={state.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
+        />
+      );
+      instance.find('[data-test-subj="lensDateHistogramUnit"]').prop('onChange')!({
+        target: {
+          value: 'd',
+        },
+      } as React.ChangeEvent<HTMLInputElement>);
+      expect(setStateSpy).toHaveBeenCalledWith(stateWithInterval('42d'));
+    });
+
+    it('should update the value', () => {
+      const setStateSpy = jest.fn();
+      const testState = stateWithInterval('42d');
+
+      const instance = shallow(
+        <InlineOptions
+          {...defaultOptions}
+          state={testState}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="first"
+          currentColumn={testState.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
+        />
+      );
+      instance.find('[data-test-subj="lensDateHistogramValue"]').prop('onChange')!({
+        target: {
+          value: '9',
+        },
+      } as React.ChangeEvent<HTMLInputElement>);
+      expect(setStateSpy).toHaveBeenCalledWith(stateWithInterval('9d'));
     });
 
     it('should not render options if they are restricted', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultOptions}
           state={{
             ...state,
             indexPatterns: {
@@ -469,14 +568,10 @@ describe('date_histogram', () => {
           columnId="col1"
           layerId="first"
           currentColumn={state.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          http={{} as HttpServiceBase}
         />
       );
 
-      expect(instance.find(EuiRange)).toHaveLength(0);
+      expect(instance.find('[data-test-subj="lensDateHistogramValue"]').exists()).toBeFalsy();
     });
   });
 });

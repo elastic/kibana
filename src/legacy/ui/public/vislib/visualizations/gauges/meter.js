@@ -38,6 +38,7 @@ const defaultConfig = {
   percentageMode: true,
   innerSpace: 5,
   extents: [0, 10000],
+  outline: false,
   scale: {
     show: true,
     color: '#666',
@@ -248,11 +249,13 @@ export class MeterGauge {
     gauges
       .append('path')
       .attr('d', bgArc)
+      .attr('class', this.gaugeConfig.outline ? 'visGauge__meter--outline' : undefined)
       .style('fill', this.gaugeConfig.style.bgFill);
 
     const series = gauges
       .append('path')
       .attr('d', arc)
+      .attr('class', this.gaugeConfig.outline ? 'visGauge__meter--outline' : undefined)
       .style('fill', (d) => this.getColorBucket(Math.max(min, d.y)));
 
     const smallContainer = svg.node().getBBox().height < 70;

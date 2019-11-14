@@ -1,5 +1,5 @@
 {
-  "apm-telemetry": {
+  "apm-services-telemetry": {
     "properties": {
       "has_any_services": {
         "type": "boolean"
@@ -39,6 +39,31 @@
             "null_value": 0
           }
         }
+      }
+    }
+  },
+  "apm-indices": {
+    "properties": {
+      "apm_oss.sourcemapIndices": {
+        "type": "keyword"
+      },
+      "apm_oss.errorIndices": {
+        "type": "keyword"
+      },
+      "apm_oss.onboardingIndices": {
+        "type": "keyword"
+      },
+      "apm_oss.spanIndices": {
+        "type": "keyword"
+      },
+      "apm_oss.transactionIndices": {
+        "type": "keyword"
+      },
+      "apm_oss.metricsIndices": {
+        "type": "keyword"
+      },
+      "apm_oss.apmAgentConfigurationIndex": {
+        "type": "keyword"
       }
     }
   }

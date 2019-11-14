@@ -40,6 +40,7 @@ import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { HttpInfoSummaryItem } from '../../../shared/Summary/HttpInfoSummaryItem';
 import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 import { UserAgentSummaryItem } from '../../../shared/Summary/UserAgentSummaryItem';
+import { ExceptionStacktrace } from './ExceptionStacktrace';
 
 const HeaderContainer = styled.div`
   display: flex;
@@ -180,7 +181,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
   );
 }
 
-export function TabContent({
+function TabContent({
   error,
   currentTab
 }: {
@@ -188,7 +189,7 @@ export function TabContent({
   currentTab: ErrorTab;
 }) {
   const codeLanguage = idx(error, _ => _.service.language.name);
-  const excStackframes = idx(error, _ => _.error.exception[0].stacktrace);
+  const exceptions = idx(error, _ => _.error.exception) || [];
   const logStackframes = idx(error, _ => _.error.log.stacktrace);
 
   switch (currentTab.key) {
@@ -198,7 +199,10 @@ export function TabContent({
       );
     case exceptionStacktraceTab.key:
       return (
-        <Stacktrace stackframes={excStackframes} codeLanguage={codeLanguage} />
+        <ExceptionStacktrace
+          codeLanguage={codeLanguage}
+          exceptions={exceptions}
+        />
       );
     default:
       return <ErrorMetadata error={error} />;

@@ -24,6 +24,7 @@ import { LegacyEditor } from '../../../np_ready/public/application/models';
 
 // @ts-ignore
 import SenseEditor from './sense_editor/editor';
+import { Position } from '../../../np_ready/public/types';
 
 let input: any;
 export function initializeEditor($el: JQuery<HTMLElement>, $actionsEl: JQuery<HTMLElement>) {
@@ -35,8 +36,18 @@ export function initializeEditor($el: JQuery<HTMLElement>, $actionsEl: JQuery<HT
     coreEditor: new LegacyEditor(input),
     parser: input.parser,
     execCommand: (cmd: string) => input.execCommand(cmd),
-    getCursor: () => input.selection.lead,
-    isCompleteActive: () => input.__ace.completer && input.__ace.completer.activated,
+    getCursorPosition: (): Position | null => {
+      if (input.selection && input.selection.lead) {
+        return {
+          lineNumber: input.selection.lead.row + 1,
+          column: input.selection.lead.column + 1,
+        };
+      }
+      return null;
+    },
+    isCompleterActive: () => {
+      return Boolean(input.__ace.completer && input.__ace.completer.activated);
+    },
     addChangeListener: (fn: any) => input.on('changeSelection', fn),
     removeChangeListener: (fn: any) => input.off('changeSelection', fn),
   };

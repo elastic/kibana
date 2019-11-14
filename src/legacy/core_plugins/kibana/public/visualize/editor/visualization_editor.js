@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { debounce } from 'lodash';
-import { uiModules } from 'ui/modules';
-import 'angular-sanitize';
-import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
+import { getServices, VisEditorTypesRegistryProvider } from '../kibana_services';
+
+const { uiModules } = getServices();
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])
@@ -34,6 +33,7 @@ uiModules
         uiState: '=?',
         timeRange: '=',
         filters: '=',
+        query: '=',
       },
       link: function ($scope, element) {
         const editorType = $scope.savedObj.vis.type.editor;
@@ -46,6 +46,7 @@ uiModules
             uiState: $scope.uiState,
             timeRange: $scope.timeRange,
             filters: $scope.filters,
+            query: $scope.query,
             appState: getAppState(),
           });
         };
@@ -58,10 +59,6 @@ uiModules
         $scope.$on('$destroy', () => {
           editor.destroy();
         });
-
-        $scope.$watchGroup(['timeRange', 'filters'], debounce(() => {
-          $scope.renderFunction();
-        }, 100));
       }
     };
   });

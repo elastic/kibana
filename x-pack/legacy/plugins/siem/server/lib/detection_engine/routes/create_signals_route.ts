@@ -5,10 +5,10 @@
  */
 
 import Hapi from 'hapi';
-import Joi from 'joi';
 import { isFunction } from 'lodash/fp';
 import { createSignals } from '../alerts/create_signals';
 import { SignalsRequest } from '../alerts/types';
+import { createSignalsSchema } from './schemas';
 
 export const createCreateSignalsRoute: Hapi.ServerRoute = {
   method: 'POST',
@@ -19,33 +19,23 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       options: {
         abortEarly: false,
       },
-      payload: Joi.object({
-        description: Joi.string().required(),
-        enabled: Joi.boolean().default(true),
-        filter: Joi.object(),
-        from: Joi.string().required(),
-        id: Joi.string().required(),
-        index: Joi.array().required(),
-        interval: Joi.string().default('5m'),
-        kql: Joi.string(),
-        max_signals: Joi.number().default(100),
-        name: Joi.string().required(),
-        severity: Joi.string().required(),
-        to: Joi.string().required(),
-        type: Joi.string()
-          .valid('filter', 'kql')
-          .required(),
-        references: Joi.array().default([]),
-      }).xor('filter', 'kql'),
+      payload: createSignalsSchema,
     },
   },
   async handler(request: SignalsRequest, headers) {
     const {
       description,
       enabled,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      false_positives: falsePositives,
       filter,
-      kql,
       from,
+      immutable,
+      query,
+      language,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      saved_id: savedId,
+      filters,
       id,
       index,
       interval,
@@ -53,13 +43,14 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       max_signals: maxSignals,
       name,
       severity,
+      size,
+      tags,
       to,
       type,
       references,
     } = request.payload;
 
     const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-
     const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
 
     if (!alertsClient || !actionsClient) {
@@ -71,15 +62,22 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       actionsClient,
       description,
       enabled,
+      falsePositives,
       filter,
       from,
+      immutable,
+      query,
+      language,
+      savedId,
+      filters,
       id,
       index,
       interval,
-      kql,
       maxSignals,
       name,
       severity,
+      size,
+      tags,
       to,
       type,
       references,

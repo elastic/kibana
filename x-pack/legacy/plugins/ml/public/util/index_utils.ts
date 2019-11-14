@@ -70,7 +70,7 @@ export function loadCurrentIndexPattern(indexPatterns: IndexPatterns, $route: Re
   return fullIndexPatterns.get($route.current.params.index);
 }
 
-export function getIndexPatternById(id: string): IndexPattern {
+export function getIndexPatternById(id: string): Promise<IndexPattern> {
   if (fullIndexPatterns !== null) {
     return fullIndexPatterns.get(id);
   } else {

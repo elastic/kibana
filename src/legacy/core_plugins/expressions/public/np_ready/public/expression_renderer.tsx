@@ -17,49 +17,50 @@
  * under the License.
  */
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import React from 'react';
-import { ExpressionAST, IExpressionLoaderParams, IInterpreterResult } from './types';
-import { IExpressionLoader, ExpressionLoader } from './loader';
+import classNames from 'classnames';
+import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
+import { ExpressionAST, IExpressionLoaderParams } from './types';
+import { ExpressionLoader } from './loader';
 
 // Accept all options of the runner as props except for the
 // dom element which is provided by the component itself
 export interface ExpressionRendererProps extends IExpressionLoaderParams {
-  className: string;
   dataAttrs?: string[];
   expression: string | ExpressionAST;
-  /**
-   * If an element is specified, but the response of the expression run can't be rendered
-   * because it isn't a valid response or the specified renderer isn't available,
-   * this callback is called with the given result.
-   */
-  onRenderFailure?: (result: IInterpreterResult) => void;
+  renderError?: (error?: string | null) => React.ReactElement | React.ReactElement[];
+}
+
+interface State {
+  isEmpty: boolean;
+  isLoading: boolean;
+  error: null | { message: string };
 }
 
 export type ExpressionRenderer = React.FC<ExpressionRendererProps>;
 
-export const createRenderer = (loader: IExpressionLoader): ExpressionRenderer => ({
-  className,
+const defaultState: State = {
+  isEmpty: true,
+  isLoading: false,
+  error: null,
+};
+
+export const ExpressionRendererImplementation = ({
   dataAttrs,
   expression,
-  onRenderFailure,
+  renderError,
   ...options
 }: ExpressionRendererProps) => {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
   const handlerRef: React.MutableRefObject<null | ExpressionLoader> = useRef(null);
+  const [state, setState] = useState<State>({ ...defaultState });
 
+  // Re-fetch data automatically when the inputs change
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
-    if (mountpoint.current) {
-      if (!handlerRef.current) {
-        handlerRef.current = loader(mountpoint.current, expression, options);
-      } else {
-        handlerRef.current.update(expression, options);
-      }
-      handlerRef.current.data$.toPromise().catch(result => {
-        if (onRenderFailure) {
-          onRenderFailure(result);
-        }
-      });
+    if (handlerRef.current) {
+      handlerRef.current.update(expression, options);
     }
   }, [
     expression,
@@ -67,8 +68,67 @@ export const createRenderer = (loader: IExpressionLoader): ExpressionRenderer =>
     options.context,
     options.variables,
     options.disableCaching,
-    mountpoint.current,
   ]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
-  return <div {...dataAttrs} className={className} ref={mountpoint} />;
+  // Initialize the loader only once
+  useEffect(() => {
+    if (mountpoint.current && !handlerRef.current) {
+      handlerRef.current = new ExpressionLoader(mountpoint.current, expression, options);
+
+      handlerRef.current.loading$.subscribe(() => {
+        if (!handlerRef.current) {
+          return;
+        }
+        setState(prevState => ({ ...prevState, isLoading: true }));
+      });
+      handlerRef.current.render$.subscribe(item => {
+        if (!handlerRef.current) {
+          return;
+        }
+        if (typeof item !== 'number') {
+          setState(() => ({
+            ...defaultState,
+            isEmpty: false,
+            error: item.error,
+          }));
+        } else {
+          setState(() => ({
+            ...defaultState,
+            isEmpty: false,
+          }));
+        }
+      });
+    }
+  }, [mountpoint.current]);
+
+  useEffect(() => {
+    // We only want a clean up to run when the entire component is unloaded, not on every render
+    return function cleanup() {
+      if (handlerRef.current) {
+        handlerRef.current.destroy();
+        handlerRef.current = null;
+      }
+    };
+  }, []);
+
+  const classes = classNames('expExpressionRenderer', {
+    'expExpressionRenderer-isEmpty': state.isEmpty,
+    'expExpressionRenderer-hasError': !!state.error,
+  });
+
+  return (
+    <div {...dataAttrs} className={classes}>
+      {state.isEmpty ? <EuiLoadingChart mono size="l" /> : null}
+      {state.isLoading ? <EuiProgress size="xs" color="accent" position="absolute" /> : null}
+      {!state.isLoading && state.error ? (
+        renderError ? (
+          renderError(state.error.message)
+        ) : (
+          <div data-test-subj="expression-renderer-error">{state.error.message}</div>
+        )
+      ) : null}
+      <div className="expExpressionRenderer__expression" ref={mountpoint} />
+    </div>
+  );
 };

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILocationProvider } from 'angular';
 import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
@@ -31,19 +30,6 @@ export function compose(): AppFrontendLibs {
   };
 
   const apolloClient = new ApolloClient(graphQLOptions);
-
-  const appModule = uiModules.get('app/siem');
-
-  // disable angular's location provider
-  appModule.config(($locationProvider: ILocationProvider) => {
-    $locationProvider.html5Mode({
-      enabled: false,
-      requireBase: false,
-      rewriteLinks: false,
-    });
-  });
-
-  // const framework = new AppKibanaFrameworkAdapter(appModule, uiRoutes, timezoneProvider);
 
   const libs: AppFrontendLibs = {
     apolloClient,
