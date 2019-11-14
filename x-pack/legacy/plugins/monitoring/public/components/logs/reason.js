@@ -155,12 +155,15 @@ export const Reason = ({ reason }) => {
     message = (
       <FormattedMessage
         id="xpack.monitoring.logs.reason.correctIndexNameMessage"
-        defaultMessage="There is an issue reading from your filebeat indices. To fix, follow steps in {link}."
+        defaultMessage="There is an issue reading from your filebeat indices.  {link}."
         values={{
           link: (
-            <EuiLink target="_blank" href="https://github.com/elastic/kibana/issues/48533#issuecomment-545031647">
+            <EuiLink
+              target="_blank"
+              href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/monitor-troubleshooting.html`}
+            >
               {i18n.translate('xpack.monitoring.logs.reason.correctIndexNameLink', {
-                defaultMessage: 'this issue'
+                defaultMessage: 'Click here for more information'
               })}
             </EuiLink>
           )

@@ -37,15 +37,15 @@ exports[`Logs should render with a bad indices reason 1`] = `
 >
   <p>
     <FormattedMessage
-      defaultMessage="There is an issue reading from your filebeat indices. To fix, follow steps in {link}."
+      defaultMessage="There is an issue reading from your filebeat indices.  {link}."
       id="xpack.monitoring.logs.reason.correctIndexNameMessage"
       values={
         Object {
           "link": <ForwardRef
-            href="https://github.com/elastic/kibana/issues/48533#issuecomment-545031647"
+            href="https://www.elastic.co/guide/en/kibana/current/monitor-troubleshooting.html"
             target="_blank"
           >
-            this issue
+            Click here for more information
           </ForwardRef>,
         }
       }
