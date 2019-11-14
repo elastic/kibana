@@ -14,6 +14,7 @@ import { checkValidNode } from './lib/check_valid_node';
 import { InvalidNodeError } from './lib/errors';
 import { metrics, findInventoryFields } from '../../../../common/inventory_models';
 import { TSVBMetricModelCreator } from '../../../../common/inventory_models/types';
+import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   private framework: InfraBackendFrameworkAdapter;
@@ -51,41 +52,10 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       );
     }
 
-    const requests = options.metrics.map(metricId => {
-      const createTSVBModel = get(metrics, ['tsvb', metricId]) as
-        | TSVBMetricModelCreator
-        | undefined;
-      if (!createTSVBModel) {
-        throw new Error(
-          i18n.translate('xpack.infra.metrics.missingTSVBModelError', {
-            defaultMessage: 'The TSVB model for {metricId} does not exist for {nodeType}',
-            values: {
-              metricId,
-              nodeType: options.nodeType,
-            },
-          })
-        );
-      }
-      const model = createTSVBModel(timeField, indexPattern, interval);
-      if (model.id_type === 'cloud' && !options.nodeIds.cloudId) {
-        throw new InvalidNodeError(
-          i18n.translate('xpack.infra.kibanaMetrics.cloudIdMissingErrorMessage', {
-            defaultMessage:
-              'Model for {metricId} requires a cloudId, but none was given for {nodeId}.',
-            values: {
-              metricId,
-              nodeId: options.nodeIds.nodeId,
-            },
-          })
-        );
-      }
-      const id =
-        model.id_type === 'cloud' ? (options.nodeIds.cloudId as string) : options.nodeIds.nodeId;
-      const filters = model.map_field_to
-        ? [{ match: { [model.map_field_to]: id } }]
-        : [{ match: { [nodeField]: id } }];
-      return this.framework.makeTSVBRequest(req, model, timerange, filters);
-    });
+    const requests = options.metrics.map(metricId =>
+      this.makeTSVBRequest(metricId, options, req, nodeField)
+    );
+
     return Promise.all(requests)
       .then(results => {
         return results.map(result => {
@@ -120,5 +90,71 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
         });
       })
       .then(result => flatten(result));
+  }
+
+  async makeTSVBRequest(
+    metricId: InfraMetric,
+    options: InfraMetricsRequestOptions,
+    req: InfraFrameworkRequest,
+    nodeField: string
+  ) {
+    const createTSVBModel = get(metrics, ['tsvb', metricId]) as TSVBMetricModelCreator | undefined;
+    if (!createTSVBModel) {
+      throw new Error(
+        i18n.translate('xpack.infra.metrics.missingTSVBModelError', {
+          defaultMessage: 'The TSVB model for {metricId} does not exist for {nodeType}',
+          values: {
+            metricId,
+            nodeType: options.nodeType,
+          },
+        })
+      );
+    }
+
+    const indexPattern = `${options.sourceConfiguration.metricAlias},${options.sourceConfiguration.logAlias}`;
+    const timerange = {
+      min: options.timerange.from,
+      max: options.timerange.to,
+    };
+
+    const model = createTSVBModel(
+      options.sourceConfiguration.fields.timestamp,
+      indexPattern,
+      options.timerange.interval
+    );
+    const calculatedInterval = await calculateMetricInterval(
+      this.framework,
+      req,
+      {
+        indexPattern: `${options.sourceConfiguration.logAlias},${options.sourceConfiguration.metricAlias}`,
+        timestampField: options.sourceConfiguration.fields.timestamp,
+        timerange: options.timerange,
+      },
+      model.requires
+    );
+
+    if (calculatedInterval) {
+      model.interval = `>=${calculatedInterval}s`;
+    }
+
+    if (model.id_type === 'cloud' && !options.nodeIds.cloudId) {
+      throw new InvalidNodeError(
+        i18n.translate('xpack.infra.kibanaMetrics.cloudIdMissingErrorMessage', {
+          defaultMessage:
+            'Model for {metricId} requires a cloudId, but none was given for {nodeId}.',
+          values: {
+            metricId,
+            nodeId: options.nodeIds.nodeId,
+          },
+        })
+      );
+    }
+    const id =
+      model.id_type === 'cloud' ? (options.nodeIds.cloudId as string) : options.nodeIds.nodeId;
+    const filters = model.map_field_to
+      ? [{ match: { [model.map_field_to]: id } }]
+      : [{ match: { [nodeField]: id } }];
+
+    return this.framework.makeTSVBRequest(req, model, timerange, filters);
   }
 }
