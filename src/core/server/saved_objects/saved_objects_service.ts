@@ -237,9 +237,9 @@ export class SavedObjectsService
     });
 
     return {
-      scopedClient: this.clientProvider.getClient,
-      setClientFactory: this.clientProvider.setClientFactory,
-      addClientWrapper: this.clientProvider.addClientWrapperFactory,
+      scopedClient: this.clientProvider.getClient.bind(this.clientProvider),
+      setClientFactory: this.clientProvider.setClientFactory.bind(this.clientProvider),
+      addClientWrapper: this.clientProvider.addClientWrapperFactory.bind(this.clientProvider),
       internalRepository: (extraTypes?: string[]) =>
         createSORepository(adminClient.callAsInternalUser, extraTypes),
       scopedRepository: (req: KibanaRequest, extraTypes?: string[]) =>
@@ -275,7 +275,7 @@ export class SavedObjectsService
     return {
       migrator: this.migrator!,
       clientProvider: this.clientProvider,
-      scopedClient: this.clientProvider.getClient,
+      scopedClient: this.clientProvider.getClient.bind(this.clientProvider),
     };
   }
 
