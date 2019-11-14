@@ -47,7 +47,10 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
       '[/\\\\]node_modules(?![\\/\\\\]@elastic[\\/\\\\]eui)(?![\\/\\\\]monaco-editor)[/\\\\].+\\.js$',
     ],
-    snapshotSerializers: [`${kibanaDirectory}/node_modules/enzyme-to-json/serializer`],
+    snapshotSerializers: [
+      `${kibanaDirectory}/node_modules/enzyme-to-json/serializer`,
+      `${kibanaDirectory}/src/plugins/kibana_react/public/util/test_helpers/react_mount_serializer.ts`
+    ],
     reporters: [
       'default',
       [

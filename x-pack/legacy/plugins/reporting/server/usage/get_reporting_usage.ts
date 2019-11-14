@@ -14,7 +14,7 @@ import {
   RangeAggregationResults,
   RangeStats,
   UsageObject,
-} from './';
+} from './types';
 import { decorateRangeStats } from './decorate_range_stats';
 // @ts-ignore untyped module
 import { getExportTypesHandler } from './get_export_type_handler';
@@ -37,14 +37,17 @@ const getKeyCount = (buckets: KeyCountBucket[]): { [key: string]: number } =>
 
 function getAggStats(aggs: AggregationResults) {
   const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY] as AggregationBuckets;
-  const jobTypes = jobBuckets.reduce((accum, { key, doc_count: count }) => {
-    return {
-      ...accum,
-      [key]: {
-        total: count,
-      },
-    };
-  }, {}) as JobTypes;
+  const jobTypes: JobTypes = jobBuckets.reduce(
+    (accum: JobTypes, { key, doc_count: count }: { key: string; doc_count: number }) => {
+      return {
+        ...accum,
+        [key]: {
+          total: count,
+        },
+      };
+    },
+    {} as JobTypes
+  );
 
   // merge pdf stats into pdf jobtype key
   const pdfJobs = jobTypes[PRINTABLE_PDF_JOBTYPE];
