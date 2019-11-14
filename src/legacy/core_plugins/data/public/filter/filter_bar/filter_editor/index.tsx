@@ -245,6 +245,7 @@ class FilterEditorUI extends Component<Props, State> {
   private renderFieldInput() {
     const { selectedIndexPattern, selectedField } = this.state;
     const fields = selectedIndexPattern ? getFilterableFields(selectedIndexPattern) : [];
+
     return (
       <EuiFormRow
         label={this.props.intl.formatMessage({
@@ -265,6 +266,7 @@ class FilterEditorUI extends Component<Props, State> {
           onChange={this.onFieldChange}
           singleSelection={{ asPlainText: true }}
           isClearable={false}
+          className="globalFilterEditor__fieldInput"
           data-test-subj="filterFieldSuggestionList"
         />
       </EuiFormRow>
