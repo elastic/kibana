@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { TimeRange } from 'src/plugins/data/public';
-import { StaticIndexPattern, Query, SavedQuery } from 'plugins/data';
+import { TimeRange, Query } from 'src/plugins/data/public';
+import { StaticIndexPattern, SavedQuery } from 'plugins/data';
 import moment from 'moment';
 import { Subscription } from 'rxjs';
 

@@ -57,7 +57,7 @@ import {
   subscribeWithScope,
   tabifyAggResponse,
   vislibSeriesResponseHandlerProvider,
-  VisProvider,
+  Vis,
   SavedObjectSaveModal,
   ensureDefaultIndexPattern,
 } from '../kibana_services';
@@ -194,7 +194,6 @@ function discoverController(
   localStorage,
   uiCapabilities
 ) {
-  const Vis = Private(VisProvider);
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
   const getUnhashableStates = Private(getUnhashableStatesProvider);
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);

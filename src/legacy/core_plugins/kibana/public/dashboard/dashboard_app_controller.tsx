@@ -38,9 +38,8 @@ import {
   SaveOptions,
   SavedObjectFinder,
 } from './legacy_imports';
+import { FilterStateManager, IndexPattern, SavedQuery } from '../../../data/public';
 import { Query } from '../../../../../plugins/data/public';
-import { FilterStateManager, IndexPattern } from '../../../data/public';
-import { SavedQuery } from '../../../data/public';
 
 import {
   DashboardContainer,
