@@ -25,7 +25,7 @@ import { ES_FIELD_TYPES } from '../../../data/public';
 type ShorthandFieldMapObject = FieldMappingSpec | ES_FIELD_TYPES | 'json';
 
 const json: FieldMappingSpec = {
-  type: ES_FIELD_TYPES.TEXT,
+  type: 'text' as ES_FIELD_TYPES,
   _serialize(v) {
     if (v) return JSON.stringify(v);
   },
