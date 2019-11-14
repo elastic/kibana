@@ -18,6 +18,10 @@ export class AbstractField {
     return this._fieldName;
   }
 
+  getSource() {
+    return this._source;
+  }
+
   isValid() {
     return !!this._fieldName;
   }

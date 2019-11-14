@@ -9,7 +9,6 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import { styleOptionShapes, rangeShape } from '../style_option_shapes';
-import { ColorGradient } from '../../../components/color_gradient';
 import { CircleIcon } from './circle_icon';
 import { getVectorStyleLabel } from '../get_vector_style_label';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
@@ -96,7 +95,13 @@ export class StylePropertyLegendRow extends Component {
   }
 
   async _loadFieldFormatter() {
-    this._fieldValueFormatter = await this.props.getFieldFormatter(this.props.options.field);
+    if (this.props.style.isDynamic() && this.props.style.getField() && this.props.style.getField().getSource()) {
+      const field = this.props.style.getField();
+      const source = field.getSource();
+      this._fieldValueFormatter = await source.getFieldFormatter(field.getName());
+    } else {
+      this._fieldValueFormatter = null;
+    }
     if (this._isMounted) {
       this.setState({ hasLoadedFieldFormatter: true });
     }
@@ -108,7 +113,7 @@ export class StylePropertyLegendRow extends Component {
     }
 
     // have to load label and then check for changes since field name stays constant while label may change
-    const label = await this.props.getFieldLabel(this.props.options.field.name);
+    const label = await this.props.style.getField().getLabel();
     if (this._prevLabel === label) {
       return;
     }
@@ -164,6 +169,5 @@ StylePropertyLegendRow.propTypes = {
   type: PropTypes.string,
   options: PropTypes.oneOfType(styleOptionShapes).isRequired,
   range: rangeShape,
-  getFieldLabel: PropTypes.func.isRequired,
   getFieldFormatter: PropTypes.func.isRequired,
 };

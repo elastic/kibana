@@ -185,15 +185,6 @@ export class VectorLayer extends AbstractLayer {
   }
 
   getLegendDetails() {
-
-    const getFieldLabel = async fieldName => {
-      const ordinalFields = await this.getOrdinalFields();
-      const field = ordinalFields.find(field => {
-        return field.getName() === fieldName;
-      });
-      return field ? await field.getLabel() : fieldName;
-    };
-
     const getFieldFormatter = async field => {
       const source = this._getFieldSource(field);
       if (!source) {
@@ -203,7 +194,7 @@ export class VectorLayer extends AbstractLayer {
       return await source.getFieldFormatter(field.name);
     };
 
-    return this._style.renderLegendDetails(getFieldLabel, getFieldFormatter);
+    return this._style.renderLegendDetails(getFieldFormatter);
   }
 
   _getBoundsBasedOnData() {

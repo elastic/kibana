@@ -297,7 +297,7 @@ export class VectorStyle extends AbstractStyle {
     );
   }
 
-  renderLegendDetails(getFieldLabel, getFieldFormatter) {
+  renderLegendDetails(getFieldFormatter) {
     const styles = this._getAllStyleProperties();
     const styleProperties = styles.map(style => {
       const type = style.isDynamic() ? STYLE_TYPE.DYNAMIC : STYLE_TYPE.STATIC;
@@ -313,7 +313,6 @@ export class VectorStyle extends AbstractStyle {
     return (
       <VectorStyleLegend
         styleProperties={styleProperties}
-        getFieldLabel={getFieldLabel}
         getFieldFormatter={getFieldFormatter}
       />
     );

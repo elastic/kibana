@@ -85,7 +85,6 @@ export class AbstractESAggSource extends AbstractESSource {
   }
 
   _getRawFieldName(fieldName) {
-    console.log('rafin', fieldName);
     const metricField = this.getMetricFields().find((esAggMetricField) => esAggMetricField.getName() === fieldName);
     return metricField ? metricField.getESDocFieldName() : null;
   }
