@@ -44,9 +44,10 @@ export class ElasticsearchIndexFieldAdapter implements FieldsAdapter {
         })
       )
     );
-    return formatIndexFields(responsesIndexFields, Object.keys(
-      indexesAliasIndices
-    ) as IndexAlias[]);
+    return formatIndexFields(
+      responsesIndexFields,
+      Object.keys(indexesAliasIndices) as IndexAlias[]
+    );
   }
 }
 
