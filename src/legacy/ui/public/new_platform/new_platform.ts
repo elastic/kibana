@@ -28,6 +28,7 @@ import {
   Start as InspectorStart,
 } from '../../../../plugins/inspector/public';
 import { EuiUtilsStart } from '../../../../plugins/eui_utils/public';
+import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/public';
 import {
   FeatureCatalogueSetup,
   FeatureCatalogueStart,
@@ -42,6 +43,7 @@ export interface PluginsSetup {
   inspector: InspectorSetup;
   uiActions: IUiActionsSetup;
   share: SharePluginSetup;
+  devTools: DevToolsSetup;
 }
 
 export interface PluginsStart {
@@ -53,6 +55,7 @@ export interface PluginsStart {
   inspector: InspectorStart;
   uiActions: IUiActionsStart;
   share: SharePluginStart;
+  devTools: DevToolsStart;
 }
 
 export const npSetup = {

@@ -56,7 +56,6 @@ export default function(kibana: any) {
   const npSrc = resolve(__dirname, 'np_ready/public');
 
   let defaultVars: any;
-  const apps: any[] = [];
   return new kibana.Plugin({
     id: 'console',
     require: ['elasticsearch'],
@@ -181,8 +180,6 @@ export default function(kibana: any) {
     },
 
     uiExports: {
-      apps,
-      hacks: ['plugins/console/quarantined/hacks/register'],
       devTools: [`${npSrc}/legacy`],
       styleSheetPaths: resolve(__dirname, 'public/quarantined/index.scss'),
 
