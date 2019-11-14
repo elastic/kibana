@@ -5,14 +5,7 @@
  */
 
 import { idx } from '@kbn/elastic-idx';
-import {
-  InfraSnapshotGroupbyInput,
-  InfraSnapshotMetricInput,
-  InfraSnapshotNode,
-  InfraTimerangeInput,
-  InfraNodeType,
-  InfraSourceConfiguration,
-} from '../../graphql/types';
+import { InfraSnapshotNode } from '../../graphql/types';
 import {
   InfraBackendFrameworkAdapter,
   InfraFrameworkRequest,
@@ -38,15 +31,8 @@ import {
 import { getAllCompositeData } from '../../utils/get_all_composite_data';
 import { createAfterKeyHandler } from '../../utils/create_afterkey_handler';
 import { findInventoryModel } from '../../../common/inventory_models';
-
-export interface InfraSnapshotRequestOptions {
-  nodeType: InfraNodeType;
-  sourceConfiguration: InfraSourceConfiguration;
-  timerange: InfraTimerangeInput;
-  groupBy: InfraSnapshotGroupbyInput[];
-  metric: InfraSnapshotMetricInput;
-  filterQuery: JsonObject | undefined;
-}
+import { InfraSnapshotRequestOptions } from './types';
+import { createTimeRangeWithInterval } from './create_timerange_with_interval';
 
 export class InfraSnapshot {
   constructor(
@@ -61,8 +47,22 @@ export class InfraSnapshot {
     // in order to page through the results of their respective composite aggregations.
     // Both chains of requests are supposed to run in parallel, and their results be merged
     // when they have both been completed.
-    const groupedNodesPromise = requestGroupedNodes(request, options, this.libs.framework);
-    const nodeMetricsPromise = requestNodeMetrics(request, options, this.libs.framework);
+    const timeRangeWithIntervalApplied = await createTimeRangeWithInterval(
+      this.libs.framework,
+      request,
+      options
+    );
+    const optionsWithTimerange = { ...options, timerange: timeRangeWithIntervalApplied };
+    const groupedNodesPromise = requestGroupedNodes(
+      request,
+      optionsWithTimerange,
+      this.libs.framework
+    );
+    const nodeMetricsPromise = requestNodeMetrics(
+      request,
+      optionsWithTimerange,
+      this.libs.framework
+    );
 
     const groupedNodeBuckets = await groupedNodesPromise;
     const nodeMetricBuckets = await nodeMetricsPromise;
