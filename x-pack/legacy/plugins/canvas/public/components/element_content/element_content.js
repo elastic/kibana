@@ -21,9 +21,12 @@ import { InvalidElementType } from './invalid_element_type';
 */
 const branches = [
   // no renderable or renderable config value, render loading
-  branch(({ renderable, state }) => {
-    return !state || !renderable;
-  }, renderComponent(({ backgroundColor }) => <Loading backgroundColor={backgroundColor} />)),
+  branch(
+    ({ renderable, state }) => {
+      return !state || !renderable;
+    },
+    renderComponent(({ backgroundColor }) => <Loading backgroundColor={backgroundColor} />)
+  ),
 
   // renderable is available, but no matching element is found, render invalid
   branch(({ renderable, renderFunction }) => {
