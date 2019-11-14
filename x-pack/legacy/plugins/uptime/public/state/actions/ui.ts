@@ -28,6 +28,11 @@ interface TriggerAppRefreshAction {
   payload: number;
 }
 
+export type UiActionTypes =
+  | SetIntegrationPopoverAction
+  | SetBasePathAction
+  | TriggerAppRefreshAction;
+
 export function toggleIntegrationsPopover(popoverState: PopoverState): SetIntegrationPopoverAction {
   return {
     type: SET_INTEGRATION_POPOVER_STATE,
@@ -48,8 +53,3 @@ export function triggerAppRefresh(refreshTime: number): TriggerAppRefreshAction 
     payload: refreshTime,
   };
 }
-
-export type UiActionTypes =
-  | SetIntegrationPopoverAction
-  | SetBasePathAction
-  | TriggerAppRefreshAction;
