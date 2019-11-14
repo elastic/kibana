@@ -34,7 +34,8 @@ with Kibana.
 
 `csp.strict:`:: *Default: `false`* Blocks access to Kibana to any browser that
 does not enforce even rudimentary CSP rules. In practice, this will disable
-support for older, less safe browsers like Internet Explorer.
+support for older, less safe browsers like Internet Explorer. 
+See <<csp-strict-mode, Content Security Policy>> for more information.
 
 `csp.warnLegacyBrowsers:`:: *Default: `true`* Shows a warning message after
 loading Kibana to any browser that does not enforce even rudimentary CSP rules,
