@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC } from 'react';
+import React, { FC } from 'react';
 
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 
@@ -20,13 +20,9 @@ export const CreateAnalyticsFlyoutWrapper: FC<CreateAnalyticsFormProps> = props 
   }
 
   return (
-    <Fragment>
-      {isModalVisible && (
-        <CreateAnalyticsFlyout {...props}>
-          {isAdvancedEditorEnabled === false && <CreateAnalyticsForm {...props} />}
-          {isAdvancedEditorEnabled === true && <CreateAnalyticsAdvancedEditor {...props} />}
-        </CreateAnalyticsFlyout>
-      )}
-    </Fragment>
+    <CreateAnalyticsFlyout {...props}>
+      {isAdvancedEditorEnabled === false && <CreateAnalyticsForm {...props} />}
+      {isAdvancedEditorEnabled === true && <CreateAnalyticsAdvancedEditor {...props} />}
+    </CreateAnalyticsFlyout>
   );
 };
