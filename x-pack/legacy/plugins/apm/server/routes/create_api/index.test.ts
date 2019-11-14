@@ -5,23 +5,25 @@
  */
 import * as t from 'io-ts';
 import { createApi } from './index';
-import { InternalCoreSetup } from 'src/core/server';
+import { CoreSetup } from 'src/core/server';
 import { Params } from '../typings';
+import { LegacySetup } from '../../new-platform/plugin';
 
-const getCoreMock = () =>
+const getCoreMock = () => (({} as unknown) as CoreSetup);
+
+const getLegacyMock = () =>
   (({
-    http: {
-      server: {
-        route: jest.fn()
-      }
+    server: {
+      route: jest.fn()
     }
-  } as unknown) as InternalCoreSetup & {
-    http: { server: { route: ReturnType<typeof jest.fn> } };
+  } as unknown) as LegacySetup & {
+    server: { route: ReturnType<typeof jest.fn> };
   });
 
 describe('createApi', () => {
   it('registers a route with the server', () => {
     const coreMock = getCoreMock();
+    const legacySetupMock = getLegacyMock();
 
     createApi()
       .add(() => ({
@@ -36,11 +38,19 @@ describe('createApi', () => {
         },
         handler: async () => null
       }))
-      .init(coreMock);
+      .add(() => ({
+        path: '/baz',
+        method: 'PUT',
+        options: {
+          tags: ['access:apm', 'access:apm_write']
+        },
+        handler: async () => null
+      }))
+      .init(coreMock, legacySetupMock);
 
-    expect(coreMock.http.server.route).toHaveBeenCalledTimes(2);
+    expect(legacySetupMock.server.route).toHaveBeenCalledTimes(3);
 
-    const firstRoute = coreMock.http.server.route.mock.calls[0][0];
+    const firstRoute = legacySetupMock.server.route.mock.calls[0][0];
 
     expect(firstRoute).toEqual({
       method: 'GET',
@@ -51,7 +61,7 @@ describe('createApi', () => {
       handler: expect.any(Function)
     });
 
-    const secondRoute = coreMock.http.server.route.mock.calls[1][0];
+    const secondRoute = legacySetupMock.server.route.mock.calls[1][0];
 
     expect(secondRoute).toEqual({
       method: 'POST',
@@ -61,11 +71,23 @@ describe('createApi', () => {
       path: '/bar',
       handler: expect.any(Function)
     });
+
+    const thirdRoute = legacySetupMock.server.route.mock.calls[2][0];
+
+    expect(thirdRoute).toEqual({
+      method: 'PUT',
+      options: {
+        tags: ['access:apm', 'access:apm_write']
+      },
+      path: '/baz',
+      handler: expect.any(Function)
+    });
   });
 
   describe('when validating', () => {
     const initApi = (params: Params) => {
       const core = getCoreMock();
+      const legacySetupMock = getLegacyMock();
       const handler = jest.fn();
       createApi()
         .add(() => ({
@@ -73,9 +95,9 @@ describe('createApi', () => {
           params,
           handler
         }))
-        .init(core);
+        .init(core, legacySetupMock);
 
-      const route = core.http.server.route.mock.calls[0][0];
+      const route = legacySetupMock.server.route.mock.calls[0][0];
 
       const routeHandler = route.handler;
 

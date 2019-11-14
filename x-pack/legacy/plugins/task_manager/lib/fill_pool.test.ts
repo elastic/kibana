@@ -11,7 +11,10 @@ import { TaskPoolRunResult } from '../task_pool';
 
 describe('fillPool', () => {
   test('stops filling when there are no more tasks in the store', async () => {
-    const tasks = [[1, 2, 3], [4, 5]];
+    const tasks = [
+      [1, 2, 3],
+      [4, 5],
+    ];
     let index = 0;
     const fetchAvailableTasks = async () => tasks[index++] || [];
     const run = sinon.spy(async () => TaskPoolRunResult.RunningAllClaimedTasks);
@@ -23,7 +26,10 @@ describe('fillPool', () => {
   });
 
   test('stops filling when the pool has no more capacity', async () => {
-    const tasks = [[1, 2, 3], [4, 5]];
+    const tasks = [
+      [1, 2, 3],
+      [4, 5],
+    ];
     let index = 0;
     const fetchAvailableTasks = async () => tasks[index++] || [];
     const run = sinon.spy(async () => TaskPoolRunResult.RanOutOfCapacity);
@@ -35,7 +41,10 @@ describe('fillPool', () => {
   });
 
   test('calls the converter on the records prior to running', async () => {
-    const tasks = [[1, 2, 3], [4, 5]];
+    const tasks = [
+      [1, 2, 3],
+      [4, 5],
+    ];
     let index = 0;
     const fetchAvailableTasks = async () => tasks[index++] || [];
     const run = sinon.spy(async () => TaskPoolRunResult.RanOutOfCapacity);
@@ -66,7 +75,10 @@ describe('fillPool', () => {
       const converter = (x: number) => x.toString();
 
       try {
-        const tasks = [[1, 2, 3], [4, 5]];
+        const tasks = [
+          [1, 2, 3],
+          [4, 5],
+        ];
         let index = 0;
         const fetchAvailableTasks = async () => tasks[index++] || [];
 
@@ -78,7 +90,10 @@ describe('fillPool', () => {
 
     test('throws exception from converter', async () => {
       try {
-        const tasks = [[1, 2, 3], [4, 5]];
+        const tasks = [
+          [1, 2, 3],
+          [4, 5],
+        ];
         let index = 0;
         const fetchAvailableTasks = async () => tasks[index++] || [];
         const run = sinon.spy(async () => TaskPoolRunResult.RanOutOfCapacity);
