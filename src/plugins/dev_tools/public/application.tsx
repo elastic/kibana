@@ -26,7 +26,7 @@ import ReactDOM from 'react-dom';
 import { useEffect, useRef } from 'react';
 
 import { AppMountContext } from 'kibana/public';
-import { DevTool } from '../../../../../plugins/dev_tools/public';
+import { DevTool } from './plugin';
 
 interface DevToolsWrapperProps {
   devTools: readonly DevTool[];

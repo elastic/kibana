@@ -17,15 +17,10 @@
  * under the License.
  */
 
-import { npSetup, npStart } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
-import { DevToolsPlugin } from './plugin';
-
-const instance = new DevToolsPlugin();
-
-instance.setup(npSetup.core, {
-  ...npSetup.plugins,
-});
-instance.start(npStart.core, {
-  newPlatformDevTools: npStart.plugins.devTools,
-});
+if (npStart.plugins.devTools.getSortedDevTools().length === 0) {
+  npStart.core.chrome.navLinks.update('kibana:dev_tools', {
+    hidden: true,
+  });
+}
