@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, Fragment } from 'react';
+import React, { useState } from 'react';
 import { EuiConfirmModal, EuiOverlayMask, EuiBadge, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
