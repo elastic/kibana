@@ -7,11 +7,11 @@ import moment from 'moment-timezone';
 import { asRelativeDateTimeRange, asAbsoluteDateTime } from '../datetime';
 
 describe('date time formatters', () => {
+  beforeAll(() => {
+    moment.tz.setDefault('Europe/Amsterdam');
+  });
+  afterAll(() => moment.tz.setDefault(''));
   describe('asRelativeDateTimeRange', () => {
-    beforeAll(() => {
-      moment.tz.setDefault('Europe/Amsterdam');
-    });
-    afterAll(() => moment.tz.setDefault(''));
     const formatDateToTimezone = (dateTimeString: string) =>
       new Date(dateTimeString).getTime();
 
