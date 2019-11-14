@@ -17,6 +17,21 @@
  * under the License.
  */
 
-export * from './use_observable';
-export * from './use_unmount';
-export * from './react_mount';
+/**
+ * A function that should mount DOM content inside the provided container element
+ * and return a handler to unmount it.
+ *
+ * @param element the container element to render into
+ * @returns a {@link UnmountCallback} that unmount the element on call.
+ *
+ * @public
+ */
+export type MountPoint = (element: HTMLElement) => UnmountCallback;
+
+/**
+ * A function that will unmount the element previously mounted by
+ * the associated {@link MountPoint}
+ *
+ * @public
+ */
+export type UnmountCallback = () => void;
