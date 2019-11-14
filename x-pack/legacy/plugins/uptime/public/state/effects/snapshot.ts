@@ -8,16 +8,21 @@ import { call, put, takeLatest, select } from 'redux-saga/effects';
 import { Action } from 'redux-actions';
 import {
   FETCH_SNAPSHOT_COUNT,
-  FETCH_SNAPSHOT_COUNT_FAIL,
-  FETCH_SNAPSHOT_COUNT_SUCCESS,
   GetSnapshotPayload,
+  fetchSnapshotCountFail,
+  fetchSnapshotCountSuccess,
 } from '../actions';
 import { fetchSnapshotCount } from '../api';
 import { getBasePath } from '../selectors';
 
 function* snapshotSaga(action: Action<GetSnapshotPayload>) {
   try {
-    if (!action.payload) throw new Error('Cannot fetch snapshot for undefined parameters.');
+    if (!action.payload) {
+      yield put(
+        fetchSnapshotCountFail(new Error('Cannot fetch snapshot for undefined parameters.'))
+      );
+      return;
+    }
     const {
       payload: { dateRangeStart, dateRangeEnd, filters, statusFilter },
     } = action;
@@ -29,9 +34,9 @@ function* snapshotSaga(action: Action<GetSnapshotPayload>) {
       filters,
       statusFilter,
     });
-    yield put({ type: FETCH_SNAPSHOT_COUNT_SUCCESS, payload: response });
+    yield put(fetchSnapshotCountSuccess(response));
   } catch (error) {
-    yield put({ type: FETCH_SNAPSHOT_COUNT_FAIL, payload: error.message });
+    yield put(fetchSnapshotCountFail(error));
   }
 }
 
