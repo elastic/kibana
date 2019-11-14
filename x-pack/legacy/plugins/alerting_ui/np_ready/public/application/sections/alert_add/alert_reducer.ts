@@ -5,37 +5,55 @@
  */
 import { isEqual } from 'lodash';
 
+interface CommandType {
+  type: 'setAlert' | 'setProperty' | 'setAlertTypeParams';
+}
+
 export interface AlertState {
   alert: any;
 }
 
-export const alertReducer = (state: any, action: any) => {
+export interface ActionAlertReducerItem {
+  command: CommandType;
+  payload: {
+    key: string;
+    value: {};
+  };
+}
+
+export const alertReducer = (state: any, action: ActionAlertReducerItem) => {
   const { command, payload } = action;
   const { alert } = state;
 
-  switch (command) {
-    case 'setAlert':
-      return {
-        ...state,
-        alert: payload,
-      };
+  switch (command.type) {
+    case 'setAlert': {
+      const { key, value } = payload;
+      if (key === 'action') {
+        return {
+          ...state,
+          alert: value,
+        };
+      } else {
+        return state;
+      }
+    }
     case 'setProperty': {
-      const { property, value } = payload;
-      if (isEqual(alert[property], value)) {
+      const { key, value } = payload;
+      if (isEqual(alert[key], value)) {
         return state;
       } else {
         return {
           ...state,
           alert: {
             ...alert,
-            [property]: value,
+            [key]: value,
           },
         };
       }
     }
     case 'setAlertTypeParams': {
-      const { property, value } = payload;
-      if (isEqual(alert.alertTypeParams[property], value)) {
+      const { key, value } = payload;
+      if (isEqual(alert.alertTypeParams[key], value)) {
         return state;
       } else {
         return {
@@ -44,7 +62,7 @@ export const alertReducer = (state: any, action: any) => {
             ...alert,
             alertTypeParams: {
               ...alert.alertTypeParams,
-              [property]: value,
+              [key]: value,
             },
           },
         };

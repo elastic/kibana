@@ -25,14 +25,10 @@ import { SectionError, ErrableFormRow } from '../../components/page_error';
 import { useAppDependencies } from '../..';
 import { actionReducer } from './action_reducer';
 import { ActionsContext } from '../../context/actions_context';
-import { ActionType, Action } from '../../../types';
+import { ActionType, Action, IErrorObject } from '../../../types';
 
 interface Props {
   actionType: ActionType;
-}
-
-interface IErrorObject {
-  [key: string]: string[];
 }
 
 export const ActionAddForm = ({ actionType }: Props) => {
@@ -41,34 +37,36 @@ export const ActionAddForm = ({ actionType }: Props) => {
     plugins: { toastNotifications },
     actionTypeRegistry,
   } = useAppDependencies();
+  const initialAction = { actionTypeId: actionType.id, config: {}, secrets: {} };
+
   const { setFlyoutVisibility, loadActions } = useContext(ActionsContext);
+
   // hooks
-  const [{ action }, dispatch] = useReducer(actionReducer, {
-    action: { actionTypeId: actionType.id, config: {}, secrets: {} },
-  });
+  const [{ action }, dispatch] = useReducer(actionReducer, { action: initialAction });
 
-  const setActionProperty = (property: string, value: any) => {
-    dispatch({ command: 'setProperty', payload: { property, value } });
+  const setActionProperty = (key: string, value: any) => {
+    dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
 
-  const setActionConfigProperty = (property: string, value: any) => {
-    dispatch({ command: 'setConfigProperty', payload: { property, value } });
+  const setActionConfigProperty = (key: string, value: any) => {
+    dispatch({ command: { type: 'setConfigProperty' }, payload: { key, value } });
   };
 
-  const setActionSecretsProperty = (property: string, value: any) => {
-    dispatch({ command: 'setSecretsProperty', payload: { property, value } });
+  const setActionSecretsProperty = (key: string, value: any) => {
+    dispatch({ command: { type: 'setSecretsProperty' }, payload: { key, value } });
   };
 
   const getAction = () => {
     dispatch({
-      command: 'setAction',
-      payload: { actionTypeId: actionType.id, config: {}, secrets: {} },
+      command: { type: 'setAction' },
+      payload: { key: 'action', value: { config: {}, secrets: {} } },
     });
   };
 
   useEffect(() => {
     getAction();
     setServerError(null);
+    setActionProperty('actionTypeId', actionType.id);
   }, [actionType]);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);

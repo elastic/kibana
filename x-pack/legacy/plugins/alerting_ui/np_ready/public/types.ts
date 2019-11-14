@@ -89,3 +89,7 @@ export interface AlertTypeModel {
   validate: (alert: Alert) => ValidationResult;
   alertTypeParamsExpression: React.FunctionComponent<any>;
 }
+
+export interface IErrorObject {
+  [key: string]: string[];
+}

@@ -35,10 +35,27 @@ import { saveAlert } from '../../lib/api';
 import { AlertsContext } from '../../context/alerts_context';
 import { alertReducer } from './alert_reducer';
 import { ErrableFormRow } from '../../components/page_error';
-import { AlertTypeModel } from '../../../types';
+import { AlertTypeModel, Alert, IErrorObject } from '../../../types';
+import { ACTION_GROUPS } from '../../constants/action_groups';
 
 interface Props {
   refreshList: () => Promise<void>;
+}
+
+function validateBaseProperties(alertObject: Alert) {
+  const validationResult = { errors: {} };
+  const errors = {
+    name: new Array<string>(),
+  };
+  validationResult.errors = errors;
+  if (!alertObject.name) {
+    errors.name.push(
+      i18n.translate('xpack.alertingUI.sections.alertAdd.error.requiredNameText', {
+        defaultMessage: 'Name is required.',
+      })
+    );
+  }
+  return validationResult;
 }
 
 export const AlertAdd = ({ refreshList }: Props) => {
@@ -47,46 +64,48 @@ export const AlertAdd = ({ refreshList }: Props) => {
     plugins: { toastNotifications },
     alertTypeRegistry,
   } = useAppDependencies();
+  const [alertType, setAlertType] = useState<AlertTypeModel | undefined>(undefined);
+
+  const initialAlert = {
+    alertTypeParams: {},
+    alertTypeId: null,
+    actions: [],
+  };
+
   const { alertFlyoutVisible, setAlertFlyoutVisibility } = useContext(AlertsContext);
   // hooks
-  const [{ alert }, dispatch] = useReducer(alertReducer, {
-    alert: {
-      validate: () => {
-        return { errors: {} };
-      },
-      alertTypeParams: {},
-    },
-  });
+  const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [selectedTabId, setSelectedTabId] = useState<string>('alert');
-  const [alertType, setAlertType] = useState<AlertTypeModel | undefined>(undefined);
   const getAlert = () => {
     dispatch({
-      command: 'setAlert',
+      command: { type: 'setAlert' },
       payload: {
-        validate: () => {
-          return { errors: {} };
+        key: 'alert',
+        value: {
+          alertTypeParams: {},
+          alertTypeId: null,
+          actions: [],
         },
-        alertTypeParams: {},
-        alertTypeId: alertType ? alertType.id : null,
-        actions: [],
       },
     });
   };
 
   useEffect(() => {
     getAlert();
-  }, [alertType]);
+    setAlertType(undefined);
+  }, [alertFlyoutVisible]);
 
-  const closeFlyout = useCallback(() => setAlertFlyoutVisibility(false), []);
-
-  const setAlertProperty = (property: string, value: any) => {
-    dispatch({ command: 'setProperty', payload: { property, value } });
+  const setAlertProperty = (key: string, value: any) => {
+    dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
 
-  const setAlertTypeParams = (property: string, value: any) => {
-    dispatch({ command: 'setAlertTypeParams', payload: { property, value } });
+  const setAlertTypeParams = (key: string, value: any) => {
+    dispatch({ command: { type: 'setAlertTypeParams' }, payload: { key, value } });
   };
+  const closeFlyout = useCallback(() => setAlertFlyoutVisibility(false), [
+    setAlertFlyoutVisibility,
+  ]);
 
   if (!alertFlyoutVisible) {
     return null;
@@ -94,22 +113,24 @@ export const AlertAdd = ({ refreshList }: Props) => {
   const tagsOptions = []; // TODO: move to alert instande when the server side will be done
   const AlertTypeParamsExpressionComponent = alertType ? alertType.alertTypeParamsExpression : null;
 
-  const { errors } = alert.validate(); // TODO: decide how beter define the Alert UI validation
+  const errors = {
+    ...(alertType ? alertType.validate(alert).errors : []),
+    ...validateBaseProperties(alert).errors,
+  } as IErrorObject;
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
-  // TODO: define constants for the action groups
   const tabs = [
     {
-      id: 'alert',
-      name: 'Alert',
+      id: ACTION_GROUPS.ALERT.toLowerCase(),
+      name: ACTION_GROUPS.ALERT,
     },
     {
-      id: 'warning',
-      name: 'Warning',
+      id: ACTION_GROUPS.WARNING.toLowerCase(),
+      name: ACTION_GROUPS.WARNING,
     },
     {
-      id: 'escalation',
-      name: 'Escalation',
+      id: ACTION_GROUPS.ESCALATION.toLowerCase(),
+      name: ACTION_GROUPS.ESCALATION,
       disabled: false,
     },
   ];
@@ -187,7 +208,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
           errors={errors}
           setAlertTypeParams={setAlertTypeParams}
           hasErrors={hasErrors}
-        ></AlertTypeParamsExpressionComponent>
+        />
       ) : null}
     </Fragment>
   );
@@ -198,13 +219,13 @@ export const AlertAdd = ({ refreshList }: Props) => {
 
   let selectedTabContent;
   switch (selectedTabId) {
-    case 'alert':
+    case ACTION_GROUPS.ALERT.toLowerCase():
       selectedTabContent = alertDetails;
       break;
-    case 'warning':
+    case ACTION_GROUPS.WARNING.toLowerCase():
       selectedTabContent = warningDetails;
       break;
-    case 'escalation':
+    case ACTION_GROUPS.ESCALATION.toLowerCase():
       selectedTabContent = escalationDetails;
       break;
     default:
@@ -322,7 +343,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => setAlertFlyoutVisibility(false)}>
+            <EuiButtonEmpty onClick={closeFlyout}>
               {i18n.translate('xpack.alertingUI.sections.alertAdd.cancelButtonLabel', {
                 defaultMessage: 'Cancel',
               })}

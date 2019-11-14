@@ -5,37 +5,55 @@
  */
 import { isEqual } from 'lodash';
 
+interface CommandType {
+  type: 'setAction' | 'setProperty' | 'setConfigProperty' | 'setSecretsProperty';
+}
+
 export interface ActionState {
   action: any;
 }
 
-export const actionReducer = (state: any, actionItem: any) => {
+export interface ActionReducerItem {
+  command: CommandType;
+  payload: {
+    key: string;
+    value: {};
+  };
+}
+
+export const actionReducer = (state: ActionState, actionItem: ActionReducerItem) => {
   const { command, payload } = actionItem;
   const { action } = state;
 
-  switch (command) {
-    case 'setAction':
-      return {
-        ...state,
-        action: payload,
-      };
+  switch (command.type) {
+    case 'setAction': {
+      const { key, value } = payload;
+      if (key === 'action') {
+        return {
+          ...state,
+          action: value,
+        };
+      } else {
+        return state;
+      }
+    }
     case 'setProperty': {
-      const { property, value } = payload;
-      if (isEqual(action[property], value)) {
+      const { key, value } = payload;
+      if (isEqual(action[key], value)) {
         return state;
       } else {
         return {
           ...state,
           action: {
             ...action,
-            [property]: value,
+            [key]: value,
           },
         };
       }
     }
     case 'setConfigProperty': {
-      const { property, value } = payload;
-      if (isEqual(action.config[property], value)) {
+      const { key, value } = payload;
+      if (isEqual(action.config[key], value)) {
         return state;
       } else {
         return {
@@ -44,15 +62,15 @@ export const actionReducer = (state: any, actionItem: any) => {
             ...action,
             config: {
               ...action.config,
-              [property]: value,
+              [key]: value,
             },
           },
         };
       }
     }
     case 'setSecretsProperty': {
-      const { property, value } = payload;
-      if (isEqual(action.secrets[property], value)) {
+      const { key, value } = payload;
+      if (isEqual(action.secrets[key], value)) {
         return state;
       } else {
         return {
@@ -61,7 +79,7 @@ export const actionReducer = (state: any, actionItem: any) => {
             ...action,
             secrets: {
               ...action.secrets,
-              [property]: value,
+              [key]: value,
             },
           },
         };
