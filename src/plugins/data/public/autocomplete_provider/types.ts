@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { StaticIndexPattern, Field } from 'ui/index_patterns';
 import { AutocompleteProviderRegister } from '.';
+import { Field, StaticIndexPattern } from '..';
 
 export type AutocompletePublicPluginSetup = Pick<
   AutocompleteProviderRegister,

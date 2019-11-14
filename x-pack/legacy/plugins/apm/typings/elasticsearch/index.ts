@@ -36,8 +36,7 @@ export type ESSearchResponse<
           TDocument
         >;
       }
-    : {}) &
-  ({
+    : {}) & {
     hits: Omit<SearchResponse<TDocument>['hits'], 'total'> &
       (TOptions['restTotalHitsAsInt'] extends true
         ? {
@@ -49,7 +48,7 @@ export type ESSearchResponse<
               relation: 'eq' | 'gte';
             };
           });
-  });
+  };
 
 export interface ESFilter {
   [key: string]: {

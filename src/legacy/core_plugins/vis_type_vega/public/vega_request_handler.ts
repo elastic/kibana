@@ -18,11 +18,9 @@
  */
 
 import { timefilter } from 'ui/timefilter';
-import { TimeRange } from 'src/plugins/data/public';
-import { Query } from 'src/legacy/core_plugins/data/public';
-import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 
-import { esFilters } from '../../../../plugins/data/public';
+import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
+import { esFilters, TimeRange, Query } from '../../../../plugins/data/public';
 
 // @ts-ignore
 import { VegaParser } from './data_model/vega_parser';
