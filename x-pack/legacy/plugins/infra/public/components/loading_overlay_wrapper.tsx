@@ -10,12 +10,10 @@ import React from 'react';
 
 import { euiStyled } from '../../../../common/eui_styled_components';
 
-export const LoadingOverlayWrapper: React.FC<
-  React.HTMLAttributes<HTMLDivElement> & {
-    isLoading: boolean;
-    loadingChildren?: React.ReactNode;
-  }
-> = ({ children, isLoading, loadingChildren, ...rest }) => {
+export const LoadingOverlayWrapper: React.FC<React.HTMLAttributes<HTMLDivElement> & {
+  isLoading: boolean;
+  loadingChildren?: React.ReactNode;
+}> = ({ children, isLoading, loadingChildren, ...rest }) => {
   return (
     <RelativeDiv {...rest}>
       {children}

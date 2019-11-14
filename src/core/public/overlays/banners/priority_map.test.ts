@@ -42,7 +42,10 @@ describe('PriorityMap', () => {
     map = map.add('b', { priority: 3 });
     map = map.add('c', { priority: 2 });
     map = map.remove('c');
-    expect([...map]).toEqual([['b', { priority: 3 }], ['a', { priority: 1 }]]);
+    expect([...map]).toEqual([
+      ['b', { priority: 3 }],
+      ['a', { priority: 1 }],
+    ]);
   });
 
   it('adds duplicate priorities to end', () => {
