@@ -10,11 +10,13 @@ import path from 'path';
 
 test('a json-format pipeline with pipeline references is correctly rewritten', () => {
   const inputStandard = readFileSync(
-    path.join(__dirname, '/tests/ingest_pipelines/real_input_standard.json')
-  ).toString('utf-8');
+    path.join(__dirname, '/tests/ingest_pipelines/real_input_standard.json'),
+    'utf-8'
+  );
   const inputBeats = readFileSync(
-    path.join(__dirname, '/tests/ingest_pipelines/real_input_beats.json')
-  ).toString('utf-8');
+    path.join(__dirname, '/tests/ingest_pipelines/real_input_beats.json'),
+    'utf-8'
+  );
   const output = readFileSync(
     path.join(__dirname, '/tests/ingest_pipelines/real_output.json')
   ).toString('utf-8');
