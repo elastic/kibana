@@ -10,7 +10,7 @@ import React from 'react';
 import { useAvgDurationByCountry } from '../../../../../hooks/useAvgDurationByCountry';
 import { ChoroplethMap } from '../ChoroplethMap';
 
-export const PageLoadCharts: React.SFC = () => {
+export const DurationByCountryMap: React.SFC = () => {
   const { data } = useAvgDurationByCountry();
 
   return (
@@ -20,7 +20,7 @@ export const PageLoadCharts: React.SFC = () => {
           <EuiTitle size="xs">
             <span>
               {i18n.translate(
-                'xpack.apm.metrics.pageLoadCharts.avgPageLoadByCountryLabel',
+                'xpack.apm.metrics.durationByCountryMap.avgPageLoadByCountryLabel',
                 {
                   defaultMessage:
                     'Avg. page load duration distribution by country'
