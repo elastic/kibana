@@ -26,22 +26,20 @@ export function moveApplyGlobalQueryToSources({ attributes }) {
   const layerList = JSON.parse(attributes.layerListJSON);
   layerList.forEach((layerDescriptor) => {
 
-    if (_.has(layerDescriptor, 'applyGlobalQuery')) {
-      const applyGlobalQuery = layerDescriptor.applyGlobalQuery;
-      delete layerDescriptor.applyGlobalQuery;
+    const applyGlobalQuery = _.get(layerDescriptor, 'applyGlobalQuery', true);
+    delete layerDescriptor.applyGlobalQuery;
 
-      if (isEsSource(layerDescriptor)) {
-        layerDescriptor.sourceDescriptor.applyGlobalQuery = applyGlobalQuery;
-      }
+    if (isEsSource(layerDescriptor)) {
+      layerDescriptor.sourceDescriptor.applyGlobalQuery = applyGlobalQuery;
+    }
 
-      if (_.has(layerDescriptor, 'joins')) {
-        layerDescriptor.joins.forEach(joinDescriptor => {
-          if (_.has(joinDescriptor, 'right')) {
-            // joinDescriptor.right is ES_TERM_SOURCE source descriptor
-            joinDescriptor.right.applyGlobalQuery = applyGlobalQuery;
-          }
-        });
-      }
+    if (_.has(layerDescriptor, 'joins')) {
+      layerDescriptor.joins.forEach(joinDescriptor => {
+        if (_.has(joinDescriptor, 'right')) {
+          // joinDescriptor.right is ES_TERM_SOURCE source descriptor
+          joinDescriptor.right.applyGlobalQuery = applyGlobalQuery;
+        }
+      });
     }
 
   });

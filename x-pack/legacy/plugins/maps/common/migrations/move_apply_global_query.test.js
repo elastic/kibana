@@ -19,10 +19,13 @@ describe('moveApplyGlobalQueryToSources', () => {
     });
   });
 
-  test('Should ignore layers that do not set applyGlobalQuery', () => {
+  test('Should ignore layers without ES sources', () => {
     const layerListJSON = JSON.stringify([
       {
         type: 'TILE',
+        sourceDescriptor: {
+          type: 'EMS_TMS'
+        }
       }
     ]);
     const attributes = {
@@ -77,6 +80,30 @@ describe('moveApplyGlobalQueryToSources', () => {
     expect(moveApplyGlobalQueryToSources({ attributes })).toEqual({
       title: 'my map',
       layerListJSON: '[{\"type\":\"VECTOR\",\"sourceDescriptor\":{\"type\":\"EMS_FILE\"},\"joins\":[{\"right\":{\"applyGlobalQuery\":false}}]}]',
+    });
+  });
+
+  test('Should set applyGlobalQuery to true sources when no value is provided in layer', () => {
+    const layerListJSON = JSON.stringify([
+      {
+        type: 'VECTOR',
+        sourceDescriptor: {
+          type: 'ES_GEO_GRID'
+        },
+        joins: [
+          {
+            right: {}
+          }
+        ]
+      }
+    ]);
+    const attributes = {
+      title: 'my map',
+      layerListJSON
+    };
+    expect(moveApplyGlobalQueryToSources({ attributes })).toEqual({
+      title: 'my map',
+      layerListJSON: '[{\"type\":\"VECTOR\",\"sourceDescriptor\":{\"type\":\"ES_GEO_GRID\",\"applyGlobalQuery\":true},\"joins\":[{\"right\":{\"applyGlobalQuery\":true}}]}]',
     });
   });
 });

@@ -20,7 +20,7 @@ const EXPECTED_JOIN_VALUES = {
 const VECTOR_SOURCE_ID = 'n1t6f';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['maps']);
+  const PageObjects = getPageObjects(['common', 'maps']);
   const inspector = getService('inspector');
 
   describe('layer with joins', () => {
@@ -32,7 +32,7 @@ export default function ({ getPageObjects, getService }) {
       await inspector.close();
     });
 
-    it('should re-fetch join with refresh timer', async () => {
+    /*it('should re-fetch join with refresh timer', async () => {
       async function getRequestTimestamp() {
         await PageObjects.maps.openInspectorRequest('meta_for_geo_shapes*.shape_name');
         const requestStats = await inspector.getTableData();
@@ -106,7 +106,7 @@ export default function ({ getPageObjects, getService }) {
       });
 
       expect(visibilitiesOfFeatures).to.eql([false, true, true, true]);
-    });
+    });*/
 
 
     describe('query bar', () => {
@@ -131,7 +131,9 @@ export default function ({ getPageObjects, getService }) {
 
       it('should not apply query to join request when apply global query is disabled', async () => {
         await PageObjects.maps.openLayerPanel('geo_shapes*');
+        await PageObjects.common.sleep(10001);
         await PageObjects.maps.disableApplyGlobalQuery();
+        await PageObjects.common.sleep(10002);
 
         await PageObjects.maps.openInspectorRequest('meta_for_geo_shapes*.shape_name');
         const requestStats = await inspector.getTableData();
