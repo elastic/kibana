@@ -5,6 +5,7 @@
  */
 
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
+import { isRight } from 'fp-ts/lib/Either';
 import { getApiPath } from '../../lib/helper';
 import { SnapshotType, Snapshot } from '../../../common/runtime_types';
 
@@ -24,14 +25,20 @@ export const fetchSnapshotCount = async ({
   statusFilter,
 }: ApiRequest): Promise<Snapshot> => {
   const url = getApiPath(`/api/uptime/snapshot/count`, basePath);
-  const urlParams = `?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}${
-    filters ? `&filters=${filters}` : ''
-  }${statusFilter ? `&statusFilter=${statusFilter}` : ''}`;
+  const urlParams = encodeURI(
+    `?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}${
+      filters ? `&filters=${filters}` : ''
+    }${statusFilter ? `&statusFilter=${statusFilter}` : ''}`
+  );
   const response = await fetch(`${url}${urlParams}`);
   if (!response.ok) {
     throw new Error(response.statusText);
   }
   const responseData = await response.json();
-  ThrowReporter.report(SnapshotType.decode(responseData));
-  return responseData;
+  const decoded = SnapshotType.decode(responseData);
+  ThrowReporter.report(decoded);
+  if (isRight(decoded)) {
+    return decoded.right;
+  }
+  throw new Error('`getSnapshotCount` response did not correspond to expected type');
 };
