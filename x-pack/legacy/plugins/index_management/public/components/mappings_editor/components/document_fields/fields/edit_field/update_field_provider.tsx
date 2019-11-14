@@ -110,14 +110,14 @@ export const UpdateFieldProvider = ({ children }: Props) => {
           onCancel={closeModal}
           onConfirm={confirmTypeUpdate}
           cancelButtonText={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.updateFieldCancelButtonLabel',
+            'xpack.idxMgmt.mappingsEditor.updateField.confirmationModal.cancelButtonLabel',
             {
               defaultMessage: 'Cancel',
             }
           )}
           buttonColor="danger"
           confirmButtonText={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.updateFieldConfirmDescription',
+            'xpack.idxMgmt.mappingsEditor.updateField.confirmationModal.confirmDescription',
             {
               defaultMessage: 'Confirm type change',
             }
@@ -127,16 +127,26 @@ export const UpdateFieldProvider = ({ children }: Props) => {
             {fieldsTree && (
               <>
                 <p>
-                  {i18n.translate('xpack.idxMgmt.mappingsEditor.updateFieldDescription', {
-                    defaultMessage: 'This will delete the following fields.',
-                  })}
+                  {i18n.translate(
+                    'xpack.idxMgmt.mappingsEditor.updateField.confirmationModal.deleteFieldsDescription',
+                    {
+                      defaultMessage: 'This will delete the following fields.',
+                    }
+                  )}
                 </p>
                 <FieldsTree fields={fieldsTree} />
               </>
             )}
             {state.aliases && (
               <>
-                <p>The following aliases will also be deleted</p>
+                <p>
+                  {i18n.translate(
+                    'xpack.idxMgmt.mappingsEditor.updateField.confirmationModal.deleteAliasesDescription',
+                    {
+                      defaultMessage: 'The following aliases will also be deleted.',
+                    }
+                  )}
+                </p>
                 <ul>
                   {state.aliases.map(path => (
                     <li key={path}>

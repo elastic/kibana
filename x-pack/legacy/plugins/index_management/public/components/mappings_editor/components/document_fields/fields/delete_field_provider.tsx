@@ -82,14 +82,14 @@ export const DeleteFieldProvider = ({ children }: Props) => {
           onCancel={closeModal}
           onConfirm={confirmDelete}
           cancelButtonText={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.deleteFieldCancelButtonLabel',
+            'xpack.idxMgmt.mappingsEditor.deleteField.confirmationModal.cancelButtonLabel',
             {
               defaultMessage: 'Cancel',
             }
           )}
           buttonColor="danger"
           confirmButtonText={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.deleteFieldRemoveButtonLabel',
+            'xpack.idxMgmt.mappingsEditor.deleteField.confirmationModal.removeButtonLabel',
             {
               defaultMessage: 'Remove',
             }
@@ -99,16 +99,26 @@ export const DeleteFieldProvider = ({ children }: Props) => {
             {fieldsTree && (
               <>
                 <p>
-                  {i18n.translate('xpack.idxMgmt.mappingsEditor.deleteDescription', {
-                    defaultMessage: 'This will also delete the following fields.',
-                  })}
+                  {i18n.translate(
+                    'xpack.idxMgmt.mappingsEditor.confirmationModal.deleteFieldsDescription',
+                    {
+                      defaultMessage: 'This will also delete the following fields.',
+                    }
+                  )}
                 </p>
                 <FieldsTree fields={fieldsTree} />
               </>
             )}
             {state.aliases && (
               <>
-                <p>The following aliases will also be deleted</p>
+                <p>
+                  {i18n.translate(
+                    'xpack.idxMgmt.mappingsEditor.confirmationModal.deleteAliasesDescription',
+                    {
+                      defaultMessage: 'The following aliases will also be deleted.',
+                    }
+                  )}
+                </p>
                 <ul>
                   {state.aliases.map(path => (
                     <li key={path}>

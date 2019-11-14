@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-
 import { EuiFormRow, EuiComboBox } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { FormRow, UseField, SerializerFunc } from '../../../shared_imports';
 import { getFieldConfig } from '../../../lib';
@@ -74,8 +74,20 @@ export const PathParameter = ({ field, allFields }: Props) => (
 
       return (
         <FormRow
-          title={<h3>Path</h3>}
-          description="Select the field you want your alias to point to."
+          title={
+            <h3>
+              {i18n.translate('xpack.idxMgmt.mappingsEditor.aliasType.aliasTargetFieldTitle', {
+                defaultMessage: 'Alias target',
+              })}
+            </h3>
+          }
+          description={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.aliasType.aliasTargetFieldDescription',
+            {
+              defaultMessage:
+                'Select the field you want your alias to point to. You will then be able to use the alias instead of the target field in search requests, and selected other APIs like field capabilities.',
+            }
+          )}
           idAria="mappingsEditorPathParameter"
         >
           <EuiFormRow
