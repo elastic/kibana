@@ -83,9 +83,7 @@ export function getTimelionRequestHandler(dependencies: TimelionVisualizationDep
           sheet: [expression],
           extended: {
             es: {
-              filter: esQuery
-                // @ts-ignore
-                .buildEsQuery(null, query, filters, esQueryConfigs),
+              filter: esQuery.buildEsQuery(null, query, filters, esQueryConfigs),
             },
           },
           time: {
