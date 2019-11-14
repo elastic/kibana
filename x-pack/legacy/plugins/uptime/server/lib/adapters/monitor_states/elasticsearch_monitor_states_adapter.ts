@@ -8,9 +8,10 @@ import { DatabaseAdapter } from '../database';
 import { UMMonitorStatesAdapter, GetMonitorStatesResult, CursorPagination } from './adapter_types';
 import { StatesIndexStatus } from '../../../../common/graphql/types';
 import { INDEX_NAMES, CONTEXT_DEFAULTS } from '../../../../common/constants';
-import { fetchPage, MonitorGroups } from './search';
+import { fetchPage } from './search';
 import { MonitorGroupIterator } from './search/monitor_group_iterator';
 import { Snapshot } from '../../../../common/runtime_types';
+import { getSnapshotCountHelper } from './get_snapshot_helper';
 
 export interface QueryContext {
   database: any;
@@ -76,42 +77,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       size: 30000,
       statusFilter,
     };
-    const iterator = new MonitorGroupIterator(context);
-    const items: MonitorGroups[] = [];
-    let res: MonitorGroups | null;
-    // query the index to find the most recent check group for each monitor/location
-    do {
-      res = await iterator.next();
-      if (res) {
-        items.push(res);
-      }
-    } while (res !== null);
-    return (
-      items
-        // result is a list of 'up' | 'down', 1:1 per monitor
-        .map(({ groups }) =>
-          // for each location, infer a status
-          groups.reduce<'up' | 'down'>((acc, cur) => {
-            if (acc === 'down') {
-              return acc;
-            }
-            return cur.status === 'down' ? 'down' : 'up';
-          }, 'up')
-        )
-        // count each status up into a single object
-        .reduce(
-          (acc, cur) => {
-            if (cur === 'up') {
-              acc.up++;
-            } else {
-              acc.down++;
-            }
-            acc.total++;
-            return acc;
-          },
-          { up: 0, down: 0, mixed: 0, total: 0 }
-        )
-    );
+    return getSnapshotCountHelper(new MonitorGroupIterator(context));
   }
 
   public async statesIndexExists(request: any): Promise<StatesIndexStatus> {
