@@ -51,9 +51,10 @@ export const getSearch = (tab: SearchNavTab, urlState: TabNavigationProps): stri
         }
         return replaceQueryStringInLocation(
           myLocation,
-          replaceStateKeyInQueryString(urlKey, urlStateToReplace)(
-            getQueryStringFromLocation(myLocation)
-          )
+          replaceStateKeyInQueryString(
+            urlKey,
+            urlStateToReplace
+          )(getQueryStringFromLocation(myLocation))
         );
       },
       {

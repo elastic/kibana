@@ -7,7 +7,6 @@
 import { Server } from 'hapi';
 import { CoreSetup } from 'src/core/server';
 import { makeApmUsageCollector } from '../lib/apm_telemetry';
-import { LegacySetupWithUsageCollector } from '../lib/apm_telemetry/make_apm_usage_collector';
 import { createApmAgentConfigurationIndex } from '../lib/settings/agent_configuration/create_agent_config_index';
 import { createApmApi } from '../routes/create_apm_api';
 
@@ -19,6 +18,6 @@ export class Plugin {
   public setup(core: CoreSetup, __LEGACY: LegacySetup) {
     createApmApi().init(core, __LEGACY);
     createApmAgentConfigurationIndex(core, __LEGACY);
-    makeApmUsageCollector(core, __LEGACY as LegacySetupWithUsageCollector);
+    makeApmUsageCollector(core, __LEGACY);
   }
 }

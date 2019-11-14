@@ -45,7 +45,10 @@ export const apm: LegacyPluginInitializer = kibana => {
       },
       hacks: ['plugins/apm/hacks/toggle_app_link_in_nav'],
       savedObjectSchemas: {
-        'apm-telemetry': {
+        'apm-services-telemetry': {
+          isNamespaceAgnostic: true
+        },
+        'apm-indices': {
           isNamespaceAgnostic: true
         }
       },
@@ -87,7 +90,7 @@ export const apm: LegacyPluginInitializer = kibana => {
         catalogue: ['apm'],
         privileges: {
           all: {
-            api: ['apm'],
+            api: ['apm', 'apm_write'],
             catalogue: ['apm'],
             savedObject: {
               all: [],
