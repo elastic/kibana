@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from '../../buckets/_terms_other_bucket_helper';
-import { VisProvider } from '../../../vis';
+import { Vis } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 const visConfigSingleTerm = {
@@ -158,7 +158,6 @@ describe('Terms Agg Other bucket helper', () => {
   function init(aggConfig) {
     ngMock.module('kibana');
     ngMock.inject((Private) => {
-      const Vis = Private(VisProvider);
       const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
       vis = new Vis(indexPattern, aggConfig);
