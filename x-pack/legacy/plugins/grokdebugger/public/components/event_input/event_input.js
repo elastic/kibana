@@ -10,33 +10,31 @@ import {
   EuiPanel,
   EuiCodeEditor
 } from '@elastic/eui';
-import { EDITOR } from '../../../../../common/constants';
-import { GrokMode } from '../../../../lib/ace';
+import { EDITOR } from '../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export function PatternInput({ value, onChange }) {
+export function EventInput({ value, onChange }) {
   return (
     <EuiFormRow
       label={(
         <FormattedMessage
-          id="xpack.grokDebugger.grokPatternLabel"
-          defaultMessage="Grok Pattern"
+          id="xpack.grokDebugger.sampleDataLabel"
+          defaultMessage="Sample Data"
         />
       )}
       fullWidth
-      data-test-subj="acePatternInput"
+      data-test-subj="aceEventInput"
     >
       <EuiPanel paddingSize="s">
         <EuiCodeEditor
           width="100%"
           value={value}
           onChange={onChange}
-          mode={new GrokMode()}
           setOptions={{
             highlightActiveLine: false,
             highlightGutterLine: false,
-            minLines: EDITOR.PATTERN_MIN_LINES,
-            maxLines: EDITOR.PATTERN_MAX_LINES,
+            minLines: EDITOR.SAMPLE_DATA_MIN_LINES,
+            maxLines: EDITOR.SAMPLE_DATA_MAX_LINES
           }}
         />
       </EuiPanel>

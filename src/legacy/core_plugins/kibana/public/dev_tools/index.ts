@@ -17,17 +17,18 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-import { DevToolsRegistryProvider } from 'ui/registry/dev_tools';
-import { npStart } from 'ui/new_platform';
+import { npSetup, npStart } from 'ui/new_platform';
 
-export function hideEmptyDevTools(Private) {
-  const hasTools = !!Private(DevToolsRegistryProvider).length;
-  if (!hasTools) {
-    npStart.core.chrome.navLinks.update('kibana:dev_tools', {
-      hidden: true
-    });
-  }
-}
+import { DevToolsPlugin } from './plugin';
+import { localApplicationService } from '../local_application_service';
 
-uiModules.get('kibana').run(hideEmptyDevTools);
+const instance = new DevToolsPlugin();
+
+instance.setup(npSetup.core, {
+  __LEGACY: {
+    localApplicationService,
+  },
+});
+instance.start(npStart.core, {
+  newPlatformDevTools: npStart.plugins.devTools,
+});
