@@ -7,7 +7,13 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import uuid from 'uuid';
-import { TaskDictionary, TaskDefinition, TaskInstance, TaskStatus } from './task';
+import {
+  TaskDictionary,
+  TaskDefinition,
+  TaskInstance,
+  TaskStatus,
+  ConcreteTaskInstance,
+} from './task';
 import { FetchOpts, StoreOpts, OwnershipClaimingOpts, TaskStore } from './task_store';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { SavedObjectsSerializer, SavedObjectsSchema, SavedObjectAttributes } from 'src/core/server';
@@ -156,6 +162,35 @@ describe('TaskStore', () => {
       await expect(testSchedule({ taskType: 'nope', params: {}, state: {} })).rejects.toThrow(
         /Unsupported task type "nope"/i
       );
+    });
+  });
+
+  describe('getTask', () => {
+    test(`gets a specific task by it's ID`, async () => {
+      const id = `id-${_.random(1, 20)}`;
+      const callCluster = jest.fn();
+      const store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        callCluster,
+        maxAttempts: 2,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+      });
+
+      savedObjectsClient.get.mockResolvedValueOnce(
+        Promise.resolve({
+          id,
+          type: 'task',
+          attributes: {},
+          references: [],
+        })
+      );
+
+      const result: ConcreteTaskInstance = await store.getTask(id);
+      expect(result).toMatchObject({ id });
+      expect(savedObjectsClient.get).toHaveBeenCalledWith('task', id);
     });
   });
 

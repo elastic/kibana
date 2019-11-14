@@ -138,6 +138,15 @@ export class TaskStore {
   }
 
   /**
+   * Get a task by id
+   *
+   * @param task - The task being scheduled.
+   */
+  public async getTask(id: string): Promise<ConcreteTaskInstance> {
+    return savedObjectToConcreteTaskInstance(await this.savedObjectsRepository.get('task', id));
+  }
+
+  /**
    * Fetches a paginatable list of scheduled tasks.
    *
    * @param opts - The query options used to filter tasks
