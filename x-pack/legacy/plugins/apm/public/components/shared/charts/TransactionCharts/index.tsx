@@ -34,7 +34,6 @@ import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { TransactionLineChart } from './TransactionLineChart';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { getDurationFormatted } from '../../../../utils/formatters';
 import { DurationByCountryMap } from './DurationByCountryMap';
 import {
   TRANSACTION_PAGE_LOAD,
