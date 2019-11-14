@@ -142,6 +142,7 @@ export interface InfraDatabaseMultiResponse<Hit, Aggregation> extends InfraDatab
 }
 
 export interface InfraDatabaseFieldCapsResponse extends InfraDatabaseResponse {
+  indices: string[];
   fields: InfraFieldsResponse;
 }
 

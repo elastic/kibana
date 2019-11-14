@@ -36,10 +36,12 @@ export const initIndexPatternsValidateRoute = ({ framework }: InfraBackendLibs) 
       // Query each pattern individually, to map correctly the errors
       await Promise.all(
         indices.map(async index => {
-          const esIndices = await framework.callWithRequest(req, 'indices.get', { index });
-          const indexNames = Object.keys(esIndices);
+          const fieldCaps = await framework.callWithRequest(req, 'fieldCaps', {
+            index,
+            fields: timestamp,
+          });
 
-          if (indexNames.length === 0) {
+          if (fieldCaps.indices.length === 0) {
             errors.push({
               error: 'INDEX_NOT_FOUND',
               index,
@@ -47,24 +49,25 @@ export const initIndexPatternsValidateRoute = ({ framework }: InfraBackendLibs) 
             return;
           }
 
-          indexNames.forEach(indexName => {
-            const metadata = esIndices[indexName];
-            const timestampProperty = metadata.mappings.properties[timestamp];
+          const fieldMetadata = fieldCaps.fields[timestamp];
 
-            if (!timestampProperty) {
-              errors.push({
-                error: 'TIMESTAMP_NOT_FOUND',
-                index,
-                timestamp,
-              });
-            } else if (timestampProperty.type !== 'date') {
+          if (fieldMetadata === undefined) {
+            errors.push({
+              error: 'TIMESTAMP_NOT_FOUND',
+              index,
+              timestamp,
+            });
+          } else {
+            const fieldTypes = Object.keys(fieldMetadata);
+
+            if (fieldTypes.length > 1 || fieldTypes[0] !== 'date') {
               errors.push({
                 error: 'TIMESTAMP_NOT_VALID',
                 index,
                 timestamp,
               });
             }
-          });
+          }
         })
       );
 
