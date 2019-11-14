@@ -18,9 +18,12 @@
  */
 
 import Joi from 'joi';
+import moment from 'moment';
 import { boomify } from 'boom';
 import { CoreSetup } from 'src/core/server';
 import { getTelemetryAllowChangingOptInStatus } from '../telemetry_config';
+import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
+
 import {
   TelemetrySavedObjectAttributes,
   updateTelemetrySavedObject,
@@ -31,7 +34,7 @@ interface RegisterOptInRoutesParams {
   currentKibanaVersion: string;
 }
 
-export function registerTelemetryConfigRoutes({
+export function registerTelemetryOptInRoutes({
   core,
   currentKibanaVersion,
 }: RegisterOptInRoutesParams) {
@@ -49,8 +52,9 @@ export function registerTelemetryConfigRoutes({
     },
     handler: async (req: any, h: any) => {
       try {
+        const newOptInStatus = req.payload.enabled;
         const attributes: TelemetrySavedObjectAttributes = {
-          enabled: req.payload.enabled,
+          enabled: newOptInStatus,
           lastVersionChecked: currentKibanaVersion,
         };
         const config = req.server.config();
@@ -58,6 +62,7 @@ export function registerTelemetryConfigRoutes({
         const configTelemetryAllowChangingOptInStatus = config.get(
           'telemetry.allowChangingOptInStatus'
         );
+
         const allowChangingOptInStatus = getTelemetryAllowChangingOptInStatus({
           telemetrySavedObject: savedObjectsClient,
           configTelemetryAllowChangingOptInStatus,
@@ -65,11 +70,28 @@ export function registerTelemetryConfigRoutes({
         if (!allowChangingOptInStatus) {
           return h.response({ error: 'Not allowed to change Opt-in Status.' }).code(400);
         }
+
+        const sendUsageFrom = config.get('telemetry.sendUsageFrom');
+        if (sendUsageFrom === 'server') {
+          const optInStatusUrl = config.get('telemetry.optInStatusUrl');
+          await sendTelemetryOptInStatus(
+            { optInStatusUrl, newOptInStatus },
+            {
+              start: moment()
+                .subtract(20, 'minutes')
+                .toISOString(),
+              end: moment().toISOString(),
+              server: req.server,
+              unencrypted: false,
+            }
+          );
+        }
+
         await updateTelemetrySavedObject(savedObjectsClient, attributes);
+        return h.response({}).code(200);
       } catch (err) {
         return boomify(err);
       }
-      return h.response({}).code(200);
     },
   });
 }

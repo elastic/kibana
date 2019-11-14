@@ -16,24 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
 
-interface GetTelemetryUsageFetcherConfig {
-  configTelemetrySendUsageFrom: 'browser' | 'server';
-  telemetrySavedObject: TelemetrySavedObject;
+export function test(value: any) {
+  return value && value.__reactMount__;
 }
 
-export function getTelemetryUsageFetcher({
-  telemetrySavedObject,
-  configTelemetrySendUsageFrom,
-}: GetTelemetryUsageFetcherConfig) {
-  if (!telemetrySavedObject) {
-    return configTelemetrySendUsageFrom;
-  }
-
-  if (typeof telemetrySavedObject.sendUsageFrom === 'undefined') {
-    return configTelemetrySendUsageFrom;
-  }
-
-  return telemetrySavedObject.sendUsageFrom;
+export function print(value: any, serialize: any) {
+  // there is no proper way to correctly indent multiline values
+  // so the trick here is to use the Object representation and rewriting the root object name
+  return serialize({
+    reactNode: value.__reactMount__,
+  }).replace('Object', 'MountPoint');
 }

@@ -17,12 +17,21 @@
  * under the License.
  */
 
-// @ts-ignore
-import { getLocalStats } from './get_local_stats';
-import { StatsGetter, getStatsCollectionConfig } from '../collection_manager';
+/**
+ * A function that should mount DOM content inside the provided container element
+ * and return a handler to unmount it.
+ *
+ * @param element the container element to render into
+ * @returns a {@link UnmountCallback} that unmount the element on call.
+ *
+ * @public
+ */
+export type MountPoint = (element: HTMLElement) => UnmountCallback;
 
-export const getStats: StatsGetter = async function(config) {
-  const { callCluster, server } = getStatsCollectionConfig(config, 'data');
-
-  return [await getLocalStats({ callCluster, server })];
-};
+/**
+ * A function that will unmount the element previously mounted by
+ * the associated {@link MountPoint}
+ *
+ * @public
+ */
+export type UnmountCallback = () => void;
