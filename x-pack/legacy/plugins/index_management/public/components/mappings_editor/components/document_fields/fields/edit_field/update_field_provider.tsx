@@ -15,6 +15,7 @@ import {
   getAllDescendantAliases,
 } from '../../../../lib';
 import { NormalizedField, DataType } from '../../../../types';
+import { PARAMETERS_DEFINITION } from '../../../../constants';
 import { FieldsTree } from '../../../fields_tree';
 
 export type UpdateFieldFunc = (field: NormalizedField) => void;
@@ -61,13 +62,17 @@ export const UpdateFieldProvider = ({ children }: Props) => {
         .map(id => byId[id].path)
         .sort();
       const hasAliases = Boolean(aliases.length);
+      const nextTypeCanHaveAlias = !PARAMETERS_DEFINITION.path.targetTypesNotAllowed.includes(
+        field.source.type
+      );
 
       // We need to check if, by changing the type, we will also
       // delete possible child properties ("fields" or "properties").
       // If we will, we need to warn the user about it.
-      const requiresConfirmation = hasAliases
-        ? true
-        : showConfirmationAfterTypeChanged(previousField.source.type, field.source.type);
+      const requiresConfirmation =
+        hasAliases && !nextTypeCanHaveAlias
+          ? true
+          : showConfirmationAfterTypeChanged(previousField.source.type, field.source.type);
 
       if (requiresConfirmation) {
         setState({ isModalOpen: true, field, aliases: hasAliases ? aliases : undefined });

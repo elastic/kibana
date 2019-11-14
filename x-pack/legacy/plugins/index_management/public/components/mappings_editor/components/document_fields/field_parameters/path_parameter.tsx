@@ -10,7 +10,10 @@ import { i18n } from '@kbn/i18n';
 
 import { FormRow, UseField, SerializerFunc } from '../../../shared_imports';
 import { getFieldConfig } from '../../../lib';
+import { PARAMETERS_DEFINITION } from '../../../constants';
 import { NormalizedField, NormalizedFields, AliasOption } from '../../../types';
+
+const targetFieldTypeNotAllowed = PARAMETERS_DEFINITION.path.targetTypesNotAllowed;
 
 const getSuggestedFields = (
   allFields: NormalizedFields['byId'],
@@ -22,13 +25,8 @@ const getSuggestedFields = (
         return false;
       }
 
-      // An alias cannot point to an "object" or "nested" type
-      if (field.canHaveChildFields) {
-        return false;
-      }
-
-      // An alias cannot point to another alias
-      if (field.source.type === 'alias') {
+      // An alias cannot point certain field types ("object", "nested", "alias")
+      if (targetFieldTypeNotAllowed.includes(field.source.type)) {
         return false;
       }
 

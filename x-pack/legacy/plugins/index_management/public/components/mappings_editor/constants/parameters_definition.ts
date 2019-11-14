@@ -14,7 +14,7 @@ import {
   fieldFormatters,
 } from '../shared_imports';
 import { INDEX_DEFAULT } from '../constants';
-import { AliasOption } from '../types';
+import { AliasOption, DataType } from '../types';
 
 const { toInt } = fieldFormatters;
 const { emptyField, containsCharsField } = fieldValidators;
@@ -364,6 +364,7 @@ export const PARAMETERS_DEFINITION = {
       ],
       serializer: (value: AliasOption[]) => (value.length === 0 ? '' : value[0].id),
     } as FieldConfig<any, string>,
+    targetTypesNotAllowed: ['object', 'nested', 'alias'] as DataType[],
   },
   position_increment_gap: {
     fieldConfig: {

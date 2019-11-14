@@ -16,6 +16,7 @@ import {
   updateFieldsPathAfterFieldNameChange,
   getAllDescendantAliases,
 } from './lib';
+import { PARAMETERS_DEFINITION } from './constants';
 
 export interface MappingsConfiguration {
   dynamic: boolean | string;
@@ -376,8 +377,11 @@ export const reducer = (state: State, action: Action): State => {
           };
         } else {
           const aliases = getAllDescendantAliases(previousField, updatedFields);
+          const nextTypeCanHaveAlias = !PARAMETERS_DEFINITION.path.targetTypesNotAllowed.includes(
+            newField.source.type
+          );
 
-          if (shouldDeleteChildFields && Boolean(aliases.length)) {
+          if (shouldDeleteChildFields && !nextTypeCanHaveAlias && Boolean(aliases.length)) {
             aliases.forEach(aliasId => {
               updatedFields = removeFieldFromMap(aliasId, updatedFields);
             });
