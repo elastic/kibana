@@ -52,7 +52,6 @@ export interface FrameworkAdapter {
     method: 'indices.getAlias' | 'indices.get', // eslint-disable-line
     options?: object
   ): Promise<DatabaseGetIndicesResponse>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getIndexPatternsService(req: FrameworkRequest): FrameworkIndexPatternsService;
   getSavedObjectsService(): Legacy.SavedObjectsService;
 }

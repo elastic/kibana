@@ -32,6 +32,7 @@ export interface RequestFacade {
   getActionsClient?: Legacy.Request['getActionsClient'];
   getUiSettingsService: Legacy.Request['getUiSettingsService'];
   headers: Legacy.Request['headers'];
+  method: Legacy.Request['method'];
   params: Legacy.Request['params'];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: any;
