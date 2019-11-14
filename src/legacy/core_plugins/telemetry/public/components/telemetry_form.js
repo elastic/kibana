@@ -117,7 +117,7 @@ export class TelemetryForm extends Component {
                 type: 'boolean',
                 value: telemetryOptInProvider.getOptIn() || false,
                 description: this.renderDescription(),
-                defVal: false,
+                defVal: true,
                 ariaName: i18n.translate('telemetry.provideUsageStatisticsLabel', { defaultMessage: 'Provide usage statistics' })
               }}
               save={this.toggleOptIn}
