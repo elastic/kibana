@@ -36,7 +36,7 @@ import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
 import { TimeRange, TimeHistoryContract } from 'src/plugins/data/public';
-import { useKibana } from '../../../../../../../plugins/kibana_react/public';
+import { useKibana, toMountPoint } from '../../../../../../../plugins/kibana_react/public';
 import { PersistedLog } from '../../../../../../../plugins/data/public';
 
 import { IndexPattern } from '../../../index_patterns';
@@ -298,7 +298,7 @@ function QueryBarTopRowUI(props: Props) {
           id: 'data.query.queryBar.luceneSyntaxWarningTitle',
           defaultMessage: 'Lucene syntax warning',
         }),
-        text: (
+        text: toMountPoint(
           <div>
             <p>
               <FormattedMessage
