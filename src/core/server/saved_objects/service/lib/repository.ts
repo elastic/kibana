@@ -111,7 +111,7 @@ const DEFAULT_REFRESH_SETTING = 'wait_for';
 export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
 
 /**
- * @internal
+ * @public
  */
 export class SavedObjectsRepository {
   private _migrator: KibanaMigrator;
@@ -123,6 +123,7 @@ export class SavedObjectsRepository {
   private _unwrappedCallCluster: CallCluster;
   private _serializer: SavedObjectsSerializer;
 
+  /** @internal */
   constructor(options: SavedObjectsRepositoryOptions) {
     const {
       index,

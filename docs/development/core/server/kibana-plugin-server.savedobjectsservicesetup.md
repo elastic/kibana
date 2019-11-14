@@ -4,13 +4,7 @@
 
 ## SavedObjectsServiceSetup interface
 
-Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing and querying state.
-
-Note: The Saved Object setup API's should only be used for creating and registering client wrappers. The Saved Objects client can be access from the [SavedObjectsServiceStart](./kibana-plugin-server.savedobjectsservicestart.md) or the [route handler context](./kibana-plugin-server.requesthandlercontext.md)<!-- -->.
-
-Warning: Constructing a Saved Objects client for use within your own plugin won't have any of the registered wrappers applied and is considered a anti-pattern. There is almost always a better alternative that doesn't require constructing your own client.
-
-When plugins access the Saved Objects client, a new client is created using the factory provided to `setClientFactory` and wrapped by all wrappers registered through `addClientWrapper`<!-- -->. To create a factory or wrapper, plugins will have to construct a Saved Objects client. First create a repository by calling `scopedRepository` or `internalRepository` and then use this repository as the argument to the [SavedObjectsClient](./kibana-plugin-server.savedobjectsclient.md) constructor.
+Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods for creating and registering Saved Object client wrappers.
 
 <b>Signature:</b>
 
@@ -23,9 +17,15 @@ export interface SavedObjectsServiceSetup
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [addClientWrapper](./kibana-plugin-server.savedobjectsservicesetup.addclientwrapper.md) | <code>(priority: number, id: string, factory: SavedObjectsClientWrapperFactory&lt;KibanaRequest&gt;) =&gt; void</code> | Add a client wrapper with the given priority. |
-|  [internalRepository](./kibana-plugin-server.savedobjectsservicesetup.internalrepository.md) | <code>(extraTypes?: string[]) =&gt; ISavedObjectsRepository</code> | Creates a [Saved Objects repository](./kibana-plugin-server.isavedobjectsrepository.md) that uses the internal Kibana user for authenticating with Elasticsearch.<!-- -->For a client that uses the credentials and associated privileges of the incoming request see the Saved Objects client exposed from the [RequestHandlerContext](./kibana-plugin-server.requesthandlercontext.md)<!-- -->. |
+|  [internalRepository](./kibana-plugin-server.savedobjectsservicesetup.internalrepository.md) | <code>(extraTypes?: string[]) =&gt; ISavedObjectsRepository</code> | Creates a [Saved Objects repository](./kibana-plugin-server.isavedobjectsrepository.md) that uses the internal Kibana user for authenticating with Elasticsearch. |
 |  [scopedRepository](./kibana-plugin-server.savedobjectsservicesetup.scopedrepository.md) | <code>(req: KibanaRequest, extraTypes?: string[]) =&gt; ISavedObjectsRepository</code> | Creates a [Saved Objects repository](./kibana-plugin-server.isavedobjectsrepository.md) that uses the credentials from the passed in request to authenticate with Elasticsearch. |
 |  [setClientFactory](./kibana-plugin-server.savedobjectsservicesetup.setclientfactory.md) | <code>(customClientFactory: SavedObjectsClientFactory&lt;KibanaRequest&gt;) =&gt; void</code> | Set a default factory for creating Saved Objects clients. Only one client factory can be set, subsequent calls to this method will fail. |
+
+## Remarks
+
+Note: The Saved Object setup API's should only be used for creating and registering client wrappers. Constructing a Saved Objects client or repository for use within your own plugin won't have any of the registered wrappers applied and is considered an anti-pattern. Use the Saved Objects client from the [SavedObjectsServiceStart\#scopedClient](./kibana-plugin-server.savedobjectsservicestart.md) method or the [route handler context](./kibana-plugin-server.requesthandlercontext.md) instead.
+
+When plugins access the Saved Objects client, a new client is created using the factory provided to `setClientFactory` and wrapped by all wrappers registered through `addClientWrapper`<!-- -->. To create a factory or wrapper, plugins will have to construct a Saved Objects client. First create a repository by calling `scopedRepository` or `internalRepository` and then use this repository as the argument to the [SavedObjectsClient](./kibana-plugin-server.savedobjectsclient.md) constructor.
 
 ## Example
 

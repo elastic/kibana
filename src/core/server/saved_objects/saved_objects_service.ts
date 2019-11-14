@@ -45,17 +45,18 @@ import { Logger } from '..';
 
 /**
  * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
- * use Elasticsearch for storing and querying state.
+ * use Elasticsearch for storing and querying state. The
+ * SavedObjectsServiceSetup API exposes methods for creating and registering
+ * Saved Object client wrappers.
  *
+ * @remarks
  * Note: The Saved Object setup API's should only be used for creating and
- * registering client wrappers. The Saved Objects client can be access from the
- * {@link SavedObjectsServiceStart} or the
- * {@link RequestHandlerContext | route handler context}.
- *
- * Warning: Constructing a Saved Objects client for use within your own plugin
- * won't have any of the registered wrappers applied and is considered a
- * anti-pattern. There is almost always a better alternative that doesn't
- * require constructing your own client.
+ * registering client wrappers. Constructing a Saved Objects client or
+ * repository for use within your own plugin won't have any of the registered
+ * wrappers applied and is considered an anti-pattern. Use the Saved Objects
+ * client from the
+ * {@link SavedObjectsServiceStart | SavedObjectsServiceStart#scopedClient }
+ * method or the {@link RequestHandlerContext | route handler context} instead.
  *
  * When plugins access the Saved Objects client, a new client is created using
  * the factory provided to `setClientFactory` and wrapped by all wrappers
@@ -98,6 +99,15 @@ export interface SavedObjectsServiceSetup {
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
    * uses the credentials from the passed in request to authenticate with
    * Elasticsearch.
+   *
+   * @remarks
+   * The repository should only be used for creating and registering a client
+   * factory or client wrapper. Using the repository directly for interacting
+   * with Saved Objects is an anti-pattern. Use the Saved Objects client from
+   * the
+   * {@link SavedObjectsServiceStart | SavedObjectsServiceStart#scopedClient }
+   * method or the {@link RequestHandlerContext | route handler context}
+   * instead.
    */
   scopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
 
@@ -105,9 +115,14 @@ export interface SavedObjectsServiceSetup {
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
    * uses the internal Kibana user for authenticating with Elasticsearch.
    *
-   * For a client that uses the credentials and associated privileges of the
-   * incoming request see the Saved Objects client exposed from the
-   * {@link RequestHandlerContext}.
+   * @remarks
+   * The repository should only be used for creating and registering a client
+   * factory or client wrapper. Using the repository directly for interacting
+   * with Saved Objects is an anti-pattern. Use the Saved Objects client from
+   * the
+   * {@link SavedObjectsServiceStart | SavedObjectsServiceStart#scopedClient }
+   * method or the {@link RequestHandlerContext | route handler context}
+   * instead.
    */
   internalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
 }
@@ -124,7 +139,9 @@ export interface InternalSavedObjectsServiceSetup extends SavedObjectsServiceSet
 
 /**
  * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
- * use Elasticsearch for storing and querying state.
+ * use Elasticsearch for storing and querying state. The
+ * SavedObjectsServiceStart API provides a scoped Saved Objects client for
+ * interacting with Saved Objects.
  *
  * @public
  */
@@ -132,7 +149,8 @@ export interface SavedObjectsServiceStart {
   /**
    * Creates a {@link SavedObjectsClientContract | Saved Objects client} that
    * uses the credentials from the passed in request to authenticate with
-   * Elasticsearch. Any middleware
+   * Elasticsearch. If other plugins have registered Saved Objects client
+   * wrappers, these will be applied to extend the functionality of the client.
    *
    * A client that is already scoped to the incoming request is also exposed
    * from the route handler context see {@link RequestHandlerContext}.

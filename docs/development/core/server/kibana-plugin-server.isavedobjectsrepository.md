@@ -4,7 +4,7 @@
 
 ## ISavedObjectsRepository type
 
-See 
+See [SavedObjectsRepository](./kibana-plugin-server.savedobjectsrepository.md)
 
 <b>Signature:</b>
 

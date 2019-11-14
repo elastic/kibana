@@ -4,7 +4,7 @@
 
 ## SavedObjectsServiceStart interface
 
-Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing and querying state.
+Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceStart API provides a scoped Saved Objects client for interacting with Saved Objects.
 
 <b>Signature:</b>
 
@@ -16,5 +16,5 @@ export interface SavedObjectsServiceStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [scopedClient](./kibana-plugin-server.savedobjectsservicestart.scopedclient.md) | <code>(req: KibanaRequest, options?: SavedObjectsClientProviderOptions) =&gt; SavedObjectsClientContract</code> | Creates a [Saved Objects client](./kibana-plugin-server.savedobjectsclientcontract.md) that uses the credentials from the passed in request to authenticate with Elasticsearch. Any middleware<!-- -->A client that is already scoped to the incoming request is also exposed from the route handler context see [RequestHandlerContext](./kibana-plugin-server.requesthandlercontext.md)<!-- -->. |
+|  [scopedClient](./kibana-plugin-server.savedobjectsservicestart.scopedclient.md) | <code>(req: KibanaRequest, options?: SavedObjectsClientProviderOptions) =&gt; SavedObjectsClientContract</code> | Creates a [Saved Objects client](./kibana-plugin-server.savedobjectsclientcontract.md) that uses the credentials from the passed in request to authenticate with Elasticsearch. If other plugins have registered Saved Objects client wrappers, these will be applied to extend the functionality of the client.<!-- -->A client that is already scoped to the incoming request is also exposed from the route handler context see [RequestHandlerContext](./kibana-plugin-server.requesthandlercontext.md)<!-- -->. |
 

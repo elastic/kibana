@@ -730,8 +730,6 @@ export interface IRouter {
 // @public
 export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolean;
 
-// Warning: (ae-incompatible-release-tags) The symbol "ISavedObjectsRepository" is marked as @public, but its signature references "SavedObjectsRepository" which is marked as @internal
-// 
 // @public
 export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
 
@@ -1191,6 +1189,7 @@ export interface SavedObjectsBulkUpdateResponse<T extends SavedObjectAttributes 
 
 // @public (undocumented)
 export class SavedObjectsClient {
+    // @internal
     constructor(repository: ISavedObjectsRepository);
     bulkCreate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T extends SavedObjectAttributes = any>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
@@ -1522,9 +1521,11 @@ export interface SavedObjectsRawDoc {
     _type?: string;
 }
 
-// @internal (undocumented)
+// @public (undocumented)
 export class SavedObjectsRepository {
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsRepositoryOptions" needs to be exported by the entry point index.d.ts
+    // 
+    // @internal
     constructor(options: SavedObjectsRepositoryOptions);
     bulkCreate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T extends SavedObjectAttributes = any>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;

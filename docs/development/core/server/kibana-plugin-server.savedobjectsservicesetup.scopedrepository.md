@@ -11,3 +11,8 @@ Creates a [Saved Objects repository](./kibana-plugin-server.isavedobjectsreposit
 ```typescript
 scopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
 ```
+
+## Remarks
+
+The repository should only be used for creating and registering a client factory or client wrapper. Using the repository directly for interacting with Saved Objects is an anti-pattern. Use the Saved Objects client from the [SavedObjectsServiceStart\#scopedClient](./kibana-plugin-server.savedobjectsservicestart.md) method or the [route handler context](./kibana-plugin-server.requesthandlercontext.md) instead.
+

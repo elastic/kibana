@@ -173,6 +173,7 @@ export class SavedObjectsClient {
 
   private _repository: ISavedObjectsRepository;
 
+  /** @internal */
   constructor(repository: ISavedObjectsRepository) {
     this._repository = repository;
   }

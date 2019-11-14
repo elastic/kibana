@@ -59,18 +59,6 @@ describe('SavedObjectsService', () => {
         'success'
       );
     });
-
-    // it('resolves with clientProvider', async () => {
-    //   const coreContext = mockCoreContext.create();
-    //   const soService = new SavedObjectsService(coreContext);
-    //   const coreSetup = ({
-    //     elasticsearch: { adminClient$: of({ callAsInternalUser: jest.fn() }) },
-    //     legacyPlugins: { uiExports: {}, pluginExtendedConfig: {} },
-    //   } as unknown) as SavedObjectsSetupDeps;
-
-    //   const savedObjectsSetup = await soService.setup(coreSetup);
-    //   // expect(savedObjectsSetup.clientProvider).toBeInstanceOf(SavedObjectsClientProvider);
-    // });
   });
 
   describe('#start()', () => {
