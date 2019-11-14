@@ -62,6 +62,9 @@ export const npSetup = {
         }
       },
     },
+    share: {
+      register: () => {},
+    },
     inspector: {
       registerView: () => undefined,
       __LEGACY: {
@@ -155,6 +158,9 @@ export const npStart = {
           history: sinon.fake(),
         },
       },
+    },
+    share: {
+      toggleShareContextMenu: () => {},
     },
     inspector: {
       isAvailable: () => false,
