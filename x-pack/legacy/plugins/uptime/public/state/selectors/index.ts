@@ -3,8 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { AppState } from '../../state';
 
-export const isIntegrationsPopupOpen = (state: AppState) => state.ui.integrationsPopoverOpen;
+export const getBasePath = ({ ui: { basePath } }: AppState) => basePath;
 
-export const getBasePath = (state: AppState) => state.ui.basePath;
+export const isIntegrationsPopupOpen = ({ ui: { integrationsPopoverOpen } }: AppState) =>
+  integrationsPopoverOpen;
