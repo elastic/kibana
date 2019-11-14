@@ -100,7 +100,9 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     },
 
     async assertAdvancedQueryEditorSwitchCheckState(expectedCheckState: boolean) {
-      const actualCheckState = await testSubjects.isSelected('transformAdvancedQueryEditorSwitch');
+      const actualCheckState =
+        (await testSubjects.getAttribute('transformAdvancedQueryEditorSwitch', 'aria-checked')) ===
+        'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Advanced query editor switch check state should be ${expectedCheckState} (got ${actualCheckState})`
@@ -193,7 +195,9 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     },
 
     async assertAdvancedPivotEditorSwitchCheckState(expectedCheckState: boolean) {
-      const actualCheckState = await testSubjects.isSelected('transformAdvancedPivotEditorSwitch');
+      const actualCheckState =
+        (await testSubjects.getAttribute('transformAdvancedPivotEditorSwitch', 'aria-checked')) ===
+        'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Advanced pivot editor switch check state should be ${expectedCheckState} (got ${actualCheckState})`
@@ -266,7 +270,9 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     },
 
     async assertCreateIndexPatternSwitchCheckState(expectedCheckState: boolean) {
-      const actualCheckState = await testSubjects.isSelected('transformCreateIndexPatternSwitch');
+      const actualCheckState =
+        (await testSubjects.getAttribute('transformCreateIndexPatternSwitch', 'aria-checked')) ===
+        'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Create index pattern switch check state should be ${expectedCheckState} (got ${actualCheckState})`
@@ -278,7 +284,9 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     },
 
     async assertContinuousModeSwitchCheckState(expectedCheckState: boolean) {
-      const actualCheckState = await testSubjects.isSelected('transformContinuousModeSwitch');
+      const actualCheckState =
+        (await testSubjects.getAttribute('transformContinuousModeSwitch', 'aria-checked')) ===
+        'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Continuous mode switch check state should be ${expectedCheckState} (got ${actualCheckState})`
