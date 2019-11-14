@@ -34,6 +34,9 @@ export interface Route<
   path: TPath;
   method?: TMethod;
   params?: TParams;
+  options?: {
+    tags: Array<'access:apm' | 'access:apm_write'>;
+  };
   handler: (
     req: Request,
     params: DecodeParams<TParams>,
@@ -92,7 +95,9 @@ type GetOptionalParamKeys<TParams extends Params> = keyof PickByValue<
   {
     [key in keyof TParams]: TParams[key] extends t.PartialType<any>
       ? false
-      : (TParams[key] extends t.Any ? true : false);
+      : TParams[key] extends t.Any
+      ? true
+      : false;
   },
   false
 >;
