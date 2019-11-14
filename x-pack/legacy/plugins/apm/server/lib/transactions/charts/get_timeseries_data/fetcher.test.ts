@@ -21,6 +21,7 @@ describe('timeseriesFetcher', () => {
         start: 1528113600000,
         end: 1528977600000,
         client: { search: clientSpy } as any,
+        internalClient: { search: clientSpy } as any,
         config: {
           get: () => 'myIndex' as any,
           has: () => true
