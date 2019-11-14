@@ -25,5 +25,12 @@ export default function({ getService }: FtrProviderContext) {
       const { body: indexTemplate } = await es.indices.getTemplate({ name: templateName });
       expect(indexTemplate[templateName].index_patterns).to.eql([indexPattern]);
     });
+
+    // Checks if template loading worked as expected
+    expect(response).to.eql({ acknowledged: true });
+
+    const { body: indexTemplate } = await es.indices.getTemplate({ name: templateName });
+    // Checks if the content of the template that was loaded is as expected
+    expect(indexTemplate[templateName].index_patterns).to.eql([indexPattern]);
   });
 }
