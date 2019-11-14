@@ -21,7 +21,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../..
 import { ExpressionInterpretWithHandlers, ExpressionExecutor } from './types';
 import { FunctionsRegistry, RenderFunctionsRegistry, TypesRegistry } from './registries';
 import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
-import { setCoreStart, setInspector } from './services';
+import { setCoreStart, setInspector, setInterpreter, setRenderersRegistry } from './services';
 import { clog as clogFunction } from './functions/clog';
 import { font as fontFunction } from './functions/font';
 import { kibana as kibanaFunction } from './functions/kibana';
@@ -93,6 +93,8 @@ export class ExpressionsPublicPlugin
   public setup(core: CoreSetup, { inspector }: ExpressionsSetupDeps): ExpressionsSetup {
     const { functions, renderers, types } = this;
 
+    setRenderersRegistry(renderers);
+
     const registerFunction: ExpressionsSetup['registerFunction'] = fn => {
       functions.register(fn);
     };
@@ -131,6 +133,8 @@ export class ExpressionsPublicPlugin
       const executor: ExpressionExecutor = { interpreter: { interpretAst } };
       return executor;
     };
+
+    setInterpreter(getExecutor().interpreter);
 
     const setup: ExpressionsSetup = {
       registerFunction,
