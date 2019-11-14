@@ -30,6 +30,23 @@ export interface ReportingPlugin {
   };
   browserDriverFactory: HeadlessChromiumDriverFactory;
 }
+
+export interface ReportingConfigOptions {
+  browser: BrowserConfig;
+  poll: {
+    jobCompletionNotifier: {
+      interval: number;
+      intervalErrorMultiplier: number;
+    };
+    jobsRefresh: {
+      interval: number;
+      intervalErrorMultiplier: number;
+    };
+  };
+  queue: QueueConfig;
+  capture: CaptureConfig;
+}
+
 export interface NetworkPolicyRule {
   allow: boolean;
   protocol: string;

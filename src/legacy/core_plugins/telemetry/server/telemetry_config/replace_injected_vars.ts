@@ -19,7 +19,7 @@
 
 import { getTelemetrySavedObject } from '../telemetry_repository';
 import { getTelemetryOptIn } from './get_telemetry_opt_in';
-import { getTelemetryUsageFetcher } from './get_telemetry_usage_fetcher';
+import { getTelemetrySendUsageFrom } from './get_telemetry_send_usage_from';
 import { getTelemetryAllowChangingOptInStatus } from './get_telemetry_allow_changing_opt_in_status';
 
 export async function replaceTelemetryInjectedVars(request: any) {
@@ -51,7 +51,7 @@ export async function replaceTelemetryInjectedVars(request: any) {
     currentKibanaVersion,
   });
 
-  const telemetrySendUsageFrom = getTelemetryUsageFetcher({
+  const telemetrySendUsageFrom = getTelemetrySendUsageFrom({
     configTelemetrySendUsageFrom,
     telemetrySavedObject,
   });
