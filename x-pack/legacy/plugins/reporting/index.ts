@@ -21,7 +21,7 @@ import { config as reportingConfig } from './config';
 import { logConfiguration } from './log_configuration';
 import { createBrowserDriverFactory } from './server/browsers';
 import { getReportingUsageCollector } from './server/usage';
-import { ReportingConfigOptions, ReportingPluginSpecOptions, ServerFacade } from './types';
+import { ReportingConfigOptions, ReportingPluginSpecOptions, ServerFacade } from './types.d';
 
 const kbToBase64Length = (kb: number) => {
   return Math.floor((kb * 1024 * 8) / 6);
