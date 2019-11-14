@@ -62,10 +62,10 @@ function DefaultEditorBottomBar({
 
   return (
     <EuiBottomBar>
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false} />
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
+          <EuiFlexGroup gutterSize="s" responsive={false}>
             {enableAutoApply && (
               <EuiFlexItem grow={false}>
                 <EuiToolTip
