@@ -19,6 +19,7 @@ interface UpdateTests {
   spaceAware: UpdateTest;
   notSpaceAware: UpdateTest;
   hiddenType: UpdateTest;
+  sharedType: UpdateTest;
   doesntExist: UpdateTest;
 }
 
@@ -51,6 +52,12 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   const expectHiddenTypeNotFound = createExpectNotFound(
     'hiddentype',
     'hiddentype_1',
+    DEFAULT_SPACE_ID
+  );
+
+  const expectSharedTypeNotFound = createExpectNotFound(
+    'sharedtype',
+    'default_and_space_1',
     DEFAULT_SPACE_ID
   );
 
@@ -114,6 +121,23 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
+  const expectSharedTypeResults = (resp: { [key: string]: any }) => {
+    // loose ISO8601 UTC time with milliseconds validation
+    expect(resp.body)
+      .to.have.property('updated_at')
+      .match(/^[\d-]{10}T[\d:\.]{12}Z$/);
+
+    expect(resp.body).to.eql({
+      id: 'default_and_space_1',
+      type: 'sharedtype',
+      updated_at: resp.body.updated_at,
+      version: resp.body.version,
+      attributes: {
+        name: 'My favorite shared type',
+      },
+    });
+  };
+
   const makeUpdateTest = (describeFn: DescribeFn) => (
     description: string,
     definition: UpdateTestDefinition
@@ -144,7 +168,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         await supertest
           .put(
             `${getUrlPrefix(
-              otherSpaceId || spaceId
+              spaceId
             )}/api/saved_objects/globaltype/8121a00-8efd-21e7-1cb3-34ab966434445`
           )
           .auth(user.username, user.password)
@@ -159,7 +183,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
       it(`should return ${tests.hiddenType.statusCode} for hiddentype doc`, async () => {
         await supertest
-          .put(`${getUrlPrefix(otherSpaceId || spaceId)}/api/saved_objects/hiddentype/hiddentype_1`)
+          .put(`${getUrlPrefix(spaceId)}/api/saved_objects/hiddentype/hiddentype_1`)
           .auth(user.username, user.password)
           .send({
             attributes: {
@@ -168,6 +192,19 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           })
           .expect(tests.hiddenType.statusCode)
           .then(tests.hiddenType.response);
+      });
+
+      it(`should return ${tests.sharedType.statusCode} for sharedtype doc`, async () => {
+        await supertest
+          .put(`${getUrlPrefix(spaceId)}/api/saved_objects/sharedtype/default_and_space_1`)
+          .auth(user.username, user.password)
+          .send({
+            attributes: {
+              name: 'My favorite shared type',
+            },
+          })
+          .expect(tests.sharedType.statusCode)
+          .then(tests.sharedType.response);
       });
 
       describe('unknown id', () => {
@@ -198,10 +235,12 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   return {
     createExpectDoesntExistNotFound,
     createExpectSpaceAwareNotFound,
-    expectSpaceNotFound: expectHiddenTypeNotFound,
+    expectHiddenTypeNotFound,
     expectDoesntExistRbacForbidden,
     expectNotSpaceAwareRbacForbidden,
     expectNotSpaceAwareResults,
+    expectSharedTypeNotFound,
+    expectSharedTypeResults,
     expectSpaceAwareRbacForbidden,
     expectSpaceAwareResults,
     expectHiddenTypeRbacForbidden,

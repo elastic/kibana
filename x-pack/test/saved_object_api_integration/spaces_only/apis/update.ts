@@ -18,7 +18,9 @@ export default function({ getService }: FtrProviderContext) {
       expectSpaceAwareResults,
       createExpectDoesntExistNotFound,
       expectNotSpaceAwareResults,
-      expectSpaceNotFound,
+      expectSharedTypeNotFound,
+      expectSharedTypeResults,
+      expectHiddenTypeNotFound,
       updateTest,
     } = updateTestSuiteFactory(esArchiver, supertest);
 
@@ -35,7 +37,11 @@ export default function({ getService }: FtrProviderContext) {
         },
         hiddenType: {
           statusCode: 404,
-          response: expectSpaceNotFound,
+          response: expectHiddenTypeNotFound,
+        },
+        sharedType: {
+          statusCode: 200,
+          response: expectSharedTypeResults,
         },
         doesntExist: {
           statusCode: 404,
@@ -57,7 +63,11 @@ export default function({ getService }: FtrProviderContext) {
         },
         hiddenType: {
           statusCode: 404,
-          response: expectSpaceNotFound,
+          response: expectHiddenTypeNotFound,
+        },
+        sharedType: {
+          statusCode: 200,
+          response: expectSharedTypeResults,
         },
         doesntExist: {
           statusCode: 404,
@@ -66,8 +76,8 @@ export default function({ getService }: FtrProviderContext) {
       },
     });
 
-    updateTest('objects that exist in another space (space_1)', {
-      spaceId: SPACES.DEFAULT.spaceId,
+    updateTest('objects that exist in another space (in space_2 updating object in space_1)', {
+      spaceId: SPACES.SPACE_2.spaceId,
       otherSpaceId: SPACES.SPACE_1.spaceId,
       tests: {
         spaceAware: {
@@ -80,11 +90,15 @@ export default function({ getService }: FtrProviderContext) {
         },
         hiddenType: {
           statusCode: 404,
-          response: expectSpaceNotFound,
+          response: expectHiddenTypeNotFound,
+        },
+        sharedType: {
+          statusCode: 404,
+          response: expectSharedTypeNotFound,
         },
         doesntExist: {
           statusCode: 404,
-          response: createExpectDoesntExistNotFound(),
+          response: createExpectDoesntExistNotFound(SPACES.SPACE_2.spaceId),
         },
       },
     });
