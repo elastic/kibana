@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { uiRegistry } from './_registry';
+import { PluginInitializerContext } from 'kibana/public';
+import { DevToolsPlugin } from './plugin';
 
-export const DevToolsRegistryProvider = uiRegistry({
-  name: 'devTools',
-  index: ['name'],
-  order: ['order']
-});
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DevToolsPlugin();
+}
 
+export * from './plugin';
