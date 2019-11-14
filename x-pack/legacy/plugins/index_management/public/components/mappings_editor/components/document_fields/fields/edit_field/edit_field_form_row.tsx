@@ -92,7 +92,7 @@ export const EditFieldFormRow = React.memo(
       );
 
     const renderContent = () => (
-      <EuiFlexGroup className="mappings-editor__edit-field__formRow">
+      <EuiFlexGroup className="mappingsEditor__editField__formRow">
         {withToggle && (
           <EuiFlexItem grow={false} className="mappingsEditor__editFieldFormRow__toggle">
             {renderToggleInput()}
@@ -110,12 +110,12 @@ export const EditFieldFormRow = React.memo(
                   <button
                     onClick={onClickTitle}
                     type="button"
-                    className="mappings-editor__edit-field__formRow__btnTitle"
+                    className="mappingsEditor__editField__formRow__btnTitle"
                   >
                     <EuiTitle
                       id={`${ariaId}-title`}
                       size={sizeTitle}
-                      className="mappings-editor__edit-field__formRow__title"
+                      className="mappingsEditor__editField__formRow__title"
                     >
                       {title}
                     </EuiTitle>

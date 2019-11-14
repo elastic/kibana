@@ -14,7 +14,7 @@ interface Props {
 
 export const EditFieldSection = ({ title, children }: Props) => {
   return (
-    <section className="mappings-editor__edit-field__section">
+    <section className="mappingsEditor__editField__section">
       {title && (
         <>
           <EuiTitle size="s">

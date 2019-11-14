@@ -93,7 +93,7 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
                   onClose={exitEdit}
                   aria-labelledby="mappingsEditorFieldEditTitle"
                   size="m"
-                  className="mappings-editor__edit-field"
+                  className="mappingsEditor__editField"
                   maxWidth={720}
                 >
                   <EuiFlyoutHeader>

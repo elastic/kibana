@@ -18,7 +18,7 @@ export const FieldsList = React.memo(function FieldsListComponent({ fields, tree
     return null;
   }
   return (
-    <ul className="mappings-editor__fields-list">
+    <ul className="mappingsEditor__fieldsList">
       {fields.map((field, index) => (
         <FieldsListItemContainer
           key={field.id}

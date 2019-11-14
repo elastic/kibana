@@ -18,7 +18,7 @@ interface Props {
 
 export const Tree = ({ tree }: Props) => {
   return (
-    <ul className="tree">
+    <ul className="esUiTree">
       {tree.map((treeItem, i) => (
         <TreeItemComponent key={i} treeItem={treeItem} />
       ))}

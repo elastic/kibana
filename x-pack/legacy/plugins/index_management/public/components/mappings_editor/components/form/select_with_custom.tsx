@@ -41,11 +41,11 @@ export const SelectWithCustom = ({ path, options, defaultValue, config, label }:
   return (
     <UseField path={path} config={fieldConfig}>
       {field => (
-        <div className="mappings-editor__select-with-custom">
+        <div className="mappingsEditor__selectWithCustom">
           <EuiButtonEmpty
             size="xs"
             onClick={toggleCustom(field)}
-            className="mappings-editor__select-with-custom__button"
+            className="mappingsEditor__selectWithCustom__button"
           >
             {isCustom
               ? i18n.translate('xpack.idxMgmt.mappingsEditor.predefinedButtonLabel', {

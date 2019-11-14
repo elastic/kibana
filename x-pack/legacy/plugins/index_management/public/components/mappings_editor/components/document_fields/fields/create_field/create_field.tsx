@@ -174,10 +174,10 @@ export const CreateField = React.memo(function CreateFieldComponent({
     <EuiOutsideClickDetector onOutsideClick={onClickOutside}>
       <Form form={form} FormWrapper={formWrapper} onSubmit={submitForm}>
         <div
-          className={classNames('mappings-editor__create-field-wrapper', {
-            'mappings-editor__create-field-wrapper--toggle':
+          className={classNames('mappingsEditor__createFieldWrapper', {
+            'mappingsEditor__createFieldWrapper--toggle':
               Boolean(maxNestedDepth) && maxNestedDepth! > 0,
-            'mappings-editor__create-field-wrapper--multi-field': isMultiField,
+            'mappingsEditor__createFieldWrapper--multiField': isMultiField,
           })}
           style={{
             paddingLeft: `${
@@ -187,10 +187,10 @@ export const CreateField = React.memo(function CreateFieldComponent({
             }px`,
           }}
         >
-          <div className="mappings-editor__create-field-content">
+          <div className="mappingsEditor__createFieldContent">
             <EuiFlexGroup gutterSize="s" alignItems="center">
               {isMultiField && (
-                <EuiFlexItem grow={false} className="mappings-editor__create-field-content__icon">
+                <EuiFlexItem grow={false} className="mappingsEditor__createFieldContent__icon">
                   <EuiIcon type="link" />
                 </EuiFlexItem>
               )}
@@ -206,7 +206,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
               {({ type, subType }) => {
                 const ParametersForm = getParametersFormForType(type, subType);
                 return ParametersForm ? (
-                  <div className="mappings-editor__create-field-required-props">
+                  <div className="mappingsEditor__createFieldRequiredProps">
                     <ParametersForm allFields={allFields} />
                   </div>
                 ) : null;

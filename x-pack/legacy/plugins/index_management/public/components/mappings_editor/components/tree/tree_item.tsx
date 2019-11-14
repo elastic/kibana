@@ -15,8 +15,8 @@ interface Props {
 
 export const TreeItem = ({ treeItem }: Props) => {
   return (
-    <li className="tree-item">
-      <div>{treeItem.label}</div>
+    <li className="esUiTreeItem">
+      <div className="esUiTreeItem__label">{treeItem.label}</div>
       {treeItem.children && <Tree tree={treeItem.children} />}
     </li>
   );

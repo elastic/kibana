@@ -19,7 +19,7 @@ export const AdvancedSettingsWrapper = ({ children }: Props) => {
   };
 
   return (
-    <div className="mappings-editor__edit-field__advanced-settings">
+    <div className="mappingsEditor__editField__advancedSettings">
       <div>
         <EuiButtonEmpty onClick={toggleIsVisilbe}>
           {isVisible ? 'Hide' : 'Show'} advanced settings
