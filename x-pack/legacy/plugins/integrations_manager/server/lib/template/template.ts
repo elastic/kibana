@@ -15,7 +15,15 @@ export function getTemplate(indexPattern: string): object {
   return template;
 }
 
-function getBaseTemplate() {
+interface Template {
+  order: number;
+  index_patterns: string[];
+  settings: object;
+  mappings: object;
+  aliases: object;
+}
+
+function getBaseTemplate(): Template {
   return {
     // We need to decide which order we use for the templates
     order: 1,
