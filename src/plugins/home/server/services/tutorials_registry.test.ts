@@ -15,4 +15,109 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- */ import { TutorialsRegistry } from './tutorials_registry';
+ */
+
+import { TutorialsRegistry } from './tutorials_registry';
+import { coreMock } from '../../../../core/server/mocks';
+import { CoreSetup } from '../../../../core/server';
+import {
+  TutorialProvider,
+  TutorialSchema,
+  TutorialsCategory,
+  ScopedTutorialContextFactory,
+} from './tutorials_registry_types';
+
+const TEST_TUTORIAL: TutorialSchema = {
+  id: 'test',
+  category: 'logging' as TutorialsCategory,
+  name: '',
+  isBeta: false,
+  shortDescription: 'short description',
+  euiIconType: 'alert',
+  longDescription: 'long description with lots of text',
+  completionTimeMinutes: 10,
+  previewImagePath: 'path',
+  onPrem: { instructionSets: [], params: [] },
+  elasticCloud: { instructionSets: [], params: [] },
+  onPremElasticCloud: { instructionSets: [], params: [] },
+  artifacts: {
+    exportedFields: { documentationUrl: 'url' },
+    dashboards: [],
+    application: { path: 'path', label: 'path' },
+  },
+  savedObjects: [],
+  savedObjectsInstallMsg: 'testMsg',
+};
+const VALID_TUTORIAL: TutorialSchema = {
+  id: 'test',
+  category: 'logging' as TutorialsCategory,
+  name: 'new tutorial provider',
+  isBeta: false,
+  shortDescription: 'short description',
+  euiIconType: 'alert',
+  longDescription: 'long description with lots of text',
+  completionTimeMinutes: 10,
+  previewImagePath: 'path',
+  onPrem: { instructionSets: [], params: [] },
+  elasticCloud: { instructionSets: [], params: [] },
+  onPremElasticCloud: { instructionSets: [], params: [] },
+  artifacts: {
+    exportedFields: { documentationUrl: 'url' },
+    dashboards: [],
+    application: { path: 'path', label: 'path' },
+  },
+  savedObjects: [],
+  savedObjectsInstallMsg: 'testMsg',
+};
+const testTutorialProvider = TEST_TUTORIAL;
+const testTutorialProvider2 = VALID_TUTORIAL;
+
+describe('TutorialsRegistry', () => {
+  let mockCoreSetup: MockedKeys<CoreSetup>;
+  let testProvider: TutorialProvider;
+  let testScopedTutorialContextFactory: ScopedTutorialContextFactory;
+
+  beforeEach(() => {
+    mockCoreSetup = coreMock.createSetup();
+  });
+
+  describe('setup', () => {
+    test('exposes proper contract', () => {
+      const setup = new TutorialsRegistry().setup(mockCoreSetup);
+      expect(setup).toHaveProperty('registerTutorial');
+      expect(setup).toHaveProperty('addScopedTutorialContextFactory');
+    });
+    test('registerTutorial throws when registering a tutorial with an invalid schema', () => {
+      const setup = new TutorialsRegistry().setup(mockCoreSetup);
+      testProvider = ({}) => testTutorialProvider;
+      expect(() => setup.registerTutorial(testProvider)).toThrowErrorMatchingInlineSnapshot(
+        `"Unable to register tutorial spec because its invalid. ValidationError: child \\"name\\" fails because [\\"name\\" is not allowed to be empty]"`
+      );
+    });
+    test('registerTutorial registers a tutorial with a valid schema', () => {
+      const setup = new TutorialsRegistry().setup(mockCoreSetup);
+      testProvider = ({}) => testTutorialProvider2;
+      expect(() => setup.registerTutorial(testProvider)).not.toThrowError();
+    });
+    test('addScopedTutorialContextFactory throws when given a scopedTutorialContextFactory that is not a function', () => {
+      const setup = new TutorialsRegistry().setup(mockCoreSetup);
+      const testItem = {};
+      expect(() =>
+        setup.addScopedTutorialContextFactory(testItem)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Unable to add scoped(request) context factory because you did not provide a function"`
+      );
+    });
+    test('addScopedTutorialContextFactory adds a scopedTutorialContextFactory when given a function', () => {
+      const setup = new TutorialsRegistry().setup(mockCoreSetup);
+      const testItem = ({}) => 'string';
+      expect(() => setup.addScopedTutorialContextFactory(testItem)).not.toThrowError();
+    });
+  });
+  describe('start', () => {
+    test('exposes proper contract', () => {
+      const start = new TutorialsRegistry().start();
+      expect(start).toBeDefined();
+    });
+  });
+});
