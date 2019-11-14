@@ -333,6 +333,7 @@ exports[`NoteCardBody renders correctly against snapshot 1`] = `
         "euiSwitchHeightCompressed": "16px",
         "euiSwitchHeightMini": "10px",
         "euiSwitchIconHeight": "16px",
+        "euiSwitchOffColor": "rgba(83, 89, 102, 0.7)",
         "euiSwitchThumbSize": "20px",
         "euiSwitchThumbSizeCompressed": "16px",
         "euiSwitchThumbSizeMini": "10px",

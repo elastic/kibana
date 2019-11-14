@@ -333,6 +333,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
         "euiSwitchHeightCompressed": "16px",
         "euiSwitchHeightMini": "10px",
         "euiSwitchIconHeight": "16px",
+        "euiSwitchOffColor": "rgba(83, 89, 102, 0.7)",
         "euiSwitchThumbSize": "20px",
         "euiSwitchThumbSizeCompressed": "16px",
         "euiSwitchThumbSizeMini": "10px",
