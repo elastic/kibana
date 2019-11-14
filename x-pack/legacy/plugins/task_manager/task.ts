@@ -10,7 +10,7 @@ import Joi from 'joi';
  * Type definitions and validations for tasks.
  */
 
-type Require<T extends object, P extends keyof T = keyof T> = Omit<T, P> & Required<Pick<T, P>>;
+type Require<T extends object, P extends keyof T> = Omit<T, P> & Required<Pick<T, P>>;
 
 /**
  * A loosely typed definition of the elasticjs wrapper. It's beyond the scope
