@@ -31,11 +31,28 @@ const reorder = (list, startIndex, endIndex) => {
   return result;
 };
 
+const getProps = async field => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const label = await field.getLabel();
+      const type = await field.getDataType();
+      resolve({
+        label: label,
+        type: type,
+        name: field.getName()
+      });
+    } catch(e) {
+      reject(e);
+    }
+  });
+};
+
 export class TooltipSelector extends Component {
 
   state = {
     fieldProps: [],
-    selectedFieldProps: []
+    selectedFieldProps: [],
+    fieldPropsInitialized: false
   };
 
   constructor() {
@@ -46,6 +63,7 @@ export class TooltipSelector extends Component {
   componentDidMount() {
     this._isMounted = true;
     this._loadFieldProps();
+    this._loadTooltipFieldProps();
   }
 
   componentWillUnmount() {
@@ -53,43 +71,41 @@ export class TooltipSelector extends Component {
   }
 
   componentDidUpdate() {
+    this._loadTooltipFieldProps();
     this._loadFieldProps();
+  }
+
+
+  async _loadTooltipFieldProps() {
+
+    if (!this.props.tooltipFields) {
+      return;
+    }
+
+    const selectedProps = this.props.tooltipFields.map(getProps);
+    const selectedFieldProps = await Promise.all(selectedProps);
+    if (this._isMounted) {
+      if (!_.isEqual(this.state.selectedFieldProps, selectedFieldProps)) {
+        this.setState({ selectedFieldProps });
+      }
+    }
+
   }
 
   async _loadFieldProps() {
 
-    if (!this.props.fields || !this.props.tooltipFields) {
+    if (!this.props.fields || this.state.fieldPropsInitialized) {
       return;
     }
 
-    const getProps = async field => {
-      return new Promise(async (resolve, reject) => {
-        try {
-          const label = await field.getLabel();
-          const type = await field.getDataType();
-          resolve({
-            label: label,
-            type: type,
-            name: field.getName()
-          });
-        } catch(e) {
-          reject(e);
-        }
-      });
-    };
-
     const props = this.props.fields.map(getProps);
-    const selectedProps = this.props.tooltipFields.map(getProps);
-
-    const newState = {
-      fieldProps: await Promise.all(props),
-      selectedFieldProps: await Promise.all(selectedProps)
-    };
-
-
+    const fieldProps =  await Promise.all(props);
     if (this._isMounted) {
-      if (!_.isEqual(this.state, newState)) {
-        this.setState(newState);
+      if (!_.isEqual(this.state.fieldProps, fieldProps)) {
+        this.setState({
+          fieldProps,
+          fieldPropsInitialized: true
+        });
       }
     }
 
@@ -225,3 +241,4 @@ export class TooltipSelector extends Component {
     );
   }
 }
+
