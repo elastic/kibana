@@ -8,7 +8,6 @@
 import { AbstractField } from './field';
 import { TooltipProperty } from '../tooltips/tooltip_property';
 
-//todo: rename to ESMFileField
 export class EMSFileField extends AbstractField {
   static type = 'EMS_FILE';
 
