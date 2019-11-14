@@ -17,37 +17,34 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { Storage } from '../../kibana_utils/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from './types';
 import { AutocompleteProviderRegister } from './autocomplete_provider';
 import { getSuggestionsProvider } from './suggestions_provider';
 import { SearchService } from './search/search_service';
-import { FieldFormatRegisty, registerConverters } from './field_formats_provider';
+import { FieldFormatsService } from './field_formats_provider';
 import { QueryService } from './query';
 
 export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
   private readonly autocomplete = new AutocompleteProviderRegister();
   private readonly searchService: SearchService;
-  private readonly fieldFormats: FieldFormatRegisty = new FieldFormatRegisty();
+  private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.searchService = new SearchService(initializerContext);
     this.queryService = new QueryService();
+    this.fieldFormatsService = new FieldFormatsService();
   }
 
   public setup(core: CoreSetup): DataPublicPluginSetup {
     const storage = new Storage(window.localStorage);
 
-    this.fieldFormats.init(core.uiSettings);
-
-    registerConverters(this.fieldFormats);
-
     return {
       autocomplete: this.autocomplete,
       search: this.searchService.setup(core),
-      fieldFormats: this.fieldFormats,
+      fieldFormats: this.fieldFormatsService.setup(core),
       query: this.queryService.setup({
         uiSettings: core.uiSettings,
         storage,
@@ -60,7 +57,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       autocomplete: this.autocomplete,
       getSuggestions: getSuggestionsProvider(core.uiSettings, core.http),
       search: this.searchService.start(core),
-      fieldFormats: this.fieldFormats,
+      fieldFormats: this.fieldFormatsService.start(),
       query: this.queryService.start(),
     };
   }

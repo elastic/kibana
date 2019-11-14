@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FieldFormatRegisty, Plugin } from '.';
+import { FieldFormatRegisty, Plugin, FieldFormatsStart, FieldFormatsSetup } from '.';
 import { searchSetupMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 
@@ -51,7 +51,7 @@ const createSetupContract = (): Setup => {
   const setupContract = {
     autocomplete: autocompleteMock,
     search: searchSetupMock,
-    fieldFormats: fieldFormatsMock as Setup['fieldFormats'],
+    fieldFormats: fieldFormatsMock as FieldFormatsSetup,
     query: querySetupMock,
   };
 
@@ -64,7 +64,7 @@ const createStartContract = (): Start => {
     autocomplete: autocompleteMock,
     getSuggestions: jest.fn(),
     search: { search: jest.fn() },
-    fieldFormats: fieldFormatsMock as Setup['fieldFormats'],
+    fieldFormats: fieldFormatsMock as FieldFormatsStart,
     query: queryStartMock,
   };
   return startContract;

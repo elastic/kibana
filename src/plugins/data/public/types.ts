@@ -22,7 +22,7 @@ import {
   AutocompletePublicPluginStart,
 } from './autocomplete_provider/types';
 
-import { FieldFormatRegisty } from './field_formats_provider';
+import { FieldFormatsSetup, FieldFormatsStart } from './field_formats_provider';
 import { ISearchSetup, ISearchStart } from './search';
 import { IGetSuggestions } from './suggestions_provider/types';
 import { QuerySetup, QueryStart } from './query';
@@ -30,7 +30,7 @@ import { QuerySetup, QueryStart } from './query';
 export interface DataPublicPluginSetup {
   autocomplete: AutocompletePublicPluginSetup;
   search: ISearchSetup;
-  fieldFormats: FieldFormatRegisty;
+  fieldFormats: FieldFormatsSetup;
   query: QuerySetup;
 }
 
@@ -38,7 +38,7 @@ export interface DataPublicPluginStart {
   autocomplete: AutocompletePublicPluginStart;
   getSuggestions: IGetSuggestions;
   search: ISearchStart;
-  fieldFormats: FieldFormatRegisty;
+  fieldFormats: FieldFormatsStart;
   query: QueryStart;
 }
 
