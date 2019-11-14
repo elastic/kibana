@@ -85,8 +85,6 @@ export { angular };
 export { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 // @ts-ignore
 export { callAfterBindingsWorkaround } from 'ui/compat';
-// @ts-ignore
-export { getFilterGenerator } from 'ui/filter_manager';
 export {
   getRequestInspectorStats,
   getResponseInspectorStats,
