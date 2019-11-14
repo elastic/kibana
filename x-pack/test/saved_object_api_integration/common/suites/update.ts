@@ -121,7 +121,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
-  const expectSharedTypeResults = (resp: { [key: string]: any }) => {
+  const expectSharedTypeResults = async (resp: { [key: string]: any }) => {
     // loose ISO8601 UTC time with milliseconds validation
     expect(resp.body)
       .to.have.property('updated_at')
@@ -130,7 +130,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql({
       id: 'default_and_space_1',
       type: 'sharedtype',
-      namespaces: [null, 'space_1'],
+      namespaces: ['default', 'space_1'],
       updated_at: resp.body.updated_at,
       version: resp.body.version,
       attributes: {

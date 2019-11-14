@@ -61,7 +61,18 @@ function getFieldsForTypes(types: string[], searchFields?: string[]) {
  *  Some types are namespace agnostic, so they must be treated differently.
  */
 function getClauseForType(schema: SavedObjectsSchema, namespace: string | undefined, type: string) {
-  if (namespace && !schema.isNamespaceAgnostic(type)) {
+  if (schema.isNamespaces(type)) {
+    return {
+      bool: {
+        must: [
+          { term: { type } },
+          { term: { namespaces: namespace === undefined ? 'default' : namespace } },
+        ],
+      },
+    };
+  }
+
+  if (namespace && schema.isNamespace(type)) {
     return {
       bool: {
         must: [{ term: { type } }, { term: { namespace } }],

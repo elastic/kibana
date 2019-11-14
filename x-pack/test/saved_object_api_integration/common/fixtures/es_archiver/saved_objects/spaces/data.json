@@ -354,10 +354,10 @@
     "index": ".kibana",
     "source": {
       "sharedtype": {
-        "name": "A shared saved-object in all spaces"
+        "name": "A shared saved-object in the default and space_1 spaces"
       },
       "type": "sharedtype",
-      "namespaces": [null, "space_1"],
+      "namespaces": ["default", "space_1"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"

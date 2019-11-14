@@ -14,6 +14,7 @@ export default function({ getService }: FtrProviderContext) {
 
   const {
     createExpectEmpty,
+    createExpectSharedTypeResults,
     createExpectVisualizationResults,
     expectFilterWrongTypeError,
     expectNotSpaceAwareResults,
@@ -44,6 +45,11 @@ export default function({ getService }: FtrProviderContext) {
           description: 'empty result',
           statusCode: 200,
           response: createExpectEmpty(1, 20, 0),
+        },
+        sharedType: {
+          description: 'only the shared types',
+          statusCode: 200,
+          response: createExpectSharedTypeResults(SPACES.SPACE_1.spaceId),
         },
         pageBeyondTotal: {
           description: 'empty result',
@@ -105,6 +111,11 @@ export default function({ getService }: FtrProviderContext) {
           description: 'empty result',
           statusCode: 200,
           response: createExpectEmpty(1, 20, 0),
+        },
+        sharedType: {
+          description: 'only the shared types',
+          statusCode: 200,
+          response: createExpectSharedTypeResults(SPACES.DEFAULT.spaceId),
         },
         unknownType: {
           description: 'empty result',

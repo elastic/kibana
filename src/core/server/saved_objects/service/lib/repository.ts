@@ -207,9 +207,9 @@ export class SavedObjectsRepository {
         }
         savedObjectNamespaces = docFound
           ? response._source.namespaces
-          : [options.namespace === undefined ? null : options.namespace];
+          : [options.namespace === undefined ? 'default' : options.namespace];
       } else {
-        savedObjectNamespaces = [options.namespace === undefined ? null : options.namespace];
+        savedObjectNamespaces = [options.namespace === undefined ? 'default' : options.namespace];
       }
     }
 
@@ -1135,7 +1135,7 @@ export class SavedObjectsRepository {
     }
 
     const namespaces = raw._source.namespaces as Array<string | null>;
-    return namespaces.includes(namespace === undefined ? null : namespace);
+    return namespaces.includes(namespace === undefined ? 'default' : namespace);
   }
 }
 

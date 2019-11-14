@@ -153,7 +153,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     expect(resp.body).to.eql({
       id: resp.body.id,
       type: sharedType,
-      namespaces: [spaceId === DEFAULT_SPACE_ID ? null : spaceId],
+      namespaces: [spaceId],
       updated_at: resp.body.updated_at,
       version: resp.body.version,
       attributes: {
@@ -171,7 +171,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
 
     const { namespaces: namespaces } = _source;
 
-    expect(namespaces).to.eql([spaceId === DEFAULT_SPACE_ID ? null : spaceId]);
+    expect(namespaces).to.eql([spaceId]);
   };
 
   const createExpectSharedTypeOverwritingResults = (spaceId = DEFAULT_SPACE_ID) => async (resp: {
@@ -187,7 +187,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     expect(resp.body).to.eql({
       id: resp.body.id,
       type: sharedType,
-      namespaces: [null, 'space_1'],
+      namespaces: ['default', 'space_1'],
       updated_at: resp.body.updated_at,
       version: resp.body.version,
       attributes: {
@@ -205,7 +205,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
 
     const { namespaces: namespaces } = _source;
 
-    expect(namespaces).to.eql([null, 'space_1']);
+    expect(namespaces).to.eql(['default', 'space_1']);
   };
 
   const expectSharedTypeOverwritingConflict = async (resp: { [key: string]: any }) => {

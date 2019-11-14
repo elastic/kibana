@@ -22,6 +22,7 @@ interface FindTests {
   pageBeyondTotal: FindTest;
   unknownSearchField: FindTest;
   hiddenType: FindTest;
+  sharedType: FindTest;
   noType: FindTest;
   filterWithNotSpaceAwareType: FindTest;
   filterWithHiddenType: FindTest;
@@ -127,6 +128,51 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
     });
   };
 
+  const createExpectSharedTypeResults = (spaceId = DEFAULT_SPACE_ID) => (resp: {
+    [key: string]: any;
+  }) => {
+    const allSavedObjects = [
+      {
+        type: 'sharedtype',
+        id: `default_and_space_1`,
+        attributes: {
+          name: 'A shared saved-object in the default and space_1 spaces',
+        },
+        namespaces: ['default', 'space_1'],
+        references: [],
+        updated_at: '2017-09-21T18:59:16.270Z',
+      },
+      {
+        type: 'sharedtype',
+        id: `only_space_1`,
+        attributes: {
+          name: 'A shared saved-object only in space_1',
+        },
+        namespaces: ['space_1'],
+        references: [],
+        updated_at: '2017-09-21T18:59:16.270Z',
+      },
+    ];
+
+    const savedObjects = allSavedObjects.filter(savedObject =>
+      savedObject.namespaces.includes(spaceId)
+    );
+
+    // we have to delete some properties from the resp.body that change every time
+    expect(resp.body).to.have.property('saved_objects');
+    for (const savedObject of resp.body.saved_objects) {
+      delete savedObject.migrationVersion;
+      delete savedObject.version;
+    }
+
+    expect(resp.body).to.eql({
+      page: 1,
+      per_page: 20,
+      total: savedObjects.length,
+      saved_objects: savedObjects,
+    });
+  };
+
   const makeFindTest = (describeFn: DescribeFn) => (
     description: string,
     definition: FindTestDefinition
@@ -157,6 +203,13 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
           .auth(user.username, user.password)
           .expect(tests.hiddenType.statusCode)
           .then(tests.hiddenType.response));
+
+      it(`finding a sharedtype should return ${tests.sharedType.statusCode} with ${tests.sharedType.description}`, async () =>
+        await supertest
+          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=sharedtype&fields=name`)
+          .auth(user.username, user.password)
+          .expect(tests.sharedType.statusCode)
+          .then(tests.sharedType.response));
 
       describe('unknown type', () => {
         it(`should return ${tests.unknownType.statusCode} with ${tests.unknownType.description}`, async () =>
@@ -268,6 +321,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
   return {
     createExpectEmpty,
     createExpectRbacForbidden,
+    createExpectSharedTypeResults,
     createExpectVisualizationResults,
     expectFilterWrongTypeError,
     expectNotSpaceAwareResults,
