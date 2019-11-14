@@ -5,11 +5,11 @@
  */
 
 import { SavedObjectAttributes } from 'src/core/server';
+import { createApmTelementry, storeApmServicesTelemetry } from '../index';
 import {
-  APM_TELEMETRY_DOC_ID,
-  createApmTelementry,
-  storeApmTelemetry
-} from '../apm_telemetry';
+  APM_SERVICES_TELEMETRY_SAVED_OBJECT_TYPE,
+  APM_SERVICES_TELEMETRY_SAVED_OBJECT_ID
+} from '../../../../common/apm_saved_object_constants';
 
 describe('apm_telemetry', () => {
   describe('createApmTelementry', () => {
@@ -44,7 +44,7 @@ describe('apm_telemetry', () => {
     });
   });
 
-  describe('storeApmTelemetry', () => {
+  describe('storeApmServicesTelemetry', () => {
     let server: any;
     let apmTelemetry: SavedObjectAttributes;
     let savedObjectsClientInstance: any;
@@ -75,24 +75,24 @@ describe('apm_telemetry', () => {
     });
 
     it('should call savedObjectsClient create with the given ApmTelemetry object', () => {
-      storeApmTelemetry(server, apmTelemetry);
+      storeApmServicesTelemetry(server, apmTelemetry);
       expect(savedObjectsClientInstance.create.mock.calls[0][1]).toBe(
         apmTelemetry
       );
     });
 
     it('should call savedObjectsClient create with the apm-telemetry document type and ID', () => {
-      storeApmTelemetry(server, apmTelemetry);
+      storeApmServicesTelemetry(server, apmTelemetry);
       expect(savedObjectsClientInstance.create.mock.calls[0][0]).toBe(
-        'apm-telemetry'
+        APM_SERVICES_TELEMETRY_SAVED_OBJECT_TYPE
       );
       expect(savedObjectsClientInstance.create.mock.calls[0][2].id).toBe(
-        APM_TELEMETRY_DOC_ID
+        APM_SERVICES_TELEMETRY_SAVED_OBJECT_ID
       );
     });
 
     it('should call savedObjectsClient create with overwrite: true', () => {
-      storeApmTelemetry(server, apmTelemetry);
+      storeApmServicesTelemetry(server, apmTelemetry);
       expect(savedObjectsClientInstance.create.mock.calls[0][2].overwrite).toBe(
         true
       );
