@@ -5,6 +5,18 @@
  */
 
 import { PluginInitializerContext } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
 import { EndgameServer } from './plugin';
 
 export const plugin = (initContext: PluginInitializerContext) => new EndgameServer(initContext);
+
+// The following config disabled the plugin by default once the following pull request is
+// merged (and pulled into our branch): https://github.com/elastic/kibana/pull/50286
+// To re-enable it for Development, add the following to your `/config/kibana.dev.yml` file:
+//
+// `x-pack.endgame.enabled: true`
+//
+// See this for more: https://github.com/elastic/endpoint-app-team/issues/1
+export const config = {
+  schema: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
+};
