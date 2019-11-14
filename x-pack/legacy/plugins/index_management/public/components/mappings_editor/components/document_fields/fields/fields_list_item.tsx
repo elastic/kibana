@@ -205,7 +205,9 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
                     className="mappingsEditor__fieldsListItem__multiFieldButton"
                   >
                     <EuiButtonEmpty onClick={addField} iconType="plusInCircleFilled">
-                      Add multi-field
+                      {i18n.translate('xpack.idxMgmt.mappingsEditor.addMultiFieldButtonLabel', {
+                        defaultMessage: 'Add multi-field',
+                      })}
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                 )}

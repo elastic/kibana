@@ -58,7 +58,16 @@ export const DeleteFieldProvider = ({ children }: Props) => {
     const field = state.field!;
     const { isMultiField, childFields } = field;
 
-    const title = `Remove ${isMultiField ? 'multi-field' : 'field'} '${field.source.name}'?`;
+    const title = i18n.translate(
+      'xpack.idxMgmt.mappingsEditor.deleteField.confirmationModal.title',
+      {
+        defaultMessage: "Remove {fieldType} '{fieldName}'?",
+        values: {
+          fieldType: isMultiField ? 'multi-field' : 'field',
+          fieldName: field.source.name,
+        },
+      }
+    );
 
     const fieldsTree =
       childFields && childFields.length

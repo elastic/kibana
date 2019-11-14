@@ -91,7 +91,17 @@ export const UpdateFieldProvider = ({ children }: Props) => {
   const renderModal = () => {
     const field = state.field!;
     const { childFields } = field;
-    const title = `Confirm change '${field.source.name}' type to "${field.source.type}".`;
+
+    const title = i18n.translate(
+      'xpack.idxMgmt.mappingsEditor.updateField.confirmationModal.title',
+      {
+        defaultMessage: "Confirm change '{fieldName}' type to '{fieldType}'.",
+        values: {
+          fieldName: field.source.name,
+          fieldType: field.source.type,
+        },
+      }
+    );
 
     const fieldsTree =
       childFields && childFields.length
@@ -148,7 +158,7 @@ export const UpdateFieldProvider = ({ children }: Props) => {
                   {i18n.translate(
                     'xpack.idxMgmt.mappingsEditor.updateField.confirmationModal.deleteAliasesDescription',
                     {
-                      defaultMessage: 'The following aliases will also be deleted.',
+                      defaultMessage: 'The following aliases will be deleted.',
                     }
                   )}
                 </p>
