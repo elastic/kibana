@@ -19,7 +19,7 @@ export const ChoroplethToolTip: React.SFC<{
       <div style={{ fontSize: fontSizes.large }}>{name}</div>
       <div>
         {i18n.translate(
-          'xpack.apm.metrics.pageLoadCharts.RegionMapChart.ToolTip.avgPageLoadDuration',
+          'xpack.apm.metrics.durationByCountryMap.RegionMapChart.ToolTip.avgPageLoadDuration',
           {
             defaultMessage: 'Avg. page load duration:'
           }
@@ -31,7 +31,7 @@ export const ChoroplethToolTip: React.SFC<{
       <div>
         (
         {i18n.translate(
-          'xpack.apm.metrics.pageLoadCharts.RegionMapChart.ToolTip.countPageLoads',
+          'xpack.apm.metrics.durationByCountryMap.RegionMapChart.ToolTip.countPageLoads',
           {
             values: { docCount: asInteger(docCount) },
             defaultMessage: '{docCount} page loads'

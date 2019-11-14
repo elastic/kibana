@@ -563,6 +563,138 @@ describe('update_signals', () => {
         }).error
       ).toBeFalsy();
     });
+
+    test('You can optionally send in an array of tags', () => {
+      expect(
+        createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
+          id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          tags: ['tag_1', 'tag_2'],
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You cannot send in an array of tags that are numbers', () => {
+      expect(
+        createSignalsSchema.validate<
+          Partial<Omit<SignalAlertParamsRest, 'tags'>> & { tags: number[] }
+        >({
+          id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          tags: [0, 1, 2],
+        }).error
+      ).toBeTruthy();
+    });
+
+    test('You can optionally send in an array of false positives', () => {
+      expect(
+        createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
+          id: 'rule-1',
+          description: 'some description',
+          false_positives: ['false_1', 'false_2'],
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You cannot send in an array of false positives that are numbers', () => {
+      expect(
+        createSignalsSchema.validate<
+          Partial<Omit<SignalAlertParamsRest, 'false_positives'>> & { false_positives: number[] }
+        >({
+          id: 'rule-1',
+          description: 'some description',
+          false_positives: [5, 4],
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+        }).error
+      ).toBeTruthy();
+    });
+
+    test('You can optionally set the immutable to be true', () => {
+      expect(
+        createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
+          id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: true,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You cannot set the immutable to be a number', () => {
+      expect(
+        createSignalsSchema.validate<
+          Partial<Omit<SignalAlertParamsRest, 'immutable'>> & { immutable: number }
+        >({
+          id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: 5,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+        }).error
+      ).toBeTruthy();
+    });
   });
 
   describe('update signals schema', () => {
