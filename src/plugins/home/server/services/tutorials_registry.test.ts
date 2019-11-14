@@ -110,8 +110,10 @@ describe('TutorialsRegistry', () => {
     });
     test('addScopedTutorialContextFactory adds a scopedTutorialContextFactory when given a function', () => {
       const setup = new TutorialsRegistry().setup(mockCoreSetup);
-      const testItem = ({}) => 'string';
-      expect(() => setup.addScopedTutorialContextFactory(testItem)).not.toThrowError();
+      testScopedTutorialContextFactory = ({}) => 'string';
+      expect(() =>
+        setup.addScopedTutorialContextFactory(testScopedTutorialContextFactory)
+      ).not.toThrowError();
     });
   });
   describe('start', () => {
