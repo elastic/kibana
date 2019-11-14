@@ -15,7 +15,7 @@ export function getTemplate(indexPattern: string): object {
   return template;
 }
 
-interface Template {
+export interface Template {
   order: number;
   index_patterns: string[];
   settings: object;
