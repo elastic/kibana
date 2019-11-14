@@ -81,13 +81,14 @@ function DefaultEditorBottomBar({
                       }
                     )}
                     data-test-subj="visualizeEditorAutoButton"
+                    fill={autoApplyEnabled}
                     iconType="refresh"
+                    isSelected={autoApplyEnabled}
                     label={i18n.translate('common.ui.vis.editors.sidebar.autoApplyChangesLabel', {
                       defaultMessage: 'Auto apply',
                     })}
-                    fill={autoApplyEnabled}
                     onChange={toggleAutoApply}
-                    isSelected={autoApplyEnabled}
+                    size="s"
                   />
                 </EuiToolTip>
               </EuiFlexItem>

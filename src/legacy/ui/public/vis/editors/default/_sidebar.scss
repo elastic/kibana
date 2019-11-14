@@ -38,26 +38,12 @@
 .visEditorSidebar__indexPattern {
   font-weight: $euiFontWeightBold;
   padding: $euiSizeXS $euiSizeS;
-  background-color: shadeOrTint($euiColorPrimary, 60%, 60%);
-  color: $euiColorEmptyShade;
   line-height: $euiSizeL;
 }
 
 .visEditorSidebar__nav {
   padding: 0 $euiSizeS;
   flex-grow: 0;
-}
-
-/**
- * 1. TODO: Override bootstrap styles. Remove !important once we're rid of bootstrap.
- */
-.visEditorSidebar__navLink--danger {
-  color: $euiColorEmptyShade !important; /* 1 */
-  background-color: $euiColorDanger;
-
-  &:hover {
-    background-color: shadeOrTint($euiColorDanger, 12%, 0%) !important; /* 1 */
-  }
 }
 
 //
@@ -83,15 +69,6 @@
   }
 }
 
-.visEditorSidebar__sectionTitle {
-  @include euiFontSizeL;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: $euiSizeM;
-  text-transform: capitalize;
-}
-
 // Collapsible section
 
 .visEditorSidebar__collapsible {
@@ -105,15 +82,6 @@
 //
 // FORMS
 //
-
-.visEditorSidebar__input,
-.visEditorSidebar__select {
-  @include __legacyInputStyles__bad;
-}
-
-.visEditorSidebar__select {
-  @include __legacySelectStyles__bad;
-}
 
 .visEditorSidebar__formRow {
   display: flex;
@@ -132,14 +100,6 @@
   display: flex;
   align-items: center;
   flex: 1 1 60%;
-}
-
-.visEditorSidebar__formRow--expand {
-  .visEditorSidebar__formLabel,
-  .visEditorSidebar__formControl {
-    flex-basis: auto;
-    flex-grow: 0;
-  }
 }
 
 .visEditorSidebar__aggGroupAccordionButtonContent {

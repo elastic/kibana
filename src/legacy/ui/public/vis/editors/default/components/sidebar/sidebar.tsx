@@ -75,7 +75,7 @@ function DefaultEditorSideBar({
         dispatch(setStateParamValue(paramName, value));
       }
     },
-    [dispatch]
+    [dispatch, state.params]
   );
 
   const onSubmit: KeyboardEventHandler<HTMLFormElement> = useCallback(
