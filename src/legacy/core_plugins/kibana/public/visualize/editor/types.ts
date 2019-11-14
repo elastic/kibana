@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
-import { TimeRange } from 'src/plugins/data/public';
+import { TimeRange, Query, esFilters } from 'src/plugins/data/public';
 import { AppState } from 'ui/state_management/app_state';
 import { PersistedState } from 'ui/persisted_state';
 
 export interface EditorRenderProps {
   appState: AppState;
-  filters: Filter[];
+  filters: esFilters.Filter[];
   uiState: PersistedState;
   timeRange: TimeRange;
+  query?: Query;
 }

@@ -19,9 +19,10 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
-import { getVisualizeLoader } from 'ui/visualize';
-import { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize_handler';
-import { EditorRenderProps } from 'src/legacy/core_plugins/kibana/public/visualize/types';
+import { start as embeddables } from '../../../../../core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { VisualizeEmbeddable } from '../../../../../core_plugins/kibana/public/visualize/embeddable';
+import { VisualizeEmbeddableFactory } from '../../../../../core_plugins/kibana/public/visualize/embeddable/visualize_embeddable_factory';
+import { EditorRenderProps } from '../../../../../core_plugins/kibana/public/visualize/types';
 
 import './vis_type_agg_filter';
 import { DefaultEditorSideBar } from './components/sidebar';
@@ -38,10 +39,12 @@ function DefaultEditor({
   filters,
   appState,
   optionTabs,
+  query,
 }: DefaultEditorControllerState & EditorRenderProps) {
   const visRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const [visHandler, setVisHandler] = useState<EmbeddedVisualizeHandler | null>(null);
+  const [visHandler, setVisHandler] = useState<VisualizeEmbeddable | null>(null);
+  const [factory, setFactory] = useState<VisualizeEmbeddableFactory | null>(null);
   const { vis } = savedObj;
   const { isDirty, setDirty } = useEditorContext();
   const [state, dispatch] = useEditorReducer(vis);
@@ -49,30 +52,40 @@ function DefaultEditor({
 
   useEffect(() => {
     async function visualize() {
-      if (!visRef.current) {
+      if (!visRef.current || (!visHandler && factory)) {
         return;
       }
 
       if (!visHandler) {
-        const loader = await getVisualizeLoader();
-        const handler = loader.embedVisualizationWithSavedObject(visRef.current, savedObj, {
+        const embeddableFactory = embeddables.getEmbeddableFactory(
+          'visualization'
+        ) as VisualizeEmbeddableFactory;
+        setFactory(embeddableFactory);
+
+        const handler = (await embeddableFactory.createFromObject(savedObj, {
+          // should be look through createFromObject interface again because of "id" param
+          id: '',
           uiState,
+          appState,
           timeRange,
           filters,
-          appState,
-        });
+          query,
+        })) as VisualizeEmbeddable;
 
         setVisHandler(handler);
+
+        handler.render(visRef.current);
       } else {
-        visHandler.update({
+        visHandler.updateInput({
           timeRange,
           filters,
+          query,
         });
       }
     }
 
     visualize();
-  }, [visRef.current, visHandler, uiState, savedObj, timeRange, filters, appState]);
+  }, [visRef.current, visHandler, uiState, savedObj, timeRange, filters, appState, query]);
 
   useEffect(() => {
     vis.on('dirtyStateChange', ({ isDirty: dirty }: { isDirty: boolean }) => {
@@ -81,7 +94,7 @@ function DefaultEditor({
   }, [vis]);
 
   const applyChanges = useCallback(() => {
-    if (formState.invalid) {
+    if (formState.invalid || !isDirty) {
       setTouched(true);
 
       return;
@@ -98,15 +111,7 @@ function DefaultEditor({
 
   return (
     <div className="visEditor--default">
-      <div
-        className="visEditor__canvas"
-        ref={visRef}
-        data-shared-item=""
-        data-shared-items-container=""
-        render-complete=""
-        data-title={vis.title}
-        data-description={vis.description}
-      />
+      <div className="visEditor__canvas" ref={visRef} />
 
       {/* <Resizer direction="horizontal" element={sidebarRef} onResize={onResize} /> */}
 

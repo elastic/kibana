@@ -21,9 +21,9 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 
-import { VisSavedObject } from 'ui/visualize/loader/types';
 import { I18nContext } from 'ui/i18n';
-import { EditorRenderProps } from 'src/legacy/core_plugins/kibana/public/visualize/types';
+import { EditorRenderProps } from '../../../../../core_plugins/kibana/public/visualize/types';
+import { VisSavedObject } from '../../../../../core_plugins/kibana/public/visualize/embeddable/visualize_embeddable';
 import { DefaultEditor } from './default_editor';
 import { DefaultEditorDataTab, OptionTab } from './components/sidebar';
 import { EditorStateContextProvider } from './state';
