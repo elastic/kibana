@@ -20,6 +20,20 @@ export default function({ getService }: FtrProviderContext) {
   } = bulkGetTestSuiteFactory(esArchiver, supertest);
 
   describe('_bulk_get', () => {
+    bulkGetTest(`objects within the default space`, {
+      ...SPACES.DEFAULT,
+      tests: {
+        default: {
+          statusCode: 200,
+          response: createExpectResults(SPACES.DEFAULT.spaceId),
+        },
+        includingHiddenType: {
+          statusCode: 200,
+          response: expectBadRequestForHiddenType,
+        },
+      },
+    });
+
     bulkGetTest(`objects within the current space (space_1)`, {
       ...SPACES.SPACE_1,
       tests: {
@@ -34,13 +48,13 @@ export default function({ getService }: FtrProviderContext) {
       },
     });
 
-    bulkGetTest(`objects within another space`, {
-      ...SPACES.SPACE_1,
-      otherSpaceId: SPACES.SPACE_2.spaceId,
+    bulkGetTest(`objects within another space (in space_2 getting objects in space_1)`, {
+      ...SPACES.SPACE_2,
+      otherSpaceId: SPACES.SPACE_1.spaceId,
       tests: {
         default: {
           statusCode: 200,
-          response: createExpectNotFoundResults(SPACES.SPACE_2.spaceId),
+          response: createExpectNotFoundResults(SPACES.SPACE_1.spaceId),
         },
         includingHiddenType: {
           statusCode: 200,

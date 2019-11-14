@@ -40,6 +40,10 @@ const createBulkRequests = (spaceId: string) => [
     type: 'globaltype',
     id: '8121a00-8efd-21e7-1cb3-34ab966434445',
   },
+  {
+    type: 'sharedtype',
+    id: 'default_and_space_1',
+  },
 ];
 
 export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
@@ -71,6 +75,14 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
             name: 'My favorite global object',
           },
           references: [],
+        },
+        {
+          id: `default_and_space_1`,
+          type: 'sharedtype',
+          error: {
+            statusCode: 404,
+            message: 'Not found',
+          },
         },
       ],
     });
@@ -149,6 +161,17 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
           version: resp.body.saved_objects[2].version,
           attributes: {
             name: 'My favorite global object',
+          },
+          references: [],
+        },
+        {
+          id: `default_and_space_1`,
+          type: 'sharedtype',
+          updated_at: '2017-09-21T18:59:16.270Z',
+          version: resp.body.saved_objects[3].version,
+          namespaces: ['default', 'space_1'],
+          attributes: {
+            name: 'A shared saved-object in the default and space_1 spaces',
           },
           references: [],
         },
