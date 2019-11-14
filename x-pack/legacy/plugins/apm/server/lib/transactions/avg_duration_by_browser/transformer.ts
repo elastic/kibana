@@ -15,9 +15,9 @@ export function transformer({
   response: ESResponse;
 }): AvgDurationByBrowserAPIResponse {
   const allUserAgentKeys = new Set<string>(
-    (idx(response, _ => _.aggregations.user_agent_keys.buckets) || []).map(
-      ({ key }) => key.toString()
-    )
+    (
+      idx(response, _ => _.aggregations.user_agent_keys.buckets) || []
+    ).map(({ key }) => key.toString())
   );
   const buckets = idx(response, _ => _.aggregations.browsers.buckets) || [];
 
