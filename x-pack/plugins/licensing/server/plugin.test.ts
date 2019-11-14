@@ -73,12 +73,7 @@ describe('licensing plugin', () => {
         coreSetup.elasticsearch.dataClient$ = new BehaviorSubject(dataClient);
 
         const { license$ } = await plugin.setup(coreSetup);
-        const [first, second, third] = await license$
-          .pipe(
-            take(3),
-            toArray()
-          )
-          .toPromise();
+        const [first, second, third] = await license$.pipe(take(3), toArray()).toPromise();
 
         expect(first.type).toBe('basic');
         expect(second.type).toBe('gold');
@@ -126,12 +121,7 @@ describe('licensing plugin', () => {
         coreSetup.elasticsearch.dataClient$ = new BehaviorSubject(dataClient);
 
         const { license$ } = await plugin.setup(coreSetup);
-        const [first, second, third] = await license$
-          .pipe(
-            take(3),
-            toArray()
-          )
-          .toPromise();
+        const [first, second, third] = await license$.pipe(take(3), toArray()).toPromise();
 
         expect(first.error).toBe(error1.message);
         expect(second.error).toBe(error2.message);
@@ -192,12 +182,7 @@ describe('licensing plugin', () => {
         coreSetup.elasticsearch.dataClient$ = new BehaviorSubject(dataClient);
 
         const { license$ } = await plugin.setup(coreSetup);
-        const [first, second, third] = await license$
-          .pipe(
-            take(3),
-            toArray()
-          )
-          .toPromise();
+        const [first, second, third] = await license$.pipe(take(3), toArray()).toPromise();
 
         expect(first.signature === third.signature).toBe(true);
         expect(first.signature === second.signature).toBe(false);

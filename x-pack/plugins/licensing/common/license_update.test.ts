@@ -33,12 +33,7 @@ describe('licensing update', () => {
     expect(first.type).toBe('basic');
 
     trigger$.next();
-    const [, second] = await update$
-      .pipe(
-        take(2),
-        toArray()
-      )
-      .toPromise();
+    const [, second] = await update$.pipe(take(2), toArray()).toPromise();
     expect(second.type).toBe('gold');
   });
 
@@ -50,12 +45,7 @@ describe('licensing update', () => {
     const fetcher = jest.fn().mockResolvedValue(fetchedLicense);
     const { update$ } = createLicenseUpdate(trigger$, fetcher, initialLicense);
     trigger$.next();
-    const [first, second] = await update$
-      .pipe(
-        take(2),
-        toArray()
-      )
-      .toPromise();
+    const [first, second] = await update$.pipe(take(2), toArray()).toPromise();
 
     expect(first.type).toBe('platinum');
     expect(second.type).toBe('gold');
@@ -77,24 +67,14 @@ describe('licensing update', () => {
     const { update$ } = createLicenseUpdate(trigger$, fetcher);
     trigger$.next();
 
-    const [first] = await update$
-      .pipe(
-        take(1),
-        toArray()
-      )
-      .toPromise();
+    const [first] = await update$.pipe(take(1), toArray()).toPromise();
 
     expect(first.type).toBe('basic');
 
     trigger$.next();
     trigger$.next();
 
-    const [, second] = await update$
-      .pipe(
-        take(2),
-        toArray()
-      )
-      .toPromise();
+    const [, second] = await update$.pipe(take(2), toArray()).toPromise();
 
     expect(second.type).toBe('gold');
     expect(fetcher).toHaveBeenCalledTimes(3);
