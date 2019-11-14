@@ -258,7 +258,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
           {customLinks}
           {content && (
             <>
-              <EuiSpacer />
+              {customLinks && <EuiSpacer size="s" />}
               <HeaderExtension extension={content} />
             </>
           )}
