@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import { TimeRange } from 'src/plugins/data/public';
-import { Query } from 'src/legacy/core_plugins/data/public';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from 'src/plugins/embeddable/public';
 import { StaticIndexPattern } from '../kibana_services';
 import { SavedSearch } from '../types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
-import { esFilters } from '../../../../../../plugins/data/public';
+import { esFilters, TimeRange, Query } from '../../../../../../plugins/data/public';
 
 export interface SearchInput extends EmbeddableInput {
   timeRange: TimeRange;

@@ -84,8 +84,6 @@ export { angular };
 export { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 // @ts-ignore
 export { callAfterBindingsWorkaround } from 'ui/compat';
-// @ts-ignore
-export { getFilterGenerator } from 'ui/filter_manager';
 export {
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -114,7 +112,7 @@ export { tabifyAggResponse } from 'ui/agg_response/tabify';
 export { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 
 // EXPORT types
-export { VisProvider } from 'ui/vis';
+export { Vis } from 'ui/vis';
 export { StaticIndexPattern, IndexPatterns, IndexPattern, FieldType } from 'ui/index_patterns';
 export { SearchSource } from 'ui/courier';
 export { ElasticSearchHit } from 'ui/registry/doc_views_types';

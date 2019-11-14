@@ -30,6 +30,7 @@ describe('getTransactionBreakdown', () => {
         start: 0,
         end: 500000,
         client: { search: clientSpy } as any,
+        internalClient: { search: clientSpy } as any,
         config: {
           get: () => 'myIndex' as any,
           has: () => true
@@ -54,6 +55,7 @@ describe('getTransactionBreakdown', () => {
         start: 0,
         end: 500000,
         client: { search: clientSpy } as any,
+        internalClient: { search: clientSpy } as any,
         config: {
           get: () => 'myIndex' as any,
           has: () => true
@@ -95,6 +97,7 @@ describe('getTransactionBreakdown', () => {
         start: 0,
         end: 500000,
         client: { search: clientSpy } as any,
+        internalClient: { search: clientSpy } as any,
         config: {
           get: () => 'myIndex' as any,
           has: () => true
@@ -135,6 +138,7 @@ describe('getTransactionBreakdown', () => {
         start: 0,
         end: 500000,
         client: { search: clientSpy } as any,
+        internalClient: { search: clientSpy } as any,
         config: {
           get: () => 'myIndex' as any,
           has: () => true
@@ -159,6 +163,7 @@ describe('getTransactionBreakdown', () => {
         start: 0,
         end: 500000,
         client: { search: clientSpy } as any,
+        internalClient: { search: clientSpy } as any,
         config: {
           get: () => 'myIndex' as any,
           has: () => true
