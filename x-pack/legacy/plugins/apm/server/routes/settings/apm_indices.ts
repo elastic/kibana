@@ -5,7 +5,6 @@
  */
 
 import * as t from 'io-ts';
-import { setupRequest } from '../../lib/helpers/setup_request';
 import { createRoute } from '../create_route';
 import {
   getApmIndices,
@@ -14,28 +13,33 @@ import {
 import { saveApmIndices } from '../../lib/settings/apm_indices/save_apm_indices';
 
 // get list of apm indices and values
-export const apmIndexSettingsRoute = createRoute(core => ({
+export const apmIndexSettingsRoute = createRoute((core, { server }) => ({
   method: 'GET',
   path: '/api/apm/settings/apm-index-settings',
   handler: async req => {
-    const { server } = core.http;
-    const setup = await setupRequest(req);
-    return await getApmIndexSettings({ setup, server });
+    const config = server.config();
+    const savedObjectsClient = req.server.savedObjects.getScopedSavedObjectsClient(
+      req
+    );
+    return await getApmIndexSettings({ config, savedObjectsClient });
   }
 }));
 
 // get apm indices configuration object
-export const apmIndicesRoute = createRoute(core => ({
+export const apmIndicesRoute = createRoute((core, { server }) => ({
   method: 'GET',
   path: '/api/apm/settings/apm-indices',
   handler: async req => {
-    const { server } = core.http;
-    return await getApmIndices(server);
+    const config = server.config();
+    const savedObjectsClient = req.server.savedObjects.getScopedSavedObjectsClient(
+      req
+    );
+    return await getApmIndices({ config, savedObjectsClient });
   }
 }));
 
 // save ui indices
-export const saveApmIndicesRoute = createRoute(core => ({
+export const saveApmIndicesRoute = createRoute(() => ({
   method: 'POST',
   path: '/api/apm/settings/apm-indices/save',
   params: {
@@ -50,7 +54,9 @@ export const saveApmIndicesRoute = createRoute(core => ({
     })
   },
   handler: async (req, { body }) => {
-    const { server } = core.http;
-    return await saveApmIndices(server, body);
+    const savedObjectsClient = req.server.savedObjects.getScopedSavedObjectsClient(
+      req
+    );
+    return await saveApmIndices(savedObjectsClient, body);
   }
 }));

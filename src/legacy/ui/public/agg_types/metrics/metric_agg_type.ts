@@ -62,8 +62,9 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
       config.getValue ||
       ((agg, bucket) => {
         // Metric types where an empty set equals `zero`
-        const isSettableToZero = [METRIC_TYPES.CARDINALITY, METRIC_TYPES.SUM].includes(agg.type
-          .name as METRIC_TYPES);
+        const isSettableToZero = [METRIC_TYPES.CARDINALITY, METRIC_TYPES.SUM].includes(
+          agg.type.name as METRIC_TYPES
+        );
 
         // Return proper values when no buckets are present
         // `Count` handles empty sets properly
