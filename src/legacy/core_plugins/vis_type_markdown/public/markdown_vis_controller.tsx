@@ -73,7 +73,7 @@ class MarkdownVisComponent extends React.Component<MarkdownVisComponentProps> {
  * The sole purpose of this component is to extract all required parameters from
  * the properties and pass them down as separate properties to the actual component.
  * That way the actual (MarkdownVisComponent) will properly trigger it's prop update
- * callback (componentWillReceiveProps) if one of these params change. It wouldn't
+ * callback (UNSAFE_componentWillReceiveProps) if one of these params change. It wouldn't
  * trigger otherwise (e.g. it doesn't for this wrapper), since it only triggers
  * if the reference to the prop changes (in this case the reference to vis).
  *

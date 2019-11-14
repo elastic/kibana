@@ -29,7 +29,7 @@ export class Router extends React.PureComponent {
 
   state = {
     router: {},
-    activeComponent: CanvasLoading,
+    ActiveComponent: CanvasLoading,
   };
 
   getChildContext() {
@@ -86,21 +86,24 @@ export class Router extends React.PureComponent {
       // notify upstream handler of route change
       onRouteChange && onRouteChange(pathname);
 
-      this.setState({ activeComponent: component });
+      this.setState({ ActiveComponent: component });
     });
 
     this.setState({ router });
   }
 
   render() {
+    const { ActiveComponent } = this.state;
     // show loading
     if (this.props.showLoading) {
       return React.createElement(CanvasLoading, { msg: this.props.loadingMessage });
     }
 
-    // show the activeComponent
-    return isClassComponent(this.state.activeComponent)
-      ? React.createElement(this.state.activeComponent, {})
-      : this.state.activeComponent({});
+    // show the ActiveComponent
+    return isClassComponent(this.state.ActiveComponent) ? (
+      React.createElement(this.state.ActiveComponent)
+    ) : (
+      <ActiveComponent />
+    );
   }
 }
