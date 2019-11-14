@@ -5,6 +5,7 @@
  */
 import { performance } from 'perf_hooks';
 import { SignalHit } from '../../types';
+import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { Logger } from '../../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../alerting/server/types';
 import { SignalSourceHit, SignalSearchResponse, SignalAlertParams, BulkResponse } from './types';
@@ -48,7 +49,7 @@ export const singleBulkIndex = async (
   const bulkBody = sr.hits.hits.flatMap(doc => [
     {
       index: {
-        _index: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
+        _index: process.env.SIGNALS_INDEX || DEFAULT_SIGNALS_INDEX,
         _id: doc._id,
       },
     },
@@ -56,7 +57,7 @@ export const singleBulkIndex = async (
   ]);
   const time1 = performance.now();
   const firstResult: BulkResponse = await service.callCluster('bulk', {
-    index: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
+    index: process.env.SIGNALS_INDEX || DEFAULT_SIGNALS_INDEX,
     refresh: false,
     body: bulkBody,
   });
@@ -87,7 +88,6 @@ export const singleSearchAfter = async (
       to: params.to,
       filter: params.filter,
       size: params.size ? params.size : 1000,
-      maxDocs: params.maxSignals,
       searchAfterSortId,
     });
     const nextSearchAfterResult: SignalSearchResponse = await service.callCluster(
@@ -132,7 +132,7 @@ export const searchAfterAndBulkIndex = async (
   logger.debug(`first size: ${hitsSize}`);
   let sortIds = someResult.hits.hits[0].sort;
   if (sortIds == null && totalHits > 0) {
-    logger.warn('sortIds was empty on first search but expected more');
+    logger.error('sortIds was empty on first search but expected more');
     return false;
   } else if (sortIds == null && totalHits === 0) {
     return true;
@@ -155,7 +155,7 @@ export const searchAfterAndBulkIndex = async (
       logger.debug(`size adjusted: ${hitsSize}`);
       sortIds = searchAfterResult.hits.hits[0].sort;
       if (sortIds == null) {
-        logger.error('sortIds was empty on search');
+        logger.debug('sortIds was empty on search');
         return true; // no more search results
       }
       sortId = sortIds[0];

@@ -19,7 +19,7 @@ export const sampleSignalAlertParams = (maxSignals: number | undefined): SignalA
   query: 'user.name: root or user.name: admin',
   language: 'kuery',
   references: ['http://google.com'],
-  maxSignals,
+  maxSignals: maxSignals ? maxSignals : 10000,
   enabled: true,
   filter: undefined,
   filters: undefined,
@@ -118,7 +118,7 @@ export const repeatedSearchResultsWithSortId = (repeat: number) => ({
     skipped: 0,
   },
   hits: {
-    total: 1,
+    total: repeat,
     max_score: 100,
     hits: Array.from({ length: repeat }).map(x => ({
       ...sampleDocWithSortId,

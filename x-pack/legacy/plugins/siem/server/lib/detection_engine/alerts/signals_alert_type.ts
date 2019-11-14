@@ -5,9 +5,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SIGNALS_ID } from '../../../../common/constants';
+import { SIGNALS_ID, DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { Logger } from '../../../../../../../../src/core/server';
-
 // TODO: Remove this for the build_events_query call eventually
 import { buildEventsReIndex } from './build_events_reindex';
 
@@ -95,13 +94,13 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
             to,
             // TODO: Change this out once we have solved
             // https://github.com/elastic/kibana/issues/47002
-            signalsIndex: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
+            signalsIndex: process.env.SIGNALS_INDEX || DEFAULT_SIGNALS_INDEX,
             severity,
             description,
             name,
             timeDetected: new Date().toISOString(),
             filter: esFilter,
-            maxDocs: typeof maxSignals === 'number' ? maxSignals : 1000,
+            maxDocs: maxSignals,
             ruleRevision: 1,
             id,
             type,

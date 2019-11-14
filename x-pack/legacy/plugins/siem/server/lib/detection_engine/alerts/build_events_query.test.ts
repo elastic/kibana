@@ -14,7 +14,6 @@ describe('create_signals', () => {
       to: 'today',
       filter: {},
       size: 100,
-      maxDocs: undefined,
       searchAfterSortId: undefined,
     });
     expect(query).toEqual({
@@ -67,7 +66,7 @@ describe('create_signals', () => {
             ],
           },
         },
-        track_total_hits: true,
+
         sort: [
           {
             '@timestamp': {
@@ -85,7 +84,6 @@ describe('create_signals', () => {
       to: 'today',
       filter: {},
       size: 100,
-      maxDocs: undefined,
       searchAfterSortId: '',
     });
     expect(query).toEqual({
@@ -138,7 +136,7 @@ describe('create_signals', () => {
             ],
           },
         },
-        track_total_hits: true,
+
         sort: [
           {
             '@timestamp': {
@@ -158,7 +156,6 @@ describe('create_signals', () => {
       filter: {},
       size: 100,
       searchAfterSortId: fakeSortId,
-      maxDocs: undefined,
     });
     expect(query).toEqual({
       allowNoIndices: true,
@@ -210,7 +207,7 @@ describe('create_signals', () => {
             ],
           },
         },
-        track_total_hits: true,
+
         sort: [
           {
             '@timestamp': {
@@ -230,7 +227,6 @@ describe('create_signals', () => {
       to: 'today',
       filter: {},
       size: 100,
-      maxDocs: undefined,
       searchAfterSortId: fakeSortIdNumber,
     });
     expect(query).toEqual({
@@ -283,7 +279,7 @@ describe('create_signals', () => {
             ],
           },
         },
-        track_total_hits: true,
+
         sort: [
           {
             '@timestamp': {
