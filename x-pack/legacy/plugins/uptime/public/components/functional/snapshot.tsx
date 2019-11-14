@@ -54,9 +54,14 @@ interface DispatchProps {
  */
 type Props = OwnProps & StoreProps & DispatchProps;
 
-export const PresentationalComponent: React.FC<
-  Pick<StoreProps, 'count' | 'loading'> & Pick<OwnProps, 'height'>
-> = ({ count, height, loading }) => (
+type PresentationalComponentProps = Pick<StoreProps, 'count' | 'loading'> &
+  Pick<OwnProps, 'height'>;
+
+export const PresentationalComponent: React.FC<PresentationalComponentProps> = ({
+  count,
+  height,
+  loading,
+}) => (
   <ChartWrapper loading={loading} height={height}>
     <SnapshotHeading down={get<number>(count, 'down', 0)} total={get<number>(count, 'total', 0)} />
     <EuiSpacer size="xs" />
