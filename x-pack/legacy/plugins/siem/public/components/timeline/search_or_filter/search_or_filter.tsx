@@ -10,7 +10,7 @@ import { pure } from 'recompose';
 import styled, { injectGlobal } from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { Filter } from '../../../../../../../../src/plugins/data/common/es_query/filters';
+import { esFilters } from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../containers/source';
 import { KueryFilterQuery, KueryFilterQueryKind } from '../../../store';
 import { KqlMode } from '../../../store/timeline/model';
@@ -55,10 +55,10 @@ interface Props {
   timelineId: string;
   updateKqlMode: ({ id, kqlMode }: { id: string; kqlMode: KqlMode }) => void;
   refreshInterval: number;
-  setFilters: (filters: Filter[]) => void;
+  setFilters: (filters: esFilters.Filter[]) => void;
   setKqlFilterQueryDraft: (expression: string, kind: KueryFilterQueryKind) => void;
   setSavedQueryId: (savedQueryId: string | null) => void;
-  filters: Filter[];
+  filters: esFilters.Filter[];
   savedQueryId: string | null;
   to: number;
   toStr: string;

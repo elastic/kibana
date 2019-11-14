@@ -6,7 +6,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { Filter } from '../../../../../../../src/plugins/data/common/es_query/filters';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { Sort } from '../../components/timeline/body/sort';
 import {
@@ -196,5 +196,5 @@ export const setSavedQueryId = actionCreator<{
 
 export const setFilters = actionCreator<{
   id: string;
-  filters: Filter[];
+  filters: esFilters.Filter[];
 }>('SET_TIMELINE_FILTERS');

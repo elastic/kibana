@@ -207,6 +207,10 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     );
   }
 
+  /*
+   * This Function is here to show the toggle in saved query form
+   * in case you the date range (from/to)
+   */
   private shouldRenderTimeFilterInSavedQueryForm() {
     const { dateRangeFrom, dateRangeTo, showDatePicker } = this.props;
     return (

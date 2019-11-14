@@ -6,7 +6,7 @@
 
 import { getOr, omit, uniq, isEmpty, isEqualWith } from 'lodash/fp';
 
-import { Filter } from '../../../../../../../src/plugins/data/common/es_query/filters';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { getColumnWidthFromType } from '../../components/timeline/body/helpers';
 import { Sort } from '../../components/timeline/body/sort';
@@ -1162,7 +1162,7 @@ export const updateSavedQuery = ({
 
 interface UpdateFiltersParams {
   id: string;
-  filters: Filter[];
+  filters: esFilters.Filter[];
   timelineById: TimelineById;
 }
 

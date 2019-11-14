@@ -9,7 +9,7 @@ import React, { useEffect, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
-import { Filter } from '../../../../../../../src/plugins/data/common/es_query/filters';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 import { WithSource } from '../../containers/source';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
@@ -42,7 +42,7 @@ interface StateReduxProps {
   columns: ColumnHeader[];
   dataProviders?: DataProvider[];
   end: number;
-  filters: Filter[];
+  filters: esFilters.Filter[];
   isLive: boolean;
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];

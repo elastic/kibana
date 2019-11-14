@@ -11,7 +11,7 @@ import * as React from 'react';
 import styled from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { Filter } from '../../../../../../../src/plugins/data/common/es_query/filters';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
@@ -62,7 +62,7 @@ interface Props {
   columns: ColumnHeader[];
   dataProviders: DataProvider[];
   end: number;
-  filters: Filter[];
+  filters: esFilters.Filter[];
   flyoutHeaderHeight: number;
   flyoutHeight: number;
   id: string;

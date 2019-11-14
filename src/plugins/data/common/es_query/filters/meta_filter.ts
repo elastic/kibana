@@ -36,6 +36,7 @@ export interface FilterMeta {
   alias: string | null;
   disabled: boolean;
   negate: boolean;
+  // controlledBy is there to identify who owns the filter
   controlledBy?: string;
   // index and type are optional only because when you create a new filter, there are no defaults
   index?: string;
@@ -49,9 +50,6 @@ export interface Filter {
   $state?: FilterState;
   meta: FilterMeta;
   query?: any;
-  exists?: any;
-  bool?: any;
-  range?: any;
 }
 
 export interface LatLon {

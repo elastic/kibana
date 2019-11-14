@@ -9607,10 +9607,34 @@
         "description": "",
         "fields": [
           {
+            "name": "exists",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "meta",
             "description": "",
             "args": [],
             "type": { "kind": "OBJECT", "name": "FilterMetaTimelineResult", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "match_all",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "missing",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -9623,23 +9647,15 @@
             "deprecationReason": null
           },
           {
-            "name": "exists",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "bool",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "range",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "script",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
@@ -9678,6 +9694,22 @@
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Boolean", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "field",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "formattedValue",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -10586,9 +10618,27 @@
         "fields": null,
         "inputFields": [
           {
+            "name": "exists",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          },
+          {
             "name": "meta",
             "description": "",
             "type": { "kind": "INPUT_OBJECT", "name": "FilterMetaTimelineInput", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "match_all",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "missing",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "defaultValue": null
           },
           {
@@ -10598,19 +10648,13 @@
             "defaultValue": null
           },
           {
-            "name": "exists",
-            "description": "",
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "defaultValue": null
-          },
-          {
-            "name": "bool",
-            "description": "",
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "defaultValue": null
-          },
-          {
             "name": "range",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "script",
             "description": "",
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "defaultValue": null
@@ -10642,6 +10686,18 @@
             "name": "disabled",
             "description": "",
             "type": { "kind": "SCALAR", "name": "Boolean", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "field",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "formattedValue",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "defaultValue": null
           },
           {

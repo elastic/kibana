@@ -65,6 +65,8 @@ export const persistTimelineMutation = gql`
             alias
             controlledBy
             disabled
+            field
+            formattedValue
             index
             key
             negate
@@ -74,8 +76,10 @@ export const persistTimelineMutation = gql`
           }
           query
           exists
-          bool
+          match_all
+          missing
           range
+          script
         }
         kqlMode
         kqlQuery {

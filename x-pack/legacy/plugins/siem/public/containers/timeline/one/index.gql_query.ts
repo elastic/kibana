@@ -77,6 +77,8 @@ export const oneTimelineQuery = gql`
           alias
           controlledBy
           disabled
+          field
+          formattedValue
           index
           key
           negate
@@ -86,8 +88,10 @@ export const oneTimelineQuery = gql`
         }
         query
         exists
-        bool
+        match_all
+        missing
         range
+        script
       }
       kqlMode
       kqlQuery {

@@ -6,6 +6,7 @@
 
 import { cloneDeep } from 'lodash/fp';
 
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { FilterStateStore } from '../../../../../../../src/plugins/data/common/es_query/filters';
 import { mockIndexPattern } from '../../mock';
 
@@ -193,7 +194,7 @@ describe('Combined Queries', () => {
               value: 'exists',
             },
             exists: { field: 'host.name' },
-          },
+          } as esFilters.Filter,
         ],
         kqlQuery: { query: '', language: 'kuery' },
         kqlMode: 'search',

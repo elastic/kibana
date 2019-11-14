@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '../../../../../../../src/plugins/data/common/es_query/filters';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/helpers';
@@ -26,7 +26,7 @@ export interface TimelineModel {
   description: string;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
   eventIdToNoteIds: Record<string, string[]>;
-  filters?: Filter[];
+  filters?: esFilters.Filter[];
   /** The chronological history of actions related to this timeline */
   historyIds: string[];
   /** The chronological history of actions related to this timeline */
@@ -74,36 +74,34 @@ export interface TimelineModel {
   version: string | null;
 }
 
-export const timelineDefaults: Readonly<
-  Pick<
-    TimelineModel,
-    | 'columns'
-    | 'dataProviders'
-    | 'description'
-    | 'eventIdToNoteIds'
-    | 'filters'
-    | 'highlightedDropAndProviderId'
-    | 'historyIds'
-    | 'isFavorite'
-    | 'isLive'
-    | 'itemsPerPage'
-    | 'itemsPerPageOptions'
-    | 'kqlMode'
-    | 'kqlQuery'
-    | 'title'
-    | 'noteIds'
-    | 'pinnedEventIds'
-    | 'pinnedEventsSaveObject'
-    | 'dateRange'
-    | 'show'
-    | 'sort'
-    | 'width'
-    | 'isSaving'
-    | 'isLoading'
-    | 'savedObjectId'
-    | 'version'
-  >
-> = {
+export const timelineDefaults: Readonly<Pick<
+  TimelineModel,
+  | 'columns'
+  | 'dataProviders'
+  | 'description'
+  | 'eventIdToNoteIds'
+  | 'filters'
+  | 'highlightedDropAndProviderId'
+  | 'historyIds'
+  | 'isFavorite'
+  | 'isLive'
+  | 'itemsPerPage'
+  | 'itemsPerPageOptions'
+  | 'kqlMode'
+  | 'kqlQuery'
+  | 'title'
+  | 'noteIds'
+  | 'pinnedEventIds'
+  | 'pinnedEventsSaveObject'
+  | 'dateRange'
+  | 'show'
+  | 'sort'
+  | 'width'
+  | 'isSaving'
+  | 'isLoading'
+  | 'savedObjectId'
+  | 'version'
+>> = {
   columns: defaultHeaders,
   dataProviders: [],
   description: '',
@@ -140,32 +138,30 @@ export const timelineDefaults: Readonly<
   version: null,
 };
 
-export const eventsDefaults: Readonly<
-  Pick<
-    TimelineModel,
-    | 'columns'
-    | 'dataProviders'
-    | 'description'
-    | 'eventIdToNoteIds'
-    | 'highlightedDropAndProviderId'
-    | 'historyIds'
-    | 'isFavorite'
-    | 'isLive'
-    | 'itemsPerPage'
-    | 'itemsPerPageOptions'
-    | 'kqlMode'
-    | 'kqlQuery'
-    | 'title'
-    | 'noteIds'
-    | 'pinnedEventIds'
-    | 'pinnedEventsSaveObject'
-    | 'dateRange'
-    | 'show'
-    | 'sort'
-    | 'width'
-    | 'isSaving'
-    | 'isLoading'
-    | 'savedObjectId'
-    | 'version'
-  >
-> = { ...timelineDefaults, columns: eventsDefaultHeaders };
+export const eventsDefaults: Readonly<Pick<
+  TimelineModel,
+  | 'columns'
+  | 'dataProviders'
+  | 'description'
+  | 'eventIdToNoteIds'
+  | 'highlightedDropAndProviderId'
+  | 'historyIds'
+  | 'isFavorite'
+  | 'isLive'
+  | 'itemsPerPage'
+  | 'itemsPerPageOptions'
+  | 'kqlMode'
+  | 'kqlQuery'
+  | 'title'
+  | 'noteIds'
+  | 'pinnedEventIds'
+  | 'pinnedEventsSaveObject'
+  | 'dateRange'
+  | 'show'
+  | 'sort'
+  | 'width'
+  | 'isSaving'
+  | 'isLoading'
+  | 'savedObjectId'
+  | 'version'
+>> = { ...timelineDefaults, columns: eventsDefaultHeaders };

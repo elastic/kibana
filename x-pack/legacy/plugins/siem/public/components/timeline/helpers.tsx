@@ -7,7 +7,7 @@
 import { isEmpty, isNumber, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { Query, esFilters } from 'src/plugins/data/public';
+import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
 import { escapeQueryValue, convertToBuildEsQuery, EsQueryConfig } from '../../lib/keury';
 

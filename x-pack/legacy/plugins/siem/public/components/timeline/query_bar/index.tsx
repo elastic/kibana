@@ -186,8 +186,8 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       (newQuery: Query) => {
         if (
           filterQueryDraft == null ||
-          ((filterQueryDraft != null && filterQueryDraft.expression !== newQuery.query) ||
-            filterQueryDraft.kind !== newQuery.language)
+          (filterQueryDraft != null && filterQueryDraft.expression !== newQuery.query) ||
+          filterQueryDraft.kind !== newQuery.language
         ) {
           setKqlFilterQueryDraft(
             newQuery.query as string,
@@ -202,8 +202,8 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       (newQuery: Query, timefilter?: SavedQueryTimeFilter) => {
         if (
           filterQuery == null ||
-          ((filterQuery != null && filterQuery.expression !== newQuery.query) ||
-            filterQuery.kind !== newQuery.language)
+          (filterQuery != null && filterQuery.expression !== newQuery.query) ||
+          filterQuery.kind !== newQuery.language
         ) {
           setKqlFilterQueryDraft(
             newQuery.query as string,

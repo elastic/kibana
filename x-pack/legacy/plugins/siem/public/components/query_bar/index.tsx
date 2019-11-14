@@ -8,13 +8,16 @@ import { isEqual } from 'lodash/fp';
 import React, { memo, useState, useEffect, useMemo, useCallback } from 'react';
 import { StaticIndexPattern, IndexPattern } from 'ui/index_patterns';
 
-import { Query, TimeRange } from 'src/plugins/data/common/types';
-
 import { SavedQuery, SearchBar } from '../../../../../../../src/legacy/core_plugins/data/public';
-import { FilterManager, TimeHistory } from '../../../../../../../src/plugins/data/public';
+import {
+  esFilters,
+  FilterManager,
+  Query,
+  TimeHistory,
+  TimeRange,
+} from '../../../../../../../src/plugins/data/public';
 import { SavedQueryTimeFilter } from '../../../../../../../src/legacy/core_plugins/data/public/search';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
-import { Filter } from '../../../../../../../src/plugins/data/common/es_query/filters';
 
 export interface QueryBarComponentProps {
   dateRangeFrom?: string;
@@ -24,7 +27,7 @@ export interface QueryBarComponentProps {
   isRefreshPaused?: boolean;
   filterQuery: Query;
   filterManager: FilterManager;
-  filters: Filter[];
+  filters: esFilters.Filter[];
   onChangedQuery: (query: Query) => void;
   onSubmitQuery: (query: Query, timefilter?: SavedQueryTimeFilter) => void;
   refreshInterval?: number;
@@ -102,7 +105,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     }, [filterManager, onSubmitQuery, onSavedQuery, savedQuery]);
 
     const onFiltersUpdated = useCallback(
-      (newFilters: Filter[]) => {
+      (newFilters: esFilters.Filter[]) => {
         filterManager.setFilters(newFilters);
       },
       [filterManager]

@@ -28,7 +28,7 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 
-import { Filter } from '../../../../../../../src/plugins/data/common/es_query/filters';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { persistTimelineMutation } from '../../containers/timeline/persist.gql_query';
 import {
@@ -278,12 +278,20 @@ export const convertTimelineAsInput = (
         return set(
           key,
           filters != null
-            ? filters.map((myfilter: Filter) => {
-                const basicFilter = omit(['$state'], myfilter);
+            ? filters.map((myFilter: esFilters.Filter) => {
+                const basicFilter = omit(['$state'], myFilter);
                 return {
                   ...basicFilter,
                   meta: {
                     ...basicFilter.meta,
+                    field:
+                      (esFilters.isMatchAllFilter(basicFilter) ||
+                        esFilters.isPhraseFilter(basicFilter) ||
+                        esFilters.isPhrasesFilter(basicFilter) ||
+                        esFilters.isRangeFilter(basicFilter)) &&
+                      basicFilter.meta.field != null
+                        ? convertToString(basicFilter.meta.field)
+                        : null,
                     value:
                       basicFilter.meta.value != null
                         ? convertToString(basicFilter.meta.value)
@@ -293,18 +301,32 @@ export const convertTimelineAsInput = (
                         ? convertToString(basicFilter.meta.params)
                         : null,
                   },
-                  ...(basicFilter.bool != null
-                    ? { bool: convertToString(basicFilter.bool) }
-                    : { bool: null }),
-                  ...(basicFilter.exists != null
+                  ...(esFilters.isMatchAllFilter(basicFilter)
+                    ? {
+                        match_all: convertToString(
+                          (basicFilter as esFilters.MatchAllFilter).match_all
+                        ),
+                      }
+                    : { match_all: null }),
+                  ...(esFilters.isMissingFilter(basicFilter) && basicFilter.missing != null
+                    ? { missing: convertToString(basicFilter.missing) }
+                    : { missing: null }),
+                  ...(esFilters.isExistsFilter(basicFilter) && basicFilter.exists != null
                     ? { exists: convertToString(basicFilter.exists) }
                     : { exists: null }),
-                  ...(basicFilter.query != null
+                  ...((esFilters.isQueryStringFilter(basicFilter) ||
+                    get('query', basicFilter) != null) &&
+                  basicFilter.query != null
                     ? { query: convertToString(basicFilter.query) }
                     : { query: null }),
-                  ...(basicFilter.range != null
+                  ...(esFilters.isRangeFilter(basicFilter) && basicFilter.range != null
                     ? { range: convertToString(basicFilter.range) }
                     : { range: null }),
+                  ...(esFilters.isRangeFilter(basicFilter) &&
+                  basicFilter.script !=
+                    null /* TODO remove it when PR50713 is merged || esFilters.isPhraseFilter(basicFilter) */
+                    ? { script: convertToString(basicFilter.script) }
+                    : { script: null }),
                 };
               })
             : [],

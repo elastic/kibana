@@ -159,6 +159,12 @@ export const timelineSavedObjectMappings: {
               disabled: {
                 type: 'boolean',
               },
+              field: {
+                type: 'text',
+              },
+              formattedValue: {
+                type: 'text',
+              },
               index: {
                 type: 'keyword',
               },
@@ -179,16 +185,22 @@ export const timelineSavedObjectMappings: {
               },
             },
           },
-          query: {
-            type: 'text',
-          },
           exists: {
             type: 'text',
           },
-          bool: {
+          match_all: {
+            type: 'text',
+          },
+          missing: {
+            type: 'text',
+          },
+          query: {
             type: 'text',
           },
           range: {
+            type: 'text',
+          },
+          script: {
             type: 'text',
           },
         },

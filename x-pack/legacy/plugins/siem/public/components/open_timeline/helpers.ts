@@ -113,6 +113,9 @@ export const defaultTimelineToTimelineModel = (
             },
             meta: {
               ...filter.meta,
+              ...(filter.meta && filter.meta.field != null
+                ? { params: parseString(filter.meta.field) }
+                : {}),
               ...(filter.meta && filter.meta.params != null
                 ? { params: parseString(filter.meta.params) }
                 : {}),
@@ -120,10 +123,12 @@ export const defaultTimelineToTimelineModel = (
                 ? { value: parseString(filter.meta.value) }
                 : {}),
             },
-            ...(filter.bool != null ? { exists: parseString(filter.bool) } : {}),
             ...(filter.exists != null ? { exists: parseString(filter.exists) } : {}),
+            ...(filter.match_all != null ? { exists: parseString(filter.match_all) } : {}),
+            ...(filter.missing != null ? { exists: parseString(filter.missing) } : {}),
             ...(filter.query != null ? { query: parseString(filter.query) } : {}),
             ...(filter.range != null ? { range: parseString(filter.range) } : {}),
+            ...(filter.script != null ? { exists: parseString(filter.script) } : {}),
           }))
         : [],
     isFavorite: duplicate

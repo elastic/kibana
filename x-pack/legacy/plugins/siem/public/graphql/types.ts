@@ -190,15 +190,19 @@ export interface QueryMatchInput {
 }
 
 export interface FilterTimelineInput {
+  exists?: Maybe<string>;
+
   meta?: Maybe<FilterMetaTimelineInput>;
+
+  match_all?: Maybe<string>;
+
+  missing?: Maybe<string>;
 
   query?: Maybe<string>;
 
-  exists?: Maybe<string>;
-
-  bool?: Maybe<string>;
-
   range?: Maybe<string>;
+
+  script?: Maybe<string>;
 }
 
 export interface FilterMetaTimelineInput {
@@ -207,6 +211,10 @@ export interface FilterMetaTimelineInput {
   controlledBy?: Maybe<string>;
 
   disabled?: Maybe<boolean>;
+
+  field?: Maybe<string>;
+
+  formattedValue?: Maybe<string>;
 
   index?: Maybe<string>;
 
@@ -1908,15 +1916,19 @@ export interface FavoriteTimelineResult {
 }
 
 export interface FilterTimelineResult {
+  exists?: Maybe<string>;
+
   meta?: Maybe<FilterMetaTimelineResult>;
+
+  match_all?: Maybe<string>;
+
+  missing?: Maybe<string>;
 
   query?: Maybe<string>;
 
-  exists?: Maybe<string>;
-
-  bool?: Maybe<string>;
-
   range?: Maybe<string>;
+
+  script?: Maybe<string>;
 }
 
 export interface FilterMetaTimelineResult {
@@ -1925,6 +1937,10 @@ export interface FilterMetaTimelineResult {
   controlledBy?: Maybe<string>;
 
   disabled?: Maybe<boolean>;
+
+  field?: Maybe<string>;
+
+  formattedValue?: Maybe<string>;
 
   index?: Maybe<string>;
 
@@ -5114,9 +5130,13 @@ export namespace GetOneTimeline {
 
     exists: Maybe<string>;
 
-    bool: Maybe<string>;
+    match_all: Maybe<string>;
+
+    missing: Maybe<string>;
 
     range: Maybe<string>;
+
+    script: Maybe<string>;
   };
 
   export type Meta = {
@@ -5127,6 +5147,10 @@ export namespace GetOneTimeline {
     controlledBy: Maybe<string>;
 
     disabled: Maybe<boolean>;
+
+    field: Maybe<string>;
+
+    formattedValue: Maybe<string>;
 
     index: Maybe<string>;
 
@@ -5382,9 +5406,13 @@ export namespace PersistTimelineMutation {
 
     exists: Maybe<string>;
 
-    bool: Maybe<string>;
+    match_all: Maybe<string>;
+
+    missing: Maybe<string>;
 
     range: Maybe<string>;
+
+    script: Maybe<string>;
   };
 
   export type Meta = {
@@ -5395,6 +5423,10 @@ export namespace PersistTimelineMutation {
     controlledBy: Maybe<string>;
 
     disabled: Maybe<boolean>;
+
+    field: Maybe<string>;
+
+    formattedValue: Maybe<string>;
 
     index: Maybe<string>;
 

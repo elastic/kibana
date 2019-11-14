@@ -7,6 +7,8 @@
 import { TimelineModel } from './model';
 import { Direction } from '../../graphql/types';
 import { convertTimelineAsInput } from './epic';
+
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { FilterStateStore } from '../../../../../../../src/plugins/data/common/es_query/filters';
 
 describe('Epic Timeline', () => {
@@ -112,7 +114,7 @@ describe('Epic Timeline', () => {
               value: 'exists',
             },
             exists: { field: '@timestamp' },
-          },
+          } as esFilters.Filter,
         ],
         isFavorite: false,
         isLive: false,
@@ -222,34 +224,40 @@ describe('Epic Timeline', () => {
         description: '',
         filters: [
           {
-            bool: null,
             exists: null,
+            match_all: null,
             meta: {
               alias: null,
               disabled: false,
+              field: null,
               key: 'event.category',
               negate: false,
               params: '{"query":"file"}',
               type: 'phrase',
               value: null,
             },
+            missing: null,
             query: '{"match_phrase":{"event.category":"file"}}',
             range: null,
+            script: null,
           },
           {
-            bool: null,
             exists: '{"field":"@timestamp"}',
+            match_all: null,
             meta: {
               alias: null,
               disabled: false,
+              field: null,
               key: '@timestamp',
               negate: false,
               params: null,
               type: 'exists',
               value: 'exists',
             },
+            missing: null,
             query: null,
             range: null,
+            script: null,
           },
         ],
         kqlMode: 'filter',

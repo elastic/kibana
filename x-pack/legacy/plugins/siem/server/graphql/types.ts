@@ -192,15 +192,19 @@ export interface QueryMatchInput {
 }
 
 export interface FilterTimelineInput {
+  exists?: Maybe<string>;
+
   meta?: Maybe<FilterMetaTimelineInput>;
+
+  match_all?: Maybe<string>;
+
+  missing?: Maybe<string>;
 
   query?: Maybe<string>;
 
-  exists?: Maybe<string>;
-
-  bool?: Maybe<string>;
-
   range?: Maybe<string>;
+
+  script?: Maybe<string>;
 }
 
 export interface FilterMetaTimelineInput {
@@ -209,6 +213,10 @@ export interface FilterMetaTimelineInput {
   controlledBy?: Maybe<string>;
 
   disabled?: Maybe<boolean>;
+
+  field?: Maybe<string>;
+
+  formattedValue?: Maybe<string>;
 
   index?: Maybe<string>;
 
@@ -1910,15 +1918,19 @@ export interface FavoriteTimelineResult {
 }
 
 export interface FilterTimelineResult {
+  exists?: Maybe<string>;
+
   meta?: Maybe<FilterMetaTimelineResult>;
+
+  match_all?: Maybe<string>;
+
+  missing?: Maybe<string>;
 
   query?: Maybe<string>;
 
-  exists?: Maybe<string>;
-
-  bool?: Maybe<string>;
-
   range?: Maybe<string>;
+
+  script?: Maybe<string>;
 }
 
 export interface FilterMetaTimelineResult {
@@ -1927,6 +1939,10 @@ export interface FilterMetaTimelineResult {
   controlledBy?: Maybe<string>;
 
   disabled?: Maybe<boolean>;
+
+  field?: Maybe<string>;
+
+  formattedValue?: Maybe<string>;
 
   index?: Maybe<string>;
 
@@ -7925,19 +7941,38 @@ export namespace FavoriteTimelineResultResolvers {
 
 export namespace FilterTimelineResultResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = FilterTimelineResult> {
+    exists?: ExistsResolver<Maybe<string>, TypeParent, TContext>;
+
     meta?: MetaResolver<Maybe<FilterMetaTimelineResult>, TypeParent, TContext>;
+
+    match_all?: MatchAllResolver<Maybe<string>, TypeParent, TContext>;
+
+    missing?: MissingResolver<Maybe<string>, TypeParent, TContext>;
 
     query?: QueryResolver<Maybe<string>, TypeParent, TContext>;
 
-    exists?: ExistsResolver<Maybe<string>, TypeParent, TContext>;
-
-    bool?: BoolResolver<Maybe<string>, TypeParent, TContext>;
-
     range?: RangeResolver<Maybe<string>, TypeParent, TContext>;
+
+    script?: ScriptResolver<Maybe<string>, TypeParent, TContext>;
   }
 
+  export type ExistsResolver<
+    R = Maybe<string>,
+    Parent = FilterTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
   export type MetaResolver<
     R = Maybe<FilterMetaTimelineResult>,
+    Parent = FilterTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type MatchAllResolver<
+    R = Maybe<string>,
+    Parent = FilterTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type MissingResolver<
+    R = Maybe<string>,
     Parent = FilterTimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -7946,17 +7981,12 @@ export namespace FilterTimelineResultResolvers {
     Parent = FilterTimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type ExistsResolver<
-    R = Maybe<string>,
-    Parent = FilterTimelineResult,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type BoolResolver<
-    R = Maybe<string>,
-    Parent = FilterTimelineResult,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
   export type RangeResolver<
+    R = Maybe<string>,
+    Parent = FilterTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ScriptResolver<
     R = Maybe<string>,
     Parent = FilterTimelineResult,
     TContext = SiemContext
@@ -7970,6 +8000,10 @@ export namespace FilterMetaTimelineResultResolvers {
     controlledBy?: ControlledByResolver<Maybe<string>, TypeParent, TContext>;
 
     disabled?: DisabledResolver<Maybe<boolean>, TypeParent, TContext>;
+
+    field?: FieldResolver<Maybe<string>, TypeParent, TContext>;
+
+    formattedValue?: FormattedValueResolver<Maybe<string>, TypeParent, TContext>;
 
     index?: IndexResolver<Maybe<string>, TypeParent, TContext>;
 
@@ -7996,6 +8030,16 @@ export namespace FilterMetaTimelineResultResolvers {
   > = Resolver<R, Parent, TContext>;
   export type DisabledResolver<
     R = Maybe<boolean>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type FieldResolver<
+    R = Maybe<string>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type FormattedValueResolver<
+    R = Maybe<string>,
     Parent = FilterMetaTimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;

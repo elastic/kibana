@@ -66,6 +66,8 @@ const SavedFilterMetaRuntimeType = runtimeTypes.partial({
   alias: unionWithNullType(runtimeTypes.string),
   controlledBy: unionWithNullType(runtimeTypes.string),
   disabled: unionWithNullType(runtimeTypes.boolean),
+  field: unionWithNullType(runtimeTypes.string),
+  formattedValue: unionWithNullType(runtimeTypes.string),
   index: unionWithNullType(runtimeTypes.string),
   key: unionWithNullType(runtimeTypes.string),
   negate: unionWithNullType(runtimeTypes.boolean),
@@ -76,10 +78,12 @@ const SavedFilterMetaRuntimeType = runtimeTypes.partial({
 
 const SavedFilterRuntimeType = runtimeTypes.partial({
   exists: unionWithNullType(runtimeTypes.string),
-  bool: unionWithNullType(runtimeTypes.string),
   meta: unionWithNullType(SavedFilterMetaRuntimeType),
+  match_all: unionWithNullType(runtimeTypes.string),
+  missing: unionWithNullType(runtimeTypes.string),
   query: unionWithNullType(runtimeTypes.string),
   range: unionWithNullType(runtimeTypes.string),
+  script: unionWithNullType(runtimeTypes.string),
 });
 
 /*
