@@ -683,7 +683,7 @@ Alias: `value`
 
 |`format`
 |`string`
-|The MomentJS format used to parse the specified date string. See https://momentjs.com/docs/#/displaying/.
+|The MomentJS format used to parse the specified date string. For more information, see https://momentjs.com/docs/#/displaying/.
 |===
 
 *Returns:* `number`
@@ -739,7 +739,7 @@ Aliases: `exp`, `expression`, `fn`, `function`
 [[dropdownControl_fn]]
 === `dropdownControl`
 
-Configures a drop-down filter control element.
+Configures a dropdown filter control element.
 
 *Expression syntax*
 [source,js]
@@ -773,7 +773,7 @@ This creates a dropdown filter element. It requires a data source and uses the u
 
 |`valueColumn` ***
 |`string`
-|The column or field from which to extract the unique values for the drop-down control.
+|The column or field from which to extract the unique values for the dropdown control.
 |===
 
 *Returns:* `render`
@@ -1244,24 +1244,24 @@ Alias: `format`
 [[formatnumber_fn]]
 === `formatnumber`
 
-Formats a number into a formatted number string using NumeralJS. See http://numeraljs.com/#format.
+Formats a number into a formatted number string using NumeralJS. For more information, see http://numeraljs.com/#format.
 
 *Expression syntax*
 [source,js]
 ----
-formatnumber format=”$0,0.00”
-formatnumber “0.0a”
+formatnumber format="$0,0.00"
+formatnumber "0.0a"
 ----
 
 *Code example*
 [source,text]
 ----
-filters	
-| demodata	
-| math "mean(percent_uptime)"	
-| progress shape="gauge" 	
-  label={formatnumber "0%"} 	
-  font={font size=24 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align="center"}	
+filters
+| demodata
+| math "mean(percent_uptime)"
+| progress shape="gauge"
+  label={formatnumber "0%"}
+  font={font size=24 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align="center"}
 | render
 ----
 The `formatnumber` subexpression receives the same `context` as the `progress` function, which is the output of the `math` function. It formats the value into a percentage.
@@ -1460,7 +1460,7 @@ Default: `"contain"`
 [[joinRows_fn]]
 === `joinRows`
 
-Concatenates values from rows in a `datatable` into a single string
+Concatenates values from rows in a `datatable` into a single string.
 
 *Accepts:* `datatable`
 
@@ -2334,7 +2334,7 @@ Aliases: `column`, `name`
 
 |`value`
 |`string`, `number`, `boolean`, `null`
-|The value to insert in each row in the new column. Tip: use a sub-expression to rollup other columns into a static value.
+|The value to insert in each row in the new column. TIP: use a sub-expression to rollup other columns into a static value.
 
 Default: `null`
 |===
