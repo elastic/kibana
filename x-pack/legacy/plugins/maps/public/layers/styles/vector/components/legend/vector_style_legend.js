@@ -15,7 +15,7 @@ export function VectorStyleLegend({  styleProperties }) {
     return (
       <StylePropertyLegendRow
         style={styleProperty.style}
-        key={styleProperty.name}
+        key={styleProperty.style.getStyleName()}
         range={styleProperty.range}
       />
     );

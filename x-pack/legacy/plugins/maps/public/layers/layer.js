@@ -195,7 +195,7 @@ export class AbstractLayer {
     return false;
   }
 
-  getLegendDetails() {
+  renderLegendDetails() {
     return null;
   }
 

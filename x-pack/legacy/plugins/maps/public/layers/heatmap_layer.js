@@ -102,8 +102,8 @@ export class HeatmapLayer extends VectorLayer {
     return true;
   }
 
-  getLegendDetails() {
+  renderLegendDetails() {
     const metricFields = this._source.getMetricFields();
-    return this._style.getLegendDetails(metricFields[0]);
+    return this._style.renderLegendDetails(metricFields[0]);
   }
 }

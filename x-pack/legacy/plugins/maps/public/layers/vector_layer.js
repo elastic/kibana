@@ -184,17 +184,8 @@ export class VectorLayer extends AbstractLayer {
     return this._style.getDynamicPropertiesArray().length > 0;
   }
 
-  getLegendDetails() {
-    const getFieldFormatter = async field => {
-      const source = this._getFieldSource(field);
-      if (!source) {
-        return null;
-      }
-
-      return await source.getFieldFormatter(field.name);
-    };
-
-    return this._style.renderLegendDetails(getFieldFormatter);
+  renderLegendDetails() {
+    return this._style.renderLegendDetails();
   }
 
   _getBoundsBasedOnData() {

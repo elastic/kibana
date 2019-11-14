@@ -299,7 +299,7 @@ export class VectorStyle extends AbstractStyle {
 
   renderLegendDetails() {
     const styles = this._getAllStyleProperties();
-    const styleProperties = styles.map(style => {
+    const styleProperties = styles.map((style) => {
       return {
         range: style.isDynamic() && style.getField() && style.getField().getName() ? this._getFieldRange(style.getField().getName()) : null,
         style: style
