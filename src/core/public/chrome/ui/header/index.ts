@@ -19,3 +19,4 @@
 
 export { Header, HeaderProps } from './header';
 export { HeaderWrapper } from './header_wrapper';
+export { HeaderHelpMenuUIExtraLink } from './header_help_menu';

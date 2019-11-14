@@ -2,11 +2,20 @@
 
 [Home](./index.md) &gt; [kibana-plugin-public](./kibana-plugin-public.md) &gt; [ChromeHelpExtension](./kibana-plugin-public.chromehelpextension.md)
 
-## ChromeHelpExtension type
+## ChromeHelpExtension interface
 
 
 <b>Signature:</b>
 
 ```typescript
-export declare type ChromeHelpExtension = (element: HTMLDivElement) => () => void;
+export interface ChromeHelpExtension 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [appName](./kibana-plugin-public.chromehelpextension.appname.md) | <code>string</code> |  |
+|  [content](./kibana-plugin-public.chromehelpextension.content.md) | <code>(element: HTMLDivElement) =&gt; () =&gt; void</code> |  |
+|  [links](./kibana-plugin-public.chromehelpextension.links.md) | <code>HeaderHelpMenuUIExtraLink[]</code> |  |
+

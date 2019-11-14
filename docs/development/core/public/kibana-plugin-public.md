@@ -33,6 +33,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeBadge](./kibana-plugin-public.chromebadge.md) |  |
 |  [ChromeBrand](./kibana-plugin-public.chromebrand.md) |  |
 |  [ChromeDocTitle](./kibana-plugin-public.chromedoctitle.md) | APIs for accessing and updating the document title. |
+|  [ChromeHelpExtension](./kibana-plugin-public.chromehelpextension.md) |  |
 |  [ChromeNavControl](./kibana-plugin-public.chromenavcontrol.md) |  |
 |  [ChromeNavControls](./kibana-plugin-public.chromenavcontrols.md) | [APIs](./kibana-plugin-public.chromenavcontrols.md) for registering new controls to be displayed in the navigation bar. |
 |  [ChromeNavLink](./kibana-plugin-public.chromenavlink.md) |  |
@@ -98,7 +99,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  --- | --- |
 |  [AppUnmount](./kibana-plugin-public.appunmount.md) | A function called when an application should be unmounted from the page. This function should be synchronous. |
 |  [ChromeBreadcrumb](./kibana-plugin-public.chromebreadcrumb.md) |  |
-|  [ChromeHelpExtension](./kibana-plugin-public.chromehelpextension.md) |  |
 |  [ChromeNavLinkUpdateableFields](./kibana-plugin-public.chromenavlinkupdateablefields.md) |  |
 |  [HandlerContextType](./kibana-plugin-public.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-public.handlerfunction.md) to represent the type of the context. |
 |  [HandlerFunction](./kibana-plugin-public.handlerfunction.md) | A function that accepts a context object and an optional number of additional arguments. Used for the generic types in [IContextContainer](./kibana-plugin-public.icontextcontainer.md) |

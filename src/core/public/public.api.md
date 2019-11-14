@@ -5,6 +5,8 @@
 ```ts
 
 import { Breadcrumb } from '@elastic/eui';
+import { EuiButtonEmptyProps } from '@elastic/eui';
+import { ExclusiveUnion } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import React from 'react';
@@ -118,7 +120,16 @@ export interface ChromeDocTitle {
 }
 
 // @public (undocumented)
-export type ChromeHelpExtension = (element: HTMLDivElement) => () => void;
+export interface ChromeHelpExtension {
+    // (undocumented)
+    appName: string;
+    // (undocumented)
+    content?: (element: HTMLDivElement) => () => void;
+    // Warning: (ae-forgotten-export) The symbol "HeaderHelpMenuUIExtraLink" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    links?: HeaderHelpMenuUIExtraLink[];
+}
 
 // @public (undocumented)
 export interface ChromeNavControl {
