@@ -38,6 +38,6 @@ const {
   injectGlobal,
   keyframes,
   withTheme,
-} = styledComponents as ThemedStyledComponentsModule<EuiTheme>;
+} = (styledComponents as unknown) as ThemedStyledComponentsModule<EuiTheme>;
 
 export { css, euiStyled, EuiThemeProvider, injectGlobal, keyframes, withTheme };
