@@ -4,6 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export interface PaginationOptions {
+  page: number;
+  perPage: number;
+  sortField: string;
+}
+
+// Fetch Rules Types
+export interface FetchRulesProps {
+  paginationOptions: PaginationOptions;
+  ruleId?: string;
+  kbnVersion: string;
+}
+
 export interface FetchRulesResponse {
   page: number;
   perPage: number;
@@ -17,7 +30,7 @@ export interface Rule {
   alertTypeId: string;
   alertTypeParams: RuleAlertTypeParams;
   interval: string;
-  enabled: true;
+  enabled: boolean;
   actions: RuleAction[];
   throttle: null;
   createdBy: string;
@@ -52,4 +65,33 @@ export interface RuleAction {
     level: string;
   };
   id: string;
+}
+
+// Enable Rules Types
+export interface EnableRulesProps {
+  ruleIds: string[];
+  enabled: boolean;
+  kbnVersion: string;
+}
+
+export interface EnableRulesResponse {
+
+}
+
+// Delete Rules Types
+export interface DeleteRulesProps {
+  ruleIds: string[];
+  kbnVersion: string;
+}
+
+// Duplicate Rule Types
+export interface DuplicateRuleProps {
+  rule: Rule;
+  kbnVersion: string;
+}
+
+// Export Rules Types
+export interface ExportRulesProps {
+  ruleIds: string[];
+  kbnVersion: string;
 }

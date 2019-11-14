@@ -10,6 +10,16 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import moment from 'moment';
 import { getEmptyTagValue } from '../../../../components/empty_value';
 import { ColumnTypes } from './index';
+import {
+  deleteRulesAction,
+  duplicateRuleAction,
+  editRuleAction,
+  enableRulesAction,
+  exportRuleAction,
+  runRuleAction,
+} from './actions';
+import { enableRules } from '../../../../containers/detection_engine/rules/api';
+import { RuleSwitch } from '../rule_switch';
 
 // Michael: Will need to change this to get the current datetime format from Kibana settings.
 const dateTimeFormat = (value: string) => {
@@ -21,36 +31,38 @@ const actions = [
     description: 'Edit rule settings',
     icon: 'visControls',
     name: 'Edit rule settings',
-    onClick: () => {},
+    onClick: editRuleAction,
+    disabled: true,
   },
   {
     description: 'Run rule manually…',
     icon: 'play',
     name: 'Run rule manually…',
-    onClick: () => {},
+    onClick: runRuleAction,
+    disabled: true,
   },
   {
     description: 'Duplicate rule…',
     icon: 'copy',
     name: 'Duplicate rule…',
-    onClick: () => {},
+    onClick: duplicateRuleAction,
   },
   {
     description: 'Export rule',
     icon: 'exportAction',
     name: 'Export rule',
-    onClick: () => {},
+    onClick: exportRuleAction,
   },
   {
     description: 'Delete rule…',
     icon: 'trash',
     name: 'Delete rule…',
-    onClick: () => {},
+    onClick: deleteRulesAction,
   },
 ];
 
 // Michael: Are we able to do custom, in-table-header filters, as shown in my wireframes?
-export const columns = [
+export const getColumns = (updateRule: (isEnabled: boolean, ruleId: string) => void) => [
   {
     field: 'rule',
     name: 'Rule',
@@ -67,7 +79,6 @@ export const columns = [
   {
     field: 'method',
     name: 'Method',
-    sortable: true,
     truncateText: true,
   },
   {
@@ -76,11 +87,11 @@ export const columns = [
     render: (value: ColumnTypes['severity']) => (
       <EuiHealth
         color={
-          value === 'Low'
+          value === 'low'
             ? euiLightVars.euiColorVis0
-            : value === 'Medium'
+            : value === 'medium'
             ? euiLightVars.euiColorVis5
-            : value === 'High'
+            : value === 'high'
             ? euiLightVars.euiColorVis7
             : euiLightVars.euiColorVis9
         }
@@ -88,7 +99,6 @@ export const columns = [
         {value}
       </EuiHealth>
     ),
-    sortable: true,
     truncateText: true,
   },
   {
@@ -123,7 +133,6 @@ export const columns = [
         </>
       );
     },
-    sortable: true,
     truncateText: true,
   },
   {
@@ -144,7 +153,6 @@ export const columns = [
         )}
       </div>
     ),
-    sortable: true,
     truncateText: true,
     width: '20%',
   },
@@ -152,13 +160,26 @@ export const columns = [
     align: 'center',
     field: 'activate',
     name: 'Activate',
-    render: (value: ColumnTypes['activate']) => (
-      // Michael: Uncomment props below when EUI 14.9.0 is added to Kibana.
-      <EuiSwitch
-        checked={value}
-        // label="Activate"
-        onChange={() => {}}
-        // showLabel={false}
+    render: (value: ColumnTypes['activate'], item: ColumnTypes) => (
+      <RuleSwitch
+        ruleId={item.id}
+        isEnabled={item.activate}
+        onRuleStateChange={async (isEnabled, ruleId, setIsLoading) => {
+          console.log('item.id', item.id);
+          console.log('isEnabled', isEnabled);
+          console.log('ruleId', ruleId);
+          try {
+            const response = await enableRules({
+              ruleIds: [ruleId],
+              enabled: isEnabled,
+              kbnVersion: '8.0.0',
+            });
+            console.log('response', response);
+          } finally {
+            updateRule(isEnabled, ruleId);
+            setIsLoading(false);
+          }
+        }}
       />
     ),
     sortable: true,
