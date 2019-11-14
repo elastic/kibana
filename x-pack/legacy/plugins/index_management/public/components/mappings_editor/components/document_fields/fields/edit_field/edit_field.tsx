@@ -36,6 +36,14 @@ import { UpdateFieldProvider, UpdateFieldFunc } from './update_field_provider';
 import { EditFieldHeaderForm } from './edit_field_header_form';
 import { EditFieldSection } from './edit_field_section';
 
+const limitStringLength = (text: string, limit = 19): string => {
+  if (text.length <= limit) {
+    return text;
+  }
+
+  return `...${text.substr(limit * -1)}`;
+};
+
 interface Props {
   type: DataType;
   form: FormHook<Field>;
@@ -89,45 +97,50 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
                   maxWidth={720}
                 >
                   <EuiFlyoutHeader>
-                    {/* Title */}
-                    <EuiTitle size="m">
-                      <h2>
-                        {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldTitle', {
-                          defaultMessage: "Edit field '{fieldName}'",
-                          values: {
-                            fieldName: field.source.name,
-                          },
-                        })}
-                      </h2>
-                    </EuiTitle>
+                    <EuiFlexGroup gutterSize="xs">
+                      <EuiFlexItem>
+                        {/* We need an extra div to get out of flex grow */}
+                        <div>
+                          {/* Title */}
+                          <EuiTitle size="m">
+                            <h2>
+                              {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldTitle', {
+                                defaultMessage: "Edit field '{fieldName}'",
+                                values: {
+                                  fieldName: limitStringLength(field.source.name),
+                                },
+                              })}
+                            </h2>
+                          </EuiTitle>
 
-                    {/* Field path */}
-                    <EuiCode>{field.path}</EuiCode>
+                          {/* Field path */}
+                          <EuiCode>{field.path}</EuiCode>
+                        </div>
+                      </EuiFlexItem>
 
-                    <EuiSpacer size="s" />
-
-                    {/* Documentation link */}
-                    <div>
-                      <EuiButtonEmpty
-                        size="s"
-                        flush="right"
-                        href={linkDocumentation}
-                        target="_blank"
-                        iconType="help"
-                      >
-                        {i18n.translate(
-                          'xpack.idxMgmt.mappingsEditor.editField.typeDocumentation',
-                          {
-                            defaultMessage: '{type} documentation',
-                            values: {
-                              type: subTypeDefinition
-                                ? subTypeDefinition.label
-                                : typeDefinition.label,
-                            },
-                          }
-                        )}
-                      </EuiButtonEmpty>
-                    </div>
+                      {/* Documentation link */}
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          size="s"
+                          flush="right"
+                          href={linkDocumentation}
+                          target="_blank"
+                          iconType="help"
+                        >
+                          {i18n.translate(
+                            'xpack.idxMgmt.mappingsEditor.editField.typeDocumentation',
+                            {
+                              defaultMessage: '{type} documentation',
+                              values: {
+                                type: subTypeDefinition
+                                  ? subTypeDefinition.label
+                                  : typeDefinition.label,
+                              },
+                            }
+                          )}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlyoutHeader>
 
                   <EuiFlyoutBody>
