@@ -15,12 +15,12 @@ export * from './handlers';
 export type CallESAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];
 
 export const SAVED_OBJECT_TYPES = new Set<AssetType>([
-  AssetType.config,
-  AssetType.dashboard,
-  AssetType.indexPattern,
-  AssetType.search,
-  AssetType.timelionSheet,
-  AssetType.visualization,
+  'config',
+  'dashboard',
+  'index-pattern',
+  'search',
+  'timelion-sheet',
+  'visualization',
 ]);
 
 export function getClusterAccessor(esClient: IClusterClient, req: Request) {

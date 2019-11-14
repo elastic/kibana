@@ -29,9 +29,10 @@ export async function removeInstallation(options: {
 
   // Delete the installed assets
   const deletePromises = installedObjects.map(async ({ id, type }) => {
-    if (assetUsesObjects(type as AssetType)) {
-      savedObjectsClient.delete(type, id);
-    } else if (type === AssetType.ingestPipeline) {
+    const assetType = type as AssetType;
+    if (assetUsesObjects(assetType)) {
+      savedObjectsClient.delete(assetType, id);
+    } else if (assetType === 'ingest-pipeline') {
       deletePipeline(callCluster, id);
     }
   });
