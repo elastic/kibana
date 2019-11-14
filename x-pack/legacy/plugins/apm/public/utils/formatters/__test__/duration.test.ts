@@ -95,9 +95,9 @@ describe('duration formatters', () => {
         value: '20',
         formatted: '20 ms'
       });
-      expect(convertTo({ unit, microseconds: thirtyFiveMilliAsMicro })).toEqual(
-        { unit: 'ms', value: '35', formatted: '35 ms' }
-      );
+      expect(
+        convertTo({ unit, microseconds: thirtyFiveMilliAsMicro })
+      ).toEqual({ unit: 'ms', value: '35', formatted: '35 ms' });
       expect(
         convertTo({ unit, microseconds: null, defaultValue: '10' })
       ).toEqual({ value: '10', formatted: '10' });

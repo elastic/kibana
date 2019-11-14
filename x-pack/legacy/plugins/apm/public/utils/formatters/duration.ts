@@ -75,6 +75,14 @@ const durationUnit: DurationUnit = {
   }
 };
 
+/**
+ * Converts a microseconds value into the unit defined.
+ *
+ * @param param0
+ * { unit: "milliseconds" | "hours" | "minutes" | "seconds" | "microseconds", microseconds, defaultValue }
+ *
+ * @returns object { value, unit, formatted }
+ */
 export function convertTo({
   unit,
   microseconds,
@@ -125,6 +133,13 @@ export const getDurationFormatter: TimeFormatterBuilder = memoize(
   }
 );
 
+/**
+ * Converts value and returns it formatted - 00 unit
+ *
+ * @param value
+ * @param param1 { defaultValue }
+ * @returns formated value - 00 unit
+ */
 export function asDuration(
   value: Maybe<number>,
   { defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
