@@ -14,6 +14,7 @@ import {
   getTestAlertData,
   ObjectRemover,
   AlertUtils,
+  TaskManagerUtils,
 } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -23,6 +24,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
+  const taskManagerUtils = new TaskManagerUtils(es, retry);
 
   describe('alerts', () => {
     const authorizationIndex = '.kibana-test-authorization';
@@ -90,6 +92,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
+              // Alert interval is 1m. It is safe to assume only 1 document will be indexed at alert execution
               const alertTestRecord = (
                 await esTestIndexTool.waitForDocs('alert:test.always-firing', reference)
               )[0];
@@ -102,6 +105,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   reference,
                 },
               });
+              // Alert interval is 1m. It is safe to assume only 1 document will be indexed at action execution
               const actionTestRecord = (
                 await esTestIndexTool.waitForDocs('action:test.index-record', reference)
               )[0];
@@ -150,7 +154,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .auth(user.username, user.password)
             .send(
               getTestAlertData({
-                interval: '1m',
                 alertTypeId: 'test.always-firing',
                 alertTypeParams: {
                   index: ES_TEST_INDEX_NAME,
@@ -185,6 +188,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
+              // Alert runs every 1m, it is safe to assume only one action will be scheduled
               const scheduledActionTask = await retry.try(async () => {
                 const searchResult = await es.search({
                   index: '.kibana_task_manager',
@@ -263,6 +267,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
+              // Alert runs every 1m. It is safe to assume only one document will be indexed
               alertTestRecord = (
                 await esTestIndexTool.waitForDocs('alert:test.authorization', reference)
               )[0];
@@ -285,6 +290,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
+              // Alert runs every 1m. It is safe to assume only one document will be indexed
               alertTestRecord = (
                 await esTestIndexTool.waitForDocs('alert:test.authorization', reference)
               )[0];
@@ -358,6 +364,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
+              // Alert runs every 1m. It is safe to assume the action will execute only once
               actionTestRecord = (
                 await esTestIndexTool.waitForDocs('action:test.authorization', reference)
               )[0];
@@ -380,6 +387,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
+              // Alert runs every 1m. It is safe to assume the action will execute only once
               actionTestRecord = (
                 await esTestIndexTool.waitForDocs('action:test.authorization', reference)
               )[0];
@@ -426,33 +434,14 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
               // Wait until alerts scheduled actions 3 times to ensure actions had a chance to execute twice
               await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 3);
+              await alertUtils.disable(response.body.id);
+              await taskManagerUtils.waitForIdle(testStart);
               // Wait until one action executed
-              await esTestIndexTool.waitForDocs('action:test.index-record', reference, 1);
-              // Should not have pending tasks for actions
-              const taskManagerSearchResult = await es.search({
-                index: '.kibana_task_manager',
-                body: {
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            'task.taskType': 'actions:test.index-record',
-                          },
-                        },
-                        {
-                          range: {
-                            'task.scheduledAt': {
-                              gte: testStart,
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                },
-              });
-              expect(taskManagerSearchResult.hits.total.value).to.eql(0);
+              const searchResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+              expect(searchResult.hits.total.value).to.eql(1);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -586,31 +575,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
               await alertUtils.enable(response.body.id);
               // Wait until alerts schedule actions twice to ensure actions had a chance to skip execution once
               await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
-              // Should not have pending tasks for actions
-              const taskManagerSearchResult = await es.search({
-                index: '.kibana_task_manager',
-                body: {
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            'task.taskType': 'actions:test.index-record',
-                          },
-                        },
-                        {
-                          range: {
-                            'task.scheduledAt': {
-                              gte: testStart,
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                },
-              });
-              expect(taskManagerSearchResult.hits.total.value).to.eql(0);
+              await alertUtils.disable(response.body.id);
+              await taskManagerUtils.waitForIdle(testStart);
               // Should not have executed action tasks
               const executedActionsResult = await esTestIndexTool.search(
                 'action:test.index-record',
@@ -652,31 +618,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
               await alertUtils.enable(response.body.id);
               // Wait until alerts scheduled actions twice to ensure actions had a chance to execute once
               await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
-              // Should not have pending tasks for actions
-              const taskManagerSearchResult = await es.search({
-                index: '.kibana_task_manager',
-                body: {
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            'task.taskType': 'actions:test.index-record',
-                          },
-                        },
-                        {
-                          range: {
-                            'task.scheduledAt': {
-                              gte: testStart,
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                },
-              });
-              expect(taskManagerSearchResult.hits.total.value).to.eql(0);
+              await alertUtils.disable(response.body.id);
+              await taskManagerUtils.waitForIdle(testStart);
               // Should not have executed action tasks
               const executedActionsResult = await esTestIndexTool.search(
                 'action:test.index-record',
