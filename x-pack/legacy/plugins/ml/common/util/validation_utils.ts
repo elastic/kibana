@@ -8,7 +8,8 @@ import { VALIDATION_STATUS } from '../constants/validation';
 
 // get the most severe status level from a list of messages
 const contains = (arr: string[], str: string) => arr.findIndex(v => v === str) >= 0;
-export function getMostSevereMessageStatus(messages: Array<{ status: string }>) {
+
+export function getMostSevereMessageStatus(messages: Array<{ status: string }>): VALIDATION_STATUS {
   const statuses = messages.map(m => m.status);
   return [VALIDATION_STATUS.INFO, VALIDATION_STATUS.WARNING, VALIDATION_STATUS.ERROR].reduce(
     (previous, current) => {

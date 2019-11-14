@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { duration, unitOfTime } from 'moment';
+import { duration, Duration, unitOfTime } from 'moment';
 import dateMath from '@elastic/datemath';
 
 type SupportedUnits = unitOfTime.Base;
@@ -25,7 +25,7 @@ const SUPPORT_ZERO_DURATION_UNITS: SupportedUnits[] = ['ms', 's', 'm', 'h'];
 // to work with units less than 'day'.
 // 3. Fractional intervals e.g. 1.5h or 4.5d are not allowed, in line with the behaviour
 // of the Elasticsearch date histogram aggregation.
-export function parseInterval(interval: string) {
+export function parseInterval(interval: string): Duration | null {
   const matches = String(interval)
     .trim()
     .match(INTERVAL_STRING_RE);

@@ -6,7 +6,7 @@
 
 // A simple template renderer, it replaces mustache/angular style {{...}} tags with
 // the values provided via the data object
-export function renderTemplate(str: string, data?: Record<string, string>) {
+export function renderTemplate(str: string, data?: Record<string, string>): string {
   const matches = str.match(/{{(.*?)}}/g);
 
   if (Array.isArray(matches) && data !== undefined) {

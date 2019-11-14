@@ -23,7 +23,7 @@ const COLORS = [
 
 const colorMap: Record<string, string> = {};
 
-export function tabColor(name: string) {
+export function tabColor(name: string): string {
   if (colorMap[name] === undefined) {
     const n = stringHash(name);
     const color = COLORS[n % COLORS.length];
@@ -34,7 +34,7 @@ export function tabColor(name: string) {
   }
 }
 
-export function stringHash(str: string) {
+function stringHash(str: string): number {
   let hash = 0;
   let chr = 0;
   if (str.length === 0) {
