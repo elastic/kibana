@@ -54,50 +54,52 @@ export async function ensureDefaultIndexPattern(
     defaultId = defined = false;
   }
 
-  if (!defined) {
-    // If there is any index pattern created, set the first as default
-    if (patterns.length >= 1) {
-      defaultId = patterns[0];
-      newPlatform.uiSettings.set('defaultIndex', defaultId);
-    } else {
-      const canManageIndexPatterns =
-        newPlatform.application.capabilities.management.kibana.index_patterns;
-      const redirectTarget = canManageIndexPatterns ? '/management/kibana/index_pattern' : '/home';
+  if (defined) {
+    return;
+  }
 
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
+  // If there is any index pattern created, set the first as default
+  if (patterns.length >= 1) {
+    defaultId = patterns[0];
+    newPlatform.uiSettings.set('defaultIndex', defaultId);
+  } else {
+    const canManageIndexPatterns =
+      newPlatform.application.capabilities.management.kibana.index_patterns;
+    const redirectTarget = canManageIndexPatterns ? '/management/kibana/index_pattern' : '/home';
 
-      // Avoid being hostile to new users who don't have an index pattern setup yet
-      // give them a friendly info message instead of a terse error message
-      bannerId = newPlatform.overlays.banners.replace(bannerId, (element: HTMLElement) => {
-        ReactDOM.render(
-          <I18nProvider>
-            <EuiCallOut
-              color="warning"
-              iconType="iInCircle"
-              title={i18n.translate('common.ui.indexPattern.bannerLabel', {
-                defaultMessage:
-                  "In order to visualize and explore data in Kibana, you'll need to create an index pattern to retrieve data from Elasticsearch.",
-              })}
-            />
-          </I18nProvider>,
-          element
-        );
-        return () => ReactDOM.unmountComponentAtNode(element);
-      });
-
-      // hide the message after the user has had a chance to acknowledge it -- so it doesn't permanently stick around
-      timeoutId = setTimeout(() => {
-        newPlatform.overlays.banners.remove(bannerId);
-        timeoutId = undefined;
-      }, 15000);
-
-      kbnUrl.change(redirectTarget);
-      $rootScope.$digest();
-
-      // return never-resolving promise to stop resolving and wait for the url change
-      return new Promise(() => {});
+    if (timeoutId) {
+      clearTimeout(timeoutId);
     }
+
+    // Avoid being hostile to new users who don't have an index pattern setup yet
+    // give them a friendly info message instead of a terse error message
+    bannerId = newPlatform.overlays.banners.replace(bannerId, (element: HTMLElement) => {
+      ReactDOM.render(
+        <I18nProvider>
+          <EuiCallOut
+            color="warning"
+            iconType="iInCircle"
+            title={i18n.translate('common.ui.indexPattern.bannerLabel', {
+              defaultMessage:
+                "In order to visualize and explore data in Kibana, you'll need to create an index pattern to retrieve data from Elasticsearch.",
+            })}
+          />
+        </I18nProvider>,
+        element
+      );
+      return () => ReactDOM.unmountComponentAtNode(element);
+    });
+
+    // hide the message after the user has had a chance to acknowledge it -- so it doesn't permanently stick around
+    timeoutId = setTimeout(() => {
+      newPlatform.overlays.banners.remove(bannerId);
+      timeoutId = undefined;
+    }, 15000);
+
+    kbnUrl.change(redirectTarget);
+    $rootScope.$digest();
+
+    // return never-resolving promise to stop resolving and wait for the url change
+    return new Promise(() => {});
   }
 }

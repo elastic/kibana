@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import { npStart } from 'ui/new_platform';
-import { onBrushEvent } from './brush_event';
 import _ from 'lodash';
-import {  start as data } from '../../../../core_plugins/data/public/legacy';
-import { uniqFilters, esFilters, changeTimeFilter, extractTimeFilter } from '../../../../../plugins/data/public';
+import { pushFilterBarFilters } from '../push_filters';
+import { onBrushEvent } from './brush_event';
+import { uniqFilters, esFilters } from '../../../../../plugins/data/public';
 
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
@@ -105,33 +104,16 @@ const createFiltersFromEvent = (event) => {
   return filters;
 };
 
-const VisFiltersProvider = () => {
+const VisFiltersProvider = (getAppState, $timeout) => {
 
-  const pushFilters = async (filters, simulate) => {
+  const pushFilters = (filters, simulate) => {
+    const appState = getAppState();
     if (filters.length && !simulate) {
-      const dedupedFilters = uniqFilters(filters);
-      // All filters originated from one visualization.
-      const indexPatternId = dedupedFilters[0].meta.index;
-      const indexPattern = _.find(
-        await data.indexPatterns.indexPatterns.getCache(),
-        p => p.id === indexPatternId
-      );
-      if (dedupedFilters.length > 1) {
-        // TODO show apply filter popover and wait for user input
-      }
-      if (indexPattern && indexPattern.attributes.timeFieldName) {
-        const { timeRangeFilter, restOfFilters } = extractTimeFilter(
-          indexPattern.attributes.timeFieldName,
-          dedupedFilters
-        );
-        npStart.plugins.data.query.filterManager.addFilters(restOfFilters);
-        if (timeRangeFilter) changeTimeFilter(data.timefilter.timefilter, timeRangeFilter);
-      } else {
-        npStart.plugins.data.query.filterManager.addFilters(dedupedFilters);
-      }
+      pushFilterBarFilters(appState, uniqFilters(filters));
+      // to trigger angular digest cycle, we can get rid of this once we have either new filterManager or actions API
+      $timeout(_.noop, 0);
     }
   };
-
 
   return {
     pushFilters,
