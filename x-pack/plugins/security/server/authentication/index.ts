@@ -70,9 +70,6 @@ export async function setupAuthentication({
     if (sessionValue.path !== (http.basePath.serverBasePath || '/')) {
       authLogger.debug(`Outdated session value with path "${sessionValue.path}"`);
       return false;
-    } else if (sessionValue.secure !== config.secureCookies) {
-      authLogger.debug(`Outdated session value with secure "${sessionValue.secure}"`);
-      return false;
     }
     // ensure that this cookie is not expired
     return !(sessionValue.expires && sessionValue.expires < Date.now());
@@ -81,11 +78,7 @@ export async function setupAuthentication({
   const authenticator = new Authenticator({
     clusterClient,
     basePath: http.basePath,
-    config: {
-      sessionTimeout: config.sessionTimeout,
-      authc: config.authc,
-      secureCookies: config.secureCookies,
-    },
+    config: { sessionTimeout: config.sessionTimeout, authc: config.authc },
     isSystemAPIRequest: (request: KibanaRequest) => getLegacyAPI().isSystemAPIRequest(request),
     loggers,
     sessionStorageFactory: await http.createCookieSessionStorageFactory({
@@ -96,7 +89,7 @@ export async function setupAuthentication({
         const array: ProviderSession[] = Array.isArray(session) ? session : [session];
         for (const sess of array) {
           if (!isValid(sess)) {
-            return { isValid: false, path: sess.path, isSecure: sess.secure };
+            return { isValid: false, path: sess.path };
           }
         }
         return { isValid: true };

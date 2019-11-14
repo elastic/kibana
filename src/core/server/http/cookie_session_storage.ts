@@ -60,10 +60,6 @@ export interface SessionCookieValidationResult {
    * The "Path" attribute of the cookie; if the cookie is invalid, this is used to clear it.
    */
   path?: string;
-  /**
-   * The "Secure" attribute of the cookie; if the cookie is invalid, this is used to clear it.
-   */
-  isSecure?: boolean;
 }
 
 class ScopedCookieSessionStorage<T extends Record<string, any>> implements SessionStorage<T> {
@@ -117,17 +113,13 @@ export async function createCookieSessionStorageFactory<T>(
   cookieOptions: SessionStorageCookieOptions<T>,
   basePath?: string
 ): Promise<SessionStorageFactory<T>> {
-  function clearInvalidCookie(
-    req: Request | undefined,
-    path: string = basePath || '/',
-    isSecure: boolean = cookieOptions.isSecure
-  ) {
+  function clearInvalidCookie(req: Request | undefined, path: string = basePath || '/') {
     // if the cookie did not include the 'path' or 'isSecure' attributes in the session value, it is a legacy cookie
     // we will assume that the cookie was created with the current configuration
     log.debug(`Clearing invalid session cookie`);
     // need to use Hapi toolkit to clear cookie with defined options
     if (req) {
-      (req.cookieAuth as any).h.unstate(cookieOptions.name, { path, isSecure });
+      (req.cookieAuth as any).h.unstate(cookieOptions.name, { path });
     }
   }
 
@@ -139,7 +131,7 @@ export async function createCookieSessionStorageFactory<T>(
     validateFunc: async (req, session: T) => {
       const result = cookieOptions.validate(session);
       if (!result.isValid) {
-        clearInvalidCookie(req, result.path, result.isSecure);
+        clearInvalidCookie(req, result.path);
       }
       return { valid: result.isValid };
     },

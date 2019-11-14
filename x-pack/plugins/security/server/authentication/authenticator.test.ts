@@ -87,7 +87,6 @@ describe('Authenticator', () => {
         state: { authorization: 'Basic xxx' },
         provider: 'basic',
         path: mockOptions.basePath.serverBasePath,
-        secure: mockOptions.config.secureCookies,
       };
 
       authenticator = new Authenticator(mockOptions);
@@ -306,7 +305,6 @@ describe('Authenticator', () => {
         state: { authorization: 'Basic xxx' },
         provider: 'basic',
         path: mockOptions.basePath.serverBasePath,
-        secure: mockOptions.config.secureCookies,
       };
 
       authenticator = new Authenticator(mockOptions);
@@ -665,7 +663,6 @@ describe('Authenticator', () => {
         state: { authorization: 'Basic xxx' },
         provider: 'basic',
         path: mockOptions.basePath.serverBasePath,
-        secure: mockOptions.config.secureCookies,
       };
 
       authenticator = new Authenticator(mockOptions);

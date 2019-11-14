@@ -1563,7 +1563,6 @@ export class ScopedClusterClient implements IScopedClusterClient {
 
 // @public
 export interface SessionCookieValidationResult {
-    isSecure?: boolean;
     isValid: boolean;
     path?: string;
 }

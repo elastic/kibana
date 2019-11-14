@@ -16,7 +16,6 @@ export interface SessionCookieValidationResult
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [isSecure](./kibana-plugin-server.sessioncookievalidationresult.issecure.md) | <code>boolean</code> | The "Secure" attribute of the cookie; if the cookie is invalid, this is used to clear it. |
 |  [isValid](./kibana-plugin-server.sessioncookievalidationresult.isvalid.md) | <code>boolean</code> | Whether the cookie is valid or not. |
 |  [path](./kibana-plugin-server.sessioncookievalidationresult.path.md) | <code>string</code> | The "Path" attribute of the cookie; if the cookie is invalid, this is used to clear it. |
 

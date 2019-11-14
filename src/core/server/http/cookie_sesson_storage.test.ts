@@ -101,7 +101,7 @@ const cookieOptions = {
   encryptionKey: 'something_at_least_32_characters',
   validate: (session: Storage) => {
     const isValid = session.path === path && session.expires > Date.now();
-    return { isValid, path: session.path, isSecure: false };
+    return { isValid, path: session.path };
   },
   isSecure: false,
   path,
