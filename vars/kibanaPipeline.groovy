@@ -129,10 +129,16 @@ def jobRunner(label, useRamDisk, closure) {
 
     def scmVars
 
+    def count = 0
     // Try to clone from Github up to 8 times, waiting 15 secs between attempts
     retry(8) {
       try {
+        count++
         scmVars = checkout scm
+
+        if (count < 2) {
+          error("TODO delete me")
+        }
       } catch (ex) {
         sleep 15
         throw ex
