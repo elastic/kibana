@@ -223,6 +223,7 @@ export interface RequestHandlerContext {
  * @public
  */
 export interface CoreSetup {
+  application: any;
   /** {@link ContextSetup} */
   context: ContextSetup;
   /** {@link ElasticsearchServiceSetup} */

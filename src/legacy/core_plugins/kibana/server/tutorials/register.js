@@ -122,6 +122,7 @@ export function registerTutorials(server) {
   server.newPlatform.setup.plugins.home.registerTutorial(windowsMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.registerTutorial(windowsEventLogsSpecProvider);
   server.newPlatform.setup.plugins.home.registerTutorial(golangMetricsSpecProvider);
+  server.newPlatform.setup.plugins.home.registerTutorial(golangMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.registerTutorial(logstashMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.registerTutorial(prometheusMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.registerTutorial(zookeeperMetricsSpecProvider);
