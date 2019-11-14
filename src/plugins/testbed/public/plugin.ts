@@ -17,12 +17,24 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup } from 'kibana/public';
+import { take } from 'rxjs/operators';
+import { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/public';
+
+interface ConfigType {
+  uiProp: string;
+}
 
 export class TestbedPlugin implements Plugin<TestbedPluginSetup, TestbedPluginStart> {
-  public setup(core: CoreSetup, deps: {}) {
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
+
+  public async setup(core: CoreSetup, deps: {}) {
+    const config = await this.initializerContext.config
+      .create<ConfigType>()
+      .pipe(take(1))
+      .toPromise();
+
     // eslint-disable-next-line no-console
-    console.log(`Testbed plugin set up`);
+    console.log(`Testbed plugin set up. uiProp: '${config.uiProp}'`);
     return {
       foo: 'bar',
     };
