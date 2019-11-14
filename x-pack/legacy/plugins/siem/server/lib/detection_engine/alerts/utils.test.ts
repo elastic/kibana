@@ -3,10 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { BulkIndexDocumentsParams } from 'elasticsearch';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-
-import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 
 import { Logger } from '../../../../../../../../src/core/server';
 import {
@@ -15,7 +12,6 @@ import {
   singleSearchAfter,
   searchAfterAndBulkIndex,
 } from './utils';
-import { SignalHit } from '../../types';
 import {
   sampleDocNoSortId,
   sampleSignalAlertParams,
