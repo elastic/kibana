@@ -18,7 +18,7 @@
  */
 
 import { buildInlineScriptForPhraseFilter, buildPhraseFilter } from './phrase_filter';
-import { IndexPattern } from './types';
+import { IndexPattern } from '../../types';
 import { getField } from '../__tests__/fields_mock';
 
 describe('Phrase filter builder', () => {

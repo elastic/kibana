@@ -14,34 +14,28 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GraphQLFormattedError } from 'graphql';
-import React, { useCallback, useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { UICapabilities } from 'ui/capabilities';
 import { injectUICapabilities } from 'ui/capabilities/react';
 import euiStyled, { EuiTheme, withTheme } from '../../../../../common/eui_styled_components';
-import { InfraMetricsErrorCodes } from '../../../common/errors';
 import { AutoSizer } from '../../components/auto_sizer';
 import { DocumentTitle } from '../../components/document_title';
 import { Header } from '../../components/header';
-import { Metrics } from '../../components/metrics';
-import { InvalidNodeError } from '../../components/metrics/invalid_node';
-import { MetricsSideNav } from '../../components/metrics/side_nav';
-import { MetricsTimeControls } from '../../components/metrics/time_controls';
+import { MetricsSideNav } from './components/side_nav';
+import { MetricsTimeControls } from './components/time_controls';
 import { ColumnarPage, PageContent } from '../../components/page';
-import { WithMetrics } from '../../containers/metrics/with_metrics';
-import {
-  WithMetricsTime,
-  WithMetricsTimeUrlState,
-} from '../../containers/metrics/with_metrics_time';
+import { WithMetrics } from './containers/with_metrics';
+import { WithMetricsTime, WithMetricsTimeUrlState } from './containers/with_metrics_time';
 import { InfraNodeType } from '../../graphql/types';
-import { ErrorPageBody } from '../error';
 import { withMetricPageProviders } from './page_providers';
 import { useMetadata } from '../../containers/metadata/use_metadata';
 import { Source } from '../../containers/source';
 import { InfraLoadingPanel } from '../../components/loading';
-import { NodeDetails } from '../../components/metrics/node_details';
+import { NodeDetails } from './components/node_details';
 import { findInventoryModel } from '../../../common/inventory_models';
-import { InventoryDetailSection } from '../../../common/inventory_models/types';
+import { PageError } from './components/page_error';
+import { NavItem, SideNavContext } from './lib/side_nav_context';
+import { PageBody } from './components/page_body';
 
 const DetailPageContent = euiStyled(PageContent)`
   overflow: auto;
@@ -69,15 +63,26 @@ export const MetricDetail = withMetricPageProviders(
       const nodeId = match.params.node;
       const nodeType = match.params.type as InfraNodeType;
       const inventoryModel = findInventoryModel(nodeType);
-      const layoutCreator = inventoryModel.layout;
       const { sourceId } = useContext(Source.Context);
-      const layouts = layoutCreator(theme);
-      const { name, filteredLayouts, loading: metadataLoading, cloudId, metadata } = useMetadata(
-        nodeId,
-        nodeType,
-        layouts,
-        sourceId
+      const {
+        name,
+        filteredRequiredMetrics,
+        loading: metadataLoading,
+        cloudId,
+        metadata,
+      } = useMetadata(nodeId, nodeType, inventoryModel.requiredMetrics, sourceId);
+
+      const [sideNav, setSideNav] = useState<NavItem[]>([]);
+
+      const addNavItem = React.useCallback(
+        (item: NavItem) => {
+          if (!sideNav.some(n => n.id === item.id)) {
+            setSideNav([item, ...sideNav]);
+          }
+        },
+        [sideNav]
       );
+
       const breadcrumbs = [
         {
           href: '#/',
@@ -88,18 +93,7 @@ export const MetricDetail = withMetricPageProviders(
         { text: name },
       ];
 
-      const handleClick = useCallback(
-        (section: InventoryDetailSection) => () => {
-          const id = section.linkToId || section.id;
-          const el = document.getElementById(id);
-          if (el) {
-            el.scrollIntoView();
-          }
-        },
-        []
-      );
-
-      if (metadataLoading && !filteredLayouts.length) {
+      if (metadataLoading && !filteredRequiredMetrics.length) {
         return (
           <InfraLoadingPanel
             height="100vh"
@@ -139,7 +133,7 @@ export const MetricDetail = withMetricPageProviders(
               />
               <DetailPageContent data-test-subj="infraMetricsPage">
                 <WithMetrics
-                  layouts={filteredLayouts}
+                  requiredMetrics={filteredRequiredMetrics}
                   sourceId={sourceId}
                   timerange={parsedTimeRange}
                   nodeType={nodeType}
@@ -148,39 +142,11 @@ export const MetricDetail = withMetricPageProviders(
                 >
                   {({ metrics, error, loading, refetch }) => {
                     if (error) {
-                      const invalidNodeError = error.graphQLErrors.some(
-                        (err: GraphQLFormattedError) =>
-                          err.code === InfraMetricsErrorCodes.invalid_node
-                      );
-
-                      return (
-                        <>
-                          <DocumentTitle
-                            title={(previousTitle: string) =>
-                              i18n.translate('xpack.infra.metricDetailPage.documentTitleError', {
-                                defaultMessage: '{previousTitle} | Uh oh',
-                                values: {
-                                  previousTitle,
-                                },
-                              })
-                            }
-                          />
-                          {invalidNodeError ? (
-                            <InvalidNodeError nodeName={name} />
-                          ) : (
-                            <ErrorPageBody message={error.message} />
-                          )}
-                        </>
-                      );
+                      return <PageError error={error} name={name} />;
                     }
                     return (
                       <EuiPage style={{ flex: '1 0 auto' }}>
-                        <MetricsSideNav
-                          layouts={filteredLayouts}
-                          loading={metadataLoading}
-                          nodeName={name}
-                          handleClick={handleClick}
-                        />
+                        <MetricsSideNav loading={metadataLoading} name={name} items={sideNav} />
                         <AutoSizer content={false} bounds detectAnyWindowResize>
                           {({ measureRef, bounds: { width = 0 } }) => {
                             const w = width ? `${width}px` : `100%`;
@@ -209,19 +175,19 @@ export const MetricDetail = withMetricPageProviders(
                                   </EuiPageHeader>
                                   <NodeDetails metadata={metadata} />
                                   <EuiPageContentWithRelative>
-                                    <Metrics
-                                      label={name}
-                                      nodeId={nodeId}
-                                      layouts={filteredLayouts}
-                                      metrics={metrics}
-                                      loading={
-                                        metrics.length > 0 && isAutoReloading ? false : loading
-                                      }
-                                      refetch={refetch}
-                                      onChangeRangeTime={setTimeRange}
-                                      isLiveStreaming={isAutoReloading}
-                                      stopLiveStreaming={() => setAutoReload(false)}
-                                    />
+                                    <SideNavContext.Provider value={{ items: sideNav, addNavItem }}>
+                                      <PageBody
+                                        loading={
+                                          metrics.length > 0 && isAutoReloading ? false : loading
+                                        }
+                                        refetch={refetch}
+                                        type={nodeType}
+                                        metrics={metrics}
+                                        onChangeRangeTime={setTimeRange}
+                                        isLiveStreaming={isAutoReloading}
+                                        stopLiveStreaming={() => setAutoReload(false)}
+                                      />
+                                    </SideNavContext.Provider>
                                   </EuiPageContentWithRelative>
                                 </EuiPageBody>
                               </MetricsDetailsPageColumn>
