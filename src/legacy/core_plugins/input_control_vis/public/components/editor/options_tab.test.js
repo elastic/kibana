@@ -47,8 +47,8 @@ describe('OptionsTab', () => {
 
   it('should update updateFiltersOnChange', () => {
     const component = mountWithIntl(<OptionsTab {...props} />);
-    const checkbox = component.find('[data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"] input[type="checkbox"]');
-    checkbox.simulate('change', { target: { checked: true } });
+    const checkbox = component.find('[data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"] button');
+    checkbox.simulate('click');
 
     expect(props.setValue).toHaveBeenCalledTimes(1);
     expect(props.setValue).toHaveBeenCalledWith('updateFiltersOnChange', true);
@@ -56,8 +56,8 @@ describe('OptionsTab', () => {
 
   it('should update useTimeFilter', () => {
     const component = mountWithIntl(<OptionsTab {...props} />);
-    const checkbox = component.find('[data-test-subj="inputControlEditorUseTimeFilterCheckbox"] input[type="checkbox"]');
-    checkbox.simulate('change', { target: { checked: true } });
+    const checkbox = component.find('[data-test-subj="inputControlEditorUseTimeFilterCheckbox"] button');
+    checkbox.simulate('click');
 
     expect(props.setValue).toHaveBeenCalledTimes(1);
     expect(props.setValue).toHaveBeenCalledWith('useTimeFilter', true);
@@ -65,8 +65,8 @@ describe('OptionsTab', () => {
 
   it('should update pinFilters', () => {
     const component = mountWithIntl(<OptionsTab {...props} />);
-    const checkbox = component.find('[data-test-subj="inputControlEditorPinFiltersCheckbox"] input[type="checkbox"]');
-    checkbox.simulate('change', { target: { checked: true } });
+    const checkbox = component.find('[data-test-subj="inputControlEditorPinFiltersCheckbox"] button');
+    checkbox.simulate('click');
 
     expect(props.setValue).toHaveBeenCalledTimes(1);
     expect(props.setValue).toHaveBeenCalledWith('pinFilters', true);

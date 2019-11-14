@@ -18,7 +18,6 @@
  */
 
 import { AppState } from 'ui/state_management/app_state';
-import { Query } from 'src/legacy/core_plugins/data/public';
 import { AppState as TAppState } from 'ui/state_management/app_state';
 import { ViewMode } from 'src/plugins/embeddable/public';
 import {
@@ -29,7 +28,7 @@ import {
   RawSavedDashboardPanel640To720,
   RawSavedDashboardPanel730ToLatest,
 } from './migrations/types';
-import { esFilters } from '../../../../../plugins/data/public';
+import { Query, esFilters } from '../../../../../plugins/data/public';
 
 export type NavAction = (anchorElement?: any) => void;
 

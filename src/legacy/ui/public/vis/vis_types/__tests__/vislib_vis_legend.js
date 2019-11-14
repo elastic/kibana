@@ -21,7 +21,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { VisProvider } from '../../vis';
+import { Vis } from '../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('visualize_legend directive', function () {
@@ -29,7 +29,6 @@ describe('visualize_legend directive', function () {
   let $compile;
   let $timeout;
   let $el;
-  let Vis;
   let indexPattern;
   let fixtures;
 
@@ -39,7 +38,6 @@ describe('visualize_legend directive', function () {
     $compile = $injector.get('$compile');
     $timeout = $injector.get('$timeout');
     fixtures = require('fixtures/fake_hierarchical_data');
-    Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 

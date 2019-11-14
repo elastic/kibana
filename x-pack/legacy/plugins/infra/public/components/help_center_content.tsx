@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import chrome from 'ui/chrome';
 
 interface HelpCenterContentProps {
@@ -12,20 +12,19 @@ interface HelpCenterContentProps {
   appName: string;
 }
 
-export class HelpCenterContent extends React.Component<HelpCenterContentProps> {
-  public componentDidMount = () => {
+export const HelpCenterContent: React.FC<HelpCenterContentProps> = ({ feedbackLink, appName }) => {
+  useEffect(() => {
     chrome.helpExtension.set({
-      appName: this.props.appName,
+      appName,
       links: [
         {
           linkType: 'discuss',
-          href: this.props.feedbackLink,
+          href: feedbackLink,
+          rel: 'noopener',
         },
       ],
     });
-  };
+  }, [feedbackLink, appName]);
 
-  public render = () => {
-    return null;
-  };
-}
+  return null;
+};

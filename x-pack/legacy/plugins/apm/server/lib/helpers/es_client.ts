@@ -66,8 +66,12 @@ async function getParamsForSearchRequest(
   apmOptions?: APMOptions
 ) {
   const uiSettings = req.getUiSettingsService();
+  const { server } = req;
   const [indices, includeFrozen] = await Promise.all([
-    getApmIndices(req.server),
+    getApmIndices({
+      config: server.config(),
+      savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(req)
+    }),
     uiSettings.get('search:includeFrozen')
   ]);
 
