@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { ExpressionType } from '../types';
-import { ExpressionValueBoxed } from '../types/types';
+import { ExpressionType, ExpressionValueBoxed } from '../../common/types';
 
 const name = 'render';
 

@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
 import { TimeRange, esFilters } from 'src/plugins/data/public';
 import { Query } from 'src/legacy/core_plugins/data/public';
-import { ExpressionRenderer } from 'src/legacy/core_plugins/expressions/public';
+import { ExpressionRenderer } from 'src/plugins/expressions/public';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ExpressionRenderer;

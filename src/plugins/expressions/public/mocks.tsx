@@ -19,6 +19,7 @@
 
 import * as React from 'react';
 import { ExpressionsSetup, ExpressionsStart, plugin as pluginInitializer } from '.';
+
 /* eslint-disable */
 import { coreMock } from '../../../core/public/mocks';
 import { inspectorPluginMock } from '../../inspector/public/mocks';

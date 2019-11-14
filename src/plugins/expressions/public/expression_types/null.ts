@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionType } from '../types';
+import { ExpressionType } from '../../common/types';
 
 const name = 'null';
 

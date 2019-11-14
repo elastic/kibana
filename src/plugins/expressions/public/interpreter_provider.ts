@@ -17,15 +17,18 @@
  * under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-var-requires */
-import { clone, each, keys, last, mapValues, reduce, zipObject } from 'lodash';
-
 // @ts-ignore
 import { fromExpression, getByAlias } from '@kbn/interpreter/common';
 
+import { clone, each, keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { createError } from './create_error';
-import { ExpressionAST, ExpressionFunctionAST, AnyExpressionFunction, ArgumentType } from './types';
-import { getType } from './interpreter';
+import {
+  ExpressionAST,
+  ExpressionFunctionAST,
+  AnyExpressionFunction,
+  ArgumentType,
+} from '../common/types';
+import { getType } from '../common/type';
 
 export { createError };
 

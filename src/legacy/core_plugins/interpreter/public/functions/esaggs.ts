@@ -23,6 +23,12 @@ import { AggConfigs } from 'ui/agg_types/agg_configs';
 import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import chrome from 'ui/chrome';
 import { TimeRange } from 'src/plugins/data/public';
+import {
+  KibanaContext,
+  KibanaDatatable,
+  ExpressionFunction,
+  KibanaDatatableColumn,
+} from 'src/plugins/expressions/public';
 import { SearchSource } from '../../../../ui/public/courier/search_source';
 import { FilterBarQueryFilterProvider } from '../../../../ui/public/filter_manager/query_filter';
 import { buildTabularInspectorData } from '../../../../ui/public/inspector/build_tabular_inspector_data';
@@ -33,8 +39,6 @@ import {
 import { calculateObjectHash } from '../../../../ui/public/vis/lib/calculate_object_hash';
 import { getTime } from '../../../../ui/public/timefilter';
 import { RequestHandlerParams } from '../../../../ui/public/visualize/loader/embedded_visualize_handler';
-import { KibanaContext, KibanaDatatable } from '../../common';
-import { ExpressionFunction, KibanaDatatableColumn } from '../../types';
 import { start as data } from '../../../data/public/legacy';
 
 // @ts-ignore

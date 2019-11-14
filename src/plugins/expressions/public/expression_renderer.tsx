@@ -21,7 +21,8 @@ import { useRef, useEffect, useState } from 'react';
 import React from 'react';
 import classNames from 'classnames';
 import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
-import { ExpressionAST, IExpressionLoaderParams } from './types';
+import { IExpressionLoaderParams } from './types';
+import { ExpressionAST } from '../common/types';
 import { ExpressionLoader } from './loader';
 
 // Accept all options of the runner as props except for the

@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction } from '../types';
+import { ExpressionFunction } from '../../common/types';
 import { KibanaContext } from '../expression_types';
 
 export type ExpressionFunctionKibana = ExpressionFunction<

@@ -24,7 +24,7 @@ import { Legacy } from '../../../../kibana';
 export default function DataExpressionsPlugin(kibana: any) {
   const config: Legacy.PluginSpecOptions = {
     id: 'expressions',
-    require: ['elasticsearch'],
+    require: [],
     publicDir: resolve(__dirname, 'public'),
     config: (Joi: any) => {
       return Joi.object({

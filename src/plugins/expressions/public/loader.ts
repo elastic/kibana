@@ -22,7 +22,8 @@ import { share } from 'rxjs/operators';
 import { Adapters, InspectorSession } from '../../inspector/public';
 import { ExpressionDataHandler } from './execute';
 import { ExpressionRenderHandler } from './render';
-import { Data, IExpressionLoaderParams, ExpressionAST } from './types';
+import { Data, IExpressionLoaderParams } from './types';
+import { ExpressionAST } from '../common/types';
 import { getInspector } from './services';
 
 export class ExpressionLoader {

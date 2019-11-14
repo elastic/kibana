@@ -17,4 +17,39 @@
  * under the License.
  */
 
-export * from './np_ready/public/legacy';
+import { ExpressionType } from '../types';
+import { Render } from './render';
+import { ExpressionValueBoxed } from '../types/types';
+
+const name = 'error';
+
+export type ExpressionValueError = ExpressionValueBoxed<
+  'error',
+  {
+    error: unknown;
+    info: unknown;
+  }
+>;
+
+/**
+ * @deprecated
+ *
+ * Exported for backwards compatibility.
+ */
+export type InterpreterErrorType = ExpressionValueError;
+
+export const error = (): ExpressionType<'error', ExpressionValueError> => ({
+  name,
+  to: {
+    render: (input): Render<Pick<InterpreterErrorType, 'error' | 'info'>> => {
+      return {
+        type: 'render',
+        as: name,
+        value: {
+          error: input.error,
+          info: input.info,
+        },
+      };
+    },
+  },
+});

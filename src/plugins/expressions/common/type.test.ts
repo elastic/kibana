@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getType } from './interpreter';
+import { getType } from './type';
 
 describe('getType()', () => {
   test('returns "null" string for null or undefined', () => {

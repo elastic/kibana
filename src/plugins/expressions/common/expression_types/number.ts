@@ -17,4 +17,32 @@
  * under the License.
  */
 
-export * from './np_ready/public/plugin';
+import { ExpressionType } from '../types';
+import { Datatable } from './datatable';
+import { Render } from './render';
+
+const name = 'number';
+
+export const number = (): ExpressionType<typeof name, number> => ({
+  name,
+  from: {
+    null: () => 0,
+    boolean: b => Number(b),
+    string: n => Number(n),
+  },
+  to: {
+    render: (value: number): Render<{ text: string }> => {
+      const text = `${value}`;
+      return {
+        type: 'render',
+        as: 'text',
+        value: { text },
+      };
+    },
+    datatable: (value): Datatable => ({
+      type: 'datatable',
+      columns: [{ name: 'value', type: 'number' }],
+      rows: [{ value }],
+    }),
+  },
+});

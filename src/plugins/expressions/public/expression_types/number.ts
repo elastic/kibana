@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionType } from '../types';
+import { ExpressionType } from '../../common/types';
 import { Datatable } from './datatable';
 import { Render } from './render';
 

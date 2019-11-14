@@ -19,7 +19,7 @@
 
 import { map, pick, zipObject } from 'lodash';
 
-import { ExpressionType } from '../types';
+import { ExpressionType } from '../../common/types';
 import { PointSeries } from './pointseries';
 import { Render } from './render';
 

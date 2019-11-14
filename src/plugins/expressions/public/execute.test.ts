@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { execute, ExpressionDataHandler } from './execute';
 import { fromExpression } from '@kbn/interpreter/common';
-import { ExpressionAST } from './types';
+import { execute, ExpressionDataHandler } from './execute';
+import { ExpressionAST } from '../common/types';
 
 jest.mock('./services', () => ({
   getInterpreter: () => {

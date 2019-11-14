@@ -17,9 +17,19 @@
  * under the License.
  */
 
-import { TimeRange } from '../../../../../../plugins/data/public';
-import { Adapters } from '../../../../../../plugins/inspector/public';
-import { Query } from '../../../../../../plugins/data/public';
+import { ExpressionType, ExpressionTypeStyle } from '../types';
 
-export { TimeRange, Adapters, Query };
-export * from '../../../../../../plugins/expressions/public';
+const name = 'style';
+
+export const style = (): ExpressionType<typeof name, ExpressionTypeStyle> => ({
+  name,
+  from: {
+    null: () => {
+      return {
+        type: 'style',
+        spec: {},
+        css: '',
+      };
+    },
+  },
+});

@@ -17,4 +17,36 @@
  * under the License.
  */
 
-export * from './np_ready/public/mocks';
+import { ExpressionType } from '../types';
+import { Render } from '.';
+
+const name = 'range';
+
+export interface Range {
+  type: typeof name;
+  from: number;
+  to: number;
+}
+
+export const range = (): ExpressionType<typeof name, Range> => ({
+  name,
+  from: {
+    null: (): Range => {
+      return {
+        type: 'range',
+        from: 0,
+        to: 0,
+      };
+    },
+  },
+  to: {
+    render: (value: Range): Render<{ text: string }> => {
+      const text = `from ${value.from} to ${value.to}`;
+      return {
+        type: 'render',
+        as: 'text',
+        value: { text },
+      };
+    },
+  },
+});

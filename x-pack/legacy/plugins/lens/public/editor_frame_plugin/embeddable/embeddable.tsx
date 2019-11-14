@@ -10,7 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { TimeRange, esFilters } from 'src/plugins/data/public';
 import { Query, StaticIndexPattern } from 'src/legacy/core_plugins/data/public';
-import { ExpressionRenderer } from 'src/legacy/core_plugins/expressions/public';
+import { ExpressionRenderer } from 'src/plugins/expressions/public';
 import { Subscription } from 'rxjs';
 import {
   Embeddable as AbstractEmbeddable,

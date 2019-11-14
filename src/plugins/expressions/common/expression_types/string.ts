@@ -17,4 +17,31 @@
  * under the License.
  */
 
-export * from '../../../../plugins/expressions/public';
+import { ExpressionType } from '../types';
+import { Datatable } from './datatable';
+import { Render } from './render';
+
+const name = 'string';
+
+export const string = (): ExpressionType<typeof name, string> => ({
+  name,
+  from: {
+    null: () => '',
+    boolean: b => String(b),
+    number: n => String(n),
+  },
+  to: {
+    render: <T>(text: T): Render<{ text: T }> => {
+      return {
+        type: 'render',
+        as: 'text',
+        value: { text },
+      };
+    },
+    datatable: (value): Datatable => ({
+      type: 'datatable',
+      columns: [{ name: 'value', type: 'string' }],
+      rows: [{ value }],
+    }),
+  },
+});

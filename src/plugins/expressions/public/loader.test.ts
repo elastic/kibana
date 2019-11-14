@@ -23,7 +23,7 @@ import { loader, ExpressionLoader } from './loader';
 import { ExpressionDataHandler } from './execute';
 import { IInterpreterRenderHandlers } from './types';
 import { Observable } from 'rxjs';
-import { ExpressionAST } from './types';
+import { ExpressionAST } from '../common/types';
 
 const element: HTMLElement = null as any;
 

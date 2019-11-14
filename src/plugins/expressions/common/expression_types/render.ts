@@ -17,4 +17,29 @@
  * under the License.
  */
 
-export * from './index';
+import { ExpressionType } from '../types';
+import { ExpressionValueBoxed } from '../types/types';
+
+const name = 'render';
+
+/**
+ * Represents an object that is intended to be rendered.
+ */
+export type Render<T> = ExpressionValueBoxed<
+  typeof name,
+  {
+    as: string;
+    value: T;
+  }
+>;
+
+export const render = (): ExpressionType<typeof name, Render<unknown>> => ({
+  name,
+  from: {
+    '*': <T>(v: T): Render<T> => ({
+      type: name,
+      as: 'debug',
+      value: v,
+    }),
+  },
+});

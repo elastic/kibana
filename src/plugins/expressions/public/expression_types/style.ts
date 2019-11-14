@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionType, ExpressionTypeStyle } from '../types';
+import { ExpressionType, ExpressionTypeStyle } from '../../common/types';
 
 const name = 'style';
 

@@ -19,8 +19,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { openSans, FontLabel as FontFamily } from '../fonts';
-import { ExpressionFunction } from '../types';
-import { CSSStyle, FontStyle, FontWeight, Style, TextAlignment, TextDecoration } from '../types';
+import {
+  ExpressionFunction,
+  CSSStyle,
+  FontStyle,
+  FontWeight,
+  Style,
+  TextAlignment,
+  TextDecoration,
+} from '../../common/types';
 
 const dashify = (str: string) => {
   return str

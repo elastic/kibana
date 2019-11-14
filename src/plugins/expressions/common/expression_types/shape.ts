@@ -17,16 +17,20 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../../../core/public';
-import { ExpressionsPublicPlugin } from './plugin';
+import { ExpressionType } from '../types';
+import { Render } from './render';
 
-export * from './plugin';
-export {
-  ExpressionRenderer,
-  ExpressionRendererProps,
-} from '../../../../../../plugins/expressions/public/expression_renderer';
-export { IInterpreterRenderFunction, IInterpreterRenderHandlers } from './types';
+const name = 'shape';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new ExpressionsPublicPlugin(initializerContext);
-}
+export const shape = (): ExpressionType<typeof name, Render<any>> => ({
+  name: 'shape',
+  to: {
+    render: input => {
+      return {
+        type: 'render',
+        as: name,
+        value: input,
+      };
+    },
+  },
+});

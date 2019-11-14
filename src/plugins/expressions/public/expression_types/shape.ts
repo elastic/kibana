@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionType } from '../types';
+import { ExpressionType } from '../../common/types';
 import { Render } from './render';
 
 const name = 'shape';

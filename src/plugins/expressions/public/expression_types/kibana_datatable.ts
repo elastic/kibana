@@ -18,7 +18,7 @@
  */
 
 import { map } from 'lodash';
-import { SerializedFieldFormat } from '../types/common';
+import { SerializedFieldFormat } from '../../common/types/common';
 import { Datatable, PointSeries } from '.';
 
 const name = 'kibana_datatable';

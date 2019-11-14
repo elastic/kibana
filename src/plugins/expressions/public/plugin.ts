@@ -18,15 +18,10 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import {
-  AnyExpressionFunction,
-  AnyExpressionType,
-  ExpressionInterpretWithHandlers,
-  ExpressionExecutor,
-} from './types';
+import { ExpressionInterpretWithHandlers, ExpressionExecutor } from './types';
 import { FunctionsRegistry, RenderFunctionsRegistry, TypesRegistry } from './registries';
 import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
-import { setCoreStart } from './services';
+import { setCoreStart, setInspector } from './services';
 import { clog as clogFunction } from './functions/clog';
 import { font as fontFunction } from './functions/font';
 import { kibana as kibanaFunction } from './functions/kibana';
@@ -54,6 +49,7 @@ import { ExpressionRendererImplementation } from './expression_renderer';
 import { ExpressionLoader, loader } from './loader';
 import { ExpressionDataHandler, execute } from './execute';
 import { render, ExpressionRenderHandler } from './render';
+import { AnyExpressionFunction, AnyExpressionType } from '../common/types';
 
 export interface ExpressionsSetupDeps {
   inspector: InspectorSetup;
@@ -157,6 +153,7 @@ export class ExpressionsPublicPlugin
 
   public start(core: CoreStart, { inspector }: ExpressionsStartDeps): ExpressionsStart {
     setCoreStart(core);
+    setInspector(inspector);
 
     return {
       execute,

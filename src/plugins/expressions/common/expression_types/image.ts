@@ -16,3 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import { ExpressionType } from '../types';
+import { Render } from './render';
+
+const name = 'image';
+
+export interface ExpressionImage {
+  type: 'image';
+  mode: string;
+  dataurl: string;
+}
+
+export const image = (): ExpressionType<typeof name, ExpressionImage> => ({
+  name,
+  to: {
+    render: (input): Render<Pick<ExpressionImage, 'mode' | 'dataurl'>> => {
+      return {
+        type: 'render',
+        as: 'image',
+        value: input,
+      };
+    },
+  },
+});

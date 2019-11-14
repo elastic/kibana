@@ -17,6 +17,32 @@
  * under the License.
  */
 
-/* eslint-disable */
-export * from '../../../../../../plugins/expressions/public/mocks';
-/* eslint-enable */
+import { ExpressionType } from '../types';
+import { Datatable } from './datatable';
+import { Render } from './render';
+
+const name = 'boolean';
+
+export const boolean = (): ExpressionType<'boolean', boolean> => ({
+  name,
+  from: {
+    null: () => false,
+    number: n => Boolean(n),
+    string: s => Boolean(s),
+  },
+  to: {
+    render: (value): Render<{ text: string }> => {
+      const text = `${value}`;
+      return {
+        type: 'render',
+        as: 'text',
+        value: { text },
+      };
+    },
+    datatable: (value): Datatable => ({
+      type: 'datatable',
+      columns: [{ name: 'value', type: name }],
+      rows: [{ value }],
+    }),
+  },
+});

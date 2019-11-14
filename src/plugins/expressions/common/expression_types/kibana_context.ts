@@ -17,5 +17,32 @@
  * under the License.
  */
 
-// eslint-disable-next-line
-export * from '../../../../plugins/expressions/public/types/common';
+import { TimeRange, Query, esFilters } from 'src/plugins/data/public';
+
+const name = 'kibana_context';
+export type KIBANA_CONTEXT_NAME = 'kibana_context';
+
+export interface KibanaContext {
+  type: typeof name;
+  query?: Query | Query[];
+  filters?: esFilters.Filter[];
+  timeRange?: TimeRange;
+}
+
+export const kibanaContext = () => ({
+  name,
+  from: {
+    null: () => {
+      return {
+        type: name,
+      };
+    },
+  },
+  to: {
+    null: () => {
+      return {
+        type: 'null',
+      };
+    },
+  },
+});

@@ -17,9 +17,13 @@
  * under the License.
  */
 
-/* eslint-disable */
-import { npSetup, npStart } from 'ui/new_platform';
-/* eslint-enable */
+import { ExpressionType } from '../types';
 
-export const setup = npSetup.plugins.expressions;
-export const start = npStart.plugins.expressions;
+const name = 'null';
+
+export const nullType = (): ExpressionType<typeof name, null> => ({
+  name,
+  from: {
+    '*': () => null,
+  },
+});

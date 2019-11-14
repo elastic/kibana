@@ -20,7 +20,8 @@
 import { fromExpression } from '@kbn/interpreter/target/common';
 import { DataAdapter, RequestAdapter, Adapters } from '../../inspector/public';
 import { getInterpreter } from './services';
-import { ExpressionAST, IExpressionLoaderParams, IInterpreterResult } from './types';
+import { IExpressionLoaderParams, IInterpreterResult } from './types';
+import { ExpressionAST } from '../common/types';
 
 /**
  * The search context describes a specific context (filters, time range and query)
