@@ -8,7 +8,7 @@ import _ from 'lodash';
 import React, { useState, useEffect, useCallback } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { Query, DataPublicPluginStart } from 'src/plugins/data/public';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { CoreStart, NotificationsStart } from 'src/core/public';
 import {
@@ -16,7 +16,6 @@ import {
   IndexPattern as IndexPatternInstance,
   IndexPatterns as IndexPatternsService,
   SavedQuery,
-  Query,
 } from 'src/legacy/core_plugins/data/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { start as navigation } from '../../../../../../src/legacy/core_plugins/navigation/public/legacy';

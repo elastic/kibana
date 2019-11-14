@@ -49,21 +49,18 @@ export async function getUpgradeAssistantStatus(
 
 // Reformats the index deprecations to an array of deprecation warnings extended with an index field.
 const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse) =>
-  Object.keys(deprecations.index_settings).reduce(
-    (indexDeprecations, indexName) => {
-      return indexDeprecations.concat(
-        deprecations.index_settings[indexName].map(
-          d =>
-            ({
-              ...d,
-              index: indexName,
-              reindex: /Index created before/.test(d.message),
-            } as EnrichedDeprecationInfo)
-        )
-      );
-    },
-    [] as EnrichedDeprecationInfo[]
-  );
+  Object.keys(deprecations.index_settings).reduce((indexDeprecations, indexName) => {
+    return indexDeprecations.concat(
+      deprecations.index_settings[indexName].map(
+        d =>
+          ({
+            ...d,
+            index: indexName,
+            reindex: /Index created before/.test(d.message),
+          } as EnrichedDeprecationInfo)
+      )
+    );
+  }, [] as EnrichedDeprecationInfo[]);
 
 const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEnabled: boolean) => {
   const combined = deprecations.cluster_settings

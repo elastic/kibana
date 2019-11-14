@@ -99,12 +99,7 @@ export async function setup(xpackInfo = {}, pluginInitializerContext: any = {}) 
   clusterClient.callAsInternalUser.mockResolvedValueOnce(licenseMerge(xpackInfo));
 
   const { license$ } = await plugin.setup(coreSetup);
-  const license = await license$
-    .pipe(
-      skip(1),
-      take(1)
-    )
-    .toPromise();
+  const license = await license$.pipe(skip(1), take(1)).toPromise();
 
   return {
     plugin,
