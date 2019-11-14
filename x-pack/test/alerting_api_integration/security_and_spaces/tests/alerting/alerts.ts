@@ -577,7 +577,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
               await alertUtils.disable(response.body.id);
               await taskManagerUtils.waitForIdle(testStart);
-              // Should not have executed action tasks
+              // Should not have executed any action
               const executedActionsResult = await esTestIndexTool.search(
                 'action:test.index-record',
                 reference
@@ -620,7 +620,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
               await alertUtils.disable(response.body.id);
               await taskManagerUtils.waitForIdle(testStart);
-              // Should not have executed action tasks
+              // Should not have executed any action
               const executedActionsResult = await esTestIndexTool.search(
                 'action:test.index-record',
                 reference
