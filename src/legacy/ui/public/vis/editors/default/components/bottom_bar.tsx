@@ -150,6 +150,7 @@ function DefaultEditorBottomBar({
                         }
                       )}
                       color="ghost"
+                      data-test-subj="visualizeEditorRenderButton"
                       disabled={!isDirty}
                       fill
                       iconType="play"

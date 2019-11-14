@@ -63,9 +63,12 @@ function DefaultEditorSideBar({
     responseAggs,
   ]);
 
-  const setStateValidity = useCallback((value: boolean) => {
-    setValidity('visOptions', value);
-  }, []);
+  const setStateValidity = useCallback(
+    (value: boolean) => {
+      setValidity('visOptions', value);
+    },
+    [setValidity]
+  );
 
   const setStateValue: DefaultEditorAggCommonProps['setStateParamValue'] = useCallback(
     (paramName, value) => {
