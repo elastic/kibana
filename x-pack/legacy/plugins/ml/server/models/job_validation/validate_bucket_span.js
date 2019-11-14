@@ -9,7 +9,7 @@
 import { estimateBucketSpanFactory } from '../../models/bucket_span_estimator';
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 import { SKIP_BUCKET_SPAN_ESTIMATION } from '../../../common/constants/validation';
-import { parseInterval } from '../../../common/util/parse_interval.js';
+import { parseInterval } from '../../../common/util/parse_interval';
 
 import { validateJobObject } from './validate_job_object';
 

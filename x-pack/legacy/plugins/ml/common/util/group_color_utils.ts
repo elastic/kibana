@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as euiVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { stringHash } from './string_utils';
-
+import euiVars from '@elastic/eui/dist/eui_theme_dark.json';
 
 const COLORS = [
   euiVars.euiColorVis0,
@@ -20,18 +18,32 @@ const COLORS = [
   euiVars.euiColorVis8,
   euiVars.euiColorVis9,
   euiVars.euiColorDarkShade,
-  euiVars.euiColorPrimary
+  euiVars.euiColorPrimary,
 ];
 
-const colorMap = {};
+const colorMap: Record<string, string> = {};
 
-export function tabColor(name) {
+export function tabColor(name: string) {
   if (colorMap[name] === undefined) {
     const n = stringHash(name);
-    const color = COLORS[(n % COLORS.length)];
+    const color = COLORS[n % COLORS.length];
     colorMap[name] = color;
     return color;
   } else {
     return colorMap[name];
   }
+}
+
+export function stringHash(str: string) {
+  let hash = 0;
+  let chr = 0;
+  if (str.length === 0) {
+    return hash;
+  }
+  for (let i = 0; i < str.length; i++) {
+    chr = str.charCodeAt(i);
+    hash = (hash << 5) - hash + chr; // eslint-disable-line no-bitwise
+    hash |= 0; // eslint-disable-line no-bitwise
+  }
+  return hash < 0 ? hash * -2 : hash;
 }

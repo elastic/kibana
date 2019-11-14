@@ -4,14 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import expect from '@kbn/expect';
 import { renderTemplate } from '../string_utils';
 
 describe('ML - string utils', () => {
   describe('renderTemplate', () => {
-
     it('returns plain string', () => {
       const templateString = 'plain string';
       const result = renderTemplate(templateString);
@@ -27,6 +24,5 @@ describe('ML - string utils', () => {
       const result = renderTemplate(templateString, { one: '1', two: '2nd' });
       expect(result).to.be('string with 1 replacement, and a 2nd one.');
     });
-
   });
 });
