@@ -58,6 +58,9 @@ export interface InjectedMetadataParams {
     uiPlugins: Array<{
       id: PluginName;
       plugin: DiscoveredPlugin;
+      config?: {
+        [key: string]: unknown;
+      };
     }>;
     capabilities: Capabilities;
     legacyMode: boolean;
@@ -168,6 +171,9 @@ export interface InjectedMetadataSetup {
   getPlugins: () => Array<{
     id: string;
     plugin: DiscoveredPlugin;
+    config?: {
+      [key: string]: unknown;
+    };
   }>;
   /** Indicates whether or not we are rendering a known legacy app. */
   getLegacyMode: () => boolean;
