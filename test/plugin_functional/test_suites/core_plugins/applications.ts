@@ -91,6 +91,18 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       await testSubjects.existOrFail('fooAppPageA');
     });
 
+    it('navigating to chromeless application hides chrome', async () => {
+      await appsMenu.clickLink('Chromeless');
+      await loadingScreenNotShown();
+      expect(await testSubjects.exists('headerGlobalNav')).to.be(false);
+    });
+
+    it('navigating away from chromeless application shows chrome', async () => {
+      await browser.goBack();
+      await loadingScreenNotShown();
+      expect(await testSubjects.exists('headerGlobalNav')).to.be(true);
+    });
+
     it('can navigate from NP apps to legacy apps', async () => {
       await appsMenu.clickLink('Management');
       await loadingScreenShown();

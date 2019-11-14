@@ -26,7 +26,7 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { RenderDeps } from './render_app';
+import { RenderDeps } from './application';
 import { LocalApplicationService } from '../local_application_service';
 import { DataStart } from '../../../data/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
@@ -57,8 +57,6 @@ export interface DashboardPluginSetupDependencies {
   __LEGACY: {
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
     localApplicationService: LocalApplicationService;
-    FeatureCatalogueRegistryProvider: any;
-    docTitle: any;
   };
   feature_catalogue: FeatureCatalogueSetup;
 }
@@ -75,12 +73,7 @@ export class DashboardPlugin implements Plugin {
   public setup(
     core: CoreSetup,
     {
-      __LEGACY: {
-        localApplicationService,
-        getAngularDependencies,
-        FeatureCatalogueRegistryProvider,
-        ...legacyServices
-      },
+      __LEGACY: { localApplicationService, getAngularDependencies, ...legacyServices },
       feature_catalogue,
     }: DashboardPluginSetupDependencies
   ) {
@@ -116,7 +109,7 @@ export class DashboardPlugin implements Plugin {
           dashboardCapabilities: contextCore.application.capabilities.dashboard,
           localStorage: new Storage(localStorage),
         };
-        const { renderApp } = await import('./render_app');
+        const { renderApp } = await import('./application');
         return renderApp(params.element, params.appBasePath, deps);
       },
     };

@@ -24,7 +24,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
-import { FilterBar, ApplyFiltersPopover } from '../filter';
+import { FilterBar } from '../filter';
 import { IndexPatterns } from '../index_patterns/index_patterns';
 
 /** @internal */
@@ -110,25 +110,12 @@ export const createApplyFiltersPopoverDirective = () => {
 };
 
 /** @internal */
-export const createApplyFiltersPopoverHelper = (reactDirective: any) =>
-  reactDirective(wrapInI18nContext(ApplyFiltersPopover), [
-    ['filters', { watchDepth: 'collection' }],
-    ['onCancel', { watchDepth: 'reference' }],
-    ['onSubmit', { watchDepth: 'reference' }],
-    ['indexPatterns', { watchDepth: 'collection' }],
-
-    // Key is needed to trigger a full rerender of the component
-    'key',
-  ]);
-
-/** @internal */
 export const initLegacyModule = once((indexPatterns: IndexPatterns): void => {
   uiModules
     .get('app/kibana', ['react'])
     .directive('filterBar', createFilterBarDirective)
     .directive('filterBarHelper', createFilterBarHelper)
-    .directive('applyFiltersPopover', createApplyFiltersPopoverDirective)
-    .directive('applyFiltersPopoverHelper', createApplyFiltersPopoverHelper);
+    .directive('applyFiltersPopover', createApplyFiltersPopoverDirective);
 
   uiModules.get('kibana/index_patterns').value('indexPatterns', indexPatterns);
 });

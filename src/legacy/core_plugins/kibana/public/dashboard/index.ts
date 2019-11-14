@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
-import { npSetup, npStart } from 'ui/new_platform';
-import { SavedObjectRegistryProvider } from 'ui/saved_objects';
-import { docTitle } from 'ui/doc_title/doc_title';
-import chrome from 'ui/chrome';
-import { IPrivate } from 'ui/private';
-import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
+import {
+  npSetup,
+  npStart,
+  SavedObjectRegistryProvider,
+  legacyChrome,
+  IPrivate,
+  ShareContextMenuExtensionsRegistryProvider,
+} from './legacy_imports';
 import { DashboardPlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { start as data } from '../../../data/public/legacy';
 import { localApplicationService } from '../local_application_service';
@@ -37,7 +38,7 @@ import './dashboard_config';
  * They also have to get resolved together with the legacy imports above
  */
 async function getAngularDependencies(): Promise<LegacyAngularInjectedDependencies> {
-  const injector = await chrome.dangerouslyGetActiveInjector();
+  const injector = await legacyChrome.dangerouslyGetActiveInjector();
 
   const Private = injector.get<IPrivate>('Private');
 
@@ -59,8 +60,6 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
     __LEGACY: {
       localApplicationService,
       getAngularDependencies,
-      FeatureCatalogueRegistryProvider,
-      docTitle,
     },
   });
   instance.start(npStart.core, {

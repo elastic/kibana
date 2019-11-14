@@ -76,7 +76,7 @@ let services: ServiceDeps = {
   metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
   toastNotifications: npStart.core.notifications.toasts,
   uiSettings: npStart.core.uiSettings,
-  timefilter: data.timefilter.timefilter,
+  timefilter: npStart.plugins.data.query.timefilter.timefilter,
   // legacy
   docTitle,
   docViewsRegistry,

@@ -40,6 +40,7 @@ import { fatalError } from 'ui/notify';
 import { RouteConfiguration } from 'ui/routes/route_manager';
 // @ts-ignore
 import { modifyUrl } from 'ui/url';
+import { toMountPoint } from '../../../../plugins/kibana_react/public';
 // @ts-ignore
 import { UrlOverflowService } from '../error_url_overflow';
 // @ts-ignore
@@ -376,7 +377,7 @@ const $setupUrlOverflowHandling = (newPlatform: CoreStart, isLocalAngular: boole
           title: i18n.translate('common.ui.chrome.bigUrlWarningNotificationTitle', {
             defaultMessage: 'The URL is big and Kibana might stop working',
           }),
-          text: (
+          text: toMountPoint(
             <Fragment>
               <FormattedMessage
                 id="common.ui.chrome.bigUrlWarningNotificationMessage"

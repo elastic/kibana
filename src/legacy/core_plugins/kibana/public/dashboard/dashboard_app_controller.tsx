@@ -23,33 +23,24 @@ import React from 'react';
 import angular from 'angular';
 import { uniq } from 'lodash';
 
-import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-
-// @ts-ignore
-import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
-
-import { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
-
-import { showShareContextMenu } from 'ui/share';
-import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-
-import { State } from 'ui/state_management/state';
-
-import { AppStateClass as TAppStateClass } from 'ui/state_management/app_state';
-
-import { KbnUrl } from 'ui/url/kbn_url';
-import { Filter } from '@kbn/es-query';
-import { IndexPattern } from 'ui/index_patterns';
-import { SaveOptions } from 'ui/saved_objects/saved_object';
 import { Subscription } from 'rxjs';
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
+
 import {
-  extractTimeFilter,
-  changeTimeFilter,
-  FilterStateManager,
-  Query,
-  SavedQuery,
-} from '../../../data/public';
+  subscribeWithScope,
+  ConfirmationButtonTypes,
+  showSaveModal,
+  SaveResult,
+  showShareContextMenu,
+  migrateLegacyQuery,
+  State,
+  AppStateClass as TAppStateClass,
+  KbnUrl,
+  SaveOptions,
+  SavedObjectFinder,
+} from './legacy_imports';
+import { Query } from '../../../../../plugins/data/public';
+import { FilterStateManager, IndexPattern } from '../../../data/public';
+import { SavedQuery } from '../../../data/public';
 
 import {
   DashboardContainer,
@@ -78,7 +69,7 @@ import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize/embeddable';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
-import { RenderDeps } from './render_app';
+import { RenderDeps } from './application';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
@@ -119,15 +110,16 @@ export class DashboardAppController {
     savedQueryService,
     embeddables,
     dashboardCapabilities,
-    docTitle,
-    dataStart: {
-      timefilter: { timefilter },
+    npDataStart: {
+      query: {
+        filterManager,
+        timefilter: { timefilter },
+      },
     },
-    npDataStart,
-    core: { notifications, overlays, chrome, injectedMetadata },
+    core: { notifications, overlays, chrome, savedObjects, uiSettings, injectedMetadata },
   }: DashboardAppControllerDependencies) {
-    new FilterStateManager(globalState, getAppState, npDataStart.query.filterManager);
-    const queryFilter = npDataStart.query.filterManager;
+    new FilterStateManager(globalState, getAppState, filterManager);
+    const queryFilter = filterManager;
 
     function getUnhashableStates(): State[] {
       return [getAppState(), globalState].filter(Boolean);
@@ -137,7 +129,7 @@ export class DashboardAppController {
 
     const dash = ($scope.dash = $route.current.locals.dash);
     if (dash.id) {
-      docTitle.change(dash.title);
+      chrome.docTitle.change(dash.title);
     }
 
     const dashboardStateManager = new DashboardStateManager({
@@ -414,31 +406,6 @@ export class DashboardAppController {
       queryFilter.setFilters(filters);
     };
 
-    $scope.onCancelApplyFilters = () => {
-      $scope.appState.$newFilters = [];
-    };
-
-    $scope.onApplyFilters = filters => {
-      if (filters.length) {
-        // All filters originated from one visualization.
-        const indexPatternId = filters[0].meta.index;
-        const indexPattern = _.find(
-          $scope.indexPatterns,
-          (p: IndexPattern) => p.id === indexPatternId
-        );
-        if (indexPattern && indexPattern.timeFieldName) {
-          const { timeRangeFilter, restOfFilters } = extractTimeFilter(
-            indexPattern.timeFieldName,
-            filters
-          );
-          queryFilter.addFilters(restOfFilters);
-          if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
-        }
-      }
-
-      $scope.appState.$newFilters = [];
-    };
-
     $scope.onQuerySaved = savedQuery => {
       $scope.savedQuery = savedQuery;
     };
@@ -510,12 +477,6 @@ export class DashboardAppController {
         }
       }
     );
-
-    $scope.$watch('appState.$newFilters', (filters: Filter[] = []) => {
-      if (filters.length === 1) {
-        $scope.onApplyFilters(filters);
-      }
-    });
 
     $scope.indexPatterns = [];
 
@@ -636,7 +597,7 @@ export class DashboardAppController {
             if (dash.id !== $routeParams.id) {
               kbnUrl.change(createDashboardEditUrl(dash.id));
             } else {
-              docTitle.change(dash.lastSavedTitle);
+              chrome.docTitle.change(dash.lastSavedTitle);
               updateViewMode(ViewMode.VIEW);
             }
           }

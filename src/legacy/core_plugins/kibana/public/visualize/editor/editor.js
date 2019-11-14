@@ -32,7 +32,6 @@ import editorTemplate from './editor.html';
 import { DashboardConstants } from '../../dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
-import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 
@@ -350,23 +349,6 @@ function VisEditor(
     queryFilter.setFilters(filters);
   };
 
-  $scope.onCancelApplyFilters = () => {
-    $scope.state.$newFilters = [];
-  };
-
-  $scope.onApplyFilters = filters => {
-    const { timeRangeFilter, restOfFilters } = extractTimeFilter($scope.indexPattern.timeFieldName, filters);
-    queryFilter.addFilters(restOfFilters);
-    if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
-    $scope.state.$newFilters = [];
-  };
-
-  $scope.$watch('state.$newFilters', (filters = []) => {
-    if (filters.length === 1) {
-      $scope.onApplyFilters(filters);
-    }
-  });
-
   $scope.showSaveQuery = capabilities.visualize.saveQuery;
 
   $scope.$watch(() => capabilities.visualize.saveQuery, (newCapability) => {
@@ -463,6 +445,12 @@ function VisEditor(
     }));
     subscriptions.add(subscribeWithScope($scope, queryFilter.getFetches$(), {
       next: $scope.fetch
+    }));
+
+    subscriptions.add(subscribeWithScope($scope, timefilter.getAutoRefreshFetch$(), {
+      next: () => {
+        $scope.vis.forceReload();
+      }
     }));
 
     $scope.$on('$destroy', function () {

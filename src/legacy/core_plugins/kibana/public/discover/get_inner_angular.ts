@@ -70,7 +70,6 @@ import { setAngularModule } from './kibana_services';
 
 import {
   createApplyFiltersPopoverDirective,
-  createApplyFiltersPopoverHelper,
   createFilterBarDirective,
   createFilterBarHelper,
 } from '../../../data/public/shim/legacy_module';
@@ -190,7 +189,6 @@ export function getInnerAngular(
     .directive('filterBar', createFilterBarDirective)
     .directive('filterBarHelper', createFilterBarHelper)
     .directive('applyFiltersPopover', createApplyFiltersPopoverDirective)
-    .directive('applyFiltersPopoverHelper', createApplyFiltersPopoverHelper)
     .directive('renderComplete', createRenderCompleteDirective)
     .directive('discoverFieldSearch', createFieldSearchDirective)
     .directive('discoverIndexPatternSelect', createIndexPatternSelectDirective)

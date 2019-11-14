@@ -58,8 +58,6 @@ export {
   IndexPatternMissingIndices,
   NoDefaultIndexPattern,
   NoDefinedIndexPatterns,
-  mockFields,
-  mockIndexPattern,
 } from './index_patterns';
 
 /**
@@ -70,14 +68,4 @@ export {
   createFilterBarHelper,
   createFilterBarDirective,
   createApplyFiltersPopoverDirective,
-  createApplyFiltersPopoverHelper,
 } from './shim/legacy_module';
-
-export {
-  TimeHistoryContract,
-  TimefilterContract,
-  getTime,
-  InputTimeRange,
-  extractTimeFilter,
-  changeTimeFilter,
-} from './timefilter';

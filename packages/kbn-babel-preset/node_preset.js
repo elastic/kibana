@@ -25,7 +25,7 @@ module.exports = (_, options = {}) => {
         test: [/x-pack[\/\\]legacy[\/\\]plugins[\/\\]task_manager/],
         plugins: [
           [
-            'filter-imports',
+            require.resolve('babel-plugin-filter-imports'),
             {
               imports: {
                 perf_hooks: ['performance'],
