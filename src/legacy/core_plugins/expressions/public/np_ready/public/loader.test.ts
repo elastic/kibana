@@ -124,12 +124,7 @@ describe('ExpressionLoader', () => {
     let response = await expressionLoader.render$.pipe(first()).toPromise();
     expect(response).toBe(1);
     expressionLoader.update('test');
-    response = await expressionLoader.render$
-      .pipe(
-        skip(1),
-        first()
-      )
-      .toPromise();
+    response = await expressionLoader.render$.pipe(skip(1), first()).toPromise();
     expect(response).toBe(2);
   });
 
