@@ -33,6 +33,7 @@ import {
   FieldMappingSpec,
   MappingObject,
 } from '../../../../../../plugins/kibana_utils/public';
+import { toMountPoint } from '../../../../../../plugins/kibana_react/public';
 
 import { findIndexPatternByTitle, getRoutes } from '../utils';
 import { IndexPatternMissingIndices } from '../errors';
@@ -215,7 +216,7 @@ export class IndexPattern implements StaticIndexPattern {
 
       toasts.addWarning({
         title: warningTitle,
-        text: (
+        text: toMountPoint(
           <div>
             <p>{warningText}</p>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
