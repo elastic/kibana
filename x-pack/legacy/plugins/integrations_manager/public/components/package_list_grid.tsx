@@ -5,7 +5,7 @@
  */
 import React, { Fragment, ReactNode } from 'react';
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import { PackageList, PackageListItem } from '../../common/types';
+import { PackageList } from '../../common/types';
 import { PackageCard, BadgeProps } from './package_card';
 
 type ListProps = {
@@ -19,24 +19,10 @@ export function PackageListGrid({ controls, title, list, showInstalledBadge }: L
   const gridContent = <GridColumn list={list} showInstalledBadge={showInstalledBadge} />;
 
   return (
-    <Fragment>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>{controlsContent}</EuiFlexItem>
-        <EuiFlexItem grow={3}>{gridContent}</EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="xxl" />
-    </Fragment>
-  );
-}
-
-type GridItemProps = PackageListItem & BadgeProps;
-
-function GridItem(item: GridItemProps) {
-  return (
-    <EuiFlexItem>
-      <PackageCard {...item} showInstalledBadge={item.showInstalledBadge} />
-    </EuiFlexItem>
+    <EuiFlexGroup>
+      <EuiFlexItem grow={1}>{controlsContent}</EuiFlexItem>
+      <EuiFlexItem grow={3}>{gridContent}</EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 
@@ -68,11 +54,9 @@ function GridColumn({ list, showInstalledBadge }: GridColumnProps) {
   return (
     <EuiFlexGrid gutterSize="l" columns={3}>
       {list.map(item => (
-        <GridItem
-          key={`${item.name}-${item.version}`}
-          {...item}
-          showInstalledBadge={showInstalledBadge}
-        />
+        <EuiFlexItem key={`${item.name}-${item.version}`}>
+          <PackageCard {...item} />
+        </EuiFlexItem>
       ))}
     </EuiFlexGrid>
   );
