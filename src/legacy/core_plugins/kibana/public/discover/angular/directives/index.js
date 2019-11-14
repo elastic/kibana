@@ -23,9 +23,8 @@ import { DiscoverNoResults } from './no_results';
 import { DiscoverUninitialized } from './uninitialized';
 import { DiscoverUnsupportedIndexPattern } from './unsupported_index_pattern';
 import { DiscoverHistogram } from './histogram';
-import { getAngularModule, getServices } from '../../kibana_services';
+import { getAngularModule, wrapInI18nContext } from '../../kibana_services';
 
-const { wrapInI18nContext } = getServices();
 const app = getAngularModule();
 
 app.directive('discoverNoResults', reactDirective =>

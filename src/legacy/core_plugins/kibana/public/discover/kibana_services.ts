@@ -24,8 +24,6 @@ import { SearchSource } from 'ui/courier';
 import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
 import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
-import { docTitle } from 'ui/doc_title';
-// @ts-ignore
 import * as docViewsRegistry from 'ui/registry/doc_views';
 import { start as data } from '../../../data/public/legacy';
 
@@ -45,6 +43,8 @@ interface ServiceDeps {
   capabilities: any;
   chrome: any;
   docLinks: any;
+  docTitle: any;
+  docViewsRegistry: any;
   eui_utils: any;
   indexPatterns: any;
   inspector: any;
@@ -54,21 +54,18 @@ interface ServiceDeps {
   uiSettings: any;
   timefilter: any;
   // legacy
-  docTitle: any;
-  docViewsRegistry: any;
-  SearchSource: any;
-  wrapInI18nContext: any;
   getSavedSearchById?: any;
   getSavedSearchUrlById?: any;
 }
 
 let services: ServiceDeps = {
-  // new plattform
   core: npStart.core,
   addBasePath: npStart.core.http.basePath.prepend,
   capabilities: npStart.core.application.capabilities,
   chrome: npStart.core.chrome,
   docLinks: npStart.core.docLinks,
+  docTitle: npStart.core.chrome.docTitle,
+  docViewsRegistry,
   eui_utils: npStart.plugins.eui_utils,
   filterManager: npStart.plugins.data.query.filterManager,
   indexPatterns: data.indexPatterns.indexPatterns,
@@ -77,11 +74,6 @@ let services: ServiceDeps = {
   toastNotifications: npStart.core.notifications.toasts,
   uiSettings: npStart.core.uiSettings,
   timefilter: npStart.plugins.data.query.timefilter.timefilter,
-  // legacy
-  docTitle,
-  docViewsRegistry,
-  SearchSource,
-  wrapInI18nContext,
 };
 export function getServices(): ServiceDeps {
   return services;
@@ -93,6 +85,7 @@ export function setServices(newServices: any) {
 
 // EXPORT legacy static dependencies
 export { angular };
+export { wrapInI18nContext };
 export { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 // @ts-ignore
 export { callAfterBindingsWorkaround } from 'ui/compat';

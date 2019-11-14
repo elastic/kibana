@@ -72,7 +72,7 @@ import {
   createApplyFiltersPopoverDirective,
   createFilterBarDirective,
   createFilterBarHelper,
-} from '../../../data/public/shim/legacy_module';
+} from '../../../data/public';
 // @ts-ignore
 import { IndexPatterns } from '../../../data/public/index_patterns/index_patterns';
 // @ts-ignore
@@ -106,7 +106,7 @@ const thirdPartyAngularDependencies = [
   'elasticsearch',
 ];
 
-export function getAngularModule(name = 'app/discover', core: CoreStart, deps: any) {
+export function getAngularModule(name: string, core: CoreStart, deps: any) {
   const discoverUiModule = getInnerAngular(name, core, deps.navigation);
   configureAppAngularModule(discoverUiModule, core as LegacyCoreStart, true);
   setAngularModule(discoverUiModule);

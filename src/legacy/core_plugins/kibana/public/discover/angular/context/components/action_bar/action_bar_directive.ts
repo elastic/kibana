@@ -16,10 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { getAngularModule, getServices } from '../../../../kibana_services';
+import { getAngularModule, wrapInI18nContext } from '../../../../kibana_services';
 import { ActionBar } from './action_bar';
-
-const { wrapInI18nContext } = getServices();
 
 getAngularModule().directive('contextActionBar', function(reactDirective: any) {
   return reactDirective(wrapInI18nContext(ActionBar));

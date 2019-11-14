@@ -16,11 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { getServices } from '../../../../kibana_services';
+import { wrapInI18nContext } from '../../../../kibana_services';
 import { ToolBarPagerText } from './tool_bar_pager_text';
 import { ToolBarPagerButtons } from './tool_bar_pager_buttons';
-
-const { wrapInI18nContext } = getServices();
 
 export function createToolBarPagerTextDirective(reactDirective: any) {
   return reactDirective(wrapInI18nContext(ToolBarPagerText));

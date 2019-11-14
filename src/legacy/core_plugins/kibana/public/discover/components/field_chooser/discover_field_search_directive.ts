@@ -16,11 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// @ts-ignore
-import { getServices } from '../../kibana_services';
+import { wrapInI18nContext } from '../../kibana_services';
 import { DiscoverFieldSearch } from './discover_field_search';
-
-const { wrapInI18nContext } = getServices();
 
 export function createFieldSearchDirective(reactDirective: any) {
   return reactDirective(wrapInI18nContext(DiscoverFieldSearch), [

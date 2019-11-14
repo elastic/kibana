@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { getAngularModule, getServices } from '../kibana_services';
+import { getAngularModule, wrapInI18nContext, getServices } from '../kibana_services';
 // @ts-ignore
 import { getRootBreadcrumbs } from '../breadcrumbs';
 import html from './doc.html';
 import { Doc } from '../doc/doc';
-const { wrapInI18nContext, timefilter } = getServices();
+const { timefilter } = getServices();
 const app = getAngularModule();
 app.directive('discoverDoc', function(reactDirective: any) {
   return reactDirective(

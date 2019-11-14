@@ -18,9 +18,7 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText, EuiToolTip } from '@elastic/eui';
-import { getServices } from '../../kibana_services';
-
-const { wrapInI18nContext } = getServices();
+import { wrapInI18nContext } from '../../kibana_services';
 
 interface Props {
   percent: number;

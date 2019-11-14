@@ -51,6 +51,7 @@ interface DiscoverStartPlugins {
   navigation: NavigationStart;
 }
 const innerAngularName = 'app/discover';
+const embeddableAngularName = 'app/discoverEmbeddable';
 
 export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   private globalAngularBootstrapped: boolean = false;
@@ -76,7 +77,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
         if (!this.innerAngularBootstrapped) {
           await this.bootstrapInnerAngular();
         }
-        const { renderApp } = await import('./render_app');
+        const { renderApp } = await import('./application');
         return renderApp(innerAngularName, params.element);
       },
     });
@@ -108,10 +109,9 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
     // bootstrap inner Angular for embeddable, return injector
     const getInjector = async () => {
       await this.bootstrapGlobalAngular();
-      const name = 'app/discoverEmbeddable';
-      getAngularModuleEmbeddable(name, core, plugins);
+      getAngularModuleEmbeddable(embeddableAngularName, core, plugins);
       const mountpoint = document.createElement('div');
-      return angular.bootstrap(mountpoint, [name]);
+      return angular.bootstrap(mountpoint, [embeddableAngularName]);
     };
 
     const factory = new SearchEmbeddableFactory(

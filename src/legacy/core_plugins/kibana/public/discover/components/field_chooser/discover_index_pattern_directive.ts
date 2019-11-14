@@ -16,11 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// @ts-ignore
-import { getServices } from '../../kibana_services';
+import { wrapInI18nContext } from '../../kibana_services';
 import { DiscoverIndexPattern } from './discover_index_pattern';
-
-const { wrapInI18nContext } = getServices();
 
 export function createIndexPatternSelectDirective(reactDirective: any) {
   return reactDirective(wrapInI18nContext(DiscoverIndexPattern), [
