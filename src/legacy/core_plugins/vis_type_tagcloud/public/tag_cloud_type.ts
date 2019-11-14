@@ -18,9 +18,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Status } from 'ui/../../visualizations/public/np_ready/public/legacy/update_status';
 // @ts-ignore
 import { Schemas } from 'ui/vis/editors/default/schemas';
+import { Status } from '../../visualizations/public';
 
 import { TagCloudOptions } from './components/tag_cloud_options';
 import { visFactory } from '../../visualizations/public';

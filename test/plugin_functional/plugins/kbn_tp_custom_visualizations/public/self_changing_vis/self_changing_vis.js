@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { visFactory } from 'ui/vis/vis_factory';
+import { visFactory } from '../../../../../../src/legacy/core_plugins/visualizations/public';
 
 import { SelfChangingEditor } from './self_changing_editor';
 import { SelfChangingComponent } from './self_changing_components';

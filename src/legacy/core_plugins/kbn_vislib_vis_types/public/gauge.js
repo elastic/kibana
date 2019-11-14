@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { visFactory } from 'ui/vis/vis_factory';
+import { visFactory } from '../../visualizations/public';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggGroupNames } from 'ui/vis/editors/default';
 import { ColorSchemas } from 'ui/vislib/components/color/colormaps';

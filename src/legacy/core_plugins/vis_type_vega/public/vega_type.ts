@@ -18,11 +18,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Status } from 'ui/../../visualizations/public/np_ready/public/legacy/update_status';
 // @ts-ignore
 import { DefaultEditorSize } from 'ui/vis/editor_size';
 // @ts-ignore
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
+import { Status } from '../../visualizations/public';
 
 import { visFactory } from '../../visualizations/public';
 import { VegaVisualizationDependencies } from './plugin';

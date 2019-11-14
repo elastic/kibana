@@ -24,7 +24,7 @@ import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
 import { GaugeOptions } from './components/options';
 import { getGaugeCollections, GaugeTypes, ColorModes } from './utils/collections';
 import { vislibVisController } from './controller';
-import { visFactory } from '../../visualizations/public/np_ready/public/vis_factory';
+import { visFactory } from '../../visualizations/public';
 
 export default function GoalVisType() {
 

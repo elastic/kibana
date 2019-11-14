@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { VisType } from './types/vis_type';
-import { AggConfigs } from '../../../../../ui/public/agg_types/agg_configs';
+import { VisType } from './types';
+import { AggConfigs } from '../../legacy_imports';
 import { Status } from './legacy/update_status';
 
 export interface Vis {

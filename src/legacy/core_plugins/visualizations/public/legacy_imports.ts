@@ -17,32 +17,10 @@
  * under the License.
  */
 
-import { SchemaConfig } from '../../visualizations/public';
-
-export enum AggTypes {
-  SUM = 'sum',
-  AVG = 'avg',
-  MIN = 'min',
-  MAX = 'max',
-  COUNT = 'count',
-}
-
-export interface Dimensions {
-  buckets: SchemaConfig[];
-  metrics: SchemaConfig[];
-}
-
-export interface TableVisParams {
-  type: 'table';
-  perPage: number | '';
-  showPartialRows: boolean;
-  showMetricsAtAllLevels: boolean;
-  sort: {
-    columnIndex: number | null;
-    direction: string | null;
-  };
-  showTotal: boolean;
-  totalFunc: AggTypes;
-  percentageCol: string;
-  dimensions: Dimensions;
-}
+export { PersistedState } from '../../../ui/public/persisted_state';
+export { SearchError, SearchSource } from '../../../ui//public/courier';
+export { AggConfig, AggConfigs, setBounds } from '../../../ui/public/agg_types';
+export { isDateHistogramBucketAggConfig } from '../../../ui/public/agg_types/buckets/date_histogram';
+export { createFormat } from '../../../ui/public/visualize/loader/pipeline_helpers/utilities';
+export { I18nContext } from '../../../ui/public/i18n';
+import '../../../ui/public/directives/bind';

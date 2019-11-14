@@ -29,10 +29,5 @@ import { plugin } from '.';
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
-export const setup = pluginInstance.setup(npSetup.core, {
-  __LEGACY: {
-    VisFiltersProvider,
-    createFilter,
-  },
-});
+export const setup = pluginInstance.setup(npSetup.core);
 export const start = pluginInstance.start(npStart.core);

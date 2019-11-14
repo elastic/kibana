@@ -22,10 +22,8 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import { colorSchemas } from 'ui/vislib/components/color/truncated_colormaps';
 import { mapToLayerWithId } from './util';
 import { createRegionMapVisualization } from './region_map_visualization';
-import { Status } from 'ui/vis/update_status';
+import { Status, visFactory } from '../../visualizations/public';
 import { RegionMapOptions } from './components/region_map_options';
-
-import { visFactory } from '../../visualizations/public';
 
 // TODO: reference to TILE_MAP plugin should be removed
 import { ORIGIN } from '../../tile_map/common/origin';

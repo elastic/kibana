@@ -35,10 +35,6 @@ import { VisFiltersProvider, createFilter } from 'ui/vis/vis_filters';
 /* eslint-enable */
 
 const createSetupContract = (): VisualizationsSetup => ({
-  filters: {
-    VisFiltersProvider: jest.fn(),
-    createFilter: jest.fn(),
-  },
   types: {
     registerVisualization: jest.fn(),
     registerAlias: jest.fn(),
@@ -57,12 +53,7 @@ const createStartContract = (): VisualizationsStart => ({
 const createInstance = async () => {
   const plugin = new VisualizationsPlugin({} as PluginInitializerContext);
 
-  const setup = plugin.setup(coreMock.createSetup(), {
-    __LEGACY: {
-      VisFiltersProvider,
-      createFilter,
-    },
-  });
+  const setup = plugin.setup(coreMock.createSetup());
   const doStart = () => plugin.start(coreMock.createStart());
 
   return {

@@ -17,32 +17,12 @@
  * under the License.
  */
 
-import { SchemaConfig } from '../../visualizations/public';
+import { UiSettingsClientContract } from 'src/core/public';
+import { TypesStart } from './types';
+import { createGetterSetter } from '../../../../../../plugins/kibana_utils/public';
 
-export enum AggTypes {
-  SUM = 'sum',
-  AVG = 'avg',
-  MIN = 'min',
-  MAX = 'max',
-  COUNT = 'count',
-}
+export const [getUISettings, setUISettings] = createGetterSetter<UiSettingsClientContract>(
+  'UISettings'
+);
 
-export interface Dimensions {
-  buckets: SchemaConfig[];
-  metrics: SchemaConfig[];
-}
-
-export interface TableVisParams {
-  type: 'table';
-  perPage: number | '';
-  showPartialRows: boolean;
-  showMetricsAtAllLevels: boolean;
-  sort: {
-    columnIndex: number | null;
-    direction: string | null;
-  };
-  showTotal: boolean;
-  totalFunc: AggTypes;
-  percentageCol: string;
-  dimensions: Dimensions;
-}
+export const [getTypes, setTypes] = createGetterSetter<TypesStart>('Types');

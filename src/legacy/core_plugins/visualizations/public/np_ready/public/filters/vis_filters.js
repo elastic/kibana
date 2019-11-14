@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { pushFilterBarFilters } from '../../../../../../ui/public/vis/push_filters';
 import { onBrushEvent } from './brush_event';
 import { esFilters } from '../../../../../../../plugins/data/public';
 

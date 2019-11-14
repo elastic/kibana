@@ -19,7 +19,6 @@
 
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
-import { dispatchRenderComplete } from '../../../../../../../plugins/kibana_utils/public';
 
 interface VisualizationNoResultsProps {
   onInit?: () => void;
@@ -57,9 +56,6 @@ export class VisualizationNoResults extends React.Component<VisualizationNoResul
   private afterRender() {
     if (this.props.onInit) {
       this.props.onInit();
-    }
-    if (this.containerDiv.current) {
-      dispatchRenderComplete(this.containerDiv.current);
     }
   }
 }

@@ -21,10 +21,10 @@ import React from 'react';
 import * as Rx from 'rxjs';
 import { debounceTime, filter, share, switchMap } from 'rxjs/operators';
 
-import { PersistedState } from '../../../../../../ui/public/persisted_state';
-import { ResizeChecker } from '../../../../../../ui/public/resize_checker';
-import { Vis, VisualizationController } from '../../../../../../ui/public/vis';
+import { PersistedState } from '../../../legacy_imports';
+import { Vis, VisualizationController } from '../vis';
 import { getUpdateStatus } from '../legacy/update_status';
+import { ResizeChecker } from '../../../../../../../plugins/kibana_utils/public';
 
 interface VisualizationChartProps {
   onInit?: () => void;

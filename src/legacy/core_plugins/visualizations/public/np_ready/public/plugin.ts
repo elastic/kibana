@@ -18,6 +18,7 @@
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { TypesService, TypesSetup, TypesStart } from './types';
+import { setUISettings, setTypes } from './services';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -41,23 +42,23 @@ export interface VisualizationsStart {
  *
  * @internal
  */
-export class VisualizationsPlugin
-  implements
-    Plugin<VisualizationsSetup, VisualizationsStart> {
+export class VisualizationsPlugin implements Plugin<VisualizationsSetup, VisualizationsStart> {
   private readonly types: TypesService = new TypesService();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
-
+    setUISettings(core.uiSettings);
     return {
       types: this.types.setup(),
     };
   }
 
   public start(core: CoreStart) {
+    const types = this.types.start();
+    setTypes(types);
     return {
-      types: this.types.start(),
+      types,
     };
   }
 

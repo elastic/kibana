@@ -20,13 +20,13 @@
 import { i18n } from '@kbn/i18n';
 import { Vis } from 'ui/vis';
 // @ts-ignore
-import { visFactory } from 'ui/../../visualizations/public/np_ready/public/legacy/vis_factory';
 
 // @ts-ignore
 import { Schemas } from 'ui/vis/editors/default/schemas';
 // @ts-ignore
 import { AngularVisController } from 'ui/vis/vis_types/angular_vis_type';
 import { AggGroupNames } from 'ui/vis/editors/default';
+import { visFactory } from '../../visualizations/public';
 import { tableVisResponseHandler } from './table_vis_request_handler';
 // @ts-ignore
 import tableVisTemplate from './table_vis.html';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { visFactory } from '../../visualizations/public/np_ready/public/vis_factory';
+import { visFactory } from '../../visualizations/public';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggGroupNames } from 'ui/vis/editors/default';

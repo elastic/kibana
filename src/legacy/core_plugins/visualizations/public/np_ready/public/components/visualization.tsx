@@ -20,12 +20,12 @@
 import { get } from 'lodash';
 import React from 'react';
 
-import { PersistedState } from '../../../../../../ui/public/persisted_state';
-import { memoizeLast } from '../../../../../../ui/public/utils/memoize';
-import { Vis } from '../../../../../../ui/public/vis';
+import { PersistedState } from '../../../legacy_imports';
+import { memoizeLast } from '../legacy/memoize';
 import { VisualizationChart } from './visualization_chart';
 import { VisualizationNoResults } from './visualization_noresults';
 import { VisualizationRequestError } from './visualization_requesterror';
+import { Vis } from '..';
 
 function shouldShowNoResultsMessage(vis: Vis, visData: any): boolean {
   const requiresSearch = get(vis, 'type.requiresSearch');

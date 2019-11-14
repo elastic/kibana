@@ -48,4 +48,7 @@ export { Vis, VisParams, VisState } from './vis';
 export * from './filters';
 
 export { Status } from './legacy/update_status';
-export { buildPipeline } from './legacy/build_pipeline';
+export { buildPipeline, buildVislibDimensions, SchemaConfig } from './legacy/build_pipeline';
+
+// @ts-ignore
+export { updateOldState } from './legacy/vis_update_state';

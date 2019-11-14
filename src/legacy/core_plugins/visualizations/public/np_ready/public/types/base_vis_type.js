@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { createFiltersFromEvent, onBrushEvent } from '../vis_filters';
+import { createFiltersFromEvent, onBrushEvent } from '../filters';
 
 export class BaseVisType {
   constructor(opts = {}) {

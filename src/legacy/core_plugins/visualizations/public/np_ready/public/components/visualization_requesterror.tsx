@@ -19,8 +19,7 @@
 
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
-import { SearchError } from 'src/legacy/ui/public/courier';
-import { dispatchRenderComplete } from '../../../../../../../plugins/kibana_utils/public';
+import { SearchError } from '../../../legacy_imports';
 
 interface VisualizationRequestErrorProps {
   onInit?: () => void;
@@ -58,9 +57,6 @@ export class VisualizationRequestError extends React.Component<VisualizationRequ
   private afterRender() {
     if (this.props.onInit) {
       this.props.onInit();
-    }
-    if (this.containerDiv.current) {
-      dispatchRenderComplete(this.containerDiv.current);
     }
   }
 }

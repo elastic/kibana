@@ -19,8 +19,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import chrome from '../../../../../../ui/public/chrome';
-import { I18nContext } from '../../../../../../ui/public/i18n';
+import { getUISettings } from '../services';
+import { I18nContext } from '../../../legacy_imports';
 import { BaseVisType } from './base_vis_type';
 
 
@@ -35,7 +35,7 @@ class ReactVisController {
 
     return new Promise((resolve) => {
       const Component = this.vis.type.visConfig.component;
-      const config = chrome.getUiSettingsClient();
+      const config = getUISettings();
       render(
         <I18nContext>
           <Component

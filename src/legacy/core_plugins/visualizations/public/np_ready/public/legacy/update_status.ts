@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PersistedState } from '../../../../../../ui/public/persisted_state';
+import { PersistedState } from '../../../legacy_imports';
 import { calculateObjectHash } from './calculate_object_hash';
 import { Vis } from '../vis';
 

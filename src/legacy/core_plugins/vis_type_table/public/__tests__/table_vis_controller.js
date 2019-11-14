@@ -21,8 +21,7 @@ import $ from 'jquery';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
-import { Vis } from 'ui/vis';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { Vis } from '../../../visualizations/public';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { AppStateProvider } from 'ui/state_management/app_state';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
@@ -40,17 +39,11 @@ describe('Table Vis - Controller', async function () {
   let AppState;
   let tableAggResponse;
   let tabifiedResponse;
-  let legacyDependencies;
 
-  ngMock.inject(function ($injector) {
-    Private = $injector.get('Private');
-    legacyDependencies = {
-      // eslint-disable-next-line new-cap
-      createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
-    };
+  ngMock.inject(function () {
 
     visualizationsSetup.types.registerVisualization(() =>
-      createTableVisTypeDefinition(legacyDependencies)
+      createTableVisTypeDefinition()
     );
   });
 
