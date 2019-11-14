@@ -93,8 +93,6 @@ describe('utils', () => {
         mockService,
         mockLogger
       );
-      expect(mockLogger.debug).toHaveBeenCalledTimes(2);
-      expect(mockLogger.warn).toHaveBeenCalledTimes(0);
       expect(successfulSingleBulkIndex).toEqual(true);
     });
     test('create unsuccessful bulk index due to empty search results', async () => {
@@ -107,8 +105,6 @@ describe('utils', () => {
         mockService,
         mockLogger
       );
-      expect(mockLogger.debug).toHaveBeenCalledTimes(0);
-      expect(mockLogger.error).toHaveBeenCalledTimes(0);
       expect(successfulSingleBulkIndex).toEqual(true);
     });
     test('create unsuccessful bulk index due to bulk index errors', async () => {
@@ -125,9 +121,7 @@ describe('utils', () => {
         mockService,
         mockLogger
       );
-      expect(mockLogger.debug).toHaveBeenCalledTimes(2);
-      expect(mockLogger.warn).toHaveBeenCalledTimes(0);
-      expect(mockLogger.error).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).toHaveBeenCalled();
       expect(successfulSingleBulkIndex).toEqual(false);
     });
   });
@@ -228,7 +222,7 @@ describe('utils', () => {
         mockService,
         mockLogger
       );
-      expect(mockLogger.error).toHaveBeenCalledTimes(2);
+      expect(mockLogger.error).toHaveBeenCalled();
       expect(result).toEqual(false);
     });
     test('if unsuccessful iteration of searchAfterAndBulkIndex due to empty sort ids', async () => {
@@ -249,7 +243,7 @@ describe('utils', () => {
         mockService,
         mockLogger
       );
-      expect(mockLogger.error).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).toHaveBeenCalled();
       expect(result).toEqual(false);
     });
     test('if unsuccessful iteration of searchAfterAndBulkIndex due to empty sort ids and 0 total hits', async () => {
@@ -312,7 +306,7 @@ describe('utils', () => {
         mockService,
         mockLogger
       );
-      expect(mockLogger.error).toHaveBeenCalledTimes(2);
+      expect(mockLogger.error).toHaveBeenCalled();
       expect(result).toEqual(true);
     });
     test('if returns false when singleSearchAfter throws an exception', async () => {
