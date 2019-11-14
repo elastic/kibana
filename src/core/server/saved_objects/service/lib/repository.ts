@@ -74,6 +74,7 @@ const isLeft = <L, R>(either: Either<L, R>): either is Left<L> => {
 
 export interface SavedObjectsRepositoryOptions {
   index: string;
+  /** @deprecated Will be removed once SavedObjectsSchema is exposed from Core */
   config: Config;
   mappings: IndexMapping;
   callCluster: CallCluster;
@@ -81,7 +82,6 @@ export interface SavedObjectsRepositoryOptions {
   serializer: SavedObjectsSerializer;
   migrator: KibanaMigrator;
   allowedTypes: string[];
-  onBeforeWrite?: (...args: Parameters<CallCluster>) => Promise<void>;
 }
 
 /**
@@ -121,7 +121,6 @@ export class SavedObjectsRepository {
   private _mappings: IndexMapping;
   private _schema: SavedObjectsSchema;
   private _allowedTypes: string[];
-  private _onBeforeWrite: (...args: Parameters<CallCluster>) => Promise<void>;
   private _unwrappedCallCluster: CallCluster;
   private _serializer: SavedObjectsSerializer;
 
@@ -135,7 +134,6 @@ export class SavedObjectsRepository {
       serializer,
       migrator,
       allowedTypes = [],
-      onBeforeWrite = () => Promise.resolve(),
     } = options;
 
     // It's important that we migrate documents / mark them as up-to-date
@@ -154,8 +152,6 @@ export class SavedObjectsRepository {
       throw new Error('Empty or missing types for saved object repository!');
     }
     this._allowedTypes = allowedTypes;
-
-    this._onBeforeWrite = onBeforeWrite;
 
     this._unwrappedCallCluster = async (...args: Parameters<CallCluster>) => {
       await migrator.runMigrations();
@@ -890,7 +886,6 @@ export class SavedObjectsRepository {
 
   private async _writeToCluster(...args: Parameters<CallCluster>) {
     try {
-      await this._onBeforeWrite(...args);
       return await this._callCluster(...args);
     } catch (err) {
       throw decorateEsError(err);
