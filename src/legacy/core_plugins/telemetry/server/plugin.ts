@@ -19,8 +19,7 @@
 
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { registerRoutes } from './routes';
-import { telemetryCollectionManager } from './collection_manager';
-import { getStats } from './telemetry_collection';
+import { registerCollection } from './telemetry_collection';
 
 export class TelemetryPlugin {
   private readonly currentKibanaVersion: string;
@@ -31,7 +30,7 @@ export class TelemetryPlugin {
 
   public setup(core: CoreSetup) {
     const currentKibanaVersion = this.currentKibanaVersion;
-    telemetryCollectionManager.setStatsGetter(getStats, 'local');
+    registerCollection();
     registerRoutes({ core, currentKibanaVersion });
   }
 }

@@ -111,11 +111,9 @@ test('executes the task by calling the executor with proper parameters', async (
 
   expect(runnerResult).toBeUndefined();
   expect(spaceIdToNamespace).toHaveBeenCalledWith('test');
-  expect(mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser).toHaveBeenCalledWith(
-    'action_task_params',
-    '3',
-    { namespace: 'namespace-test' }
-  );
+  expect(
+    mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser
+  ).toHaveBeenCalledWith('action_task_params', '3', { namespace: 'namespace-test' });
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
     params: { baz: true },

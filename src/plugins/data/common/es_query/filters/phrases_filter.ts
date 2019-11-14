@@ -18,7 +18,7 @@
  */
 
 import { Filter, FilterMeta } from './meta_filter';
-import { Field, IndexPattern } from './types';
+import { Field, IndexPattern } from '../../types';
 import { getPhraseScript } from './phrase_filter';
 
 export type PhrasesFilterMeta = FilterMeta & {

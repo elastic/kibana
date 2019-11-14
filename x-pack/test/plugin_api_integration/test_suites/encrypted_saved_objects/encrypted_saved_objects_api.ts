@@ -252,7 +252,10 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     describe('within a default space', () => {
-      runTests(() => '/api/saved_objects/', id => `${SAVED_OBJECT_WITH_SECRET_TYPE}:${id}`);
+      runTests(
+        () => '/api/saved_objects/',
+        id => `${SAVED_OBJECT_WITH_SECRET_TYPE}:${id}`
+      );
     });
 
     describe('within a custom space', () => {

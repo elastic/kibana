@@ -290,10 +290,7 @@ const makeMapStateToProps = () => {
   });
 };
 
-export const IPDetails = connect(
-  makeMapStateToProps,
-  {
-    setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
-    setIpDetailsTablesActivePageToZero: dispatchIpDetailsTablesActivePageToZero,
-  }
-)(IPDetailsComponent);
+export const IPDetails = connect(makeMapStateToProps, {
+  setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
+  setIpDetailsTablesActivePageToZero: dispatchIpDetailsTablesActivePageToZero,
+})(IPDetailsComponent);
