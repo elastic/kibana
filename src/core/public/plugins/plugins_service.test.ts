@@ -25,13 +25,14 @@ import {
   mockPluginInitializerProvider,
 } from './plugins_service.test.mocks';
 
-import { PluginName, DiscoveredPlugin } from 'src/core/server';
+import { PluginName } from 'src/core/server';
 import { coreMock } from '../mocks';
 import {
   PluginsService,
   PluginsServiceStartDeps,
   PluginsServiceSetupDeps,
 } from './plugins_service';
+import { InjectedPluginMetadata } from '../injected_metadata';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
 import { applicationServiceMock } from '../application/application_service.mock';
 import { i18nServiceMock } from '../i18n/i18n_service.mock';
@@ -52,7 +53,7 @@ mockPluginInitializerProvider.mockImplementation(
   pluginName => mockPluginInitializers.get(pluginName)!
 );
 
-let plugins: Array<{ id: string; plugin: DiscoveredPlugin }>;
+let plugins: InjectedPluginMetadata[];
 
 type DeeplyMocked<T> = { [P in keyof T]: jest.Mocked<T[P]> };
 

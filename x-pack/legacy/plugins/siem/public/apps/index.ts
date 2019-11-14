@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { of } from 'rxjs';
 import chrome from 'ui/chrome';
 import { npStart } from 'ui/new_platform';
 import { Plugin } from './plugin';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-new Plugin({ opaqueId: Symbol('siem'), env: {} as any }, chrome).start(npStart);
+new Plugin(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  { opaqueId: Symbol('siem'), env: {} as any, config: { create: () => of({} as any) } },
+  chrome
+).start(npStart);

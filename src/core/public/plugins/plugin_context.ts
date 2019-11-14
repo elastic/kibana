@@ -18,7 +18,7 @@
  */
 
 import { omit } from 'lodash';
-
+import { Observable, of } from 'rxjs';
 import { DiscoveredPlugin } from '../../server';
 import { PluginOpaqueId, PackageInfo, EnvironmentMode } from '../../server/types';
 import { CoreContext } from '../core_system';
@@ -31,7 +31,7 @@ import { CoreSetup, CoreStart } from '../';
  *
  * @public
  */
-export interface PluginInitializerContext {
+export interface PluginInitializerContext<ConfigSchema = unknown> {
   /**
    * A symbol used to identify this plugin in the system. Needed when registering handlers or context providers.
    */
@@ -40,6 +40,9 @@ export interface PluginInitializerContext {
     mode: Readonly<EnvironmentMode>;
     packageInfo: Readonly<PackageInfo>;
   };
+  readonly config: {
+    create: <T = ConfigSchema>() => Observable<T>;
+  };
 }
 
 /**
@@ -47,17 +50,27 @@ export interface PluginInitializerContext {
  * empty but should provide static services in the future, such as config and logging.
  *
  * @param coreContext
- * @param pluginManinfest
+ * @param opaqueId
+ * @param pluginManifest
+ * @param pluginConfig
  * @internal
  */
 export function createPluginInitializerContext(
   coreContext: CoreContext,
   opaqueId: PluginOpaqueId,
-  pluginManifest: DiscoveredPlugin
+  pluginManifest: DiscoveredPlugin,
+  pluginConfig: {
+    [key: string]: unknown;
+  }
 ): PluginInitializerContext {
   return {
     opaqueId,
     env: coreContext.env,
+    config: {
+      create<T>() {
+        return of<T>((pluginConfig as unknown) as T);
+      },
+    },
   };
 }
 
