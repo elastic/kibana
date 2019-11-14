@@ -53,9 +53,21 @@ function updateExistingFilter(existingFilter: esFilters.Filter, negate: boolean)
   }
 }
 
+/**
+ * Generate filter objects, as a result of triggering a filter action on a
+ * specific index pattern field.
+ *
+ * @param {FilterManager} filterManager - The active filter manager to lookup for existing filters
+ * @param {Field | string} field - The field for which filters should be generated
+ * @param {any} values - One or more values to filter for.
+ * @param {string} operation - "-" to create a negated filter
+ * @param {string} index - Index string to generate filters for
+ *
+ * @returns {object} An array of filters to be added back to filterManager
+ */
 export function generateFilters(
   filterManager: FilterManager,
-  field: Field,
+  field: Field | string,
   values: any,
   operation: string,
   index: string
