@@ -28,7 +28,6 @@ import angular from 'angular'; // just used in embeddables and discover controll
 import uiRoutes from 'ui/routes';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { SearchSource } from 'ui/courier';
 // @ts-ignore
 import { StateProvider } from 'ui/state_management/state';
 // @ts-ignore
@@ -44,6 +43,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 import { docTitle } from 'ui/doc_title';
 // @ts-ignore
 import * as docViewsRegistry from 'ui/registry/doc_views';
+import { SearchSource } from '../../../../ui/public/courier';
 
 const services = {
   // new plattform
@@ -89,9 +89,10 @@ export { getFilterGenerator } from 'ui/filter_manager';
 export {
   getRequestInspectorStats,
   getResponseInspectorStats,
-} from 'ui/courier/utils/courier_inspector_utils';
-// @ts-ignore
-export { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
+  hasSearchStategyForIndexPattern,
+  isDefaultTypeIndexPattern,
+  SearchSource,
+} from '../../../../ui/public/courier';
 // @ts-ignore
 export { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
 // @ts-ignore
@@ -116,7 +117,6 @@ export { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vi
 // EXPORT types
 export { VisProvider } from 'ui/vis';
 export { StaticIndexPattern, IndexPatterns, IndexPattern, FieldType } from 'ui/index_patterns';
-export { SearchSource } from 'ui/courier';
 export { ElasticSearchHit } from 'ui/registry/doc_views_types';
 export { DocViewRenderProps, DocViewRenderFn } from 'ui/registry/doc_views';
 export { Adapters } from 'ui/inspector/types';

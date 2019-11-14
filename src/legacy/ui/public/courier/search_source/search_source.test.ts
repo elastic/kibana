@@ -98,49 +98,6 @@ describe('SearchSource', function() {
           expect(searchSource.getField('source')).toBe(undefined);
         });
       });
-
-      describe('ip assigned before custom searchSource filter', function() {
-        it('custom searchSource filter becomes new searchSource', function() {
-          const searchSource = new SearchSource();
-          const football = {};
-          searchSource.setField('index', indexPattern);
-          expect(typeof searchSource.getField('source')).toBe('function');
-          searchSource.setField('source', football);
-          expect(searchSource.getField('index')).toBe(indexPattern);
-          expect(searchSource.getField('source')).toBe(football);
-        });
-
-        it('custom searchSource stays after removal', function() {
-          const searchSource = new SearchSource();
-          const football = {};
-          searchSource.setField('index', indexPattern);
-          searchSource.setField('source', football);
-          searchSource.setField('index', undefined);
-          expect(searchSource.getField('index')).toBe(undefined);
-          expect(searchSource.getField('source')).toBe(football);
-        });
-      });
-
-      describe('ip assigned after custom searchSource filter', function() {
-        it('leaves the custom filter in place', function() {
-          const searchSource = new SearchSource();
-          const football = {};
-          searchSource.setField('source', football);
-          searchSource.setField('index', indexPattern);
-          expect(searchSource.getField('index')).toBe(indexPattern);
-          expect(searchSource.getField('source')).toBe(football);
-        });
-
-        it('custom searchSource stays after removal', function() {
-          const searchSource = new SearchSource();
-          const football = {};
-          searchSource.setField('source', football);
-          searchSource.setField('index', indexPattern);
-          searchSource.setField('index', undefined);
-          expect(searchSource.getField('index')).toBe(undefined);
-          expect(searchSource.getField('source')).toBe(football);
-        });
-      });
     });
   });
 

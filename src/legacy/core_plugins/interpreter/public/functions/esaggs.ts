@@ -32,10 +32,7 @@ import {
 } from '../../../../ui/public/filter_manager/query_filter';
 
 import { buildTabularInspectorData } from '../../../../ui/public/inspector/build_tabular_inspector_data';
-import {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-} from '../../../../ui/public/courier/utils/courier_inspector_utils';
+import { getRequestInspectorStats, getResponseInspectorStats } from '../../../../ui/public/courier';
 import { calculateObjectHash } from '../../../../ui/public/vis/lib/calculate_object_hash';
 import { getTime } from '../../../../ui/public/timefilter';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 import { reverseSortDir } from '../sorting';
-import { SortDirection } from 'ui/courier/types';
+import { SortDirection } from '../../../../../../../../../ui/public/courier';
 
 jest.mock('ui/new_platform');
 

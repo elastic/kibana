@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SortDirection } from 'ui/courier/types';
+import { SortDirection } from '../../../../../../../ui/public/courier';
 import { IndexPatterns, IndexPattern, getServices } from '../../../kibana_services';
 import { reverseSortDir } from './utils/sorting';
 import { extractNanos, convertIsoToMillis } from './utils/date_conversion';

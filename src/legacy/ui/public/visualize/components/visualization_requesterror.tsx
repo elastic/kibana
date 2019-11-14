@@ -19,7 +19,7 @@
 
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
-import { SearchError } from 'ui/courier';
+import { SearchError } from '../../courier';
 import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
 
 interface VisualizationRequestErrorProps {

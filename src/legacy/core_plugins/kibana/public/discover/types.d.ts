@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SearchSourceContract } from 'ui/courier';
+import { SearchSourceContract } from '../../../../ui/public/courier';
 import { SortOrder } from './angular/doc_table/components/table_header/helpers';
 export { SortOrder } from './angular/doc_table/components/table_header/helpers';
 

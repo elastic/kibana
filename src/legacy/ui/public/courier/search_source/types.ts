@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { NameList } from 'elasticsearch';
 import { esFilters } from '../../../../../plugins/data/public';
 import { Query } from '../../../../../plugins/data/common/query';
 import { IndexPattern } from '../../../../core_plugins/data/public/index_patterns';
@@ -42,9 +43,9 @@ export interface SearchSourceFields {
   aggs?: any;
   from?: number;
   size?: number;
-  source?: any;
+  source?: NameList;
   version?: boolean;
-  fields?: string[];
+  fields?: NameList;
   index?: IndexPattern;
   searchAfter?: EsQuerySearchAfter;
 }
@@ -54,6 +55,17 @@ export interface SearchSourceOptions {
 }
 
 export { SearchSourceContract } from './search_source';
+
+export interface SortOptions {
+  mode?: 'min' | 'max' | 'sum' | 'avg' | 'median';
+  type?: 'double' | 'long' | 'date' | 'date_nanos';
+  nested?: object;
+  unmapped_type?: string;
+  distance_type?: 'arc' | 'plane';
+  unit?: string;
+  ignore_unmapped?: boolean;
+  _script?: object;
+}
 
 export interface Request {
   docvalue_fields: string[];

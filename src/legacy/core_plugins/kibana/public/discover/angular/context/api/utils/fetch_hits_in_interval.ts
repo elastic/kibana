@@ -16,7 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { EsQuerySortValue, SortDirection, SearchSourceContract } from 'ui/courier/types';
+import {
+  EsQuerySortValue,
+  SortDirection,
+  SearchSourceContract,
+} from '../../../../../../../../ui/public/courier';
 import { convertTimeValueToIso } from './date_conversion';
 import { EsHitRecordList } from '../context';
 import { IntervalValue } from './generate_intervals';

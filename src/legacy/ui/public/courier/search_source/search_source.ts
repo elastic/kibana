@@ -86,7 +86,6 @@ import { FetchOptions, ApiCaller } from '../fetch/types';
 
 const esShardTimeout = npSetup.core.injectedMetadata.getInjectedVar('esShardTimeout') as number;
 const config = npSetup.core.uiSettings;
-const forIp = Symbol('for which index pattern?');
 
 export type SearchSourceContract = Pick<SearchSource, keyof SearchSource>;
 
@@ -116,39 +115,11 @@ export class SearchSource {
   }
 
   setField<K extends keyof SearchSourceFields>(field: K, value: SearchSourceFields[K]) {
-    if (field === 'index') {
-      const { fields } = this;
-      const hasSource = fields.source;
-      const sourceCameFromIp = hasSource && fields.source.hasOwnProperty(forIp);
-      const sourceIsForOurIp = sourceCameFromIp && fields.source[forIp] === fields.index;
-      if (sourceIsForOurIp) {
-        delete fields.source;
-      }
-
-      if (value === null || value === undefined) {
-        delete fields.index;
-        return this;
-      }
-
-      fields[field] = value;
-      if (!fields.source) {
-        // imply source filtering based on the index pattern, but allow overriding
-        // it by simply setting another field for "source". When index is changed
-        fields.source = function() {
-          return value.getSourceFiltering();
-        };
-        fields.source[forIp] = value;
-      }
-
-      return this;
-    }
-
     if (value == null) {
       delete this.fields[field];
-      return this;
+    } else {
+      this.fields[field] = value;
     }
-
-    this.fields[field] = value;
     return this;
   }
 
@@ -384,6 +355,10 @@ export class SearchSource {
       ? computedFields.docvalueFields
       : [];
     body.docvalue_fields = body.docvalue_fields || defaultDocValueFields;
+
+    if (!body.hasOwnProperty('_source')) {
+      body._source = index.getSourceFiltering();
+    }
 
     if (body._source) {
       // exclude source fields for this index pattern specified by the user

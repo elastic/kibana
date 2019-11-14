@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
+import { getRequestInspectorStats, getResponseInspectorStats } from '../../../../../src/legacy/ui/public/courier';
 export { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { start as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
 
-export { SearchSource } from 'ui/courier';
+export { SearchSource } from '../../../../../src/legacy/ui/public/courier';
 export const indexPatternService = data.indexPatterns.indexPatterns;
 
 export async function fetchSearchSourceAndRecordWithInspector({

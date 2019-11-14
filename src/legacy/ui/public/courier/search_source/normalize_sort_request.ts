@@ -18,12 +18,12 @@
  */
 
 import { IndexPattern } from '../../../../core_plugins/data/public';
-import { EsQuerySortValue } from './types';
+import { EsQuerySortValue, SortOptions } from './types';
 
 export function normalizeSortRequest(
   sortObject: EsQuerySortValue | EsQuerySortValue[],
   indexPattern: IndexPattern | string | undefined,
-  defaultSortOptions: any = {}
+  defaultSortOptions: SortOptions = {}
 ) {
   const sortArray: EsQuerySortValue[] = Array.isArray(sortObject) ? sortObject : [sortObject];
   return sortArray.map(function(sortable) {

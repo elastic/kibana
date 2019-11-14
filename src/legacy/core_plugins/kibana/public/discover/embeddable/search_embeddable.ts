@@ -18,11 +18,11 @@
  */
 import _ from 'lodash';
 import * as Rx from 'rxjs';
-import { SearchSourceContract } from 'ui/courier/types';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
 import { npStart } from 'ui/new_platform';
+import { SearchSourceContract } from '../../../../../ui/public/courier';
 import {
   esFilters,
   TimeRange,

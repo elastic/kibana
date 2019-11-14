@@ -28,7 +28,7 @@ import {
 } from './build_pipeline';
 import { Vis, VisState } from 'ui/vis';
 import { AggConfig } from 'ui/agg_types/agg_config';
-import { searchSourceMock } from 'ui/courier/search_source/mocks';
+import { searchSourceMock } from '../../../courier/search_source/mocks';
 
 jest.mock('ui/new_platform');
 jest.mock('ui/agg_types/buckets/date_histogram', () => ({

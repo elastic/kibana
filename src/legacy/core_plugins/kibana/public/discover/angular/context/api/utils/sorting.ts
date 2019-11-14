@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SortDirection } from 'ui/courier/types';
+import { SortDirection } from '../../../../../../../../ui/public/courier';
 import { IndexPattern } from '../../../../kibana_services';
 
 /**
