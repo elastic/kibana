@@ -8,7 +8,7 @@ import { rewriteIngestPipeline } from './ingest_pipelines';
 import { readFileSync } from 'fs';
 import path from 'path';
 
-test('a pipeline with pipeline references is correctly rewritten', () => {
+test('a json-format pipeline with pipeline references is correctly rewritten', () => {
   const input = readFileSync(
     path.join(__dirname, '/tests/ingest_pipelines/real_input.json')
   ).toString('utf-8');
@@ -29,4 +29,44 @@ test('a pipeline with pipeline references is correctly rewritten', () => {
     },
   ];
   expect(rewriteIngestPipeline(input, substitutions)).toBe(output);
+});
+
+test('a json-format pipeline with no pipeline references stays unchanged', () => {
+  const input = readFileSync(
+    path.join(__dirname, '/tests/ingest_pipelines/no_replacement.json')
+  ).toString('utf-8');
+
+  const substitutions = [
+    {
+      source: 'pipeline-json',
+      target: 'new-pipeline-json',
+      templateFunction: 'IngestPipeline',
+    },
+    {
+      source: 'pipeline-plaintext',
+      target: 'new-pipeline-plaintext',
+      templateFunction: 'IngestPipeline',
+    },
+  ];
+  expect(rewriteIngestPipeline(input, substitutions)).toBe(input);
+});
+
+test('a yml-format pipeline with no pipeline references stays unchanged', () => {
+  const input = readFileSync(
+    path.join(__dirname, '/tests/ingest_pipelines/no_replacement.yml')
+  ).toString('utf-8');
+
+  const substitutions = [
+    {
+      source: 'pipeline-json',
+      target: 'new-pipeline-json',
+      templateFunction: 'IngestPipeline',
+    },
+    {
+      source: 'pipeline-plaintext',
+      target: 'new-pipeline-plaintext',
+      templateFunction: 'IngestPipeline',
+    },
+  ];
+  expect(rewriteIngestPipeline(input, substitutions)).toBe(input);
 });
