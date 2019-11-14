@@ -468,9 +468,17 @@ export class Authenticator {
   private calculateExpiry(
     existingSession: ProviderSession | null
   ): { expires: number | null; maxExpires: number | null } {
-    const maxExpires = existingSession
-      ? existingSession.maxExpires
-      : this.lifespan && Date.now() + this.lifespan;
+    let maxExpires = this.lifespan && Date.now() + this.lifespan;
+    if (existingSession) {
+      if (existingSession.maxExpires && this.lifespan) {
+        maxExpires = existingSession.maxExpires;
+      }
+      // otherwise, three cases:
+      // A. existing session has no max expiry, but server is configured for one -> set to now + lifespan
+      // B. existing session has a max expiry, but server is *not* configured for one -> set to null
+      // C. existing session has no max expiry, and server is *not* configured for one -> set to null
+      // all of these are already correct
+    }
     let expires = this.idleTimeout && Date.now() + this.idleTimeout;
 
     if (expires && maxExpires && expires > maxExpires) {

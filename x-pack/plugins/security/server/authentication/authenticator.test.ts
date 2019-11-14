@@ -586,6 +586,61 @@ describe('Authenticator', () => {
       expect(mockSessionStorage.clear).not.toHaveBeenCalled();
     });
 
+    it('only updates the session max expiration if it does not match the current server config.', async () => {
+      const user = mockAuthenticatedUser();
+      const state = { authorization: 'Basic xxx' };
+      const request = httpServerMock.createKibanaRequest();
+      const hr = 1000 * 60 * 60;
+
+      async function createAndUpdateSession(
+        lifespan: number | null,
+        oldMaxExpires: number | null,
+        newMaxExpires: number | null
+      ) {
+        mockOptions = getMockOptions({
+          session: {
+            idleTimeout: null,
+            lifespan,
+          },
+          authc: { providers: ['basic'], oidc: {}, saml: {} },
+        });
+
+        mockSessionStorage = sessionStorageMock.create();
+        mockSessionStorage.get.mockResolvedValue({
+          expires: 1,
+          maxExpires: oldMaxExpires,
+          state,
+          provider: 'basic',
+        });
+        mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
+
+        authenticator = new Authenticator(mockOptions);
+
+        mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+          AuthenticationResult.succeeded(user)
+        );
+
+        const authenticationResult = await authenticator.authenticate(request);
+        expect(authenticationResult.succeeded()).toBe(true);
+        expect(authenticationResult.user).toEqual(user);
+
+        expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
+        expect(mockSessionStorage.set).toHaveBeenCalledWith({
+          expires: 1,
+          maxExpires: newMaxExpires,
+          state,
+          provider: 'basic',
+        });
+        expect(mockSessionStorage.clear).not.toHaveBeenCalled();
+      }
+      // do not change max expiration
+      createAndUpdateSession(hr * 8, 1234, 1234);
+      createAndUpdateSession(null, null, null);
+      // change max expiration
+      createAndUpdateSession(null, 1234, null);
+      createAndUpdateSession(hr * 8, null, hr * 8);
+    });
+
     it('does not touch session for system API calls if authentication fails with non-401 reason.', async () => {
       const state = { authorization: 'Basic xxx' };
       const request = httpServerMock.createKibanaRequest();
