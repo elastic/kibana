@@ -32,7 +32,11 @@ jest.mock('ui/registry/field_formats', () => ({
   },
 }));
 
-describe.skip('DashboardState', function() {
+jest.mock('ui/state_management/state', () => ({
+  State: {},
+}));
+
+describe('DashboardState', function() {
   let dashboardState: DashboardStateManager;
   const savedDashboard = getSavedDashboardMock();
 

@@ -17,28 +17,23 @@
  * under the License.
  */
 
+import { InternalElasticsearchServiceSetup } from './elasticsearch';
+import { InternalHttpServiceSetup } from './http';
+import { InternalUiSettingsServiceSetup } from './ui_settings';
+import { ContextSetup } from './context';
+import { SavedObjectsServiceStart } from './saved_objects';
 
-import React from 'react';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+/** @internal */
+export interface InternalCoreSetup {
+  context: ContextSetup;
+  http: InternalHttpServiceSetup;
+  elasticsearch: InternalElasticsearchServiceSetup;
+  uiSettings: InternalUiSettingsServiceSetup;
+}
 
-jest.mock('../legacy_imports', () => ({
-  SavedObjectSaveModal: () => null
-}));
-
-jest.mock('ui/new_platform');
-
-import { DashboardSaveModal } from './save_modal';
-
-test.skip('renders DashboardSaveModal', () => {
-  const component = shallowWithI18nProvider(
-    <DashboardSaveModal
-      onSave={() => {}}
-      onClose={() => {}}
-      title="dash title"
-      description="dash description"
-      timeRestore={true}
-      showCopyOnSave={true}
-    />
-  );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
-});
+/**
+ * @internal
+ */
+export interface InternalCoreStart {
+  savedObjects: SavedObjectsServiceStart;
+}
