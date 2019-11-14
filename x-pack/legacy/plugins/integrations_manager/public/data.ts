@@ -71,12 +71,12 @@ export async function getPackageInfoByKey(pkgkey: string): Promise<PackageInfo> 
   return info;
 }
 
-export async function installPackage(pkgkey: string) {
+export async function installPackage(pkgkey: string): Promise<PackageInfo> {
   const path = getInstallPath(pkgkey);
   return _fetch(path);
 }
 
-export async function removePackage(pkgkey: string) {
+export async function removePackage(pkgkey: string): Promise<PackageInfo> {
   const path = getRemovePath(pkgkey);
   return _fetch(path);
 }
