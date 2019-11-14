@@ -27,8 +27,7 @@ import { FiltersParamEditor, FilterValue } from '../../vis/editors/default/contr
 import { createFilterFilters } from './create_filter/filters';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
-import { esQuery } from '../../../../../plugins/data/public';
-import { getQueryLog } from '../../../../../plugins/data/public';
+import { getQueryLog, esQuery } from '../../../../../plugins/data/public';
 
 const config = chrome.getUiSettingsClient();
 const storage = new Storage(window.localStorage);

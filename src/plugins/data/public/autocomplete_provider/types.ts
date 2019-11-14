@@ -18,7 +18,7 @@
  */
 
 import { AutocompleteProviderRegister } from '.';
-import { IIndexPattern, IFieldType } from '../../common/index_patterns';
+import { IIndexPattern, IFieldType } from '../../common';
 
 export type AutocompletePublicPluginSetup = Pick<
   AutocompleteProviderRegister,
