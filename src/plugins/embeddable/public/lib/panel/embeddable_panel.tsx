@@ -49,7 +49,7 @@ interface Props {
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
-  hideHeader: boolean;
+  hideHeader?: boolean;
 }
 
 interface State {
