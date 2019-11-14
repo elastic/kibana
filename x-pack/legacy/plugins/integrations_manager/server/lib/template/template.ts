@@ -9,7 +9,7 @@
  *
  * @param indexPattern String with the index pattern
  */
-export function getTemplate(indexPattern: string): object {
+export function getTemplate(indexPattern: string): Template {
   const template = getBaseTemplate();
   template.index_patterns = [indexPattern];
   return template;
