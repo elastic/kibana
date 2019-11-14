@@ -18,9 +18,7 @@
  */
 
 import { timefilter } from 'ui/timefilter';
-import { TimeRange } from 'src/plugins/data/public';
-import { Query } from 'src/legacy/core_plugins/data/public';
-import { esFilters, esQuery } from '../../../../plugins/data/public';
+import { esFilters, esQuery, TimeRange, Query } from '../../../../plugins/data/public';
 
 // @ts-ignore
 import { VegaParser } from './data_model/vega_parser';

@@ -24,7 +24,7 @@ import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
 
-import { IndexPattern, Query, FilterBar } from '../../../../../data/public';
+import { IndexPattern, FilterBar } from '../../../../../data/public';
 import { QueryBarTopRow } from '../../../query';
 import { SavedQuery, SavedQueryAttributes } from '../index';
 import { SavedQueryMeta, SaveQueryForm } from './saved_query_management/save_query_form';
@@ -37,9 +37,10 @@ import {
 } from '../../../../../../../plugins/kibana_react/public';
 import { IDataPluginServices } from '../../../types';
 import {
+  TimeRange,
+  Query,
   esFilters,
   TimeHistoryContract,
-  TimeRange,
 } from '../../../../../../../plugins/data/public';
 
 interface SearchBarInjectedDeps {

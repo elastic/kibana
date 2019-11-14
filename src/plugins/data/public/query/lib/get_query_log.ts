@@ -17,25 +17,22 @@
  * under the License.
  */
 
-import angular from 'angular';
+import { UiSettingsClientContract } from 'src/core/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { PersistedLog } from '../persisted_log';
 
-/**
- * Take text from the model and present it to the user as a string
- * @param text model value
- * @returns {string}
- */
-export function toUser(text: { [key: string]: any } | string): string {
-  if (text == null) {
-    return '';
-  }
-  if (typeof text === 'object') {
-    if (text.match_all) {
-      return '';
-    }
-    if (text.query_string) {
-      return toUser(text.query_string.query);
-    }
-    return angular.toJson(text);
-  }
-  return '' + text;
+export function getQueryLog(
+  uiSettings: UiSettingsClientContract,
+  storage: IStorageWrapper,
+  appName: string,
+  language: string
+) {
+  return new PersistedLog(
+    `typeahead:${appName}-${language}`,
+    {
+      maxLength: uiSettings.get('history:limit'),
+      filterDuplicates: true,
+    },
+    storage
+  );
 }
