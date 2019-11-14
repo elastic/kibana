@@ -12,7 +12,7 @@ import { escapeQueryValue, convertToBuildEsQuery } from '../../lib/keury';
 
 import { DataProvider, DataProvidersAnd, EXISTS_OPERATOR } from './data_providers/data_provider';
 import { BrowserFields } from '../../containers/source';
-import { Query, esQuery, esFilters } from '../../../../../../../src/plugins/data/common';
+import { Query, esQuery, esFilters } from '../../../../../../../src/plugins/data/public';
 
 const convertDateFieldToQuery = (field: string, value: string | number) =>
   `${field}: ${isNumber(value) ? value : new Date(value).valueOf()}`;

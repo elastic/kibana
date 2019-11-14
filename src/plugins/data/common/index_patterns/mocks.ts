@@ -17,29 +17,4 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { MetricAggType } from './metric_agg_type';
-import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
-
-const averageTitle = i18n.translate('common.ui.aggTypes.metrics.averageTitle', {
-  defaultMessage: 'Average',
-});
-
-export const avgMetricAgg = new MetricAggType({
-  name: METRIC_TYPES.AVG,
-  title: averageTitle,
-  makeLabel: aggConfig => {
-    return i18n.translate('common.ui.aggTypes.metrics.averageLabel', {
-      defaultMessage: 'Average {field}',
-      values: { field: aggConfig.getFieldDisplayName() },
-    });
-  },
-  params: [
-    {
-      name: 'field',
-      type: 'field',
-      filterFieldTypes: KBN_FIELD_TYPES.NUMBER,
-    },
-  ],
-});
+export * from './fields/fields.mocks.ts';

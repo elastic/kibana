@@ -19,8 +19,7 @@
 
 import { mapExists } from './map_exists';
 import { mapQueryString } from './map_query_string';
-import { esFilters } from '../../../../../common/es_query';
-import { IIndexPattern, IFieldType } from '../../../../../common/types';
+import { esFilters, IIndexPattern, IFieldType } from '../../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapExists()', () => {

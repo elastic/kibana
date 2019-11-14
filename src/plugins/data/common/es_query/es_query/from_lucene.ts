@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { map } from 'lodash';
 import { decorateQuery } from './decorate_query';
 import { luceneStringToDsl } from './lucene_string_to_dsl';
 import { Query } from '../../query/types';
@@ -26,10 +25,12 @@ export function buildQueryFromLucene(
   queryStringOptions: Record<string, any>,
   dateFormatTZ?: string
 ) {
-  const combinedQueries = map(queries, query => {
-    const queryDsl = luceneStringToDsl(query.query);
-    return decorateQuery(queryDsl, queryStringOptions, dateFormatTZ);
-  });
+  const combinedQueries =
+    queries &&
+    queries.map(query => {
+      const queryDsl = luceneStringToDsl(query.query);
+      return decorateQuery(queryDsl, queryStringOptions, dateFormatTZ);
+    });
 
   return {
     must: combinedQueries,

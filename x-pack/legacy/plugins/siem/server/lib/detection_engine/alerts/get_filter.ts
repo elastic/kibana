@@ -12,7 +12,7 @@ import {
   esQuery,
   esFilters,
   IIndexPattern,
-} from '../../../../../../../../src/plugins/data/common';
+} from '../../../../../../../../src/plugins/data/server';
 
 export const getQueryFilter = (
   query: string,

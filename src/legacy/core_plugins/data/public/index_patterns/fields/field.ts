@@ -22,7 +22,8 @@ import { fieldFormats } from 'ui/registry/field_formats';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { ObjDefine } from './obj_define';
-import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
+
+import { FieldFormat } from '../../../../../../plugins/data/public';
 // @ts-ignore
 import { shortenDottedString } from '../../../../../core_plugins/kibana/common/utils/shorten_dotted_string';
 import { IndexPattern } from '../index_patterns';

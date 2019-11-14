@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IFieldType } from '../../fields';
+import { IFieldType } from './types';
 
 export const fields: IFieldType[] = [
   {

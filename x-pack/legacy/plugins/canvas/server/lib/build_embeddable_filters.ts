@@ -7,7 +7,7 @@
 import { Filter } from '../../types';
 // @ts-ignore Untyped Local
 import { buildBoolArray } from './build_bool_array';
-import { TimeRange, esFilters } from '../../../../../../src/plugins/data/common';
+import { TimeRange, esFilters } from '../../../../../../src/plugins/data/server';
 
 export interface EmbeddableFilterInput {
   filters: esFilters.Filter[];

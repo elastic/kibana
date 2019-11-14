@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IFieldType } from '../../common';
+import { IFieldType } from '../../../../plugins/data/public';
 
 export const stubFields: IFieldType[] = [
   {

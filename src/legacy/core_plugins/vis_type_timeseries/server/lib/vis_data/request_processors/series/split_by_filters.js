@@ -18,7 +18,7 @@
  */
 
 import { set } from 'lodash';
-import { esQuery } from '../../../../../../../../plugins/data/common';
+import { esQuery } from '../../../../../../../../plugins/data/server';
 
 export function splitByFilters(req, panel, series, esQueryConfig, indexPattern) {
   return next => doc => {

@@ -48,7 +48,7 @@ const type = 'index-pattern';
  * */
 export type StaticIndexPattern = IIndexPattern;
 
-export class IndexPattern implements StaticIndexPattern {
+export class IndexPattern implements IIndexPattern {
   [key: string]: any;
 
   public id?: string;

@@ -20,8 +20,7 @@
 import { Filter, FilterMeta } from './meta_filter';
 import { getPhraseScript } from './phrase_filter';
 import { FILTERS } from './index';
-import { IIndexPattern } from '../../index_patterns';
-import { IFieldType } from '../../fields';
+import { IIndexPattern, IFieldType } from '../../index_patterns';
 
 export type PhrasesFilterMeta = FilterMeta & {
   params: string[]; // The unformatted values

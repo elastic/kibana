@@ -24,8 +24,6 @@ import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
 
-import { TimeRange } from 'src/plugins/data/common/types';
-import { TimeHistoryContract } from 'src/plugins/data/public';
 import { IndexPattern, Query, FilterBar } from '../../../../../data/public';
 import { QueryBarTopRow } from '../../../query';
 import { SavedQuery, SavedQueryAttributes } from '../index';
@@ -38,7 +36,7 @@ import {
   KibanaReactContextValue,
 } from '../../../../../../../plugins/kibana_react/public';
 import { IDataPluginServices } from '../../../types';
-import { esFilters } from '../../../../../../../plugins/data/public';
+import { esFilters, TimeHistoryContract, TimeRange } from '../../../../../../../plugins/data/public';
 
 interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;

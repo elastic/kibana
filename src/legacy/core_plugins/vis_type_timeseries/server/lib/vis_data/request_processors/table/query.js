@@ -18,7 +18,7 @@
  */
 import { getTimerange } from '../../helpers/get_timerange';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
-import { esQuery } from '../../../../../../../../plugins/data/common';
+import { esQuery } from '../../../../../../../../plugins/data/server';
 
 export function query(req, panel, esQueryConfig, indexPatternObject) {
   return next => doc => {

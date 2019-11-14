@@ -36,7 +36,7 @@ export function buildQueryFromKuery(
 
 function buildQuery(
   indexPattern: IIndexPattern | null,
-  queryASTs: any,
+  queryASTs: KueryNode[],
   config: Record<string, any> = {}
 ) {
   const compoundQueryAST: KueryNode = nodeTypes.function.buildNode('and', queryASTs);

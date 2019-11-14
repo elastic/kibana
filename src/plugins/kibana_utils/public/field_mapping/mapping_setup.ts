@@ -18,8 +18,8 @@
  */
 
 import { mapValues, isString } from 'lodash';
-import { ES_FIELD_TYPES } from '../../../../plugins/data/common';
 import { FieldMappingSpec, MappingObject } from './types';
+import { ES_FIELD_TYPES } from '../../../../plugins/data/common';
 
 /** @private */
 type ShorthandFieldMapObject = FieldMappingSpec | ES_FIELD_TYPES | 'json';

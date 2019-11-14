@@ -33,4 +33,7 @@ export {
 
 export * from './search';
 
+export * from '../common';
+export * from '../common/types';
+
 export { IRequestTypesMap, IResponseTypesMap } from './search';

@@ -18,8 +18,7 @@
  */
 
 import { Filter, FilterMeta } from './meta_filter';
-import { IIndexPattern } from '../../index_patterns';
-import { IFieldType } from '../../fields';
+import { IIndexPattern, IFieldType } from '../../index_patterns';
 
 export type ExistsFilterMeta = FilterMeta;
 

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IFieldType } from '../../common/fields/types';
+import { IFieldType } from '../../common';
 
 export type IGetSuggestions = (
   index: string,

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IFieldType } from '../fields';
+import { IFieldType } from './fields';
 
 export interface IIndexPattern {
   fields: IFieldType[];

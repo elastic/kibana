@@ -19,9 +19,8 @@
 
 import { each } from 'lodash';
 import { buildRangeFilter, RangeFilter } from './range_filter';
-import { getField } from '../__tests__/fields_mock';
-import { IIndexPattern } from '../../index_patterns';
-import { IFieldType } from '../../fields';
+import { getField } from '../../index_patterns/mocks';
+import { IIndexPattern, IFieldType } from '../../index_patterns';
 
 describe('Range filter builder', () => {
   let indexPattern: IIndexPattern;

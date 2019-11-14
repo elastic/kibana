@@ -19,7 +19,7 @@
 
 import { offsetTime } from '../../offset_time';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
-import { esQuery } from '../../../../../../../../plugins/data/common';
+import { esQuery } from '../../../../../../../../plugins/data/server';
 
 export function query(req, panel, series, esQueryConfig, indexPatternObject) {
   return next => doc => {

@@ -17,7 +17,7 @@ import {
 import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
 import { SearchResponse } from '../../types';
-import { esFilters } from '../../../../../../../../src/plugins/data/common';
+import { esFilters } from '../../../../../../../../src/plugins/data/server';
 
 export type PartialFilter = Partial<esFilters.Filter>;
 

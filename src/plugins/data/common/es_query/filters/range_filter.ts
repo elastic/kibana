@@ -18,8 +18,7 @@
  */
 import { map, reduce, mapValues, get, keys, pick } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
-import { IIndexPattern } from '../../index_patterns';
-import { IFieldType } from '../../fields';
+import { IIndexPattern, IFieldType } from '../../index_patterns';
 
 const OPERANDS_IN_RANGE = 2;
 

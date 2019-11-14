@@ -19,7 +19,7 @@
 
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getTimerange } from '../../helpers/get_timerange';
-import { esQuery } from '../../../../../../../../plugins/data/common';
+import { esQuery } from '../../../../../../../../plugins/data/server';
 
 export function query(req, panel, annotation, esQueryConfig, indexPattern, capabilities) {
   return next => doc => {

@@ -20,7 +20,7 @@
 import { buildQueryFromFilters } from './from_filters';
 import { IIndexPattern } from '../../index_patterns';
 import { ExistsFilter, Filter, MatchAllFilter } from '../filters';
-import { fields } from '../__tests__/fields_mock';
+import { fields } from '../../index_patterns/mocks';
 
 describe('build query', () => {
   const indexPattern: IIndexPattern = ({

@@ -23,7 +23,7 @@ import {
   esFilters,
   IIndexPattern,
   Query,
-} from '../../../../../../../../src/plugins/data/common';
+} from '../../../../../../../../src/plugins/data/server';
 
 const getEsQueryConfig = async (config: any) => {
   const configs = await Promise.all([

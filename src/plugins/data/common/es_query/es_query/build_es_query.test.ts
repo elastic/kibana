@@ -23,7 +23,7 @@ import { luceneStringToDsl } from './lucene_string_to_dsl';
 import { decorateQuery } from './decorate_query';
 import { IIndexPattern } from '../../index_patterns';
 import { MatchAllFilter } from '../filters';
-import { fields } from '../__tests__/fields_mock';
+import { fields } from '../../index_patterns/mocks';
 import { Query } from '../../query/types';
 
 describe('build query', () => {

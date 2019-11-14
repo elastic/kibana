@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { IIndexPattern } from '../../index_patterns';
-import { IFieldType } from '../../fields';
+import { IIndexPattern, IFieldType } from '../../index_patterns';
 import { Filter } from '../filters';
 
 /*

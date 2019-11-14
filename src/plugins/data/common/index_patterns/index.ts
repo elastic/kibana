@@ -17,4 +17,5 @@
  * under the License.
  */
 
+export * from './fields';
 export * from './types';

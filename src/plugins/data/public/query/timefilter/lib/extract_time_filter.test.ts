@@ -18,8 +18,7 @@
  */
 
 import { extractTimeFilter } from './extract_time_filter';
-import { esFilters } from '../../../../../../plugins/data/public';
-import { IIndexPattern, IFieldType } from '../../../../common/types';
+import { esFilters, IIndexPattern, IFieldType } from '../../../../common';
 
 describe('filter manager utilities', () => {
   let indexPattern: IIndexPattern;

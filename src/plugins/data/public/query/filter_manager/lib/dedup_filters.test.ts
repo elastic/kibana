@@ -18,8 +18,7 @@
  */
 
 import { dedupFilters } from './dedup_filters';
-import { esFilters } from '../../../../common/es_query';
-import { IIndexPattern, IFieldType } from '../../../../common/types';
+import { esFilters, IIndexPattern, IFieldType } from '../../../../common';
 
 describe('filter manager utilities', () => {
   let indexPattern: IIndexPattern;
