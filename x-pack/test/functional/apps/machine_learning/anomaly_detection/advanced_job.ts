@@ -206,6 +206,8 @@ export default function({ getService }: FtrProviderContext) {
       },
     },
     {
+      // TODO: fix and re-enable the categorization test as soon as Kibana and ES are in sync again
+      skipTest: true,
       suiteTitle: 'with categorization detector and default datafeed settings',
       jobSource: 'ecommerce',
       jobId: `ec_advanced_2_${Date.now()}`,
@@ -274,8 +276,7 @@ export default function({ getService }: FtrProviderContext) {
     },
   ];
 
-  // failing test in 7.5, see #50010
-  describe.skip('advanced job', function() {
+  describe('advanced job', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/ecommerce');
@@ -286,7 +287,9 @@ export default function({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
     });
 
-    for (const testData of testDataList) {
+    for (const testData of testDataList.filter(td => {
+      return td.skipTest !== true;
+    })) {
       describe(`${testData.suiteTitle}`, function() {
         it('job creation loads the job management page', async () => {
           await ml.navigation.navigateToMl();

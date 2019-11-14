@@ -84,9 +84,22 @@ interface APMOptions {
   includeLegacyData: boolean;
 }
 
-export function getESClient(req: Legacy.Request) {
+interface ClientCreateOptions {
+  clientAsInternalUser?: boolean;
+}
+
+export type ESClient = ReturnType<typeof getESClient>;
+
+export function getESClient(
+  req: Legacy.Request,
+  { clientAsInternalUser = false }: ClientCreateOptions = {}
+) {
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
   const query = req.query as StringMap;
+
+  const callMethod = clientAsInternalUser
+    ? cluster.callWithInternalUser.bind(cluster)
+    : cluster.callWithRequest.bind(cluster, req);
 
   return {
     search: async <Hits = unknown, U extends SearchParams = {}>(
@@ -110,22 +123,18 @@ export function getESClient(req: Legacy.Request) {
         console.log(JSON.stringify(nextParams.body, null, 4));
       }
 
-      return (cluster.callWithRequest(
-        req,
-        'search',
-        nextParams
-      ) as unknown) as Promise<
+      return (callMethod('search', nextParams) as unknown) as Promise<
         AggregationSearchResponseWithTotalHitsAsObject<Hits, U>
       >;
     },
     index: <Body>(params: IndexDocumentParams<Body>) => {
-      return cluster.callWithRequest(req, 'index', params);
+      return callMethod('index', params);
     },
     delete: (params: IndicesDeleteParams) => {
-      return cluster.callWithRequest(req, 'delete', params);
+      return callMethod('delete', params);
     },
     indicesCreate: (params: IndicesCreateParams) => {
-      return cluster.callWithRequest(req, 'indices.create', params);
+      return callMethod('indices.create', params);
     }
   };
 }
