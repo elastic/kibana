@@ -5,7 +5,6 @@
  */
 
 import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../../src/core/server';
-// TODO, require from licensing plugin root once https://github.com/elastic/kibana/pull/44922 is merged.
 import { LicenseCheck, LICENSE_CHECK_STATE } from '../../../../../licensing/server';
 import { RawKibanaPrivileges } from '../../../../common/model';
 import { defineGetPrivilegesRoutes } from './get';
