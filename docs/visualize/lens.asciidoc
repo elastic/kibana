@@ -3,154 +3,115 @@
 
 beta[]
 
-*Lens* provides you with a simple and fast way to create visualizations that allow you to easily make sense of your Elasticsearch data.
+To easily make sense of your Elasticsearch data, *Lens* provides you with a simple and fast way to create basic visualizations.
 
 With Lens, you can:
 
-* Easily change the search query that retrieves the data you want to display.
-* Use aggregations to plot any data set, no matter how large.
-* Focus the data you want to display with searches and filters.
-* Easily change the type of visualization that you want to use to display your data.
+* Get a quick summary of each data field to help you decide exactly what you want to display.
+
+* Quickly build visualizations by simply dragging and dropping data fields.
+
+* Easily change the visualization type by selecting the automatically generated visualization suggestions.
 
 [float]
 [[choose-lens-visualization]]
 === Types of Lens visualizations
 
-Lens comes with these types of visualizations:
+Lens comes with several types of basic visualizations.
 
-Bar:: Display numerical comparisons across multiple categories. In bar charts,
+[cols="^,<v,^,<v"]
+|===
+|*Bar*
+|image:images/lens_bar_chart.png[Lens bar chart]
+Display numerical comparisons across multiple categories. In bar charts,
 data is displayed using a number of bars that represent a particular category.
-+
-[role="screenshot"]
-image::images/lens_bar_chart.png[Lens bar chart]
 
-Stacked Bar:: Display numerical comparisons across multiple categories, with the
+|*Stacked Bar*
+|image:images/lens_stacked_bar_chart.png[Lens stacked bar chart]
+Display numerical comparisons across multiple categories, with the
 added ability to compare the different parts of a particular category. In
 stacked bar charts, each bar represents a particular category, and the segments
 of the bar represent the subcategories of that bar.
-+
-[role="screenshot"]
-image::images/lens_stacked_bar_chart.png[Lens stacked bar chart]
 
-Line:: Display data trends over time. In line charts, data is displayed as a
+|*Line*
+|image:images/lens_line_chart.png[Lens line chart]
+Display data trends over time. In line charts, data is displayed as a
 series of data points that are connected by line segments.
-+
-[role="screenshot"]
-image::images/lens_line_chart.png[Lens line chart]
 
-Area:: Display one or more quantities over time. In area charts, points are
+|*Area*
+|image:images/lens_area.png[Lens area chart]
+Display one or more quantities over time. In area charts, points are
 plotted and connected by lines to show the value of a quantity at several
 different times.
-+
-[role="screenshot"]
-image::images/lens_area.png[Lens area chart]
 
-Stacked Area:: Display the evolution of numeric variables for several
+|*Stacked Area*
+|image:images/lens_stacked_area.png[Lens stacked area chart]
+Display the evolution of numeric variables for several
 categories stacked on top of each other.
-+
-[role="screenshot"]
-image::images/lens_stacked_area.png[Lens stacked area chart]
 
-<<<<<<< HEAD
-Data Table:: Display your raw data or aggregation results in a tabular format.
-+
-[role="screenshot"]
-image::images/lens_data_table.png[Lens data table]
-
-Metric:: Display the latest number in a data series.
-+
-=======
-Data Table::
-
+|*Data Table*
+|image:images/lens_data_table.png[Lens data table]
 Display your raw data or aggregation results in a tabular format.
-+
-[role="screenshot"]
-image::images/lens_data_table.png[Lens data table]
 
-Metric::
-
+|*Metric*
+|image:images/lens_metric.png[Lens metric]
 Display the latest number in a data series.
-<<<<<<< HEAD
 
->>>>>>> a0e76bc82c... Comments from Gail pt 2
-=======
-+
->>>>>>> d4160dc607... Fixes
-[role="screenshot"]
-image::images/lens_metric.png[Lens metric]
+|
+|
+
+|===
+
+[float]
+[[lens-aggregation-types]]
+=== Aggregations
+
 
 [float]
 [[create-lens-visualization]]
-=== Create Lens visualizations
+=== Build visualizations
 
-To create your Lens visualizations, use the visualization builder.
+When you build Lens visualizations, you add data fields from the left column. The data fields that appear are dependent on the time filter.
 
-[float]
-[[choose-your-data]]
-==== Choose the data you want to display
+There are two ways you can add data:
 
-<<<<<<< HEAD
-The available data fields appear in the editor on the left. If you want to use a different search query to retrieve the data for your visualization, click *change* next to the index name, then select the index.
-[role="screenshot"]
-image::images/lens_change_index.gif[Change index]
+* Drag and drop the data fields onto the visualization builder pane.
 
-To see the top values of a field, click *i* next to the field.
-[role="screenshot"]
-image::images/lens_top_values.gif[Top values]
-=======
-The data that you can add to the visualization builder appears in the left column.
+* Drag and drop the data fields onto the *X-axis* and *Y-axis* fields in the right column.
 
-. If you want to use a different index pattern, click the dropdown next to the index name, then select the index.
->>>>>>> a0e76bc82c... Comments from Gail pt 2
+As you drag and drop different data fields, Lens automatically builds the visualization that best displays your data.
 
-To narrow the data fields that are displayed:
+TIP: Drag and drop capabilities are available only when Lens is able to build a visualization for that data.
 
-* Enter the field name in *Search for fields*.
-
-<<<<<<< HEAD
-* Click *Filter by type*, then click the filter.
-+
-[role="screenshot"]
-image::images/lens_fields_filtered.png[Fields filtered]
-=======
-* Click *Filter by type*, then click the filter
-
-. To see the top values of a field, click *i* next to the field.
->>>>>>> a0e76bc82c... Comments from Gail pt 2
+If at any time you'd like to update the data that appears, click *Refresh*.
 
 [float]
-[[add-data]]
-==== Add the data you want to display
-
-<<<<<<< HEAD
-Add your data to the Lens visualization builder by simply dragging and dropping the data fields to the *Create a visualization* pane. Lens does the hard work for you and figures out the data to apply to the x- and y-axises.
-=======
-Add your data to the Lens visualization builder by simply dragging and dropping the data fields to the visualization builder pane. Lens does the hard work for you and figures out which data to apply to the x- and y-axises.
->>>>>>> a0e76bc82c... Comments from Gail pt 2
-
-[role="screenshot"]
-image::images/lens_data_fields.gif[Data fields]
-
-You can also drag and drop the data fields to the *X-axis* and *Y-axis* fields.
-
-<<<<<<< HEAD
-To refresh the data that is displayed, click *Refresh*.
-=======
-To refresh the data, click *Refresh*.
->>>>>>> a0e76bc82c... Comments from Gail pt 2
-
-[float]
-[[change-visualization-type]]
+[[change-the-visualization-type]]
 ==== Change the visualization type
 
-When you add your data, Lens creates _Suggestions_, which are automatically generated visualizations that best display your data.
+With Lens, you are no longer required to build each visualization from scratch. With smart suggestions, Lens automatically creates alternative visualizations that already include your selected data fields.
 
-To quickly see the visualization that best displays your data, click on each of the *Suggestions*.
+To view your data in another type of visualization, click the *Suggestions*.
 
-[role="screenshot"]
-image::images/lens_suggestions.gif[Suggestions]
+[float]
+[[view-data-summaries]]
+==== View data information
 
-To manually change the visualization type, click *change* in the editor on the right, then select the visualization.
+To help you decide exactly the data you want to display, get a quick summary of each data field.
+
+To view the data information, navigate to a data field, then click *i*.
+
+[float]
+[[apply-lens-filters]]
+==== Filter the data
+
+To narrow the data fields you see in the left column, you can apply filters.
+
+There are two ways you can filter the data fields:
+
+* In *Search for fields*, enter the field name.
+
+* Click *Filter by type*, then click the filter you want to apply.
 
 [float]
 [[lens-tutorial]]
@@ -170,13 +131,11 @@ For this tutorial, you'll need to add the <<add-sample-data, Sample flight data>
 
 Create the visualization, then add your data.
 
-. Open *Visualize*.
-
-. Click *Create visualization*.
+. Open *Visualize*, then click *Create visualization*.
 
 . On the *New Visualization* window, click *Lens*.
 
-. Make sure that the *kibana_sample_data_flights* data appears in the left column.
+. In the left column, make sure that the *kibana_sample_data_flights* data appears.
 
 . Drag and drop the *AvgTicketPrice* data field to the visualization builder pane.
 +
@@ -208,7 +167,7 @@ image::images/lens_tutorial_2.png[Lens tutorial]
 [[change-lens-visualization-type]]
 ==== Change the visualization type
 
-To find the visualization that best displays your data, click on each of the *Suggestions*.
+To find the visualization that best displays the flight data, click on each of the *Suggestions*.
 
 [role="screenshot"]
 image::images/lens_tutorial_3.gif[Lens tutorial]
