@@ -14,7 +14,8 @@ export function rewriteIngestPipeline(
 ): string {
   substitutions.forEach(sub => {
     const { source, target, templateFunction } = sub;
-    // This reimplements the golang text/template expression {{TemplateFunction 'some-param'}}
+    // This fakes the use of the golang text/template expression {{SomeTemplateFunction 'some-param'}}
+    // cf. https://github.com/elastic/beats/blob/master/filebeat/fileset/fileset.go#L294
     const match = `{{\\s?${templateFunction}\\s+'${source}'\\s?}}`;
     const regex = new RegExp(match);
     pipeline = pipeline.replace(regex, target);
