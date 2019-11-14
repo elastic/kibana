@@ -247,45 +247,49 @@ Array [
               <div
                 class="euiSwitch"
               >
-                <input
-                  class="euiSwitch__input"
+                <button
+                  aria-checked="false"
+                  aria-describedby="mockId"
+                  class="euiSwitch__button"
                   data-test-subj="remoteClusterFormSkipUnavailableFormToggle"
                   id="mockId"
-                  type="checkbox"
-                />
-                <span
-                  class="euiSwitch__body"
+                  role="switch"
+                  type="button"
                 >
                   <span
-                    class="euiSwitch__thumb"
-                  />
-                  <span
-                    class="euiSwitch__track"
+                    class="euiSwitch__body"
                   >
-                    <svg
-                      class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
-                      focusable="false"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      width="16"
-                      xmlns="http://www.w3.org/2000/svg"
+                    <span
+                      class="euiSwitch__thumb"
                     />
-                    <svg
-                      class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
-                      focusable="false"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      width="16"
-                      xmlns="http://www.w3.org/2000/svg"
-                    />
+                    <span
+                      class="euiSwitch__track"
+                    >
+                      <svg
+                        class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
+                        focusable="false"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                      <svg
+                        class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
+                        focusable="false"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                    </span>
                   </span>
-                </span>
-                <label
+                </button>
+                <p
                   class="euiSwitch__label"
-                  for="mockId"
+                  id="mockId"
                 >
                   Skip if unavailable
-                </label>
+                </p>
               </div>
             </div>
           </div>
@@ -502,45 +506,49 @@ Array [
       <div
         class="euiSwitch"
       >
-        <input
-          class="euiSwitch__input"
+        <button
+          aria-checked="false"
+          aria-describedby="mockId"
+          class="euiSwitch__button"
           data-test-subj="remoteClusterFormSkipUnavailableFormToggle"
           id="mockId"
-          type="checkbox"
-        />
-        <span
-          class="euiSwitch__body"
+          role="switch"
+          type="button"
         >
           <span
-            class="euiSwitch__thumb"
-          />
-          <span
-            class="euiSwitch__track"
+            class="euiSwitch__body"
           >
-            <svg
-              class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
-              focusable="false"
-              height="16"
-              viewBox="0 0 16 16"
-              width="16"
-              xmlns="http://www.w3.org/2000/svg"
+            <span
+              class="euiSwitch__thumb"
             />
-            <svg
-              class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
-              focusable="false"
-              height="16"
-              viewBox="0 0 16 16"
-              width="16"
-              xmlns="http://www.w3.org/2000/svg"
-            />
+            <span
+              class="euiSwitch__track"
+            >
+              <svg
+                class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
+                focusable="false"
+                height="16"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <svg
+                class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
+                focusable="false"
+                height="16"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              />
+            </span>
           </span>
-        </span>
-        <label
+        </button>
+        <p
           class="euiSwitch__label"
-          for="mockId"
+          id="mockId"
         >
           Skip if unavailable
-        </label>
+        </p>
       </div>
     </div>
   </div>,
