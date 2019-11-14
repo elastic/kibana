@@ -310,14 +310,13 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async disableApplyGlobalQuery() {
-      const element = await testSubjects.find('mapLayerPanelApplyGlobalQueryCheckbox');
-      const isSelected = await element.isSelected();
-      if(isSelected) {
+      const isSelected = await testSubjects.getAttribute('mapLayerPanelApplyGlobalQueryCheckbox', 'aria-checked');
+      if(isSelected === 'true') {
         await retry.try(async () => {
           log.debug(`disabling applyGlobalQuery`);
           await testSubjects.click('mapLayerPanelApplyGlobalQueryCheckbox');
-          const isStillSelected = await element.isSelected();
-          if (isStillSelected) {
+          const isStillSelected = await testSubjects.getAttribute('mapLayerPanelApplyGlobalQueryCheckbox', 'aria-checked');
+          if (isStillSelected === 'true') {
             throw new Error('applyGlobalQuery not disabled');
           }
         });

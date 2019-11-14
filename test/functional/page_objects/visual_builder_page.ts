@@ -305,9 +305,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async getRhythmChartLegendValue(nth = 0) {
       await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-      const metricValue = (await find.allByCssSelector(
-        `.echLegendItem .echLegendItem__displayValue`
-      ))[nth];
+      const metricValue = (
+        await find.allByCssSelector(`.echLegendItem .echLegendItem__displayValue`)
+      )[nth];
       await metricValue.moveMouseTo();
       return await metricValue.getVisibleText();
     }
