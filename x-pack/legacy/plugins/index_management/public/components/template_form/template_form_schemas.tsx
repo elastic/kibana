@@ -24,7 +24,13 @@ import {
   INVALID_TEMPLATE_NAME_CHARS,
 } from '../../../common/constants';
 
-const { emptyField, containsCharsField, startsWithField, indexPatternField } = fieldValidators;
+const {
+  emptyField,
+  containsCharsField,
+  startsWithField,
+  indexPatternField,
+  lowerCaseStringField,
+} = fieldValidators;
 const { toInt } = fieldFormatters;
 const indexPatternInvalidCharacters = INVALID_INDEX_PATTERN_CHARS.join(' ');
 
@@ -82,6 +88,13 @@ export const schemas: Record<string, FormSchema> = {
                 }
               ),
           }),
+        },
+        {
+          validator: lowerCaseStringField(
+            i18n.translate('xpack.idxMgmt.templateValidation.templateNameLowerCaseRequiredError', {
+              defaultMessage: 'The template name must be in lowercase.',
+            })
+          ),
         },
       ],
     },

@@ -17,12 +17,23 @@
  * under the License.
  */
 
-export * from './contains_chars';
-export * from './ends_with';
-export * from './has_max_length';
-export * from './has_min_length';
-export * from './is_empty';
-export * from './is_url';
-export * from './starts_with';
-export * from './is_json';
-export * from './is_lowercase';
+import { ValidationFunc } from '../../hook_form_lib';
+import { isLowerCaseString } from '../../../validators/string';
+import { ERROR_CODE } from './types';
+
+export const lowerCaseStringField = (message: string) => (
+  ...args: Parameters<ValidationFunc>
+): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
+  const [{ value }] = args;
+
+  if (typeof value !== 'string') {
+    return;
+  }
+
+  if (!isLowerCaseString(value)) {
+    return {
+      code: 'ERR_LOWERCASE_STRING',
+      message,
+    };
+  }
+};

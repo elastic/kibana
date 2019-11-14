@@ -17,12 +17,4 @@
  * under the License.
  */
 
-export * from './contains_chars';
-export * from './ends_with';
-export * from './has_max_length';
-export * from './has_min_length';
-export * from './is_empty';
-export * from './is_url';
-export * from './starts_with';
-export * from './is_json';
-export * from './is_lowercase';
+export const isLowerCaseString = (value: string) => value.toLowerCase() === value;

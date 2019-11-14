@@ -36,7 +36,7 @@ import { UpdateFieldProvider, UpdateFieldFunc } from './update_field_provider';
 import { EditFieldHeaderForm } from './edit_field_header_form';
 import { EditFieldSection } from './edit_field_section';
 
-const limitStringLength = (text: string, limit = 19): string => {
+const limitStringLength = (text: string, limit = 18): string => {
   if (text.length <= limit) {
     return text;
   }
