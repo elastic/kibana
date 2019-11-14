@@ -128,7 +128,7 @@ export const EditFieldFormRow = React.memo(
                 )}
               </EuiFlexItem>
             )}
-            {(isContentVisible || isChildrenFunction) && (
+            {((isContentVisible && children !== undefined) || isChildrenFunction) && (
               <EuiFlexItem
                 style={{
                   paddingLeft: withToggle === false ? PADDING_LEFT_NO_TOGGLE : undefined,

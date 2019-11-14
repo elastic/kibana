@@ -341,7 +341,7 @@ export const TextType = React.memo(({ field }: Props) => {
                                 'xpack.idxMgmt.mappingsEditor.positionsErrorMessage',
                                 {
                                   defaultMessage:
-                                    'You need to set the index options to "positions" or "offsets" in order to be able to change the position increment gap.',
+                                    'You need to set the index options (under the "Searchable" toggle) to "positions" or "offsets" in order to be able to change the position increment gap.',
                                 }
                               )}
                             </p>
