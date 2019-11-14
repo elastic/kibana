@@ -18,9 +18,12 @@
  */
 
 import { get, omit } from 'lodash';
+// @ts-ignore
 import { getClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
+// @ts-ignore
 import { getKibana, handleKibanaStats } from './get_kibana';
+import { StatsGetter } from '../collection_manager';
 
 /**
  * Handle the separate local calls by combining them into a single object response that looks like the
@@ -30,9 +33,9 @@ import { getKibana, handleKibanaStats } from './get_kibana';
  * @param {Object} clusterStats Cluster stats (GET /_cluster/stats)
  * @return {Object} A combined object containing the different responses.
  */
-export function handleLocalStats(server, clusterInfo, clusterStats, kibana) {
+export function handleLocalStats(server: any, clusterInfo: any, clusterStats: any, kibana: any) {
   return {
-    timestamp: (new Date()).toISOString(),
+    timestamp: new Date().toISOString(),
     cluster_uuid: get(clusterInfo, 'cluster_uuid'),
     cluster_name: get(clusterInfo, 'cluster_name'),
     version: get(clusterInfo, 'version.number'),
@@ -40,7 +43,7 @@ export function handleLocalStats(server, clusterInfo, clusterStats, kibana) {
     collection: 'local',
     stack_stats: {
       kibana: handleKibanaStats(server, kibana),
-    }
+    },
   };
 }
 
@@ -51,12 +54,16 @@ export function handleLocalStats(server, clusterInfo, clusterStats, kibana) {
  * @param {function} callCluster The callWithInternalUser handler (exposed for testing)
  * @return {Promise} The object containing the current Elasticsearch cluster's telemetry.
  */
-export async function getLocalStats({ server, callCluster }) {
-  const [ clusterInfo, clusterStats, kibana ] = await Promise.all([
-    getClusterInfo(callCluster),  // cluster info
-    getClusterStats(callCluster), // cluster stats (not to be confused with cluster _state_)
-    getKibana(server, callCluster),
-  ]);
-
-  return handleLocalStats(server, clusterInfo, clusterStats, kibana);
-}
+export const getLocalStats: StatsGetter = async (clustersDetails, config) => {
+  const { server, callCluster } = config;
+  return await Promise.all(
+    clustersDetails.map(async clustersDetail => {
+      const [clusterInfo, clusterStats, kibana] = await Promise.all([
+        getClusterInfo(callCluster), // cluster info
+        getClusterStats(callCluster), // cluster stats (not to be confused with cluster _state_)
+        getKibana(server, callCluster),
+      ]);
+      return handleLocalStats(server, clusterInfo, clusterStats, kibana);
+    })
+  );
+};
