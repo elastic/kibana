@@ -20,7 +20,7 @@ Before you upgrade {kib}:
 
 * Consult the <<breaking-changes,breaking changes>>.
 * Before you upgrade production servers, test the upgrades in a dev environment.
-* Backup your data with {es} {ref}/modules-snapshots.html[snapshots].
+* Back up your data with {es} {ref}/modules-snapshots.html[snapshots].
   To roll back to an earlier version, you **must** have a backup of your data.
 * If you are using custom plugins, check that a compatible version is
   available. 
