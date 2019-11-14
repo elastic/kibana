@@ -15,6 +15,7 @@ import {
   InfraNodeType,
   InfraSnapshotGroupbyInput,
 } from '../../graphql/types';
+import { findInventoryModel } from '../../../common/inventory_models';
 
 interface Props {
   nodeType: InfraNodeType;
@@ -32,7 +33,10 @@ export const WaffleInventorySwitcher = (props: Props) => {
       closePopover();
       props.changeNodeType(nodeType);
       props.changeGroupBy([]);
-      props.changeMetric({ type: InfraSnapshotMetricType.cpu });
+      const inventoryModel = findInventoryModel(nodeType);
+      props.changeMetric({
+        type: inventoryModel.metrics.defaultSnapshot as InfraSnapshotMetricType,
+      });
     },
     [props.changeGroupBy, props.changeNodeType, props.changeMetric]
   );
