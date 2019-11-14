@@ -38,7 +38,7 @@ export const testServerTask = async () => {
         })
       )
       .on('error', reject)
-      .on('end', resolve);
+      .on('_result', resolve); // This is what gulp-mocha emits after everything is complete
   });
 };
 
