@@ -345,17 +345,20 @@ Array [
         .pipe(toArray())
         .toPromise();
 
-      start.setHelpExtension(() => () => undefined);
+      start.setHelpExtension({ appName: 'App name', content: () => () => undefined });
       start.setHelpExtension(undefined);
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
-Array [
-  undefined,
-  [Function],
-  undefined,
-]
-`);
+              Array [
+                undefined,
+                Object {
+                  "appName": "App name",
+                  "content": [Function],
+                },
+                undefined,
+              ]
+            `);
     });
   });
 });
