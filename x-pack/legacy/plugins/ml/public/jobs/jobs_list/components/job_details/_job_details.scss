@@ -68,19 +68,20 @@
   .json-textarea {
     height: 500px;
   }
+}
 
-  .job-messages-table {
-    max-height: 500px;
-    overflow: auto;
+.job-messages-table {
+  max-height: 500px;
+  overflow: auto;
+  text-align: left;
 
-    tr:last-child {
-      td {
-        border-bottom: none;
-      }
+  tr:last-child {
+    td {
+      border-bottom: none;
     }
+  }
 
-    .euiTableRowCell {
-      background-color: $euiColorEmptyShade;
-    }
+  .euiTableRowCell {
+    background-color: $euiColorEmptyShade;
   }
 }
