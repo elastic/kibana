@@ -10,6 +10,7 @@ import React, { Component, ReactElement } from 'react';
 import { KFetchError } from 'ui/kfetch/kfetch_error';
 import { toastNotifications } from 'ui/notify';
 import url from 'url';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { reportingClient } from '../lib/reporting_client';
 
 interface Props {
@@ -209,7 +210,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
             },
             { objectType: this.props.objectType }
           ),
-          text: (
+          text: toMountPoint(
             <FormattedMessage
               id="xpack.reporting.panelContent.successfullyQueuedReportNotificationDescription"
               defaultMessage="Track its progress in Management"
@@ -229,7 +230,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
               },
               { objectType: this.props.objectType }
             ),
-            text: (
+            text: toMountPoint(
               <FormattedMessage
                 id="xpack.reporting.panelContent.whatCanBeExportedWarningDescription"
                 defaultMessage="Please save your work first"
@@ -256,7 +257,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
             id: 'xpack.reporting.panelContent.notification.reportingErrorTitle',
             defaultMessage: 'Reporting error',
           }),
-          text: kfetchError.message || defaultMessage,
+          text: toMountPoint(kfetchError.message || defaultMessage),
           'data-test-subj': 'queueReportError',
         });
       });

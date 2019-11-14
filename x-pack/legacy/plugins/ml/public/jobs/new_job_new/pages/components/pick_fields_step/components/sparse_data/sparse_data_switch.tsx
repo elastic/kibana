@@ -5,6 +5,7 @@
  */
 
 import React, { FC, useState, useContext, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiSwitch } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
@@ -43,6 +44,10 @@ export const SparseDataSwitch: FC = () => {
         checked={sparseData}
         onChange={toggleSparseData}
         data-test-subj="mlJobWizardSwitchSparseData"
+        showLabel={false}
+        label={i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.sparseData.title', {
+          defaultMessage: 'Sparse data',
+        })}
       />
     </Description>
   );

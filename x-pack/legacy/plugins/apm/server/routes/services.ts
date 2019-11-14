@@ -6,7 +6,10 @@
 
 import * as t from 'io-ts';
 import { AgentName } from '../../typings/es_schemas/ui/fields/Agent';
-import { createApmTelementry, storeApmTelemetry } from '../lib/apm_telemetry';
+import {
+  createApmTelementry,
+  storeApmServicesTelemetry
+} from '../lib/apm_telemetry';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServices } from '../lib/services/get_services';
@@ -16,7 +19,7 @@ import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getServiceMap } from '../lib/services/map';
 
-export const servicesRoute = createRoute(core => ({
+export const servicesRoute = createRoute((core, { server }) => ({
   path: '/api/apm/services',
   params: {
     query: t.intersection([uiFiltersRt, rangeRt])
@@ -24,14 +27,13 @@ export const servicesRoute = createRoute(core => ({
   handler: async req => {
     const setup = await setupRequest(req);
     const services = await getServices(setup);
-    const { server } = core.http;
 
     // Store telemetry data derived from services
     const agentNames = services.items.map(
       ({ agentName }) => agentName as AgentName
     );
     const apmTelemetry = createApmTelementry(agentNames);
-    storeApmTelemetry(server, apmTelemetry);
+    storeApmServicesTelemetry(server, apmTelemetry);
 
     return services;
   }
