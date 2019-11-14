@@ -85,8 +85,8 @@ describe('<Settings />', () => {
 
     // Click the Hide Toolbar switch
     portal(wrapper)
-      .find('input[data-test-subj="hideToolbarSwitch"]')
-      .simulate('change');
+      .find('button[data-test-subj="hideToolbarSwitch"]')
+      .simulate('click');
 
     // Wait for the animation and DOM update
     await tick(20);
