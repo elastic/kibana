@@ -4,15 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {Client} from 'elasticsearch';
+
+
 /**
  * Calls the given esClient, creates and index and sets it as write index on the given alias.
  */
-export function createIndexWithAlias(esClient: object, indexName: string, aliasName: string) {
-  // TODO: replace esClient by an actual client
-  const query = '/' + indexName;
-  const method = 'PUT';
+export async function createIndexWithAlias(esClient: Client, indexName: string, aliasName: string) {
   const body = getIndexWithWithAlias(indexName, aliasName);
   // TODO: API request go create it
+
+  client.indices.create({
+    index: indexName,
+    body: body,
+  });
+
 }
 
 export function getIndexWithWithAlias(aliasName: string) {
