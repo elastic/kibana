@@ -17,6 +17,24 @@
  * under the License.
  */
 
-export * from './use_observable';
-export * from './use_unmount';
-export * from './react_mount';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { I18nProvider } from '@kbn/i18n/react';
+import { MountPoint } from 'kibana/public';
+
+/**
+ * MountPoint converter for react nodes.
+ *
+ * @param node to get a mount point for
+ */
+export const toMountPoint = (node: React.ReactNode): MountPoint => {
+  const mount = (element: HTMLElement) => {
+    ReactDOM.render(<I18nProvider>{node}</I18nProvider>, element);
+    return () => ReactDOM.unmountComponentAtNode(element);
+  };
+  // only used for tests and snapshots serialization
+  if (process.env.NODE_ENV !== 'production') {
+    mount.__reactMount__ = node;
+  }
+  return mount;
+};
