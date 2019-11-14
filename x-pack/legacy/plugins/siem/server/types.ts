@@ -21,7 +21,6 @@ export interface ServerFacade {
     alerting?: Legacy.Server['plugins']['alerting'];
     xpack_main: Legacy.Server['plugins']['xpack_main'];
   };
-  register: Legacy.Server['register'];
   route: Legacy.Server['route'];
   savedObjects: Legacy.Server['savedObjects'];
 }

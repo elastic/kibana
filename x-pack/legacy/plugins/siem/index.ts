@@ -130,7 +130,6 @@ export const siem = (kibana: any) => {
         injectUiAppVars,
         newPlatform,
         plugins,
-        register,
         route,
         savedObjects,
       } = server;
@@ -147,7 +146,6 @@ export const siem = (kibana: any) => {
           env: newPlatform.env,
         },
         plugins: { alerting: plugins.alerting, xpack_main: plugins.xpack_main },
-        register: register.bind(server),
         route: route.bind(server),
         savedObjects,
       };
