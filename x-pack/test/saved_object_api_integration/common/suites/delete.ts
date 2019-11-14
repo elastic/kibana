@@ -19,6 +19,7 @@ interface DeleteTests {
   spaceAware: DeleteTest;
   notSpaceAware: DeleteTest;
   hiddenType: DeleteTest;
+  sharedType: DeleteTest;
   invalidId: DeleteTest;
 }
 
@@ -66,6 +67,10 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     [key: string]: any;
   }) => {
     createExpectNotFound(spaceId, 'dashboard', `not-a-real-id`)(resp);
+  };
+
+  const expectSharedTypeNotFound = (resp: { [key: string]: any }) => {
+    createExpectNotFound(DEFAULT_SPACE_ID, 'sharedtype', `default_and_space_1`)(resp);
   };
 
   const expectEmpty = (resp: { [key: string]: any }) => {
@@ -119,6 +124,13 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           .expect(tests.hiddenType.statusCode)
           .then(tests.hiddenType.response));
 
+      it(`should return ${tests.sharedType.statusCode} when deleting a sharedtype doc`, async () =>
+        await supertest
+          .delete(`${getUrlPrefix(spaceId)}/api/saved_objects/sharedtype/default_and_space_1`)
+          .auth(user.username, user.password)
+          .expect(tests.sharedType.statusCode)
+          .then(tests.sharedType.response));
+
       it(`should return ${tests.invalidId.statusCode} when deleting an unknown doc`, async () =>
         await supertest
           .delete(
@@ -146,5 +158,6 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expectRbacNotSpaceAwareForbidden,
     expectRbacSpaceAwareForbidden,
     expectRbacHiddenTypeForbidden,
+    expectSharedTypeNotFound,
   };
 }

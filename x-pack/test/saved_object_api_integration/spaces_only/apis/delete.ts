@@ -19,6 +19,7 @@ export default function({ getService }: FtrProviderContext) {
       deleteTest,
       expectEmpty,
       expectGenericNotFound,
+      expectSharedTypeNotFound,
     } = deleteTestSuiteFactory(esArchiver, supertest);
 
     deleteTest(`in the default space`, {
@@ -35,6 +36,10 @@ export default function({ getService }: FtrProviderContext) {
         hiddenType: {
           statusCode: 404,
           response: expectGenericNotFound,
+        },
+        sharedType: {
+          statusCode: 200,
+          response: expectEmpty,
         },
         invalidId: {
           statusCode: 404,
@@ -58,6 +63,10 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 404,
           response: expectGenericNotFound,
         },
+        sharedType: {
+          statusCode: 200,
+          response: expectEmpty,
+        },
         invalidId: {
           statusCode: 404,
           response: createExpectUnknownDocNotFound(SPACES.SPACE_1.spaceId),
@@ -65,13 +74,13 @@ export default function({ getService }: FtrProviderContext) {
       },
     });
 
-    deleteTest(`in another space (space_2)`, {
-      spaceId: SPACES.SPACE_1.spaceId,
-      otherSpaceId: SPACES.SPACE_2.spaceId,
+    deleteTest(`in another space (in space_2 deleting object in space_1)`, {
+      spaceId: SPACES.SPACE_2.spaceId,
+      otherSpaceId: SPACES.SPACE_1.spaceId,
       tests: {
         spaceAware: {
           statusCode: 404,
-          response: createExpectSpaceAwareNotFound(SPACES.SPACE_2.spaceId),
+          response: createExpectSpaceAwareNotFound(SPACES.SPACE_1.spaceId),
         },
         notSpaceAware: {
           statusCode: 200,
@@ -81,9 +90,13 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 404,
           response: expectGenericNotFound,
         },
+        sharedType: {
+          statusCode: 404,
+          response: expectSharedTypeNotFound,
+        },
         invalidId: {
           statusCode: 404,
-          response: createExpectUnknownDocNotFound(SPACES.SPACE_2.spaceId),
+          response: createExpectUnknownDocNotFound(SPACES.SPACE_1.spaceId),
         },
       },
     });
