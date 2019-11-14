@@ -18,7 +18,7 @@
  */
 
 import { has } from 'lodash';
-import { Query } from 'plugins/data';
+import { Query } from 'src/plugins/data/public';
 
 /**
  * Creates a standardized query object from old queries that were either strings or pure ES query DSL

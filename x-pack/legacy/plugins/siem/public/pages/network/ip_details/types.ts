@@ -38,7 +38,7 @@ export type IPDetailsComponentProps = IPDetailsComponentReduxProps &
   IPDetailsComponentDispatchProps &
   GlobalTimeArgs & { detailName: string };
 
-interface OwnProps {
+export interface OwnProps {
   type: NetworkType;
   startDate: number;
   endDate: number;
