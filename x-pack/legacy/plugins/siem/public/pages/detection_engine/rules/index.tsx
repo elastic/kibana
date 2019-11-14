@@ -213,13 +213,7 @@ const AllRules = React.memo(() => {
       field: 'activate',
       name: 'Activate',
       render: (value: ColumnTypes['activate']) => (
-        // Michael: Uncomment props below when EUI 14.9.0 is added to Kibana.
-        <EuiSwitch
-          checked={value}
-          // label="Activate"
-          onChange={() => {}}
-          // showLabel={false}
-        />
+        <EuiSwitch checked={value} label="Activate" onChange={() => {}} showLabel={false} />
       ),
       sortable: true,
       width: '65px',

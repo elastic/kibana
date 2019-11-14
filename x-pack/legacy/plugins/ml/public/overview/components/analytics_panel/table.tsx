@@ -72,6 +72,7 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
       dataType: 'date',
       render: (time: number) => formatHumanReadableDateTimeSeconds(time),
       textOnly: true,
+      truncateText: true,
       sortable: true,
       width: '20%',
     },
