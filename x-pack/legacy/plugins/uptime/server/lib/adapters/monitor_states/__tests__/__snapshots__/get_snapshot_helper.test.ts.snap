@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`get snapshot helper reduces check groups as expected 1`] = `
+Object {
+  "down": 1,
+  "mixed": 0,
+  "total": 3,
+  "up": 2,
+}
+`;
