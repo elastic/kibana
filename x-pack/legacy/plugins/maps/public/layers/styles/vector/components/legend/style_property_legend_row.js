@@ -138,13 +138,13 @@ export class StylePropertyLegendRow extends Component {
 
   render() {
 
-    const { options, range, style } = this.props;
+    const { range, style } = this.props;
     if (this._isStatic()) {
       return null;
     }
 
     let header;
-    if (options.color) {
+    if (style.getOptions().color) {
       header = style.renderHeader();
     } else if (style.getStyleName() === vectorStyles.LINE_WIDTH) {
       header = renderHeaderWithIcons(getLineWidthIcons());
@@ -165,9 +165,6 @@ export class StylePropertyLegendRow extends Component {
 }
 
 StylePropertyLegendRow.propTypes = {
-  name: PropTypes.string.isRequired,
-  type: PropTypes.string,
   options: PropTypes.oneOfType(styleOptionShapes).isRequired,
-  range: rangeShape,
-  getFieldFormatter: PropTypes.func.isRequired,
+  range: rangeShape
 };

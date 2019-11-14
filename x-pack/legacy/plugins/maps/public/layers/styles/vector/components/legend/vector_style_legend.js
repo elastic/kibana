@@ -7,33 +7,26 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { styleOptionShapes, rangeShape } from '../style_option_shapes';
+import { rangeShape } from '../style_option_shapes';
 import { StylePropertyLegendRow } from './style_property_legend_row';
 
-export function VectorStyleLegend({ getFieldFormatter, styleProperties }) {
+export function VectorStyleLegend({  styleProperties }) {
   return styleProperties.map(styleProperty => {
     return (
       <StylePropertyLegendRow
         style={styleProperty.style}
         key={styleProperty.name}
-        name={styleProperty.name}
-        type={styleProperty.type}
-        options={styleProperty.options}
         range={styleProperty.range}
-        getFieldFormatter={getFieldFormatter}
       />
     );
   });
 }
 
 const stylePropertyShape = PropTypes.shape({
-  name: PropTypes.string.isRequired,
-  type: PropTypes.string,
-  options: PropTypes.oneOfType(styleOptionShapes).isRequired,
   range: rangeShape,
+  style: PropTypes.object
 });
 
 VectorStyleLegend.propTypes = {
-  styleProperties: PropTypes.arrayOf(stylePropertyShape).isRequired,
-  getFieldFormatter: PropTypes.func.isRequired,
+  styleProperties: PropTypes.arrayOf(stylePropertyShape).isRequired
 };
