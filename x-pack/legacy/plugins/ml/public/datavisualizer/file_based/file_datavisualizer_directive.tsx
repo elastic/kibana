@@ -22,7 +22,7 @@ import { InjectorService } from '../../../common/types/angular';
 import { checkBasicLicense } from '../../license/check_license';
 import { checkFindFileStructurePrivilege } from '../../privilege/check_privilege';
 import { getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
-import { loadNewJobDefaults } from '../../jobs/new_job_new/utils/new_job_defaults';
+import { loadMlServerInfo } from '../../services/ml_server_info';
 import { loadIndexPatterns } from '../../util/index_utils';
 // @ts-ignore
 import { FileDataVisualizerPage } from './file_datavisualizer';
@@ -40,7 +40,7 @@ uiRoutes.when('/filedatavisualizer/?', {
     privileges: checkFindFileStructurePrivilege,
     indexPatterns: loadIndexPatterns,
     mlNodeCount: getMlNodeCount,
-    loadNewJobDefaults,
+    loadMlServerInfo,
   },
 });
 
