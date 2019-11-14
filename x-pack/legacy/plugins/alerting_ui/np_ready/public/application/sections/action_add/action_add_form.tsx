@@ -56,18 +56,13 @@ export const ActionAddForm = ({ actionType }: Props) => {
     dispatch({ command: { type: 'setSecretsProperty' }, payload: { key, value } });
   };
 
-  const getAction = () => {
+  useEffect(() => {
     dispatch({
       command: { type: 'setAction' },
-      payload: { key: 'action', value: { config: {}, secrets: {} } },
+      payload: { key: 'action', value: initialAction },
     });
-  };
-
-  useEffect(() => {
-    getAction();
     setServerError(null);
-    setActionProperty('actionTypeId', actionType.id);
-  }, [actionType]);
+  }, [initialAction]);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [serverError, setServerError] = useState<{

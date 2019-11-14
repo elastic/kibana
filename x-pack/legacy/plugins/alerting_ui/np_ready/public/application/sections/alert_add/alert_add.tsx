@@ -77,24 +77,17 @@ export const AlertAdd = ({ refreshList }: Props) => {
   const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [selectedTabId, setSelectedTabId] = useState<string>('alert');
-  const getAlert = () => {
+
+  useEffect(() => {
     dispatch({
       command: { type: 'setAlert' },
       payload: {
         key: 'alert',
-        value: {
-          alertTypeParams: {},
-          alertTypeId: null,
-          actions: [],
-        },
+        value: initialAlert,
       },
     });
-  };
-
-  useEffect(() => {
-    getAlert();
     setAlertType(undefined);
-  }, [alertFlyoutVisible]);
+  }, [alertFlyoutVisible, initialAlert]);
 
   const setAlertProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
