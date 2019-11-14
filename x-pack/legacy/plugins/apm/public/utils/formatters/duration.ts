@@ -12,21 +12,33 @@ import { asDecimal, asInteger } from './formatters';
 import { TimeUnit } from './datetime';
 import { Maybe } from '../../../typings/common';
 
-const SPACE = ' ';
-
 interface FormatterOptions {
-  withUnit?: boolean;
   defaultValue?: string;
 }
 
-interface DurationTimeUnit {
+type DurationTimeUnit = TimeUnit | 'microseconds';
+
+interface DurationUnit {
   [unit: string]: {
     label: string;
     convert: (value: number) => string;
   };
 }
 
-const durationUnit: DurationTimeUnit = {
+interface ConvertedDuration {
+  value: string;
+  unit?: string;
+  formatted: string;
+}
+
+export type TimeFormatter = (
+  value: Maybe<number>,
+  options?: FormatterOptions
+) => ConvertedDuration;
+
+type TimeFormatterBuilder = (max: number) => TimeFormatter;
+
+const durationUnit: DurationUnit = {
   hours: {
     label: i18n.translate('xpack.apm.formatters.hoursTimeUnitLabel', {
       defaultMessage: 'h'
@@ -63,104 +75,64 @@ const durationUnit: DurationTimeUnit = {
   }
 };
 
-function convertTo({
+export function convertTo({
   unit,
-  value,
-  withUnit,
-  defaultValue
+  microseconds,
+  defaultValue = NOT_AVAILABLE_LABEL
 }: {
-  unit: TimeUnit | 'microseconds';
-  value: Maybe<number>;
-  withUnit: boolean;
-  defaultValue: string;
-}) {
+  unit: DurationTimeUnit;
+  microseconds: Maybe<number>;
+  defaultValue?: string;
+}): ConvertedDuration {
   const duration = durationUnit[unit];
-  if (!duration || value == null) {
-    return defaultValue;
+  if (!duration || microseconds == null) {
+    return { value: defaultValue, formatted: defaultValue };
   }
 
-  const message = SPACE + duration.label;
-
-  const convertedValue = duration.convert(value);
-  return `${convertedValue}${withUnit ? message : ''}`;
+  const convertedValue = duration.convert(microseconds);
+  return {
+    value: convertedValue,
+    unit: duration.label,
+    formatted: `${convertedValue} ${duration.label}`
+  };
 }
-
-export const asHours = (
-  value: Maybe<number>,
-  { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
-) => convertTo({ unit: 'hours', value, withUnit, defaultValue });
-
-export const asMinutes = (
-  value: Maybe<number>,
-  { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
-) => convertTo({ unit: 'minutes', value, withUnit, defaultValue });
-
-export const asSeconds = (
-  value: Maybe<number>,
-  { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
-) => convertTo({ unit: 'seconds', value, withUnit, defaultValue });
-
-export const asMillis = (
-  value: Maybe<number>,
-  { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
-) => convertTo({ unit: 'milliseconds', value, withUnit, defaultValue });
-
-export const asMicros = (
-  value: Maybe<number>,
-  { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
-) => convertTo({ unit: 'microseconds', value, withUnit, defaultValue });
-
-export type TimeFormatter = (
-  value: Maybe<number>,
-  options?: FormatterOptions
-) => string;
-
-type TimeFormatterBuilder = (max: number) => TimeFormatter;
-
-export const getDurationFormatter: TimeFormatterBuilder = memoize(
-  (max: number) => {
-    const unit = getDurationUnit(max);
-    switch (unit) {
-      case 'h':
-        return asHours;
-      case 'm':
-        return asMinutes;
-      case 's':
-        return asSeconds;
-      case 'ms':
-        return asMillis;
-      case 'us':
-        return asMicros;
-    }
-  }
-);
 
 export const toMicroseconds = (value: number, timeUnit: TimeUnit) =>
   moment.duration(value, timeUnit).asMilliseconds() * 1000;
 
-export function getDurationUnit(max: number) {
+function getDurationUnitKey(max: number): DurationTimeUnit {
   if (max > toMicroseconds(1, 'hours')) {
-    return 'h';
+    return 'hours';
   }
   if (max > toMicroseconds(1, 'minutes')) {
-    return 'm';
+    return 'minutes';
   }
   if (max > toMicroseconds(10, 'seconds')) {
-    return 's';
+    return 'seconds';
   }
   if (max > toMicroseconds(10, 'milliseconds')) {
-    return 'ms';
+    return 'milliseconds';
   }
-  return 'us';
+  return 'microseconds';
 }
+
+export const getDurationFormatter: TimeFormatterBuilder = memoize(
+  (max: number) => {
+    const unit = getDurationUnitKey(max);
+    return (value, { defaultValue }: FormatterOptions = {}) => {
+      return convertTo({ unit, microseconds: value, defaultValue });
+    };
+  }
+);
 
 export function asDuration(
   value: Maybe<number>,
-  { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
+  { defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
 ) {
   if (value == null) {
     return defaultValue;
   }
+
   const formatter = getDurationFormatter(value);
-  return formatter(value, { withUnit, defaultValue });
+  return formatter(value, { defaultValue }).formatted;
 }

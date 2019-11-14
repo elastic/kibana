@@ -74,12 +74,14 @@ export class TransactionCharts extends Component<TransactionChartProps> {
   };
 
   public getResponseTimeTickFormatter = (formatter: TimeFormatter) => {
-    return (t: number) => formatter(t);
+    return (t: number) => formatter(t).formatted;
   };
 
   public getResponseTimeTooltipFormatter = (formatter: TimeFormatter) => {
     return (p: Coordinate) => {
-      return isValidCoordinateValue(p.y) ? formatter(p.y) : NOT_AVAILABLE_LABEL;
+      return isValidCoordinateValue(p.y)
+        ? formatter(p.y).formatted
+        : NOT_AVAILABLE_LABEL;
     };
   };
 

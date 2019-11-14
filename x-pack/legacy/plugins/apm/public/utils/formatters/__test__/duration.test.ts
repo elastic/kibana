@@ -3,16 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  asDuration,
-  getDurationUnit,
-  asHours,
-  asMinutes,
-  asSeconds,
-  asMillis,
-  asMicros,
-  toMicroseconds
-} from '../duration';
+import { asDuration, convertTo, toMicroseconds } from '../duration';
 
 describe('duration formatters', () => {
   describe('asDuration', () => {
@@ -30,93 +21,103 @@ describe('duration formatters', () => {
       );
       expect(asDuration(toMicroseconds(20, 'seconds'))).toEqual('20.0 s');
       expect(asDuration(toMicroseconds(10, 'minutes'))).toEqual('10.0 min');
+      expect(asDuration(toMicroseconds(1, 'hours'))).toEqual('60.0 min');
       expect(asDuration(toMicroseconds(1.5, 'hours'))).toEqual('1.5 h');
-    });
-
-    it('formats without unit', () => {
-      expect(asDuration(1000, { withUnit: false })).toEqual('1,000');
     });
 
     it('falls back to default value', () => {
       expect(asDuration(undefined, { defaultValue: 'nope' })).toEqual('nope');
     });
   });
-  describe('getDurationUnit', () => {
-    test('should return right duration unit', () => {
-      expect(getDurationUnit(toMicroseconds(1.1, 'hours'))).toEqual('h');
-      expect(getDurationUnit(toMicroseconds(1, 'hours'))).toEqual('m');
-      expect(getDurationUnit(toMicroseconds(60, 'minutes'))).toEqual('m');
-      expect(getDurationUnit(toMicroseconds(60, 'seconds'))).toEqual('s');
-      expect(getDurationUnit(toMicroseconds(100, 'milliseconds'))).toEqual(
-        'ms'
-      );
-      expect(getDurationUnit(toMicroseconds(101, 'milliseconds'))).toEqual(
-        'ms'
-      );
-      expect(getDurationUnit(toMicroseconds(10, 'milliseconds'))).toEqual('us');
-      expect(getDurationUnit(10)).toEqual('us');
-    });
-  });
 
-  describe('asHours', () => {
-    it('should format microseconds to hours', () => {
+  describe('convertTo', () => {
+    it('hours', () => {
+      const unit = 'hours';
       const oneHourAsMicro = toMicroseconds(1, 'hours');
       const twoHourAsMicro = toMicroseconds(2, 'hours');
-      expect(asHours(oneHourAsMicro)).toEqual('1.0 h');
-      expect(asHours(oneHourAsMicro, { withUnit: false })).toEqual('1.0');
-      expect(asHours(twoHourAsMicro)).toEqual('2.0 h');
-      expect(asHours(twoHourAsMicro, { withUnit: false })).toEqual('2.0');
-      expect(asHours(null, { defaultValue: '1.2' })).toEqual('1.2');
+      expect(convertTo({ unit, microseconds: oneHourAsMicro })).toEqual({
+        unit: 'h',
+        value: '1.0',
+        formatted: '1.0 h'
+      });
+      expect(convertTo({ unit, microseconds: twoHourAsMicro })).toEqual({
+        unit: 'h',
+        value: '2.0',
+        formatted: '2.0 h'
+      });
+      expect(
+        convertTo({ unit, microseconds: null, defaultValue: '1.2' })
+      ).toEqual({ value: '1.2', formatted: '1.2' });
     });
-  });
 
-  describe('asMinutes', () => {
-    it('should format microseconds to minutes', () => {
+    it('minutes', () => {
+      const unit = 'minutes';
       const oneHourAsMicro = toMicroseconds(1, 'hours');
       const twoHourAsMicro = toMicroseconds(2, 'hours');
-      expect(asMinutes(oneHourAsMicro)).toEqual('60.0 min');
-      expect(asMinutes(oneHourAsMicro, { withUnit: false })).toEqual('60.0');
-      expect(asMinutes(twoHourAsMicro)).toEqual('120.0 min');
-      expect(asMinutes(twoHourAsMicro, { withUnit: false })).toEqual('120.0');
-      expect(asMinutes(null, { defaultValue: '10' })).toEqual('10');
+      expect(convertTo({ unit, microseconds: oneHourAsMicro })).toEqual({
+        unit: 'min',
+        value: '60.0',
+        formatted: '60.0 min'
+      });
+      expect(convertTo({ unit, microseconds: twoHourAsMicro })).toEqual({
+        unit: 'min',
+        value: '120.0',
+        formatted: '120.0 min'
+      });
+      expect(
+        convertTo({ unit, microseconds: null, defaultValue: '10' })
+      ).toEqual({ value: '10', formatted: '10' });
     });
-  });
 
-  describe('asSeconds', () => {
-    it('should format microseconds to seconds', () => {
+    it('seconds', () => {
+      const unit = 'seconds';
       const twentySecondsAsMicro = toMicroseconds(20, 'seconds');
       const thirtyFiveSecondsAsMicro = toMicroseconds(35, 'seconds');
-      expect(asSeconds(twentySecondsAsMicro)).toEqual('20.0 s');
-      expect(asSeconds(twentySecondsAsMicro, { withUnit: false })).toEqual(
-        '20.0'
-      );
-      expect(asSeconds(thirtyFiveSecondsAsMicro)).toEqual('35.0 s');
-      expect(asSeconds(thirtyFiveSecondsAsMicro, { withUnit: false })).toEqual(
-        '35.0'
-      );
-      expect(asSeconds(null, { defaultValue: '10' })).toEqual('10');
+      expect(convertTo({ unit, microseconds: twentySecondsAsMicro })).toEqual({
+        unit: 's',
+        value: '20.0',
+        formatted: '20.0 s'
+      });
+      expect(
+        convertTo({ unit, microseconds: thirtyFiveSecondsAsMicro })
+      ).toEqual({ unit: 's', value: '35.0', formatted: '35.0 s' });
+      expect(
+        convertTo({ unit, microseconds: null, defaultValue: '10' })
+      ).toEqual({ value: '10', formatted: '10' });
     });
-  });
-  describe('asMillis', () => {
-    it('should format microseconds to milliseconds', () => {
+
+    it('milliseconds', () => {
+      const unit = 'milliseconds';
       const twentyMilliAsMicro = toMicroseconds(20, 'milliseconds');
       const thirtyFiveMilliAsMicro = toMicroseconds(35, 'milliseconds');
-      expect(asMillis(twentyMilliAsMicro)).toEqual('20 ms');
-      expect(asMillis(twentyMilliAsMicro, { withUnit: false })).toEqual('20');
-      expect(asMillis(thirtyFiveMilliAsMicro)).toEqual('35 ms');
-      expect(asMillis(thirtyFiveMilliAsMicro, { withUnit: false })).toEqual(
-        '35'
+      expect(convertTo({ unit, microseconds: twentyMilliAsMicro })).toEqual({
+        unit: 'ms',
+        value: '20',
+        formatted: '20 ms'
+      });
+      expect(convertTo({ unit, microseconds: thirtyFiveMilliAsMicro })).toEqual(
+        { unit: 'ms', value: '35', formatted: '35 ms' }
       );
-      expect(asMillis(null, { defaultValue: '10' })).toEqual('10');
+      expect(
+        convertTo({ unit, microseconds: null, defaultValue: '10' })
+      ).toEqual({ value: '10', formatted: '10' });
     });
-  });
-  describe('asMicros', () => {
-    it('should format microseconds to formated microseconds', () => {
-      expect(asMicros(20)).toEqual('20 μs');
-      expect(asMicros(35)).toEqual('35 μs');
-      expect(asMicros(20, { withUnit: false })).toEqual('20');
-      expect(asMicros(35, { withUnit: false })).toEqual('35');
-      expect(asMicros(null, { defaultValue: '10' })).toEqual('10');
+
+    it('microseconds', () => {
+      const unit = 'microseconds';
+      expect(convertTo({ unit, microseconds: 20 })).toEqual({
+        unit: 'μs',
+        value: '20',
+        formatted: '20 μs'
+      });
+      expect(convertTo({ unit, microseconds: 35 })).toEqual({
+        unit: 'μs',
+        value: '35',
+        formatted: '35 μs'
+      });
+      expect(
+        convertTo({ unit, microseconds: null, defaultValue: '10' })
+      ).toEqual({ value: '10', formatted: '10' });
     });
   });
   describe('toMicroseconds', () => {

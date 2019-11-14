@@ -12,8 +12,7 @@ import { HistogramInner } from '../index';
 import response from './response.json';
 import {
   asDecimal,
-  getDurationFormatter,
-  getDurationUnit
+  getDurationFormatter
 } from '../../../../../utils/formatters';
 import { toJson } from '../../../../../utils/testHelpers';
 import { getFormattedBuckets } from '../../../../app/TransactionDetails/Distribution/index';
@@ -26,7 +25,6 @@ describe('Histogram', () => {
     const buckets = getFormattedBuckets(response.buckets, response.bucketSize);
     const xMax = d3.max(buckets, d => d.x);
     const timeFormatter = getDurationFormatter(xMax);
-    const unit = getDurationUnit(xMax);
 
     wrapper = mount(
       <HistogramInner
@@ -34,14 +32,14 @@ describe('Histogram', () => {
         bucketSize={response.bucketSize}
         transactionId="myTransactionId"
         onClick={onClick}
-        formatX={timeFormatter}
+        formatX={time => timeFormatter(time).formatted}
         formatYShort={t => `${asDecimal(t)} occ.`}
         formatYLong={t => `${asDecimal(t)} occurrences`}
-        tooltipHeader={bucket =>
-          `${timeFormatter(bucket.x0, {
-            withUnit: false
-          })} - ${timeFormatter(bucket.x, { withUnit: false })} ${unit}`
-        }
+        tooltipHeader={bucket => {
+          const xFormatted = timeFormatter(bucket.x);
+          const x0Formatted = timeFormatter(bucket.x0);
+          return `${x0Formatted.value} - ${xFormatted.value} ${xFormatted.unit}`;
+        }}
         width={800}
       />
     );
