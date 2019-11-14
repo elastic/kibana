@@ -17,6 +17,7 @@ import { IpType } from './ip_type';
 import { TokenCountType } from './token_count';
 import { CompletionType } from './completion_type';
 import { GeoPointType } from './geo_point_type';
+import { DateType } from './date_type';
 
 const typeMapToParametersForm: { [key in DataType]?: ComponentType<any> } = {
   text: TextType,
@@ -29,6 +30,8 @@ const typeMapToParametersForm: { [key in DataType]?: ComponentType<any> } = {
   token_count: TokenCountType,
   completion: CompletionType,
   geo_point: GeoPointType,
+  date: DateType,
+  date_nanos: DateType,
 };
 
 export const getParametersFormForType = (

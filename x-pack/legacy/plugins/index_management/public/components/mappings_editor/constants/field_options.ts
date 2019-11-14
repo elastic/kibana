@@ -8,6 +8,73 @@ import { MainType, ParameterName, SelectOption } from '../types';
 import { INDEX_DEFAULT } from './default_values';
 import { MAIN_DATA_TYPE_DEFINITION } from './data_types_definition';
 
+const DATE_FORMATS = [
+  { label: 'epoch_millis' },
+  { label: 'epoch_second' },
+  { label: 'date_optional_time', strict: true },
+  { label: 'basic_date' },
+  { label: 'basic_date_time' },
+  { label: 'basic_date_time_no_millis' },
+  { label: 'basic_ordinal_date' },
+  { label: 'basic_ordinal_date_time' },
+  { label: 'basic_ordinal_date_time_no_millis' },
+  { label: 'basic_time' },
+  { label: 'basic_time_no_millis' },
+  { label: 'basic_t_time' },
+  { label: 'basic_t_time_no_millis' },
+  { label: 'basic_week_date', strict: true },
+  { label: 'basic_week_date_time', strict: true },
+  {
+    label: 'basic_week_date_time_no_millis',
+    strict: true,
+  },
+  { label: 'date', strict: true },
+  { label: 'date_hour', strict: true },
+  { label: 'date_hour_minute', strict: true },
+  { label: 'date_hour_minute_second', strict: true },
+  {
+    label: 'date_hour_minute_second_fraction',
+    strict: true,
+  },
+  {
+    label: 'date_hour_minute_second_millis',
+    strict: true,
+  },
+  { label: 'date_time', strict: true },
+  { label: 'date_time_no_millis', strict: true },
+  { label: 'hour', strict: true },
+  { label: 'hour_minute ', strict: true },
+  { label: 'hour_minute_second', strict: true },
+  { label: 'hour_minute_second_fraction', strict: true },
+  { label: 'hour_minute_second_millis', strict: true },
+  { label: 'ordinal_date', strict: true },
+  { label: 'ordinal_date_time', strict: true },
+  { label: 'ordinal_date_time_no_millis', strict: true },
+  { label: 'time', strict: true },
+  { label: 'time_no_millis', strict: true },
+  { label: 't_time', strict: true },
+  { label: 't_time_no_millis', strict: true },
+  { label: 'week_date', strict: true },
+  { label: 'week_date_time', strict: true },
+  { label: 'week_date_time_no_millis', strict: true },
+  { label: 'weekyear', strict: true },
+  { label: 'weekyear_week', strict: true },
+  { label: 'weekyear_week_day', strict: true },
+  { label: 'year', strict: true },
+  { label: 'year_month', strict: true },
+  { label: 'year_month_day', strict: true },
+];
+
+const STRICT_DATE_FORMAT_OPTIONS = DATE_FORMATS.filter(format => format.strict).map(
+  ({ label }) => ({
+    label: `strict_${label}`,
+  })
+);
+
+const DATE_FORMAT_OPTIONS = DATE_FORMATS.map(({ label }) => ({ label }));
+
+export const ALL_DATE_FORMAT_OPTIONS = [...DATE_FORMAT_OPTIONS, ...STRICT_DATE_FORMAT_OPTIONS];
+
 export const TYPE_NOT_ALLOWED_MULTIFIELD: MainType[] = ['object', 'nested'];
 
 export const DYNAMIC_SETTING_OPTIONS = [

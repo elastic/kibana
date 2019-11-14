@@ -162,3 +162,7 @@ export interface SelectOption {
   value: any;
   text: string;
 }
+
+export interface ComboBoxOption {
+  label: string;
+}

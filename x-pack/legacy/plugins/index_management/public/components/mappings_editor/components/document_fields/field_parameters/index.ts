@@ -25,3 +25,5 @@ export * from './similarity_parameter';
 export * from './coerce_parameter';
 
 export * from './ignore_malformed_parameter';
+
+export * from './format_parameter';

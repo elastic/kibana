@@ -15,6 +15,9 @@ import {
 } from '../shared_imports';
 import { INDEX_DEFAULT } from '../constants';
 
+import { ComboBoxOption } from '../types';
+import { ALL_DATE_FORMAT_OPTIONS } from './field_options';
+
 const { toInt } = fieldFormatters;
 const { emptyField, containsCharsField } = fieldValidators;
 
@@ -158,6 +161,21 @@ export const PARAMETERS_DEFINITION = {
       ],
     },
   },
+  locale: {
+    fieldConfig: {
+      defaultValue: 'ROOT',
+      type: FIELD_TYPES.TEXT,
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate('xpack.idxMgmt.mappingsEditor.localeFieldRequiredErrorMessage', {
+              defaultMessage: 'Specify a locale.',
+            })
+          ),
+        },
+      ],
+    },
+  },
   boost: {
     fieldConfig: {
       defaultValue: 1.0,
@@ -222,23 +240,16 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: true,
     },
   },
-  locale: {
-    fieldConfig: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.localeFieldLabel', {
-        defaultMessage: 'Locale',
-      }),
-      defaultValue: '',
-    },
-  },
   format: {
     fieldConfig: {
-      label: 'Formats',
-      type: FIELD_TYPES.COMBO_BOX,
-      defaultValue: [],
-      serializer: (options: any[]): string | undefined =>
-        options.length ? options.join('||') : undefined,
-      deSerializer: (formats?: string | any[]): any[] =>
-        Array.isArray(formats) ? formats : (formats as string).split('||'),
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.formatFieldLabel', {
+        defaultMessage: 'Format',
+      }),
+      defaultValue: 'strict_date_optional_time||epoch_millis',
+      serializer: (format: ComboBoxOption[]): string | undefined =>
+        format.length ? format.map(({ label }) => label).join('||') : undefined,
+      deserializer: (formats: string): ComboBoxOption[] | undefined =>
+        formats.split('||').map(format => ({ label: format })),
     },
   },
   analyzer: {

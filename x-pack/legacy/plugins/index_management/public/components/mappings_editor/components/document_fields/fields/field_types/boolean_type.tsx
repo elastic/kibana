@@ -32,32 +32,24 @@ const getDefaultValueToggle = (param: string, field: FieldType) => {
   }
 };
 
-const trueText = i18n.translate('xpack.idxMgmt.mappingsEditor.booleanTrueFieldDescription', {
-  defaultMessage: 'true',
-});
-
-const falseText = i18n.translate('xpack.idxMgmt.mappingsEditor.booleanFalseFieldDescription', {
-  defaultMessage: 'false',
-});
-
 const mapIndexToValue = ['true', true, 'false', false];
 
 const nullValueOptions = [
   {
     value: 0,
-    text: `"${trueText}"`,
+    text: `"true"`,
   },
   {
     value: 1,
-    text: trueText,
+    text: 'true',
   },
   {
     value: 2,
-    text: `"${falseText}"`,
+    text: `"false"`,
   },
   {
     value: 3,
-    text: falseText,
+    text: 'false',
   },
 ];
 
