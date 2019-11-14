@@ -16,9 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { tutorialsRegistryMock } from './services/tutorials_registry.mock';
 
-export const registryMock = tutorialsRegistryMock.create();
-jest.doMock('./services', () => ({
-  TutorialsRegistry: jest.fn(() => registryMock),
-}));
+import { registryMock } from './plugin.test.mocks';
+import { HomePlugin } from './plugin';
+import { coreMock } from '../../../core/server/mocks';
+import { CoreSetup } from '../../../core/server';
+
+type MockedKeys<T> = { [P in keyof T]: jest.Mocked<T[P]> };
+
+describe('HomePlugin', () => {
+  beforeEach(() => {
+    registryMock.setup.mockClear();
+    registryMock.start.mockClear();
+  });
+
+  describe('setup', () => {
+    // let mockCoreSetup: MockedKeys<CoreSetup>;
+    const mockCoreSetup: MockedKeys<CoreSetup> = coreMock.createSetup();
+
+    test('wires up and returns registerTutorial and addScopedTutorialContextFactory', () => {
+      const setup = new HomePlugin().setup(mockCoreSetup);
+      expect(setup).toHaveProperty('registerTutorial');
+      expect(setup).toHaveProperty('addScopedTutorialContextFactory');
+    });
+  });
+
+  describe('start', () => {
+    test('is defined', () => {
+      const start = new HomePlugin().start();
+      expect(start).toBeDefined();
+    });
+  });
+});
