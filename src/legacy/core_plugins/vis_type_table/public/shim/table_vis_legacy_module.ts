@@ -37,9 +37,8 @@ import { KbnRows } from '../paginated_table/rows';
 import { PaginatedTable } from '../paginated_table/paginated_table';
 
 /** @internal */
-export const initTableVisLegacyModule = once((): void => {
-  uiModules
-    .get('kibana/table_vis', ['kibana', 'RecursionHelper'])
+export const initTableVisLegacyModule = once((angularIns: any): void => {
+  angularIns
     .controller('KbnTableVisController', TableVisController)
     .directive('kbnAggTable', KbnAggTable)
     .directive('kbnAggTableGroup', KbnAggTableGroup)

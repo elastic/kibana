@@ -24,13 +24,12 @@ import { visFactory } from 'ui/vis/vis_factory';
 
 // @ts-ignore
 import { Schemas } from 'ui/vis/editors/default/schemas';
-// @ts-ignore
-import { AngularVisController } from 'ui/vis/vis_types/angular_vis_type';
 import { AggGroupNames } from 'ui/vis/editors/default';
 import { tableVisResponseHandler } from './table_vis_request_handler';
 // @ts-ignore
 import tableVisTemplate from './table_vis.html';
 import { TableOptions } from './components/table_vis_options';
+import { TableVisController } from './vis_controller';
 
 export const createTableVisTypeDefinition = () => {
   return visFactory.createBaseVisualization({
@@ -43,7 +42,7 @@ export const createTableVisTypeDefinition = () => {
     description: i18n.translate('visTypeTable.tableVisDescription', {
       defaultMessage: 'Display values in a table',
     }),
-    visualization: AngularVisController,
+    visualization: TableVisController,
     visConfig: {
       defaults: {
         perPage: 10,
