@@ -18,6 +18,7 @@
  */
 
 import { Request, Server } from 'hapi';
+import url from 'url';
 
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
@@ -96,7 +97,7 @@ export class HttpServer {
 
     const basePathService = new BasePath(config.basePath);
     this.setupBasePathRewrite(config, basePathService);
-    this.setupConditionalCompression();
+    this.setupConditionalCompression(config);
 
     return {
       registerRouter: this.registerRouter.bind(this),
@@ -176,21 +177,31 @@ export class HttpServer {
     });
   }
 
-  private setupConditionalCompression() {
+  private setupConditionalCompression(config: HttpConfig) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
 
-    this.server.ext('onRequest', (request, h) => {
-      // whenever there is a referrer, don't use compression even if the client supports it
-      if (request.info.referrer !== '') {
-        this.log.debug(
-          `Not using compression because there is a referer: ${request.info.referrer}`
-        );
+    const { enabled, referrerWhitelist: list } = config.compression;
+    if (!enabled) {
+      this.log.debug('HTTP compression is disabled');
+      this.server.ext('onRequest', (request, h) => {
         request.info.acceptEncoding = '';
-      }
-      return h.continue;
-    });
+        return h.continue;
+      });
+    } else if (list) {
+      this.log.debug(`HTTP compression is only enabled for any referrer in the following: ${list}`);
+      this.server.ext('onRequest', (request, h) => {
+        const { referrer } = request.info;
+        if (referrer !== '') {
+          const { hostname } = url.parse(referrer);
+          if (!hostname || !list.includes(hostname)) {
+            request.info.acceptEncoding = '';
+          }
+        }
+        return h.continue;
+      });
+    }
   }
 
   private registerOnPostAuth(fn: OnPostAuthHandler) {

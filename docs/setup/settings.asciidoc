@@ -258,6 +258,12 @@ running behind a proxy. Use the `server.rewriteBasePath` setting to tell Kibana
 if it should remove the basePath from requests it receives, and to prevent a
 deprecation warning at startup. This setting cannot end in a slash (`/`).
 
+[[server-compression]]`server.compression.enabled:`:: *Default: `true`* Set to `false` to disable HTTP compression for all responses.
+
+`server.compression.referrerWhitelist:`:: *Default: none* Specifies an array of trusted hostnames, such as the Kibana host, or a reverse
+proxy sitting in front of it. This determines whether HTTP compression may be used for responses, based on the request's `Referer` header.
+This setting may not be used when `server.compression.enabled` is set to `false`.
+
 [[server-cors]]`server.cors:`:: *Default: `false`* Set to `true` to enable CORS support. This setting is required to configure `server.cors.origin`.
 
 `server.cors.origin:`:: *Default: none* Specifies origins. "origin" must be an array. To use this setting, you must set `server.cors` to `true`. To accept all origins, use `server.cors.origin: ["*"]`.

@@ -52,6 +52,7 @@ beforeEach(() => {
     maxPayload: new ByteSizeValue(1024),
     port: 10002,
     ssl: { enabled: false },
+    compression: { enabled: true },
   } as HttpConfig;
 
   configWithSSL = {
@@ -578,41 +579,86 @@ test('exposes route details of incoming request to a route handler', async () =>
 });
 
 describe('conditional compression', () => {
-  test('disables compression when there is a referer', async () => {
-    const { registerRouter, server: innerServer } = await server.setup(config);
-
+  async function setupServer(innerConfig: HttpConfig) {
+    const { registerRouter, server: innerServer } = await server.setup(innerConfig);
     const router = new Router('', logger, enhanceWithContext);
-    router.get({ path: '/', validate: false }, (context, req, res) =>
-      // we need the large body here so that compression would normally be used
-      res.ok({ body: 'hello'.repeat(500), headers: { 'Content-Type': 'text/html; charset=UTF-8' } })
-    );
+    // we need the large body here so that compression would normally be used
+    const largeRequest = {
+      body: 'hello'.repeat(500),
+      headers: { 'Content-Type': 'text/html; charset=UTF-8' },
+    };
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok(largeRequest));
     registerRouter(router);
-
     await server.start();
-    const response = await supertest(innerServer.listener)
-      .get('/')
-      .set('accept-encoding', 'gzip')
-      .set('referer', 'http://some-other-site/');
+    return innerServer.listener;
+  }
 
-    expect(response.header).not.toHaveProperty('content-encoding');
-  });
+  test('with `compression.enabled: true`', async () => {
+    const listener = await setupServer(config);
 
-  test(`enables compression when there isn't a referer`, async () => {
-    const { registerRouter, server: innerServer } = await server.setup(config);
-
-    const router = new Router('', logger, enhanceWithContext);
-    router.get({ path: '/', validate: false }, (context, req, res) =>
-      // we need the large body here so that compression will be used
-      res.ok({ body: 'hello'.repeat(500), headers: { 'Content-Type': 'text/html; charset=UTF-8' } })
-    );
-    registerRouter(router);
-
-    await server.start();
-    const response = await supertest(innerServer.listener)
+    const response = await supertest(listener)
       .get('/')
       .set('accept-encoding', 'gzip');
 
     expect(response.header).toHaveProperty('content-encoding', 'gzip');
+  });
+
+  test('with `compression.enabled: false`', async () => {
+    const listener = await setupServer({
+      ...config,
+      compression: { enabled: false },
+    });
+
+    const response = await supertest(listener)
+      .get('/')
+      .set('accept-encoding', 'gzip');
+
+    expect(response.header).not.toHaveProperty('content-encoding');
+  });
+
+  describe('with defined `compression.referrerWhitelist`', () => {
+    let listener: Server;
+    beforeEach(async () => {
+      listener = await setupServer({
+        ...config,
+        compression: { enabled: true, referrerWhitelist: ['foo'] },
+      });
+    });
+
+    test('enables compression for no referer', async () => {
+      const response = await supertest(listener)
+        .get('/')
+        .set('accept-encoding', 'gzip');
+
+      expect(response.header).toHaveProperty('content-encoding', 'gzip');
+    });
+
+    test('enables compression for whitelisted referer', async () => {
+      const response = await supertest(listener)
+        .get('/')
+        .set('accept-encoding', 'gzip')
+        .set('referer', 'http://foo:1234');
+
+      expect(response.header).toHaveProperty('content-encoding', 'gzip');
+    });
+
+    test('disables compression for non-whitelisted referer', async () => {
+      const response = await supertest(listener)
+        .get('/')
+        .set('accept-encoding', 'gzip')
+        .set('referer', 'http://bar:1234');
+
+      expect(response.header).not.toHaveProperty('content-encoding');
+    });
+
+    test('disables compression for invalid referer', async () => {
+      const response = await supertest(listener)
+        .get('/')
+        .set('accept-encoding', 'gzip')
+        .set('referer', 'http://asdf$%^');
+
+      expect(response.header).not.toHaveProperty('content-encoding');
+    });
   });
 });
 

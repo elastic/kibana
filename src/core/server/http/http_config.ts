@@ -72,11 +72,25 @@ export const config = {
       socketTimeout: schema.number({
         defaultValue: 120000,
       }),
+      compression: schema.object({
+        enabled: schema.boolean({ defaultValue: true }),
+        referrerWhitelist: schema.maybe(
+          schema.arrayOf(
+            schema.string({
+              hostname: true,
+            }),
+            { minSize: 1 }
+          )
+        ),
+      }),
     },
     {
       validate: rawConfig => {
         if (!rawConfig.basePath && rawConfig.rewriteBasePath) {
           return 'cannot use [rewriteBasePath] when [basePath] is not specified';
+        }
+        if (!rawConfig.compression.enabled && rawConfig.compression.referrerWhitelist) {
+          return 'cannot use [compression.referrerWhitelist] when [compression.enabled] is set to false';
         }
 
         if (
@@ -109,6 +123,7 @@ export class HttpConfig {
   public publicDir: string;
   public defaultRoute?: string;
   public ssl: SslConfig;
+  public compression: { enabled: boolean; referrerWhitelist?: string[] };
 
   /**
    * @internal
@@ -126,5 +141,6 @@ export class HttpConfig {
     this.publicDir = env.staticFilesDir;
     this.ssl = new SslConfig(rawConfig.ssl || {});
     this.defaultRoute = rawConfig.defaultRoute;
+    this.compression = rawConfig.compression;
   }
 }
