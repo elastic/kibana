@@ -20,11 +20,10 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { TabbedAggResponseWriter } from '../_response_writer';
-import { VisProvider } from '../../../vis';
+import { Vis } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('TabbedAggResponseWriter class', function () {
-  let Vis;
   let Private;
   let indexPattern;
 
@@ -32,7 +31,6 @@ describe('TabbedAggResponseWriter class', function () {
   beforeEach(ngMock.inject(function ($injector) {
     Private = $injector.get('Private');
 
-    Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 

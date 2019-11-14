@@ -21,7 +21,7 @@ import moment from 'moment';
 // @ts-ignore
 import fetch from 'node-fetch';
 import { telemetryCollectionManager } from './collection_manager';
-import { getTelemetryOptIn, getTelemetryUsageFetcher } from './telemetry_config';
+import { getTelemetryOptIn, getTelemetrySendUsageFrom } from './telemetry_config';
 import { getTelemetrySavedObject, updateTelemetrySavedObject } from './telemetry_repository';
 import { REPORT_INTERVAL_MS } from '../common/constants';
 import { getXpackConfigWithDeprecated } from '../common/get_xpack_config_with_deprecated';
@@ -61,7 +61,7 @@ export class FetcherTask {
         allowChangingOptInStatus,
         configTelemetryOptIn,
       }),
-      telemetrySendUsageFrom: getTelemetryUsageFetcher({
+      telemetrySendUsageFrom: getTelemetrySendUsageFrom({
         telemetrySavedObject,
         configTelemetrySendUsageFrom,
       }),
@@ -87,18 +87,13 @@ export class FetcherTask {
   };
 
   private fetchTelemetry = async () => {
-    const { getStats, title } = telemetryCollectionManager.getStatsGetter();
-    this.server.log(['debug', 'telemetry', 'fetcher'], `Fetching usage using ${title} getter.`);
-    const config = this.server.config();
-
-    return await getStats({
+    return await telemetryCollectionManager.getStats({
       unencrypted: false,
       server: this.server,
       start: moment()
         .subtract(20, 'minutes')
         .toISOString(),
       end: moment().toISOString(),
-      isDev: config.get('env.dev'),
     });
   };
 
