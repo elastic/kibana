@@ -5,9 +5,10 @@
  */
 import { i18n } from '@kbn/i18n';
 import { BASE_PATH } from '../../../common/constants';
+import { ChromeStart } from '../../../../../../../src/core/public';
 
 class BreadcrumbService {
-  private chrome: any;
+  private chrome: ChromeStart | undefined;
   private breadcrumbs: {
     [key: string]: Array<{
       text: string;
@@ -18,7 +19,7 @@ class BreadcrumbService {
     home: [],
   };
 
-  public init(chrome: any, managementBreadcrumb: any): void {
+  public init(chrome: ChromeStart, managementBreadcrumb: any): void {
     this.chrome = chrome;
     this.breadcrumbs.management = [managementBreadcrumb];
 
@@ -87,7 +88,9 @@ class BreadcrumbService {
       href: undefined,
     });
 
-    this.chrome.setBreadcrumbs(newBreadcrumbs);
+    if (this.chrome) {
+      this.chrome.setBreadcrumbs(newBreadcrumbs);
+    }
   }
 }
 

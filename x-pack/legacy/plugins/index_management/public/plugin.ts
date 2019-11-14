@@ -29,6 +29,6 @@ export class IndexMgmtPlugin {
 
     // Register management section and Angular route
     registerManagementSection(management.getSection('elasticsearch'));
-    registerRoutes(core as CoreStart);
+    registerRoutes(core);
   }
 }
