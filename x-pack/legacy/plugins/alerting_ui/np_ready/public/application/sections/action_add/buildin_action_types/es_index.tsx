@@ -38,7 +38,7 @@ const IndexActionFields: React.FunctionComponent<Props> = ({ action, editActionC
         fullWidth
         name="index"
         data-test-subj="indexInput"
-        value={index}
+        value={index || ''}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           editActionConfig('index', e.target.value);
         }}

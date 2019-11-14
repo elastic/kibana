@@ -59,10 +59,10 @@ export const ActionAddForm = ({ actionType }: Props) => {
   useEffect(() => {
     dispatch({
       command: { type: 'setAction' },
-      payload: { key: 'action', value: initialAction },
+      payload: { key: 'action', value: { actionTypeId: actionType.id, config: {}, secrets: {} } },
     });
     setServerError(null);
-  }, [initialAction]);
+  }, [actionType]);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [serverError, setServerError] = useState<{
