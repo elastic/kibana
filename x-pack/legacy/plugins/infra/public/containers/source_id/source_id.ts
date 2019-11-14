@@ -28,7 +28,4 @@ export const replaceSourceIdInQueryString = (sourceId: string) =>
 const sourceIdRuntimeType = runtimeTypes.union([runtimeTypes.string, runtimeTypes.undefined]);
 const encodeSourceIdUrlState = sourceIdRuntimeType.encode;
 const decodeSourceIdUrlState = (value: unknown) =>
-  pipe(
-    sourceIdRuntimeType.decode(value),
-    fold(constant(undefined), identity)
-  );
+  pipe(sourceIdRuntimeType.decode(value), fold(constant(undefined), identity));
