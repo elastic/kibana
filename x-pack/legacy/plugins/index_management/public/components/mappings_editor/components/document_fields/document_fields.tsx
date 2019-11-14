@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useMappingsState, useDispatch } from '../../mappings_state';
-import { FieldsList, CreateField, EditField } from './fields';
+import { FieldsList, CreateField, EditFieldContainer } from './fields';
 
 export const DocumentFields = () => {
   const dispatch = useDispatch();
@@ -61,7 +61,7 @@ export const DocumentFields = () => {
       return null;
     }
     const field = byId[fieldToEdit!];
-    return <EditField field={field} allFields={byId} />;
+    return <EditFieldContainer field={field} allFields={byId} />;
   };
 
   return (

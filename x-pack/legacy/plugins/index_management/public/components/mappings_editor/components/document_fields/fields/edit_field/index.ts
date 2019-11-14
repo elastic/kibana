@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './edit_field';
+export * from './edit_field_container';
 
 export * from './edit_field_section';
 

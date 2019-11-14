@@ -10,6 +10,7 @@ export {
   UseMultiFields,
   getUseField,
   Form,
+  FormHook,
   FormDataProvider,
   FormSchema,
   FieldHook,

@@ -25,13 +25,11 @@ export const AdvancedSettingsWrapper = ({ children }: Props) => {
           {isVisible ? 'Hide' : 'Show'} advanced settings
         </EuiButtonEmpty>
       </div>
-      {isVisible && (
-        <>
-          <EuiSpacer size="s" />
-          {/* We ned to wrap the children inside a "div" to have our css :first-child rule */}
-          <div>{children}</div>
-        </>
-      )}
+      <div style={{ display: isVisible ? 'block' : 'none' }}>
+        <EuiSpacer size="s" />
+        {/* We ned to wrap the children inside a "div" to have our css :first-child rule */}
+        <div>{children}</div>
+      </div>
     </div>
   );
 };

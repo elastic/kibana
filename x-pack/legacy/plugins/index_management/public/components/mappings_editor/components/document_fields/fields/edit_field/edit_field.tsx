@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
@@ -20,29 +20,31 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { useForm, Form, FormDataProvider } from '../../../../shared_imports';
-import { useDispatch } from '../../../../mappings_state';
+import { Form, FormHook, FormDataProvider } from '../../../../shared_imports';
 import { TYPE_DEFINITION } from '../../../../constants';
-import { Field, NormalizedField, NormalizedFields, MainType, SubType } from '../../../../types';
-import { fieldSerializer, fieldDeserializer, getTypeDocLink } from '../../../../lib';
+import {
+  Field,
+  NormalizedField,
+  NormalizedFields,
+  DataType,
+  MainType,
+  SubType,
+} from '../../../../types';
+import { getTypeDocLink } from '../../../../lib';
 import { getParametersFormForType } from '../field_types';
 import { UpdateFieldProvider, UpdateFieldFunc } from './update_field_provider';
 import { EditFieldHeaderForm } from './edit_field_header_form';
 import { EditFieldSection } from './edit_field_section';
 
 interface Props {
+  type: DataType;
+  form: FormHook<Field>;
   field: NormalizedField;
   allFields: NormalizedFields['byId'];
+  exitEdit(): void;
 }
 
-export const EditField = React.memo(({ field, allFields }: Props) => {
-  const { form } = useForm<Field>({
-    defaultValue: { ...field.source },
-    serializer: fieldSerializer,
-    deserializer: fieldDeserializer,
-  });
-  const dispatch = useDispatch();
-
+export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props) => {
   const getSubmitForm = (updateField: UpdateFieldFunc) => async (e?: React.FormEvent) => {
     if (e) {
       e.preventDefault();
@@ -53,18 +55,6 @@ export const EditField = React.memo(({ field, allFields }: Props) => {
     if (isValid) {
       updateField({ ...field, source: data });
     }
-  };
-
-  useEffect(() => {
-    const subscription = form.subscribe(updatedFieldForm => {
-      dispatch({ type: 'fieldForm.update', value: updatedFieldForm });
-    });
-
-    return subscription.unsubscribe;
-  }, [form]);
-
-  const exitEdit = () => {
-    dispatch({ type: 'documentField.changeStatus', value: 'idle' });
   };
 
   const cancel = () => {
@@ -99,6 +89,7 @@ export const EditField = React.memo(({ field, allFields }: Props) => {
                   maxWidth={720}
                 >
                   <EuiFlyoutHeader>
+                    {/* Title */}
                     <EuiTitle size="m">
                       <h2>
                         {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldTitle', {
@@ -109,8 +100,13 @@ export const EditField = React.memo(({ field, allFields }: Props) => {
                         })}
                       </h2>
                     </EuiTitle>
+
+                    {/* Field path */}
                     <EuiCode>{field.path}</EuiCode>
+
                     <EuiSpacer size="s" />
+
+                    {/* Documentation link */}
                     <div>
                       <EuiButtonEmpty
                         size="s"
