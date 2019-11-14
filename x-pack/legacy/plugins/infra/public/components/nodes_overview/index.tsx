@@ -25,11 +25,12 @@ import { InfraLoadingPanel } from '../loading';
 import { Map } from '../waffle/map';
 import { ViewSwitcher } from '../waffle/view_switcher';
 import { TableView } from './table';
+import { SnapshotNode } from '../../../common/http_api/snapshot_api';
 
 interface Props {
   options: InfraWaffleMapOptions;
   nodeType: InfraNodeType;
-  nodes: InfraSnapshotNode[];
+  nodes: SnapshotNode[];
   loading: boolean;
   reload: () => void;
   onDrilldown: (filter: KueryFilterQuery) => void;

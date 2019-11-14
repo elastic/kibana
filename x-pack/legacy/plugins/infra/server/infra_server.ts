@@ -16,6 +16,7 @@ import { InfraBackendLibs } from './lib/infra_types';
 import { initLogAnalysisGetLogEntryRateRoute } from './routes/log_analysis';
 import { initMetricExplorerRoute } from './routes/metrics_explorer';
 import { initMetadataRoute } from './routes/metadata';
+import { initSnapshotRoute } from './routes/snapshot';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   const schema = makeExecutableSchema({
@@ -33,6 +34,7 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
 
   initIpToHostName(libs);
   initLogAnalysisGetLogEntryRateRoute(libs);
+  initSnapshotRoute(libs);
   initMetricExplorerRoute(libs);
   initMetadataRoute(libs);
 };

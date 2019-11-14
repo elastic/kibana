@@ -291,7 +291,7 @@ export interface InfraSnapshotNodePath {
 }
 
 export interface InfraSnapshotNodeMetric {
-  name: InfraSnapshotMetricType;
+  name: 'count' | 'cpu' | 'load' | 'memory' | 'tx' | 'rx' | 'logRate';
 
   value?: number | null;
 
