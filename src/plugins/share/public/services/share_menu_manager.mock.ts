@@ -21,7 +21,7 @@ import { ShareMenuManager, ShareMenuManagerStart } from './share_menu_manager';
 
 const createStartMock = (): jest.Mocked<ShareMenuManagerStart> => {
   const start = {
-    showShareContextMenu: jest.fn(),
+    toggleShareContextMenu: jest.fn(),
   };
   return start;
 };

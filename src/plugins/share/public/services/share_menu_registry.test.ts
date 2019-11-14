@@ -18,7 +18,7 @@
  */
 
 import { ShareMenuRegistry } from './share_menu_registry';
-import { ShareMenuItem, ShareMenuItemProps } from '../types';
+import { ShareMenuItem, ShareContext } from '../types';
 
 describe('ShareActionsRegistry', () => {
   describe('setup', () => {
@@ -57,14 +57,14 @@ describe('ShareActionsRegistry', () => {
           id: 'myTest2',
           getShareMenuItems: provider2Callback,
         });
-        const actionProps = {} as ShareMenuItemProps;
-        expect(service.start().getShareMenuItems(actionProps)).toEqual([
+        const context = {} as ShareContext;
+        expect(service.start().getShareMenuItems(context)).toEqual([
           shareAction1,
           shareAction2,
           shareAction3,
         ]);
-        expect(provider1Callback).toHaveBeenCalledWith(actionProps);
-        expect(provider2Callback).toHaveBeenCalledWith(actionProps);
+        expect(provider1Callback).toHaveBeenCalledWith(context);
+        expect(provider2Callback).toHaveBeenCalledWith(context);
       });
     });
   });

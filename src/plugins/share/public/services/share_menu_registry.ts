@@ -17,13 +17,20 @@
  * under the License.
  */
 
-import { ShareMenuItemProps, ShareMenuProvider } from '../types';
+import { ShareContext, ShareMenuProvider } from '../types';
 
 export class ShareMenuRegistry {
   private readonly shareMenuProviders = new Map<string, ShareMenuProvider>();
 
   public setup() {
     return {
+      /**
+       * Register an additional source of items for share context menu items. All registered providers
+       * will be called if a consumer displays the context menu. Returned `ShareMenuItem`s will be shown
+       * in the context menu together with the default built-in share options.
+       * Each share provider needs a globally unique id.
+       * @param shareMenuProvider
+       */
       register: (shareMenuProvider: ShareMenuProvider) => {
         if (this.shareMenuProviders.has(shareMenuProvider.id)) {
           throw new Error(
@@ -38,9 +45,9 @@ export class ShareMenuRegistry {
 
   public start() {
     return {
-      getShareMenuItems: (props: ShareMenuItemProps) =>
+      getShareMenuItems: (context: ShareContext) =>
         Array.from(this.shareMenuProviders.values()).flatMap(shareActionProvider =>
-          shareActionProvider.getShareMenuItems(props)
+          shareActionProvider.getShareMenuItems(context)
         ),
     };
   }

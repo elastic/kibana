@@ -24,7 +24,7 @@ import { EuiWrappingPopover } from '@elastic/eui';
 
 import { CoreStart, HttpStart } from 'kibana/public';
 import { ShareContextMenu } from '../components/share_context_menu';
-import { ShareMenuItem, ShowProps } from '../types';
+import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
 
 export class ShareMenuManager {
@@ -34,10 +34,15 @@ export class ShareMenuManager {
 
   start(core: CoreStart, shareRegistry: ShareMenuRegistryStart) {
     return {
-      showShareContextMenu: (props: ShowProps) => {
-        const menuItems = shareRegistry.getShareMenuItems({ ...props, onClose: this.onClose });
-        this.showShareContextMenu({
-          ...props,
+      /**
+       * Collects share menu items from registered providers and mounts the share context menu under
+       * the given `anchorElement`. If the context menu is already opened, a call to this method closes it.
+       * @param options
+       */
+      toggleShareContextMenu: (options: ShowShareMenuOptions) => {
+        const menuItems = shareRegistry.getShareMenuItems({ ...options, onClose: this.onClose });
+        this.toggleShareContextMenu({
+          ...options,
           menuItems,
           post: core.http.post,
           basePath: core.http.basePath.get(),
@@ -51,7 +56,7 @@ export class ShareMenuManager {
     this.isOpen = false;
   };
 
-  private showShareContextMenu({
+  private toggleShareContextMenu({
     anchorElement,
     allowEmbed,
     allowShortUrl,
@@ -62,7 +67,11 @@ export class ShareMenuManager {
     shareableUrl,
     post,
     basePath,
-  }: ShowProps & { menuItems: ShareMenuItem[]; post: HttpStart['post']; basePath: string }) {
+  }: ShowShareMenuOptions & {
+    menuItems: ShareMenuItem[];
+    post: HttpStart['post'];
+    basePath: string;
+  }) {
     if (this.isOpen) {
       this.onClose();
       return;

@@ -46,7 +46,7 @@ describe('SharePlugin', () => {
         expect.anything(),
         expect.objectContaining({ getShareMenuItems: expect.any(Function) })
       );
-      expect(start.showShareContextMenu).toBeDefined();
+      expect(start.toggleShareContextMenu).toBeDefined();
     });
   });
 });

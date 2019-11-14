@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { ChangeEvent, Component } from 'react';
+import React, { Component } from 'react';
 
 import {
   EuiButton,
@@ -31,6 +31,7 @@ import {
   EuiLoadingSpinner,
   EuiRadioGroup,
   EuiSwitch,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 
 import { format as formatUrl, parse as parseUrl } from 'url';
@@ -231,7 +232,7 @@ export class UrlPanelContent extends Component<Props, State> {
     );
   };
 
-  private handleShortUrlChange = async (evt: ChangeEvent<HTMLInputElement>) => {
+  private handleShortUrlChange = async (evt: EuiSwitchEvent) => {
     const isChecked = evt.target.checked;
 
     if (!isChecked || this.shortUrlCache !== undefined) {

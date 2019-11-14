@@ -19,10 +19,10 @@
 
 export { SharePluginSetup, SharePluginStart } from './plugin';
 export {
-  ShareMenuItemProps,
+  ShareContext,
   ShareMenuProvider,
   ShareMenuItem,
-  ShowProps,
+  ShowShareMenuOptions,
   ShareContextMenuPanelItem,
 } from './types';
 import { SharePlugin } from './plugin';

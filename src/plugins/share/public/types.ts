@@ -28,10 +28,10 @@ import {
  * menu providers will provide suitable items which have to
  * be rendered in an appropriate place by the caller.
  *
- * It is possible to use the static function `showShareContextMenu`
+ * It is possible to use the static function `toggleShareContextMenu`
  * to render the menu as a popover.
  * */
-export interface ShareMenuItemProps {
+export interface ShareContext {
   objectType: string;
   objectId?: string;
   /**
@@ -69,15 +69,21 @@ export interface ShareMenuItem {
   panel: EuiContextMenuPanelDescriptor;
 }
 
-/** @public */
+/**
+ * @public
+ * A source for additional menu items shown in the share context menu. Any provider
+ * registered via `share.register()` will be called if a consumer displays the context
+ * menu. Returned `ShareMenuItem`s will be shown in the context menu together with the
+ * default built-in share options. Each share provider needs a globally unique id.
+ * */
 export interface ShareMenuProvider {
   readonly id: string;
 
-  getShareMenuItems: (actionProps: ShareMenuItemProps) => ShareMenuItem[];
+  getShareMenuItems: (context: ShareContext) => ShareMenuItem[];
 }
 
 /** @public */
-export interface ShowProps extends Omit<ShareMenuItemProps, 'onClose'> {
+export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   anchorElement: HTMLElement;
   allowEmbed: boolean;
   allowShortUrl: boolean;

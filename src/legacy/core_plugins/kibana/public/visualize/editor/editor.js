@@ -238,7 +238,7 @@ function VisEditor(
     run: (anchorElement) => {
       const hasUnappliedChanges = vis.dirty;
       const hasUnsavedChanges = $appStatus.dirty;
-      share.showShareContextMenu({
+      share.toggleShareContextMenu({
         anchorElement,
         allowEmbed: true,
         allowShortUrl: capabilities.visualize.createShortUrl,

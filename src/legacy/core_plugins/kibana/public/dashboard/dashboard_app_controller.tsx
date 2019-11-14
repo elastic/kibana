@@ -756,7 +756,7 @@ export class DashboardAppController {
       });
     };
     navActions[TopNavIds.SHARE] = anchorElement => {
-      npStart.plugins.share.showShareContextMenu({
+      npStart.plugins.share.toggleShareContextMenu({
         anchorElement,
         allowEmbed: true,
         allowShortUrl: !dashboardConfig.getHideWriteControls(),

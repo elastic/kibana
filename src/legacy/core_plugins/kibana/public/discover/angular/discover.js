@@ -326,7 +326,7 @@ function discoverController(
       testId: 'shareTopNavButton',
       run: async (anchorElement) => {
         const sharingData = await this.getSharingData();
-        share.showShareContextMenu({
+        share.toggleShareContextMenu({
           anchorElement,
           allowEmbed: false,
           allowShortUrl: uiCapabilities.discover.createShortUrl,

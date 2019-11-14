@@ -12,7 +12,7 @@ import { npSetup } from 'ui/new_platform';
 import React from 'react';
 import chrome from 'ui/chrome';
 import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content';
-import { ShareMenuItemProps } from '../../../../../../src/plugins/share/public';
+import { ShareContext } from '../../../../../../src/plugins/share/public';
 
 async function reportingProvider() {
   const injector = await chrome.dangerouslyGetActiveInjector();
@@ -23,7 +23,7 @@ async function reportingProvider() {
     isDirty,
     onClose,
     shareableUrl,
-  }: ShareMenuItemProps) => {
+  }: ShareContext) => {
     if (!['dashboard', 'visualization'].includes(objectType)) {
       return [];
     }

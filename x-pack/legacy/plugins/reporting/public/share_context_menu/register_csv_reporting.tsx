@@ -10,7 +10,7 @@ import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import React from 'react';
 import { npSetup } from 'ui/new_platform';
 import { ReportingPanelContent } from '../components/reporting_panel_content';
-import { ShareMenuItemProps } from '../../../../../../src/plugins/share/public';
+import { ShareContext } from '../../../../../../src/plugins/share/public';
 
 function reportingProvider() {
   const getShareMenuItems = ({
@@ -19,7 +19,7 @@ function reportingProvider() {
     sharingData,
     isDirty,
     onClose,
-  }: ShareMenuItemProps) => {
+  }: ShareContext) => {
     if ('search' !== objectType) {
       return [];
     }
