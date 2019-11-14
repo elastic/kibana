@@ -19,9 +19,13 @@
 
 
 import $ from 'jquery';
-import { CUSTOM_LEGEND_VIS_TYPES } from '../../../ui/public/vis/vis_types/vislib_vis_legend';
+
+// import '../../../ui/public/vis/vis_types/vislib_vis_legend';
+import '../../../ui/public/vis/vis_types/vis_legend';
 import { VislibVisProvider } from '../../../ui/public/vislib/vis';
 import chrome from '../../../ui/public/chrome';
+
+export const CUSTOM_LEGEND_VIS_TYPES = ['heatmap', 'gauge'];
 
 const legendClassName = {
   top: 'visLib--legend-top',
@@ -82,7 +86,16 @@ export class vislibVisController {
         this.$scope.visData = esResponse;
         this.$scope.visParams = visParams;
         this.$scope.uiState = this.$scope.vis.getUiState();
-        const legendHtml = this.$compile('<vislib-legend></vislib-legend>')(this.$scope);
+        const component =
+          `<vislib-legend
+            vis="vis"
+            refreshLegend="refreshLegend"
+            visData="visData"
+            visParams="visParams"
+            uiState="uiState"
+          >
+          </vislib-legend>`;
+        const legendHtml = this.$compile(component)(this.$scope);
         this.container.appendChild(legendHtml[0]);
         this.$scope.$digest();
       }
