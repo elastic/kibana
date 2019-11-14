@@ -10,6 +10,8 @@ import { npStart } from 'ui/new_platform';
 import 'react-vis/dist/style.css';
 import 'ui/autoload/all';
 import chrome from 'ui/chrome';
+import { i18n } from '@kbn/i18n';
+
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import { GlobalHelpExtension } from './components/app/GlobalHelpExtension';
@@ -22,16 +24,28 @@ import { KibanaCoreContextProvider } from '../../observability/public';
 const { core } = npStart;
 
 // render APM feedback link in global help menu
-core.chrome.setHelpExtension(domElement => {
-  ReactDOM.render(
-    <KibanaCoreContextProvider core={core}>
-      <GlobalHelpExtension />
-    </KibanaCoreContextProvider>,
-    domElement
-  );
-  return () => {
-    ReactDOM.unmountComponentAtNode(domElement);
-  };
+core.chrome.setHelpExtension({
+  appName: i18n.translate('xpack.apm.feedbackMenu.appName', {
+    defaultMessage: 'APM'
+  }),
+  links: [
+    {
+      linkType: 'discuss',
+      href: 'https://discuss.elastic.co/c/apm',
+      rel: 'noopener'
+    }
+  ],
+  content: domElement => {
+    ReactDOM.render(
+      <KibanaCoreContextProvider core={core}>
+        <GlobalHelpExtension />
+      </KibanaCoreContextProvider>,
+      domElement
+    );
+    return () => {
+      ReactDOM.unmountComponentAtNode(domElement);
+    };
+  }
 });
 
 // @ts-ignore
