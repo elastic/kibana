@@ -162,10 +162,15 @@ const removeFieldFromMap = (fieldId: string, fields: NormalizedFields): Normaliz
   let { rootLevelFields } = fields;
 
   const updatedById = { ...fields.byId };
+  const updatedAliases = { ...fields.aliases };
+
   const { parentId } = updatedById[fieldId];
 
   // Remove the field from the map
   delete updatedById[fieldId];
+
+  // delete its alias array reference
+  delete updatedAliases[fieldId];
 
   if (parentId) {
     const parentField = updatedById[parentId];
@@ -195,6 +200,7 @@ const removeFieldFromMap = (fieldId: string, fields: NormalizedFields): Normaliz
     ...fields,
     rootLevelFields,
     byId: updatedById,
+    aliases: updatedAliases,
   };
 };
 
@@ -381,10 +387,11 @@ export const reducer = (state: State, action: Action): State => {
             newField.source.type
           );
 
-          if (shouldDeleteChildFields && !nextTypeCanHaveAlias && Boolean(aliases.length)) {
+          if ((shouldDeleteChildFields || !nextTypeCanHaveAlias) && Boolean(aliases.length)) {
             aliases.forEach(aliasId => {
               updatedFields = removeFieldFromMap(aliasId, updatedFields);
             });
+            delete updatedFields.aliases[fieldToEdit];
           }
         }
 
