@@ -166,17 +166,15 @@ describe('licensing plugin', () => {
         await plugin.setup(coreSetup);
         await flushPromises();
 
-        expect(loggingServiceMock.collect(pluginInitContextMock.logger).debug)
-          .toMatchInlineSnapshot(`
-          Array [
-            Array [
-              "Setting up Licensing plugin",
-            ],
-            Array [
-              "Imported license information from Elasticsearch:type: basic | status: active | expiry date: 1970-01-01T01:00:01+01:00",
-            ],
-          ]
-        `);
+        const loggedMessages = loggingServiceMock.collect(pluginInitContextMock.logger).debug;
+
+        expect(
+          loggedMessages.some(([message]) =>
+            message.startsWith(
+              'Imported license information from Elasticsearch:type: basic | status: active | expiry date:'
+            )
+          )
+        ).toBe(true);
       });
 
       it('generates signature based on fetched license content', async () => {
