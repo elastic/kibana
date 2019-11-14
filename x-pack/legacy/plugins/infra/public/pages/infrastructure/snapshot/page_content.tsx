@@ -38,7 +38,7 @@ export const SnapshotPageContent: React.SFC = () => (
                         groupBy={groupBy}
                         nodeType={nodeType}
                         sourceId={sourceId}
-                        timerange={currentTimeRange}
+                        timeRange={currentTimeRange}
                         options={{
                           ...wafflemap,
                           metric,

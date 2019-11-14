@@ -34,7 +34,6 @@ export interface LayoutProps {
   metric: InfraSnapshotMetricInput;
   groupBy: InfraSnapshotGroupbyInput[];
   sourceId: string;
-  timerange: InfraTimerangeInput;
 }
 
 export const Layout = (props: LayoutProps) => {
@@ -44,7 +43,7 @@ export const Layout = (props: LayoutProps) => {
     props.groupBy,
     props.nodeType,
     props.sourceId,
-    props.timerange
+    props.timeRange
   );
   return (
     <>
