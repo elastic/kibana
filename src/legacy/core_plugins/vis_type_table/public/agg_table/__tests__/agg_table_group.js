@@ -23,13 +23,12 @@ import expect from '@kbn/expect';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { VisProvider } from 'ui/vis';
+import { Vis } from 'ui/vis';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 
 describe('Table Vis - AggTableGroup Directive', function () {
   let $rootScope;
   let $compile;
-  let Vis;
   let indexPattern;
   let tableAggResponse;
   const tabifiedData = {};
@@ -69,7 +68,6 @@ describe('Table Vis - AggTableGroup Directive', function () {
 
       tableAggResponse = legacyResponseHandlerProvider().handler;
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      Vis = Private(VisProvider);
 
       $rootScope = $injector.get('$rootScope');
       $compile = $injector.get('$compile');

@@ -26,7 +26,36 @@ import { i18n } from '@kbn/i18n';
 let bannerId: string | null = null;
 let currentOptInStatus = false;
 
-export function TelemetryOptInProvider($injector: any, chrome: any) {
+async function sendOptInStatus($injector: any, chrome: any, enabled: boolean) {
+  const telemetryOptInStatusUrl = npStart.core.injectedMetadata.getInjectedVar(
+    'telemetryOptInStatusUrl'
+  ) as string;
+  const $http = $injector.get('$http');
+
+  try {
+    const optInStatus = await $http.post(
+      chrome.addBasePath('/api/telemetry/v2/clusters/_opt_in_stats'),
+      {
+        enabled,
+        unencrypted: false,
+      }
+    );
+
+    if (optInStatus.data && optInStatus.data.length) {
+      return await fetch(telemetryOptInStatusUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(optInStatus.data),
+      });
+    }
+  } catch (err) {
+    // Sending the ping is best-effort. Telemetry tries to send the ping once and discards it immediately if sending fails.
+    // swallow any errors
+  }
+}
+export function TelemetryOptInProvider($injector: any, chrome: any, sendOptInStatusChange = true) {
   currentOptInStatus = npStart.core.injectedMetadata.getInjectedVar('telemetryOptedIn') as boolean;
   const allowChangingOptInStatus = npStart.core.injectedMetadata.getInjectedVar(
     'allowChangingOptInStatus'
@@ -49,6 +78,9 @@ export function TelemetryOptInProvider($injector: any, chrome: any) {
 
       try {
         await $http.post(chrome.addBasePath('/api/telemetry/v2/optIn'), { enabled });
+        if (sendOptInStatusChange) {
+          await sendOptInStatus($injector, chrome, enabled);
+        }
         currentOptInStatus = enabled;
       } catch (error) {
         toastNotifications.addError(error, {

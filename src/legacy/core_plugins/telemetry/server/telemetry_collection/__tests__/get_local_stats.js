@@ -152,7 +152,7 @@ describe('get_local_stats', () => {
     });
   });
 
-  describe('getLocalStats', () => {
+  describe.skip('getLocalStats', () => {
     it('returns expected object without xpack data when X-Pack fails to respond', async () => {
       const callClusterUsageFailed = sinon.stub();
 
