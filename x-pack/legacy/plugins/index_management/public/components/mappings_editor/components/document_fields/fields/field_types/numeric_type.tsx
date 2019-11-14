@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { UseField, FormDataProvider } from '../../../../shared_imports';
+import {
+  UseField,
+  FormDataProvider,
+  NumericField,
+  fieldFormatters,
+} from '../../../../shared_imports';
 import {
   StoreParameter,
   IndexParameter,
@@ -95,7 +100,13 @@ export const NumericType = ({ field }: Props) => {
           {/* null_value */}
           <NullValueParameter
             defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
-          />
+          >
+            <UseField
+              path="null_value"
+              component={NumericField}
+              config={{ formatters: [fieldFormatters.toInt] }}
+            />
+          </NullValueParameter>
 
           {/* coerce */}
           <CoerceParameter />
