@@ -33,7 +33,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         savedId: schema.nullable(schema.string()),
         query: schema.nullable(schema.string()),
         filters: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
-        maxSignals: schema.number({ defaultValue: 100 }),
+        maxSignals: schema.number({ defaultValue: 10000 }),
         severity: schema.string(),
         tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
         to: schema.string(),
@@ -81,7 +81,6 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         to,
         filter: esFilter,
         size: searchAfterSize,
-        maxDocs: maxSignals,
         searchAfterSortId: undefined,
       });
 

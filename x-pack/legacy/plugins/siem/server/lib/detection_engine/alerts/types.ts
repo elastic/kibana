@@ -33,7 +33,7 @@ export interface SignalAlertParams {
   interval: string;
   id: string;
   language: string | undefined;
-  maxSignals: number | undefined;
+  maxSignals: number;
   name: string;
   query: string | undefined;
   references: string[];
