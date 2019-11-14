@@ -11,6 +11,7 @@ export {
   getUseField,
   Form,
   FormHook,
+  useFormContext,
   FormDataProvider,
   FormSchema,
   FieldHook,

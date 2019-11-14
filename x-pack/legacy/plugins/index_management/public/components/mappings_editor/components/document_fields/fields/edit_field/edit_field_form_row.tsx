@@ -8,7 +8,13 @@ import React, { useState, useRef } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSwitch } from '@elastic/eui';
 
-import { ToggleField, UseField, FormDataProvider, FieldHook } from '../../../../shared_imports';
+import {
+  ToggleField,
+  UseField,
+  FormDataProvider,
+  FieldHook,
+  useFormContext,
+} from '../../../../shared_imports';
 
 import { ParameterName } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
@@ -41,6 +47,7 @@ export const EditFieldFormRow = React.memo(
     formFieldPath,
     children,
   }: Props) => {
+    const form = useFormContext();
     const toggleField = useRef<FieldHook | undefined>(undefined);
 
     const initialVisibleState =
@@ -53,6 +60,13 @@ export const EditFieldFormRow = React.memo(
     const isChildrenFunction = typeof children === 'function';
 
     const onToggle = () => {
+      if (isContentVisible === true) {
+        /**
+         * We are hiding the children (and thus removing any form field from the DOM).
+         * We need to reset the form to re-enable a possible disabled "save" button (from a previous validation error).
+         */
+        form.reset({ resetValues: false });
+      }
       setIsContentVisible(!isContentVisible);
     };
 
@@ -66,7 +80,8 @@ export const EditFieldFormRow = React.memo(
 
     const renderToggleInput = () =>
       formFieldPath === undefined ? (
-        <EuiSwitch checked={isContentVisible} onChange={onToggle} data-test-subj="input" />
+        // TODO: Ask EUI why the "label" is a required prop since last update
+        <EuiSwitch label="" checked={isContentVisible} onChange={onToggle} data-test-subj="input" />
       ) : (
         <UseField path={formFieldPath} config={getFieldConfig(formFieldPath)}>
           {field => {

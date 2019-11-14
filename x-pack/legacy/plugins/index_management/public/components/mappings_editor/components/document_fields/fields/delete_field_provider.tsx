@@ -135,9 +135,9 @@ export const DeleteFieldProvider = ({ children }: Props) => {
   };
 
   return (
-    <Fragment>
+    <>
       {children(deleteField)}
       {state.isModalOpen && renderModal()}
-    </Fragment>
+    </>
   );
 };
