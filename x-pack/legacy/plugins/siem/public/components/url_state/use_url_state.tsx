@@ -75,9 +75,10 @@ export const useUrlStateHooks = ({
         search,
         state: '',
       },
-      replaceStateKeyInQueryString(urlStateKey, urlStateToReplace)(
-        getQueryStringFromLocation(latestLocation)
-      )
+      replaceStateKeyInQueryString(
+        urlStateKey,
+        urlStateToReplace
+      )(getQueryStringFromLocation(latestLocation))
     );
     if (history) {
       history.replace(newLocation);

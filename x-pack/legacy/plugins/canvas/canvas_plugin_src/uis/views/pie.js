@@ -14,7 +14,10 @@ const { Pie: strings } = ViewStrings;
 export const pie = () => ({
   name: 'pie',
   displayName: strings.getDisplayName(),
-  modelArgs: [['color', { label: 'Slice Labels' }], ['size', { label: 'Slice Angles' }]],
+  modelArgs: [
+    ['color', { label: 'Slice Labels' }],
+    ['size', { label: 'Slice Angles' }],
+  ],
   args: [
     {
       name: 'palette',
