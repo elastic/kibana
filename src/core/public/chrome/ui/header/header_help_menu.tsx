@@ -18,9 +18,9 @@
  */
 
 import * as Rx from 'rxjs';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { InjectedIntl, injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiButtonEmptyProps,
@@ -60,6 +60,14 @@ type GitHubLink = EuiButtonEmptyProps & {
   title?: string;
 };
 
+type DiscussLink = EuiButtonEmptyProps & {
+  /**
+   * Creates a generic give feedback link with comment icon
+   */
+  linkType: 'discuss';
+  href: string;
+};
+
 type DocumentationLink = EuiButtonEmptyProps & {
   /**
    * Creates a deep-link to app-specific documentation
@@ -78,7 +86,7 @@ type CustomLink = EuiButtonEmptyProps & {
 
 export type HeaderHelpMenuUIExtraLink = ExclusiveUnion<
   GitHubLink,
-  ExclusiveUnion<DocumentationLink, CustomLink>
+  ExclusiveUnion<DiscussLink, ExclusiveUnion<DocumentationLink, CustomLink>>
 >;
 
 interface Props {
@@ -211,6 +219,14 @@ class HeaderHelpMenuUI extends Component<Props, State> {
     if (helpExtension) {
       const { appName, links, content } = helpExtension;
 
+      const feedbackText = i18n.translate(
+        'core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackOnApp',
+        {
+          defaultMessage: 'Give feedback on {appName}',
+          values: { appName: helpExtension.appName },
+        }
+      );
+
       const customLinks =
         links &&
         links.map((link, index) => {
@@ -227,21 +243,18 @@ class HeaderHelpMenuUI extends Component<Props, State> {
                 { target: '_blank', ...rest }
               );
             case 'github':
-              return this.createCustomLink(
-                index,
-                <FormattedMessage
-                  id="core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackOnApp"
-                  defaultMessage="Give feedback on {appName}"
-                  values={{ appName: helpExtension.appName }}
-                />,
-                index < links.length - 1,
-                {
-                  iconType: 'logoGithub',
-                  href: this.createGithubUrl(labels, title),
-                  target: '_blank',
-                  ...rest,
-                }
-              );
+              return this.createCustomLink(index, feedbackText, index < links.length - 1, {
+                iconType: 'logoGithub',
+                href: this.createGithubUrl(labels, title),
+                target: '_blank',
+                ...rest,
+              });
+            case 'discuss':
+              return this.createCustomLink(index, feedbackText, index < links.length - 1, {
+                iconType: 'editorComment',
+                target: '_blank',
+                ...rest,
+              });
             case 'custom':
               return this.createCustomLink(index, text, index < links.length - 1, { ...rest });
             default:
