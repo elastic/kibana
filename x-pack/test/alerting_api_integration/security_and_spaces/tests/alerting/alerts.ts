@@ -90,10 +90,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
-              const alertTestRecord = (await esTestIndexTool.waitForDocs(
-                'alert:test.always-firing',
-                reference
-              ))[0];
+              const alertTestRecord = (
+                await esTestIndexTool.waitForDocs('alert:test.always-firing', reference)
+              )[0];
               expect(alertTestRecord._source).to.eql({
                 source: 'alert:test.always-firing',
                 reference,
@@ -103,10 +102,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   reference,
                 },
               });
-              const actionTestRecord = (await esTestIndexTool.waitForDocs(
-                'action:test.index-record',
-                reference
-              ))[0];
+              const actionTestRecord = (
+                await esTestIndexTool.waitForDocs('action:test.index-record', reference)
+              )[0];
               expect(actionTestRecord._source).to.eql({
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
@@ -265,10 +263,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
-              alertTestRecord = (await esTestIndexTool.waitForDocs(
-                'alert:test.authorization',
-                reference
-              ))[0];
+              alertTestRecord = (
+                await esTestIndexTool.waitForDocs('alert:test.authorization', reference)
+              )[0];
               expect(alertTestRecord._source.state).to.eql({
                 callClusterSuccess: false,
                 savedObjectsClientSuccess: false,
@@ -288,10 +285,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
-              alertTestRecord = (await esTestIndexTool.waitForDocs(
-                'alert:test.authorization',
-                reference
-              ))[0];
+              alertTestRecord = (
+                await esTestIndexTool.waitForDocs('alert:test.authorization', reference)
+              )[0];
               expect(alertTestRecord._source.state).to.eql({
                 callClusterSuccess: true,
                 savedObjectsClientSuccess: false,
@@ -362,10 +358,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
-              actionTestRecord = (await esTestIndexTool.waitForDocs(
-                'action:test.authorization',
-                reference
-              ))[0];
+              actionTestRecord = (
+                await esTestIndexTool.waitForDocs('action:test.authorization', reference)
+              )[0];
               expect(actionTestRecord._source.state).to.eql({
                 callClusterSuccess: false,
                 savedObjectsClientSuccess: false,
@@ -385,10 +380,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
-              actionTestRecord = (await esTestIndexTool.waitForDocs(
-                'action:test.authorization',
-                reference
-              ))[0];
+              actionTestRecord = (
+                await esTestIndexTool.waitForDocs('action:test.authorization', reference)
+              )[0];
               expect(actionTestRecord._source.state).to.eql({
                 callClusterSuccess: true,
                 savedObjectsClientSuccess: false,
