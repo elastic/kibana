@@ -884,29 +884,44 @@ export class SavedObjectsRepository {
         delete documentToSave.references;
       }
 
-      const expectedResult = {
-        type,
-        id,
-        version,
-        esRequestIndex: bulkGetRequestIndexCounter++,
-        documentToSave,
-      };
+      if (!this._schema.isNamespaces) {
+        return {
+          tag: 'Right' as 'Right',
+          value: {
+            type,
+            id,
+            version,
+            documentToSave,
+          },
+        };
+      }
 
       bulkGetDocs.push({
         _id: this._serializer.generateRawId(namespace, type, id),
         _index: this.getIndexForType(type),
-        _source: ['type', 'namespace'],
+        _source: ['type', 'namespaces'],
       });
 
-      return { tag: 'Right' as 'Right', value: expectedResult };
+      return {
+        tag: 'Right' as 'Right',
+        value: {
+          type,
+          id,
+          version,
+          esRequestIndex: bulkGetRequestIndexCounter++,
+          documentToSave,
+        },
+      };
     });
 
-    const bulkGetResponse = await this._callCluster('mget', {
-      body: {
-        docs: bulkGetDocs,
-      },
-      ignore: [404],
-    });
+    const bulkGetResponse = bulkGetDocs.length
+      ? await this._callCluster('mget', {
+          body: {
+            docs: bulkGetDocs,
+          },
+          ignore: [404],
+        })
+      : undefined;
 
     let bulkUpdateRequestIndexCounter = 0;
     const bulkUpdateParams: object[] = [];
@@ -917,23 +932,28 @@ export class SavedObjectsRepository {
         }
 
         const { esRequestIndex, id, type, version, documentToSave } = expectedBulkGetResult.value;
-        const indexFound = bulkGetResponse.status !== 404;
-        const actualResult = indexFound ? bulkGetResponse.docs[esRequestIndex] : undefined;
-        const docFound = indexFound && actualResult.found === true;
-        if (!indexFound || !docFound || !this._rawInNamespaces(actualResult, namespace)) {
-          return {
-            tag: 'Left' as 'Left',
-            error: {
-              id,
-              type,
-              error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload,
-            },
-          };
+        let namespaces;
+        if (esRequestIndex !== undefined) {
+          const indexFound = bulkGetResponse.status !== 404;
+          const actualResult = indexFound ? bulkGetResponse.docs[esRequestIndex] : undefined;
+          const docFound = indexFound && actualResult.found === true;
+          if (!indexFound || !docFound || !this._rawInNamespaces(actualResult, namespace)) {
+            return {
+              tag: 'Left' as 'Left',
+              error: {
+                id,
+                type,
+                error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload,
+              },
+            };
+          }
+          namespaces = actualResult._source.namespaces;
         }
 
         const expectedResult = {
           type,
           id,
+          namespaces,
           esRequestIndex: bulkUpdateRequestIndexCounter++,
           documentToSave: expectedBulkGetResult.value.documentToSave,
         };
@@ -967,7 +987,7 @@ export class SavedObjectsRepository {
           return expectedResult.error;
         }
 
-        const { type, id, documentToSave, esRequestIndex } = expectedResult.value;
+        const { type, id, namespaces, documentToSave, esRequestIndex } = expectedResult.value;
         const response = bulkUpdateResponse.items[esRequestIndex];
         const { error, _seq_no: seqNo, _primary_term: primaryTerm } = Object.values(
           response
@@ -984,6 +1004,7 @@ export class SavedObjectsRepository {
         return {
           id,
           type,
+          ...(namespaces && { namespaces }),
           updated_at,
           version: encodeVersion(seqNo, primaryTerm),
           attributes,

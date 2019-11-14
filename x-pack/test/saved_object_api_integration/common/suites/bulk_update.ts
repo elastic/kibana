@@ -19,6 +19,7 @@ interface BulkUpdateTests {
   spaceAware: BulkUpdateTest;
   notSpaceAware: BulkUpdateTest;
   hiddenType: BulkUpdateTest;
+  sharedType: BulkUpdateTest;
   doesntExist: BulkUpdateTest;
 }
 
@@ -118,6 +119,26 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
     });
   };
 
+  const expectSharedTypeNotFound = createExpectNotFound('sharedtype', 'default_and_space_1');
+
+  const expectSharedTypeResults = (resp: { [key: string]: any }) => {
+    const [, savedObject] = resp.body.saved_objects;
+
+    // loose ISO8601 UTC time with milliseconds validation
+    expect(savedObject)
+      .to.have.property('updated_at')
+      .match(/^[\d-]{10}T[\d:\.]{12}Z$/);
+
+    expect(savedObject).to.eql({
+      id: 'default_and_space_1',
+      type: 'sharedtype',
+      namespaces: ['default', 'space_1'],
+      version: savedObject.version,
+      updated_at: savedObject.updated_at,
+      attributes: { name: 'My favorite shared type' },
+    });
+  };
+
   const makeBulkUpdateTest = (describeFn: DescribeFn) => (
     description: string,
     definition: BulkUpdateTestDefinition
@@ -160,7 +181,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
 
       it(`should return ${tests.notSpaceAware.statusCode} for a non space-aware doc`, async () => {
         await supertest
-          .put(`${getUrlPrefix(otherSpaceId || spaceId)}/api/saved_objects/_bulk_update`)
+          .put(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_update`)
           .auth(user.username, user.password)
           .send([
             generateNonSpaceAwareGlobalSavedObject(),
@@ -179,7 +200,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
 
       it(`should return ${tests.hiddenType.statusCode} for hiddentype doc`, async () => {
         await supertest
-          .put(`${getUrlPrefix(otherSpaceId || spaceId)}/api/saved_objects/_bulk_update`)
+          .put(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_update`)
           .auth(user.username, user.password)
           .send([
             generateNonSpaceAwareGlobalSavedObject(),
@@ -196,6 +217,25 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
           .then(tests.hiddenType.response);
       });
 
+      it(`should return ${tests.sharedType.statusCode} for sharedtype doc`, async () => {
+        await supertest
+          .put(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_update`)
+          .auth(user.username, user.password)
+          .send([
+            generateNonSpaceAwareGlobalSavedObject(),
+            {
+              type: 'sharedtype',
+              id: 'default_and_space_1',
+              attributes: {
+                name: 'My favorite shared type',
+              },
+            },
+            generateNonSpaceAwareGlobalSavedObject(),
+          ])
+          .expect(tests.sharedType.statusCode)
+          .then(tests.sharedType.response);
+      });
+
       describe('unknown id', () => {
         it(`should return ${tests.doesntExist.statusCode}`, async () => {
           await supertest
@@ -205,7 +245,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
               generateNonSpaceAwareGlobalSavedObject(),
               {
                 type: 'visualization',
-                id: `${getIdPrefix(spaceId)}not an id`,
+                id: `${getIdPrefix(otherSpaceId || spaceId)}not an id`,
                 attributes: {
                   title: 'My second favorite vis',
                 },
@@ -226,10 +266,12 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
   return {
     createExpectDoesntExistNotFound,
     createExpectSpaceAwareNotFound,
-    expectSpaceNotFound: expectHiddenTypeNotFound,
+    expectHiddenTypeNotFound,
     expectDoesntExistRbacForbidden,
     expectNotSpaceAwareRbacForbidden,
     expectNotSpaceAwareResults,
+    expectSharedTypeNotFound,
+    expectSharedTypeResults,
     expectSpaceAwareRbacForbidden,
     expectSpaceAwareResults,
     expectHiddenTypeRbacForbidden,
