@@ -17,36 +17,8 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
-/**
- * Take userInput from the user and make it into a query object
- * @returns {object}
- * @param userInput
- */
-
-export function fromUser(userInput: object | string) {
-  const matchAll = '';
-
-  if (_.isObject(userInput)) {
-    return userInput;
-  }
-
-  userInput = userInput || '';
-  if (typeof userInput === 'string') {
-    const trimmedUserInput = userInput.trim();
-    if (trimmedUserInput.length === 0) {
-      return matchAll;
-    }
-
-    if (trimmedUserInput[0] === '{') {
-      try {
-        return JSON.parse(trimmedUserInput);
-      } catch (e) {
-        return userInput;
-      }
-    } else {
-      return userInput;
-    }
-  }
-}
+export * from './match_pairs';
+export * from './from_user';
+export * from './to_user';
+export * from './to_user';
+export * from './get_query_log';

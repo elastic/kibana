@@ -17,35 +17,23 @@
  * under the License.
  */
 
-import { QueryService, QuerySetup } from '.';
-
-type QueryServiceClientContract = PublicMethodsOf<QueryService>;
-
-const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<QuerySetup> = {
-    helpers: {
-      fromUser: jest.fn(),
-      toUser: jest.fn(),
-      getQueryLog: jest.fn(),
-    },
-  };
-
-  return setupContract;
-};
-
-const createMock = () => {
-  const mocked: jest.Mocked<QueryServiceClientContract> = {
-    setup: jest.fn(),
-    start: jest.fn(),
-    stop: jest.fn(),
-  };
-
-  mocked.setup.mockReturnValue(createSetupContractMock());
-  return mocked;
-};
-
-export const queryServiceMock = {
-  create: createMock,
-  createSetupContract: createSetupContractMock,
-  createStartContract: createSetupContractMock,
-};
+/**
+ * Take text from the model and present it to the user as a string
+ * @param text model value
+ * @returns {string}
+ */
+export function toUser(text: { [key: string]: any } | string | number): string {
+  if (text == null) {
+    return '';
+  }
+  if (typeof text === 'object') {
+    if (text.match_all) {
+      return '';
+    }
+    if (text.query_string) {
+      return toUser(text.query_string.query);
+    }
+    return JSON.stringify(text);
+  }
+  return '' + text;
+}
