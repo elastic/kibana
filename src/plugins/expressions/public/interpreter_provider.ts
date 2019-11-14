@@ -166,9 +166,9 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
 
     // Check for missing required arguments
     each(argDefs, argDef => {
-      const { aliases, default: argDefault, name: argName, required } = argDef as (ArgumentType<
+      const { aliases, default: argDefault, name: argName, required } = argDef as ArgumentType<
         any
-      > & { name: string });
+      > & { name: string };
       if (
         typeof argDefault === 'undefined' &&
         required &&

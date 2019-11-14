@@ -35,10 +35,10 @@ import {
 } from 'ui/state_management/app_state';
 
 import { KbnUrl } from 'ui/url/kbn_url';
-import { TimeRange } from 'src/plugins/data/public';
+import { TimeRange, Query } from 'src/plugins/data/public';
 import { IndexPattern } from 'ui/index_patterns';
 import { IPrivate } from 'ui/private';
-import { StaticIndexPattern, Query, SavedQuery } from 'plugins/data';
+import { StaticIndexPattern, SavedQuery } from 'plugins/data';
 import moment from 'moment';
 import { Subscription } from 'rxjs';
 

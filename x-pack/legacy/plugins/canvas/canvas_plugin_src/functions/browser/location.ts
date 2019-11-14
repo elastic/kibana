@@ -31,7 +31,10 @@ export function location(): ExpressionFunction<'location', null, {}, Promise<Ret
           const { latitude, longitude } = geoposition.coords;
           return resolve({
             type: 'datatable',
-            columns: [{ name: 'latitude', type: 'number' }, { name: 'longitude', type: 'number' }],
+            columns: [
+              { name: 'latitude', type: 'number' },
+              { name: 'longitude', type: 'number' },
+            ],
             rows: [{ latitude, longitude }],
           });
         }
