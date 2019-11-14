@@ -9,12 +9,21 @@ import { Logger } from './types';
 import { fillPool } from './lib/fill_pool';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
 import { sanitizeTaskDefinitions } from './lib/sanitize_task_definitions';
-import { ConcreteTaskInstance, RunContext, TaskInstance } from './task';
-import { SanitizedTaskDefinition, TaskDefinition, TaskDictionary } from './task';
+import {
+  SanitizedTaskDefinition,
+  TaskDefinition,
+  TaskDictionary,
+  ConcreteTaskInstance,
+  RunContext,
+  TaskInstanceWithId,
+  TaskInstance,
+} from './task';
 import { TaskPoller } from './task_poller';
 import { TaskPool } from './task_pool';
 import { TaskManagerRunner } from './task_runner';
 import { FetchOpts, FetchResult, TaskStore } from './task_store';
+
+const VERSION_CONFLICT_STATUS = 409;
 
 export interface TaskManagerOpts {
   logger: Logger;
@@ -190,6 +199,26 @@ export class TaskManager {
     const result = await this.store.schedule(modifiedTask);
     this.poller.attemptWork();
     return result;
+  }
+
+  /**
+   * Schedules a task with an Id
+   *
+   * @param task - The task being scheduled.
+   * @returns {Promise<TaskInstanceWithId>}
+   */
+  public async ensureScheduled(
+    taskInstance: TaskInstanceWithId,
+    options?: any
+  ): Promise<TaskInstanceWithId> {
+    try {
+      return await this.schedule(taskInstance, options);
+    } catch (err) {
+      if (err.statusCode === VERSION_CONFLICT_STATUS) {
+        return taskInstance;
+      }
+      throw err;
+    }
   }
 
   /**
