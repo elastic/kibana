@@ -10,6 +10,8 @@ import Joi from 'joi';
  * Type definitions and validations for tasks.
  */
 
+type Require<T extends object, P extends keyof T = keyof T> = Omit<T, P> & Required<Pick<T, P>>;
+
 /**
  * A loosely typed definition of the elasticjs wrapper. It's beyond the scope
  * of this work to try to make a comprehensive type definition of this.
@@ -219,13 +221,7 @@ export interface TaskInstance {
 /**
  * A task instance that has an id.
  */
-export interface ExistingTaskInstance extends TaskInstance {
-  /**
-   * The id of the Elastic document that stores this instance's data. This can
-   * be passed by the caller when scheduling the task.
-   */
-  id: string;
-}
+export type TaskInstanceWithId = Require<TaskInstance, 'id'>;
 
 /**
  * A task instance that has an id and is ready for storage.

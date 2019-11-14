@@ -14,8 +14,8 @@ import {
   TaskDefinition,
   TaskDictionary,
   ConcreteTaskInstance,
-  ExistingTaskInstance,
   RunContext,
+  TaskInstanceWithId,
   TaskInstance,
 } from './task';
 import { TaskPoller } from './task_poller';
@@ -229,9 +229,9 @@ export class TaskManager {
    * @returns {Promise<ConcreteTaskInstance>}
    */
   public async ensureScheduling(
-    taskInstance: ExistingTaskInstance,
+    taskInstance: TaskInstanceWithId,
     options?: any
-  ): Promise<ExistingTaskInstance> {
+  ): Promise<TaskInstanceWithId> {
     try {
       return await this.schedule(taskInstance, options);
     } catch (err) {
