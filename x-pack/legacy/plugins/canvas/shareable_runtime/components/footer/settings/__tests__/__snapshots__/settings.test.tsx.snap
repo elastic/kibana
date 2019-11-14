@@ -390,18 +390,8 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFormRow"
+                            class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--compressed"
                           >
-                            <div
-                              class="euiFormRow__labelWrapper"
-                            >
-                              <label
-                                class="euiFormLabel euiFormRow__label"
-                                for="generated-id"
-                              >
-                                 
-                              </label>
-                            </div>
                             <div
                               class="euiFormRow__fieldWrapper"
                             >

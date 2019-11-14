@@ -116,7 +116,7 @@ export class TelemetryForm extends Component {
                 type: 'boolean',
                 value: telemetryOptInProvider.getOptIn() || false,
                 description: this.renderDescription(),
-                defVal: false,
+                defVal: true,
               }}
               save={this.toggleOptIn}
               clear={this.toggleOptIn}
