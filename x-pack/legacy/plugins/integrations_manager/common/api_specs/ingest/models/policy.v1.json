@@ -1,0 +1,37 @@
+{
+  "title": "Policy",
+  "type": "object",
+  "description": "The entire config for the Beats agent, including all assigned data source config outputs along with agent-wide configuration values",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "use_case": {
+      "type": "string"
+    },
+    "datasources": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "./datasource.v1.json"
+      }
+    },
+    "description": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "status"
+  ]
+}
