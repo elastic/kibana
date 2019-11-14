@@ -42,12 +42,9 @@ export const WithMetrics = ({
   nodeId,
   cloudId,
 }: WithMetricsProps) => {
-  const metrics = layouts.reduce(
-    (acc, item) => {
-      return acc.concat(item.sections.map(s => s.id));
-    },
-    [] as InfraMetric[]
-  );
+  const metrics = layouts.reduce((acc, item) => {
+    return acc.concat(item.sections.map(s => s.id));
+  }, [] as InfraMetric[]);
 
   return (
     <Query<MetricsQuery.Query, MetricsQuery.Variables>

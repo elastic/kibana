@@ -34,6 +34,7 @@ exports[`TelemetryForm renders as expected when allows to change optIn status 1`
         save={[Function]}
         setting={
           Object {
+            "ariaName": "Provide usage statistics",
             "defVal": false,
             "description": <React.Fragment>
               <p>
@@ -52,7 +53,7 @@ exports[`TelemetryForm renders as expected when allows to change optIn status 1`
               </p>
               <p>
                 <ForwardRef
-                  href="https://www.elastic.co/legal/telemetry-privacy-statement"
+                  href="https://www.elastic.co/legal/privacy-statement"
                   target="_blank"
                 >
                   <FormattedMessage

@@ -21,7 +21,7 @@ export const getToolbarPanel = (wrapper: ReactWrapper) =>
 export const getToolbarCheckbox = (wrapper: ReactWrapper) =>
   getToolbarPanel(wrapper)
     .find('EuiSwitch')
-    .find('input[type="checkbox"]');
+    .find('button');
 
 export const getAutoplayPanel = (wrapper: ReactWrapper) =>
   wrapper.find('AutoplaySettings > AutoplaySettingsComponent');
@@ -29,7 +29,7 @@ export const getAutoplayPanel = (wrapper: ReactWrapper) =>
 export const getAutoplayCheckbox = (wrapper: ReactWrapper) =>
   getAutoplayPanel(wrapper)
     .find('EuiSwitch')
-    .find('input[type="checkbox"]');
+    .find('button');
 
 export const getAutoplayTextField = (wrapper: ReactWrapper) =>
   getAutoplayPanel(wrapper)

@@ -195,10 +195,9 @@ export const TransactionDistribution: FunctionComponent<Props> = (
         }
         backgroundHover={(bucket: IChartPoint) => bucket.y > 0 && bucket.sample}
         tooltipHeader={(bucket: IChartPoint) =>
-          `${timeFormatter(bucket.x0, { withUnit: false })} - ${timeFormatter(
-            bucket.x,
-            { withUnit: false }
-          )} ${unit}`
+          `${timeFormatter(bucket.x0, {
+            withUnit: false
+          })} - ${timeFormatter(bucket.x, { withUnit: false })} ${unit}`
         }
         tooltipFooter={(bucket: IChartPoint) =>
           !bucket.sample &&

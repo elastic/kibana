@@ -243,6 +243,10 @@ override this parameter to use their own Tile Map Service. For example:
 `ops.interval:`:: *Default: 5000* Set the interval in milliseconds to sample
 system and process performance metrics. The minimum value is 100.
 
+`newsfeed.enabled:` :: *Default: `true`* Controls whether to enable the newsfeed
+system for the Kibana UI notification center. Set to `false` to disable the
+newsfeed system.
+
 `path.data:`:: *Default: `data`* The path where Kibana stores persistent data
 not saved in Elasticsearch.
 
