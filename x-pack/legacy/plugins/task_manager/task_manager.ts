@@ -226,9 +226,9 @@ export class TaskManager {
    * Schedules a task with an Id
    *
    * @param task - The task being scheduled.
-   * @returns {Promise<ConcreteTaskInstance>}
+   * @returns {Promise<TaskInstanceWithId>}
    */
-  public async ensureScheduling(
+  public async ensureScheduled(
     taskInstance: TaskInstanceWithId,
     options?: any
   ): Promise<TaskInstanceWithId> {

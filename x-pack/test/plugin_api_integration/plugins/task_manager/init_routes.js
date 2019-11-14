@@ -39,7 +39,7 @@ export function initRoutes(server) {
             state: Joi.object().optional(),
             id: Joi.string().optional()
           }),
-          ensureScheduling: Joi.boolean()
+          ensureScheduled: Joi.boolean()
             .default(false)
             .optional(),
         }),
@@ -47,15 +47,15 @@ export function initRoutes(server) {
     },
     async handler(request) {
       try {
-        const { ensureScheduling = false, task: taskFields } = request.payload;
+        const { ensureScheduled = false, task: taskFields } = request.payload;
         const task = {
           ...taskFields,
           scope: [scope],
         };
 
         const taskResult = await (
-          ensureScheduling
-            ? taskManager.ensureScheduling(task, { request })
+          ensureScheduled
+            ? taskManager.ensureScheduled(task, { request })
             : taskManager.schedule(task, { request })
         );
 

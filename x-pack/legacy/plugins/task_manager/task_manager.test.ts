@@ -136,7 +136,7 @@ describe('TaskManager', () => {
 
     client.start();
 
-    const result = await client.ensureScheduling({
+    const result = await client.ensureScheduled({
       id: 'my-foo-id',
       taskType: 'foo',
       params: {},
@@ -162,7 +162,7 @@ describe('TaskManager', () => {
     client.start();
 
     return expect(
-      client.ensureScheduling({
+      client.ensureScheduled({
         id: 'my-foo-id',
         taskType: 'foo',
         params: {},
