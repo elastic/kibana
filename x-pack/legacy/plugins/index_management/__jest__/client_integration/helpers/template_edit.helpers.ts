@@ -6,7 +6,7 @@
 
 import { registerTestBed, TestBedConfig } from '../../../../../../test_utils';
 import { BASE_PATH } from '../../../common/constants';
-import { TemplateEdit } from '../../../public/sections/template_edit';
+import { TemplateEdit } from '../../../public/app/sections/template_edit';
 import { formSetup, TestSubjects } from './template_form.helpers';
 import { TEMPLATE_NAME } from './constants';
 
