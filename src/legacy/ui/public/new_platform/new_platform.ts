@@ -35,7 +35,7 @@ export interface PluginsSetup {
   data: ReturnType<DataPlugin['setup']>;
   embeddable: EmbeddableSetup;
   expressions: ReturnType<ExpressionsPlugin['setup']>;
-  feature_catalogue: FeatureCatalogueSetup;
+  home: FeatureCatalogueSetup;
   inspector: InspectorSetup;
   uiActions: IUiActionsSetup;
   devTools: DevToolsSetup;
@@ -46,7 +46,7 @@ export interface PluginsStart {
   embeddable: EmbeddableStart;
   eui_utils: EuiUtilsStart;
   expressions: ReturnType<ExpressionsPlugin['start']>;
-  feature_catalogue: FeatureCatalogueStart;
+  home: FeatureCatalogueStart;
   inspector: InspectorStart;
   uiActions: IUiActionsStart;
   devTools: DevToolsStart;

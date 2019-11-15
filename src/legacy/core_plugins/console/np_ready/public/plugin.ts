@@ -32,10 +32,10 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
     const {
       __LEGACY: { I18nContext, ResizeChecker },
       devTools,
-      feature_catalogue,
+      home,
     } = pluginSet;
 
-    feature_catalogue.register({
+    home.register({
       id: 'console',
       title: i18n.translate('console.devToolsTitle', {
         defaultMessage: 'Console',

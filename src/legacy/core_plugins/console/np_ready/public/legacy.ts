@@ -31,7 +31,7 @@ import { ResizeChecker } from 'ui/resize_checker';
 
 export interface XPluginSet {
   devTools: DevToolsSetup;
-  feature_catalogue: FeatureCatalogueSetup;
+  home: FeatureCatalogueSetup;
   __LEGACY: {
     I18nContext: any;
     ResizeChecker: any;
