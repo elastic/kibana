@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { asTime, asInteger } from '../../../../../utils/formatters';
+import { asDuration, asInteger } from '../../../../../utils/formatters';
 import { fontSizes } from '../../../../../style/variables';
 
 export const ChoroplethToolTip: React.SFC<{
@@ -26,7 +26,7 @@ export const ChoroplethToolTip: React.SFC<{
         )}
       </div>
       <div style={{ fontWeight: 'bold', fontSize: fontSizes.large }}>
-        {asTime(value)}
+        {asDuration(value)}
       </div>
       <div>
         (
