@@ -69,7 +69,7 @@ export class OptedInBanner extends React.PureComponent<Props> {
         <EuiSpacer size="s" />
         <EuiButton size="s" onClick={this.props.onSeenBanner}>
           <FormattedMessage
-            id="telemetry.welcomeBanner.enableButtonLabel"
+            id="telemetry.telemetryOptedInDismissMessage"
             defaultMessage="Dismiss"
           />
         </EuiButton>
