@@ -17,8 +17,9 @@
  * under the License.
  */
 
+import { Legacy } from 'kibana';
 import { Request } from 'hapi';
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup, SavedObjectsRepository } from 'src/core/server';
 import {
   TelemetrySavedObject,
   TelemetrySavedObjectAttributes,
@@ -26,7 +27,7 @@ import {
   updateTelemetrySavedObject,
 } from '../telemetry_repository';
 
-const getInternalRepository = (server: any) => {
+const getInternalRepository = (server: Legacy.Server): SavedObjectsRepository => {
   const { getSavedObjectsRepository } = server.savedObjects;
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const internalRepository = getSavedObjectsRepository(callWithInternalUser);
@@ -34,7 +35,7 @@ const getInternalRepository = (server: any) => {
 };
 
 export function registerTelemetryUserHasSeenNotice(core: CoreSetup) {
-  const { server } = core.http as any;
+  const { server }: { server: Legacy.Server } = core.http as any;
 
   server.route({
     method: 'PUT',
