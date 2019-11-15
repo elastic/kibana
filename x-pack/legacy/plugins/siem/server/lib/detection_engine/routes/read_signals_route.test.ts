@@ -13,7 +13,12 @@ import {
 
 import { readSignalsRoute } from './read_signals_route';
 import { ServerInjectOptions } from 'hapi';
-import { getFindResult, getResult, getReadRequest } from './__mocks__/request_responses';
+import {
+  getFindResult,
+  getResult,
+  getReadRequest,
+  getFindResultWithSingleHit,
+} from './__mocks__/request_responses';
 
 describe('read_signals', () => {
   let { server, alertsClient } = createMockServer();
@@ -29,7 +34,7 @@ describe('read_signals', () => {
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when reading a single signal with a valid actionClient and alertClient', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
+      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       const { statusCode } = await server.inject(getReadRequest());
       expect(statusCode).toBe(200);

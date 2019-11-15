@@ -5,27 +5,20 @@
  */
 
 import Hapi from 'hapi';
-import Joi from 'joi';
 import { isFunction } from 'lodash/fp';
 import { updateSignal } from '../alerts/update_signals';
 import { UpdateSignalsRequest } from '../alerts/types';
 import { updateSignalSchema } from './schemas';
+import { getIdError, transformOrError } from './utils';
 
 export const createUpdateSignalsRoute: Hapi.ServerRoute = {
   method: 'PUT',
-  path: '/api/siem/signals/{id?}',
+  path: '/api/siem/signals',
   options: {
     tags: ['access:signals-all'],
     validate: {
       options: {
         abortEarly: false,
-      },
-      params: {
-        id: Joi.when(Joi.ref('$payload.id'), {
-          is: Joi.exist(),
-          then: Joi.string().optional(),
-          otherwise: Joi.string().required(),
-        }),
       },
       payload: updateSignalSchema,
     },
@@ -43,6 +36,8 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
       // eslint-disable-next-line @typescript-eslint/camelcase
       saved_id: savedId,
       filters,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      rule_id: ruleId,
       id,
       index,
       interval,
@@ -63,7 +58,8 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
     if (!alertsClient || !actionsClient) {
       return headers.response().code(404);
     }
-    return updateSignal({
+
+    const signal = await updateSignal({
       alertsClient,
       actionsClient,
       description,
@@ -76,7 +72,8 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
       language,
       savedId,
       filters,
-      id: request.params.id ? request.params.id : id,
+      id,
+      ruleId,
       index,
       interval,
       maxSignals,
@@ -88,6 +85,11 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
       type,
       references,
     });
+    if (signal != null) {
+      return transformOrError(signal);
+    } else {
+      return getIdError({ id, ruleId });
+    }
   },
 };
 

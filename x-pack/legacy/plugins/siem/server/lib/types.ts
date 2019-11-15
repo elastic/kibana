@@ -65,8 +65,9 @@ export interface SiemContext {
 export interface SignalHit {
   signal: {
     '@timestamp': string;
+    id: string;
     rule_revision: number;
-    rule_id: string;
+    rule_id: string | undefined; // TODO: Double check the siem signals output to see if this gets added or not.
     rule_type: string;
     parent: {
       id: string;

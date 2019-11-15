@@ -65,20 +65,20 @@ describe('create_signals', () => {
   });
 
   describe('validation', () => {
-    test('returns 400 if id is not given', async () => {
+    test('returns 200 if id is not given as the id is auto generated from the alert framework', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(createAlertResult());
-      // missing id should throw a 400
-      const { id, ...noId } = typicalPayload();
+      // missing id should return 200 as it will be auto generated if not given
+      const { rule_id, ...noId } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'POST',
         url: '/api/siem/signals',
         payload: noId,
       };
       const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(400);
+      expect(statusCode).toBe(200);
     });
 
     test('returns 200 if type is query', async () => {

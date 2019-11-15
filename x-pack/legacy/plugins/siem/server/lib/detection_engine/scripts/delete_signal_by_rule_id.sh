@@ -9,14 +9,8 @@
 set -e
 ./check_env_variables.sh
 
-# Uses a default if no argument is specified
-SIGNAL=${1:-./signals/root_or_admin_update_1.json}
-
-# Example: ./update_signal.sh ./signals/root_or_admin_update_1.json
+# Example: ./delete_signal_by_rule_id.sh ${rule_id}
 curl -s -k \
- -H 'Content-Type: application/json' \
  -H 'kbn-xsrf: 123' \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- -X PUT ${KIBANA_URL}/api/siem/signals \
- -d @${SIGNAL} \
- | jq .
+ -X DELETE ${KIBANA_URL}/api/siem/signals?rule_id="$1" | jq .

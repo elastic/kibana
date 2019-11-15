@@ -20,6 +20,8 @@ import {
   updateAlertResult,
   getUpdateRequest,
   typicalPayload,
+  getFindResultWithSingleHit,
+  typicalFilterPayload,
 } from './__mocks__/request_responses';
 
 describe('update_signals', () => {
@@ -33,12 +35,21 @@ describe('update_signals', () => {
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when updating a single signal with a valid actionClient and alertClient', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
+      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(updateAlertResult());
       const { statusCode } = await server.inject(getUpdateRequest());
       expect(statusCode).toBe(200);
+    });
+
+    test('returns 404 when updating a single signal that does not exist', async () => {
+      alertsClient.find.mockResolvedValue(getFindResult());
+      alertsClient.get.mockResolvedValue(getResult());
+      actionsClient.update.mockResolvedValue(updateActionResult());
+      alertsClient.update.mockResolvedValue(updateAlertResult());
+      const { statusCode } = await server.inject(getUpdateRequest());
+      expect(statusCode).toBe(404);
     });
 
     test('returns 404 if actionClient is not available on the route', async () => {
@@ -67,9 +78,9 @@ describe('update_signals', () => {
 
   describe('validation', () => {
     test('returns 400 if id is not given in either the body or the url', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
+      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
-      const { id, ...noId } = typicalPayload();
+      const { rule_id, ...noId } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'PUT',
         url: '/api/siem/signals',
@@ -81,44 +92,49 @@ describe('update_signals', () => {
       expect(statusCode).toBe(400);
     });
 
-    test('returns 200 if type is query', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
-      alertsClient.get.mockResolvedValue(getResult());
+    test('returns 404 if the record does not exist yet', async () => {
+      alertsClient.find.mockResolvedValueOnce(getFindResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(updateAlertResult());
-      const { type, ...noType } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'PUT',
         url: '/api/siem/signals',
-        payload: {
-          ...noType,
-          type: 'query',
-        },
+        payload: typicalPayload(),
+      };
+      const { statusCode } = await server.inject(request);
+      expect(statusCode).toBe(404);
+    });
+
+    test('returns 200 if type is query', async () => {
+      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      alertsClient.get.mockResolvedValue(getResult());
+      actionsClient.update.mockResolvedValue(updateActionResult());
+      alertsClient.update.mockResolvedValue(updateAlertResult());
+      const request: ServerInjectOptions = {
+        method: 'PUT',
+        url: '/api/siem/signals',
+        payload: typicalPayload(),
       };
       const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(200);
     });
 
     test('returns 200 if type is filter', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
+      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(updateAlertResult());
-      const { language, query, type, ...noType } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'PUT',
         url: '/api/siem/signals',
-        payload: {
-          ...noType,
-          type: 'filter',
-        },
+        payload: typicalFilterPayload(),
       };
       const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(200);
     });
 
     test('returns 400 if type is not filter or kql', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
+      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(updateAlertResult());
@@ -133,22 +149,6 @@ describe('update_signals', () => {
       };
       const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(400);
-    });
-
-    test('returns 200 if id is given in the url but not the payload', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
-      alertsClient.get.mockResolvedValue(getResult());
-      actionsClient.update.mockResolvedValue(updateActionResult());
-      alertsClient.update.mockResolvedValue(updateAlertResult());
-      // missing id should throw a 400
-      const { id, ...noId } = typicalPayload();
-      const request: ServerInjectOptions = {
-        method: 'PUT',
-        url: '/api/siem/signals/rule-1',
-        payload: noId,
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(200);
     });
   });
 });

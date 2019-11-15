@@ -22,7 +22,7 @@ do {
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
  -X POST ${KIBANA_URL}/api/siem/signals \
   --data "{
-    \"id\": \"${i}\",
+    \"rule_id\": \"${i}\",
     \"description\": \"Detecting root and admin users\",
     \"index\": [\"auditbeat-*\", \"filebeat-*\", \"packetbeat-*\", \"winlogbeat-*\"],
     \"interval\": \"24h\",

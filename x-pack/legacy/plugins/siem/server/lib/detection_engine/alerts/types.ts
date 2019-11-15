@@ -31,7 +31,7 @@ export interface SignalAlertParams {
   immutable: boolean;
   index: string[];
   interval: string;
-  id: string;
+  ruleId: string | undefined;
   language: string | undefined;
   maxSignals: number;
   name: string;
@@ -47,15 +47,23 @@ export interface SignalAlertParams {
 
 export type SignalAlertParamsRest = Omit<
   SignalAlertParams,
-  'falsePositives' | 'maxSignals' | 'saved_id'
+  'ruleId' | 'falsePositives' | 'maxSignals' | 'savedId'
 > & {
+  rule_id: SignalAlertParams['ruleId'];
   false_positives: SignalAlertParams['falsePositives'];
   saved_id: SignalAlertParams['savedId'];
   max_signals: SignalAlertParams['maxSignals'];
 };
 
-export type UpdateSignalAlertParamsRest = Partial<Omit<SignalAlertParamsRest, 'id'>> & {
-  id: SignalAlertParams['id'];
+export type OutputSignalAlertRest = SignalAlertParamsRest & {
+  id: string;
+  created_by: string | null;
+  updated_by: string | null;
+};
+
+export type UpdateSignalAlertParamsRest = Partial<SignalAlertParamsRest> & {
+  id: string | undefined;
+  rule_id: SignalAlertParams['ruleId'] | undefined;
 };
 
 export interface FindParamsRest {
@@ -72,11 +80,11 @@ export interface Clients {
 
 export type SignalParams = SignalAlertParams & Clients;
 
-export type UpdateSignalParams = Partial<Omit<SignalAlertParams, 'id'>> & {
-  id: SignalAlertParams['id'];
+export type UpdateSignalParams = Partial<SignalAlertParams> & {
+  id: string | undefined;
 } & Clients;
 
-export type DeleteSignalParams = Clients & { id: string };
+export type DeleteSignalParams = Clients & { id: string | undefined; ruleId: string | undefined };
 
 export interface FindSignalsRequest extends Omit<Hapi.Request, 'query'> {
   query: {
@@ -98,7 +106,13 @@ export interface FindSignalParams {
 
 export interface ReadSignalParams {
   alertsClient: AlertsClient;
-  id: string;
+  id?: string;
+  ruleId?: string;
+}
+
+export interface ReadSignalByRuleId {
+  alertsClient: AlertsClient;
+  ruleId: string;
 }
 
 export type SignalAlertType = Alert & {
@@ -145,6 +159,10 @@ export interface BulkResponse {
 export type SignalSearchResponse = SearchResponse<SignalSource>;
 export type SignalSourceHit = SignalSearchResponse['hits']['hits'][0];
 
+export type QueryRequest = Omit<Hapi.Request, 'query'> & {
+  query: { id: string | undefined; rule_id: string | undefined };
+};
+
 // This returns true because by default a SignalAlertTypeDefinition is an AlertType
 // since we are only increasing the strictness of params.
 export const isAlertExecutor = (obj: SignalAlertTypeDefinition): obj is AlertType => {
@@ -153,6 +171,10 @@ export const isAlertExecutor = (obj: SignalAlertTypeDefinition): obj is AlertTyp
 
 export type SignalAlertTypeDefinition = Omit<AlertType, 'executor'> & {
   executor: ({ services, params, state }: SignalExecutorOptions) => Promise<State | void>;
+};
+
+export const isAlertTypes = (obj: unknown[]): obj is SignalAlertType[] => {
+  return obj.every(signal => isAlertType(signal));
 };
 
 export const isAlertType = (obj: unknown): obj is SignalAlertType => {

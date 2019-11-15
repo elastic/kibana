@@ -22,6 +22,7 @@ interface BuildEventsReIndexParams {
   timeDetected: string;
   ruleRevision: number;
   id: string;
+  ruleId: string | undefined;
   type: string;
   references: string[];
 }
@@ -39,6 +40,7 @@ export const buildEventsReIndex = ({
   timeDetected,
   ruleRevision,
   id,
+  ruleId,
   type,
   references,
 }: BuildEventsReIndexParams) => {
@@ -107,6 +109,7 @@ export const buildEventsReIndex = ({
       dest: {
         index: signalsIndex,
       },
+      // TODO: Below the rule_id can be undefined, we need to fix that.
       script: {
         source: `
           String[] indexPatterns = new String[] {${indexPatterns}};
@@ -120,8 +123,9 @@ export const buildEventsReIndex = ({
           ];
 
           def signal = [
+            "id": "${id}",
             "rule_revision": "${ruleRevision}",
-            "rule_id": "${id}",
+            "rule_id": "${ruleId}",
             "rule_type": "${type}",
             "parent": parent,
             "name": "${name}",

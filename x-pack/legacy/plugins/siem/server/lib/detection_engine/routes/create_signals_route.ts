@@ -6,9 +6,12 @@
 
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
+import Boom from 'boom';
 import { createSignals } from '../alerts/create_signals';
 import { SignalsRequest } from '../alerts/types';
 import { createSignalsSchema } from './schemas';
+import { readSignals } from '../alerts/read_signals';
+import { transformOrError } from './utils';
 
 export const createCreateSignalsRoute: Hapi.ServerRoute = {
   method: 'POST',
@@ -36,7 +39,8 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       // eslint-disable-next-line @typescript-eslint/camelcase
       saved_id: savedId,
       filters,
-      id,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      rule_id: ruleId,
       index,
       interval,
       // eslint-disable-next-line @typescript-eslint/camelcase
@@ -57,7 +61,14 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       return headers.response().code(404);
     }
 
-    return createSignals({
+    if (ruleId != null) {
+      const signal = await readSignals({ alertsClient, ruleId });
+      if (signal != null) {
+        return new Boom(`Signal rule_id ${ruleId} already exists`, { statusCode: 409 });
+      }
+    }
+
+    const createdSignal = await createSignals({
       alertsClient,
       actionsClient,
       description,
@@ -70,7 +81,7 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       language,
       savedId,
       filters,
-      id,
+      ruleId,
       index,
       interval,
       maxSignals,
@@ -82,6 +93,7 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       type,
       references,
     });
+    return transformOrError(createdSignal);
   },
 };
 

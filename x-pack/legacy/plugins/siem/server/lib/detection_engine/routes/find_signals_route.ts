@@ -9,6 +9,7 @@ import { isFunction } from 'lodash/fp';
 import { findSignals } from '../alerts/find_signals';
 import { FindSignalsRequest } from '../alerts/types';
 import { findSignalsSchema } from './schemas';
+import { transformFindAlertsOrError } from './utils';
 
 export const createFindSignalRoute: Hapi.ServerRoute = {
   method: 'GET',
@@ -31,12 +32,13 @@ export const createFindSignalRoute: Hapi.ServerRoute = {
       return headers.response().code(404);
     }
 
-    return findSignals({
+    const signals = await findSignals({
       alertsClient,
       perPage: query.per_page,
       page: query.page,
       sortField: query.sort_field,
     });
+    return transformFindAlertsOrError(signals);
   },
 };
 
