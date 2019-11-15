@@ -64,12 +64,12 @@ doc-table {
 
 .kbnDocTable__bar--footer {
   position: relative;
-  margin: -48px $euiSizeXS 0 0;
+  margin: -($euiSize * 3) $euiSizeXS 0;
 }
 
 
 .kbnDocTable__padBottom {
-  padding-bottom: 32px;
+  padding-bottom: $euiSizeXL;
 }
 
 .kbnDocTable__error {
