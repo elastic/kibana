@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { ExpressionsSetup, ExpressionsStart, plugin as pluginInitializer } from '.';
 
 /* eslint-disable */
