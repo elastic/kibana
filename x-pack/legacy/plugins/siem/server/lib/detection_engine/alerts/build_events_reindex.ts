@@ -109,7 +109,7 @@ export const buildEventsReIndex = ({
       dest: {
         index: signalsIndex,
       },
-      // TODO: Below the rule_id can be undefined, we need to fix that.
+      // TODO: Below the rule_id can be undefined, we need to fix that soon or remove this feature.
       script: {
         source: `
           String[] indexPatterns = new String[] {${indexPatterns}};
