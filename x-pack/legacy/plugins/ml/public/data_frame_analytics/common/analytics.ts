@@ -11,7 +11,6 @@ import { Subscription } from 'rxjs';
 import { idx } from '@kbn/elastic-idx';
 import { ml } from '../../services/ml_api_service';
 import { getErrorMessage } from '../pages/analytics_management/hooks/use_create_analytics_form';
-import { RegressionEvaluateResponse } from '../common';
 
 export type IndexName = string;
 export type IndexPattern = string;
@@ -27,6 +26,15 @@ interface RegressionAnalysis {
     training_percent?: number;
     prediction_field_name?: string;
   };
+}
+
+export const SEARCH_SIZE = 1000;
+
+export enum INDEX_STATUS {
+  UNUSED,
+  LOADING,
+  LOADED,
+  ERROR,
 }
 
 export interface Eval {
@@ -89,6 +97,16 @@ export const getPredictionFieldName = (analysis: AnalysisConfig) => {
     predictionFieldName = analysis.regression.prediction_field_name;
   }
   return predictionFieldName;
+};
+
+export const getPredictedFieldName = (resultsField: string, analysis: AnalysisConfig) => {
+  // default is 'ml'
+  const predictionFieldName = getPredictionFieldName(analysis);
+  const defaultPredictionField = `${getDependentVar(analysis)}_prediction`;
+  const predictedField = `${resultsField}.${
+    predictionFieldName ? predictionFieldName : defaultPredictionField
+  }`;
+  return predictedField;
 };
 
 export const isOutlierAnalysis = (arg: any): arg is OutlierAnalysis => {

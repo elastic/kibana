@@ -27,23 +27,18 @@ interface ListPackagesRequest extends Request {
   query: Request['query'] & SearchParams;
 }
 
-interface PackageRequest extends Request {
+interface PackageInfoRequest extends Request {
   params: {
     pkgkey: string;
   };
 }
 
-interface InstallAssetRequest extends Request {
-  params: AssetRequestParams;
+interface InstallDeletePackageRequest extends Request {
+  params: {
+    pkgkey: string;
+    asset: AssetType;
+  };
 }
-
-interface DeleteAssetRequest extends Request {
-  params: AssetRequestParams;
-}
-
-type AssetRequestParams = PackageRequest['params'] & {
-  asset?: AssetType;
-};
 
 export async function handleGetCategories(req: Request, extra: Extra) {
   return getCategories();
@@ -51,20 +46,16 @@ export async function handleGetCategories(req: Request, extra: Extra) {
 
 export async function handleGetList(req: ListPackagesRequest, extra: Extra) {
   const savedObjectsClient = getClient(req);
-  const packageList = await getPackages({
+  return getPackages({
     savedObjectsClient,
     category: req.query.category,
   });
-
-  return packageList;
 }
 
-export async function handleGetInfo(req: PackageRequest, extra: Extra) {
+export async function handleGetInfo(req: PackageInfoRequest, extra: Extra) {
   const { pkgkey } = req.params;
   const savedObjectsClient = getClient(req);
-  const packageInfo = await getPackageInfo({ savedObjectsClient, pkgkey });
-
-  return packageInfo;
+  return getPackageInfo({ savedObjectsClient, pkgkey });
 }
 
 export const handleGetFile = async (req: Request, extra: Extra) => {
@@ -81,26 +72,18 @@ export const handleGetFile = async (req: Request, extra: Extra) => {
   return epmResponse;
 };
 
-export async function handleRequestInstall(req: InstallAssetRequest, extra: Extra) {
-  const { pkgkey, asset } = req.params;
-  if (!asset) throw new Error('Unhandled empty/default asset case');
-
-  const savedObjectsClient = getClient(req);
-  const callCluster = getClusterAccessor(extra.context.esClient, req);
-  const object = await installPackage({
-    savedObjectsClient,
-    pkgkey,
-    asset,
-    callCluster,
-  });
-
-  return object;
-}
-
-export async function handleRequestDelete(req: DeleteAssetRequest, extra: Extra) {
+export async function handleRequestInstall(req: InstallDeletePackageRequest, extra: Extra) {
   const { pkgkey } = req.params;
   const savedObjectsClient = getClient(req);
-  const deleted = await removeInstallation({ savedObjectsClient, pkgkey });
+  return installPackage({
+    savedObjectsClient,
+    pkgkey,
+  });
+}
 
-  return deleted;
+export async function handleRequestDelete(req: InstallDeletePackageRequest, extra: Extra) {
+  const { pkgkey } = req.params;
+  const savedObjectsClient = getClient(req);
+  const callCluster = getClusterAccessor(extra.context.esClient, req);
+  return removeInstallation({ savedObjectsClient, pkgkey, callCluster });
 }

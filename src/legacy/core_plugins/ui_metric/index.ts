@@ -39,13 +39,13 @@ export default function(kibana: any) {
       injectDefaultVars(server: Server) {
         const config = server.config();
         return {
+          uiMetricEnabled: config.get('ui_metric.enabled'),
           debugUiMetric: config.get('ui_metric.debug'),
         };
       },
       mappings: require('./mappings.json'),
       hacks: ['plugins/ui_metric/hacks/ui_metric_init'],
     },
-
     init(server: Legacy.Server) {
       registerUiMetricRoute(server);
     },

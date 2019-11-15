@@ -449,11 +449,11 @@ export interface AuthToolkit {
 export class BasePath {
     // @internal
     constructor(serverBasePath?: string);
-    get: (request: LegacyRequest | KibanaRequest<unknown, unknown, unknown>) => string;
+    get: (request: KibanaRequest<unknown, unknown, unknown> | LegacyRequest) => string;
     prepend: (path: string) => string;
     remove: (path: string) => string;
     readonly serverBasePath: string;
-    set: (request: LegacyRequest | KibanaRequest<unknown, unknown, unknown>, requestSpecificBasePath: string) => void;
+    set: (request: KibanaRequest<unknown, unknown, unknown> | LegacyRequest, requestSpecificBasePath: string) => void;
 }
 
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
@@ -712,36 +712,6 @@ export interface IndexSettingsDeprecationInfo {
     [indexName: string]: DeprecationInfo[];
 }
 
-// @internal (undocumented)
-export interface InternalCoreSetup {
-    // (undocumented)
-    context: ContextSetup;
-    // Warning: (ae-forgotten-export) The symbol "InternalElasticsearchServiceSetup" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
-    elasticsearch: InternalElasticsearchServiceSetup;
-    // Warning: (ae-forgotten-export) The symbol "InternalHttpServiceSetup" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
-    http: InternalHttpServiceSetup;
-    // (undocumented)
-    uiSettings: InternalUiSettingsServiceSetup;
-}
-
-// @internal (undocumented)
-export interface InternalCoreStart {
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectsServiceStart" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
-    savedObjects: SavedObjectsServiceStart;
-}
-
-// @internal (undocumented)
-export interface InternalUiSettingsServiceSetup {
-    asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
-    register(settings: Record<string, UiSettingsParams>): void;
-}
-
 // @public
 export interface IRouter {
     delete: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
@@ -839,7 +809,7 @@ export interface LegacyRequest extends Request {
 
 // @public @deprecated (undocumented)
 export interface LegacyServiceSetupDeps {
-    // Warning: (ae-incompatible-release-tags) The symbol "core" is marked as @public, but its signature references "InternalCoreSetup" which is marked as @internal
+    // Warning: (ae-forgotten-export) The symbol "InternalCoreSetup" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
     core: InternalCoreSetup & {
@@ -851,7 +821,7 @@ export interface LegacyServiceSetupDeps {
 
 // @public @deprecated (undocumented)
 export interface LegacyServiceStartDeps {
-    // Warning: (ae-incompatible-release-tags) The symbol "core" is marked as @public, but its signature references "InternalCoreStart" which is marked as @internal
+    // Warning: (ae-forgotten-export) The symbol "InternalCoreStart" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
     core: InternalCoreStart & {
@@ -1491,6 +1461,8 @@ export interface SavedObjectsLegacyService<Request = any> {
     SavedObjectsClient: typeof SavedObjectsClient;
     // (undocumented)
     schema: SavedObjectsSchema;
+    // (undocumented)
+    setScopedSavedObjectsClientFactory: SavedObjectsClientProvider<Request>['setClientFactory'];
     // (undocumented)
     types: string[];
 }

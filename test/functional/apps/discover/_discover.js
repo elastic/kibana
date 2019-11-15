@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
+  const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -152,6 +153,26 @@ export default function ({ getService, getPageObjects }) {
         const isVisible = await PageObjects.discover.hasNoResultsTimepicker();
         expect(isVisible).to.be(true);
       });
+    });
+
+    describe('nested query', () => {
+
+      before(async () => {
+        log.debug('setAbsoluteRangeForAnotherQuery');
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+      });
+
+      it('should support querying on nested fields', async function () {
+        await queryBar.setQuery('nestedField:{ child: nestedValue }');
+        await queryBar.submitQuery();
+        await retry.try(async function () {
+          expect(await PageObjects.discover.getHitCount()).to.be(
+            '1'
+          );
+        });
+      });
+
     });
 
     describe('filter editor', function () {

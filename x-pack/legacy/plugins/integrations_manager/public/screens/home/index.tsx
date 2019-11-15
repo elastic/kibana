@@ -43,7 +43,7 @@ export function Home() {
       {state.installedPackages.length ? (
         <Fragment>
           <InstalledPackages list={state.installedPackages} />
-          <EuiHorizontalRule margin="l" />
+          <EuiHorizontalRule margin="xxl" />
         </Fragment>
       ) : null}
       <AvailablePackages {...state} />
@@ -54,13 +54,9 @@ export function Home() {
     <Fragment>
       <Header restrictWidth={maxContentWidth} onSearch={state.setSearchTerm} />
       <EuiHorizontalRule margin="none" />
+      <EuiSpacer size="xxl" />
       <FullBleedPage>
-        <EuiPageBody restrictWidth={maxContentWidth}>
-          <Fragment>
-            <EuiSpacer size="l" />
-            {body}
-          </Fragment>
-        </EuiPageBody>
+        <EuiPageBody restrictWidth={maxContentWidth}>{body}</EuiPageBody>
       </FullBleedPage>
     </Fragment>
   );

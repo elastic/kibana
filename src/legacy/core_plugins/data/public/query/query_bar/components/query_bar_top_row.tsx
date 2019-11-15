@@ -21,7 +21,7 @@ import dateMath from '@elastic/datemath';
 import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
 
 import classNames from 'classnames';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiButton,
@@ -35,15 +35,18 @@ import {
 import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
-import { TimeRange } from 'src/plugins/data/public';
-import { useKibana } from '../../../../../../../plugins/kibana_react/public';
+import {
+  TimeRange,
+  TimeHistoryContract,
+  Query,
+  PersistedLog,
+  getQueryLog,
+} from '../../../../../../../plugins/data/public';
+import { useKibana, toMountPoint } from '../../../../../../../plugins/kibana_react/public';
 
 import { IndexPattern } from '../../../index_patterns';
 import { QueryBarInput } from './query_bar_input';
-import { Query, getQueryLog } from '../index';
-import { TimeHistoryContract } from '../../../timefilter';
 import { IDataPluginServices } from '../../../types';
-import { PersistedLog } from '../../persisted_log';
 
 interface Props {
   query?: Query;
@@ -73,17 +76,18 @@ function QueryBarTopRowUI(props: Props) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
 
   const kibana = useKibana<IDataPluginServices>();
-  const { uiSettings, notifications, store, appName, docLinks } = kibana.services;
+  const { uiSettings, notifications, storage, appName, docLinks } = kibana.services;
 
   const kueryQuerySyntaxLink: string = docLinks!.links.query.kueryQuerySyntax;
 
   const queryLanguage = props.query && props.query.language;
-  let persistedLog: PersistedLog | undefined;
-
-  useEffect(() => {
-    if (!props.query) return;
-    persistedLog = getQueryLog(uiSettings!, store, appName, props.query.language);
-  }, [queryLanguage]);
+  const persistedLog: PersistedLog | undefined = React.useMemo(
+    () =>
+      queryLanguage && uiSettings && storage && appName
+        ? getQueryLog(uiSettings!, storage, appName, queryLanguage)
+        : undefined,
+    [appName, queryLanguage, uiSettings, storage]
+  );
 
   function onClickSubmitButton(event: React.MouseEvent<HTMLButtonElement>) {
     if (persistedLog && props.query) {
@@ -211,7 +215,7 @@ function QueryBarTopRowUI(props: Props) {
   }
 
   function shouldRenderQueryInput(): boolean {
-    return Boolean(props.showQueryInput && props.indexPatterns && props.query && store);
+    return Boolean(props.showQueryInput && props.indexPatterns && props.query && storage);
   }
 
   function renderUpdateButton() {
@@ -293,7 +297,7 @@ function QueryBarTopRowUI(props: Props) {
     if (
       language === 'kuery' &&
       typeof query === 'string' &&
-      (!store || !store.get('kibana.luceneSyntaxWarningOptOut')) &&
+      (!storage || !storage.get('kibana.luceneSyntaxWarningOptOut')) &&
       doesKueryExpressionHaveLuceneSyntaxError(query)
     ) {
       const toast = notifications!.toasts.addWarning({
@@ -301,7 +305,7 @@ function QueryBarTopRowUI(props: Props) {
           id: 'data.query.queryBar.luceneSyntaxWarningTitle',
           defaultMessage: 'Lucene syntax warning',
         }),
-        text: (
+        text: toMountPoint(
           <div>
             <p>
               <FormattedMessage
@@ -337,8 +341,8 @@ function QueryBarTopRowUI(props: Props) {
   }
 
   function onLuceneSyntaxWarningOptOut(toast: Toast) {
-    if (!store) return;
-    store.set('kibana.luceneSyntaxWarningOptOut', true);
+    if (!storage) return;
+    storage.set('kibana.luceneSyntaxWarningOptOut', true);
     notifications!.toasts.remove(toast);
   }
 

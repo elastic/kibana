@@ -14,6 +14,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
     servers: xPackAPITestsConfig.get('servers'),
     services: {
       supertest: xPackAPITestsConfig.get('services.supertest'),
+      es: xPackAPITestsConfig.get('services.es'),
     },
     junit: {
       reportName: 'X-Pack EPM API Integration Tests',

@@ -15,11 +15,12 @@ export * from './handlers';
 export type CallESAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];
 
 export const SAVED_OBJECT_TYPES = new Set<AssetType>([
-  'config',
   'dashboard',
+  'ilm-policy',
   'index-pattern',
+  'index-template',
+  'ingest-pipeline',
   'search',
-  'timelion-sheet',
   'visualization',
 ]);
 
@@ -40,6 +41,6 @@ export function createInstallableFrom<T>(from: T, savedObject?: Installation): I
       };
 }
 
-export function assetUsesObjects(asset: AssetType) {
-  return SAVED_OBJECT_TYPES.has(asset);
+export function assetUsesObjects(assetType: AssetType) {
+  return SAVED_OBJECT_TYPES.has(assetType);
 }

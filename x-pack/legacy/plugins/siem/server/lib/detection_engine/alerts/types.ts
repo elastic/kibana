@@ -7,6 +7,7 @@
 import { get } from 'lodash/fp';
 
 import Hapi from 'hapi';
+import { esFilters } from '../../../../../../../../src/plugins/data/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import {
   Alert,
@@ -18,21 +19,50 @@ import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
 import { SearchResponse } from '../../types';
 
+export type PartialFilter = Partial<esFilters.Filter>;
+
 export interface SignalAlertParams {
   description: string;
+  enabled: boolean;
+  falsePositives: string[];
+  filter: Record<string, {}> | undefined;
+  filters: PartialFilter[] | undefined;
   from: string;
-  id: string;
+  immutable: boolean;
   index: string[];
   interval: string;
-  enabled: boolean;
-  filter: Record<string, {}> | undefined;
-  kql: string | undefined;
-  maxSignals: string;
+  id: string;
+  language: string | undefined;
+  maxSignals: number;
   name: string;
-  severity: string;
-  type: 'filter' | 'kql';
-  to: string;
+  query: string | undefined;
   references: string[];
+  savedId: string | undefined;
+  severity: string;
+  size: number | undefined;
+  tags: string[];
+  to: string;
+  type: 'filter' | 'query' | 'saved_query';
+}
+
+export type SignalAlertParamsRest = Omit<
+  SignalAlertParams,
+  'falsePositives' | 'maxSignals' | 'saved_id'
+> & {
+  false_positives: SignalAlertParams['falsePositives'];
+  saved_id: SignalAlertParams['savedId'];
+  max_signals: SignalAlertParams['maxSignals'];
+};
+
+export type UpdateSignalAlertParamsRest = Partial<Omit<SignalAlertParamsRest, 'id'>> & {
+  id: SignalAlertParams['id'];
+};
+
+export interface FindParamsRest {
+  per_page: number;
+  page: number;
+  sort_field: string;
+  fields: string[];
 }
 
 export interface Clients {
@@ -41,6 +71,10 @@ export interface Clients {
 }
 
 export type SignalParams = SignalAlertParams & Clients;
+
+export type UpdateSignalParams = Partial<Omit<SignalAlertParams, 'id'>> & {
+  id: SignalAlertParams['id'];
+} & Clients;
 
 export type DeleteSignalParams = Clients & { id: string };
 
@@ -73,9 +107,11 @@ export type SignalAlertType = Alert & {
 };
 
 export interface SignalsRequest extends Hapi.Request {
-  payload: Omit<SignalAlertParams, 'maxSignals'> & {
-    max_signals: string;
-  };
+  payload: SignalAlertParamsRest;
+}
+
+export interface UpdateSignalsRequest extends Hapi.Request {
+  payload: UpdateSignalAlertParamsRest;
 }
 
 export type SignalExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {
@@ -98,6 +134,12 @@ export type SearchTypes =
 export interface SignalSource {
   [key: string]: SearchTypes;
   '@timestamp': string;
+}
+
+export interface BulkResponse {
+  took: number;
+  errors: boolean;
+  items: unknown[];
 }
 
 export type SignalSearchResponse = SearchResponse<SignalSource>;

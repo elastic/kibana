@@ -32,7 +32,7 @@ export async function getTransactionBreakdown({
   transactionName?: string;
   transactionType: string;
 }) {
-  const { uiFiltersES, client, config, start, end } = setup;
+  const { uiFiltersES, client, start, end, indices } = setup;
 
   const subAggs = {
     sum_all_self_times: {
@@ -88,7 +88,7 @@ export async function getTransactionBreakdown({
   }
 
   const params = {
-    index: config.get<string>('apm_oss.metricsIndices'),
+    index: indices['apm_oss.metricsIndices'],
     body: {
       size: 0,
       query: {
@@ -151,56 +151,53 @@ export async function getTransactionBreakdown({
 
   const bucketsByDate = idx(resp.aggregations, _ => _.by_date.buckets) || [];
 
-  const timeseriesPerSubtype = bucketsByDate.reduce(
-    (prev, bucket) => {
-      const formattedValues = formatBucket(bucket);
-      const time = bucket.key;
+  const timeseriesPerSubtype = bucketsByDate.reduce((prev, bucket) => {
+    const formattedValues = formatBucket(bucket);
+    const time = bucket.key;
 
-      const updatedSeries = kpiNames.reduce((p, kpiName) => {
-        const { name, percentage } = formattedValues.find(
-          val => val.name === kpiName
-        ) || {
-          name: kpiName,
-          percentage: null
-        };
+    const updatedSeries = kpiNames.reduce((p, kpiName) => {
+      const { name, percentage } = formattedValues.find(
+        val => val.name === kpiName
+      ) || {
+        name: kpiName,
+        percentage: null
+      };
 
-        if (!p[name]) {
-          p[name] = [];
-        }
-        return {
-          ...p,
-          [name]: p[name].concat({
-            x: time,
-            y: percentage
-          })
-        };
-      }, prev);
-
-      const lastValues = Object.values(updatedSeries).map(last);
-
-      // If for a given timestamp, some series have data, but others do not,
-      // we have to set any null values to 0 to make sure the stacked area chart
-      // is drawn correctly.
-      // If we set all values to 0, the chart always displays null values as 0,
-      // and the chart looks weird.
-      const hasAnyValues = lastValues.some(value => value.y !== null);
-      const hasNullValues = lastValues.some(value => value.y === null);
-
-      if (hasAnyValues && hasNullValues) {
-        Object.values(updatedSeries).forEach(series => {
-          const value = series[series.length - 1];
-          const isEmpty = value.y === null;
-          if (isEmpty) {
-            // local mutation to prevent complicated map/reduce calls
-            value.y = 0;
-          }
-        });
+      if (!p[name]) {
+        p[name] = [];
       }
+      return {
+        ...p,
+        [name]: p[name].concat({
+          x: time,
+          y: percentage
+        })
+      };
+    }, prev);
 
-      return updatedSeries;
-    },
-    {} as Record<string, Array<{ x: number; y: number | null }>>
-  );
+    const lastValues = Object.values(updatedSeries).map(last);
+
+    // If for a given timestamp, some series have data, but others do not,
+    // we have to set any null values to 0 to make sure the stacked area chart
+    // is drawn correctly.
+    // If we set all values to 0, the chart always displays null values as 0,
+    // and the chart looks weird.
+    const hasAnyValues = lastValues.some(value => value.y !== null);
+    const hasNullValues = lastValues.some(value => value.y === null);
+
+    if (hasAnyValues && hasNullValues) {
+      Object.values(updatedSeries).forEach(series => {
+        const value = series[series.length - 1];
+        const isEmpty = value.y === null;
+        if (isEmpty) {
+          // local mutation to prevent complicated map/reduce calls
+          value.y = 0;
+        }
+      });
+    }
+
+    return updatedSeries;
+  }, {} as Record<string, Array<{ x: number; y: number | null }>>);
 
   const timeseries = kpis.map(kpi => ({
     title: kpi.name,

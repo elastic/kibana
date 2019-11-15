@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { decorateQuery, luceneStringToDsl } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
 import { toastNotifications } from 'ui/notify';

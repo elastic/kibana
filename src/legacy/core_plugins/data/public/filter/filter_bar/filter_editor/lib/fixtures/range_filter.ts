@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { FilterStateStore, RangeFilter } from '@kbn/es-query';
+import { esFilters } from '../../../../../../../../../plugins/data/public';
 
-export const rangeFilter: RangeFilter = {
+export const rangeFilter: esFilters.RangeFilter = {
   meta: {
     index: 'logstash-*',
     negate: false,
@@ -34,7 +34,7 @@ export const rangeFilter: RangeFilter = {
     },
   },
   $state: {
-    store: FilterStateStore.APP_STATE,
+    store: esFilters.FilterStateStore.APP_STATE,
   },
   range: {},
 };

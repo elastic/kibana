@@ -21,16 +21,15 @@ import _ from 'lodash';
 import angular from 'angular';
 
 import { i18n } from '@kbn/i18n';
-import { Storage } from 'ui/storage';
 
 import chrome from 'ui/chrome';
 import { buildEsQuery } from '@kbn/es-query';
 import { FiltersParamEditor, FilterValue } from '../../vis/editors/default/controls/filters';
 import { createFilterFilters } from './create_filter/filters';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
-import { setup as data } from '../../../../core_plugins/data/public/legacy';
+import { Storage } from '../../../../../plugins/kibana_utils/public';
+import { getQueryLog } from '../../../../../plugins/data/public';
 
-const { getQueryLog } = data.query.helpers;
 const config = chrome.getUiSettingsClient();
 const storage = new Storage(window.localStorage);
 

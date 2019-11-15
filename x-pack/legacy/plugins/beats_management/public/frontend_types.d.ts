@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from 'react-router-dom';
 import { BeatsContainer } from './containers/beats';
 import { TagsContainer } from './containers/tags';
 import { URLStateProps } from './containers/with_url_state';

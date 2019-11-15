@@ -131,6 +131,8 @@ export const useSourceIndexData = (
 
   useEffect(() => {
     getSourceIndexData();
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexPattern.title, JSON.stringify(query)]);
   return { errorMessage, status, tableItems };
 };

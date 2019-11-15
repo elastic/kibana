@@ -10,14 +10,11 @@ export { Request, ResponseToolkit, Server, ServerRoute } from 'hapi';
 
 export type InstallationStatus = Installed['status'] | NotInstalled['status'];
 
-export type AssetType =
-  | 'config'
-  | 'dashboard'
-  | 'index-pattern'
-  | 'ingest-pipeline'
-  | 'search'
-  | 'timelion-sheet'
-  | 'visualization';
+export type AssetType = KibanaAssetType | ElasticsearchAssetType;
+
+export type KibanaAssetType = 'dashboard' | 'visualization' | 'search' | 'index-pattern';
+
+export type ElasticsearchAssetType = 'ingest-pipeline' | 'index-template' | 'ilm-policy';
 
 // Registry's response types
 // from /search
@@ -39,7 +36,7 @@ export interface ScreenshotItem {
 
 // from /package/{name}
 // https://github.com/elastic/integrations-registry/blob/master/docs/api/package.json
-export type ServiceName = 'kibana' | 'elasticsearch' | 'filebeat' | 'metricbeat';
+export type ServiceName = 'kibana' | 'elasticsearch';
 export type RequirementVersion = string;
 
 export interface ServiceRequirements {
@@ -68,8 +65,8 @@ export interface AssetParts {
   type: AssetType;
   file: string;
 }
-
-export type AssetsGroupedByServiceByType = Record<ServiceName, Record<AssetType, AssetParts[]>>;
+export type AssetTypeToParts = Record<AssetType, AssetParts[]>;
+export type AssetsGroupedByServiceByType = Record<ServiceName, AssetTypeToParts>;
 export interface RegistryPackage {
   name: string;
   version: string;
@@ -79,6 +76,7 @@ export interface RegistryPackage {
   requirement: RequirementsByServiceName;
   title?: string;
   screenshots?: ScreenshotItem[];
+  assets: string[];
 }
 
 // Managers public HTTP response types
