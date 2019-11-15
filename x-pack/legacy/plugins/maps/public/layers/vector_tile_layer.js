@@ -51,7 +51,7 @@ export class VectorTileLayer extends TileLayer {
       const spriteSheetImageData = await loadSpriteSheetImageData(styleAndSprites.spriteMeta.png);
       const data = {
         ...styleAndSprites,
-        spriteSheetImageData: spriteSheetImageData
+        spriteSheetImageData
       };
       stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, data, {});
     } catch(error) {
@@ -166,6 +166,9 @@ export class VectorTileLayer extends TileLayer {
       }
 
       const imageData = this._getSpriteImageData();
+      if (!imageData) {
+        return;
+      }
       addSpriteSheetToMapFromImageData(newJson, imageData, mbMap);
 
       //sync layers
