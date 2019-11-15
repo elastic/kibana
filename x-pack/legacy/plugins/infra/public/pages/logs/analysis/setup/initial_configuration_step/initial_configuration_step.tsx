@@ -18,6 +18,7 @@ interface InitialConfigurationStepProps {
   setEndTime: (endTime: number | undefined) => void;
   startTime: number | undefined;
   endTime: number | undefined;
+  isValidating: boolean;
   selectedIndices: IndicesSelection;
   setSelectedIndices: (selectedIndices: IndicesSelection) => void;
   validationErrors?: ValidationIndicesUIError[];
@@ -28,6 +29,7 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
   setEndTime,
   startTime,
   endTime,
+  isValidating,
   selectedIndices,
   setSelectedIndices,
   validationErrors = [],
@@ -44,6 +46,7 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
         />
         <AnalysisSetupIndicesForm
           indices={selectedIndices}
+          isValidating={isValidating}
           onChangeSelectedIndices={setSelectedIndices}
           valid={validationErrors.length === 0}
         />

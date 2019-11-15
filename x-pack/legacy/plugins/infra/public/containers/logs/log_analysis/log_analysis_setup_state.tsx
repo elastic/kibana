@@ -52,7 +52,7 @@ export const useAnalysisSetupState = ({
 
   // Prepare the validation
   const [validatedIndices, setValidatedIndices] = useState<ValidatedIndex[]>([]);
-  const [, validateIndices] = useTrackedPromise(
+  const [validateIndicesRequest, validateIndices] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
@@ -103,8 +103,15 @@ export const useAnalysisSetupState = ({
     return cleanupAndSetupModule(selectedIndexNames, startTime, endTime);
   }, [cleanupAndSetupModule, selectedIndexNames, startTime, endTime]);
 
+  const isValidating = useMemo(
+    () =>
+      validateIndicesRequest.state === 'pending' ||
+      validateIndicesRequest.state === 'uninitialized',
+    [validateIndicesRequest.state]
+  );
+
   const validationErrors = useMemo<ValidationIndicesUIError[]>(() => {
-    if (validatedIndices.length === 0) {
+    if (isValidating) {
       return [];
     }
 
@@ -126,6 +133,7 @@ export const useAnalysisSetupState = ({
   return {
     cleanupAndSetup,
     endTime,
+    isValidating,
     selectedIndexNames,
     selectedIndices,
     setEndTime,

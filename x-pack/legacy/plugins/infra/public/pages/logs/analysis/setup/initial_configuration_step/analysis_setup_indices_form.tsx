@@ -19,9 +19,10 @@ export type IndicesSelection = Record<string, boolean>;
 
 export const AnalysisSetupIndicesForm: React.FunctionComponent<{
   indices: IndicesSelection;
+  isValidating: boolean;
   onChangeSelectedIndices: (selectedIndices: IndicesSelection) => void;
   valid: boolean;
-}> = ({ indices, onChangeSelectedIndices, valid }) => {
+}> = ({ indices, isValidating, onChangeSelectedIndices, valid }) => {
   const choices = useMemo(
     () =>
       Object.keys(indices).map(indexName => ({
@@ -57,7 +58,9 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
         />
       }
     >
-      {choices.length > 0 ? (
+      {isValidating ? (
+        <EuiLoadingSpinner size="m" />
+      ) : (
         <EuiFormRow
           describedByIds={['indices']}
           fullWidth
@@ -71,8 +74,6 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
             onChange={handleCheckboxGroupChange}
           />
         </EuiFormRow>
-      ) : (
-        <EuiLoadingSpinner size="m" />
       )}
     </EuiDescribedFormGroup>
   );

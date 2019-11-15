@@ -45,6 +45,7 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
     setEndTime,
     startTime,
     endTime,
+    isValidating,
     selectedIndices,
     setSelectedIndices,
     validationErrors,
@@ -66,6 +67,7 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
           setEndTime={setEndTime}
           startTime={startTime}
           endTime={endTime}
+          isValidating={isValidating}
           selectedIndices={selectedIndices}
           setSelectedIndices={setSelectedIndices}
           validationErrors={validationErrors}
