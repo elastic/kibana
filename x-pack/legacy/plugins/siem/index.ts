@@ -9,7 +9,6 @@ import { resolve } from 'path';
 import { Server } from 'hapi';
 
 import { plugin } from './server';
-import { initServerWithKibana } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 
 import {
@@ -150,9 +149,7 @@ export const siem = (kibana: any) => {
         savedObjects,
       };
 
-      plugin({ logger }).setup({}, {});
-
-      initServerWithKibana(serverFacade);
+      plugin({ logger }).setup({ __legacy: serverFacade }, {});
     },
   });
 };

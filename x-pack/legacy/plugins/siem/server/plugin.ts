@@ -5,18 +5,30 @@
  */
 
 import { CoreSetup, PluginInitializerContext, Logger } from 'src/core/server';
+import { ServerFacade } from './types';
+import { initServerWithKibana } from './kibana.index';
+
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
+export interface SiemInitializerContext extends Pick<PluginInitializerContext, 'logger'> {}
+
+export interface SiemCoreSetup extends Partial<CoreSetup> {
+  __legacy: ServerFacade;
+}
 
 export class Plugin {
   name = 'siem';
   private logger: Logger;
 
-  constructor({ logger }: Pick<PluginInitializerContext, 'logger'>) {
+  constructor({ logger }: SiemInitializerContext) {
     this.logger = logger.get('plugins', this.name);
 
     this.logger.info('NP plugin initialized');
   }
 
-  public setup(core: Partial<CoreSetup>, dependencies: {}) {
+  public setup({ __legacy }: SiemCoreSetup, dependencies: {}) {
     this.logger.info('NP plugin setup');
+
+    initServerWithKibana(__legacy);
   }
 }
