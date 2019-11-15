@@ -57,7 +57,10 @@ export async function getPackageInfo(options: {
     Registry.fetchInfo(pkgkey),
     getInstallationObject({ savedObjectsClient, pkgkey }),
     Registry.getArchiveInfo(pkgkey),
-  ]);
+  ] as const);
+  // adding `as const` due to regression in TS 3.7.2
+  // see https://github.com/microsoft/TypeScript/issues/34925#issuecomment-550021453
+  // and https://github.com/microsoft/TypeScript/pull/33707#issuecomment-550718523
 
   // add properties that aren't (or aren't yet) on Registry response
   const updated = Object.assign({}, item, {
