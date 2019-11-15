@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/helpers';
@@ -25,6 +26,7 @@ export interface TimelineModel {
   description: string;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
   eventIdToNoteIds: Record<string, string[]>;
+  filters?: esFilters.Filter[];
   /** The chronological history of actions related to this timeline */
   historyIds: string[];
   /** The chronological history of actions related to this timeline */
@@ -59,6 +61,7 @@ export interface TimelineModel {
     start: number;
     end: number;
   };
+  savedQueryId?: string | null;
   /** When true, show the timeline flyover */
   show: boolean;
   /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
@@ -77,6 +80,7 @@ export const timelineDefaults: Readonly<Pick<
   | 'dataProviders'
   | 'description'
   | 'eventIdToNoteIds'
+  | 'filters'
   | 'highlightedDropAndProviderId'
   | 'historyIds'
   | 'isFavorite'
@@ -104,6 +108,7 @@ export const timelineDefaults: Readonly<Pick<
   eventIdToNoteIds: {},
   highlightedDropAndProviderId: '',
   historyIds: [],
+  filters: [],
   isFavorite: false,
   isLive: false,
   isLoading: false,
