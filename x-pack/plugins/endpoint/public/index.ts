@@ -6,6 +6,7 @@
 
 import { PluginInitializer } from 'kibana/public';
 import { schema } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { EndpointPlugin } from './plugin';
 
 export const config = {
