@@ -26,26 +26,20 @@ interface NotifyOpts {
   configTelemetryOptIn: boolean;
 }
 
-/*
- - telemetrySavedObject, // "notifyUserAboutOptIn" telemetry:telemetry -> true -> dont notify
- - allowChangingOptInStatus, // false -> dont notify
- - configTelemetryOptIn, // true -> notify
- - telemetryOptedIn, // telemetryOptedIn && configTelemetryOptIn = true -> notify
-*/
 export function getNotifyUserAboutOptInDefault({
   allowChangingOptInStatus,
   telemetrySavedObject,
   telemetryOptedIn,
   configTelemetryOptIn,
 }: NotifyOpts) {
-  if (!allowChangingOptInStatus) {
+  if (allowChangingOptInStatus === false) {
     return false;
   }
 
   // determine if notice has been seen before
-  if (telemetrySavedObject && telemetrySavedObject.userHasSeenNotice) {
+  if (telemetrySavedObject && telemetrySavedObject.userHasSeenNotice === true) {
     return false;
   }
 
-  return telemetryOptedIn && configTelemetryOptIn;
+  return telemetryOptedIn === true && configTelemetryOptIn === true;
 }
