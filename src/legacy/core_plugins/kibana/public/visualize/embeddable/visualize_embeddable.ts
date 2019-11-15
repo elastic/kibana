@@ -33,11 +33,12 @@ import { npStart } from 'ui/new_platform';
 import { IExpressionLoaderParams } from '../../../../expressions/public/np_ready/public/types';
 import { start as expressions } from '../../../../expressions/public/legacy';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-import { Query } from '../../../../data/public';
 import {
   TimeRange,
+  Query,
   onlyDisabledFiltersChanged,
   esFilters,
+  mapAndFlattenFilters,
 } from '../../../../../../plugins/data/public';
 import {
   EmbeddableInput,
@@ -47,7 +48,6 @@ import {
   APPLY_FILTER_TRIGGER,
 } from '../../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../../plugins/kibana_utils/public';
-import { mapAndFlattenFilters } from '../../../../../../plugins/data/public';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 

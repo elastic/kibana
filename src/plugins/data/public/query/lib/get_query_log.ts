@@ -17,10 +17,22 @@
  * under the License.
  */
 
-export function addFilter(field, values = [], operation, index, state, filterGen) {
-  if (!Array.isArray(values)) {
-    values = [values];
-  }
+import { UiSettingsClientContract } from 'src/core/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { PersistedLog } from '../persisted_log';
 
-  filterGen.add(field, values, operation, index);
+export function getQueryLog(
+  uiSettings: UiSettingsClientContract,
+  storage: IStorageWrapper,
+  appName: string,
+  language: string
+) {
+  return new PersistedLog(
+    `typeahead:${appName}-${language}`,
+    {
+      maxLength: uiSettings.get('history:limit'),
+      filterDuplicates: true,
+    },
+    storage
+  );
 }

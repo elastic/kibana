@@ -17,25 +17,40 @@
  * under the License.
  */
 
-import angular from 'angular';
+import _ from 'lodash';
 
 /**
- * Take text from the model and present it to the user as a string
- * @param text model value
- * @returns {string}
+ * Take userInput from the user and make it into a query object
+ * @returns {object}
+ * @param userInput
  */
-export function toUser(text: { [key: string]: any } | string): string {
-  if (text == null) {
+
+export function fromUser(userInput: object | string) {
+  const matchAll = '';
+
+  if (_.isEmpty(userInput)) {
     return '';
   }
-  if (typeof text === 'object') {
-    if (text.match_all) {
-      return '';
-    }
-    if (text.query_string) {
-      return toUser(text.query_string.query);
-    }
-    return angular.toJson(text);
+
+  if (_.isObject(userInput)) {
+    return userInput;
   }
-  return '' + text;
+
+  userInput = userInput || '';
+  if (typeof userInput === 'string') {
+    const trimmedUserInput = userInput.trim();
+    if (trimmedUserInput.length === 0) {
+      return matchAll;
+    }
+
+    if (trimmedUserInput[0] === '{') {
+      try {
+        return JSON.parse(trimmedUserInput);
+      } catch (e) {
+        return userInput;
+      }
+    } else {
+      return userInput;
+    }
+  }
 }
