@@ -15,8 +15,10 @@ export const updateIfIdExists = async ({
   actionsClient,
   description,
   enabled,
+  falsePositives,
   filter,
   from,
+  immutable,
   query,
   language,
   savedId,
@@ -28,6 +30,7 @@ export const updateIfIdExists = async ({
   name,
   severity,
   size,
+  tags,
   to,
   type,
   references,
@@ -38,8 +41,10 @@ export const updateIfIdExists = async ({
       actionsClient,
       description,
       enabled,
+      falsePositives,
       filter,
       from,
+      immutable,
       query,
       language,
       savedId,
@@ -51,16 +56,19 @@ export const updateIfIdExists = async ({
       name,
       severity,
       size,
+      tags,
       to,
       type,
       references,
     });
     return signal;
   } catch (err) {
-    // This happens when we cannot get a saved object back from reading a signal.
-    // So we continue normally as we have nothing we can upsert.
+    if (err.output.statusCode === 404) {
+      return null;
+    } else {
+      return err;
+    }
   }
-  return null;
 };
 
 export const createSignals = async ({
@@ -68,6 +76,7 @@ export const createSignals = async ({
   actionsClient,
   description,
   enabled,
+  falsePositives,
   filter,
   from,
   query,
@@ -75,12 +84,14 @@ export const createSignals = async ({
   savedId,
   filters,
   id,
+  immutable,
   index,
   interval,
   maxSignals,
   name,
   severity,
   size,
+  tags,
   to,
   type,
   references,
@@ -91,6 +102,7 @@ export const createSignals = async ({
     actionsClient,
     description,
     enabled,
+    falsePositives,
     filter,
     from,
     query,
@@ -98,12 +110,14 @@ export const createSignals = async ({
     savedId,
     filters,
     id,
+    immutable,
     index,
     interval,
     maxSignals,
     name,
     severity,
     size,
+    tags,
     to,
     type,
     references,
@@ -124,20 +138,23 @@ export const createSignals = async ({
 
     return alertsClient.create({
       data: {
+        name,
         alertTypeId: SIGNALS_ID,
         alertTypeParams: {
           description,
           id,
           index,
+          falsePositives,
           from,
           filter,
+          immutable,
           query,
           language,
           savedId,
           filters,
           maxSignals,
-          name,
           severity,
+          tags,
           to,
           type,
           references,

@@ -253,13 +253,10 @@ export class AggConfigs {
     // collect all the aggregations
     const aggregations = this.aggs
       .filter(agg => agg.enabled && agg.type)
-      .reduce(
-        (requestValuesAggs, agg: AggConfig) => {
-          const aggs = agg.getRequestAggs();
-          return aggs ? requestValuesAggs.concat(aggs) : requestValuesAggs;
-        },
-        [] as AggConfig[]
-      );
+      .reduce((requestValuesAggs, agg: AggConfig) => {
+        const aggs = agg.getRequestAggs();
+        return aggs ? requestValuesAggs.concat(aggs) : requestValuesAggs;
+      }, [] as AggConfig[]);
     // move metrics to the end
     return _.sortBy(aggregations, (agg: AggConfig) =>
       agg.type.type === AggGroupNames.Metrics ? 1 : 0
@@ -282,13 +279,10 @@ export class AggConfigs {
    * @return {array[AggConfig]}
    */
   getResponseAggs(): AggConfig[] {
-    return this.getRequestAggs().reduce(
-      function(responseValuesAggs, agg: AggConfig) {
-        const aggs = agg.getResponseAggs();
-        return aggs ? responseValuesAggs.concat(aggs) : responseValuesAggs;
-      },
-      [] as AggConfig[]
-    );
+    return this.getRequestAggs().reduce(function(responseValuesAggs, agg: AggConfig) {
+      const aggs = agg.getResponseAggs();
+      return aggs ? responseValuesAggs.concat(aggs) : responseValuesAggs;
+    }, [] as AggConfig[]);
   }
 
   /**

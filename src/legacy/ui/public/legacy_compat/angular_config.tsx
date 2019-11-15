@@ -40,6 +40,7 @@ import { fatalError } from 'ui/notify';
 import { capabilities } from 'ui/capabilities';
 // @ts-ignore
 import { modifyUrl } from 'ui/url';
+import { toMountPoint } from '../../../../plugins/kibana_react/public';
 // @ts-ignore
 import { UrlOverflowService } from '../error_url_overflow';
 import { npStart } from '../new_platform';
@@ -290,6 +291,9 @@ const $setupHelpExtensionAutoClear = (newPlatform: CoreStart) => (
   });
 
   $rootScope.$on('$routeChangeSuccess', () => {
+    if (isDummyWrapperRoute($route)) {
+      return;
+    }
     const current = $route.current || {};
 
     if (helpExtensionSetSinceRouteChange || (current.$$route && current.$$route.redirectTo)) {
@@ -326,7 +330,7 @@ const $setupUrlOverflowHandling = (newPlatform: CoreStart) => (
           title: i18n.translate('common.ui.chrome.bigUrlWarningNotificationTitle', {
             defaultMessage: 'The URL is big and Kibana might stop working',
           }),
-          text: (
+          text: toMountPoint(
             <Fragment>
               <FormattedMessage
                 id="common.ui.chrome.bigUrlWarningNotificationMessage"

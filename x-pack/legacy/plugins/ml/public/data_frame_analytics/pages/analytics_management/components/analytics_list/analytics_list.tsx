@@ -8,7 +8,14 @@ import React, { Fragment, FC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
@@ -22,7 +29,6 @@ import {
   Query,
   Clause,
 } from './common';
-import { ActionDispatchers } from '../../hooks/use_create_analytics_form/actions';
 import { getAnalyticsFactory } from '../../services/analytics_service';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
@@ -33,21 +39,23 @@ import {
   SortDirection,
   SORT_DIRECTION,
 } from '../../../../../components/ml_in_memory_table';
+import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats_bar';
+import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
+import { CreateAnalyticsButton } from '../create_analytics_button';
+import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
+import { CreateAnalyticsFlyoutWrapper } from '../create_analytics_flyout_wrapper';
 
 function getItemIdToExpandedRowMap(
   itemIds: DataFrameAnalyticsId[],
   dataFrameAnalytics: DataFrameAnalyticsListRow[]
 ): ItemIdToExpandedRowMap {
-  return itemIds.reduce(
-    (m: ItemIdToExpandedRowMap, analyticsId: DataFrameAnalyticsId) => {
-      const item = dataFrameAnalytics.find(analytics => analytics.config.id === analyticsId);
-      if (item !== undefined) {
-        m[analyticsId] = <ExpandedRow item={item} />;
-      }
-      return m;
-    },
-    {} as ItemIdToExpandedRowMap
-  );
+  return itemIds.reduce((m: ItemIdToExpandedRowMap, analyticsId: DataFrameAnalyticsId) => {
+    const item = dataFrameAnalytics.find(analytics => analytics.config.id === analyticsId);
+    if (item !== undefined) {
+      m[analyticsId] = <ExpandedRow item={item} />;
+    }
+    return m;
+  }, {} as ItemIdToExpandedRowMap);
 }
 
 function stringMatch(str: string | undefined, substr: string) {
@@ -62,20 +70,22 @@ interface Props {
   isManagementTable?: boolean;
   isMlEnabledInSpace?: boolean;
   blockRefresh?: boolean;
-  openCreateJobModal?: ActionDispatchers['openModal'];
+  createAnalyticsForm?: CreateAnalyticsFormProps;
 }
-// isManagementTable - for use in Kibana managagement ML section
 export const DataFrameAnalyticsList: FC<Props> = ({
   isManagementTable = false,
   isMlEnabledInSpace = true,
   blockRefresh = false,
-  openCreateJobModal,
+  createAnalyticsForm,
 }) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [filterActive, setFilterActive] = useState(false);
 
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
+  const [analyticsStats, setAnalyticsStats] = useState<AnalyticStatsBarStats | undefined>(
+    undefined
+  );
   const [filteredAnalytics, setFilteredAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<DataFrameAnalyticsId[]>([]);
 
@@ -94,10 +104,12 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   const getAnalytics = getAnalyticsFactory(
     setAnalytics,
+    setAnalyticsStats,
     setErrorMessage,
     setIsInitialized,
     blockRefresh
   );
+
   // Subscribe to the refresh observable to trigger reloading the analytics list.
   useRefreshAnalyticsList({
     isLoading: setIsLoading,
@@ -213,9 +225,12 @@ export const DataFrameAnalyticsList: FC<Props> = ({
             </h2>
           }
           actions={
-            !isManagementTable && openCreateJobModal !== undefined
+            !isManagementTable && createAnalyticsForm
               ? [
-                  <EuiButtonEmpty onClick={openCreateJobModal} isDisabled={disabled}>
+                  <EuiButtonEmpty
+                    onClick={createAnalyticsForm.actions.openModal}
+                    isDisabled={disabled}
+                  >
                     {i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptButtonText', {
                       defaultMessage: 'Create your first data frame analytics job',
                     })}
@@ -225,6 +240,9 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           }
           data-test-subj="mlNoDataFrameAnalyticsFound"
         />
+        {!isManagementTable && createAnalyticsForm && (
+          <CreateAnalyticsFlyoutWrapper {...createAnalyticsForm} />
+        )}
       </Fragment>
     );
   }
@@ -310,7 +328,28 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   return (
     <Fragment>
-      <ProgressBar isLoading={isLoading} />
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          {analyticsStats && (
+            <EuiFlexItem grow={false}>
+              <StatsBar stats={analyticsStats} dataTestSub={'mlAnalyticsStatsBar'} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <RefreshAnalyticsListButton />
+            </EuiFlexItem>
+            {!isManagementTable && createAnalyticsForm && (
+              <EuiFlexItem grow={false}>
+                <CreateAnalyticsButton {...createAnalyticsForm} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
       <MlInMemoryTable
         allowNeutralSort={false}
         className="mlAnalyticsTable"

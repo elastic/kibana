@@ -176,10 +176,7 @@ const makeMapStateToProps = () => {
 };
 
 export const NetworkTopNFlowTable = compose<React.ComponentClass<OwnProps>>(
-  connect(
-    makeMapStateToProps,
-    {
-      updateNetworkTable: networkActions.updateNetworkTable,
-    }
-  )
+  connect(makeMapStateToProps, {
+    updateNetworkTable: networkActions.updateNetworkTable,
+  })
 )(NetworkTopNFlowTableComponent);

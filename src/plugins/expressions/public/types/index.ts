@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { ExpressionInterpret } from '../interpreter_provider';
 import { TimeRange } from '../../../data/public';
 import { Adapters } from '../../../inspector/public';
 import { Query } from '../../../data/public';
-import { ExpressionAST } from '../../../expressions/public';
-import { ExpressionArgAST } from '../../../../plugins/expressions/public';
+import { esFilters } from '../../../../plugins/data/public';
 
 export { ArgumentType } from './arguments';
 export {
@@ -76,7 +74,7 @@ export type Context = object;
 
 export interface SearchContext {
   type: 'kibana_context';
-  filters?: Filter[];
+  filters?: esFilters.Filter[];
   query?: Query;
   timeRange?: TimeRange;
 }
@@ -91,6 +89,7 @@ export interface IExpressionLoaderParams {
   customFunctions?: [];
   customRenderers?: [];
   extraHandlers?: Record<string, any>;
+  inspectorAdapters?: Adapters;
 }
 
 export interface IInterpreterHandlers {
