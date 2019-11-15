@@ -10,13 +10,16 @@ import { pure } from 'recompose';
 import styled, { injectGlobal } from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { KueryAutocompletion } from '../../../containers/kuery_autocompletion';
-import { KueryFilterQuery } from '../../../store';
-import { AutocompleteField } from '../../autocomplete_field';
-
-import { getPlaceholderText, modes, options } from './helpers';
-import * as i18n from './translations';
+import { esFilters } from '../../../../../../../../src/plugins/data/public';
+import { BrowserFields } from '../../../containers/source';
+import { KueryFilterQuery, KueryFilterQueryKind } from '../../../store';
 import { KqlMode } from '../../../store/timeline/model';
+import { DataProvider } from '../data_providers/data_provider';
+import { QueryBarTimeline } from '../query_bar';
+
+import { options } from './helpers';
+import * as i18n from './translations';
+import { DispatchUpdateReduxTime } from '../../super_date_picker';
 
 const timelineSelectModeItemsClassName = 'timelineSelectModeItemsClassName';
 const searchOrFilterPopoverClassName = 'searchOrFilterPopover';
@@ -39,19 +42,40 @@ injectGlobal`
 `;
 
 interface Props {
-  applyKqlFilterQuery: (expression: string) => void;
+  applyKqlFilterQuery: (expression: string, kind: KueryFilterQueryKind) => void;
+  browserFields: BrowserFields;
+  dataProviders: DataProvider[];
+  filterQuery: KueryFilterQuery;
   filterQueryDraft: KueryFilterQuery;
+  from: number;
+  fromStr: string;
   indexPattern: StaticIndexPattern;
-  isFilterQueryDraftValid: boolean;
+  isRefreshPaused: boolean;
   kqlMode: KqlMode;
   timelineId: string;
   updateKqlMode: ({ id, kqlMode }: { id: string; kqlMode: KqlMode }) => void;
-  setKqlFilterQueryDraft: (expression: string) => void;
+  refreshInterval: number;
+  setFilters: (filters: esFilters.Filter[]) => void;
+  setKqlFilterQueryDraft: (expression: string, kind: KueryFilterQueryKind) => void;
+  setSavedQueryId: (savedQueryId: string | null) => void;
+  filters: esFilters.Filter[];
+  savedQueryId: string | null;
+  to: number;
+  toStr: string;
+  updateReduxTime: DispatchUpdateReduxTime;
 }
 
 const SearchOrFilterContainer = styled.div`
   margin: 5px 0 10px 0;
   user-select: none;
+  .globalQueryBar {
+    padding: 0px;
+    .kbnQueryBar {
+      div:first-child {
+        margin-right: 0px;
+      }
+    }
+  }
 `;
 
 SearchOrFilterContainer.displayName = 'SearchOrFilterContainer';
@@ -65,13 +89,26 @@ ModeFlexItem.displayName = 'ModeFlexItem';
 export const SearchOrFilter = pure<Props>(
   ({
     applyKqlFilterQuery,
+    browserFields,
+    dataProviders,
     indexPattern,
-    isFilterQueryDraftValid,
+    isRefreshPaused,
+    filters,
+    filterQuery,
     filterQueryDraft,
+    from,
+    fromStr,
     kqlMode,
     timelineId,
+    refreshInterval,
+    savedQueryId,
+    setFilters,
     setKqlFilterQueryDraft,
+    setSavedQueryId,
+    to,
+    toStr,
     updateKqlMode,
+    updateReduxTime,
   }) => (
     <SearchOrFilterContainer>
       <EuiFlexGroup data-test-subj="timeline-search-or-filter" gutterSize="xs">
@@ -90,22 +127,28 @@ export const SearchOrFilter = pure<Props>(
           </EuiToolTip>
         </ModeFlexItem>
         <EuiFlexItem data-test-subj="timeline-search-or-filter-search-container">
-          <EuiToolTip content={modes[kqlMode].kqlBarTooltip}>
-            <KueryAutocompletion indexPattern={indexPattern}>
-              {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
-                <AutocompleteField
-                  isLoadingSuggestions={isLoadingSuggestions}
-                  isValid={isFilterQueryDraftValid}
-                  loadSuggestions={loadSuggestions}
-                  onChange={setKqlFilterQueryDraft}
-                  onSubmit={applyKqlFilterQuery}
-                  placeholder={getPlaceholderText(kqlMode)}
-                  suggestions={suggestions}
-                  value={filterQueryDraft ? filterQueryDraft.expression : ''}
-                />
-              )}
-            </KueryAutocompletion>
-          </EuiToolTip>
+          <QueryBarTimeline
+            applyKqlFilterQuery={applyKqlFilterQuery}
+            browserFields={browserFields}
+            dataProviders={dataProviders}
+            filters={filters}
+            filterQuery={filterQuery}
+            filterQueryDraft={filterQueryDraft}
+            from={from}
+            fromStr={fromStr}
+            kqlMode={kqlMode}
+            indexPattern={indexPattern}
+            isRefreshPaused={isRefreshPaused}
+            refreshInterval={refreshInterval}
+            savedQueryId={savedQueryId}
+            setFilters={setFilters}
+            setKqlFilterQueryDraft={setKqlFilterQueryDraft}
+            setSavedQueryId={setSavedQueryId}
+            timelineId={timelineId}
+            to={to}
+            toStr={toStr}
+            updateReduxTime={updateReduxTime}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </SearchOrFilterContainer>

@@ -36,7 +36,6 @@ import 'uiExports/navbarExtensions';
 import 'uiExports/contextMenuActions';
 import 'uiExports/managementSections';
 import 'uiExports/indexManagement';
-import 'uiExports/devTools';
 import 'uiExports/docViews';
 import 'uiExports/embeddableFactories';
 import 'uiExports/embeddableActions';
