@@ -24,6 +24,7 @@ import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
 import { AlertsIndicator } from 'plugins/monitoring/components/cluster/listing/alerts_indicator';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 
 const IsClusterSupported = ({ isSupported, children }) => {
@@ -271,14 +272,14 @@ const licenseWarning = (scope, { title, text }) => {
 
 const handleClickIncompatibleLicense = (scope, clusterName) => {
   licenseWarning(scope, {
-    title: (
+    title: toMountPoint(
       <FormattedMessage
         id="xpack.monitoring.cluster.listing.incompatibleLicense.warningMessageTitle"
         defaultMessage="You can't view the {clusterName} cluster"
         values={{ clusterName: '"' + clusterName + '"' }}
       />
     ),
-    text: (
+    text: toMountPoint(
       <Fragment>
         <p>
           <FormattedMessage
@@ -311,14 +312,14 @@ const handleClickInvalidLicense = (scope, clusterName) => {
   const licensingPath = `${chrome.getBasePath()}/app/kibana#/management/elasticsearch/license_management/home`;
 
   licenseWarning(scope, {
-    title: (
+    title: toMountPoint(
       <FormattedMessage
         id="xpack.monitoring.cluster.listing.invalidLicense.warningMessageTitle"
         defaultMessage="You can't view the {clusterName} cluster"
         values={{ clusterName: '"' + clusterName + '"' }}
       />
     ),
-    text: (
+    text: toMountPoint(
       <Fragment>
         <p>
           <FormattedMessage
