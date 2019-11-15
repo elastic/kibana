@@ -158,7 +158,7 @@ exports[`render 1`] = `
     />
     <EuiCopy
       afterMessage="Copied"
-      anchorClassName="kbnShareContextMenu__copyAnchor"
+      anchorClassName="eui-displayBlock"
       textToCopy="http://localhost/"
     >
       <Component />
@@ -314,7 +314,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
     />
     <EuiCopy
       afterMessage="Copied"
-      anchorClassName="kbnShareContextMenu__copyAnchor"
+      anchorClassName="eui-displayBlock"
       textToCopy="http://localhost/"
     >
       <Component />
@@ -427,7 +427,7 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
     />
     <EuiCopy
       afterMessage="Copied"
-      anchorClassName="kbnShareContextMenu__copyAnchor"
+      anchorClassName="eui-displayBlock"
       textToCopy="http://localhost/"
     >
       <Component />
