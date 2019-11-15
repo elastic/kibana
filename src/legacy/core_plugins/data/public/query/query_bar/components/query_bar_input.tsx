@@ -38,18 +38,22 @@ import {
   AutocompleteSuggestion,
   AutocompleteSuggestionType,
   PersistedLog,
+  toUser,
+  fromUser,
+  matchPairs,
+  getQueryLog,
+  Query,
 } from '../../../../../../../plugins/data/public';
 import {
   withKibana,
   KibanaReactContextValue,
+  toMountPoint,
 } from '../../../../../../../plugins/kibana_react/public';
 import { IndexPattern, StaticIndexPattern } from '../../../index_patterns';
-import { Query, getQueryLog } from '../index';
-import { fromUser, matchPairs, toUser } from '../lib';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
-import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 import { IDataPluginServices } from '../../../types';
+import { fetchIndexPatterns } from './fetch_index_patterns';
 
 interface Props {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -361,7 +365,7 @@ export class QueryBarInputUI extends Component<Props, State> {
             id: 'data.query.queryBar.KQLNestedQuerySyntaxInfoTitle',
             defaultMessage: 'KQL nested query syntax',
           }),
-          text: (
+          text: toMountPoint(
             <div>
               <p>
                 <FormattedMessage

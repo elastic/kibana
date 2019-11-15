@@ -181,11 +181,12 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
       sectionOptions: SectionOptions = { withAdvancedSection: true }
     ): Promise<boolean> {
       let subj = 'mlJobWizardSwitchModelPlot';
+      const isSelected = await testSubjects.getAttribute(subj, 'aria-checked');
       if (sectionOptions.withAdvancedSection === true) {
         await this.ensureAdvancedSectionOpen();
         subj = advancedSectionSelector(subj);
       }
-      return await testSubjects.isSelected(subj);
+      return isSelected === 'true';
     },
 
     async assertModelPlotSwitchCheckedState(
@@ -213,11 +214,12 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
       sectionOptions: SectionOptions = { withAdvancedSection: true }
     ): Promise<boolean> {
       let subj = 'mlJobWizardSwitchUseDedicatedIndex';
+      const isSelected = await testSubjects.getAttribute(subj, 'aria-checked');
       if (sectionOptions.withAdvancedSection === true) {
         await this.ensureAdvancedSectionOpen();
         subj = advancedSectionSelector(subj);
       }
-      return await testSubjects.isSelected(subj);
+      return isSelected === 'true';
     },
 
     async assertDedicatedIndexSwitchCheckedState(
