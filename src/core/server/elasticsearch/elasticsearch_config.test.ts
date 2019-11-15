@@ -108,10 +108,10 @@ test('#ssl.certificateAuthorities accepts both string and array of strings', () 
   expect(configValue.ssl.certificateAuthorities).toEqual(['some-path', 'another-path']);
 });
 
-test('#username throws if equal to "elastic", only while in dev mode', () => {
+test('#username throws if equal to "elastic", only while running from source', () => {
   const obj = {
     username: 'elastic',
   };
-  expect(() => config.schema.validate(obj, { dev: true })).toThrowErrorMatchingSnapshot();
-  expect(() => config.schema.validate(obj, { dev: false })).not.toThrow();
+  expect(() => config.schema.validate(obj, { dist: false })).toThrowErrorMatchingSnapshot();
+  expect(() => config.schema.validate(obj, { dist: true })).not.toThrow();
 });

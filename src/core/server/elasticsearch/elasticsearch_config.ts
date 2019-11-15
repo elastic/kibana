@@ -40,22 +40,22 @@ export const config = {
       defaultValue: 'http://localhost:9200',
     }),
     preserveHost: schema.boolean({ defaultValue: true }),
-    username: schema.conditional(
-      schema.contextRef('dev'),
-      true,
-      schema.maybe(
+    username: schema.maybe(
+      schema.conditional(
+        schema.contextRef('dist'),
+        false,
         schema.string({
           validate: rawConfig => {
             if (rawConfig === 'elastic') {
               return (
-                'value of "elastic" is forbidden in dev mode. This is a superuser account that can obfuscate privilege-related ' +
-                'issues. You should use the "kibana" user instead.'
+                'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
+                'privilege-related issues. You should use the "kibana" user instead.'
               );
             }
           },
-        })
-      ),
-      schema.maybe(schema.string())
+        }),
+        schema.string()
+      )
     ),
     password: schema.maybe(schema.string()),
     requestHeadersWhitelist: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
@@ -215,9 +215,9 @@ export class ElasticsearchConfig {
 
     if (this.username === 'elastic' && log !== undefined) {
       // logger is optional / not used during tests
-      // TODO: logger can be removed when ISSUE#40255 is resolved to support deprecations in NP config service
+      // TODO: logger can be removed when issue #40255 is resolved to support deprecations in NP config service
       log.warn(
-        `Setting the elasticsearch username to "elastic" in production mode is deprecated. You should use the "kibana" user instead.`,
+        `Setting the elasticsearch username to "elastic" is deprecated. You should use the "kibana" user instead.`,
         { tags: ['deprecation'] }
       );
     }
