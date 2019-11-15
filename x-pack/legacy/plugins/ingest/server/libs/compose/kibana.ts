@@ -16,6 +16,8 @@ import { PolicyLib } from '../policy';
 import { PolicyAdapter } from '../adapters/policy/default';
 import { SODatabaseAdapter } from '../adapters/so_database/default';
 import { KibanaLegacyServer } from '../adapters/framework/adapter_types';
+import { OutputsLib } from '../outputs';
+import { DatasourcesLib } from '../datasources';
 
 export function compose(server: KibanaLegacyServer): ServerLibs {
   const framework = new BackendFrameworkLib(
@@ -24,10 +26,16 @@ export function compose(server: KibanaLegacyServer): ServerLibs {
   const database = new ESDatabaseAdapter(server.plugins.elasticsearch as DatabaseKbnESPlugin);
   const soDatabase = new SODatabaseAdapter(server.savedObjects, server.plugins.elasticsearch);
 
+  const outputs = new OutputsLib();
+
+  const datasources = new DatasourcesLib();
+
   const policyAdapter = new PolicyAdapter(soDatabase);
-  const policy = new PolicyLib(policyAdapter, { framework });
+  const policy = new PolicyLib(policyAdapter, { framework, outputs, datasources });
 
   const libs: ServerLibs = {
+    datasources,
+    outputs,
     policy,
     framework,
     database,

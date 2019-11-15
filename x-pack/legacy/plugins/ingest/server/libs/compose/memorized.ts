@@ -18,6 +18,8 @@ import { SODatabaseAdapter } from '../adapters/so_database/default';
 import { KibanaLegacyServer } from '../adapters/framework/adapter_types';
 import { MemorizedPolicyAdapter } from '../adapters/policy/memorized';
 import { MemorizedBackendFrameworkAdapter } from '../adapters/framework/memorized';
+import { OutputsLib } from '../outputs';
+import { DatasourcesLib } from '../datasources';
 
 export function compose(servers?: {
   shutdown: () => Promise<void>;
@@ -50,10 +52,16 @@ export function compose(servers?: {
   ) as BackendFrameworkAdapter;
   const framework = new BackendFrameworkLib(memorizedFrameworkAdapter);
 
+  const outputs = new OutputsLib();
+
+  const datasources = new DatasourcesLib();
+
   const memorizedPolicyAdapter = new MemorizedPolicyAdapter(realPolicyAdapter!) as PolicyAdapter;
-  const policy = new PolicyLib(memorizedPolicyAdapter, { framework });
+  const policy = new PolicyLib(memorizedPolicyAdapter, { framework, outputs, datasources });
 
   const libs: ServerLibs = {
+    outputs,
+    datasources,
     policy,
     framework,
     database: new Proxy(

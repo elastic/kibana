@@ -16,23 +16,27 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiSpacer,
+  EuiSuperSelect,
   EuiText,
   EuiFilterGroup,
   EuiFilterButton,
 } from '@elastic/eui';
+import { Policy } from '../../../../scripts/mock_spec/types';
+import { useLibs } from '../../../hooks/use_libs';
 import {
   ShellEnrollmentInstructions,
   ContainerEnrollmentInstructions,
   ToolsEnrollmentInstructions,
 } from './enrollment_instructions';
-import { useLibs } from '../../../hooks/use_libs';
 
 interface RouterProps {
   onClose: () => void;
+  policies: Policy[];
 }
 
-export const AgentEnrollmentFlyout: React.SFC<RouterProps> = ({ onClose }) => {
+export const AgentEnrollmentFlyout: React.SFC<RouterProps> = ({ onClose, policies }) => {
   const libs = useLibs();
+  const [selectedPolicy, setSelectedPolicy] = useState('');
   const [quickInstallType, setQuickInstallType] = useState<'shell' | 'container' | 'tools'>(
     'shell'
   );
@@ -61,6 +65,21 @@ export const AgentEnrollmentFlyout: React.SFC<RouterProps> = ({ onClose }) => {
 
   const renderInstructions = () => (
     <Fragment>
+      <EuiText>
+        <h5>
+          <FormattedMessage
+            id="xpack.fleet.agentEnrollment.enrollIntoSelectionTitle"
+            defaultMessage="Enroll into policy:"
+          />
+        </h5>
+      </EuiText>
+      <EuiSuperSelect
+        options={policies.map(p => ({ value: p.id, inputDisplay: p.name }))}
+        valueOfSelected={selectedPolicy || ''}
+        onChange={value => setSelectedPolicy(value)}
+      />
+      <EuiSpacer size="s" />
+
       <EuiText>
         <h5>
           <FormattedMessage

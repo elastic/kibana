@@ -6,18 +6,23 @@
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isRight } from 'fp-ts/lib/Either';
-import { SavedObjectsBulkGetObject } from 'src/core/server';
 import { SODatabaseAdapter } from '../so_database/default';
-import { RuntimePolicyFile, NewPolicyFile } from './adapter_types';
-import { PolicyFile, DatasourceInput, BackupPolicyFile } from './adapter_types';
+import { StoredPolicy, RuntimeStoredPolicy } from './adapter_types';
+import { ListOptions } from '../../../../../fleet/server/repositories/agents/types';
+import { FrameworkUser } from '../framework/adapter_types';
 
 export class PolicyAdapter {
   constructor(private readonly so: SODatabaseAdapter) {}
 
-  public async create(policy: NewPolicyFile, options?: { id?: string }): Promise<PolicyFile> {
-    const newSo = await this.so.create<PolicyFile>(
+  public async create(
+    user: FrameworkUser,
+    policy: StoredPolicy,
+    options?: { id?: string }
+  ): Promise<StoredPolicy> {
+    const newSo = await this.so.create<any>(
+      user,
       'policies',
-      (policy as any) as PolicyFile,
+      (policy as any) as StoredPolicy,
       options
     );
 
@@ -27,8 +32,11 @@ export class PolicyAdapter {
     };
   }
 
-  public async get(id: string): Promise<PolicyFile> {
-    const policySO = await this.so.get<PolicyFile>('policies', id);
+  public async get(user: FrameworkUser, id: string): Promise<StoredPolicy | null> {
+    const policySO = await this.so.get<any>(user, 'policies', id);
+    if (!policySO) {
+      return null;
+    }
 
     if (policySO.error) {
       throw new Error(policySO.error.message);
@@ -39,190 +47,130 @@ export class PolicyAdapter {
       ...policySO.attributes,
     };
 
-    const decoded = RuntimePolicyFile.decode(policy);
+    const decoded = RuntimeStoredPolicy.decode(policy);
 
     if (isRight(decoded)) {
       return decoded.right;
     } else {
       throw new Error(
-        `Invalid PolicyFile data. == ${JSON.stringify(policy)} -- ${PathReporter.report(decoded)}`
+        `Invalid Policy data. == ${JSON.stringify(policy)} -- ${PathReporter.report(decoded)}`
       );
     }
   }
 
   public async list(
-    page: number = 1,
-    perPage: number = 25
-  ): Promise<{ items: PolicyFile[]; total: number }> {
-    const policys = await this.so.find<any>({
-      type: 'policies',
-      search: '*',
-      searchFields: ['shared_id'],
-      page,
-      perPage,
-    });
+    user: FrameworkUser,
+    options: ListOptions = {}
+  ): Promise<{ items: StoredPolicy[]; total: number; page: number; perPage: number }> {
+    const { page = 1, perPage = 20, kuery } = options;
+    const filters = [];
 
-    const uniqPolicyFile = policys.saved_objects
-      .map<PolicyFile>(policySO => {
-        const policy = {
-          id: policySO.id,
-          ...policySO.attributes,
-        };
-        const decoded = RuntimePolicyFile.decode(policy);
-
-        if (isRight(decoded)) {
-          return decoded.right;
-        } else {
-          throw new Error(
-            `Invalid PolicyFile data. == ${JSON.stringify(policy)}  -- ${PathReporter.report(
-              decoded
-            )}`
-          );
-        }
-      })
-      .reduce((acc, policy: PolicyFile) => {
-        if (!acc.has(policy.shared_id)) {
-          acc.set(policy.shared_id, policy);
-        }
-        const prevPolicy = acc.get(policy.shared_id);
-        if (prevPolicy && prevPolicy.version < policy.version) {
-          acc.set(policy.shared_id, policy);
-        }
-
-        return acc;
-      }, new Map<string, PolicyFile>());
-
-    return { items: [...uniqPolicyFile.values()], total: policys.total };
-  }
-
-  public async listVersions(
-    sharedID: string,
-    activeOnly = true,
-    page: number = 1,
-    perPage: number = 25
-  ): Promise<PolicyFile[]> {
-    const policys = (await this.so.find<any>({
-      type: 'policies',
-      search: sharedID,
-      searchFields: ['shared_id'],
-      page,
-      perPage,
-    })).saved_objects;
-
-    if (!activeOnly) {
-      const backupPolicies = await this.so.find<BackupPolicyFile>({
-        type: 'backup_policies',
-        search: sharedID,
-        searchFields: ['shared_id'],
-      });
-      policys.concat(backupPolicies.saved_objects);
+    if (kuery && kuery !== '') {
+      filters.push(kuery.replace(/policies\./g, 'policies.attributes.'));
     }
 
-    return policys.map<PolicyFile>(policySO => {
+    const policys = await this.so.find<any>(user, {
+      type: 'policies',
+      page,
+      perPage,
+      filter: _joinFilters(filters),
+    });
+
+    const storedPolicies = policys.saved_objects.map<StoredPolicy>(policySO => {
       const policy = {
         id: policySO.id,
         ...policySO.attributes,
       };
-      const decoded = RuntimePolicyFile.decode(policy);
+      const decoded = RuntimeStoredPolicy.decode(policy);
+
       if (isRight(decoded)) {
         return decoded.right;
       } else {
-        throw new Error(`Invalid PolicyFile data. == ${policy}`);
+        throw new Error(
+          `Invalid PolicyFile data. == ${JSON.stringify(policy)}  -- ${PathReporter.report(
+            decoded
+          )}`
+        );
       }
     });
-  }
-
-  public async update(id: string, policy: PolicyFile): Promise<{ id: string; version: number }> {
-    const updatedPolicy = await this.so.update<PolicyFile>('policies', id, policy);
-
     return {
-      id: policy.id,
-      version: updatedPolicy.attributes.version || 1,
-    };
-  }
-
-  public async deleteVersion(id: string): Promise<{ success: boolean }> {
-    await this.so.delete('policies', id);
-    return {
-      success: true,
-    };
-  }
-
-  public async createBackup(
-    policy: BackupPolicyFile
-  ): Promise<{ success: boolean; id?: string; error?: string }> {
-    const newSo = await this.so.create<PolicyFile>('policies', (policy as any) as PolicyFile);
-
-    return {
-      success: newSo.error ? false : true,
-      id: newSo.id,
-      error: newSo.error ? newSo.error.message : undefined,
-    };
-  }
-
-  public async getBackup(id: string): Promise<BackupPolicyFile> {
-    const policy = await this.so.get<BackupPolicyFile>('backup_policies', id);
-
-    if (policy.error) {
-      throw new Error(policy.error.message);
-    }
-
-    if (!policy.attributes) {
-      throw new Error(`No backup policy found with ID of ${id}`);
-    }
-    if (isRight(RuntimePolicyFile.decode(policy.attributes))) {
-      return policy.attributes as BackupPolicyFile;
-    } else {
-      throw new Error(`Invalid BackupPolicyFile data. == ${policy.attributes}`);
-    }
-  }
-
-  /**
-   * Inputs sub-domain type
-   */
-  public async getInputsById(ids: string[]): Promise<DatasourceInput[]> {
-    const inputs = await this.so.bulkGet(
-      ids.map(
-        (id): SavedObjectsBulkGetObject => ({
-          id,
-          type: 'inputs',
-        })
-      )
-    );
-
-    return inputs.saved_objects.map(input => input.attributes);
-  }
-
-  public async listInputsforPolicy(
-    policyId: string,
-    page: number = 1,
-    perPage: number = 25
-  ): Promise<DatasourceInput[]> {
-    const inputs = await this.so.find({
-      type: 'inputs',
-      search: policyId,
-      searchFields: ['policy_id'],
-      perPage,
+      items: [...storedPolicies.values()],
+      total: policys.total,
       page,
-    });
-
-    return inputs.saved_objects.map(input => input.attributes);
-  }
-
-  public async addInputs(inputs: DatasourceInput[]): Promise<string[]> {
-    const newInputs = [];
-    for (const input of inputs) {
-      newInputs.push(await this.so.create<DatasourceInput>('inputs', input));
-    }
-    return newInputs.map(input => input.id);
-  }
-
-  public async deleteInputs(inputIDs: string[]): Promise<{ success: boolean }> {
-    for (const id of inputIDs) {
-      await this.so.delete('inputs', id);
-    }
-    return {
-      success: true,
+      perPage,
     };
   }
+
+  // public async listVersions(
+  //   sharedID: string,
+  //   activeOnly = true,
+  //   page: number = 1,
+  //   perPage: number = 25
+  // ): Promise<PolicyFile[]> {
+  //   const policys = (await this.so.find<any>({
+  //     type: 'policies',
+  //     search: sharedID,
+  //     searchFields: ['shared_id'],
+  //     page,
+  //     perPage,
+  //   })).saved_objects;
+
+  //   if (!activeOnly) {
+  //     const backupPolicies = await this.so.find<BackupPolicyFile>({
+  //       type: 'backup_policies',
+  //       search: sharedID,
+  //       searchFields: ['shared_id'],
+  //     });
+  //     policys.concat(backupPolicies.saved_objects);
+  //   }
+
+  //   return policys.map<PolicyFile>(policySO => {
+  //     const policy = {
+  //       id: policySO.id,
+  //       ...policySO.attributes,
+  //     };
+  //     const decoded = RuntimePolicyFile.decode(policy);
+  //     if (isRight(decoded)) {
+  //       return decoded.right;
+  //     } else {
+  //       throw new Error(`Invalid PolicyFile data. == ${policy}`);
+  //     }
+  //   });
+  // }
+
+  public async update(
+    user: FrameworkUser,
+    id: string,
+    policy: StoredPolicy
+  ): Promise<StoredPolicy> {
+    await this.so.update<StoredPolicy>(user, 'policies', id, policy);
+
+    return policy;
+  }
+
+  // public async getBackup(id: string): Promise<BackupPolicyFile> {
+  //   const policy = await this.so.get<BackupPolicyFile>('backup_policies', id);
+
+  //   if (policy.error) {
+  //     throw new Error(policy.error.message);
+  //   }
+
+  //   if (!policy.attributes) {
+  //     throw new Error(`No backup policy found with ID of ${id}`);
+  //   }
+  //   if (isRight(RuntimePolicyFile.decode(policy.attributes))) {
+  //     return policy.attributes as BackupPolicyFile;
+  //   } else {
+  //     throw new Error(`Invalid BackupPolicyFile data. == ${policy.attributes}`);
+  //   }
+  // }
+}
+function _joinFilters(filters: string[], operator = 'AND') {
+  return filters.reduce((acc: string | undefined, filter) => {
+    if (acc) {
+      return `${acc} ${operator} (${filter})`;
+    }
+
+    return `(${filter})`;
+  }, undefined);
 }

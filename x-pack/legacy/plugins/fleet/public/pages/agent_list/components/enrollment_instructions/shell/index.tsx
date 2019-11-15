@@ -65,7 +65,7 @@ export const ShellEnrollmentInstructions: React.SFC<Props> = ({ kibanaUrl }) => 
   const [isManualInstallationOpen, setIsManualInstallationOpen] = useState<boolean>(false);
 
   // Build quick installation command
-  const quickInstallInstructions = `curl ${kibanaUrl}/api/fleet/install/${currentPlatform} | bash`;
+  const quickInstallInstructions = `FLEET_API_KEY=VnVhQ2ZHY0JDZGJrUW0tZTVhT3g6dWkybHAyYXhUTm1zeWFrdzl0dk5udw bash -c "$(curl ${kibanaUrl}/api/fleet/install/${currentPlatform})"`;
 
   return (
     <Fragment>
