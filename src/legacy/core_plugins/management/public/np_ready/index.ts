@@ -29,11 +29,8 @@
  * either types, or static code.
  */
 import { PluginInitializerContext } from 'src/core/public';
-import { ManagementPlugin, ManagementSetup, ManagementStart } from './plugin';
-
-/** @public */
-export type ManagementSetup = ManagementSetup;
-export type ManagementStart = ManagementStart;
+import { ManagementPlugin } from './plugin';
+export { ManagementSetup, ManagementStart } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new ManagementPlugin(initializerContext);
