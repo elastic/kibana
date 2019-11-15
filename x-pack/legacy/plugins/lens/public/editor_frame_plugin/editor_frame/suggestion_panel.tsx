@@ -70,6 +70,7 @@ const PreviewRenderer = ({
       })}
     >
       <ExpressionRendererComponent
+        padding={'s'}
         expression={expression}
         renderError={() => {
           return (

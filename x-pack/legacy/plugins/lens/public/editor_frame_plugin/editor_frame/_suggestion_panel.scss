@@ -49,11 +49,6 @@
   height: 100%;
   width: 100%;
   pointer-events: none;
-  padding: $euiSizeS;
-
-  > .expExpressionRenderer {
-    position: static; // Let the progress indicator position itself against the button
-  }
 }
 
 .lnsSuggestionPanel__chartWrapper--withLabel {
@@ -67,4 +62,5 @@
   font-weight: $euiFontWeightBold;
   text-align: center;
   flex-grow: 0;
+  height: $euiSizeL;
 }

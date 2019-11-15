@@ -213,6 +213,7 @@ export function InnerWorkspacePanel({
     return (
       <div className="lnsExpressionRenderer">
         <ExpressionRendererComponent
+          padding={'m'}
           expression={expression!}
           renderError={(errorMessage?: string | null) => {
             return (

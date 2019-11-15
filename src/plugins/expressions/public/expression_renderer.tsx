@@ -21,6 +21,7 @@ import { useRef, useEffect, useState } from 'react';
 import React from 'react';
 import classNames from 'classnames';
 import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { IExpressionLoaderParams } from './types';
 import { ExpressionAST } from '../common/types';
 import { ExpressionLoader } from './loader';
@@ -31,6 +32,7 @@ export interface ExpressionRendererProps extends IExpressionLoaderParams {
   dataAttrs?: string[];
   expression: string | ExpressionAST;
   renderError?: (error?: string | null) => React.ReactElement | React.ReactElement[];
+  padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
 }
 
 interface State {
@@ -51,6 +53,7 @@ export const ExpressionRendererImplementation = ({
   dataAttrs,
   expression,
   renderError,
+  padding,
   ...options
 }: ExpressionRendererProps) => {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
@@ -121,6 +124,12 @@ export const ExpressionRendererImplementation = ({
     'expExpressionRenderer-hasError': !!state.error,
   });
 
+  const expressionStyles: React.CSSProperties = {};
+
+  if (padding) {
+    expressionStyles.padding = theme.paddingSizes[padding];
+  }
+
   return (
     <div {...dataAttrs} className={classes}>
       {state.isEmpty ? <EuiLoadingChart mono size="l" /> : null}
@@ -132,7 +141,11 @@ export const ExpressionRendererImplementation = ({
           <div data-test-subj="expression-renderer-error">{state.error.message}</div>
         )
       ) : null}
-      <div className="expExpressionRenderer__expression" ref={mountpoint} />
+      <div
+        className="expExpressionRenderer__expression"
+        style={expressionStyles}
+        ref={mountpoint}
+      />
     </div>
   );
 };
