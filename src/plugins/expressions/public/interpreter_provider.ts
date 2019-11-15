@@ -29,11 +29,12 @@ import {
   ArgumentType,
 } from '../common/types';
 import { getType } from '../common/type';
+import { FunctionsRegistry } from './registries';
 
 export { createError };
 
 export interface InterpreterConfig {
-  functions: any;
+  functions: FunctionsRegistry;
   types: any;
   handlers: any;
 }
@@ -81,7 +82,7 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
     const link = chain.shift(); // Every thing in the chain will always be a function right?
     if (!link) throw Error('Function chain is empty.');
     const { function: fnName, arguments: fnArgs } = link;
-    const fnDef = getByAlias(functions, fnName);
+    const fnDef = getByAlias(functions.toJS(), fnName);
 
     if (!fnDef) {
       return createError({ message: `Function ${fnName} could not be found.` });
