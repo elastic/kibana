@@ -55,8 +55,8 @@ export function Screenshots(props: ScreenshotProps) {
           </NestedEuiFlexItem>
         )}
         <NestedEuiFlexItem>
-          {/* by default EuiImage sets width to 100% and Figure to 22.5rem for large images,
-              set image to same width
+          {/* By default EuiImage sets width to 100% and Figure to 22.5rem for size=l images,
+              set image to same width.  Will need to update if size changes.
             */}
           <EuiImage
             url={toImage(image.src)}
