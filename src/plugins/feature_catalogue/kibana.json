@@ -1,6 +1,0 @@
-{
-  "id": "feature_catalogue",
-  "version": "kibana",
-  "server": false,
-  "ui": true
-}

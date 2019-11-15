@@ -17,17 +17,34 @@
  * under the License.
  */
 
-import { uiRegistry } from './_registry';
-import { capabilities } from '../capabilities';
-export { FeatureCatalogueCategory } from '../../../../plugins/home/public';
+import { CoreStart, Plugin } from 'src/core/public';
+import {
+  FeatureCatalogueRegistry,
+  FeatureCatalogueRegistrySetup,
+  FeatureCatalogueRegistryStart,
+} from './services';
 
-export const FeatureCatalogueRegistryProvider = uiRegistry({
-  name: 'featureCatalogue',
-  index: ['id'],
-  group: ['category'],
-  order: ['title'],
-  filter: featureCatalogItem => {
-    const isDisabledViaCapabilities = capabilities.get().catalogue[featureCatalogItem.id] === false;
-    return !isDisabledViaCapabilities && Object.keys(featureCatalogItem).length > 0;
+export class FeatureCataloguePlugin
+  implements Plugin<FeatureCatalogueSetup, FeatureCatalogueStart> {
+  private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
+
+  public async setup() {
+    return {
+      ...this.featuresCatalogueRegistry.setup(),
+    };
   }
-});
+
+  public async start(core: CoreStart) {
+    return {
+      ...this.featuresCatalogueRegistry.start({
+        capabilities: core.application.capabilities,
+      }),
+    };
+  }
+}
+
+/** @public */
+export type FeatureCatalogueSetup = FeatureCatalogueRegistrySetup;
+
+/** @public */
+export type FeatureCatalogueStart = FeatureCatalogueRegistryStart;

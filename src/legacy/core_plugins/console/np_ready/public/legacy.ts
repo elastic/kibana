@@ -40,7 +40,7 @@ export interface XPluginSet {
 
 import { plugin } from '.';
 import { DevToolsSetup } from '../../../../../plugins/dev_tools/public';
-import { FeatureCatalogueSetup } from '../../../../../plugins/feature_catalogue/public';
+import { FeatureCatalogueSetup } from '../../../../../plugins/home/public';
 
 const pluginInstance = plugin({} as any);
 
