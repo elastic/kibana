@@ -19,6 +19,7 @@
 
 import moment from 'moment';
 import { setCanTrackUiMetrics } from 'ui/ui_metric';
+// @ts-ignore
 import { banners, toastNotifications } from 'ui/notify';
 import { npStart } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
