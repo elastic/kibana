@@ -34,9 +34,4 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
   @include flex-parent();
   width: 100%;
   z-index: 0;
-
-  // overrides for tablet and desktop
-  @include euiBreakpoint('l', 'xl') {
-    flex-direction: row;
-  }
 }

@@ -116,45 +116,41 @@ function DefaultEditorSideBar({
   };
 
   return (
-    <div className="visEditor__sidebar">
-      <div className="visEditorSidebar__container">
-        <form className="visEditorSidebar__form" name="visualizeEditor" onKeyDownCapture={onSubmit}>
-          {vis.type.requiresSearch && vis.type.options.showIndexSelection && (
-            <h2
-              aria-label={i18n.translate('common.ui.vis.editors.sidebar.indexPatternAriaLabel', {
-                defaultMessage: 'Index pattern: {title}',
-                values: {
-                  title: vis.indexPattern.title,
-                },
-              })}
-              className="visEditorSidebar__indexPattern"
-              tabIndex={0}
-            >
-              {vis.indexPattern.title}
-            </h2>
-          )}
+    <form className="visEditorSidebar__form" name="visualizeEditor" onKeyDownCapture={onSubmit}>
+      {vis.type.requiresSearch && vis.type.options.showIndexSelection && (
+        <h2
+          aria-label={i18n.translate('common.ui.vis.editors.sidebar.indexPatternAriaLabel', {
+            defaultMessage: 'Index pattern: {title}',
+            values: {
+              title: vis.indexPattern.title,
+            },
+          })}
+          className="visEditorSidebar__indexPattern"
+          tabIndex={0}
+        >
+          {vis.indexPattern.title}
+        </h2>
+      )}
 
-          {optionTabs.length > 1 && (
-            <DefaultEditorNavBar
-              optionTabs={optionTabs}
-              selectedTab={selectedTab}
-              setSelectedTab={setSelectedTab}
-            />
-          )}
+      {optionTabs.length > 1 && (
+        <DefaultEditorNavBar
+          optionTabs={optionTabs}
+          selectedTab={selectedTab}
+          setSelectedTab={setSelectedTab}
+        />
+      )}
 
-          {optionTabs.map(({ editor: Editor, name }) => (
-            <div
-              key={name}
-              className={`visEditorSidebar__config ${
-                selectedTab === name ? '' : 'visEditorSidebar__config--hidden'
-              }`}
-            >
-              <Editor {...(name === 'data' ? dataTabProps : optionTabProps)} />
-            </div>
-          ))}
-        </form>
-      </div>
-    </div>
+      {optionTabs.map(({ editor: Editor, name }) => (
+        <div
+          key={name}
+          className={`visEditorSidebar__config ${
+            selectedTab === name ? '' : 'visEditorSidebar__config--hidden'
+          }`}
+        >
+          <Editor {...(name === 'data' ? dataTabProps : optionTabProps)} />
+        </div>
+      ))}
+    </form>
   );
 }
 

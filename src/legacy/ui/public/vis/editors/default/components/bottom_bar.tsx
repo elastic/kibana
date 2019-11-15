@@ -26,6 +26,7 @@ import {
   EuiButtonEmpty,
   EuiButtonToggle,
   EuiToolTip,
+  EuiControlBar,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -60,117 +61,160 @@ function DefaultEditorBottomBar({
     }
   }, [isDirty, autoApplyEnabled]);
 
-  return (
-    <EuiBottomBar>
-      <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-        <EuiFlexItem grow={false} />
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" responsive={false}>
-            {enableAutoApply && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={i18n.translate('common.ui.vis.editors.sidebar.autoApplyChangesTooltip', {
-                    defaultMessage: 'Auto apply editor changes.',
-                  })}
-                >
-                  <EuiButtonToggle
-                    aria-label={i18n.translate(
-                      'common.ui.vis.editors.sidebar.autoApplyChangesAriaLabel',
-                      {
-                        defaultMessage: 'Auto update the visualization on every change',
-                      }
-                    )}
-                    data-test-subj="visualizeEditorAutoButton"
-                    fill={autoApplyEnabled}
-                    iconType="refresh"
-                    isSelected={autoApplyEnabled}
-                    label={i18n.translate('common.ui.vis.editors.sidebar.autoApplyChangesLabel', {
-                      defaultMessage: 'Auto apply',
-                    })}
-                    onChange={toggleAutoApply}
-                    size="s"
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
-            {!autoApplyEnabled && (
-              <>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    aria-label={i18n.translate(
-                      'common.ui.vis.editors.sidebar.discardChangesAriaLabel',
-                      {
-                        defaultMessage: 'Reset the visualization',
-                      }
-                    )}
-                    color="ghost"
-                    data-test-subj="visualizeEditorResetButton"
-                    disabled={!isDirty}
-                    iconType="cross"
-                    onClick={onClickDiscard}
-                    size="s"
-                  >
-                    <FormattedMessage
-                      id="common.ui.vis.editors.sidebar.discardChangesButtonLabel"
-                      defaultMessage="Discard changes"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
+  const controls = [
+    {
+      controlType: 'spacer',
+    },
+    {
+      controlType: 'button',
+      id: 'discard_changes_button',
+      label: i18n.translate('common.ui.vis.editors.sidebar.discardChangesButtonLabel', {
+        defaultMessage: 'Discard changes',
+      }),
+      ['aria-label']: i18n.translate('common.ui.vis.editors.sidebar.discardChangesAriaLabel', {
+        defaultMessage: 'Reset the visualization',
+      }),
+      ['data-test-subj']: 'visualizeEditorResetButton',
+      disabled: !isDirty,
+      iconType: 'cross',
+      onClick: onClickDiscard,
+    },
+    {
+      controlType: 'button',
+      id: 'apply_changes_button',
+      label: i18n.translate('common.ui.vis.editors.sidebar.updateChartButtonLabel', {
+        defaultMessage: 'Update chart',
+      }),
+      ['aria-label']: i18n.translate('common.ui.vis.editors.sidebar.applyChangesAriaLabel', {
+        defaultMessage: 'Update the visualization with your changes',
+      }),
+      ['data-test-subj']: 'visualizeEditorRenderButton',
+      disabled: !isDirty,
+      iconType: 'play',
+      onClick: applyChanges,
+    },
+  ];
 
-                <EuiFlexItem grow={false}>
-                  {isInvalid && isTouched ? (
-                    <EuiToolTip
-                      content={i18n.translate('common.ui.vis.editors.sidebar.errorButtonTooltip', {
-                        defaultMessage: 'Errors in the highlighted fields need to be resolved.',
-                      })}
-                    >
-                      <EuiButton
-                        aria-label={i18n.translate(
-                          'common.ui.vis.editors.sidebar.errorButtonAriaLabel',
-                          {
-                            defaultMessage: 'Errors in the highlighted fields need to be resolved.',
-                          }
-                        )}
-                        color="danger"
-                        iconType="alert"
-                        size="s"
-                      >
-                        <FormattedMessage
-                          id="common.ui.vis.editors.sidebar.updateChartButtonLabel"
-                          defaultMessage="Update chart"
-                        />
-                      </EuiButton>
-                    </EuiToolTip>
-                  ) : (
-                    <EuiButton
-                      aria-label={i18n.translate(
-                        'common.ui.vis.editors.sidebar.applyChangesAriaLabel',
-                        {
-                          defaultMessage: 'Update the visualization with your changes',
-                        }
-                      )}
-                      color="ghost"
-                      data-test-subj="visualizeEditorRenderButton"
-                      disabled={!isDirty}
-                      fill
-                      iconType="play"
-                      onClick={applyChanges}
-                      size="s"
-                    >
-                      <FormattedMessage
-                        id="common.ui.vis.editors.sidebar.updateChartButtonLabel"
-                        defaultMessage="Update chart"
-                      />
-                    </EuiButton>
-                  )}
-                </EuiFlexItem>
-              </>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiBottomBar>
+  return (
+    <EuiControlBar
+      // @ts-ignore
+      controls={controls}
+      position="relative"
+      showOnMobile
+    />
   );
+
+  // return (
+  //   <EuiBottomBar>
+  //     <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+  //       <EuiFlexItem grow={false} />
+  //       <EuiFlexItem grow={false}>
+  //         <EuiFlexGroup gutterSize="s" responsive={false}>
+  //           {enableAutoApply && (
+  //             <EuiFlexItem grow={false}>
+  //               <EuiToolTip
+  //                 content={i18n.translate('common.ui.vis.editors.sidebar.autoApplyChangesTooltip', {
+  //                   defaultMessage: 'Auto apply editor changes.',
+  //                 })}
+  //               >
+  //                 <EuiButtonToggle
+  //                   aria-label={i18n.translate(
+  //                     'common.ui.vis.editors.sidebar.autoApplyChangesAriaLabel',
+  //                     {
+  //                       defaultMessage: 'Auto update the visualization on every change',
+  //                     }
+  //                   )}
+  //                   data-test-subj="visualizeEditorAutoButton"
+  //                   fill={autoApplyEnabled}
+  //                   iconType="refresh"
+  //                   isSelected={autoApplyEnabled}
+  //                   label={i18n.translate('common.ui.vis.editors.sidebar.autoApplyChangesLabel', {
+  //                     defaultMessage: 'Auto apply',
+  //                   })}
+  //                   onChange={toggleAutoApply}
+  //                   size="s"
+  //                 />
+  //               </EuiToolTip>
+  //             </EuiFlexItem>
+  //           )}
+  //           {!autoApplyEnabled && (
+  //             <>
+  //               <EuiFlexItem grow={false}>
+  //                 <EuiButtonEmpty
+  //                   aria-label={i18n.translate(
+  //                     'common.ui.vis.editors.sidebar.discardChangesAriaLabel',
+  //                     {
+  //                       defaultMessage: 'Reset the visualization',
+  //                     }
+  //                   )}
+  //                   color="ghost"
+  //                   data-test-subj="visualizeEditorResetButton"
+  //                   disabled={!isDirty}
+  //                   iconType="cross"
+  //                   onClick={onClickDiscard}
+  //                   size="s"
+  //                 >
+  //                   <FormattedMessage
+  //                     id="common.ui.vis.editors.sidebar.discardChangesButtonLabel"
+  //                     defaultMessage="Discard changes"
+  //                   />
+  //                 </EuiButtonEmpty>
+  //               </EuiFlexItem>
+
+  //               <EuiFlexItem grow={false}>
+  //                 {isInvalid && isTouched ? (
+  //                   <EuiToolTip
+  //                     content={i18n.translate('common.ui.vis.editors.sidebar.errorButtonTooltip', {
+  //                       defaultMessage: 'Errors in the highlighted fields need to be resolved.',
+  //                     })}
+  //                   >
+  //                     <EuiButton
+  //                       aria-label={i18n.translate(
+  //                         'common.ui.vis.editors.sidebar.errorButtonAriaLabel',
+  //                         {
+  //                           defaultMessage: 'Errors in the highlighted fields need to be resolved.',
+  //                         }
+  //                       )}
+  //                       color="danger"
+  //                       iconType="alert"
+  //                       size="s"
+  //                     >
+  //                       <FormattedMessage
+  //                         id="common.ui.vis.editors.sidebar.updateChartButtonLabel"
+  //                         defaultMessage="Update chart"
+  //                       />
+  //                     </EuiButton>
+  //                   </EuiToolTip>
+  //                 ) : (
+  //                   <EuiButton
+  //                     aria-label={i18n.translate(
+  //                       'common.ui.vis.editors.sidebar.applyChangesAriaLabel',
+  //                       {
+  //                         defaultMessage: 'Update the visualization with your changes',
+  //                       }
+  //                     )}
+  //                     color="ghost"
+  //                     data-test-subj="visualizeEditorRenderButton"
+  //                     disabled={!isDirty}
+  //                     fill
+  //                     iconType="play"
+  //                     onClick={applyChanges}
+  //                     size="s"
+  //                   >
+  //                     <FormattedMessage
+  //                       id="common.ui.vis.editors.sidebar.updateChartButtonLabel"
+  //                       defaultMessage="Update chart"
+  //                     />
+  //                   </EuiButton>
+  //                 )}
+  //               </EuiFlexItem>
+  //             </>
+  //           )}
+  //         </EuiFlexGroup>
+  //       </EuiFlexItem>
+  //     </EuiFlexGroup>
+  //   </EuiBottomBar>
+  // );
 }
 
 export { DefaultEditorBottomBar };

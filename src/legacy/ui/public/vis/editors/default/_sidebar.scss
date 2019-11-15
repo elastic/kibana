@@ -4,13 +4,11 @@
 // LAYOUT
 //
 
-.visEditorSidebar__container {
-  @include flex-parent(1, 1, auto);
-  background-color: $euiColorLightestShade;
-}
-
 .visEditorSidebar__form {
   @include flex-parent(1, 1, auto);
+
+  max-width: 100%;
+  background-color: $euiColorLightestShade;
 }
 
 .visEditorSidebar__config {

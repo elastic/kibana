@@ -1,7 +1,6 @@
 .visEditor--default {
   flex: 1 1 auto;
   display: flex;
-  margin-bottom: $euiSizeXL * 2;
 
   @include euiBreakpoint('xs', 's', 'm') {
     flex-direction: column-reverse;
@@ -51,7 +50,8 @@
  */
 
 .visEditor__sidebar {
-  @include flex-parent(1, 0, auto);
+  @include flex-parent(1, 1, auto);
+  background-color: $euiColorLightestShade;
 
   // overridden for tablet and desktop
   @include euiBreakpoint('l', 'xl') {

@@ -110,30 +110,32 @@ function DefaultEditor({
   }, [vis, state, formState.invalid, setDirty, setTouched]);
 
   return (
-    <div className="visEditor--default">
-      <div className="visEditor__canvas" ref={visRef} />
+    <>
+      <div className="visEditor--default">
+        <div className="visEditor__canvas" ref={visRef} />
 
-      {/* <Resizer direction="horizontal" element={sidebarRef} onResize={onResize} /> */}
+        {/* <Resizer direction="horizontal" element={sidebarRef} onResize={onResize} /> */}
 
-      <div
-        className={`collapsible-sidebar ${sidebarClassName} ${
-          vis.type.editorConfig.defaultSize
-            ? `visEditor__collapsibleSidebar--${vis.type.editorConfig.defaultSize}`
-            : ''
-        }`}
-        ref={sidebarRef}
-      >
-        <DefaultEditorSideBar
-          applyChanges={applyChanges}
-          dispatch={dispatch}
-          formIsTouched={formState.touched}
-          optionTabs={optionTabs}
-          setTouched={setTouched}
-          setValidity={setValidity}
-          state={state}
-          vis={vis}
-          uiState={uiState}
-        />
+        <div
+          className={`collapsible-sidebar ${sidebarClassName} ${
+            vis.type.editorConfig.defaultSize
+              ? `visEditor__collapsibleSidebar--${vis.type.editorConfig.defaultSize}`
+              : ''
+          }`}
+          ref={sidebarRef}
+        >
+          <DefaultEditorSideBar
+            applyChanges={applyChanges}
+            dispatch={dispatch}
+            formIsTouched={formState.touched}
+            optionTabs={optionTabs}
+            setTouched={setTouched}
+            setValidity={setValidity}
+            state={state}
+            vis={vis}
+            uiState={uiState}
+          />
+        </div>
       </div>
 
       <DefaultEditorBottomBar
@@ -144,7 +146,7 @@ function DefaultEditor({
         isInvalid={formState.invalid}
         vis={vis}
       />
-    </div>
+    </>
   );
 }
 
