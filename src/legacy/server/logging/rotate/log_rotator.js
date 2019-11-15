@@ -33,7 +33,9 @@ const unlinkAsync = promisify(fs.unlink);
 const writeFileAsync = promisify(fs.writeFile);
 
 export class LogRotator {
-  constructor(config) {
+  constructor(config, server) {
+    this.config = config;
+    this.log = server.log;
     this.logFilePath = config.get('logging.dest');
     this.interval = 1;
     this.everyBytes = config.get('logging.rotate.everyBytes');
@@ -136,6 +138,14 @@ export class LogRotator {
 
   async _startLogFileSizeMonitor() {
     this.usePolling = await this._shouldUsePolling();
+
+    if (this.usePolling && this.usePolling !== this.config.get('logging.rotate.usePolling')) {
+      this.log(
+        ['warning', 'logging:rotate'],
+        'The current environment does not support `fs.watch`. Falling back to polling using `fs.watchFile`'
+      );
+    }
+
     this.stalker = chokidar.watch(this.logFilePath, this._buildWatchCfg(this.usePolling));
     this.stalker.on('change', async (filename, stats) => await this._logFileSizeMonitorHandler.bind(this)(filename, stats));
   }

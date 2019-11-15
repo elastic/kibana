@@ -49,7 +49,7 @@ export async function setupLoggingRotate(server, config) {
   // try to setupLoggingRotate more than once,
   // so we'll need to assure it only loads once.
   if (!logRotator) {
-    logRotator = new LogRotator(config);
+    logRotator = new LogRotator(config, server);
     await logRotator.start();
   }
 
