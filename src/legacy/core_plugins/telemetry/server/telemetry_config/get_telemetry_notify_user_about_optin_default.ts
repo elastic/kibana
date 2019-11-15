@@ -19,11 +19,11 @@
 
 import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
 
-interface MyOpts {
-  telemetrySavedObject: TelemetrySavedObject;
+interface NotifyOpts {
   allowChangingOptInStatus: boolean;
-  configTelemetryOptIn: boolean;
+  telemetrySavedObject: TelemetrySavedObject;
   telemetryOptedIn: boolean | null;
+  configTelemetryOptIn: boolean;
 }
 
 /*
@@ -33,16 +33,19 @@ interface MyOpts {
  - telemetryOptedIn, // telemetryOptedIn && configTelemetryOptIn = true -> notify
 */
 export function getNotifyUserAboutOptInDefault({
-  telemetrySavedObject,
   allowChangingOptInStatus,
-  configTelemetryOptIn,
+  telemetrySavedObject,
   telemetryOptedIn,
-}: MyOpts) {
+  configTelemetryOptIn,
+}: NotifyOpts) {
   if (!allowChangingOptInStatus) {
     return false;
   }
 
   // determine if notice has been seen before
+  if (telemetrySavedObject && telemetrySavedObject.userHasSeenNotice) {
+    return false;
+  }
 
   return telemetryOptedIn && configTelemetryOptIn;
 }
