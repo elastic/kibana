@@ -90,7 +90,7 @@ export function infra(kibana: any) {
           indexPatternsServiceFactory: legacyServer.indexPatternsServiceFactory,
         },
         metrics: legacyServer.plugins.metrics,
-        spaces: legacyServer.plugins.spaces,
+        spaces: plugins.spaces,
         features: plugins.features,
         // NP_NOTE: [TSVB_GROUP] Huge hack to make TSVB (getVisData()) work with raw requests that
         // originate from the New Platform router (and are very different to the old request object).

@@ -46,7 +46,8 @@ export const initLogAnalysisGetLogEntryRateRoute = ({
           payload.data.sourceId,
           payload.data.timeRange.startTime,
           payload.data.timeRange.endTime,
-          payload.data.bucketDuration
+          payload.data.bucketDuration,
+          request
         );
 
         return response.ok({

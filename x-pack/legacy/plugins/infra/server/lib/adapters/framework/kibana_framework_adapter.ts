@@ -204,13 +204,15 @@ export class KibanaFramework {
     });
   }
 
-  // NP_TODO: Does this function still work with legacy getSpaceId(requestContext)?
-  // When can we switch to NP plugin for spaces, with associated exported types???
-  public getSpaceId(requestContext: RequestHandlerContext): string {
+  public getSpaceId(request: KibanaRequest): string {
     const spacesPlugin = this.plugins.spaces;
 
-    if (spacesPlugin && typeof spacesPlugin.getSpaceId === 'function') {
-      return spacesPlugin.getSpaceId(requestContext);
+    if (
+      spacesPlugin &&
+      spacesPlugin.spacesService &&
+      typeof spacesPlugin.spacesService.getSpaceId === 'function'
+    ) {
+      return spacesPlugin.spacesService.getSpaceId(request);
     } else {
       return 'default';
     }
