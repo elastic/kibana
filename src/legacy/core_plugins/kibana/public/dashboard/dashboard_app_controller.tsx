@@ -41,6 +41,7 @@ import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { timefilter } from 'ui/timefilter';
 
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing/get_unhashable_states_provider';
+import './dashboard_empty_screen_directive';
 
 import {
   AppStateClass as TAppStateClass,

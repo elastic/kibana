@@ -49,12 +49,7 @@
       <br><br>
 
       <div ng-show="getShouldShowEditHelp()" class="euiText">
-        <h2
-          i18n-id="kbn.dashboard.fillDashboardTitle"
-          i18n-default-message="This dashboard is empty. Let&rsquo;s fill it up!"
-        >
-        </h2>
-
+        <dashboard-empty-screen/>
         <p>
           <span
             i18n-id="kbn.dashboard.addVisualizationDescription1"
@@ -85,12 +80,7 @@
       </div>
 
       <div ng-show="getShouldShowViewHelp()" class="euiText">
-        <h2
-          i18n-id="kbn.dashboard.fillDashboardTitle"
-          i18n-default-message="This dashboard is empty. Let&rsquo;s fill it up!"
-        >
-        </h2>
-
+        <dashboard-empty-screen/>
         <p>
           <span
             i18n-id="kbn.dashboard.howToStartWorkingOnNewDashboardDescription1"
