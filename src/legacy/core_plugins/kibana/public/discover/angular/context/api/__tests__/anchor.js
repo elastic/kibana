@@ -26,7 +26,7 @@ import { createIndexPatternsStub, createSearchSourceStub } from './_stubs';
 import { fetchAnchorProvider } from '../anchor';
 
 describe('context app', function () {
-  beforeEach(() => pluginInstance.bootstrapInnerAngular());
+  beforeEach(() => pluginInstance.initializeInnerAngular());
   beforeEach(ngMock.module('app/discover'));
 
   describe('function fetchAnchor', function () {

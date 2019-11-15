@@ -37,7 +37,8 @@ describe('Doc Table', function () {
 
   let fakeRowVals;
   let stubFieldFormatConverter;
-  beforeEach(() => pluginInstance.bootstrapInnerAngular());
+  beforeEach(() => pluginInstance.initializeServices(true));
+  beforeEach(() => pluginInstance.initializeInnerAngular());
   beforeEach(ngMock.module('app/discover'));
   beforeEach(
     ngMock.inject(function (_config_, $rootScope, Private) {

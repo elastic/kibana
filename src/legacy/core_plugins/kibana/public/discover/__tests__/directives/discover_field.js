@@ -32,7 +32,8 @@ describe('discoverField', function () {
   let $scope;
   let indexPattern;
   let $elem;
-  beforeEach(() => pluginInstance.bootstrapInnerAngular());
+  beforeEach(() => pluginInstance.initializeServices(true));
+  beforeEach(() => pluginInstance.initializeInnerAngular());
   beforeEach(ngMock.module('app/discover'));
   beforeEach(ngMock.inject(function (Private, $rootScope, $compile) {
     $elem = angular.element(`

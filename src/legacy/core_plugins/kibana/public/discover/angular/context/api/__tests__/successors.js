@@ -33,7 +33,7 @@ const ANCHOR_TIMESTAMP_3 = (new Date(MS_PER_DAY * 3)).toJSON();
 const ANCHOR_TIMESTAMP_3000 = (new Date(MS_PER_DAY * 3000)).toJSON();
 
 describe('context app', function () {
-  beforeEach(() => pluginInstance.bootstrapInnerAngular());
+  beforeEach(() => pluginInstance.initializeInnerAngular());
   beforeEach(ngMock.module('app/discover'));
 
   describe('function fetchSuccessors', function () {

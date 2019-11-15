@@ -16,18 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { npStart } from 'ui/new_platform';
 import angular from 'angular'; // just used in embeddables and discover controller
-// @ts-ignore
-import { SearchSource } from 'ui/courier';
-// @ts-ignore
-import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
-import { wrapInI18nContext } from 'ui/i18n';
-// @ts-ignore
-import * as docViewsRegistry from 'ui/registry/doc_views';
-import { start as data } from '../../../data/public/legacy';
+import { DiscoverServices } from './build_services';
 
-export let angularModule: any = null;
+let angularModule: any = null;
+let services: DiscoverServices | null = null;
 
 export function setAngularModule(module: any) {
   angularModule = module;
@@ -37,55 +30,23 @@ export function getAngularModule() {
   return angularModule;
 }
 
-interface ServiceDeps {
-  core: any;
-  addBasePath: any;
-  capabilities: any;
-  chrome: any;
-  docLinks: any;
-  docTitle: any;
-  docViewsRegistry: any;
-  eui_utils: any;
-  indexPatterns: any;
-  inspector: any;
-  filterManager: any;
-  metadata: any;
-  toastNotifications: any;
-  uiSettings: any;
-  timefilter: any;
-  // legacy
-  getSavedSearchById?: any;
-  getSavedSearchUrlById?: any;
-}
-
-let services: ServiceDeps = {
-  core: npStart.core,
-  addBasePath: npStart.core.http.basePath.prepend,
-  capabilities: npStart.core.application.capabilities,
-  chrome: npStart.core.chrome,
-  docLinks: npStart.core.docLinks,
-  docTitle: npStart.core.chrome.docTitle,
-  docViewsRegistry,
-  eui_utils: npStart.plugins.eui_utils,
-  filterManager: npStart.plugins.data.query.filterManager,
-  indexPatterns: data.indexPatterns.indexPatterns,
-  inspector: npStart.plugins.inspector,
-  metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
-  toastNotifications: npStart.core.notifications.toasts,
-  uiSettings: npStart.core.uiSettings,
-  timefilter: npStart.plugins.data.query.timefilter.timefilter,
-};
-export function getServices(): ServiceDeps {
+export function getServices(): DiscoverServices {
+  if (!services) {
+    throw new Error('Discover services are not yet available');
+  }
   return services;
 }
 
 export function setServices(newServices: any) {
-  services = Object.assign({}, services, newServices);
+  if (services) {
+    throw new Error('Discover services are already set');
+  }
+  services = newServices;
 }
 
 // EXPORT legacy static dependencies
 export { angular };
-export { wrapInI18nContext };
+export { wrapInI18nContext } from 'ui/i18n';
 export { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 // @ts-ignore
 export { callAfterBindingsWorkaround } from 'ui/compat';

@@ -20,6 +20,7 @@
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 import angular from 'angular';
 import { IUiActionsStart } from 'src/plugins/ui_actions/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { registerFeature } from './helpers/register_feature';
 import './kibana_services';
 import {
@@ -28,10 +29,11 @@ import {
 } from '../../../../../plugins/embeddable/public';
 
 import { LocalApplicationService } from '../local_application_service';
-import { getGlobalAngular } from './get_global_angular';
 import { getAngularModule, getAngularModuleEmbeddable } from './get_inner_angular';
 import { setServices } from './kibana_services';
 import { NavigationStart } from '../../../navigation/public';
+import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
+import { buildServices } from './build_services';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -40,26 +42,30 @@ import { NavigationStart } from '../../../navigation/public';
  */
 export type DiscoverSetup = void;
 export type DiscoverStart = void;
-interface DiscoverSetupPlugins {
+export interface DiscoverSetupPlugins {
   uiActions: IUiActionsStart;
   embeddable: EmbeddableSetup;
   localApplicationService: LocalApplicationService;
 }
-interface DiscoverStartPlugins {
+export interface DiscoverStartPlugins {
   uiActions: IUiActionsStart;
   embeddable: EmbeddableStart;
   navigation: NavigationStart;
+  eui_utils: EuiUtilsStart;
+  data: DataPublicPluginStart;
+  inspector: any;
 }
 const innerAngularName = 'app/discover';
 const embeddableAngularName = 'app/discoverEmbeddable';
 
 export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
-  private globalAngularBootstrapped: boolean = false;
-  private innerAngularBootstrapped: boolean = false;
+  private servicesInitialized: boolean = false;
+  private innerAngularInitialized: boolean = false;
   /**
-   * why is this public? it's still needed for some tests, remove once all is jest
+   * why is or those functions public? it's still needed for some mocha tests, remove once all is jest
    */
-  public bootstrapInnerAngular?: () => void;
+  public initializeInnerAngular?: () => void;
+  public initializeServices?: () => void;
   constructor(initializerContext: PluginInitializerContext) {}
   setup(core: CoreSetup, plugins: DiscoverSetupPlugins): DiscoverSetup {
     registerFeature();
@@ -69,14 +75,14 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
       order: -1004,
       euiIconType: 'discoverApp',
       mount: async (context, params) => {
-        await this.bootstrapGlobalAngular();
-        if (!this.bootstrapInnerAngular) {
-          // TODO to be improved
-          throw Error('Discover plugin bootstrapInnerAngular is undefined');
+        if (!this.initializeInnerAngular) {
+          throw Error('Discover plugin method initializeInnerAngular is undefined');
         }
-        if (!this.innerAngularBootstrapped) {
-          await this.bootstrapInnerAngular();
+        if (!this.initializeServices) {
+          throw Error('Discover plugin method initializeServices is undefined');
         }
+        await this.initializeServices();
+        await this.initializeInnerAngular();
         const { renderApp } = await import('./application');
         return renderApp(innerAngularName, params.element);
       },
@@ -84,31 +90,34 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
-    this.bootstrapInnerAngular = async () => {
-      // this is used by application mount and tests
-      // don't add 'bootstrapGlobalAngular' here, or mocha tests will fail
-      if (!this.innerAngularBootstrapped) {
-        getAngularModule(innerAngularName, core, plugins);
-        this.innerAngularBootstrapped = true;
+    this.initializeInnerAngular = async () => {
+      if (this.innerAngularInitialized) {
+        return;
       }
+      // this is used by application mount and tests
+      getAngularModule(innerAngularName, core, plugins);
+      this.innerAngularInitialized = true;
     };
-    this.registerEmbeddable(core, plugins);
-  }
 
-  private async bootstrapGlobalAngular() {
-    if (!this.globalAngularBootstrapped) {
-      const angularDeps = await getGlobalAngular();
-      setServices(angularDeps);
-      this.globalAngularBootstrapped = true;
-    }
-    return true;
+    this.initializeServices = async (test = false) => {
+      if (this.servicesInitialized) {
+        return;
+      }
+      const services = await buildServices(core, plugins, test);
+      setServices(services);
+      this.servicesInitialized = true;
+    };
+
+    this.registerEmbeddable(core, plugins);
   }
 
   private async registerEmbeddable(core: CoreStart, plugins: DiscoverStartPlugins) {
     const { SearchEmbeddableFactory } = await import('./embeddable');
-    // bootstrap inner Angular for embeddable, return injector
     const getInjector = async () => {
-      await this.bootstrapGlobalAngular();
+      if (!this.initializeServices) {
+        throw Error('Discover plugin registerEmbeddable:  initializeServices is undefined');
+      }
+      await this.initializeServices();
       getAngularModuleEmbeddable(embeddableAngularName, core, plugins);
       const mountpoint = document.createElement('div');
       return angular.bootstrap(mountpoint, [embeddableAngularName]);

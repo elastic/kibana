@@ -86,7 +86,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
     const queryFilter = getServices().filterManager;
 
     const url = await getServices().getSavedSearchUrlById(savedObjectId);
-    const editUrl = await getServices().addBasePath(`/app/kibana${url}`);
+    const editUrl = getServices().addBasePath(`/app/kibana${url}`);
     try {
       const savedObject = await getServices().getSavedSearchById(savedObjectId);
       return new SearchEmbeddable(

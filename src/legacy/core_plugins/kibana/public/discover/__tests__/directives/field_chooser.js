@@ -70,7 +70,8 @@ describe('discover field chooser directives', function () {
       on-remove-field="removeField"
     ></disc-field-chooser>
   `);
-  beforeEach(() => pluginInstance.bootstrapInnerAngular());
+  beforeEach(() => pluginInstance.initializeServices(true));
+  beforeEach(() => pluginInstance.initializeInnerAngular());
 
   beforeEach(ngMock.module('app/discover', ($provide) => {
     $provide.decorator('config', ($delegate) => {

@@ -30,7 +30,7 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 let indexPattern;
 
 describe('fieldCalculator', function () {
-  beforeEach(() => pluginInstance.bootstrapInnerAngular());
+  beforeEach(() => pluginInstance.initializeInnerAngular());
   beforeEach(ngMock.module('app/discover'));
   beforeEach(ngMock.inject(function (Private) {
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
