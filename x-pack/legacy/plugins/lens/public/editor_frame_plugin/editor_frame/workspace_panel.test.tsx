@@ -20,7 +20,7 @@ import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../drag_drop';
 import { Ast } from '@kbn/interpreter/common';
 import { coreMock } from 'src/core/public/mocks';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { esFilters, IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
@@ -378,10 +378,13 @@ describe('workspace_panel', () => {
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(1);
 
+    const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+    const field = ({ name: 'myfield' } as unknown) as IFieldType;
+
     instance.setProps({
       framePublicAPI: {
         ...framePublicAPI,
-        filters: [esFilters.buildExistsFilter({ name: 'myfield' }, { id: 'index1' })],
+        filters: [esFilters.buildExistsFilter(field, indexPattern)],
       },
     });
 

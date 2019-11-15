@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 
-import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
+import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/server';
 import { parseInterval } from '../../../common/util/parse_interval.js';
 import { validateJobObject } from './validate_job_object';
 

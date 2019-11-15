@@ -17,21 +17,30 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { decorateQuery } from '../decorate_query';
+import { decorateQuery } from './decorate_query';
 
-describe('Query decorator', function () {
-  it('should be a function', function () {
-    expect(decorateQuery).to.be.a(Function);
+describe('Query decorator', () => {
+  test('should be a function', () => {
+    expect(typeof decorateQuery).toBe('function');
   });
 
-  it('should merge in the query string options', function () {
-    const decoratedQuery = decorateQuery({ query_string: { query: '*' } }, { analyze_wildcard: true });
-    expect(decoratedQuery).to.eql({ query_string: { query: '*', analyze_wildcard: true } });
+  test('should merge in the query string options', () => {
+    const decoratedQuery = decorateQuery(
+      { query_string: { query: '*' } },
+      { analyze_wildcard: true }
+    );
+
+    expect(decoratedQuery).toEqual({ query_string: { query: '*', analyze_wildcard: true } });
   });
 
-  it('should add a default of a time_zone parameter if one is provided', function () {
-    const decoratedQuery = decorateQuery({ query_string: { query: '*' } }, { analyze_wildcard: true }, 'America/Phoenix');
-    expect(decoratedQuery).to.eql({ query_string: { query: '*', analyze_wildcard: true, time_zone: 'America/Phoenix' } });
+  test('should add a default of a time_zone parameter if one is provided', () => {
+    const decoratedQuery = decorateQuery(
+      { query_string: { query: '*' } },
+      { analyze_wildcard: true },
+      'America/Phoenix'
+    );
+    expect(decoratedQuery).toEqual({
+      query_string: { query: '*', analyze_wildcard: true, time_zone: 'America/Phoenix' },
+    });
   });
 });

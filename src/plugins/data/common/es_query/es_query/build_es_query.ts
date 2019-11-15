@@ -21,6 +21,16 @@ import { groupBy, has } from 'lodash';
 import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
+import { IIndexPattern } from '../../index_patterns';
+import { Filter } from '../filters';
+import { Query } from '../../query/types';
+
+export interface EsQueryConfig {
+  allowLeadingWildcards: boolean;
+  queryStringOptions: Record<string, any>;
+  ignoreFilterIfFieldNotInIndex: boolean;
+  dateFormatTZ?: string;
+}
 
 /**
  * @param indexPattern
@@ -31,30 +41,43 @@ import { buildQueryFromLucene } from './from_lucene';
  * config contains dateformat:tz
  */
 export function buildEsQuery(
-  indexPattern,
-  queries = [],
-  filters = [],
-  config = {
+  indexPattern: IIndexPattern | null,
+  queries: Query | Query[],
+  filters: Filter | Filter[],
+  config: EsQueryConfig = {
     allowLeadingWildcards: false,
     queryStringOptions: {},
     ignoreFilterIfFieldNotInIndex: false,
-    dateFormatTZ: null,
-  }) {
+  }
+) {
   queries = Array.isArray(queries) ? queries : [queries];
   filters = Array.isArray(filters) ? filters : [filters];
 
-  const validQueries = queries.filter((query) => has(query, 'query'));
+  const validQueries = queries.filter(query => has(query, 'query'));
   const queriesByLanguage = groupBy(validQueries, 'language');
-  const kueryQuery = buildQueryFromKuery(indexPattern, queriesByLanguage.kuery, config.allowLeadingWildcards, config.dateFormatTZ);
-  const luceneQuery = buildQueryFromLucene(queriesByLanguage.lucene, config.queryStringOptions, config.dateFormatTZ);
-  const filterQuery = buildQueryFromFilters(filters, indexPattern, config.ignoreFilterIfFieldNotInIndex);
+  const kueryQuery = buildQueryFromKuery(
+    indexPattern,
+    queriesByLanguage.kuery,
+    config.allowLeadingWildcards,
+    config.dateFormatTZ
+  );
+  const luceneQuery = buildQueryFromLucene(
+    queriesByLanguage.lucene,
+    config.queryStringOptions,
+    config.dateFormatTZ
+  );
+  const filterQuery = buildQueryFromFilters(
+    filters,
+    indexPattern,
+    config.ignoreFilterIfFieldNotInIndex
+  );
 
   return {
     bool: {
-      must: [].concat(kueryQuery.must, luceneQuery.must, filterQuery.must),
-      filter: [].concat(kueryQuery.filter, luceneQuery.filter, filterQuery.filter),
-      should: [].concat(kueryQuery.should, luceneQuery.should, filterQuery.should),
-      must_not: [].concat(kueryQuery.must_not, luceneQuery.must_not, filterQuery.must_not),
-    }
+      must: [...kueryQuery.must, ...luceneQuery.must, ...filterQuery.must],
+      filter: [...kueryQuery.filter, ...luceneQuery.filter, ...filterQuery.filter],
+      should: [...kueryQuery.should, ...luceneQuery.should, ...filterQuery.should],
+      must_not: [...kueryQuery.must_not, ...luceneQuery.must_not, ...filterQuery.must_not],
+    },
   };
 }

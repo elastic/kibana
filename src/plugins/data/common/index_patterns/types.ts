@@ -17,10 +17,19 @@
  * under the License.
  */
 
-export function getEsQueryConfig(config) {
-  const allowLeadingWildcards = config.get('query:allowLeadingWildcards');
-  const queryStringOptions = config.get('query:queryString:options');
-  const ignoreFilterIfFieldNotInIndex = config.get('courier:ignoreFilterIfFieldNotInIndex');
-  const dateFormatTZ = config.get('dateFormat:tz');
-  return { allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex, dateFormatTZ };
+import { IFieldType } from './fields';
+
+export interface IIndexPattern {
+  fields: IFieldType[];
+  title: string;
+  id?: string;
+  type?: string;
+  timeFieldName?: string;
+  fieldFormatMap?: Record<
+    string,
+    {
+      id: string;
+      params: unknown;
+    }
+  >;
 }

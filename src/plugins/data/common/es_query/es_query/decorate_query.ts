@@ -17,33 +17,31 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { getConvertedValueForField } from '../utils/filters';
+import { extend, defaults } from 'lodash';
+import { getTimeZoneFromSettings } from '../utils';
+import { DslQuery, isEsQueryString } from './es_query_dsl';
 
-export function migrateFilter(filter, indexPattern) {
-  if (filter.match) {
-    const fieldName = Object.keys(filter.match)[0];
+/**
+ * Decorate queries with default parameters
+ * @param query object
+ * @param queryStringOptions query:queryString:options from UI settings
+ * @param dateFormatTZ dateFormat:tz from UI settings
+ * @returns {object}
+ */
 
-
-    if (isMatchPhraseFilter(filter, fieldName)) {
-      const params = _.get(filter, ['match', fieldName]);
-      if (indexPattern) {
-        const field = indexPattern.fields.find(f => f.name === fieldName);
-        if (field) {
-          params.query = getConvertedValueForField(field, params.query);
-        }
-      }
-      return {
-        match_phrase: {
-          [fieldName]: _.omit(params, 'type'),
-        },
-      };
+export function decorateQuery(
+  query: DslQuery,
+  queryStringOptions: Record<string, any>,
+  dateFormatTZ?: string
+) {
+  if (isEsQueryString(query)) {
+    extend(query.query_string, queryStringOptions);
+    if (dateFormatTZ) {
+      defaults(query.query_string, {
+        time_zone: getTimeZoneFromSettings(dateFormatTZ),
+      });
     }
   }
 
-  return filter;
-}
-
-function isMatchPhraseFilter(filter, fieldName) {
-  return _.get(filter, ['match', fieldName, 'type']) === 'phrase';
+  return query;
 }
