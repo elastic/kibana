@@ -18,12 +18,11 @@
  */
 
 import { CoreStart, Plugin } from '../../../../../core/public';
-import { initTableVisLegacyModule } from './table_vis_legacy_module';
 
 /** @internal */
 export class LegacyDependenciesPlugin implements Plugin {
   public setup() {
-    // initTableVisLegacyModule();
+    // nothing to do here yet
   }
 
   public start(core: CoreStart) {

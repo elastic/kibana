@@ -29,11 +29,9 @@ import { CoreStart, LegacyCoreStart, UiSettingsClientContract } from 'kibana/pub
 // @ts-ignore
 import { watchMultiDecorator } from 'ui/directives/watch_multi/watch_multi';
 // @ts-ignore
-import { GlobalStateProvider } from 'ui/state_management/global_state';
+import { KbnAccessibleClickProvider } from 'ui/accessibility/kbn_accessible_click';
 // @ts-ignore
 import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
-// @ts-ignore
-import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 import { configureAppAngularModule } from 'ui/legacy_compat';
 
 import {
@@ -42,33 +40,20 @@ import {
   // @ts-ignore
 } from 'ui/directives/paginate';
 
-import { NavigationStart } from '../../navigation/public';
+const thirdPartyAngularDependencies = ['ngSanitize', 'ui.bootstrap', 'RecursionHelper'];
 
-const thirdPartyAngularDependencies = [
-  'ngSanitize',
-  'ngRoute',
-  'react',
-  'ui.bootstrap',
-  'RecursionHelper',
-];
-
-export function getAngularModule(name: string, core: CoreStart, deps: any) {
-  const discoverUiModule = getInnerAngular(name, core, deps.navigation);
+export function getAngularModule(name: string, core: CoreStart) {
+  const discoverUiModule = getInnerAngular(name, core);
   configureAppAngularModule(discoverUiModule, core as LegacyCoreStart, true);
   return discoverUiModule;
 }
 
 let initialized = false;
 
-export function getInnerAngular(
-  name = 'kibana/table_vis',
-  core: CoreStart,
-  navigation: NavigationStart
-) {
+export function getInnerAngular(name = 'kibana/table_vis', core: CoreStart) {
   if (!initialized) {
     createLocalPrivateModule();
     createLocalI18nModule();
-    createLocalTopNavModule(navigation);
     createLocalConfigModule(core.uiSettings);
     createLocalPaginateModule();
     initialized = true;
@@ -79,10 +64,10 @@ export function getInnerAngular(
       'tableVisPaginate',
       'tableVisConfig',
       'tableVisPrivate',
-      'tableVisTopNav',
       'tableVisI18n',
     ])
-    .config(watchMultiDecorator);
+    .config(watchMultiDecorator)
+    .directive('kbnAccessibleClick', KbnAccessibleClickProvider);
 }
 
 function createLocalPrivateModule() {
@@ -102,26 +87,6 @@ function createLocalConfigModule(uiSettings: UiSettingsClientContract) {
         }),
       };
     });
-}
-
-export function createLocalGlobalStateModule() {
-  angular
-    .module('tableVisGlobalState', [
-      'tableVisPrivate',
-      'tableVisConfig',
-      'tableVisKbnUrl',
-      'tableVisPromise',
-    ])
-    .service('globalState', function(Private: any) {
-      return Private(GlobalStateProvider);
-    });
-}
-
-function createLocalTopNavModule(navigation: NavigationStart) {
-  angular
-    .module('tableVisTopNav', ['react'])
-    .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
 }
 
 function createLocalI18nModule() {

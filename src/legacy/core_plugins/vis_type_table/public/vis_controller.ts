@@ -17,36 +17,31 @@
  * under the License.
  */
 
-import angular from 'angular';
+import angular, { IModule, auto, IRootScopeService, IScope, ICompileService } from 'angular';
 import $ from 'jquery';
 import { npStart } from 'ui/new_platform';
 import { getAngularModule } from './get_inner_angular';
-import { Vis } from '../../visualizations/public';
+import { Vis, VisParams } from '../../visualizations/public';
 
-import { start as navigation } from '../../navigation/public/legacy';
 import { initTableVisLegacyModule } from './shim/table_vis_legacy_module';
 
 const innerAngularName = 'kibana/table_vis';
 
-interface ITableVisController {
+export class TableVisualizationController {
+  private tableVisModule: IModule | undefined;
+  private injector: auto.IInjectorService | undefined;
   el: JQuery<Element>;
   vis: Vis;
-}
-export class TableVisController implements ITableVisController {
-  private innerAngularBootstrapped: boolean = false;
-  private injector: any;
-  el: JQuery<Element>;
-  vis: Vis;
-  $rootScope: any;
-  $scope: any;
-  $compile: any;
+  $rootScope: IRootScopeService | null = null;
+  $scope: IScope & { [key: string]: any } | undefined;
+  $compile: ICompileService | undefined;
 
   constructor(domeElement: Element, vis: Vis) {
     this.el = $(domeElement);
     this.vis = vis;
   }
 
-  async getInjector() {
+  getInjector() {
     if (!this.injector) {
       const mountpoint = document.createElement('div');
       mountpoint.setAttribute('style', 'height: 100%; width: 100%;');
@@ -57,18 +52,19 @@ export class TableVisController implements ITableVisController {
     return this.injector;
   }
 
-  async render(esResponse: any, visParams: any, status: any) {
-    if (!this.innerAngularBootstrapped) {
-      this.bootstrapInnerAngular();
-    }
+  async render(esResponse: object, visParams: VisParams, status: { [key: string]: boolean }) {
+    this.initLocalAngular();
 
     return new Promise(async (resolve, reject) => {
       if (!this.$rootScope) {
-        const $injector = await this.getInjector();
+        const $injector = this.getInjector();
         this.$rootScope = $injector.get('$rootScope');
         this.$compile = $injector.get('$compile');
       }
       const updateScope = () => {
+        if (!this.$scope) {
+          return;
+        }
         this.$scope.vis = this.vis;
         this.$scope.visState = this.vis.getState();
         this.$scope.esResponse = esResponse;
@@ -80,11 +76,11 @@ export class TableVisController implements ITableVisController {
         this.$scope.$apply();
       };
 
-      if (!this.$scope) {
+      if (!this.$scope && this.$compile) {
         this.$scope = this.$rootScope.$new();
         this.$scope.uiState = this.vis.getUiState();
         updateScope();
-        this.el.find('div').html(this.$compile(this.vis.type.visConfig.template)(this.$scope));
+        this.el.find('div').append(this.$compile(this.vis.type.visConfig.template)(this.$scope));
         this.$scope.$apply();
       } else {
         updateScope();
@@ -92,11 +88,10 @@ export class TableVisController implements ITableVisController {
     });
   }
 
-  bootstrapInnerAngular = async () => {
-    if (!this.innerAngularBootstrapped) {
-      const tableVisModule = getAngularModule(innerAngularName, npStart.core, { navigation });
-      initTableVisLegacyModule(tableVisModule);
-      this.innerAngularBootstrapped = true;
+  initLocalAngular = async () => {
+    if (!this.tableVisModule) {
+      this.tableVisModule = getAngularModule(innerAngularName, npStart.core);
+      initTableVisLegacyModule(this.tableVisModule);
     }
   };
 
