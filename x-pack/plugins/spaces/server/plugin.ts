@@ -31,6 +31,7 @@ import { ConfigType } from './config';
 import { toggleUICapabilities } from './lib/toggle_ui_capabilities';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { initExternalSpacesApi } from './routes/api/external';
+import { createRouteHandlerContext } from './spaces_route_context_handler';
 
 /**
  * Describes a set of APIs that is available in the legacy platform only and required by this plugin
@@ -117,6 +118,8 @@ export class Plugin {
       getSpacesAuditLogger: this.getSpacesAuditLogger,
       config$: this.config$,
     });
+
+    core.http.registerRouteHandlerContext('spaces', createRouteHandlerContext(spacesService));
 
     const externalRouter = core.http.createRouter();
     initExternalSpacesApi({

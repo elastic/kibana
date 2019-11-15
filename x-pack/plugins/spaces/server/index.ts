@@ -7,6 +7,7 @@
 import { PluginInitializerContext } from '../../../../src/core/server';
 import { ConfigSchema } from './config';
 import { Plugin } from './plugin';
+export * from './types';
 
 // These exports are part of public Spaces plugin contract, any change in signature of exported
 // functions or removal of exports should be considered as a breaking change. Ideally we should
