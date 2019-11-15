@@ -36,7 +36,7 @@ export const AnalyzeInMlButton: React.FunctionComponent<{
   ) : (
     <EuiButton
       fill={true}
-      size='s'
+      size="s"
       href={getOverallAnomalyExplorerLink(pathname, jobId, timeRange)}>
       {buttonLabel}
     </EuiButton>
