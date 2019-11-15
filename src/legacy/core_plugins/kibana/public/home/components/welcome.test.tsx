@@ -50,3 +50,14 @@ test('should render a Welcome screen with no telemetry disclaimer', () => {
 
   expect(component).toMatchSnapshot();
 });
+
+test('fires opt-in seen when mounted', () => {
+  const seen = jest.fn();
+
+  shallow(
+    // @ts-ignore
+    <Welcome urlBase="/" onSkip={() => {}} showTelemetryDisclaimer={true} optInSeen={seen} />
+  );
+
+  expect(seen).toHaveBeenCalled();
+});
