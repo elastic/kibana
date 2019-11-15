@@ -6,7 +6,6 @@
 
 import { get } from 'lodash/fp';
 
-import { esFilters } from '../../../../../../../../src/plugins/data/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import {
   Alert,
@@ -18,6 +17,7 @@ import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
 import { RequestFacade } from '../../../types';
 import { SearchResponse } from '../../types';
+import { esFilters } from '../../../../../../../../src/plugins/data/server';
 
 export type PartialFilter = Partial<esFilters.Filter>;
 
