@@ -28,7 +28,7 @@ export const AnalyzeInMlButton: React.FunctionComponent<{
   return partition ? (
     <EuiButton
       fill={false}
-      size='s'
+      size="s"
       href={getPartitionSpecificSingleMetricViewerLink(pathname, jobId, partition, timeRange)}
     >
       {buttonLabel}
