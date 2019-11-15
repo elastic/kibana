@@ -20,8 +20,7 @@
 import { TutorialsRegistry } from './tutorials_registry';
 import { coreMock } from '../../../../core/server/mocks';
 import { CoreSetup } from '../../../../core/server';
-import { httpServiceMock, httpServerMock } from '../../../../../src/core/server/mocks';
-import { IRouter } from 'kibana/server';
+import { httpServerMock } from '../../../../../src/core/server/mocks';
 
 import {
   TutorialProvider,
@@ -81,11 +80,8 @@ describe('TutorialsRegistry', () => {
   let testScopedTutorialContextFactory: ScopedTutorialContextFactory;
 
   describe('GET /api/kibana/home/NP_tutorials', () => {
-    let routerMock: jest.Mocked<IRouter>;
-
     beforeEach(() => {
       mockCoreSetup = coreMock.createSetup();
-      routerMock = httpServiceMock.createRouter();
     });
 
     test('has a router that retrieves registered tutorials', () => {
