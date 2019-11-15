@@ -4,9 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as _ from 'lodash';
 // @ts-ignore
 import contentDisposition from 'content-disposition';
-import * as _ from 'lodash';
+import {
+  ServerFacade,
+  ExportTypeDefinition,
+  JobDocExecuted,
+  JobDocOutputExecuted,
+} from '../../../types';
 import { oncePerServer } from '../../lib/once_per_server';
 import { CSV_JOB_TYPE } from '../../../common/constants';
 
@@ -16,10 +22,10 @@ interface ICustomHeaders {
 
 const DEFAULT_TITLE = 'report';
 
-const getTitle = (exportType: any, title?: string): string =>
+const getTitle = (exportType: ExportTypeDefinition, title?: string): string =>
   `${title || DEFAULT_TITLE}.${exportType.jobContentExtension}`;
 
-const getReportingHeaders = (output: any, exportType: any) => {
+const getReportingHeaders = (output: JobDocOutputExecuted, exportType: ExportTypeDefinition) => {
   const metaDataHeaders: ICustomHeaders = {};
 
   if (exportType.jobType === CSV_JOB_TYPE) {
@@ -33,20 +39,22 @@ const getReportingHeaders = (output: any, exportType: any) => {
   return metaDataHeaders;
 };
 
-function getDocumentPayloadFn(server: any) {
-  const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
+function getDocumentPayloadFn(server: ServerFacade) {
+  const exportTypesRegistry = server.plugins.reporting!.exportTypesRegistry;
 
-  function encodeContent(content: string, exportType: any) {
+  function encodeContent(content: string | null, exportType: ExportTypeDefinition) {
     switch (exportType.jobContentEncoding) {
       case 'base64':
-        return Buffer.from(content, 'base64');
+        return content ? Buffer.from(content, 'base64') : content; // Buffer.from rejects null
       default:
         return content;
     }
   }
 
-  function getCompleted(output: any, jobType: string, title: any) {
-    const exportType = exportTypesRegistry.get((item: any) => item.jobType === jobType);
+  function getCompleted(output: JobDocOutputExecuted, jobType: string, title: string) {
+    const exportType = exportTypesRegistry.get(
+      (item: ExportTypeDefinition) => item.jobType === jobType
+    );
     const filename = getTitle(exportType, title);
     const headers = getReportingHeaders(output, exportType);
 
@@ -61,7 +69,7 @@ function getDocumentPayloadFn(server: any) {
     };
   }
 
-  function getFailure(output: any) {
+  function getFailure(output: JobDocOutputExecuted) {
     return {
       statusCode: 500,
       content: {
@@ -72,19 +80,18 @@ function getDocumentPayloadFn(server: any) {
     };
   }
 
-  function getIncomplete(status: any) {
+  function getIncomplete(status: string) {
     return {
       statusCode: 503,
       content: status,
       contentType: 'application/json',
-      headers: {
-        'retry-after': 30,
-      },
+      headers: { 'retry-after': 30 },
     };
   }
 
-  return function getDocumentPayload(doc: any) {
-    const { status, output, jobtype: jobType, payload: { title } = { title: '' } } = doc._source;
+  return function getDocumentPayload(doc: { _source: JobDocExecuted }) {
+    const { status, jobtype: jobType, payload: { title } = { title: '' } } = doc._source;
+    const { output } = doc._source as { output: JobDocOutputExecuted };
 
     if (status === 'completed') {
       return getCompleted(output, jobType, title);

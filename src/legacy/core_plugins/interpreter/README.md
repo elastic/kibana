@@ -17,7 +17,6 @@ In the Legacy Platform:
 
 ```ts
 import { npSetup, npStart } from 'ui/new_platform';
-npSetup.plugins.expressions;
-npSetup.plugins.expressions;
+
 npSetup.plugins.expressions.registerFunction(myFunction);
 ```
