@@ -5,11 +5,11 @@
  */
 
 import {
-  EuiCheckboxGroup,
   EuiCode,
   EuiDescribedFormGroup,
   EuiFormRow,
   EuiLoadingSpinner,
+  EuiCheckbox,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -23,23 +23,28 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
   onChangeSelectedIndices: (selectedIndices: IndicesSelection) => void;
   valid: boolean;
 }> = ({ indices, isValidating, onChangeSelectedIndices, valid }) => {
-  const choices = useMemo(
-    () =>
-      Object.keys(indices).map(indexName => ({
-        id: indexName,
-        label: <EuiCode>{indexName}</EuiCode>,
-      })),
-    [indices]
-  );
-
-  const handleCheckboxGroupChange = useCallback(
-    indexName => {
+  const handleCheckboxChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
       onChangeSelectedIndices({
         ...indices,
-        [indexName]: !indices[indexName],
+        [event.currentTarget.id]: event.currentTarget.checked,
       });
     },
     [indices, onChangeSelectedIndices]
+  );
+
+  const choices = useMemo(
+    () =>
+      Object.keys(indices).map(indexName => (
+        <EuiCheckbox
+          key={indexName}
+          id={indexName}
+          label={<EuiCode>{indexName}</EuiCode>}
+          onChange={handleCheckboxChange}
+          checked={indices[indexName]}
+        />
+      )),
+    [indices]
   );
 
   return (
@@ -69,11 +74,7 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
             label={indicesSelectionLabel}
             labelType="legend"
           >
-            <EuiCheckboxGroup
-              options={choices}
-              idToSelectedMap={indices}
-              onChange={handleCheckboxGroupChange}
-            />
+            <>{choices}</>
           </EuiFormRow>
         )
       )}
