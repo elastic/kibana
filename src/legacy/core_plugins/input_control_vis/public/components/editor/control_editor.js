@@ -36,7 +36,7 @@ import {
 
 class ControlEditorUi extends Component {
   changeLabel = evt => {
-    this.props.handleLabelChange(this.props.controlIndex, evt);
+    this.props.handleLabelChange(this.props.controlIndex, evt.target.value);
   };
 
   removeControl = () => {
@@ -70,8 +70,7 @@ class ControlEditorUi extends Component {
             handleIndexPatternChange={this.changeIndexPattern}
             handleFieldNameChange={this.changeFieldName}
             getIndexPattern={this.props.getIndexPattern}
-            handleNumberOptionChange={this.props.handleNumberOptionChange}
-            handleCheckboxOptionChange={this.props.handleCheckboxOptionChange}
+            handleOptionsChange={this.props.handleOptionsChange}
             parentCandidates={this.props.parentCandidates}
             handleParentChange={this.props.handleParentChange}
           />
@@ -85,7 +84,7 @@ class ControlEditorUi extends Component {
             handleIndexPatternChange={this.changeIndexPattern}
             handleFieldNameChange={this.changeFieldName}
             getIndexPattern={this.props.getIndexPattern}
-            handleNumberOptionChange={this.props.handleNumberOptionChange}
+            handleOptionsChange={this.props.handleOptionsChange}
           />
         );
         break;
@@ -176,8 +175,7 @@ ControlEditorUi.propTypes = {
   handleIndexPatternChange: PropTypes.func.isRequired,
   handleFieldNameChange: PropTypes.func.isRequired,
   getIndexPattern: PropTypes.func.isRequired,
-  handleCheckboxOptionChange: PropTypes.func.isRequired,
-  handleNumberOptionChange: PropTypes.func.isRequired,
+  handleOptionsChange: PropTypes.func.isRequired,
   parentCandidates: PropTypes.arrayOf(
     PropTypes.shape({
       value: PropTypes.string.isRequired,

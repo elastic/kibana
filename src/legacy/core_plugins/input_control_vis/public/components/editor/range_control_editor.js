@@ -34,10 +34,10 @@ export function RangeControlEditor(props) {
   const stepSizeId = `stepSize-${props.controlIndex}`;
   const decimalPlacesId = `decimalPlaces-${props.controlIndex}`;
   const handleDecimalPlacesChange = evt => {
-    props.handleNumberOptionChange(props.controlIndex, 'decimalPlaces', evt);
+    props.handleOptionsChange(props.controlIndex, 'decimalPlaces', evt.target.valueAsNumber);
   };
   const handleStepChange = evt => {
-    props.handleNumberOptionChange(props.controlIndex, 'step', evt);
+    props.handleOptionsChange(props.controlIndex, 'step', evt.target.valueAsNumber);
   };
   return (
     <Fragment>
@@ -98,5 +98,5 @@ RangeControlEditor.propTypes = {
   controlParams: PropTypes.object.isRequired,
   handleFieldNameChange: PropTypes.func.isRequired,
   handleIndexPatternChange: PropTypes.func.isRequired,
-  handleNumberOptionChange: PropTypes.func.isRequired,
+  handleOptionsChange: PropTypes.func.isRequired,
 };

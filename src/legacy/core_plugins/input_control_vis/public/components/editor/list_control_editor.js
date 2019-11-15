@@ -122,7 +122,7 @@ export class ListControlEditor extends Component {
             options={parentCandidatesOptions}
             value={this.props.controlParams.parent}
             onChange={evt => {
-              this.props.handleParentChange(this.props.controlIndex, evt);
+              this.props.handleParentChange(this.props.controlIndex, evt.target.value);
             }}
           />
         </EuiFormRow>
@@ -149,7 +149,7 @@ export class ListControlEditor extends Component {
           }
           checked={this.props.controlParams.options.multiselect}
           onChange={evt => {
-            this.props.handleCheckboxOptionChange(this.props.controlIndex, 'multiselect', evt);
+            this.props.handleOptionsChange(this.props.controlIndex, 'multiselect', evt.target.checked);
           }}
           data-test-subj="listControlMultiselectInput"
         />
@@ -182,7 +182,7 @@ export class ListControlEditor extends Component {
           }
           checked={this.props.controlParams.options.dynamicOptions}
           onChange={evt => {
-            this.props.handleCheckboxOptionChange(this.props.controlIndex, 'dynamicOptions', evt);
+            this.props.handleOptionsChange(this.props.controlIndex, 'dynamicOptions', evt.target.checked);
           }}
           disabled={this.state.isStringField ? false : true}
           data-test-subj="listControlDynamicOptionsSwitch"
@@ -213,7 +213,7 @@ export class ListControlEditor extends Component {
             min={1}
             value={this.props.controlParams.options.size}
             onChange={evt => {
-              this.props.handleNumberOptionChange(this.props.controlIndex, 'size', evt);
+              this.props.handleOptionsChange(this.props.controlIndex, 'size', evt.target.valueAsNumber);
             }}
             data-test-subj="listControlSizeInput"
           />
@@ -254,8 +254,7 @@ ListControlEditor.propTypes = {
   controlParams: PropTypes.object.isRequired,
   handleFieldNameChange: PropTypes.func.isRequired,
   handleIndexPatternChange: PropTypes.func.isRequired,
-  handleCheckboxOptionChange: PropTypes.func.isRequired,
-  handleNumberOptionChange: PropTypes.func.isRequired,
+  handleOptionsChange: PropTypes.func.isRequired,
   parentCandidates: PropTypes.arrayOf(
     PropTypes.shape({
       value: PropTypes.string.isRequired,

@@ -50,7 +50,6 @@ function InputControlVisProvider() {
         pinFilters: false,
       },
     },
-    editor: 'default',
     editorConfig: {
       optionTabs: [
         {

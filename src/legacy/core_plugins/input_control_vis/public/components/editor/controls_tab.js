@@ -46,34 +46,40 @@ class ControlsTabUi extends Component {
 
   onChange = value => this.props.setValue('controls', value)
 
-  handleLabelChange = (controlIndex, evt) => {
-    const updatedControl = this.props.stateParams.controls[controlIndex];
-    updatedControl.label = evt.target.value;
+  handleLabelChange = (controlIndex, label) => {
+    const updatedControl = {
+      ...this.props.stateParams.controls[controlIndex],
+      label,
+    };
     this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
   }
 
-  handleIndexPatternChange = (controlIndex, indexPatternId) => {
-    const updatedControl = this.props.stateParams.controls[controlIndex];
-    updatedControl.indexPattern = indexPatternId;
-    updatedControl.fieldName = '';
+  handleIndexPatternChange = (controlIndex, indexPattern) => {
+    const updatedControl = {
+      ...this.props.stateParams.controls[controlIndex],
+      indexPattern,
+      fieldName: ''
+    };
     this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
   }
 
   handleFieldNameChange = (controlIndex, fieldName) => {
-    const updatedControl = this.props.stateParams.controls[controlIndex];
-    updatedControl.fieldName = fieldName;
+    const updatedControl = {
+      ...this.props.stateParams.controls[controlIndex],
+      fieldName
+    };
     this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
   }
 
-  handleCheckboxOptionChange = (controlIndex, optionName, evt) => {
-    const updatedControl = this.props.stateParams.controls[controlIndex];
-    updatedControl.options[optionName] = evt.target.checked;
-    this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
-  }
-
-  handleNumberOptionChange = (controlIndex, optionName, evt) => {
-    const updatedControl = this.props.stateParams.controls[controlIndex];
-    updatedControl.options[optionName] = parseFloat(evt.target.value);
+  handleOptionsChange = (controlIndex, optionName, value) => {
+    const control = this.props.stateParams.controls[controlIndex];
+    const updatedControl = {
+      ...control,
+      options: {
+        ...control.options,
+        [optionName]: value,
+      }
+    };
     this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
   }
 
@@ -89,9 +95,11 @@ class ControlsTabUi extends Component {
     this.onChange(addControl(this.props.stateParams.controls, newControl(this.state.type)));
   }
 
-  handleParentChange = (controlIndex, evt) => {
-    const updatedControl = this.props.stateParams.controls[controlIndex];
-    updatedControl.parent = evt.target.value;
+  handleParentChange = (controlIndex, parent) => {
+    const updatedControl = {
+      ...this.props.stateParams.controls[controlIndex],
+      parent
+    };
     this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
   }
 
@@ -113,8 +121,7 @@ class ControlsTabUi extends Component {
           handleIndexPatternChange={this.handleIndexPatternChange}
           handleFieldNameChange={this.handleFieldNameChange}
           getIndexPattern={this.getIndexPattern}
-          handleCheckboxOptionChange={this.handleCheckboxOptionChange}
-          handleNumberOptionChange={this.handleNumberOptionChange}
+          handleOptionsChange={this.handleOptionsChange}
           parentCandidates={parentCandidates}
           handleParentChange={this.handleParentChange}
         />
