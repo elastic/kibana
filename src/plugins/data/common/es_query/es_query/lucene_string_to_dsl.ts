@@ -17,27 +17,17 @@
  * under the License.
  */
 
-import {
-  fromKueryExpression,
-  toElasticsearchQuery,
-  nodeTypes,
-} from '../kuery';
+import { isString } from 'lodash';
+import { DslQuery } from './es_query_dsl';
 
-export function buildQueryFromKuery(indexPattern, queries = [], allowLeadingWildcards, dateFormatTZ = null) {
-  const queryASTs = queries.map(query => {
-    return fromKueryExpression(query.query, { allowLeadingWildcards });
-  });
-  return buildQuery(indexPattern, queryASTs, { dateFormatTZ });
-}
+export function luceneStringToDsl(query: string | any): DslQuery {
+  if (isString(query)) {
+    if (query.trim() === '') {
+      return { match_all: {} };
+    }
 
-function buildQuery(indexPattern, queryASTs, config = null) {
-  const compoundQueryAST = nodeTypes.function.buildNode('and', queryASTs);
-  const kueryQuery = toElasticsearchQuery(compoundQueryAST, indexPattern, config);
-  return {
-    must: [],
-    filter: [],
-    should: [],
-    must_not: [],
-    ...kueryQuery.bool
-  };
+    return { query_string: { query } };
+  }
+
+  return query;
 }

@@ -11,8 +11,6 @@ import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import { StaticIndexPattern, IndexPattern } from 'ui/index_patterns';
-
-import { TimeRange, Query } from 'src/plugins/data/common/types';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 
 import { OnTimeChangeProps } from '@elastic/eui';
@@ -36,7 +34,7 @@ import {
   toStrSelector,
 } from './selectors';
 import { timelineActions, hostsActions, networkActions } from '../../store/actions';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { TimeRange, Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
 const {
   ui: { SearchBar },
