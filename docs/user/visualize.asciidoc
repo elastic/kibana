@@ -25,10 +25,9 @@ To create a visualization:
 . Click the *Create new visualization* button or the **+** button.
 . Choose the visualization type:
 
-* *Basic visualizations*
-<<lens,Lens>>:: Quickly build several types of basic visualizations by simply dragging and dropping the data fields you want to display.
 * *Basic charts*
 [horizontal]
+<<lens,Lens>>:: Quickly build several types of basic visualizations by simply dragging and dropping the data fields you want to display.
 <<xy-chart,Line&comma; Area and Bar charts>>:: Compare different series in X/Y charts.
 <<heatmap-chart,Heat maps>>:: Shade cells within a matrix.
 <<pie-chart,Pie chart>>:: Display each source's contribution to a total.
