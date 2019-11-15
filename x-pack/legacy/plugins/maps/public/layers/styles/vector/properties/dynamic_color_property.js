@@ -9,8 +9,8 @@ import { DynamicStyleProperty } from './dynamic_style_property';
 import _ from 'lodash';
 import { getComputedFieldName } from '../style_util';
 import { getColorRampStops } from '../../color_utils';
-import {ColorGradient} from "../../components/color_gradient";
-import React from "react";
+import { ColorGradient } from '../../components/color_gradient';
+import React from 'react';
 
 
 export class DynamicColorProperty extends DynamicStyleProperty {
