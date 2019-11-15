@@ -22,7 +22,7 @@ const mockCallEndpoint = sinon.stub();
 const mockSearchRequest = {};
 const mockConfig: ScrollConfig = { duration: '2s', size: 123 };
 let realCancellationToken = new CancellationToken();
-let isCancelledStub: sinon.SinonStub;
+let isCancelledStub: sinon.SinonStub<[], boolean>;
 
 describe('hitIterator', function() {
   beforeEach(() => {

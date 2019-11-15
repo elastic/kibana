@@ -98,7 +98,10 @@ export const rangeBucketAgg = new BucketAggType({
     },
     {
       name: 'ranges',
-      default: [{ from: 0, to: 1000 }, { from: 1000, to: 2000 }],
+      default: [
+        { from: 0, to: 1000 },
+        { from: 1000, to: 2000 },
+      ],
       editorComponent: RangesEditor,
       write(aggConfig: IBucketAggConfig, output: Record<string, any>) {
         output.params.ranges = aggConfig.params.ranges;
