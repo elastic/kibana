@@ -28,14 +28,11 @@ import { npSetup, npStart } from 'ui/new_platform';
 import { I18nContext } from 'ui/i18n';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
-import { ResizeChecker } from '../../../../../plugins/kibana_utils/public';
-
 export interface XPluginSet {
   devTools: DevToolsSetup;
   feature_catalogue: FeatureCatalogueSetup;
   __LEGACY: {
     I18nContext: any;
-    ResizeChecker: any;
   };
 }
 
@@ -49,7 +46,6 @@ pluginInstance.setup(npSetup.core, {
   ...npSetup.plugins,
   __LEGACY: {
     I18nContext,
-    ResizeChecker,
   },
 });
 pluginInstance.start(npStart.core);
