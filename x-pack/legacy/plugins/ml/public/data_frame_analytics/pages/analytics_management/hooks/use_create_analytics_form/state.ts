@@ -56,7 +56,8 @@ export interface State {
     jobIdValid: boolean;
     jobType: AnalyticsJobType;
     loadingDepFieldOptions: boolean;
-    modelMemoryLimit: string;
+    modelMemoryLimit: string | undefined;
+    modelMemoryLimitUnitValid: boolean;
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
@@ -98,7 +99,8 @@ export const getInitialState = (): State => ({
     jobIdValid: false,
     jobType: undefined,
     loadingDepFieldOptions: false,
-    modelMemoryLimit: DEFAULT_MODEL_MEMORY_LIMIT.regression,
+    modelMemoryLimit: undefined,
+    modelMemoryLimitUnitValid: true,
     sourceIndex: '',
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,

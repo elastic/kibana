@@ -35,6 +35,7 @@ import {
 import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
 import { Messages } from './messages';
 import { JobType } from './job_type';
+import { mmlUnitInvalidErrorMessage } from '../../hooks/use_create_analytics_form/reducer';
 
 // based on code used by `ui/index_patterns` internally
 // remove the space character from the list of illegal characters
@@ -79,6 +80,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     jobType,
     loadingDepFieldOptions,
     modelMemoryLimit,
+    modelMemoryLimitUnitValid,
     sourceIndex,
     sourceIndexNameEmpty,
     sourceIndexNameValid,
@@ -113,6 +115,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     try {
       const jobConfig = getJobConfigFromFormState(form);
       delete jobConfig.dest;
+      delete jobConfig.model_memory_limit;
       const resp = await ml.dataFrameAnalytics.estimateMemoryUsage(jobConfig);
       setFormState({
         modelMemoryLimit: resp.expected_memory_without_disk,
@@ -316,7 +319,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                   placeholder={i18n.translate(
                     'xpack.ml.dataframe.analytics.create.sourceIndexPlaceholder',
                     {
-                      defaultMessage: 'Choose a source index pattern or saved search.',
+                      defaultMessage: 'Choose a source index pattern.',
                     }
                   )}
                   singleSelection={{ asPlainText: true }}
@@ -480,8 +483,14 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
             label={i18n.translate('xpack.ml.dataframe.analytics.create.modelMemoryLimitLabel', {
               defaultMessage: 'Model memory limit',
             })}
+            helpText={!modelMemoryLimitUnitValid && mmlUnitInvalidErrorMessage}
           >
             <EuiFieldText
+              placeholder={
+                jobType !== undefined
+                  ? DEFAULT_MODEL_MEMORY_LIMIT[jobType]
+                  : DEFAULT_MODEL_MEMORY_LIMIT.outlier_detection
+              }
               disabled={isJobCreated}
               value={modelMemoryLimit}
               onChange={e => setFormState({ modelMemoryLimit: e.target.value })}

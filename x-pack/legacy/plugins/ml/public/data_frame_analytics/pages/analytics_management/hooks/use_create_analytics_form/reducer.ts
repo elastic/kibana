@@ -13,10 +13,28 @@ import { isValidIndexName } from '../../../../../../common/util/es_utils';
 
 import { Action, ACTION } from './actions';
 import { getInitialState, getJobConfigFromFormState, State, JOB_TYPES } from './state';
-import { isJobIdValid } from '../../../../../../common/util/job_utils';
+import {
+  isJobIdValid,
+  validateModelMemoryLimitUnits,
+} from '../../../../../../common/util/job_utils';
 import { maxLengthValidator } from '../../../../../../common/util/validators';
-import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
+import {
+  JOB_ID_MAX_LENGTH,
+  ALLOWED_DATA_UNITS,
+} from '../../../../../../common/constants/validation';
 import { getDependentVar, isRegressionAnalysis } from '../../../../common/analytics';
+
+const mmlAllowedUnitsStr = `${ALLOWED_DATA_UNITS.slice(0, ALLOWED_DATA_UNITS.length - 1).join(
+  ', '
+)} or ${[...ALLOWED_DATA_UNITS].pop()}`;
+
+export const mmlUnitInvalidErrorMessage = i18n.translate(
+  'xpack.ml.dataframe.analytics.create.modelMemoryUnitsInvalidError',
+  {
+    defaultMessage: 'Model memory limit data unit unrecognized. It must be {str}',
+    values: { str: mmlAllowedUnitsStr },
+  }
+);
 
 const getSourceIndexString = (state: State) => {
   const { jobConfig } = state;
@@ -65,6 +83,10 @@ export const validateAdvancedEditor = (state: State): State => {
     state.indexPatternsMap[destinationIndexName] !== undefined;
   const mml = jobConfig.model_memory_limit;
   const modelMemoryLimitEmpty = mml === '';
+  if (!modelMemoryLimitEmpty && mml !== undefined) {
+    const { valid } = validateModelMemoryLimitUnits(mml);
+    state.form.modelMemoryLimitUnitValid = valid;
+  }
 
   let dependentVariableEmpty = false;
   if (isRegressionAnalysis(jobConfig.analysis)) {
@@ -140,7 +162,15 @@ export const validateAdvancedEditor = (state: State): State => {
     });
   }
 
+  if (!state.form.modelMemoryLimitUnitValid) {
+    state.advancedEditorMessages.push({
+      error: mmlUnitInvalidErrorMessage,
+      message: '',
+    });
+  }
+
   state.isValid =
+    state.form.modelMemoryLimitUnitValid &&
     !jobIdEmpty &&
     jobIdValid &&
     !jobIdExists &&
@@ -174,7 +204,13 @@ const validateForm = (state: State): State => {
   const dependentVariableEmpty = jobType === JOB_TYPES.REGRESSION && dependentVariable === '';
   const modelMemoryLimitEmpty = modelMemoryLimit === '';
 
+  if (modelMemoryLimit !== undefined && modelMemoryLimit !== '') {
+    const { valid } = validateModelMemoryLimitUnits(modelMemoryLimit);
+    state.form.modelMemoryLimitUnitValid = valid;
+  }
+
   state.isValid =
+    state.form.modelMemoryLimitUnitValid &&
     !jobIdEmpty &&
     jobIdValid &&
     !jobIdExists &&
