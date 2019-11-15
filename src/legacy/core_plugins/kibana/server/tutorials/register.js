@@ -79,6 +79,7 @@ import { couchdbMetricsSpecProvider } from './couchdb_metrics';
 import { emsBoundariesSpecProvider } from './ems';
 import { consulMetricsSpecProvider } from './consul_metrics';
 import { cockroachdbMetricsSpecProvider } from './cockroachdb_metrics';
+import { traefikMetricsSpecProvider } from './traefik_metrics';
 
 export function registerTutorials(server) {
   server.registerTutorial(systemLogsSpecProvider);
@@ -143,4 +144,5 @@ export function registerTutorials(server) {
   server.registerTutorial(emsBoundariesSpecProvider);
   server.registerTutorial(consulMetricsSpecProvider);
   server.registerTutorial(cockroachdbMetricsSpecProvider);
+  server.registerTutorial(traefikMetricsSpecProvider);
 }
