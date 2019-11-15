@@ -9,8 +9,6 @@ export const setHttpClient = client => {
 };
 
 export async function getRollupIndices() {
-  // '..' exists to ignore randomized app basename.
-  // TODO: Find a way to remove '..'
-  const response = await httpClient.get(`../api/rollup/indices`);
+  const response = await httpClient.get('/api/rollup/indices');
   return response || {};
 }
