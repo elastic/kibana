@@ -107,11 +107,8 @@ const mapStateToProps = (state: State) => {
   };
 };
 
-export const AutoSaveWarningMsg = connect(
-  mapStateToProps,
-  {
-    setTimelineRangeDatePicker: dispatchSetTimelineRangeDatePicker,
-    updateAutoSaveMsg: timelineActions.updateAutoSaveMsg,
-    updateTimeline: timelineActions.updateTimeline,
-  }
-)(AutoSaveWarningMsgComponent);
+export const AutoSaveWarningMsg = connect(mapStateToProps, {
+  setTimelineRangeDatePicker: dispatchSetTimelineRangeDatePicker,
+  updateAutoSaveMsg: timelineActions.updateAutoSaveMsg,
+  updateTimeline: timelineActions.updateTimeline,
+})(AutoSaveWarningMsgComponent);

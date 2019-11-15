@@ -21,7 +21,7 @@ import chrome from 'ui/chrome';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 // @ts-ignore
-import { VisProvider } from '../../../../ui/public/visualize/loader/vis';
+import { Vis } from '../../../../ui/public/visualize/loader/vis';
 import { Visualization } from '../../../../ui/public/visualize/components';
 
 export const visualization = () => ({
@@ -33,8 +33,6 @@ export const visualization = () => ({
     const visType = config.visType || visConfig.type;
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const $rootScope = $injector.get('$rootScope') as any;
-    const Private = $injector.get('Private') as any;
-    const Vis = Private(VisProvider);
 
     if (handlers.vis) {
       // special case in visualize, we need to render first (without executing the expression), for maps to work

@@ -8,7 +8,7 @@ import React from 'react';
 import { DateHistogramIndexPatternColumn } from './date_histogram';
 import { dateHistogramOperation } from '.';
 import { shallow } from 'enzyme';
-import { EuiSwitch } from '@elastic/eui';
+import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import {
   UiSettingsClientContract,
   SavedObjectsClientContract,
@@ -423,7 +423,7 @@ describe('date_histogram', () => {
       );
       instance.find(EuiSwitch).prop('onChange')!({
         target: { checked: true },
-      } as React.ChangeEvent<HTMLInputElement>);
+      } as EuiSwitchEvent);
       expect(setStateSpy).toHaveBeenCalled();
       const newState = setStateSpy.mock.calls[0][0];
       expect(newState).toHaveProperty('layers.third.columns.col1.params.interval', '30d');

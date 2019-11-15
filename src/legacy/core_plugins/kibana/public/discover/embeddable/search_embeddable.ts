@@ -25,10 +25,12 @@ import { npStart } from 'ui/new_platform';
 import {
   esFilters,
   TimeRange,
+  FilterManager,
   onlyDisabledFiltersChanged,
+  generateFilters,
   getTime,
+  Query,
 } from '../../../../../../plugins/data/public';
-import { Query } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
   Container,
@@ -43,7 +45,6 @@ import { getSortForSearchSource } from '../angular/doc_table/lib/get_sort_for_se
 import {
   Adapters,
   angular,
-  getFilterGenerator,
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
@@ -72,18 +73,6 @@ interface SearchScope extends ng.IScope {
   isLoading?: boolean;
 }
 
-export interface FilterManager {
-  generate: (
-    field: {
-      name: string;
-      scripted: boolean;
-    },
-    values: string | string[],
-    operation: string,
-    index: number
-  ) => esFilters.Filter[];
-}
-
 interface SearchEmbeddableConfig {
   $rootScope: ng.IRootScopeService;
   $compile: ng.ICompileService;
@@ -107,7 +96,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   private autoRefreshFetchSubscription?: Subscription;
   private subscription?: Subscription;
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
-  private filterGen: FilterManager;
+  private filterManager: FilterManager;
   private abortController?: AbortController;
 
   private prevTimeRange?: TimeRange;
@@ -134,7 +123,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       parent
     );
 
-    this.filterGen = getFilterGenerator(queryFilter);
+    this.filterManager = queryFilter as FilterManager;
     this.savedSearch = savedSearch;
     this.$rootScope = $rootScope;
     this.$compile = $compile;
@@ -251,7 +240,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     };
 
     searchScope.filter = async (field, value, operator) => {
-      let filters = this.filterGen.generate(field, value, operator, indexPattern.id);
+      let filters = generateFilters(this.filterManager, field, value, operator, indexPattern.id);
       filters = filters.map(filter => ({
         ...filter,
         $state: { store: esFilters.FilterStateStore.APP_STATE },
