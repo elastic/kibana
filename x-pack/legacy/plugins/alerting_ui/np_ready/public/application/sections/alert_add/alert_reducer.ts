@@ -6,7 +6,7 @@
 import { isEqual } from 'lodash';
 
 interface CommandType {
-  type: 'setAlert' | 'setProperty' | 'setAlertTypeParams';
+  type: 'setAlert' | 'setProperty' | 'setAlertTypeParams' | 'setAlertActionParam';
 }
 
 export interface AlertState {
@@ -28,7 +28,7 @@ export const alertReducer = (state: any, action: ActionAlertReducerItem) => {
   switch (command.type) {
     case 'setAlert': {
       const { key, value } = payload;
-      if (key === 'action') {
+      if (key === 'alert') {
         return {
           ...state,
           alert: value,
@@ -67,6 +67,9 @@ export const alertReducer = (state: any, action: ActionAlertReducerItem) => {
           },
         };
       }
+    }
+    case 'setAlertActionParam': {
+      return state;
     }
   }
 };

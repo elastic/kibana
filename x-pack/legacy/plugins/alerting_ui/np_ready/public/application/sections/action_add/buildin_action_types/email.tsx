@@ -10,10 +10,13 @@ import {
   EuiFlexGroup,
   EuiFieldNumber,
   EuiFieldPassword,
+  EuiComboBox,
+  EuiFormRow,
+  EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../components/page_error';
-import { ActionTypeModel, Props, Action, ValidationResult } from '../../../../types';
+import { ActionTypeModel, Props, Action, ValidationResult, ParamsProps } from '../../../../types';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -73,6 +76,7 @@ export function getActionType(): ActionTypeModel {
       return validationResult;
     },
     actionFields: EmailActionFields,
+    actionParamsFields: EmailParamsFields,
   };
 }
 
@@ -241,6 +245,99 @@ const EmailActionFields: React.FunctionComponent<Props> = ({
           </ErrableFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+    </Fragment>
+  );
+};
+
+const EmailParamsFields: React.FunctionComponent<ParamsProps> = ({
+  action,
+  editAction,
+  errors,
+  hasErrors,
+}) => {
+  const { to, subject, body } = action;
+  const toOptions = to ? to.map((label: any) => ({ label })) : [];
+
+  return (
+    <Fragment>
+      <ErrableFormRow
+        id="emailRecipient"
+        errorKey="to"
+        fullWidth
+        errors={errors}
+        isShowingErrors={hasErrors === true && to !== undefined}
+        label={i18n.translate(
+          'xpack.alertingUI.sections.actionAdd.emailAction.recipientTextFieldLabel',
+          {
+            defaultMessage: 'To email address',
+          }
+        )}
+      >
+        <EuiComboBox
+          noSuggestions
+          fullWidth
+          data-test-subj="toEmailAddressInput"
+          selectedOptions={toOptions}
+          onCreateOption={(searchValue: string) => {
+            const newOptions = [...toOptions, { label: searchValue }];
+            editAction(
+              'to',
+              newOptions.map(newOption => newOption.label)
+            );
+          }}
+          onChange={(selectedOptions: Array<{ label: string }>) => {
+            editAction(
+              'to',
+              selectedOptions.map(selectedOption => selectedOption.label)
+            );
+          }}
+          onBlur={() => {
+            if (!to) {
+              editAction('to', []);
+            }
+          }}
+        />
+      </ErrableFormRow>
+
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate(
+          'xpack.alertingUI.sections.actionAdd.emailAction.subjectTextFieldLabel',
+          {
+            defaultMessage: 'Subject (optional)',
+          }
+        )}
+      >
+        <EuiFieldText
+          fullWidth
+          name="subject"
+          data-test-subj="emailSubjectInput"
+          value={subject || ''}
+          onChange={e => {
+            editAction('subject', e.target.value);
+          }}
+        />
+      </EuiFormRow>
+
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate(
+          'xpack.alertingUI.sections.actionAdd.emailAction.bodyTextAreaFieldLabel',
+          {
+            defaultMessage: 'Body',
+          }
+        )}
+      >
+        <EuiTextArea
+          fullWidth
+          value={body || ''}
+          name="body"
+          data-test-subj="emailBodyInput"
+          onChange={e => {
+            editAction('body', e.target.value);
+          }}
+        />
+      </EuiFormRow>
     </Fragment>
   );
 };

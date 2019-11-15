@@ -6,7 +6,8 @@
 import React from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeModel, Props, ValidationResult } from '../../../../types';
+import { ActionTypeModel, Props, ValidationResult, ParamsProps } from '../../../../types';
+import { ErrableFormRow } from '../../../components/page_error';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -22,6 +23,7 @@ export function getActionType(): ActionTypeModel {
       return { errors: {} };
     },
     actionFields: IndexActionFields,
+    actionParamsFields: IndexParamsFields,
   };
 }
 
@@ -49,5 +51,41 @@ const IndexActionFields: React.FunctionComponent<Props> = ({ action, editActionC
         }}
       />
     </EuiFormRow>
+  );
+};
+
+const IndexParamsFields: React.FunctionComponent<ParamsProps> = ({
+  action,
+  editAction,
+  errors,
+  hasErrors,
+}) => {
+  const { index } = action;
+  return (
+    <ErrableFormRow
+      id="indexName"
+      errorKey="index"
+      fullWidth
+      errors={errors}
+      isShowingErrors={hasErrors === true && index !== undefined}
+      label={i18n.translate('xpack.alertingUI.sections.actionAdd.indexAction.indexFieldLabel', {
+        defaultMessage: 'Index',
+      })}
+    >
+      <EuiFieldText
+        fullWidth
+        name="index"
+        data-test-subj="indexInput"
+        value={index || ''}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          editAction('index', e.target.value);
+        }}
+        onBlur={() => {
+          if (!index) {
+            editAction('index', '');
+          }
+        }}
+      />
+    </ErrableFormRow>
   );
 };

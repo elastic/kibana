@@ -9,5 +9,5 @@ export const ACTION_GROUPS: { [key: string]: string } = {
 
   WARNING: 'warning',
 
-  ESCALATION: 'escalation',
+  UNACKNOWLEDGED: 'unacknowledged',
 };

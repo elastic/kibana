@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiFieldText } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiComboBox, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../components/page_error';
-import { ActionTypeModel, Props, Action, ValidationResult } from '../../../../types';
+import { ActionTypeModel, Props, Action, ValidationResult, ParamsProps } from '../../../../types';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -38,6 +38,7 @@ export function getActionType(): ActionTypeModel {
       return validationResult;
     },
     actionFields: SlackActionFields,
+    actionParamsFields: SlackParamsFields,
   };
 }
 
@@ -79,6 +80,72 @@ const SlackActionFields: React.FunctionComponent<Props> = ({
           }}
         />
       </ErrableFormRow>
+    </Fragment>
+  );
+};
+
+const SlackParamsFields: React.FunctionComponent<ParamsProps> = ({
+  action,
+  editAction,
+  errors,
+  hasErrors,
+  children,
+}) => {
+  const { text, to } = action;
+  const toOptions = to ? to.map((label: any) => ({ label })) : [];
+
+  return (
+    <Fragment>
+      {children}
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate(
+          'xpack.alertingUI.sections.actionAdd.slackAction.recipientTextFieldLabel',
+          {
+            defaultMessage: 'Recipient (optional)',
+          }
+        )}
+      >
+        <EuiComboBox
+          noSuggestions
+          fullWidth
+          selectedOptions={toOptions}
+          data-test-subj="slackRecipientComboBox"
+          onCreateOption={(searchValue: string) => {
+            const newOptions = [...toOptions, { label: searchValue }];
+            editAction(
+              'to',
+              newOptions.map(newOption => newOption.label)
+            );
+          }}
+          onChange={(selectedOptions: Array<{ label: string }>) => {
+            editAction(
+              'to',
+              selectedOptions.map(selectedOption => selectedOption.label)
+            );
+          }}
+        />
+      </EuiFormRow>
+
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate(
+          'xpack.alertingUI.sections.actionAdd.slackAction.messageTextAreaFieldLabel',
+          {
+            defaultMessage: 'Message (optional)',
+          }
+        )}
+      >
+        <EuiTextArea
+          fullWidth
+          name="text"
+          value={text}
+          data-test-subj="slackMessageTextarea"
+          onChange={e => {
+            editAction('text', e.target.value);
+          }}
+        />
+      </EuiFormRow>
     </Fragment>
   );
 };

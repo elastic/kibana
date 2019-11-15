@@ -7,7 +7,7 @@ import React, { Fragment } from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../components/page_error';
-import { ActionTypeModel, Props, Action, ValidationResult } from '../../../../types';
+import { ActionTypeModel, Props, Action, ValidationResult, ParamsProps } from '../../../../types';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -49,6 +49,7 @@ export function getActionType(): ActionTypeModel {
       return validationResult;
     },
     actionFields: PagerDutyActionFields,
+    actionParamsFields: PagerDutyParamsFields,
   };
 }
 
@@ -115,6 +116,49 @@ const PagerDutyActionFields: React.FunctionComponent<Props> = ({
           onBlur={() => {
             if (!routingKey) {
               editActionSecrets('routingKey', '');
+            }
+          }}
+        />
+      </ErrableFormRow>
+    </Fragment>
+  );
+};
+
+const PagerDutyParamsFields: React.FunctionComponent<ParamsProps> = ({
+  action,
+  editAction,
+  errors,
+  hasErrors,
+  children,
+}) => {
+  const { description } = action;
+  return (
+    <Fragment>
+      {children}
+      <ErrableFormRow
+        id="pagerDutyDescription"
+        errorKey="description"
+        fullWidth
+        errors={errors}
+        isShowingErrors={hasErrors === true && description !== undefined}
+        label={i18n.translate(
+          'xpack.alertingUI.sections.actionAdd.pagerDutyAction.descriptionFieldLabel',
+          {
+            defaultMessage: 'Description',
+          }
+        )}
+      >
+        <EuiFieldText
+          fullWidth
+          name="description"
+          value={description || ''}
+          data-test-subj="pagerdutyDescriptionInput"
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            editAction('description', e.target.value);
+          }}
+          onBlur={() => {
+            if (!description) {
+              editAction('description', '');
             }
           }}
         />

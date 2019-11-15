@@ -46,4 +46,13 @@ export class ActionTypeRegistry {
     }
     return this.actionTypes.get(id)!;
   }
+
+  public list() {
+    return Array.from(this.actionTypes).map(([actionTypeId, actionType]) => ({
+      id: actionTypeId,
+      name: actionType.id,
+      iconClass: actionType.iconClass,
+      actionType,
+    }));
+  }
 }

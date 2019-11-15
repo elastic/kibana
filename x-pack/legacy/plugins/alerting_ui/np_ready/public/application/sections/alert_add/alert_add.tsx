@@ -29,13 +29,14 @@ import {
   EuiTab,
   EuiText,
   EuiLink,
+  EuiPanel,
 } from '@elastic/eui';
 import { useAppDependencies } from '../..';
 import { saveAlert } from '../../lib/api';
 import { AlertsContext } from '../../context/alerts_context';
 import { alertReducer } from './alert_reducer';
 import { ErrableFormRow } from '../../components/page_error';
-import { AlertTypeModel, Alert, IErrorObject } from '../../../types';
+import { AlertTypeModel, Alert, IErrorObject, ActionTypeModel, AlertAction } from '../../../types';
 import { ACTION_GROUPS } from '../../constants/action_groups';
 
 interface Props {
@@ -63,6 +64,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
     core: { http },
     plugins: { toastNotifications },
     alertTypeRegistry,
+    actionTypeRegistry,
   } = useAppDependencies();
   const [alertType, setAlertType] = useState<AlertTypeModel | undefined>(undefined);
 
@@ -77,17 +79,21 @@ export const AlertAdd = ({ refreshList }: Props) => {
   const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [selectedTabId, setSelectedTabId] = useState<string>('alert');
+  const [alertAction, setAlertAction] = useState<AlertAction | undefined>(undefined);
 
   useEffect(() => {
     dispatch({
       command: { type: 'setAlert' },
       payload: {
         key: 'alert',
-        value: initialAlert,
+        value: {
+          alertTypeParams: {},
+          alertTypeId: null,
+          actions: [],
+        },
       },
     });
-    setAlertType(undefined);
-  }, [alertFlyoutVisible, initialAlert]);
+  }, [alertFlyoutVisible]);
 
   const setAlertProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
@@ -96,9 +102,16 @@ export const AlertAdd = ({ refreshList }: Props) => {
   const setAlertTypeParams = (key: string, value: any) => {
     dispatch({ command: { type: 'setAlertTypeParams' }, payload: { key, value } });
   };
-  const closeFlyout = useCallback(() => setAlertFlyoutVisibility(false), [
-    setAlertFlyoutVisibility,
-  ]);
+
+  const setActionParams = (key: string, value: any) => {
+    dispatch({ command: { type: 'setAlertActionParam' }, payload: { key, value } });
+  };
+  const closeFlyout = useCallback(() => {
+    setAlertFlyoutVisibility(false);
+    setAlertType(undefined);
+    setAlertAction(undefined);
+    setSelectedTabId('alert');
+  }, [setAlertFlyoutVisibility]);
 
   if (!alertFlyoutVisible) {
     return null;
@@ -114,16 +127,22 @@ export const AlertAdd = ({ refreshList }: Props) => {
 
   const tabs = [
     {
-      id: ACTION_GROUPS.ALERT.toLowerCase(),
-      name: ACTION_GROUPS.ALERT,
+      id: ACTION_GROUPS.ALERT,
+      name: i18n.translate('xpack.alertingUI.sections.alertAdd.alertTabText', {
+        defaultMessage: 'Alert',
+      }),
     },
     {
-      id: ACTION_GROUPS.WARNING.toLowerCase(),
-      name: ACTION_GROUPS.WARNING,
+      id: ACTION_GROUPS.WARNING,
+      name: i18n.translate('xpack.alertingUI.sections.alertAdd.warningTabText', {
+        defaultMessage: 'Warning',
+      }),
     },
     {
-      id: ACTION_GROUPS.ESCALATION.toLowerCase(),
-      name: ACTION_GROUPS.ESCALATION,
+      id: ACTION_GROUPS.UNACKNOWLEDGED,
+      name: i18n.translate('xpack.alertingUI.sections.alertAdd.unacknowledgedTabText', {
+        defaultMessage: 'If unacknowledged',
+      }),
       disabled: false,
     },
   ];
@@ -147,6 +166,10 @@ export const AlertAdd = ({ refreshList }: Props) => {
     }
   }
 
+  function addActionType(actionType: ActionTypeModel) {
+    setAlertAction({ id: actionType.id, group: selectedTabId, params: {} });
+  }
+
   const alertTypeNodes = alertTypeRegistry.list().map(function(item, index) {
     return (
       <EuiFlexItem key={index}>
@@ -155,6 +178,19 @@ export const AlertAdd = ({ refreshList }: Props) => {
           title={item.name}
           description={''}
           onClick={() => setAlertType(item.alertType)}
+        />
+      </EuiFlexItem>
+    );
+  });
+
+  const actionTypeNodes = actionTypeRegistry.list().map(function(item, index) {
+    return (
+      <EuiFlexItem key={index}>
+        <EuiCard
+          icon={<EuiIcon size="xl" type={item.iconClass} />}
+          title={item.name}
+          description={''}
+          onClick={() => addActionType(item.actionType)}
         />
       </EuiFlexItem>
     );
@@ -173,53 +209,91 @@ export const AlertAdd = ({ refreshList }: Props) => {
     );
   });
 
-  const alertDetails = (
+  const alertTypeDetails = (
     <Fragment>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
-            <h5 id="selectedAlertTypeTitle">
+      <EuiPanel paddingSize="s">
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xxs">
+              <h5 id="selectedAlertTypeTitle">
+                <FormattedMessage
+                  defaultMessage={alertType ? alertType.name : ''}
+                  id="xpack.alertingUI.sections.alertAdd.selectedAlertTypeTitle"
+                />
+              </h5>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiLink onClick={() => setAlertType(undefined)}>
               <FormattedMessage
-                defaultMessage={alertType ? alertType.name : ''}
-                id="xpack.alertingUI.sections.alertAdd.selectedAlertTypeTitle"
+                defaultMessage={'Change'}
+                id="xpack.alertingUI.sections.alertAdd.changeAlertTypeLink"
               />
-            </h5>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink onClick={() => setAlertType(undefined)}>
-            <FormattedMessage
-              defaultMessage={'Change'}
-              id="xpack.alertingUI.sections.alertAdd.changeAlertTypeLink"
-            />
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {AlertTypeParamsExpressionComponent ? (
-        <AlertTypeParamsExpressionComponent
-          alert={alert}
-          errors={errors}
-          setAlertTypeParams={setAlertTypeParams}
-          hasErrors={hasErrors}
-        />
-      ) : null}
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {AlertTypeParamsExpressionComponent ? (
+          <AlertTypeParamsExpressionComponent
+            alert={alert}
+            errors={errors}
+            setAlertTypeParams={setAlertTypeParams}
+            hasErrors={hasErrors}
+          />
+        ) : null}
+      </EuiPanel>
     </Fragment>
   );
 
+  let alertDetails;
+  if (!alertAction) {
+    alertDetails = (
+      <Fragment>
+        <EuiSpacer size="m" />
+        <EuiTitle size="xxs">
+          <h5 id="alertActionTypeTitle">
+            <FormattedMessage
+              defaultMessage={'Select an action'}
+              id="xpack.alertingUI.sections.alertAdd.selectAlertActionTypeTitle"
+            />
+          </h5>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiFlexGrid columns={4}>{actionTypeNodes}</EuiFlexGrid>
+      </Fragment>
+    );
+  } else {
+    alert.actions.push(alertAction);
+    const actionTypeRegisterd = actionTypeRegistry.get(alert.actions[0].id);
+    if (actionTypeRegisterd === null) return null;
+    const ParamsFieldsComponent = actionTypeRegisterd.actionParamsFields;
+    alertDetails = (
+      <Fragment>
+        {ParamsFieldsComponent !== null ? (
+          <ParamsFieldsComponent
+            action={alert.actions[0].params}
+            errors={{}}
+            editAction={setActionParams}
+            hasErrors={false}
+          />
+        ) : null}
+      </Fragment>
+    );
+  }
+
   const warningDetails = <Fragment>Warning</Fragment>;
 
-  const escalationDetails = <Fragment>Escalation</Fragment>;
+  const unacknowledgedDetails = <Fragment>Unacknowledged</Fragment>;
 
   let selectedTabContent;
   switch (selectedTabId) {
-    case ACTION_GROUPS.ALERT.toLowerCase():
+    case ACTION_GROUPS.ALERT:
       selectedTabContent = alertDetails;
       break;
-    case ACTION_GROUPS.WARNING.toLowerCase():
+    case ACTION_GROUPS.WARNING:
       selectedTabContent = warningDetails;
       break;
-    case ACTION_GROUPS.ESCALATION.toLowerCase():
-      selectedTabContent = escalationDetails;
+    case ACTION_GROUPS.UNACKNOWLEDGED:
+      selectedTabContent = unacknowledgedDetails;
       break;
     default:
       selectedTabContent = null;
@@ -232,7 +306,9 @@ export const AlertAdd = ({ refreshList }: Props) => {
         <EuiSpacer size="m" />
         <EuiTabs>{alertTabs}</EuiTabs>
         <EuiSpacer size="m" />
-        {selectedTabContent}
+        {alertTypeDetails}
+        <EuiSpacer size="m" />
+        <EuiPanel paddingSize="s">{selectedTabContent}</EuiPanel>
       </Fragment>
     );
   } else {
@@ -242,7 +318,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
         <EuiTitle size="xxs">
           <h5 id="alertTypeTitle">
             <FormattedMessage
-              defaultMessage={'Select type'}
+              defaultMessage={'Select a trigger'}
               id="xpack.alertingUI.sections.alertAdd.selectAlertTypeTitle"
             />
           </h5>
@@ -302,7 +378,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
                 label={i18n.translate(
                   'xpack.alertingUI.sections.actionAdd.indexAction.indexTextFieldLabel',
                   {
-                    defaultMessage: 'Tags',
+                    defaultMessage: 'Tags (optional)',
                   }
                 )}
               >
@@ -319,7 +395,10 @@ export const AlertAdd = ({ refreshList }: Props) => {
                     };
                   })}
                   onChange={async (selected: EuiComboBoxOptionProps[]) => {
-                    setAlertProperty('tags', selected.map(aSelected => aSelected.value));
+                    setAlertProperty(
+                      'tags',
+                      selected.map(aSelected => aSelected.value)
+                    );
                   }}
                   onBlur={() => {
                     if (!alert.tags) {
@@ -349,6 +428,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
               data-test-subj="saveActionButton"
               type="submit"
               iconType="check"
+              isDisabled={hasErrors}
               isLoading={isSaving}
               onClick={async () => {
                 setIsSaving(true);

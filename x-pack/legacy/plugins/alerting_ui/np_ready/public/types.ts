@@ -15,6 +15,13 @@ export interface Props {
   hasErrors?: boolean;
 }
 
+export interface ParamsProps {
+  action: any;
+  editAction: (property: string, value: any) => void;
+  errors: { [key: string]: string[] };
+  hasErrors?: boolean;
+}
+
 export interface Pagination {
   index: number;
   size: number;
@@ -26,6 +33,7 @@ export interface ActionTypeModel {
   selectMessage: string;
   validate: (action: Action) => ValidationResult;
   actionFields: React.FunctionComponent<Props> | null;
+  actionParamsFields: React.FunctionComponent<ParamsProps> | null;
 }
 
 export interface ValidationResult {
