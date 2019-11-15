@@ -48,9 +48,10 @@ type GenericMetricsRequest = Overwrite<
   }
 >;
 
-export function transformDataToMetricsChart<
-  TRequest extends GenericMetricsRequest
->(result: ESSearchResponse<unknown, TRequest>, chartBase: ChartBase) {
+export function transformDataToMetricsChart(
+  result: ESSearchResponse<unknown, GenericMetricsRequest>,
+  chartBase: ChartBase
+) {
   const { aggregations, hits } = result;
   const timeseriesData = idx(aggregations, _ => _.timeseriesData);
 
