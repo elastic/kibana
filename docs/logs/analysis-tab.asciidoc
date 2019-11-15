@@ -1,0 +1,102 @@
+[role="xpack"]
+[[xpack-logs-analysis-page]]
+== Detecting and inspecting log anomalies
+
+beta::[]
+
+If the {ml} {anomaly-detect} features are enabled, you can use the *Analysis* page in the Logs app to automatically detect some kinds of log anomalies.
+The analysis automatically highlights periods where the log rate is outside the expected limits and therefore may be anomalous.
+This helps you to spot suspicious behavior without significant human intervention.
+You can use this information as a basis for further investigations.
+
+On the *Analysis* page, you can inspect the anomalies and the log partitions in which they occurred.
+You can also view the anomalies directly in the Machine Learning app to get a greater understanding of the issues.
+
+[role="screenshot"]
+image::logs/images/analysis-tab.png[Analysis tab in Logs app in Kibana]
+
+[float]
+[[logs-analysis-page-create-ml-job]]
+=== Create a machine learning job for logs analysis
+Logs anomaly detection is carried out within a {kibana-ref}/xpack-spaces.html[space].
+Within a space, the first time you select *Analysis* from the Logs app, you are prompted to create a machine learning job to carry out the logs analysis.
+
+First, you need to choose the time range for the analysis.
+By default, the analysis uses logs from between four weeks ago and the current date, then continues to add new logs to the analysis as they are ingested. You cannot change the time range for the analysis after the machine learning job has been created.
+
+Once you have selected the time range, click *Create ML job* to create the machine learning job.
+Now you can start detecting anomalies in your logs.
+
+[float]
+[[logs-analysis-page-view-log-entries]]
+=== View log entries
+
+Once the machine learning job has been created, the *Analysis* page shows:
+* the log entries chart
+* an overall anomalies chart
+* the anomalies in each partition.
+
+The time range over which the logs are analyzed is fixed at the time range you selected when you created the machine learning job.
+But you can use the time filter at the top of the *Analysis* page to restrict the time range for which the results are shown.
+
+[float]
+[[logs-analysis-page-change-time]]
+=== Changing the time range
+
+Use the time filter to select the time range for the results shown in the anomaly charts.
+
+To quickly select some popular time range options, click the clock dropdown image:logs/images/time-filter-clock.png[]. In this popup you can choose from:
+
+* *Quick select* to choose a recent time range, and use the back and forward arrows to move through the time ranges
+* *Commonly used* to choose a time range from some commonly used options such as *Last 15 minutes*, *Today*, or *Week to date*
+* *Refresh every* to specify an auto-refresh rate
+* *Stop* to stop auto-refresh (enabled by default for logs anomaly charts)
+
+NOTE: When you stop auto-refresh from within this dialog, the clock dropdown changes to a calendar image:logs/images/time-filter-calendar.png[].
+
+For complete control over the start and end times, click the start time or end time shown in the bar beside the calendar or clock dropdown. In this popup, you can choose from the *Absolute*, *Relative* or *Now* tabs, then specify the required options.
+
+[float]
+[[logs-analysis-page-log-entries-chart]]
+=== Log entries chart
+
+[role="screenshot"]
+image::logs/images/analysis-tab-log-entries.png[Analysis tab log entries]
+
+The log entries chart shows an overall visualization of the log entry rate, partitioned and color-coded according to the value of the {ecs-ref}/ecs-event.html[ECS `event.dataset`] field.
+
+You can hover over a time period to see the log rate for each of the partitions for that period.
+
+You can click a partition name on the right hand side to show or hide the values for that partition, or hover over a partition name to highlight just the values for that partition in the chart.
+
+[float]
+[[logs-analysis-page-anomalies-chart]]
+=== Anomalies chart
+
+[role="screenshot"]
+image::logs/images/analysis-tab-anomalies.png[Analysis tab anomalies]
+
+The Anomalies chart shows the areas where anomalies were detected in the overall log entry rate across all log partitions. The underlying rate values are shown in grey, and the anomalous regions are color-coded and superimposed on top.
+
+Where a time period is flagged as anomalous, it means that the machine learning algorithms detected something unusual about the log rate in that time period. This may be because the log rate was significantly higher than usual, or significantly lower than usual, or some other anomalous behavior was detected.
+
+The level of anomaly detected in a time period is color-coded from red through orange to yellow and blue, where red indicates a critical anomaly level, and blue is a warning level.
+
+You can hover over an underlying log rate value to see the average log rate for that time period, or hover over an anomalous region to see the partitions that had anomalies in that time period, and their anomaly scores. Anomaly scores range from 0 (no anomalies) to 100 (critical).
+
+You can also click *Analyze in ML* to open the Anomaly Explorer in Machine Learning and {kibana-ref}/xpack-ml.html[analyze the anomalies in more detail].
+
+[float]
+[[logs-analysis-tab-partition-anomaly-chart]]
+=== Partition anomaly charts
+
+[role="screenshot"]
+image::logs/images/analysis-tab-partition-anomalies.png[Analysis tab partition anomalies]
+
+You can also view the anomaly chart for an individual partition.
+Below the main anomalies chart, click the dropdown beside a partition name to see the anomaly distribution for only that partition.
+In this example, we are viewing the anomaly chart for the `elasticsearch.server` partition.
+
+You can hover over an underlying log rate value to see the average log rate for that partition in that time period, or hover over an anomalous region to see the anomaly score for that partition in that time period.
+
+You can also click *Analyze in ML* to open the Anomaly Explorer in Machine Learning and {kibana-ref}/xpack-ml.html[analyze the anomalies in this partition in more detail].
