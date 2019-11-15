@@ -157,15 +157,19 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       let isSubscribed = true;
       async function setSavedQueryByServices() {
         if (savedQueryId != null && savedQueryServices != null) {
-          const mySavedQuery = await savedQueryServices.getSavedQuery(savedQueryId);
-          if (isSubscribed) {
-            setSavedQuery({
-              ...mySavedQuery,
-              attributes: {
-                ...mySavedQuery.attributes,
-                filters: filters.filter(f => f.meta.controlledBy !== timelineFilterDropArea),
-              },
-            });
+          try {
+            const mySavedQuery = await savedQueryServices.getSavedQuery(savedQueryId);
+            if (isSubscribed && mySavedQuery != null) {
+              setSavedQuery({
+                ...mySavedQuery,
+                attributes: {
+                  ...mySavedQuery.attributes,
+                  filters: filters.filter(f => f.meta.controlledBy !== timelineFilterDropArea),
+                },
+              });
+            }
+          } catch (exc) {
+            setSavedQuery(null);
           }
         } else if (isSubscribed) {
           setSavedQuery(null);
