@@ -38,9 +38,6 @@ export function getServices(): DiscoverServices {
 }
 
 export function setServices(newServices: any) {
-  if (services) {
-    throw new Error('Discover services are already set');
-  }
   services = newServices;
 }
 
