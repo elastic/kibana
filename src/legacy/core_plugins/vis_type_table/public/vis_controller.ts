@@ -33,7 +33,7 @@ export class TableVisualizationController {
   el: JQuery<Element>;
   vis: Vis;
   $rootScope: IRootScopeService | null = null;
-  $scope: IScope & { [key: string]: any } | undefined;
+  $scope: (IScope & { [key: string]: any }) | undefined;
   $compile: ICompileService | undefined;
 
   constructor(domeElement: Element, vis: Vis) {
