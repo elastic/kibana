@@ -83,7 +83,6 @@ export function infra(kibana: any) {
 
       const initContext = ({
         config: infraSetup.__legacy.config,
-        getUiSettingsService: legacyServer.getUiSettingsService, // NP_TODO: Replace this with route handler context instead when ready, see: https://github.com/elastic/kibana/issues/44994
       } as unknown) as PluginInitializerContext;
       // NP_TODO: Use real types from the other plugins as they are migrated
       const pluginDeps: InfraServerPluginDeps = {
