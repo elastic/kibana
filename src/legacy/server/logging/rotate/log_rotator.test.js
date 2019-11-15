@@ -46,6 +46,10 @@ const createLogRotatorConfig = (logFilePath) => {
   ]);
 };
 
+const mockServer = jest.fn(() => ({
+  log: jest.fn()
+}));
+
 const writeBytesToFile = (filePath, numberOfBytes) => {
   writeFileSync(filePath, 'a'.repeat(numberOfBytes), { flag: 'a' });
 };
@@ -64,7 +68,7 @@ describe('LogRotator', () => {
   it('rotates log file when bigger than set limit on start', async () => {
     writeBytesToFile(testFilePath, 3);
 
-    const logRotator = new LogRotator(createLogRotatorConfig(testFilePath));
+    const logRotator = new LogRotator(createLogRotatorConfig(testFilePath), mockServer);
     jest.spyOn(logRotator, '_sendReloadLogConfigSignal').mockImplementation(() => {});
     await logRotator.start();
 
@@ -79,7 +83,7 @@ describe('LogRotator', () => {
   it('rotates log file when equal than set limit over time', async () => {
     writeBytesToFile(testFilePath, 1);
 
-    const logRotator = new LogRotator(createLogRotatorConfig(testFilePath));
+    const logRotator = new LogRotator(createLogRotatorConfig(testFilePath), mockServer);
     jest.spyOn(logRotator, '_sendReloadLogConfigSignal').mockImplementation(() => {});
     await logRotator.start();
 
@@ -101,7 +105,7 @@ describe('LogRotator', () => {
   it('rotates log file when file size is bigger than limit', async () => {
     writeBytesToFile(testFilePath, 1);
 
-    const logRotator = new LogRotator(createLogRotatorConfig(testFilePath));
+    const logRotator = new LogRotator(createLogRotatorConfig(testFilePath), mockServer);
     jest.spyOn(logRotator, '_sendReloadLogConfigSignal').mockImplementation(() => {});
     await logRotator.start();
 
@@ -125,7 +129,7 @@ describe('LogRotator', () => {
 
     writeBytesToFile(testFilePath, 3);
 
-    const logRotator = new LogRotator(createLogRotatorConfig(testFilePath));
+    const logRotator = new LogRotator(createLogRotatorConfig(testFilePath), mockServer);
     jest.spyOn(logRotator, '_sendReloadLogConfigSignal').mockImplementation(() => {});
     await logRotator.start();
 
@@ -155,7 +159,7 @@ describe('LogRotator', () => {
   it('rotates log file service correctly detects usePolling when it should be false', async () => {
     writeBytesToFile(testFilePath, 1);
 
-    const logRotator = new LogRotator(createLogRotatorConfig(testFilePath));
+    const logRotator = new LogRotator(createLogRotatorConfig(testFilePath), mockServer);
     jest.spyOn(logRotator, '_sendReloadLogConfigSignal').mockImplementation(() => {});
     await logRotator.start();
 
@@ -172,7 +176,7 @@ describe('LogRotator', () => {
   it('rotates log file service correctly detects usePolling when it should be true', async () => {
     writeBytesToFile(testFilePath, 1);
 
-    const logRotator = new LogRotator(createLogRotatorConfig(testFilePath));
+    const logRotator = new LogRotator(createLogRotatorConfig(testFilePath), mockServer);
     jest.spyOn(logRotator, '_sendReloadLogConfigSignal').mockImplementation(() => {});
 
     jest.spyOn(fs, 'watch').mockImplementation(() => ({
@@ -196,7 +200,7 @@ describe('LogRotator', () => {
     jest.useFakeTimers();
     writeBytesToFile(testFilePath, 1);
 
-    const logRotator = new LogRotator(createLogRotatorConfig(testFilePath));
+    const logRotator = new LogRotator(createLogRotatorConfig(testFilePath), mockServer);
     jest.spyOn(logRotator, '_sendReloadLogConfigSignal').mockImplementation(() => {});
     jest.spyOn(fs, 'watch').mockImplementation(() => ({
       on: jest.fn((ev) => {
