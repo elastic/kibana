@@ -74,7 +74,9 @@ export const FilterView: SFC<Props> = ({
       })}
       {...rest}
     >
-      <FilterLabel filter={filter} valueLabel={valueLabel} />
+      <span ref={ref}>
+        <FilterLabel filter={filter} valueLabel={valueLabel} />
+      </span>
     </EuiBadge>
   );
 };
