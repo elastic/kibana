@@ -103,7 +103,10 @@ export function infra(kibana: any) {
           },
         },
         apm: {
-          getIndices: () => getApmIndices(legacyServer),
+          // NP_NOTE: This needs migrating once APM's getApmIndices() has been ported to NP.
+          // On our side we're using the NP savedObjectsClient, but legacyServer.config() needs to go.
+          getIndices: savedObjectsClient =>
+            getApmIndices({ savedObjectsClient, config: legacyServer.config() }),
         },
       };
 

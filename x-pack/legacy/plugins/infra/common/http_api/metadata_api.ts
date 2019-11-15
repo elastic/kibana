@@ -66,6 +66,7 @@ export const InfraMetadataInfoRT = rt.partial({
 });
 
 const InfraMetadataRequiredRT = rt.type({
+  id: rt.string,
   name: rt.string,
   features: rt.array(InfraMetadataFeatureRT),
 });

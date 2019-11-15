@@ -123,7 +123,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     );
     const calculatedInterval = await calculateMetricInterval(
       this.framework,
-      req,
+      requestContext,
       {
         indexPattern: `${options.sourceConfiguration.logAlias},${options.sourceConfiguration.metricAlias}`,
         timestampField: options.sourceConfiguration.fields.timestamp,

@@ -86,7 +86,7 @@ export class InfraServerPlugin {
     };
 
     this.libs = {
-      configuration: this.config, // NP_TODO: Do we ever use this anywhere else in the app?
+      configuration: this.config,
       framework,
       logAnalysis,
       snapshot,

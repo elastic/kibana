@@ -22,7 +22,7 @@ export interface InfraServerPluginDeps {
   };
   features: any;
   apm: {
-    getIndices: () => Promise<ApmIndices>;
+    getIndices: (savedObjectsClient: any) => Promise<ApmIndices>;
   };
   ___legacy: any;
 }

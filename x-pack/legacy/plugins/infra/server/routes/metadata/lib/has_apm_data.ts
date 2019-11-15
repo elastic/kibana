@@ -17,7 +17,9 @@ export const hasAPMData = async (
   nodeId: string,
   nodeType: 'host' | 'pod' | 'container'
 ) => {
-  const apmIndices = await framework.plugins.apm.getIndices();
+  const apmIndices = await framework.plugins.apm.getIndices(
+    requestContext.core.savedObjects.client
+  );
   const apmIndex = apmIndices['apm_oss.transactionIndices'] || 'apm-*';
 
   // There is a bug in APM ECS data where host.name is not set.

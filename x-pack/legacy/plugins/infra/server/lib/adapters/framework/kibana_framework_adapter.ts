@@ -80,8 +80,8 @@ export class KibanaFramework {
 
         const gqlResponse = await runHttpQuery([context, request], {
           method: request.route.method.toUpperCase(),
-          options: (req: Legacy.Request) => ({
-            context: { req },
+          options: (req: RequestHandlerContext, rawReq: KibanaRequest) => ({
+            context: { req, rawReq },
             schema: gqlSchema,
           }),
           query,
