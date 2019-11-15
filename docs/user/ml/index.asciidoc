@@ -6,7 +6,9 @@
 --
 As datasets increase in size and complexity, the human effort required to
 inspect dashboards or maintain rules for spotting infrastructure problems,
-cyber attacks, or business issues becomes impractical. 
+cyber attacks, or business issues becomes impractical. Elastic {ml-features}
+such as {anomaly-detect} make it easier to notice suspicious activities with
+minimal human interference.
 
 If you have a basic license, you can use the *Data Visualizer* to learn more
 about your data. In particular, if your data is stored in {es} and contains a
