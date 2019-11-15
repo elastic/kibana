@@ -27,6 +27,7 @@ export function EventOutput({ value }) {
       <EuiPanel paddingSize="s">
         <EuiCodeEditor
           mode="json"
+          theme="textmate"
           isReadOnly
           width="100%"
           height="340px"

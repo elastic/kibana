@@ -5,6 +5,7 @@
  */
 
 import { get } from 'lodash';
+import { ServerFacade, ESCallCluster } from '../../types';
 import {
   AggregationBuckets,
   AggregationResults,
@@ -13,7 +14,6 @@ import {
   KeyCountBucket,
   RangeAggregationResults,
   RangeStats,
-  UsageObject,
 } from './types';
 import { decorateRangeStats } from './decorate_range_stats';
 // @ts-ignore untyped module
@@ -80,7 +80,10 @@ type RangeStatSets = Partial<
     last7Days: RangeStats;
   }
 >;
-async function handleResponse(server: any, response: AggregationResults): Promise<RangeStatSets> {
+async function handleResponse(
+  server: ServerFacade,
+  response: AggregationResults
+): Promise<RangeStatSets> {
   const buckets = get(response, 'aggregations.ranges.buckets');
   if (!buckets) {
     return {};
@@ -98,7 +101,7 @@ async function handleResponse(server: any, response: AggregationResults): Promis
   };
 }
 
-export async function getReportingUsage(server: any, callCluster: any) {
+export async function getReportingUsage(server: ServerFacade, callCluster: ESCallCluster) {
   const config = server.config();
   const reportingIndex = config.get('xpack.reporting.index');
 
@@ -135,7 +138,7 @@ export async function getReportingUsage(server: any, callCluster: any) {
 
   return callCluster('search', params)
     .then((response: AggregationResults) => handleResponse(server, response))
-    .then(async (usage: UsageObject) => {
+    .then(async (usage: RangeStatSets) => {
       // Allow this to explicitly throw an exception if/when this config is deprecated,
       // because we shouldn't collect browserType in that case!
       const browserType = config.get('xpack.reporting.capture.browser.type');
