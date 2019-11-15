@@ -34,7 +34,7 @@ stage("Kibana Pipeline") {
                 if (!IS_XPACK) {
                   kibanaPipeline.buildOss()
                   if (CI_GROUP == '1') {
-                    runbld "./test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh"
+                    runbld("./test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh", "Build kbn tp sample panel action for ciGroup1")
                   }
                 } else {
                   kibanaPipeline.buildXpack()
@@ -62,18 +62,18 @@ stage("Kibana Pipeline") {
 def getWorkerFromParams(isXpack, job, ciGroup) {
   if (!isXpack) {
     if (job == 'firefoxSmoke') {
-      return kibanaPipeline.getPostBuildWorker('firefoxSmoke', { runbld './test/scripts/jenkins_firefox_smoke.sh' })
+      return kibanaPipeline.getPostBuildWorker('firefoxSmoke', { runbld('./test/scripts/jenkins_firefox_smoke.sh', 'Execute kibana-firefoxSmoke') })
     } else if(job == 'visualRegression') {
-      return kibanaPipeline.getPostBuildWorker('visualRegression', { runbld './test/scripts/jenkins_visual_regression.sh' })
+      return kibanaPipeline.getPostBuildWorker('visualRegression', { runbld('./test/scripts/jenkins_visual_regression.sh', 'Execute kibana-visualRegression') })
     } else {
       return kibanaPipeline.getOssCiGroupWorker(ciGroup)
     }
   }
 
   if (job == 'firefoxSmoke') {
-    return kibanaPipeline.getPostBuildWorker('xpack-firefoxSmoke', { runbld './test/scripts/jenkins_xpack_firefox_smoke.sh' })
+    return kibanaPipeline.getPostBuildWorker('xpack-firefoxSmoke', { runbld('./test/scripts/jenkins_xpack_firefox_smoke.sh', 'Execute xpack-firefoxSmoke') })
   } else if(job == 'visualRegression') {
-    return kibanaPipeline.getPostBuildWorker('xpack-visualRegression', { runbld './test/scripts/jenkins_xpack_visual_regression.sh' })
+    return kibanaPipeline.getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') })
   } else {
     return kibanaPipeline.getXpackCiGroupWorker(ciGroup)
   }
