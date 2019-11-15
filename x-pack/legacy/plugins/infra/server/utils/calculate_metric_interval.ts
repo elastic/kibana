@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../lib/adapters/framework';
+import { RequestHandlerContext } from 'src/core/server';
 
 interface Options {
   indexPattern: string;
@@ -21,7 +21,7 @@ interface Options {
  */
 export const calculateMetricInterval = async (
   framework: InfraBackendFrameworkAdapter,
-  request: InfraFrameworkRequest,
+  requestContext: RequestHandlerContext,
   options: Options,
   modules: string[]
 ) => {
@@ -64,7 +64,11 @@ export const calculateMetricInterval = async (
     },
   };
 
-  const resp = await framework.callWithRequest<{}, PeriodAggregationData>(request, 'search', query);
+  const resp = await framework.callWithRequest<{}, PeriodAggregationData>(
+    requestContext,
+    'search',
+    query
+  );
 
   // if ES doesn't return an aggregations key, something went seriously wrong.
   if (!resp.aggregations) {

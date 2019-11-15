@@ -55,7 +55,7 @@ export const populateSeriesWithTSVBData = (
   const model = createMetricModel(options);
   const calculatedInterval = await calculateMetricInterval(
     framework,
-    req,
+    requestContext,
     {
       indexPattern: options.indexPattern,
       timestampField: options.timerange.field,
