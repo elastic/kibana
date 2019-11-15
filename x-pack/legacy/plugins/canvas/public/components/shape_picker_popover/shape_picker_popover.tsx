@@ -5,7 +5,9 @@
  */
 
 import React, { MouseEvent } from 'react';
-import { EuiLink } from '@elastic/eui';
+import PropTypes from 'prop-types';
+import { EuiLink, EuiPanel } from '@elastic/eui';
+
 import { Popover } from '../popover';
 import { ShapePicker } from '../shape_picker';
 import { ShapePreview } from '../shape_preview';
@@ -20,9 +22,11 @@ interface Props {
 
 export const ShapePickerPopover = React.memo<Props>(({ shapes, onChange, value }) => {
   const button = (handleClick: (ev: MouseEvent) => void) => (
-    <EuiLink style={{ fontSize: 0 }} onClick={handleClick}>
-      <ShapePreview shape={value ? shapes[value] : undefined} />
-    </EuiLink>
+    <EuiPanel paddingSize="s" hasShadow={false}>
+      <EuiLink style={{ fontSize: 0 }} onClick={handleClick}>
+        <ShapePreview shape={value ? shapes[value] : undefined} />
+      </EuiLink>
+    </EuiPanel>
   );
 
   return (
