@@ -24,7 +24,11 @@ import {
   ServiceIcons,
   ServiceTitleMap,
 } from '../constants';
-import { AssetsGroupedByServiceByType, Assets, KibanaAssetType } from '../../common/types';
+import {
+  AssetsGroupedByServiceByType,
+  AssetTypeToParts,
+  KibanaAssetType,
+} from '../../common/types';
 import { useCore } from '../hooks/use_core';
 
 export function AssetsFacetGroup({ assets }: { assets: AssetsGroupedByServiceByType }) {
@@ -46,10 +50,13 @@ export function AssetsFacetGroup({ assets }: { assets: AssetsGroupedByServiceByT
       {entries(assets).map(([service, typeToParts], index) => {
         const Header = index === 0 ? FirstHeaderRow : HeaderRow;
         // filter out assets we are not going to display
-        const filteredTypes: Assets = entries(typeToParts).reduce((acc: any, [asset, value]) => {
-          if (DisplayedAssets[service].includes(asset)) acc[asset] = value;
-          return acc;
-        }, {});
+        const filteredTypes: AssetTypeToParts = entries(typeToParts).reduce(
+          (acc: any, [asset, value]) => {
+            if (DisplayedAssets[service].includes(asset)) acc[asset] = value;
+            return acc;
+          },
+          {}
+        );
         return (
           <Fragment key={service}>
             <Header gutterSize="s" alignItems="center">

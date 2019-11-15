@@ -65,8 +65,8 @@ export interface AssetParts {
   type: AssetType;
   file: string;
 }
-export type Assets = Record<AssetType, AssetParts[]>;
-export type AssetsGroupedByServiceByType = Record<ServiceName, Assets>;
+export type AssetTypeToParts = Record<AssetType, AssetParts[]>;
+export type AssetsGroupedByServiceByType = Record<ServiceName, AssetTypeToParts>;
 export interface RegistryPackage {
   name: string;
   version: string;
