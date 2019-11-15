@@ -42,7 +42,7 @@ import {
   style as styleType,
   kibanaContext as kibanaContextType,
   kibanaDatatable as kibanaDatatableType,
-} from './expression_types';
+} from '../common/expression_types';
 import { interpreterProvider } from './interpreter_provider';
 import { createHandlers } from './create_handlers';
 import { ExpressionRendererImplementation } from './expression_renderer';
