@@ -6,6 +6,7 @@ exports[`TopAggregateParamEditor should init with the default set of props 1`] =
   describedByIds={Array []}
   display="row"
   fullWidth={true}
+  hasChildLabel={true}
   hasEmptyLabelSpace={false}
   isInvalid={false}
   label={

@@ -19,9 +19,6 @@ import {
 
 export const SplitFieldSelector: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
-  if (isMultiMetricJobCreator(jc) === false && isPopulationJobCreator(jc) === false) {
-    return null;
-  }
   const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator;
   const canClearSelection = isMultiMetricJobCreator(jc);
 

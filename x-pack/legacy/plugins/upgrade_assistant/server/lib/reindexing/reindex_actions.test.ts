@@ -299,9 +299,7 @@ describe('ReindexActions', () => {
   });
 
   describe('runWhileConsumerLocked', () => {
-    Object.keys(IndexGroup).forEach(typeKey => {
-      const consumerType = IndexGroup[typeKey as any] as IndexGroup;
-
+    Object.entries(IndexGroup).forEach(([typeKey, consumerType]) => {
       describe(`IndexConsumerType.${typeKey}`, () => {
         it('creates the lock doc if it does not exist and executes callback', async () => {
           expect.assertions(3);

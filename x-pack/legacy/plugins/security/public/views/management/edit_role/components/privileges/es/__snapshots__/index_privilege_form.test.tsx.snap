@@ -13,6 +13,7 @@ exports[`it renders without crashing 1`] = `
             describedByIds={Array []}
             display="row"
             fullWidth={true}
+            hasChildLabel={true}
             hasEmptyLabelSpace={false}
             isInvalid={false}
             label={
@@ -43,6 +44,7 @@ exports[`it renders without crashing 1`] = `
             describedByIds={Array []}
             display="row"
             fullWidth={true}
+            hasChildLabel={true}
             hasEmptyLabelSpace={false}
             label={
               <FormattedMessage
@@ -131,6 +133,7 @@ exports[`it renders without crashing 1`] = `
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={true}
         labelType="label"
       >

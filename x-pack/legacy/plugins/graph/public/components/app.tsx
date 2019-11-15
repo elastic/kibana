@@ -10,8 +10,8 @@ import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { Provider } from 'react-redux';
 import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
-import { Storage } from 'ui/storage';
 import { CoreStart } from 'kibana/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { FieldManager } from './field_manager';
 import { SearchBarProps, SearchBar } from './search_bar';
 import { GraphStore } from '../state_management';
@@ -23,21 +23,29 @@ export interface GraphAppProps extends SearchBarProps {
   coreStart: CoreStart;
   // This is not named dataStart because of Angular treating data- prefix differently
   pluginDataStart: DataPublicPluginStart;
-  store: Storage;
+  storage: IStorageWrapper;
   reduxStore: GraphStore;
   isInitialized: boolean;
+  noIndexPatterns: boolean;
 }
 
 export function GraphApp(props: GraphAppProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
-  const { coreStart, pluginDataStart, store, reduxStore, ...searchBarProps } = props;
+  const {
+    coreStart,
+    pluginDataStart,
+    storage,
+    reduxStore,
+    noIndexPatterns,
+    ...searchBarProps
+  } = props;
 
   return (
     <I18nProvider>
       <KibanaContextProvider
         services={{
           appName: 'graph',
-          store,
+          storage,
           data: pluginDataStart,
           ...coreStart,
         }}
@@ -51,6 +59,7 @@ export function GraphApp(props: GraphAppProps) {
             </div>
             {!props.isInitialized && (
               <GuidancePanel
+                noIndexPatterns={noIndexPatterns}
                 onOpenFieldPicker={() => {
                   setPickerOpen(true);
                 }}

@@ -44,7 +44,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/status_page'),
       resolve(__dirname, './apps/timelion'),
       resolve(__dirname, './apps/upgrade_assistant'),
-      resolve(__dirname, './apps/code'),
       resolve(__dirname, './apps/visualize'),
       resolve(__dirname, './apps/uptime'),
       resolve(__dirname, './apps/saved_objects_management'),
@@ -79,12 +78,12 @@ export default async function ({ readConfigFile }) {
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.maps.showMapsInspectorAdapter=true',
         '--xpack.maps.preserveDrawingBuffer=true',
-        '--xpack.telemetry.banner=false',
         '--xpack.reporting.queue.pollInterval=3000', // make it explicitly the default
         '--xpack.reporting.csv.maxSizeBytes=2850', // small-ish limit for cutting off a 1999 byte report
         '--stats.maximumWaitTimeForAllCollectorsInS=1',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
-        '--xpack.encrypted_saved_objects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
+        '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
+        '--telemetry.banner=false',
         '--timelion.ui.enabled=true',
       ],
     },

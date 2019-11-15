@@ -23,6 +23,9 @@ import {
   IndexPatternLayer,
   IndexPatternField,
 } from './types';
+import { documentField } from './document_field';
+
+type IndexPatternSugestion = DatasourceSuggestion<IndexPatternPrivateState>;
 
 function buildSuggestion({
   state,
@@ -78,6 +81,8 @@ function buildSuggestion({
       changeType,
       label,
     },
+
+    keptLayerIds: Object.keys(state.layers),
   };
 }
 
@@ -85,15 +90,18 @@ export function getDatasourceSuggestionsForField(
   state: IndexPatternPrivateState,
   indexPatternId: string,
   field: IndexPatternField
-): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
+): IndexPatternSugestion[] {
   const layers = Object.keys(state.layers);
   const layerIds = layers.filter(id => state.layers[id].indexPatternId === indexPatternId);
 
   if (layerIds.length === 0) {
-    // The field we're suggesting on does not match any existing layer. This will always add
-    // a new layer if possible, but that might not be desirable if the layers are too complicated
-    // already
-    return getEmptyLayerSuggestionsForField(state, generateId(), indexPatternId, field);
+    // The field we're suggesting on does not match any existing layer.
+    // This generates a set of suggestions where we add a layer.
+    // A second set of suggestions is generated for visualizations that don't work with layers
+    const newId = generateId();
+    return getEmptyLayerSuggestionsForField(state, newId, indexPatternId, field).concat(
+      getEmptyLayerSuggestionsForField({ ...state, layers: {} }, newId, indexPatternId, field)
+    );
   } else {
     // The field we're suggesting on matches an existing layer. In this case we find the layer with
     // the fewest configured columns and try to add the field to this table. If this layer does not
@@ -123,23 +131,39 @@ function getExistingLayerSuggestionsForField(
   const fieldInUse = Object.values(layer.columns).some(
     column => hasField(column) && column.sourceField === field.name
   );
-  let updatedLayer: IndexPatternLayer | undefined;
+  const suggestions: IndexPatternSugestion[] = [];
+
   if (usableAsBucketOperation && !fieldInUse) {
-    updatedLayer = addFieldAsBucketOperation(layer, layerId, indexPattern, field);
-  } else if (!usableAsBucketOperation && operations.length > 0) {
-    updatedLayer = addFieldAsMetricOperation(layer, layerId, indexPattern, field);
+    suggestions.push(
+      buildSuggestion({
+        state,
+        updatedLayer: addFieldAsBucketOperation(layer, layerId, indexPattern, field),
+        layerId,
+        changeType: 'extended',
+      })
+    );
   }
 
-  return updatedLayer
-    ? [
+  if (!usableAsBucketOperation && operations.length > 0) {
+    const updatedLayer = addFieldAsMetricOperation(layer, layerId, indexPattern, field);
+    if (updatedLayer) {
+      suggestions.push(
         buildSuggestion({
           state,
           updatedLayer,
           layerId,
           changeType: 'extended',
-        }),
-      ]
-    : [];
+        })
+      );
+    }
+  }
+
+  const metricSuggestion = createMetricSuggestion(indexPattern, layerId, state, field);
+  if (metricSuggestion) {
+    suggestions.push(metricSuggestion);
+  }
+
+  return suggestions;
 }
 
 function addFieldAsMetricOperation(
@@ -147,7 +171,7 @@ function addFieldAsMetricOperation(
   layerId: string,
   indexPattern: IndexPattern,
   field: IndexPatternField
-) {
+): IndexPatternLayer | undefined {
   const operations = getOperationTypesForField(field);
   const operationsAlreadyAppliedToThisField = Object.values(layer.columns)
     .filter(column => hasField(column) && column.sourceField === field.name)
@@ -157,7 +181,7 @@ function addFieldAsMetricOperation(
   );
 
   if (!operationCandidate) {
-    return undefined;
+    return;
   }
 
   const newColumn = buildColumn({
@@ -187,7 +211,7 @@ function addFieldAsBucketOperation(
   layerId: string,
   indexPattern: IndexPattern,
   field: IndexPatternField
-) {
+): IndexPatternLayer {
   const applicableBucketOperation = getBucketOperation(field);
   const newColumn = buildColumn({
     op: applicableBucketOperation,
@@ -231,7 +255,7 @@ function getEmptyLayerSuggestionsForField(
   layerId: string,
   indexPatternId: string,
   field: IndexPatternField
-) {
+): IndexPatternSugestion[] {
   const indexPattern = state.indexPatterns[indexPatternId];
   let newLayer: IndexPatternLayer | undefined;
   if (getBucketOperation(field)) {
@@ -260,13 +284,14 @@ function createNewLayerWithBucketAggregation(
   layerId: string,
   indexPattern: IndexPattern,
   field: IndexPatternField
-) {
+): IndexPatternLayer {
   const countColumn = buildColumn({
     op: 'count',
     columns: {},
     indexPattern,
     layerId,
     suggestedPriority: undefined,
+    field: documentField,
   });
 
   const col1 = generateId();
@@ -298,7 +323,7 @@ function createNewLayerWithMetricAggregation(
   layerId: string,
   indexPattern: IndexPattern,
   field: IndexPatternField
-) {
+): IndexPatternLayer {
   const dateField = indexPattern.fields.find(f => f.name === indexPattern.timeFieldName)!;
 
   const operations = getOperationTypesForField(field);
@@ -336,15 +361,58 @@ function createNewLayerWithMetricAggregation(
 export function getDatasourceSuggestionsFromCurrentState(
   state: IndexPatternPrivateState
 ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
+  const layers = Object.entries(state.layers || {});
+  if (layers.length > 1) {
+    // Return suggestions that reduce the data to each layer individually
+    return layers
+      .map(([layerId, layer], index) => {
+        const hasMatchingLayer = layers.some(
+          ([otherLayerId, otherLayer]) =>
+            otherLayerId !== layerId && otherLayer.indexPatternId === layer.indexPatternId
+        );
+
+        const suggestionTitle = hasMatchingLayer
+          ? i18n.translate('xpack.lens.indexPatternSuggestion.removeLayerPositionLabel', {
+              defaultMessage: 'Show only layer {layerNumber}',
+              values: { layerNumber: index + 1 },
+            })
+          : i18n.translate('xpack.lens.indexPatternSuggestion.removeLayerLabel', {
+              defaultMessage: 'Show only {indexPatternTitle}',
+              values: { indexPatternTitle: state.indexPatterns[layer.indexPatternId].title },
+            });
+
+        return buildSuggestion({
+          state: {
+            ...state,
+            layers: {
+              [layerId]: layer,
+            },
+          },
+          layerId,
+          changeType: 'layers',
+          label: suggestionTitle,
+        });
+      })
+      .concat([
+        buildSuggestion({
+          state,
+          layerId: layers[0][0],
+          changeType: 'unchanged',
+        }),
+      ]);
+  }
   return _.flatten(
     Object.entries(state.layers || {})
-      .filter(([_id, layer]) => layer.columnOrder.length)
-      .map(([layerId, layer], index) => {
+      .filter(([_id, layer]) => layer.columnOrder.length && layer.indexPatternId)
+      .map(([layerId, layer]) => {
         const indexPattern = state.indexPatterns[layer.indexPatternId];
         const [buckets, metrics] = separateBucketColumns(layer);
         const timeDimension = layer.columnOrder.find(
           columnId =>
             layer.columns[columnId].isBucketed && layer.columns[columnId].dataType === 'date'
+        );
+        const timeField = indexPattern.fields.find(
+          ({ name }) => name === indexPattern.timeFieldName
         );
 
         const suggestions: Array<DatasourceSuggestion<IndexPatternPrivateState>> = [];
@@ -358,9 +426,9 @@ export function getDatasourceSuggestionsFromCurrentState(
             })
           );
         } else if (buckets.length === 0) {
-          if (indexPattern.timeFieldName) {
+          if (timeField) {
             // suggest current metric over time if there is a default time field
-            suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId));
+            suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId, timeField));
           }
           suggestions.push(...createAlternativeMetricSuggestions(indexPattern, layerId, state));
           // also suggest simple current state
@@ -374,10 +442,10 @@ export function getDatasourceSuggestionsFromCurrentState(
         } else {
           suggestions.push(...createSimplifiedTableSuggestions(state, layerId));
 
-          if (!timeDimension && indexPattern.timeFieldName) {
+          if (!timeDimension && timeField) {
             // suggest current configuration over time if there is a default time field
             // and no time dimension yet
-            suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId));
+            suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId, timeField));
           }
 
           if (buckets.length === 2) {
@@ -409,7 +477,6 @@ function createMetricSuggestion(
   state: IndexPatternPrivateState,
   field: IndexPatternField
 ) {
-  const layer = state.layers[layerId];
   const operationDefinitionsMap = _.indexBy(operationDefinitions, 'type');
   const [column] = getOperationTypesForField(field)
     .map(type =>
@@ -421,20 +488,33 @@ function createMetricSuggestion(
         suggestedPriority: 0,
       })
     )
-    .filter(op => op.dataType === 'number' && !op.isBucketed);
+    .filter(op => (op.dataType === 'number' || op.dataType === 'document') && !op.isBucketed);
 
   if (!column) {
     return;
   }
 
   const newId = generateId();
+
   return buildSuggestion({
     layerId,
     state,
     changeType: 'initial',
     updatedLayer: {
-      ...layer,
-      columns: { [newId]: column },
+      indexPatternId: indexPattern.id,
+      columns: {
+        [newId]:
+          column.dataType !== 'document'
+            ? column
+            : buildColumn({
+                op: 'count',
+                columns: {},
+                indexPattern,
+                layerId,
+                suggestedPriority: undefined,
+                field: documentField,
+              }),
+      },
       columnOrder: [newId],
     },
   });
@@ -442,10 +522,10 @@ function createMetricSuggestion(
 
 function getNestedTitle([outerBucket, innerBucket]: IndexPatternColumn[]) {
   return i18n.translate('xpack.lens.indexpattern.suggestions.nestingChangeLabel', {
-    defaultMessage: '{innerOperation} per each {outerOperation}',
+    defaultMessage: '{innerOperation} for each {outerOperation}',
     values: {
-      innerOperation: innerBucket.label,
-      outerOperation: hasField(outerBucket) ? outerBucket.sourceField : outerBucket.label,
+      innerOperation: innerBucket.sourceField,
+      outerOperation: outerBucket.sourceField,
     },
   });
 }
@@ -479,7 +559,7 @@ function createAlternativeMetricSuggestions(
       suggestedPriority: undefined,
     });
     const updatedLayer = {
-      ...layer,
+      indexPatternId: indexPattern.id,
       columns: { [newId]: newColumn },
       columnOrder: [newId],
     };
@@ -497,7 +577,8 @@ function createAlternativeMetricSuggestions(
 
 function createSuggestionWithDefaultDateHistogram(
   state: IndexPatternPrivateState,
-  layerId: string
+  layerId: string,
+  timeField: IndexPatternField
 ) {
   const layer = state.layers[layerId];
   const indexPattern = state.indexPatterns[layer.indexPatternId];
@@ -508,11 +589,11 @@ function createSuggestionWithDefaultDateHistogram(
     op: 'date_histogram',
     indexPattern,
     columns: layer.columns,
-    field: indexPattern.fields.find(({ name }) => name === indexPattern.timeFieldName),
+    field: timeField,
     suggestedPriority: undefined,
   });
   const updatedLayer = {
-    ...layer,
+    indexPatternId: layer.indexPatternId,
     columns: { ...layer.columns, [newId]: timeColumn },
     columnOrder: [...buckets, newId, ...metrics],
   };

@@ -32,7 +32,8 @@ strongly recommend that you keep the default CSP rules that ship with Kibana.
 
 `csp.strict:`:: *Default: `true`* Blocks access to Kibana to any browser that
 does not enforce even rudimentary CSP rules. In practice, this will disable
-support for older, less safe browsers like Internet Explorer.
+support for older, less safe browsers like Internet Explorer. 
+See <<csp-strict-mode, Content Security Policy>> for more information.
 
 `csp.warnLegacyBrowsers:`:: *Default: `true`* Shows a warning message after
 loading Kibana to any browser that does not enforce even rudimentary CSP rules,
@@ -240,6 +241,10 @@ Kibana reads this url from an external metadata service, but users can still
 override this parameter to use their own Tile Map Service. For example:
 `"https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana"`
 
+`newsfeed.enabled:` :: *Default: `true`* Controls whether to enable the newsfeed
+system for the Kibana UI notification center. Set to `false` to disable the
+newsfeed system.
+
 `path.data:`:: *Default: `data`* The path where Kibana stores persistent data
 not saved in Elasticsearch.
 
@@ -252,6 +257,10 @@ system and process performance metrics. The minimum value is 100.
 running behind a proxy. Use the `server.rewriteBasePath` setting to tell Kibana
 if it should remove the basePath from requests it receives, and to prevent a
 deprecation warning at startup. This setting cannot end in a slash (`/`).
+
+[[server-cors]]`server.cors:`:: *Default: `false`* Set to `true` to enable CORS support. This setting is required to configure `server.cors.origin`.
+
+`server.cors.origin:`:: *Default: none* Specifies origins. "origin" must be an array. To use this setting, you must set `server.cors` to `true`. To accept all origins, use `server.cors.origin: ["*"]`.
 
 `server.customResponseHeaders:`:: *Default: `{}`* Header names and values to
   send on all responses to the client from the Kibana server.
@@ -273,8 +282,8 @@ setting specifies the port to use.
 
 `server.rewriteBasePath:`:: *Default: deprecated* Specifies whether Kibana should
 rewrite requests that are prefixed with `server.basePath` or require that they
-are rewritten by your reverse proxy. In Kibana 6.3 and earlier, the default is 
-`false`. In Kibana 7.x, the setting is deprecated. In Kibana 8.0 and later, the 
+are rewritten by your reverse proxy. In Kibana 6.3 and earlier, the default is
+`false`. In Kibana 7.x, the setting is deprecated. In Kibana 8.0 and later, the
 default is `true`.
 
 `server.socketTimeout:`:: *Default: "120000"* The number of milliseconds to wait before closing an
@@ -311,6 +320,18 @@ supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2
 setting this to `true` enables unauthenticated users to access the Kibana
 server status API and status page.
 
+`telemetry.allowChangingOptInStatus`:: *Default: true*. If `true`, 
+users are able to change the telemetry setting at a later time in 
+<<advanced-options, Advanced Settings>>.  If `false`, 
+{kib} looks at the value of `telemetry.optIn` to determine whether to send 
+telemetry data or not. `telemetry.allowChangingOptInStatus` and `telemetry.optIn`
+cannot be `false` at the same time.
+
+`telemetry.optIn`:: *Default: true* If `true`, telemetry data is sent to Elastic. 
+ If `false`, collection of telemetry data is disabled.  
+ To enable telemetry and prevent users from disabling it,
+ set `telemetry.allowChangingOptInStatus` to `false` and `telemetry.optIn` to `true`.
+
 `vega.enableExternalUrls:`:: *Default: false* Set this value to true to allow Vega to use any URL to access external data sources and images. If false, Vega can only get data from Elasticsearch.
 
 `xpack.license_management.enabled`:: *Default: true* Set this value to false to
@@ -323,7 +344,6 @@ Rollup user interface.
 
 
 include::{docdir}/settings/apm-settings.asciidoc[]
-include::{docdir}/settings/code-settings.asciidoc[]
 include::{docdir}/settings/dev-settings.asciidoc[]
 include::{docdir}/settings/graph-settings.asciidoc[]
 include::{docdir}/settings/infrastructure-ui-settings.asciidoc[]

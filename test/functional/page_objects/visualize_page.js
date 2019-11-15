@@ -269,6 +269,14 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       }
     }
 
+    async isBetaInfoShown() {
+      return await testSubjects.exists('betaVisInfo');
+    }
+
+    async getBetaTypeLinks() {
+      return await find.allByCssSelector('[data-vis-stage="beta"]');
+    }
+
     async getExperimentalTypeLinks() {
       return await find.allByCssSelector('[data-vis-stage="experimental"]');
     }
@@ -360,6 +368,28 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       const isChecked = await this.isChecked(selector);
       if (isChecked) {
         log.debug(`unchecking checkbox ${selector}`);
+        await testSubjects.click(selector);
+      }
+    }
+
+    async isSwitchChecked(selector) {
+      const checkbox = await testSubjects.find(selector);
+      const isChecked = await checkbox.getAttribute('aria-checked');
+      return isChecked === 'true';
+    }
+
+    async checkSwitch(selector) {
+      const isChecked = await this.isSwitchChecked(selector);
+      if (!isChecked) {
+        log.debug(`checking switch ${selector}`);
+        await testSubjects.click(selector);
+      }
+    }
+
+    async uncheckSwitch(selector) {
+      const isChecked = await this.isSwitchChecked(selector);
+      if (isChecked) {
+        log.debug(`unchecking switch ${selector}`);
         await testSubjects.click(selector);
       }
     }
@@ -736,7 +766,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     async saveVisualizationExpectSuccess(vizName, { saveAsNew = false } = {}) {
       await this.saveVisualization(vizName, { saveAsNew });
       const successToast = await testSubjects.exists('saveVisualizationSuccess', {
-        timeout: defaultFindTimeout
+        timeout: 2 * defaultFindTimeout
       });
       expect(successToast).to.be(true);
     }
@@ -997,6 +1027,16 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async toggleIsFilteredByCollarCheckbox() {
       await testSubjects.click('isFilteredByCollarCheckbox');
+    }
+
+    async setIsFilteredByCollarCheckbox(value = true) {
+      await retry.try(async () => {
+        const isChecked = await this.isSwitchChecked('isFilteredByCollarCheckbox');
+        if (isChecked !== value) {
+          await testSubjects.click('isFilteredByCollarCheckbox');
+          throw new Error('isFilteredByCollar not set correctly');
+        }
+      });
     }
 
     async getMarkdownData() {

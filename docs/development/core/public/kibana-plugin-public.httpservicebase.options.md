@@ -4,6 +4,8 @@
 
 ## HttpServiceBase.options property
 
+Makes an HTTP request with the OPTIONS method. See [HttpHandler](./kibana-plugin-public.httphandler.md) for options.
+
 <b>Signature:</b>
 
 ```typescript

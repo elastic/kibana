@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useContext, useState } from 'react';
+import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
 import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { mlJobService } from '../../../../../services/job_service';
-import { ValidateJob } from '../../../../../components/validate_job/validate_job_view';
+import { ValidateJob } from '../../../../../components/validate_job';
+import { JOB_TYPE } from '../../../common/job_creator/util/constants';
 
 const idFilterList = [
   'job_id_valid',
@@ -19,8 +20,14 @@ const idFilterList = [
 ];
 
 export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
-  const { jobCreator, jobValidator } = useContext(JobCreatorContext);
+  const { jobCreator, jobCreatorUpdate, jobValidator } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
+
+  if (jobCreator.type === JOB_TYPE.ADVANCED) {
+    // for advanced jobs, ignore time range warning as the
+    // user hasn't selected a time range.
+    idFilterList.push(...['time_range_short', 'success_time_range']);
+  }
 
   function getJobConfig() {
     return {
@@ -35,6 +42,12 @@ export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
       end: jobCreator.end,
     };
   }
+
+  useEffect(() => {
+    // force basic validation to run
+    jobValidator.validate(() => {}, true);
+    jobCreatorUpdate();
+  }, []);
 
   // keep a record of the advanced validation in the jobValidator
   // and disable the next button if any advanced checks have failed.
@@ -65,7 +78,7 @@ export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
           />
         </Fragment>
       )}
-      {isCurrentStep === false && <Fragment></Fragment>}
+      {isCurrentStep === false && <Fragment />}
     </Fragment>
   );
 };

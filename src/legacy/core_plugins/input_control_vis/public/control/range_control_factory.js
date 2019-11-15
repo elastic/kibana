@@ -27,6 +27,7 @@ import { RangeFilterManager } from './filter_manager/range_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { i18n } from '@kbn/i18n';
 import { start as data } from '../../../../core_plugins/data/public/legacy';
+import { npStart } from 'ui/new_platform';
 
 const minMaxAgg = (field) => {
   const aggBody = {};
@@ -64,13 +65,13 @@ class RangeControl extends Control {
 
     const fieldName = this.filterManager.fieldName;
 
-    const aggs = minMaxAgg(indexPattern.fields.byName[fieldName]);
-    const searchSource = createSearchSource(this.kbnApi, null, indexPattern, aggs, this.useTimeFilter);
-    this.abortController.signal.addEventListener('abort', () => searchSource.cancelQueued());
+    const aggs = minMaxAgg(indexPattern.fields.getByName(fieldName));
+    const searchSource = createSearchSource(this.SearchSource, null, indexPattern, aggs, this.useTimeFilter);
+    const abortSignal = this.abortController.signal;
 
     let resp;
     try {
-      resp = await searchSource.fetch();
+      resp = await searchSource.fetch({ abortSignal });
     } catch(error) {
       // If the fetch was aborted then no need to surface this error in the UI
       if (error.name === 'AbortError') return;
@@ -99,17 +100,18 @@ class RangeControl extends Control {
   }
 }
 
-export async function rangeControlFactory(controlParams, kbnApi, useTimeFilter) {
+export async function rangeControlFactory(controlParams, useTimeFilter, SearchSource) {
   let indexPattern;
   try {
     indexPattern = await data.indexPatterns.indexPatterns.get(controlParams.indexPattern);
   } catch (err) {
     // ignore not found error and return control so it can be displayed in disabled state.
   }
+  const { filterManager } = npStart.plugins.data.query;
   return new RangeControl(
     controlParams,
-    new RangeFilterManager(controlParams.id, controlParams.fieldName, indexPattern, data.filter.filterManager),
-    kbnApi,
-    useTimeFilter
+    new RangeFilterManager(controlParams.id, controlParams.fieldName, indexPattern, filterManager),
+    useTimeFilter,
+    SearchSource,
   );
 }

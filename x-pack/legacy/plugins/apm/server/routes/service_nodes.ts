@@ -17,7 +17,7 @@ export const serviceNodesRoute = createRoute(core => ({
     }),
     query: t.intersection([rangeRt, uiFiltersRt])
   },
-  handler: async (req, { path, query }) => {
+  handler: async (req, { path }) => {
     const setup = await setupRequest(req);
     const { serviceName } = path;
 

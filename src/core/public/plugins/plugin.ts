@@ -71,7 +71,7 @@ export class PluginWrapper<
   private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   constructor(
-    readonly discoveredPlugin: DiscoveredPlugin,
+    public readonly discoveredPlugin: DiscoveredPlugin,
     public readonly opaqueId: PluginOpaqueId,
     private readonly initializerContext: PluginInitializerContext
   ) {

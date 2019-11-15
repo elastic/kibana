@@ -7,6 +7,7 @@ exports[`Overrides render overrides 1`] = `
     display="row"
     error="Value must be greater than 3 and less than or equal to 1000000"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
@@ -30,6 +31,7 @@ exports[`Overrides render overrides 1`] = `
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
       <FormattedMessage
@@ -76,19 +78,18 @@ exports[`Overrides render overrides 1`] = `
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <EuiText
         size="xs"
       >
-        <EuiLink
-          color="primary"
+        <ForwardRef
           href="https://www.elastic.co/guide/en/elasticsearch/reference/jest-metadata-mock-branch/search-aggregations-bucket-daterange-aggregation.html#date-format-pattern"
           target="_blank"
-          type="button"
         >
           See more on accepted formats
-        </EuiLink>
+        </ForwardRef>
       </EuiText>
     }
     label={
@@ -328,6 +329,7 @@ exports[`Overrides render overrides 1`] = `
     describedByIds={Array []}
     display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
       <FormattedMessage

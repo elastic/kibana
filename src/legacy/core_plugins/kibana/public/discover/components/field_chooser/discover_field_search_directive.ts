@@ -17,17 +17,17 @@
  * under the License.
  */
 // @ts-ignore
-import { uiModules } from 'ui/modules';
-import { wrapInI18nContext } from 'ui/i18n';
+import { getServices } from '../../kibana_services';
 import { DiscoverFieldSearch } from './discover_field_search';
+
+const { wrapInI18nContext, uiModules } = getServices();
 
 const app = uiModules.get('apps/discover');
 
 app.directive('discoverFieldSearch', function(reactDirective: any) {
   return reactDirective(wrapInI18nContext(DiscoverFieldSearch), [
     ['onChange', { watchDepth: 'reference' }],
-    ['onShowFilter', { watchDepth: 'reference' }],
-    ['showFilter', { watchDepth: 'value' }],
     ['value', { watchDepth: 'value' }],
+    ['types', { watchDepth: 'value' }],
   ]);
 });

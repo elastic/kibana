@@ -160,6 +160,16 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'PUT'
   });
 
+  ml.evaluateDataFrameAnalytics = ca({
+    urls: [
+      {
+        fmt: '/_ml/data_frame/_evaluate',
+      }
+    ],
+    needBody: true,
+    method: 'POST'
+  });
+
   ml.deleteDataFrameAnalytics = ca({
     urls: [
       {

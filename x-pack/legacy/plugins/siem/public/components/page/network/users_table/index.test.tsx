@@ -18,6 +18,14 @@ import { createStore, networkModel, State } from '../../../../store';
 import { UsersTable } from '.';
 import { mockUsersData } from './mock';
 
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+
+jest.mock('../../../search_bar', () => ({
+  siemFilterManager: {
+    addFilters: jest.fn(),
+  },
+}));
+
 describe('Users Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
@@ -75,7 +83,7 @@ describe('Users Table Component', () => {
           </TestProviders>
         </MockedProvider>
       );
-      expect(store.getState().network.details.queries!.users.usersSortField).toEqual({
+      expect(store.getState().network.details.queries!.users.sort).toEqual({
         direction: 'asc',
         field: 'name',
       });
@@ -87,7 +95,7 @@ describe('Users Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.details.queries!.users.usersSortField).toEqual({
+      expect(store.getState().network.details.queries!.users.sort).toEqual({
         direction: 'desc',
         field: 'name',
       });

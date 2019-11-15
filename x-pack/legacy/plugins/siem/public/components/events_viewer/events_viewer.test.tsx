@@ -9,14 +9,21 @@ import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 
 import { TestProviders } from '../../mock';
+import { mockUiSettings } from '../../mock/ui_settings';
 import { wait } from '../../lib/helpers';
-import '../../mock/ui_settings';
 
 import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
 import { defaultHeaders } from './default_headers';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
+
+const mockUseKibanaCore = useKibanaCore as jest.Mock;
+jest.mock('../../lib/compose/kibana_core');
+mockUseKibanaCore.mockImplementation(() => ({
+  uiSettings: mockUiSettings,
+}));
 
 const from = 1566943856794;
 const to = 1566857456791;
@@ -35,12 +42,7 @@ describe('EventsViewer', () => {
     const wrapper = mount(
       <TestProviders>
         <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer
-            end={to}
-            id={'test-stateful-events-viewer'}
-            kqlQueryExpression={''}
-            start={from}
-          />
+          <StatefulEventsViewer end={to} id={'test-stateful-events-viewer'} start={from} />
         </MockedProvider>
       </TestProviders>
     );
@@ -50,7 +52,7 @@ describe('EventsViewer', () => {
 
     expect(
       wrapper
-        .find(`[data-test-subj="header-panel-subtitle"]`)
+        .find(`[data-test-subj="header-section-subtitle"]`)
         .first()
         .text()
     ).toEqual('Showing: 12 events');
@@ -60,12 +62,7 @@ describe('EventsViewer', () => {
     const wrapper = mount(
       <TestProviders>
         <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer
-            end={to}
-            id={'test-stateful-events-viewer'}
-            kqlQueryExpression={''}
-            start={from}
-          />
+          <StatefulEventsViewer end={to} id={'test-stateful-events-viewer'} start={from} />
         </MockedProvider>
       </TestProviders>
     );
@@ -85,12 +82,7 @@ describe('EventsViewer', () => {
     const wrapper = mount(
       <TestProviders>
         <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer
-            end={to}
-            id={'test-stateful-events-viewer'}
-            kqlQueryExpression={''}
-            start={from}
-          />
+          <StatefulEventsViewer end={to} id={'test-stateful-events-viewer'} start={from} />
         </MockedProvider>
       </TestProviders>
     );
@@ -111,12 +103,7 @@ describe('EventsViewer', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-            <StatefulEventsViewer
-              end={to}
-              id={'test-stateful-events-viewer'}
-              kqlQueryExpression={''}
-              start={from}
-            />
+            <StatefulEventsViewer end={to} id={'test-stateful-events-viewer'} start={from} />
           </MockedProvider>
         </TestProviders>
       );

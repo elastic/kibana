@@ -8,10 +8,14 @@ import { useContext, useState } from 'react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../../../common/types/fields';
-import { isMultiMetricJobCreator, isPopulationJobCreator } from '../../../../../common/job_creator';
-import { ml } from '../../../../../../../services/ml_api_service';
+import {
+  isMultiMetricJobCreator,
+  isPopulationJobCreator,
+  isAdvancedJobCreator,
+} from '../../../../../common/job_creator';
+import { ml, BucketSpanEstimatorData } from '../../../../../../../services/ml_api_service';
 import { useKibanaContext } from '../../../../../../../contexts/kibana';
-import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
+import { mlMessageBarService } from '../../../../../../../components/messagebar';
 
 export enum ESTIMATE_STATUS {
   NOT_RUNNING,
@@ -24,7 +28,7 @@ export function useEstimateBucketSpan() {
 
   const [status, setStatus] = useState(ESTIMATE_STATUS.NOT_RUNNING);
 
-  const data = {
+  const data: BucketSpanEstimatorData = {
     aggTypes: jobCreator.aggregations.map(a => a.dslName),
     duration: {
       start: jobCreator.start,
@@ -33,13 +37,31 @@ export function useEstimateBucketSpan() {
     fields: jobCreator.fields.map(f => (f.id === EVENT_RATE_FIELD_ID ? null : f.id)),
     index: kibanaContext.currentIndexPattern.title,
     query: kibanaContext.combinedQuery,
-    splitField:
-      (isMultiMetricJobCreator(jobCreator) || isPopulationJobCreator(jobCreator)) &&
-      jobCreator.splitField !== null
-        ? jobCreator.splitField.id
-        : undefined,
+    splitField: undefined,
     timeField: kibanaContext.currentIndexPattern.timeFieldName,
   };
+
+  if (
+    (isMultiMetricJobCreator(jobCreator) || isPopulationJobCreator(jobCreator)) &&
+    jobCreator.splitField !== null
+  ) {
+    data.splitField = jobCreator.splitField.id;
+  } else if (isAdvancedJobCreator(jobCreator)) {
+    jobCreator.richDetectors.some(d => {
+      if (d.partitionField !== null) {
+        data.splitField = d.partitionField.id;
+        return true;
+      }
+      if (d.overField !== null) {
+        data.splitField = d.overField.id;
+        return true;
+      }
+      if (d.byField !== null) {
+        data.splitField = d.byField.id;
+        return true;
+      }
+    });
+  }
 
   async function estimateBucketSpan() {
     setStatus(ESTIMATE_STATUS.RUNNING);

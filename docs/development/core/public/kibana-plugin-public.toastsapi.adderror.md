@@ -4,6 +4,8 @@
 
 ## ToastsApi.addError() method
 
+Adds a new toast that displays an exception message with a button to open the full stacktrace in a modal.
+
 <b>Signature:</b>
 
 ```typescript
@@ -14,10 +16,12 @@ addError(error: Error, options: ErrorToastOptions): Toast;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  error | <code>Error</code> |  |
-|  options | <code>ErrorToastOptions</code> |  |
+|  error | <code>Error</code> | an <code>Error</code> instance. |
+|  options | <code>ErrorToastOptions</code> | [ErrorToastOptions](./kibana-plugin-public.errortoastoptions.md) |
 
 <b>Returns:</b>
 
 `Toast`
+
+a [Toast](./kibana-plugin-public.toast.md)
 

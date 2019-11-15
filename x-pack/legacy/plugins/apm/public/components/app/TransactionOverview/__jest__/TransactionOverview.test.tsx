@@ -28,8 +28,6 @@ import { LegacyCoreStart } from 'kibana/public';
 jest.spyOn(history, 'push');
 jest.spyOn(history, 'replace');
 
-jest.mock('ui/kfetch');
-
 const coreMock = ({
   notifications: { toasts: { addWarning: () => {} } }
 } as unknown) as LegacyCoreStart;

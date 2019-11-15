@@ -4,6 +4,8 @@
 
 ## HttpRequestInit.headers property
 
+[HttpHeadersInit](./kibana-plugin-public.httpheadersinit.md)
+
 <b>Signature:</b>
 
 ```typescript

@@ -13,7 +13,7 @@ import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { wrapError } from '../../../../../../../plugins/security/server';
 import { KibanaRequest } from '../../../../../../../../src/core/server';
 
-export function initUsersApi({ authc: { login }, config }, server) {
+export function initUsersApi({ authc: { login }, __legacyCompat: { config } }, server) {
   const callWithRequest = getClient(server).callWithRequest;
   const routePreCheckLicenseFn = routePreCheckLicense(server);
 
@@ -108,7 +108,7 @@ export function initUsersApi({ authc: { login }, config }, server) {
             return Boom.unauthorized(authenticationResult.error);
           }
         } catch(err) {
-          return Boom.unauthorized(err);
+          throw Boom.forbidden(err);
         }
       }
 

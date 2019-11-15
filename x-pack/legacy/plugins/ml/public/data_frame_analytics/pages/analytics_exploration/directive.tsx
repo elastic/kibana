@@ -16,7 +16,7 @@ import { I18nContext } from 'ui/i18n';
 import { IPrivate } from 'ui/private';
 
 import { InjectorService } from '../../../../common/types/angular';
-import { SearchItemsProvider } from '../../../jobs/new_job/utils/new_job_utils';
+import { SearchItemsProvider } from '../../../jobs/new_job_new/utils/new_job_utils';
 
 import { KibanaConfigTypeFix, KibanaContext } from '../../../contexts/kibana';
 
@@ -50,7 +50,11 @@ module.directive('mlDataFrameAnalyticsExploration', ($injector: InjectorService)
       ReactDOM.render(
         <I18nContext>
           <KibanaContext.Provider value={kibanaContext}>
-            <Page jobId={globalState.ml.jobId} />
+            <Page
+              jobId={globalState.ml.jobId}
+              analysisType={globalState.ml.analysisType}
+              jobStatus={globalState.ml.jobStatus}
+            />
           </KibanaContext.Provider>
         </I18nContext>,
         element[0]

@@ -13,7 +13,7 @@ import {
   Render,
   Style,
   Range,
-} from 'src/plugins/expressions/common/expressions/expression_types';
+} from 'src/plugins/expressions/public';
 import { CanvasFunction } from './functions';
 import { AssetType } from './assets';
 import { CanvasWorkpad } from './canvas';
@@ -69,7 +69,7 @@ export interface ExpressionContext {
 }
 
 export interface ResolvedArgType {
-  expressionRenderable: ExpressionRenderable;
+  expressionRenderable?: ExpressionRenderable;
   expressionContext: ExpressionContext;
 }
 

@@ -23,8 +23,8 @@ export interface MetaDataState {
 export const updateMetaData = actionCreator<Partial<MetaDataState>>('UPDATE_META_DATA');
 
 const initialMetaData: MetaDataState = {
-  title: i18n.translate('xpack.graph.newWorkspaceTitle', {
-    defaultMessage: 'Unsaved workspace',
+  title: i18n.translate('xpack.graph.newGraphTitle', {
+    defaultMessage: 'Unsaved graph',
   }),
   description: '',
 };

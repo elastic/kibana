@@ -5,17 +5,20 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import { getOr, isEmpty } from 'lodash/fp';
+import { getEsQueryConfig } from '@kbn/es-query';
+import { getOr, isEmpty, isEqual } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
+import { Query } from 'src/plugins/data/common';
 
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { KqlMode } from '../../store/timeline/model';
 import { AutoSizer } from '../auto_sizer';
-import { HeaderPanel } from '../header_panel';
+import { HeaderSection } from '../header_section';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 import { Sort } from '../timeline/body/sort';
@@ -28,6 +31,7 @@ import { TimelineRefetch } from '../timeline/refetch_timeline';
 import { isCompactFooter } from '../timeline/timeline';
 import { ManageTimelineContext } from '../timeline/timeline_context';
 import * as i18n from './translations';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;
 
@@ -41,6 +45,7 @@ interface Props {
   columns: ColumnHeader[];
   dataProviders: DataProvider[];
   end: number;
+  filters: esFilters.Filter[];
   height?: number;
   id: string;
   indexPattern: StaticIndexPattern;
@@ -48,8 +53,8 @@ interface Props {
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   kqlMode: KqlMode;
-  kqlQueryExpression: string;
   onChangeItemsPerPage: OnChangeItemsPerPage;
+  query: Query;
   showInspect: boolean;
   start: number;
   sort: Sort;
@@ -62,6 +67,7 @@ export const EventsViewer = React.memo<Props>(
     columns,
     dataProviders,
     end,
+    filters,
     height = DEFAULT_EVENTS_VIEWER_HEIGHT,
     id,
     indexPattern,
@@ -69,25 +75,27 @@ export const EventsViewer = React.memo<Props>(
     itemsPerPage,
     itemsPerPageOptions,
     kqlMode,
-    kqlQueryExpression,
     onChangeItemsPerPage,
+    query,
     showInspect,
     start,
     sort,
     toggleColumn,
   }) => {
     const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
-
-    const combinedQueries = combineQueries(
+    const core = useKibanaCore();
+    const combinedQueries = combineQueries({
+      config: getEsQueryConfig(core.uiSettings),
       dataProviders,
       indexPattern,
       browserFields,
-      kqlQueryExpression,
+      filters,
+      kqlQuery: query,
       kqlMode,
       start,
       end,
-      true
-    );
+      isEventViewer: true,
+    });
 
     return (
       <EuiPanel data-test-subj="events-viewer-panel" grow={false}>
@@ -124,7 +132,7 @@ export const EventsViewer = React.memo<Props>(
                     totalCount = 0,
                   }) => (
                     <>
-                      <HeaderPanel
+                      <HeaderSection
                         id={id}
                         showInspect={showInspect}
                         subtitle={`${i18n.SHOWING}: ${totalCount.toLocaleString()} ${i18n.UNIT(
@@ -190,6 +198,7 @@ export const EventsViewer = React.memo<Props>(
     prevProps.columns === nextProps.columns &&
     prevProps.dataProviders === nextProps.dataProviders &&
     prevProps.end === nextProps.end &&
+    isEqual(prevProps.filters, nextProps.filters) &&
     prevProps.height === nextProps.height &&
     prevProps.id === nextProps.id &&
     prevProps.indexPattern === nextProps.indexPattern &&
@@ -197,7 +206,7 @@ export const EventsViewer = React.memo<Props>(
     prevProps.itemsPerPage === nextProps.itemsPerPage &&
     prevProps.itemsPerPageOptions === nextProps.itemsPerPageOptions &&
     prevProps.kqlMode === nextProps.kqlMode &&
-    prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
+    isEqual(prevProps.query, nextProps.query) &&
     prevProps.showInspect === nextProps.showInspect &&
     prevProps.start === nextProps.start &&
     prevProps.sort === nextProps.sort

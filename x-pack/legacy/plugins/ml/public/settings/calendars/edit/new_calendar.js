@@ -21,7 +21,7 @@ import {
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 
-import { NavigationMenu } from '../../../components/navigation_menu/navigation_menu';
+import { NavigationMenu } from '../../../components/navigation_menu';
 
 import { getCalendarSettingsData, validateCalendarId } from './utils';
 import { CalendarForm } from './calendar_form/';

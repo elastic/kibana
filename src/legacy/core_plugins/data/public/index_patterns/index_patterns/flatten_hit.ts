@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { IndexPattern } from './';
+import { IndexPattern } from './index_pattern';
 
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a flattened version
@@ -27,14 +27,15 @@ function flattenHit(indexPattern: IndexPattern, hit: Record<string, any>, deep: 
   const flat = {} as Record<string, any>;
 
   // recursively merge _source
-  const fields = indexPattern.fields.byName;
+  const fields = indexPattern.fields.getByName;
   (function flatten(obj, keyPrefix = '') {
     keyPrefix = keyPrefix ? keyPrefix + '.' : '';
     _.forOwn(obj, function(val, key) {
       key = keyPrefix + key;
 
       if (deep) {
-        const isNestedField = fields[key] && fields[key].type === 'nested';
+        const field = fields(key);
+        const isNestedField = field && field.type === 'nested';
         const isArrayOfObjects = Array.isArray(val) && _.isPlainObject(_.first(val));
         if (isArrayOfObjects && !isNestedField) {
           _.each(val, v => flatten(v, key));
@@ -44,7 +45,8 @@ function flattenHit(indexPattern: IndexPattern, hit: Record<string, any>, deep: 
         return;
       }
 
-      const hasValidMapping = fields[key] && fields[key].type !== 'conflict';
+      const field = fields(key);
+      const hasValidMapping = field && field.type !== 'conflict';
       const isValue = !_.isPlainObject(val);
 
       if (hasValidMapping || isValue) {

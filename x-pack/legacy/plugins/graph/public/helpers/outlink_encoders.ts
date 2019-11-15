@@ -25,7 +25,7 @@ export const outlinkEncoders: OutlinkEncoder[] = [
       defaultMessage: 'KQL OR query',
     }),
     description: i18n.translate('xpack.graph.outlinkEncoders.kqlLooseDescription', {
-      defaultMessage: 'KQL query, compatible with Discover, Visualize and Dashboards',
+      defaultMessage: 'KQL query, compatible with Discover, Visualize, and Dashboards',
     }),
     encode(workspace) {
       return asKQL(workspace, 'or');
@@ -38,7 +38,7 @@ export const outlinkEncoders: OutlinkEncoder[] = [
       defaultMessage: 'KQL AND query',
     }),
     description: i18n.translate('xpack.graph.outlinkEncoders.kqlLooseDescription', {
-      defaultMessage: 'KQL query, compatible with Discover, Visualize and Dashboards',
+      defaultMessage: 'KQL query, compatible with Discover, Visualize, and Dashboards',
     }),
     encode(workspace) {
       return asKQL(workspace, 'and');

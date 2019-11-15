@@ -12,13 +12,21 @@ import {
   SavedObjectsClientContract,
   HttpServiceBase,
 } from 'src/core/public';
-import { Storage } from 'ui/storage';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { createMockedIndexPattern } from '../../mocks';
 import { TermsIndexPatternColumn } from './terms';
 import { termsOperation } from '.';
 import { IndexPatternPrivateState } from '../../types';
 
 jest.mock('ui/new_platform');
+
+const defaultProps = {
+  storage: {} as IStorageWrapper,
+  uiSettings: {} as UiSettingsClientContract,
+  savedObjectsClient: {} as SavedObjectsClientContract,
+  dateRange: { fromDate: 'now-1d', toDate: 'now' },
+  http: {} as HttpServiceBase,
+};
 
 describe('terms', () => {
   let state: IndexPatternPrivateState;
@@ -28,6 +36,7 @@ describe('terms', () => {
     state = {
       indexPatternRefs: [],
       indexPatterns: {},
+      existingFields: {},
       currentIndexPatternId: '1',
       showEmptyFields: false,
       layers: {
@@ -39,8 +48,6 @@ describe('terms', () => {
               label: 'Top value of category',
               dataType: 'string',
               isBucketed: true,
-
-              // Private
               operationType: 'terms',
               params: {
                 orderBy: { type: 'alphabetical' },
@@ -53,8 +60,7 @@ describe('terms', () => {
               label: 'Count',
               dataType: 'number',
               isBucketed: false,
-
-              // Private
+              sourceField: 'Records',
               operationType: 'count',
             },
           },
@@ -205,8 +211,7 @@ describe('terms', () => {
             label: 'Count',
             dataType: 'number',
             isBucketed: false,
-
-            // Private
+            sourceField: 'Records',
             operationType: 'count',
           },
         },
@@ -246,8 +251,7 @@ describe('terms', () => {
           label: 'Count',
           dataType: 'number',
           isBucketed: false,
-
-          // Private
+          sourceField: 'Records',
           operationType: 'count',
         },
       });
@@ -323,15 +327,12 @@ describe('terms', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultProps}
           state={state}
           setState={setStateSpy}
           columnId="col1"
           currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
           layerId="first"
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          http={{} as HttpServiceBase}
         />
       );
 
@@ -345,62 +346,16 @@ describe('terms', () => {
       ]);
     });
 
-    it('should not show filter ratio column as sort target', () => {
-      const setStateSpy = jest.fn();
-      const instance = shallow(
-        <InlineOptions
-          state={{
-            ...state,
-            layers: {
-              first: {
-                ...state.layers.first,
-                columns: {
-                  ...state.layers.first.columns,
-                  col2: {
-                    label: 'Count',
-                    dataType: 'number',
-                    isBucketed: false,
-
-                    // Private
-                    operationType: 'filter_ratio',
-                    params: {
-                      numerator: { query: '', language: 'kuery' },
-                      denominator: { query: '', language: 'kuery' },
-                    },
-                  },
-                },
-              },
-            },
-          }}
-          setState={setStateSpy}
-          columnId="col1"
-          layerId="first"
-          currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          http={{} as HttpServiceBase}
-        />
-      );
-
-      const select = instance.find('[data-test-subj="indexPattern-terms-orderBy"]').find(EuiSelect);
-
-      expect(select.prop('options').map(({ value }) => value)).toEqual(['alphabetical']);
-    });
-
     it('should update state with the order by value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultProps}
           state={state}
           setState={setStateSpy}
           columnId="col1"
           currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
           layerId="first"
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          http={{} as HttpServiceBase}
         />
       );
 
@@ -440,15 +395,12 @@ describe('terms', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultProps}
           state={state}
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
           currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          http={{} as HttpServiceBase}
         />
       );
 
@@ -464,15 +416,12 @@ describe('terms', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultProps}
           state={state}
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
           currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          http={{} as HttpServiceBase}
         />
       );
 
@@ -509,15 +458,12 @@ describe('terms', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultProps}
           state={state}
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
           currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          http={{} as HttpServiceBase}
         />
       );
 
@@ -528,15 +474,12 @@ describe('terms', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
+          {...defaultProps}
           state={state}
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
           currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
-          storage={{} as Storage}
-          uiSettings={{} as UiSettingsClientContract}
-          savedObjectsClient={{} as SavedObjectsClientContract}
-          http={{} as HttpServiceBase}
         />
       );
 

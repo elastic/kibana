@@ -19,7 +19,7 @@ import { unquoteString } from '../../../../common/lib/unquote_string';
 import { isColumnReference } from './lib/is_column_reference';
 // @ts-ignore Untyped local
 import { getExpressionType } from './lib/get_expression_type';
-import { getFunctionHelp, getFunctionErrors } from '../../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../../../i18n';
 import {
   Datatable,
   DatatableRow,
@@ -187,7 +187,10 @@ export function pointseries(): ExpressionFunction<
       // Then compute that 1 value for each measure
       Object.values<DatatableRow[]>(measureKeys).forEach(valueRows => {
         const subtable = { type: 'datatable', columns: context.columns, rows: valueRows };
-        const subScope = pivotObjectArray(subtable.rows, subtable.columns.map(col => col.name));
+        const subScope = pivotObjectArray(
+          subtable.rows,
+          subtable.columns.map(col => col.name)
+        );
         const measureValues = measureNames.map(measure => {
           try {
             const ev = evaluate(args[measure], subScope);

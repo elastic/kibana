@@ -29,12 +29,11 @@ import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
 const startMock = coreMock.createStart();
 
-import { timefilterServiceMock } from '../../../timefilter/timefilter_service.mock';
-const timefilterSetupMock = timefilterServiceMock.createSetupContract();
-
-timefilterSetupMock.history.get.mockImplementation(() => {
-  return [];
-});
+const mockTimeHistory = {
+  get: () => {
+    return [];
+  },
+};
 
 startMock.uiSettings.get.mockImplementation((key: string) => {
   switch (key) {
@@ -47,9 +46,14 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
         },
       ];
     case 'dateFormat':
-      return 'YY';
+      return 'MMM D, YYYY @ HH:mm:ss.SSS';
     case 'history:limit':
       return 10;
+    case 'timepicker:timeDefaults':
+      return {
+        from: 'now-15m',
+        to: 'now',
+      };
     default:
       throw new Error(`Unexpected config key: ${key}`);
   }
@@ -74,7 +78,7 @@ const createMockWebStorage = () => ({
 });
 
 const createMockStorage = () => ({
-  store: createMockWebStorage(),
+  storage: createMockWebStorage(),
   get: jest.fn(),
   set: jest.fn(),
   remove: jest.fn(),
@@ -107,7 +111,7 @@ function wrapQueryBarTopRowInContext(testProps: any) {
   const services = {
     ...startMock,
     appName: 'discover',
-    store: createMockStorage(),
+    storage: createMockStorage(),
   };
 
   return (
@@ -122,6 +126,7 @@ function wrapQueryBarTopRowInContext(testProps: any) {
 describe('QueryBarTopRowTopRow', () => {
   const QUERY_INPUT_SELECTOR = 'QueryBarInputUI';
   const TIMEPICKER_SELECTOR = 'EuiSuperDatePicker';
+  const TIMEPICKER_DURATION = '[data-shared-timefilter-duration]';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -134,7 +139,7 @@ describe('QueryBarTopRowTopRow', () => {
         screenTitle: 'Another Screen',
         isDirty: false,
         indexPatterns: [mockIndexPattern],
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
       })
     );
 
@@ -148,7 +153,7 @@ describe('QueryBarTopRowTopRow', () => {
         query: kqlQuery,
         screenTitle: 'Another Screen',
         indexPatterns: [mockIndexPattern],
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
         disableAutoFocus: true,
         isDirty: false,
       })
@@ -161,7 +166,7 @@ describe('QueryBarTopRowTopRow', () => {
     const component = mount(
       wrapQueryBarTopRowInContext({
         isDirty: false,
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
       })
     );
 
@@ -173,7 +178,7 @@ describe('QueryBarTopRowTopRow', () => {
     const component = mount(
       wrapQueryBarTopRowInContext({
         showDatePicker: false,
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
         isDirty: false,
       })
     );
@@ -190,12 +195,30 @@ describe('QueryBarTopRowTopRow', () => {
         showDatePicker: true,
         dateRangeFrom: 'now-7d',
         dateRangeTo: 'now',
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
       })
     );
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
     expect(component.find(TIMEPICKER_SELECTOR).length).toBe(1);
+  });
+
+  it('Should render the timefilter duration container for sharing', () => {
+    const component = mount(
+      wrapQueryBarTopRowInContext({
+        isDirty: false,
+        screenTitle: 'Another Screen',
+        showDatePicker: true,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+        timeHistory: mockTimeHistory,
+      })
+    );
+
+    // match the data attribute rendered in the in the ReactHTML object
+    expect(component.find(TIMEPICKER_DURATION)).toMatchObject(
+      /<div\b.*\bdata-shared-timefilter-duration\b/
+    );
   });
 
   it('Should render only query input bar', () => {
@@ -208,7 +231,7 @@ describe('QueryBarTopRowTopRow', () => {
         showDatePicker: false,
         dateRangeFrom: 'now-7d',
         dateRangeTo: 'now',
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
       })
     );
 
@@ -225,7 +248,7 @@ describe('QueryBarTopRowTopRow', () => {
         indexPatterns: [mockIndexPattern],
         showQueryInput: false,
         showDatePicker: false,
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
       })
     );
 
@@ -239,7 +262,7 @@ describe('QueryBarTopRowTopRow', () => {
         isDirty: false,
         screenTitle: 'Another Screen',
         showDatePicker: false,
-        timeHistory: timefilterSetupMock.history,
+        timeHistory: mockTimeHistory,
       })
     );
 

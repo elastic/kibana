@@ -5,28 +5,28 @@
  */
 
 import { ActionCreator } from 'typescript-fsa';
-import { hostsModel, networkModel } from '../../store';
-import { UrlStateContainerPropTypes, LocationTypes, KqlQuery } from './types';
-import { CONSTANTS } from './constants';
+import { Query } from 'src/plugins/data/common';
+
 import { DispatchUpdateTimeline } from '../open_timeline/types';
-import { navTabs, SiemPageName } from '../../pages/home/home_navigations';
-import { hostsActions, inputsActions, networkActions } from '../../store/actions';
+import { navTabs } from '../../pages/home/home_navigations';
+import { SiemPageName } from '../../pages/home/types';
+import { hostsModel, networkModel } from '../../store';
+import { inputsActions } from '../../store/actions';
 import { HostsTableType } from '../../store/hosts/model';
+
+import { CONSTANTS } from './constants';
 import { dispatchSetInitialStateFromUrl } from './initialize_redux_by_url';
+import { UrlStateContainerPropTypes, LocationTypes } from './types';
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
 
-export const getFilterQuery = (queryLocation: LocationTypes): KqlQuery => ({
-  filterQuery: {
-    expression: 'host.name:"siem-es"',
-    kind: 'kuery',
-  },
-  queryLocation,
+export const getFilterQuery = (): Query => ({
+  query: 'host.name:"siem-es"',
+  language: 'kuery',
 });
 
-export const mockApplyHostsFilterQuery: jest.Mock = (hostsActions.applyHostsFilterQuery as unknown) as jest.Mock;
-export const mockApplyNetworkFilterQuery: jest.Mock = (networkActions.applyNetworkFilterQuery as unknown) as jest.Mock;
+export const mockSetFilterQuery: jest.Mock = (inputsActions.setFilterQuery as unknown) as jest.Mock;
 export const mockAddGlobalLinkTo: jest.Mock = (inputsActions.addGlobalLinkTo as unknown) as jest.Mock;
 export const mockAddTimelineLinkTo: jest.Mock = (inputsActions.addTimelineLinkTo as unknown) as jest.Mock;
 export const mockRemoveGlobalLinkTo: jest.Mock = (inputsActions.removeGlobalLinkTo as unknown) as jest.Mock;
@@ -35,12 +35,6 @@ export const mockSetAbsoluteRangeDatePicker: jest.Mock = (inputsActions.setAbsol
 export const mockSetRelativeRangeDatePicker: jest.Mock = (inputsActions.setRelativeRangeDatePicker as unknown) as jest.Mock;
 
 jest.mock('../../store/actions', () => ({
-  hostsActions: {
-    applyHostsFilterQuery: jest.fn(),
-  },
-  networkActions: {
-    applyNetworkFilterQuery: jest.fn(),
-  },
   inputsActions: {
     addGlobalLinkTo: jest.fn(),
     addTimelineLinkTo: jest.fn(),
@@ -48,6 +42,7 @@ jest.mock('../../store/actions', () => ({
     removeTimelineLinkTo: jest.fn(),
     setAbsoluteRangeDatePicker: jest.fn(),
     setRelativeRangeDatePicker: jest.fn(),
+    setFilterQuery: jest.fn(),
   },
 }));
 
@@ -116,11 +111,12 @@ export const defaultProps: UrlStateContainerPropTypes = {
         linkTo: ['global'],
       },
     },
-    [CONSTANTS.kqlQuery]: {
-      filterQuery: null,
-      queryLocation: null,
+    [CONSTANTS.appQuery]: { query: '', language: 'kuery' },
+    [CONSTANTS.filters]: [],
+    [CONSTANTS.timeline]: {
+      id: '',
+      isOpen: false,
     },
-    [CONSTANTS.timelineId]: '',
   },
   setInitialStateFromUrl: dispatchSetInitialStateFromUrl(mockDispatch),
   updateTimeline: (jest.fn() as unknown) as DispatchUpdateTimeline,
@@ -137,14 +133,14 @@ export const defaultProps: UrlStateContainerPropTypes = {
 export const getMockProps = (
   location = defaultLocation,
   kqlQueryKey = CONSTANTS.networkPage,
-  kqlQueryValue: KqlQuery | null,
+  kqlQueryValue: Query | null,
   pageName: string,
   detailName: string | undefined
 ): UrlStateContainerPropTypes => ({
   ...defaultProps,
   urlState: {
     ...defaultProps.urlState,
-    [CONSTANTS.kqlQuery]: kqlQueryValue || { filterQuery: null, queryLocation: null },
+    [CONSTANTS.appQuery]: kqlQueryValue || { query: '', language: 'kuery' },
   },
   history: {
     ...mockHistory,
@@ -192,7 +188,7 @@ export const getMockPropsObj = ({
         state: '',
       },
       page,
-      getFilterQuery(page),
+      getFilterQuery(),
       pageName,
       detailName
     ),
@@ -202,7 +198,7 @@ export const getMockPropsObj = ({
       {
         hash: '',
         pathname: examplePath,
-        search: `?_g=()&kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:${page})&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
+        search: `?_g=()&query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
         state: '',
       },
       page,
@@ -214,11 +210,11 @@ export const getMockPropsObj = ({
       {
         hash: '',
         pathname: examplePath,
-        search: `?_g=()&kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:${page})&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
+        search: `?_g=()&query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
         state: '',
       },
       page,
-      getFilterQuery(page),
+      getFilterQuery(),
       pageName,
       detailName
     ),
@@ -246,7 +242,7 @@ export const getMockPropsObj = ({
         state: '',
       },
       page,
-      getFilterQuery(page),
+      getFilterQuery(),
       pageName,
       detailName
     ),
@@ -256,9 +252,7 @@ export const getMockPropsObj = ({
       {
         hash: '',
         pathname: examplePath,
-        search: `?_g=()&kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:${
-          namespaceLower === 'hosts' ? 'network' : 'hosts'
-        }.page)&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
+        search: `?_g=()&query=(query:'host.name:%22siem-es%22',language:kuery)&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
         state: '',
       },
       page,
@@ -271,9 +265,15 @@ export const getMockPropsObj = ({
 
 // silly that this needs to be an array and not an object
 // https://jestjs.io/docs/en/api#testeachtable-name-fn-timeout
-export const testCases: Array<
-  [LocationTypes, string, string, string, string | null, string, undefined | string]
-> = [
+export const testCases: Array<[
+  LocationTypes,
+  string,
+  string,
+  string,
+  string | null,
+  string,
+  undefined | string
+]> = [
   [
     /* page */ CONSTANTS.networkPage,
     /* namespaceLower */ 'network',

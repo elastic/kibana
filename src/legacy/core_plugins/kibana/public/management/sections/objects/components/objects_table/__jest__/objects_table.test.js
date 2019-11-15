@@ -25,6 +25,7 @@ import { ObjectsTable, POSSIBLE_TYPES } from '../objects_table';
 import { Flyout } from '../components/flyout/';
 import { Relationships } from '../components/relationships/';
 import { findObjects } from '../../../lib';
+import { extractExportDetails } from '../../../lib/extract_export_details';
 
 jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
 
@@ -47,6 +48,10 @@ jest.mock('../../../lib/fetch_export_objects', () => ({
 
 jest.mock('../../../lib/fetch_export_by_type_and_search', () => ({
   fetchExportByTypeAndSearch: jest.fn(),
+}));
+
+jest.mock('../../../lib/extract_export_details', () => ({
+  extractExportDetails: jest.fn(),
 }));
 
 jest.mock('../../../lib/get_saved_object_counts', () => ({
@@ -101,10 +106,10 @@ const allSavedObjects = [
   },
 ];
 
-const $http = () => {};
+const $http = () => { };
 $http.post = jest.fn().mockImplementation(() => []);
 const defaultProps = {
-  goInspectObject: () => {},
+  goInspectObject: () => { },
   confirmModalPromise: jest.fn(),
   savedObjectsClient: {
     find: jest.fn(),
@@ -190,12 +195,14 @@ beforeEach(() => {
 
 let addDangerMock;
 let addSuccessMock;
+let addWarningMock;
 
 describe('ObjectsTable', () => {
   beforeEach(() => {
     defaultProps.savedObjectsClient.find.mockClear();
+    extractExportDetails.mockReset();
     // mock _.debounce to fire immediately with no internal timer
-    require('lodash').debounce = function (func) {
+    require('lodash').debounce = func => {
       function debounced(...args) {
         return func.apply(this, args);
       }
@@ -203,9 +210,11 @@ describe('ObjectsTable', () => {
     };
     addDangerMock = jest.fn();
     addSuccessMock = jest.fn();
+    addWarningMock = jest.fn();
     require('ui/notify').toastNotifications = {
       addDanger: addDangerMock,
       addSuccess: addSuccessMock,
+      addWarning: addWarningMock,
     };
   });
 
@@ -247,7 +256,6 @@ describe('ObjectsTable', () => {
 
       const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
         _id: obj.id,
-        _type: obj._type,
         _source: {},
       }));
 
@@ -280,6 +288,54 @@ describe('ObjectsTable', () => {
       });
     });
 
+    it('should display a warning is export contains missing references', async () => {
+      const mockSelectedSavedObjects = [
+        { id: '1', type: 'index-pattern' },
+        { id: '3', type: 'dashboard' },
+      ];
+
+      const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
+        _id: obj.id,
+        _source: {},
+      }));
+
+      const mockSavedObjectsClient = {
+        ...defaultProps.savedObjectsClient,
+        bulkGet: jest.fn().mockImplementation(() => ({
+          savedObjects: mockSavedObjects,
+        })),
+      };
+
+      const { fetchExportObjects } = require('../../../lib/fetch_export_objects');
+      extractExportDetails.mockImplementation(() => ({
+        exportedCount: 2,
+        missingRefCount: 1,
+        missingReferences: [{ id: '7', type: 'visualisation' }],
+      }));
+
+      const component = shallowWithI18nProvider(
+        <ObjectsTable {...defaultProps} savedObjectsClient={mockSavedObjectsClient} />
+      );
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      // Set some as selected
+      component.instance().onSelectionChanged(mockSelectedSavedObjects);
+
+      await component.instance().onExport(true);
+
+      expect(fetchExportObjects).toHaveBeenCalledWith(mockSelectedSavedObjects, true);
+      expect(addWarningMock).toHaveBeenCalledWith({
+        title:
+          'Your file is downloading in the background. ' +
+          'Some related objects could not be found. ' +
+          'Please see the last line in the exported file for a list of missing objects.',
+      });
+    });
+
     it('should allow the user to choose when exporting all', async () => {
       const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
 
@@ -295,7 +351,9 @@ describe('ObjectsTable', () => {
     });
 
     it('should export all', async () => {
-      const { fetchExportByTypeAndSearch } = require('../../../lib/fetch_export_by_type_and_search');
+      const {
+        fetchExportByTypeAndSearch,
+      } = require('../../../lib/fetch_export_by_type_and_search');
       const { saveAs } = require('@elastic/filesaver');
       const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
 
@@ -312,20 +370,20 @@ describe('ObjectsTable', () => {
 
       expect(fetchExportByTypeAndSearch).toHaveBeenCalledWith(POSSIBLE_TYPES, undefined, true);
       expect(saveAs).toHaveBeenCalledWith(blob, 'export.ndjson');
-      expect(addSuccessMock).toHaveBeenCalledWith({ title: 'Your file is downloading in the background' });
+      expect(addSuccessMock).toHaveBeenCalledWith({
+        title: 'Your file is downloading in the background',
+      });
     });
 
     it('should export all, accounting for the current search criteria', async () => {
-      const { fetchExportByTypeAndSearch } = require('../../../lib/fetch_export_by_type_and_search');
+      const {
+        fetchExportByTypeAndSearch,
+      } = require('../../../lib/fetch_export_by_type_and_search');
       const { saveAs } = require('@elastic/filesaver');
-      const component = shallowWithI18nProvider(
-        <ObjectsTable
-          {...defaultProps}
-        />
-      );
+      const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
 
       component.instance().onQueryChange({
-        query: Query.parse('test')
+        query: Query.parse('test'),
       });
 
       // Ensure all promises resolve

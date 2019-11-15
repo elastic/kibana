@@ -8,7 +8,6 @@ import React from 'react';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useFetcher } from '../../../hooks/useFetcher';
-import { callApmApi } from '../../../services/rest/callApmApi';
 import { Cytoscape } from './Cytoscape';
 import { Controls } from './Controls';
 
@@ -41,14 +40,17 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     urlParams: { start, end }
   } = useUrlParams();
 
-  const { data } = useFetcher(async () => {
-    if (start && end) {
-      return callApmApi({
-        pathname: '/api/apm/service-map',
-        params: { query: { start, end } }
-      });
-    }
-  }, [start, end]);
+  const { data } = useFetcher(
+    callApmApi => {
+      if (start && end) {
+        return callApmApi({
+          pathname: '/api/apm/service-map',
+          params: { query: { start, end } }
+        });
+      }
+    },
+    [start, end]
+  );
 
   const elements = Array.isArray(data) ? data : [];
 

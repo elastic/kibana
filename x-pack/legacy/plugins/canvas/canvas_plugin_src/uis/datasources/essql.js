@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { EuiFormRow, EuiTextArea } from '@elastic/eui';
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
-import { DataSourceStrings } from '../../strings';
+import { DataSourceStrings } from '../../../i18n';
 
 const { Essql: strings } = DataSourceStrings;
 

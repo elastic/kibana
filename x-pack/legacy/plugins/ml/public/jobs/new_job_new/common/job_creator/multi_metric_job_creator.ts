@@ -141,7 +141,7 @@ export class MultiMetricJobCreator extends JobCreator {
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
     this.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
-    const detectors = getRichDetectors(job, datafeed);
+    const detectors = getRichDetectors(job, datafeed, this.scriptFields, false);
 
     if (datafeed.aggregations !== undefined) {
       // if we've converting from a single metric job,

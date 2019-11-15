@@ -5,34 +5,106 @@
  */
 
 import { idx } from '@kbn/elastic-idx';
-import { Job, Datafeed } from '../configs';
+import { Job, Datafeed, Detector } from '../configs';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import {
   ML_JOB_AGGREGATION,
   SPARSE_DATA_AGGREGATIONS,
 } from '../../../../../../common/constants/aggregation_types';
-import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
+import { MLCATEGORY } from '../../../../../../common/constants/field_types';
+import {
+  EVENT_RATE_FIELD_ID,
+  Field,
+  AggFieldPair,
+  mlCategory,
+} from '../../../../../../common/types/fields';
 import { mlJobService } from '../../../../../services/job_service';
 import { JobCreatorType, isMultiMetricJobCreator, isPopulationJobCreator } from '../';
 import { CREATED_BY_LABEL, JOB_TYPE } from './constants';
 
+const getFieldByIdFactory = (scriptFields: Field[]) => (id: string) => {
+  let field = newJobCapsService.getFieldById(id);
+  // if no field could be found it may be a pretend field, like mlcategory or a script field
+  if (field === null) {
+    if (id === MLCATEGORY) {
+      field = mlCategory;
+    } else if (scriptFields.length) {
+      field = scriptFields.find(f => f.id === id) || null;
+    }
+  }
+  return field;
+};
+
 // populate the detectors with Field and Agg objects loaded from the job capabilities service
-export function getRichDetectors(job: Job, datafeed: Datafeed) {
-  const detectors = getDetectors(job, datafeed);
+export function getRichDetectors(
+  job: Job,
+  datafeed: Datafeed,
+  scriptFields: Field[],
+  advanced: boolean = false
+) {
+  const detectors = advanced ? getDetectorsAdvanced(job, datafeed) : getDetectors(job, datafeed);
+
+  const getFieldById = getFieldByIdFactory(scriptFields);
+
   return detectors.map(d => {
+    let field = null;
+    let byField = null;
+    let overField = null;
+    let partitionField = null;
+
+    if (d.field_name !== undefined) {
+      field = getFieldById(d.field_name);
+    }
+    if (d.by_field_name !== undefined) {
+      byField = getFieldById(d.by_field_name);
+    }
+    if (d.over_field_name !== undefined) {
+      overField = getFieldById(d.over_field_name);
+    }
+    if (d.partition_field_name !== undefined) {
+      partitionField = getFieldById(d.partition_field_name);
+    }
+
     return {
       agg: newJobCapsService.getAggById(d.function),
-      field: d.field_name !== undefined ? newJobCapsService.getFieldById(d.field_name) : null,
-      byField:
-        d.by_field_name !== undefined ? newJobCapsService.getFieldById(d.by_field_name) : null,
-      overField:
-        d.over_field_name !== undefined ? newJobCapsService.getFieldById(d.over_field_name) : null,
-      partitionField:
-        d.partition_field_name !== undefined
-          ? newJobCapsService.getFieldById(d.partition_field_name)
-          : null,
+      field,
+      byField,
+      overField,
+      partitionField,
+      excludeFrequent: d.exclude_frequent || null,
+      description: d.detector_description || null,
     };
   });
+}
+
+export function createFieldOptions(fields: Field[]) {
+  return fields
+    .filter(f => f.id !== EVENT_RATE_FIELD_ID)
+    .map(f => ({
+      label: f.name,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+}
+
+export function createScriptFieldOptions(scriptFields: Field[]) {
+  return scriptFields.map(f => ({
+    label: f.id,
+  }));
+}
+
+export function createMlcategoryFieldOption(categorizationFieldName: string | null) {
+  if (categorizationFieldName === null) {
+    return [];
+  }
+  return [
+    {
+      label: MLCATEGORY,
+    },
+  ];
+}
+
+function getDetectorsAdvanced(job: Job, datafeed: Datafeed) {
+  return processFieldlessAggs(job.analysis_config.detectors);
 }
 
 function getDetectors(job: Job, datafeed: Datafeed) {
@@ -62,18 +134,9 @@ function getDetectors(job: Job, datafeed: Datafeed) {
     }
   } else {
     // all other detectors.
+    detectors = processFieldlessAggs(detectors);
     detectors = detectors.map(d => {
       switch (d.function) {
-        // if a count function is used, add EVENT_RATE_FIELD_ID as its field
-        case ML_JOB_AGGREGATION.COUNT:
-          return { ...d, field_name: EVENT_RATE_FIELD_ID };
-
-        case ML_JOB_AGGREGATION.HIGH_COUNT:
-          return { ...d, field_name: EVENT_RATE_FIELD_ID };
-
-        case ML_JOB_AGGREGATION.LOW_COUNT:
-          return { ...d, field_name: EVENT_RATE_FIELD_ID };
-
         // if sparse data functions were used, replace them with their non-sparse versions
         // the sparse data flag has already been determined and set, so this information is not being lost.
         case ML_JOB_AGGREGATION.NON_ZERO_COUNT:
@@ -102,6 +165,27 @@ function getDetectors(job: Job, datafeed: Datafeed) {
   return detectors;
 }
 
+// if a fieldless function is used, add EVENT_RATE_FIELD_ID as its field
+function processFieldlessAggs(detectors: Detector[]) {
+  return detectors.map(d => {
+    switch (d.function) {
+      case ML_JOB_AGGREGATION.COUNT:
+      case ML_JOB_AGGREGATION.HIGH_COUNT:
+      case ML_JOB_AGGREGATION.LOW_COUNT:
+      case ML_JOB_AGGREGATION.NON_ZERO_COUNT:
+      case ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT:
+      case ML_JOB_AGGREGATION.LOW_NON_ZERO_COUNT:
+      case ML_JOB_AGGREGATION.RARE:
+      case ML_JOB_AGGREGATION.FREQ_RARE:
+      case ML_JOB_AGGREGATION.TIME_OF_DAY:
+      case ML_JOB_AGGREGATION.TIME_OF_WEEK:
+        return { ...d, field_name: EVENT_RATE_FIELD_ID };
+      default:
+        return d;
+    }
+  });
+}
+
 // determine whether the job has been configured to run on sparse data
 // by looking to see whether the datafeed contains a dc_region field in an aggregation
 // if it does, it is a distinct count single metric job and no a sparse data job.
@@ -128,33 +212,29 @@ export function isSparseDataJob(job: Job, datafeed: Datafeed): boolean {
 function stashCombinedJob(
   jobCreator: JobCreatorType,
   skipTimeRangeStep: boolean = false,
-  advanced: boolean = false,
   includeTimeRange: boolean = false
 ) {
   const combinedJob = {
     ...jobCreator.jobConfig,
     datafeed_config: jobCreator.datafeedConfig,
   };
-  if (advanced === true) {
-    mlJobService.currentJob = combinedJob;
-  } else {
-    mlJobService.tempJobCloningObjects.job = combinedJob;
 
-    // skip over the time picker step of the wizard
-    mlJobService.tempJobCloningObjects.skipTimeRangeStep = skipTimeRangeStep;
+  mlJobService.tempJobCloningObjects.job = combinedJob;
 
-    if (includeTimeRange === true) {
-      // auto select the start and end dates of the time picker
-      mlJobService.tempJobCloningObjects.start = jobCreator.start;
-      mlJobService.tempJobCloningObjects.end = jobCreator.end;
-    }
+  // skip over the time picker step of the wizard
+  mlJobService.tempJobCloningObjects.skipTimeRangeStep = skipTimeRangeStep;
+
+  if (includeTimeRange === true) {
+    // auto select the start and end dates of the time picker
+    mlJobService.tempJobCloningObjects.start = jobCreator.start;
+    mlJobService.tempJobCloningObjects.end = jobCreator.end;
   }
 }
 
 export function convertToMultiMetricJob(jobCreator: JobCreatorType) {
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   jobCreator.modelPlot = false;
-  stashCombinedJob(jobCreator, true, false, true);
+  stashCombinedJob(jobCreator, true, true);
 
   window.location.href = window.location.href.replace(
     JOB_TYPE.SINGLE_METRIC,
@@ -164,7 +244,7 @@ export function convertToMultiMetricJob(jobCreator: JobCreatorType) {
 
 export function convertToAdvancedJob(jobCreator: JobCreatorType) {
   jobCreator.createdBy = null;
-  stashCombinedJob(jobCreator, false, true, false);
+  stashCombinedJob(jobCreator, true, true);
 
   let jobType = JOB_TYPE.SINGLE_METRIC;
   if (isMultiMetricJobCreator(jobCreator)) {
@@ -178,7 +258,16 @@ export function convertToAdvancedJob(jobCreator: JobCreatorType) {
 
 export function resetJob(jobCreator: JobCreatorType) {
   jobCreator.jobId = '';
-  stashCombinedJob(jobCreator, true, false, true);
+  stashCombinedJob(jobCreator, true, true);
 
   window.location.href = '#/jobs/new_job';
+}
+
+export function advancedStartDatafeed(jobCreator: JobCreatorType) {
+  stashCombinedJob(jobCreator, false, false);
+  window.location.href = '#/jobs';
+}
+
+export function aggFieldPairsCanBeCharted(afs: AggFieldPair[]) {
+  return afs.some(a => a.agg.dslName === null) === false;
 }

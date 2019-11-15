@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../../../components/navigation_menu/navigation_menu', () => ({
+jest.mock('../../../components/navigation_menu', () => ({
   NavigationMenu: () => <div id="mockNavigationMenu" />
 }));
 jest.mock('../../../privilege/check_privilege', () => ({

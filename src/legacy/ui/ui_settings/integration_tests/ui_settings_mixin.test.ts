@@ -20,9 +20,7 @@
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 
-// @ts-ignore
-import { Config } from '../../../server/config';
-
+import { savedObjectsClientMock } from '../../../../core/server/mocks';
 import * as uiSettingsServiceFactoryNS from '../ui_settings_service_factory';
 import * as getUiSettingsServiceForRequestNS from '../ui_settings_service_for_request';
 // @ts-ignore
@@ -33,18 +31,16 @@ interface Decorators {
   request: { [name: string]: any };
 }
 
+const uiSettingDefaults = {
+  application: {
+    defaultProperty1: 'value1',
+  },
+};
+
 describe('uiSettingsMixin()', () => {
   const sandbox = sinon.createSandbox();
 
   function setup() {
-    const config = Config.withDefaultSchema({
-      uiSettings: {
-        overrides: {
-          foo: 'bar',
-        },
-      },
-    });
-
     // maps of decorations passed to `server.decorate()`
     const decorations: Decorators = {
       server: {},
@@ -55,7 +51,6 @@ describe('uiSettingsMixin()', () => {
     const server = {
       log: sinon.stub(),
       route: sinon.stub(),
-      config: () => config,
       addMemoizedFactoryToRequest(name: string, factory: (...args: any[]) => any) {
         this.decorate('request', name, function(this: typeof server) {
           return factory(this);
@@ -73,12 +68,18 @@ describe('uiSettingsMixin()', () => {
 
     const kbnServer = {
       server,
-      config,
-      uiExports: { addConsumer: sinon.stub() },
+      uiExports: { uiSettingDefaults },
       ready: sinon.stub().returns(readyPromise),
+      newPlatform: {
+        __internals: {
+          uiSettings: {
+            register: sinon.stub(),
+          },
+        },
+      },
     };
 
-    uiSettingsMixin(kbnServer, server, config);
+    uiSettingsMixin(kbnServer, server);
 
     return {
       kbnServer,
@@ -89,6 +90,15 @@ describe('uiSettingsMixin()', () => {
   }
 
   afterEach(() => sandbox.restore());
+
+  it('passes uiSettingsDefaults to the new platform', () => {
+    const { kbnServer } = setup();
+    sinon.assert.calledOnce(kbnServer.newPlatform.__internals.uiSettings.register);
+    sinon.assert.calledWithExactly(
+      kbnServer.newPlatform.__internals.uiSettings.register,
+      uiSettingDefaults
+    );
+  });
 
   describe('server.uiSettingsServiceFactory()', () => {
     it('decorates server with "uiSettingsServiceFactory"', () => {
@@ -116,18 +126,16 @@ describe('uiSettingsMixin()', () => {
         uiSettingsServiceFactoryNS,
         'uiSettingsServiceFactory'
       );
+
       sinon.assert.notCalled(uiSettingsServiceFactoryStub);
+
+      const savedObjectsClient = savedObjectsClientMock.create();
       decorations.server.uiSettingsServiceFactory({
-        foo: 'bar',
+        savedObjectsClient,
       });
       sinon.assert.calledOnce(uiSettingsServiceFactoryStub);
       sinon.assert.calledWithExactly(uiSettingsServiceFactoryStub, server as any, {
-        // @ts-ignore foo doesn't exist on Hapi.Server
-        foo: 'bar',
-        overrides: {
-          foo: 'bar',
-        },
-        getDefaults: sinon.match.func,
+        savedObjectsClient,
       });
     });
   });
@@ -161,12 +169,7 @@ describe('uiSettingsMixin()', () => {
       sinon.assert.notCalled(getUiSettingsServiceForRequestStub);
       const request = {};
       decorations.request.getUiSettingsService.call(request);
-      sinon.assert.calledWith(getUiSettingsServiceForRequestStub, server as any, request as any, {
-        overrides: {
-          foo: 'bar',
-        },
-        getDefaults: sinon.match.func,
-      });
+      sinon.assert.calledWith(getUiSettingsServiceForRequestStub, server as any, request as any);
     });
   });
 

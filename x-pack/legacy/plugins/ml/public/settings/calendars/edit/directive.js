@@ -14,7 +14,7 @@ const module = uiModules.get('apps/ml', ['react']);
 
 import { checkFullLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
-import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
+import { checkMlNodesAvailable } from '../../../ml_nodes_check';
 import { getCreateCalendarBreadcrumbs, getEditCalendarBreadcrumbs } from '../../breadcrumbs';
 
 import uiRoutes from 'ui/routes';

@@ -27,7 +27,7 @@ export async function getErrorDistribution({
   setup: Setup;
 }) {
   const bucketSize = getBucketSize(setup);
-  const { buckets, totalHits } = await getBuckets({
+  const { buckets, noHits } = await getBuckets({
     serviceName,
     groupId,
     bucketSize,
@@ -35,7 +35,7 @@ export async function getErrorDistribution({
   });
 
   return {
-    totalHits,
+    noHits,
     buckets,
     bucketSize
   };

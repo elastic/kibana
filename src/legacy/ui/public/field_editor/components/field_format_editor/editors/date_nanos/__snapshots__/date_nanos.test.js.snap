@@ -7,14 +7,13 @@ exports[`DateFormatEditor should render normally 1`] = `
     display="row"
     error={null}
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <span>
-        <EuiLink
-          color="primary"
+        <ForwardRef
           href="https://momentjs.com/"
           target="_blank"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Documentation"
@@ -25,7 +24,7 @@ exports[`DateFormatEditor should render normally 1`] = `
           <EuiIcon
             type="link"
           />
-        </EuiLink>
+        </ForwardRef>
       </span>
     }
     isInvalid={false}

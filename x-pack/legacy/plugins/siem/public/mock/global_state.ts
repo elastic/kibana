@@ -7,16 +7,14 @@
 import { DEFAULT_TIMELINE_WIDTH } from '../components/timeline/body/helpers';
 import {
   Direction,
-  DomainsFields,
-  FlowDirection,
   FlowTarget,
   HostsFields,
   NetworkDnsFields,
-  NetworkTopNFlowFields,
+  NetworkTopTablesFields,
   TlsFields,
   UsersFields,
 } from '../graphql/types';
-import { State } from '../store';
+import { networkModel, State } from '../store';
 
 import { defaultHeaders } from './header';
 import {
@@ -48,8 +46,6 @@ export const mockGlobalState: State = {
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
       },
-      filterQuery: null,
-      filterQueryDraft: null,
     },
     details: {
       queries: {
@@ -64,53 +60,86 @@ export const mockGlobalState: State = {
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
       },
-      filterQuery: null,
-      filterQueryDraft: null,
     },
   },
   network: {
     page: {
       queries: {
-        topNFlowSource: {
+        [networkModel.NetworkTableType.topCountriesDestination]: {
           activePage: 0,
           limit: 10,
-          topNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
+          sort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
         },
-        topNFlowDestination: {
+        [networkModel.NetworkTableType.topCountriesSource]: {
           activePage: 0,
           limit: 10,
-          topNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
+          sort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
         },
-        dns: {
+        [networkModel.NetworkTableType.topNFlowSource]: {
           activePage: 0,
           limit: 10,
-          dnsSortField: { field: NetworkDnsFields.queryCount, direction: Direction.desc },
+          sort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
+        },
+        [networkModel.NetworkTableType.topNFlowDestination]: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
+        },
+        [networkModel.NetworkTableType.dns]: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: NetworkDnsFields.queryCount, direction: Direction.desc },
           isPtrIncluded: false,
         },
+        [networkModel.NetworkTableType.tls]: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: TlsFields._id, direction: Direction.desc },
+        },
+        [networkModel.NetworkTableType.http]: {
+          activePage: 0,
+          limit: 10,
+          sort: { direction: Direction.desc },
+        },
       },
-      filterQuery: null,
-      filterQueryDraft: null,
     },
     details: {
-      filterQuery: null,
-      filterQueryDraft: null,
       flowTarget: FlowTarget.source,
       queries: {
-        domains: {
+        [networkModel.IpDetailsTableType.topCountriesDestination]: {
           activePage: 0,
           limit: 10,
-          flowDirection: FlowDirection.uniDirectional,
-          domainsSortField: { field: DomainsFields.bytes, direction: Direction.desc },
+          sort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
         },
-        tls: {
+        [networkModel.IpDetailsTableType.topCountriesSource]: {
           activePage: 0,
           limit: 10,
-          tlsSortField: { field: TlsFields._id, direction: Direction.desc },
+          sort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
         },
-        users: {
+        [networkModel.IpDetailsTableType.topNFlowSource]: {
           activePage: 0,
           limit: 10,
-          usersSortField: { field: UsersFields.name, direction: Direction.asc },
+          sort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
+        },
+        [networkModel.IpDetailsTableType.topNFlowDestination]: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
+        },
+        [networkModel.IpDetailsTableType.tls]: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: TlsFields._id, direction: Direction.desc },
+        },
+        [networkModel.IpDetailsTableType.users]: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: UsersFields.name, direction: Direction.asc },
+        },
+        [networkModel.IpDetailsTableType.http]: {
+          activePage: 0,
+          limit: 10,
+          sort: { direction: Direction.desc },
         },
       },
     },
@@ -119,14 +148,24 @@ export const mockGlobalState: State = {
     global: {
       timerange: { kind: 'relative', fromStr: DEFAULT_FROM, toStr: DEFAULT_TO, from: 0, to: 1 },
       linkTo: ['timeline'],
-      query: [],
+      queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+      filters: [],
     },
     timeline: {
       timerange: { kind: 'relative', fromStr: DEFAULT_FROM, toStr: DEFAULT_TO, from: 0, to: 1 },
       linkTo: ['global'],
-      query: [],
+      queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+      filters: [],
     },
   },
   dragAndDrop: { dataProviders: {} },

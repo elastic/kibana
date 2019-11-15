@@ -6,8 +6,10 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
+import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { InspectQuery, Refetch } from './model';
 import { InputsModelId } from './constants';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/inputs');
 
@@ -67,3 +69,19 @@ export const addTimelineLinkTo = actionCreator<{ linkToId: InputsModelId }>('ADD
 
 export const removeGlobalLinkTo = actionCreator('REMOVE_GLOBAL_LINK_TO');
 export const addGlobalLinkTo = actionCreator<{ linkToId: InputsModelId }>('ADD_GLOBAL_LINK_TO');
+
+export const setFilterQuery = actionCreator<{
+  id: InputsModelId;
+  query: string | { [key: string]: unknown };
+  language: string;
+}>('SET_FILTER_QUERY');
+
+export const setSavedQuery = actionCreator<{
+  id: InputsModelId;
+  savedQuery: SavedQuery | undefined;
+}>('SET_SAVED_QUERY');
+
+export const setSearchBarFilter = actionCreator<{
+  id: InputsModelId;
+  filters: esFilters.Filter[];
+}>('SET_SEARCH_BAR_FILTER');

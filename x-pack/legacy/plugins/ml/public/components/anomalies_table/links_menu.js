@@ -24,8 +24,10 @@ import { toastNotifications } from 'ui/notify';
 
 import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { checkPermission } from '../../privilege/check_privilege';
+import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';
 import { isRuleSupported } from '../../../common/util/anomaly_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
+import { escapeDoubleQuotes } from '../kql_filter_bar/utils';
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
 import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
@@ -277,11 +279,19 @@ export const LinksMenu = injectI18n(class LinksMenu extends Component {
           // categorization field in documents (usually indicated by a categoryId of -1).
           if (categorizationFieldType === ES_FIELD_TYPES.KEYWORD) {
             if (resp.regex) {
-              query = `${categorizationFieldName}:/${resp.regex}/`;
+              query = {
+                language: SEARCH_QUERY_LANGUAGE.LUCENE,
+                query: `${categorizationFieldName}:/${resp.regex}/`
+              };
             }
           } else {
             if (resp.terms) {
-              query = `${categorizationFieldName}:` + resp.terms.split(' ').join(` AND ${categorizationFieldName}:`);
+              const escapedTerms = escapeDoubleQuotes(resp.terms);
+              query = {
+                language: SEARCH_QUERY_LANGUAGE.KUERY,
+                query: `${categorizationFieldName}:"` +
+                escapedTerms.split(' ').join(`" and ${categorizationFieldName}:"`) + '"'
+              };
             }
           }
 
@@ -308,12 +318,7 @@ export const LinksMenu = injectI18n(class LinksMenu extends Component {
             filters: []
           };
           if (query !== null) {
-            appStateProps.query = {
-              query_string: {
-                analyze_wildcard: true,
-                query: query
-              }
-            };
+            appStateProps.query = query;
           }
           const _a = rison.encode(appStateProps);
 

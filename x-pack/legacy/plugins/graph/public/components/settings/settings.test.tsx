@@ -179,7 +179,7 @@ describe('settings', () => {
 
   describe('blacklist', () => {
     beforeEach(() => {
-      toTab('Blacklist');
+      toTab('Block list');
     });
 
     it('should switch tab to blacklist', () => {
@@ -259,7 +259,7 @@ describe('settings', () => {
     }
 
     beforeEach(() => {
-      toTab('Drill-downs');
+      toTab('Drilldowns');
     });
 
     it('should switch tab to url templates', () => {

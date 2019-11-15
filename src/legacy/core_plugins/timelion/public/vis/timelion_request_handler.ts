@@ -18,14 +18,12 @@
  */
 
 // @ts-ignore
-import { buildEsQuery, getEsQueryConfig, Filter } from '@kbn/es-query';
+import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 // @ts-ignore
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { KIBANA_CONTEXT_NAME } from 'src/plugins/expressions/public';
-import { Query } from 'src/legacy/core_plugins/data/public';
-import { TimeRange } from 'src/plugins/data/public';
+import { Query, TimeRange, esFilters } from 'src/plugins/data/public';
 import { VisParams } from 'ui/vis';
-import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { TimelionVisualizationDependencies } from '../plugin';
 
@@ -51,7 +49,7 @@ export interface TimelionSuccessResponse {
 }
 
 export function getTimelionRequestHandler(dependencies: TimelionVisualizationDependencies) {
-  const { uiSettings, http } = dependencies;
+  const { uiSettings, http, timefilter } = dependencies;
   const timezone = timezoneProvider(uiSettings)();
 
   return async function({
@@ -61,16 +59,25 @@ export function getTimelionRequestHandler(dependencies: TimelionVisualizationDep
     visParams,
   }: {
     timeRange: TimeRange;
-    filters: Filter[];
+    filters: esFilters.Filter[];
     query: Query;
     visParams: VisParams;
     forceFetch?: boolean;
-  }): Promise<TimelionSuccessResponse | void> {
+  }): Promise<TimelionSuccessResponse> {
     const expression = visParams.expression;
 
-    if (!expression) return;
+    if (!expression) {
+      throw new Error(
+        i18n.translate('timelion.emptyExpressionErrorMessage', {
+          defaultMessage: 'Timelion error: No expression provided',
+        })
+      );
+    }
 
     const esQueryConfigs = getEsQueryConfig(uiSettings);
+
+    // parse the time range client side to make sure it behaves like other charts
+    const timeRangeBounds = timefilter.calculateBounds(timeRange);
 
     try {
       return await http.post('../api/timelion/run', {
@@ -81,19 +88,26 @@ export function getTimelionRequestHandler(dependencies: TimelionVisualizationDep
               filter: buildEsQuery(undefined, query, filters, esQueryConfigs),
             },
           },
-          time: { ...timeRange, interval: visParams.interval, timezone },
+          time: {
+            from: timeRangeBounds.min,
+            to: timeRangeBounds.max,
+            interval: visParams.interval,
+            timezone,
+          },
         }),
       });
     } catch (e) {
-      const err = new Error(e.data.message);
-
-      err.stack = e.data.stack;
-
-      toastNotifications.addError(err, {
-        title: i18n.translate('timelion.requestHandlerErrorTitle', {
-          defaultMessage: 'Timelion request error',
-        }),
-      });
+      if (e && e.body) {
+        const err = new Error(
+          `${i18n.translate('timelion.requestHandlerErrorTitle', {
+            defaultMessage: 'Timelion request error',
+          })}: ${e.body.title} ${e.body.message}`
+        );
+        err.stack = e.stack;
+        throw err;
+      } else {
+        throw e;
+      }
     }
   };
 }

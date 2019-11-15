@@ -6,11 +6,14 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
+import { RendererStrings } from '../../i18n';
+
+const { text: strings } = RendererStrings;
 
 export const text = () => ({
   name: 'text',
-  displayName: 'Plain text',
-  help: 'Render output as plain text',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   reuseDomNode: true,
   render(domNode, { text }, handlers) {
     ReactDOM.render(<div>{text}</div>, domNode, () => handlers.done());

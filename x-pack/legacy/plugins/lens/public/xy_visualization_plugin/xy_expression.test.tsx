@@ -26,8 +26,12 @@ function sampleArgs() {
           },
           { id: 'b', name: 'b', formatHint: { id: 'number', params: { pattern: '000,0' } } },
           { id: 'c', name: 'c', formatHint: { id: 'string' } },
+          { id: 'd', name: 'ColD', formatHint: { id: 'string' } },
         ],
-        rows: [{ a: 1, b: 2, c: 'I' }, { a: 1, b: 5, c: 'J' }],
+        rows: [
+          { a: 1, b: 2, c: 'I', d: 'Foo' },
+          { a: 1, b: 5, c: 'J', d: 'Bar' },
+        ],
       },
     },
   };
@@ -125,6 +129,57 @@ describe('xy_expression', () => {
       );
       expect(component).toMatchSnapshot();
       expect(component.find(LineSeries)).toHaveLength(1);
+    });
+
+    test('it uses the full date range', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          data={{
+            ...data,
+            dateRange: {
+              fromDate: new Date('2019-01-02T05:00:00.000Z'),
+              toDate: new Date('2019-01-03T05:00:00.000Z'),
+            },
+          }}
+          args={{
+            ...args,
+            layers: [{ ...args.layers[0], seriesType: 'line', xScaleType: 'time' }],
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+        />
+      );
+      expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
+        Object {
+          "max": 1546491600000,
+          "min": 1546405200000,
+        }
+      `);
+    });
+
+    test('it does not use date range if the x is not a time scale', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          data={{
+            ...data,
+            dateRange: {
+              fromDate: new Date('2019-01-02T05:00:00.000Z'),
+              toDate: new Date('2019-01-03T05:00:00.000Z'),
+            },
+          }}
+          args={{
+            ...args,
+            layers: [{ ...args.layers[0], seriesType: 'line', xScaleType: 'linear' }],
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+        />
+      );
+      expect(component.find(Settings).prop('xDomain')).toBeUndefined();
     });
 
     test('it renders bar', () => {
@@ -287,8 +342,8 @@ describe('xy_expression', () => {
         <XYChart data={data} args={args} formatFactory={getFormatSpy} timeZone="UTC" />
       );
       expect(component.find(LineSeries).prop('data')).toEqual([
-        { 'Label A': 1, 'Label B': 2, c: 'I' },
-        { 'Label A': 1, 'Label B': 5, c: 'J' },
+        { 'Label A': 1, 'Label B': 2, c: 'I', 'Label D': 'Foo', d: 'Foo' },
+        { 'Label A': 1, 'Label B': 5, c: 'J', 'Label D': 'Bar', d: 'Bar' },
       ]);
     });
 
@@ -356,7 +411,6 @@ describe('xy_expression', () => {
         />
       );
 
-      expect(getFormatSpy).toHaveBeenCalledTimes(2);
       expect(getFormatSpy).toHaveBeenCalledWith({ id: 'number' });
     });
 

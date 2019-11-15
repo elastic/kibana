@@ -68,7 +68,7 @@ export async function getLocalUIFilters({
       options: sortByOrder(
         aggregationsForFilter.by_terms.buckets.map(bucket => {
           return {
-            name: bucket.key,
+            name: bucket.key as string,
             count:
               'bucket_count' in bucket
                 ? bucket.bucket_count.value

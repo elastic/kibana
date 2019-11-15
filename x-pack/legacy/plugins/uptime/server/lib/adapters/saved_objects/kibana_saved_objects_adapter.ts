@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectsLegacyService } from 'src/core/server';
 import { UMSavedObjectsAdapter } from './types';
 import uptimeIndexPattern from './heartbeat_index_pattern.json';
 
 export class UMKibanaSavedObjectsAdapter implements UMSavedObjectsAdapter {
   private readonly savedObjectsClient: any;
-  constructor(server: any) {
-    const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
-    const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+  constructor(savedObjects: SavedObjectsLegacyService<any>, elasticsearch: any) {
+    const { SavedObjectsClient, getSavedObjectsRepository } = savedObjects;
+    const { callWithInternalUser } = elasticsearch.getCluster('admin');
     const internalRepository = getSavedObjectsRepository(callWithInternalUser);
     this.savedObjectsClient = new SavedObjectsClient(internalRepository);
   }

@@ -9,7 +9,10 @@ import 'jest-dom/extend-expect';
 import { render, cleanup } from 'react-testing-library';
 import { SpanMetadata } from '..';
 import { Span } from '../../../../../../typings/es_schemas/ui/Span';
-import { expectTextsInDocument } from '../../../../../utils/testHelpers';
+import {
+  expectTextsInDocument,
+  expectTextsNotInDocument
+} from '../../../../../utils/testHelpers';
 
 describe('SpanMetadata', () => {
   afterEach(cleanup);
@@ -54,6 +57,30 @@ describe('SpanMetadata', () => {
       } as unknown) as Span;
       const output = render(<SpanMetadata span={span} />);
       expectTextsInDocument(output, ['Service', 'Agent', 'Span']);
+    });
+  });
+  describe('when there is no id inside span', () => {
+    it('does not show the section', () => {
+      const span = ({
+        agent: {
+          ephemeral_id: 'ed8e3a4f-21d2-4a1f-bbc7-fa2064d94225',
+          name: 'java',
+          version: '1.9.1-SNAPSHOT'
+        },
+        service: {
+          name: 'opbeans-java'
+        },
+        span: {
+          http: {
+            response: { status_code: 200 }
+          },
+          subtype: 'http',
+          type: 'external'
+        }
+      } as unknown) as Span;
+      const output = render(<SpanMetadata span={span} />);
+      expectTextsInDocument(output, ['Service', 'Agent']);
+      expectTextsNotInDocument(output, ['Span']);
     });
   });
 });

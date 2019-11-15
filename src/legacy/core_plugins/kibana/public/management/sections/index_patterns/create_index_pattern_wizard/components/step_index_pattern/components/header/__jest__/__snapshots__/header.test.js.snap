@@ -35,6 +35,7 @@ exports[`Header should mark the input as invalid 1`] = `
             ]
           }
           fullWidth={false}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           helpText={
             <div>
@@ -141,6 +142,7 @@ exports[`Header should render normally 1`] = `
           display="row"
           error={Array []}
           fullWidth={false}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           helpText={
             <div>

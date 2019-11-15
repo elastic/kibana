@@ -40,6 +40,7 @@ describe('state_helpers', () => {
 
       const state: IndexPatternPrivateState = {
         indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
         showEmptyFields: false,
@@ -53,8 +54,7 @@ describe('state_helpers', () => {
                 label: 'Count',
                 dataType: 'number',
                 isBucketed: false,
-
-                // Private
+                sourceField: 'Records',
                 operationType: 'count',
               },
             },
@@ -87,6 +87,7 @@ describe('state_helpers', () => {
 
       const state: IndexPatternPrivateState = {
         indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
         showEmptyFields: false,
@@ -100,8 +101,7 @@ describe('state_helpers', () => {
                 label: 'Count',
                 dataType: 'number',
                 isBucketed: false,
-
-                // Private
+                sourceField: 'Records',
                 operationType: 'count',
               },
             },
@@ -138,6 +138,7 @@ describe('state_helpers', () => {
 
       const state: IndexPatternPrivateState = {
         indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
         showEmptyFields: false,
@@ -171,6 +172,7 @@ describe('state_helpers', () => {
     it('should update order on changing the column', () => {
       const state: IndexPatternPrivateState = {
         indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
         showEmptyFields: false,
@@ -232,6 +234,7 @@ describe('state_helpers', () => {
     it('should carry over params from old column if the operation type stays the same', () => {
       const state: IndexPatternPrivateState = {
         indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
         showEmptyFields: false,
@@ -309,6 +312,7 @@ describe('state_helpers', () => {
 
       const state: IndexPatternPrivateState = {
         indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
         showEmptyFields: false,
@@ -322,8 +326,7 @@ describe('state_helpers', () => {
                 label: 'Count',
                 dataType: 'number',
                 isBucketed: false,
-
-                // Private
+                sourceField: 'Records',
                 operationType: 'count',
               },
             },

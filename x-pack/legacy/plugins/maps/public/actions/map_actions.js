@@ -14,16 +14,22 @@ import {
   getMapReady,
   getWaitingForMapReadyLayerListRaw,
   getTransientLayerId,
-  getTooltipState
+  getTooltipState,
+  getQuery,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import {
   cancelRequest,
   registerCancelCallback,
-  unregisterCancelCallback
+  unregisterCancelCallback,
+  getEventHandlers,
 } from '../reducers/non_serializable_instances';
 import { updateFlyout } from '../actions/ui_actions';
-import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
+import {
+  FEATURE_ID_PROPERTY_NAME,
+  LAYER_TYPE,
+  SOURCE_DATA_ID_ORIGIN
+} from '../../common/constants';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const SET_TRANSIENT_LAYER = 'SET_TRANSIENT_LAYER';
@@ -143,7 +149,7 @@ export function removeTrackedLayerStateForSelectedLayer() {
 export function replaceLayerList(newLayerList) {
   return (dispatch, getState) => {
     getLayerListRaw(getState()).forEach(({ id }) => {
-      dispatch(removeLayer(id));
+      dispatch(removeLayerFromLayerList(id));
     });
 
     newLayerList.forEach(layerDescriptor => {
@@ -203,11 +209,36 @@ function setLayerDataLoadErrorStatus(layerId, errorMessage) {
   };
 }
 
-export function clearTooltipStateForLayer(layerId) {
+export function cleanTooltipStateForLayer(layerId, layerFeatures = []) {
   return (dispatch, getState) => {
     const tooltipState = getTooltipState(getState());
-    if (tooltipState && tooltipState.layerId === layerId) {
+
+    if (!tooltipState) {
+      return;
+    }
+
+    const nextTooltipFeatures = tooltipState.features.filter(tooltipFeature => {
+      if (tooltipFeature.layerId !== layerId) {
+        // feature from another layer, keep it
+        return true;
+      }
+
+      // Keep feature if it is still in layer
+      return layerFeatures.some(layerFeature => {
+        return layerFeature.properties[FEATURE_ID_PROPERTY_NAME] === tooltipFeature.id;
+      });
+    });
+
+    if (tooltipState.features.length === nextTooltipFeatures.length) {
+      // no features got removed, nothing to update
+      return;
+    }
+
+    if (nextTooltipFeatures.length === 0) {
+      // all features removed from tooltip, close tooltip
       dispatch(setTooltipState(null));
+    } else {
+      dispatch(setTooltipState({ ...tooltipState, features: nextTooltipFeatures }));
     }
   };
 }
@@ -223,7 +254,7 @@ export function toggleLayerVisible(layerId) {
     const makeVisible = !layer.isVisible();
 
     if (!makeVisible) {
-      dispatch(clearTooltipStateForLayer(layerId));
+      dispatch(cleanTooltipStateForLayer(layerId));
     }
 
     await dispatch({
@@ -257,7 +288,7 @@ export function removeTransientLayer() {
   return async (dispatch, getState) => {
     const transientLayerId = getTransientLayerId(getState());
     if (transientLayerId) {
-      await dispatch(removeLayer(transientLayerId));
+      await dispatch(removeLayerFromLayerList(transientLayerId));
       await dispatch(setTransientLayer(null));
     }
   };
@@ -430,6 +461,14 @@ export function startDataLoad(layerId, dataId, requestToken, meta = {}) {
       dispatch(cancelRequest(layer.getPrevRequestToken(dataId)));
     }
 
+    const eventHandlers = getEventHandlers(getState());
+    if (eventHandlers && eventHandlers.onDataLoad) {
+      eventHandlers.onDataLoad({
+        layerId,
+        dataId,
+      });
+    }
+
     dispatch({
       meta,
       type: LAYER_DATA_LOAD_STARTED,
@@ -454,9 +493,27 @@ export function updateSourceDataRequest(layerId, newData) {
 }
 
 export function endDataLoad(layerId, dataId, requestToken, data, meta) {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
     dispatch(unregisterCancelCallback(requestToken));
-    dispatch(clearTooltipStateForLayer(layerId));
+
+    const features = data && data.features ? data.features : [];
+
+    const eventHandlers = getEventHandlers(getState());
+    if (eventHandlers && eventHandlers.onDataLoadEnd) {
+      const layer = getLayerById(layerId, getState());
+      const resultMeta = {};
+      if (layer && layer.getType() === LAYER_TYPE.VECTOR) {
+        resultMeta.featuresCount = features.length;
+      }
+
+      eventHandlers.onDataLoadEnd({
+        layerId,
+        dataId,
+        resultMeta
+      });
+    }
+
+    dispatch(cleanTooltipStateForLayer(layerId, features));
     dispatch({
       type: LAYER_DATA_LOAD_ENDED,
       layerId,
@@ -476,9 +533,19 @@ export function endDataLoad(layerId, dataId, requestToken, data, meta) {
 }
 
 export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
     dispatch(unregisterCancelCallback(requestToken));
-    dispatch(clearTooltipStateForLayer(layerId));
+
+    const eventHandlers = getEventHandlers(getState());
+    if (eventHandlers && eventHandlers.onDataLoadError) {
+      eventHandlers.onDataLoadError({
+        layerId,
+        dataId,
+        errorMessage,
+      });
+    }
+
+    dispatch(cleanTooltipStateForLayer(layerId));
     dispatch({
       type: LAYER_DATA_LOAD_ERROR,
       data: null,
@@ -585,11 +652,22 @@ export function removeSelectedLayer() {
     const state = getState();
     const layerId = getSelectedLayerId(state);
     dispatch(removeLayer(layerId));
-    dispatch(setSelectedLayer(null));
   };
 }
 
 export function removeLayer(layerId) {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const selectedLayerId = getSelectedLayerId(state);
+    if (layerId === selectedLayerId) {
+      dispatch(updateFlyout(FLYOUT_STATE.NONE));
+      await dispatch(setSelectedLayer(null));
+    }
+    dispatch(removeLayerFromLayerList(layerId));
+  };
+}
+
+function removeLayerFromLayerList(layerId) {
   return (dispatch, getState) => {
     const layerGettingRemoved = getLayerById(layerId, getState());
     if (!layerGettingRemoved) {
@@ -599,7 +677,7 @@ export function removeLayer(layerId) {
     layerGettingRemoved.getInFlightRequestTokens().forEach(requestToken => {
       dispatch(cancelRequest(requestToken));
     });
-    dispatch(clearTooltipStateForLayer(layerId));
+    dispatch(cleanTooltipStateForLayer(layerId));
     layerGettingRemoved.destroy();
     dispatch({
       type: REMOVE_LAYER,
@@ -608,15 +686,25 @@ export function removeLayer(layerId) {
   };
 }
 
-export function setQuery({ query, timeFilters, filters = [] }) {
+export function setQuery({ query, timeFilters, filters = [], refresh = false }) {
+  function generateQueryTimestamp() {
+    return (new Date()).toISOString();
+  }
   return async (dispatch, getState) => {
+    const prevQuery = getQuery(getState());
+    const prevTriggeredAt = (prevQuery && prevQuery.queryLastTriggeredAt)
+      ? prevQuery.queryLastTriggeredAt
+      : generateQueryTimestamp();
+
     dispatch({
       type: SET_QUERY,
       timeFilters,
       query: {
         ...query,
-        // ensure query changes to trigger re-fetch even when query is the same because "Refresh" clicked
-        queryLastTriggeredAt: (new Date()).toISOString(),
+        // ensure query changes to trigger re-fetch when "Refresh" clicked
+        queryLastTriggeredAt: refresh
+          ? generateQueryTimestamp()
+          : prevTriggeredAt,
       },
       filters,
     });
@@ -656,7 +744,10 @@ export function clearMissingStyleProperties(layerId) {
     if (!style) {
       return;
     }
-    const ordinalFields = await targetLayer.getOrdinalFields();
+
+    const dateFields = await targetLayer.getDateFields();
+    const numberFields = await targetLayer.getNumberFields();
+    const ordinalFields = [...dateFields, ...numberFields];
     const { hasChanges, nextStyleDescriptor } = style.getDescriptorWithMissingStylePropsRemoved(ordinalFields);
     if (hasChanges) {
       dispatch(updateLayerStyle(layerId, nextStyleDescriptor));

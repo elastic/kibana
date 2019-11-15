@@ -11,12 +11,7 @@ import { SplitFieldSelect } from './split_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Field } from '../../../../../../../../common/types/fields';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
-import {
-  MultiMetricJobCreator,
-  isMultiMetricJobCreator,
-  PopulationJobCreator,
-  isPopulationJobCreator,
-} from '../../../../../common/job_creator';
+import { MultiMetricJobCreator, PopulationJobCreator } from '../../../../../common/job_creator';
 
 interface Props {
   detectorIndex: number;
@@ -24,9 +19,6 @@ interface Props {
 
 export const ByFieldSelector: FC<Props> = ({ detectorIndex }) => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
-  if (isMultiMetricJobCreator(jc) === false && isPopulationJobCreator(jc) === false) {
-    return null;
-  }
   const jobCreator = jc as PopulationJobCreator;
 
   const { categoryFields: allCategoryFields } = newJobCapsService;

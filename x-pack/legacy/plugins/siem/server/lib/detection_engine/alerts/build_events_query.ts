@@ -4,87 +4,94 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultIndexPattern } from '../../../../default_index_pattern';
+interface BuildEventsSearchQuery {
+  index: string[];
+  from: string;
+  to: string;
+  filter: unknown;
+  size: number;
+  searchAfterSortId?: string;
+}
 
-// TODO: See build_events_reindex.ts for all the spots to make things "configurable"
-// here but this is intended to replace the build_events_reindex.ts
-export const buildEventsQuery = () => {
-  return {
+export const buildEventsSearchQuery = ({
+  index,
+  from,
+  to,
+  filter,
+  size,
+  searchAfterSortId,
+}: BuildEventsSearchQuery) => {
+  const filterWithTime = [
+    filter,
+    {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: from,
+                    },
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+          {
+            bool: {
+              should: [
+                {
+                  range: {
+                    '@timestamp': {
+                      lte: to,
+                    },
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    },
+  ];
+  const searchQuery = {
     allowNoIndices: true,
-    index: defaultIndexPattern,
+    index,
+    size,
     ignoreUnavailable: true,
     body: {
       query: {
         bool: {
           filter: [
-            {
-              bool: {
-                filter: [
-                  {
-                    bool: {
-                      should: [
-                        {
-                          match_phrase: {
-                            'user.name': 'root',
-                          },
-                        },
-                      ],
-                      minimum_should_match: 1,
-                    },
-                  },
-                  {
-                    bool: {
-                      filter: [
-                        {
-                          bool: {
-                            should: [
-                              {
-                                range: {
-                                  '@timestamp': {
-                                    gte: 1567317600000,
-                                  },
-                                },
-                              },
-                            ],
-                            minimum_should_match: 1,
-                          },
-                        },
-                        {
-                          bool: {
-                            should: [
-                              {
-                                range: {
-                                  '@timestamp': {
-                                    lte: 1569909599999,
-                                  },
-                                },
-                              },
-                            ],
-                            minimum_should_match: 1,
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
+            ...filterWithTime,
             {
               match_all: {},
             },
           ],
         },
       },
-      size: 26,
       track_total_hits: true,
       sort: [
         {
-          '@timestamp': 'desc',
-        },
-        {
-          _doc: 'desc',
+          '@timestamp': {
+            order: 'asc',
+          },
         },
       ],
     },
   };
+  if (searchAfterSortId) {
+    return {
+      ...searchQuery,
+      body: {
+        ...searchQuery.body,
+        search_after: [searchAfterSortId],
+      },
+    };
+  }
+  return searchQuery;
 };

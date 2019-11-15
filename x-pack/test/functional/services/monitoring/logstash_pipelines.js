@@ -75,7 +75,7 @@ export function MonitoringLogstashPipelinesProvider({ getService, getPageObjects
     }
 
     assertNoData() {
-      return PageObjects.monitoring.assertEuiTableNoData(SUBJ_TABLE_NO_DATA);
+      return PageObjects.monitoring.assertTableNoData(SUBJ_TABLE_NO_DATA);
     }
   };
 }

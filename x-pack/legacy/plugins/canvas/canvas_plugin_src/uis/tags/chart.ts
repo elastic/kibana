@@ -5,5 +5,9 @@
  */
 
 import { TagFactory } from '../../../public/lib/tag';
+import { TagStrings as strings } from '../../../i18n';
 
-export const chart: TagFactory = () => ({ name: 'chart', color: '#FEB6DB' });
+export const chart: TagFactory = () => ({
+  name: strings.chart(),
+  color: '#FEB6DB',
+});

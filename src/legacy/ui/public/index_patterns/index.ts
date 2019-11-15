@@ -47,14 +47,13 @@ export {
   IndexPatternMissingIndices,
   NoDefaultIndexPattern,
   NoDefinedIndexPatterns,
-  mockFields,
-  mockIndexPattern,
 } from '../../../core_plugins/data/public';
 
 // types
 export {
   Field,
   FieldType,
+  FieldListInterface,
   IndexPattern,
   IndexPatterns,
   StaticIndexPattern,

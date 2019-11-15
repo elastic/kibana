@@ -115,16 +115,17 @@ export class AbstractSource {
     return AbstractSource.isIndexingSource;
   }
 
-  isInjectedData() {
-    return false;
-  }
-
   supportsElasticsearchFilters() {
     return false;
   }
 
   // Returns geo_shape indexed_shape context for spatial quering by pre-indexed shapes
   async getPreIndexedShape(/* properties */) {
+    return null;
+  }
+
+  // Returns function used to format value
+  async getFieldFormatter(/* fieldName */) {
     return null;
   }
 }

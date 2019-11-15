@@ -7,13 +7,13 @@
 import _ from 'lodash';
 import React, { memo, useMemo } from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
-import { Storage } from 'ui/storage';
 import { i18n } from '@kbn/i18n';
 import {
   UiSettingsClientContract,
   SavedObjectsClientContract,
   HttpServiceBase,
 } from 'src/core/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { DatasourceDimensionPanelProps, StateSetter } from '../../types';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
@@ -22,23 +22,25 @@ import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_dr
 import { changeColumn, deleteColumn } from '../state_helpers';
 import { isDraggedField, hasField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
+import { trackUiEvent } from '../../lens_ui_telemetry';
+import { DateRange } from '../../../common';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
   setState: StateSetter<IndexPatternPrivateState>;
   dragDropContext: DragContextState;
   uiSettings: UiSettingsClientContract;
-  storage: Storage;
+  storage: IStorageWrapper;
   savedObjectsClient: SavedObjectsClientContract;
   layerId: string;
   http: HttpServiceBase;
   uniqueLabel: string;
+  dateRange: DateRange;
 };
 
 export interface OperationFieldSupportMatrix {
   operationByField: Partial<Record<string, OperationType[]>>;
   fieldByOperation: Partial<Record<OperationType, string[]>>;
-  operationByDocument: OperationType[];
 }
 
 export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPanel(
@@ -54,30 +56,25 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
 
     const supportedOperationsByField: Partial<Record<string, OperationType[]>> = {};
     const supportedFieldsByOperation: Partial<Record<OperationType, string[]>> = {};
-    const supportedOperationsByDocument: OperationType[] = [];
+
     filteredOperationsByMetadata.forEach(({ operations }) => {
       operations.forEach(operation => {
-        if (operation.type === 'field') {
-          if (supportedOperationsByField[operation.field]) {
-            supportedOperationsByField[operation.field]!.push(operation.operationType);
-          } else {
-            supportedOperationsByField[operation.field] = [operation.operationType];
-          }
-
-          if (supportedFieldsByOperation[operation.operationType]) {
-            supportedFieldsByOperation[operation.operationType]!.push(operation.field);
-          } else {
-            supportedFieldsByOperation[operation.operationType] = [operation.field];
-          }
+        if (supportedOperationsByField[operation.field]) {
+          supportedOperationsByField[operation.field]!.push(operation.operationType);
         } else {
-          supportedOperationsByDocument.push(operation.operationType);
+          supportedOperationsByField[operation.field] = [operation.operationType];
+        }
+
+        if (supportedFieldsByOperation[operation.operationType]) {
+          supportedFieldsByOperation[operation.operationType]!.push(operation.field);
+        } else {
+          supportedFieldsByOperation[operation.operationType] = [operation.field];
         }
       });
     });
     return {
       operationByField: _.mapValues(supportedOperationsByField, _.uniq),
       fieldByOperation: _.mapValues(supportedFieldsByOperation, _.uniq),
-      operationByDocument: _.uniq(supportedOperationsByDocument),
     };
   }, [currentIndexPattern, props.filterOperations]);
 
@@ -137,6 +134,10 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
                 field: droppedItem.field,
               });
 
+          trackUiEvent('drop_onto_dimension');
+          const hasData = Object.values(props.state.layers).some(({ columns }) => columns.length);
+          trackUiEvent(hasData ? 'drop_non_empty' : 'drop_empty');
+
           props.setState(
             changeColumn({
               state: props.state,
@@ -170,6 +171,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
               defaultMessage: 'Remove configuration',
             })}
             onClick={() => {
+              trackUiEvent('indexpattern_dimension_removed');
               props.setState(
                 deleteColumn({
                   state: props.state,

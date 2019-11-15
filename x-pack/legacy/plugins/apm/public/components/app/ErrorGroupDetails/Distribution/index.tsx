@@ -18,7 +18,7 @@ interface IBucket {
 
 // TODO: cleanup duplication of this in distribution/get_distribution.ts (ErrorDistributionAPIResponse) and transactions/distribution/index.ts (TransactionDistributionAPIResponse)
 interface IDistribution {
-  totalHits: number;
+  noHits: boolean;
   buckets: IBucket[];
   bucketSize: number;
 }
@@ -57,9 +57,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
     distribution.bucketSize
   );
 
-  const isEmpty = distribution.totalHits === 0;
-
-  if (isEmpty) {
+  if (distribution.noHits) {
     return (
       <EmptyMessage
         heading={i18n.translate('xpack.apm.errorGroupDetails.noErrorsLabel', {

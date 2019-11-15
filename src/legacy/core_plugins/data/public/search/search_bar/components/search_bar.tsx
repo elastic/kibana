@@ -17,35 +17,35 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
+import { compact } from 'lodash';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
 
-import { TimeRange } from 'src/plugins/data/common/types';
-import { IndexPattern, Query, FilterBar } from '../../../../../data/public';
+import { TimeRange, Query, TimeHistoryContract } from 'src/plugins/data/public';
+import { IndexPattern, FilterBar } from '../../../../../data/public';
 import { QueryBarTopRow } from '../../../query';
 import { SavedQuery, SavedQueryAttributes } from '../index';
 import { SavedQueryMeta, SaveQueryForm } from './saved_query_management/save_query_form';
 import { SavedQueryManagementComponent } from './saved_query_management/saved_query_management_component';
 import { SavedQueryService } from '../lib/saved_query_service';
 import { createSavedQueryService } from '../lib/saved_query_service';
-import { TimeHistoryContract } from '../../../timefilter';
 import {
   withKibana,
   KibanaReactContextValue,
 } from '../../../../../../../plugins/kibana_react/public';
 import { IDataPluginServices } from '../../../types';
+import { esFilters } from '../../../../../../../plugins/data/public';
 
 interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
   intl: InjectedIntl;
   timeHistory: TimeHistoryContract;
   // Filter bar
-  onFiltersUpdated?: (filters: Filter[]) => void;
-  filters?: Filter[];
+  onFiltersUpdated?: (filters: esFilters.Filter[]) => void;
+  filters?: esFilters.Filter[];
   // Date picker
   dateRangeFrom?: string;
   dateRangeTo?: string;
@@ -57,6 +57,7 @@ interface SearchBarInjectedDeps {
 
 export interface SearchBarOwnProps {
   indexPatterns?: IndexPattern[];
+  isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
   screenTitle?: string;
 
@@ -71,6 +72,7 @@ export interface SearchBarOwnProps {
   // Show when user has privileges to save
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
+  onQueryChange?: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onQuerySubmit?: (payload: { dateRange: TimeRange; query?: Query }) => void;
   // User has saved the current state as a saved query
   onSaved?: (savedQuery: SavedQuery) => void;
@@ -78,6 +80,8 @@ export interface SearchBarOwnProps {
   onSavedQueryUpdated?: (savedQuery: SavedQuery) => void;
   // User has cleared the active query, your app should clear the entire query bar
   onClearSavedQuery?: () => void;
+
+  onRefresh?: (payload: { dateRange: TimeRange }) => void;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -195,7 +199,24 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   private shouldRenderFilterBar() {
-    return this.props.showFilterBar && this.props.filters && this.props.indexPatterns;
+    return (
+      this.props.showFilterBar &&
+      this.props.filters &&
+      this.props.indexPatterns &&
+      compact(this.props.indexPatterns).length > 0
+    );
+  }
+
+  /*
+   * This Function is here to show the toggle in saved query form
+   * in case you the date range (from/to)
+   */
+  private shouldRenderTimeFilterInSavedQueryForm() {
+    const { dateRangeFrom, dateRangeTo, showDatePicker } = this.props;
+    return (
+      showDatePicker ||
+      (!showDatePicker && dateRangeFrom !== undefined && dateRangeTo !== undefined)
+    );
   }
 
   public setFilterBarHeight = () => {
@@ -291,6 +312,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       dateRangeFrom: queryAndDateRange.dateRange.from,
       dateRangeTo: queryAndDateRange.dateRange.to,
     });
+    if (this.props.onQueryChange) {
+      this.props.onQueryChange(queryAndDateRange);
+    }
   };
 
   public onQueryBarSubmit = (queryAndDateRange: { dateRange?: TimeRange; query?: Query }) => {
@@ -359,7 +383,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onLoad={this.onLoadSavedQuery}
         savedQueryService={this.savedQueryService}
         onClearSavedQuery={this.props.onClearSavedQuery}
-      ></SavedQueryManagementComponent>
+      />
     );
 
     let queryBar;
@@ -371,6 +395,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}
           indexPatterns={this.props.indexPatterns}
+          isLoading={this.props.isLoading}
           prepend={this.props.showFilterBar ? savedQueryManagement : undefined}
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
@@ -379,6 +404,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           refreshInterval={this.props.refreshInterval}
           showAutoRefreshOnly={this.props.showAutoRefreshOnly}
           showQueryInput={this.props.showQueryInput}
+          onRefresh={this.props.onRefresh}
           onRefreshChange={this.props.onRefreshChange}
           onChange={this.onQueryBarChange}
           isDirty={this.isDirty()}
@@ -430,7 +456,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             onSave={this.onSave}
             onClose={() => this.setState({ showSaveQueryModal: false })}
             showFilterOption={this.props.showFilterBar}
-            showTimeFilterOption={this.props.showDatePicker}
+            showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
           />
         ) : null}
         {this.state.showSaveNewQueryModal ? (
@@ -439,7 +465,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             onSave={savedQueryMeta => this.onSave(savedQueryMeta, true)}
             onClose={() => this.setState({ showSaveNewQueryModal: false })}
             showFilterOption={this.props.showFilterBar}
-            showTimeFilterOption={this.props.showDatePicker}
+            showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
           />
         ) : null}
       </div>

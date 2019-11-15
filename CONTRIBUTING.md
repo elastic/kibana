@@ -306,6 +306,8 @@ IntelliJ   | Settings » Languages & Frameworks » JavaScript » Code Quality To
 
 Another tool we use for enforcing consistent coding style is EditorConfig, which can be set up by installing a plugin in your editor that dynamically updates its configuration. Take a look at the [EditorConfig](http://editorconfig.org/#download) site to find a plugin for your editor, and browse our [`.editorconfig`](https://github.com/elastic/kibana/blob/master/.editorconfig) file to see what config rules we set up.
 
+#### Setup Guide for VS Code Users
+
 Note that for VSCode, to enable "live" linting of TypeScript (and other) file types, you will need to modify your local settings, as shown below.  The default for the ESLint extension is to only lint JavaScript file types.
 
 ```json
@@ -316,6 +318,14 @@ Note that for VSCode, to enable "live" linting of TypeScript (and other) file ty
   { "language": "typescriptreact", "autoFix": true }
 ]
 ```
+
+`eslint` can automatically fix trivial lint errors when you save a file by adding this line in your setting.
+
+```json
+  "eslint.autoFixOnSave": true,
+```
+
+It is **not** recommended to use `prettier` plugin on Kibana project. Because settings are in `eslintrc.js` file and it is applied to too many files that shouldn't be prettier-ized. 
 
 ### Internationalization
 

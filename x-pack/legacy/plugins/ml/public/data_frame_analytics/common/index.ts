@@ -6,6 +6,8 @@
 
 export {
   getAnalysisType,
+  getDependentVar,
+  getPredictionFieldName,
   isOutlierAnalysis,
   refreshAnalyticsList$,
   useRefreshAnalyticsList,
@@ -14,12 +16,23 @@ export {
   IndexName,
   IndexPattern,
   REFRESH_ANALYTICS_LIST_STATE,
+  ANALYSIS_CONFIG_TYPE,
+  RegressionEvaluateResponse,
+  getValuesFromResponse,
+  loadEvalData,
+  Eval,
+  getPredictedFieldName,
+  INDEX_STATUS,
+  SEARCH_SIZE,
 } from './analytics';
 
 export {
   getDefaultSelectableFields,
+  getDefaultRegressionFields,
   getFlattenedFields,
   sortColumns,
+  sortRegressionResultsColumns,
+  sortRegressionResultsFields,
   toggleSelectedField,
   EsId,
   EsDoc,

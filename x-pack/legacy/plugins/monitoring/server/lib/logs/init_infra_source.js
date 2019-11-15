@@ -7,11 +7,8 @@
 import { prefixIndexPattern } from '../ccs_utils';
 import { INDEX_PATTERN_FILEBEAT, INFRA_SOURCE_ID } from '../../../common/constants';
 
-export const initInfraSource = server => {
-  const infraPlugin = server.plugins.infra;
-
+export const initInfraSource = (config, infraPlugin) => {
   if (infraPlugin) {
-    const config = server.config();
     const filebeatIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_FILEBEAT, '*');
     infraPlugin.defineInternalSourceConfiguration(INFRA_SOURCE_ID, {
       name: 'Elastic Stack Logs',

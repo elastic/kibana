@@ -6,22 +6,12 @@
 
 import { isEqual } from 'lodash/fp';
 import React, { useEffect } from 'react';
-import { compose } from 'redux';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 
 import { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
-import { CONSTANTS } from '../url_state/constants';
-import {
-  inputsSelectors,
-  hostsSelectors,
-  networkSelectors,
-  timelineSelectors,
-  State,
-  hostsModel,
-  networkModel,
-} from '../../store';
-
+import { makeMapStateToProps } from '../url_state/helpers';
 import { setBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
 import { TabNavigationProps } from './tab_navigation/types';
@@ -29,50 +19,48 @@ import { SiemNavigationComponentProps } from './types';
 
 export const SiemNavigationComponent = React.memo<TabNavigationProps & RouteSpyState>(
   ({
+    query,
     detailName,
     display,
-    hostDetails,
-    hosts,
+    filters,
     navTabs,
-    network,
     pageName,
     pathName,
+    savedQuery,
     search,
-    showBorder,
     tabName,
-    timelineId,
+    timeline,
     timerange,
   }) => {
     useEffect(() => {
       if (pathName) {
         setBreadcrumbs({
+          query,
           detailName,
-          hosts,
-          hostDetails,
+          filters,
           navTabs,
-          network,
           pageName,
           pathName,
+          savedQuery,
           search,
           tabName,
           timerange,
-          timelineId,
+          timeline,
         });
       }
-    }, [pathName, search, hosts, hostDetails, network, navTabs, timerange, timelineId]);
+    }, [query, pathName, search, filters, navTabs, savedQuery, timerange, timeline]);
 
     return (
       <TabNavigation
+        query={query}
         display={display}
-        hosts={hosts}
-        hostDetails={hostDetails}
+        filters={filters}
         navTabs={navTabs}
-        network={network}
         pageName={pageName}
         pathName={pathName}
-        showBorder={showBorder}
+        savedQuery={savedQuery}
         tabName={tabName}
-        timelineId={timelineId}
+        timeline={timeline}
         timerange={timerange}
       />
     );
@@ -81,63 +69,17 @@ export const SiemNavigationComponent = React.memo<TabNavigationProps & RouteSpyS
     return (
       prevProps.pathName === nextProps.pathName &&
       prevProps.search === nextProps.search &&
-      isEqual(prevProps.hosts, nextProps.hosts) &&
-      isEqual(prevProps.hostDetails, nextProps.hostDetails) &&
-      isEqual(prevProps.network, nextProps.network) &&
+      prevProps.savedQuery === nextProps.savedQuery &&
+      isEqual(prevProps.query, nextProps.query) &&
+      isEqual(prevProps.filters, nextProps.filters) &&
       isEqual(prevProps.navTabs, nextProps.navTabs) &&
       isEqual(prevProps.timerange, nextProps.timerange) &&
-      isEqual(prevProps.timelineId, nextProps.timelineId)
+      isEqual(prevProps.timeline, nextProps.timeline)
     );
   }
 );
 
 SiemNavigationComponent.displayName = 'SiemNavigationComponent';
-
-const makeMapStateToProps = () => {
-  const getInputsSelector = inputsSelectors.inputsSelector();
-  const getHostsFilterQueryAsKuery = hostsSelectors.hostsFilterQueryAsKuery();
-  const getNetworkFilterQueryAsKuery = networkSelectors.networkFilterQueryAsKuery();
-  const getTimelines = timelineSelectors.getTimelines();
-  const mapStateToProps = (state: State) => {
-    const inputState = getInputsSelector(state);
-    const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
-    const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
-
-    const openTimelineId = Object.entries(getTimelines(state)).reduce(
-      (useTimelineId, [timelineId, timelineObj]) =>
-        timelineObj.savedObjectId != null ? timelineObj.savedObjectId : useTimelineId,
-      ''
-    );
-
-    return {
-      hosts: {
-        filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.page),
-        queryLocation: CONSTANTS.hostsPage,
-      },
-      hostDetails: {
-        filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.details),
-        queryLocation: CONSTANTS.hostsDetails,
-      },
-      network: {
-        filterQuery: getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.page),
-        queryLocation: CONSTANTS.networkPage,
-      },
-      [CONSTANTS.timerange]: {
-        global: {
-          [CONSTANTS.timerange]: globalTimerange,
-          linkTo: globalLinkTo,
-        },
-        timeline: {
-          [CONSTANTS.timerange]: timelineTimerange,
-          linkTo: timelineLinkTo,
-        },
-      },
-      [CONSTANTS.timelineId]: openTimelineId,
-    };
-  };
-
-  return mapStateToProps;
-};
 
 export const SiemNavigationRedux = compose<
   React.ComponentClass<SiemNavigationComponentProps & RouteSpyState>

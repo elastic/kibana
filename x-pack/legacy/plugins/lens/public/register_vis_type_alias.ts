@@ -11,14 +11,22 @@ import { BASE_APP_URL, getEditPath } from '../common';
 visualizations.types.registerAlias({
   aliasUrl: BASE_APP_URL,
   name: 'lens',
-  isPromoted: true,
+  promotion: {
+    description: i18n.translate('xpack.lens.visTypeAlias.promotion.description', {
+      defaultMessage: 'Try Lens, our new, intuitive way to create visualizations.',
+    }),
+    buttonText: i18n.translate('xpack.lens.visTypeAlias.promotion.buttonText', {
+      defaultMessage: 'Go to Lens',
+    }),
+  },
   title: i18n.translate('xpack.lens.visTypeAlias.title', {
-    defaultMessage: 'Lens Visualizations',
+    defaultMessage: 'Lens',
   }),
   description: i18n.translate('xpack.lens.visTypeAlias.description', {
     defaultMessage: `Lens is a simpler way to create basic visualizations`,
   }),
   icon: 'lensApp',
+  stage: 'beta',
   appExtensions: {
     visualizations: {
       docTypes: ['lens'],
@@ -31,7 +39,7 @@ visualizations.types.registerAlias({
           title,
           editUrl: getEditPath(id),
           icon: 'lensApp',
-          isExperimental: true,
+          stage: 'beta',
           savedObjectType: type,
           typeTitle: i18n.translate('xpack.lens.visTypeAlias.type', { defaultMessage: 'Lens' }),
         };

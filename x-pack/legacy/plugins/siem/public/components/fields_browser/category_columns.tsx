@@ -26,7 +26,9 @@ import { LoadingSpinner, getCategoryPaneCategoryClassName, getFieldCount } from 
 import * as i18n from './translations';
 
 const CategoryName = styled.span<{ bold: boolean }>`
-  font-weight: ${({ bold }) => (bold ? 'bold' : 'normal')};
+  .euiText {
+    font-weight: ${({ bold }) => (bold ? 'bold' : 'normal')};
+  }
 `;
 
 CategoryName.displayName = 'CategoryName';

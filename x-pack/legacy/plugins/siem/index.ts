@@ -26,9 +26,10 @@ import {
 } from './common/constants';
 import { signalsAlertType } from './server/lib/detection_engine/alerts/signals_alert_type';
 import { defaultIndexPattern } from './default_index_pattern';
+import { isAlertExecutor } from './server/lib/detection_engine/alerts/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function siem(kibana: any) {
+export const siem = (kibana: any) => {
   return new kibana.Plugin({
     id: APP_ID,
     configPrefix: 'xpack.siem',
@@ -126,12 +127,15 @@ export function siem(kibana: any) {
     init(server: Server) {
       const newPlatform = ((server as unknown) as KbnServer).newPlatform;
       if (server.plugins.alerting != null) {
-        server.plugins.alerting.setup.registerType(
-          signalsAlertType({ logger: newPlatform.coreContext.logger.get('plugins', APP_ID) })
-        );
+        const type = signalsAlertType({
+          logger: newPlatform.coreContext.logger.get('plugins', APP_ID),
+        });
+        if (isAlertExecutor(type)) {
+          server.plugins.alerting.setup.registerType(type);
+        }
       }
       server.injectUiAppVars('siem', async () => server.getInjectedUiAppVars('kibana'));
       initServerWithKibana(server);
     },
   });
-}
+};

@@ -43,10 +43,21 @@ class Plugin {
     );
 
     const router = core.http.createRouter();
-    router.get({ path: '/ping', validate: false }, async (context, req, res) => {
-      const response = await context.core.elasticsearch.adminClient.callAsInternalUser('ping');
-      return res.ok({ body: `Pong: ${response}` });
-    });
+    router.get(
+      { path: '/requestcontext/elasticsearch', validate: false },
+      async (context, req, res) => {
+        const response = await context.core.elasticsearch.adminClient.callAsInternalUser('ping');
+        return res.ok({ body: `Elasticsearch: ${response}` });
+      }
+    );
+
+    router.get(
+      { path: '/requestcontext/savedobjectsclient', validate: false },
+      async (context, req, res) => {
+        const response = await context.core.savedObjects.client.find({ type: 'TYPE' });
+        return res.ok({ body: `SavedObjects client: ${JSON.stringify(response)}` });
+      }
+    );
 
     return {
       data$: this.initializerContext.config.create<ConfigType>().pipe(

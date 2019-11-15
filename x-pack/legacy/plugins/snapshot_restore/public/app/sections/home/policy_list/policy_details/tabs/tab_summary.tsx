@@ -165,7 +165,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
                   description={i18n.translate(
                     'xpack.snapshotRestore.policyDetails.snapshotsDeletedStat',
                     {
-                      defaultMessage: 'Deletions',
+                      defaultMessage: 'Deleted',
                     }
                   )}
                   titleSize="s"

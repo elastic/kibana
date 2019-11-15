@@ -5,7 +5,7 @@
  */
 
 import chromeMock from 'ui/chrome';
-import { Storage } from 'ui/storage';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { SavedObjectsClientContract } from 'kibana/public';
 import { getIndexPatternDatasource, IndexPatternColumn, uniqueLabels } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
@@ -131,6 +131,7 @@ function stateFromPersistedState(
     layers: persistedState.layers,
     indexPatterns: expectedIndexPatterns,
     indexPatternRefs: [],
+    existingFields: {},
     showEmptyFields: true,
   };
 }
@@ -142,7 +143,7 @@ describe('IndexPattern Data Source', () => {
   beforeEach(() => {
     indexPatternDatasource = getIndexPatternDatasource({
       chrome: chromeMock,
-      storage: {} as Storage,
+      storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
       savedObjectsClient: {} as SavedObjectsClientContract,
       data: pluginsMock.createStart().data,
@@ -182,6 +183,7 @@ describe('IndexPattern Data Source', () => {
         isBucketed: false,
         label: 'Foo',
         operationType: 'count',
+        sourceField: 'Records',
       };
       const map = uniqueLabels({
         a: {
@@ -239,19 +241,16 @@ describe('IndexPattern Data Source', () => {
             columnOrder: ['col1', 'col2'],
             columns: {
               col1: {
-                label: 'Count of Documents',
+                label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-
-                // Private
+                sourceField: 'Records',
                 operationType: 'count',
               },
               col2: {
                 label: 'Date',
                 dataType: 'date',
                 isBucketed: true,
-
-                // Private
                 operationType: 'date_histogram',
                 sourceField: 'timestamp',
                 params: {
@@ -266,13 +265,13 @@ describe('IndexPattern Data Source', () => {
       const state = stateFromPersistedState(queryPersistedState);
 
       expect(indexPatternDatasource.toExpression(state, 'first')).toMatchInlineSnapshot(`
-                "esaggs
-                      index=\\"1\\"
-                      metricsAtAllLevels=false
-                      partialRows=false
-                      includeFormatHints=true
-                      aggConfigs='[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":1,\\"extended_bounds\\":{}}}]' | lens_rename_columns idMap='{\\"col-0-col1\\":\\"col1\\",\\"col-1-col2\\":\\"col2\\"}'"
-            `);
+        "esaggs
+              index=\\"1\\"
+              metricsAtAllLevels=false
+              partialRows=false
+              includeFormatHints=true
+              aggConfigs={lens_auto_date aggConfigs='[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":0,\\"extended_bounds\\":{}}}]'} | lens_rename_columns idMap='{\\"col-0-col1\\":{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"Records\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"},\\"col-1-col2\\":{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}}'"
+      `);
     });
   });
 
@@ -280,6 +279,7 @@ describe('IndexPattern Data Source', () => {
     it('should insert an empty layer into the previous state', () => {
       const state = {
         indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: expectedIndexPatterns,
         layers: {
           first: {
@@ -314,6 +314,7 @@ describe('IndexPattern Data Source', () => {
     it('should remove a layer', () => {
       const state = {
         indexPatternRefs: [],
+        existingFields: {},
         showEmptyFields: false,
         indexPatterns: expectedIndexPatterns,
         layers: {
@@ -348,6 +349,7 @@ describe('IndexPattern Data Source', () => {
       expect(
         indexPatternDatasource.getLayers({
           indexPatternRefs: [],
+          existingFields: {},
           showEmptyFields: false,
           indexPatterns: expectedIndexPatterns,
           layers: {
@@ -373,6 +375,7 @@ describe('IndexPattern Data Source', () => {
       expect(
         indexPatternDatasource.getMetaData({
           indexPatternRefs: [],
+          existingFields: {},
           showEmptyFields: false,
           indexPatterns: expectedIndexPatterns,
           layers: {
@@ -409,7 +412,15 @@ describe('IndexPattern Data Source', () => {
 
     beforeEach(async () => {
       const initialState = stateFromPersistedState(persistedState);
-      publicAPI = indexPatternDatasource.getPublicAPI(initialState, () => {}, 'first');
+      publicAPI = indexPatternDatasource.getPublicAPI({
+        state: initialState,
+        setState: () => {},
+        layerId: 'first',
+        dateRange: {
+          fromDate: 'now-30d',
+          toDate: 'now',
+        },
+      });
     });
 
     describe('getTableSpec', () => {
@@ -448,8 +459,8 @@ describe('IndexPattern Data Source', () => {
             suggestedPriority: 2,
           },
         };
-        const api = indexPatternDatasource.getPublicAPI(
-          {
+        const api = indexPatternDatasource.getPublicAPI({
+          state: {
             ...initialState,
             layers: {
               first: {
@@ -460,8 +471,12 @@ describe('IndexPattern Data Source', () => {
             },
           },
           setState,
-          'first'
-        );
+          layerId: 'first',
+          dateRange: {
+            fromDate: 'now-1y',
+            toDate: 'now',
+          },
+        });
 
         api.removeColumnInTableSpec('b');
 

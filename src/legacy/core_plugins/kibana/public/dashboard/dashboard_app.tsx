@@ -26,26 +26,23 @@ import { IInjector } from 'ui/chrome';
 // @ts-ignore
 import * as filterActions from 'plugins/kibana/discover/doc_table/actions/filter';
 
-// @ts-ignore
-import { getFilterGenerator } from 'ui/filter_manager';
-
 import {
   AppStateClass as TAppStateClass,
   AppState as TAppState,
 } from 'ui/state_management/app_state';
 
 import { KbnUrl } from 'ui/url/kbn_url';
-import { Filter } from '@kbn/es-query';
-import { TimeRange } from 'src/plugins/data/public';
+import { TimeRange, Query } from 'src/plugins/data/public';
 import { IndexPattern } from 'ui/index_patterns';
 import { IPrivate } from 'ui/private';
-import { StaticIndexPattern, Query, SavedQuery } from 'plugins/data';
+import { StaticIndexPattern, SavedQuery } from 'plugins/data';
 import moment from 'moment';
 import { Subscription } from 'rxjs';
 
 import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
 import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
 import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn } from './types';
+import { esFilters } from '../../../../../../src/plugins/data/public';
 
 import { DashboardAppController } from './dashboard_app_controller';
 
@@ -55,7 +52,7 @@ export interface DashboardAppScope extends ng.IScope {
   screenTitle: string;
   model: {
     query: Query;
-    filters: Filter[];
+    filters: esFilters.Filter[];
     timeRestore: boolean;
     title: string;
     description: string;
@@ -81,9 +78,9 @@ export interface DashboardAppScope extends ng.IScope {
     isPaused: boolean;
     refreshInterval: any;
   }) => void;
-  onFiltersUpdated: (filters: Filter[]) => void;
+  onFiltersUpdated: (filters: esFilters.Filter[]) => void;
   onCancelApplyFilters: () => void;
-  onApplyFilters: (filters: Filter[]) => void;
+  onApplyFilters: (filters: esFilters.Filter[]) => void;
   onQuerySaved: (savedQuery: SavedQuery) => void;
   onSavedQueryUpdated: (savedQuery: SavedQuery) => void;
   onClearSavedQuery: () => void;
@@ -96,20 +93,13 @@ export interface DashboardAppScope extends ng.IScope {
   timefilterSubscriptions$: Subscription;
 }
 
-const app = uiModules.get('app/dashboard', [
-  'elasticsearch',
-  'ngRoute',
-  'react',
-  'kibana/courier',
-  'kibana/config',
-]);
+const app = uiModules.get('app/dashboard', ['elasticsearch', 'ngRoute', 'react', 'kibana/config']);
 
 app.directive('dashboardApp', function($injector: IInjector) {
   const AppState = $injector.get<TAppStateClass<DashboardAppState>>('AppState');
   const kbnUrl = $injector.get<KbnUrl>('kbnUrl');
   const confirmModal = $injector.get<ConfirmModalFn>('confirmModal');
   const config = $injector.get('config');
-  const courier = $injector.get<{ fetch: () => void }>('courier');
 
   const Private = $injector.get<IPrivate>('Private');
 
@@ -149,7 +139,6 @@ app.directive('dashboardApp', function($injector: IInjector) {
         indexPatterns,
         config,
         confirmModal,
-        courier,
       }),
   };
 });

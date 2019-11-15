@@ -4,6 +4,8 @@
 
 ## HttpServiceBase.patch property
 
+Makes an HTTP request with the PATCH method. See [HttpHandler](./kibana-plugin-public.httphandler.md) for options.
+
 <b>Signature:</b>
 
 ```typescript

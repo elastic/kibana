@@ -49,6 +49,12 @@ export const EMS_FILE = 'EMS_FILE';
 export const ES_GEO_GRID = 'ES_GEO_GRID';
 export const ES_SEARCH = 'ES_SEARCH';
 export const ES_PEW_PEW = 'ES_PEW_PEW';
+
+export const FIELD_ORIGIN = {
+  SOURCE: 'source',
+  JOIN: 'join'
+};
+
 export const SOURCE_DATA_ID_ORIGIN = 'source';
 
 export const GEOJSON_FILE = 'GEOJSON_FILE';
@@ -95,4 +101,13 @@ export const EMPTY_FEATURE_COLLECTION = {
 export const DRAW_TYPE = {
   BOUNDS: 'BOUNDS',
   POLYGON: 'POLYGON'
+};
+
+export const METRIC_TYPE = {
+  AVG: 'avg',
+  COUNT: 'count',
+  MAX: 'max',
+  MIN: 'min',
+  SUM: 'sum',
+  UNIQUE_COUNT: 'cardinality',
 };

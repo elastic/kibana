@@ -4,6 +4,8 @@
 
 ## HttpServiceBase.intercept() method
 
+Adds a new [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md) to the global HTTP client.
+
 <b>Signature:</b>
 
 ```typescript
@@ -19,4 +21,6 @@ intercept(interceptor: HttpInterceptor): () => void;
 <b>Returns:</b>
 
 `() => void`
+
+a function for removing the attached interceptor.
 

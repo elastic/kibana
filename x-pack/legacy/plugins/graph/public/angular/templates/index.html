@@ -4,7 +4,49 @@
   </kbn-top-nav>
 
   <div class="gphGraph__menus" ng-show="menus.showInspect">
-    <graph-inspect ng-show="menus.showInspect"></graph-inspect>
+    <div>
+      <div
+        class="kuiLocalDropdownTitle"
+        i18n-id="xpack.graph.inspect.title"
+        i18n-default-message="Inspect"
+      ></div>
+
+      <div
+        class="list-group-item"
+        ng-if="(workspace !== null)"
+      >
+        <small class="help-block">http://host:port/{{ selectedIndex.name }}/_graph/explore</small>
+        <ul class="nav nav-tabs">
+          <li ng-class="{active: spymode === 'request'}">
+            <a
+              ng-click="spymode='request'"
+              i18n-id="xpack.graph.inspect.requestTabTitle"
+              i18n-default-message="Request"
+            ></a>
+          </li>
+          <li ng-class="{active: spymode === 'response'}">
+            <a
+              ng-click="spymode='response'"
+              i18n-id="xpack.graph.inspect.responseTabTitle"
+              i18n-default-message="Response"
+            ></a>
+          </li>
+        </ul>
+
+        <div
+          ng-show="spymode == 'request'"
+          ui-ace="{ onLoad: aceLoaded, mode: 'json', advanced: { readOnly: true } }"
+          ng-model="workspace.lastRequest"
+          class="gphSettings__jsonView"
+        ></div>
+        <div
+          ng-show="spymode == 'response'"
+          ui-ace="{ onLoad: aceLoaded, mode: 'json', advanced: { readOnly: true } }"
+          ng-model="workspace.lastResponse"
+          class="gphSettings__jsonView"
+        ></div>
+      </div>
+    </div>
   </div>
 
   <div
@@ -17,10 +59,10 @@
     is-loading="loading"
     is-initialized="workspaceInitialized || savedWorkspace.id"
     initial-query="initialQuery"
-    on-fill-workspace="fillWorkspace"
     plugin-data-start="pluginDataStart"
     core-start="coreStart"
-    store="store"
+    storage="storage"
+    no-index-patterns="noIndexPatterns"
   ></div>
 
   <div class="gphGraph__container" id="GraphSvgContainer" ng-if="workspaceInitialized || savedWorkspace.id">
@@ -107,7 +149,6 @@
 
       <div>
         <div class="gphSidebar__header">
-          <span class="kuiIcon fa-shopping-cart"></span>
           {{ ::'xpack.graph.sidebar.selectionsTitle' | i18n: { defaultMessage: 'Selections' } }}
         </div>
 
@@ -150,7 +191,7 @@
             ng-if="workspace.selectedNodes.length === 0"
             class="help-block"
             i18n-id="xpack.graph.sidebar.selections.noSelectionsHelpText"
-            i18n-default-message="No selections. Click on vertices to add"
+            i18n-default-message="No selections. Click on vertices to add."
           ></p>
 
           <div ng-repeat="n in workspace.selectedNodes" class="gphSelectionList__field" ng-class="{'gphSelectionList__field--selected': isSelectedSelected(n)}"
@@ -273,7 +314,7 @@
               <div
                 class="help-block"
                 i18n-id="xpack.graph.sidebar.displayLabelHelpText"
-                i18n-default-message="Change the label for this vertex"
+                i18n-default-message="Change the label for this vertex."
               ></div>
             </div>
           </div>
@@ -335,61 +376,6 @@
               values: { count: mc.v2, term: mc.term2 },
             } }}"
           >{{mc.v2}}</small>
-        </div>
-
-
-
-        <div class="gphSidebar__panel" ng-if="(detail.inferredEdge)">
-          <div class="gphSidebar__header">
-            <span class="kuiIcon fa-cog"></span>
-            {{ ::'xpack.graph.sidebar.similarLabelsTitle' | i18n: { defaultMessage: 'Similar labels' } }}
-          </div>
-
-          <div class="form-group form-group-sm gphFormGroup--small">
-            <div style="line-height: 24px;">
-              <button
-                tooltip="{{ ::'xpack.graph.sidebar.similarLabels.mergeTargetToSrcButtonTooltip' | i18n: {
-                  defaultMessage: 'Merge {targetLabel} into {srcLabel}',
-                  values: { targetLabel: detail.inferredEdge.topTarget.label, srcLabel: detail.inferredEdge.topSrc.label },
-                } }}"
-                type="button" style="vertical-align: top;" class="kuiButton kuiButton--basic kuiButton--small"
-                ng-click="performMerge(detail.inferredEdge.topTarget.id, detail.inferredEdge.topSrc.id)">
-                <span class="kui fa-chevron-circle-down"></span>
-              </button>
-              <svg width="24" height="24">
-                <circle class="gphNode__circle " r="10" cx="12" cy="12" ng-attr-style="fill:{{detail.inferredEdge.topSrc.color}}" />
-
-                <text ng-if="detail.inferredEdge.topSrc.icon" class="fa gphNode__text" text-anchor="middle" x="12" y="16">{{detail.inferredEdge.topSrc.icon.code}}</text>
-              </svg>
-              <span style="vertical-align: top;">{{detail.inferredEdge.topSrc.label}}</span>
-            </div>
-            <div style="line-height: 24px;">
-              <button
-                tooltip="{{ ::'xpack.graph.sidebar.similarLabels.mergeSrcToTargetButtonTooltip' | i18n: {
-                  defaultMessage: 'Merge {srcLabel} into {targetLabel}',
-                  values: { targetLabel: detail.inferredEdge.topTarget.label, srcLabel: detail.inferredEdge.topSrc.label },
-                } }}"
-                type="button" style="vertical-align: top;" class="kuiButton kuiButton--basic kuiButton--small"
-                ng-click="performMerge(detail.inferredEdge.topSrc.id, detail.inferredEdge.topTarget.id)">
-                <span class="kuiIcon fa-chevron-circle-up"></span>
-              </button>
-
-              <svg width="24" height="24">
-                <circle class="gphNode__circle " r="10" cx="12" cy="12" ng-attr-style="fill:{{detail.inferredEdge.topTarget.color}}" />
-
-                <text ng-if="detail.inferredEdge.topTarget.icon" class="fa gphNode__text" text-anchor="middle" x="12" y="16">{{detail.inferredEdge.topTarget.icon.code}}</text>
-              </svg>
-              <span style="vertical-align: top;">{{detail.inferredEdge.topTarget.label}}</span>
-
-            </div>
-
-            <div
-              class="col-sm-10"
-              i18n-id="xpack.graph.sidebar.similarLabels.keyTermsText"
-              i18n-default-message="Key terms: {inferredEdgeLabel}"
-              i18n-values="{ html_inferredEdgeLabel: '<small>' + detail.inferredEdge.label + '</small>' }"
-            ></div>
-          </div>
         </div>
       </div>
       <!-- end edge-merge detail panel -->

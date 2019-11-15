@@ -67,32 +67,30 @@ export interface HostsSortField {
   direction: Direction;
 }
 
-export interface DomainsSortField {
-  field: DomainsFields;
-
-  direction: Direction;
-}
-
-export interface TlsSortField {
-  field: TlsFields;
-
-  direction: Direction;
-}
-
 export interface UsersSortField {
   field: UsersFields;
 
   direction: Direction;
 }
 
-export interface NetworkTopNFlowSortField {
-  field: NetworkTopNFlowFields;
+export interface NetworkTopTablesSortField {
+  field: NetworkTopTablesFields;
 
   direction: Direction;
 }
 
 export interface NetworkDnsSortField {
   field: NetworkDnsFields;
+
+  direction: Direction;
+}
+
+export interface NetworkHttpSortField {
+  direction: Direction;
+}
+
+export interface TlsSortField {
+  field: TlsFields;
 
   direction: Direction;
 }
@@ -124,6 +122,8 @@ export interface TimelineInput {
 
   description?: Maybe<string>;
 
+  filters?: Maybe<FilterTimelineInput[]>;
+
   kqlMode?: Maybe<string>;
 
   kqlQuery?: Maybe<SerializedFilterQueryInput>;
@@ -131,6 +131,8 @@ export interface TimelineInput {
   title?: Maybe<string>;
 
   dateRange?: Maybe<DateRangePickerInput>;
+
+  savedQueryId?: Maybe<string>;
 
   sort?: Maybe<SortTimelineInput>;
 }
@@ -185,6 +187,46 @@ export interface QueryMatchInput {
   displayValue?: Maybe<string>;
 
   operator?: Maybe<string>;
+}
+
+export interface FilterTimelineInput {
+  exists?: Maybe<string>;
+
+  meta?: Maybe<FilterMetaTimelineInput>;
+
+  match_all?: Maybe<string>;
+
+  missing?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  range?: Maybe<string>;
+
+  script?: Maybe<string>;
+}
+
+export interface FilterMetaTimelineInput {
+  alias?: Maybe<string>;
+
+  controlledBy?: Maybe<string>;
+
+  disabled?: Maybe<boolean>;
+
+  field?: Maybe<string>;
+
+  formattedValue?: Maybe<string>;
+
+  index?: Maybe<string>;
+
+  key?: Maybe<string>;
+
+  negate?: Maybe<boolean>;
+
+  params?: Maybe<string>;
+
+  type?: Maybe<string>;
+
+  value?: Maybe<string>;
 }
 
 export interface SerializedFilterQueryInput {
@@ -245,17 +287,9 @@ export enum HostsFields {
   lastSeen = 'lastSeen',
 }
 
-export enum DomainsFields {
-  domainName = 'domainName',
-  direction = 'direction',
-  bytes = 'bytes',
-  packets = 'packets',
-  uniqueIpCount = 'uniqueIpCount',
-}
-
-export enum FlowDirection {
-  uniDirectional = 'uniDirectional',
-  biDirectional = 'biDirectional',
+export enum UsersFields {
+  name = 'name',
+  count = 'count',
 }
 
 export enum FlowTarget {
@@ -265,32 +299,12 @@ export enum FlowTarget {
   source = 'source',
 }
 
-export enum NetworkDirectionEcs {
-  inbound = 'inbound',
-  outbound = 'outbound',
-  internal = 'internal',
-  external = 'external',
-  incoming = 'incoming',
-  outgoing = 'outgoing',
-  listening = 'listening',
-  unknown = 'unknown',
-}
-
-export enum TlsFields {
-  _id = '_id',
-}
-
-export enum UsersFields {
-  name = 'name',
-  count = 'count',
-}
-
-export enum FlowTargetNew {
+export enum FlowTargetSourceDest {
   destination = 'destination',
   source = 'source',
 }
 
-export enum NetworkTopNFlowFields {
+export enum NetworkTopTablesFields {
   bytes_in = 'bytes_in',
   bytes_out = 'bytes_out',
   flows = 'flows',
@@ -306,11 +320,41 @@ export enum NetworkDnsFields {
   dnsBytesOut = 'dnsBytesOut',
 }
 
+export enum TlsFields {
+  _id = '_id',
+}
+
 export enum SortFieldTimeline {
   title = 'title',
   description = 'description',
   updated = 'updated',
   created = 'created',
+}
+
+export enum NetworkDirectionEcs {
+  inbound = 'inbound',
+  outbound = 'outbound',
+  internal = 'internal',
+  external = 'external',
+  incoming = 'incoming',
+  outgoing = 'outgoing',
+  listening = 'listening',
+  unknown = 'unknown',
+}
+
+export enum NetworkHttpFields {
+  domains = 'domains',
+  lastHost = 'lastHost',
+  lastSourceIp = 'lastSourceIp',
+  methods = 'methods',
+  path = 'path',
+  requestCount = 'requestCount',
+  statuses = 'statuses',
+}
+
+export enum FlowDirection {
+  uniDirectional = 'uniDirectional',
+  biDirectional = 'biDirectional',
 }
 
 export type ToStringArray = string[];
@@ -415,6 +459,8 @@ export interface Source {
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
 
+  AuthenticationsOverTime: AuthenticationsOverTimeData;
+
   Timeline: TimelineData;
 
   TimelineDetails: TimelineDetailsData;
@@ -431,10 +477,6 @@ export interface Source {
 
   IpOverview?: Maybe<IpOverviewData>;
 
-  Domains: DomainsData;
-
-  Tls: TlsData;
-
   Users: UsersData;
 
   KpiNetwork?: Maybe<KpiNetworkData>;
@@ -442,14 +484,20 @@ export interface Source {
   KpiHosts: KpiHostsData;
 
   KpiHostDetails: KpiHostDetailsData;
-  /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
+
+  NetworkTopCountries: NetworkTopCountriesData;
+
   NetworkTopNFlow: NetworkTopNFlowData;
 
   NetworkDns: NetworkDnsData;
 
+  NetworkHttp: NetworkHttpData;
+
   OverviewNetwork?: Maybe<OverviewNetworkData>;
 
   OverviewHost?: Maybe<OverviewHostData>;
+
+  Tls: TlsData;
   /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
   UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
@@ -646,6 +694,22 @@ export interface Inspect {
   dsl: string[];
 
   response: string[];
+}
+
+export interface AuthenticationsOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  authenticationsOverTime: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface MatrixOverTimeHistogramData {
+  x: number;
+
+  y: number;
+
+  g: string;
 }
 
 export interface TimelineData {
@@ -1232,14 +1296,6 @@ export interface EventsOverTimeData {
   totalCount: number;
 }
 
-export interface MatrixOverTimeHistogramData {
-  x: number;
-
-  y: number;
-
-  g: string;
-}
-
 export interface HostsData {
   edges: HostsEdges[];
 
@@ -1326,90 +1382,6 @@ export interface AutonomousSystem {
 
 export interface AutonomousSystemOrganization {
   name?: Maybe<string>;
-}
-
-export interface DomainsData {
-  edges: DomainsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface DomainsEdges {
-  node: DomainsNode;
-
-  cursor: CursorType;
-}
-
-export interface DomainsNode {
-  _id?: Maybe<string>;
-
-  timestamp?: Maybe<string>;
-
-  source?: Maybe<DomainsItem>;
-
-  destination?: Maybe<DomainsItem>;
-
-  client?: Maybe<DomainsItem>;
-
-  server?: Maybe<DomainsItem>;
-
-  network?: Maybe<DomainsNetworkField>;
-}
-
-export interface DomainsItem {
-  uniqueIpCount?: Maybe<number>;
-
-  domainName?: Maybe<string>;
-
-  firstSeen?: Maybe<string>;
-
-  lastSeen?: Maybe<string>;
-}
-
-export interface DomainsNetworkField {
-  bytes?: Maybe<number>;
-
-  packets?: Maybe<number>;
-
-  transport?: Maybe<string>;
-
-  direction?: Maybe<NetworkDirectionEcs[]>;
-}
-
-export interface TlsData {
-  edges: TlsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Maybe<Inspect>;
-}
-
-export interface TlsEdges {
-  node: TlsNode;
-
-  cursor: CursorType;
-}
-
-export interface TlsNode {
-  _id?: Maybe<string>;
-
-  timestamp?: Maybe<string>;
-
-  alternativeNames?: Maybe<string[]>;
-
-  notAfter?: Maybe<string[]>;
-
-  commonNames?: Maybe<string[]>;
-
-  ja3?: Maybe<string[]>;
-
-  issuerNames?: Maybe<string[]>;
 }
 
 export interface UsersData {
@@ -1524,6 +1496,68 @@ export interface KpiHostDetailsData {
   inspect?: Maybe<Inspect>;
 }
 
+export interface NetworkTopCountriesData {
+  edges: NetworkTopCountriesEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface NetworkTopCountriesEdges {
+  node: NetworkTopCountriesItem;
+
+  cursor: CursorType;
+}
+
+export interface NetworkTopCountriesItem {
+  _id?: Maybe<string>;
+
+  source?: Maybe<TopCountriesItemSource>;
+
+  destination?: Maybe<TopCountriesItemDestination>;
+
+  network?: Maybe<TopNetworkTablesEcsField>;
+}
+
+export interface TopCountriesItemSource {
+  country?: Maybe<string>;
+
+  destination_ips?: Maybe<number>;
+
+  flows?: Maybe<number>;
+
+  location?: Maybe<GeoItem>;
+
+  source_ips?: Maybe<number>;
+}
+
+export interface GeoItem {
+  geo?: Maybe<GeoEcsFields>;
+
+  flowTarget?: Maybe<FlowTargetSourceDest>;
+}
+
+export interface TopCountriesItemDestination {
+  country?: Maybe<string>;
+
+  destination_ips?: Maybe<number>;
+
+  flows?: Maybe<number>;
+
+  location?: Maybe<GeoItem>;
+
+  source_ips?: Maybe<number>;
+}
+
+export interface TopNetworkTablesEcsField {
+  bytes_in?: Maybe<number>;
+
+  bytes_out?: Maybe<number>;
+}
+
 export interface NetworkTopNFlowData {
   edges: NetworkTopNFlowEdges[];
 
@@ -1547,7 +1581,7 @@ export interface NetworkTopNFlowItem {
 
   destination?: Maybe<TopNFlowItemDestination>;
 
-  network?: Maybe<TopNFlowNetworkEcsField>;
+  network?: Maybe<TopNetworkTablesEcsField>;
 }
 
 export interface TopNFlowItemSource {
@@ -1570,12 +1604,6 @@ export interface AutonomousSystemItem {
   number?: Maybe<number>;
 }
 
-export interface GeoItem {
-  geo?: Maybe<GeoEcsFields>;
-
-  flowTarget?: Maybe<FlowTarget>;
-}
-
 export interface TopNFlowItemDestination {
   autonomous_system?: Maybe<AutonomousSystemItem>;
 
@@ -1588,12 +1616,6 @@ export interface TopNFlowItemDestination {
   flows?: Maybe<number>;
 
   source_ips?: Maybe<number>;
-}
-
-export interface TopNFlowNetworkEcsField {
-  bytes_in?: Maybe<number>;
-
-  bytes_out?: Maybe<number>;
 }
 
 export interface NetworkDnsData {
@@ -1624,6 +1646,40 @@ export interface NetworkDnsItem {
   queryCount?: Maybe<number>;
 
   uniqueDomains?: Maybe<number>;
+}
+
+export interface NetworkHttpData {
+  edges: NetworkHttpEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface NetworkHttpEdges {
+  node: NetworkHttpItem;
+
+  cursor: CursorType;
+}
+
+export interface NetworkHttpItem {
+  _id?: Maybe<string>;
+
+  domains: string[];
+
+  lastHost?: Maybe<string>;
+
+  lastSourceIp?: Maybe<string>;
+
+  methods: string[];
+
+  path?: Maybe<string>;
+
+  requestCount?: Maybe<number>;
+
+  statuses: string[];
 }
 
 export interface OverviewNetworkData {
@@ -1682,6 +1738,38 @@ export interface OverviewHostData {
   inspect?: Maybe<Inspect>;
 }
 
+export interface TlsData {
+  edges: TlsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface TlsEdges {
+  node: TlsNode;
+
+  cursor: CursorType;
+}
+
+export interface TlsNode {
+  _id?: Maybe<string>;
+
+  timestamp?: Maybe<string>;
+
+  alternativeNames?: Maybe<string[]>;
+
+  notAfter?: Maybe<string[]>;
+
+  commonNames?: Maybe<string[]>;
+
+  ja3?: Maybe<string[]>;
+
+  issuerNames?: Maybe<string[]>;
+}
+
 export interface UncommonProcessesData {
   edges: UncommonProcessesEdges[];
 
@@ -1716,9 +1804,11 @@ export interface SayMyName {
 }
 
 export interface TimelineResult {
-  savedObjectId: string;
-
   columns?: Maybe<ColumnHeaderResult[]>;
+
+  created?: Maybe<number>;
+
+  createdBy?: Maybe<string>;
 
   dataProviders?: Maybe<DataProviderResult[]>;
 
@@ -1729,6 +1819,8 @@ export interface TimelineResult {
   eventIdToNoteIds?: Maybe<NoteResult[]>;
 
   favorite?: Maybe<FavoriteTimelineResult[]>;
+
+  filters?: Maybe<FilterTimelineResult[]>;
 
   kqlMode?: Maybe<string>;
 
@@ -1742,13 +1834,13 @@ export interface TimelineResult {
 
   pinnedEventsSaveObject?: Maybe<PinnedEvent[]>;
 
-  title?: Maybe<string>;
+  savedQueryId?: Maybe<string>;
+
+  savedObjectId: string;
 
   sort?: Maybe<SortTimelineResult>;
 
-  created?: Maybe<number>;
-
-  createdBy?: Maybe<string>;
+  title?: Maybe<string>;
 
   updated?: Maybe<number>;
 
@@ -1821,6 +1913,46 @@ export interface FavoriteTimelineResult {
   userName?: Maybe<string>;
 
   favoriteDate?: Maybe<number>;
+}
+
+export interface FilterTimelineResult {
+  exists?: Maybe<string>;
+
+  meta?: Maybe<FilterMetaTimelineResult>;
+
+  match_all?: Maybe<string>;
+
+  missing?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  range?: Maybe<string>;
+
+  script?: Maybe<string>;
+}
+
+export interface FilterMetaTimelineResult {
+  alias?: Maybe<string>;
+
+  controlledBy?: Maybe<string>;
+
+  disabled?: Maybe<boolean>;
+
+  field?: Maybe<string>;
+
+  formattedValue?: Maybe<string>;
+
+  index?: Maybe<string>;
+
+  key?: Maybe<string>;
+
+  negate?: Maybe<boolean>;
+
+  params?: Maybe<string>;
+
+  type?: Maybe<string>;
+
+  value?: Maybe<string>;
 }
 
 export interface SerializedFilterQueryResult {
@@ -1994,6 +2126,13 @@ export interface AuthenticationsSourceArgs {
 
   defaultIndex: string[];
 }
+export interface AuthenticationsOverTimeSourceArgs {
+  timerange: TimerangeInput;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
 export interface TimelineSourceArgs {
   pagination: PaginationInput;
 
@@ -2068,42 +2207,6 @@ export interface IpOverviewSourceArgs {
 
   defaultIndex: string[];
 }
-export interface DomainsSourceArgs {
-  filterQuery?: Maybe<string>;
-
-  id?: Maybe<string>;
-
-  ip: string;
-
-  pagination: PaginationInputPaginated;
-
-  sort: DomainsSortField;
-
-  flowDirection: FlowDirection;
-
-  flowTarget: FlowTarget;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
-export interface TlsSourceArgs {
-  filterQuery?: Maybe<string>;
-
-  id?: Maybe<string>;
-
-  ip: string;
-
-  pagination: PaginationInputPaginated;
-
-  sort: TlsSortField;
-
-  flowTarget: FlowTarget;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
 export interface UsersSourceArgs {
   filterQuery?: Maybe<string>;
 
@@ -2148,16 +2251,35 @@ export interface KpiHostDetailsSourceArgs {
 
   defaultIndex: string[];
 }
+export interface NetworkTopCountriesSourceArgs {
+  id?: Maybe<string>;
+
+  filterQuery?: Maybe<string>;
+
+  ip?: Maybe<string>;
+
+  flowTarget: FlowTargetSourceDest;
+
+  pagination: PaginationInputPaginated;
+
+  sort: NetworkTopTablesSortField;
+
+  timerange: TimerangeInput;
+
+  defaultIndex: string[];
+}
 export interface NetworkTopNFlowSourceArgs {
   id?: Maybe<string>;
 
   filterQuery?: Maybe<string>;
 
-  flowTarget: FlowTargetNew;
+  ip?: Maybe<string>;
+
+  flowTarget: FlowTargetSourceDest;
 
   pagination: PaginationInputPaginated;
 
-  sort: NetworkTopNFlowSortField;
+  sort: NetworkTopTablesSortField;
 
   timerange: TimerangeInput;
 
@@ -2178,6 +2300,21 @@ export interface NetworkDnsSourceArgs {
 
   defaultIndex: string[];
 }
+export interface NetworkHttpSourceArgs {
+  id?: Maybe<string>;
+
+  filterQuery?: Maybe<string>;
+
+  ip?: Maybe<string>;
+
+  pagination: PaginationInputPaginated;
+
+  sort: NetworkHttpSortField;
+
+  timerange: TimerangeInput;
+
+  defaultIndex: string[];
+}
 export interface OverviewNetworkSourceArgs {
   id?: Maybe<string>;
 
@@ -2193,6 +2330,23 @@ export interface OverviewHostSourceArgs {
   timerange: TimerangeInput;
 
   filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
+export interface TlsSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  id?: Maybe<string>;
+
+  ip: string;
+
+  pagination: PaginationInputPaginated;
+
+  sort: TlsSortField;
+
+  flowTarget: FlowTargetSourceDest;
+
+  timerange: TimerangeInput;
 
   defaultIndex: string[];
 }
@@ -2256,6 +2410,58 @@ export interface DeleteTimelineMutationArgs {
 // ====================================================
 // Documents
 // ====================================================
+
+export namespace GetAuthenticationsOverTimeQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    filterQuery?: Maybe<string>;
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    AuthenticationsOverTime: AuthenticationsOverTime;
+  };
+
+  export type AuthenticationsOverTime = {
+    __typename?: 'AuthenticationsOverTimeData';
+
+    authenticationsOverTime: _AuthenticationsOverTime[];
+
+    totalCount: number;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type _AuthenticationsOverTime = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+
+    g: string;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
 
 export namespace GetAuthenticationsQuery {
   export type Variables = {
@@ -2369,123 +2575,6 @@ export namespace GetAuthenticationsQuery {
     id: Maybe<string[]>;
 
     name: Maybe<string[]>;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value: Maybe<string>;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetDomainsQuery {
-  export type Variables = {
-    sourceId: string;
-    filterQuery?: Maybe<string>;
-    flowDirection: FlowDirection;
-    flowTarget: FlowTarget;
-    ip: string;
-    pagination: PaginationInputPaginated;
-    sort: DomainsSortField;
-    timerange: TimerangeInput;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    Domains: Domains;
-  };
-
-  export type Domains = {
-    __typename?: 'DomainsData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type Edges = {
-    __typename?: 'DomainsEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
-    __typename?: 'DomainsNode';
-
-    source: Maybe<_Source>;
-
-    destination: Maybe<Destination>;
-
-    network: Maybe<Network>;
-  };
-
-  export type _Source = {
-    __typename?: 'DomainsItem';
-
-    uniqueIpCount: Maybe<number>;
-
-    domainName: Maybe<string>;
-
-    firstSeen: Maybe<string>;
-
-    lastSeen: Maybe<string>;
-  };
-
-  export type Destination = {
-    __typename?: 'DomainsItem';
-
-    uniqueIpCount: Maybe<number>;
-
-    domainName: Maybe<string>;
-
-    firstSeen: Maybe<string>;
-
-    lastSeen: Maybe<string>;
-  };
-
-  export type Network = {
-    __typename?: 'DomainsNetworkField';
-
-    bytes: Maybe<number>;
-
-    direction: Maybe<NetworkDirectionEcs[]>;
-
-    packets: Maybe<number>;
   };
 
   export type Cursor = {
@@ -3273,13 +3362,217 @@ export namespace GetNetworkDnsQuery {
   };
 }
 
+export namespace GetNetworkHttpQuery {
+  export type Variables = {
+    sourceId: string;
+    ip?: Maybe<string>;
+    filterQuery?: Maybe<string>;
+    pagination: PaginationInputPaginated;
+    sort: NetworkHttpSortField;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    NetworkHttp: NetworkHttp;
+  };
+
+  export type NetworkHttp = {
+    __typename?: 'NetworkHttpData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type Edges = {
+    __typename?: 'NetworkHttpEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'NetworkHttpItem';
+
+    domains: string[];
+
+    lastHost: Maybe<string>;
+
+    lastSourceIp: Maybe<string>;
+
+    methods: string[];
+
+    path: Maybe<string>;
+
+    requestCount: Maybe<number>;
+
+    statuses: string[];
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: Maybe<string>;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfoPaginated';
+
+    activePage: number;
+
+    fakeTotalCount: number;
+
+    showMorePagesIndicator: boolean;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
+export namespace GetNetworkTopCountriesQuery {
+  export type Variables = {
+    sourceId: string;
+    ip?: Maybe<string>;
+    filterQuery?: Maybe<string>;
+    pagination: PaginationInputPaginated;
+    sort: NetworkTopTablesSortField;
+    flowTarget: FlowTargetSourceDest;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    NetworkTopCountries: NetworkTopCountries;
+  };
+
+  export type NetworkTopCountries = {
+    __typename?: 'NetworkTopCountriesData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type Edges = {
+    __typename?: 'NetworkTopCountriesEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'NetworkTopCountriesItem';
+
+    source: Maybe<_Source>;
+
+    destination: Maybe<Destination>;
+
+    network: Maybe<Network>;
+  };
+
+  export type _Source = {
+    __typename?: 'TopCountriesItemSource';
+
+    country: Maybe<string>;
+
+    destination_ips: Maybe<number>;
+
+    flows: Maybe<number>;
+
+    source_ips: Maybe<number>;
+  };
+
+  export type Destination = {
+    __typename?: 'TopCountriesItemDestination';
+
+    country: Maybe<string>;
+
+    destination_ips: Maybe<number>;
+
+    flows: Maybe<number>;
+
+    source_ips: Maybe<number>;
+  };
+
+  export type Network = {
+    __typename?: 'TopNetworkTablesEcsField';
+
+    bytes_in: Maybe<number>;
+
+    bytes_out: Maybe<number>;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: Maybe<string>;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfoPaginated';
+
+    activePage: number;
+
+    fakeTotalCount: number;
+
+    showMorePagesIndicator: boolean;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
 export namespace GetNetworkTopNFlowQuery {
   export type Variables = {
     sourceId: string;
+    ip?: Maybe<string>;
     filterQuery?: Maybe<string>;
     pagination: PaginationInputPaginated;
-    sort: NetworkTopNFlowSortField;
-    flowTarget: FlowTargetNew;
+    sort: NetworkTopTablesSortField;
+    flowTarget: FlowTargetSourceDest;
     timerange: TimerangeInput;
     defaultIndex: string[];
     inspect: boolean;
@@ -3358,7 +3651,7 @@ export namespace GetNetworkTopNFlowQuery {
 
     geo: Maybe<Geo>;
 
-    flowTarget: Maybe<FlowTarget>;
+    flowTarget: Maybe<FlowTargetSourceDest>;
   };
 
   export type Geo = {
@@ -3406,7 +3699,7 @@ export namespace GetNetworkTopNFlowQuery {
 
     geo: Maybe<_Geo>;
 
-    flowTarget: Maybe<FlowTarget>;
+    flowTarget: Maybe<FlowTargetSourceDest>;
   };
 
   export type _Geo = {
@@ -3426,7 +3719,7 @@ export namespace GetNetworkTopNFlowQuery {
   };
 
   export type Network = {
-    __typename?: 'TopNFlowNetworkEcsField';
+    __typename?: 'TopNetworkTablesEcsField';
 
     bytes_in: Maybe<number>;
 
@@ -4669,6 +4962,8 @@ export namespace GetOneTimeline {
 
     favorite: Maybe<Favorite[]>;
 
+    filters: Maybe<Filters[]>;
+
     kqlMode: Maybe<string>;
 
     kqlQuery: Maybe<KqlQuery>;
@@ -4682,6 +4977,8 @@ export namespace GetOneTimeline {
     pinnedEventsSaveObject: Maybe<PinnedEventsSaveObject[]>;
 
     title: Maybe<string>;
+
+    savedQueryId: Maybe<string>;
 
     sort: Maybe<Sort>;
 
@@ -4824,6 +5121,50 @@ export namespace GetOneTimeline {
     favoriteDate: Maybe<number>;
   };
 
+  export type Filters = {
+    __typename?: 'FilterTimelineResult';
+
+    meta: Maybe<Meta>;
+
+    query: Maybe<string>;
+
+    exists: Maybe<string>;
+
+    match_all: Maybe<string>;
+
+    missing: Maybe<string>;
+
+    range: Maybe<string>;
+
+    script: Maybe<string>;
+  };
+
+  export type Meta = {
+    __typename?: 'FilterMetaTimelineResult';
+
+    alias: Maybe<string>;
+
+    controlledBy: Maybe<string>;
+
+    disabled: Maybe<boolean>;
+
+    field: Maybe<string>;
+
+    formattedValue: Maybe<string>;
+
+    index: Maybe<string>;
+
+    key: Maybe<string>;
+
+    negate: Maybe<boolean>;
+
+    params: Maybe<string>;
+
+    type: Maybe<string>;
+
+    value: Maybe<string>;
+  };
+
   export type KqlQuery = {
     __typename?: 'SerializedFilterQueryResult';
 
@@ -4937,6 +5278,8 @@ export namespace PersistTimelineMutation {
 
     favorite: Maybe<Favorite[]>;
 
+    filters: Maybe<Filters[]>;
+
     kqlMode: Maybe<string>;
 
     kqlQuery: Maybe<KqlQuery>;
@@ -4944,6 +5287,8 @@ export namespace PersistTimelineMutation {
     title: Maybe<string>;
 
     dateRange: Maybe<DateRange>;
+
+    savedQueryId: Maybe<string>;
 
     sort: Maybe<Sort>;
 
@@ -5052,6 +5397,50 @@ export namespace PersistTimelineMutation {
     favoriteDate: Maybe<number>;
   };
 
+  export type Filters = {
+    __typename?: 'FilterTimelineResult';
+
+    meta: Maybe<Meta>;
+
+    query: Maybe<string>;
+
+    exists: Maybe<string>;
+
+    match_all: Maybe<string>;
+
+    missing: Maybe<string>;
+
+    range: Maybe<string>;
+
+    script: Maybe<string>;
+  };
+
+  export type Meta = {
+    __typename?: 'FilterMetaTimelineResult';
+
+    alias: Maybe<string>;
+
+    controlledBy: Maybe<string>;
+
+    disabled: Maybe<boolean>;
+
+    field: Maybe<string>;
+
+    formattedValue: Maybe<string>;
+
+    index: Maybe<string>;
+
+    key: Maybe<string>;
+
+    negate: Maybe<boolean>;
+
+    params: Maybe<string>;
+
+    type: Maybe<string>;
+
+    value: Maybe<string>;
+  };
+
   export type KqlQuery = {
     __typename?: 'SerializedFilterQueryResult';
 
@@ -5131,7 +5520,7 @@ export namespace GetTlsQuery {
   export type Variables = {
     sourceId: string;
     filterQuery?: Maybe<string>;
-    flowTarget: FlowTarget;
+    flowTarget: FlowTargetSourceDest;
     ip: string;
     pagination: PaginationInputPaginated;
     sort: TlsSortField;

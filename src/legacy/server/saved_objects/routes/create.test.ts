@@ -20,22 +20,22 @@
 import Hapi from 'hapi';
 import { createMockServer } from './_mock_server';
 import { createCreateRoute } from './create';
+import { savedObjectsClientMock } from '../../../../core/server/mocks';
 
 describe('POST /api/saved_objects/{type}', () => {
   let server: Hapi.Server;
-  const savedObjectsClient = {
-    errors: {} as any,
-    bulkCreate: jest.fn(),
-    bulkGet: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
+  const clientResponse = {
+    id: 'logstash-*',
+    type: 'index-pattern',
+    title: 'logstash-*',
+    version: 'foo',
+    references: [],
+    attributes: {},
   };
+  const savedObjectsClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
-    savedObjectsClient.create.mockImplementation(() => Promise.resolve(''));
+    savedObjectsClient.create.mockImplementation(() => Promise.resolve(clientResponse));
     server = createMockServer();
 
     const prereqs = {
@@ -64,15 +64,6 @@ describe('POST /api/saved_objects/{type}', () => {
         },
       },
     };
-
-    const clientResponse = {
-      type: 'index-pattern',
-      id: 'logstash-*',
-      title: 'Testing',
-      references: [],
-    };
-
-    savedObjectsClient.create.mockImplementation(() => Promise.resolve(clientResponse));
 
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);

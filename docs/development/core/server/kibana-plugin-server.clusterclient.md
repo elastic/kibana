@@ -24,12 +24,12 @@ export declare class ClusterClient implements IClusterClient
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [callAsInternalUser](./kibana-plugin-server.clusterclient.callasinternaluser.md) |  | <code>APICaller</code> | Calls specified endpoint with provided clientParams on behalf of the Kibana internal user. |
+|  [callAsInternalUser](./kibana-plugin-server.clusterclient.callasinternaluser.md) |  | <code>APICaller</code> | Calls specified endpoint with provided clientParams on behalf of the Kibana internal user. See [APICaller](./kibana-plugin-server.apicaller.md)<!-- -->. |
 
 ## Methods
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [asScoped(request)](./kibana-plugin-server.clusterclient.asscoped.md) |  | Creates an instance of <code>ScopedClusterClient</code> based on the configuration the current cluster client that exposes additional <code>callAsCurrentUser</code> method scoped to the provided req. Consumers shouldn't worry about closing scoped client instances, these will be automatically closed as soon as the original cluster client isn't needed anymore and closed. |
+|  [asScoped(request)](./kibana-plugin-server.clusterclient.asscoped.md) |  | Creates an instance of [IScopedClusterClient](./kibana-plugin-server.iscopedclusterclient.md) based on the configuration the current cluster client that exposes additional <code>callAsCurrentUser</code> method scoped to the provided req. Consumers shouldn't worry about closing scoped client instances, these will be automatically closed as soon as the original cluster client isn't needed anymore and closed. |
 |  [close()](./kibana-plugin-server.clusterclient.close.md) |  | Closes the cluster client. After that client cannot be used and one should create a new client instance to be able to interact with Elasticsearch API. |
 

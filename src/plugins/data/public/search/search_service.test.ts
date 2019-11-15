@@ -25,9 +25,9 @@ import { CoreSetup } from '../../../../core/public';
 describe('Search service', () => {
   let searchService: SearchService;
   let mockCoreSetup: MockedKeys<CoreSetup>;
-  const opaqueId = Symbol();
+
   beforeEach(() => {
-    searchService = new SearchService({ opaqueId });
+    searchService = new SearchService(coreMock.createPluginInitializerContext());
     mockCoreSetup = coreMock.createSetup();
   });
 

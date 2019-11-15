@@ -11,7 +11,6 @@ import mean from 'lodash.mean';
 import { rgba } from 'polished';
 import { TimeSeriesAPIResponse } from '../../server/lib/transactions/charts';
 import { ApmTimeSeriesResponse } from '../../server/lib/transactions/charts/get_timeseries_data/transform';
-import { StringMap } from '../../typings/common';
 import {
   Coordinate,
   RectCoordinate,
@@ -20,6 +19,7 @@ import {
 import { asDecimal, asMillis, tpmUnit } from '../utils/formatters';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { getEmptySeries } from '../components/shared/charts/CustomPlot/getEmptySeries';
+import { httpStatusCodeToColor } from '../utils/httpStatusCodeToColor';
 
 export interface ITpmBucket {
   title: string;
@@ -181,22 +181,17 @@ export function getTpmSeries(
 
 function colorMatch(key: string) {
   if (/ok|success/i.test(key)) {
-    return theme.euiColorVis0;
+    return theme.euiColorSecondary;
   } else if (/error|fail/i.test(key)) {
-    return theme.euiColorVis2;
+    return theme.euiColorDanger;
   }
 }
 
 function getColorByKey(keys: string[]) {
-  const assignedColors: StringMap<string> = {
-    'HTTP 2xx': theme.euiColorVis0,
-    'HTTP 3xx': theme.euiColorVis5,
-    'HTTP 4xx': theme.euiColorVis7,
-    'HTTP 5xx': theme.euiColorVis2
-  };
+  const assignedColors = ['HTTP 2xx', 'HTTP 3xx', 'HTTP 4xx', 'HTTP 5xx'];
 
-  const unknownKeys = difference(keys, Object.keys(assignedColors));
-  const unassignedColors: StringMap<string> = zipObject(unknownKeys, [
+  const unknownKeys = difference(keys, assignedColors);
+  const unassignedColors: Record<string, string> = zipObject(unknownKeys, [
     theme.euiColorVis1,
     theme.euiColorVis3,
     theme.euiColorVis4,
@@ -206,5 +201,5 @@ function getColorByKey(keys: string[]) {
   ]);
 
   return (key: string) =>
-    colorMatch(key) || assignedColors[key] || unassignedColors[key];
+    colorMatch(key) || httpStatusCodeToColor(key) || unassignedColors[key];
 }

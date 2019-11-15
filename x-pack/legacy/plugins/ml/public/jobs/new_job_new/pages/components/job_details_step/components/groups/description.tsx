@@ -11,7 +11,6 @@ import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import { Validation } from '../../../../../common/job_validator';
 
 interface Props {
-  children: JSX.Element;
   validation: Validation;
 }
 
@@ -36,7 +35,7 @@ export const Description: FC<Props> = memo(({ children, validation }) => {
         error={validation.message}
         isInvalid={validation.valid === false}
       >
-        {children}
+        <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
   );

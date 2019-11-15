@@ -7,14 +7,17 @@
 import { map, uniq } from 'lodash';
 import { legendOptions } from '../../../public/lib/legend_options';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
-import { ViewStrings } from '../../strings';
+import { ViewStrings } from '../../../i18n';
 
 const { Pie: strings } = ViewStrings;
 
 export const pie = () => ({
   name: 'pie',
   displayName: strings.getDisplayName(),
-  modelArgs: [['color', { label: 'Slice Labels' }], ['size', { label: 'Slice Angles' }]],
+  modelArgs: [
+    ['color', { label: 'Slice Labels' }],
+    ['size', { label: 'Slice Angles' }],
+  ],
   args: [
     {
       name: 'palette',

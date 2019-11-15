@@ -25,51 +25,19 @@ export const UPGRADE_TITLE = i18n.translate('xpack.siem.components.mlPopup.upgra
 });
 
 export const UPGRADE_BUTTON = i18n.translate('xpack.siem.components.mlPopup.upgradeButtonLabel', {
-  defaultMessage: 'Subscription options',
+  defaultMessage: 'Subscription plans',
 });
 
-export const FILTER_PLACEHOLDER = i18n.translate(
-  'xpack.siem.components.mlPopup.filterPlaceholder',
-  {
-    defaultMessage: 'e.g. rare_process_linux',
-  }
-);
-
-export const SHOW_ELASTIC_JOBS = i18n.translate('xpack.siem.components.mlPopup.showAllJobsLabel', {
-  defaultMessage: 'Elastic jobs',
+export const LICENSE_BUTTON = i18n.translate('xpack.siem.components.mlPopup.licenseButtonLabel', {
+  defaultMessage: 'Manage license',
 });
 
-export const SHOW_CUSTOM_JOBS = i18n.translate('xpack.siem.components.mlPopup.showSiemJobsLabel', {
-  defaultMessage: 'Custom jobs',
-});
-
-export const COLUMN_JOB_NAME = i18n.translate(
-  'xpack.siem.components.mlPopup.jobsTable.jobNameColumn',
-  {
-    defaultMessage: 'Job name',
-  }
-);
-
-export const COLUMN_RUN_JOB = i18n.translate(
-  'xpack.siem.components.mlPopup.jobsTable.runJobColumn',
-  {
-    defaultMessage: 'Run job',
-  }
-);
-
-export const NO_ITEMS_TEXT = i18n.translate(
-  'xpack.siem.components.mlPopup.jobsTable.noItemsDescription',
-  {
-    defaultMessage: 'No SIEM Machine Learning jobs found',
-  }
-);
-
-export const CREATE_CUSTOM_JOB = i18n.translate(
-  'xpack.siem.components.mlPopup.jobsTable.createCustomJobButtonLabel',
-  {
-    defaultMessage: 'Create custom job',
-  }
-);
+export const MODULE_NOT_COMPATIBLE_TITLE = (incompatibleJobCount: number) =>
+  i18n.translate('xpack.siem.components.mlPopup.moduleNotCompatibleTitle', {
+    values: { incompatibleJobCount },
+    defaultMessage:
+      '{incompatibleJobCount} {incompatibleJobCount, plural, =1 {job} other {jobs}} are currently unavailable',
+  });
 
 export const START_JOB_FAILURE = i18n.translate(
   'xpack.siem.components.mlPopup.errors.startJobFailureTitle',

@@ -250,7 +250,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async changeDataFormatter(
       formatter: 'Bytes' | 'Number' | 'Percent' | 'Duration' | 'Custom'
     ) {
-      const formatterEl = await find.byCssSelector('[id$="row"] .euiComboBox');
+      const formatterEl = await testSubjects.find('tsvbDataFormatPicker');
       await comboBox.setElement(formatterEl, formatter, { clickWithMouse: true });
     }
 
@@ -305,9 +305,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async getRhythmChartLegendValue(nth = 0) {
       await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-      const metricValue = (await find.allByCssSelector(
-        `.echLegendItem .echLegendItem__displayValue`
-      ))[nth];
+      const metricValue = (
+        await find.allByCssSelector(`.echLegendItem .echLegendItem__displayValue`)
+      )[nth];
       await metricValue.moveMouseTo();
       return await metricValue.getVisibleText();
     }

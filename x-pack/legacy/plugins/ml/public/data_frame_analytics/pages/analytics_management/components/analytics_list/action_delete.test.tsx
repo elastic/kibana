@@ -19,6 +19,7 @@ jest.mock('../../../../../privilege/check_privilege', () => ({
   checkPermission: jest.fn(() => false),
   createPermissionFailureMessage: jest.fn(),
 }));
+jest.mock('ui/new_platform');
 
 describe('DeleteAction', () => {
   afterEach(cleanup);

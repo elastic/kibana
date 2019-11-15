@@ -17,6 +17,7 @@
  * under the License.
  */
 import {
+  htmlIdGenerator,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -31,6 +32,7 @@ import {
   EuiOverlayMask,
   EuiSpacer,
   EuiSwitch,
+  EuiSwitchEvent,
   EuiTextArea,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -67,7 +69,10 @@ interface State {
   visualizationDescription: string;
 }
 
+const generateId = htmlIdGenerator();
+
 export class SavedObjectSaveModal extends React.Component<Props, State> {
+  private warning = React.createRef<HTMLDivElement>();
   public readonly state = {
     title: this.props.title,
     copyOnSave: false,
@@ -79,6 +84,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
 
   public render() {
     const { isTitleDuplicateConfirmed, hasTitleDuplicate, title } = this.state;
+    const duplicateWarningId = generateId();
 
     return (
       <EuiOverlayMask>
@@ -99,7 +105,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
             </EuiModalHeader>
 
             <EuiModalBody>
-              {this.renderDuplicateTitleCallout()}
+              {this.renderDuplicateTitleCallout(duplicateWarningId)}
 
               <EuiForm>
                 {this.props.objectType !== VISUALIZE_EMBEDDABLE_TYPE && this.props.description && (
@@ -127,6 +133,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
                     isInvalid={
                       (!isTitleDuplicateConfirmed && hasTitleDuplicate) || title.length === 0
                     }
+                    aria-describedby={this.state.hasTitleDuplicate ? duplicateWarningId : undefined}
                   />
                 </EuiFormRow>
 
@@ -188,6 +195,10 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
       isTitleDuplicateConfirmed: true,
       hasTitleDuplicate: true,
     });
+
+    if (this.warning.current) {
+      this.warning.current.focus();
+    }
   };
 
   private saveSavedObject = async () => {
@@ -217,7 +228,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
     });
   };
 
-  private onCopyOnSaveChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  private onCopyOnSaveChange = (event: EuiSwitchEvent) => {
     this.setState({
       copyOnSave: event.target.checked,
     });
@@ -255,43 +266,46 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
     );
   };
 
-  private renderDuplicateTitleCallout = () => {
+  private renderDuplicateTitleCallout = (duplicateWarningId: string) => {
     if (!this.state.hasTitleDuplicate) {
       return;
     }
 
     return (
       <>
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="kibana-react.savedObjects.saveModal.duplicateTitleLabel"
-              defaultMessage="A {objectType} with the title '{title}' already exists"
-              values={{ objectType: this.props.objectType, title: this.state.title }}
-            />
-          }
-          color="warning"
-          data-test-subj="titleDupicateWarnMsg"
-        >
-          <p>
-            <FormattedMessage
-              id="kibana-react.savedObjects.saveModal.duplicateTitleDescription"
-              defaultMessage="Clicking {confirmSaveLabel} overwrites the existing {objectType}."
-              values={{
-                objectType: this.props.objectType,
-                confirmSaveLabel: (
-                  <strong>
-                    {this.props.confirmButtonLabel
-                      ? this.props.confirmButtonLabel
-                      : i18n.translate('kibana-react.savedObjects.saveModal.saveButtonLabel', {
-                          defaultMessage: 'Save',
-                        })}
-                  </strong>
-                ),
-              }}
-            />
-          </p>
-        </EuiCallOut>
+        <div ref={this.warning} tabIndex={-1}>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="kibana-react.savedObjects.saveModal.duplicateTitleLabel"
+                defaultMessage="A {objectType} with the title '{title}' already exists"
+                values={{ objectType: this.props.objectType, title: this.state.title }}
+              />
+            }
+            color="warning"
+            data-test-subj="titleDupicateWarnMsg"
+            id={duplicateWarningId}
+          >
+            <p>
+              <FormattedMessage
+                id="kibana-react.savedObjects.saveModal.duplicateTitleDescription"
+                defaultMessage="Clicking {confirmSaveLabel} overwrites the existing {objectType}."
+                values={{
+                  objectType: this.props.objectType,
+                  confirmSaveLabel: (
+                    <strong>
+                      {this.props.confirmButtonLabel
+                        ? this.props.confirmButtonLabel
+                        : i18n.translate('kibana-react.savedObjects.saveModal.saveButtonLabel', {
+                            defaultMessage: 'Save',
+                          })}
+                    </strong>
+                  ),
+                }}
+              />
+            </p>
+          </EuiCallOut>
+        </div>
         <EuiSpacer />
       </>
     );

@@ -36,7 +36,8 @@ export {
   PointSeriesColumn,
   PointSeriesColumnName,
   Render,
+  ExpressionTypeStyle,
   Style,
   Type,
-} from '../../../../plugins/expressions/common';
+} from '../../../../plugins/expressions/public';
 export const API_ROUTE = '/api/interpreter';

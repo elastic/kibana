@@ -12,7 +12,6 @@ import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import { JOB_TYPE } from '../../../../../common/job_creator/util/constants';
 
 interface Props {
-  children: JSX.Element;
   jobType: JOB_TYPE;
 }
 
@@ -33,7 +32,7 @@ export const Description: FC<Props> = memo(({ children, jobType }) => {
         }
       >
         <EuiFormRow label={title} describedByIds={['description']}>
-          {children}
+          <>{children}</>
         </EuiFormRow>
       </EuiDescribedFormGroup>
     );
@@ -53,7 +52,7 @@ export const Description: FC<Props> = memo(({ children, jobType }) => {
         }
       >
         <EuiFormRow label={title} describedByIds={['description']}>
-          {children}
+          <>{children}</>
         </EuiFormRow>
       </EuiDescribedFormGroup>
     );

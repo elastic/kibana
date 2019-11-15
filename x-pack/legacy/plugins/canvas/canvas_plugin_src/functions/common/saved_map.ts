@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Filter as ESFilterType } from '@kbn/es-query';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { TimeRange } from 'src/plugins/data/public';
 import { EmbeddableInput } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
@@ -14,7 +13,8 @@ import {
   EmbeddableExpressionType,
   EmbeddableExpression,
 } from '../../expression_types';
-import { getFunctionHelp } from '../../strings';
+import { getFunctionHelp } from '../../../i18n';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 interface Arguments {
   id: string;
@@ -29,7 +29,7 @@ interface SavedMapInput extends EmbeddableInput {
     isPaused: boolean;
     interval: number;
   };
-  filters: ESFilterType[];
+  filters: esFilters.Filter[];
 }
 
 type Return = EmbeddableExpression<SavedMapInput>;

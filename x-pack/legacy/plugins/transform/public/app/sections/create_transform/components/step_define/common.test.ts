@@ -124,7 +124,7 @@ describe('Transform: Define Pivot Common', () => {
     const request = getPreviewRequestBody('the-index-pattern-title', query, [groupBy], [agg]);
     const pivotPreviewDevConsoleStatement = getPivotPreviewDevConsoleStatement(request);
 
-    expect(pivotPreviewDevConsoleStatement).toBe(`POST _data_frame/transforms/_preview
+    expect(pivotPreviewDevConsoleStatement).toBe(`POST _transform/_preview
 {
   "source": {
     "index": [

@@ -71,10 +71,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         ]);
       });
 
-      it('landing page shows "Create new Workspace" button', async () => {
+      it('landing page shows "Create new graph" button', async () => {
         await PageObjects.common.navigateToApp('graph');
-        await testSubjects.existOrFail('workspaceLandingPage', { timeout: 10000 });
-        await testSubjects.existOrFail('graphCreateWorkspacePromptButton');
+        await testSubjects.existOrFail('graphLandingPage', { timeout: 10000 });
+        await testSubjects.existOrFail('graphCreateGraphPromptButton');
       });
 
       it(`doesn't show read-only badge`, async () => {
@@ -83,9 +83,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('allows creating a new workspace', async () => {
         await PageObjects.common.navigateToApp('graph');
-        await testSubjects.click('graphCreateWorkspacePromptButton');
-        const breadcrumb = await testSubjects.find('~graphCurrentWorkspaceBreadcrumb');
-        expect(await breadcrumb.getVisibleText()).to.equal('Unsaved workspace');
+        await testSubjects.click('graphCreateGraphPromptButton');
+        const breadcrumb = await testSubjects.find('~graphCurrentGraphBreadcrumb');
+        expect(await breadcrumb.getVisibleText()).to.equal('Unsaved graph');
       });
 
       it('shows save button', async () => {
@@ -138,7 +138,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('does not show a "Create new Workspace" button', async () => {
         await PageObjects.common.navigateToApp('graph');
-        await testSubjects.existOrFail('workspaceLandingPage', { timeout: 10000 });
+        await testSubjects.existOrFail('graphLandingPage', { timeout: 10000 });
         await testSubjects.missingOrFail('newItemButton');
       });
 

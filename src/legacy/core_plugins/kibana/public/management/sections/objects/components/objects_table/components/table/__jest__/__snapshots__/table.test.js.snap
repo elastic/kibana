@@ -67,6 +67,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             describedByIds={Array []}
             display="row"
             fullWidth={false}
+            hasChildLabel={true}
             hasEmptyLabelSpace={false}
             label={
               <FormattedMessage
@@ -94,6 +95,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             describedByIds={Array []}
             display="row"
             fullWidth={false}
+            hasChildLabel={true}
             hasEmptyLabelSpace={false}
             labelType="label"
           >
@@ -272,6 +274,7 @@ exports[`Table should render normally 1`] = `
             describedByIds={Array []}
             display="row"
             fullWidth={false}
+            hasChildLabel={true}
             hasEmptyLabelSpace={false}
             label={
               <FormattedMessage
@@ -299,6 +302,7 @@ exports[`Table should render normally 1`] = `
             describedByIds={Array []}
             display="row"
             fullWidth={false}
+            hasChildLabel={true}
             hasEmptyLabelSpace={false}
             labelType="label"
           >

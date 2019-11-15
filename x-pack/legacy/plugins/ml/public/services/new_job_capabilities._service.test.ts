@@ -9,40 +9,60 @@ import { IndexPattern } from 'ui/index_patterns';
 
 // there is magic happening here. starting the include name with `mock..`
 // ensures it can be lazily loaded by the jest.mock function below.
-import mockFarequoteResponse from './__mocks__/farequote_job_caps_response.json';
+import mockCloudwatchResponse from './__mocks__/cloudwatch_job_caps_response.json';
 
 jest.mock('./ml_api_service', () => ({
   ml: {
     jobs: {
-      newJobCaps: jest.fn(() => Promise.resolve(mockFarequoteResponse)),
+      newJobCaps: jest.fn(() => Promise.resolve(mockCloudwatchResponse)),
     },
   },
 }));
 
 const indexPattern = ({
-  id: 'farequote-*',
-  title: 'farequote-*',
+  id: 'cloudwatch-*',
+  title: 'cloudwatch-*',
 } as unknown) as IndexPattern;
 
 describe('new_job_capabilities_service', () => {
-  describe('farequote newJobCaps()', () => {
+  describe('cloudwatch newJobCaps()', () => {
     it('can construct job caps objects from endpoint json', async done => {
       await newJobCapsService.initializeFromIndexPattern(indexPattern);
       const { fields, aggs } = await newJobCapsService.newJobCaps;
 
-      const responseTimeField = fields.find(f => f.id === 'responsetime') || { aggs: [] };
-      const airlineField = fields.find(f => f.id === 'airline') || { aggs: [] };
+      const networkOutField = fields.find(f => f.id === 'NetworkOut') || { aggs: [] };
+      const regionField = fields.find(f => f.id === 'region') || { aggs: [] };
       const meanAgg = aggs.find(a => a.id === 'mean') || { fields: [] };
       const distinctCountAgg = aggs.find(a => a.id === 'distinct_count') || { fields: [] };
 
-      expect(fields).toHaveLength(3);
-      expect(aggs).toHaveLength(15);
+      expect(fields).toHaveLength(12);
+      expect(aggs).toHaveLength(35);
 
-      expect(responseTimeField.aggs).toHaveLength(12);
-      expect(airlineField.aggs).toHaveLength(1);
+      expect(networkOutField.aggs).toHaveLength(25);
+      expect(regionField.aggs).toHaveLength(3);
 
-      expect(meanAgg.fields).toHaveLength(1);
-      expect(distinctCountAgg.fields).toHaveLength(2);
+      expect(meanAgg.fields).toHaveLength(7);
+      expect(distinctCountAgg.fields).toHaveLength(10);
+      done();
+    });
+
+    it('job caps including text fields', async done => {
+      await newJobCapsService.initializeFromIndexPattern(indexPattern, true, false);
+      const { fields, aggs } = await newJobCapsService.newJobCaps;
+
+      expect(fields).toHaveLength(13); // one more field
+      expect(aggs).toHaveLength(35);
+
+      done();
+    });
+
+    it('job caps excluding event rate', async done => {
+      await newJobCapsService.initializeFromIndexPattern(indexPattern, false, true);
+      const { fields, aggs } = await newJobCapsService.newJobCaps;
+
+      expect(fields).toHaveLength(11); // one less field
+      expect(aggs).toHaveLength(35);
+
       done();
     });
   });

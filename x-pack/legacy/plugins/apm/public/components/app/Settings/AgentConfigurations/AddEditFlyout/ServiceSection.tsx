@@ -9,7 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { SelectWithPlaceholder } from '../../../../shared/SelectWithPlaceholder';
 import { useFetcher } from '../../../../../hooks/useFetcher';
-import { callApmApi } from '../../../../../services/rest/callApmApi';
 import {
   getOptionLabel,
   omitAllOption
@@ -36,7 +35,7 @@ export function ServiceSection({
   setEnvironment
 }: Props) {
   const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher(
-    () => {
+    callApmApi => {
       if (!isReadOnly) {
         return callApmApi({
           pathname: '/api/apm/settings/agent-configuration/services',
@@ -48,7 +47,7 @@ export function ServiceSection({
     { preservePreviousData: false }
   );
   const { data: environments = [], status: environmentStatus } = useFetcher(
-    () => {
+    callApmApi => {
       if (!isReadOnly && serviceName) {
         return callApmApi({
           pathname: '/api/apm/settings/agent-configuration/environments',

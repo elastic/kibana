@@ -33,23 +33,17 @@ export { FilterBar, ApplyFiltersPopover } from './filter';
 export {
   Field,
   FieldType,
+  FieldListInterface,
   IndexPattern,
   IndexPatterns,
   StaticIndexPattern,
 } from './index_patterns';
-export { Query, QueryBarInput } from './query';
+export { QueryBarInput } from './query';
 export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
 
 /** @public static code */
 export * from '../common';
-export {
-  FilterManager,
-  FilterStateManager,
-  uniqFilters,
-  extractTimeFilter,
-  changeTimeFilter,
-  onlyDisabledFiltersChanged,
-} from './filter/filter_manager';
+export { FilterStateManager } from './filter/filter_manager';
 export {
   CONTAINS_SPACES,
   getFromSavedObject,
@@ -64,8 +58,4 @@ export {
   IndexPatternMissingIndices,
   NoDefaultIndexPattern,
   NoDefinedIndexPatterns,
-  mockFields,
-  mockIndexPattern,
 } from './index_patterns';
-
-export { TimeHistoryContract, TimefilterContract, getTime, InputTimeRange } from './timefilter';

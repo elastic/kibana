@@ -19,7 +19,7 @@
 
 import { httpServiceMock, httpServerMock } from '../../../../../src/core/server/mocks';
 import { registerSearchRoute } from './routes';
-import { IRouter, ScopedClusterClient } from 'kibana/server';
+import { IRouter, ScopedClusterClient, RequestHandlerContext } from 'kibana/server';
 
 describe('Search service', () => {
   let routerMock: jest.Mocked<IRouter>;
@@ -56,7 +56,7 @@ describe('Search service', () => {
 
     registerSearchRoute(routerMock);
     const handler = routerMock.post.mock.calls[0][1];
-    await handler(mockContext, mockRequest, mockResponse);
+    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockSearch).toBeCalled();
     expect(mockSearch.mock.calls[0][0]).toStrictEqual(mockBody);
@@ -88,7 +88,7 @@ describe('Search service', () => {
 
     registerSearchRoute(routerMock);
     const handler = routerMock.post.mock.calls[0][1];
-    await handler(mockContext, mockRequest, mockResponse);
+    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockSearch).toBeCalled();
     expect(mockSearch.mock.calls[0][0]).toStrictEqual(mockBody);

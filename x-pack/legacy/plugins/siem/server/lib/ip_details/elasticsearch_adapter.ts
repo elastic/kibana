@@ -8,14 +8,9 @@ import { get, getOr } from 'lodash/fp';
 
 import {
   AutonomousSystem,
-  DomainsData,
-  DomainsEdges,
-  FlowTarget,
   GeoEcsFields,
   HostEcsFields,
   IpOverviewData,
-  TlsData,
-  TlsEdges,
   UsersData,
   UsersEdges,
 } from '../../graphql/types';
@@ -23,29 +18,19 @@ import { inspectStringifyObject } from '../../utils/build_query';
 import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
-import {
-  DomainsRequestOptions,
-  IpOverviewRequestOptions,
-  TlsRequestOptions,
-  UsersRequestOptions,
-} from './index';
-import { buildDomainsQuery } from './query_domains.dsl';
+import { IpOverviewRequestOptions, UsersRequestOptions } from './index';
 import { buildOverviewQuery } from './query_overview.dsl';
+import { buildUsersQuery } from './query_users.dsl';
+
 import {
-  DomainsBuckets,
   IpDetailsAdapter,
   IpOverviewHit,
   OverviewHit,
   OverviewHostHit,
-  TlsBuckets,
   UsersBucketsItem,
 } from './types';
 
-import { buildTlsQuery } from './query_tls.dsl';
-
-import { buildUsersQuery } from './query_users.dsl';
-
-export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
+export class ElasticsearchIpDetailsAdapter implements IpDetailsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getIpDetails(
@@ -69,75 +54,6 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
       ...getIpOverviewAgg('source', getOr({}, 'aggregations.source', response)),
       ...getIpOverviewAgg('destination', getOr({}, 'aggregations.destination', response)),
       ...getIpOverviewHostAgg(getOr({}, 'aggregations.host', response)),
-    };
-  }
-
-  public async getDomains(
-    request: FrameworkRequest,
-    options: DomainsRequestOptions
-  ): Promise<DomainsData> {
-    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
-      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
-    }
-    const dsl = buildDomainsQuery(options);
-    const response = await this.framework.callWithRequest<DomainsData, TermAggregation>(
-      request,
-      'search',
-      dsl
-    );
-
-    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-    const totalCount = getOr(0, 'aggregations.domain_count.value', response);
-    const domainsEdges: DomainsEdges[] = getDomainsEdges(response, options);
-    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
-    const edges = domainsEdges.splice(cursorStart, querySize - cursorStart);
-    const inspect = {
-      dsl: [inspectStringifyObject(dsl)],
-      response: [inspectStringifyObject(response)],
-    };
-    const showMorePagesIndicator = totalCount > fakeTotalCount;
-    return {
-      edges,
-      inspect,
-      pageInfo: {
-        activePage: activePage ? activePage : 0,
-        fakeTotalCount,
-        showMorePagesIndicator,
-      },
-      totalCount,
-    };
-  }
-
-  public async getTls(request: FrameworkRequest, options: TlsRequestOptions): Promise<TlsData> {
-    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
-      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
-    }
-    const dsl = buildTlsQuery(options);
-    const response = await this.framework.callWithRequest<TlsData, TermAggregation>(
-      request,
-      'search',
-      dsl
-    );
-
-    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-    const totalCount = getOr(0, 'aggregations.count.value', response);
-    const tlsEdges: TlsEdges[] = getTlsEdges(response, options);
-    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
-    const edges = tlsEdges.splice(cursorStart, querySize - cursorStart);
-    const inspect = {
-      dsl: [inspectStringifyObject(dsl)],
-      response: [inspectStringifyObject(response)],
-    };
-    const showMorePagesIndicator = totalCount > fakeTotalCount;
-    return {
-      edges,
-      inspect,
-      pageInfo: {
-        activePage: activePage ? activePage : 0,
-        fakeTotalCount,
-        showMorePagesIndicator,
-      },
-      totalCount,
     };
   }
 
@@ -217,76 +133,6 @@ export const getIpOverviewHostAgg = (overviewHostHit: OverviewHostHit | {}) => {
       ...hostFields,
     },
   };
-};
-
-const getDomainsEdges = (
-  response: DatabaseSearchResponse<DomainsData, TermAggregation>,
-  options: DomainsRequestOptions
-): DomainsEdges[] => {
-  return formatDomainsEdges(
-    getOr([], `aggregations.${options.flowTarget}_domains.buckets`, response),
-    options.flowTarget
-  );
-};
-
-export const formatDomainsEdges = (
-  buckets: DomainsBuckets[],
-  flowTarget: FlowTarget
-): DomainsEdges[] =>
-  buckets.map((bucket: DomainsBuckets) => ({
-    node: {
-      _id: bucket.key,
-      [flowTarget]: {
-        uniqueIpCount: getOrNumber('uniqueIpCount.value', bucket),
-        domainName: bucket.key,
-        lastSeen: get('lastSeen.value_as_string', bucket),
-      },
-      network: {
-        bytes: getOrNumber('bytes.value', bucket),
-        packets: getOrNumber('packets.value', bucket),
-        direction: bucket.direction.buckets.map(bucketDir => bucketDir.key),
-      },
-    },
-    cursor: {
-      value: bucket.key,
-      tiebreaker: null,
-    },
-  }));
-
-const getTlsEdges = (
-  response: DatabaseSearchResponse<TlsData, TermAggregation>,
-  options: TlsRequestOptions
-): TlsEdges[] => {
-  return formatTlsEdges(getOr([], 'aggregations.sha1.buckets', response));
-};
-
-export const formatTlsEdges = (buckets: TlsBuckets[]): TlsEdges[] => {
-  return buckets.map((bucket: TlsBuckets) => {
-    const edge: TlsEdges = {
-      node: {
-        _id: bucket.key,
-        alternativeNames: bucket.alternative_names.buckets.map(({ key }) => key),
-        commonNames: bucket.common_names.buckets.map(({ key }) => key),
-        ja3: bucket.ja3.buckets.map(({ key }) => key),
-        issuerNames: bucket.issuer_names.buckets.map(({ key }) => key),
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        notAfter: bucket.not_after.buckets.map(({ key_as_string }) => key_as_string),
-      },
-      cursor: {
-        value: bucket.key,
-        tiebreaker: null,
-      },
-    };
-    return edge;
-  });
-};
-
-const getOrNumber = (path: string, bucket: DomainsBuckets) => {
-  const numb = get(path, bucket);
-  if (numb == null) {
-    return null;
-  }
-  return numb;
 };
 
 export const getUsersEdges = (

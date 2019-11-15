@@ -21,12 +21,14 @@ import {
   UiSettingsClientContract,
   SavedObjectsClientContract,
   HttpServiceBase,
-  NotificationsSetup,
+  NotificationsStart,
 } from 'src/core/public';
-import { Field, FieldList, FieldType } from './fields';
-import { createFlattenHitWrapper } from './index_patterns';
+import { Field, FieldList, FieldListInterface, FieldType } from './fields';
 import { createIndexPatternSelect } from './components';
+import { setNotifications } from './services';
+
 import {
+  createFlattenHitWrapper,
   formatHitProvider,
   IndexPattern,
   IndexPatterns,
@@ -37,7 +39,7 @@ export interface IndexPatternDependencies {
   uiSettings: UiSettingsClientContract;
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpServiceBase;
-  notifications: NotificationsSetup;
+  notifications: NotificationsStart;
 }
 
 /**
@@ -63,9 +65,11 @@ export class IndexPatternsService {
   }
 
   public start({ uiSettings, savedObjectsClient, http, notifications }: IndexPatternDependencies) {
+    setNotifications(notifications);
+
     return {
       ...this.setupApi,
-      indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient, http, notifications),
+      indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient, http),
       IndexPatternSelect: createIndexPatternSelect(savedObjectsClient),
     };
   }
@@ -88,8 +92,6 @@ export {
   INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
   isFilterable,
   validateIndexPattern,
-  mockFields,
-  mockIndexPattern,
 } from './utils';
 
 /** @public */
@@ -107,4 +109,7 @@ export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
 export type IndexPatternsStart = ReturnType<IndexPatternsService['start']>;
 
 /** @public */
-export { IndexPattern, IndexPatterns, StaticIndexPattern, Field, FieldType };
+export { IndexPattern, IndexPatterns, StaticIndexPattern, Field, FieldType, FieldListInterface };
+
+/** @public */
+export { getIndexPatternTitle, findIndexPatternByTitle } from './utils';

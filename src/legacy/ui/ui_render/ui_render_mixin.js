@@ -185,7 +185,7 @@ export function uiRenderMixin(kbnServer, server, config) {
   async function getUiSettings({ request, includeUserProvidedConfig }) {
     const uiSettings = request.getUiSettingsService();
     return props({
-      defaults: uiSettings.getDefaults(),
+      defaults: uiSettings.getRegistered(),
       user: includeUserProvidedConfig && uiSettings.getUserProvided()
     });
   }
@@ -237,6 +237,7 @@ export function uiRenderMixin(kbnServer, server, config) {
         buildNumber: config.get('pkg.buildNum'),
         branch: config.get('pkg.branch'),
         basePath,
+        env: kbnServer.newPlatform.env,
         legacyMode: app.getId() !== 'core',
         i18n: {
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,

@@ -86,7 +86,7 @@ export class DashboardContainerExample extends React.Component<Props, State> {
   }
 
   public switchViewMode = () => {
-    this.setState((prevState: State) => {
+    this.setState<'viewMode'>((prevState: State) => {
       if (!this.container || isErrorEmbeddable<DashboardContainer>(this.container)) {
         return prevState;
       }

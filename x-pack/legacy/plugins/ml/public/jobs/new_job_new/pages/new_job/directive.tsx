@@ -17,7 +17,7 @@ import { I18nContext } from 'ui/i18n';
 import { IPrivate } from 'ui/private';
 import { InjectorService } from '../../../../../common/types/angular';
 
-import { SearchItemsProvider } from '../../../new_job/utils/new_job_utils';
+import { SearchItemsProvider } from '../../utils/new_job_utils';
 import { Page, PageProps } from './page';
 import { JOB_TYPE } from '../../common/job_creator/util/constants';
 

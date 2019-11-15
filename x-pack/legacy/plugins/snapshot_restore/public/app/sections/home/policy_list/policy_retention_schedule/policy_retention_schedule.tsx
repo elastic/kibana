@@ -60,7 +60,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
               <p>
                 <FormattedMessage
                   id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleDescription"
-                  defaultMessage="Snapshot retention will run on the cron schedule: {cronSchedule}."
+                  defaultMessage="The cron schedule for retaining snapshots is: {cronSchedule}."
                   values={{ cronSchedule: <strong>{cronSchedule}</strong> }}
                 />
               </p>
@@ -142,7 +142,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
         title={
           <FormattedMessage
             id="xpack.snapshotRestore.policyRetentionSchedulePanel.noScheduleConfiguredWarningTitle"
-            defaultMessage="Retention schedule not configured"
+            defaultMessage="Retention not scheduled"
           />
         }
         color="warning"
@@ -151,7 +151,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
         <p>
           <FormattedMessage
             id="xpack.snapshotRestore.policyRetentionSchedulePanel.noScheduleConfiguredWarningDescription"
-            defaultMessage="You have one or more policies with retention, but you do not have a retention schedule configured."
+            defaultMessage="One or more policies have a retention period, but no retention is scheduled."
           />
         </p>
         <RetentionExecuteModalProvider>
@@ -210,7 +210,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
                                 name: i18n.translate(
                                   'xpack.snapshotRestore.policyRetentionSchedulePanel.addButtonLabel',
                                   {
-                                    defaultMessage: 'Configure schedule',
+                                    defaultMessage: 'Schedule',
                                   }
                                 ),
                                 icon: 'plusInCircle',

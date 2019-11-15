@@ -27,12 +27,10 @@ import { METRIC_TYPES } from './metric_agg_types';
 import { fieldFormats } from '../../registry/field_formats';
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 
-export interface IMetricAggConfig extends AggConfig {
-  params: MetricAggParam[];
-}
+export type IMetricAggConfig = AggConfig;
 
 export interface MetricAggTypeConfig<TMetricAggConfig extends IMetricAggConfig>
-  extends AggTypeConfig<TMetricAggConfig> {
+  extends AggTypeConfig<TMetricAggConfig, MetricAggParam> {
   isScalable?: () => boolean;
   subtype?: string;
 }
@@ -42,11 +40,16 @@ export interface MetricAggParam extends AggParamType {
   onlyAggregatable?: boolean;
 }
 
-export class MetricAggType<TMetricAggConfig extends IMetricAggConfig> extends AggType<
-  TMetricAggConfig
-> {
+const metricType = 'metrics';
+
+export class MetricAggType<
+  TMetricAggConfig extends IMetricAggConfig = IMetricAggConfig
+> extends AggType<TMetricAggConfig, MetricAggParam> {
   subtype: string;
   isScalable: () => boolean;
+  type = metricType;
+
+  getKey = () => {};
 
   constructor(config: MetricAggTypeConfig<TMetricAggConfig>) {
     super(config);
@@ -55,8 +58,9 @@ export class MetricAggType<TMetricAggConfig extends IMetricAggConfig> extends Ag
       config.getValue ||
       ((agg, bucket) => {
         // Metric types where an empty set equals `zero`
-        const isSettableToZero = [METRIC_TYPES.CARDINALITY, METRIC_TYPES.SUM].includes(agg.type
-          .name as METRIC_TYPES);
+        const isSettableToZero = [METRIC_TYPES.CARDINALITY, METRIC_TYPES.SUM].includes(
+          agg.type.name as METRIC_TYPES
+        );
 
         // Return proper values when no buckets are present
         // `Count` handles empty sets properly
@@ -80,4 +84,8 @@ export class MetricAggType<TMetricAggConfig extends IMetricAggConfig> extends Ag
 
     this.isScalable = config.isScalable || (() => false);
   }
+}
+
+export function isMetricAggType(aggConfig: any): aggConfig is MetricAggType {
+  return aggConfig && aggConfig.type === metricType;
 }

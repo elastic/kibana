@@ -37,6 +37,6 @@ export function fromKueryExpression(
   parseOptions?: KueryParseOptions
 ): KueryNode;
 
-export function toElasticsearchQuery(node: KueryNode, indexPattern: any): JsonObject;
+export function toElasticsearchQuery(node: KueryNode, indexPattern?: any): JsonObject;
 
 export function doesKueryExpressionHaveLuceneSyntaxError(expression: string): boolean;

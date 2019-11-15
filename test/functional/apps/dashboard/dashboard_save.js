@@ -31,10 +31,6 @@ export default function ({ getPageObjects }) {
       await PageObjects.dashboard.initTests();
     });
 
-    after(async function () {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-    });
-
     it('warns on duplicate name for new dashboard', async function () {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.saveDashboard(dashboardName);

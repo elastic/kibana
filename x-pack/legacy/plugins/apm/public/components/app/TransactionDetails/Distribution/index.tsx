@@ -111,7 +111,7 @@ export const TransactionDistribution: FunctionComponent<Props> = (
   ]);
 
   // no data in response
-  if (!distribution || !distribution.totalHits) {
+  if (!distribution || distribution.noHits) {
     // only show loading state if there is no data - else show stale data until new data has loaded
     if (isLoading) {
       return <LoadingStatePrompt />;
@@ -195,10 +195,9 @@ export const TransactionDistribution: FunctionComponent<Props> = (
         }
         backgroundHover={(bucket: IChartPoint) => bucket.y > 0 && bucket.sample}
         tooltipHeader={(bucket: IChartPoint) =>
-          `${timeFormatter(bucket.x0, { withUnit: false })} - ${timeFormatter(
-            bucket.x,
-            { withUnit: false }
-          )} ${unit}`
+          `${timeFormatter(bucket.x0, {
+            withUnit: false
+          })} - ${timeFormatter(bucket.x, { withUnit: false })} ${unit}`
         }
         tooltipFooter={(bucket: IChartPoint) =>
           !bucket.sample &&

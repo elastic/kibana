@@ -17,18 +17,13 @@
  * under the License.
  */
 import { Legacy } from 'kibana';
-import {
-  IUiSettingsClient,
-  UiSettingsService,
-  UiSettingsServiceOptions,
-} from './ui_settings_service';
+import { IUiSettingsClient, SavedObjectsClientContract } from 'src/core/server';
 
-export type UiSettingsServiceFactoryOptions = Pick<
-  UiSettingsServiceOptions,
-  'savedObjectsClient' | 'getDefaults' | 'overrides'
->;
+export interface UiSettingsServiceFactoryOptions {
+  savedObjectsClient: SavedObjectsClientContract;
+}
 /**
- *  Create an instance of UiSettingsService that will use the
+ *  Create an instance of UiSettingsClient that will use the
  *  passed `savedObjectsClient` to communicate with elasticsearch
  *
  *  @return {IUiSettingsClient}
@@ -37,17 +32,5 @@ export function uiSettingsServiceFactory(
   server: Legacy.Server,
   options: UiSettingsServiceFactoryOptions
 ): IUiSettingsClient {
-  const config = server.config();
-
-  const { savedObjectsClient, getDefaults, overrides } = options;
-
-  return new UiSettingsService({
-    type: 'config',
-    id: config.get('pkg.version'),
-    buildNum: config.get('pkg.buildNum'),
-    savedObjectsClient,
-    getDefaults,
-    overrides,
-    logWithMetadata: server.logWithMetadata,
-  });
+  return server.newPlatform.__internals.uiSettings.asScopedToClient(options.savedObjectsClient);
 }

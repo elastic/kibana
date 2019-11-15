@@ -8,7 +8,7 @@ integration with {kib}, or automating certain aspects of configuring and
 deploying {kib}.
 
 Each API is experimental and can include breaking changes in any version of 
-{kib}, or might have been entirely removed from {kib}.
+{kib}, or might be entirely removed from {kib}.
 
 ////
 Each API has one of the following labels:
@@ -29,25 +29,14 @@ entirely.
 If a label is missing from an API, it is considered `experimental`.
 ////
 
-NOTE: You cannot access the APIs via the Console in {kib}.
-
-[float]
-== APIs
-* <<features-api>>
-* <<spaces-api>>
-* <<role-management-api>>
-* <<saved-objects-api>>
-* <<dashboard-import-api>>
-* <<logstash-configuration-management-api>>
-* <<url-shortening-api>>
-* <<upgrade-assistant-api>>
 --
 
+include::{kib-repo-dir}/api/using-api.asciidoc[]
 include::{kib-repo-dir}/api/features.asciidoc[]
 include::{kib-repo-dir}/api/spaces-management.asciidoc[]
 include::{kib-repo-dir}/api/role-management.asciidoc[]
 include::{kib-repo-dir}/api/saved-objects.asciidoc[]
-include::{kib-repo-dir}/api/dashboard-import.asciidoc[]
+include::{kib-repo-dir}/api/dashboard-api.asciidoc[]
 include::{kib-repo-dir}/api/logstash-configuration-management.asciidoc[]
 include::{kib-repo-dir}/api/url-shortening.asciidoc[]
 include::{kib-repo-dir}/api/upgrade-assistant.asciidoc[]

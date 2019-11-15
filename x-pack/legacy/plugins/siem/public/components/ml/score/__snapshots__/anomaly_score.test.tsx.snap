@@ -125,14 +125,12 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 <EuiFlexItem
                   grow={false}
                 >
-                  <EuiLink
-                    color="primary"
+                  <ForwardRef
                     href="ml#/explorer?_g=(ml:(jobIds:!(job-1)),refreshInterval:(display:Off,pause:!f,value:0),time:(from:'1970-01-01T00:00:00.000Z',mode:absolute,to:'3000-01-01T00:00:00.000Z'))&_a=(mlExplorerFilter:(),mlExplorerSwimlane:(),mlSelectLimit:(display:'10',val:10),mlShowCharts:!t)"
                     target="_blank"
-                    type="button"
                   >
                     View in Machine Learning
-                  </EuiLink>
+                  </ForwardRef>
                 </EuiFlexItem>
               </ForwardRef>,
               "title": <React.Fragment>
@@ -158,15 +156,13 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 <EuiFlexItem
                   grow={false}
                 >
-                  <EuiLink
-                    color="primary"
+                  <ForwardRef
                     data-test-subj="anomaly-description-narrow-range-link"
                     onClick={[Function]}
                     target="_blank"
-                    type="button"
                   >
                     Narrow to this date range
-                  </EuiLink>
+                  </ForwardRef>
                 </EuiFlexItem>
               </ForwardRef>,
               "title": "Detected",

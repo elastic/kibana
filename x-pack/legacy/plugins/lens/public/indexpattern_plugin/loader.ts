@@ -6,7 +6,11 @@
 
 import _ from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/public';
+import {
+  SavedObjectsClientContract,
+  SavedObjectAttributes,
+  HttpServiceBase,
+} from 'src/core/public';
 import { SimpleSavedObject } from 'src/core/public';
 import { StateSetter } from '../types';
 import {
@@ -17,6 +21,9 @@ import {
   IndexPatternField,
 } from './types';
 import { updateLayerIndexPattern } from './state_helpers';
+import { DateRange, ExistingFields } from '../../common/types';
+import { BASE_API_URL } from '../../common';
+import { documentField } from './document_field';
 
 interface SavedIndexPatternAttributes extends SavedObjectAttributes {
   title: string;
@@ -42,9 +49,9 @@ interface SavedRestrictionsObject {
   >;
 }
 
+type SetState = StateSetter<IndexPatternPrivateState>;
 type SavedRestrictionsInfo = SavedRestrictionsObject | undefined;
 type SavedObjectsClient = Pick<SavedObjectsClientContract, 'find' | 'bulkGet'>;
-
 type ErrorHandler = (err: Error) => void;
 
 export async function loadIndexPatterns({
@@ -68,9 +75,9 @@ export async function loadIndexPatterns({
 
   return resp.savedObjects.reduce(
     (acc, savedObject) => {
-      const indexPattern = fromSavedObject(savedObject as SimpleSavedObject<
-        SavedIndexPatternAttributes
-      >);
+      const indexPattern = fromSavedObject(
+        savedObject as SimpleSavedObject<SavedIndexPatternAttributes>
+      );
       acc[indexPattern.id] = indexPattern;
       return acc;
     },
@@ -108,6 +115,7 @@ export async function loadInitialState({
       indexPatternRefs,
       indexPatterns,
       showEmptyFields: false,
+      existingFields: {},
     };
   }
 
@@ -117,6 +125,7 @@ export async function loadInitialState({
     indexPatterns,
     layers: {},
     showEmptyFields: false,
+    existingFields: {},
   };
 }
 
@@ -130,7 +139,7 @@ export async function changeIndexPattern({
   id: string;
   savedObjectsClient: SavedObjectsClient;
   state: IndexPatternPrivateState;
-  setState: StateSetter<IndexPatternPrivateState>;
+  setState: SetState;
   onError: ErrorHandler;
 }) {
   try {
@@ -163,13 +172,15 @@ export async function changeLayerIndexPattern({
   state,
   setState,
   onError,
+  replaceIfPossible,
 }: {
   indexPatternId: string;
   layerId: string;
   savedObjectsClient: SavedObjectsClient;
   state: IndexPatternPrivateState;
-  setState: StateSetter<IndexPatternPrivateState>;
+  setState: SetState;
   onError: ErrorHandler;
+  replaceIfPossible?: boolean;
 }) {
   try {
     const indexPatterns = await loadIndexPatterns({
@@ -188,6 +199,7 @@ export async function changeLayerIndexPattern({
         ...s.indexPatterns,
         [indexPatternId]: indexPatterns[indexPatternId],
       },
+      currentIndexPatternId: replaceIfPossible ? indexPatternId : s.currentIndexPatternId,
     }));
   } catch (err) {
     onError(err);
@@ -203,10 +215,58 @@ async function loadIndexPatternRefs(
     perPage: 10000,
   });
 
-  return result.savedObjects.map(o => ({
-    id: String(o.id),
-    title: (o.attributes as { title: string }).title,
+  return result.savedObjects
+    .map(o => ({
+      id: String(o.id),
+      title: (o.attributes as { title: string }).title,
+    }))
+    .sort((a, b) => {
+      return a.title.localeCompare(b.title);
+    });
+}
+
+export async function syncExistingFields({
+  indexPatterns,
+  dateRange,
+  fetchJson,
+  setState,
+}: {
+  dateRange: DateRange;
+  indexPatterns: Array<{ title: string; timeFieldName?: string | null }>;
+  fetchJson: HttpServiceBase['get'];
+  setState: SetState;
+}) {
+  const emptinessInfo = await Promise.all(
+    indexPatterns.map(pattern => {
+      const query: Record<string, string> = {
+        fromDate: dateRange.fromDate,
+        toDate: dateRange.toDate,
+      };
+
+      if (pattern.timeFieldName) {
+        query.timeFieldName = pattern.timeFieldName;
+      }
+
+      return fetchJson(`${BASE_API_URL}/existing_fields/${pattern.title}`, {
+        query,
+      }) as Promise<ExistingFields>;
+    })
+  );
+
+  setState(state => ({
+    ...state,
+    existingFields: emptinessInfo.reduce((acc, info) => {
+      acc[info.indexPatternTitle] = booleanMap(info.existingFieldNames);
+      return acc;
+    }, state.existingFields),
   }));
+}
+
+function booleanMap(keys: string[]) {
+  return keys.reduce((acc, key) => {
+    acc[key] = true;
+    return acc;
+  }, {} as Record<string, boolean>);
 }
 
 function isSingleEmptyLayer(layerMap: IndexPatternPrivateState['layers']) {
@@ -223,10 +283,12 @@ function fromSavedObject(
     id,
     type,
     title: attributes.title,
-    fields: (JSON.parse(attributes.fields) as IndexPatternField[]).filter(
-      ({ type: fieldType, esTypes }) =>
-        fieldType !== 'string' || (esTypes && esTypes.includes('keyword'))
-    ),
+    fields: (JSON.parse(attributes.fields) as IndexPatternField[])
+      .filter(
+        ({ type: fieldType, esTypes }) =>
+          fieldType !== 'string' || (esTypes && esTypes.includes('keyword'))
+      )
+      .concat(documentField),
     typeMeta: attributes.typeMeta
       ? (JSON.parse(attributes.typeMeta) as SavedRestrictionsInfo)
       : undefined,

@@ -10,7 +10,7 @@ import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
 // @ts-ignore .png file
 import { elasticOutline } from '../../lib/elastic_outline';
 import { Render } from '../../../types';
-import { getFunctionHelp, getFunctionErrors } from '../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 export enum Origin {
   TOP = 'top',

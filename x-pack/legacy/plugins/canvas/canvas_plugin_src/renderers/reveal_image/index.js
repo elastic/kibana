@@ -6,11 +6,14 @@
 
 import { elasticOutline } from '../../lib/elastic_outline';
 import { isValidUrl } from '../../../common/lib/url';
+import { RendererStrings } from '../../../i18n';
+
+const { revealImage: strings } = RendererStrings;
 
 export const revealImage = () => ({
   name: 'revealImage',
-  displayName: 'Image reveal',
-  help: 'Reveal a percentage of an image to make a custom gauge-style chart',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const aligner = document.createElement('div');

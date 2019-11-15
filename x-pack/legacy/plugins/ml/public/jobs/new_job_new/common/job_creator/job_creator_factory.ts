@@ -9,6 +9,7 @@ import { IndexPattern } from 'ui/index_patterns';
 import { SingleMetricJobCreator } from './single_metric_job_creator';
 import { MultiMetricJobCreator } from './multi_metric_job_creator';
 import { PopulationJobCreator } from './population_job_creator';
+import { AdvancedJobCreator } from './advanced_job_creator';
 
 import { JOB_TYPE } from './util/constants';
 
@@ -27,6 +28,9 @@ export const jobCreatorFactory = (jobType: JOB_TYPE) => (
       break;
     case JOB_TYPE.POPULATION:
       jc = PopulationJobCreator;
+      break;
+    case JOB_TYPE.ADVANCED:
+      jc = AdvancedJobCreator;
       break;
     default:
       jc = SingleMetricJobCreator;

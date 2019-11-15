@@ -23,7 +23,6 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import $ from 'jquery';
-import 'ui/private';
 import '../../components/field_chooser/field_chooser';
 import FixturesHitsProvider from 'fixtures/hits';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';

@@ -4,6 +4,7 @@
 
 ## AssistanceAPIResponse interface
 
+
 <b>Signature:</b>
 
 ```typescript

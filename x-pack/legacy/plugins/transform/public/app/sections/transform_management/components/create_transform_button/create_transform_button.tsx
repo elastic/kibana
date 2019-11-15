@@ -33,12 +33,11 @@ export const CreateTransformButton: FC<CreateTransformButtonProps> = ({ onClick 
       fill
       onClick={onClick}
       iconType="plusInCircle"
-      size="s"
       data-test-subj="transformButtonCreate"
     >
       <FormattedMessage
         id="xpack.transform.transformList.createTransformButton"
-        defaultMessage="Create transform"
+        defaultMessage="Create a transform"
       />
     </EuiButton>
   );

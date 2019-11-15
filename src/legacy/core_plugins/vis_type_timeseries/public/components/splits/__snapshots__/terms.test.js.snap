@@ -8,6 +8,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         id="42"
         label={
@@ -29,6 +30,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         id="42"
         label={
@@ -72,6 +74,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         id="42"
         label={
@@ -96,6 +99,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         id="42"
         label={
@@ -122,6 +126,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         id="42"
         label={
@@ -147,6 +152,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         id="42"
         label={
@@ -183,6 +189,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         id="42"
         label={

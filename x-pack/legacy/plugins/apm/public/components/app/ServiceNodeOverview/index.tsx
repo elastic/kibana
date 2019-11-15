@@ -7,12 +7,13 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../common/i18n';
+import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { ManagedTable, ITableColumn } from '../../shared/ManagedTable';
 import { useFetcher } from '../../../hooks/useFetcher';
-import { callApmApi } from '../../../services/rest/callApmApi';
 import {
   asDynamicBytes,
   asInteger,
@@ -21,9 +22,9 @@ import {
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { truncate, px, unit } from '../../../style/variables';
 
-const INITIAL_PAGE_SIZE = 10;
-const INITIAL_SORT_FIELD = 'name';
-const INITIAL_SORT_DIRECTION = 'asc';
+const INITIAL_PAGE_SIZE = 25;
+const INITIAL_SORT_FIELD = 'cpu';
+const INITIAL_SORT_DIRECTION = 'desc';
 
 const ServiceNodeName = styled.div`
   ${truncate(px(8 * unit))}
@@ -33,9 +34,7 @@ const ServiceNodeOverview = () => {
   const { uiFilters, urlParams } = useUrlParams();
   const { serviceName, start, end } = urlParams;
 
-  const localFiltersConfig: React.ComponentProps<
-    typeof LocalUIFilters
-  > = useMemo(
+  const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
     () => ({
       filterNames: ['host', 'containerId', 'podName'],
       params: {
@@ -46,24 +45,27 @@ const ServiceNodeOverview = () => {
     [serviceName]
   );
 
-  const { data: items } = useFetcher(() => {
-    if (!serviceName || !start || !end) {
-      return;
-    }
-    return callApmApi({
-      pathname: '/api/apm/services/{serviceName}/serviceNodes',
-      params: {
-        path: {
-          serviceName
-        },
-        query: {
-          start,
-          end,
-          uiFilters: JSON.stringify(uiFilters)
-        }
+  const { data: items = [] } = useFetcher(
+    callApmApi => {
+      if (!serviceName || !start || !end) {
+        return undefined;
       }
-    });
-  }, [serviceName, start, end, uiFilters]);
+      return callApmApi({
+        pathname: '/api/apm/services/{serviceName}/serviceNodes',
+        params: {
+          path: {
+            serviceName
+          },
+          query: {
+            start,
+            end,
+            uiFilters: JSON.stringify(uiFilters)
+          }
+        }
+      });
+    },
+    [serviceName, start, end, uiFilters]
+  );
 
   if (!serviceName) {
     return null;
@@ -71,19 +73,43 @@ const ServiceNodeOverview = () => {
 
   const columns: Array<ITableColumn<typeof items[0]>> = [
     {
-      name: i18n.translate('xpack.apm.jvmsTable.nameColumnLabel', {
-        defaultMessage: 'Name'
-      }),
+      name: (
+        <EuiToolTip
+          content={i18n.translate('xpack.apm.jvmsTable.nameExplanation', {
+            defaultMessage: `By default, the JVM name is the container ID (where applicable) or the hostname, but it can be manually configured through the agent's 'service_node_name' configuration.`
+          })}
+        >
+          <>
+            {i18n.translate('xpack.apm.jvmsTable.nameColumnLabel', {
+              defaultMessage: 'Name'
+            })}
+          </>
+        </EuiToolTip>
+      ),
       field: 'name',
       sortable: true,
       render: (name: string) => {
+        const { displayedName, tooltip } =
+          name === SERVICE_NODE_NAME_MISSING
+            ? {
+                displayedName: UNIDENTIFIED_SERVICE_NODES_LABEL,
+                tooltip: i18n.translate(
+                  'xpack.apm.jvmsTable.explainServiceNodeNameMissing',
+                  {
+                    defaultMessage:
+                      'We could not identify which JVMs these metrics belong to. This is likely caused by running a version of APM Server that is older than 7.5. Upgrading to APM Server 7.5 or higher should resolve this issue.'
+                  }
+                )
+              }
+            : { displayedName: name, tooltip: name };
+
         return (
-          <EuiToolTip content={name}>
+          <EuiToolTip content={tooltip}>
             <ServiceNodeMetricOverviewLink
               serviceName={serviceName}
               serviceNodeName={name}
             >
-              <ServiceNodeName>{name}</ServiceNodeName>
+              <ServiceNodeName>{displayedName}</ServiceNodeName>
             </ServiceNodeMetricOverviewLink>
           </EuiToolTip>
         );
@@ -91,7 +117,7 @@ const ServiceNodeOverview = () => {
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.cpuColumnLabel', {
-        defaultMessage: 'CPU'
+        defaultMessage: 'CPU avg'
       }),
       field: 'cpu',
       sortable: true,
@@ -99,7 +125,7 @@ const ServiceNodeOverview = () => {
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.heapMemoryColumnLabel', {
-        defaultMessage: 'Heap memory max'
+        defaultMessage: 'Heap memory avg'
       }),
       field: 'heapMemory',
       sortable: true,
@@ -107,7 +133,7 @@ const ServiceNodeOverview = () => {
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.nonHeapMemoryColumnLabel', {
-        defaultMessage: 'Non-heap memory max'
+        defaultMessage: 'Non-heap memory avg'
       }),
       field: 'nonHeapMemory',
       sortable: true,
@@ -115,7 +141,7 @@ const ServiceNodeOverview = () => {
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.threadCountColumnLabel', {
-        defaultMessage: 'Thread count'
+        defaultMessage: 'Thread count max'
       }),
       field: 'threadCount',
       sortable: true,
@@ -134,12 +160,11 @@ const ServiceNodeOverview = () => {
             noItemsMessage={i18n.translate('xpack.apm.jvmsTable.noJvmsLabel', {
               defaultMessage: 'No JVMs were found'
             })}
-            items={items || []}
+            items={items}
             columns={columns}
             initialPageSize={INITIAL_PAGE_SIZE}
             initialSortField={INITIAL_SORT_FIELD}
             initialSortDirection={INITIAL_SORT_DIRECTION}
-            hidePerPageOptions={false}
           />
         </EuiPanel>
       </EuiFlexItem>

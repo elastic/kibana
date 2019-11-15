@@ -4,47 +4,63 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC } from 'react';
+import React, { Fragment, FC, useEffect } from 'react';
 
 import {
-  EuiCallOut,
   EuiComboBox,
   EuiForm,
   EuiFieldText,
   EuiFormRow,
   EuiLink,
-  EuiSpacer,
+  EuiRange,
   EuiSwitch,
-  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { metadata } from 'ui/metadata';
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_patterns';
+import { IndexPattern, INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_patterns';
+import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
 
+import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
+import { useKibanaContext } from '../../../../../contexts/kibana';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
+import { JOB_TYPES } from '../../hooks/use_create_analytics_form/state';
 import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
+import { Messages } from './messages';
+import { JobType } from './job_type';
 
 // based on code used by `ui/index_patterns` internally
 // remove the space character from the list of illegal characters
 INDEX_PATTERN_ILLEGAL_CHARACTERS.pop();
 const characterList = INDEX_PATTERN_ILLEGAL_CHARACTERS.join(', ');
 
+const NUMERICAL_FIELD_TYPES = new Set([
+  'long',
+  'integer',
+  'short',
+  'byte',
+  'double',
+  'float',
+  'half_float',
+  'scaled_float',
+]);
+
+// List of system fields we want to ignore for the numeric field check.
+const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];
+
 export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
   const { setFormState } = actions;
+  const kibanaContext = useKibanaContext();
 
-  const {
-    form,
-    indexPatternsWithNumericFields,
-    indexPatternTitles,
-    isJobCreated,
-    requestMessages,
-  } = state;
+  const { form, indexPatternsMap, isAdvancedEditorEnabled, isJobCreated, requestMessages } = state;
 
   const {
     createIndexPattern,
+    dependentVariable,
+    dependentVariableFetchFail,
+    dependentVariableOptions,
     destinationIndex,
     destinationIndexNameEmpty,
     destinationIndexNameExists,
@@ -55,54 +71,137 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     jobIdExists,
     jobIdValid,
     jobIdInvalidMaxLength,
+    jobType,
+    loadingDepFieldOptions,
     sourceIndex,
     sourceIndexNameEmpty,
     sourceIndexNameValid,
+    sourceIndexContainsNumericalFields,
+    sourceIndexFieldsCheckFailed,
+    trainingPercent,
   } = form;
+
+  // Find out if index pattern contain numeric fields. Provides a hint in the form
+  // that an analytics jobs is not able to identify outliers if there are no numeric fields present.
+  const validateSourceIndexFields = async () => {
+    try {
+      const indexPattern: IndexPattern = await kibanaContext.indexPatterns.get(
+        indexPatternsMap[sourceIndex].value
+      );
+      const containsNumericalFields: boolean = indexPattern.fields.some(
+        ({ name, type }) => !OMIT_FIELDS.includes(name) && type === 'number'
+      );
+
+      setFormState({
+        sourceIndexContainsNumericalFields: containsNumericalFields,
+        sourceIndexFieldsCheckFailed: false,
+      });
+    } catch (e) {
+      setFormState({
+        sourceIndexFieldsCheckFailed: true,
+      });
+    }
+  };
+
+  const loadDependentFieldOptions = async () => {
+    setFormState({
+      loadingDepFieldOptions: true,
+      dependentVariable: '',
+      // Reset outlier detection sourceIndex checks to default values if we've switched to regression
+      sourceIndexFieldsCheckFailed: false,
+      sourceIndexContainsNumericalFields: true,
+    });
+    try {
+      const indexPattern: IndexPattern = await kibanaContext.indexPatterns.get(
+        indexPatternsMap[sourceIndex].value
+      );
+
+      if (indexPattern !== undefined) {
+        await newJobCapsService.initializeFromIndexPattern(indexPattern);
+        // Get fields and filter for numeric
+        const { fields } = newJobCapsService;
+        const options: Array<{ label: string }> = [];
+
+        fields.forEach((field: Field) => {
+          if (NUMERICAL_FIELD_TYPES.has(field.type) && field.id !== EVENT_RATE_FIELD_ID) {
+            options.push({ label: field.id });
+          }
+        });
+
+        setFormState({
+          dependentVariableOptions: options,
+          loadingDepFieldOptions: false,
+          dependentVariableFetchFail: false,
+        });
+      }
+    } catch (e) {
+      setFormState({ loadingDepFieldOptions: false, dependentVariableFetchFail: true });
+    }
+  };
+
+  const getSourceIndexErrorMessages = () => {
+    const errors = [];
+    if (!sourceIndexNameEmpty && !sourceIndexNameValid) {
+      errors.push(
+        <Fragment>
+          <FormattedMessage
+            id="xpack.ml.dataframe.analytics.create.sourceIndexInvalidError"
+            defaultMessage="Invalid source index name, it cannot contain spaces or the characters: {characterList}"
+            values={{ characterList }}
+          />
+        </Fragment>
+      );
+    }
+
+    if (sourceIndexFieldsCheckFailed === true) {
+      errors.push(
+        <Fragment>
+          <FormattedMessage
+            id="xpack.ml.dataframe.analytics.create.sourceIndexFieldCheckError"
+            defaultMessage="There was a problem checking for numerical fields. Please refresh the page and try again."
+          />
+        </Fragment>
+      );
+    }
+
+    return errors;
+  };
+
+  useEffect(() => {
+    if (jobType === JOB_TYPES.REGRESSION && sourceIndexNameEmpty === false) {
+      loadDependentFieldOptions();
+    } else if (jobType === JOB_TYPES.OUTLIER_DETECTION && sourceIndexNameEmpty === false) {
+      validateSourceIndexFields();
+    }
+  }, [sourceIndex, jobType, sourceIndexNameEmpty]);
 
   return (
     <EuiForm className="mlDataFrameAnalyticsCreateForm">
-      {requestMessages.map((requestMessage, i) => (
-        <Fragment key={i}>
-          <EuiCallOut
-            title={requestMessage.message}
-            color={requestMessage.error !== undefined ? 'danger' : 'primary'}
-            iconType={requestMessage.error !== undefined ? 'alert' : 'checkInCircleFilled'}
-            size="s"
-          >
-            {requestMessage.error !== undefined ? <p>{requestMessage.error}</p> : null}
-          </EuiCallOut>
-          <EuiSpacer size="s" />
-        </Fragment>
-      ))}
+      <Messages messages={requestMessages} />
       {!isJobCreated && (
         <Fragment>
+          <JobType type={jobType} setFormState={setFormState} />
           <EuiFormRow
-            label={i18n.translate('xpack.ml.dataframe.analytics.create.jobTypeLabel', {
-              defaultMessage: 'Job type',
-            })}
-            helpText={
-              <FormattedMessage
-                id="xpack.ml.dataframe.analytics.create.jobTypeHelpText"
-                defaultMessage="Outlier detection jobs require a source index that is mapped as a table-like data structure and will only analyze numeric and boolean fields. Please use the {advancedEditorButton} to apply custom options such as the model memory limit and analysis type. You cannot switch back to this form from the advanced editor."
-                values={{
-                  advancedEditorButton: (
-                    <EuiLink onClick={actions.switchToAdvancedEditor}>
-                      <FormattedMessage
-                        id="xpack.ml.dataframe.analytics.create.switchToAdvancedEditorButton"
-                        defaultMessage="advanced editor"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            }
+            helpText={i18n.translate(
+              'xpack.ml.dataframe.analytics.create.enableAdvancedEditorHelpText',
+              {
+                defaultMessage: 'You cannot switch back to this form from the advanced editor.',
+              }
+            )}
           >
-            <EuiText>
-              {i18n.translate('xpack.ml.dataframe.analytics.create.outlierDetectionText', {
-                defaultMessage: 'Outlier detection',
-              })}
-            </EuiText>
+            <EuiSwitch
+              disabled={jobType === undefined}
+              compressed={true}
+              name="mlDataFrameAnalyticsEnableAdvancedEditor"
+              label={i18n.translate(
+                'xpack.ml.dataframe.analytics.create.enableAdvancedEditorSwitch',
+                {
+                  defaultMessage: 'Enable advanced editor',
+                }
+              )}
+              checked={isAdvancedEditorEnabled}
+              onChange={actions.switchToAdvancedEditor}
+            />
           </EuiFormRow>
           <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdLabel', {
@@ -163,25 +262,14 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
             })}
             helpText={
               !sourceIndexNameEmpty &&
-              !indexPatternsWithNumericFields.includes(sourceIndex) &&
+              !sourceIndexContainsNumericalFields &&
               i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexHelpText', {
                 defaultMessage:
                   'This index pattern does not contain any numeric type fields. The analytics job may not be able to come up with any outliers.',
               })
             }
             isInvalid={!sourceIndexNameEmpty && !sourceIndexNameValid}
-            error={
-              !sourceIndexNameEmpty &&
-              !sourceIndexNameValid && [
-                <Fragment>
-                  {i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexInvalidError', {
-                    defaultMessage:
-                      'Invalid source index name, it cannot contain spaces or the characters: {characterList}',
-                    values: { characterList },
-                  })}
-                </Fragment>,
-              ]
-            }
+            error={getSourceIndexErrorMessages()}
           >
             <Fragment>
               {!isJobCreated && (
@@ -193,8 +281,12 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                     }
                   )}
                   singleSelection={{ asPlainText: true }}
-                  options={indexPatternTitles.sort().map(d => ({ label: d }))}
-                  selectedOptions={[{ label: sourceIndex }]}
+                  options={Object.values(indexPatternsMap).sort((a, b) =>
+                    a.label.localeCompare(b.label)
+                  )}
+                  selectedOptions={
+                    indexPatternsMap[sourceIndex] !== undefined ? [{ label: sourceIndex }] : []
+                  }
                   onChange={selectedOptions =>
                     setFormState({ sourceIndex: selectedOptions[0].label || '' })
                   }
@@ -267,12 +359,90 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               isInvalid={!destinationIndexNameEmpty && !destinationIndexNameValid}
             />
           </EuiFormRow>
+          {jobType === JOB_TYPES.REGRESSION && (
+            <Fragment>
+              <EuiFormRow
+                label={i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.dependentVariableLabel',
+                  {
+                    defaultMessage: 'Dependent variable',
+                  }
+                )}
+                helpText={
+                  dependentVariableOptions.length === 0 &&
+                  dependentVariableFetchFail === false &&
+                  !sourceIndexNameEmpty &&
+                  i18n.translate(
+                    'xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields',
+                    {
+                      defaultMessage: 'No numeric type fields were found for this index pattern.',
+                    }
+                  )
+                }
+                error={
+                  dependentVariableFetchFail === true && [
+                    <Fragment>
+                      {i18n.translate(
+                        'xpack.ml.dataframe.analytics.create.dependentVariableOptionsFetchError',
+                        {
+                          defaultMessage:
+                            'There was a problem fetching fields. Please refresh the page and try again.',
+                        }
+                      )}
+                    </Fragment>,
+                  ]
+                }
+              >
+                <EuiComboBox
+                  aria-label={i18n.translate(
+                    'xpack.ml.dataframe.analytics.create.dependentVariableInputAriaLabel',
+                    {
+                      defaultMessage: 'Enter field to be used as dependent variable.',
+                    }
+                  )}
+                  placeholder={i18n.translate(
+                    'xpack.ml.dataframe.analytics.create.dependentVariablePlaceholder',
+                    {
+                      defaultMessage: 'dependent variable',
+                    }
+                  )}
+                  isDisabled={isJobCreated}
+                  isLoading={loadingDepFieldOptions}
+                  singleSelection={true}
+                  options={dependentVariableOptions}
+                  selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
+                  onChange={selectedOptions =>
+                    setFormState({ dependentVariable: selectedOptions[0].label || '' })
+                  }
+                  isClearable={false}
+                  isInvalid={dependentVariable === ''}
+                />
+              </EuiFormRow>
+              <EuiFormRow
+                label={i18n.translate('xpack.ml.dataframe.analytics.create.trainingPercentLabel', {
+                  defaultMessage: 'Training percent',
+                })}
+              >
+                <EuiRange
+                  min={0}
+                  max={100}
+                  step={1}
+                  showLabels
+                  showRange
+                  showValue
+                  value={trainingPercent}
+                  // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
+                  onChange={e => setFormState({ trainingPercent: e.target.value })}
+                />
+              </EuiFormRow>
+            </Fragment>
+          )}
           <EuiFormRow
             isInvalid={createIndexPattern && destinationIndexPatternTitleExists}
             error={
               createIndexPattern &&
               destinationIndexPatternTitleExists && [
-                i18n.translate('xpack.ml.dataframe.analytics.create.indexPatternTitleError', {
+                i18n.translate('xpack.ml.dataframe.analytics.create.indexPatternExistsError', {
                   defaultMessage: 'An index pattern with this title already exists.',
                 }),
               ]

@@ -4,6 +4,8 @@
 
 ## HttpFetchOptions.headers property
 
+Headers to send with the request. See [HttpHeadersInit](./kibana-plugin-public.httpheadersinit.md)<!-- -->.
+
 <b>Signature:</b>
 
 ```typescript

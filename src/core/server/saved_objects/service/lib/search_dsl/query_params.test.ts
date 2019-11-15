@@ -18,7 +18,6 @@
  */
 
 import { schemaMock } from '../../../schema/schema.mock';
-import { SavedObjectsIndexPattern } from '../cache_index_patterns';
 import { getQueryParams } from './query_params';
 
 const SCHEMA = schemaMock.create();
@@ -61,41 +60,6 @@ const MAPPINGS = {
       },
     },
   },
-};
-const INDEX_PATTERN: SavedObjectsIndexPattern = {
-  fields: [
-    {
-      aggregatable: true,
-      name: 'type',
-      searchable: true,
-      type: 'string',
-    },
-    {
-      aggregatable: true,
-      name: 'pending.title',
-      searchable: true,
-      type: 'string',
-    },
-    {
-      aggregatable: true,
-      name: 'saved.title',
-      searchable: true,
-      type: 'string',
-    },
-    {
-      aggregatable: true,
-      name: 'saved.obj.key1',
-      searchable: true,
-      type: 'string',
-    },
-    {
-      aggregatable: true,
-      name: 'global.name',
-      searchable: true,
-      type: 'string',
-    },
-  ],
-  title: 'test',
 };
 
 // create a type clause to be used within the "should", if a namespace is specified
@@ -1005,7 +969,6 @@ describe('searchDsl/queryParams', () => {
               { type: 'literal', value: false },
             ],
           },
-          indexPattern: INDEX_PATTERN,
         })
       ).toEqual({
         query: {
@@ -1121,7 +1084,6 @@ describe('searchDsl/queryParams', () => {
               },
             ],
           },
-          indexPattern: INDEX_PATTERN,
         })
       ).toEqual({
         query: {
@@ -1240,7 +1202,6 @@ describe('searchDsl/queryParams', () => {
               { type: 'literal', value: false },
             ],
           },
-          indexPattern: INDEX_PATTERN,
         })
       ).toEqual({
         query: {

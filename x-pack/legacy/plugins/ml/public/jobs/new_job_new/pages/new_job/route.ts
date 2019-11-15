@@ -15,13 +15,14 @@ import {
   getCreateSingleMetricJobBreadcrumbs,
   getCreateMultiMetricJobBreadcrumbs,
   getCreatePopulationJobBreadcrumbs,
+  getAdvancedJobConfigurationBreadcrumbs,
 } from '../../../breadcrumbs';
 
 import { Route } from '../../../../../common/types/kibana';
 
 import { loadNewJobCapabilities } from '../../../../services/new_job_capabilities_service';
 
-import { loadNewJobDefaults } from '../../../new_job/utils/new_job_defaults';
+import { loadMlServerInfo } from '../../../../services/ml_server_info';
 
 import { mlJobService } from '../../../../services/job_service';
 import { JOB_TYPE } from '../../common/job_creator/util/constants';
@@ -41,6 +42,10 @@ const routes: Route[] = [
     id: JOB_TYPE.POPULATION,
     k7Breadcrumbs: getCreatePopulationJobBreadcrumbs,
   },
+  {
+    id: JOB_TYPE.ADVANCED,
+    k7Breadcrumbs: getAdvancedJobConfigurationBreadcrumbs,
+  },
 ];
 
 routes.forEach((route: Route) => {
@@ -53,7 +58,7 @@ routes.forEach((route: Route) => {
       indexPattern: loadCurrentIndexPattern,
       savedSearch: loadCurrentSavedSearch,
       loadNewJobCapabilities,
-      loadNewJobDefaults,
+      loadMlServerInfo,
       existingJobsAndGroups: mlJobService.getJobAndGroupIds,
       jobType: () => route.id,
     },

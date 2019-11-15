@@ -36,6 +36,28 @@ exports[`xy_expression XYChart component it renders area 1`] = `
             "fontSize": 12,
             "padding": 10,
           },
+          "gridLineStyle": Object {
+            "horizontal": Object {
+              "dash": Array [
+                0,
+                0,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "vertical": Object {
+              "dash": Array [
+                4,
+                4,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
           "tickLabelStyle": Object {
             "fill": "rgba(105, 112, 125, 1)",
             "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
@@ -44,8 +66,9 @@ exports[`xy_expression XYChart component it renders area 1`] = `
             "padding": 8,
           },
           "tickLineStyle": Object {
-            "stroke": "rgba(0,0,0,0)",
-            "strokeWidth": 0,
+            "stroke": "rgba(239, 241, 244, 1)",
+            "strokeWidth": 1,
+            "visible": false,
           },
         },
         "barSeriesStyle": Object {
@@ -100,6 +123,10 @@ exports[`xy_expression XYChart component it renders area 1`] = `
             "strokeWidth": 2,
           },
         },
+        "scales": Object {
+          "barsPadding": 0.25,
+          "histogramPadding": 0.05,
+        },
       }
     }
   />
@@ -108,7 +135,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     position="bottom"
     showGridLines={false}
     tickFormat={[Function]}
-    title=""
+    title="c"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
@@ -123,12 +150,16 @@ exports[`xy_expression XYChart component it renders area 1`] = `
         Object {
           "Label A": 1,
           "Label B": 2,
+          "Label D": "Foo",
           "c": "I",
+          "d": "Foo",
         },
         Object {
           "Label A": 1,
           "Label B": 5,
+          "Label D": "Bar",
           "c": "J",
+          "d": "Bar",
         },
       ]
     }
@@ -137,7 +168,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     key="0"
     splitSeriesAccessors={
       Array [
-        "Label D",
+        "d",
       ]
     }
     stackAccessors={Array []}
@@ -191,6 +222,28 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
             "fontSize": 12,
             "padding": 10,
           },
+          "gridLineStyle": Object {
+            "horizontal": Object {
+              "dash": Array [
+                0,
+                0,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "vertical": Object {
+              "dash": Array [
+                4,
+                4,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
           "tickLabelStyle": Object {
             "fill": "rgba(105, 112, 125, 1)",
             "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
@@ -199,8 +252,9 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
             "padding": 8,
           },
           "tickLineStyle": Object {
-            "stroke": "rgba(0,0,0,0)",
-            "strokeWidth": 0,
+            "stroke": "rgba(239, 241, 244, 1)",
+            "strokeWidth": 1,
+            "visible": false,
           },
         },
         "barSeriesStyle": Object {
@@ -255,6 +309,10 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
             "strokeWidth": 2,
           },
         },
+        "scales": Object {
+          "barsPadding": 0.25,
+          "histogramPadding": 0.05,
+        },
       }
     }
   />
@@ -263,7 +321,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     position="bottom"
     showGridLines={false}
     tickFormat={[Function]}
-    title=""
+    title="c"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
@@ -278,12 +336,16 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
         Object {
           "Label A": 1,
           "Label B": 2,
+          "Label D": "Foo",
           "c": "I",
+          "d": "Foo",
         },
         Object {
           "Label A": 1,
           "Label B": 5,
+          "Label D": "Bar",
           "c": "J",
+          "d": "Bar",
         },
       ]
     }
@@ -292,7 +354,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     key="0"
     splitSeriesAccessors={
       Array [
-        "Label D",
+        "d",
       ]
     }
     stackAccessors={Array []}
@@ -346,6 +408,28 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
             "fontSize": 12,
             "padding": 10,
           },
+          "gridLineStyle": Object {
+            "horizontal": Object {
+              "dash": Array [
+                0,
+                0,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "vertical": Object {
+              "dash": Array [
+                4,
+                4,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
           "tickLabelStyle": Object {
             "fill": "rgba(105, 112, 125, 1)",
             "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
@@ -354,8 +438,9 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
             "padding": 8,
           },
           "tickLineStyle": Object {
-            "stroke": "rgba(0,0,0,0)",
-            "strokeWidth": 0,
+            "stroke": "rgba(239, 241, 244, 1)",
+            "strokeWidth": 1,
+            "visible": false,
           },
         },
         "barSeriesStyle": Object {
@@ -410,6 +495,10 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
             "strokeWidth": 2,
           },
         },
+        "scales": Object {
+          "barsPadding": 0.25,
+          "histogramPadding": 0.05,
+        },
       }
     }
   />
@@ -418,7 +507,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     position="left"
     showGridLines={false}
     tickFormat={[Function]}
-    title=""
+    title="c"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
@@ -433,12 +522,16 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
         Object {
           "Label A": 1,
           "Label B": 2,
+          "Label D": "Foo",
           "c": "I",
+          "d": "Foo",
         },
         Object {
           "Label A": 1,
           "Label B": 5,
+          "Label D": "Bar",
           "c": "J",
+          "d": "Bar",
         },
       ]
     }
@@ -447,7 +540,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     key="0"
     splitSeriesAccessors={
       Array [
-        "Label D",
+        "d",
       ]
     }
     stackAccessors={Array []}
@@ -501,6 +594,28 @@ exports[`xy_expression XYChart component it renders line 1`] = `
             "fontSize": 12,
             "padding": 10,
           },
+          "gridLineStyle": Object {
+            "horizontal": Object {
+              "dash": Array [
+                0,
+                0,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "vertical": Object {
+              "dash": Array [
+                4,
+                4,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
           "tickLabelStyle": Object {
             "fill": "rgba(105, 112, 125, 1)",
             "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
@@ -509,8 +624,9 @@ exports[`xy_expression XYChart component it renders line 1`] = `
             "padding": 8,
           },
           "tickLineStyle": Object {
-            "stroke": "rgba(0,0,0,0)",
-            "strokeWidth": 0,
+            "stroke": "rgba(239, 241, 244, 1)",
+            "strokeWidth": 1,
+            "visible": false,
           },
         },
         "barSeriesStyle": Object {
@@ -565,6 +681,10 @@ exports[`xy_expression XYChart component it renders line 1`] = `
             "strokeWidth": 2,
           },
         },
+        "scales": Object {
+          "barsPadding": 0.25,
+          "histogramPadding": 0.05,
+        },
       }
     }
   />
@@ -573,7 +693,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     position="bottom"
     showGridLines={false}
     tickFormat={[Function]}
-    title=""
+    title="c"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
@@ -588,12 +708,16 @@ exports[`xy_expression XYChart component it renders line 1`] = `
         Object {
           "Label A": 1,
           "Label B": 2,
+          "Label D": "Foo",
           "c": "I",
+          "d": "Foo",
         },
         Object {
           "Label A": 1,
           "Label B": 5,
+          "Label D": "Bar",
           "c": "J",
+          "d": "Bar",
         },
       ]
     }
@@ -602,7 +726,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     key="0"
     splitSeriesAccessors={
       Array [
-        "Label D",
+        "d",
       ]
     }
     stackAccessors={Array []}
@@ -656,6 +780,28 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
             "fontSize": 12,
             "padding": 10,
           },
+          "gridLineStyle": Object {
+            "horizontal": Object {
+              "dash": Array [
+                0,
+                0,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "vertical": Object {
+              "dash": Array [
+                4,
+                4,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
           "tickLabelStyle": Object {
             "fill": "rgba(105, 112, 125, 1)",
             "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
@@ -664,8 +810,9 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
             "padding": 8,
           },
           "tickLineStyle": Object {
-            "stroke": "rgba(0,0,0,0)",
-            "strokeWidth": 0,
+            "stroke": "rgba(239, 241, 244, 1)",
+            "strokeWidth": 1,
+            "visible": false,
           },
         },
         "barSeriesStyle": Object {
@@ -720,6 +867,10 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
             "strokeWidth": 2,
           },
         },
+        "scales": Object {
+          "barsPadding": 0.25,
+          "histogramPadding": 0.05,
+        },
       }
     }
   />
@@ -728,7 +879,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     position="bottom"
     showGridLines={false}
     tickFormat={[Function]}
-    title=""
+    title="c"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
@@ -743,12 +894,16 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
         Object {
           "Label A": 1,
           "Label B": 2,
+          "Label D": "Foo",
           "c": "I",
+          "d": "Foo",
         },
         Object {
           "Label A": 1,
           "Label B": 5,
+          "Label D": "Bar",
           "c": "J",
+          "d": "Bar",
         },
       ]
     }
@@ -757,7 +912,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     key="0"
     splitSeriesAccessors={
       Array [
-        "Label D",
+        "d",
       ]
     }
     stackAccessors={
@@ -815,6 +970,28 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
             "fontSize": 12,
             "padding": 10,
           },
+          "gridLineStyle": Object {
+            "horizontal": Object {
+              "dash": Array [
+                0,
+                0,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "vertical": Object {
+              "dash": Array [
+                4,
+                4,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
           "tickLabelStyle": Object {
             "fill": "rgba(105, 112, 125, 1)",
             "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
@@ -823,8 +1000,9 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
             "padding": 8,
           },
           "tickLineStyle": Object {
-            "stroke": "rgba(0,0,0,0)",
-            "strokeWidth": 0,
+            "stroke": "rgba(239, 241, 244, 1)",
+            "strokeWidth": 1,
+            "visible": false,
           },
         },
         "barSeriesStyle": Object {
@@ -879,6 +1057,10 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
             "strokeWidth": 2,
           },
         },
+        "scales": Object {
+          "barsPadding": 0.25,
+          "histogramPadding": 0.05,
+        },
       }
     }
   />
@@ -887,7 +1069,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     position="bottom"
     showGridLines={false}
     tickFormat={[Function]}
-    title=""
+    title="c"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
@@ -902,12 +1084,16 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
         Object {
           "Label A": 1,
           "Label B": 2,
+          "Label D": "Foo",
           "c": "I",
+          "d": "Foo",
         },
         Object {
           "Label A": 1,
           "Label B": 5,
+          "Label D": "Bar",
           "c": "J",
+          "d": "Bar",
         },
       ]
     }
@@ -916,7 +1102,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     key="0"
     splitSeriesAccessors={
       Array [
-        "Label D",
+        "d",
       ]
     }
     stackAccessors={
@@ -974,6 +1160,28 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
             "fontSize": 12,
             "padding": 10,
           },
+          "gridLineStyle": Object {
+            "horizontal": Object {
+              "dash": Array [
+                0,
+                0,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "vertical": Object {
+              "dash": Array [
+                4,
+                4,
+              ],
+              "opacity": 1,
+              "stroke": "rgba(239, 241, 244, 1)",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
           "tickLabelStyle": Object {
             "fill": "rgba(105, 112, 125, 1)",
             "fontFamily": "'Inter UI', -apple-system, BlinkMacSystemFont,
@@ -982,8 +1190,9 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
             "padding": 8,
           },
           "tickLineStyle": Object {
-            "stroke": "rgba(0,0,0,0)",
-            "strokeWidth": 0,
+            "stroke": "rgba(239, 241, 244, 1)",
+            "strokeWidth": 1,
+            "visible": false,
           },
         },
         "barSeriesStyle": Object {
@@ -1038,6 +1247,10 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
             "strokeWidth": 2,
           },
         },
+        "scales": Object {
+          "barsPadding": 0.25,
+          "histogramPadding": 0.05,
+        },
       }
     }
   />
@@ -1046,7 +1259,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     position="left"
     showGridLines={false}
     tickFormat={[Function]}
-    title=""
+    title="c"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
@@ -1061,12 +1274,16 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
         Object {
           "Label A": 1,
           "Label B": 2,
+          "Label D": "Foo",
           "c": "I",
+          "d": "Foo",
         },
         Object {
           "Label A": 1,
           "Label B": 5,
+          "Label D": "Bar",
           "c": "J",
+          "d": "Bar",
         },
       ]
     }
@@ -1075,7 +1292,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     key="0"
     splitSeriesAccessors={
       Array [
-        "Label D",
+        "d",
       ]
     }
     stackAccessors={

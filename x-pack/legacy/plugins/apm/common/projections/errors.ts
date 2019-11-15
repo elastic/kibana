@@ -19,10 +19,10 @@ export function getErrorGroupsProjection({
   setup: Setup;
   serviceName: string;
 }) {
-  const { start, end, uiFiltersES, config } = setup;
+  const { start, end, uiFiltersES, indices } = setup;
 
   return {
-    index: config.get<string>('apm_oss.errorIndices'),
+    index: indices['apm_oss.errorIndices'],
     body: {
       query: {
         bool: {

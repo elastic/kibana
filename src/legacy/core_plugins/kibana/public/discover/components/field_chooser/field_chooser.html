@@ -9,9 +9,8 @@
     <form>
       <discover-field-search
         on-change="setFilterValue"
-        on-show-filter="toggleShowFilter"
-        show-filter="showFilter"
         value="filter.vals.name"
+        types="fieldTypes"
       >
       </discover-field-search>
       <div data-test-subj="discoverFieldFilter" class="dscFieldFilter" ng-show="showFilter">
@@ -41,7 +40,7 @@
             class="form-control">
           </select>
         </div>
-        <div class="form-group"  ng-show="showFilter">
+        <div class="form-group" ng-show="showFilter">
           <label
             for="discoverFieldChooserFilterType"
             i18n-id="kbn.discover.fieldChooser.filter.typeLabel"
@@ -86,7 +85,7 @@
   </div>
   <ul class="list-unstyled dscFieldList--selected" aria-labelledby="selected_fields">
     <discover-field
-      ng-repeat="field in fields.raw|filter:filter.isFieldFilteredAndDisplayed"
+      ng-repeat="field in fields|filter:filter.isFieldFilteredAndDisplayed"
       field="field"
       on-add-field="onAddField"
       on-add-filter="onAddFilter"

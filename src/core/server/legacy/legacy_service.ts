@@ -20,7 +20,8 @@
 import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription } from 'rxjs';
 import { first, map, publishReplay, tap } from 'rxjs/operators';
 import { CoreService } from '../../types';
-import { InternalCoreSetup, InternalCoreStart, CoreSetup, CoreStart } from '../';
+import { CoreSetup, CoreStart } from '../';
+import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { SavedObjectsLegacyUiExports } from '../types';
 import { Config } from '../config';
 import { CoreContext } from '../core_context';
@@ -116,7 +117,7 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
     this.update$ = this.coreContext.configService.getConfig$().pipe(
       tap(config => {
         if (this.kbnServer !== undefined) {
-          this.kbnServer.applyLoggingConfiguration(config.toRaw());
+          this.kbnServer.applyLoggingConfiguration(getLegacyRawConfig(config));
         }
       }),
       tap({ error: err => this.log.error(err) }),
@@ -248,6 +249,9 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
         basePath: setupDeps.core.http.basePath,
         isTlsEnabled: setupDeps.core.http.isTlsEnabled,
       },
+      uiSettings: {
+        register: setupDeps.core.uiSettings.register,
+      },
     };
     const coreStart: CoreStart = {};
 
@@ -257,6 +261,10 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
       settings,
       config,
       {
+        env: {
+          mode: this.coreContext.env.mode,
+          packageInfo: this.coreContext.env.packageInfo,
+        },
         handledConfigPaths: await this.coreContext.configService.getUsedPaths(),
         setupDeps: {
           core: coreSetup,
@@ -271,6 +279,8 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
           kibanaMigrator: startDeps.core.savedObjects.migrator,
           uiPlugins: setupDeps.core.plugins.uiPlugins,
           elasticsearch: setupDeps.core.elasticsearch,
+          uiSettings: setupDeps.core.uiSettings,
+          savedObjectsClientProvider: startDeps.core.savedObjects.clientProvider,
         },
         logger: this.coreContext.logger,
       },

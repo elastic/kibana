@@ -429,8 +429,7 @@ const pipelineDefinition = {
   version: 123,
 };
 
-export default function (api) {
-
+export const register = api => {
   // Note: this isn't an actual API endpoint. It exists so the forEach processor's "processor" field
   // may recursively use the autocomplete rules for any processor.
   api.addEndpointDescription('_processor', {
@@ -445,8 +444,6 @@ export default function (api) {
     data_autocomplete_rules: pipelineDefinition
   });
 
-
-
   api.addEndpointDescription('ingest.simulate', {
     data_autocomplete_rules: {
       pipeline: pipelineDefinition,
@@ -454,4 +451,8 @@ export default function (api) {
       ]
     }
   });
-}
+};
+
+export const addProcessorDefinition = processor => {
+  processorDefinition.__one_of.push(processor);
+};

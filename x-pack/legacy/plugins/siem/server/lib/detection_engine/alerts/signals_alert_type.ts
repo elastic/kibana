@@ -7,16 +7,16 @@
 import { schema } from '@kbn/config-schema';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { Logger } from '../../../../../../../../src/core/server';
-import { AlertType, AlertExecutorOptions } from '../../../../../alerting';
 
 // TODO: Remove this for the build_events_query call eventually
 import { buildEventsReIndex } from './build_events_reindex';
 
-// TODO: Comment this in and use this instead of the reIndex API
-// once scrolling and other things are done with it.
-// import { buildEventsQuery } from './build_events_query';
+import { buildEventsSearchQuery } from './build_events_query';
+import { searchAfterAndBulkIndex } from './utils';
+import { SignalAlertTypeDefinition } from './types';
+import { getFilter } from './get_filter';
 
-export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
+export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
     name: 'SIEM Signals',
@@ -24,79 +24,120 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): AlertType => {
     validate: {
       params: schema.object({
         description: schema.string(),
+        falsePositives: schema.arrayOf(schema.string(), { defaultValue: [] }),
         from: schema.string(),
-        filter: schema.maybe(schema.object({}, { allowUnknowns: true })),
-        id: schema.number(),
+        filter: schema.nullable(schema.object({}, { allowUnknowns: true })),
+        id: schema.string(),
+        immutable: schema.boolean({ defaultValue: false }),
         index: schema.arrayOf(schema.string()),
-        kql: schema.maybe(schema.string({ defaultValue: undefined })),
+        language: schema.nullable(schema.string()),
+        savedId: schema.nullable(schema.string()),
+        query: schema.nullable(schema.string()),
+        filters: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
         maxSignals: schema.number({ defaultValue: 100 }),
-        name: schema.string(),
-        severity: schema.number(),
+        severity: schema.string(),
+        tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
         to: schema.string(),
         type: schema.string(),
         references: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        size: schema.maybe(schema.number()),
       }),
     },
-    // TODO: Type the params as it is all filled with any
-    async executor({ services, params, state }: AlertExecutorOptions) {
-      const instance = services.alertInstanceFactory('siem-signals');
-
-      // TODO: Comment this in eventually and use the buildEventsQuery()
-      // for scrolling and other fun stuff instead of using the buildEventsReIndex()
-      // const query = buildEventsQuery();
-
+    async executor({ services, params }) {
       const {
         description,
         filter,
         from,
         id,
         index,
-        kql,
+        filters,
+        language,
+        savedId,
+        query,
         maxSignals,
         name,
         references,
         severity,
         to,
         type,
+        size,
       } = params;
-      const reIndex = buildEventsReIndex({
+
+      const searchAfterSize = size ? size : 1000;
+
+      const esFilter = await getFilter({
+        type,
+        filter,
+        filters,
+        language,
+        query,
+        savedId,
+        services,
+        index,
+      });
+
+      const noReIndex = buildEventsSearchQuery({
         index,
         from,
-        kql,
         to,
-        // TODO: Change this out once we have solved
-        // https://github.com/elastic/kibana/issues/47002
-        signalsIndex: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
-        severity,
-        description,
-        name,
-        timeDetected: Date.now(),
-        filter,
-        maxDocs: maxSignals,
-        ruleRevision: 1,
-        id,
-        type,
-        references,
+        filter: esFilter,
+        size: searchAfterSize,
       });
 
       try {
-        logger.info('Starting SIEM signal job');
+        logger.debug(`Starting signal rule "${id}"`);
+        if (process.env.USE_REINDEX_API === 'true') {
+          const reIndex = buildEventsReIndex({
+            index,
+            from,
+            to,
+            // TODO: Change this out once we have solved
+            // https://github.com/elastic/kibana/issues/47002
+            signalsIndex: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
+            severity,
+            description,
+            name,
+            timeDetected: new Date().toISOString(),
+            filter: esFilter,
+            maxDocs: maxSignals,
+            ruleRevision: 1,
+            id,
+            type,
+            references,
+          });
+          const result = await services.callCluster('reindex', reIndex);
+          if (result.total > 0) {
+            logger.info(
+              `Total signals found from signal rule "${id}" (reindex algorithm): ${result.total}`
+            );
+          }
+        } else {
+          logger.debug(`[+] Initial search call of signal rule "${id}"`);
+          const noReIndexResult = await services.callCluster('search', noReIndex);
+          if (noReIndexResult.hits.total.value !== 0) {
+            logger.info(
+              `Total signals found from signal rule "${id}": ${noReIndexResult.hits.total.value}`
+            );
+          }
 
-        // TODO: Comment this in eventually and use this for manual insertion of the
-        // signals instead of the ReIndex() api
-        // const result = await services.callCluster('search', query);
-        const result = await services.callCluster('reindex', reIndex);
+          const bulkIndexResult = await searchAfterAndBulkIndex(
+            noReIndexResult,
+            params,
+            services,
+            logger
+          );
 
-        // TODO: Error handling here and writing of any errors that come back from ES by
-        logger.info(`Result of reindex: ${JSON.stringify(result, null, 2)}`);
+          if (bulkIndexResult) {
+            logger.debug(`Finished signal rule "${id}"`);
+          } else {
+            logger.error(`Error processing signal rule "${id}"`);
+          }
+        }
       } catch (err) {
         // TODO: Error handling and writing of errors into a signal that has error
         // handling/conditions
-        logger.error(`You encountered an error of: ${err.message}`);
+        logger.error(`Error from signal rule "${id}", ${err.message}`);
       }
-
-      // Schedule the default action which is nothing if it's a plain signal.
-      instance.scheduleActions('default');
     },
   };
 };

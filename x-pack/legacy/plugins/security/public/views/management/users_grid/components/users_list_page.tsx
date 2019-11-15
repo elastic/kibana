@@ -63,12 +63,12 @@ class UsersListPageUI extends Component<Props, State> {
             <EuiEmptyPrompt
               iconType="securityApp"
               title={
-                <h2>
+                <h1>
                   <FormattedMessage
                     id="xpack.security.management.users.deniedPermissionTitle"
                     defaultMessage="You need permission to manage users"
                   />
-                </h2>
+                </h1>
               }
               body={
                 <p data-test-subj="permissionDeniedMessage">
@@ -209,12 +209,12 @@ class UsersListPageUI extends Component<Props, State> {
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>
               <EuiTitle>
-                <h2>
+                <h1>
                   <FormattedMessage
                     id="xpack.security.management.users.usersTitle"
                     defaultMessage="Users"
                   />
-                </h2>
+                </h1>
               </EuiTitle>
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>

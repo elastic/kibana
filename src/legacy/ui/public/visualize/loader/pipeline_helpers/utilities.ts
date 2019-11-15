@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
 import { AggConfig, Vis } from 'ui/vis';
-import { SerializedFieldFormat } from 'src/plugins/expressions/common/expressions/types/common';
+import { SerializedFieldFormat } from 'src/plugins/expressions/public';
 
 import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
 
@@ -28,6 +28,10 @@ import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
 import chrome from '../../../chrome';
 // @ts-ignore
 import { fieldFormats } from '../../../registry/field_formats';
+import { dateRange } from '../../../utils/date_range';
+import { ipRange } from '../../../utils/ip_range';
+import { DateRangeKey } from '../../../agg_types/buckets/date_range';
+import { IpRangeKey } from '../../../agg_types/buckets/ip_range';
 
 interface TermsFieldFormatParams {
   otherBucketLabel: string;
@@ -58,7 +62,8 @@ const getFieldFormat = (id: string | undefined, params: object = {}) => {
 export const createFormat = (agg: AggConfig): SerializedFieldFormat => {
   const format: SerializedFieldFormat = agg.params.field ? agg.params.field.format.toJSON() : {};
   const formats: Record<string, () => SerializedFieldFormat> = {
-    date_range: () => ({ id: 'string' }),
+    date_range: () => ({ id: 'date_range', params: format }),
+    ip_range: () => ({ id: 'ip_range', params: format }),
     percentile_ranks: () => ({ id: 'percent' }),
     count: () => ({ id: 'number' }),
     cardinality: () => ({ id: 'number' }),
@@ -109,6 +114,20 @@ export const getFormat: FormatFactory = (mapping = {}) => {
       });
     });
     return new RangeFormat();
+  } else if (id === 'date_range') {
+    const nestedFormatter = mapping.params as SerializedFieldFormat;
+    const DateRangeFormat = FieldFormat.from((range: DateRangeKey) => {
+      const format = getFieldFormat(nestedFormatter.id, nestedFormatter.params);
+      return dateRange.toString(range, format.convert.bind(format));
+    });
+    return new DateRangeFormat();
+  } else if (id === 'ip_range') {
+    const nestedFormatter = mapping.params as SerializedFieldFormat;
+    const IpRangeFormat = FieldFormat.from((range: IpRangeKey) => {
+      const format = getFieldFormat(nestedFormatter.id, nestedFormatter.params);
+      return ipRange.toString(range, format.convert.bind(format));
+    });
+    return new IpRangeFormat();
   } else if (isTermsFieldFormat(mapping) && mapping.params) {
     const params = mapping.params;
     return {

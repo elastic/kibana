@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, Fragment, useState, useEffect } from 'react';
 import moment from 'moment-timezone';
+import { idx } from '@kbn/elastic-idx';
 
-import { EuiTabbedContent } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiTabbedContent } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -17,6 +18,15 @@ import { DataFrameAnalyticsListRow } from './common';
 import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ProgressBar } from './progress_bar';
+import {
+  getDependentVar,
+  getPredictionFieldName,
+  getValuesFromResponse,
+  loadEvalData,
+  Eval,
+} from '../../../../common';
+import { isCompletedAnalyticsJob } from './common';
+import { isRegressionAnalysis } from '../../../../common/analytics';
 // import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 
 function getItemDescription(value: any) {
@@ -27,11 +37,102 @@ function getItemDescription(value: any) {
   return value.toString();
 }
 
+interface LoadedStatProps {
+  isLoading: boolean;
+  evalData: Eval;
+  resultProperty: 'meanSquaredError' | 'rSquared';
+}
+
+const LoadedStat: FC<LoadedStatProps> = ({ isLoading, evalData, resultProperty }) => {
+  return (
+    <Fragment>
+      {isLoading === false && evalData.error !== null && <EuiIcon type="alert" size="s" />}
+      {isLoading === true && <EuiLoadingSpinner size="s" />}
+      {isLoading === false && evalData.error === null && evalData[resultProperty]}
+    </Fragment>
+  );
+};
+
 interface Props {
   item: DataFrameAnalyticsListRow;
 }
 
+const defaultEval: Eval = { meanSquaredError: '', rSquared: '', error: null };
+
 export const ExpandedRow: FC<Props> = ({ item }) => {
+  const [trainingEval, setTrainingEval] = useState<Eval>(defaultEval);
+  const [generalizationEval, setGeneralizationEval] = useState<Eval>(defaultEval);
+  const [isLoadingTraining, setIsLoadingTraining] = useState<boolean>(false);
+  const [isLoadingGeneralization, setIsLoadingGeneralization] = useState<boolean>(false);
+  const index = idx(item, _ => _.config.dest.index) as string;
+  const dependentVariable = getDependentVar(item.config.analysis);
+  const predictionFieldName = getPredictionFieldName(item.config.analysis);
+  // default is 'ml'
+  const resultsField = item.config.dest.results_field;
+  const jobIsCompleted = isCompletedAnalyticsJob(item.stats);
+  const isRegressionJob = isRegressionAnalysis(item.config.analysis);
+
+  const loadData = async () => {
+    setIsLoadingGeneralization(true);
+    setIsLoadingTraining(true);
+
+    const genErrorEval = await loadEvalData({
+      isTraining: false,
+      index,
+      dependentVariable,
+      resultsField,
+      predictionFieldName,
+    });
+
+    if (genErrorEval.success === true && genErrorEval.eval) {
+      const { meanSquaredError, rSquared } = getValuesFromResponse(genErrorEval.eval);
+      setGeneralizationEval({
+        meanSquaredError,
+        rSquared,
+        error: null,
+      });
+      setIsLoadingGeneralization(false);
+    } else {
+      setIsLoadingGeneralization(false);
+      setGeneralizationEval({
+        meanSquaredError: '',
+        rSquared: '',
+        error: genErrorEval.error,
+      });
+    }
+
+    const trainingErrorEval = await loadEvalData({
+      isTraining: true,
+      index,
+      dependentVariable,
+      resultsField,
+      predictionFieldName,
+    });
+
+    if (trainingErrorEval.success === true && trainingErrorEval.eval) {
+      const { meanSquaredError, rSquared } = getValuesFromResponse(trainingErrorEval.eval);
+      setTrainingEval({
+        meanSquaredError,
+        rSquared,
+        error: null,
+      });
+      setIsLoadingTraining(false);
+    } else {
+      setIsLoadingTraining(false);
+      setTrainingEval({
+        meanSquaredError: '',
+        rSquared: '',
+        error: genErrorEval.error,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (jobIsCompleted && isRegressionJob) {
+      loadData();
+    }
+  }, [jobIsCompleted]);
+
   const stateValues = { ...item.stats };
   delete stateValues.progress;
 
@@ -75,6 +176,51 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     ],
     position: 'right',
   };
+
+  if (jobIsCompleted && isRegressionJob) {
+    stats.items.push(
+      {
+        title: 'generalization mean squared error',
+        description: (
+          <LoadedStat
+            isLoading={isLoadingGeneralization}
+            evalData={generalizationEval}
+            resultProperty={'meanSquaredError'}
+          />
+        ),
+      },
+      {
+        title: 'generalization r squared',
+        description: (
+          <LoadedStat
+            isLoading={isLoadingGeneralization}
+            evalData={generalizationEval}
+            resultProperty={'rSquared'}
+          />
+        ),
+      },
+      {
+        title: 'training mean squared error',
+        description: (
+          <LoadedStat
+            isLoading={isLoadingTraining}
+            evalData={trainingEval}
+            resultProperty={'meanSquaredError'}
+          />
+        ),
+      },
+      {
+        title: 'training r squared',
+        description: (
+          <LoadedStat
+            isLoading={isLoadingTraining}
+            evalData={trainingEval}
+            resultProperty={'rSquared'}
+          />
+        ),
+      }
+    );
+  }
 
   const tabs = [
     {

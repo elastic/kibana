@@ -90,11 +90,11 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
       ),
       sortable: true,
       render: (score: Group['max_anomaly_score']) => {
-        if (score === null) {
+        if (score === undefined) {
           // score is not loaded yet
           return <EuiLoadingSpinner />;
-        } else if (score === undefined) {
-          // an error occurred for this group's score
+        } else if (score === null) {
+          // an error occurred loading this group's score
           return (
             <EuiToolTip
               content={i18n.translate(
@@ -106,6 +106,13 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
             >
               <EuiIcon type="alert" />
             </EuiToolTip>
+          );
+        } else if (score === 0) {
+          return (
+            // @ts-ignore
+            <EuiHealth color={'transparent'} compressed="true">
+              {score}
+            </EuiHealth>
           );
         } else {
           const color: string = getSeverityColor(score);
@@ -137,6 +144,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
       dataType: 'date',
       render: (time: number) => formatHumanReadableDateTimeSeconds(time),
       textOnly: true,
+      truncateText: true,
       sortable: true,
       width: '20%',
     },

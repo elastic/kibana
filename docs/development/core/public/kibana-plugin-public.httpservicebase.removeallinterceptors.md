@@ -4,6 +4,8 @@
 
 ## HttpServiceBase.removeAllInterceptors() method
 
+Removes all configured interceptors.
+
 <b>Signature:</b>
 
 ```typescript

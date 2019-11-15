@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { buildEsQuery, fromKueryExpression, toElasticsearchQuery, JsonObject } from '@kbn/es-query';
 import { isEmpty, isString, flow } from 'lodash/fp';
 import { StaticIndexPattern } from 'ui/index_patterns';
+import { Query } from 'src/plugins/data/common';
+
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 import { KueryFilterQuery } from '../../store';
 
@@ -20,6 +23,19 @@ export const convertKueryToElasticSearchQuery = (
       : '';
   } catch (err) {
     return '';
+  }
+};
+
+export const convertKueryToDslFilter = (
+  kueryExpression: string,
+  indexPattern: StaticIndexPattern
+): JsonObject => {
+  try {
+    return kueryExpression
+      ? toElasticsearchQuery(fromKueryExpression(kueryExpression), indexPattern)
+      : {};
+  } catch (err) {
+    return {};
   }
 };
 
@@ -59,9 +75,39 @@ const escapeAndOr = (val: string) => val.replace(/(\s+)(and|or)(\s+)/gi, '$1\\$2
 
 const escapeNot = (val: string) => val.replace(/not(\s+)/gi, '\\$&');
 
-export const escapeKuery = flow(
-  escapeSpecialCharacters,
-  escapeAndOr,
-  escapeNot,
-  escapeWhitespace
-);
+export const escapeKuery = flow(escapeSpecialCharacters, escapeAndOr, escapeNot, escapeWhitespace);
+
+export interface EsQueryConfig {
+  allowLeadingWildcards: boolean;
+  queryStringOptions: unknown;
+  ignoreFilterIfFieldNotInIndex: boolean;
+  dateFormatTZ?: string | null;
+}
+
+export const convertToBuildEsQuery = ({
+  config,
+  indexPattern,
+  queries,
+  filters,
+}: {
+  config: EsQueryConfig;
+  indexPattern: StaticIndexPattern;
+  queries: Query[];
+  filters: esFilters.Filter[];
+}) => {
+  try {
+    return JSON.stringify(
+      buildEsQuery(
+        indexPattern,
+        queries,
+        filters.filter(f => f.meta.disabled === false),
+        {
+          ...config,
+          dateFormatTZ: null,
+        }
+      )
+    );
+  } catch (exp) {
+    return '';
+  }
+};

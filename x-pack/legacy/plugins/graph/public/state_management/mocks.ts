@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Chrome } from 'ui/chrome';
 import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { NotificationsStart, HttpStart } from 'kibana/public';
 import createSagaMiddleware from 'redux-saga';
 import { createStore, applyMiddleware, AnyAction } from 'redux';
+import { ChromeStart } from 'kibana/public';
 import { GraphStoreDependencies, createRootReducer, GraphStore, GraphState } from './store';
 import { Workspace, GraphWorkspaceSavedObject, IndexPatternSavedObject } from '../types';
 
@@ -52,10 +52,8 @@ export function createMockGraphStore({
     basePath: 'basepath',
     changeUrl: jest.fn(),
     chrome: ({
-      breadcrumbs: {
-        set: jest.fn(),
-      },
-    } as unknown) as Chrome,
+      setBreadcrumbs: jest.fn(),
+    } as unknown) as ChromeStart,
     createWorkspace: jest.fn(),
     getWorkspace: jest.fn(() => workspaceMock),
     getSavedWorkspace: jest.fn(() => savedWorkspace),

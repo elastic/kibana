@@ -12,6 +12,7 @@ import { Field, SplitField, AggFieldPair } from '../../../../../common/types/fie
 import { ml } from '../../../../services/ml_api_service';
 import { mlResultsService } from '../../../../services/results_service';
 import { getCategoryFields as getCategoryFieldsOrig } from './searches';
+import { aggFieldPairsCanBeCharted } from '../job_creator/util/general';
 
 type DetectorIndex = number;
 export interface LineChartPoint {
@@ -51,7 +52,13 @@ export class ChartLoader {
     intervalMs: number
   ): Promise<LineChartData> {
     if (this._timeFieldName !== '') {
+      if (aggFieldPairsCanBeCharted(aggFieldPairs) === false) {
+        // no elasticsearch aggregation, this must contain ML only functions
+        return {};
+      }
+
       const splitFieldName = splitField !== null ? splitField.name : null;
+      const aggFieldPairNames = aggFieldPairs.map(getAggFieldPairNames);
 
       const resp = await newJobLineChart(
         this._indexPatternTitle,
@@ -60,7 +67,7 @@ export class ChartLoader {
         end,
         intervalMs,
         this._query,
-        aggFieldPairs.map(getAggFieldPairNames),
+        aggFieldPairNames,
         splitFieldName,
         splitFieldValue
       );
@@ -80,7 +87,13 @@ export class ChartLoader {
     intervalMs: number
   ): Promise<LineChartData> {
     if (this._timeFieldName !== '') {
+      if (aggFieldPairsCanBeCharted(aggFieldPairs) === false) {
+        // no elasticsearch aggregation, this must contain ML only functions
+        return {};
+      }
+
       const splitFieldName = splitField !== null ? splitField.name : '';
+      const aggFieldPairNames = aggFieldPairs.map(getAggFieldPairNames);
 
       const resp = await newJobPopulationsChart(
         this._indexPatternTitle,
@@ -89,7 +102,7 @@ export class ChartLoader {
         end,
         intervalMs,
         this._query,
-        aggFieldPairs.map(getAggFieldPairNames),
+        aggFieldPairNames,
         splitFieldName
       );
       if (resp.error !== undefined) {
@@ -144,7 +157,7 @@ export function getAggFieldPairNames(af: AggFieldPair) {
       : { field: null, value: null };
 
   return {
-    agg: af.agg.dslName,
+    agg: af.agg.dslName || '',
     field: af.field.id,
     by,
   };

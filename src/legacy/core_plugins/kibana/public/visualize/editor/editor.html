@@ -72,13 +72,6 @@
     index-patterns="[indexPattern]"
   ></filter-bar>
 
-  <apply-filters-popover
-    key="applyFiltersKey"
-    filters="state.$newFilters"
-    on-cancel="onCancelApplyFilters"
-    on-submit="onApplyFilters"
-  ></apply-filters-popover>
-
   <div
     class="euiCallOut euiCallOut--primary euiCallOut--small hide-for-sharing"
     ng-if="vis.type.shouldMarkAsExperimentalInUI()"
@@ -89,7 +82,14 @@
     </div>
   </div>
 
-  <div class="visualize" ng-if="!chrome.getVisible()"/>
+  <visualization-embedded
+    ng-if="!chrome.getVisible()"
+    class="visualize"
+    saved-obj="savedVis"
+    ui-state="uiState"
+    time-range="timeRange"
+    filters="filters"
+    query="query"/>
 
   <h1
     class="euiScreenReaderOnly"
@@ -106,7 +106,8 @@
     saved-obj="savedVis"
     ui-state="uiState"
     time-range="timeRange"
-    filters="globalFilters"
+    filters="filters"
+    query="query"
     class="visEditor__content"
   />
 

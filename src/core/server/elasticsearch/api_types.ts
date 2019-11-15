@@ -158,7 +158,7 @@ export interface CallAPIOptions {
    * header that could have been returned by the API itself. If API didn't specify that
    * then `Basic realm="Authorization Required"` is used as `WWW-Authenticate`.
    */
-  wrap401Errors: boolean;
+  wrap401Errors?: boolean;
   /**
    * A signal object that allows you to abort the request via an AbortController object.
    */
@@ -317,14 +317,18 @@ export interface APICaller {
   /* eslint-enable */
 }
 
+/** @public */
 export interface AssistantAPIClientParams extends GenericParams {
   path: '/_migration/assistance';
   method: 'GET';
 }
 
+/** @public */
 export type MIGRATION_ASSISTANCE_INDEX_ACTION = 'upgrade' | 'reindex';
+/** @public */
 export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
 
+/** @public */
 export interface AssistanceAPIResponse {
   indices: {
     [indexName: string]: {
@@ -333,11 +337,13 @@ export interface AssistanceAPIResponse {
   };
 }
 
+/** @public */
 export interface DeprecationAPIClientParams extends GenericParams {
   path: '/_migration/deprecations';
   method: 'GET';
 }
 
+/** @public */
 export interface DeprecationInfo {
   level: MIGRATION_DEPRECATION_LEVEL;
   message: string;
@@ -345,10 +351,12 @@ export interface DeprecationInfo {
   details?: string;
 }
 
+/** @public */
 export interface IndexSettingsDeprecationInfo {
   [indexName: string]: DeprecationInfo[];
 }
 
+/** @public */
 export interface DeprecationAPIResponse {
   cluster_settings: DeprecationInfo[];
   ml_settings: DeprecationInfo[];

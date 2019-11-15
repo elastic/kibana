@@ -5,8 +5,8 @@
  */
 
 import { ReactElement } from 'react';
-import { basicJobValidation } from '../../../../../common/util/job_utils';
-import { newJobLimits } from '../../../new_job/utils/new_job_defaults';
+import { basicJobValidation, basicDatafeedValidation } from '../../../../../common/util/job_utils';
+import { getNewJobLimits } from '../../../../services/ml_server_info';
 import { JobCreatorType } from '../job_creator';
 import { populateValidationMessages, checkForExistingJobAndGroupIds } from './util';
 import { ExistingJobsAndGroups } from '../../../../services/job_service';
@@ -32,12 +32,17 @@ export interface BasicValidations {
   modelMemoryLimit: Validation;
   bucketSpan: Validation;
   duplicateDetectors: Validation;
+  query: Validation;
+  queryDelay: Validation;
+  frequency: Validation;
+  scrollSize: Validation;
 }
 
 export class JobValidator {
   private _jobCreator: JobCreatorType;
   private _validationSummary: ValidationSummary;
   private _lastJobConfig: string;
+  private _lastDatafeedConfig: string;
   private _validateTimeout: ReturnType<typeof setTimeout> | null = null;
   private _existingJobsAndGroups: ExistingJobsAndGroups;
   private _basicValidations: BasicValidations = {
@@ -46,12 +51,17 @@ export class JobValidator {
     modelMemoryLimit: { valid: true },
     bucketSpan: { valid: true },
     duplicateDetectors: { valid: true },
+    query: { valid: true },
+    queryDelay: { valid: true },
+    frequency: { valid: true },
+    scrollSize: { valid: true },
   };
   private _validating: boolean = false;
 
   constructor(jobCreator: JobCreatorType, existingJobsAndGroups: ExistingJobsAndGroups) {
     this._jobCreator = jobCreator;
     this._lastJobConfig = this._jobCreator.formattedJobJson;
+    this._lastDatafeedConfig = this._jobCreator.formattedDatafeedJson;
     this._validationSummary = {
       basic: false,
       advanced: false,
@@ -59,16 +69,22 @@ export class JobValidator {
     this._existingJobsAndGroups = existingJobsAndGroups;
   }
 
-  public validate(callback: () => void) {
+  public validate(callback: () => void, forceValidate: boolean = false) {
     this._validating = true;
     const formattedJobConfig = this._jobCreator.formattedJobJson;
+    const formattedDatafeedConfig = this._jobCreator.formattedDatafeedJson;
     // only validate if the config has changed
-    if (formattedJobConfig !== this._lastJobConfig) {
+    if (
+      forceValidate ||
+      formattedJobConfig !== this._lastJobConfig ||
+      formattedDatafeedConfig !== this._lastDatafeedConfig
+    ) {
       if (this._validateTimeout !== null) {
         // clear any previous on going validation timeouts
         clearTimeout(this._validateTimeout);
       }
       this._lastJobConfig = formattedJobConfig;
+      this._lastDatafeedConfig = formattedDatafeedConfig;
       this._validateTimeout = setTimeout(() => {
         this._runBasicValidation();
         this._validating = false;
@@ -94,11 +110,20 @@ export class JobValidator {
     this._resetBasicValidations();
 
     const jobConfig = this._jobCreator.jobConfig;
-    const limits = newJobLimits();
+    const datafeedConfig = this._jobCreator.datafeedConfig;
+    const limits = getNewJobLimits();
 
     // run standard basic validation
-    const basicResults = basicJobValidation(jobConfig, undefined, limits);
-    populateValidationMessages(basicResults, this._basicValidations, jobConfig);
+    const basicJobResults = basicJobValidation(jobConfig, undefined, limits);
+    populateValidationMessages(basicJobResults, this._basicValidations, jobConfig, datafeedConfig);
+
+    const basicDatafeedResults = basicDatafeedValidation(datafeedConfig);
+    populateValidationMessages(
+      basicDatafeedResults,
+      this._basicValidations,
+      jobConfig,
+      datafeedConfig
+    );
 
     // run addition job and group id validation
     const idResults = checkForExistingJobAndGroupIds(
@@ -106,7 +131,7 @@ export class JobValidator {
       this._jobCreator.groups,
       this._existingJobsAndGroups
     );
-    populateValidationMessages(idResults, this._basicValidations, jobConfig);
+    populateValidationMessages(idResults, this._basicValidations, jobConfig, datafeedConfig);
 
     this._validationSummary.basic = this._isOverallBasicValid();
   }
@@ -137,6 +162,22 @@ export class JobValidator {
 
   public get modelMemoryLimit(): Validation {
     return this._basicValidations.modelMemoryLimit;
+  }
+
+  public get query(): Validation {
+    return this._basicValidations.query;
+  }
+
+  public get queryDelay(): Validation {
+    return this._basicValidations.queryDelay;
+  }
+
+  public get frequency(): Validation {
+    return this._basicValidations.frequency;
+  }
+
+  public get scrollSize(): Validation {
+    return this._basicValidations.scrollSize;
   }
 
   public set advancedValid(valid: boolean) {

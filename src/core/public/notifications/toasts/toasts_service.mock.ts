@@ -18,10 +18,10 @@
  */
 
 import { Observable } from 'rxjs';
-import { ToastsSetup } from './toasts_service';
+import { IToasts } from './toasts_api';
 
 const createToastsApiMock = () => {
-  const api: jest.Mocked<PublicMethodsOf<ToastsSetup>> = {
+  const api: jest.Mocked<IToasts> = {
     get$: jest.fn(() => new Observable()),
     add: jest.fn(),
     remove: jest.fn(),

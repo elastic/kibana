@@ -5,13 +5,16 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/public';
+import _ from 'lodash';
 import {
   loadInitialState,
   loadIndexPatterns,
   changeIndexPattern,
   changeLayerIndexPattern,
+  syncExistingFields,
 } from './loader';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
+import { documentField } from './document_field';
 
 // TODO: This should not be necessary
 jest.mock('ui/new_platform');
@@ -61,6 +64,7 @@ const sampleIndexPatterns = {
         searchable: true,
         esTypes: ['keyword'],
       },
+      documentField,
     ],
   },
   b: {
@@ -119,6 +123,7 @@ const sampleIndexPatterns = {
         },
         esTypes: ['keyword'],
       },
+      documentField,
     ],
   },
 };
@@ -131,7 +136,7 @@ function indexPatternSavedObject({ id }: { id: keyof typeof sampleIndexPatterns 
     attributes: {
       title: pattern.title,
       timeFieldName: pattern.timeFieldName,
-      fields: JSON.stringify(pattern.fields),
+      fields: JSON.stringify(pattern.fields.filter(f => f.type !== 'document')),
     },
   };
 }
@@ -315,6 +320,7 @@ describe('loader', () => {
         currentIndexPatternId: 'b',
         indexPatternRefs: [],
         indexPatterns: {},
+        existingFields: {},
         layers: {},
         showEmptyFields: true,
       };
@@ -343,6 +349,7 @@ describe('loader', () => {
       const state: IndexPatternPrivateState = {
         currentIndexPatternId: 'b',
         indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: {},
         layers: {},
         showEmptyFields: true,
@@ -372,6 +379,7 @@ describe('loader', () => {
       const state: IndexPatternPrivateState = {
         currentIndexPatternId: 'b',
         indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: {
           a: sampleIndexPatterns.a,
         },
@@ -450,6 +458,7 @@ describe('loader', () => {
       const state: IndexPatternPrivateState = {
         currentIndexPatternId: 'b',
         indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: {
           a: sampleIndexPatterns.a,
         },
@@ -479,6 +488,46 @@ describe('loader', () => {
 
       expect(setState).not.toHaveBeenCalled();
       expect(onError).toHaveBeenCalledWith(err);
+    });
+  });
+
+  describe('syncExistingFields', () => {
+    it('should call once for each index pattern', async () => {
+      const setState = jest.fn();
+      const fetchJson = jest.fn(async (url: string) => {
+        const indexPatternTitle = _.last(url.split('/'));
+        return {
+          indexPatternTitle,
+          existingFieldNames: ['field_1', 'field_2'].map(
+            fieldName => `${indexPatternTitle}_${fieldName}`
+          ),
+        };
+      });
+
+      await syncExistingFields({
+        dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
+        fetchJson,
+        indexPatterns: [{ title: 'a' }, { title: 'b' }, { title: 'c' }],
+        setState,
+      });
+
+      expect(fetchJson).toHaveBeenCalledTimes(3);
+      expect(setState).toHaveBeenCalledTimes(1);
+
+      const [fn] = setState.mock.calls[0];
+      const newState = fn({
+        foo: 'bar',
+        existingFields: {},
+      });
+
+      expect(newState).toEqual({
+        foo: 'bar',
+        existingFields: {
+          a: { a_field_1: true, a_field_2: true },
+          b: { b_field_1: true, b_field_2: true },
+          c: { c_field_1: true, c_field_2: true },
+        },
+      });
     });
   });
 });

@@ -13,12 +13,12 @@ import {
   ConsoleMessage,
   Request as PuppeteerRequest,
 } from 'puppeteer';
-import rimraf from 'rimraf';
+import del from 'del';
 import * as Rx from 'rxjs';
 import { ignoreElements, mergeMap, tap } from 'rxjs/operators';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 
-import { BrowserConfig } from '../../../../types';
+import { BrowserConfig, NetworkPolicy } from '../../../../types';
 import { LevelLogger as Logger } from '../../../lib/level_logger';
 import { HeadlessChromiumDriver } from '../driver';
 import { safeChildProcess } from '../../safe_child_process';
@@ -34,17 +34,20 @@ export class HeadlessChromiumDriverFactory {
   private logger: Logger;
   private browserConfig: BrowserConfig;
   private queueTimeout: queueTimeout;
+  private networkPolicy: NetworkPolicy;
 
   constructor(
     binaryPath: binaryPath,
     logger: Logger,
     browserConfig: BrowserConfig,
-    queueTimeout: queueTimeout
+    queueTimeout: queueTimeout,
+    networkPolicy: NetworkPolicy
   ) {
     this.binaryPath = binaryPath;
     this.browserConfig = browserConfig;
     this.queueTimeout = queueTimeout;
     this.logger = logger;
+    this.networkPolicy = networkPolicy;
   }
 
   type = 'chromium';
@@ -152,7 +155,7 @@ export class HeadlessChromiumDriverFactory {
       this.getBrowserLogger(page).subscribe();
       this.getProcessLogger(browser).subscribe();
 
-      const driver$ = Rx.of(new HeadlessChromiumDriver(page, { inspect: this.browserConfig.inspect })); //  prettier-ignore
+      const driver$ = Rx.of(new HeadlessChromiumDriver(page, { inspect: this.browserConfig.inspect, networkPolicy: this.networkPolicy })); //  prettier-ignore
 
       const exit$ = this.getPageExit(browser, page);
 
@@ -163,20 +166,16 @@ export class HeadlessChromiumDriverFactory {
         this.logger.debug(`deleting chromium user data directory at [${userDataDir}]`);
         // the unsubscribe function isn't `async` so we're going to make our best effort at
         // deleting the userDataDir and if it fails log an error.
-        rimraf(userDataDir, err => {
-          if (err) {
-            return this.logger.error(
-              `error deleting user data directory at [${userDataDir}]: [${err}]`
-            );
-          }
+        del(userDataDir).catch(error => {
+          this.logger.error(`error deleting user data directory at [${userDataDir}]: [${error}]`);
         });
       });
     });
   }
 
   getBrowserLogger(page: Page): Rx.Observable<ConsoleMessage> {
-    return Rx.fromEvent(page as NodeJS.EventEmitter, 'console').pipe(
-      tap((line: ConsoleMessage) => {
+    return Rx.fromEvent<ConsoleMessage>(page, 'console').pipe(
+      tap(line => {
         if (line.type() === 'error') {
           this.logger.error(line.text(), ['headless-browser-console']);
         } else {
@@ -186,14 +185,14 @@ export class HeadlessChromiumDriverFactory {
     );
   }
 
-  getProcessLogger(browser: Browser): Rx.Observable<string> {
+  getProcessLogger(browser: Browser) {
     const childProcess = browser.process();
     // NOTE: The browser driver can not observe stdout and stderr of the child process
     // Puppeteer doesn't give a handle to the original ChildProcess object
     // See https://github.com/GoogleChrome/puppeteer/issues/1292#issuecomment-521470627
 
     // just log closing of the process
-    const processClose$: Rx.Observable<string> = Rx.fromEvent(childProcess, 'close').pipe(
+    const processClose$ = Rx.fromEvent<void>(childProcess, 'close').pipe(
       tap(() => {
         this.logger.debug('child process closed', ['headless-browser-process']);
       })
@@ -202,17 +201,15 @@ export class HeadlessChromiumDriverFactory {
     return processClose$; // ideally, this would also merge with observers for stdout and stderr
   }
 
-  getPageExit(browser: Browser, page: Page): Rx.Observable<never> {
-    const pageError$: Rx.Observable<never> = Rx.fromEvent(page, 'error').pipe(
-      mergeMap((err: Error) => Rx.throwError(err))
+  getPageExit(browser: Browser, page: Page) {
+    const pageError$ = Rx.fromEvent<Error>(page, 'error').pipe(mergeMap(err => Rx.throwError(err)));
+
+    const uncaughtExceptionPageError$ = Rx.fromEvent<Error>(page, 'pageerror').pipe(
+      mergeMap(err => Rx.throwError(err))
     );
 
-    const uncaughtExceptionPageError$: Rx.Observable<never> = Rx.fromEvent(page, 'pageerror').pipe(
-      mergeMap((err: Error) => Rx.throwError(err))
-    );
-
-    const pageRequestFailed$: Rx.Observable<never> = Rx.fromEvent(page, 'requestfailed').pipe(
-      mergeMap((req: PuppeteerRequest) => {
+    const pageRequestFailed$ = Rx.fromEvent<PuppeteerRequest>(page, 'requestfailed').pipe(
+      mergeMap(req => {
         const failure = req.failure && req.failure();
         if (failure) {
           return Rx.throwError(

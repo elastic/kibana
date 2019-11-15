@@ -9,6 +9,7 @@ import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
 import url from 'url';
+import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
@@ -17,7 +18,6 @@ import { useTrackPageview } from '../../../../../infra/public';
 import { useKibanaCore } from '../../../../../observability/public';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { callApmApi } from '../../../services/rest/callApmApi';
 
 const initalData = {
   items: [],
@@ -33,16 +33,19 @@ export function ServiceOverview() {
     urlParams: { start, end },
     uiFilters
   } = useUrlParams();
-  const { data = initalData, status } = useFetcher(() => {
-    if (start && end) {
-      return callApmApi({
-        pathname: '/api/apm/services',
-        params: {
-          query: { start, end, uiFilters: JSON.stringify(uiFilters) }
-        }
-      });
-    }
-  }, [start, end, uiFilters]);
+  const { data = initalData, status } = useFetcher(
+    callApmApi => {
+      if (start && end) {
+        return callApmApi({
+          pathname: '/api/apm/services',
+          params: {
+            query: { start, end, uiFilters: JSON.stringify(uiFilters) }
+          }
+        });
+      }
+    },
+    [start, end, uiFilters]
+  );
 
   useEffect(() => {
     if (data.hasLegacyData && !hasDisplayedToast) {
@@ -53,7 +56,7 @@ export function ServiceOverview() {
           defaultMessage:
             'Legacy data was detected within the selected time range'
         }),
-        text: (
+        text: toMountPoint(
           <p>
             {i18n.translate('xpack.apm.serviceOverview.toastText', {
               defaultMessage:
@@ -82,9 +85,7 @@ export function ServiceOverview() {
   useTrackPageview({ app: 'apm', path: 'services_overview' });
   useTrackPageview({ app: 'apm', path: 'services_overview', delay: 15000 });
 
-  const localFiltersConfig: React.ComponentProps<
-    typeof LocalUIFilters
-  > = useMemo(
+  const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
     () => ({
       filterNames: ['host', 'agentName'],
       projection: PROJECTION.SERVICES

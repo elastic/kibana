@@ -84,6 +84,8 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     describe('monitor state scoping', async () => {
+      const numIps = 4; // Must be > 2 for IP uniqueness checks
+
       before('load heartbeat data', () => getService('esArchiver').load('uptime/blank'));
       after('unload heartbeat index', () => getService('esArchiver').unload('uptime/blank'));
 
@@ -106,7 +108,7 @@ export default function({ getService }: FtrProviderContext) {
 
           const es = getService('es');
           dateRangeStart = new Date().toISOString();
-          checks = await makeChecks(es, index, testMonitorId, 1, 2, {}, d => {
+          checks = await makeChecks(es, index, testMonitorId, 1, numIps, {}, d => {
             if (d.summary) {
               d.monitor.status = 'down';
               d.summary.up--;
@@ -116,6 +118,17 @@ export default function({ getService }: FtrProviderContext) {
           });
           dateRangeEnd = new Date().toISOString();
           nonSummaryIp = checks[0][0].monitor.ip;
+        });
+
+        it('should return all IPs', async () => {
+          const res = await getMonitorStates(makeApiParams(testMonitorId));
+
+          const uniqueIps = new Set<string>();
+          res.monitorStates.summaries[0].state.checks.forEach((c: any) =>
+            uniqueIps.add(c.monitor.ip)
+          );
+
+          expect(uniqueIps.size).to.eql(4);
         });
 
         it('should match non summary documents without a status filter', async () => {

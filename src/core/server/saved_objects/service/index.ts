@@ -18,7 +18,7 @@
  */
 
 import { Readable } from 'stream';
-import { ScopedSavedObjectsClientProvider } from './lib';
+import { SavedObjectsClientProvider } from './lib';
 import { SavedObjectsClient } from './saved_objects_client';
 import { SavedObjectsExportOptions } from '../export';
 import { SavedObjectsImportOptions, SavedObjectsImportResponse } from '../import';
@@ -31,10 +31,11 @@ import { SavedObjectsResolveImportErrorsOptions } from '../import/types';
  */
 export interface SavedObjectsLegacyService<Request = any> {
   // ATTENTION: these types are incomplete
-  addScopedSavedObjectsClientWrapperFactory: ScopedSavedObjectsClientProvider<
+  addScopedSavedObjectsClientWrapperFactory: SavedObjectsClientProvider<
     Request
   >['addClientWrapperFactory'];
-  getScopedSavedObjectsClient: ScopedSavedObjectsClientProvider<Request>['getClient'];
+  setScopedSavedObjectsClientFactory: SavedObjectsClientProvider<Request>['setClientFactory'];
+  getScopedSavedObjectsClient: SavedObjectsClientProvider<Request>['getClient'];
   SavedObjectsClient: typeof SavedObjectsClient;
   types: string[];
   schema: SavedObjectsSchema;
@@ -51,12 +52,12 @@ export interface SavedObjectsLegacyService<Request = any> {
 
 export {
   SavedObjectsRepository,
-  ScopedSavedObjectsClientProvider,
+  SavedObjectsClientProvider,
+  ISavedObjectsClientProvider,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   SavedObjectsErrorHelpers,
-  SavedObjectsCacheIndexPatterns,
 } from './lib';
 
 export * from './saved_objects_client';

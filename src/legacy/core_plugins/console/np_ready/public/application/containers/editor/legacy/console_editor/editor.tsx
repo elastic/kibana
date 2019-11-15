@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { CSSProperties, useEffect, useRef, useState } from 'react';
+import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -33,7 +33,7 @@ import { registerCommands } from './keyboard_shortcuts';
 import { applyCurrentSettings } from './apply_editor_settings';
 
 // @ts-ignore
-import { initializeInput } from '../../../../../../../public/quarantined/src/input';
+import { initializeEditor } from '../../../../../../../public/quarantined/src/input';
 // @ts-ignore
 import mappings from '../../../../../../../public/quarantined/src/mappings';
 
@@ -88,7 +88,7 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
   useEffect(() => {
     const $editor = $(editorRef.current!);
     const $actions = $(actionsRef.current!);
-    editorInstanceRef.current = initializeInput($editor, $actions);
+    editorInstanceRef.current = initializeEditor($editor, $actions);
 
     if (previousStateLocation === 'stored') {
       const { content } = history.getSavedEditorState() || {
@@ -143,7 +143,7 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
     };
   }, []);
 
-  const sendCurrentRequestToES = () => {
+  const sendCurrentRequestToES = useCallback(() => {
     dispatch({
       type: 'sendRequestToEs',
       value: {
@@ -153,7 +153,7 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
           history.addToHistory(esPath, esMethod, esData),
       },
     });
-  };
+  }, [settings]);
 
   useEffect(() => {
     applyCurrentSettings(editorInstanceRef.current!, settings);
@@ -167,7 +167,7 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
       sendCurrentRequestToES,
       openDocumentation,
     });
-  }, []);
+  }, [sendCurrentRequestToES]);
 
   return (
     <div style={abs} className="conApp">

@@ -19,23 +19,21 @@
 
 import { fromKueryExpression, KueryNode, nodeTypes } from '@kbn/es-query';
 import { get, set } from 'lodash';
-
-import { SavedObjectsIndexPattern, SavedObjectsIndexPatternField } from './cache_index_patterns';
 import { SavedObjectsErrorHelpers } from './errors';
+import { IndexMapping } from '../../mappings';
 
 export const validateConvertFilterToKueryNode = (
-  types: string[],
+  allowedTypes: string[],
   filter: string,
-  indexPattern: SavedObjectsIndexPattern | undefined
+  indexMapping: IndexMapping
 ): KueryNode => {
-  if (filter && filter.length > 0 && indexPattern) {
+  if (filter && filter.length > 0 && indexMapping) {
     const filterKueryNode = fromKueryExpression(filter);
 
-    const typeIndexPatterns = getSavedObjectTypeIndexPatterns(types, indexPattern);
     const validationFilterKuery = validateFilterKueryNode(
       filterKueryNode,
-      types,
-      typeIndexPatterns,
+      allowedTypes,
+      indexMapping,
       filterKueryNode.type === 'function' && ['is', 'range'].includes(filterKueryNode.function)
     );
 
@@ -60,7 +58,7 @@ export const validateConvertFilterToKueryNode = (
         path.length === 0 ? filterKueryNode : get(filterKueryNode, path);
       if (item.isSavedObjectAttr) {
         existingKueryNode.arguments[0].value = existingKueryNode.arguments[0].value.split('.')[1];
-        const itemType = types.filter(t => t === item.type);
+        const itemType = allowedTypes.filter(t => t === item.type);
         if (itemType.length === 1) {
           set(
             filterKueryNode,
@@ -84,18 +82,6 @@ export const validateConvertFilterToKueryNode = (
   return null;
 };
 
-export const getSavedObjectTypeIndexPatterns = (
-  types: string[],
-  indexPattern: SavedObjectsIndexPattern | undefined
-): SavedObjectsIndexPatternField[] => {
-  return indexPattern != null
-    ? indexPattern.fields.filter(
-        ip =>
-          !ip.name.includes('.') || (ip.name.includes('.') && types.includes(ip.name.split('.')[0]))
-      )
-    : [];
-};
-
 interface ValidateFilterKueryNode {
   astPath: string;
   error: string;
@@ -107,7 +93,7 @@ interface ValidateFilterKueryNode {
 export const validateFilterKueryNode = (
   astFilter: KueryNode,
   types: string[],
-  typeIndexPatterns: SavedObjectsIndexPatternField[],
+  indexMapping: IndexMapping,
   storeValue: boolean = false,
   path: string = 'arguments'
 ): ValidateFilterKueryNode[] => {
@@ -119,7 +105,7 @@ export const validateFilterKueryNode = (
         ...validateFilterKueryNode(
           ast,
           types,
-          typeIndexPatterns,
+          indexMapping,
           ast.type === 'function' && ['is', 'range'].includes(ast.function),
           `${myPath}.arguments`
         ),
@@ -131,8 +117,8 @@ export const validateFilterKueryNode = (
         ...kueryNode,
         {
           astPath: splitPath.slice(0, splitPath.length - 1).join('.'),
-          error: hasFilterKeyError(ast.value, types, typeIndexPatterns),
-          isSavedObjectAttr: isSavedObjectAttr(ast.value, typeIndexPatterns),
+          error: hasFilterKeyError(ast.value, types, indexMapping),
+          isSavedObjectAttr: isSavedObjectAttr(ast.value, indexMapping),
           key: ast.value,
           type: getType(ast.value),
         },
@@ -144,47 +130,55 @@ export const validateFilterKueryNode = (
 
 const getType = (key: string) => (key.includes('.') ? key.split('.')[0] : null);
 
-export const isSavedObjectAttr = (
-  key: string,
-  typeIndexPatterns: SavedObjectsIndexPatternField[]
-) => {
-  const splitKey = key.split('.');
-  if (splitKey.length === 1 && typeIndexPatterns.some(tip => tip.name === splitKey[0])) {
+/**
+ * Is this filter key referring to a a top-level SavedObject attribute such as
+ * `updated_at` or `references`.
+ *
+ * @param key
+ * @param indexMapping
+ */
+export const isSavedObjectAttr = (key: string, indexMapping: IndexMapping) => {
+  const keySplit = key.split('.');
+  if (keySplit.length === 1 && fieldDefined(indexMapping, keySplit[0])) {
     return true;
-  } else if (splitKey.length > 1 && typeIndexPatterns.some(tip => tip.name === splitKey[1])) {
+  } else if (keySplit.length === 2 && fieldDefined(indexMapping, keySplit[1])) {
     return true;
+  } else {
+    return false;
   }
-  return false;
 };
 
 export const hasFilterKeyError = (
   key: string,
   types: string[],
-  typeIndexPatterns: SavedObjectsIndexPatternField[]
+  indexMapping: IndexMapping
 ): string | null => {
   if (!key.includes('.')) {
     return `This key '${key}' need to be wrapped by a saved object type like ${types.join()}`;
   } else if (key.includes('.')) {
     const keySplit = key.split('.');
+
     if (keySplit.length <= 1 || !types.includes(keySplit[0])) {
       return `This type ${keySplit[0]} is not allowed`;
     }
     if (
-      (keySplit.length === 2 && typeIndexPatterns.some(tip => tip.name === key)) ||
-      (keySplit.length > 2 && types.includes(keySplit[0]) && keySplit[1] !== 'attributes')
+      (keySplit.length === 2 && fieldDefined(indexMapping, key)) ||
+      (keySplit.length > 2 && keySplit[1] !== 'attributes')
     ) {
       return `This key '${key}' does NOT match the filter proposition SavedObjectType.attributes.key`;
     }
     if (
-      (keySplit.length === 2 && !typeIndexPatterns.some(tip => tip.name === keySplit[1])) ||
+      (keySplit.length === 2 && !fieldDefined(indexMapping, keySplit[1])) ||
       (keySplit.length > 2 &&
-        !typeIndexPatterns.some(
-          tip =>
-            tip.name === [...keySplit.slice(0, 1), ...keySplit.slice(2, keySplit.length)].join('.')
-        ))
+        !fieldDefined(indexMapping, keySplit[0] + '.' + keySplit.slice(2, keySplit.length)))
     ) {
       return `This key '${key}' does NOT exist in ${types.join()} saved object index patterns`;
     }
   }
   return null;
+};
+
+const fieldDefined = (indexMappings: IndexMapping, key: string) => {
+  const mappingKey = 'properties.' + key.split('.').join('.properties.');
+  return get(indexMappings, mappingKey) != null;
 };

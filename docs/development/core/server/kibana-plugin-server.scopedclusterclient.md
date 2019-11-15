@@ -24,6 +24,6 @@ export declare class ScopedClusterClient implements IScopedClusterClient
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [callAsCurrentUser(endpoint, clientParams, options)](./kibana-plugin-server.scopedclusterclient.callascurrentuser.md) |  | Calls specified <code>endpoint</code> with provided <code>clientParams</code> on behalf of the user initiated request to the Kibana server (via HTTP request headers). |
-|  [callAsInternalUser(endpoint, clientParams, options)](./kibana-plugin-server.scopedclusterclient.callasinternaluser.md) |  | Calls specified <code>endpoint</code> with provided <code>clientParams</code> on behalf of the Kibana internal user. |
+|  [callAsCurrentUser(endpoint, clientParams, options)](./kibana-plugin-server.scopedclusterclient.callascurrentuser.md) |  | Calls specified <code>endpoint</code> with provided <code>clientParams</code> on behalf of the user initiated request to the Kibana server (via HTTP request headers). See [APICaller](./kibana-plugin-server.apicaller.md)<!-- -->. |
+|  [callAsInternalUser(endpoint, clientParams, options)](./kibana-plugin-server.scopedclusterclient.callasinternaluser.md) |  | Calls specified <code>endpoint</code> with provided <code>clientParams</code> on behalf of the Kibana internal user. See [APICaller](./kibana-plugin-server.apicaller.md)<!-- -->. |
 

@@ -10,13 +10,8 @@ import expect from '@kbn/expect';
 import { replaceInjectedVars } from '../replace_injected_vars';
 import { KibanaRequest } from '../../../../../../../src/core/server';
 
-const buildRequest = (telemetryOptedIn = null, path = '/app/kibana') => {
+const buildRequest = (path = '/app/kibana') => {
   const get = sinon.stub();
-  if (telemetryOptedIn === null) {
-    get.withArgs('telemetry', 'telemetry').rejects(new Error('not found exception'));
-  } else {
-    get.withArgs('telemetry', 'telemetry').resolves({ attributes: { enabled: telemetryOptedIn } });
-  }
 
   return {
     path,
@@ -50,7 +45,6 @@ describe('replaceInjectedVars uiExport', () => {
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      telemetryOptedIn: null,
       xpackInitialInfo: {
         b: 1
       },
@@ -73,7 +67,6 @@ describe('replaceInjectedVars uiExport', () => {
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      telemetryOptedIn: null,
       xpackInitialInfo: {
         b: 1
       },
@@ -89,7 +82,6 @@ describe('replaceInjectedVars uiExport', () => {
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      telemetryOptedIn: null,
       xpackInitialInfo: {
         b: 1
       },
@@ -98,14 +90,13 @@ describe('replaceInjectedVars uiExport', () => {
 
   it('respects the telemetry opt-in document when opted-out', async () => {
     const originalInjectedVars = { a: 1 };
-    const request = buildRequest(false);
+    const request = buildRequest();
     const server = mockServer();
     server.plugins.xpack_main.info.license.isOneOf.returns(true);
 
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      telemetryOptedIn: false,
       xpackInitialInfo: {
         b: 1
       },
@@ -114,14 +105,13 @@ describe('replaceInjectedVars uiExport', () => {
 
   it('respects the telemetry opt-in document when opted-in', async () => {
     const originalInjectedVars = { a: 1 };
-    const request = buildRequest(true);
+    const request = buildRequest();
     const server = mockServer();
     server.plugins.xpack_main.info.license.isOneOf.returns(true);
 
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      telemetryOptedIn: true,
       xpackInitialInfo: {
         b: 1
       },
@@ -137,7 +127,6 @@ describe('replaceInjectedVars uiExport', () => {
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      telemetryOptedIn: false,
       xpackInitialInfo: {
         b: 1
       },
@@ -174,7 +163,6 @@ describe('replaceInjectedVars uiExport', () => {
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      telemetryOptedIn: null,
       xpackInitialInfo: undefined,
       uiCapabilities: {
         navLinks: { foo: true },

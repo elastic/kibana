@@ -39,26 +39,15 @@
  * @packageDocumentation
  */
 
-import { Observable } from 'rxjs';
-import {
-  IClusterClient,
-  ElasticsearchClientConfig,
-  ElasticsearchServiceSetup,
-  IScopedClusterClient,
-} from './elasticsearch';
-import {
-  HttpServiceSetup,
-  HttpServiceStart,
-  IRouter,
-  RequestHandlerContextContainer,
-  RequestHandlerContextProvider,
-} from './http';
+import { ElasticsearchServiceSetup, IScopedClusterClient } from './elasticsearch';
+import { HttpServiceSetup } from './http';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
-import { SavedObjectsServiceStart } from './saved_objects';
+import { IUiSettingsClient, UiSettingsServiceSetup } from './ui_settings';
+import { SavedObjectsClientContract } from './saved_objects/types';
 
 export { bootstrap } from './bootstrap';
-export { ConfigPath, ConfigService } from './config';
+export { ConfigPath, ConfigService, EnvironmentMode, PackageInfo } from './config';
 export {
   IContextContainer,
   IContextProvider,
@@ -76,6 +65,8 @@ export {
   ElasticsearchClientConfig,
   ElasticsearchError,
   ElasticsearchErrorHelpers,
+  ElasticsearchServiceSetup,
+  APICaller,
   FakeRequest,
 } from './elasticsearch';
 export * from './elasticsearch/api_types';
@@ -85,6 +76,9 @@ export {
   AuthResultParams,
   AuthStatus,
   AuthToolkit,
+  AuthResult,
+  AuthResultType,
+  Authenticated,
   BasePath,
   IBasePath,
   CustomHttpResponseOptions,
@@ -92,12 +86,14 @@ export {
   GetAuthState,
   HttpResponseOptions,
   HttpResponsePayload,
-  HttpServerSetup,
+  HttpServiceSetup,
+  HttpServiceStart,
   ErrorHttpResponseOptions,
   IKibanaSocket,
   IsAuthenticated,
   KibanaRequest,
   KibanaRequestRoute,
+  IKibanaResponse,
   LifecycleResponseFactory,
   KnownHeaders,
   LegacyRequest,
@@ -136,7 +132,10 @@ export {
 export {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkResponse,
+  SavedObjectsBulkUpdateResponse,
   SavedObjectsClient,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
@@ -144,6 +143,7 @@ export {
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsExportOptions,
+  SavedObjectsExportResultDetails,
   SavedObjectsFindResponse,
   SavedObjectsImportConflictError,
   SavedObjectsImportError,
@@ -161,7 +161,16 @@ export {
   SavedObjectsLegacyService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsDeleteOptions,
 } from './saved_objects';
+
+export {
+  IUiSettingsClient,
+  UiSettingsParams,
+  UiSettingsType,
+  UiSettingsServiceSetup,
+  UserProvidedValues,
+} from './ui_settings';
 
 export { RecursiveReadonly } from '../utils';
 
@@ -172,6 +181,7 @@ export {
   SavedObjectAttributeSingle,
   SavedObjectReference,
   SavedObjectsBaseOptions,
+  MutatingOperationRefreshSetting,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
@@ -181,13 +191,28 @@ export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
 
 /**
  * Plugin specific context passed to a route handler.
+ *
+ * Provides the following clients:
+ *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
+ *      which uses the credentials of the incoming request
+ *    - {@link ScopedClusterClient | elasticsearch.dataClient} - Elasticsearch
+ *      data client which uses the credentials of the incoming request
+ *    - {@link ScopedClusterClient | elasticsearch.adminClient} - Elasticsearch
+ *      admin client which uses the credentials of the incoming request
+ *
  * @public
  */
 export interface RequestHandlerContext {
   core: {
+    savedObjects: {
+      client: SavedObjectsClientContract;
+    };
     elasticsearch: {
       dataClient: IScopedClusterClient;
       adminClient: IScopedClusterClient;
+    };
+    uiSettings: {
+      client: IUiSettingsClient;
     };
   };
 }
@@ -198,30 +223,14 @@ export interface RequestHandlerContext {
  * @public
  */
 export interface CoreSetup {
-  context: {
-    createContextContainer: ContextSetup['createContextContainer'];
-  };
-  elasticsearch: {
-    adminClient$: Observable<IClusterClient>;
-    dataClient$: Observable<IClusterClient>;
-    createClient: (
-      type: string,
-      clientConfig?: Partial<ElasticsearchClientConfig>
-    ) => IClusterClient;
-  };
-  http: {
-    createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
-    registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
-    registerAuth: HttpServiceSetup['registerAuth'];
-    registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
-    basePath: HttpServiceSetup['basePath'];
-    isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
-    registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
-      name: T,
-      provider: RequestHandlerContextProvider<T>
-    ) => RequestHandlerContextContainer;
-    createRouter: () => IRouter;
-  };
+  /** {@link ContextSetup} */
+  context: ContextSetup;
+  /** {@link ElasticsearchServiceSetup} */
+  elasticsearch: ElasticsearchServiceSetup;
+  /** {@link HttpServiceSetup} */
+  http: HttpServiceSetup;
+  /** {@link UiSettingsServiceSetup} */
+  uiSettings: UiSettingsServiceSetup;
 }
 
 /**
@@ -231,26 +240,4 @@ export interface CoreSetup {
  */
 export interface CoreStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
-/** @internal */
-export interface InternalCoreSetup {
-  context: ContextSetup;
-  http: HttpServiceSetup;
-  elasticsearch: ElasticsearchServiceSetup;
-}
-
-/**
- * @internal
- */
-export interface InternalCoreStart {
-  savedObjects: SavedObjectsServiceStart;
-}
-
-export {
-  ContextSetup,
-  HttpServiceSetup,
-  HttpServiceStart,
-  ElasticsearchServiceSetup,
-  PluginsServiceSetup,
-  PluginsServiceStart,
-  PluginOpaqueId,
-};
+export { ContextSetup, PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId };

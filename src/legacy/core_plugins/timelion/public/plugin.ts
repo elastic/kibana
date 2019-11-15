@@ -19,81 +19,78 @@
 import {
   CoreSetup,
   CoreStart,
-  LegacyCoreStart,
   Plugin,
   PluginInitializerContext,
   UiSettingsClientContract,
   HttpSetup,
 } from 'kibana/public';
 import { Plugin as ExpressionsPlugin } from 'src/plugins/expressions/public';
+import { DataPublicPluginSetup, TimefilterContract } from 'src/plugins/data/public';
 import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisualization } from './vis';
 import { getTimeChart } from './panels/timechart/timechart';
-import { LegacyDependenciesPlugin, LegacyDependenciesPluginStart } from './shim';
+import { Panel } from './panels/panel';
+import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
+
+/** @internal */
+export interface TimelionVisualizationDependencies extends LegacyDependenciesPluginSetup {
+  uiSettings: UiSettingsClientContract;
+  http: HttpSetup;
+  timelionPanels: Map<string, Panel>;
+  timefilter: TimefilterContract;
+}
 
 /** @internal */
 export interface TimelionPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPlugin['setup']>;
   visualizations: VisualizationsSetup;
+  data: DataPublicPluginSetup;
 
   // Temporary solution
   __LEGACY: LegacyDependenciesPlugin;
 }
 
 /** @internal */
-export interface TimelionPluginStartDependencies {
-  panelRegistry: any;
-
-  // Temporary solution
-  __LEGACY: LegacyDependenciesPlugin;
-}
-
-/** @private */
-export interface TimelionVisualizationDependencies {
-  uiSettings: UiSettingsClientContract;
-  http: HttpSetup;
-}
-
-/** @internal */
-export type TimelionStartDependencies = Pick<TimelionVisualizationDependencies, 'uiSettings'> &
-  LegacyDependenciesPluginStart;
-
-/** @internal */
-export class TimelionPlugin
-  implements
-    Plugin<Promise<void>, void, TimelionPluginSetupDependencies, TimelionPluginStartDependencies> {
+export class TimelionPlugin implements Plugin<Promise<void>, void> {
   initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
   }
 
-  public async setup(core: CoreSetup, plugins: TimelionPluginSetupDependencies) {
+  public async setup(
+    core: CoreSetup,
+    { __LEGACY, expressions, visualizations, data }: TimelionPluginSetupDependencies
+  ) {
+    const timelionPanels: Map<string, Panel> = new Map();
+
     const dependencies: TimelionVisualizationDependencies = {
       uiSettings: core.uiSettings,
       http: core.http,
+      timelionPanels,
+      timefilter: data.query.timefilter.timefilter,
+      ...(await __LEGACY.setup(core, timelionPanels)),
     };
 
-    plugins.__LEGACY.setup();
-    plugins.expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
-    plugins.visualizations.types.registerVisualization(() =>
-      getTimelionVisualization(dependencies)
-    );
+    this.registerPanels(dependencies);
+
+    expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
+    visualizations.types.registerVisualization(() => getTimelionVisualization(dependencies));
   }
 
-  public async start(core: CoreStart & LegacyCoreStart, plugins: TimelionPluginStartDependencies) {
-    const dependencies: TimelionStartDependencies = {
-      uiSettings: core.uiSettings,
-      ...(await plugins.__LEGACY.start()),
-    };
+  private registerPanels(dependencies: TimelionVisualizationDependencies) {
+    const timeChartPanel: Panel = getTimeChart(dependencies);
+
+    dependencies.timelionPanels.set(timeChartPanel.name, timeChartPanel);
+  }
+
+  public start(core: CoreStart) {
     const timelionUiEnabled = core.injectedMetadata.getInjectedVar('timelionUiEnabled');
 
     if (timelionUiEnabled === false) {
       core.chrome.navLinks.update('timelion', { hidden: true });
     }
-
-    plugins.panelRegistry.register(() => getTimeChart(dependencies));
   }
 
   public stop(): void {}

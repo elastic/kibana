@@ -19,69 +19,55 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { capabilities } from 'ui/capabilities';
-import { TableListView } from './../../table_list_view';
+import { TableListView } from '../../../../../../../src/plugins/kibana_react/public';
 
-import {
-  EuiIcon,
-  EuiBetaBadge,
-  EuiLink,
-  EuiButton,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiIcon, EuiBetaBadge, EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
-class VisualizeListingTableUi extends Component {
+import { getServices } from '../kibana_services';
 
+const { capabilities, toastNotifications, uiSettings } = getServices();
+
+class VisualizeListingTable extends Component {
   constructor(props) {
     super(props);
   }
 
   render() {
-    const { intl } = this.props;
     return (
       <TableListView
         // we allow users to create visualizations even if they can't save them
         // for data exploration purposes
         createItem={this.props.createItem}
         findItems={this.props.findItems}
-        deleteItems={capabilities.get().visualize.delete ? this.props.deleteItems : null}
-        editItem={capabilities.get().visualize.save ? this.props.editItem : null}
+        deleteItems={capabilities.visualize.delete ? this.props.deleteItems : null}
+        editItem={capabilities.visualize.save ? this.props.editItem : null}
         tableColumns={this.getTableColumns()}
         listingLimit={this.props.listingLimit}
         selectable={item => item.canDelete}
         initialFilter={''}
         noItemsFragment={this.getNoItemsMessage()}
-        entityName={
-          intl.formatMessage({
-            id: 'kbn.visualize.listing.table.entityName',
-            defaultMessage: 'visualization',
-          })
-        }
-        entityNamePlural={
-          intl.formatMessage({
-            id: 'kbn.visualize.listing.table.entityNamePlural',
-            defaultMessage: 'visualizations',
-          })
-        }
-        tableListTitle={
-          intl.formatMessage({
-            id: 'kbn.visualize.listing.table.listTitle',
-            defaultMessage: 'Visualizations',
-          })
-        }
+        entityName={i18n.translate('kbn.visualize.listing.table.entityName', {
+          defaultMessage: 'visualization',
+        })}
+        entityNamePlural={i18n.translate('kbn.visualize.listing.table.entityNamePlural', {
+          defaultMessage: 'visualizations',
+        })}
+        tableListTitle={i18n.translate('kbn.visualize.listing.table.listTitle', {
+          defaultMessage: 'Visualizations',
+        })}
+        toastNotifications={toastNotifications}
+        uiSettings={uiSettings}
       />
     );
   }
 
   getTableColumns() {
-    const { intl } = this.props;
     const tableColumns = [
       {
         field: 'title',
-        name: intl.formatMessage({
-          id: 'kbn.visualize.listing.table.titleColumnName',
+        name: i18n.translate('kbn.visualize.listing.table.titleColumnName', {
           defaultMessage: 'Title',
         }),
         sortable: true,
@@ -92,35 +78,29 @@ class VisualizeListingTableUi extends Component {
           >
             {field}
           </EuiLink>
-        )
+        ),
       },
       {
         field: 'typeTitle',
-        name: intl.formatMessage({
-          id: 'kbn.visualize.listing.table.typeColumnName',
+        name: i18n.translate('kbn.visualize.listing.table.typeColumnName', {
           defaultMessage: 'Type',
         }),
         sortable: true,
-        render: (field, record) =>  (
+        render: (field, record) => (
           <span>
             {this.renderItemTypeIcon(record)}
             {record.typeTitle}
-            {this.getExperimentalBadge(record)}
+            {this.getBadge(record)}
           </span>
-        )
+        ),
       },
       {
         field: 'description',
-        name: intl.formatMessage({
-          id: 'kbn.dashboard.listing.table.descriptionColumnName',
+        name: i18n.translate('kbn.dashboard.listing.table.descriptionColumnName', {
           defaultMessage: 'Description',
         }),
         sortable: true,
-        render: (field, record) =>  (
-          <span>
-            {record.description}
-          </span>
-        )
+        render: (field, record) => <span>{record.description}</span>,
       },
     ];
 
@@ -184,19 +164,13 @@ class VisualizeListingTableUi extends Component {
         />
       </div>
     );
-
   }
 
   renderItemTypeIcon(item) {
     let icon;
     if (item.image) {
       icon = (
-        <img
-          className="visListingTable__typeImage"
-          aria-hidden="true"
-          alt=""
-          src={item.image}
-        />
+        <img className="visListingTable__typeImage" aria-hidden="true" alt="" src={item.image} />
       );
     } else {
       icon = (
@@ -212,25 +186,42 @@ class VisualizeListingTableUi extends Component {
     return icon;
   }
 
-  getExperimentalBadge(item) {
-    return item.isExperimental && (
-      <EuiBetaBadge
-        className="visListingTable__experimentalIcon"
-        label="E"
-        title={i18n.translate('kbn.visualize.listing.experimentalTitle', {
-          defaultMessage: 'Experimental',
-        })}
-        tooltipContent={
-          i18n.translate('kbn.visualize.listing.experimentalTooltip', {
-            defaultMessage: 'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
-          })
-        }
-      />
-    );
+  getBadge(item) {
+    if (item.stage === 'beta') {
+      return (
+        <EuiBetaBadge
+          className="visListingTable__betaIcon"
+          label="B"
+          title={i18n.translate('kbn.visualize.listing.betaTitle', {
+            defaultMessage: 'Beta',
+          })}
+          tooltipContent={i18n.translate('kbn.visualize.listing.betaTooltip', {
+            defaultMessage:
+              'This visualization is in beta and is subject to change. The design and code is less mature than official GA ' +
+              'features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA ' +
+              'features',
+          })}
+        />
+      );
+    } else if (item.stage === 'experimental') {
+      return (
+        <EuiBetaBadge
+          className="visListingTable__experimentalIcon"
+          label="E"
+          title={i18n.translate('kbn.visualize.listing.experimentalTitle', {
+            defaultMessage: 'Experimental',
+          })}
+          tooltipContent={i18n.translate('kbn.visualize.listing.experimentalTooltip', {
+            defaultMessage:
+              'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
+          })}
+        />
+      );
+    }
   }
 }
 
-VisualizeListingTableUi.propTypes = {
+VisualizeListingTable.propTypes = {
   deleteItems: PropTypes.func.isRequired,
   findItems: PropTypes.func.isRequired,
   createItem: PropTypes.func.isRequired,
@@ -239,4 +230,4 @@ VisualizeListingTableUi.propTypes = {
   listingLimit: PropTypes.number.isRequired,
 };
 
-export const VisualizeListingTable = injectI18n(VisualizeListingTableUi);
+export { VisualizeListingTable };

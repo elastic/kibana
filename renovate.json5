@@ -23,17 +23,18 @@
     'release_note:skip',
     'renovate',
     'v8.0.0',
-    'v7.5.0',
+    'v7.6.0',
   ],
   major: {
     labels: [
       'release_note:skip',
       'renovate',
       'v8.0.0',
-      'v7.5.0',
+      'v7.6.0',
       'renovate:major',
     ],
   },
+  separateMajorMinor: false,
   masterIssue: true,
   masterIssueApproval: true,
   rangeStrategy: 'bump',
@@ -77,6 +78,7 @@
         reviewers: [
           'markov00',
         ],
+        masterIssueApproval: false,
       },
       {
         groupSlug: 'mocha',
@@ -228,7 +230,7 @@
           'release_note:skip',
           'renovate',
           'v8.0.0',
-          'v7.5.0',
+          'v7.6.0',
           ':ml',
         ],
       },
@@ -352,14 +354,6 @@
         ],
       },
       {
-        groupSlug: 'execa',
-        groupName: 'execa related packages',
-        packageNames: [
-          'execa',
-          '@types/execa',
-        ],
-      },
-      {
         groupSlug: 'fetch-mock',
         groupName: 'fetch-mock related packages',
         packageNames: [
@@ -405,14 +399,6 @@
         packageNames: [
           'history',
           '@types/history',
-        ],
-      },
-      {
-        groupSlug: 'humps',
-        groupName: 'humps related packages',
-        packageNames: [
-          'humps',
-          '@types/humps',
         ],
       },
       {
@@ -536,14 +522,6 @@
         ],
       },
       {
-        groupSlug: 'rimraf',
-        groupName: 'rimraf related packages',
-        packageNames: [
-          'rimraf',
-          '@types/rimraf',
-        ],
-      },
-      {
         groupSlug: 'selenium-webdriver',
         groupName: 'selenium-webdriver related packages',
         packageNames: [
@@ -592,6 +570,14 @@
         ],
       },
       {
+        groupSlug: 'supertest-as-promised',
+        groupName: 'supertest-as-promised related packages',
+        packageNames: [
+          'supertest-as-promised',
+          '@types/supertest-as-promised',
+        ],
+      },
+      {
         groupSlug: 'type-detect',
         groupName: 'type-detect related packages',
         packageNames: [
@@ -621,6 +607,14 @@
         packageNames: [
           'zen-observable',
           '@types/zen-observable',
+        ],
+      },
+      {
+        groupSlug: 'archiver',
+        groupName: 'archiver related packages',
+        packageNames: [
+          'archiver',
+          '@types/archiver',
         ],
       },
       {
@@ -808,19 +802,19 @@
         ],
       },
       {
-        groupSlug: 'xml2js',
-        groupName: 'xml2js related packages',
-        packageNames: [
-          'xml2js',
-          '@types/xml2js',
-        ],
-      },
-      {
         groupSlug: 'xml-crypto',
         groupName: 'xml-crypto related packages',
         packageNames: [
           'xml-crypto',
           '@types/xml-crypto',
+        ],
+      },
+      {
+        groupSlug: 'xml2js',
+        groupName: 'xml2js related packages',
+        packageNames: [
+          'xml2js',
+          '@types/xml2js',
         ],
       },
       {

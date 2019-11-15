@@ -17,8 +17,7 @@ import {
   KueryBar,
   MonitorList,
   OverviewPageParsingErrorCallout,
-  Snapshot,
-  SnapshotHistogram,
+  StatusPanel,
 } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
@@ -149,19 +148,11 @@ export const OverviewPage = ({
           {error && <OverviewPageParsingErrorCallout error={error} />}
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={4}>
-            <Snapshot variables={sharedProps} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={8}>
-            <SnapshotHistogram
-              absoluteStartDate={absoluteDateRangeStart}
-              absoluteEndDate={absoluteDateRangeEnd}
-              variables={sharedProps}
-              height="120px"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <StatusPanel
+          absoluteDateRangeStart={absoluteDateRangeStart}
+          absoluteDateRangeEnd={absoluteDateRangeEnd}
+          sharedProps={sharedProps}
+        />
         <EuiSpacer size="s" />
         <MonitorList
           absoluteStartDate={absoluteDateRangeStart}

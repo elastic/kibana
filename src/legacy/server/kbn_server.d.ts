@@ -24,9 +24,12 @@ import { SavedObjectsClientProviderOptions, CoreSetup } from 'src/core/server';
 import {
   ConfigService,
   ElasticsearchServiceSetup,
+  EnvironmentMode,
   LoggerFactory,
   SavedObjectsClientContract,
   SavedObjectsLegacyService,
+  IUiSettingsClient,
+  PackageInfo,
 } from '../../core/server';
 
 import { LegacyServiceSetupDeps, LegacyServiceStartDeps } from '../../core/server/';
@@ -39,7 +42,6 @@ import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/ela
 import { CapabilitiesModifier } from './capabilities';
 import { IndexPatternsServiceFactory } from './index_patterns';
 import { Capabilities } from '../../core/public';
-import { IUiSettingsClient } from '../../legacy/ui/ui_settings/ui_settings_service';
 import { UiSettingsServiceFactoryOptions } from '../../legacy/ui/ui_settings/ui_settings_service_factory';
 
 export interface KibanaConfig {
@@ -102,6 +104,17 @@ type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promi
 // eslint-disable-next-line import/no-default-export
 export default class KbnServer {
   public readonly newPlatform: {
+    __internals: {
+      hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
+      uiPlugins: LegacyServiceSetupDeps['core']['plugins']['uiPlugins'];
+      elasticsearch: LegacyServiceSetupDeps['core']['elasticsearch'];
+      uiSettings: LegacyServiceSetupDeps['core']['uiSettings'];
+      kibanaMigrator: LegacyServiceStartDeps['core']['savedObjects']['migrator'];
+    };
+    env: {
+      mode: Readonly<EnvironmentMode>;
+      packageInfo: Readonly<PackageInfo>;
+    };
     coreContext: {
       logger: LoggerFactory;
     };
@@ -137,5 +150,5 @@ export default class KbnServer {
 export { Server, Request, ResponseToolkit } from 'hapi';
 
 // Re-export commonly accessed api types.
-export { IndexPatternsService } from './index_patterns';
+export { IndexPatternsFetcher as IndexPatternsService } from './index_patterns';
 export { SavedObjectsLegacyService, SavedObjectsClient } from 'src/core/server';

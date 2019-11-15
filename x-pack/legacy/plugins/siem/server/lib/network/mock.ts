@@ -5,7 +5,7 @@
  */
 
 import { defaultIndexPattern } from '../../../default_index_pattern';
-import { Direction, FlowTargetNew, NetworkTopNFlowFields } from '../../graphql/types';
+import { Direction, FlowTargetSourceDest, NetworkTopTablesFields } from '../../graphql/types';
 
 import { NetworkTopNFlowRequestOptions } from '.';
 
@@ -54,8 +54,8 @@ export const mockOptions: NetworkTopNFlowRequestOptions = {
     'pageInfo.__typename',
     '__typename',
   ],
-  networkTopNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
-  flowTarget: FlowTargetNew.source,
+  networkTopNFlowSort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
+  flowTarget: FlowTargetSourceDest.source,
 };
 
 export const mockRequest = {
@@ -64,7 +64,7 @@ export const mockRequest = {
     operationName: 'GetNetworkTopNFlowQuery',
     variables: {
       filterQuery: '',
-      flowTarget: FlowTargetNew.source,
+      flowTarget: FlowTargetSourceDest.source,
       pagination: {
         activePage: 0,
         cursorStart: 0,
@@ -74,56 +74,96 @@ export const mockRequest = {
       sourceId: 'default',
       timerange: { interval: '12h', from: 1549765830772, to: 1549852230772 },
     },
-    query: `query GetNetworkTopNFlowQuery($sourceId: ID!, $sort: NetworkTopNFlowSortField!, $flowTarget: FlowTargetNew!, $timerange: TimerangeInput!, $pagination: PaginationInput!, $filterQuery: String) {
-        source(id: $sourceId) {
-          id
-          NetworkTopNFlow(sort: $sort, flowTarget: $flowTarget, timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
-            totalCount
-            edges {
-              node {
-                source {
-                  autonomous_system
-                  domain
-                  ip
-                  location
-                  flows
-                  destination_ips
-                  __typename
+    query: `
+  query GetNetworkTopNFlowQuery(
+    $sourceId: ID!
+    $ip: String
+    $filterQuery: String
+    $pagination: PaginationInputPaginated!
+    $sort: NetworkTopTablesSortField!
+    $flowTarget: FlowTargetSourceDest!
+    $timerange: TimerangeInput!
+    $defaultIndex: [String!]!
+    $inspect: Boolean!
+  ) {
+    source(id: $sourceId) {
+      id
+      NetworkTopNFlow(
+        filterQuery: $filterQuery
+        flowTarget: $flowTarget
+        ip: $ip
+        pagination: $pagination
+        sort: $sort
+        timerange: $timerange
+        defaultIndex: $defaultIndex
+      ) {
+        totalCount
+        edges {
+          node {
+            source {
+              autonomous_system {
+                name
+                number
+              }
+              domain
+              ip
+              location {
+                geo {
+                  continent_name
+                  country_name
+                  country_iso_code
+                  city_name
+                  region_iso_code
+                  region_name
                 }
-                destination {
-                  autonomous_system
-                  domain
-                  ip
-                  location
-                  source_ips
-                  __typename
-                }
-                network {
-                  bytes_in
-                  bytes_out
-                  __typename
-                }
-              __typename
+                flowTarget
+              }
+              flows
+              destination_ips
             }
-            cursor {
-              value
-              __typename
+            destination {
+              autonomous_system {
+                name
+                number
+              }
+              domain
+              ip
+              location {
+                geo {
+                  continent_name
+                  country_name
+                  country_iso_code
+                  city_name
+                  region_iso_code
+                  region_name
+                }
+                flowTarget
+              }
+              flows
+              source_ips
             }
-            __typename
+            network {
+              bytes_in
+              bytes_out
+            }
           }
-          pageInfo {
-            activePage
-            __typename
-            fakeTotalCount
-            __typename
-            showMorePagesIndicator
-            __typename
+          cursor {
+            value
           }
-          __typename
         }
-        __typename
+        pageInfo {
+          activePage
+          fakeTotalCount
+          showMorePagesIndicator
+        }
+        inspect @include(if: $inspect) {
+          dsl
+          response
+        }
       }
-    }`,
+    }
+  }
+`,
   },
 };
 
@@ -144,7 +184,7 @@ export const mockResponse = {
     top_n_flow_count: {
       value: 545,
     },
-    [FlowTargetNew.source]: {
+    [FlowTargetSourceDest.source]: {
       buckets: [
         {
           key: '1.1.1.1',
@@ -1458,4 +1498,179 @@ export const mockResult = {
     showMorePagesIndicator: true,
   },
   totalCount: 545,
+};
+
+export const mockOptionsIp: NetworkTopNFlowRequestOptions = {
+  ...mockOptions,
+  ip: '1.1.1.1',
+};
+
+export const mockRequestIp = {
+  ...mockRequest,
+  payload: {
+    ...mockRequest.payload,
+    variables: {
+      ...mockRequest.payload.variables,
+      ip: '1.1.1.1',
+    },
+  },
+};
+
+export const mockResponseIp = {
+  took: 122,
+  timed_out: false,
+  _shards: {
+    total: 1,
+    successful: 1,
+    skipped: 0,
+    failed: 0,
+  },
+  hits: {
+    max_score: null,
+    hits: [],
+  },
+  aggregations: {
+    top_n_flow_count: {
+      value: 1,
+    },
+    [FlowTargetSourceDest.source]: {
+      buckets: [
+        {
+          key: '1.1.1.1',
+          flows: { value: 1234567 },
+          destination_ips: { value: 345345 },
+          bytes_in: {
+            value: 11276023407,
+          },
+          bytes_out: {
+            value: 1025631,
+          },
+          location: {
+            doc_count: 14,
+            top_geo: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        geo: {
+                          continent_name: 'North America',
+                          region_iso_code: 'US-PA',
+                          city_name: 'Philadelphia',
+                          country_iso_code: 'US',
+                          region_name: 'Pennsylvania',
+                          location: {
+                            lon: -75.1534,
+                            lat: 39.9359,
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          autonomous_system: {
+            doc_count: 14,
+            top_as: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        as: {
+                          number: 3356,
+                          organization: {
+                            name: 'Level 3 Parent, LLC',
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          domain: {
+            buckets: [
+              {
+                key: 'test.1.net',
+              },
+            ],
+          },
+        },
+      ],
+    },
+  },
+};
+
+export const mockResultIp = {
+  inspect: {
+    dsl: [JSON.stringify(mockTopNFlowQueryDsl, null, 2)],
+    response: [JSON.stringify(mockResponseIp, null, 2)],
+  },
+  edges: [
+    {
+      cursor: {
+        tiebreaker: null,
+        value: '1.1.1.1',
+      },
+      node: {
+        _id: '1.1.1.1',
+        network: {
+          bytes_in: 11276023407,
+          bytes_out: 1025631,
+        },
+        source: {
+          domain: ['test.1.net'],
+          ip: '1.1.1.1',
+          autonomous_system: {
+            name: 'Level 3 Parent, LLC',
+            number: 3356,
+          },
+          location: {
+            flowTarget: 'source',
+            geo: {
+              city_name: 'Philadelphia',
+              continent_name: 'North America',
+              country_iso_code: 'US',
+              location: {
+                lat: 39.9359,
+                lon: -75.1534,
+              },
+              region_iso_code: 'US-PA',
+              region_name: 'Pennsylvania',
+            },
+          },
+          flows: 1234567,
+          destination_ips: 345345,
+        },
+      },
+    },
+  ],
+  pageInfo: {
+    activePage: 0,
+    fakeTotalCount: 1,
+    showMorePagesIndicator: false,
+  },
+  totalCount: 1,
 };
