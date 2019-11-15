@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { Logger, EnvironmentMode } from 'src/core/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
 import {
@@ -27,10 +28,11 @@ const APP_ID = 'siem';
 
 export const amMocking = (): boolean => process.env.INGEST_MOCKS === 'true';
 
-export const initServerWithKibana = (kbnServer: ServerFacade) => {
-  const logger = kbnServer.newPlatform.coreContext.logger.get('plugins', APP_ID);
-  logger.info('Plugin initializing');
-
+export const initServerWithKibana = (
+  kbnServer: ServerFacade,
+  logger: Logger,
+  mode: EnvironmentMode
+) => {
   if (kbnServer.plugins.alerting != null) {
     const type = signalsAlertType({ logger });
     if (isAlertExecutor(type)) {
@@ -46,7 +48,7 @@ export const initServerWithKibana = (kbnServer: ServerFacade) => {
     );
   }
 
-  const libs = compose(kbnServer);
+  const libs = compose(kbnServer, mode);
   initServer(libs);
   if (
     kbnServer.config().has('xpack.actions.enabled') &&

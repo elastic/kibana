@@ -29,9 +29,9 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   public version: string;
   public envMode: EnvironmentMode;
 
-  constructor(private server: ServerFacade) {
+  constructor(private server: ServerFacade, mode: EnvironmentMode) {
     this.version = server.config().get('pkg.version');
-    this.envMode = server.newPlatform.env.mode;
+    this.envMode = mode;
   }
 
   public async callWithRequest(

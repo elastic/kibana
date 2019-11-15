@@ -141,10 +141,6 @@ export const siem = (kibana: any) => {
         getInjectedUiAppVars,
         indexPatternsServiceFactory,
         injectUiAppVars,
-        newPlatform: {
-          coreContext: { logger: coreContext.logger },
-          env: newPlatform.env,
-        },
         plugins: { alerting: plugins.alerting, xpack_main: plugins.xpack_main },
         route: route.bind(server),
         savedObjects,

@@ -11,12 +11,6 @@ export interface ServerFacade {
   getInjectedUiAppVars: Legacy.Server['getInjectedUiAppVars'];
   indexPatternsServiceFactory: Legacy.Server['indexPatternsServiceFactory'];
   injectUiAppVars: Legacy.Server['injectUiAppVars'];
-  newPlatform: {
-    coreContext: {
-      logger: Legacy.Server['newPlatform']['coreContext']['logger'];
-    };
-    env: Legacy.Server['newPlatform']['env'];
-  };
   plugins: {
     alerting?: Legacy.Server['plugins']['alerting'];
     xpack_main: Legacy.Server['plugins']['xpack_main'];
