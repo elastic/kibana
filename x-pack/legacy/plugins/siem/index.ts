@@ -134,7 +134,12 @@ export const siem = (kibana: any) => {
         savedObjects,
       } = server;
 
-      const { coreContext, setup } = newPlatform;
+      const {
+        env,
+        coreContext: { logger },
+        setup,
+      } = newPlatform;
+      const initializerContext = { logger, env };
 
       const serverFacade = {
         config,
@@ -146,7 +151,7 @@ export const siem = (kibana: any) => {
         savedObjects,
       };
 
-      plugin(coreContext as PluginInitializerContext).setup(
+      plugin(initializerContext as PluginInitializerContext).setup(
         setup.core,
         setup.plugins,
         serverFacade
