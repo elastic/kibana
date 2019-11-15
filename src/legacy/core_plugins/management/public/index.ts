@@ -23,7 +23,16 @@
  *
  * @public
  */
-export * from './np_ready';
+
+export {
+  ManagementSetup,
+  ManagementStart,
+  plugin,
+  IndexPatternCreationConfig,
+  IndexPatternListConfig,
+  SavedObjectsManagementAction,
+  SavedObjectsManagementRecord,
+} from './np_ready';
 
 export {
   processImportResponse,
