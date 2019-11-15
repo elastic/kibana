@@ -714,7 +714,7 @@ export class SavedObjectsRepository {
           return {
             id,
             type,
-            ...(this._schema.isNamespaces(type) && { namespaces: doc._source.namespaces }),
+            ...(doc._source.namespaces && { namespaces: doc._source.namespaces }),
             ...(time && { updated_at: time }),
             version: encodeHitVersion(doc),
             attributes: doc._source[type],
