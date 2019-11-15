@@ -5,6 +5,7 @@
  */
 import { performance } from 'perf_hooks';
 import { SignalHit } from '../../types';
+import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { Logger } from '../../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../alerting/server/types';
 import { SignalSourceHit, SignalSearchResponse, SignalAlertParams, BulkResponse } from './types';
@@ -48,7 +49,7 @@ export const singleBulkIndex = async (
   const bulkBody = sr.hits.hits.flatMap(doc => [
     {
       index: {
-        _index: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
+        _index: process.env.SIGNALS_INDEX || DEFAULT_SIGNALS_INDEX,
         _id: doc._id,
       },
     },
@@ -56,7 +57,7 @@ export const singleBulkIndex = async (
   ]);
   const time1 = performance.now();
   const firstResult: BulkResponse = await service.callCluster('bulk', {
-    index: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
+    index: process.env.SIGNALS_INDEX || DEFAULT_SIGNALS_INDEX,
     refresh: false,
     body: bulkBody,
   });
@@ -64,7 +65,7 @@ export const singleBulkIndex = async (
   logger.debug(`individual bulk process time took: ${time2 - time1} milliseconds`);
   logger.debug(`took property says bulk took: ${firstResult.took} milliseconds`);
   if (firstResult.errors) {
-    logger.error(`[-] bulkResponse had errors: ${JSON.stringify(firstResult.errors, null, 2)}}`);
+    logger.error(`[-] bulkResponse had errors: ${JSON.stringify(firstResult.errors, null, 2)}`);
     return false;
   }
   return true;
@@ -89,7 +90,10 @@ export const singleSearchAfter = async (
       size: params.size ? params.size : 1000,
       searchAfterSortId,
     });
-    const nextSearchAfterResult = await service.callCluster('search', searchAfterQuery);
+    const nextSearchAfterResult: SignalSearchResponse = await service.callCluster(
+      'search',
+      searchAfterQuery
+    );
     return nextSearchAfterResult;
   } catch (exc) {
     logger.error(`[-] nextSearchAfter threw an error ${exc}`);
@@ -117,11 +121,18 @@ export const searchAfterAndBulkIndex = async (
 
   const totalHits =
     typeof someResult.hits.total === 'number' ? someResult.hits.total : someResult.hits.total.value;
-  let size = someResult.hits.hits.length - 1;
-  logger.debug(`first size: ${size}`);
+  // maxTotalHitsSize represents the total number of docs to
+  // query for. If maxSignals is present we will only query
+  // up to max signals - otherwise use the value
+  // from track_total_hits.
+  const maxTotalHitsSize = params.maxSignals ? params.maxSignals : totalHits;
+
+  // number of docs in the current search result
+  let hitsSize = someResult.hits.hits.length;
+  logger.debug(`first size: ${hitsSize}`);
   let sortIds = someResult.hits.hits[0].sort;
   if (sortIds == null && totalHits > 0) {
-    logger.error(`sortIds was empty on first search when encountering ${totalHits}`);
+    logger.error('sortIds was empty on first search but expected more');
     return false;
   } else if (sortIds == null && totalHits === 0) {
     return true;
@@ -130,8 +141,7 @@ export const searchAfterAndBulkIndex = async (
   if (sortIds != null) {
     sortId = sortIds[0];
   }
-  while (size < totalHits) {
-    // utilize track_total_hits instead of true
+  while (hitsSize < maxTotalHitsSize && hitsSize !== 0) {
     try {
       logger.debug(`sortIds: ${sortIds}`);
       const searchAfterResult: SignalSearchResponse = await singleSearchAfter(
@@ -140,12 +150,13 @@ export const searchAfterAndBulkIndex = async (
         service,
         logger
       );
-      size += searchAfterResult.hits.hits.length - 1;
-      logger.debug(`size adjusted: ${size}`);
+      sortIds = searchAfterResult.hits.hits[0].sort;
+      hitsSize += searchAfterResult.hits.hits.length;
+      logger.debug(`size adjusted: ${hitsSize}`);
       sortIds = searchAfterResult.hits.hits[0].sort;
       if (sortIds == null) {
-        logger.error('sortIds was empty search when running a signal rule');
-        return false;
+        logger.debug('sortIds was empty on search');
+        return true; // no more search results
       }
       sortId = sortIds[0];
       logger.debug('next bulk index');
