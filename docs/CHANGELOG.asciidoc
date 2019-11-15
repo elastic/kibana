@@ -14,6 +14,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.8.5>>
 * <<release-notes-6.8.4>>
 * <<release-notes-6.8.3>>
 * <<release-notes-6.8.2>>
@@ -90,6 +91,17 @@ This section summarizes the changes in each release.
 //[float]
 //=== Known Issues
 ////
+
+[[release-notes-6.8.5]]
+== {kib} 6.8.5
+
+[float]
+[[bug-6.8.5]]
+=== Bug fixes
+
+Reporting::
+* Fixes old backport for content-disposition in reporting {pull}49249[#49249]
+
 
 [[release-notes-6.8.4]]
 == {kib} 6.8.4
