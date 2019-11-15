@@ -41,7 +41,7 @@ import {
   SET_SCROLL_ZOOM,
   SET_MAP_INIT_ERROR,
   UPDATE_DRAW_STATE,
-  SET_ZOOM,
+  SET_INTERACTIVE,
   DISABLE_TOOLTIP_CONTROL
 } from '../actions/map_actions';
 
@@ -97,7 +97,7 @@ const INITIAL_STATE = {
     zoom: 4,
     center: {
       lon: -100.41,
-      lat: 32.82
+      lat: 32.82,
     },
     scrollZoom: true,
     extent: null,
@@ -108,7 +108,7 @@ const INITIAL_STATE = {
     refreshConfig: null,
     refreshTimerLastTriggeredAt: null,
     drawState: null,
-    disableZoom: false,
+    disableInteractive: false,
     disableTooltipControl: false,
   },
   selectedLayerId: null,
@@ -330,12 +330,12 @@ export function map(state = INITIAL_STATE, action) {
         ...state,
         mapInitError: action.errorMessage,
       };
-    case SET_ZOOM:
+    case SET_INTERACTIVE:
       return {
         ...state,
         mapState: {
           ...state.mapState,
-          disableZoom: action.disableZoom,
+          disableInteractive: action.disableInteractive,
         },
       };
     case DISABLE_TOOLTIP_CONTROL:
