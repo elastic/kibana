@@ -42,7 +42,10 @@ it(`logs out 401 responses`, async () => {
 
   let fetchResolved = false;
   let fetchRejected = false;
-  http.fetch('/foo-api').then(() => (fetchResolved = true), () => (fetchRejected = true));
+  http.fetch('/foo-api').then(
+    () => (fetchResolved = true),
+    () => (fetchRejected = true)
+  );
 
   await logoutPromise;
   await drainPromiseQueue();
