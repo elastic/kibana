@@ -27,7 +27,7 @@ import {
   setQuery,
   setRefreshConfig,
   disableScrollZoom,
-  disableZoom,
+  disableInteractive,
   disableTooltipControl,
 } from '../actions/map_actions';
 import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
@@ -119,8 +119,8 @@ export class MapEmbeddable extends Embeddable {
       this._store.dispatch(setOpenTOCDetails(this.input.openTOCDetails));
     }
 
-    if (_.has(this.input, 'disableZoom')) {
-      this._store.dispatch(disableZoom(this.input.disableZoom));
+    if (_.has(this.input, 'disableInteractive')) {
+      this._store.dispatch(disableInteractive(this.input.disableInteractive));
     }
 
     if (_.has(this.input, 'disableTooltipControl')) {

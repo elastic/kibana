@@ -122,6 +122,7 @@ export class MBMapContainer extends React.Component {
         scrollZoom: this.props.scrollZoom,
         preserveDrawingBuffer: chrome.getInjected('preserveDrawingBuffer', false),
         doubleClickZoom: !this.props.disableZoom,
+        interactive: !this.props.disableInteractive,
       };
       if (initialView) {
         options.zoom = initialView.zoom;
@@ -133,7 +134,7 @@ export class MBMapContainer extends React.Component {
       const mbMap = new mapboxgl.Map(options);
       mbMap.dragRotate.disable();
       mbMap.touchZoomRotate.disableRotation();
-      if (!this.props.disableZoom) {
+      if (!this.props.disableInteractive) {
         mbMap.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-left');
       }
 
