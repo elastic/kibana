@@ -6,13 +6,10 @@
 
 import { xyVisualization } from './xy_visualization';
 import { Position } from '@elastic/charts';
-import { Operation } from '../types';
+import { Operation, EMPTY_ACCESSOR } from '../types';
 import { State, SeriesType } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_plugin/mocks';
-import { generateId } from '../id_generator';
 import { Ast } from '@kbn/interpreter/target/common';
-
-jest.mock('../id_generator');
 
 function exampleState(): State {
   return {
@@ -87,31 +84,24 @@ describe('xy_visualization', () => {
 
   describe('#initialize', () => {
     it('loads default state', () => {
-      (generateId as jest.Mock)
-        .mockReturnValueOnce('test-id1')
-        .mockReturnValueOnce('test-id2')
-        .mockReturnValue('test-id3');
       const mockFrame = createMockFramePublicAPI();
       const initialState = xyVisualization.initialize(mockFrame);
 
       expect(initialState.layers).toHaveLength(1);
-      expect(initialState.layers[0].xAccessor).toBeDefined();
-      expect(initialState.layers[0].accessors[0]).toBeDefined();
-      expect(initialState.layers[0].xAccessor).not.toEqual(initialState.layers[0].accessors[0]);
+      expect(initialState.layers[0].xAccessor).toEqual(EMPTY_ACCESSOR);
+      expect(initialState.layers[0].accessors).toHaveLength(0);
 
       expect(initialState).toMatchInlineSnapshot(`
         Object {
           "layers": Array [
             Object {
-              "accessors": Array [
-                "test-id1",
-              ],
+              "accessors": Array [],
               "layerId": "",
               "position": "top",
               "seriesType": "bar_stacked",
               "showGridlines": false,
-              "splitAccessor": "test-id2",
-              "xAccessor": "test-id3",
+              "splitAccessor": "",
+              "xAccessor": "",
             },
           ],
           "legend": Object {

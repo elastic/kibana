@@ -44,9 +44,9 @@ export interface OperationFieldSupportMatrix {
 }
 
 export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPanel(
-  props: IndexPatternDimensionPanelProps
+  props: IndexPatternDimensionPanelProps & { columnId: string }
 ) {
-  const layerId = props.layerId;
+  const { layerId, onCreate } = props;
   const currentIndexPattern = props.state.indexPatterns[props.state.layers[layerId].indexPatternId];
 
   const operationFieldSupportMatrix = useMemo(() => {
@@ -142,8 +142,9 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
             changeColumn({
               state: props.state,
               layerId,
-              columnId: props.columnId,
+              onCreate,
               newColumn,
+              columnId: props.columnId,
               // If the field has changed, the onFieldChange method needs to take care of everything including moving
               // over params. If we create a new column above we want changeColumn to move over params.
               keepParams: !hasFieldChanged,

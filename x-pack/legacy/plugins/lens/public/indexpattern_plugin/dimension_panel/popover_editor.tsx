@@ -57,7 +57,7 @@ function asOperationOptions(operationTypes: OperationType[], compatibleWithCurre
     }));
 }
 
-export function PopoverEditor(props: PopoverEditorProps) {
+export function PopoverEditor(props: PopoverEditorProps & { columnId: string }) {
   const {
     selectedColumn,
     operationFieldSupportMatrix,
@@ -68,6 +68,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
     currentIndexPattern,
     uniqueLabel,
     hideGrouping,
+    onCreate,
   } = props;
   const { operationByField, fieldByOperation } = operationFieldSupportMatrix;
   const [isPopoverOpen, setPopoverOpen] = useState(false);
@@ -136,6 +137,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     state,
                     layerId,
                     columnId,
+                    onCreate,
                     newColumn: buildColumn({
                       columns: props.state.layers[props.layerId].columns,
                       suggestedPriority: props.suggestedPriority,
@@ -180,6 +182,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                 layerId,
                 columnId,
                 newColumn,
+                onCreate,
               })
             );
           },
@@ -308,6 +311,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     columnId,
                     newColumn: column,
                     keepParams: false,
+                    onCreate,
                   })
                 );
                 setInvalidOperationType(null);
@@ -376,6 +380,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                             state,
                             layerId,
                             columnId,
+                            onCreate,
                             newColumn: {
                               ...selectedColumn,
                               label: e.target.value,

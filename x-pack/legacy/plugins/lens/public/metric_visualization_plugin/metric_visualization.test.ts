@@ -7,10 +7,7 @@
 import { metricVisualization } from './metric_visualization';
 import { State } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_plugin/mocks';
-import { generateId } from '../id_generator';
 import { DatasourcePublicAPI, FramePublicAPI } from '../types';
-
-jest.mock('../id_generator');
 
 function exampleState(): State {
   return {
@@ -33,13 +30,12 @@ function mockFrame(): FramePublicAPI {
 describe('metric_visualization', () => {
   describe('#initialize', () => {
     it('loads default state', () => {
-      (generateId as jest.Mock).mockReturnValueOnce('test-id1');
       const initialState = metricVisualization.initialize(mockFrame());
 
       expect(initialState.accessor).toBeDefined();
       expect(initialState).toMatchInlineSnapshot(`
                 Object {
-                  "accessor": "test-id1",
+                  "accessor": "",
                   "layerId": "l42",
                 }
             `);

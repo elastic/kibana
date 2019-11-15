@@ -240,6 +240,7 @@ export function getIndexPatternDatasource({
                   http={core.http}
                   uniqueLabel={columnLabelMap[props.columnId]}
                   dateRange={dateRange}
+                  columnId={props.columnId}
                   {...props}
                 />
               </KibanaContextProvider>

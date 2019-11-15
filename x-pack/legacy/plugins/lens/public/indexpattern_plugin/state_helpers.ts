@@ -8,6 +8,7 @@ import _ from 'lodash';
 import { isColumnTransferable } from './operations';
 import { operationDefinitionMap, IndexPatternColumn } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
+import { generateId } from '../id_generator';
 
 export function updateColumnParam<
   C extends IndexPatternColumn & { params: object },
@@ -77,13 +78,28 @@ export function changeColumn<C extends IndexPatternColumn>({
   columnId,
   newColumn,
   keepParams = true,
+  onCreate,
 }: {
   state: IndexPatternPrivateState;
   layerId: string;
-  columnId: string;
+  columnId?: string;
   newColumn: C;
   keepParams?: boolean;
+  onCreate: (columnId: string) => void;
 }): IndexPatternPrivateState {
+  if (!columnId) {
+    columnId = generateId();
+
+    // The datasource is responsible for creating column ids when
+    // the column is first configured. Technically, we're calling
+    // onCreate before we've updated our internal state to reflect
+    // the creation. This call may need to be postponed until after
+    // state is updated, or possibly just placed into a setTimeout.
+    if (onCreate) {
+      onCreate(columnId);
+    }
+  }
+
   const oldColumn = state.layers[layerId].columns[columnId];
 
   const updatedColumn =

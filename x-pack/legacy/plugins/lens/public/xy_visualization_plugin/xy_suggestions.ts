@@ -13,9 +13,9 @@ import {
   TableSuggestionColumn,
   TableSuggestion,
   TableChangeType,
+  EMPTY_ACCESSOR,
 } from '../types';
 import { State, SeriesType, XYState } from './types';
-import { generateId } from '../id_generator';
 import { getIconForSeries } from './state_helpers';
 
 const columnSortOrder = {
@@ -356,7 +356,7 @@ function buildSuggestion({
     layerId,
     seriesType,
     xAccessor: xValue.columnId,
-    splitAccessor: splitBy ? splitBy.columnId : generateId(),
+    splitAccessor: splitBy ? splitBy.columnId : EMPTY_ACCESSOR,
     accessors: yValues.map(col => col.columnId),
   };
 

@@ -13,9 +13,6 @@ import {
 } from './visualization';
 import { mount } from 'enzyme';
 import { Operation, DataType, FramePublicAPI, TableSuggestionColumn } from '../types';
-import { generateId } from '../id_generator';
-
-jest.mock('../id_generator');
 
 function mockFrame(): FramePublicAPI {
   return {
@@ -34,12 +31,11 @@ function mockFrame(): FramePublicAPI {
 describe('Datatable Visualization', () => {
   describe('#initialize', () => {
     it('should initialize from the empty state', () => {
-      (generateId as jest.Mock).mockReturnValueOnce('id');
       expect(datatableVisualization.initialize(mockFrame(), undefined)).toEqual({
         layers: [
           {
             layerId: 'aaa',
-            columns: ['id'],
+            columns: [],
           },
         ],
       });
@@ -250,7 +246,6 @@ describe('Datatable Visualization', () => {
     });
 
     it('allows columns to be added', () => {
-      (generateId as jest.Mock).mockReturnValueOnce('d');
       const setState = jest.fn();
       const datasource = createMockDatasource();
       const layer = { layerId: 'a', columns: ['b', 'c'] };
@@ -269,9 +264,9 @@ describe('Datatable Visualization', () => {
       const onAdd = component
         .find('[data-test-subj="datatable_multicolumnEditor"]')
         .first()
-        .prop('onAdd') as () => {};
+        .prop('onAdd') as (s: string) => {};
 
-      onAdd();
+      onAdd('d');
 
       expect(setState).toHaveBeenCalledWith({
         layers: [

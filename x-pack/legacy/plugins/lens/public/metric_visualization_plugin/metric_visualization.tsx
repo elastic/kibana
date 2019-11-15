@@ -11,9 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { Ast } from '@kbn/interpreter/target/common';
 import { getSuggestions } from './metric_suggestions';
 import { MetricConfigPanel } from './metric_config_panel';
-import { Visualization, FramePublicAPI } from '../types';
+import { Visualization, FramePublicAPI, EMPTY_ACCESSOR } from '../types';
 import { State, PersistableState } from './types';
-import { generateId } from '../id_generator';
 import chartMetricSVG from '../assets/chart_metric.svg';
 
 const toExpression = (
@@ -69,7 +68,7 @@ export const metricVisualization: Visualization<State, PersistableState> = {
     return (
       state || {
         layerId: frame.addNewLayer(),
-        accessor: generateId(),
+        accessor: EMPTY_ACCESSOR,
       }
     );
   },

@@ -12,10 +12,9 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { getSuggestions } from './xy_suggestions';
 import { XYConfigPanel } from './xy_config_panel';
-import { Visualization } from '../types';
+import { Visualization, EMPTY_ACCESSOR } from '../types';
 import { State, PersistableState, SeriesType, visualizationTypes } from './types';
 import { toExpression, toPreviewExpression } from './to_expression';
-import { generateId } from '../id_generator';
 import chartBarStackedSVG from '../assets/chart_bar_stacked.svg';
 import chartMixedSVG from '../assets/chart_mixed_xy.svg';
 import { isHorizontalChart } from './state_helpers';
@@ -99,12 +98,12 @@ export const xyVisualization: Visualization<State, PersistableState> = {
         layers: [
           {
             layerId: frame.addNewLayer(),
-            accessors: [generateId()],
+            accessors: [],
             position: Position.Top,
             seriesType: defaultSeriesType,
             showGridlines: false,
-            splitAccessor: generateId(),
-            xAccessor: generateId(),
+            splitAccessor: EMPTY_ACCESSOR,
+            xAccessor: EMPTY_ACCESSOR,
           },
         ],
       }

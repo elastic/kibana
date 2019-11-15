@@ -49,7 +49,7 @@ describe('MetricConfigPanel', () => {
     );
 
     const panel = testSubj(component, 'lns_metric_valueDimensionPanel');
-    const nativeProps = (panel as NativeRendererProps<DatasourceDimensionPanelProps>).nativeProps;
+    const nativeProps = panel as DatasourceDimensionPanelProps;
     const { columnId, filterOperations } = nativeProps;
     const exampleOperation: Operation = {
       dataType: 'number',

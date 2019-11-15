@@ -9,14 +9,10 @@ import { ReactWrapper } from 'enzyme';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { EuiButtonGroupProps } from '@elastic/eui';
 import { XYConfigPanel } from './xy_config_panel';
-import { DatasourceDimensionPanelProps, Operation, FramePublicAPI } from '../types';
+import { DatasourceDimensionPanelProps, Operation, FramePublicAPI, EMPTY_ACCESSOR } from '../types';
 import { State, XYState } from './types';
 import { Position } from '@elastic/charts';
-import { NativeRendererProps } from '../native_renderer';
-import { generateId } from '../id_generator';
 import { createMockFramePublicAPI, createMockDatasource } from '../editor_frame_plugin/mocks';
-
-jest.mock('../id_generator');
 
 describe('XYConfigPanel', () => {
   const dragDropContext = { dragging: undefined, setDragging: jest.fn() };
@@ -130,9 +126,8 @@ describe('XYConfigPanel', () => {
       />
     );
 
-    const panel = testSubj(component, 'lnsXY_xDimensionPanel');
-    const nativeProps = (panel as NativeRendererProps<DatasourceDimensionPanelProps>).nativeProps;
-    const { columnId, filterOperations } = nativeProps;
+    const panel = testSubj(component, 'lnsXY_xDimensionPanel') as DatasourceDimensionPanelProps;
+    const { columnId, filterOperations } = panel;
     const exampleOperation: Operation = {
       dataType: 'number',
       isBucketed: false,
@@ -218,7 +213,6 @@ describe('XYConfigPanel', () => {
   });
 
   test('allows adding a y axis dimension', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('zed');
     const setState = jest.fn();
     const state = testState();
     const component = mount(
@@ -233,9 +227,9 @@ describe('XYConfigPanel', () => {
     const onAdd = component
       .find('[data-test-subj="lensXY_yDimensionPanel"]')
       .first()
-      .prop('onAdd') as () => {};
+      .prop('onAdd') as (s: string) => {};
 
-    onAdd();
+    onAdd('zed');
 
     expect(setState).toHaveBeenCalledTimes(1);
     expect(setState.mock.calls[0][0]).toMatchObject({
@@ -251,7 +245,6 @@ describe('XYConfigPanel', () => {
   describe('layers', () => {
     it('adds layers', () => {
       frame.addNewLayer = jest.fn().mockReturnValue('newLayerId');
-      (generateId as jest.Mock).mockReturnValue('accessor');
       const setState = jest.fn();
       const state = testState();
       const component = mount(
@@ -270,15 +263,15 @@ describe('XYConfigPanel', () => {
 
       expect(frame.addNewLayer).toHaveBeenCalled();
       expect(setState).toHaveBeenCalledTimes(1);
-      expect(generateId).toHaveBeenCalledTimes(4);
+
       expect(setState.mock.calls[0][0]).toMatchObject({
         layers: [
           ...state.layers,
           expect.objectContaining({
             layerId: 'newLayerId',
-            xAccessor: 'accessor',
-            accessors: ['accessor'],
-            splitAccessor: 'accessor',
+            xAccessor: EMPTY_ACCESSOR,
+            accessors: [],
+            splitAccessor: EMPTY_ACCESSOR,
           }),
         ],
       });
@@ -287,7 +280,7 @@ describe('XYConfigPanel', () => {
     it('should use series type of existing layers if they all have the same', () => {
       frame.addNewLayer = jest.fn().mockReturnValue('newLayerId');
       frame.datasourceLayers.second = createMockDatasource().publicAPIMock;
-      (generateId as jest.Mock).mockReturnValue('accessor');
+
       const setState = jest.fn();
       const state: XYState = {
         ...testState(),
@@ -336,7 +329,7 @@ describe('XYConfigPanel', () => {
     it('should use preffered series type if there are already various different layers', () => {
       frame.addNewLayer = jest.fn().mockReturnValue('newLayerId');
       frame.datasourceLayers.second = createMockDatasource().publicAPIMock;
-      (generateId as jest.Mock).mockReturnValue('accessor');
+
       const setState = jest.fn();
       const state: XYState = {
         ...testState(),

@@ -23,12 +23,12 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { State, SeriesType, LayerConfig, visualizationTypes } from './types';
-import { VisualizationProps, OperationMetadata } from '../types';
+import { VisualizationProps, OperationMetadata, EMPTY_ACCESSOR } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { MultiColumnEditor } from '../multi_column_editor';
-import { generateId } from '../id_generator';
 import { isHorizontalChart, isHorizontalSeries } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
+import { DimensionPanel } from '../dimension_panel';
 
 const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
 const isBucketed = (op: OperationMetadata) => op.isBucketed;
@@ -49,9 +49,9 @@ function newLayerState(seriesType: SeriesType, layerId: string): LayerConfig {
   return {
     layerId,
     seriesType,
-    xAccessor: generateId(),
-    accessors: [generateId()],
-    splitAccessor: generateId(),
+    xAccessor: EMPTY_ACCESSOR,
+    accessors: [],
+    splitAccessor: EMPTY_ACCESSOR,
   };
 }
 
@@ -179,17 +179,19 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
               defaultMessage: 'X-axis',
             })}
           >
-            <NativeRenderer
+            <DimensionPanel
               data-test-subj="lnsXY_xDimensionPanel"
-              render={props.frame.datasourceLayers[layer.layerId].renderDimensionPanel}
-              nativeProps={{
-                columnId: layer.xAccessor,
-                dragDropContext: props.dragDropContext,
-                filterOperations: isBucketed,
-                suggestedPriority: 1,
-                layerId: layer.layerId,
-                hideGrouping: true,
-              }}
+              datasource={props.frame.datasourceLayers[layer.layerId]}
+              columnId={layer.xAccessor}
+              dragDropContext={props.dragDropContext}
+              filterOperations={isBucketed}
+              suggestedPriority={1}
+              layerId={layer.layerId}
+              hideGrouping={true}
+              onCreate={xAccessor => setState(updateLayer(state, { ...layer, xAccessor }, index))}
+              onRemove={() =>
+                setState(updateLayer(state, { ...layer, xAccessor: EMPTY_ACCESSOR }, index))
+              }
             />
           </EuiFormRow>
           <EuiFormRow
@@ -203,13 +205,13 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
               accessors={layer.accessors}
               datasource={frame.datasourceLayers[layer.layerId]}
               dragDropContext={props.dragDropContext}
-              onAdd={() =>
+              onAdd={accessor =>
                 setState(
                   updateLayer(
                     state,
                     {
                       ...layer,
-                      accessors: [...layer.accessors, generateId()],
+                      accessors: [...layer.accessors, accessor],
                     },
                     index
                   )
@@ -239,16 +241,20 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
               defaultMessage: 'Break down by',
             })}
           >
-            <NativeRenderer
+            <DimensionPanel
               data-test-subj="lnsXY_splitDimensionPanel"
-              render={props.frame.datasourceLayers[layer.layerId].renderDimensionPanel}
-              nativeProps={{
-                columnId: layer.splitAccessor,
-                dragDropContext: props.dragDropContext,
-                filterOperations: isBucketed,
-                suggestedPriority: 0,
-                layerId: layer.layerId,
-              }}
+              datasource={props.frame.datasourceLayers[layer.layerId]}
+              columnId={layer.splitAccessor}
+              dragDropContext={props.dragDropContext}
+              filterOperations={isBucketed}
+              suggestedPriority={0}
+              layerId={layer.layerId}
+              onCreate={splitAccessor =>
+                setState(updateLayer(state, { ...layer, splitAccessor }, index))
+              }
+              onRemove={() =>
+                setState(updateLayer(state, { ...layer, splitAccessor: EMPTY_ACCESSOR }, index))
+              }
             />
           </EuiFormRow>
         </EuiPanel>

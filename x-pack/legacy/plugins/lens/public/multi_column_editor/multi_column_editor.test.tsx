@@ -9,14 +9,12 @@ import { createMockDatasource } from '../editor_frame_plugin/mocks';
 import { MultiColumnEditor } from './multi_column_editor';
 import { mount } from 'enzyme';
 
-jest.useFakeTimers();
-
 describe('MultiColumnEditor', () => {
-  it('should add a trailing accessor if the accessor list is empty', () => {
+  it('should not call onAdd if an existing dimension is edited', () => {
     const onAdd = jest.fn();
-    mount(
+    const component = mount(
       <MultiColumnEditor
-        accessors={[]}
+        accessors={['foo']}
         datasource={createMockDatasource().publicAPIMock}
         dragDropContext={{ dragging: undefined, setDragging: jest.fn() }}
         filterOperations={() => true}
@@ -29,14 +27,18 @@ describe('MultiColumnEditor', () => {
 
     expect(onAdd).toHaveBeenCalledTimes(0);
 
-    jest.runAllTimers();
+    const onCreate = component
+      .find('[data-test-subj="lns_multi_column_bar_foo"]')
+      .first()
+      .prop('onCreate');
+    (onCreate as () => {})();
 
-    expect(onAdd).toHaveBeenCalledTimes(1);
+    expect(onAdd).toHaveBeenCalledTimes(0);
   });
 
   it('should add a trailing accessor if the last accessor is configured', () => {
     const onAdd = jest.fn();
-    mount(
+    const component = mount(
       <MultiColumnEditor
         accessors={['baz']}
         datasource={{
@@ -64,8 +66,12 @@ describe('MultiColumnEditor', () => {
 
     expect(onAdd).toHaveBeenCalledTimes(0);
 
-    jest.runAllTimers();
+    const onCreate = component
+      .find('[data-test-subj="lns_multi_column_add_bar"]')
+      .first()
+      .prop('onCreate');
+    (onCreate as (s: string) => {})('hi');
 
-    expect(onAdd).toHaveBeenCalledTimes(1);
+    expect(onAdd).toHaveBeenCalledWith('hi');
   });
 });

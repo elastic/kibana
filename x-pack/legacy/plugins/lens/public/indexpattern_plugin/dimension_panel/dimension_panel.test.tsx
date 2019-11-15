@@ -139,6 +139,8 @@ describe('IndexPatternDimensionPanel', () => {
       uiSettings: {} as UiSettingsClientContract,
       savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpServiceBase,
+      onRemove: jest.fn(),
+      onCreate: jest.fn(),
     };
 
     jest.clearAllMocks();
@@ -956,15 +958,17 @@ describe('IndexPatternDimensionPanel', () => {
         .prop('onClick')!({} as React.MouseEvent<{}, MouseEvent>);
     });
 
-    expect(changeColumn).toHaveBeenCalledWith({
-      state: initialState,
-      columnId: 'col1',
-      layerId: 'first',
-      newColumn: expect.objectContaining({
-        sourceField: 'bytes',
-        operationType: 'min',
-      }),
-    });
+    expect(changeColumn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        state: initialState,
+        columnId: 'col1',
+        layerId: 'first',
+        newColumn: expect.objectContaining({
+          sourceField: 'bytes',
+          operationType: 'min',
+        }),
+      })
+    );
   });
 
   it('should clear the dimension with the clear button', () => {

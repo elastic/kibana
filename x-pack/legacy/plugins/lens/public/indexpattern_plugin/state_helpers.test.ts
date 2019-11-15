@@ -220,6 +220,7 @@ describe('state_helpers', () => {
             },
             sourceField: 'timestamp',
           },
+          onCreate: jest.fn(),
         })
       ).toEqual({
         ...state,
@@ -276,6 +277,7 @@ describe('state_helpers', () => {
               interval: 'w',
             },
           },
+          onCreate: jest.fn(),
         }).layers.first.columns.col1
       ).toEqual(
         expect.objectContaining({
@@ -339,6 +341,7 @@ describe('state_helpers', () => {
         layerId: 'first',
         columnId: 'col2',
         newColumn,
+        onCreate: jest.fn(),
       });
 
       expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(termsColumn, {

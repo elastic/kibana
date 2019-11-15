@@ -17,7 +17,6 @@ import {
   VisualizationSuggestion,
   Operation,
 } from '../types';
-import { generateId } from '../id_generator';
 import { NativeRenderer } from '../native_renderer';
 import chartTableSVG from '../assets/chart_datatable.svg';
 
@@ -33,7 +32,7 @@ export interface DatatableVisualizationState {
 function newLayerState(layerId: string): LayerState {
   return {
     layerId,
-    columns: [generateId()],
+    columns: [],
   };
 }
 
@@ -81,7 +80,7 @@ export function DataTableLayer({
           dragDropContext={dragDropContext}
           filterOperations={allOperations}
           layerId={layer.layerId}
-          onAdd={() => setState(updateColumns(state, layer, columns => [...columns, generateId()]))}
+          onAdd={column => setState(updateColumns(state, layer, columns => [...columns, column]))}
           onRemove={column =>
             setState(updateColumns(state, layer, columns => columns.filter(c => c !== column)))
           }

@@ -15,6 +15,8 @@ import { Document } from './persistence';
 import { DateRange } from '../common';
 import { esFilters } from '../../../../../src/plugins/data/public';
 
+export const EMPTY_ACCESSOR = '';
+
 // eslint-disable-next-line
 export interface EditorFrameOptions {}
 
@@ -195,7 +197,8 @@ export interface DatasourceDimensionPanelProps {
   // Visualizations can hint at the role this dimension would play, which
   // affects the default ordering of the query
   suggestedPriority?: DimensionPriority;
-  onRemove?: (accessor: string) => void;
+  onRemove: (columnId: string) => void;
+  onCreate: (columnId: string) => void;
 
   // Some dimension editors will allow users to change the operation grouping
   // from the panel, and this lets the visualization hint that it doesn't want

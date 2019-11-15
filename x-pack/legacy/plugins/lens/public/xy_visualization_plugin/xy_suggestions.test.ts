@@ -10,11 +10,9 @@ import {
   VisualizationSuggestion,
   DataType,
   TableSuggestion,
+  EMPTY_ACCESSOR,
 } from '../types';
 import { State, XYState } from './types';
-import { generateId } from '../id_generator';
-
-jest.mock('../id_generator');
 
 describe('xy_suggestions', () => {
   function numCol(columnId: string): TableSuggestionColumn {
@@ -107,7 +105,6 @@ describe('xy_suggestions', () => {
   });
 
   test('suggests a basic x y chart with date on x', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('aaa');
     const [suggestion, ...rest] = getSuggestions({
       table: {
         isMultiRow: true,
@@ -123,7 +120,7 @@ describe('xy_suggestions', () => {
       Array [
         Object {
           "seriesType": "bar_stacked",
-          "splitAccessor": "aaa",
+          "splitAccessor": "",
           "x": "date",
           "y": Array [
             "bytes",
@@ -240,7 +237,6 @@ describe('xy_suggestions', () => {
   });
 
   test('only makes a seriesType suggestion for unchanged table without split', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
@@ -249,7 +245,7 @@ describe('xy_suggestions', () => {
           accessors: ['price'],
           layerId: 'first',
           seriesType: 'bar',
-          splitAccessor: 'dummyCol',
+          splitAccessor: EMPTY_ACCESSOR,
           xAccessor: 'date',
         },
       ],
@@ -316,7 +312,6 @@ describe('xy_suggestions', () => {
   });
 
   test('suggests a flipped chart for unchanged table and existing bar chart on ordinal x axis', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
@@ -421,7 +416,6 @@ describe('xy_suggestions', () => {
   });
 
   test('overwrites column to dimension mappings if a date dimension is added', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
@@ -460,7 +454,6 @@ describe('xy_suggestions', () => {
   });
 
   test('handles two numeric values', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('ddd');
     const [suggestion] = getSuggestions({
       table: {
         isMultiRow: true,
@@ -472,21 +465,20 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-                        Array [
-                          Object {
-                            "seriesType": "bar_stacked",
-                            "splitAccessor": "ddd",
-                            "x": "quantity",
-                            "y": Array [
-                              "price",
-                            ],
-                          },
-                        ]
-                `);
+      Array [
+        Object {
+          "seriesType": "bar_stacked",
+          "splitAccessor": "",
+          "x": "quantity",
+          "y": Array [
+            "price",
+          ],
+        },
+      ]
+    `);
   });
 
   test('handles ip', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('ddd');
     const [suggestion] = getSuggestions({
       table: {
         isMultiRow: true,
@@ -509,21 +501,20 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "seriesType": "bar_stacked",
-                "splitAccessor": "ddd",
-                "x": "myip",
-                "y": Array [
-                  "quantity",
-                ],
-              },
-            ]
-        `);
+      Array [
+        Object {
+          "seriesType": "bar_stacked",
+          "splitAccessor": "",
+          "x": "myip",
+          "y": Array [
+            "quantity",
+          ],
+        },
+      ]
+    `);
   });
 
   test('handles unbucketed suggestions', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('eee');
     const [suggestion] = getSuggestions({
       table: {
         isMultiRow: true,
@@ -545,16 +536,16 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-                  Array [
-                    Object {
-                      "seriesType": "bar_stacked",
-                      "splitAccessor": "eee",
-                      "x": "mybool",
-                      "y": Array [
-                        "num votes",
-                      ],
-                    },
-                  ]
-            `);
+      Array [
+        Object {
+          "seriesType": "bar_stacked",
+          "splitAccessor": "",
+          "x": "mybool",
+          "y": Array [
+            "num votes",
+          ],
+        },
+      ]
+    `);
   });
 });

@@ -4,22 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
-import { NativeRenderer } from '../native_renderer';
+import React from 'react';
 import { DatasourcePublicAPI, OperationMetadata } from '../types';
 import { DragContextState } from '../drag_drop';
+import { DimensionPanel } from '../dimension_panel';
 
 interface Props {
   accessors: string[];
   datasource: DatasourcePublicAPI;
   dragDropContext: DragContextState;
   onRemove: (accessor: string) => void;
-  onAdd: () => void;
+  onAdd: (accessor: string) => void;
   filterOperations: (op: OperationMetadata) => boolean;
   suggestedPriority?: 0 | 1 | 2 | undefined;
   testSubj: string;
   layerId: string;
 }
+
+const noop = () => {};
 
 export function MultiColumnEditor({
   accessors,
@@ -32,32 +34,33 @@ export function MultiColumnEditor({
   testSubj,
   layerId,
 }: Props) {
-  const lastOperation = datasource.getOperationForColumnId(accessors[accessors.length - 1]);
-
-  useEffect(() => {
-    if (accessors.length === 0 || lastOperation !== null) {
-      setTimeout(onAdd);
-    }
-  }, [lastOperation]);
-
   return (
     <>
       {accessors.map(accessor => (
         <div key={accessor}>
-          <NativeRenderer
-            data-test-subj={`lnsXY_${testSubj}_${accessor}`}
-            render={datasource.renderDimensionPanel}
-            nativeProps={{
-              columnId: accessor,
-              dragDropContext,
-              filterOperations,
-              suggestedPriority,
-              layerId,
-              onRemove,
-            }}
+          <DimensionPanel
+            data-test-subj={`lns_multi_column_${testSubj}_${accessor}`}
+            datasource={datasource}
+            layerId={layerId}
+            columnId={accessor}
+            dragDropContext={dragDropContext}
+            filterOperations={filterOperations}
+            onRemove={onRemove}
+            onCreate={noop}
+            suggestedPriority={suggestedPriority}
           />
         </div>
       ))}
+      <DimensionPanel
+        data-test-subj={`lns_multi_column_add_${testSubj}`}
+        columnId={''}
+        datasource={datasource}
+        layerId={layerId}
+        dragDropContext={dragDropContext}
+        filterOperations={filterOperations}
+        onCreate={onAdd}
+        onRemove={noop}
+      />
     </>
   );
 }
