@@ -27,6 +27,10 @@
 .canvasSidebar__panel {
   border-bottom: $euiBorderThin;
   padding: $euiSizeS $euiSizeM;
+
+  &--isEmpty {
+    border-bottom: none;
+  }
 }
 
 .canvasSidebar__panel-noMinWidth .euiButton {
