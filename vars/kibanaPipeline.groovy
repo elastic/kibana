@@ -127,7 +127,17 @@ def jobRunner(label, useRamDisk, closure) {
       }
     }
 
-    def scmVars = checkout scm
+    def scmVars
+
+    // Try to clone from Github up to 8 times, waiting 15 secs between attempts
+    retry(8) {
+      try {
+        scmVars = checkout scm
+      } catch (ex) {
+        sleep 15
+        throw ex
+      }
+    }
 
     withEnv([
       "CI=true",
