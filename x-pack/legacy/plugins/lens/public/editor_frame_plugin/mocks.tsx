@@ -10,6 +10,10 @@ import {
   ExpressionsSetup,
   ExpressionsStart,
 } from '../../../../../../src/plugins/expressions/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { embeddablePluginMock } from '../../../../../../src/plugins/embeddable/public/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
 import { DatasourcePublicAPI, FramePublicAPI, Visualization, Datasource } from '../types';
 import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './plugin';
 
@@ -101,10 +105,8 @@ export function createExpressionRendererMock(): jest.Mock<
 export function createMockSetupDependencies() {
   return ({
     data: {},
-    expressions: {
-      registerFunction: jest.fn(),
-      registerRenderer: jest.fn(),
-    },
+    embeddable: embeddablePluginMock.createSetupContract(),
+    expressions: expressionsPluginMock.createSetupContract(),
     chrome: {
       getSavedObjectsClient: () => {},
     },
@@ -118,11 +120,7 @@ export function createMockStartDependencies() {
         indexPatterns: {},
       },
     },
-    expressions: {
-      ExpressionRenderer: jest.fn(() => null),
-    },
-    embeddables: {
-      registerEmbeddableFactory: jest.fn(),
-    },
+    embeddable: embeddablePluginMock.createStartContract(),
+    expressions: expressionsPluginMock.createStartContract(),
   } as unknown) as MockedStartDependencies;
 }
