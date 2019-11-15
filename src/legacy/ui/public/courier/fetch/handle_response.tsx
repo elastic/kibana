@@ -23,8 +23,9 @@ import { EuiSpacer } from '@elastic/eui';
 import { toastNotifications } from '../../notify/toasts';
 import { ShardFailureOpenModalButton } from './components/shard_failure_open_modal_button';
 import { Request, ResponseWithShardFailure } from './components/shard_failure_types';
+import { SearchRequest, SearchResponse } from '../types';
 
-export function handleResponse(request: any, response: any) {
+export function handleResponse(request: SearchRequest, response: SearchResponse) {
   if (response.timed_out) {
     toastNotifications.addWarning({
       title: i18n.translate('common.ui.courier.fetch.requestTimedOutNotificationMessage', {

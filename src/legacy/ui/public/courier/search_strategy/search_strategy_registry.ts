@@ -20,6 +20,7 @@
 import { IndexPattern } from '../../../../core_plugins/data/public';
 import { SearchStrategyProvider } from './types';
 import { noOpSearchStrategy } from './no_op_search_strategy';
+import { SearchResponse } from '../types';
 
 export const searchStrategies: SearchStrategyProvider[] = [];
 
@@ -44,7 +45,7 @@ export const getSearchStrategyById = (searchStrategyId: string) => {
 };
 
 export const getSearchStrategyForSearchRequest = (
-  searchRequest: any,
+  searchRequest: SearchResponse,
   { searchStrategyId }: { searchStrategyId?: string } = {}
 ) => {
   // Allow the searchSource to declare the correct strategy with which to execute its searches.

@@ -18,13 +18,14 @@
  */
 
 import { UiSettingsClientContract } from '../../../../../core/public';
+import { SearchRequest, SearchResponse } from '../types';
 
 export interface ApiCaller {
-  search: (searchRequest: any) => ApiCallerResponse;
-  msearch: (searchRequest: any) => ApiCallerResponse;
+  search: (searchRequest: SearchRequest) => ApiCallerResponse;
+  msearch: (searchRequest: SearchRequest) => ApiCallerResponse;
 }
 
-export interface ApiCallerResponse extends Promise<any> {
+export interface ApiCallerResponse extends Promise<SearchResponse> {
   abort: () => void;
 }
 

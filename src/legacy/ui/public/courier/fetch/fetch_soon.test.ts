@@ -21,6 +21,7 @@ import { fetchSoon } from './fetch_soon';
 import { callClient } from './call_client';
 import { UiSettingsClientContract } from '../../../../../core/public';
 import { FetchHandlers, FetchOptions } from './types';
+import { SearchRequest, SearchResponse } from '../types';
 
 function getConfigStub(config: any = {}) {
   return {
@@ -28,7 +29,7 @@ function getConfigStub(config: any = {}) {
   } as UiSettingsClientContract;
 }
 
-const mockResponses: any = {
+const mockResponses: Record<string, SearchResponse> = {
   foo: {},
   bar: {},
   baz: {},
@@ -37,7 +38,7 @@ const mockResponses: any = {
 jest.useFakeTimers();
 
 jest.mock('./call_client', () => ({
-  callClient: jest.fn((requests: any[]) => {
+  callClient: jest.fn((requests: SearchRequest[]) => {
     // Allow a request object to specify which mockResponse it wants to receive (_mockResponseId)
     // in addition to how long to simulate waiting before returning a response (_waitMs)
     const responses = requests.map(request => {

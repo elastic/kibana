@@ -77,11 +77,11 @@ import { normalizeSortRequest } from './normalize_sort_request';
 
 import { fetchSoon } from '../fetch';
 import { fieldWildcardFilter } from '../../field_wildcard';
-import { getHighlightRequest } from '../../../../../plugins/data/public';
+import { getHighlightRequest, esFilters } from '../../../../../plugins/data/public';
 import chrome from '../../chrome';
 import { RequestFailure } from '../fetch/errors';
 import { filterDocvalueFields } from './filter_docvalue_fields';
-import { SearchSourceOptions, SearchSourceFields } from './types';
+import { SearchSourceOptions, SearchSourceFields, SearchRequest } from './types';
 import { FetchOptions, ApiCaller } from '../fetch/types';
 
 const esShardTimeout = npSetup.core.injectedMetadata.getInjectedVar('esShardTimeout') as number;
@@ -97,7 +97,7 @@ export class SearchSource {
     (searchSource: SearchSourceContract, options?: FetchOptions) => Promise<unknown>
   > = [];
   private inheritOptions: SearchSourceOptions = {};
-  public history: any[] = [];
+  public history: SearchRequest[] = [];
 
   constructor(private fields: SearchSourceFields = {}) {}
 
@@ -278,7 +278,7 @@ export class SearchSource {
    * @return {undefined}
    */
   private mergeProp<K extends keyof SearchSourceFields>(
-    data: any,
+    data: SearchRequest,
     val: SearchSourceFields[K],
     key: K
   ) {
@@ -329,7 +329,7 @@ export class SearchSource {
    * @returns {Promise}
    * @resolved {Object|null} - the flat data of the SearchSource
    */
-  private mergeProps(root = this, searchRequest: any = { body: {} }) {
+  private mergeProps(root = this, searchRequest: SearchRequest = { body: {} }) {
     Object.entries(this.fields).forEach(([key, value]) => {
       this.mergeProp(searchRequest, value, key as keyof SearchSourceFields);
     });
@@ -388,7 +388,7 @@ export class SearchSource {
       delete searchRequest.highlightAll;
     }
 
-    const translateToQuery = (filter: any) => filter && (filter.query || filter);
+    const translateToQuery = (filter: esFilters.Filter) => filter && (filter.query || filter);
 
     // re-write filters within filter aggregations
     (function recurse(aggBranch) {

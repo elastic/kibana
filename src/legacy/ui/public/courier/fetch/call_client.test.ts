@@ -19,7 +19,7 @@
 
 import { callClient } from './call_client';
 import { handleResponse } from './handle_response';
-import { FetchHandlers, SearchStrategySearchParams } from '../types';
+import { FetchHandlers, SearchRequest, SearchStrategySearchParams } from '../types';
 
 const mockResponses = [{}, {}];
 const mockAbortFns = [jest.fn(), jest.fn()];
@@ -40,7 +40,7 @@ jest.mock('./handle_response', () => ({
 }));
 
 jest.mock('../search_strategy', () => ({
-  getSearchStrategyForSearchRequest: (request: any) =>
+  getSearchStrategyForSearchRequest: (request: SearchRequest) =>
     mockSearchStrategies[request._searchStrategyId],
   getSearchStrategyById: (id: number) => mockSearchStrategies[id],
 }));

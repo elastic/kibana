@@ -21,18 +21,18 @@ import { groupBy } from 'lodash';
 import { getSearchStrategyForSearchRequest, getSearchStrategyById } from '../search_strategy';
 import { handleResponse } from './handle_response';
 import { FetchOptions, FetchHandlers } from './types';
+import { SearchRequest } from '../types';
 
 export function callClient(
-  searchRequests: any[],
+  searchRequests: SearchRequest[],
   requestsOptions: FetchOptions[] = [],
   { es, config, esShardTimeout }: FetchHandlers
 ) {
   // Correlate the options with the request that they're associated with
-  const requestOptionEntries: Array<[any, FetchOptions]> = searchRequests.map((request, i) => [
-    request,
-    requestsOptions[i],
-  ]);
-  const requestOptionsMap = new Map<any, FetchOptions>(requestOptionEntries);
+  const requestOptionEntries: Array<[SearchRequest, FetchOptions]> = searchRequests.map(
+    (request, i) => [request, requestsOptions[i]]
+  );
+  const requestOptionsMap = new Map<SearchRequest, FetchOptions>(requestOptionEntries);
 
   // Group the requests by the strategy used to search that specific request
   const searchStrategyMap = groupBy(searchRequests, (request, i) => {

@@ -19,13 +19,14 @@
 
 import { callClient } from './call_client';
 import { FetchHandlers, FetchOptions } from './types';
+import { SearchRequest, SearchResponse } from '../types';
 
 /**
  * This function introduces a slight delay in the request process to allow multiple requests to queue
  * up (e.g. when a dashboard is loading).
  */
 export async function fetchSoon(
-  request: any,
+  request: SearchRequest,
   options: FetchOptions,
   { es, config, esShardTimeout }: FetchHandlers
 ) {
@@ -47,11 +48,11 @@ function delay(fn: Function, ms: number) {
 }
 
 // The current batch/queue of requests to fetch
-let requestsToFetch: any[] = [];
+let requestsToFetch: SearchRequest[] = [];
 let requestOptions: FetchOptions[] = [];
 
 // The in-progress fetch (if there is one)
-let fetchInProgress: Promise<any> | null = null;
+let fetchInProgress: Promise<SearchResponse> | null = null;
 
 /**
  * Delay fetching for a given amount of time, while batching up the requests to be fetched.
@@ -61,7 +62,7 @@ let fetchInProgress: Promise<any> | null = null;
  * @return Promise<SearchResponse> The response for the given request
  */
 async function delayedFetch(
-  request: any,
+  request: SearchRequest,
   options: FetchOptions,
   { es, config, esShardTimeout }: FetchHandlers,
   ms: number

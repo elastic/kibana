@@ -102,3 +102,6 @@ export interface ShardFailure {
   };
   shard: number;
 }
+
+export type SearchRequest = any;
+export type SearchResponse = any;

@@ -19,6 +19,7 @@
 
 import { IndexPattern } from '../../../../core_plugins/data/public';
 import { FetchHandlers } from '../fetch/types';
+import { SearchRequest, SearchResponse } from '../types';
 
 export interface SearchStrategyProvider {
   id: string;
@@ -27,10 +28,10 @@ export interface SearchStrategyProvider {
 }
 
 export interface SearchStrategyResponse {
-  searching: Promise<any[]>;
+  searching: Promise<SearchResponse[]>;
   abort: () => void;
 }
 
 export interface SearchStrategySearchParams extends FetchHandlers {
-  searchRequests: any[];
+  searchRequests: SearchRequest[];
 }
