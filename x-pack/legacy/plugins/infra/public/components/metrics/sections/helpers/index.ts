@@ -74,7 +74,7 @@ export const getChartColor = (section: InfraMetricLayoutSection, seriesId: strin
 const isInfraMetricLayoutVisualizationType = (
   subject: any
 ): subject is InfraMetricLayoutVisualizationType => {
-  return InfraMetricLayoutVisualizationType[subject] != null;
+  return subject in InfraMetricLayoutVisualizationType;
 };
 
 /**
