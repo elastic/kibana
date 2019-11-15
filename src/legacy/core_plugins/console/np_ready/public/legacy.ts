@@ -26,8 +26,9 @@ import 'brace/mode/text';
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { npSetup, npStart } from 'ui/new_platform';
 import { I18nContext } from 'ui/i18n';
-import { ResizeChecker } from 'ui/resize_checker';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
+
+import { ResizeChecker } from '../../../../../plugins/kibana_utils/public';
 
 export interface XPluginSet {
   devTools: DevToolsSetup;
