@@ -11,7 +11,7 @@ import { AuditMessageBase } from '../../../common/types/audit_message';
 
 interface Props {
   message: AuditMessageBase;
-  showTooltip: boolean;
+  showTooltip?: boolean;
 }
 
 const [INFO, WARNING, ERROR] = ['info', 'warning', 'error'];

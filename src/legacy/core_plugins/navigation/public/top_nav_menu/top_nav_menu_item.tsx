@@ -45,6 +45,7 @@ export function TopNavMenuItem(props: TopNavMenuData) {
       isDisabled={isDisabled()}
       onClick={handleClick}
       data-test-subj={props.testId}
+      className={props.className}
     >
       {capitalize(props.label || props.id!)}
     </EuiButtonEmpty>
