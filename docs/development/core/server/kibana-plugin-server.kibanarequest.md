@@ -26,7 +26,7 @@ export declare class KibanaRequest<Params = unknown, Query = unknown, Body = unk
 |  [headers](./kibana-plugin-server.kibanarequest.headers.md) |  | <code>Headers</code> | Readonly copy of incoming request headers. |
 |  [params](./kibana-plugin-server.kibanarequest.params.md) |  | <code>Params</code> |  |
 |  [query](./kibana-plugin-server.kibanarequest.query.md) |  | <code>Query</code> |  |
-|  [route](./kibana-plugin-server.kibanarequest.route.md) |  | <code>RecursiveReadonly&lt;KibanaRequestRoute&gt;</code> | matched route details |
+|  [route](./kibana-plugin-server.kibanarequest.route.md) |  | <code>RecursiveReadonly&lt;KibanaRequestRoute&lt;RouteMethod &#124; 'patch' &#124; 'options'&gt;&gt;</code> | matched route details |
 |  [socket](./kibana-plugin-server.kibanarequest.socket.md) |  | <code>IKibanaSocket</code> |  |
 |  [url](./kibana-plugin-server.kibanarequest.url.md) |  | <code>Url</code> | a WHATWG URL standard object. |
 

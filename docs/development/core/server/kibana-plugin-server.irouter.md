@@ -16,9 +16,9 @@ export interface IRouter
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [delete](./kibana-plugin-server.irouter.delete.md) | <code>&lt;P extends ObjectType, Q extends ObjectType, B extends ObjectType&gt;(route: RouteConfig&lt;P, Q, B&gt;, handler: RequestHandler&lt;P, Q, B&gt;) =&gt; void</code> | Register a route handler for <code>DELETE</code> request. |
-|  [get](./kibana-plugin-server.irouter.get.md) | <code>&lt;P extends ObjectType, Q extends ObjectType, B extends ObjectType&gt;(route: RouteConfig&lt;P, Q, B&gt;, handler: RequestHandler&lt;P, Q, B&gt;) =&gt; void</code> | Register a route handler for <code>GET</code> request. |
-|  [post](./kibana-plugin-server.irouter.post.md) | <code>&lt;P extends ObjectType, Q extends ObjectType, B extends ObjectType&gt;(route: RouteConfig&lt;P, Q, B&gt;, handler: RequestHandler&lt;P, Q, B&gt;) =&gt; void</code> | Register a route handler for <code>POST</code> request. |
-|  [put](./kibana-plugin-server.irouter.put.md) | <code>&lt;P extends ObjectType, Q extends ObjectType, B extends ObjectType&gt;(route: RouteConfig&lt;P, Q, B&gt;, handler: RequestHandler&lt;P, Q, B&gt;) =&gt; void</code> | Register a route handler for <code>PUT</code> request. |
+|  [delete](./kibana-plugin-server.irouter.delete.md) | <code>&lt;P extends ObjectType, Q extends ObjectType, B extends ObjectType&gt;(route: RouteConfig&lt;P, Q, B, 'delete'&gt;, handler: RequestHandler&lt;P, Q, B&gt;) =&gt; void</code> | Register a route handler for <code>DELETE</code> request. |
+|  [get](./kibana-plugin-server.irouter.get.md) | <code>&lt;P extends ObjectType, Q extends ObjectType, B extends ObjectType&gt;(route: RouteConfig&lt;P, Q, B, 'get'&gt;, handler: RequestHandler&lt;P, Q, B&gt;) =&gt; void</code> | Register a route handler for <code>GET</code> request. |
+|  [post](./kibana-plugin-server.irouter.post.md) | <code>&lt;P extends ObjectType, Q extends ObjectType, B extends ObjectType&gt;(route: RouteConfig&lt;P, Q, B, 'post'&gt;, handler: RequestHandler&lt;P, Q, B&gt;) =&gt; void</code> | Register a route handler for <code>POST</code> request. |
+|  [put](./kibana-plugin-server.irouter.put.md) | <code>&lt;P extends ObjectType, Q extends ObjectType, B extends ObjectType&gt;(route: RouteConfig&lt;P, Q, B, 'put'&gt;, handler: RequestHandler&lt;P, Q, B&gt;) =&gt; void</code> | Register a route handler for <code>PUT</code> request. |
 |  [routerPath](./kibana-plugin-server.irouter.routerpath.md) | <code>string</code> | Resulted path |
 

@@ -577,6 +577,38 @@ test('exposes route details of incoming request to a route handler', async () =>
     });
 });
 
+test('exposes route details of incoming request to a route handler (POST + payload options)', async () => {
+  const { registerRouter, server: innerServer } = await server.setup(config);
+
+  const router = new Router('', logger, enhanceWithContext);
+  router.post(
+    {
+      path: '/',
+      validate: false,
+      options: { accepts: 'application/json' },
+    },
+    (context, req, res) => res.ok({ body: req.route })
+  );
+  registerRouter(router);
+
+  await server.start();
+  await supertest(innerServer.listener)
+    .post('/')
+    .send({ test: 1 })
+    .expect(200, {
+      method: 'post',
+      path: '/',
+      options: {
+        authRequired: true,
+        tags: [],
+        parse: true, // hapi populates the default
+        maxBytes: 1024, // hapi populates the default
+        accepts: ['application/json'],
+        output: 'data',
+      },
+    });
+});
+
 describe('setup contract', () => {
   describe('#createSessionStorage', () => {
     it('creates session storage factory', async () => {

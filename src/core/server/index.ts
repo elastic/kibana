@@ -114,6 +114,7 @@ export {
   IRouter,
   RouteMethod,
   RouteConfigOptions,
+  RouteContentType,
   SessionStorage,
   SessionStorageCookieOptions,
   SessionStorageFactory,

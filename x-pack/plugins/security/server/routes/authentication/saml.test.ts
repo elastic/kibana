@@ -42,7 +42,7 @@ describe('SAML authentication routes', () => {
 
   describe('Assertion consumer service endpoint', () => {
     let routeHandler: RequestHandler<any, any, any>;
-    let routeConfig: RouteConfig<any, any, any>;
+    let routeConfig: RouteConfig<any, any, any, any>;
     beforeEach(() => {
       const [acsRouteConfig, acsRouteHandler] = router.post.mock.calls.find(
         ([{ path }]) => path === '/api/security/saml/callback'

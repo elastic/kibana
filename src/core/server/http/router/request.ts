@@ -33,10 +33,12 @@ const requestSymbol = Symbol('request');
  * Request specific route information exposed to a handler.
  * @public
  * */
-export interface KibanaRequestRoute {
+export interface KibanaRequestRoute<Method extends RouteMethod | 'patch' | 'options'> {
   path: string;
-  method: RouteMethod | 'patch' | 'options';
-  options: Required<RouteConfigOptions>;
+  method: Method;
+  options: Method extends 'get'
+    ? Required<Pick<RouteConfigOptions<Method>, 'authRequired' | 'tags'>> // GET requests cannot have payload options
+    : Required<RouteConfigOptions>; // Using any because 'patch' and 'options' are not valid RouteMethods but shouldn't affect much to typings
 }
 
 /**
@@ -113,7 +115,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   /** a WHATWG URL standard object. */
   public readonly url: Url;
   /** matched route details */
-  public readonly route: RecursiveReadonly<KibanaRequestRoute>;
+  public readonly route: RecursiveReadonly<KibanaRequestRoute<RouteMethod | 'patch' | 'options'>>;
   /**
    * Readonly copy of incoming request headers.
    * @remarks
@@ -150,12 +152,18 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
 
   private getRouteInfo() {
     const request = this[requestSymbol];
+    const payload = request.route.settings.payload || {};
+    const { parse, maxBytes, allow, output } = payload;
     return {
       path: request.path,
       method: request.method,
       options: {
         authRequired: request.route.settings.auth !== false,
         tags: request.route.settings.tags || [],
+        parse,
+        maxBytes,
+        accepts: allow,
+        output,
       },
     };
   }

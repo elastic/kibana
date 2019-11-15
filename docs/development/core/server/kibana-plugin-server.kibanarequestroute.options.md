@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-options: Required<RouteConfigOptions>;
+options: Method extends 'get' ? Required<Pick<RouteConfigOptions<Method>, 'authRequired' | 'tags'>> : Required<RouteConfigOptions>;
 ```

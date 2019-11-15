@@ -53,7 +53,7 @@ export interface IRouter {
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
   get: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B>,
+    route: RouteConfig<P, Q, B, 'get'>,
     handler: RequestHandler<P, Q, B>
   ) => void;
 
@@ -63,7 +63,7 @@ export interface IRouter {
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
   post: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B>,
+    route: RouteConfig<P, Q, B, 'post'>,
     handler: RequestHandler<P, Q, B>
   ) => void;
 
@@ -73,7 +73,7 @@ export interface IRouter {
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
   put: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B>,
+    route: RouteConfig<P, Q, B, 'put'>,
     handler: RequestHandler<P, Q, B>
   ) => void;
 
@@ -83,12 +83,12 @@ export interface IRouter {
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
   delete: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B>,
+    route: RouteConfig<P, Q, B, 'delete'>,
     handler: RequestHandler<P, Q, B>
   ) => void;
 
   /**
-   * Returns all routes registered with the this router.
+   * Returns all routes registered with this router.
    * @returns List of registered routes.
    * @internal
    */
@@ -115,8 +115,9 @@ function getRouteFullPath(routerPath: string, routePath: string) {
 function routeSchemasFromRouteConfig<
   P extends ObjectType,
   Q extends ObjectType,
-  B extends ObjectType
->(route: RouteConfig<P, Q, B>, routeMethod: RouteMethod) {
+  B extends ObjectType,
+  Method extends RouteMethod
+>(route: RouteConfig<P, Q, B, Method>, routeMethod: Method) {
   // The type doesn't allow `validate` to be undefined, but it can still
   // happen when it's used from JavaScript.
   if (route.validate === undefined) {
@@ -153,12 +154,12 @@ export class Router implements IRouter {
     private readonly log: Logger,
     private readonly enhanceWithContext: ContextEnhancer<any, any, any>
   ) {
-    const buildMethod = (method: RouteMethod) => <
+    const buildMethod = <Method extends RouteMethod>(method: Method) => <
       P extends ObjectType,
       Q extends ObjectType,
       B extends ObjectType
     >(
-      route: RouteConfig<P, Q, B>,
+      route: RouteConfig<P, Q, B, Method>,
       handler: RequestHandler<P, Q, B>
     ) => {
       const { path, options = {} } = route;

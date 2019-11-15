@@ -169,6 +169,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ResponseError](./kibana-plugin-server.responseerror.md) | Error message and optional data send to the client in case of error. |
 |  [ResponseErrorAttributes](./kibana-plugin-server.responseerrorattributes.md) | Additional data to provide error details. |
 |  [ResponseHeaders](./kibana-plugin-server.responseheaders.md) | Http response headers to set. |
+|  [RouteContentType](./kibana-plugin-server.routecontenttype.md) | The set of supported parseable Content-Types |
 |  [RouteMethod](./kibana-plugin-server.routemethod.md) | The set of common HTTP methods supported by Kibana routing. |
 |  [SavedObjectAttribute](./kibana-plugin-server.savedobjectattribute.md) | Type definition for a Saved Object attribute value |
 |  [SavedObjectAttributeSingle](./kibana-plugin-server.savedobjectattributesingle.md) | Don't use this type, it's simply a helper type for [SavedObjectAttribute](./kibana-plugin-server.savedobjectattribute.md) |

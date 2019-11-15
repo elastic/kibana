@@ -714,14 +714,14 @@ export interface IndexSettingsDeprecationInfo {
 
 // @public
 export interface IRouter {
-    delete: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
-    get: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
+    delete: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B, 'delete'>, handler: RequestHandler<P, Q, B>) => void;
+    get: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B, 'get'>, handler: RequestHandler<P, Q, B>) => void;
     // Warning: (ae-forgotten-export) The symbol "RouterRoute" needs to be exported by the entry point index.d.ts
     // 
     // @internal
     getRoutes: () => RouterRoute[];
-    post: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
-    put: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
+    post: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B, 'post'>, handler: RequestHandler<P, Q, B>) => void;
+    put: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B, 'put'>, handler: RequestHandler<P, Q, B>) => void;
     routerPath: string;
 }
 
@@ -760,18 +760,18 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     readonly params: Params;
     // (undocumented)
     readonly query: Query;
-    readonly route: RecursiveReadonly<KibanaRequestRoute>;
+    readonly route: RecursiveReadonly<KibanaRequestRoute<RouteMethod | 'patch' | 'options'>>;
     // (undocumented)
     readonly socket: IKibanaSocket;
     readonly url: Url;
     }
 
 // @public
-export interface KibanaRequestRoute {
+export interface KibanaRequestRoute<Method extends RouteMethod | 'patch' | 'options'> {
     // (undocumented)
-    method: RouteMethod | 'patch' | 'options';
+    method: Method;
     // (undocumented)
-    options: Required<RouteConfigOptions>;
+    options: Method extends 'get' ? Required<Pick<RouteConfigOptions<Method>, 'authRequired' | 'tags'>> : Required<RouteConfigOptions>;
     // (undocumented)
     path: string;
 }
@@ -1085,17 +1085,24 @@ export type ResponseHeaders = {
 };
 
 // @public
-export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType> {
-    options?: RouteConfigOptions;
+export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType, Method extends RouteMethod> {
+    options?: RouteConfigOptions<Method>;
     path: string;
     validate: RouteSchemas<P, Q, B> | false;
 }
 
 // @public
-export interface RouteConfigOptions {
+export interface RouteConfigOptions<Method extends RouteMethod = any> {
+    accepts?: Method extends 'get' ? never : RouteContentType | RouteContentType[] | string | string[];
     authRequired?: boolean;
+    maxBytes?: Method extends 'get' ? never : number;
+    output?: Method extends 'get' ? never : 'data' | 'stream' | 'file';
+    parse?: Method extends 'get' ? never : boolean | 'gunzip';
     tags?: readonly string[];
 }
+
+// @public
+export type RouteContentType = 'application/json' | 'application/*+json' | 'application/octec-stream' | 'application/x-www-form-urlencoded' | 'multipart/form-data' | 'text/*';
 
 // @public
 export type RouteMethod = 'get' | 'post' | 'put' | 'delete';
