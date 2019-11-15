@@ -43,7 +43,7 @@ export function getErrorMessage(error: any) {
   return JSON.stringify(error);
 }
 
-export const useCreateAnalyticsForm = () => {
+export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   const kibanaContext = useKibanaContext();
   const [state, dispatch] = useReducer(reducer, getInitialState());
   const { refresh } = useRefreshAnalyticsList();

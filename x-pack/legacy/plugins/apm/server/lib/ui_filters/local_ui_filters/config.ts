@@ -61,17 +61,14 @@ export const localUIFilterNames = Object.keys(
   filtersByName
 ) as LocalUIFilterName[];
 
-export const localUIFilters = localUIFilterNames.reduce(
-  (acc, key) => {
-    const field = filtersByName[key];
+export const localUIFilters = localUIFilterNames.reduce((acc, key) => {
+  const field = filtersByName[key];
 
-    return {
-      ...acc,
-      [key]: {
-        ...field,
-        name: key
-      }
-    };
-  },
-  {} as LocalUIFilterMap
-);
+  return {
+    ...acc,
+    [key]: {
+      ...field,
+      name: key
+    }
+  };
+}, {} as LocalUIFilterMap);
