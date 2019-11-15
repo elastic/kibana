@@ -182,9 +182,9 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     async sleep(sleepMilliseconds: number) {
-      log.debug('... sleep(' + sleepMilliseconds + ') start');
+      log.debug(`... sleep(${sleepMilliseconds}) start`);
       await delay(sleepMilliseconds);
-      log.debug('... sleep(' + sleepMilliseconds + ') end');
+      log.debug(`... sleep(${sleepMilliseconds}) end`);
     }
 
     async navigateToApp(
@@ -241,22 +241,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           // remove that part so we can get a match in the tests.
           const navSuccessful = new RegExp(
             appUrl.replace(':80/', '/').replace(':443/', '/') +
-              '.{0,' +
-              maxAdditionalLengthOnNavUrl +
-              '}$'
+              `.{0,${maxAdditionalLengthOnNavUrl}}$`
           ).test(currentUrl);
 
           if (!navSuccessful) {
-            const msg =
-              'App failed to load: ' +
-              appName +
-              ' in ' +
-              defaultFindTimeout +
-              'ms' +
-              ' appUrl = ' +
-              appUrl +
-              ' currentUrl = ' +
-              currentUrl;
+            const msg = `App failed to load: ${appName} in ${defaultFindTimeout}ms appUrl=${appUrl} currentUrl=${currentUrl}`;
             log.debug(msg);
             throw new Error(msg);
           }
