@@ -4,14 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface AuditMessageBase {
-  message: string;
-  level: string;
-  timestamp: number;
-  node_name: string;
-  text?: string;
-}
-
-export interface JobMessage extends AuditMessageBase {
-  job_id: string;
-}
+export { JobIcon } from './job_message_icon';
