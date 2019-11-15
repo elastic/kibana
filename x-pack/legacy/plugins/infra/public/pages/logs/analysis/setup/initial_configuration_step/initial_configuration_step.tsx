@@ -103,13 +103,13 @@ function errorToI18n(error: ValidationIndicesUIError): string {
       return i18n.translate('xpack.infra.mlValidation.noTimestampField', {
         defaultMessage:
           'Index `{index}` has no field `{timestamp}`. Ensure the "Timestamp" field in your settings exists in all indices.',
-        values: { index: error.index, timestamp: error.timestamp },
+        values: { index: error.index, timestamp: error.timestampField },
       });
     case 'TIMESTAMP_NOT_VALID':
       return i18n.translate('xpack.infra.mlValidation.invalidTimestampField', {
         defaultMessage:
           'Field `{timestamp}` in index `{index}` is not of type `date`. Ensure the "Timestamp" field in your settings has `date` type.',
-        values: { index: error.index, timestamp: error.timestamp },
+        values: { index: error.index, timestamp: error.timestampField },
       });
     default:
       return '';

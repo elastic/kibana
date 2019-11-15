@@ -13,7 +13,7 @@ export const LOG_ANALYSIS_VALIDATION_INDICES_PATH = '/api/infra/log_analysis/val
  */
 export const validationIndicesRequestPayloadRT = rt.type({
   data: rt.type({
-    timestamp: rt.string,
+    timestampField: rt.string,
     indices: rt.string,
   }),
 });
@@ -31,12 +31,12 @@ export const validationIndicesErrorRT = rt.union([
   rt.type({
     error: rt.literal('TIMESTAMP_NOT_FOUND'),
     index: rt.string,
-    timestamp: rt.string,
+    timestampField: rt.string,
   }),
   rt.type({
     error: rt.literal('TIMESTAMP_NOT_VALID'),
     index: rt.string,
-    timestamp: rt.string,
+    timestampField: rt.string,
   }),
 ]);
 

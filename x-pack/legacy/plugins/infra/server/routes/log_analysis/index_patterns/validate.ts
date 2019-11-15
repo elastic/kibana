@@ -29,7 +29,7 @@ export const initIndexPatternsValidateRoute = ({ framework }: InfraBackendLibs) 
         fold(throwErrors(Boom.badRequest), identity)
       );
 
-      const { timestamp } = payload.data;
+      const { timestampField } = payload.data;
       const indices = payload.data.indices.split(',');
       const errors: ValidationIndicesError[] = [];
 
@@ -38,7 +38,7 @@ export const initIndexPatternsValidateRoute = ({ framework }: InfraBackendLibs) 
         indices.map(async index => {
           const fieldCaps = await framework.callWithRequest(req, 'fieldCaps', {
             index,
-            fields: timestamp,
+            fields: timestampField,
           });
 
           if (fieldCaps.indices.length === 0) {
@@ -49,13 +49,13 @@ export const initIndexPatternsValidateRoute = ({ framework }: InfraBackendLibs) 
             return;
           }
 
-          const fieldMetadata = fieldCaps.fields[timestamp];
+          const fieldMetadata = fieldCaps.fields[timestampField];
 
           if (fieldMetadata === undefined) {
             errors.push({
               error: 'TIMESTAMP_NOT_FOUND',
               index,
-              timestamp,
+              timestampField,
             });
           } else {
             const fieldTypes = Object.keys(fieldMetadata);
@@ -64,7 +64,7 @@ export const initIndexPatternsValidateRoute = ({ framework }: InfraBackendLibs) 
               errors.push({
                 error: 'TIMESTAMP_NOT_VALID',
                 index,
-                timestamp,
+                timestampField,
               });
             }
           }
