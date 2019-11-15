@@ -7,17 +7,17 @@ To easily make sense of your Elasticsearch data, *Lens* provides you with a simp
 
 With Lens, you can:
 
-* Get a quick summary of each data field to help you decide exactly what you want to display.
-
 * Quickly build visualizations by simply dragging and dropping data fields.
+
+* Get a quick summary of each data field to help you decide exactly what you want to display.
 
 * Easily change the visualization type by selecting the automatically generated visualization suggestions.
 
 [float]
 [[choose-lens-visualization]]
-=== Types of Lens visualizations
+=== Supported visualizations
 
-Lens comes with several types of basic visualizations.
+Lens supports several types of visualizations.
 
 [cols="^,<v,^,<v"]
 |===
@@ -64,14 +64,35 @@ Display the latest number in a data series.
 
 [float]
 [[lens-aggregation-types]]
-=== Aggregations
+=== Supported aggregations
 
+To build your visualizations, Lens supports these metric aggregations:
+
+{ref}/search-aggregations-metrics-valuecount-aggregation.html[Count]:: Visualize the number of records, or documents, in a bucket.
+If there are no bucket aggregations defined, the count is the total number of records, or documents, that match the query.
+
+{ref}/search-aggregations-metrics-cardinality-aggregation.html[Unique Count]:: Cardinality of the field within the bucket.
+Supports any data type.
+
+{ref}/search-aggregations-metrics-avg-aggregation.html[Average]:: The mean value.
+
+{ref}/search-aggregations-metrics-max-aggregation.html[Maximum]:: The highest value.
+
+{ref}/search-aggregations-metrics-min-aggregation.html[Minimum]:: The lowest value.
+
+{ref}/search-aggregations-metrics-sum-aggregation.html[Sum]:: The total value.
+
+Lens supports these bucket aggregations:
+
+{ref}/search-aggregations-bucket-datehistogram-aggregation.html[Date Histogram]:: Splits a date field into buckets by interval. When the date field is the primary time field for the index pattern, an internal is automatically chosen for you.
+
+{ref}/search-aggregations-bucket-terms-aggregation.html[Top Values]:: Specifies the top or bottom _n_ elements of a field to display. Ordered by count or a custom metric.
 
 [float]
 [[create-lens-visualization]]
 === Build visualizations
 
-When you build Lens visualizations, you add data fields from the left column. The data fields that appear are dependent on the time filter.
+When you build visualizations with Lens, you add data fields from the left column. The data fields that appear are dependent on the time filter.
 
 There are two ways you can add data:
 
@@ -79,19 +100,14 @@ There are two ways you can add data:
 
 * Drag and drop the data fields onto the *X-axis* and *Y-axis* fields in the right column.
 
-As you drag and drop different data fields, Lens automatically builds the visualization that best displays your data.
+As you drag and drop different data fields, Lens automatically builds the visualization.
 
-TIP: Drag and drop capabilities are available only when Lens is able to build a visualization for that data.
+[role="screenshot"]
+image::images/lens_drag_drop.gif[]
 
-If at any time you'd like to update the data that appears, click *Refresh*.
+TIP: Drag and drop capabilities are available only when Lens is able to build a visualization using that data.
 
-[float]
-[[change-the-visualization-type]]
-==== Change the visualization type
-
-With Lens, you are no longer required to build each visualization from scratch. With smart suggestions, Lens automatically creates alternative visualizations that already include your selected data fields.
-
-To view your data in another type of visualization, click the *Suggestions*.
+If at any time you'd like to update the data that is displayed, click *Refresh*.
 
 [float]
 [[view-data-summaries]]
@@ -101,23 +117,37 @@ To help you decide exactly the data you want to display, get a quick summary of 
 
 To view the data information, navigate to a data field, then click *i*.
 
+[role="screenshot"]
+image::images/lens_data_info.gif[]
+
 [float]
 [[apply-lens-filters]]
 ==== Filter the data
 
 To narrow the data fields you see in the left column, you can apply filters.
 
-There are two ways you can filter the data fields:
+There are two ways to filter the data fields:
 
-* In *Search for fields*, enter the field name.
+* In *Search field names*, enter the field name, then select the field.
 
 * Click *Filter by type*, then click the filter you want to apply.
+
+[float]
+[[change-the-visualization-type]]
+==== Change the visualization type
+
+With Lens, you are no longer required to build each visualization from scratch. With smart suggestions, Lens automatically creates alternative visualizations that already include your selected data fields.
+
+To view your data in another type of visualization, click the *Suggestions*.
+
+[role="screenshot"]
+image::images/lens_suggestions.gif[]
 
 [float]
 [[lens-tutorial]]
 === Lens tutorial
 
-Ready to create a visualization with Lens? Use the following tutorial to create a visualization that displays the average ticket price from the {kib} sample flight data.
+Ready to create your own visualization with Lens? Use the following tutorial to create a visualization that displays the average ticket price from the {kib} sample flight data.
 
 [float]
 [[lens-before-you-begin]]
@@ -129,7 +159,7 @@ For this tutorial, you'll need to add the <<add-sample-data, Sample flight data>
 [[build-the-lens-visualization]]
 ==== Build the visualization
 
-Create the visualization, then add your data.
+Add the data fields to the visualization builder pane.
 
 . Open *Visualize*, then click *Create visualization*.
 
@@ -167,7 +197,7 @@ image::images/lens_tutorial_2.png[Lens tutorial]
 [[change-lens-visualization-type]]
 ==== Change the visualization type
 
-To find the visualization that best displays the flight data, click on each of the *Suggestions*.
+Click on each of the *Suggestions* to see if the other visualizations display your data better.
 
 [role="screenshot"]
 image::images/lens_tutorial_3.gif[Lens tutorial]

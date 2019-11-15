@@ -26,7 +26,6 @@ To create a visualization:
 . Choose the visualization type:
 
 * *Basic visualizations*
-[horizontal]
 <<lens,Lens>>:: Quickly build several types of basic visualizations by simply dragging and dropping the data fields you want to display.
 * *Basic charts*
 [horizontal]
