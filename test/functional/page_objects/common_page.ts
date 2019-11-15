@@ -33,7 +33,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
   const find = getService('find');
   const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
-  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['shield']);
 
   const defaultTryTimeout = config.get('timeouts.try');
@@ -92,7 +91,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     private async loginIfPrompted(appUrl: string) {
       let currentUrl = await browser.getCurrentUrl();
       log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
-      await find.byCssSelector('[data-test-subj="kibanaChrome"]', defaultTryTimeout * 2);
+      await find.byCssSelector('[data-test-subj="kibanaChrome"]', 6 * defaultFindTimeout); // 60 sec waiting
       const loginPage = currentUrl.includes('/login');
       const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
 
@@ -104,7 +103,10 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           config.get('servers.kibana.username'),
           config.get('servers.kibana.password')
         );
-        await find.byCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide)', 20000);
+        await find.byCssSelector(
+          '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
+          2 * defaultFindTimeout
+        );
         await browser.get(appUrl);
         currentUrl = await browser.getCurrentUrl();
         log.debug(`Finished login process currentUrl = ${currentUrl}`);
@@ -206,10 +208,9 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
       log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
-      await retry.tryForTime(defaultTryTimeout * 3, async () => {
+      await retry.tryForTime(defaultTryTimeout * 2, async () => {
         let lastUrl = await retry.try(async () => {
           // since we're using hash URLs, always reload first to force re-render
-          await kibanaServer.uiSettings.getDefaultIndex();
           await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert);
           await this.sleep(700);
           log.debug('returned from get, calling refresh');
@@ -388,7 +389,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     async getBodyText() {
-      if (await find.existsByCssSelector('a[id=rawdata-tab]', 10000)) {
+      if (await find.existsByCssSelector('a[id=rawdata-tab]', defaultFindTimeout)) {
         // Firefox has 3 tabs and requires navigation to see Raw output
         await find.clickByCssSelector('a[id=rawdata-tab]');
       }
