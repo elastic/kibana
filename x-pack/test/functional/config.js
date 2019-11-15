@@ -86,6 +86,7 @@ export default async function ({ readConfigFile }) {
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--telemetry.banner=false',
         '--timelion.ui.enabled=true',
+        '--xpack.endpoint.enabled=true',
       ],
     },
     uiSettings: {
@@ -153,10 +154,10 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/uptime',
       },
       apm: {
-        pathname: '/app/apm'
+        pathname: '/app/apm',
       },
       ml: {
-        pathname: '/app/ml'
+        pathname: '/app/ml',
       },
       rollupJob: {
         pathname: '/app/kibana',
