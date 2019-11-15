@@ -46,9 +46,9 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
     startTime,
     endTime,
     isValidating,
-    selectedIndices,
-    setSelectedIndices,
     validationErrors,
+    validatedIndices,
+    setValidatedIndices,
   } = useAnalysisSetupState({
     availableIndices,
     setupModule,
@@ -68,8 +68,8 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
           startTime={startTime}
           endTime={endTime}
           isValidating={isValidating}
-          selectedIndices={selectedIndices}
-          setSelectedIndices={setSelectedIndices}
+          validatedIndices={validatedIndices}
+          setValidatedIndices={setValidatedIndices}
           validationErrors={validationErrors}
         />
       ),

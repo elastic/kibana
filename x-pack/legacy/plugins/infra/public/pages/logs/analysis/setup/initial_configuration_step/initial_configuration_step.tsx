@@ -9,9 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import { AnalysisSetupIndicesForm, IndicesSelection } from './analysis_setup_indices_form';
+import { AnalysisSetupIndicesForm } from './analysis_setup_indices_form';
 import { AnalysisSetupTimerangeForm } from './analysis_setup_timerange_form';
-import { ValidationIndicesUIError } from '../../../../../containers/logs/log_analysis/log_analysis_setup_state';
+import {
+  ValidatedIndex,
+  ValidationIndicesUIError,
+} from '../../../../../containers/logs/log_analysis/log_analysis_setup_state';
 
 interface InitialConfigurationStepProps {
   setStartTime: (startTime: number | undefined) => void;
@@ -19,8 +22,8 @@ interface InitialConfigurationStepProps {
   startTime: number | undefined;
   endTime: number | undefined;
   isValidating: boolean;
-  selectedIndices: IndicesSelection;
-  setSelectedIndices: (selectedIndices: IndicesSelection) => void;
+  validatedIndices: ValidatedIndex[];
+  setValidatedIndices: (selectedIndices: ValidatedIndex[]) => void;
   validationErrors?: ValidationIndicesUIError[];
 }
 
@@ -30,8 +33,8 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
   startTime,
   endTime,
   isValidating,
-  selectedIndices,
-  setSelectedIndices,
+  validatedIndices,
+  setValidatedIndices,
   validationErrors = [],
 }: InitialConfigurationStepProps) => {
   return (
@@ -45,9 +48,9 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
           endTime={endTime}
         />
         <AnalysisSetupIndicesForm
-          indices={selectedIndices}
+          indices={validatedIndices}
           isValidating={isValidating}
-          onChangeSelectedIndices={setSelectedIndices}
+          onChangeSelectedIndices={setValidatedIndices}
           valid={validationErrors.length === 0}
         />
 

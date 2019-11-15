@@ -14,34 +14,35 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
-
-export type IndicesSelection = Record<string, boolean>;
+import { ValidatedIndex } from '../../../../../containers/logs/log_analysis/log_analysis_setup_state';
 
 export const AnalysisSetupIndicesForm: React.FunctionComponent<{
-  indices: IndicesSelection;
+  indices: ValidatedIndex[];
   isValidating: boolean;
-  onChangeSelectedIndices: (selectedIndices: IndicesSelection) => void;
+  onChangeSelectedIndices: (selectedIndices: ValidatedIndex[]) => void;
   valid: boolean;
 }> = ({ indices, isValidating, onChangeSelectedIndices, valid }) => {
   const handleCheckboxChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      onChangeSelectedIndices({
-        ...indices,
-        [event.currentTarget.id]: event.currentTarget.checked,
-      });
+      onChangeSelectedIndices(
+        indices.map(index => {
+          const checkbox = event.currentTarget;
+          return index.index === checkbox.id ? { ...index, checked: checkbox.checked } : index;
+        })
+      );
     },
     [indices, onChangeSelectedIndices]
   );
 
   const choices = useMemo(
     () =>
-      Object.keys(indices).map(indexName => (
+      indices.map(index => (
         <EuiCheckbox
-          key={indexName}
-          id={indexName}
-          label={<EuiCode>{indexName}</EuiCode>}
+          key={index.index}
+          id={index.index}
+          label={<EuiCode>{index.index}</EuiCode>}
           onChange={handleCheckboxChange}
-          checked={indices[indexName]}
+          checked={index.checked}
         />
       )),
     [indices]

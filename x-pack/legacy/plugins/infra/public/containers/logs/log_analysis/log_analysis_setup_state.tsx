@@ -22,9 +22,10 @@ export type ValidationIndicesUIError =
   | { error: 'NETWORK_ERROR' }
   | { error: 'TOO_FEW_SELECTED_INDICES' };
 
-interface ValidatedIndex {
+export interface ValidatedIndex {
   index: string;
   validation?: ValidationIndicesError;
+  checked: boolean;
 }
 
 interface AnalysisSetupStateArguments {
@@ -33,8 +34,6 @@ interface AnalysisSetupStateArguments {
   setupModule: SetupHandler;
   timestampField: string;
 }
-
-type IndicesSelection = Record<string, boolean>;
 
 const fourWeeksInMs = 86400000 * 7 * 4;
 
@@ -47,8 +46,6 @@ export const useAnalysisSetupState = ({
   const [startTime, setStartTime] = useState<number | undefined>(Date.now() - fourWeeksInMs);
   const [endTime, setEndTime] = useState<number | undefined>(undefined);
 
-  const [selectedIndices, setSelectedIndices] = useState<IndicesSelection>({});
-
   // Prepare the validation
   const [validatedIndices, setValidatedIndices] = useState<ValidatedIndex[]>([]);
   const [validateIndicesRequest, validateIndices] = useTrackedPromise(
@@ -59,27 +56,18 @@ export const useAnalysisSetupState = ({
       },
       onResolve: ({ data }) => {
         setValidatedIndices(
-          availableIndices.map(index => ({
-            index,
-            validation: data.errors.find(error => error.index === index),
-          }))
-        );
-
-        // By default select only indices that have no errors
-        setSelectedIndices(
-          availableIndices.reduce<IndicesSelection>(
-            (map, index) => ({
-              ...map,
-              [index]:
-                !data.errors.some(error => error.index === index) && !isExampleDataIndex(index),
-            }),
-            {}
-          )
+          availableIndices.map(index => {
+            const validation = data.errors.find(error => error.index === index);
+            return {
+              index,
+              validation,
+              checked: validation === undefined && !isExampleDataIndex(index),
+            };
+          })
         );
       },
       onReject: () => {
         setValidatedIndices([]);
-        setSelectedIndices({});
       },
     },
     [availableIndices, timestampField]
@@ -90,11 +78,8 @@ export const useAnalysisSetupState = ({
   }, [availableIndices]);
 
   const selectedIndexNames = useMemo(
-    () =>
-      Object.entries(selectedIndices)
-        .filter(([_indexName, isSelected]) => isSelected)
-        .map(([indexName]) => indexName),
-    [selectedIndices, availableIndices]
+    () => validatedIndices.filter(i => i.checked).map(i => i.index),
+    [validatedIndices]
   );
 
   const setup = useCallback(() => {
@@ -141,12 +126,12 @@ export const useAnalysisSetupState = ({
     endTime,
     isValidating,
     selectedIndexNames,
-    selectedIndices,
     setEndTime,
-    setSelectedIndices,
     setStartTime,
     setup,
     startTime,
+    validatedIndices,
+    setValidatedIndices,
     validationErrors,
   };
 };
