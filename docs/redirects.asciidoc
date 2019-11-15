@@ -39,3 +39,9 @@ This page has moved. Please see <<xpack-logs-configuring>>.
 == Extend your use case
 
 This page was deleted. See <<xpack-graph>> and <<xpack-ml>>.
+
+[role="exclude",id="xpack-dashboard-only-mode"]
+== Dashboard-only mode
+
+Using the `kibana_dashboard_only_user` role is deprecated. 
+Use <<kibana-feature-privileges,feature privileges>> instead.
