@@ -2,6 +2,7 @@
   "id": "epm",
   "version": "0.0.2",
   "kibanaVersion": "kibana",
+  "optionalPlugins": ["feature_catalogue"],
   "requiredPlugins": ["kibana", "elasticsearch", "xpack_main"],
   "server": true,
   "ui": true
