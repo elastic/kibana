@@ -95,7 +95,7 @@ export function TelemetryOptInProvider($injector: any, chrome: any, sendOptInSta
       }
 
       try {
-        await $http.post(chrome.addBasePath('/api/telemetry/v2/userHasSeenNotice'));
+        await $http.put(chrome.addBasePath('/api/telemetry/v2/userHasSeenNotice'));
         telemetryNotifyUserAboutOptInDefault = false;
       } catch (error) {
         toastNotifications.addError(error, {
