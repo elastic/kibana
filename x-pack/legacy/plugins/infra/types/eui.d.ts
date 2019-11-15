@@ -53,7 +53,7 @@ declare module '@elastic/eui' {
     sizes: EuiSizesResponsive[];
   };
 
-  export const EuiHideFor: React.SFC<EuiResponsiveProps>;
+  export const EuiHideFor: React.FunctionComponent<EuiResponsiveProps>;
 
-  export const EuiShowFor: React.SFC<EuiResponsiveProps>;
+  export const EuiShowFor: React.FunctionComponent<EuiResponsiveProps>;
 }

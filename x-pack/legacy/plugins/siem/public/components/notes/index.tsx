@@ -34,11 +34,11 @@ const NotesPanel = styled(EuiPanel)`
 
 NotesPanel.displayName = 'NotesPanel';
 
-const InMemoryTable = styled(EuiInMemoryTable)`
+const InMemoryTable: typeof EuiInMemoryTable & { displayName: string } = styled(EuiInMemoryTable)`
   overflow-x: hidden;
   overflow-y: auto;
   height: 220px;
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 InMemoryTable.displayName = 'InMemoryTable';
 
@@ -66,7 +66,6 @@ export const Notes = React.memo<Props>(
             data-test-subj="notes-table"
             items={getNotesByIds(noteIds)}
             columns={columns}
-            pagination={false}
             search={search}
             sorting={true}
           />
