@@ -132,17 +132,17 @@ export class Welcome extends React.Component<Props> {
                     >
                       <FormattedMessage
                         id="kbn.home.dataManagementDisclaimerPrivacyLink"
-                        defaultMessage="Privacy Policy."
+                        defaultMessage="Privacy Statement."
                       />
                     </EuiLink>
                     <FormattedMessage
                       id="kbn.home.dataManagementDisableCollection"
-                      defaultMessage=" To disable collection, "
+                      defaultMessage=" To stop collection, "
                     />
                     <EuiLink href="#/management/kibana/settings">
                       <FormattedMessage
                         id="kbn.home.dataManagementDisableCollectionLink"
-                        defaultMessage="click here."
+                        defaultMessage="disable usage data here."
                       />
                     </EuiLink>
                   </EuiTextColor>
