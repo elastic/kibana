@@ -9,15 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import { ValidationIndicesError } from '../../../../../../common/http_api';
 import { AnalysisSetupIndicesForm, IndicesSelection } from './analysis_setup_indices_form';
 import { AnalysisSetupTimerangeForm } from './analysis_setup_timerange_form';
-
-export type ValidationIndicesUIError =
-  | ValidationIndicesError
-  | {
-      error: 'TOO_FEW_SELECTED_INDICES';
-    };
+import { ValidationIndicesUIError } from '../../../../../containers/logs/log_analysis/log_analysis_setup_state';
 
 interface InitialConfigurationStepProps {
   setStartTime: (startTime: number | undefined) => void;

@@ -7,7 +7,6 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 
 import { isExampleDataIndex } from '../../../../common/log_analysis';
-import { ValidationIndicesUIError } from '../../../pages/logs/analysis/setup/initial_configuration_step';
 import { ValidationIndicesError } from '../../../../common/http_api';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callIndexPatternsValidate } from './api/index_patterns_validate';
@@ -17,6 +16,12 @@ type SetupHandler = (
   startTime: number | undefined,
   endTime: number | undefined
 ) => void;
+
+export type ValidationIndicesUIError =
+  | ValidationIndicesError
+  | {
+      error: 'TOO_FEW_SELECTED_INDICES';
+    };
 
 interface ValidatedIndex {
   index: string;
