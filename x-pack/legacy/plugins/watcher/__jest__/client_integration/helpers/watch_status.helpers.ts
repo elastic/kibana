@@ -13,9 +13,10 @@ import {
   TestBedConfig,
   nextTick,
 } from '../../../../../../test_utils';
-import { WatchStatus } from '../../../public/sections/watch_status/components/watch_status';
+import { WatchStatus } from '../../../public/np_ready/application/sections/watch_status/components/watch_status';
 import { ROUTES } from '../../../common/constants';
 import { WATCH_ID } from './constants';
+import { withAppContext } from './app_context.mock';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
@@ -25,7 +26,7 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(WatchStatus, testBedConfig);
+const initTestBed = registerTestBed(withAppContext(WatchStatus), testBedConfig);
 
 export interface WatchStatusTestBed extends TestBed<WatchStatusTestSubjects> {
   actions: {

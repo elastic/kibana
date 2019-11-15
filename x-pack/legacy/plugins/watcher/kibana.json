@@ -1,0 +1,9 @@
+{
+  "id": "watcher",
+  "version": "kibana",
+  "requiredPlugins": [
+    "feature_catalogue"
+  ],
+  "server": true,
+  "ui": true
+}

@@ -18,13 +18,6 @@ import { ROUTES } from '../../common/constants';
 
 const { API_ROOT } = ROUTES;
 
-jest.mock('ui/chrome', () => ({
-  breadcrumbs: { set: () => {} },
-  addBasePath: (path: string) => path || '/api/watcher',
-}));
-
-jest.mock('ui/time_buckets', () => {});
-
 const { setup } = pageHelpers.watchList;
 
 describe.skip('<WatchList />', () => {

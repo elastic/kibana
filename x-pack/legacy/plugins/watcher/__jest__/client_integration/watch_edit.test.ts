@@ -9,33 +9,14 @@ import axios from 'axios';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { WatchEditTestBed } from './helpers/watch_edit.helpers';
 import { WATCH } from './helpers/constants';
-import defaultWatchJson from '../../public/models/watch/default_watch.json';
+import defaultWatchJson from '../../public/np_ready/application/models/watch/default_watch.json';
 import { getWatch } from '../../test/fixtures';
 import { getRandomString } from '../../../../../test_utils';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
-jest.mock('ui/chrome', () => ({
-  breadcrumbs: { set: () => {} },
-  addBasePath: (path: string) => path || '/api/watcher',
-}));
-
-jest.mock('ui/time_buckets', () => {
-  class MockTimeBuckets {
-    setBounds(_domain: any) {
-      return {};
-    }
-    getInterval() {
-      return {
-        expression: {},
-      };
-    }
-  }
-  return { TimeBuckets: MockTimeBuckets };
-});
-
-jest.mock('../../public/lib/api', () => ({
-  ...jest.requireActual('../../public/lib/api'),
+jest.mock('../../public/np_ready/application/lib/api', () => ({
+  ...jest.requireActual('../../public/np_ready/application/lib/api'),
   loadIndexPatterns: async () => {
     const INDEX_PATTERNS = [
       { attributes: { title: 'index1' } },

@@ -7,15 +7,8 @@ import { act } from 'react-dom/test-utils';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { WatchCreateJsonTestBed } from './helpers/watch_create_json.helpers';
 import { WATCH } from './helpers/constants';
-import defaultWatchJson from '../../public/models/watch/default_watch.json';
+import defaultWatchJson from '../../public/np_ready/application/models/watch/default_watch.json';
 import { getExecuteDetails } from '../../test/fixtures';
-
-jest.mock('ui/chrome', () => ({
-  breadcrumbs: { set: () => {} },
-  addBasePath: (path: string) => path || '/api/watcher',
-}));
-
-jest.mock('ui/time_buckets', () => {});
 
 const { setup } = pageHelpers.watchCreateJson;
 

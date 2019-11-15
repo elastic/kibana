@@ -42,31 +42,8 @@ const WATCH_VISUALIZE_DATA = {
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
-jest.mock('ui/chrome', () => ({
-  breadcrumbs: { set: () => {} },
-  addBasePath: (path: string) => path || '/api/watcher',
-  getUiSettingsClient: () => ({
-    get: () => {},
-    isDefault: () => true,
-  }),
-}));
-
-jest.mock('ui/time_buckets', () => {
-  class MockTimeBuckets {
-    setBounds(_domain: any) {
-      return {};
-    }
-    getInterval() {
-      return {
-        expression: {},
-      };
-    }
-  }
-  return { TimeBuckets: MockTimeBuckets };
-});
-
-jest.mock('../../public/lib/api', () => ({
-  ...jest.requireActual('../../public/lib/api'),
+jest.mock('../../public/np_ready/application/lib/api', () => ({
+  ...jest.requireActual('../../public/np_ready/application/lib/api'),
   loadIndexPatterns: async () => {
     const INDEX_PATTERNS = [
       { attributes: { title: 'index1' } },

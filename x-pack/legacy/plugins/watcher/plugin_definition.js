@@ -22,8 +22,8 @@ export const pluginDefinition = {
   publicDir: resolve(__dirname, 'public'),
   require: ['kibana', 'elasticsearch', 'xpack_main'],
   uiExports: {
-    styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    managementSections: ['plugins/watcher'],
+    styleSheetPaths: resolve(__dirname, 'public/np_ready/application/index.scss'),
+    managementSections: ['plugins/watcher/legacy'],
     home: ['plugins/watcher/register_feature'],
   },
   init: function (server) {
