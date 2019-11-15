@@ -121,6 +121,23 @@ export function ServiceNodeMetrics() {
             <EuiStat
               titleSize="s"
               isLoading={isLoading}
+              description={i18n.translate(
+                'xpack.apm.serviceNodeMetrics.serviceName',
+                {
+                  defaultMessage: 'Service name'
+                }
+              )}
+              title={
+                <EuiToolTip content={serviceName}>
+                  <Truncate>{serviceName}</Truncate>
+                </EuiToolTip>
+              }
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiStat
+              titleSize="s"
+              isLoading={isLoading}
               description={i18n.translate('xpack.apm.serviceNodeMetrics.host', {
                 defaultMessage: 'Host'
               })}
