@@ -29,6 +29,7 @@ import {
   EuiPopoverTitle,
   EuiSelect,
   EuiSwitch,
+  EuiSwitchEvent,
   EuiForm,
   EuiFormRow,
   EuiButtonGroup,
@@ -154,7 +155,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     setActiveFiltersCount(activeFiltersCount + diff);
   };
 
-  const handleMissingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMissingChange = (e: EuiSwitchEvent) => {
     const missingValue = e.target.checked;
     handleValueChange('missing', missingValue);
   };
