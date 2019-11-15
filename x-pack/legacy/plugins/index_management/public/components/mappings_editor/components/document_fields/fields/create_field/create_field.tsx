@@ -17,13 +17,20 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import { useForm, Form, FormDataProvider, SelectField, UseField } from '../../../../shared_imports';
+import {
+  useForm,
+  Form,
+  FormDataProvider,
+  SelectField,
+  UseField,
+  FieldHook,
+} from '../../../../shared_imports';
 
 import { TYPE_DEFINITION, FIELD_TYPES_OPTIONS, EUI_SIZE } from '../../../../constants';
 
 import { useDispatch } from '../../../../mappings_state';
 import { fieldSerializer, getFieldConfig, filterTypesForMultiField } from '../../../../lib';
-import { Field, MainType, NormalizedFields } from '../../../../types';
+import { Field, MainType, SubType, NormalizedFields } from '../../../../types';
 import { NameParameter } from '../../field_parameters';
 import { getParametersFormForType } from './required_parameters_forms';
 
@@ -89,16 +96,47 @@ export const CreateField = React.memo(function CreateFieldComponent({
     }
   };
 
-  const renderFormFields = (type: MainType) => {
+  /**
+   * When we change the type, we need to check if there is a subType array to choose from.
+   * If there is a subType array, we build the options list for the select (and in case the field is a multi-field
+   * we also filter out blacklisted types).
+   *
+   * @param type The selected field type
+   */
+  const getSubTypeMeta = (
+    type: MainType
+  ): { subTypeLabel?: string; subTypeOptions?: Array<{ value: SubType; text: string }> } => {
     const typeDefinition = TYPE_DEFINITION[type];
-    const hasSubType = typeDefinition && typeDefinition.subTypes !== undefined;
+    const hasSubTypes = typeDefinition !== undefined && typeDefinition.subTypes;
 
-    const subTypeOptions =
-      typeDefinition && typeDefinition.subTypes
-        ? typeDefinition.subTypes.types
-            .map(subType => TYPE_DEFINITION[subType])
-            .map(subType => ({ value: subType.value, text: subType.label }))
-        : undefined;
+    let subTypeOptions = hasSubTypes
+      ? typeDefinition
+          .subTypes!.types.map(subType => TYPE_DEFINITION[subType])
+          .map(subType => ({ value: subType.value as SubType, text: subType.label }))
+      : undefined;
+
+    if (isMultiField && hasSubTypes) {
+      // If it is a multi-field, we need to filter out non-allowed types
+      subTypeOptions = filterTypesForMultiField(subTypeOptions!);
+    }
+
+    return {
+      subTypeOptions,
+      subTypeLabel: hasSubTypes ? typeDefinition.subTypes!.label : undefined,
+    };
+  };
+
+  const onTypeChanged = (typeField: FieldHook) => (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const nextType = e.target.value as MainType;
+    const { subTypeOptions } = getSubTypeMeta(nextType);
+
+    // We both set the type 6 the subType field values
+    form.setFieldValue('subType', subTypeOptions ? subTypeOptions[0].value : undefined);
+    typeField.setValue(nextType);
+  };
+
+  const renderFormFields = (type: MainType) => {
+    const { subTypeOptions, subTypeLabel } = getSubTypeMeta(type);
 
     return (
       <EuiFlexGroup gutterSize="s">
@@ -109,36 +147,35 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
         {/* Field type */}
         <EuiFlexItem>
-          <UseField
-            path="type"
-            config={getFieldConfig('type')}
-            component={SelectField}
-            componentProps={{
-              euiFieldProps: {
-                options: isMultiField
-                  ? filterTypesForMultiField(FIELD_TYPES_OPTIONS)
-                  : FIELD_TYPES_OPTIONS,
-              },
-            }}
-          />
+          <UseField path="type" config={getFieldConfig('type')}>
+            {typeField => (
+              <SelectField
+                field={typeField}
+                euiFieldProps={{
+                  options: isMultiField
+                    ? filterTypesForMultiField(FIELD_TYPES_OPTIONS)
+                    : FIELD_TYPES_OPTIONS,
+                  onChange: onTypeChanged(typeField),
+                }}
+              />
+            )}
+          </UseField>
         </EuiFlexItem>
 
         {/* Field sub type (if any) */}
-        {hasSubType && (
+        {subTypeOptions !== undefined && (
           <EuiFlexItem grow={false}>
             <UseField
               path="subType"
-              defaultValue={typeDefinition.subTypes!.types[0]}
+              defaultValue={subTypeOptions[0].value}
               config={{
                 ...getFieldConfig('type'),
-                label: typeDefinition.subTypes!.label,
+                label: subTypeLabel,
               }}
               component={SelectField}
               componentProps={{
                 euiFieldProps: {
-                  options: isMultiField
-                    ? filterTypesForMultiField(subTypeOptions!)
-                    : subTypeOptions,
+                  options: subTypeOptions,
                   hasNoInitialSelection: false,
                 },
               }}
@@ -196,7 +233,6 @@ export const CreateField = React.memo(function CreateFieldComponent({
               )}
               <FormDataProvider pathsToWatch="type">
                 {({ type }) => {
-                  form.setFieldValue('subType', undefined);
                   return <EuiFlexItem grow={false}>{renderFormFields(type)}</EuiFlexItem>;
                 }}
               </FormDataProvider>

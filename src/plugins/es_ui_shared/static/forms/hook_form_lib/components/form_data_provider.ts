@@ -51,7 +51,7 @@ export const FormDataProvider = ({ children, pathsToWatch }: Props) => {
     });
 
     return subscription.unsubscribe;
-  }, [pathsToWatch]);
+  }, [form, pathsToWatch]);
 
   return children(formData);
 };
