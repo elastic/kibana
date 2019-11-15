@@ -51,7 +51,7 @@ export class Home extends Component {
       getServices().getInjected('disableWelcomeScreen') ||
       props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false'
     );
-    const showTelemetryDisclaimer = getServices().getInjected('allowChangingOptInStatus');
+    const showTelemetryDisclaimer = getServices().getInjected('telemetryNotifyUserAboutOptInDefault');
 
     this.state = {
       // If welcome is enabled, we wait for loading to complete

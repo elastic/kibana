@@ -17,18 +17,25 @@
  * under the License.
  */
 
+/* eslint @elastic/eui/href-or-on-click:0 */
+
 import * as React from 'react';
 import { EuiButton, EuiLink, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Props {
-  dismiss: () => Promise<any[]>;
+  onSeenBanner: () => any;
 }
 
 /**
  * React component for displaying the Telemetry opt-in banner.
  */
 export class OptedInBanner extends React.PureComponent<Props> {
+  onLinkClick = () => {
+    this.props.onSeenBanner();
+    return;
+  };
+
   render() {
     return (
       <EuiCallOut title="Help us improve the Elastic Stack">
@@ -37,7 +44,12 @@ export class OptedInBanner extends React.PureComponent<Props> {
           defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our {privacyStatementLink}. To stop collection, {disableLink}."
           values={{
             privacyStatementLink: (
-              <EuiLink href="#" target="_blank">
+              <EuiLink
+                onClick={this.onLinkClick}
+                href="https://www.elastic.co/legal/privacy-statement"
+                target="_blank"
+                rel="noopener"
+              >
                 <FormattedMessage
                   id="telemetry.telemetryOptedInPrivacyStatement"
                   defaultMessage="Privacy Statement"
@@ -45,7 +57,7 @@ export class OptedInBanner extends React.PureComponent<Props> {
               </EuiLink>
             ),
             disableLink: (
-              <EuiLink href="#" target="_blank">
+              <EuiLink href="#/management/kibana/settings" onClick={this.onLinkClick}>
                 <FormattedMessage
                   id="telemetry.telemetryOptedInDisableUsage"
                   defaultMessage="disable usage data here"
@@ -55,7 +67,7 @@ export class OptedInBanner extends React.PureComponent<Props> {
           }}
         />
         <EuiSpacer size="s" />
-        <EuiButton size="s" onClick={this.props.dismiss}>
+        <EuiButton size="s" onClick={this.props.onSeenBanner}>
           <FormattedMessage
             id="telemetry.welcomeBanner.enableButtonLabel"
             defaultMessage="Dismiss"
