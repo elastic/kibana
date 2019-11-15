@@ -126,7 +126,7 @@ export class ExpressionsPublicPlugin
         const interpret = interpreterProvider({
           types: types.toJS(),
           handlers: { ...handlers, ...createHandlers() },
-          functions: functions.toJS(),
+          functions,
         });
         return interpret(ast, context);
       };
