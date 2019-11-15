@@ -72,7 +72,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
           <h2
             className="euiTitle euiTitle--small"
           >
-            Keyboard Shortcuts
+            Keyboard shortcuts
           </h2>
         </div>
         <div
