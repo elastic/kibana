@@ -5,7 +5,7 @@
  */
 
 import { npSetup } from 'ui/new_platform';
-import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import { FeatureCatalogueCategory } from '../../../../../src/plugins/feature_catalogue/public';
 import { PLUGIN } from '../common/constants';
 import { patterns } from './routes';
 
