@@ -134,7 +134,7 @@ export const siem = (kibana: any) => {
         savedObjects,
       } = server;
 
-      const { logger } = newPlatform.coreContext;
+      const { coreContext, setup } = newPlatform;
 
       const serverFacade = {
         config,
@@ -142,7 +142,7 @@ export const siem = (kibana: any) => {
         indexPatternsServiceFactory,
         injectUiAppVars,
         newPlatform: {
-          coreContext: { logger },
+          coreContext: { logger: coreContext.logger },
           env: newPlatform.env,
         },
         plugins: { alerting: plugins.alerting, xpack_main: plugins.xpack_main },
@@ -150,7 +150,11 @@ export const siem = (kibana: any) => {
         savedObjects,
       };
 
-      plugin({ logger } as PluginInitializerContext).setup({ __legacy: serverFacade }, {});
+      plugin(coreContext as PluginInitializerContext).setup(
+        setup.core,
+        setup.plugins,
+        serverFacade
+      );
     },
   });
 };

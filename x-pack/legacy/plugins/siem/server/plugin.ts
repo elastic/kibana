@@ -8,10 +8,6 @@ import { CoreSetup, PluginInitializerContext, Logger } from 'src/core/server';
 import { ServerFacade } from './types';
 import { initServerWithKibana } from './kibana.index';
 
-export interface SiemCoreSetup extends Partial<CoreSetup> {
-  __legacy: ServerFacade;
-}
-
 export class Plugin {
   name = 'siem';
   private logger: Logger;
@@ -22,7 +18,7 @@ export class Plugin {
     this.logger.info('NP plugin initialized');
   }
 
-  public setup({ __legacy }: SiemCoreSetup, dependencies: {}) {
+  public setup(core: CoreSetup, dependencies: {}, __legacy: ServerFacade) {
     this.logger.info('NP plugin setup');
 
     initServerWithKibana(__legacy);
