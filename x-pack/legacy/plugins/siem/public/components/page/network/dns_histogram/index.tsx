@@ -8,11 +8,8 @@ import React from 'react';
 
 import { ScaleType } from '@elastic/charts';
 import * as i18n from './translation';
-import {
-  MatrixHistogram,
-  MatrixHistogramBasicProps,
-  bytesFormatter,
-} from '../../../matrix_histogram';
+import { MatrixHistogram, MatrixHistogramBasicProps } from '../../../matrix_histogram';
+import { bytesFormatter } from '../../../matrix_histogram/utils';
 import { MatrixOverOrdinalHistogramData } from '../../../../graphql/types';
 
 export const NetworkDnsHistogram = (
