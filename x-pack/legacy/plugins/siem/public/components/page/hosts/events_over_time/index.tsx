@@ -7,7 +7,8 @@
 import React from 'react';
 
 import * as i18n from './translation';
-import { MatrixHistogram, MatrixHistogramBasicProps } from '../../../matrix_histogram';
+import { MatrixHistogram } from '../../../matrix_histogram';
+import { MatrixHistogramBasicProps } from '../../../matrix_histogram/types';
 import { MatrixOverTimeHistogramData } from '../../../../graphql/types';
 
 export const EventsOverTimeHistogram = (

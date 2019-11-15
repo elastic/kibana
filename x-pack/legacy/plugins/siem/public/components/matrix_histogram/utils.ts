@@ -7,9 +7,8 @@
 import { ScaleType, niceTimeFormatter, Position } from '@elastic/charts';
 import { get, groupBy, map, toPairs } from 'lodash/fp';
 import numeral from '@elastic/numeral';
-import { AuthMatrixDataFields } from '../page/hosts/authentications_over_time/utils';
-import { MatrixOverTimeHistogramData, MatrixOverOrdinalHistogramData } from '../../graphql/types';
 import { UpdateDateRange, ChartSeriesData } from '../charts/common';
+import { MatrixHistogramDataTypes, MatrixHistogramMappingTypes } from './types';
 
 export const getBarchartConfigs = ({
   from,
@@ -86,9 +85,6 @@ export const getCustomChartData = (
     }, formattedChartData);
   else return formattedChartData;
 };
-
-export type MatrixHistogramDataTypes = MatrixOverTimeHistogramData | MatrixOverOrdinalHistogramData;
-export type MatrixHistogramMappingTypes = AuthMatrixDataFields;
 
 export const bytesFormatter = (value: number) => {
   return numeral(value).format('0,0.[0]b');

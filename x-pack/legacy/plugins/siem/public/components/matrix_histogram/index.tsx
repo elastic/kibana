@@ -12,36 +12,13 @@ import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiLoadingContent } from '@elastic/eui';
 import { BarChart } from '../charts/barchart';
 import { HeaderPanel } from '../header_panel';
-import { ChartSeriesData, UpdateDateRange } from '../charts/common';
+import { ChartSeriesData } from '../charts/common';
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
 import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { Loader } from '../loader';
 import { Panel } from '../panel';
-import {
-  getBarchartConfigs,
-  getCustomChartData,
-  MatrixHistogramDataTypes,
-  MatrixHistogramMappingTypes,
-} from './utils';
-
-export interface MatrixHistogramBasicProps<T> {
-  data: T[];
-  endDate: number;
-  id: string;
-  loading: boolean;
-  mapping?: MatrixHistogramMappingTypes;
-  startDate: number;
-  totalCount: number;
-  updateDateRange: UpdateDateRange;
-}
-
-export interface MatrixHistogramProps<T> extends MatrixHistogramBasicProps<T> {
-  dataKey?: string;
-  scaleType?: ScaleType;
-  subtitle?: string;
-  title?: string;
-  yTickFormatter?: (value: number) => string;
-}
+import { getBarchartConfigs, getCustomChartData } from './utils';
+import { MatrixHistogramProps, MatrixHistogramDataTypes } from './types';
 
 export const MatrixHistogram = ({
   data,
