@@ -42,3 +42,9 @@ export const assertUnreachable = (
 ): never => {
   throw new Error(`${message}: ${x}`);
 };
+
+/**
+ * Global variables
+ */
+
+export const gutterTimeline = '70px'; // Michael: Temporary until timeline is moved.

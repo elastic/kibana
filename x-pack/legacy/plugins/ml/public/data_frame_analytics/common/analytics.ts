@@ -11,7 +11,6 @@ import { Subscription } from 'rxjs';
 import { idx } from '@kbn/elastic-idx';
 import { ml } from '../../services/ml_api_service';
 import { getErrorMessage } from '../pages/analytics_management/hooks/use_create_analytics_form';
-import { RegressionEvaluateResponse } from '../common';
 
 export type IndexName = string;
 export type IndexPattern = string;
