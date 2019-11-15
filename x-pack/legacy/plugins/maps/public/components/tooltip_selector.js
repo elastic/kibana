@@ -95,7 +95,6 @@ export class TooltipSelector extends Component {
   async _loadFieldProps() {
 
     if (!this.props.fields || this.props.fields === this.state.previousFields) {
-      console.log('skip!', this.props.fields, this.state.previousFields);
       return;
     }
 
