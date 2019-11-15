@@ -28,6 +28,8 @@ export function EventInput({ value, onChange }) {
       <EuiPanel paddingSize="s">
         <EuiCodeEditor
           width="100%"
+          theme="textmate"
+          mode="text"
           value={value}
           onChange={onChange}
           setOptions={{
