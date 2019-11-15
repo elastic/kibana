@@ -57,7 +57,7 @@ configService.atPath.mockReturnValue(
     ssl: {
       verificationMode: 'none',
     },
-    compression: {},
+    compression: { enabled: true },
   } as any)
 );
 
