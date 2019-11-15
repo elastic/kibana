@@ -6,7 +6,7 @@
 
 import React, { FC, Fragment, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiStat, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { ErrorCallout } from './error_callout';
 import {
   getValuesFromResponse,
@@ -18,24 +18,13 @@ import {
 } from '../../../../common';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
+import { EvaluateStat } from './evaluate_stat';
 
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus: DATA_FRAME_TASK_STATE;
 }
 
-const meanSquaredErrorText = i18n.translate(
-  'xpack.ml.dataframe.analytics.regressionExploration.meanSquaredErrorText',
-  {
-    defaultMessage: 'Mean squared error',
-  }
-);
-const rSquaredText = i18n.translate(
-  'xpack.ml.dataframe.analytics.regressionExploration.rSquaredText',
-  {
-    defaultMessage: 'R squared',
-  }
-);
 const defaultEval: Eval = { meanSquaredError: '', rSquared: '', error: null };
 
 export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus }) => {
@@ -129,7 +118,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus }) => {
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
-          <EuiTitle size="s">
+          <EuiTitle size="xxs">
             <span>
               {i18n.translate(
                 'xpack.ml.dataframe.analytics.regressionExploration.generalizationErrorTitle',
@@ -145,21 +134,17 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus }) => {
             {generalizationEval.error === null && (
               <Fragment>
                 <EuiFlexItem>
-                  <EuiStat
-                    reverse
+                  <EvaluateStat
                     isLoading={isLoadingGeneralization}
                     title={generalizationEval.meanSquaredError}
-                    description={meanSquaredErrorText}
-                    titleSize="m"
+                    isMSE
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiStat
-                    reverse
+                  <EvaluateStat
                     isLoading={isLoadingGeneralization}
                     title={generalizationEval.rSquared}
-                    description={rSquaredText}
-                    titleSize="m"
+                    isMSE={false}
                   />
                 </EuiFlexItem>
               </Fragment>
@@ -167,7 +152,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus }) => {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiTitle size="s">
+          <EuiTitle size="xxs">
             <span>
               {i18n.translate(
                 'xpack.ml.dataframe.analytics.regressionExploration.trainingErrorTitle',
@@ -183,21 +168,17 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus }) => {
             {trainingEval.error === null && (
               <Fragment>
                 <EuiFlexItem>
-                  <EuiStat
-                    reverse
+                  <EvaluateStat
                     isLoading={isLoadingTraining}
                     title={trainingEval.meanSquaredError}
-                    description={meanSquaredErrorText}
-                    titleSize="m"
+                    isMSE
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiStat
-                    reverse
+                  <EvaluateStat
                     isLoading={isLoadingTraining}
                     title={trainingEval.rSquared}
-                    description={rSquaredText}
-                    titleSize="m"
+                    isMSE={false}
                   />
                 </EuiFlexItem>
               </Fragment>
