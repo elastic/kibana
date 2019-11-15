@@ -39,10 +39,12 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private $injector: IInjector | null;
   private getInjector: () => Promise<IInjector> | null;
+  public isEditable: () => boolean;
 
   constructor(
     private readonly executeTriggerActions: TExecuteTriggerActions,
-    getInjector: () => Promise<IInjector>
+    getInjector: () => Promise<IInjector>,
+    isEditable: () => boolean
   ) {
     super({
       savedObjectMetaData: {
@@ -55,10 +57,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
     });
     this.$injector = null;
     this.getInjector = getInjector;
-  }
-
-  public isEditable() {
-    return getServices().capabilities.discover.save as boolean;
+    this.isEditable = isEditable;
   }
 
   public canCreateNew() {

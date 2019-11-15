@@ -122,10 +122,12 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
       const mountpoint = document.createElement('div');
       return angular.bootstrap(mountpoint, [embeddableAngularName]);
     };
+    const isEditable = () => core.application.capabilities.discover.save as boolean;
 
     const factory = new SearchEmbeddableFactory(
       plugins.uiActions.executeTriggerActions,
-      getInjector
+      getInjector,
+      isEditable
     );
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
