@@ -17,4 +17,3 @@
  * under the License.
  */
 
-export { getFilterGenerator } from './filter_generator';

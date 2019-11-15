@@ -103,12 +103,14 @@ export function KueryBar() {
 
     const boolFilter = getBoolFilter(urlParams);
     try {
-      const suggestions = (await getSuggestions(
-        inputValue,
-        selectionStart,
-        indexPattern,
-        boolFilter
-      ))
+      const suggestions = (
+        await getSuggestions(
+          inputValue,
+          selectionStart,
+          indexPattern,
+          boolFilter
+        )
+      )
         .filter(suggestion => !startsWith(suggestion.text, 'span.'))
         .slice(0, 15);
 
