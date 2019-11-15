@@ -20,17 +20,7 @@ export const search = {
   box: {
     incremental: true,
     placeholder: i18n.PLACEHOLDER,
-    schema: {
-      fieldId: {
-        type: 'string',
-      },
-      valuesFlattened: {
-        type: 'string',
-      },
-      description: {
-        type: 'string',
-      },
-    },
+    schema: true,
   },
 };
 

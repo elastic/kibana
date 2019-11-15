@@ -26,7 +26,7 @@ const sorting = {
     field: 'anomaly.severity',
     direction: 'desc',
   },
-};
+} as const;
 
 export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
   ({ startDate, endDate, narrowDateRange, skip, ip, type, flowTarget }): JSX.Element | null => {
@@ -69,8 +69,10 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
           />
 
           <BasicTable
+            // @ts-ignore the Columns<T, U> type is not as specific as EUI's...
             columns={columns}
             compressed
+            // @ts-ignore ...which leads to `networks` not "matching" the columns
             items={networks}
             pagination={pagination}
             sorting={sorting}

@@ -170,13 +170,13 @@ export const getFieldColumns = () => [
     field: 'field',
     name: i18n.FIELD,
     sortable: true,
-    render: (field: React.ReactNode) => <>{field}</>,
+    render: (field: React.ReactNode, _: FieldItem) => <>{field}</>,
     width: '250px',
   },
   {
     field: 'description',
     name: i18n.DESCRIPTION,
-    render: (description: string) => (
+    render: (description: string, _: FieldItem) => (
       <TruncatableText>
         <EuiToolTip position="top" content={description}>
           <>{description}</>

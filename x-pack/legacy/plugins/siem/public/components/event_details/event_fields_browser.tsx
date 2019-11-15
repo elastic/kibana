@@ -33,6 +33,7 @@ export const EventFieldsBrowser = React.memo<Props>(
     return (
       <div className="euiTable--compressed">
         <EuiInMemoryTable
+          // @ts-ignore items going in match Partial<BrowserField>, column `render` callbacks expect complete BrowserField
           items={sortBy(data, ['field']).map(item => {
             return {
               ...item,

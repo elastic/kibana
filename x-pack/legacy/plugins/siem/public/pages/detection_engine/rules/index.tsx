@@ -7,7 +7,7 @@
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import {
   EuiBadge,
-  EuiBasicTable,
+  EuiBasicTable as _EuiBasicTable,
   EuiButton,
   EuiFieldSearch,
   EuiFlexGroup,
@@ -23,6 +23,9 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 import React, { useState } from 'react';
+
+// there are a number of type mismatches across this file
+const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 import { getEmptyTagValue } from '../../../components/empty_value';
 import { HeaderPage } from '../../../components/header_page';
