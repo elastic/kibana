@@ -1,6 +1,6 @@
 [role="xpack"]
 [[graph-troubleshooting]]
-== Graph Troubleshooting
+== Graph troubleshooting
 ++++
 <titleabbrev>Troubleshooting</titleabbrev>
 ++++

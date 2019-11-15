@@ -19,7 +19,7 @@
 
 import { TELEMETRY_STATS_TYPE } from '../../../common/constants';
 import { getTelemetrySavedObject, TelemetrySavedObject } from '../../telemetry_repository';
-import { getTelemetryOptIn, getTelemetryUsageFetcher } from '../../telemetry_config';
+import { getTelemetryOptIn, getTelemetrySendUsageFrom } from '../../telemetry_config';
 export interface TelemetryUsageStats {
   opt_in_status?: boolean | null;
   usage_fetcher?: 'browser' | 'server';
@@ -53,7 +53,7 @@ export function createCollectorFetch(server: any) {
         configTelemetryOptIn,
       }),
       last_reported: telemetrySavedObject ? telemetrySavedObject.lastReported : undefined,
-      usage_fetcher: getTelemetryUsageFetcher({
+      usage_fetcher: getTelemetrySendUsageFrom({
         telemetrySavedObject,
         configTelemetrySendUsageFrom,
       }),
