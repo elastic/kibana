@@ -232,7 +232,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
           savedQuery: undefined,
         });
       }
-    }, [id, end, fromStr, start, toStr]);
+    }, [id, end, fromStr, start, toStr, savedQuery]);
 
     useEffect(() => {
       let isSubscribed = true;
@@ -256,13 +256,13 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
         subscriptions.unsubscribe();
       };
     }, []);
-    const IndexPatterns = useMemo(() => [indexPattern as IndexPattern], [indexPattern]);
+    const indexPatterns = useMemo(() => [indexPattern as IndexPattern], [indexPattern]);
     return (
       <SearchBarContainer data-test-subj={`${id}DatePicker`}>
         <SearchBar
           appName="siem"
           isLoading={isLoading}
-          indexPatterns={IndexPatterns}
+          indexPatterns={indexPatterns}
           query={filterQuery}
           onClearSavedQuery={onClearSavedQuery}
           onQuerySubmit={onQuerySubmit}

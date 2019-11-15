@@ -2,7 +2,15 @@
 == Upgrading {kib}
 
 Depending on the {kib} version you're upgrading from, the upgrade process to 7.0
-varies.
+varies. 
+
+NOTE: {kib} upgrades automatically when starting a new version, as described in 
+<<upgrade-migrations, this document>>.
+Although you do not need to manually back up {kib} before upgrading, we recommend
+that you have a backup on hand. You can use  
+<<snapshot-repositories, Snapshot and Restore>> to back up {kib}
+data by targeting `.kibana*` indices. If you are using the Reporting plugin, 
+you can also target `.reporting*` indices.
 
 [float]
 [[upgrade-before-you-begin]]
@@ -12,7 +20,7 @@ Before you upgrade {kib}:
 
 * Consult the <<breaking-changes,breaking changes>>.
 * Before you upgrade production servers, test the upgrades in a dev environment.
-* Backup your data with {es} {ref}/modules-snapshots.html[snapshots].
+* Back up your data with {es} {ref}/modules-snapshots.html[snapshots].
   To roll back to an earlier version, you **must** have a backup of your data.
 * If you are using custom plugins, check that a compatible version is
   available. 

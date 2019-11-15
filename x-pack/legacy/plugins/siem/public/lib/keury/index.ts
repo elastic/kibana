@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery, JsonObject } from '@kbn/es-query';
 import { isEmpty, isString, flow } from 'lodash/fp';
 import {
   Query,
@@ -25,6 +25,19 @@ export const convertKueryToElasticSearchQuery = (
       : '';
   } catch (err) {
     return '';
+  }
+};
+
+export const convertKueryToDslFilter = (
+  kueryExpression: string,
+  indexPattern: IIndexPattern
+): JsonObject => {
+  try {
+    return kueryExpression
+      ? toElasticsearchQuery(fromKueryExpression(kueryExpression), indexPattern)
+      : {};
+  } catch (err) {
+    return {};
   }
 };
 
