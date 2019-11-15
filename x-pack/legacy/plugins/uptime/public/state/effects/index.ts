@@ -6,6 +6,7 @@
 
 import { fork } from 'redux-saga/effects';
 import { fetchMonitorDetailsEffect } from './monitor';
+import { fetchOverviewFiltersSaga } from './overview_filters';
 import { fetchSnapshotCountSaga } from './snapshot';
 
 export function* rootEffect() {

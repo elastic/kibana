@@ -135,13 +135,13 @@ export const OverviewPage = ({
           </EuiFlexItem>
           <EuiFlexItemStyled grow={true}>
             <FilterGroup
+              {...sharedProps}
               currentFilter={urlFilters}
               onFilterUpdate={(filtersKuery: string) => {
                 if (urlFilters !== filtersKuery) {
                   updateUrl({ filters: filtersKuery, pagination: '' });
                 }
               }}
-              variables={sharedProps}
             />
           </EuiFlexItemStyled>
           {error && <OverviewPageParsingErrorCallout error={error} />}

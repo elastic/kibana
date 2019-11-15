@@ -5,35 +5,46 @@
  */
 
 import { EuiFilterGroup } from '@elastic/eui';
-import React from 'react';
-import { get } from 'lodash';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FilterBar as FilterBarType } from '../../../../common/graphql/types';
-import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
-import { filterBarQuery } from '../../../queries';
+import { connect } from 'react-redux';
 import { FilterPopoverProps, FilterPopover } from './filter_popover';
 import { FilterStatusButton } from './filter_status_button';
+import { OverviewFilters } from '../../../../common/runtime_types';
+import { fetchOverviewFilters } from '../../../state/actions';
+import { AppState } from '../../../state';
 
-interface FilterBarQueryResult {
-  filters?: FilterBarType;
+interface OwnProps {
+  currentFilter: any;
+  onFilterUpdate: any;
+  dateRangeStart: string;
+  dateRangeEnd: string;
+  filters?: string;
+  statusFilter?: string;
 }
 
-interface FilterBarDropdownsProps {
-  currentFilter: string;
-  onFilterUpdate: (kuery: string) => void;
+interface StoreProps {
+  lastRefresh: number;
+  loading: boolean;
+  overviewFilters: OverviewFilters;
 }
 
-type Props = UptimeGraphQLQueryProps<FilterBarQueryResult> & FilterBarDropdownsProps;
+interface DispatchProps {
+  loadFilterGroup: typeof fetchOverviewFilters;
+}
 
-export const FilterGroupComponent = ({
-  loading: isLoading,
+type Props = OwnProps & StoreProps & DispatchProps;
+
+type PresentationalComponentProps = Pick<StoreProps, 'overviewFilters' | 'loading'> &
+  Pick<OwnProps, 'currentFilter' | 'onFilterUpdate'>;
+
+export const PresentationalComponent: React.FC<PresentationalComponentProps> = ({
   currentFilter,
-  data,
+  overviewFilters,
+  loading,
   onFilterUpdate,
-}: Props) => {
-  const locations = get<string[]>(data, 'filterBar.locations', []);
-  const ports = get<string[]>(data, 'filterBar.ports', []);
-  const schemes = get<string[]>(data, 'filterBar.schemes', []);
+}) => {
+  const { locations, ports, schemes, tags } = overviewFilters;
 
   let filterKueries: Map<string, string[]>;
   try {
@@ -69,7 +80,7 @@ export const FilterGroupComponent = ({
     {
       fieldName: 'observer.geo.name',
       id: 'location',
-      isLoading,
+      loading,
       items: locations,
       onFilterFieldChange,
       selectedItems: getSelectedItems('observer.geo.name'),
@@ -80,8 +91,8 @@ export const FilterGroupComponent = ({
     {
       fieldName: 'url.port',
       id: 'port',
-      isLoading,
-      items: ports,
+      loading,
+      items: ports.map((p: number) => p.toString()),
       onFilterFieldChange,
       selectedItems: getSelectedItems('url.port'),
       title: i18n.translate('xpack.uptime.filterBar.options.portLabel', { defaultMessage: 'Port' }),
@@ -89,12 +100,23 @@ export const FilterGroupComponent = ({
     {
       fieldName: 'monitor.type',
       id: 'scheme',
-      isLoading,
+      loading,
       items: schemes,
       onFilterFieldChange,
       selectedItems: getSelectedItems('monitor.type'),
       title: i18n.translate('xpack.uptime.filterBar.options.schemeLabel', {
         defaultMessage: 'Scheme',
+      }),
+    },
+    {
+      fieldName: 'tags',
+      id: 'tags',
+      loading,
+      items: tags,
+      onFilterFieldChange,
+      selectedItems: getSelectedItems('tags'),
+      title: i18n.translate('xpack.uptime.filterBar.options.tagsLabel', {
+        defaultMessage: 'Tags',
       }),
     },
   ];
@@ -124,7 +146,52 @@ export const FilterGroupComponent = ({
   );
 };
 
-export const FilterGroup = withUptimeGraphQL<FilterBarQueryResult, FilterBarDropdownsProps>(
-  FilterGroupComponent,
-  filterBarQuery
-);
+export const Container: React.FC<Props> = ({
+  currentFilter,
+  filters,
+  loading,
+  loadFilterGroup,
+  dateRangeStart,
+  dateRangeEnd,
+  overviewFilters,
+  statusFilter,
+  onFilterUpdate,
+}: Props) => {
+  useEffect(() => {
+    loadFilterGroup(dateRangeStart, dateRangeEnd, filters, statusFilter);
+  }, [dateRangeStart, dateRangeEnd, filters, statusFilter]);
+  return (
+    <PresentationalComponent
+      currentFilter={currentFilter}
+      overviewFilters={overviewFilters}
+      loading={loading}
+      onFilterUpdate={onFilterUpdate}
+    />
+  );
+};
+
+const mapStateToProps = ({
+  overviewFilters: { loading, filters },
+  ui: { lastRefresh },
+}: AppState): StoreProps => ({
+  overviewFilters: filters,
+  lastRefresh,
+  loading,
+});
+
+const mapDispatchToProps = (dispatch: any): DispatchProps => ({
+  loadFilterGroup: (
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string,
+    statusFilter?: string
+  ) => {
+    return dispatch(fetchOverviewFilters(dateRangeStart, dateRangeEnd, filters, statusFilter));
+  },
+});
+
+export const FilterGroup = connect<StoreProps, DispatchProps, OwnProps>(
+  // @ts-ignore connect is expecting null | undefined for some reason
+  mapStateToProps,
+  mapDispatchToProps
+)(Container);

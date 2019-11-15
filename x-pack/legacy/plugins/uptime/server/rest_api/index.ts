@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createGetOverviewFilters } from './overview_filters';
 import { createGetAllRoute } from './pings';
 import { createGetIndexPatternRoute } from './index_pattern';
 import { createLogMonitorPageRoute, createLogOverviewPageRoute } from './telemetry';
@@ -14,6 +15,7 @@ import { createGetMonitorDetailsRoute } from './monitors';
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';
 export const restApiRoutes: UMRestApiRouteCreator[] = [
+  createGetOverviewFilters,
   createGetAllRoute,
   createGetIndexPatternRoute,
   createGetMonitorDetailsRoute,

@@ -5,6 +5,7 @@
  */
 
 import { Snapshot } from '../../../common/runtime_types';
+
 export const FETCH_SNAPSHOT_COUNT = 'FETCH_SNAPSHOT_COUNT';
 export const FETCH_SNAPSHOT_COUNT_FAIL = 'FETCH_SNAPSHOT_COUNT_FAIL';
 export const FETCH_SNAPSHOT_COUNT_SUCCESS = 'FETCH_SNAPSHOT_COUNT_SUCCESS';

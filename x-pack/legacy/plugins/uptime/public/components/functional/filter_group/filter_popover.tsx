@@ -14,7 +14,7 @@ import { LocationLink } from '../monitor_list';
 export interface FilterPopoverProps {
   fieldName: string;
   id: string;
-  isLoading: boolean;
+  loading: boolean;
   items: string[];
   onFilterFieldChange: (fieldName: string, values: string[]) => void;
   selectedItems: string[];
@@ -27,7 +27,7 @@ const isItemSelected = (selectedItems: string[], item: string): 'on' | undefined
 export const FilterPopover = ({
   fieldName,
   id,
-  isLoading,
+  loading,
   items,
   onFilterFieldChange,
   selectedItems,
@@ -77,7 +77,7 @@ export const FilterPopover = ({
           disabled={items.length === 0}
           onSearch={query => setSearchQuery(query)}
           placeholder={
-            isLoading
+            loading
               ? i18n.translate('xpack.uptime.filterPopout.loadingMessage', {
                   defaultMessage: 'Loading...',
                 })
@@ -90,7 +90,7 @@ export const FilterPopover = ({
           }
         />
       </EuiPopoverTitle>
-      {!isLoading &&
+      {!loading &&
         itemsToDisplay.map(item => (
           <EuiFilterSelectItem
             checked={isItemSelected(tempSelectedItems, item)}

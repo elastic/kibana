@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './monitor/monitor_details';
-export * from './overview_filters';
-export * from './snapshot';
+export { OverviewFiltersType, OverviewFilters } from './overview_filters';

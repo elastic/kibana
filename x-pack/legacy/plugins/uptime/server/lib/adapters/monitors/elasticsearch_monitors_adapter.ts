@@ -7,7 +7,6 @@
 import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import {
-  FilterBar,
   MonitorChart,
   MonitorPageTitle,
   Ping,
@@ -16,7 +15,12 @@ import {
 import { getHistogramIntervalFormatted } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
-import { MonitorDetails, MonitorError } from '../../../../common/runtime_types';
+import {
+  Error,
+  MonitorDetails,
+  MonitorError,
+  OverviewFilters,
+} from '../../../../common/runtime_types';
 
 const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
   let up = null;
@@ -194,13 +198,14 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string
-  ): Promise<FilterBar> {
-    const fields: { [key: string]: string } = {
+  ): Promise<OverviewFilters> {
+    const fields = {
       ids: 'monitor.id',
       schemes: 'monitor.type',
       urls: 'url.full',
       ports: 'url.port',
       locations: 'observer.geo.name',
+      tags: 'tags',
     };
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
@@ -222,11 +227,26 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
     const { aggregations } = await this.database.search(request, params);
 
-    return Object.keys(fields).reduce((acc: { [key: string]: any[] }, field) => {
-      const bucketName = fields[field];
-      acc[field] = aggregations[bucketName].buckets.map((b: { key: string | number }) => b.key);
-      return acc;
-    }, {});
+    // @ts-ignore the current code does not jive with TS's type inference
+    const c = Object.keys(fields).reduce(
+      (
+        acc: { [key: string]: any[] },
+        field: 'ids' | 'schemes' | 'urls' | 'ports' | 'locations' | 'tags'
+      ) => {
+        const bucketName:
+          | 'monitor.id'
+          | 'monitor.type'
+          | 'url.full'
+          | 'url.port'
+          | 'observer.geo.name'
+          | 'tags' = fields[field];
+        acc[field] = aggregations[bucketName].buckets.map((b: { key: string | number }) => b.key);
+        return acc;
+      },
+      {}
+    );
+    console.log(JSON.stringify(c, null, 2));
+    return c;
   }
 
   /**
