@@ -227,11 +227,10 @@ export function useForm<T extends object = FormData>(
 
   const subscribe: FormHook<T>['subscribe'] = handler => {
     const format = () => serializer(getFormData() as T);
-    const validate = async () => await validateAllFields();
 
     const subscription = formData$.current.subscribe(raw => {
       if (!isUnmounted.current) {
-        handler({ isValid, data: { raw, format }, validate });
+        handler({ isValid, data: { raw, format }, validate: validateAllFields });
       }
     });
 

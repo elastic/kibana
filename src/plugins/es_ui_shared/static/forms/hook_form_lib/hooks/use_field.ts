@@ -49,6 +49,7 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
   const changeCounter = useRef(0);
   const inflightValidation = useRef<Promise<any> | null>(null);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  const isUnmounted = useRef<boolean>(false);
 
   // -- HELPERS
   // ----------------------------------
@@ -101,6 +102,10 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
 
     // Validate field(s) and set form.isValid flag
     await form.__validateFields(fieldsToValidateOnChange);
+
+    if (isUnmounted.current) {
+      return;
+    }
 
     /**
      * If we have set a delay to display the error message after the field value has changed,
@@ -397,6 +402,15 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
       }
     };
   }, [value]);
+
+  /**
+   * On unmount
+   */
+  useEffect(() => {
+    return () => {
+      isUnmounted.current = true;
+    };
+  }, []);
 
   const field: FieldHook = {
     path,
