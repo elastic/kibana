@@ -4,24 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter, KibanaResponseFactory } from 'kibana/server';
+import { IRouter } from 'kibana/server';
 
 export function addRoutes(router: IRouter) {
   router.get(
     {
-      path: '/endpoint/hello-world',
+      path: '/api/endpoint/hello-world',
       validate: false,
     },
-    greetingIndex
+    async function greetingIndex(...passedArgs) {
+      const [, , response] = passedArgs;
+      return response.ok({
+        body: { hello: 'world' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
   );
-}
-
-async function greetingIndex(...passedArgs: [unknown, unknown, KibanaResponseFactory]) {
-  const [, , response] = passedArgs;
-  return response.ok({
-    body: JSON.stringify({ hello: 'world' }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
 }
