@@ -80,20 +80,16 @@ export interface RegistryPackage {
 }
 
 // Managers public HTTP response types
-// from API_LIST_PATTERN
 export type PackageList = PackageListItem[];
 // add title here until it's a part of registry response
 export type PackageListItem = Installable<Required<RegistryListItem>>;
 export type PackagesGroupedByStatus = Record<InstallationStatus, PackageList>;
 
-// from API_INFO_PATTERN
 // add title here until it's a part of registry response
 export type PackageInfo = Installable<
   Required<RegistryPackage> & { assets: AssetsGroupedByServiceByType }
 >;
 
-// from API_INSTALL_PATTERN
-// returns Installation
 export type Installation = SavedObject<InstallationAttributes>;
 export interface InstallationAttributes extends SavedObjectAttributes {
   installed: AssetReference[];
@@ -110,6 +106,4 @@ export type NotInstalled<T = {}> = T & {
   status: 'not_installed';
 };
 
-// from API_DELETE_PATTERN
-// returns InstallationAttributes['installed']
 export type AssetReference = Pick<SavedObjectReference, 'id' | 'type'>;
