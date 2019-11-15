@@ -26,8 +26,6 @@ import { ServerFacade } from './types';
 
 const APP_ID = 'siem';
 
-export const amMocking = (): boolean => process.env.INGEST_MOCKS === 'true';
-
 export const initServerWithKibana = (
   kbnServer: ServerFacade,
   logger: Logger,
@@ -40,13 +38,6 @@ export const initServerWithKibana = (
     }
   }
   kbnServer.injectUiAppVars('siem', async () => kbnServer.getInjectedUiAppVars('kibana'));
-
-  const mocking = amMocking();
-  if (mocking) {
-    logger.info(
-      `Mocks for ${APP_ID} is activated. No real ${APP_ID} data will be used, only mocks will be used.`
-    );
-  }
 
   const libs = compose(kbnServer, mode);
   initServer(libs);
