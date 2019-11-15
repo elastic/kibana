@@ -29,7 +29,7 @@ import { tableVisResponseHandler } from './table_vis_request_handler';
 // @ts-ignore
 import tableVisTemplate from './table_vis.html';
 import { TableOptions } from './components/table_vis_options';
-import { TableVisController } from './vis_controller';
+import { TableVisualizationController } from './vis_controller';
 
 export const createTableVisTypeDefinition = () => {
   return visFactory.createBaseVisualization({
@@ -42,7 +42,7 @@ export const createTableVisTypeDefinition = () => {
     description: i18n.translate('visTypeTable.tableVisDescription', {
       defaultMessage: 'Display values in a table',
     }),
-    visualization: TableVisController,
+    visualization: TableVisualizationController,
     visConfig: {
       defaults: {
         perPage: 10,
