@@ -102,7 +102,7 @@ const operators = {
       />),
     fieldTypes: ['number', 'date', 'ip']
   },
-  ':*': {
+  ': *': {
     description: (
       <FormattedMessage
         id="xpack.kueryAutocomplete.existOperatorDescription"

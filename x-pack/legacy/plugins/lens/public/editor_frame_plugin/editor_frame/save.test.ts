@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { buildExistsFilter } from '@kbn/es-query';
 import { getSavedObjectFormat, Props } from './save';
 import { createMockDatasource, createMockVisualization } from '../mocks';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 describe('save editor frame state', () => {
   const mockVisualization = createMockVisualization();
@@ -37,7 +37,7 @@ describe('save editor frame state', () => {
       },
       query: { query: '', language: 'lucene' },
       dateRange: { fromDate: 'now-7d', toDate: 'now' },
-      filters: [buildExistsFilter({ name: '@timestamp' }, { id: 'indexpattern' })],
+      filters: [esFilters.buildExistsFilter({ name: '@timestamp' }, { id: 'indexpattern' })],
     },
   };
 

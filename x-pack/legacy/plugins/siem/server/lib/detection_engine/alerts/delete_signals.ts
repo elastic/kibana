@@ -26,7 +26,7 @@ export const deleteSignals = async ({ alertsClient, actionsClient, id }: DeleteS
 
   // TODO: Remove this as cast as soon as signal.actions TypeScript bug is fixed
   // where it is trying to return AlertAction[] or RawAlertAction[]
-  const actions = (signal.actions as (AlertAction[] | undefined)) || [];
+  const actions = (signal.actions as AlertAction[] | undefined) || [];
 
   const actionsErrors = await deleteAllSignalActions(actionsClient, actions);
   const deletedAlert = await alertsClient.delete({ id: signal.id });
