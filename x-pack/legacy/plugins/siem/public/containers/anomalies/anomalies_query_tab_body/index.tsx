@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { AnomaliesQueryTabBodyProps } from './types';
 import { manageQuery } from '../../../components/page/manage_query';
 import { AnomaliesOverTimeHistogram } from '../../../components/anomalies_over_time';
@@ -26,29 +26,22 @@ export const AnomaliesQueryTabBody = ({
   filterQuery,
   anomaliesFilterQuery,
   setQuery,
+  hideHistogramIfEmpty,
   updateDateRange = () => {},
   AnomaliesTableComponent,
+  flowTarget,
+  ip,
 }: AnomaliesQueryTabBodyProps) => {
   const [siemJobsLoading, siemJobs] = useSiemJobs(true);
   const [anomalyScore] = useKibanaUiSetting(DEFAULT_ANOMALY_SCORE);
-
-  if (siemJobsLoading) {
-    return (
-      <EuiFlexGroup justifyContent="center" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiSpacer size="xl" />
-          <EuiLoadingSpinner size="xl" />
-          <EuiSpacer size="xl" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
 
   const mergedFilterQuery = getAnomaliesFilterQuery(
     filterQuery,
     anomaliesFilterQuery,
     siemJobs,
-    anomalyScore
+    anomalyScore,
+    flowTarget,
+    ip
   );
 
   return (
@@ -60,28 +53,38 @@ export const AnomaliesQueryTabBody = ({
         startDate={startDate}
         type={type}
       >
-        {({ anomaliesOverTime, loading, id, inspect, refetch, totalCount }) => (
-          <AnomaliesOverTimeManage
-            data={anomaliesOverTime!}
-            endDate={endDate}
-            id={id}
-            inspect={inspect}
-            loading={loading}
-            refetch={refetch}
-            setQuery={setQuery}
-            startDate={startDate}
-            totalCount={totalCount}
-            updateDateRange={updateDateRange}
-          />
-        )}
+        {({ anomaliesOverTime, loading, id, inspect, refetch, totalCount }) => {
+          if (hideHistogramIfEmpty && !anomaliesOverTime.length) {
+            return <div />;
+          }
+
+          return (
+            <>
+              <AnomaliesOverTimeManage
+                data={anomaliesOverTime!}
+                endDate={endDate}
+                id={id}
+                inspect={inspect}
+                loading={siemJobsLoading || loading}
+                refetch={refetch}
+                setQuery={setQuery}
+                startDate={startDate}
+                totalCount={totalCount}
+                updateDateRange={updateDateRange}
+              />
+              <EuiSpacer />
+            </>
+          );
+        }}
       </AnomaliesOverTimeQuery>
-      <EuiSpacer size="l" />
       <AnomaliesTableComponent
         startDate={startDate}
         endDate={endDate}
         skip={skip}
-        type={type}
+        type={type as never}
         narrowDateRange={narrowDateRange}
+        flowTarget={flowTarget}
+        ip={ip}
       />
     </>
   );
