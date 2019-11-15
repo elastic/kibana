@@ -23,5 +23,5 @@ addError(error: Error, options: ErrorToastOptions): Toast;
 
 `Toast`
 
-a 
+a [Toast](./kibana-plugin-public.toast.md)
 
