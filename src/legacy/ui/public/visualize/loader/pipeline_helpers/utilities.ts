@@ -55,7 +55,7 @@ const getFieldFormat = (id?: FIELD_FORMAT_IDS | string, params: object = {}): Fi
   if (Format) {
     return new Format(params, getConfig);
   } else {
-    return new DefaultFieldFormat({}, getConfig);
+    return new DefaultFieldFormat();
   }
 };
 
@@ -95,10 +95,9 @@ export type FormatFactory = (mapping?: SerializedFieldFormat) => FieldFormat;
 
 export const getFormat: FormatFactory = mapping => {
   if (!mapping) {
-    return new DefaultFieldFormat({}, getConfig);
+    return new DefaultFieldFormat();
   }
   const { id } = mapping;
-  const getUISettings = npStart.core.uiSettings.get;
   if (id === 'range') {
     const RangeFormat = FieldFormat.from((range: any) => {
       const format = getFieldFormat(id, mapping.params);
@@ -114,21 +113,21 @@ export const getFormat: FormatFactory = mapping => {
         },
       });
     });
-    return new RangeFormat({}, getUISettings);
+    return new RangeFormat();
   } else if (id === 'date_range') {
     const nestedFormatter = mapping.params as SerializedFieldFormat;
     const DateRangeFormat = FieldFormat.from((range: DateRangeKey) => {
       const format = getFieldFormat(nestedFormatter.id, nestedFormatter.params);
       return dateRange.toString(range, format.convert.bind(format));
     });
-    return new DateRangeFormat({}, getUISettings);
+    return new DateRangeFormat();
   } else if (id === 'ip_range') {
     const nestedFormatter = mapping.params as SerializedFieldFormat;
     const IpRangeFormat = FieldFormat.from((range: IpRangeKey) => {
       const format = getFieldFormat(nestedFormatter.id, nestedFormatter.params);
       return ipRange.toString(range, format.convert.bind(format));
     });
-    return new IpRangeFormat({}, getUISettings);
+    return new IpRangeFormat();
   } else if (isTermsFieldFormat(mapping) && mapping.params) {
     const params = mapping.params;
     return {

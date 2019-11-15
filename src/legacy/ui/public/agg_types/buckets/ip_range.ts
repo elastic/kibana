@@ -61,7 +61,7 @@ export const ipRangeBucketAgg = new BucketAggType({
     const IpRangeFormat = FieldFormat.from(function(range: IpRangeKey) {
       return ipRange.toString(range, formatter);
     });
-    return new IpRangeFormat({}, npStart.core.uiSettings.get);
+    return new IpRangeFormat();
   },
   makeLabel(aggConfig) {
     return i18n.translate('common.ui.aggTypes.buckets.ipRangeLabel', {

@@ -18,7 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { npSetup } from 'ui/new_platform';
 import { IBucketAggConfig } from './_bucket_agg_type';
 import { BucketAggType } from './_bucket_agg_type';
 import { FieldFormat } from '../../../../../plugins/data/public';
@@ -86,7 +85,7 @@ export const rangeBucketAgg = new BucketAggType({
       });
     });
 
-    aggFormat = new RangeFormat({}, npSetup.core.uiSettings.get);
+    aggFormat = new RangeFormat();
 
     formats.set(agg, aggFormat);
     return aggFormat;

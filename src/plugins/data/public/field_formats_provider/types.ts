@@ -17,28 +17,10 @@
  * under the License.
  */
 
-import { NumeralFormat } from './numeral';
-import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import { FIELD_FORMAT_IDS } from '../../common';
 
-export class PercentFormat extends NumeralFormat {
-  static id = FIELD_FORMAT_IDS.PERCENT;
-  static title = 'Percentage';
-
-  id = PercentFormat.id;
-  title = PercentFormat.title;
-
-  getParamDefaults = () => ({
-    pattern: this.getConfig!('format:percent:defaultPattern'),
-    fractional: true,
-  });
-
-  textConvert: TextContextTypeConvert = val => {
-    const formatted = super.getConvertedValue(val);
-
-    if (this.param('fractional')) {
-      return formatted;
-    }
-
-    return String(Number(formatted) / 100);
-  };
+export interface FieldType {
+  id: FIELD_FORMAT_IDS;
+  params: Record<string, any>;
+  es?: boolean;
 }

@@ -26,12 +26,7 @@ import {
   IFieldFormatType,
   FieldFormat,
 } from '../../common';
-
-interface FieldType {
-  id: FIELD_FORMAT_IDS;
-  params: Record<string, any>;
-  es?: boolean;
-}
+import { FieldType } from './types';
 
 export class FieldFormatRegisty {
   private fieldFormats: Map<FIELD_FORMAT_IDS, IFieldFormatType>;

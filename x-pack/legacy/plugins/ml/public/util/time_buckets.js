@@ -13,6 +13,7 @@ import { npStart } from 'ui/new_platform';
 
 import { timeBucketsCalcAutoIntervalProvider } from './calc_auto_interval';
 import { parseInterval } from '../../common/util/parse_interval';
+import { FIELD_FORMAT_IDS } from '../../../../../../src/plugins/data/public';
 
 const unitsDesc = dateMath.unitsDesc;
 const largeMax = unitsDesc.indexOf('w');    // Multiple units of week or longer converted to days for ES intervals.
@@ -317,7 +318,7 @@ TimeBuckets.prototype.getScaledDateFormat = function () {
 
 TimeBuckets.prototype.getScaledDateFormatter = function () {
   const fieldFormats = npStart.plugins.data.fieldFormats;
-  const DateFieldFormat = fieldFormats.getType('date');
+  const DateFieldFormat = fieldFormats.getType(FIELD_FORMAT_IDS.DATE);
   return new DateFieldFormat({
     pattern: this.getScaledDateFormat()
   }, getConfig);

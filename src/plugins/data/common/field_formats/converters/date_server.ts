@@ -64,8 +64,8 @@ export class DateFormat extends FieldFormat {
 
   getParamDefaults() {
     return {
-      pattern: this.getConfig('dateFormat'),
-      timezone: this.getConfig('dateFormat:tz'),
+      pattern: this.getConfig!('dateFormat'),
+      timezone: this.getConfig!('dateFormat:tz'),
     };
   }
 

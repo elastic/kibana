@@ -79,9 +79,9 @@ export class DateNanosFormat extends FieldFormat {
 
   getParamDefaults() {
     return {
-      pattern: this.getConfig('dateNanosFormat'),
-      fallbackPattern: this.getConfig('dateFormat'),
-      timezone: this.getConfig('dateFormat:tz'),
+      pattern: this.getConfig!('dateNanosFormat'),
+      fallbackPattern: this.getConfig!('dateFormat'),
+      timezone: this.getConfig!('dateFormat:tz'),
     };
   }
 

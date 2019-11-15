@@ -26,14 +26,10 @@ import { calculateLabel } from '../../../../common/calculate_label';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
+import { FIELD_FORMAT_IDS } from '../../../../../../../plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { METRIC_TYPES } from '../../../../common/metric_types';
-
-const getDateFormatType = () => {
-  const fieldFormats = npStart.plugins.data.fieldFormats;
-  return fieldFormats.getType('date');
-};
 
 function getColor(rules, colorKey, value) {
   let color;
@@ -53,7 +49,8 @@ export class TableVis extends Component {
   constructor(props) {
     super(props);
 
-    const DateFormat = getDateFormatType();
+    const fieldFormats = npStart.plugins.data.fieldFormats;
+    const DateFormat = fieldFormats.getType(FIELD_FORMAT_IDS.DATE);
 
     this.dateFormatter = new DateFormat({}, this.props.getConfig);
   }

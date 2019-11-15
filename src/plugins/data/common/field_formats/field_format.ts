@@ -74,11 +74,14 @@ export abstract class FieldFormat {
   public type: any = this.constructor;
 
   public _params: any;
-  protected getConfig: Function;
+  protected getConfig: Function | undefined;
 
-  constructor(_params: any = {}, getConfig: Function) {
+  constructor(_params: any = {}, getConfig?: Function) {
     this._params = _params;
-    this.getConfig = getConfig;
+
+    if (getConfig) {
+      this.getConfig = getConfig;
+    }
   }
 
   /**
@@ -194,7 +197,7 @@ export abstract class FieldFormat {
 }
 
 export type IFieldFormat = PublicMethodsOf<FieldFormat>;
-export type IFieldFormatType = (new (params: any, getConfig: Function) => FieldFormat) & {
+export type IFieldFormatType = (new (params?: any, getConfig?: Function) => FieldFormat) & {
   id: FIELD_FORMAT_IDS;
   fieldType: string | string[];
 };

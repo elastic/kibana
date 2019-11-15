@@ -27,6 +27,7 @@ import {
   convertDurationToNormalizedEsInterval,
   convertIntervalToEsInterval,
 } from './calc_es_interval';
+import { FIELD_FORMAT_IDS } from '../../../../plugins/data/public';
 
 const config = chrome.getUiSettingsClient();
 
@@ -312,7 +313,7 @@ TimeBuckets.prototype.getScaledDateFormat = function () {
 
 TimeBuckets.prototype.getScaledDateFormatter = function () {
   const fieldFormats = npStart.plugins.data.fieldFormats;
-  const DateFieldFormat = fieldFormats.getType('date');
+  const DateFieldFormat = fieldFormats.getType(FIELD_FORMAT_IDS.DATE);
 
   return new DateFieldFormat({
     pattern: this.getScaledDateFormat()
