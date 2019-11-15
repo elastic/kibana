@@ -82,8 +82,11 @@ function QueryBarTopRowUI(props: Props) {
 
   const queryLanguage = props.query && props.query.language;
   const persistedLog: PersistedLog | undefined = React.useMemo(
-    () => (queryLanguage ? getQueryLog(uiSettings!, storage, appName, queryLanguage) : undefined),
-    [queryLanguage]
+    () =>
+      queryLanguage && uiSettings && storage && appName
+        ? getQueryLog(uiSettings!, storage, appName, queryLanguage)
+        : undefined,
+    [appName, queryLanguage, uiSettings, storage]
   );
 
   function onClickSubmitButton(event: React.MouseEvent<HTMLButtonElement>) {
