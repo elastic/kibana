@@ -29,9 +29,10 @@ export function callClient(
   { es, config, esShardTimeout }: FetchHandlers
 ) {
   // Correlate the options with the request that they're associated with
-  const requestOptionEntries: Array<[SearchRequest, FetchOptions]> = searchRequests.map(
-    (request, i) => [request, requestsOptions[i]]
-  );
+  const requestOptionEntries: Array<[
+    SearchRequest,
+    FetchOptions
+  ]> = searchRequests.map((request, i) => [request, requestsOptions[i]]);
   const requestOptionsMap = new Map<SearchRequest, FetchOptions>(requestOptionEntries);
 
   // Group the requests by the strategy used to search that specific request
