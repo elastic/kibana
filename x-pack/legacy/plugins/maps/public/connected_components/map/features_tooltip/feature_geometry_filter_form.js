@@ -11,11 +11,14 @@ import { i18n } from '@kbn/i18n';
 import { createSpatialFilterWithGeometry } from '../../../elasticsearch_geo_utils';
 import { GEO_JSON_TYPE } from '../../../../common/constants';
 import { GeometryFilterForm } from '../../../components/geometry_filter_form';
+import { UrlOverflowService } from 'ui/error_url_overflow';
+import rison from 'rison-node';
 
 export class FeatureGeometryFilterForm extends Component {
 
   state = {
     isLoading: false,
+    errorMsg: undefined,
   }
 
   componentDidMount() {
@@ -46,6 +49,7 @@ export class FeatureGeometryFilterForm extends Component {
   }
 
   _createFilter = async ({ geometryLabel, indexPatternId, geoFieldName, geoFieldType, relation }) => {
+    this.setState({ errorMsg: undefined });
     const preIndexedShape = await this._loadPreIndexedShape();
     if (!this._isMounted) {
       // do not create filter if component is unmounted
@@ -61,6 +65,20 @@ export class FeatureGeometryFilterForm extends Component {
       geoFieldType,
       relation,
     });
+
+    // When filter contains geometry, ensure filter will not overflow URL
+    if (!preIndexedShape) {
+      const urlOverflow = new UrlOverflowService();
+      if (window.location.href.length + rison.encode(filter).length > urlOverflow.failLength()) {
+        this.setState({
+          errorMsg: i18n.translate('xpack.maps.tooltip.geometryFilterForm.filterTooLargeMessage', {
+            defaultMessage: 'Unable to create filter, too many vertices in shape.'
+          })
+        });
+        return;
+      }
+    }
+
     this.props.addFilters([filter]);
     this.props.onClose();
   }
@@ -102,6 +120,7 @@ export class FeatureGeometryFilterForm extends Component {
         isFilterGeometryClosed={this.props.geometry.type !== GEO_JSON_TYPE.LINE_STRING
           && this.props.geometry.type !== GEO_JSON_TYPE.MULTI_LINE_STRING}
         isLoading={this.state.isLoading}
+        errorMsg={this.state.errorMsg}
       />
     );
   }
