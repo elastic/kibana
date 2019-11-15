@@ -12,6 +12,7 @@ import { toastNotifications } from 'ui/notify';
 
 import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 
+import { toMountPoint } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { isKibanaContextInitialized, KibanaContext } from '../../../../lib/kibana';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
@@ -91,7 +92,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
             title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
               defaultMessage: 'An error occurred getting the existing transform IDs:',
             }),
-            text: <ToastNotificationText text={e} />,
+            text: toMountPoint(<ToastNotificationText text={e} />),
           });
         }
 
@@ -102,7 +103,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
             title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {
               defaultMessage: 'An error occurred getting the existing index names:',
             }),
-            text: <ToastNotificationText text={e} />,
+            text: toMountPoint(<ToastNotificationText text={e} />),
           });
         }
 
@@ -116,11 +117,13 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
                 defaultMessage: 'An error occurred getting the existing index pattern titles:',
               }
             ),
-            text: <ToastNotificationText text={e} />,
+            text: toMountPoint(<ToastNotificationText text={e} />),
           });
         }
       }
     })();
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kibanaContext.initialized]);
 
   if (!isKibanaContextInitialized(kibanaContext)) {
@@ -169,6 +172,8 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
       touched: true,
       valid,
     });
+    // custom comparison
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, [
     continuousModeDateField,
     continuousModeDelay,
@@ -178,6 +183,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     transformDescription,
     destinationIndex,
     valid,
+    /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 
   return (

@@ -25,7 +25,7 @@ export const AnalyzeInMlButton: React.FunctionComponent<{
       defaultMessage="Analyze in ML"
     />
   );
-  return partition ? (
+  return typeof partition === 'string' ? (
     <EuiButton
       fill={false}
       size="s"
@@ -86,7 +86,7 @@ const getPartitionSpecificSingleMetricViewerLink = (
 
   const _a = encode({
     mlTimeSeriesExplorer: {
-      entities: { 'event.dataset': partition === 'unknown' ? '' : partition },
+      entities: { 'event.dataset': partition },
     },
   });
 

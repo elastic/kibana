@@ -101,7 +101,12 @@ test('handles dependencies of dependencies', async () => {
     'packages/baz'
   );
 
-  const projects = new Map([['kibana', kibana], ['foo', foo], ['bar', bar], ['baz', baz]]);
+  const projects = new Map([
+    ['kibana', kibana],
+    ['foo', foo],
+    ['bar', bar],
+    ['baz', baz],
+  ]);
   const projectGraph = buildProjectGraph(projects);
 
   const logMock = jest.spyOn(console, 'log').mockImplementation(noop);
@@ -133,7 +138,10 @@ test('does not run installer if no deps in package', async () => {
     'packages/bar'
   );
 
-  const projects = new Map([['kibana', kibana], ['bar', bar]]);
+  const projects = new Map([
+    ['kibana', kibana],
+    ['bar', bar],
+  ]);
   const projectGraph = buildProjectGraph(projects);
 
   const logMock = jest.spyOn(console, 'log').mockImplementation(noop);
@@ -193,7 +201,10 @@ test('calls "kbn:bootstrap" scripts and links executables after installing deps'
     'packages/bar'
   );
 
-  const projects = new Map([['kibana', kibana], ['bar', bar]]);
+  const projects = new Map([
+    ['kibana', kibana],
+    ['bar', bar],
+  ]);
   const projectGraph = buildProjectGraph(projects);
 
   jest.spyOn(console, 'log').mockImplementation(noop);

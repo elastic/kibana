@@ -22,16 +22,14 @@ import fixtures from 'fixtures/fake_hierarchical_data';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { tabifyAggResponse } from '../tabify';
-import { VisProvider } from '../../../vis';
+import { Vis } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('tabifyAggResponse Integration', function () {
-  let Vis;
   let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
