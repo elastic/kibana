@@ -6,7 +6,7 @@
 import { UIM_APP_NAME } from '../../../common/constants';
 import {
   createUiStatsReporter,
-  METRIC_TYPE,
+  UiStatsMetricType,
 } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
 
 class UiMetricService {
@@ -18,7 +18,7 @@ class UiMetricService {
 
   public trackMetric = (type: 'loaded' | 'click' | 'count', eventName: string): void => {
     if (!this.track) throw Error('UiMetricService not initialized.');
-    return this.track(type as METRIC_TYPE, eventName);
+    return this.track(type as UiStatsMetricType, eventName);
   };
 }
 
