@@ -34,7 +34,7 @@ describe('TelemetryOptInProvider', () => {
       addBasePath: (url) => url
     };
 
-    mockInjectedMetadata({ telemetryOptedIn: optedIn });
+    mockInjectedMetadata({ telemetryOptedIn: optedIn, allowChangingOptInStatus: true });
 
     const mockInjector = {
       get: (key) => {
@@ -48,7 +48,7 @@ describe('TelemetryOptInProvider', () => {
       }
     };
 
-    const provider = new TelemetryOptInProvider(mockInjector, mockChrome);
+    const provider = new TelemetryOptInProvider(mockInjector, mockChrome, false);
     return {
       provider,
       mockHttp,

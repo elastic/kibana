@@ -78,6 +78,10 @@ export class TelemetryForm extends Component {
       queryMatches,
     } = this.state;
 
+    if (!telemetryOptInProvider.canChangeOptInStatus()) {
+      return null;
+    }
+
     if (queryMatches !== null && !queryMatches) {
       return null;
     }
@@ -112,7 +116,7 @@ export class TelemetryForm extends Component {
                 type: 'boolean',
                 value: telemetryOptInProvider.getOptIn() || false,
                 description: this.renderDescription(),
-                defVal: false,
+                defVal: true,
               }}
               save={this.toggleOptIn}
               clear={this.toggleOptIn}
