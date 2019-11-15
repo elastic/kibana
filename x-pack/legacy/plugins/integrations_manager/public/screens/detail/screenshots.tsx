@@ -63,7 +63,7 @@ export function Screenshots(props: ScreenshotProps) {
             alt="screenshot image preview"
             size="l"
             allowFullScreen
-            style={{ width: '22.5rem' }}
+            style={{ width: '22.5rem', maxWidth: '100%' }}
           />
         </NestedEuiFlexItem>
       </ScreenshotsContainer>
