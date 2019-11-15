@@ -2,7 +2,9 @@
   "rule_id": "rule-1",
   "risk_score": 98,
   "description": "Changed Description of only detecting root user",
-  "index": ["auditbeat-*"],
+  "index": [
+    "auditbeat-*"
+  ],
   "interval": "50m",
   "name": "A different name",
   "severity": "high",
@@ -12,5 +14,8 @@
   "to": "now-5m",
   "query": "user.name: root",
   "language": "kuery",
-  "references": ["https://update1.example.com", "https://update2.example.com"]
+  "references": [
+    "https://update1.example.com",
+    "https://update2.example.com"
+  ]
 }

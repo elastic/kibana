@@ -6,14 +6,38 @@
 
 import chrome from 'ui/chrome';
 import {
+  AddRulesProps,
   DeleteRulesProps,
   DuplicateRulesProps,
   EnableRulesProps,
   FetchRulesProps,
   FetchRulesResponse,
+  NewRule,
   Rule,
 } from './types';
 import { throwIfNotOk } from '../../../hooks/api/api';
+
+/**
+ * Add provided Rule
+ *
+ * @param rule to add
+ * @param kbnVersion current Kibana Version to use for headers
+ */
+export const addRule = async ({ rule, kbnVersion }: AddRulesProps): Promise<NewRule> => {
+  const response = await fetch(`${chrome.getBasePath()}/api/detection_engine/rules`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: {
+      'content-type': 'application/json',
+      'kbn-version': kbnVersion,
+      'kbn-xsrf': kbnVersion,
+    },
+    body: JSON.stringify(rule),
+  });
+
+  await throwIfNotOk(response);
+  return response.json();
+};
 
 /**
  * Fetches all rules or single specified rule from the Detection Engine API
@@ -55,12 +79,6 @@ export const fetchRules = async ({
 
   const response = await fetch(endpoint, {
     method: 'GET',
-    credentials: 'same-origin',
-    headers: {
-      'content-type': 'application/json',
-      'kbn-version': kbnVersion,
-      'kbn-xsrf': kbnVersion,
-    },
     signal,
   });
   await throwIfNotOk(response);
