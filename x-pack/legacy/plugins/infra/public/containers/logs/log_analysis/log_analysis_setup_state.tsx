@@ -19,9 +19,8 @@ type SetupHandler = (
 
 export type ValidationIndicesUIError =
   | ValidationIndicesError
-  | {
-      error: 'TOO_FEW_SELECTED_INDICES';
-    };
+  | { error: 'NETWORK_ERROR' }
+  | { error: 'TOO_FEW_SELECTED_INDICES' };
 
 interface ValidatedIndex {
   index: string;
@@ -78,7 +77,10 @@ export const useAnalysisSetupState = ({
           )
         );
       },
-      onReject: () => {},
+      onReject: () => {
+        setValidatedIndices([]);
+        setSelectedIndices({});
+      },
     },
     [availableIndices, timestampField]
   );
@@ -115,6 +117,10 @@ export const useAnalysisSetupState = ({
       return [];
     }
 
+    if (validateIndicesRequest.state === 'rejected') {
+      return [{ error: 'NETWORK_ERROR' }];
+    }
+
     if (selectedIndexNames.length === 0) {
       return [{ error: 'TOO_FEW_SELECTED_INDICES' }];
     }
@@ -128,7 +134,7 @@ export const useAnalysisSetupState = ({
     }
 
     return [];
-  }, [selectedIndexNames, validatedIndices]);
+  }, [selectedIndexNames, validatedIndices, validateIndicesRequest.state]);
 
   return {
     cleanupAndSetup,

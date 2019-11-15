@@ -85,6 +85,13 @@ const ValidationErrors: React.FC<{ errors: ValidationIndicesUIError[] }> = ({ er
 
 function errorToI18n(error: ValidationIndicesUIError): React.ReactNode {
   switch (error.error) {
+    case 'NETWORK_ERROR':
+      return (
+        <FormattedMessage
+          id="xpack.infra.analysisSetup.indicesSelectionNetworkError"
+          defaultMessage="We couldn't load your index configuration"
+        />
+      );
     case 'TOO_FEW_SELECTED_INDICES':
       return (
         <FormattedMessage

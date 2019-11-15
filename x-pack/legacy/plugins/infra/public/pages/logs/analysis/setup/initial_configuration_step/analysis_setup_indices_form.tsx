@@ -61,19 +61,21 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
       {isValidating ? (
         <EuiLoadingSpinner size="m" />
       ) : (
-        <EuiFormRow
-          describedByIds={['indices']}
-          fullWidth
-          isInvalid={!valid}
-          label={indicesSelectionLabel}
-          labelType="legend"
-        >
-          <EuiCheckboxGroup
-            options={choices}
-            idToSelectedMap={indices}
-            onChange={handleCheckboxGroupChange}
-          />
-        </EuiFormRow>
+        choices.length > 0 && (
+          <EuiFormRow
+            describedByIds={['indices']}
+            fullWidth
+            isInvalid={!valid}
+            label={indicesSelectionLabel}
+            labelType="legend"
+          >
+            <EuiCheckboxGroup
+              options={choices}
+              idToSelectedMap={indices}
+              onChange={handleCheckboxGroupChange}
+            />
+          </EuiFormRow>
+        )
       )}
     </EuiDescribedFormGroup>
   );
