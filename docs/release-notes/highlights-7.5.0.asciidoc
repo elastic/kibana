@@ -8,8 +8,8 @@ coming[7.5.0]
 
 Each release of {kib} brings new features and product improvements. 
 Following are the most notable feature and user experience changes in 7.5.
-Play around with them locally or on the 
-https://www.elastic.co/products/elasticsearch/service[Elasticsearch Service] 
+Play around with them locally, or on the 
+https://www.elastic.co/products/elasticsearch/service[Elasticsearch Service],
 and reach out on the https://discuss.elastic.co/c/kibana[Kibana Discuss forum] 
 if you have any questions or feedback.
 
@@ -39,11 +39,11 @@ image::release-notes/images/7.5-lens.gif[Lens]
 [[smart-query-cancellation-7.5]]
 === Smart query cancellation
 
-Starting in version 7.5, if you navigate to a different page or 
+Starting in 7.5, if you navigate to a different page or 
 update a query before getting the results, {kib} applies a smart cancellation policy,
 canceling the 
 {es} query.  Canceling unnecessary queries improves cluster performance 
-by reducing noise caused by queries that are no longer needed.
+by reducing noise caused by queries that you no longer need.
 
 [float]
 [[canvas-shareables-7.5]]
@@ -73,15 +73,15 @@ image::release-notes/images/7.5-newsfeed.png[Newsfeed]
 === More Maps enhancements
 
 GeoJSON upload was released as Beta in 7.3, 
-and now it is production ready.   
-GeoJSON upload makes it easier to add custom vector shapes to your map
-and leverage them for analysis. Check out the {kibana-ref}/indexing-geojson-data-tutorial.html[Indexing GeoJSON data tutorial].
+and now it's production ready in 7.5.   
+GeoJSON upload makes it easier to add custom vector shapes to your map. 
+Check out the {kibana-ref}/indexing-geojson-data-tutorial.html[Indexing GeoJSON data tutorial].
 
-In this release, Maps also introduces these new features:
+In 7.5, Maps also introduces these new features:
 
-* Styling by date and time field, which is good for asset tracking or other time 
+* Styling by date and time field, which is good for tracking time 
 series data and for highlighting newer data over older records.
-* Document sorting to ensure your most important data is on top of the map.
+* Document sorting to ensure that your most important data is on top of the map.
 * A new tooltip design with support for drag-drop field sorting and image embeds. 
 
 [role="screenshot"]
