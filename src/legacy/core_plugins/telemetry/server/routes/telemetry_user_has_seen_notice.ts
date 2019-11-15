@@ -37,9 +37,9 @@ export function registerTelemetryUserHasSeenNotice(core: CoreSetup) {
   const { server } = core.http as any;
 
   server.route({
-    method: 'POST',
+    method: 'PUT',
     path: '/api/telemetry/v2/userHasSeenNotice',
-    handler: async (req: Request) => {
+    handler: async (req: Request): Promise<TelemetrySavedObjectAttributes> => {
       const internalRepository = getInternalRepository(server);
       const telemetrySavedObject: TelemetrySavedObject = await getTelemetrySavedObject(
         internalRepository
