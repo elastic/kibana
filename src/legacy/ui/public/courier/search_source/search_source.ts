@@ -70,14 +70,11 @@
  */
 
 import _ from 'lodash';
-import { getEsQueryConfig, buildEsQuery } from '@kbn/es-query';
-
 import { npSetup } from 'ui/new_platform';
 import { normalizeSortRequest } from './normalize_sort_request';
-
 import { fetchSoon } from '../fetch';
 import { fieldWildcardFilter } from '../../field_wildcard';
-import { getHighlightRequest, esFilters } from '../../../../../plugins/data/public';
+import { getHighlightRequest, esFilters, esQuery } from '../../../../../plugins/data/public';
 import chrome from '../../chrome';
 import { RequestFailure } from '../fetch/errors';
 import { filterDocvalueFields } from './filter_docvalue_fields';
@@ -380,8 +377,8 @@ export class SearchSource {
       _.set(body, '_source.includes', remainingFields);
     }
 
-    const esQueryConfigs = getEsQueryConfig(config);
-    body.query = buildEsQuery(index, query, filters, esQueryConfigs);
+    const esQueryConfigs = esQuery.getEsQueryConfig(config);
+    body.query = esQuery.buildEsQuery(index, query, filters, esQueryConfigs);
 
     if (highlightAll && body.query) {
       body.highlight = getHighlightRequest(body.query, config.get('doc_table:highlight'));

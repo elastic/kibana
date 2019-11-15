@@ -6,7 +6,7 @@
 
 import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
-import { EuiSpacer, EuiTabbedContent } from '@elastic/eui';
+import { EuiTabbedContent } from '@elastic/eui';
 // @ts-ignore unconverted component
 import { Datasource } from '../../datasource';
 // @ts-ignore unconverted component
@@ -30,7 +30,6 @@ export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
       name: strings.getDisplayTabLabel(),
       content: (
         <div className="canvasSidebar__pop">
-          <EuiSpacer size="s" />
           <div className="canvasSidebar--args">
             <FunctionFormList element={element} />
           </div>
@@ -42,7 +41,6 @@ export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
       name: strings.getDataTabLabel(),
       content: (
         <div className="canvasSidebar__pop">
-          <EuiSpacer size="s" />
           <Datasource />
         </div>
       ),

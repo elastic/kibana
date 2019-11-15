@@ -31,6 +31,7 @@ import {
   generateFilters,
   getTime,
   Query,
+  IFieldType,
 } from '../../../../../../plugins/data/public';
 import {
   APPLY_FILTER_TRIGGER,
@@ -66,7 +67,7 @@ interface SearchScope extends ng.IScope {
   removeColumn?: (column: string) => void;
   addColumn?: (column: string) => void;
   moveColumn?: (column: string, index: number) => void;
-  filter?: (field: { name: string; scripted: boolean }, value: string[], operator: string) => void;
+  filter?: (field: IFieldType, value: string[], operator: string) => void;
   hits?: any[];
   indexPattern?: IndexPattern;
   totalHitCount?: number;

@@ -32,5 +32,6 @@ export {
 } from './index_patterns';
 
 export * from './search';
+export * from '../common';
 
 export { IRequestTypesMap, IResponseTypesMap } from './search';
