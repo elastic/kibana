@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { ServiceListAPIResponse } from '../../../../../server/lib/services/get_services';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { fontSizes, truncate } from '../../../../style/variables';
-import { asDecimal, asMillis } from '../../../../utils/formatters';
+import { asDecimal, convertTo } from '../../../../utils/formatters';
 import { ManagedTable } from '../../../shared/ManagedTable';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
 import { TransactionOverviewLink } from '../../../shared/Links/apm/TransactionOverviewLink';
@@ -80,7 +80,11 @@ export const SERVICE_COLUMNS = [
     }),
     sortable: true,
     dataType: 'number',
-    render: (value: number) => asMillis(value)
+    render: (time: number) =>
+      convertTo({
+        unit: 'milliseconds',
+        microseconds: time
+      }).formatted
   },
   {
     field: 'transactionsPerMinute',
