@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer, EuiForm, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer, EuiForm, EuiCallOut, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import { ValidationIndicesError } from '../../../../../../common/http_api';
@@ -85,32 +86,47 @@ const ValidationErrors: React.FC<{ errors: ValidationIndicesUIError[] }> = ({ er
   );
 };
 
-function errorToI18n(error: ValidationIndicesUIError): string {
+function errorToI18n(error: ValidationIndicesUIError): React.ReactNode {
   switch (error.error) {
     case 'TOO_FEW_SELECTED_INDICES':
-      return i18n.translate(
-        'xpack.infra.analysisSetup.indicesSelectionTooFewSelectedIndicesDescription',
-        {
-          defaultMessage: 'Select at least one index name.',
-        }
+      return (
+        <FormattedMessage
+          id="xpack.infra.analysisSetup.indicesSelectionTooFewSelectedIndicesDescription"
+          defaultMessage="Select at least one index name."
+        />
       );
     case 'INDEX_NOT_FOUND':
-      return i18n.translate('xpack.infra.mlValidation.noIndexFound', {
-        defaultMessage: 'No indices match the pattern `{index}`',
-        values: { index: error.index },
-      });
+      return (
+        <FormattedMessage
+          id="xpack.infra.analysisSetup.indicesSelectionIndexNotFound"
+          defaultMessage="No indices match the pattern {index}"
+          values={{ index: <EuiCode>{error.index}</EuiCode> }}
+        />
+      );
     case 'TIMESTAMP_NOT_FOUND':
-      return i18n.translate('xpack.infra.mlValidation.noTimestampField', {
-        defaultMessage:
-          'Index `{index}` has no field `{timestamp}`. Ensure the "Timestamp" field in your settings exists in all indices.',
-        values: { index: error.index, timestamp: error.timestampField },
-      });
+      return (
+        <FormattedMessage
+          id="xpack.infra.analysisSetup.indicesSelectionNoTimestampField"
+          defaultMessage="At least one index matching {index} lacks a field called {timestamp}. Go to settings and ensure the Timestamp field value is correct."
+          values={{
+            index: <EuiCode>{error.index}</EuiCode>,
+            timestamp: <EuiCode>{error.timestampField}</EuiCode>,
+          }}
+        />
+      );
+
     case 'TIMESTAMP_NOT_VALID':
-      return i18n.translate('xpack.infra.mlValidation.invalidTimestampField', {
-        defaultMessage:
-          'Field `{timestamp}` in index `{index}` is not of type `date`. Ensure the "Timestamp" field in your settings has `date` type.',
-        values: { index: error.index, timestamp: error.timestampField },
-      });
+      return (
+        <FormattedMessage
+          id="xpack.infra.analysisSetup.indicesSelectionTimestampNotValid"
+          defaultMessage="At least one index matching {index} has a field called {timestamp} which is not a date field. Go to settings and ensure the Timestamp field value is correct."
+          values={{
+            index: <EuiCode>{error.index}</EuiCode>,
+            timestamp: <EuiCode>{error.timestampField}</EuiCode>,
+          }}
+        />
+      );
+
     default:
       return '';
   }
