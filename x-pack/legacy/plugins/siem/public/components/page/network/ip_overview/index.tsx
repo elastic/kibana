@@ -8,7 +8,6 @@ import { EuiFlexItem } from '@elastic/eui';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { useContext, useState } from 'react';
-import { pure } from 'recompose';
 
 import { DEFAULT_DARK_MODE } from '../../../../../common/constants';
 import { DescriptionList } from '../../../../../common/utility_types';
@@ -59,7 +58,7 @@ const getDescriptionList = (descriptionList: DescriptionList[], key: number) => 
   );
 };
 
-export const IpOverview = pure<IpOverviewProps>(
+export const IpOverview = React.memo<IpOverviewProps>(
   ({
     id,
     ip,

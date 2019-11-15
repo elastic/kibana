@@ -5,7 +5,6 @@
  */
 
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { DraggableBadge } from '../../../../draggables';
 import { TokensFlexItem } from '../helpers';
@@ -18,7 +17,7 @@ interface Props {
   packageVersion: string | null | undefined;
 }
 
-export const Package = pure<Props>(
+export const Package = React.memo<Props>(
   ({ contextId, eventId, packageName, packageSummary, packageVersion }) => {
     if (packageName != null || packageSummary != null || packageVersion != null) {
       return (

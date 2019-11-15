@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pure } from 'recompose';
-
+import React from 'react';
 import { PalettePicker as Component } from './palette_picker';
 
-export const PalettePicker = pure(Component);
+export const PalettePicker = React.memo(Component);

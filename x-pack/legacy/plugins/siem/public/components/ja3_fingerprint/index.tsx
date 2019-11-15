@@ -5,7 +5,6 @@
  */
 
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { DraggableBadge } from '../draggables';
@@ -22,17 +21,19 @@ const Ja3FingerprintLabel = styled.span`
 
 Ja3FingerprintLabel.displayName = 'Ja3FingerprintLabel';
 
+interface Props {
+  eventId: string;
+  contextId: string;
+  fieldName: string;
+  value?: string | null;
+}
+
 /**
  * Renders a ja3 fingerprint, which enables (some) clients and servers communicating
  * using TLS traffic to be identified, which is possible because SSL
  * negotiations happen in the clear
  */
-export const Ja3Fingerprint = pure<{
-  eventId: string;
-  contextId: string;
-  fieldName: string;
-  value?: string | null;
-}>(({ contextId, eventId, fieldName, value }) => (
+export const Ja3Fingerprint = React.memo<Props>(({ contextId, eventId, fieldName, value }) => (
   <DraggableBadge
     contextId={contextId}
     data-test-subj="ja3-hash"

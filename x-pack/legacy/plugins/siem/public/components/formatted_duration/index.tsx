@@ -5,23 +5,26 @@
  */
 
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { getFormattedDurationString } from './helpers';
 import { FormattedDurationTooltip } from './tooltip';
 
-export const FormattedDuration = pure<{
+interface FormattedDurationProps {
   maybeDurationNanoseconds: string | number | object | undefined | null;
   tooltipTitle?: string;
-}>(({ maybeDurationNanoseconds, tooltipTitle }) => (
-  <FormattedDurationTooltip
-    maybeDurationNanoseconds={maybeDurationNanoseconds}
-    tooltipTitle={tooltipTitle}
-  >
-    <div data-test-subj="formatted-duration">
-      {getFormattedDurationString(maybeDurationNanoseconds)}
-    </div>
-  </FormattedDurationTooltip>
-));
+}
+
+export const FormattedDuration = React.memo<FormattedDurationProps>(
+  ({ maybeDurationNanoseconds, tooltipTitle }) => (
+    <FormattedDurationTooltip
+      maybeDurationNanoseconds={maybeDurationNanoseconds}
+      tooltipTitle={tooltipTitle}
+    >
+      <div data-test-subj="formatted-duration">
+        {getFormattedDurationString(maybeDurationNanoseconds)}
+      </div>
+    </FormattedDurationTooltip>
+  )
+);
 
 FormattedDuration.displayName = 'FormattedDuration';

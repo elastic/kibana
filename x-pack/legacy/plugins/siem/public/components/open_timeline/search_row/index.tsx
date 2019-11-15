@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import * as i18n from '../translations';
@@ -43,7 +42,7 @@ type Props = Pick<
 /**
  * Renders the row containing the search input and Only Favorites filter
  */
-export const SearchRow = pure<Props>(
+export const SearchRow = React.memo<Props>(
   ({ onlyFavorites, onQueryChange, onToggleOnlyFavorites, query, totalSearchResultsCount }) => (
     <SearchRowContainer>
       <SearchRowFlexGroup gutterSize="s">

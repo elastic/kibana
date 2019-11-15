@@ -6,7 +6,6 @@
 
 import { isArray, isEmpty, isString, uniq } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
@@ -60,120 +59,132 @@ const getDataProvider = ({
   and: [],
 });
 
-const NonDecoratedIp = pure<{
+interface NonDecoratedIpProps {
   contextId: string;
   eventId: string;
   fieldName: string;
   truncate?: boolean;
   value: string | object | null | undefined;
-}>(({ contextId, eventId, fieldName, truncate, value }) => (
-  <DraggableWrapper
-    dataProvider={getDataProvider({ contextId, eventId, fieldName, address: value })}
-    key={`non-decorated-ip-draggable-wrapper-${getUniqueId({
-      contextId,
-      eventId,
-      fieldName,
-      address: value,
-    })}`}
-    render={(dataProvider, _, snapshot) =>
-      snapshot.isDragging ? (
-        <DragEffects>
-          <Provider dataProvider={dataProvider} />
-        </DragEffects>
-      ) : typeof value !== 'object' ? (
-        getOrEmptyTagFromValue(value)
-      ) : (
-        getOrEmptyTagFromValue(tryStringify(value))
-      )
-    }
-    truncate={truncate}
-  />
-));
+}
+
+const NonDecoratedIp = React.memo<NonDecoratedIpProps>(
+  ({ contextId, eventId, fieldName, truncate, value }) => (
+    <DraggableWrapper
+      dataProvider={getDataProvider({ contextId, eventId, fieldName, address: value })}
+      key={`non-decorated-ip-draggable-wrapper-${getUniqueId({
+        contextId,
+        eventId,
+        fieldName,
+        address: value,
+      })}`}
+      render={(dataProvider, _, snapshot) =>
+        snapshot.isDragging ? (
+          <DragEffects>
+            <Provider dataProvider={dataProvider} />
+          </DragEffects>
+        ) : typeof value !== 'object' ? (
+          getOrEmptyTagFromValue(value)
+        ) : (
+          getOrEmptyTagFromValue(tryStringify(value))
+        )
+      }
+      truncate={truncate}
+    />
+  )
+);
 
 NonDecoratedIp.displayName = 'NonDecoratedIp';
 
-const AddressLinks = pure<{
+interface AddressLinksProps {
   addresses: string[];
   contextId: string;
   eventId: string;
   fieldName: string;
   truncate?: boolean;
-}>(({ addresses, contextId, eventId, fieldName, truncate }) => (
-  <>
-    {uniq(addresses).map(address => (
-      <DraggableWrapper
-        dataProvider={getDataProvider({ contextId, eventId, fieldName, address })}
-        key={`address-links-draggable-wrapper-${getUniqueId({
-          contextId,
-          eventId,
-          fieldName,
-          address,
-        })}`}
-        render={(_, __, snapshot) =>
-          snapshot.isDragging ? (
-            <DragEffects>
-              <Provider
-                dataProvider={getDataProvider({ contextId, eventId, fieldName, address })}
-              />
-            </DragEffects>
-          ) : (
-            <IPDetailsLink data-test-sub="ip-details" ip={address} />
-          )
-        }
-        truncate={truncate}
-      />
-    ))}
-  </>
-));
+}
+
+const AddressLinks = React.memo<AddressLinksProps>(
+  ({ addresses, contextId, eventId, fieldName, truncate }) => (
+    <>
+      {uniq(addresses).map(address => (
+        <DraggableWrapper
+          dataProvider={getDataProvider({ contextId, eventId, fieldName, address })}
+          key={`address-links-draggable-wrapper-${getUniqueId({
+            contextId,
+            eventId,
+            fieldName,
+            address,
+          })}`}
+          render={(_, __, snapshot) =>
+            snapshot.isDragging ? (
+              <DragEffects>
+                <Provider
+                  dataProvider={getDataProvider({ contextId, eventId, fieldName, address })}
+                />
+              </DragEffects>
+            ) : (
+              <IPDetailsLink data-test-sub="ip-details" ip={address} />
+            )
+          }
+          truncate={truncate}
+        />
+      ))}
+    </>
+  )
+);
 
 AddressLinks.displayName = 'AddressLinks';
 
-export const FormattedIp = pure<{
+interface FormattedIpProps {
   contextId: string;
   eventId: string;
   fieldName: string;
   truncate?: boolean;
   value: string | object | null | undefined;
-}>(({ contextId, eventId, fieldName, truncate, value }) => {
-  if (isString(value) && !isEmpty(value)) {
-    try {
-      const addresses = JSON.parse(value);
-      if (isArray(addresses)) {
-        return (
-          <AddressLinks
-            addresses={addresses}
-            contextId={contextId}
-            eventId={eventId}
-            fieldName={fieldName}
-            truncate={truncate}
-          />
-        );
-      }
-    } catch (_) {
-      // fall back to formatting it as a single link
-    }
+}
 
-    // return a single draggable link
-    return (
-      <AddressLinks
-        addresses={[value]}
-        contextId={contextId}
-        eventId={eventId}
-        fieldName={fieldName}
-        truncate={truncate}
-      />
-    );
-  } else {
-    return (
-      <NonDecoratedIp
-        contextId={contextId}
-        eventId={eventId}
-        fieldName={fieldName}
-        truncate={truncate}
-        value={value}
-      />
-    );
+export const FormattedIp = React.memo<FormattedIpProps>(
+  ({ contextId, eventId, fieldName, truncate, value }) => {
+    if (isString(value) && !isEmpty(value)) {
+      try {
+        const addresses = JSON.parse(value);
+        if (isArray(addresses)) {
+          return (
+            <AddressLinks
+              addresses={addresses}
+              contextId={contextId}
+              eventId={eventId}
+              fieldName={fieldName}
+              truncate={truncate}
+            />
+          );
+        }
+      } catch (_) {
+        // fall back to formatting it as a single link
+      }
+
+      // return a single draggable link
+      return (
+        <AddressLinks
+          addresses={[value]}
+          contextId={contextId}
+          eventId={eventId}
+          fieldName={fieldName}
+          truncate={truncate}
+        />
+      );
+    } else {
+      return (
+        <NonDecoratedIp
+          contextId={contextId}
+          eventId={eventId}
+          fieldName={fieldName}
+          truncate={truncate}
+          value={value}
+        />
+      );
+    }
   }
-});
+);
 
 FormattedIp.displayName = 'FormattedIp';

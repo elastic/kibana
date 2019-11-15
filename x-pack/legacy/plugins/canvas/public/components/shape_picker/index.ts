@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pure } from 'recompose';
-
+import React from 'react';
 import { ShapePicker as Component } from './shape_picker';
 
-export const ShapePicker = pure(Component);
+export const ShapePicker = React.memo(Component);

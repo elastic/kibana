@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
-import { pure } from 'recompose';
 
 import { SiemPageName } from '../../pages/home/types';
 import { HostsTableType } from '../../store/hosts/model';
@@ -26,7 +25,7 @@ interface LinkToPageProps {
   match: RouteMatch<{}>;
 }
 
-export const LinkToPage = pure<LinkToPageProps>(({ match }) => (
+export const LinkToPage = React.memo<LinkToPageProps>(({ match }) => (
   <Switch>
     <Route
       component={RedirectToOverviewPage}

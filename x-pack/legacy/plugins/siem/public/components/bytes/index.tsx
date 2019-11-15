@@ -11,16 +11,18 @@ import { PreferenceFormattedBytes } from '../formatted_bytes';
 
 export const BYTES_FORMAT = 'bytes';
 
-/**
- * Renders draggable text containing the value of a field representing a
- * duration of time, (e.g. `event.duration`)
- */
-export const Bytes = React.memo<{
+interface BytesProps {
   contextId: string;
   eventId: string;
   fieldName: string;
   value?: string | null;
-}>(({ contextId, eventId, fieldName, value }) => (
+}
+
+/**
+ * Renders draggable text containing the value of a field representing a
+ * duration of time, (e.g. `event.duration`)
+ */
+export const Bytes = React.memo<BytesProps>(({ contextId, eventId, fieldName, value }) => (
   <DefaultDraggable
     id={`bytes-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
     name={name}

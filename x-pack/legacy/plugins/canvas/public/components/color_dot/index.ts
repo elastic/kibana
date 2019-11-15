@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pure } from 'recompose';
-
+import React from 'react';
 import { ColorDot as Component } from './color_dot';
 
 export { Props } from './color_dot';
-export const ColorDot = pure(Component);
+export const ColorDot = React.memo(Component);

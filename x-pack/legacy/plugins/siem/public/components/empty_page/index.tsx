@@ -6,7 +6,7 @@
 
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
 import React from 'react';
-import { pure } from 'recompose';
+
 import styled from 'styled-components';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
@@ -29,7 +29,7 @@ interface EmptyPageProps {
   title: string;
 }
 
-export const EmptyPage = pure<EmptyPageProps>(
+export const EmptyPage = React.memo<EmptyPageProps>(
   ({
     actionPrimaryIcon,
     actionPrimaryLabel,

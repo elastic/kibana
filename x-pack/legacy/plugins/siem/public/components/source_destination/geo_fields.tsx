@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { get, uniq } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { DefaultDraggable } from '../draggables';
@@ -69,38 +68,41 @@ const GeoFlexItem = styled(EuiFlexItem)`
 
 GeoFlexItem.displayName = 'GeoFlexItem';
 
-const GeoFieldValues = pure<{
+interface GeoFieldValuesProps {
   contextId: string;
   eventId: string;
   fieldName: string;
   values?: string[] | null;
-}>(({ contextId, eventId, fieldName, values }) =>
-  values != null ? (
-    <>
-      {uniq(values).map(value => (
-        <GeoFlexItem grow={false} key={`${contextId}-${eventId}-${fieldName}-${value}`}>
-          <EuiFlexGroup alignItems="center" gutterSize="none">
-            {fieldName === SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME ||
-            fieldName === DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME ? (
-              <EuiFlexItem grow={false}>
-                <CountryFlag countryCode={value} />
-              </EuiFlexItem>
-            ) : null}
+}
 
-            <EuiFlexItem grow={false}>
-              <DefaultDraggable
-                data-test-subj={fieldName}
-                field={fieldName}
-                id={`geo-field-values-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-                tooltipContent={fieldName}
-                value={value}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </GeoFlexItem>
-      ))}
-    </>
-  ) : null
+const GeoFieldValues = React.memo<GeoFieldValuesProps>(
+  ({ contextId, eventId, fieldName, values }) =>
+    values != null ? (
+      <>
+        {uniq(values).map(value => (
+          <GeoFlexItem grow={false} key={`${contextId}-${eventId}-${fieldName}-${value}`}>
+            <EuiFlexGroup alignItems="center" gutterSize="none">
+              {fieldName === SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME ||
+              fieldName === DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME ? (
+                <EuiFlexItem grow={false}>
+                  <CountryFlag countryCode={value} />
+                </EuiFlexItem>
+              ) : null}
+
+              <EuiFlexItem grow={false}>
+                <DefaultDraggable
+                  data-test-subj={fieldName}
+                  field={fieldName}
+                  id={`geo-field-values-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+                  tooltipContent={fieldName}
+                  value={value}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </GeoFlexItem>
+        ))}
+      </>
+    ) : null
 );
 
 GeoFieldValues.displayName = 'GeoFieldValues';
@@ -113,7 +115,7 @@ GeoFieldValues.displayName = 'GeoFieldValues';
  * - `source|destination.geo.region_iso_code`
  * - `source|destination.geo.city_name`
  */
-export const GeoFields = pure<GeoFieldsProps>(props => {
+export const GeoFields = React.memo<GeoFieldsProps>(props => {
   const { contextId, eventId, type } = props;
 
   const propNameToFieldName = getGeoFieldPropNameToFieldNameMap(type);

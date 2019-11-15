@@ -6,7 +6,6 @@
 
 import * as React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { AutoSizer } from '../../components/auto_sizer';
@@ -56,7 +55,7 @@ const calculateFlyoutHeight = ({
   windowHeight: number;
 }): number => Math.max(0, windowHeight - globalHeaderSize);
 
-export const HomePage = pure(() => (
+export const HomePage = React.memo(() => (
   <AutoSizer detectAnyWindowResize={true} content>
     {({ measureRef, windowMeasurement: { height: windowHeight = 0 } }) => (
       <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" innerRef={measureRef}>
@@ -142,4 +141,5 @@ export const HomePage = pure(() => (
     )}
   </AutoSizer>
 ));
+
 HomePage.displayName = 'HomePage';

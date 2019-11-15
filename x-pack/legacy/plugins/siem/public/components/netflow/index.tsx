@@ -6,7 +6,6 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { Fingerprints } from './fingerprints';
 import { NetflowColumns } from './netflow_columns';
@@ -21,7 +20,7 @@ import { NetflowProps } from './types';
  * - `event.category` is `network_traffic`
  * - rendering data from `Zeek` and `Suricata`
  */
-export const Netflow = pure<NetflowProps>(
+export const Netflow = React.memo<NetflowProps>(
   ({
     contextId,
     destinationBytes,

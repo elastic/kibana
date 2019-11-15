@@ -5,14 +5,11 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { pure } from 'recompose';
 import * as React from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
-
 import { getFieldBrowserCategoryTitleClassName, getFieldCount } from './helpers';
-
 import { CountBadge } from '../page';
 
 const CountBadgeContainer = styled.div`
@@ -35,26 +32,28 @@ interface Props {
   timelineId: string;
 }
 
-export const CategoryTitle = pure<Props>(({ filteredBrowserFields, categoryId, timelineId }) => (
-  <EuiFlexGroup alignItems="center" data-test-subj="category-title-container" gutterSize="none">
-    <EuiFlexItem grow={false}>
-      <EuiTitle
-        className={getFieldBrowserCategoryTitleClassName({ categoryId, timelineId })}
-        data-test-subj="selected-category-title"
-        size="xxs"
-      >
-        <h5>{categoryId}</h5>
-      </EuiTitle>
-    </EuiFlexItem>
+export const CategoryTitle = React.memo<Props>(
+  ({ filteredBrowserFields, categoryId, timelineId }) => (
+    <EuiFlexGroup alignItems="center" data-test-subj="category-title-container" gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <EuiTitle
+          className={getFieldBrowserCategoryTitleClassName({ categoryId, timelineId })}
+          data-test-subj="selected-category-title"
+          size="xxs"
+        >
+          <h5>{categoryId}</h5>
+        </EuiTitle>
+      </EuiFlexItem>
 
-    <EuiFlexItem grow={false}>
-      <CountBadgeContainer>
-        <CountBadge data-test-subj="selected-category-count-badge" color="hollow">
-          {getFieldCount(filteredBrowserFields[categoryId])}
-        </CountBadge>
-      </CountBadgeContainer>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-));
+      <EuiFlexItem grow={false}>
+        <CountBadgeContainer>
+          <CountBadge data-test-subj="selected-category-count-badge" color="hollow">
+            {getFieldCount(filteredBrowserFields[categoryId])}
+          </CountBadge>
+        </CountBadgeContainer>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  )
+);
 
 CategoryTitle.displayName = 'CategoryTitle';

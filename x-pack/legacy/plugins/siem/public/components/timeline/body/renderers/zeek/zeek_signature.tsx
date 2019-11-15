@@ -7,7 +7,7 @@
 import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
+
 import styled from 'styled-components';
 
 import { Ecs } from '../../../../../graphql/types';
@@ -64,81 +64,91 @@ export const md5StringRenderer: StringRenderer = (value: string) => `md5: ${valu
 export const sha1StringRenderer: StringRenderer = (value: string) =>
   `sha1: ${value.substr(0, 7)}...`;
 
-export const DraggableZeekElement = pure<{
+interface DraggableZeekElementProps {
   id: string;
   field: string;
   value: string | null | undefined;
   stringRenderer?: StringRenderer;
-}>(({ id, field, value, stringRenderer = defaultStringRenderer }) =>
-  value != null ? (
-    <TokensFlexItem grow={false}>
-      <DraggableWrapper
-        dataProvider={{
-          and: [],
-          enabled: true,
-          id: escapeDataProviderId(
-            `draggable-zeek-element-draggable-wrapper-${id}-${field}-${value}`
-          ),
-          name: value,
-          excluded: false,
-          kqlQuery: '',
-          queryMatch: {
-            field,
-            value,
-            operator: IS_OPERATOR,
-          },
-        }}
-        render={(dataProvider, _, snapshot) =>
-          snapshot.isDragging ? (
-            <DragEffects>
-              <Provider dataProvider={dataProvider} />
-            </DragEffects>
-          ) : (
-            <EuiToolTip data-test-subj="badge-tooltip" content={field}>
-              <Badge iconType="tag" color="hollow">
-                {stringRenderer(value)}
-              </Badge>
-            </EuiToolTip>
-          )
-        }
-      />
-    </TokensFlexItem>
-  ) : null
+}
+
+export const DraggableZeekElement = React.memo<DraggableZeekElementProps>(
+  ({ id, field, value, stringRenderer = defaultStringRenderer }) =>
+    value != null ? (
+      <TokensFlexItem grow={false}>
+        <DraggableWrapper
+          dataProvider={{
+            and: [],
+            enabled: true,
+            id: escapeDataProviderId(
+              `draggable-zeek-element-draggable-wrapper-${id}-${field}-${value}`
+            ),
+            name: value,
+            excluded: false,
+            kqlQuery: '',
+            queryMatch: {
+              field,
+              value,
+              operator: IS_OPERATOR,
+            },
+          }}
+          render={(dataProvider, _, snapshot) =>
+            snapshot.isDragging ? (
+              <DragEffects>
+                <Provider dataProvider={dataProvider} />
+              </DragEffects>
+            ) : (
+              <EuiToolTip data-test-subj="badge-tooltip" content={field}>
+                <Badge iconType="tag" color="hollow">
+                  {stringRenderer(value)}
+                </Badge>
+              </EuiToolTip>
+            )
+          }
+        />
+      </TokensFlexItem>
+    ) : null
 );
 
 DraggableZeekElement.displayName = 'DraggableZeekElement';
 
-export const Link = pure<{ value: string | null | undefined; link?: string | null }>(
-  ({ value, link }) => {
-    if (value != null) {
-      if (link != null) {
-        return (
-          <LinkFlexItem grow={false}>
-            <div>
-              <GoogleLink link={link}>{value}</GoogleLink>
-              <ExternalLinkIcon />
-            </div>
-          </LinkFlexItem>
-        );
-      } else {
-        return (
-          <LinkFlexItem grow={false}>
-            <div>
-              <GoogleLink link={value} />
-              <ExternalLinkIcon />
-            </div>
-          </LinkFlexItem>
-        );
-      }
+interface LinkProps {
+  value: string | null | undefined;
+  link?: string | null;
+}
+
+export const Link = React.memo<LinkProps>(({ value, link }) => {
+  if (value != null) {
+    if (link != null) {
+      return (
+        <LinkFlexItem grow={false}>
+          <div>
+            <GoogleLink link={link}>{value}</GoogleLink>
+            <ExternalLinkIcon />
+          </div>
+        </LinkFlexItem>
+      );
     } else {
-      return null;
+      return (
+        <LinkFlexItem grow={false}>
+          <div>
+            <GoogleLink link={value} />
+            <ExternalLinkIcon />
+          </div>
+        </LinkFlexItem>
+      );
     }
+  } else {
+    return null;
   }
-);
+});
 
 Link.displayName = 'Link';
 
-export const TotalVirusLinkSha = pure<{ value: string | null | undefined }>(({ value }) =>
+interface TotalVirusLinkShaProps {
+  value: string | null | undefined;
+}
+
+export const TotalVirusLinkSha = React.memo<TotalVirusLinkShaProps>(({ value }) =>
   value != null ? (
     <LinkFlexItem grow={false}>
       <div>
@@ -188,7 +198,12 @@ export const extractStateValue = (state: string | null | undefined): string | nu
 export const constructDroppedValue = (dropped: boolean | null | undefined): string | null =>
   dropped != null ? String(dropped) : null;
 
-export const ZeekSignature = pure<{ data: Ecs; timelineId: string }>(({ data, timelineId }) => {
+interface ZeekSignatureProps {
+  data: Ecs;
+  timelineId: string;
+}
+
+export const ZeekSignature = React.memo<ZeekSignatureProps>(({ data, timelineId }) => {
   const id = `zeek-signature-draggable-zeek-element-${timelineId}-${data._id}`;
   const sessionId: string | null | undefined = get('zeek.session_id[0]', data);
   const dataSet: string | null | undefined = get('event.dataset[0]', data);

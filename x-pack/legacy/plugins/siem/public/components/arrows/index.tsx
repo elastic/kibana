@@ -6,11 +6,14 @@
 
 import { EuiIcon } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
+interface ArrowBodyProps {
+  height: number;
+}
+
 /** Renders the body (non-pointy part) of an arrow */
-export const ArrowBody = styled.span<{ height: number }>`
+export const ArrowBody = styled.span<ArrowBodyProps>`
   background-color: ${props => props.theme.eui.euiColorLightShade};
   height: ${({ height }) => `${height}px`};
   width: 25px;
@@ -20,10 +23,12 @@ ArrowBody.displayName = 'ArrowBody';
 
 export type ArrowDirection = 'arrowLeft' | 'arrowRight';
 
-/** Renders the head of an arrow */
-export const ArrowHead = pure<{
+interface ArrowHeadProps {
   direction: ArrowDirection;
-}>(({ direction }) => (
+}
+
+/** Renders the head of an arrow */
+export const ArrowHead = React.memo<ArrowHeadProps>(({ direction }) => (
   <EuiIcon color="subdued" data-test-subj="arrow-icon" size="s" type={direction} />
 ));
 

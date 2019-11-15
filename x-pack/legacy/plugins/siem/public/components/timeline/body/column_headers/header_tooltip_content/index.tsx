@@ -7,7 +7,6 @@
 import { EuiIcon } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { getIconFromType } from '../../../../event_details/helpers';
@@ -36,7 +35,11 @@ const ToolTipTableValue = styled.span`
 `;
 ToolTipTableValue.displayName = 'ToolTipTableValue';
 
-export const HeaderToolTipContent = pure<{ header: ColumnHeader }>(({ header }) => (
+interface Props {
+  header: ColumnHeader;
+}
+
+export const HeaderToolTipContent = React.memo<Props>(({ header }) => (
   <>
     {!isEmpty(header.category) && (
       <P>

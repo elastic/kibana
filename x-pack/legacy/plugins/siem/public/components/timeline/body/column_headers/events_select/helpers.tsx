@@ -6,7 +6,6 @@
 
 import { EuiText } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { Pin } from '../../../../pin';
@@ -47,7 +46,11 @@ export interface EventsSelectOption {
   dropdownDisplay: JSX.Element | string;
 }
 
-export const DropdownDisplay = pure<{ text: string }>(({ text }) => (
+interface DropdownDisplayProps {
+  text: string;
+}
+
+export const DropdownDisplay = React.memo<DropdownDisplayProps>(({ text }) => (
   <EuiText size="s" color="subdued">
     {text}
   </EuiText>

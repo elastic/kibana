@@ -7,7 +7,6 @@
 import { EuiCheckbox, EuiSuperSelect } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled, { injectGlobal } from 'styled-components';
 
 import { getEventsSelectOptions } from './helpers';
@@ -51,30 +50,28 @@ interface Props {
   timelineId: string;
 }
 
-export const EventsSelect = pure<Props>(({ checkState, timelineId }) => {
-  return (
-    <div data-test-subj="events-select">
-      <EuiSuperSelect
-        className="eventsSelectDropdown"
-        data-test-subj="events-select-dropdown"
-        itemClassName="eventsSelectItem"
-        onChange={noop}
-        options={getEventsSelectOptions()}
-      />
-      <CheckboxContainer data-test-subj="timeline-events-select-checkbox-container">
-        <PositionedCheckbox data-test-subj="timeline-events-select-positioned-checkbox">
-          <EuiCheckbox
-            checked={checkState === 'checked'}
-            data-test-subj="events-select-checkbox"
-            disabled
-            id={`timeline-${timelineId}-events-select`}
-            indeterminate={checkState === 'indeterminate'}
-            onChange={noop}
-          />
-        </PositionedCheckbox>
-      </CheckboxContainer>
-    </div>
-  );
-});
+export const EventsSelect = React.memo<Props>(({ checkState, timelineId }) => (
+  <div data-test-subj="events-select">
+    <EuiSuperSelect
+      className="eventsSelectDropdown"
+      data-test-subj="events-select-dropdown"
+      itemClassName="eventsSelectItem"
+      onChange={noop}
+      options={getEventsSelectOptions()}
+    />
+    <CheckboxContainer data-test-subj="timeline-events-select-checkbox-container">
+      <PositionedCheckbox data-test-subj="timeline-events-select-positioned-checkbox">
+        <EuiCheckbox
+          checked={checkState === 'checked'}
+          data-test-subj="events-select-checkbox"
+          disabled
+          id={`timeline-${timelineId}-events-select`}
+          indeterminate={checkState === 'indeterminate'}
+          onChange={noop}
+        />
+      </PositionedCheckbox>
+    </CheckboxContainer>
+  </div>
+));
 
 EventsSelect.displayName = 'EventsSelect';

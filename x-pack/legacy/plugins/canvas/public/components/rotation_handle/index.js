@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pure } from 'recompose';
+import React from 'react';
 import { RotationHandle as Component } from './rotation_handle';
 
-export const RotationHandle = pure(Component);
+export const RotationHandle = React.memo(Component);

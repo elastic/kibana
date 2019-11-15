@@ -6,7 +6,6 @@
 
 import { EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 
@@ -18,39 +17,47 @@ const P = styled.p`
 
 P.displayName = 'P';
 
-export const FormattedDurationTooltipContent = pure<{
+interface FormattedDurationTooltipContentProps {
   maybeDurationNanoseconds: string | number | object | undefined | null;
   tooltipTitle?: string;
-}>(({ maybeDurationNanoseconds, tooltipTitle }) => (
-  <>
-    {tooltipTitle != null ? <P data-test-subj="title">{tooltipTitle}</P> : null}
-    <P data-test-subj="humanized">{getHumanizedDuration(maybeDurationNanoseconds)}</P>
-    <P data-test-subj="raw-value">
-      <FormattedMessage id="xpack.siem.formattedDuration.tooltipLabel" defaultMessage="raw" />
-      {': '}
-      {maybeDurationNanoseconds}
-    </P>
-  </>
-));
+}
+
+export const FormattedDurationTooltipContent = React.memo<FormattedDurationTooltipContentProps>(
+  ({ maybeDurationNanoseconds, tooltipTitle }) => (
+    <>
+      {tooltipTitle != null ? <P data-test-subj="title">{tooltipTitle}</P> : null}
+      <P data-test-subj="humanized">{getHumanizedDuration(maybeDurationNanoseconds)}</P>
+      <P data-test-subj="raw-value">
+        <FormattedMessage id="xpack.siem.formattedDuration.tooltipLabel" defaultMessage="raw" />
+        {': '}
+        {maybeDurationNanoseconds}
+      </P>
+    </>
+  )
+);
 
 FormattedDurationTooltipContent.displayName = 'FormattedDurationTooltipContent';
 
-export const FormattedDurationTooltip = pure<{
+interface FormattedDurationTooltipProps {
   children: JSX.Element;
   maybeDurationNanoseconds: string | number | object | undefined | null;
   tooltipTitle?: string;
-}>(({ children, maybeDurationNanoseconds, tooltipTitle }) => (
-  <EuiToolTip
-    data-test-subj="formatted-duration-tooltip"
-    content={
-      <FormattedDurationTooltipContent
-        maybeDurationNanoseconds={maybeDurationNanoseconds}
-        tooltipTitle={tooltipTitle}
-      />
-    }
-  >
-    <>{children}</>
-  </EuiToolTip>
-));
+}
+
+export const FormattedDurationTooltip = React.memo<FormattedDurationTooltipProps>(
+  ({ children, maybeDurationNanoseconds, tooltipTitle }) => (
+    <EuiToolTip
+      data-test-subj="formatted-duration-tooltip"
+      content={
+        <FormattedDurationTooltipContent
+          maybeDurationNanoseconds={maybeDurationNanoseconds}
+          tooltipTitle={tooltipTitle}
+        />
+      }
+    >
+      <>{children}</>
+    </EuiToolTip>
+  )
+);
 
 FormattedDurationTooltip.displayName = 'FormattedDurationTooltip';

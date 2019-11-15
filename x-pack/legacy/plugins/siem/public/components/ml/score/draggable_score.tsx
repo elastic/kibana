@@ -12,11 +12,13 @@ import { Provider } from '../../timeline/data_providers/provider';
 import { Spacer } from '../../page';
 import { getScoreString } from './score_health';
 
-export const DraggableScore = React.memo<{
+interface DraggableScoreProps {
   id: string;
   index?: number;
   score: Anomaly;
-}>(
+}
+
+export const DraggableScore = React.memo<DraggableScoreProps>(
   ({ id, index = 0, score }): JSX.Element => (
     <DraggableWrapper
       key={`draggable-score-draggable-wrapper-${id}`}

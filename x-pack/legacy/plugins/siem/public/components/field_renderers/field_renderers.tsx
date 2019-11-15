@@ -8,9 +8,8 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getOr } from 'lodash/fp';
 import React, { Fragment, useState } from 'react';
-import { pure } from 'recompose';
-
 import styled from 'styled-components';
+
 import { AutonomousSystem, FlowTarget, HostEcsFields, IpOverviewData } from '../../graphql/types';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { DefaultDraggable } from '../draggables';
@@ -151,7 +150,7 @@ interface DefaultFieldRendererProps {
 
 // TODO: This causes breaks between elements until the ticket below is fixed
 // https://github.com/elastic/ingest-dev/issues/474
-export const DefaultFieldRenderer = pure<DefaultFieldRendererProps>(
+export const DefaultFieldRenderer = React.memo<DefaultFieldRendererProps>(
   ({
     attrName,
     displayCount = 1,

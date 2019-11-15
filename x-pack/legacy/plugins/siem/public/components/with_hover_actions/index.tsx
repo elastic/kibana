@@ -5,7 +5,6 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 interface Props {
@@ -36,7 +35,12 @@ const HoverActionsPanelContainer = styled.div`
 
 HoverActionsPanelContainer.displayName = 'HoverActionsPanelContainer';
 
-const HoverActionsPanel = pure<{ children: JSX.Element; show: boolean }>(({ children, show }) => (
+interface HoverActionsPanelProps {
+  children: JSX.Element;
+  show: boolean;
+}
+
+const HoverActionsPanel = React.memo<HoverActionsPanelProps>(({ children, show }) => (
   <HoverActionsPanelContainer data-test-subj="hover-actions-panel-container">
     {show ? children : null}
   </HoverActionsPanelContainer>

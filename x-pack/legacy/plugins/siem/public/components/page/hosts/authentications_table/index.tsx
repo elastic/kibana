@@ -7,7 +7,6 @@
 import { has } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
 import { hostsActions } from '../../../../store/hosts';
@@ -84,7 +83,7 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const AuthenticationTableComponent = pure<AuthenticationTableProps>(
+const AuthenticationTableComponent = React.memo<AuthenticationTableProps>(
   ({
     activePage,
     data,

@@ -6,7 +6,6 @@
 
 import { EuiBadge, EuiBadgeProps, EuiToolTip, IconType } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { Omit } from '../../../common/utility_types';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
@@ -47,15 +46,17 @@ export const getDefaultWhenTooltipIsUnspecified = ({
   tooltipContent?: React.ReactNode;
 }): React.ReactNode => (tooltipContent != null ? tooltipContent : field);
 
-/**
- * Renders the content of the draggable, wrapped in a tooltip
- */
-const Content = pure<{
+interface ContentProps {
   children?: React.ReactNode;
   field: string;
   tooltipContent?: React.ReactNode;
   value?: string | null;
-}>(({ children, field, tooltipContent, value }) =>
+}
+
+/**
+ * Renders the content of the draggable, wrapped in a tooltip
+ */
+const Content = React.memo<ContentProps>(({ children, field, tooltipContent, value }) =>
   !tooltipContentIsExplicitlyNull(tooltipContent) ? (
     <EuiToolTip
       data-test-subj={`${field}-tooltip`}
@@ -83,7 +84,7 @@ Content.displayName = 'Content';
  * prevent a tooltip from being displayed, or pass arbitrary content
  * @param queryValue - defaults to `value`, this query overrides the `queryMatch.value` used by the `DataProvider` that represents the data
  */
-export const DefaultDraggable = pure<DefaultDraggableType>(
+export const DefaultDraggable = React.memo<DefaultDraggableType>(
   ({ id, field, value, name, children, tooltipContent, queryValue }) =>
     value != null ? (
       <DraggableWrapper
@@ -152,7 +153,7 @@ export type BadgeDraggableType = Omit<DefaultDraggableType, 'id'> & {
  * prevent a tooltip from being displayed, or pass arbitrary content
  * @param queryValue - defaults to `value`, this query overrides the `queryMatch.value` used by the `DataProvider` that represents the data
  */
-export const DraggableBadge = pure<BadgeDraggableType>(
+export const DraggableBadge = React.memo<BadgeDraggableType>(
   ({
     contextId,
     eventId,

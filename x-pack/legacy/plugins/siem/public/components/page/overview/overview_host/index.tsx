@@ -7,7 +7,6 @@
 import { EuiButton, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
-import { pure } from 'recompose';
 
 import { HeaderSection } from '../../../header_section';
 import { manageQuery } from '../../../page/manage_query';
@@ -37,7 +36,7 @@ export interface OwnProps {
 
 const OverviewHostStatsManage = manageQuery(OverviewHostStats);
 type OverviewHostProps = OwnProps;
-export const OverviewHost = pure<OverviewHostProps>(({ endDate, startDate, setQuery }) => {
+export const OverviewHost = React.memo<OverviewHostProps>(({ endDate, startDate, setQuery }) => {
   const [isHover, setIsHover] = useState(false);
   return (
     <EuiFlexItem>

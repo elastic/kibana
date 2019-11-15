@@ -13,7 +13,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
@@ -65,7 +64,7 @@ interface Props {
   timelineId: string;
 }
 
-const CountRow = pure<Pick<Props, 'filteredBrowserFields'>>(({ filteredBrowserFields }) => (
+const CountRow = React.memo<Pick<Props, 'filteredBrowserFields'>>(({ filteredBrowserFields }) => (
   <CountsFlexGroup
     alignItems="center"
     data-test-subj="counts-flex-group"
@@ -93,11 +92,13 @@ const CountRow = pure<Pick<Props, 'filteredBrowserFields'>>(({ filteredBrowserFi
 
 CountRow.displayName = 'CountRow';
 
-const TitleRow = pure<{
+interface TitleRowProps {
   isEventViewer?: boolean;
   onOutsideClick: () => void;
   onUpdateColumns: OnUpdateColumns;
-}>(({ isEventViewer, onOutsideClick, onUpdateColumns }) => (
+}
+
+const TitleRow = React.memo<TitleRowProps>(({ isEventViewer, onOutsideClick, onUpdateColumns }) => (
   <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" direction="row" gutterSize="none">
     <EuiFlexItem grow={false}>
       <EuiTitle data-test-subj="field-browser-title" size="s">
@@ -121,7 +122,7 @@ const TitleRow = pure<{
 
 TitleRow.displayName = 'TitleRow';
 
-export const Header = pure<Props>(
+export const Header = React.memo<Props>(
   ({
     isEventViewer,
     isSearching,

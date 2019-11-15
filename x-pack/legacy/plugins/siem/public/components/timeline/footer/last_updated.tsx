@@ -7,7 +7,6 @@
 import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import React, { useEffect, useState } from 'react';
-import { pure } from 'recompose';
 
 import * as i18n from './translations';
 
@@ -16,20 +15,24 @@ interface LastUpdatedAtProps {
   updatedAt: number;
 }
 
-export const Updated = pure<{ date: number; prefix: string; updatedAt: number }>(
-  ({ date, prefix, updatedAt }) => (
-    <>
-      {prefix}
-      {
-        <FormattedRelative
-          data-test-subj="last-updated-at-date"
-          key={`formatedRelative-${date}`}
-          value={new Date(updatedAt)}
-        />
-      }
-    </>
-  )
-);
+interface UpdatedProps {
+  date: number;
+  prefix: string;
+  updatedAt: number;
+}
+
+export const Updated = React.memo<UpdatedProps>(({ date, prefix, updatedAt }) => (
+  <>
+    {prefix}
+    {
+      <FormattedRelative
+        data-test-subj="last-updated-at-date"
+        key={`formatedRelative-${date}`}
+        value={new Date(updatedAt)}
+      />
+    }
+  </>
+));
 
 Updated.displayName = 'Updated';
 

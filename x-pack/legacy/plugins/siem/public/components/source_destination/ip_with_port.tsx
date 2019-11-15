@@ -6,7 +6,6 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { Ip } from '../ip';
@@ -18,49 +17,55 @@ const IpPortSeparator = styled.span`
 
 IpPortSeparator.displayName = 'IpPortSeparator';
 
-/**
- * Renders a separator (i.e. `:`) and a draggable, hyperlinked port when
- * a port is specified
- */
-const PortWithSeparator = pure<{
+interface PortWithSeparatorProps {
   contextId: string;
   eventId: string;
   port?: string | null;
   portFieldName: string;
-}>(({ contextId, eventId, port, portFieldName }) => {
-  return port != null ? (
-    <EuiFlexGroup gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <IpPortSeparator data-test-subj="ip-port-separator">{':'}</IpPortSeparator>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <Port
-          contextId={contextId}
-          data-test-subj="port"
-          eventId={eventId}
-          fieldName={portFieldName}
-          value={port}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  ) : null;
-});
+}
+
+/**
+ * Renders a separator (i.e. `:`) and a draggable, hyperlinked port when
+ * a port is specified
+ */
+const PortWithSeparator = React.memo<PortWithSeparatorProps>(
+  ({ contextId, eventId, port, portFieldName }) => {
+    return port != null ? (
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <IpPortSeparator data-test-subj="ip-port-separator">{':'}</IpPortSeparator>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <Port
+            contextId={contextId}
+            data-test-subj="port"
+            eventId={eventId}
+            fieldName={portFieldName}
+            value={port}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ) : null;
+  }
+);
 
 PortWithSeparator.displayName = 'PortWithSeparator';
 
-/**
- * Renders a draggable, hyperlinked IP address, and if provided, an associated
- * draggable, hyperlinked port (with a separator between the IP address and port)
- */
-export const IpWithPort = pure<{
+interface IpWithPortProps {
   contextId: string;
   eventId: string;
   ip?: string | null;
   ipFieldName: string;
   port?: string | null;
   portFieldName: string;
-}>(({ contextId, eventId, ip, ipFieldName, port, portFieldName }) => {
-  return (
+}
+
+/**
+ * Renders a draggable, hyperlinked IP address, and if provided, an associated
+ * draggable, hyperlinked port (with a separator between the IP address and port)
+ */
+export const IpWithPort = React.memo<IpWithPortProps>(
+  ({ contextId, eventId, ip, ipFieldName, port, portFieldName }) => (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem grow={false}>
         <Ip
@@ -80,7 +85,7 @@ export const IpWithPort = pure<{
         />
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
-});
+  )
+);
 
 IpWithPort.displayName = 'IpWithPort';

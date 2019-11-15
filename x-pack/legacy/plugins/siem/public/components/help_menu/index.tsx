@@ -6,12 +6,11 @@
 
 import { render, unmountComponentAtNode } from 'react-dom';
 import React, { useEffect } from 'react';
-import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
 import { HelpMenuComponent } from './help_menu';
 
-export const HelpMenu = pure<{}>(() => {
+export const HelpMenu = React.memo(() => {
   useEffect(() => {
     chrome.helpExtension.set(domNode => {
       render(<HelpMenuComponent />, domNode);

@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-
 import {
   Chart,
   BarSeries,
@@ -44,68 +43,81 @@ const checkIfAnyValidSeriesExist = (
   !checkIfAllValuesAreZero(data) &&
   data.some(checkIfAllTheDataInTheSeriesAreValid);
 
-// Bar chart rotation: https://ela.st/chart-rotations
-export const BarChartBaseComponent = React.memo<{
+interface BarChartBaseComponentProps {
   data: ChartSeriesData[];
   width: string | null | undefined;
   height: string | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
-}>(({ data, ...chartConfigs }) => {
-  const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
-  const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
-  const tickSize = getOr(0, 'configs.axis.tickSize', chartConfigs);
-  const xAxisId = getAxisId(`stat-items-barchart-${data[0].key}-x`);
-  const yAxisId = getAxisId(`stat-items-barchart-${data[0].key}-y`);
-  const settings = {
-    ...chartDefaultSettings,
-    ...get('configs.settings', chartConfigs),
-  };
-  return chartConfigs.width && chartConfigs.height ? (
-    <Chart>
-      <Settings {...settings} />
-      {data.map(series => {
-        const barSeriesKey = series.key;
-        const barSeriesSpecId = getSpecId(barSeriesKey);
-        const seriesType = SeriesType.BAR;
-        return checkIfAllTheDataInTheSeriesAreValid ? (
-          <BarSeries
-            id={barSeriesSpecId}
-            key={barSeriesKey}
-            name={series.key}
-            xScaleType={getOr(ScaleType.Linear, 'configs.series.xScaleType', chartConfigs)}
-            yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
-            xAccessor="x"
-            yAccessors={['y']}
-            timeZone={browserTimezone}
-            splitSeriesAccessors={['g']}
-            data={series.value!}
-            stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
-            customSeriesColors={getSeriesStyle(barSeriesKey, series.color, seriesType)}
-          />
-        ) : null;
-      })}
+}
 
-      <Axis
-        id={xAxisId}
-        position={Position.Bottom}
-        showOverlappingTicks={false}
-        tickSize={tickSize}
-        tickFormat={xTickFormatter}
-      />
+// Bar chart rotation: https://ela.st/chart-rotations
+export const BarChartBaseComponent = React.memo<BarChartBaseComponentProps>(
+  ({ data, ...chartConfigs }) => {
+    const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
+    const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
+    const tickSize = getOr(0, 'configs.axis.tickSize', chartConfigs);
+    const xAxisId = getAxisId(`stat-items-barchart-${data[0].key}-x`);
+    const yAxisId = getAxisId(`stat-items-barchart-${data[0].key}-y`);
+    const settings = {
+      ...chartDefaultSettings,
+      ...get('configs.settings', chartConfigs),
+    };
 
-      <Axis id={yAxisId} position={Position.Left} tickSize={tickSize} tickFormat={yTickFormatter} />
-    </Chart>
-  ) : null;
-});
+    return chartConfigs.width && chartConfigs.height ? (
+      <Chart>
+        <Settings {...settings} />
+        {data.map(series => {
+          const barSeriesKey = series.key;
+          const barSeriesSpecId = getSpecId(barSeriesKey);
+          const seriesType = SeriesType.BAR;
+          return checkIfAllTheDataInTheSeriesAreValid ? (
+            <BarSeries
+              id={barSeriesSpecId}
+              key={barSeriesKey}
+              name={series.key}
+              xScaleType={getOr(ScaleType.Linear, 'configs.series.xScaleType', chartConfigs)}
+              yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
+              xAccessor="x"
+              yAccessors={['y']}
+              timeZone={browserTimezone}
+              splitSeriesAccessors={['g']}
+              data={series.value!}
+              stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
+              customSeriesColors={getSeriesStyle(barSeriesKey, series.color, seriesType)}
+            />
+          ) : null;
+        })}
+
+        <Axis
+          id={xAxisId}
+          position={Position.Bottom}
+          showOverlappingTicks={false}
+          tickSize={tickSize}
+          tickFormat={xTickFormatter}
+        />
+
+        <Axis
+          id={yAxisId}
+          position={Position.Left}
+          tickSize={tickSize}
+          tickFormat={yTickFormatter}
+        />
+      </Chart>
+    ) : null;
+  }
+);
 
 BarChartBaseComponent.displayName = 'BarChartBaseComponent';
 
-export const BarChart = React.memo<{
+interface BarChartProps {
   barChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
-}>(({ barChart, configs }) => {
+}
+
+export const BarChart = React.memo<BarChartProps>(({ barChart, configs }) => {
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
+
   return checkIfAnyValidSeriesExist(barChart) ? (
     <AutoSizer detectAnyWindowResize={false} content>
       {({ measureRef, content: { height, width } }) => (

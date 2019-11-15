@@ -235,14 +235,19 @@ export const DraggableWrapper = connect(null, {
   unRegisterProvider: dragAndDropActions.unRegisterProvider,
 })(DraggableWrapperComponent);
 
+interface ConditionalPortalProps {
+  children: React.ReactNode;
+  usePortal: boolean;
+}
+
 /**
  * Conditionally wraps children in an EuiPortal to ensure drag offsets are correct when dragging
  * from containers that have css transforms
  *
  * See: https://github.com/atlassian/react-beautiful-dnd/issues/499
  */
-const ConditionalPortal = React.memo<{ children: React.ReactNode; usePortal: boolean }>(
-  ({ children, usePortal }) => (usePortal ? <EuiPortal>{children}</EuiPortal> : <>{children}</>)
+const ConditionalPortal = React.memo<ConditionalPortalProps>(({ children, usePortal }) =>
+  usePortal ? <EuiPortal>{children}</EuiPortal> : <>{children}</>
 );
 
 ConditionalPortal.displayName = 'ConditionalPortal';

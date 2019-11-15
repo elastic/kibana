@@ -6,7 +6,6 @@
 
 import { uniqBy } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { NotePreview } from './note_preview';
@@ -19,13 +18,14 @@ const NotePreviewsContainer = styled.section`
 
 NotePreviewsContainer.displayName = 'NotePreviewsContainer';
 
+interface NotePreviewsProps {
+  notes?: TimelineResultNote[] | null;
+}
+
 /**
  * Renders a preview of a note in the All / Open Timelines table
  */
-export const NotePreviews = pure<{
-  notes?: TimelineResultNote[] | null;
-  isModal: boolean;
-}>(({ notes, isModal }) => {
+export const NotePreviews = React.memo<NotePreviewsProps>(({ notes }) => {
   if (notes == null || notes.length === 0) {
     return null;
   }

@@ -5,7 +5,6 @@
  */
 
 import React, { MouseEvent } from 'react';
-import PropTypes from 'prop-types';
 import { EuiLink } from '@elastic/eui';
 import { Popover } from '../popover';
 import { ShapePicker } from '../shape_picker';
@@ -19,7 +18,7 @@ interface Props {
   value?: string;
 }
 
-export const ShapePickerPopover = ({ shapes, onChange, value }: Props) => {
+export const ShapePickerPopover = React.memo<Props>(({ shapes, onChange, value }) => {
   const button = (handleClick: (ev: MouseEvent) => void) => (
     <EuiLink style={{ fontSize: 0 }} onClick={handleClick}>
       <ShapePreview shape={value ? shapes[value] : undefined} />
@@ -31,10 +30,6 @@ export const ShapePickerPopover = ({ shapes, onChange, value }: Props) => {
       {() => <ShapePicker onChange={onChange} shapes={shapes} />}
     </Popover>
   );
-};
+});
 
-ShapePickerPopover.propTypes = {
-  shapes: PropTypes.object.isRequired,
-  value: PropTypes.string,
-  onChange: PropTypes.func,
-};
+ShapePickerPopover.displayName = 'ShapePickerPopover';

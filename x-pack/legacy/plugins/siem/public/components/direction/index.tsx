@@ -5,7 +5,6 @@
  */
 
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { NetworkDirectionEcs } from '../../graphql/types';
 import { DraggableBadge } from '../draggables';
@@ -53,22 +52,26 @@ export const getDirectionIcon = (
   }
 };
 
-/**
- * Renders a badge containing the value of `network.direction`
- */
-export const DirectionBadge = pure<{
+interface DirectionBadgeProps {
   contextId: string;
   direction?: string | null;
   eventId: string;
-}>(({ contextId, eventId, direction }) => (
-  <DraggableBadge
-    contextId={contextId}
-    data-test-subj="network-direction"
-    eventId={eventId}
-    field={NETWORK_DIRECTION_FIELD_NAME}
-    iconType={getDirectionIcon(direction)}
-    value={direction}
-  />
-));
+}
+
+/**
+ * Renders a badge containing the value of `network.direction`
+ */
+export const DirectionBadge = React.memo<DirectionBadgeProps>(
+  ({ contextId, eventId, direction }) => (
+    <DraggableBadge
+      contextId={contextId}
+      data-test-subj="network-direction"
+      eventId={eventId}
+      field={NETWORK_DIRECTION_FIELD_NAME}
+      iconType={getDirectionIcon(direction)}
+      value={direction}
+    />
+  )
+);
 
 DirectionBadge.displayName = 'DirectionBadge';

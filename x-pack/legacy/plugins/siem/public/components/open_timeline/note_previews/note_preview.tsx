@@ -7,7 +7,6 @@
 import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { getEmptyValue, defaultToEmptyTag } from '../../empty_value';
@@ -33,7 +32,7 @@ NotePreviewHeader.displayName = 'NotePreviewHeader';
 /**
  * Renders a preview of a note in the All / Open Timelines table
  */
-export const NotePreview = pure<Pick<TimelineResultNote, 'note' | 'updated' | 'updatedBy'>>(
+export const NotePreview = React.memo<Pick<TimelineResultNote, 'note' | 'updated' | 'updatedBy'>>(
   ({ note, updated, updatedBy }) => (
     <NotePreviewGroup>
       <EuiFlexGroup gutterSize="m" responsive={false}>

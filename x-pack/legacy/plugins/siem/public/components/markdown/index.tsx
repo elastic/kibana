@@ -7,7 +7,6 @@
 import { EuiLink, EuiTableRow, EuiTableRowCell, EuiText, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
 import ReactMarkdown from 'react-markdown';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 const TableHeader = styled.thead`
@@ -25,7 +24,12 @@ const REL_NOFOLLOW = 'nofollow';
 /** prevents the browser from sending the current address as referrer via the Referer HTTP header */
 const REL_NOREFERRER = 'noreferrer';
 
-export const Markdown = pure<{ raw?: string; size?: 'xs' | 's' | 'm' }>(({ raw, size = 's' }) => {
+interface MarkdownProps {
+  raw?: string;
+  size?: 'xs' | 's' | 'm';
+}
+
+export const Markdown = React.memo<MarkdownProps>(({ raw, size = 's' }) => {
   const markdownRenderers = {
     root: ({ children }: { children: React.ReactNode[] }) => (
       <EuiText data-test-subj="markdown-root" grow={true} size={size}>

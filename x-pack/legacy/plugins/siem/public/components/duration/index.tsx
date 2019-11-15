@@ -5,23 +5,24 @@
  */
 
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { DefaultDraggable } from '../draggables';
 import { FormattedDuration } from '../formatted_duration';
 
 export const EVENT_DURATION_FIELD_NAME = 'event.duration';
 
-/**
- * Renders draggable text containing the value of a field representing a
- * duration of time, (e.g. `event.duration`)
- */
-export const Duration = pure<{
+interface DurationProps {
   contextId: string;
   eventId: string;
   fieldName: string;
   value?: string | null;
-}>(({ contextId, eventId, fieldName, value }) => (
+}
+
+/**
+ * Renders draggable text containing the value of a field representing a
+ * duration of time, (e.g. `event.duration`)
+ */
+export const Duration = React.memo<DurationProps>(({ contextId, eventId, fieldName, value }) => (
   <DefaultDraggable
     id={`duration-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
     name={name}

@@ -6,7 +6,6 @@
 
 import { EuiText } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
@@ -62,7 +61,11 @@ const TrailingWhitespace = styled.span`
 
 TrailingWhitespace.displayName = 'TrailingWhitespace';
 
-export const MarkdownHint = pure<{ show: boolean }>(({ show }) => (
+interface Props {
+  show: boolean;
+}
+
+export const MarkdownHint = React.memo<Props>(({ show }) => (
   <MarkdownHintContainer
     color="subdued"
     data-test-subj="markdown-hint"
