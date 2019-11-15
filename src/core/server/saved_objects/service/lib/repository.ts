@@ -365,18 +365,16 @@ export class SavedObjectsRepository {
         const expectedResult = {
           esRequestIndex: bulkRequestIndexCounter++,
           requestedId: object.id,
-          rawMigratedDoc: this._serializer.savedObjectToRaw(
-            this._migrator.migrateDocument({
-              id: object.id,
-              type: object.type,
-              attributes: object.attributes,
-              migrationVersion: object.migrationVersion,
-              ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
-              ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-              updated_at: time,
-              references: object.references || [],
-            }) as SanitizedSavedObjectDoc
-          ),
+          rawMigratedDoc: this._serializer.savedObjectToRaw(this._migrator.migrateDocument({
+            id: object.id,
+            type: object.type,
+            attributes: object.attributes,
+            migrationVersion: object.migrationVersion,
+            ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+            ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+            updated_at: time,
+            references: object.references || [],
+          }) as SanitizedSavedObjectDoc),
         };
 
         bulkCreateParams.push(
@@ -393,10 +391,12 @@ export class SavedObjectsRepository {
       }
     );
 
-    const bulkResponse = await this._writeToCluster('bulk', {
-      refresh,
-      body: bulkCreateParams,
-    });
+    const bulkResponse = bulkCreateParams.length
+      ? await this._writeToCluster('bulk', {
+          refresh,
+          body: bulkCreateParams,
+        })
+      : undefined;
 
     return {
       saved_objects: expectedBulkResults.map(expectedResult => {
