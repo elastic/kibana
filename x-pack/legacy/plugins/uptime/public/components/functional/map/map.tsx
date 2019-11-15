@@ -17,12 +17,7 @@ export const LocationMap = () => {
   // return <div style={style} ref={el => (mapContainer = el)} />;
   return (
     <MapPanel>
-      <EmbeddedMap
-        endDate={new Date('2019-08-28T05:50:57.877Z').getTime()}
-        filters={[]}
-        query={{ query: '', language: 'kuery' }}
-        startDate={new Date('2019-08-28T05:50:47.877Z').getTime()}
-      />
+      <EmbeddedMap filters={[]} query={{ query: '', language: 'kuery' }} />
     </MapPanel>
   );
 };

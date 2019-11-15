@@ -66,7 +66,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(({ filters, query }) => 
   return embeddable != null ? (
     <EmbeddablePanel
       data-test-subj="embeddable-panel"
-      hideHeader={true}
+      hideHeader={false}
       embeddable={embeddable}
       // @ts-ignore
       getActions={getActions}
@@ -75,6 +75,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(({ filters, query }) => 
       SavedObjectFinder={SavedObjectFinder}
       inspector={{
         isAvailable: () => false,
+        // @ts-ignore
         open: false,
       }}
     />
