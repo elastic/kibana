@@ -19,7 +19,6 @@ import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check
 import { checkMlNodesAvailable } from '../../../ml_nodes_check';
 import { getCreateCalendarBreadcrumbs, getEditCalendarBreadcrumbs } from '../../breadcrumbs';
 
-// @ts-ignore
 import { NewCalendar } from './new_calendar';
 
 const template = `
@@ -52,7 +51,7 @@ module.directive('mlNewCalendar', function($route: any) {
     restrict: 'E',
     replace: false,
     scope: {},
-    link(scope: any, element: ng.IAugmentedJQuery) {
+    link(scope: ng.IScope, element: ng.IAugmentedJQuery) {
       const props = {
         calendarId: $route.current.params.calendarId,
         canCreateCalendar: checkPermission('canCreateCalendar'),

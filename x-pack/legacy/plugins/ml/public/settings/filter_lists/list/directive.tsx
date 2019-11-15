@@ -19,7 +19,6 @@ import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { getFilterListsBreadcrumbs } from '../../breadcrumbs';
 
-// @ts-ignore
 import { FilterLists } from './filter_lists';
 
 const template = `
@@ -42,7 +41,7 @@ module.directive('mlFilterLists', function() {
     restrict: 'E',
     replace: false,
     scope: {},
-    link(scope: any, element: ng.IAugmentedJQuery) {
+    link(scope: ng.IScope, element: ng.IAugmentedJQuery) {
       const props = {
         canCreateFilter: checkPermission('canCreateFilter'),
         canDeleteFilter: checkPermission('canDeleteFilter'),

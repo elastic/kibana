@@ -20,8 +20,8 @@ export interface SearchItems {
 
 export function createSearchItems(
   kibanaConfig: KibanaConfigTypeFix,
-  indexPattern: any,
-  savedSearch: any
+  indexPattern: IndexPattern,
+  savedSearch: SavedSearch
 ) {
   // query is only used by the data visualizer as it needs
   // a lucene query_string.

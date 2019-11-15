@@ -7,7 +7,6 @@
 import React from 'react';
 // @ts-ignore No declaration file for module
 import { banners } from 'ui/notify';
-// import chrome from 'ui/chrome';
 import { EuiCallOut } from '@elastic/eui';
 // @ts-ignore No declaration file for module
 import { xpackInfo } from '../../../xpack_main/public/services/xpack_info';
@@ -16,7 +15,7 @@ import { LICENSE_STATUS_VALID } from '../../../../common/constants/license_statu
 
 let licenseHasExpired = true;
 let licenseType: LICENSE_TYPE | null = null;
-let expiredLicenseBannerId: any;
+let expiredLicenseBannerId: string;
 
 export function checkFullLicense() {
   const features = getFeatures();

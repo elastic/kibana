@@ -19,7 +19,6 @@ import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check
 import { checkFullLicense } from '../../../license/check_license';
 import { getCreateFilterListBreadcrumbs, getEditFilterListBreadcrumbs } from '../../breadcrumbs';
 
-// @ts-ignore
 import { EditFilterList } from './edit_filter_list';
 
 const template = `
@@ -52,7 +51,7 @@ module.directive('mlEditFilterList', function($route: any) {
     restrict: 'E',
     replace: false,
     scope: {},
-    link(scope: any, element: ng.IAugmentedJQuery) {
+    link(scope: ng.IScope, element: ng.IAugmentedJQuery) {
       const props = {
         filterId: $route.current.params.filterId,
         canCreateFilter: checkPermission('canCreateFilter'),

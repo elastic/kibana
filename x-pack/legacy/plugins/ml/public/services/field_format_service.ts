@@ -10,11 +10,12 @@ import { getIndexPatternById, getIndexPatternIdFromName } from '../util/index_ut
 import { mlJobService } from '../services/job_service';
 
 type FormatsByJobId = Record<string, any>;
+type IndexPatternIdsByJob = Record<string, any>;
 
 // Service for accessing FieldFormat objects configured for a Kibana index pattern
 // for use in formatting the actual and typical values from anomalies.
 class FieldFormatService {
-  indexPatternIdsByJob: any = {};
+  indexPatternIdsByJob: IndexPatternIdsByJob = {};
   formatsByJob: FormatsByJobId = {};
 
   // Populate the service with the FieldFormats for the list of jobs with the
@@ -49,7 +50,6 @@ class FieldFormatService {
           resolve(this.formatsByJob);
         })
         .catch(err => {
-          // console.log('fieldFormatService error populating formats:', err);
           reject({ formats: {}, err });
         });
     });

@@ -46,7 +46,7 @@ module.directive('mlSettings', function() {
     restrict: 'E',
     replace: false,
     scope: {},
-    link(scope: any, element: ng.IAugmentedJQuery) {
+    link(scope: ng.IScope, element: ng.IAugmentedJQuery) {
       timefilter.disableTimeRangeSelector();
       timefilter.disableAutoRefreshSelector();
 
