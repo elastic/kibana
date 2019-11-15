@@ -13,7 +13,7 @@ import { endpointsListSaga } from './endpoints_list';
 
 // TODO: Type this properly
 // eslint-disable-next-line import/no-default-export
-export default function(context: AppMountContext, history: History) {
+export default function sagas(context: AppMountContext, history: History) {
   return async function(...args: any[]) {
     await Promise.all([
       routingSaga(...args),
