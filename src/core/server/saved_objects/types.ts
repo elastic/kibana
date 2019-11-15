@@ -95,6 +95,7 @@ export interface SavedObject<T extends SavedObjectAttributes = any> {
   references: SavedObjectReference[];
   /** {@inheritdoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
+  namespaces?: string[];
 }
 
 /**

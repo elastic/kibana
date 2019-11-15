@@ -123,7 +123,39 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     namespaces: string[],
     options: SavedObjectsUpdateNamespacesOptions = {}
   ) {
-    // TODO: Implement security
+    const existingSavedObject = await this.baseClient.get(type, id);
+    const allNamespaces = [...new Set([...namespaces, ...existingSavedObject.namespaces!])];
+    try {
+      const checkPrivilegesResult = await this.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces(
+        'update',
+        allNamespaces
+      );
+      const args = {
+        type,
+        id,
+        namespaces,
+        options,
+      };
+      if (!checkPrivilegesResult.hasAllRequested) {
+        this.auditLogger.savedObjectsAuthorizationFailure(
+          checkPrivilegesResult.username,
+          'updateNamespaces',
+          [type],
+          ['update'],
+          args
+        );
+        throw this.errors.decorateForbiddenError(new Error('Unable to updateNamespaces'));
+      }
+      this.auditLogger.savedObjectsAuthorizationSuccess(
+        checkPrivilegesResult.username,
+        'updateNamespaces',
+        [type],
+        args
+      );
+    } catch (error) {
+      throw this.errors.decorateGeneralError(error, error.body && error.body.reason);
+    }
+
     return await this.baseClient.updateNamespaces(type, id, namespaces, options);
   }
 
@@ -143,7 +175,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
   private async checkPrivileges(actions: string | string[], namespace?: string) {
     try {
-      return await this.checkSavedObjectsPrivilegesAsCurrentUser(actions, namespace);
+      return await this.checkSavedObjectsPrivilegesAsCurrentUser.dynamically(actions, namespace);
     } catch (error) {
       throw this.errors.decorateGeneralError(error, error.body && error.body.reason);
     }
