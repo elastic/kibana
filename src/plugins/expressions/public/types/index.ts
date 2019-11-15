@@ -21,8 +21,6 @@ import { ExpressionInterpret } from '../interpreter_provider';
 import { TimeRange } from '../../../data/public';
 import { Adapters } from '../../../inspector/public';
 import { Query } from '../../../data/public';
-import { ExpressionAST } from '../../../expressions/public';
-import { ExpressionArgAST } from '../../../../plugins/expressions/public';
 import { esFilters } from '../../../../plugins/data/public';
 
 export { ArgumentType } from './arguments';
