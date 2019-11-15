@@ -18,9 +18,8 @@
  */
 
 import { npSetup } from 'ui/new_platform';
-import { visualization } from './renderers/visualization';
-import { visualization as visualizationFn } from './functions/visualization';
+import { visualization as visualizationFunction } from './visualization_function';
+import { visualization as visualizationRenderer } from './visualization_renderer';
 
-// TODO: This needs to be moved to `visualizations` plugin.
-npSetup.plugins.expressions.registerFunction(visualizationFn);
-npSetup.plugins.expressions.registerRenderer(visualization);
+npSetup.plugins.expressions.registerFunction(visualizationFunction);
+npSetup.plugins.expressions.registerRenderer(visualizationRenderer);

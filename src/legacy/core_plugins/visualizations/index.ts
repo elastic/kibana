@@ -18,27 +18,17 @@
  */
 
 import { resolve } from 'path';
-import { Legacy } from '../../../../kibana';
-import { init } from './init';
+import { LegacyPluginInitializer } from '../../../../src/legacy/types';
 
-// eslint-disable-next-line
-export default function InterpreterPlugin(kibana: any) {
-  const config: Legacy.PluginSpecOptions = {
-    id: 'interpreter',
-    require: ['kibana', 'elasticsearch'],
+export const visualizations: LegacyPluginInitializer = kibana =>
+  new kibana.Plugin({
+    id: 'visualizations',
     publicDir: resolve(__dirname, 'public'),
+    require: [],
     uiExports: {
-      injectDefaultVars: server => ({
-        serverBasePath: server.config().get('server.basePath'),
-      }),
+      interpreter: ['plugins/visualizations/expressions/boot'],
     },
-    config: (Joi: any) => {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-      }).default();
-    },
-    init,
-  };
+  });
 
-  return new kibana.Plugin(config);
-}
+// eslint-disable-next-line import/no-default-export
+export default visualizations;
