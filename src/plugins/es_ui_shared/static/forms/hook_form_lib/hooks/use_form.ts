@@ -179,10 +179,16 @@ export function useForm<T extends object = FormData>(
   };
 
   const setFieldValue: FormHook<T>['setFieldValue'] = (fieldName, value) => {
+    if (fieldsRefs.current[fieldName] === undefined) {
+      return;
+    }
     fieldsRefs.current[fieldName].setValue(value);
   };
 
   const setFieldErrors: FormHook<T>['setFieldErrors'] = (fieldName, errors) => {
+    if (fieldsRefs.current[fieldName] === undefined) {
+      return;
+    }
     fieldsRefs.current[fieldName].setErrors(errors);
   };
 

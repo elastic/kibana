@@ -196,6 +196,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
               )}
               <FormDataProvider pathsToWatch="type">
                 {({ type }) => {
+                  form.setFieldValue('subType', undefined);
                   return <EuiFlexItem grow={false}>{renderFormFields(type)}</EuiFlexItem>;
                 }}
               </FormDataProvider>
