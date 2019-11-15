@@ -53,18 +53,15 @@ export async function getPackageInfo(options: {
   pkgkey: string;
 }) {
   const { savedObjectsClient, pkgkey } = options;
-  const [item, savedObject, paths] = await Promise.all([
+  const [item, savedObject] = await Promise.all([
     Registry.fetchInfo(pkgkey),
     getInstallationObject({ savedObjectsClient, pkgkey }),
-    Registry.getArchiveInfo(pkgkey),
   ]);
-
-  // add properties that aren't (or aren't yet) on Registry response
-  const updated = Object.assign({}, item, {
+  const updated = {
+    ...item,
     title: item.title || nameAsTitle(item.name),
-    assets: Registry.groupPathsByService(paths),
-  });
-
+    assets: Registry.groupPathsByService(item.assets),
+  };
   return createInstallableFrom(updated, savedObject);
 }
 

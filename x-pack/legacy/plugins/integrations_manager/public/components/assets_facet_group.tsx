@@ -17,8 +17,18 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { entries } from '../../common/type_utils';
-import { AssetIcons, AssetTitleMap, ServiceIcons, ServiceTitleMap } from '../constants';
-import { AssetsGroupedByServiceByType } from '../../common/types';
+import {
+  DisplayedAssets,
+  AssetIcons,
+  AssetTitleMap,
+  ServiceIcons,
+  ServiceTitleMap,
+} from '../constants';
+import {
+  AssetsGroupedByServiceByType,
+  AssetTypeToParts,
+  KibanaAssetType,
+} from '../../common/types';
 import { useCore } from '../hooks/use_core';
 
 export function AssetsFacetGroup({ assets }: { assets: AssetsGroupedByServiceByType }) {
@@ -39,6 +49,14 @@ export function AssetsFacetGroup({ assets }: { assets: AssetsGroupedByServiceByT
     <Fragment>
       {entries(assets).map(([service, typeToParts], index) => {
         const Header = index === 0 ? FirstHeaderRow : HeaderRow;
+        // filter out assets we are not going to display
+        const filteredTypes: AssetTypeToParts = entries(typeToParts).reduce(
+          (acc: any, [asset, value]) => {
+            if (DisplayedAssets[service].includes(asset)) acc[asset] = value;
+            return acc;
+          },
+          {}
+        );
         return (
           <Fragment key={service}>
             <Header gutterSize="s" alignItems="center">
@@ -56,8 +74,12 @@ export function AssetsFacetGroup({ assets }: { assets: AssetsGroupedByServiceByT
             </Header>
 
             <FacetGroup>
-              {entries(typeToParts).map(([type, parts]) => {
-                const iconType = AssetIcons[type];
+              {entries(filteredTypes).map(([type, parts]) => {
+                let iconType = null;
+                if (type in AssetIcons) {
+                  // only kibana assets have icons
+                  iconType = AssetIcons[type as KibanaAssetType];
+                }
                 const iconNode = iconType ? <EuiIcon type={iconType} size="s" /> : '';
                 const FacetButton = styled(EuiFacetButton)`
                   padding: '${theme.eui.paddingSizes.xs} 0';
