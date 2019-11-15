@@ -28,7 +28,7 @@ interface Props {
 }
 
 /**
- * React component for displaying the Telemetry opt-in banner.
+ * React component for displaying the Telemetry opt-in notice.
  */
 export class OptedInBanner extends React.PureComponent<Props> {
   onLinkClick = () => {

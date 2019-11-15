@@ -90,7 +90,9 @@ export function TelemetryOptInProvider($injector: any, chrome: any, sendOptInSta
         return telemetryNotifyUserAboutOptInDefault;
       }
 
-      banners.remove(optInBannerNoticeId);
+      if (optInBannerNoticeId) {
+        banners.remove(optInBannerNoticeId);
+      }
 
       try {
         await $http.post(chrome.addBasePath('/api/telemetry/v2/userHasSeenNotice'));

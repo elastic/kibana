@@ -23,10 +23,9 @@ import { banners } from 'ui/notify';
 import { OptedInBanner } from '../../components/opted_in_notice_banner';
 
 /**
- * Render the Telemetry Opt-in banner.
+ * Render the Telemetry Opt-in notice banner.
  *
  * @param {Object} telemetryOptInProvider The telemetry opt-in provider.
- * @param {Function} fetchTelemetry Function to pull telemetry on demand.
  * @param {Object} _banners Banners singleton, which can be overridden for tests.
  */
 export function renderOptedInBanner(telemetryOptInProvider, { _banners = banners } = {}) {
