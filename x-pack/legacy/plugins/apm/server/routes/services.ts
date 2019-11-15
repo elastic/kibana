@@ -6,7 +6,10 @@
 
 import * as t from 'io-ts';
 import { AgentName } from '../../typings/es_schemas/ui/fields/Agent';
-import { createApmTelementry, storeApmTelemetry } from '../lib/apm_telemetry';
+import {
+  createApmTelementry,
+  storeApmServicesTelemetry
+} from '../lib/apm_telemetry';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServices } from '../lib/services/get_services';
@@ -30,7 +33,7 @@ export const servicesRoute = createRoute((core, { server }) => ({
       ({ agentName }) => agentName as AgentName
     );
     const apmTelemetry = createApmTelementry(agentNames);
-    storeApmTelemetry(server, apmTelemetry);
+    storeApmServicesTelemetry(server, apmTelemetry);
 
     return services;
   }

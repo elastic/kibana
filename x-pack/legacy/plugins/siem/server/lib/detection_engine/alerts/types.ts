@@ -24,9 +24,11 @@ export type PartialFilter = Partial<esFilters.Filter>;
 export interface SignalAlertParams {
   description: string;
   enabled: boolean;
+  falsePositives: string[];
   filter: Record<string, {}> | undefined;
   filters: PartialFilter[] | undefined;
   from: string;
+  immutable: boolean;
   index: string[];
   interval: string;
   id: string;
@@ -38,11 +40,16 @@ export interface SignalAlertParams {
   savedId: string | undefined;
   severity: string;
   size: number | undefined;
+  tags: string[];
   to: string;
   type: 'filter' | 'query' | 'saved_query';
 }
 
-export type SignalAlertParamsRest = Omit<SignalAlertParams, 'maxSignals' | 'saved_id'> & {
+export type SignalAlertParamsRest = Omit<
+  SignalAlertParams,
+  'falsePositives' | 'maxSignals' | 'saved_id'
+> & {
+  false_positives: SignalAlertParams['falsePositives'];
   saved_id: SignalAlertParams['savedId'];
   max_signals: SignalAlertParams['maxSignals'];
 };
