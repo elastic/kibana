@@ -120,7 +120,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
      */
     public async navigateToUrl(
       appName: string,
-      subUrl: string,
+      subUrl?: string,
       {
         basePath = '',
         ensureCurrentUrl = true,
@@ -162,7 +162,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
      */
     async navigateToActualUrl(
       appName: string,
-      hash: string,
+      hash?: string,
       {
         basePath = '',
         ensureCurrentUrl = true,
@@ -209,7 +209,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       await retry.tryForTime(defaultTryTimeout * 3, async () => {
         let lastUrl = await retry.try(async () => {
           // since we're using hash URLs, always reload first to force re-render
-          const defaultIndex = await kibanaServer.uiSettings.getDefaultIndex();
+          await kibanaServer.uiSettings.getDefaultIndex();
           await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert);
           await this.sleep(700);
           log.debug('returned from get, calling refresh');
