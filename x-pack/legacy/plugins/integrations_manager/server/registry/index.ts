@@ -116,10 +116,10 @@ export function getAsset(key: string) {
   return buffer;
 }
 
-export function groupPathsByService(paths: string[]) {
+export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByType {
   // ASK: best way, if any, to avoid `any`?
-  const byServiceByType: AssetsGroupedByServiceByType = paths.reduce((map: any, path) => {
-    const parts = pathParts(path);
+  const assets = paths.reduce((map: any, path) => {
+    const parts = pathParts(path.replace(/^\/package\//, ''));
     if (!map[parts.service]) map[parts.service] = {};
     if (!map[parts.service][parts.type]) map[parts.service][parts.type] = [];
     map[parts.service][parts.type].push(parts);
@@ -127,5 +127,8 @@ export function groupPathsByService(paths: string[]) {
     return map;
   }, {});
 
-  return byServiceByType;
+  return {
+    kibana: assets.kibana,
+    elasticsearch: assets.elasticsearch,
+  };
 }
