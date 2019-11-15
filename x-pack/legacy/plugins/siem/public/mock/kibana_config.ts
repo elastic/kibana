@@ -9,6 +9,7 @@ import {
   DEFAULT_BYTES_FORMAT,
   DEFAULT_KBN_VERSION,
   DEFAULT_TIMEZONE_BROWSER,
+  DEFAULT_TIMEPICKER_QUICK_RANGES,
 } from '../../common/constants';
 
 export interface MockFrameworks {
@@ -29,6 +30,61 @@ export const getMockKibanaUiSetting = (config: MockFrameworks) => (key: string) 
     return ['8.0.0'];
   } else if (key === DEFAULT_TIMEZONE_BROWSER) {
     return config && config.timezone ? [config.timezone] : ['America/New_York'];
+  } else if (key === DEFAULT_TIMEPICKER_QUICK_RANGES) {
+    return [
+      [
+        {
+          from: 'now/d',
+          to: 'now/d',
+          display: 'Today',
+        },
+        {
+          from: 'now/w',
+          to: 'now/w',
+          display: 'This week',
+        },
+        {
+          from: 'now-15m',
+          to: 'now',
+          display: 'Last 15 minutes',
+        },
+        {
+          from: 'now-30m',
+          to: 'now',
+          display: 'Last 30 minutes',
+        },
+        {
+          from: 'now-1h',
+          to: 'now',
+          display: 'Last 1 hour',
+        },
+        {
+          from: 'now-24h',
+          to: 'now',
+          display: 'Last 24 hours',
+        },
+        {
+          from: 'now-7d',
+          to: 'now',
+          display: 'Last 7 days',
+        },
+        {
+          from: 'now-30d',
+          to: 'now',
+          display: 'Last 30 days',
+        },
+        {
+          from: 'now-90d',
+          to: 'now',
+          display: 'Last 90 days',
+        },
+        {
+          from: 'now-1y',
+          to: 'now',
+          display: 'Last 1 year',
+        },
+      ],
+    ];
   }
   return [null];
 };
