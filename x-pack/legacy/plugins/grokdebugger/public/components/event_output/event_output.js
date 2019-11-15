@@ -22,6 +22,7 @@ export function EventOutput({ value }) {
     >
       <EuiCodeEditor
         mode="json"
+        theme="textmate"
         isReadOnly
         width="100%"
         height="340px"

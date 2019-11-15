@@ -49,6 +49,8 @@ MSG message-id=<%{GREEDYDATA}>`;
       <EuiFormRow fullWidth data-test-subj="aceCustomPatternsInput">
         <EuiCodeEditor
           width="100%"
+          theme="textmate"
+          mode="text"
           value={value}
           onChange={onChange}
           setOptions={{
