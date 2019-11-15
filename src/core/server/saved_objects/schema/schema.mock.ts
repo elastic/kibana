@@ -26,6 +26,7 @@ const createSchemaMock = () => {
     isHiddenType: jest.fn().mockReturnValue(false),
     isNamespaceAgnostic: jest.fn((type: string) => type === 'global'),
     isNamespace: jest.fn((type: string) => type !== 'global' && type !== 'shared'),
+    isNamespaces: jest.fn((type: string) => type === 'shared'),
     getConvertToAliasScript: jest.fn().mockReturnValue(undefined),
   };
   return mocked;

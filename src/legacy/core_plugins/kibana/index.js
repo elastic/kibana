@@ -228,7 +228,10 @@ export default function (kibana) {
         },
         'kql-telemetry': {
           isNamespaceAgnostic: true,
-        }
+        },
+        'index-pattern': {
+          namespaces: true
+        },
       },
 
       injectDefaultVars(server, options) {

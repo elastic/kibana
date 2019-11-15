@@ -171,6 +171,7 @@ export {
   SavedObjectsLegacyService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsUpdateNamespacesOptions,
   SavedObjectsDeleteOptions,
 } from './saved_objects';
 

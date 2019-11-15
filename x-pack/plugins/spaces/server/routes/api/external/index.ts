@@ -12,6 +12,7 @@ import { initPostSpacesApi } from './post';
 import { initPutSpacesApi } from './put';
 import { SpacesServiceSetup } from '../../../spaces_service/spaces_service';
 import { initCopyToSpacesApi } from './copy_to_space';
+import { initShareToSpacesApi } from './share_to_space';
 
 export interface ExternalRouteDeps {
   externalRouter: IRouter;
@@ -27,4 +28,5 @@ export function initExternalSpacesApi(deps: ExternalRouteDeps) {
   initPostSpacesApi(deps);
   initPutSpacesApi(deps);
   initCopyToSpacesApi(deps);
+  initShareToSpacesApi(deps);
 }

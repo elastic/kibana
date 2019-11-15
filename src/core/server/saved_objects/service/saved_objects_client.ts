@@ -112,6 +112,17 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
  *
  * @public
  */
+export interface SavedObjectsUpdateNamespacesOptions {
+  /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
+  version?: string;
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
+}
+
+/**
+ *
+ * @public
+ */
 export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
@@ -283,6 +294,23 @@ export class SavedObjectsClient {
     options: SavedObjectsUpdateOptions = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
     return await this._repository.update(type, id, attributes, options);
+  }
+
+  /**
+   * Updates a SavedObject's namespaces
+   *
+   * @param type
+   * @param id
+   * @param namespaces
+   * @param options
+   */
+  async updateNamespaces(
+    type: string,
+    id: string,
+    namespaces: string[],
+    options: SavedObjectsUpdateNamespacesOptions = {}
+  ): Promise<void> {
+    return await this._repository.updateNamespaces(type, id, namespaces, options);
   }
 
   /**

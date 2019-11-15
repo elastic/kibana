@@ -24,6 +24,7 @@ export const savedObjectsClientErrors = SavedObjectsClient.errors;
 
 export interface SavedObjectsClientStub {
   update: sinon.SinonStub<any[], any>;
+  updateNamespaces: sinon.SinonStub<any[], any>;
   get: sinon.SinonStub<any[], any>;
   create: sinon.SinonStub<any[], any>;
   bulkCreate: sinon.SinonStub<any[], any>;
@@ -37,6 +38,7 @@ export interface SavedObjectsClientStub {
 export function createObjectsClientStub(esDocSource = {}): SavedObjectsClientStub {
   const savedObjectsClient = {
     update: sinon.stub(),
+    updateNamespaces: sinon.stub(),
     get: sinon.stub().returns({ attributes: esDocSource }),
     create: sinon.stub(),
     errors: savedObjectsClientErrors,

@@ -105,6 +105,11 @@ export class SecureSavedObjectsClientWrapper {
     return await this._baseClient.update(type, id, attributes, options);
   }
 
+  async updateNamespaces(type, id, namespaces, options = {}) {
+    //TODO: Implement secureity
+    return await this._baseClient.updateNamespaces(type, id, namespaces, options);
+  }
+
   async bulkUpdate(objects = [], options) {
     const types = uniq(objects.map(o => o.type));
     await this._ensureAuthorized(

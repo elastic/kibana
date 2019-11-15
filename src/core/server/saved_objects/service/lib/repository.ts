@@ -43,6 +43,7 @@ import {
   SavedObjectsBulkUpdateOptions,
   SavedObjectsDeleteOptions,
   SavedObjectsDeleteByNamespaceOptions,
+  SavedObjectsUpdateNamespacesOptions,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -850,6 +851,48 @@ export class SavedObjectsRepository {
       references,
       attributes,
     };
+  }
+
+  async updateNamespaces(
+    type: string,
+    id: string,
+    namespaces: string[],
+    options: SavedObjectsUpdateNamespacesOptions = {}
+  ): Promise<void> {
+    if (!this._allowedTypes.includes(type)) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+
+    if (!this._schema.isNamespaces(type)) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(`${type} doesn't support namespaces`);
+    }
+
+    const { version, refresh = DEFAULT_REFRESH_SETTING } = options;
+
+    const time = this._getCurrentTime();
+
+    const doc = {
+      updated_at: time,
+      namespaces,
+    };
+
+    const updateResponse = await this._writeToCluster('update', {
+      id: this._serializer.generateRawId(undefined, type, id),
+      index: this.getIndexForType(type),
+      ...(version && decodeRequestVersion(version)),
+      refresh,
+      ignore: [404],
+      body: {
+        doc,
+      },
+    });
+
+    if (updateResponse.status === 404) {
+      // see "404s from missing index" above
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+
+    return;
   }
 
   /**
