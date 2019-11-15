@@ -14,10 +14,9 @@ import {
   EuiButtonIcon,
   EuiIcon,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 
-import { NormalizedField } from '../../../types';
+import { NormalizedField, NormalizedFields } from '../../../types';
 import {
   TYPE_DEFINITION,
   CHILD_FIELD_INDENT_SIZE,
@@ -29,6 +28,7 @@ import { DeleteFieldProvider } from './delete_field_provider';
 
 interface Props {
   field: NormalizedField;
+  allFields: NormalizedFields['byId'];
   isCreateFieldFormVisible: boolean;
   areActionButtonsVisible: boolean;
   isHighlighted: boolean;
@@ -44,6 +44,7 @@ interface Props {
 
 export const FieldsListItem = React.memo(function FieldListItemComponent({
   field,
+  allFields,
   isHighlighted,
   isDimmed,
   isCreateFieldFormVisible,
@@ -93,6 +94,7 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
 
     return (
       <CreateField
+        allFields={allFields}
         isMultiField={canHaveMultiFields}
         paddingLeft={indentCreateField}
         maxNestedDepth={maxNestedDepth}

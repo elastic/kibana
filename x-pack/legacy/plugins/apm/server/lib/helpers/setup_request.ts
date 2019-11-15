@@ -31,17 +31,21 @@ export type Setup = PromiseReturnType<typeof setupRequest>;
 export async function setupRequest(req: Legacy.Request) {
   const query = (req.query as unknown) as APMRequestQuery;
   const { server } = req;
+  const savedObjectsClient = server.savedObjects.getScopedSavedObjectsClient(
+    req
+  );
   const config = server.config();
   const [uiFiltersES, indices] = await Promise.all([
     decodeUiFilters(server, query.uiFilters),
-    getApmIndices(server)
+    getApmIndices({ config, savedObjectsClient })
   ]);
 
   return {
     start: moment.utc(query.start).valueOf(),
     end: moment.utc(query.end).valueOf(),
     uiFiltersES,
-    client: getESClient(req),
+    client: getESClient(req, { clientAsInternalUser: false }),
+    internalClient: getESClient(req, { clientAsInternalUser: true }),
     config,
     indices
   };

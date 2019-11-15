@@ -13,7 +13,7 @@ export async function deleteConfiguration({
   configurationId: string;
   setup: Setup;
 }) {
-  const { client, indices } = setup;
+  const { internalClient, indices } = setup;
 
   const params = {
     refresh: 'wait_for',
@@ -21,5 +21,5 @@ export async function deleteConfiguration({
     id: configurationId
   };
 
-  return client.delete(params);
+  return internalClient.delete(params);
 }

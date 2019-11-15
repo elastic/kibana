@@ -1,6 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`TelemetryForm renders as expected 1`] = `
+exports[`TelemetryForm doesn't render form when not allowed to change optIn status 1`] = `""`;
+
+exports[`TelemetryForm renders as expected when allows to change optIn status 1`] = `
 <Fragment>
   <EuiPanel
     paddingSize="l"
@@ -32,7 +34,8 @@ exports[`TelemetryForm renders as expected 1`] = `
         save={[Function]}
         setting={
           Object {
-            "defVal": false,
+            "ariaName": "Provide usage statistics",
+            "defVal": true,
             "description": <React.Fragment>
               <p>
                 Help us improve the Elastic Stack by providing usage statistics for basic features. We will not share this data outside of Elastic.
@@ -50,7 +53,7 @@ exports[`TelemetryForm renders as expected 1`] = `
               </p>
               <p>
                 <ForwardRef
-                  href="https://www.elastic.co/legal/telemetry-privacy-statement"
+                  href="https://www.elastic.co/legal/privacy-statement"
                   target="_blank"
                 >
                   <FormattedMessage

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useReducer, useEffect, createContext, useContext } from 'react';
+import React, { useReducer, useEffect, createContext, useContext, useMemo } from 'react';
 
 import {
   reducer,
@@ -48,7 +48,10 @@ export interface Props {
 }
 
 export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: Props) => {
-  const { byId, rootLevelFields, maxNestedDepth } = normalize(defaultValue.fields);
+  const { byId, aliases, rootLevelFields, maxNestedDepth } = useMemo(
+    () => normalize(defaultValue.fields),
+    [defaultValue.fields]
+  );
 
   const canUseDefaultEditor = canUseMappingsEditor(maxNestedDepth);
   const initialState: State = {
@@ -63,6 +66,7 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
     fields: {
       byId,
       rootLevelFields,
+      aliases,
       maxNestedDepth,
     },
     documentFields: {
@@ -81,10 +85,14 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
     // console.log('State update', state);
     // If we are creating a new field, but haven't entered any name
     // it is valid and we can byPass its form validation (that requires a "name" to be defined)
-    const byPassFieldFormValidation =
-      state.documentFields.status === 'creatingField' &&
-      state.fieldForm !== undefined &&
-      state.fieldForm.data.raw.name.trim() === '';
+    const isFieldFormVisible = state.fieldForm !== undefined;
+    const emptyNameValue =
+      isFieldFormVisible &&
+      state.fieldForm!.data.raw.name !== undefined &&
+      state.fieldForm!.data.raw.name.trim() === '';
+
+    const bypassFieldFormValidation =
+      state.documentFields.status === 'creatingField' && emptyNameValue;
 
     onUpdate({
       getData: (isValid: boolean) => {
@@ -93,7 +101,7 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
         if (
           state.documentFields.status === 'creatingField' &&
           isValid &&
-          !byPassFieldFormValidation
+          !bypassFieldFormValidation
         ) {
           // If the form field is valid and we are creating a new field that has some data
           // we automatically add the field to our state.
@@ -116,7 +124,7 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
       validate: async () => {
         const promisesToValidate = [state.configuration.validate()];
 
-        if (state.fieldForm !== undefined && !byPassFieldFormValidation) {
+        if (state.fieldForm !== undefined && !bypassFieldFormValidation) {
           promisesToValidate.push(state.fieldForm.validate());
         }
 

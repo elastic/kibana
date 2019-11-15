@@ -22,6 +22,8 @@ export * from './norms_parameter';
 
 export * from './similarity_parameter';
 
+export * from './path_parameter';
+
 export * from './coerce_parameter';
 
 export * from './ignore_malformed_parameter';

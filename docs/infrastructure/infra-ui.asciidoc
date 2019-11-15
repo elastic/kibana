@@ -2,12 +2,12 @@
 [[infra-ui]]
 == Using the Metrics app
 
-Use the Metrics app in {kib} to monitor your infrastructure and identify problems in real time.
+Use the Metrics app in {kib} to monitor your infrastructure metrics and identify problems in real time.
 You can explore metrics for hosts, containers, and services.
 You can also drill down to view more detailed metrics, or seamlessly switch to view the corresponding logs, application traces, and uptime information.
 
 Initially, the *Inventory* tab shows an overview of the hosts in of your infrastructure and the current CPU usage for each host.
-From here, you can drill down into areas of interest.
+From here, you can view other metrics or drill down into areas of interest.
 
 [role="screenshot"]
 image::infrastructure/images/infra-sysmon.png[Infrastructure Overview in Kibana]

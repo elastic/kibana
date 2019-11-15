@@ -5,13 +5,12 @@
  */
 
 import React, { useState, Fragment } from 'react';
-import { EuiConfirmModal, EuiOverlayMask, EuiBadge } from '@elastic/eui';
-
+import { EuiConfirmModal, EuiOverlayMask, EuiBadge, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useMappingsState, useDispatch } from '../../../mappings_state';
 import { NormalizedField } from '../../../types';
-import { buildFieldTreeFromIds } from '../../../lib';
+import { buildFieldTreeFromIds, getAllDescendantAliases } from '../../../lib';
 import { FieldsTree } from '../../fields_tree';
 
 type DeleteFieldFunc = (property: NormalizedField) => void;
@@ -22,25 +21,29 @@ interface Props {
 
 interface State {
   isModalOpen: boolean;
-  field: NormalizedField | undefined;
+  field?: NormalizedField;
+  aliases?: string[];
 }
 
 export const DeleteFieldProvider = ({ children }: Props) => {
-  const [state, setState] = useState<State>({ isModalOpen: false, field: undefined });
+  const [state, setState] = useState<State>({ isModalOpen: false });
   const dispatch = useDispatch();
-  const {
-    fields: { byId },
-  } = useMappingsState();
+  const { fields } = useMappingsState();
+  const { byId } = fields;
 
   const closeModal = () => {
-    setState({ isModalOpen: false, field: undefined });
+    setState({ isModalOpen: false });
   };
 
   const deleteField: DeleteFieldFunc = field => {
     const { hasChildFields, hasMultiFields } = field;
+    const aliases = getAllDescendantAliases(field, fields)
+      .map(id => byId[id].path)
+      .sort();
+    const hasAliases = Boolean(aliases.length);
 
-    if (hasChildFields || hasMultiFields) {
-      setState({ isModalOpen: true, field });
+    if (hasChildFields || hasMultiFields || hasAliases) {
+      setState({ isModalOpen: true, field, aliases: hasAliases ? aliases : undefined });
     } else {
       dispatch({ type: 'field.remove', value: field.id });
     }
@@ -53,23 +56,24 @@ export const DeleteFieldProvider = ({ children }: Props) => {
 
   const renderModal = () => {
     const field = state.field!;
-    const title = `Remove property '${field.source.name}'?`;
+    const { isMultiField, childFields } = field;
 
-    const fieldsTree = buildFieldTreeFromIds(
-      field.childFields!,
-      byId,
-      (fieldItem: NormalizedField) => (
-        <>
-          {fieldItem.source.name}
-          {fieldItem.isMultiField && (
+    const title = `Remove ${isMultiField ? 'multi-field' : 'field'} '${field.source.name}'?`;
+
+    const fieldsTree =
+      childFields && childFields.length
+        ? buildFieldTreeFromIds(childFields, byId, (fieldItem: NormalizedField) => (
             <>
-              {' '}
-              <EuiBadge color="hollow">multi-field</EuiBadge>
+              {fieldItem.source.name}
+              {fieldItem.isMultiField && (
+                <>
+                  {' '}
+                  <EuiBadge color="hollow">multi-field</EuiBadge>
+                </>
+              )}
             </>
-          )}
-        </>
-      )
-    );
+          ))
+        : null;
 
     return (
       <EuiOverlayMask>
@@ -78,27 +82,53 @@ export const DeleteFieldProvider = ({ children }: Props) => {
           onCancel={closeModal}
           onConfirm={confirmDelete}
           cancelButtonText={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.deleteFieldCancelButtonLabel',
+            'xpack.idxMgmt.mappingsEditor.deleteField.confirmationModal.cancelButtonLabel',
             {
               defaultMessage: 'Cancel',
             }
           )}
           buttonColor="danger"
           confirmButtonText={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.deleteFieldRemoveButtonLabel',
+            'xpack.idxMgmt.mappingsEditor.deleteField.confirmationModal.removeButtonLabel',
             {
               defaultMessage: 'Remove',
             }
           )}
         >
-          <Fragment>
-            <p>
-              {i18n.translate('xpack.idxMgmt.mappingsEditor.deleteDescription', {
-                defaultMessage: 'This will also delete the following fields.',
-              })}
-            </p>
-            <FieldsTree fields={fieldsTree} />
-          </Fragment>
+          <>
+            {fieldsTree && (
+              <>
+                <p>
+                  {i18n.translate(
+                    'xpack.idxMgmt.mappingsEditor.confirmationModal.deleteFieldsDescription',
+                    {
+                      defaultMessage: 'This will also delete the following fields.',
+                    }
+                  )}
+                </p>
+                <FieldsTree fields={fieldsTree} />
+              </>
+            )}
+            {state.aliases && (
+              <>
+                <p>
+                  {i18n.translate(
+                    'xpack.idxMgmt.mappingsEditor.confirmationModal.deleteAliasesDescription',
+                    {
+                      defaultMessage: 'The following aliases will also be deleted.',
+                    }
+                  )}
+                </p>
+                <ul>
+                  {state.aliases.map(path => (
+                    <li key={path}>
+                      <EuiCode>{path}</EuiCode>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </>
         </EuiConfirmModal>
       </EuiOverlayMask>
     );

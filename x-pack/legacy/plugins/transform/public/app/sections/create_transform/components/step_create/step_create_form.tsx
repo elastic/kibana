@@ -29,6 +29,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { toMountPoint } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { ToastNotificationText } from '../../../../components';
 import { useApi } from '../../../../hooks/use_api';
 import { isKibanaContextInitialized, KibanaContext } from '../../../../lib/kibana';
@@ -76,6 +77,8 @@ export const StepCreateForm: SFC<Props> = React.memo(
 
     useEffect(() => {
       onChange({ created, started, indexPatternId });
+      // custom comparison
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [created, started, indexPatternId]);
 
     const api = useApi();
@@ -112,7 +115,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
             defaultMessage: 'An error occurred creating the transform {transformId}:',
             values: { transformId },
           }),
-          text: <ToastNotificationText text={e} />,
+          text: toMountPoint(<ToastNotificationText text={e} />),
         });
         return false;
       }
@@ -142,7 +145,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
             defaultMessage: 'An error occurred starting the transform {transformId}:',
             values: { transformId },
           }),
-          text: <ToastNotificationText text={e} />,
+          text: toMountPoint(<ToastNotificationText text={e} />),
         });
       }
     }
@@ -201,7 +204,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
               'An error occurred creating the Kibana index pattern {indexPatternName}:',
             values: { indexPatternName },
           }),
-          text: <ToastNotificationText text={e} />,
+          text: toMountPoint(<ToastNotificationText text={e} />),
         });
         return false;
       }
@@ -232,7 +235,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
               title: i18n.translate('xpack.transform.stepCreateForm.progressErrorMessage', {
                 defaultMessage: 'An error occurred getting the progress percentage:',
               }),
-              text: <ToastNotificationText text={e} />,
+              text: toMountPoint(<ToastNotificationText text={e} />),
             });
             clearInterval(interval);
           }

@@ -4,9 +4,55 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MainType, ParameterName, SelectOption } from '../types';
+import { DataType, ParameterName, SelectOption } from '../types';
 import { INDEX_DEFAULT } from './default_values';
 import { MAIN_DATA_TYPE_DEFINITION } from './data_types_definition';
+
+export const TYPE_NOT_ALLOWED_MULTIFIELD: DataType[] = ['object', 'nested', 'alias'];
+
+export const DYNAMIC_SETTING_OPTIONS = [
+  { value: true, text: 'true' },
+  { value: false, text: 'false' },
+  { value: 'strict', text: 'strict' },
+];
+
+export const FIELD_TYPES_OPTIONS = Object.entries(MAIN_DATA_TYPE_DEFINITION).map(
+  ([dataType, { label }]) => ({
+    value: dataType,
+    text: label,
+  })
+);
+
+export const PARAMETERS_OPTIONS: { [key in ParameterName]?: SelectOption[] } = {
+  index_options: [
+    { value: 'docs', text: 'docs' },
+    { value: 'freqs', text: 'freqs' },
+    { value: 'positions', text: 'positions' },
+    { value: 'offsets', text: 'offsets' },
+  ],
+  analyzer: [
+    { value: INDEX_DEFAULT, text: 'Index default' },
+    { value: 'standard', text: 'Standard' },
+    { value: 'simple', text: 'Simple' },
+    { value: 'whitespace', text: 'Whitespace' },
+    { value: 'keyword', text: 'Keyword' },
+    { value: 'pattern', text: 'Pattern' },
+    { value: 'fingerprint', text: 'Fingerprint' },
+  ],
+  similarity: [
+    { value: 'BM25', text: 'Okapi BM25' },
+    { value: 'boolean', text: 'Boolean' },
+  ],
+  term_vector: [
+    { value: 'no', text: 'No' },
+    { value: 'yes', text: 'Yes' },
+    { value: 'with_positions', text: 'With positions' },
+    { value: 'with_offsets', text: 'With offsets' },
+    { value: 'with_positions_offsets', text: 'With positions offsets' },
+    { value: 'with_positions_payloads', text: 'With positions payloads' },
+    { value: 'with_positions_offsets_payloads', text: 'With positions offsets payloads' },
+  ],
+};
 
 const DATE_FORMATS = [
   { label: 'epoch_millis' },
@@ -74,50 +120,3 @@ const STRICT_DATE_FORMAT_OPTIONS = DATE_FORMATS.filter(format => format.strict).
 const DATE_FORMAT_OPTIONS = DATE_FORMATS.map(({ label }) => ({ label }));
 
 export const ALL_DATE_FORMAT_OPTIONS = [...DATE_FORMAT_OPTIONS, ...STRICT_DATE_FORMAT_OPTIONS];
-
-export const TYPE_NOT_ALLOWED_MULTIFIELD: MainType[] = ['object', 'nested'];
-
-export const DYNAMIC_SETTING_OPTIONS = [
-  { value: true, text: 'true' },
-  { value: false, text: 'false' },
-  { value: 'strict', text: 'strict' },
-];
-
-export const FIELD_TYPES_OPTIONS = Object.entries(MAIN_DATA_TYPE_DEFINITION).map(
-  ([dataType, { label }]) => ({
-    value: dataType,
-    text: label,
-  })
-);
-
-export const MULTIFIELD_TYPES_OPTIONS = FIELD_TYPES_OPTIONS.filter(
-  option => TYPE_NOT_ALLOWED_MULTIFIELD.includes(option.value as MainType) === false
-);
-
-export const PARAMETERS_OPTIONS: { [key in ParameterName]?: SelectOption[] } = {
-  index_options: [
-    { value: 'docs', text: 'docs' },
-    { value: 'freqs', text: 'freqs' },
-    { value: 'positions', text: 'positions' },
-    { value: 'offsets', text: 'offsets' },
-  ],
-  analyzer: [
-    { value: INDEX_DEFAULT, text: 'Index default' },
-    { value: 'standard', text: 'Standard' },
-    { value: 'simple', text: 'Simple' },
-    { value: 'whitespace', text: 'Whitespace' },
-    { value: 'keyword', text: 'Keyword' },
-    { value: 'pattern', text: 'Pattern' },
-    { value: 'fingerprint', text: 'Fingerprint' },
-  ],
-  similarity: [{ value: 'BM25', text: 'BM25' }, { value: 'boolean', text: 'Boolean' }],
-  term_vector: [
-    { value: 'no', text: 'No' },
-    { value: 'yes', text: 'Yes' },
-    { value: 'with_positions', text: 'With positions' },
-    { value: 'with_offsets', text: 'With offsets' },
-    { value: 'with_positions_offsets', text: 'With positions offsets' },
-    { value: 'with_positions_payloads', text: 'With positions payloads' },
-    { value: 'with_positions_offsets_payloads', text: 'With positions offsets payloads' },
-  ],
-};

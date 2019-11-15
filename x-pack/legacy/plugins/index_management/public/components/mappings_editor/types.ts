@@ -101,7 +101,8 @@ export type ParameterName =
   | 'preserve_separators'
   | 'preserve_position_increments'
   | 'ignore_z_value'
-  | 'enable_position_increments';
+  | 'enable_position_increments'
+  | 'path';
 
 export interface Parameter {
   fieldConfig: FieldConfig;
@@ -142,6 +143,7 @@ export interface NormalizedFields {
     [id: string]: NormalizedField;
   };
   rootLevelFields: string[];
+  aliases: { [key: string]: string[] };
   maxNestedDepth: number;
 }
 
@@ -161,6 +163,11 @@ export type FieldsEditor = 'default' | 'json';
 export interface SelectOption {
   value: any;
   text: string;
+}
+
+export interface AliasOption {
+  id: string;
+  label: string;
 }
 
 export interface ComboBoxOption {
