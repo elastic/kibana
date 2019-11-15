@@ -24,12 +24,7 @@ import {
   ServiceIcons,
   ServiceTitleMap,
 } from '../constants';
-import {
-  AssetsGroupedByServiceByType,
-  Assets,
-  KibanaAssetType,
-  AssetType,
-} from '../../common/types';
+import { AssetsGroupedByServiceByType, Assets, KibanaAssetType } from '../../common/types';
 import { useCore } from '../hooks/use_core';
 
 export function AssetsFacetGroup({ assets }: { assets: AssetsGroupedByServiceByType }) {
