@@ -44,7 +44,7 @@ export interface ShareContext {
    * If not set it will default to `window.location.href`
    */
   shareableUrl: string;
-  sharingData: unknown;
+  sharingData: { [key: string]: unknown };
   isDirty: boolean;
   onClose: () => void;
 }
