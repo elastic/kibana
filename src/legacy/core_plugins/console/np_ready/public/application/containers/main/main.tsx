@@ -70,7 +70,7 @@ export function Main() {
   };
 
   return (
-    <>
+    <div id="consoleRoot">
       <EuiFlexGroup
         className="consoleContainer"
         gutterSize="none"
@@ -124,6 +124,6 @@ export function Main() {
       {showSettings ? <Settings onClose={() => setShowSettings(false)} /> : null}
 
       {showHelp ? <HelpPanel onClose={() => setShowHelp(false)} /> : null}
-    </>
+    </div>
   );
 }

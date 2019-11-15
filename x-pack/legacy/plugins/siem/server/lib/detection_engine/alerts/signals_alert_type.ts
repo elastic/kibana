@@ -24,9 +24,11 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
     validate: {
       params: schema.object({
         description: schema.string(),
+        falsePositives: schema.arrayOf(schema.string(), { defaultValue: [] }),
         from: schema.string(),
         filter: schema.nullable(schema.object({}, { allowUnknowns: true })),
         id: schema.string(),
+        immutable: schema.boolean({ defaultValue: false }),
         index: schema.arrayOf(schema.string()),
         language: schema.nullable(schema.string()),
         savedId: schema.nullable(schema.string()),
@@ -34,6 +36,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         filters: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
         maxSignals: schema.number({ defaultValue: 100 }),
         severity: schema.string(),
+        tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
         to: schema.string(),
         type: schema.string(),
         references: schema.arrayOf(schema.string(), { defaultValue: [] }),
@@ -135,13 +138,6 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         // handling/conditions
         logger.error(`Error from signal rule "${id}", ${err.message}`);
       }
-
-      // TODO: Schedule and fire any and all actions configured for the signals rule
-      // such as email/slack/etc... Note you will not be able to save in-memory state
-      // without calling this at least once but we are not using in-memory state at the moment.
-      // Schedule the default action which is nothing if it's a plain signal.
-      // const instance = services.alertInstanceFactory('siem-signals');
-      // instance.scheduleActions('default');
     },
   };
 };

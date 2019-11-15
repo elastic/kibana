@@ -247,6 +247,10 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
                     useDedicatedIndex: checked,
                   });
                 }}
+                showLabel={false}
+                label={i18n.translate('xpack.ml.newJob.recognize.useDedicatedIndexLabel', {
+                  defaultMessage: 'Use dedicated index',
+                })}
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>

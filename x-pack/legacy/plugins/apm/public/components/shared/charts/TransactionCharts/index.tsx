@@ -27,14 +27,19 @@ import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import {
   asInteger,
   tpmUnit,
-  TimeFormatter
+  TimeFormatter,
+  getDurationFormatter
 } from '../../../../utils/formatters';
 import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { TransactionLineChart } from './TransactionLineChart';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { getTimeFormatter } from '../../../../utils/formatters';
-import { PageLoadCharts } from './PageLoadCharts';
+import { DurationByCountryMap } from './DurationByCountryMap';
+import {
+  TRANSACTION_PAGE_LOAD,
+  TRANSACTION_ROUTE_CHANGE,
+  TRANSACTION_REQUEST
+} from '../../../../../common/transaction_types';
 
 interface TransactionChartProps {
   hasMLJob: boolean;
@@ -55,8 +60,6 @@ const ShiftedEuiText = styled(EuiText)`
   top: 5px;
 `;
 
-const RUM_PAGE_LOAD_TYPE = 'page-load';
-
 export class TransactionCharts extends Component<TransactionChartProps> {
   public getMaxY = (responseTimeSeries: TimeSeries[]) => {
     const coordinates = flatten(
@@ -71,12 +74,14 @@ export class TransactionCharts extends Component<TransactionChartProps> {
   };
 
   public getResponseTimeTickFormatter = (formatter: TimeFormatter) => {
-    return (t: number) => formatter(t);
+    return (t: number) => formatter(t).formatted;
   };
 
   public getResponseTimeTooltipFormatter = (formatter: TimeFormatter) => {
     return (p: Coordinate) => {
-      return isValidCoordinateValue(p.y) ? formatter(p.y) : NOT_AVAILABLE_LABEL;
+      return isValidCoordinateValue(p.y)
+        ? formatter(p.y).formatted
+        : NOT_AVAILABLE_LABEL;
     };
   };
 
@@ -151,7 +156,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
     const { responseTimeSeries, tpmSeries } = charts;
     const { transactionType } = urlParams;
     const maxY = this.getMaxY(responseTimeSeries);
-    const formatter = getTimeFormatter(maxY);
+    const formatter = getDurationFormatter(maxY);
 
     return (
       <>
@@ -200,19 +205,19 @@ export class TransactionCharts extends Component<TransactionChartProps> {
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGrid>
-        {transactionType === RUM_PAGE_LOAD_TYPE ? (
+        {transactionType === TRANSACTION_PAGE_LOAD && (
           <>
             <EuiSpacer size="s" />
-            <PageLoadCharts />
+            <DurationByCountryMap />
           </>
-        ) : null}
+        )}
       </>
     );
   }
 }
 
 function tpmLabel(type?: string) {
-  return type === 'request'
+  return type === TRANSACTION_REQUEST
     ? i18n.translate(
         'xpack.apm.metrics.transactionChart.requestsPerMinuteLabel',
         {
@@ -229,14 +234,14 @@ function tpmLabel(type?: string) {
 
 function responseTimeLabel(type?: string) {
   switch (type) {
-    case RUM_PAGE_LOAD_TYPE:
+    case TRANSACTION_PAGE_LOAD:
       return i18n.translate(
         'xpack.apm.metrics.transactionChart.pageLoadTimesLabel',
         {
           defaultMessage: 'Page load times'
         }
       );
-    case 'route-change':
+    case TRANSACTION_ROUTE_CHANGE:
       return i18n.translate(
         'xpack.apm.metrics.transactionChart.routeChangeTimesLabel',
         {

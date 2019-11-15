@@ -34,6 +34,9 @@ function getMockRequest() {
             callWithInternalUser: callWithInternalUserSpy
           })
         }
+      },
+      savedObjects: {
+        getScopedSavedObjectsClient: () => ({ get: async () => false })
       }
     },
     getUiSettingsService: () => ({ get: async () => false })
