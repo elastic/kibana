@@ -7,6 +7,7 @@
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 
+import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import { deleteSignals } from '../alerts/delete_signals';
 import { querySignalSchema } from './schemas';
 import { QueryRequest } from '../alerts/types';
@@ -14,7 +15,7 @@ import { getIdError, transformOrError } from './utils';
 
 export const createDeleteSignalsRoute: Hapi.ServerRoute = {
   method: 'DELETE',
-  path: '/api/siem/signals',
+  path: DETECTION_ENGINE_RULES_URL,
   options: {
     tags: ['access:signals-all'],
     validate: {

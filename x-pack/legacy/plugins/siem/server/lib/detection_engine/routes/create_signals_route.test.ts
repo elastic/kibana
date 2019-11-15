@@ -20,6 +20,7 @@ import {
   getCreateRequest,
   typicalPayload,
 } from './__mocks__/request_responses';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 
 describe('create_signals', () => {
   let { server, alertsClient, actionsClient } = createMockServer();
@@ -74,7 +75,7 @@ describe('create_signals', () => {
       const { rule_id, ...noId } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'POST',
-        url: '/api/siem/signals',
+        url: DETECTION_ENGINE_RULES_URL,
         payload: noId,
       };
       const { statusCode } = await server.inject(request);
@@ -89,7 +90,7 @@ describe('create_signals', () => {
       const { type, ...noType } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'POST',
-        url: '/api/siem/signals',
+        url: DETECTION_ENGINE_RULES_URL,
         payload: {
           ...noType,
           type: 'query',
@@ -109,7 +110,7 @@ describe('create_signals', () => {
       const { language, query, type, ...noType } = typicalPayload();
       const request = {
         method: 'POST',
-        url: '/api/siem/signals',
+        url: DETECTION_ENGINE_RULES_URL,
         payload: {
           ...noType,
           type: 'filter',
@@ -128,7 +129,7 @@ describe('create_signals', () => {
       const { type, ...noType } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'POST',
-        url: '/api/siem/signals',
+        url: DETECTION_ENGINE_RULES_URL,
         payload: {
           ...noType,
           type: 'something-made-up',

@@ -23,6 +23,7 @@ import {
   getFindResultWithSingleHit,
   typicalFilterPayload,
 } from './__mocks__/request_responses';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 
 describe('update_signals', () => {
   let { server, alertsClient, actionsClient } = createMockServer();
@@ -83,7 +84,7 @@ describe('update_signals', () => {
       const { rule_id, ...noId } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'PUT',
-        url: '/api/siem/signals',
+        url: DETECTION_ENGINE_RULES_URL,
         payload: {
           payload: noId,
         },
@@ -98,7 +99,7 @@ describe('update_signals', () => {
       alertsClient.update.mockResolvedValue(updateAlertResult());
       const request: ServerInjectOptions = {
         method: 'PUT',
-        url: '/api/siem/signals',
+        url: DETECTION_ENGINE_RULES_URL,
         payload: typicalPayload(),
       };
       const { statusCode } = await server.inject(request);
@@ -112,7 +113,7 @@ describe('update_signals', () => {
       alertsClient.update.mockResolvedValue(updateAlertResult());
       const request: ServerInjectOptions = {
         method: 'PUT',
-        url: '/api/siem/signals',
+        url: DETECTION_ENGINE_RULES_URL,
         payload: typicalPayload(),
       };
       const { statusCode } = await server.inject(request);
@@ -126,7 +127,7 @@ describe('update_signals', () => {
       alertsClient.update.mockResolvedValue(updateAlertResult());
       const request: ServerInjectOptions = {
         method: 'PUT',
-        url: '/api/siem/signals',
+        url: DETECTION_ENGINE_RULES_URL,
         payload: typicalFilterPayload(),
       };
       const { statusCode } = await server.inject(request);
@@ -141,7 +142,7 @@ describe('update_signals', () => {
       const { type, ...noType } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'PUT',
-        url: '/api/siem/signals',
+        url: DETECTION_ENGINE_RULES_URL,
         payload: {
           ...noType,
           type: 'something-made-up',

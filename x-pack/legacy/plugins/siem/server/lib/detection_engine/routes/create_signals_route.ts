@@ -7,6 +7,7 @@
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 import Boom from 'boom';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import { createSignals } from '../alerts/create_signals';
 import { SignalsRequest } from '../alerts/types';
 import { createSignalsSchema } from './schemas';
@@ -15,7 +16,7 @@ import { transformOrError } from './utils';
 
 export const createCreateSignalsRoute: Hapi.ServerRoute = {
   method: 'POST',
-  path: '/api/siem/signals',
+  path: DETECTION_ENGINE_RULES_URL,
   options: {
     tags: ['access:signals-all'],
     validate: {

@@ -6,6 +6,7 @@
 
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import { updateSignal } from '../alerts/update_signals';
 import { UpdateSignalsRequest } from '../alerts/types';
 import { updateSignalSchema } from './schemas';
@@ -13,7 +14,7 @@ import { getIdError, transformOrError } from './utils';
 
 export const createUpdateSignalsRoute: Hapi.ServerRoute = {
   method: 'PUT',
-  path: '/api/siem/signals',
+  path: DETECTION_ENGINE_RULES_URL,
   options: {
     tags: ['access:signals-all'],
     validate: {

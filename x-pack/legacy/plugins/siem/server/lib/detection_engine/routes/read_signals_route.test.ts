@@ -19,6 +19,7 @@ import {
   getReadRequest,
   getFindResultWithSingleHit,
 } from './__mocks__/request_responses';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 
 describe('read_signals', () => {
   let { server, alertsClient } = createMockServer();
@@ -65,16 +66,16 @@ describe('read_signals', () => {
   });
 
   describe('validation', () => {
-    test('returns 404 if given a non-existent id', async () => {
+    test('returns 400 if given a non-existent id', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.delete.mockResolvedValue({});
       const request: ServerInjectOptions = {
         method: 'GET',
-        url: '/api/siem/signals/',
+        url: DETECTION_ENGINE_RULES_URL,
       };
       const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(404);
+      expect(statusCode).toBe(400);
     });
   });
 });

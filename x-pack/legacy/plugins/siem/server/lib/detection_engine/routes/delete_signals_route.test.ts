@@ -20,6 +20,7 @@ import {
   getFindResultWithSingleHit,
   getDeleteRequestById,
 } from './__mocks__/request_responses';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 
 describe('delete_signals', () => {
   let { server, alertsClient } = createMockServer();
@@ -89,7 +90,7 @@ describe('delete_signals', () => {
       alertsClient.delete.mockResolvedValue({});
       const request: ServerInjectOptions = {
         method: 'DELETE',
-        url: '/api/siem/signals',
+        url: DETECTION_ENGINE_RULES_URL,
       };
       const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(400);

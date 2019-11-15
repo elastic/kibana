@@ -7,6 +7,7 @@
 import { ServerInjectOptions } from 'hapi';
 import { ActionResult } from '../../../../../../actions/server/types';
 import { SignalAlertParamsRest } from '../../alerts/types';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 // The Omit of filter is because of a Hapi Server Typing issue that I am unclear
 // where it comes from. I would hope to remove the "filter" as an omit at some point
@@ -40,7 +41,7 @@ export const typicalFilterPayload = (): Partial<SignalAlertParamsRest> => ({
 
 export const getUpdateRequest = (): ServerInjectOptions => ({
   method: 'PUT',
-  url: '/api/siem/signals',
+  url: DETECTION_ENGINE_RULES_URL,
   payload: {
     ...typicalPayload(),
   },
@@ -48,12 +49,12 @@ export const getUpdateRequest = (): ServerInjectOptions => ({
 
 export const getReadRequest = (): ServerInjectOptions => ({
   method: 'GET',
-  url: '/api/siem/signals?rule_id=rule-1',
+  url: `${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`,
 });
 
 export const getFindRequest = (): ServerInjectOptions => ({
   method: 'GET',
-  url: '/api/siem/signals/_find',
+  url: `${DETECTION_ENGINE_RULES_URL}/_find`,
 });
 
 export const getFindResult = () => ({
@@ -107,17 +108,17 @@ export const getFindResultWithSingleHit = () => ({
 
 export const getDeleteRequest = (): ServerInjectOptions => ({
   method: 'DELETE',
-  url: '/api/siem/signals?rule_id=rule-1',
+  url: `${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`,
 });
 
 export const getDeleteRequestById = (): ServerInjectOptions => ({
   method: 'DELETE',
-  url: '/api/siem/signals?id=04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+  url: `${DETECTION_ENGINE_RULES_URL}?id=04128c15-0d1b-4716-a4c5-46997ac7f3bd`,
 });
 
 export const getCreateRequest = (): ServerInjectOptions => ({
   method: 'POST',
-  url: '/api/siem/signals',
+  url: DETECTION_ENGINE_RULES_URL,
   payload: {
     ...typicalPayload(),
   },

@@ -13,4 +13,4 @@ set -e
 curl -s -k \
  -H 'kbn-xsrf: 123' \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- -X DELETE ${KIBANA_URL}/api/siem/signals?rule_id="$1" | jq .
+ -X DELETE ${KIBANA_URL}/api/detection_engine/rules?rule_id="$1" | jq .

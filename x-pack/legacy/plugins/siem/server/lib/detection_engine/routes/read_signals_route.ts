@@ -6,6 +6,7 @@
 
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import { getIdError, transformOrError } from './utils';
 
 import { readSignals } from '../alerts/read_signals';
@@ -14,7 +15,7 @@ import { QueryRequest } from '../alerts/types';
 
 export const createReadSignalsRoute: Hapi.ServerRoute = {
   method: 'GET',
-  path: '/api/siem/signals',
+  path: DETECTION_ENGINE_RULES_URL,
   options: {
     tags: ['access:signals-all'],
     validate: {
