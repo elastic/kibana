@@ -18,7 +18,7 @@ export default function({ getService }: FtrProviderContext) {
     createExpectResults,
     createExpectRbacForbidden,
     expectBadRequestForHiddenType,
-    expectedForbiddenTypesWithHiddenType: expectedForbiddenTypesWithHiddenType,
+    expectedForbiddenTypesWithHiddenType,
   } = bulkCreateTestSuiteFactory(es, esArchiver, supertest);
 
   describe('_bulk_create', () => {
@@ -29,7 +29,7 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 403,
           response: createExpectRbacForbidden(),
         },
-        includingSpace: {
+        includingHiddenType: {
           statusCode: 403,
           response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
         },
@@ -43,7 +43,7 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 200,
           response: createExpectResults(),
         },
-        includingSpace: {
+        includingHiddenType: {
           statusCode: 200,
           response: expectBadRequestForHiddenType,
         },
@@ -57,7 +57,7 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 403,
           response: createExpectRbacForbidden(),
         },
-        includingSpace: {
+        includingHiddenType: {
           statusCode: 403,
           response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
         },
@@ -71,7 +71,7 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 200,
           response: createExpectResults(),
         },
-        includingSpace: {
+        includingHiddenType: {
           statusCode: 403,
           response: createExpectRbacForbidden(['hiddentype']),
         },
@@ -85,7 +85,7 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 403,
           response: createExpectRbacForbidden(),
         },
-        includingSpace: {
+        includingHiddenType: {
           statusCode: 403,
           response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
         },
@@ -99,7 +99,7 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 200,
           response: createExpectResults(),
         },
-        includingSpace: {
+        includingHiddenType: {
           statusCode: 403,
           response: createExpectRbacForbidden(['hiddentype']),
         },
@@ -113,7 +113,7 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 403,
           response: createExpectRbacForbidden(),
         },
-        includingSpace: {
+        includingHiddenType: {
           statusCode: 403,
           response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
         },
@@ -127,7 +127,7 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 403,
           response: createExpectRbacForbidden(),
         },
-        includingSpace: {
+        includingHiddenType: {
           statusCode: 403,
           response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
         },
@@ -141,7 +141,7 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 403,
           response: createExpectRbacForbidden(),
         },
-        includingSpace: {
+        includingHiddenType: {
           statusCode: 403,
           response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
         },
@@ -155,7 +155,7 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 403,
           response: createExpectRbacForbidden(),
         },
-        includingSpace: {
+        includingHiddenType: {
           statusCode: 403,
           response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
         },
@@ -169,7 +169,7 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 403,
           response: createExpectRbacForbidden(),
         },
-        includingSpace: {
+        includingHiddenType: {
           statusCode: 403,
           response: createExpectRbacForbidden(expectedForbiddenTypesWithHiddenType),
         },

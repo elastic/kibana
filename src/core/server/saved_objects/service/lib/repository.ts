@@ -290,7 +290,7 @@ export class SavedObjectsRepository {
       // something   true        index           index
       // something   false       create          create
       const method = object.id && overwrite ? 'index' : 'create';
-      if (method === 'create') {
+      if (method === 'create' || !this._schema.isNamespaces(object.type)) {
         return {
           tag: 'Right' as 'Right',
           value: {
@@ -300,19 +300,20 @@ export class SavedObjectsRepository {
         };
       }
 
-      const expectedResult = {
-        esRequestIndex: bulkGetRequestIndexCounter++,
-        method,
-        object,
-      };
-
       bulkGetDocs.push({
         _id: this._serializer.generateRawId(namespace, object.type, object.id),
         _index: this.getIndexForType(object.type),
-        _source: ['type', 'namespace'],
+        _source: ['type', 'namespaces'],
       });
 
-      return { tag: 'Right' as 'Right', value: expectedResult };
+      return {
+        tag: 'Right' as 'Right',
+        value: {
+          esRequestIndex: bulkGetRequestIndexCounter++,
+          method,
+          object,
+        },
+      };
     });
 
     const bulkGetResponse = bulkGetDocs.length
@@ -332,11 +333,10 @@ export class SavedObjectsRepository {
           return expectedBulkGetResult;
         }
 
+        let savedObjectNamespace;
+        let savedObjectNamespaces;
         const { esRequestIndex, object, method } = expectedBulkGetResult.value;
         if (esRequestIndex !== undefined) {
-          // TODO: When switching from namespace to namespaces, we'll want to use the namespaces returned
-          // from this to ensure we aren't dropping an existing namespace. However, it's somewhat awkward that
-          // a create with overwrite=true would maintain existing spaces it's been shared to.
           const indexFound = bulkGetResponse.status !== 404;
           const actualResult = indexFound ? bulkGetResponse.docs[esRequestIndex] : undefined;
           const docFound = indexFound && actualResult.found === true;
@@ -347,9 +347,18 @@ export class SavedObjectsRepository {
               error: {
                 id,
                 type,
-                error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload,
+                error: SavedObjectsErrorHelpers.createConflictError(type, id).output.payload,
               },
             };
+          }
+          savedObjectNamespaces = docFound
+            ? actualResult._source.namespaces
+            : [namespace === undefined ? 'default' : namespace];
+        } else {
+          if (this._schema.isNamespace(object.type)) {
+            savedObjectNamespace = namespace;
+          } else if (this._schema.isNamespaces(object.type)) {
+            savedObjectNamespaces = [namespace === undefined ? 'default' : namespace];
           }
         }
 
@@ -362,7 +371,8 @@ export class SavedObjectsRepository {
               type: object.type,
               attributes: object.attributes,
               migrationVersion: object.migrationVersion,
-              namespace,
+              ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+              ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
               updated_at: time,
               references: object.references || [],
             }) as SanitizedSavedObjectDoc
@@ -404,7 +414,7 @@ export class SavedObjectsRepository {
         } = Object.values(response)[0] as any;
 
         const {
-          _source: { type, [type]: attributes, references = [] },
+          _source: { type, [type]: attributes, references = [], namespaces },
         } = rawMigratedDoc;
 
         const id = requestedId || responseId;
@@ -418,6 +428,7 @@ export class SavedObjectsRepository {
         return {
           id,
           type,
+          ...(namespaces && { namespaces }),
           updated_at: time,
           version: encodeVersion(seqNo, primaryTerm),
           attributes,

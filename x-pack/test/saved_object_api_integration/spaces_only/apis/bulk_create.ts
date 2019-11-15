@@ -29,6 +29,7 @@ export default function({ getService }: FtrProviderContext) {
 
   const {
     bulkCreateTest,
+    createExpectOverwritingResults,
     createExpectResults,
     expectBadRequestForHiddenType,
   } = bulkCreateTestSuiteFactory(es, esArchiver, supertest);
@@ -41,7 +42,11 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 200,
           response: createExpectResults(SPACES.SPACE_1.spaceId),
         },
-        includingSpace: {
+        overwriting: {
+          statusCode: 200,
+          response: createExpectOverwritingResults(SPACES.SPACE_1.spaceId),
+        },
+        includingHiddenType: {
           statusCode: 200,
           response: expectBadRequestForHiddenType,
         },
@@ -69,7 +74,43 @@ export default function({ getService }: FtrProviderContext) {
           statusCode: 200,
           response: createExpectResults(SPACES.DEFAULT.spaceId),
         },
-        includingSpace: {
+        overwriting: {
+          statusCode: 200,
+          response: createExpectOverwritingResults(SPACES.DEFAULT.spaceId),
+        },
+        includingHiddenType: {
+          statusCode: 200,
+          response: expectBadRequestForHiddenType,
+        },
+        custom: {
+          description: 'when a namespace is specified on the saved object',
+          requestBody: [
+            {
+              type: 'visualization',
+              namespace: 'space_1',
+              attributes: {
+                title: 'something',
+              },
+            },
+          ],
+          statusCode: 400,
+          response: expectNamespaceSpecifiedBadRequest,
+        },
+      },
+    });
+
+    bulkCreateTest('in the current space (space_1)', {
+      ...SPACES.SPACE_1,
+      tests: {
+        default: {
+          statusCode: 200,
+          response: createExpectResults(SPACES.SPACE_1.spaceId),
+        },
+        overwriting: {
+          statusCode: 200,
+          response: createExpectOverwritingResults(SPACES.SPACE_1.spaceId),
+        },
+        includingHiddenType: {
           statusCode: 200,
           response: expectBadRequestForHiddenType,
         },

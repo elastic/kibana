@@ -24,7 +24,8 @@ interface BulkCreateCustomTest extends BulkCreateTest {
 
 interface BulkCreateTests {
   default: BulkCreateTest;
-  includingSpace: BulkCreateTest;
+  overwriting: BulkCreateTest;
+  includingHiddenType: BulkCreateTest;
   custom?: BulkCreateCustomTest;
 }
 
@@ -57,15 +58,37 @@ const createBulkRequests = (spaceId: string) => [
     },
   },
   {
+    type: 'sharedtype',
+    id: 'new_sharedtype',
+    attributes: {
+      name: 'A new sharedtype object',
+    },
+  },
+  {
     type: 'globaltype',
     id: '8121a00-8efd-21e7-1cb3-34ab966434445',
     attributes: {
       name: 'An existing globaltype',
     },
   },
+  {
+    type: 'sharedtype',
+    id: 'default_and_space_1',
+    attributes: {
+      name: 'An existing sharedtype',
+    },
+  },
+  {
+    type: 'sharedtype',
+    id: 'only_space_2',
+    attributes: {
+      name: 'An existing sharedtype',
+    },
+  },
 ];
 
 const isGlobalType = (type: string) => type === 'globaltype';
+const isSharedType = (type: string) => type === 'sharedtype';
 
 export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
   const createExpectResults = (spaceId = DEFAULT_SPACE_ID) => async (resp: {
@@ -102,8 +125,35 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
           references: [],
         },
         {
+          type: 'sharedtype',
+          id: 'new_sharedtype',
+          namespaces: [spaceId],
+          updated_at: resp.body.saved_objects[3].updated_at,
+          version: resp.body.saved_objects[3].version,
+          attributes: {
+            name: 'A new sharedtype object',
+          },
+          references: [],
+        },
+        {
           type: 'globaltype',
           id: '8121a00-8efd-21e7-1cb3-34ab966434445',
+          error: {
+            message: 'version conflict, document already exists',
+            statusCode: 409,
+          },
+        },
+        {
+          type: 'sharedtype',
+          id: 'default_and_space_1',
+          error: {
+            message: 'version conflict, document already exists',
+            statusCode: 409,
+          },
+        },
+        {
+          type: 'sharedtype',
+          id: 'only_space_2',
           error: {
             message: 'version conflict, document already exists',
             statusCode: 409,
@@ -114,7 +164,11 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
 
     for (const savedObject of createBulkRequests(spaceId)) {
       const expectedSpacePrefix =
-        spaceId === DEFAULT_SPACE_ID || isGlobalType(savedObject.type) ? '' : `${spaceId}:`;
+        spaceId === DEFAULT_SPACE_ID ||
+        isGlobalType(savedObject.type) ||
+        isSharedType(savedObject.type)
+          ? ''
+          : `${spaceId}:`;
 
       // query ES directory to ensure namespace was or wasn't specified
       const { _source } = await es.get({
@@ -123,12 +177,144 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
         index: '.kibana',
       });
 
-      const { namespace: actualNamespace } = _source;
+      const { namespace: actualNamespace, namespaces: actualNamespaces } = _source;
 
-      if (spaceId === DEFAULT_SPACE_ID || isGlobalType(savedObject.type)) {
+      if (
+        spaceId === DEFAULT_SPACE_ID ||
+        isGlobalType(savedObject.type) ||
+        isSharedType(savedObject.type)
+      ) {
         expect(actualNamespace).to.eql(undefined);
       } else {
         expect(actualNamespace).to.eql(spaceId);
+      }
+
+      if (isSharedType(savedObject.type)) {
+        if (savedObject.id === 'default_and_space_1') {
+          expect(actualNamespaces).to.eql(['default', 'space_1']);
+        } else if (savedObject.id === 'only_space_2') {
+          expect(actualNamespaces).to.eql(['space_2']);
+        } else {
+          expect(actualNamespaces).to.eql([spaceId]);
+        }
+      }
+    }
+  };
+
+  const createExpectOverwritingResults = (spaceId = DEFAULT_SPACE_ID) => async (resp: {
+    [key: string]: any;
+  }) => {
+    expect(resp.body).to.eql({
+      saved_objects: [
+        {
+          type: 'visualization',
+          id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
+          updated_at: resp.body.saved_objects[0].updated_at,
+          version: resp.body.saved_objects[0].version,
+          attributes: {
+            title: 'An existing visualization',
+          },
+          references: [],
+        },
+        {
+          type: 'dashboard',
+          id: `${getIdPrefix(spaceId)}a01b2f57-fcfd-4864-b735-09e28f0d815e`,
+          updated_at: resp.body.saved_objects[1].updated_at,
+          version: resp.body.saved_objects[1].version,
+          attributes: {
+            title: 'A great new dashboard',
+          },
+          references: [],
+        },
+        {
+          type: 'globaltype',
+          id: `05976c65-1145-4858-bbf0-d225cc78a06e`,
+          updated_at: resp.body.saved_objects[2].updated_at,
+          version: resp.body.saved_objects[2].version,
+          attributes: {
+            name: 'A new globaltype object',
+          },
+          references: [],
+        },
+        {
+          type: 'sharedtype',
+          id: 'new_sharedtype',
+          namespaces: [spaceId],
+          updated_at: resp.body.saved_objects[3].updated_at,
+          version: resp.body.saved_objects[3].version,
+          attributes: {
+            name: 'A new sharedtype object',
+          },
+          references: [],
+        },
+        {
+          type: 'globaltype',
+          id: '8121a00-8efd-21e7-1cb3-34ab966434445',
+          updated_at: resp.body.saved_objects[4].updated_at,
+          version: resp.body.saved_objects[4].version,
+          attributes: {
+            name: 'An existing globaltype',
+          },
+          references: [],
+        },
+        {
+          type: 'sharedtype',
+          id: 'default_and_space_1',
+          namespaces: ['default', 'space_1'],
+          updated_at: resp.body.saved_objects[5].updated_at,
+          version: resp.body.saved_objects[5].version,
+          attributes: {
+            name: 'An existing sharedtype',
+          },
+          references: [],
+        },
+        {
+          type: 'sharedtype',
+          id: 'only_space_2',
+          error: {
+            error: 'Conflict',
+            message: 'Saved object [sharedtype/only_space_2] conflict',
+            statusCode: 409,
+          },
+        },
+      ],
+    });
+
+    for (const savedObject of createBulkRequests(spaceId)) {
+      const expectedSpacePrefix =
+        spaceId === DEFAULT_SPACE_ID ||
+        isGlobalType(savedObject.type) ||
+        isSharedType(savedObject.type)
+          ? ''
+          : `${spaceId}:`;
+
+      // query ES directory to ensure namespace was or wasn't specified
+      const { _source } = await es.get({
+        id: `${expectedSpacePrefix}${savedObject.type}:${savedObject.id}`,
+        type: '_doc',
+        index: '.kibana',
+      });
+
+      const { namespace: actualNamespace, namespaces: actualNamespaces } = _source;
+
+      if (
+        spaceId === DEFAULT_SPACE_ID ||
+        isGlobalType(savedObject.type) ||
+        isSharedType(savedObject.type)
+      ) {
+        expect(actualNamespace).to.eql(undefined);
+      } else {
+        expect(actualNamespace).to.eql(spaceId);
+      }
+
+      if (isSharedType(savedObject.type)) {
+        if (savedObject.id === 'default_and_space_1') {
+          expect(actualNamespaces).to.eql(['default', 'space_1']);
+        } else if (savedObject.id === 'only_space_2') {
+          expect(actualNamespaces).to.eql(['space_2']);
+        } else {
+          expect(actualNamespaces).to.eql([spaceId]);
+        }
       }
     }
   };
@@ -184,7 +370,16 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
           .then(tests.default.response);
       });
 
-      it(`including a hiddentype saved object should return ${tests.includingSpace.statusCode}`, async () => {
+      it(`should return ${tests.overwriting.statusCode}`, async () => {
+        await supertest
+          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_create?overwrite=true`)
+          .auth(user.username, user.password)
+          .send(createBulkRequests(spaceId))
+          .expect(tests.overwriting.statusCode)
+          .then(tests.overwriting.response);
+      });
+
+      it(`including a hiddentype saved object should return ${tests.includingHiddenType.statusCode}`, async () => {
         await supertest
           .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_create`)
           .auth(user.username, user.password)
@@ -199,8 +394,8 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
               },
             ])
           )
-          .expect(tests.includingSpace.statusCode)
-          .then(tests.includingSpace.response);
+          .expect(tests.includingHiddenType.statusCode)
+          .then(tests.includingHiddenType.response);
       });
 
       if (tests.custom) {
@@ -222,6 +417,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
 
   return {
     bulkCreateTest,
+    createExpectOverwritingResults,
     createExpectResults,
     createExpectRbacForbidden,
     expectBadRequestForHiddenType,
