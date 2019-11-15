@@ -7,6 +7,6 @@
 import { PluginInitializerContext } from 'src/core/server';
 import { Plugin } from './plugin';
 
-export const plugin = (context: Pick<PluginInitializerContext, 'logger'>) => {
+export const plugin = (context: PluginInitializerContext) => {
   return new Plugin(context);
 };

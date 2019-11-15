@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { Server } from 'hapi';
 
+import { PluginInitializerContext } from 'src/core/server';
 import { plugin } from './server';
 import { savedObjectMappings } from './server/saved_objects';
 
@@ -149,7 +150,7 @@ export const siem = (kibana: any) => {
         savedObjects,
       };
 
-      plugin({ logger }).setup({ __legacy: serverFacade }, {});
+      plugin({ logger } as PluginInitializerContext).setup({ __legacy: serverFacade }, {});
     },
   });
 };
