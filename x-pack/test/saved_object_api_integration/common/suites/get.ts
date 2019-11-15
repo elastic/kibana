@@ -88,6 +88,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     expect(resp.body).to.eql({
       id: sharedTypeOnlySpace1Id,
       type: 'sharedtype',
+      namespaces: ['space_1'],
       updated_at: '2017-09-21T18:59:16.270Z',
       version: resp.body.version,
       attributes: {
