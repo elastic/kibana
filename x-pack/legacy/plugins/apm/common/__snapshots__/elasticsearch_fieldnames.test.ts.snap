@@ -314,6 +314,6 @@ exports[`Transaction TRANSACTION_TYPE 1`] = `"transaction type"`;
 
 exports[`Transaction URL_FULL 1`] = `"http://www.elastic.co"`;
 
-exports[`Transaction USER_AGENT_NAME 1`] = `undefined`;
+exports[`Transaction USER_AGENT_NAME 1`] = `"Other"`;
 
 exports[`Transaction USER_ID 1`] = `"1337"`;
