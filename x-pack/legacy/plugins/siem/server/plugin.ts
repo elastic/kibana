@@ -24,5 +24,7 @@ export class Plugin {
     this.logger.info('NP plugin setup');
 
     initServerWithKibana(__legacy, this.logger, this.mode);
+
+    this.logger.info('NP plugin setup complete');
   }
 }

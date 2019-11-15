@@ -56,7 +56,6 @@ export const initServerWithKibana = (
     deleteSignalsRoute(kbnServer);
     findSignalsRoute(kbnServer);
   }
-  logger.info('Plugin done initializing');
 
   const xpackMainPlugin = kbnServer.plugins.xpack_main;
   xpackMainPlugin.registerFeature({
