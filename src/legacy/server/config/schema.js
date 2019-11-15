@@ -137,7 +137,7 @@ export default () => Joi.object({
       }),
     timezone: Joi.string(),
     rotate: Joi.object().keys({
-      enable: Joi.boolean().default(false),
+      enabled: Joi.boolean().default(false),
       everyBytes: Joi.number().greater(1024).default(10485760),
       keepFiles: Joi.number().greater(2).less(1024).default(7),
       pollingInterval: Joi.number().greater(5).less(3600).default(10),

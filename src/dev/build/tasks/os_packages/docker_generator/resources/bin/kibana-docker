@@ -43,7 +43,7 @@ kibana_vars=(
     logging.dest
     logging.quiet
     logging.rotate
-    logging.rotate.enable
+    logging.rotate.enabled
     logging.rotate.everyBytes
     logging.rotate.keepFiles
     logging.rotate.pollingInterval

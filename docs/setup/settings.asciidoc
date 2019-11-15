@@ -152,12 +152,12 @@ The following example shows a valid logging rotate configuration:
 +
 --
     logging.rotate:
-      enable: true
+      enabled: true
       everyBytes: 104857600
       keepFiles: 10
 --
 
-`logging.rotate.enable:`:: *Default: false* Set the value of this setting to `true` to
+`logging.rotate.enabled:`:: *Default: false* Set the value of this setting to `true` to
 enable logging rotate. If you do not have a `logging.dest` set that is different from `stdout`
 that feature would not take any effect.
 
