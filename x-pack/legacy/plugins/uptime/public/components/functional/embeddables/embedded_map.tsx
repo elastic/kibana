@@ -45,7 +45,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(({ filters, query }) => 
     isLayerTOCOpen: false,
     hideFilterActions: true,
     mapCenter: { lon: 11, lat: 47, zoom: 0 },
-    disableZoom: true,
+    disableInteractive: true,
     disableTooltipControl: true,
     hideToolbarOverlay: true,
     hideWidgetOverlay: true,
