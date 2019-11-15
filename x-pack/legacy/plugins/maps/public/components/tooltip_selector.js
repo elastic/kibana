@@ -50,9 +50,9 @@ const getProps = async field => {
 export class TooltipSelector extends Component {
 
   state = {
+    previousFields: null,
     fieldProps: [],
-    selectedFieldProps: [],
-    fieldPropsInitialized: false
+    selectedFieldProps: []
   };
 
   constructor() {
@@ -94,17 +94,19 @@ export class TooltipSelector extends Component {
 
   async _loadFieldProps() {
 
-    if (!this.props.fields || this.state.fieldPropsInitialized) {
+    if (!this.props.fields || this.props.fields === this.state.previousFields) {
+      console.log('skip!', this.props.fields, this.state.previousFields);
       return;
     }
 
+    const previousFields = this.props.fields;
     const props = this.props.fields.map(getProps);
     const fieldProps =  await Promise.all(props);
     if (this._isMounted) {
       if (!_.isEqual(this.state.fieldProps, fieldProps)) {
         this.setState({
           fieldProps,
-          fieldPropsInitialized: true
+          previousFields: previousFields
         });
       }
     }

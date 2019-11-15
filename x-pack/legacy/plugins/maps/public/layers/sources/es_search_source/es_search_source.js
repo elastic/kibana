@@ -69,7 +69,6 @@ export class ESSearchSource extends AbstractESSource {
     }, inspectorAdapters);
 
     this._tooltipFields = this._descriptor.tooltipProperties.map((property) => this.createField({ fieldName: property }));
-    console.log('ttf', this._tooltipFields);
   }
 
   createField({ fieldName }) {
