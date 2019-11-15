@@ -204,7 +204,7 @@ const validateForm = (state: State): State => {
   const dependentVariableEmpty = jobType === JOB_TYPES.REGRESSION && dependentVariable === '';
   const modelMemoryLimitEmpty = modelMemoryLimit === '';
 
-  if (modelMemoryLimit !== undefined && modelMemoryLimit !== '') {
+  if (!modelMemoryLimitEmpty && modelMemoryLimit !== undefined) {
     const { valid } = validateModelMemoryLimitUnits(modelMemoryLimit);
     state.form.modelMemoryLimitUnitValid = valid;
   }
