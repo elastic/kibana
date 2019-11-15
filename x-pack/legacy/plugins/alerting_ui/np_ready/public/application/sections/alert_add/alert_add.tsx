@@ -30,6 +30,9 @@ import {
   EuiText,
   EuiLink,
   EuiPanel,
+  EuiFieldNumber,
+  EuiSelect,
+  EuiIconTip,
 } from '@elastic/eui';
 import { useAppDependencies } from '../..';
 import { saveAlert } from '../../lib/api';
@@ -38,6 +41,8 @@ import { alertReducer } from './alert_reducer';
 import { ErrableFormRow } from '../../components/page_error';
 import { AlertTypeModel, Alert, IErrorObject, ActionTypeModel, AlertAction } from '../../../types';
 import { ACTION_GROUPS } from '../../constants/action_groups';
+import { getTimeUnitLabel } from '../../lib/get_time_unit_label';
+import { TIME_UNITS } from '../../constants';
 
 interface Props {
   refreshList: () => Promise<void>;
@@ -58,6 +63,14 @@ function validateBaseProperties(alertObject: Alert) {
   }
   return validationResult;
 }
+
+const getTimeOptions = (unitSize: string) =>
+  Object.entries(TIME_UNITS).map(([_key, value]) => {
+    return {
+      text: getTimeUnitLabel(value, unitSize),
+      value,
+    };
+  });
 
 export const AlertAdd = ({ refreshList }: Props) => {
   const {
@@ -211,36 +224,35 @@ export const AlertAdd = ({ refreshList }: Props) => {
 
   const alertTypeDetails = (
     <Fragment>
-      <EuiPanel paddingSize="s">
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
-              <h5 id="selectedAlertTypeTitle">
-                <FormattedMessage
-                  defaultMessage={alertType ? alertType.name : ''}
-                  id="xpack.alertingUI.sections.alertAdd.selectedAlertTypeTitle"
-                />
-              </h5>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink onClick={() => setAlertType(undefined)}>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xxs">
+            <h5 id="selectedAlertTypeTitle">
               <FormattedMessage
-                defaultMessage={'Change'}
-                id="xpack.alertingUI.sections.alertAdd.changeAlertTypeLink"
+                defaultMessage={'{alertType} alert condition'}
+                id="xpack.alertingUI.sections.alertAdd.selectedAlertTypeTitle"
+                values={{ alertType: alertType ? alertType.name : '' }}
               />
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {AlertTypeParamsExpressionComponent ? (
-          <AlertTypeParamsExpressionComponent
-            alert={alert}
-            errors={errors}
-            setAlertTypeParams={setAlertTypeParams}
-            hasErrors={hasErrors}
-          />
-        ) : null}
-      </EuiPanel>
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiLink onClick={() => setAlertType(undefined)}>
+            <FormattedMessage
+              defaultMessage={'Change'}
+              id="xpack.alertingUI.sections.alertAdd.changeAlertTypeLink"
+            />
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {AlertTypeParamsExpressionComponent ? (
+        <AlertTypeParamsExpressionComponent
+          alert={alert}
+          errors={errors}
+          setAlertTypeParams={setAlertTypeParams}
+          hasErrors={hasErrors}
+        />
+      ) : null}
     </Fragment>
   );
 
@@ -248,7 +260,6 @@ export const AlertAdd = ({ refreshList }: Props) => {
   if (!alertAction) {
     alertDetails = (
       <Fragment>
-        <EuiSpacer size="m" />
         <EuiTitle size="xxs">
           <h5 id="alertActionTypeTitle">
             <FormattedMessage
@@ -301,20 +312,10 @@ export const AlertAdd = ({ refreshList }: Props) => {
 
   let alertTypeArea;
   if (alertType) {
-    alertTypeArea = (
-      <Fragment>
-        <EuiSpacer size="m" />
-        <EuiTabs>{alertTabs}</EuiTabs>
-        <EuiSpacer size="m" />
-        {alertTypeDetails}
-        <EuiSpacer size="m" />
-        <EuiPanel paddingSize="s">{selectedTabContent}</EuiPanel>
-      </Fragment>
-    );
+    alertTypeArea = <Fragment>{alertTypeDetails}</Fragment>;
   } else {
     alertTypeArea = (
       <Fragment>
-        <EuiSpacer size="m" />
         <EuiTitle size="xxs">
           <h5 id="alertTypeTitle">
             <FormattedMessage
@@ -328,6 +329,38 @@ export const AlertAdd = ({ refreshList }: Props) => {
       </Fragment>
     );
   }
+
+  const labelForAlertChecked = (
+    <>
+      <FormattedMessage
+        id="xpack.alertingUI.sections.alertAdd.checkFieldLabel"
+        defaultMessage="Check every"
+      />{' '}
+      <EuiIconTip
+        position="right"
+        type="questionInCircle"
+        content={i18n.translate('xpack.alertingUI.sections.alertAdd.checkWithTooltip', {
+          defaultMessage: 'This is some help text here for check alert.',
+        })}
+      />
+    </>
+  );
+
+  const labelForAlertRenotify = (
+    <>
+      <FormattedMessage
+        id="xpack.alertingUI.sections.alertAdd.renotifyFieldLabel"
+        defaultMessage="Re-notify every"
+      />{' '}
+      <EuiIconTip
+        position="right"
+        type="questionInCircle"
+        content={i18n.translate('xpack.alertingUI.sections.alertAdd.renotifyWithTooltip', {
+          defaultMessage: 'This is some help text here for re-notify alert.',
+        })}
+      />
+    </>
+  );
 
   return (
     <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutAlertAddTitle" size="m">
@@ -409,7 +442,66 @@ export const AlertAdd = ({ refreshList }: Props) => {
               </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGrid>
-          {alertTypeArea}
+          <EuiSpacer size="m" />
+          <EuiFlexGrid columns={2}>
+            <EuiFlexItem grow={false}>
+              <EuiFormRow fullWidth compressed label={labelForAlertChecked}>
+                <EuiFlexGroup gutterSize="none">
+                  <EuiFlexItem grow={false}>
+                    <EuiFieldNumber
+                      value={alert.checkIntervalSize || ''}
+                      name="throttle"
+                      data-test-subj="throttleInput"
+                      onChange={e => {
+                        setAlertProperty('checkIntervalSize', e.target.value);
+                      }}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiSelect
+                      value={alert.checkIntervalUnit}
+                      options={getTimeOptions(alert.checkIntervalSize)}
+                      onChange={(e: any) => setAlertProperty('checkIntervalUnit', e.target.value)}
+                      fullWidth={true}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFormRow fullWidth label={labelForAlertRenotify}>
+                <EuiFlexGroup gutterSize="none">
+                  <EuiFlexItem grow={false}>
+                    <EuiFieldNumber
+                      value={alert.throttle || ''}
+                      name="throttle"
+                      data-test-subj="throttleInput"
+                      onChange={e => {
+                        setAlertProperty('renotifyIntervalSize', e.target.value);
+                      }}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiSelect
+                      value={alert.renotifyIntervalUnit}
+                      options={getTimeOptions(alert.renotifyIntervalSize)}
+                      onChange={(e: any) =>
+                        setAlertProperty('renotifyIntervalUnit', e.target.value)
+                      }
+                      fullWidth={true}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGrid>
+          <EuiSpacer size="m" />
+          <EuiTabs>{alertTabs}</EuiTabs>
+          <EuiSpacer size="m" />
+          <EuiPanel paddingSize="m">{alertTypeArea}</EuiPanel>
+          <EuiSpacer size="m" />
+          <EuiPanel paddingSize="m">{selectedTabContent}</EuiPanel>
+          <EuiSpacer size="m" />
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

@@ -10,22 +10,22 @@ import { TIME_UNITS } from '../constants';
 export function getTimeUnitLabel(timeUnit = TIME_UNITS.SECOND, timeValue = '0') {
   switch (timeUnit) {
     case TIME_UNITS.SECOND:
-      return i18n.translate('xpack.watcher.timeUnits.secondLabel', {
+      return i18n.translate('xpack.alertingUI.timeUnits.secondLabel', {
         defaultMessage: '{timeValue, plural, one {second} other {seconds}}',
         values: { timeValue },
       });
     case TIME_UNITS.MINUTE:
-      return i18n.translate('xpack.watcher.timeUnits.minuteLabel', {
+      return i18n.translate('xpack.alertingUI.timeUnits.minuteLabel', {
         defaultMessage: '{timeValue, plural, one {minute} other {minutes}}',
         values: { timeValue },
       });
     case TIME_UNITS.HOUR:
-      return i18n.translate('xpack.watcher.timeUnits.hourLabel', {
+      return i18n.translate('xpack.alertingUI.timeUnits.hourLabel', {
         defaultMessage: '{timeValue, plural, one {hour} other {hours}}',
         values: { timeValue },
       });
     case TIME_UNITS.DAY:
-      return i18n.translate('xpack.watcher.timeUnits.dayLabel', {
+      return i18n.translate('xpack.alertingUI.timeUnits.dayLabel', {
         defaultMessage: '{timeValue, plural, one {day} other {days}}',
         values: { timeValue },
       });
