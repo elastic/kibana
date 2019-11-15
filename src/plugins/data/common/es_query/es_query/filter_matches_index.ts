@@ -17,24 +17,17 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { getTimeZoneFromSettings } from '../utils/get_time_zone_from_settings';
+import { IIndexPattern, IFieldType } from '../../index_patterns';
+import { Filter } from '../filters';
 
-/**
- * Decorate queries with default parameters
- * @param query object
- * @param queryStringOptions query:queryString:options from UI settings
- * @param dateFormatTZ dateFormat:tz from UI settings
- * @returns {object}
+/*
+ * TODO: We should base this on something better than `filter.meta.key`. We should probably modify
+ * this to check if `filter.meta.index` matches `indexPattern.id` instead, but that's a breaking
+ * change.
  */
-
-export function decorateQuery(query, queryStringOptions, dateFormatTZ = null) {
-  if (_.has(query, 'query_string.query')) {
-    _.extend(query.query_string, queryStringOptions);
-    if (dateFormatTZ) {
-      _.defaults(query.query_string, { time_zone: getTimeZoneFromSettings(dateFormatTZ) });
-    }
+export function filterMatchesIndex(filter: Filter, indexPattern: IIndexPattern | null) {
+  if (!filter.meta || !indexPattern) {
+    return true;
   }
-
-  return query;
+  return indexPattern.fields.some((field: IFieldType) => field.name === filter.meta.key);
 }

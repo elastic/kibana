@@ -17,16 +17,22 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { EsQueryConfig } from './build_es_query';
 
-export function luceneStringToDsl(query) {
-  if (!_.isString(query)) {
-    return query;
-  }
+interface KibanaConfig {
+  get<T>(key: string): T;
+}
 
-  if (query.trim() === '') {
-    return { match_all: {} };
-  }
+export function getEsQueryConfig(config: KibanaConfig) {
+  const allowLeadingWildcards = config.get('query:allowLeadingWildcards');
+  const queryStringOptions = config.get('query:queryString:options');
+  const ignoreFilterIfFieldNotInIndex = config.get('courier:ignoreFilterIfFieldNotInIndex');
+  const dateFormatTZ = config.get('dateFormat:tz');
 
-  return { query_string: { query } };
+  return {
+    allowLeadingWildcards,
+    queryStringOptions,
+    ignoreFilterIfFieldNotInIndex,
+    dateFormatTZ,
+  } as EsQueryConfig;
 }
