@@ -11,9 +11,7 @@ import { BrowserLineChart } from './BrowserLineChart';
 describe('BrowserLineChart', () => {
   describe('render', () => {
     it('renders', () => {
-      const props = { series: [] };
-
-      expect(() => shallow(<BrowserLineChart {...props} />)).not.toThrowError();
+      expect(() => shallow(<BrowserLineChart />)).not.toThrowError();
     });
   });
 });
