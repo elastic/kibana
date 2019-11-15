@@ -6,6 +6,7 @@
 import { IconType } from '@elastic/eui';
 import { KibanaAssetType, AssetType, ServiceName } from '../common/types';
 
+// TODO: figure out how to allow only corresponding asset types (KibanaAssetType, ElasticsearchAssetType)
 export const DisplayedAssets: Record<ServiceName, AssetType[]> = {
   kibana: ['index-pattern', 'visualization', 'search', 'dashboard'],
   elasticsearch: ['index-template', 'ingest-pipeline', 'ilm-policy'],
