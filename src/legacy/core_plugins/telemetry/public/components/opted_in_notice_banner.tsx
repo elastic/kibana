@@ -18,32 +18,50 @@
  */
 
 import * as React from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiLink, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Props {
   dismiss: () => Promise<any[]>;
 }
 
-export class OptInMessage extends React.PureComponent<Props> {
+/**
+ * React component for displaying the Telemetry opt-in banner.
+ */
+export class OptedInBanner extends React.PureComponent<Props> {
   render() {
     return (
-      <React.Fragment>
+      <EuiCallOut title="Help us improve the Elastic Stack">
         <FormattedMessage
           id="telemetry.telemetryOptedInNoticeDescription"
-          defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our Privacy Statement. To stop collection, disable usage data here."
+          defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our {privacyStatementLink}. To stop collection, {disableLink}."
           values={{
-            dismissLink: (
-              <EuiButton target="_blank">
+            privacyStatementLink: (
+              <EuiLink href="#" target="_blank">
                 <FormattedMessage
-                  id="telemetry.telemetryOptedInNoticeDismiss"
-                  defaultMessage="Dismiss"
+                  id="telemetry.telemetryOptedInPrivacyStatement"
+                  defaultMessage="Privacy Statement"
                 />
-              </EuiButton>
+              </EuiLink>
+            ),
+            disableLink: (
+              <EuiLink href="#" target="_blank">
+                <FormattedMessage
+                  id="telemetry.telemetryOptedInDisableUsage"
+                  defaultMessage="disable usage data here"
+                />
+              </EuiLink>
             ),
           }}
         />
-      </React.Fragment>
+        <EuiSpacer size="s" />
+        <EuiButton size="s" onClick={this.props.dismiss}>
+          <FormattedMessage
+            id="telemetry.welcomeBanner.enableButtonLabel"
+            defaultMessage="Dismiss"
+          />
+        </EuiButton>
+      </EuiCallOut>
     );
   }
 }
