@@ -90,7 +90,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
         ? [{ match: { [model.map_field_to]: id } }]
         : [{ match: { [nodeField]: id } }];
       // NP_TODO: make this method no longer require raw request :(
-      return this.framework.makeTSVBRequest(rawRequest, model, timerange, filters);
+      return this.framework.makeTSVBRequest(rawRequest, model, timerange, filters, requestContext);
     });
     return Promise.all(requests)
       .then(results => {

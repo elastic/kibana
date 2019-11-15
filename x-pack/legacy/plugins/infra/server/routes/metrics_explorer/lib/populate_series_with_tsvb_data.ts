@@ -5,7 +5,7 @@
  */
 
 import { union } from 'lodash';
-import { KibanaRequest } from 'src/core/server';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import {
   MetricsExplorerColumnType,
@@ -19,7 +19,8 @@ import { JsonObject } from '../../../../common/typed_json';
 export const populateSeriesWithTSVBData = (
   request: KibanaRequest,
   options: MetricsExplorerRequestBody,
-  framework: KibanaFramework
+  framework: KibanaFramework,
+  requestContext: RequestHandlerContext
 ) => async (series: MetricsExplorerSeries) => {
   // IF there are no metrics selected then we should return an empty result.
   if (options.metrics.length === 0) {
@@ -53,7 +54,13 @@ export const populateSeriesWithTSVBData = (
   const model = createMetricModel(options);
 
   // Get TSVB results using the model, timerange and filters
-  const tsvbResults = await framework.makeTSVBRequest(request, model, timerange, filters);
+  const tsvbResults = await framework.makeTSVBRequest(
+    request,
+    model,
+    timerange,
+    filters,
+    requestContext
+  );
 
   // If there is no data `custom` will not exist.
   if (!tsvbResults.custom) {
@@ -80,7 +87,10 @@ export const populateSeriesWithTSVBData = (
   // MetricsExplorerRow.
   const timestamps = tsvbResults.custom.series.reduce(
     (currentTimestamps, tsvbSeries) =>
-      union(currentTimestamps, tsvbSeries.data.map(row => row[0])).sort(),
+      union(
+        currentTimestamps,
+        tsvbSeries.data.map(row => row[0])
+      ).sort(),
     [] as number[]
   );
   // Combine the TSVB series for multiple metrics.

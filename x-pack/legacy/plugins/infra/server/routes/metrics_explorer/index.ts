@@ -37,7 +37,9 @@ export const initMetricExplorerRoute = (libs: InfraBackendLibs) => {
         // Then we take the results and fill in the data from TSVB with the
         // user's custom metrics
         const seriesWithMetrics = await Promise.all(
-          groupings.series.map(populateSeriesWithTSVBData(request, options, framework))
+          groupings.series.map(
+            populateSeriesWithTSVBData(request, options, framework, requestContext)
+          )
         );
         return response.ok({ body: { ...response, series: seriesWithMetrics } });
       } catch (error) {

@@ -19,6 +19,7 @@ import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
 // not sure how the graphql stuff uses it, so we can't remove it yet
 export interface InfraContext {
   req: any;
+  rawReq?: any;
 }
 
 export interface InfraDomainLibs {

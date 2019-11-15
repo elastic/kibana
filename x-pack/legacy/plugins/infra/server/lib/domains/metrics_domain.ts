@@ -18,7 +18,7 @@ export class InfraMetricsDomain {
   public async getMetrics(
     requestContext: RequestHandlerContext,
     options: InfraMetricsRequestOptions,
-    rawRequest: KibanaRequest
+    rawRequest: KibanaRequest // NP_TODO: temporarily needed until metrics getVisData no longer needs full request
   ): Promise<InfraMetricData[]> {
     return await this.adapter.getMetrics(requestContext, options, rawRequest);
   }

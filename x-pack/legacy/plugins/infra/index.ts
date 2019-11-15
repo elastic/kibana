@@ -93,6 +93,16 @@ export function infra(kibana: any) {
         metrics: legacyServer.plugins.metrics,
         spaces: legacyServer.plugins.spaces,
         features: plugins.features,
+        // NP_NOTE: [TSVB_GROUP] Huge hack to make TSVB (getVisData()) work with raw requests that
+        // originate from the New Platform router (and are very different to the old request object).
+        // Once TSVB has migrated over to NP, and can work with the new raw requests, or ideally just
+        // the requestContext, this can be removed.
+        ___legacy: {
+          tsvb: {
+            elasticsearch: legacyServer.plugins.elasticsearch,
+            __internals: legacyServer.newPlatform.__internals,
+          },
+        },
         apm: {
           getIndices: () => getApmIndices(legacyServer),
         },

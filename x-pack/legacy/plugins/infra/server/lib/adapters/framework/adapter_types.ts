@@ -24,6 +24,7 @@ export interface InfraServerPluginDeps {
   apm: {
     getIndices: () => Promise<ApmIndices>;
   };
+  ___legacy: any;
 }
 
 export interface CallWithRequestParams extends GenericParams {

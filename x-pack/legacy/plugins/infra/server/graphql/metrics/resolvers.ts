@@ -33,7 +33,7 @@ export const createMetricResolvers = (
   };
 } => ({
   InfraSource: {
-    async metrics(source, args, { req }) {
+    async metrics(source, args, { req, rawReq }) {
       const sourceConfiguration = pipe(
         SourceConfigurationRuntimeType.decode(source.configuration),
         fold(errors => {
@@ -49,7 +49,7 @@ export const createMetricResolvers = (
         metrics: args.metrics,
         sourceConfiguration,
       };
-      return libs.metrics.getMetrics(req, options);
+      return libs.metrics.getMetrics(req, options, rawReq);
     },
   },
 });
