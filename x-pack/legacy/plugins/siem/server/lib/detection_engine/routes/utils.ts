@@ -5,6 +5,7 @@
  */
 
 import Boom from 'boom';
+import { pickBy, identity } from 'lodash/fp';
 import { SignalAlertType, isAlertType, OutputSignalAlertRest, isAlertTypes } from '../alerts/types';
 
 export const getIdError = ({
@@ -23,33 +24,35 @@ export const getIdError = ({
   }
 };
 
-export const transformAlertToSignal = (signal: SignalAlertType): OutputSignalAlertRest => {
-  return {
+// Transforms the data but will remove any null or undefined it encounters and not include
+// those on the export
+export const transformAlertToSignal = (signal: SignalAlertType): Partial<OutputSignalAlertRest> => {
+  return pickBy<OutputSignalAlertRest>(identity, {
     created_by: signal.createdBy,
     description: signal.alertTypeParams.description,
     enabled: signal.enabled,
     false_positives: signal.alertTypeParams.falsePositives,
-    ...{ filter: signal.alertTypeParams.filter },
-    ...{ filters: signal.alertTypeParams.filters },
+    filter: signal.alertTypeParams.filter,
+    filters: signal.alertTypeParams.filters,
     from: signal.alertTypeParams.from,
     id: signal.id,
     immutable: signal.alertTypeParams.immutable,
     index: signal.alertTypeParams.index,
     interval: signal.interval,
-    ...{ rule_id: signal.alertTypeParams.ruleId },
-    ...{ language: signal.alertTypeParams.language },
+    rule_id: signal.alertTypeParams.ruleId,
+    language: signal.alertTypeParams.language,
     max_signals: signal.alertTypeParams.maxSignals,
     name: signal.name,
-    ...{ query: signal.alertTypeParams.query },
+    query: signal.alertTypeParams.query,
     references: signal.alertTypeParams.references,
-    ...{ saved_id: signal.alertTypeParams.savedId },
+    saved_id: signal.alertTypeParams.savedId,
     severity: signal.alertTypeParams.severity,
-    ...{ size: signal.alertTypeParams.size },
+    size: signal.alertTypeParams.size,
     updated_by: signal.updatedBy,
     tags: signal.alertTypeParams.tags,
     to: signal.alertTypeParams.to,
     type: signal.alertTypeParams.type,
-  };
+  });
 };
 
 export const transformFindAlertsOrError = (findResults: { data: unknown[] }): unknown | Boom => {
@@ -61,7 +64,7 @@ export const transformFindAlertsOrError = (findResults: { data: unknown[] }): un
   }
 };
 
-export const transformOrError = (signal: unknown): OutputSignalAlertRest | Boom => {
+export const transformOrError = (signal: unknown): Partial<OutputSignalAlertRest> | Boom => {
   if (isAlertType(signal)) {
     return transformAlertToSignal(signal);
   } else {
