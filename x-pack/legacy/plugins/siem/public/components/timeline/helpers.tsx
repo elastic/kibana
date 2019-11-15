@@ -7,7 +7,7 @@
 import { isEmpty, isNumber, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { Query, esFilters } from 'src/plugins/data/public';
+import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
 import { escapeQueryValue, convertToBuildEsQuery, EsQueryConfig } from '../../lib/keury';
 
@@ -113,9 +113,14 @@ export const combineQueries = ({
   isEventViewer?: boolean;
 }): { filterQuery: string } | null => {
   const kuery: Query = { query: '', language: kqlQuery.language };
-  if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEventViewer) {
+  if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters) && !isEventViewer) {
     return null;
   } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEventViewer) {
+    kuery.query = `@timestamp >= ${start} and @timestamp <= ${end}`;
+    return {
+      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+    };
+  } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
     kuery.query = `@timestamp >= ${start} and @timestamp <= ${end}`;
     return {
       filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),

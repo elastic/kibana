@@ -25,6 +25,7 @@ export const DEFAULT_TO = 'now';
 export const DEFAULT_INTERVAL_PAUSE = true;
 export const DEFAULT_INTERVAL_TYPE = 'manual';
 export const DEFAULT_INTERVAL_VALUE = 300000; // ms
+export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
 
 /**
  * Id for the SIGNALS alerting type
