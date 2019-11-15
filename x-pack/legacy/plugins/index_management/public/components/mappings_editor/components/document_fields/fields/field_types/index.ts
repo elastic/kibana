@@ -19,6 +19,7 @@ import { TokenCountType } from './token_count';
 import { CompletionType } from './completion_type';
 import { GeoPointType } from './geo_point_type';
 import { DateType } from './date_type';
+import { GeoShapeType } from './geo_shape_type';
 
 const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   alias: AliasType,
@@ -34,6 +35,7 @@ const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   geo_point: GeoPointType,
   date: DateType,
   date_nanos: DateType,
+  geo_shape: GeoShapeType,
 };
 
 export const getParametersFormForType = (

@@ -199,6 +199,21 @@ export const PARAMETERS_DEFINITION = {
       ],
     },
   },
+  orientation: {
+    fieldConfig: {
+      defaultValue: 'ccw',
+      type: FIELD_TYPES.TEXT,
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate('xpack.idxMgmt.mappingsEditor.orientationFieldRequiredErrorMessage', {
+              defaultMessage: 'Specify an orientation.',
+            })
+          ),
+        },
+      ],
+    },
+  },
   boost: {
     fieldConfig: {
       defaultValue: 1.0,
@@ -367,6 +382,11 @@ export const PARAMETERS_DEFINITION = {
     },
   },
   ignore_z_value: {
+    fieldConfig: {
+      defaultValue: true,
+    },
+  },
+  points_only: {
     fieldConfig: {
       defaultValue: true,
     },

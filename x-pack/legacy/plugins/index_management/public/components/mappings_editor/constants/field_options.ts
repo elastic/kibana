@@ -52,6 +52,10 @@ export const PARAMETERS_OPTIONS: { [key in ParameterName]?: SelectOption[] } = {
     { value: 'with_positions_payloads', text: 'With positions payloads' },
     { value: 'with_positions_offsets_payloads', text: 'With positions offsets payloads' },
   ],
+  orientation: [
+    { value: 'ccw', text: 'counterclockwise' },
+    { value: 'cw', text: 'clockwise' },
+  ],
 };
 
 const DATE_FORMATS = [

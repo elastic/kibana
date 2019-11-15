@@ -102,6 +102,8 @@ export type ParameterName =
   | 'preserve_position_increments'
   | 'ignore_z_value'
   | 'enable_position_increments'
+  | 'orientation'
+  | 'points_only'
   | 'path';
 
 export interface Parameter {
