@@ -118,7 +118,7 @@ class JobDetailsUI extends Component {
           id: 'xpack.ml.jobsList.jobDetails.tabs.jobMessagesLabel',
           defaultMessage: 'Job messages'
         }),
-        content: <JobMessagesPane job={job} />,
+        content: <JobMessagesPane jobId={job.job_id} />,
       },
       ];
 

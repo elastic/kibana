@@ -18,10 +18,8 @@
  */
 
 import { SavedObject } from 'ui/saved_objects/saved_object';
-import { RefreshInterval } from 'src/plugins/data/public';
-import { Query } from 'src/legacy/core_plugins/data/public';
 import { SearchSourceContract } from '../../../../../ui/public/courier';
-import { esFilters } from '../../../../../../plugins/data/public';
+import { esFilters, Query, RefreshInterval } from '../../../../../../plugins/data/public';
 
 export interface SavedObjectDashboard extends SavedObject {
   id?: string;

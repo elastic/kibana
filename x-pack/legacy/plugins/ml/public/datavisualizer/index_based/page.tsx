@@ -403,7 +403,8 @@ export const Page: FC = () => {
     let allMetricFields = indexPatternFields.filter(f => {
       return (
         f.type === KBN_FIELD_TYPES.NUMBER &&
-        (f.displayName !== undefined && dataLoader.isDisplayField(f.displayName) === true)
+        f.displayName !== undefined &&
+        dataLoader.isDisplayField(f.displayName) === true
       );
     });
     if (metricFieldQuery !== undefined) {
@@ -477,7 +478,8 @@ export const Page: FC = () => {
       allNonMetricFields = indexPatternFields.filter(f => {
         return (
           f.type !== KBN_FIELD_TYPES.NUMBER &&
-          (f.displayName !== undefined && dataLoader.isDisplayField(f.displayName) === true)
+          f.displayName !== undefined &&
+          dataLoader.isDisplayField(f.displayName) === true
         );
       });
     } else {

@@ -269,7 +269,8 @@ export function PopoverEditor(props: PopoverEditorProps) {
                 if (
                   !incompatibleSelectedOperationType &&
                   selectedColumn &&
-                  ('field' in choice && choice.operationType === selectedColumn.operationType)
+                  'field' in choice &&
+                  choice.operationType === selectedColumn.operationType
                 ) {
                   // If we just changed the field are not in an error state and the operation didn't change,
                   // we use the operations onFieldChange method to calculate the new column.

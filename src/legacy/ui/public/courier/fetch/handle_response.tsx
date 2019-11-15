@@ -24,6 +24,7 @@ import { toastNotifications } from '../../notify/toasts';
 import { ShardFailureOpenModalButton } from './components/shard_failure_open_modal_button';
 import { Request, ResponseWithShardFailure } from './components/shard_failure_types';
 import { SearchRequest, SearchResponse } from '../types';
+import { toMountPoint } from '../../../../../plugins/kibana_react/public';
 
 export function handleResponse(request: SearchRequest, response: SearchResponse) {
   if (response.timed_out) {
@@ -49,7 +50,7 @@ export function handleResponse(request: SearchRequest, response: SearchResponse)
       }
     );
 
-    const text = (
+    const text = toMountPoint(
       <>
         {description}
         <EuiSpacer size="s" />
@@ -61,10 +62,7 @@ export function handleResponse(request: SearchRequest, response: SearchResponse)
       </>
     );
 
-    toastNotifications.addWarning({
-      title,
-      text,
-    });
+    toastNotifications.addWarning({ title, text });
   }
 
   return response;

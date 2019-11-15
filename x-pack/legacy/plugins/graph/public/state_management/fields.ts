@@ -51,17 +51,12 @@ export const fieldsReducer = reducerWithInitialState(initialFields)
   .build();
 
 export const fieldMapSelector = (state: GraphState) => state.fields;
-export const fieldsSelector = createSelector(
-  fieldMapSelector,
-  fields => Object.values(fields)
+export const fieldsSelector = createSelector(fieldMapSelector, fields => Object.values(fields));
+export const selectedFieldsSelector = createSelector(fieldsSelector, fields =>
+  fields.filter(field => field.selected)
 );
-export const selectedFieldsSelector = createSelector(
-  fieldsSelector,
-  fields => fields.filter(field => field.selected)
-);
-export const liveResponseFieldsSelector = createSelector(
-  selectedFieldsSelector,
-  fields => fields.filter(field => field.hopSize && field.hopSize > 0)
+export const liveResponseFieldsSelector = createSelector(selectedFieldsSelector, fields =>
+  fields.filter(field => field.hopSize && field.hopSize > 0)
 );
 export const hasFieldsSelector = createSelector(
   selectedFieldsSelector,
