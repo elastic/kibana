@@ -147,7 +147,8 @@ will default to `true`.
 `logging.quiet:`:: *Default: false* Set the value of this setting to `true` to
 suppress all logging output other than error messages.
 
-`logging.rotate:`:: *Default: false* Specifies the options for the logging rotate feature.
+`logging.rotate:`:: Specifies the options for the logging rotate feature.
+When not defined, all the sub options defaults would be applied.
 The following example shows a valid logging rotate configuration:
 +
 --
