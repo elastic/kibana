@@ -7,7 +7,6 @@ import euiLight from '@elastic/eui/dist/eui_theme_light.json';
 import euiDark from '@elastic/eui/dist/eui_theme_dark.json';
 import chrome from 'ui/chrome';
 import { npSetup, npStart } from 'ui/new_platform';
-import { useUiSetting$ } from '../../../../../src/plugins/kibana_react/public';
 import { Plugin, PluginInitializerContext } from './plugin';
 import { routes } from './routes';
 
@@ -28,7 +27,7 @@ epmPlugin.setup(npSetup.core);
 chrome.setRootTemplate(template);
 
 waitForElement(getRootEl).then(element => {
-  const [isDarkMode] = useUiSetting$<boolean>('theme:darkMode');
+  const isDarkMode = npStart.core.uiSettings.get('theme:darkMode');
   epmPlugin.start({
     ...npStart.core,
     routes,
