@@ -7,6 +7,7 @@
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { CapabilitiesModifier } from 'src/legacy/server/capabilities';
+import { HomePluginSetup } from 'src/plugins/home';
 import {
   SavedObjectsLegacyService,
   CoreSetup,
@@ -62,6 +63,7 @@ export interface PluginsSetup {
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
+  home?: HomePluginSetup;
 }
 
 export interface SpacesPluginSetup {
@@ -136,6 +138,12 @@ export class Plugin {
 
     if (plugins.security) {
       plugins.security.registerSpacesService(spacesService);
+    }
+
+    if (plugins.home) {
+      plugins.home.addScopedTutorialContextFactory(
+        createSpacesTutorialContextFactory(spacesService)
+      );
     }
 
     return {
