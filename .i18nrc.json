@@ -33,7 +33,7 @@
     "visTypeTagCloud": "src/legacy/core_plugins/vis_type_tagcloud",
     "visTypeTimeseries": "src/legacy/core_plugins/vis_type_timeseries",
     "visTypeVega": "src/legacy/core_plugins/vis_type_vega",
-    "visualizations": "src/plugins/visualizations"
+    "visualizations": ["src/plugins/visualizations", "src/legacy/core_plugins/visualizations"]
   },
   "exclude": ["src/legacy/ui/ui_render/ui_render_mixin.js"],
   "translations": []

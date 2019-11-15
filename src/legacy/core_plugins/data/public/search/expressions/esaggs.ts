@@ -142,17 +142,14 @@ const handleCourierRequest = async ({
   if (shouldQuery) {
     inspectorAdapters.requests.reset();
     const request = inspectorAdapters.requests.start(
-      i18n.translate('interpreter.functions.esaggs.inspector.dataRequest.title', {
+      i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
         defaultMessage: 'Data',
       }),
       {
-        description: i18n.translate(
-          'interpreter.functions.esaggs.inspector.dataRequest.description',
-          {
-            defaultMessage:
-              'This request queries Elasticsearch to fetch the data for the visualization.',
-          }
-        ),
+        description: i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
+          defaultMessage:
+            'This request queries Elasticsearch to fetch the data for the visualization.',
+        }),
       }
     );
     request.stats(getRequestInspectorStats(requestSearchSource));
@@ -231,7 +228,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
   context: {
     types: ['kibana_context', 'null'],
   },
-  help: i18n.translate('interpreter.functions.esaggs.help', {
+  help: i18n.translate('data.functions.esaggs.help', {
     defaultMessage: 'Run AggConfig aggregation',
   }),
   args: {

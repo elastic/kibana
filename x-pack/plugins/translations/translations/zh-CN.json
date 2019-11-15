@@ -939,7 +939,7 @@
     "visualizations.function.visDimension.accessor.help": "数据集中要使用的列（列索引或列名称）",
     "visualizations.function.visDimension.error.accessor": "提供的列名称无效",
     "visualizations.function.visDimension.help": "生成 visConfig 维度对象",
-    "interpreter.functions.esaggs.help": "运行 AggConfig 聚合",
+    "data.functions.esaggs.help": "运行 AggConfig 聚合",
     "expressions.functions.kibana_context.help": "更新 kibana 全局上下文",
     "expressions.functions.kibana.help": "获取 kibana 全局上下文",
     "expressions.functions.font.args.alignHelpText": "水平文本对齐。",

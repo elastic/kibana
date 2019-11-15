@@ -938,7 +938,7 @@
     "visualizations.function.visDimension.accessor.help": "使用するデータセット内の列 (列インデックスまたは列名)",
     "visualizations.function.visDimension.error.accessor": "入力された列名は無効です。",
     "visualizations.function.visDimension.help": "visConfig ディメンションオブジェクトを生成します",
-    "interpreter.functions.esaggs.help": "AggConfig 集約を実行します",
+    "data.functions.esaggs.help": "AggConfig 集約を実行します",
     "expressions.functions.kibana_context.help": "Kibana グローバルコンテキストを更新します",
     "expressions.functions.kibana.help": "Kibana グローバルコンテキストを取得します",
     "expressions.functions.font.args.alignHelpText": "水平テキスト配置",

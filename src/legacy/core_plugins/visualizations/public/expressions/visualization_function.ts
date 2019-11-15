@@ -47,7 +47,7 @@ export type ExpressionFunctionVisualization = ExpressionFunction<
 export const visualization = (): ExpressionFunctionVisualization => ({
   name: 'visualization',
   type: 'render',
-  help: i18n.translate('interpreter.functions.visualization.help', {
+  help: i18n.translate('visualizations.functions.visualization.help', {
     defaultMessage: 'A simple visualization',
   }),
   args: {
