@@ -17,10 +17,8 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('general', () => {
-    loadTestFile(require.resolve('./cookies'));
-    loadTestFile(require.resolve('./csp'));
-    loadTestFile(require.resolve('./prototype_pollution'));
-  });
-}
+import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
+
+import { services } from './services';
+
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
