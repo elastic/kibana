@@ -40,7 +40,7 @@ when users navigate away or update the query.
 The `xpack.telemetry.enabled` setting has been removed.  
 
 *Impact:*
-Use <<telemetry.enabled, `telemetry.enabled`>> instead.
+Use {kibana-ref}/monitoring-settings-kb.html#monitoring-general-settings[`telemetry.enabled`] instead.
 
 
 // end::notable-breaking-changes[]
