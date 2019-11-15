@@ -24,4 +24,4 @@ export {
   TutorialsRegistrySetup,
   TutorialsRegistryStart,
 } from './tutorials_registry';
-export * from './tutorials_registry_types';
+export * from '../lib/tutorials_registry_types';

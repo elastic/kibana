@@ -27,7 +27,7 @@ import {
   TutorialSchema,
   TutorialsCategory,
   ScopedTutorialContextFactory,
-} from './tutorials_registry_types';
+} from '../lib/tutorials_registry_types';
 
 const INVALID_TUTORIAL: TutorialSchema = {
   id: 'test',

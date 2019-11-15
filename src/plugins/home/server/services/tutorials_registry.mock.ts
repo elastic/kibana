@@ -23,9 +23,6 @@ import {
   TutorialsRegistry,
 } from './tutorials_registry';
 
-type PublicMethodsOf<T> = {
-  [P in { [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never }[keyof T]]: T[P];
-};
 const createSetupMock = (): jest.Mocked<TutorialsRegistrySetup> => {
   const setup = {
     registerTutorial: jest.fn(),

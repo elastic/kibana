@@ -31,7 +31,6 @@ describe('HomePlugin', () => {
   });
 
   describe('setup', () => {
-    // let mockCoreSetup: MockedKeys<CoreSetup>;
     const mockCoreSetup: MockedKeys<CoreSetup> = coreMock.createSetup();
 
     test('wires up and returns registerTutorial and addScopedTutorialContextFactory', () => {

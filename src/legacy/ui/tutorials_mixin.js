@@ -19,38 +19,6 @@
 
 import Joi from 'joi';
 import { tutorialSchema } from '../core_plugins/kibana/common/tutorials/tutorial_schema';
-// import { schema } from '@kbn/config-schema';
-
-class TutorialsPlugin {
-  setup(core) {
-    const tutorialProviders = [];
-    const scopedTutorialContextFactories = [];
-
-    core.http.registerRouteHandlerContext('getTutorials', (request) => {
-      const initialContext = {};
-      const scopedContext = scopedTutorialContextFactories.reduce((accumulatedContext, contextFactory) => {
-        return { ...accumulatedContext, ...contextFactory(request) };
-      }, initialContext);
-
-      return tutorialProviders.map((tutorialProvider) => {
-        return tutorialProvider(server, scopedContext);
-      });
-    });
-
-    return {
-      registerTutorial(specProvider) {
-        const emptyContext = {};
-        const { error } = Joi.validate(specProvider(server, emptyContext), tutorialSchema);
-
-        if (error) {
-          throw new Error(`Unable to register tutorial spec because its invalid. ${error}`);
-        }
-
-        tutorialProviders.push(specProvider);
-      }
-    };
-  }
-}
 
 export function tutorialsMixin(kbnServer, server) {
   const tutorialProviders = [];
