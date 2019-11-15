@@ -5,7 +5,6 @@
  */
 
 export { docCountQuery, docCountQueryString } from './doc_count_query';
-export { filterBarQuery, filterBarQueryString } from './filter_bar_query';
 export { monitorChartsQuery, monitorChartsQueryString } from './monitor_charts_query';
 export { monitorPageTitleQuery } from './monitor_page_title_query';
 export { monitorStatusBarQuery, monitorStatusBarQueryString } from './monitor_status_bar_query';
