@@ -9,19 +9,7 @@ import { useFetcher } from './useFetcher';
 import { useUrlParams } from './useUrlParams';
 import { AvgDurationByBrowserAPIResponse } from '../../server/lib/transactions/avg_duration_by_browser';
 import { TimeSeries } from '../../typings/timeseries';
-
-const colors = [
-  theme.euiColorVis0,
-  theme.euiColorVis1,
-  theme.euiColorVis2,
-  theme.euiColorVis3,
-  theme.euiColorVis4,
-  theme.euiColorVis5,
-  theme.euiColorVis6,
-  theme.euiColorVis7,
-  theme.euiColorVis8,
-  theme.euiColorVis9
-];
+import { getVizColorForIndex } from '../../common/viz_colors';
 
 function toTimeSeries(data?: AvgDurationByBrowserAPIResponse): TimeSeries[] {
   if (!data) {
@@ -31,7 +19,7 @@ function toTimeSeries(data?: AvgDurationByBrowserAPIResponse): TimeSeries[] {
   return data.map((item, index) => {
     return {
       ...item,
-      color: colors[index % colors.length],
+      color: getVizColorForIndex(index, theme),
       type: 'linemark'
     };
   });
