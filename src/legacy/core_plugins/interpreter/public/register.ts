@@ -17,29 +17,14 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { Legacy } from '../../../../kibana';
-import { init } from './init';
+import { npSetup } from 'ui/new_platform';
+import { visualization } from './renderers/visualization';
+import { esaggs as esaggsFn } from './functions/esaggs';
+import { visualization as visualizationFn } from './functions/visualization';
 
-// eslint-disable-next-line
-export default function InterpreterPlugin(kibana: any) {
-  const config: Legacy.PluginSpecOptions = {
-    id: 'interpreter',
-    require: ['kibana', 'elasticsearch'],
-    publicDir: resolve(__dirname, 'public'),
-    uiExports: {
-      injectDefaultVars: server => ({
-        serverBasePath: server.config().get('server.basePath'),
-      }),
-      interpreter: ['plugins/interpreter/register'],
-    },
-    config: (Joi: any) => {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-      }).default();
-    },
-    init,
-  };
+// TODO: This needs to be moved to `data` plugin Search service.
+npSetup.plugins.expressions.registerFunction(esaggsFn);
 
-  return new kibana.Plugin(config);
-}
+// TODO: This needs to be moved to `visualizations` plugin.
+npSetup.plugins.expressions.registerFunction(visualizationFn);
+npSetup.plugins.expressions.registerRenderer(visualization);
