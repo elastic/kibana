@@ -5,12 +5,12 @@
 ```ts
 
 import { Breadcrumb } from '@elastic/eui';
+import { EuiGlobalToastListToast } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { ShallowPromise } from '@kbn/utility-types';
-import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
 import { UiSettingsParams as UiSettingsParams_2 } from 'src/core/server/types';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
@@ -619,6 +619,9 @@ export interface LegacyNavLink {
     url: string;
 }
 
+// @public
+export type MountPoint = (element: HTMLElement) => UnmountCallback;
+
 // @public (undocumented)
 export interface NotificationsSetup {
     // (undocumented)
@@ -631,12 +634,9 @@ export interface NotificationsStart {
     toasts: ToastsStart;
 }
 
-// @public
-export type OverlayBannerMount = (element: HTMLElement) => OverlayBannerUnmount;
-
 // @public (undocumented)
 export interface OverlayBannersStart {
-    add(mount: OverlayBannerMount, priority?: number): string;
+    add(mount: MountPoint, priority?: number): string;
     // Warning: (ae-forgotten-export) The symbol "OverlayBanner" needs to be exported by the entry point index.d.ts
     // 
     // @internal (undocumented)
@@ -644,11 +644,8 @@ export interface OverlayBannersStart {
     // (undocumented)
     getComponent(): JSX.Element;
     remove(id: string): boolean;
-    replace(id: string | undefined, mount: OverlayBannerMount, priority?: number): string;
+    replace(id: string | undefined, mount: MountPoint, priority?: number): string;
 }
-
-// @public
-export type OverlayBannerUnmount = () => void;
 
 // @public
 export interface OverlayRef {
@@ -917,35 +914,36 @@ export class SimpleSavedObject<T extends SavedObjectAttributes> {
     _version?: SavedObject<T>['version'];
 }
 
-export { Toast }
+// Warning: (ae-missing-release-tag) "Toast" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export type Toast = ToastInputFields & {
+    id: string;
+};
 
 // @public
-export type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
+export type ToastInput = string | ToastInputFields;
 
 // @public
-export type ToastInputFields = Pick<Toast, Exclude<keyof Toast, 'id'>>;
+export type ToastInputFields = Pick<EuiGlobalToastListToast, Exclude<keyof EuiGlobalToastListToast, 'id' | 'text' | 'title'>> & {
+    title?: string | MountPoint;
+    text?: string | MountPoint;
+};
 
 // @public
 export class ToastsApi implements IToasts {
     constructor(deps: {
         uiSettings: UiSettingsClientContract;
     });
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     add(toastOrTitle: ToastInput): Toast;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     addDanger(toastOrTitle: ToastInput): Toast;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     addError(error: Error, options: ErrorToastOptions): Toast;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     addSuccess(toastOrTitle: ToastInput): Toast;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     addWarning(toastOrTitle: ToastInput): Toast;
     get$(): Rx.Observable<Toast[]>;
     // @internal (undocumented)
     registerOverlays(overlays: OverlayStart): void;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ToastApi"
-    remove(toast: Toast): void;
+    remove(toastOrId: Toast | string): void;
     }
 
 // @public (undocumented)
@@ -990,6 +988,9 @@ export interface UiSettingsState {
     // (undocumented)
     [key: string]: UiSettingsParams_2 & UserProvidedValues_2;
 }
+
+// @public
+export type UnmountCallback = () => void;
 
 
 ```
