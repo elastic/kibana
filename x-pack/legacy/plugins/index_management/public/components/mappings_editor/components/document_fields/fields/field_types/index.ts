@@ -5,19 +5,21 @@
  */
 
 import { ComponentType } from 'react';
-import { MainType, SubType, DataType, NormalizedField } from '../../../../types';
+import { MainType, SubType, DataType, NormalizedField, NormalizedFields } from '../../../../types';
 
-import { TextType } from './text_type';
+import { AliasType } from './alias_type';
 import { KeywordType } from './keyword_type';
 import { NumericType } from './numeric_type';
+import { TextType } from './text_type';
 import { BooleanType } from './boolean_type';
 import { BinaryType } from './binary_type';
 import { RangeType } from './range_type';
 
-const typeMapToParametersForm: { [key in DataType]?: ComponentType<any> } = {
-  text: TextType,
+const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
+  alias: AliasType,
   keyword: KeywordType,
   numeric: NumericType,
+  text: TextType,
   boolean: BooleanType,
   binary: BinaryType,
   range: RangeType,
@@ -26,7 +28,7 @@ const typeMapToParametersForm: { [key in DataType]?: ComponentType<any> } = {
 export const getParametersFormForType = (
   type: MainType,
   subType?: SubType
-): ComponentType<{ field: NormalizedField }> | undefined =>
+): ComponentType<{ field: NormalizedField; allFields: NormalizedFields['byId'] }> | undefined =>
   subType === undefined
-    ? typeMapToParametersForm[type]
-    : typeMapToParametersForm[subType] || typeMapToParametersForm[type];
+    ? typeToParametersFormMap[type]
+    : typeToParametersFormMap[subType] || typeToParametersFormMap[type];

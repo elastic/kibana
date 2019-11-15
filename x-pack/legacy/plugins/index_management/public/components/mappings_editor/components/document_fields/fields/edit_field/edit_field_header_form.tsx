@@ -9,12 +9,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { SelectField, UseField, FieldHook } from '../../../../shared_imports';
 import { MainType, SubType, Field } from '../../../../types';
-import { getFieldConfig } from '../../../../lib';
-import {
-  TYPE_DEFINITION,
-  FIELD_TYPES_OPTIONS,
-  MULTIFIELD_TYPES_OPTIONS,
-} from '../../../../constants';
+import { getFieldConfig, filterTypesForMultiField } from '../../../../lib';
+import { TYPE_DEFINITION, FIELD_TYPES_OPTIONS } from '../../../../constants';
 
 import { NameParameter } from '../../field_parameters';
 
@@ -73,7 +69,9 @@ export const EditFieldHeaderForm = React.memo(({ type, defaultValue, isMultiFiel
             <SelectField
               field={field}
               euiFieldProps={{
-                options: isMultiField ? MULTIFIELD_TYPES_OPTIONS : FIELD_TYPES_OPTIONS,
+                options: isMultiField
+                  ? filterTypesForMultiField(FIELD_TYPES_OPTIONS)
+                  : FIELD_TYPES_OPTIONS,
                 hasNoInitialSelection: true,
                 onChange: onTypeChange(field),
               }}
@@ -95,7 +93,7 @@ export const EditFieldHeaderForm = React.memo(({ type, defaultValue, isMultiFiel
             component={SelectField}
             componentProps={{
               euiFieldProps: {
-                options: subTypeOptions,
+                options: isMultiField ? filterTypesForMultiField(subTypeOptions!) : subTypeOptions,
                 hasNoInitialSelection: false,
               },
             }}

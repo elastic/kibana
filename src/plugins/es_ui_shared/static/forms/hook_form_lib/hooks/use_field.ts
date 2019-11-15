@@ -362,7 +362,9 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
     return errorMessages ? errorMessages : null;
   };
 
-  const reset: FieldHook['reset'] = ({ resetValue } = { resetValue: true }) => {
+  const reset: FieldHook['reset'] = (resetOptions = { resetValue: true }) => {
+    const { resetValue = true } = resetOptions;
+
     setPristine(true);
     setValidating(false);
     setIsChangingValue(false);
@@ -371,7 +373,9 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
 
     if (resetValue) {
       setValue(initialValue);
+      return initialValue;
     }
+    return value;
   };
 
   const serializeOutput: FieldHook['__serializeOutput'] = (rawValue = value) =>

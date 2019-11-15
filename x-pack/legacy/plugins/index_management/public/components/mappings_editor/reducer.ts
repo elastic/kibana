@@ -14,7 +14,9 @@ import {
   isStateValid,
   normalize,
   updateFieldsPathAfterFieldNameChange,
+  getAllDescendantAliases,
 } from './lib';
+import { PARAMETERS_DEFINITION } from './constants';
 
 export interface MappingsConfiguration {
   dynamic: boolean | string;
@@ -64,20 +66,25 @@ export type Action =
 export type Dispatch = (action: Action) => void;
 
 export const addFieldToState = (field: Field, state: State): State => {
+  const updatedFields = { ...state.fields };
   const id = getUniqueId();
   const { fieldToAddFieldTo } = state.documentFields;
   const addToRootLevel = fieldToAddFieldTo === undefined;
-  const parentField = addToRootLevel ? undefined : state.fields.byId[fieldToAddFieldTo!];
+  const parentField = addToRootLevel ? undefined : updatedFields.byId[fieldToAddFieldTo!];
   const isMultiField = parentField ? parentField.canHaveMultiFields : false;
 
-  const rootLevelFields = addToRootLevel
-    ? [...state.fields.rootLevelFields, id]
-    : [...state.fields.rootLevelFields];
+  updatedFields.byId = { ...updatedFields.byId };
+  updatedFields.rootLevelFields = addToRootLevel
+    ? [...updatedFields.rootLevelFields, id]
+    : updatedFields.rootLevelFields;
+
   const nestedDepth =
     parentField && (parentField.canHaveChildFields || parentField.canHaveMultiFields)
       ? parentField.nestedDepth + 1
       : 0;
-  const maxNestedDepth = Math.max(state.fields.maxNestedDepth, nestedDepth);
+
+  updatedFields.maxNestedDepth = Math.max(updatedFields.maxNestedDepth, nestedDepth);
+
   const { name } = field;
   const path = parentField ? `${parentField.path}.${name}` : name;
 
@@ -91,13 +98,13 @@ export const addFieldToState = (field: Field, state: State): State => {
     ...getFieldMeta(field, isMultiField),
   };
 
-  state.fields.byId[id] = newField;
+  updatedFields.byId[id] = newField;
 
   if (parentField) {
     const childFields = parentField.childFields || [];
 
     // Update parent field with new children
-    state.fields.byId[fieldToAddFieldTo!] = {
+    updatedFields.byId[fieldToAddFieldTo!] = {
       ...parentField,
       childFields: [...childFields, id],
       hasChildFields: parentField.canHaveChildFields,
@@ -106,10 +113,88 @@ export const addFieldToState = (field: Field, state: State): State => {
     };
   }
 
+  if (newField.source.type === 'alias') {
+    updatedFields.aliases = updateAliasesReferences(newField, updatedFields);
+  }
+
   return {
     ...state,
     isValid: isStateValid(state),
-    fields: { ...state.fields, rootLevelFields, maxNestedDepth },
+    fields: updatedFields,
+  };
+};
+
+const updateAliasesReferences = (
+  field: NormalizedField,
+  { aliases }: NormalizedFields,
+  previousTargetPath?: string
+): NormalizedFields['aliases'] => {
+  const updatedAliases = { ...aliases };
+  /**
+   * If the field where the alias points to has changed, we need to remove the alias field id from the previous reference array.
+   */
+  if (previousTargetPath && updatedAliases[previousTargetPath]) {
+    updatedAliases[previousTargetPath] = updatedAliases[previousTargetPath].filter(
+      id => id !== field.id
+    );
+  }
+
+  const targetId = field.source.path!;
+
+  if (!updatedAliases[targetId]) {
+    updatedAliases[targetId] = [];
+  }
+
+  updatedAliases[targetId] = [...updatedAliases[targetId], field.id];
+
+  return updatedAliases;
+};
+
+/**
+ * Helper to remove a field from our map, in an immutable way.
+ * When we remove a field we also need to update its parent "childFields" array, or
+ * if there are no parent, we then need to update the "rootLevelFields" array.
+ *
+ * @param fieldId The field id that has been removed
+ * @param byId The fields map by Id
+ */
+const removeFieldFromMap = (fieldId: string, fields: NormalizedFields): NormalizedFields => {
+  let { rootLevelFields } = fields;
+
+  const updatedById = { ...fields.byId };
+  const { parentId } = updatedById[fieldId];
+
+  // Remove the field from the map
+  delete updatedById[fieldId];
+
+  if (parentId) {
+    const parentField = updatedById[parentId];
+
+    if (parentField) {
+      // If the parent exist, update its childFields Array
+      const childFields = parentField.childFields!.filter(childId => childId !== fieldId);
+
+      updatedById[parentId] = {
+        ...parentField,
+        childFields,
+        hasChildFields: parentField.canHaveChildFields && Boolean(childFields.length),
+        hasMultiFields: parentField.canHaveMultiFields && Boolean(childFields.length),
+        isExpanded:
+          !parentField.hasChildFields && !parentField.hasMultiFields
+            ? false
+            : parentField.isExpanded,
+      };
+    }
+  } else {
+    // If there are no parentId it means that we have deleted a top level field
+    // We need to update the root level fields Array
+    rootLevelFields = rootLevelFields.filter(childId => childId !== fieldId);
+  }
+
+  return {
+    ...fields,
+    rootLevelFields,
+    byId: updatedById,
   };
 };
 
@@ -191,61 +276,86 @@ export const reducer = (state: State, action: Action): State => {
     }
     case 'field.remove': {
       const field = state.fields.byId[action.value];
-      const { id, parentId, hasChildFields, hasMultiFields } = field;
+      const { id, hasChildFields, hasMultiFields } = field;
 
-      let { rootLevelFields } = state.fields;
-
-      if (parentId) {
-        // Deleting a child field, we need to update its parent meta
-        const parentField = { ...state.fields.byId[parentId] };
-        parentField.childFields = parentField.childFields!.filter(childId => childId !== id);
-        parentField.hasChildFields =
-          parentField.canHaveChildFields && Boolean(parentField.childFields.length);
-        parentField.hasMultiFields =
-          parentField.canHaveMultiFields && Boolean(parentField.childFields.length);
-
-        if (!parentField.hasChildFields && !parentField.hasMultiFields) {
-          parentField.isExpanded = false;
-        }
-
-        state.fields.byId[parentId] = parentField;
-      } else {
-        // Deleting a root level field
-        rootLevelFields = rootLevelFields.filter(childId => childId !== id);
-      }
+      // Remove the field
+      let updatedFields = removeFieldFromMap(id, state.fields);
 
       if (hasChildFields || hasMultiFields) {
         const allChildFields = getAllChildFields(field, state.fields.byId);
+
+        // Remove all of its children
         allChildFields!.forEach(childField => {
-          delete state.fields.byId[childField.id];
+          updatedFields = removeFieldFromMap(childField.id, updatedFields);
         });
       }
 
-      // Finally... we delete the field from our map
-      delete state.fields.byId[id];
+      // Handle Alias
+      if (field.source.type === 'alias' && field.source.path) {
+        /**
+         * If we delete an alias field, we need to remove its id from the reference Array
+         */
+        const targetId = field.source.path;
+        updatedFields.aliases = {
+          ...updatedFields.aliases,
+          [targetId]: updatedFields.aliases[targetId].filter(aliasId => aliasId !== id),
+        };
+      } else if (field.source.type !== 'alias') {
+        /**
+         * A field can have one or multiple aliases that point to it.
+         * An "object" tyep field for example can have multiple of its child fields that have
+         * aliases pointed to them.
+         *
+         * The `getAllDescendantAliases()` is in charge of returning all the aliases pointing to
+         * the field being deleted and its child fields.
+         */
+        const aliases = getAllDescendantAliases(field, state.fields);
+        aliases.forEach(aliasId => {
+          updatedFields = removeFieldFromMap(aliasId, updatedFields);
+        });
+        delete state.fields.aliases[id];
+      }
 
-      const maxNestedDepth = getMaxNestedDepth(state.fields.byId);
+      updatedFields.maxNestedDepth = getMaxNestedDepth(updatedFields.byId);
 
       return {
         ...state,
-        fields: {
-          ...state.fields,
-          rootLevelFields,
-          maxNestedDepth,
-        },
+        fields: updatedFields,
       };
     }
     case 'field.edit': {
+      let updatedFields = { ...state.fields };
       const fieldToEdit = state.documentFields.fieldToEdit!;
-      const previousField = state.fields.byId[fieldToEdit!];
+      const previousField = updatedFields.byId[fieldToEdit!];
 
       let newField: NormalizedField = {
         ...previousField,
         source: action.value,
       };
 
+      if (newField.source.type === 'alias') {
+        updatedFields.aliases = updateAliasesReferences(
+          newField,
+          updatedFields,
+          previousField.source.path
+        );
+      }
+
       const nameHasChanged = newField.source.name !== previousField.source.name;
       const typeHasChanged = newField.source.type !== previousField.source.type;
+
+      if (nameHasChanged) {
+        // If the name has changed, we need to update the `path` of the field and recursively
+        // the paths of all its "descendant" fields (child or multi-field)
+        const { updatedFieldPath, updatedById } = updateFieldsPathAfterFieldNameChange(
+          newField,
+          updatedFields.byId
+        );
+        newField.path = updatedFieldPath;
+        updatedFields.byId = updatedById;
+      }
+
+      updatedFields.byId[fieldToEdit] = newField;
 
       if (typeHasChanged) {
         // The field `type` has changed, we need to update its meta information
@@ -256,40 +366,54 @@ export const reducer = (state: State, action: Action): State => {
           newField.source.type
         );
 
-        newField = {
-          ...newField,
-          ...getFieldMeta(action.value, newField.isMultiField),
-          hasChildFields: shouldDeleteChildFields ? false : previousField.hasChildFields,
-          hasMultiFields: shouldDeleteChildFields ? false : previousField.hasMultiFields,
-          isExpanded: previousField.isExpanded,
-        };
+        if (previousField.source.type === 'alias' && previousField.source.path) {
+          // The field was previously an alias, now that it is not an alias anymore
+          // We need to remove its reference from our state.aliases map
+          updatedFields.aliases = {
+            ...updatedFields.aliases,
+            [previousField.source.path]: updatedFields.aliases[previousField.source.path].filter(
+              aliasId => aliasId !== fieldToEdit
+            ),
+          };
+        } else {
+          const aliases = getAllDescendantAliases(previousField, updatedFields);
+          const nextTypeCanHaveAlias = !PARAMETERS_DEFINITION.path.targetTypesNotAllowed.includes(
+            newField.source.type
+          );
 
-        if (shouldDeleteChildFields) {
-          newField.childFields = undefined;
-
-          if (previousField.childFields) {
-            const allChildFields = getAllChildFields(previousField, state.fields.byId);
-            allChildFields!.forEach(childField => {
-              delete state.fields.byId[childField.id];
+          if (shouldDeleteChildFields && !nextTypeCanHaveAlias && Boolean(aliases.length)) {
+            aliases.forEach(aliasId => {
+              updatedFields = removeFieldFromMap(aliasId, updatedFields);
             });
           }
         }
+
+        if (shouldDeleteChildFields && previousField.childFields) {
+          const allChildFields = getAllChildFields(previousField, updatedFields.byId);
+          allChildFields!.forEach(childField => {
+            updatedFields = removeFieldFromMap(childField.id, updatedFields);
+          });
+        }
+
+        newField = {
+          ...newField,
+          ...getFieldMeta(action.value, newField.isMultiField),
+          childFields: shouldDeleteChildFields ? undefined : previousField.childFields,
+          hasChildFields: shouldDeleteChildFields ? false : previousField.hasChildFields,
+          hasMultiFields: shouldDeleteChildFields ? false : previousField.hasMultiFields,
+          isExpanded: shouldDeleteChildFields ? false : previousField.isExpanded,
+        };
+
+        updatedFields.byId[fieldToEdit] = newField;
       }
 
-      if (nameHasChanged) {
-        // If the name has changed, we need to update the `path` of the field and recursively
-        // the paths of all its "descendant" fields (child or multi-field)
-        const { path, byId } = updateFieldsPathAfterFieldNameChange(newField, state.fields.byId);
-        newField.path = path;
-        state.fields.byId = byId;
-      }
-
-      state.fields.byId[fieldToEdit] = newField;
+      updatedFields.maxNestedDepth = getMaxNestedDepth(updatedFields.byId);
 
       return {
         ...state,
         isValid: isStateValid(state),
         fieldForm: undefined,
+        fields: updatedFields,
         documentFields: {
           ...state.documentFields,
           fieldToEdit: undefined,

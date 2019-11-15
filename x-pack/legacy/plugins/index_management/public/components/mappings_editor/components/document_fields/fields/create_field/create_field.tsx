@@ -17,23 +17,20 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import { useForm, Form, FormDataProvider, SelectField, UseField } from '../../../shared_imports';
+import { useForm, Form, FormDataProvider, SelectField, UseField } from '../../../../shared_imports';
 
-import {
-  TYPE_DEFINITION,
-  FIELD_TYPES_OPTIONS,
-  MULTIFIELD_TYPES_OPTIONS,
-  EUI_SIZE,
-} from '../../../constants';
+import { TYPE_DEFINITION, FIELD_TYPES_OPTIONS, EUI_SIZE } from '../../../../constants';
 
-import { useDispatch } from '../../../mappings_state';
-import { fieldSerializer, getFieldConfig } from '../../../lib';
-import { Field, MainType } from '../../../types';
-import { NameParameter } from '../field_parameters';
+import { useDispatch } from '../../../../mappings_state';
+import { fieldSerializer, getFieldConfig, filterTypesForMultiField } from '../../../../lib';
+import { Field, MainType, NormalizedFields } from '../../../../types';
+import { NameParameter } from '../../field_parameters';
+import { getParametersFormForType } from './required_parameters_forms';
 
 const formWrapper = (props: any) => <form {...props} />;
 
 interface Props {
+  allFields: NormalizedFields['byId'];
   isMultiField?: boolean;
   paddingLeft?: number;
   isCancelable?: boolean;
@@ -41,13 +38,15 @@ interface Props {
 }
 
 export const CreateField = React.memo(function CreateFieldComponent({
+  allFields,
   isMultiField,
   paddingLeft,
   isCancelable,
   maxNestedDepth,
 }: Props) {
-  const { form } = useForm<Field>({ serializer: fieldSerializer });
   const dispatch = useDispatch();
+
+  const { form } = useForm<Field>({ serializer: fieldSerializer });
 
   useEffect(() => {
     const subscription = form.subscribe(updatedFieldForm => {
@@ -92,6 +91,8 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
   const renderFormFields = (type: MainType) => {
     const typeDefinition = TYPE_DEFINITION[type];
+    const hasSubType = typeDefinition && typeDefinition.subTypes !== undefined;
+
     const subTypeOptions =
       typeDefinition && typeDefinition.subTypes
         ? typeDefinition.subTypes.types
@@ -114,14 +115,16 @@ export const CreateField = React.memo(function CreateFieldComponent({
             component={SelectField}
             componentProps={{
               euiFieldProps: {
-                options: isMultiField ? MULTIFIELD_TYPES_OPTIONS : FIELD_TYPES_OPTIONS,
+                options: isMultiField
+                  ? filterTypesForMultiField(FIELD_TYPES_OPTIONS)
+                  : FIELD_TYPES_OPTIONS,
               },
             }}
           />
         </EuiFlexItem>
 
         {/* Field sub type (if any) */}
-        {subTypeOptions && (
+        {hasSubType && (
           <EuiFlexItem grow={false}>
             <UseField
               path="subType"
@@ -133,7 +136,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
               component={SelectField}
               componentProps={{
                 euiFieldProps: {
-                  options: subTypeOptions,
+                  options: isMultiField
+                    ? filterTypesForMultiField(subTypeOptions!)
+                    : subTypeOptions,
                   hasNoInitialSelection: false,
                 },
               }}
@@ -196,6 +201,17 @@ export const CreateField = React.memo(function CreateFieldComponent({
               </FormDataProvider>
               <EuiFlexItem>{renderFormActions()}</EuiFlexItem>
             </EuiFlexGroup>
+
+            <FormDataProvider pathsToWatch={['type', 'subType']}>
+              {({ type, subType }) => {
+                const ParametersForm = getParametersFormForType(type, subType);
+                return ParametersForm ? (
+                  <div className="mappings-editor__create-field-required-props">
+                    <ParametersForm allFields={allFields} />
+                  </div>
+                ) : null;
+              }}
+            </FormDataProvider>
           </div>
         </div>
       </Form>

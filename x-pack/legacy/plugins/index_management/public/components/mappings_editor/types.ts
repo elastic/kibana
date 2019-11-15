@@ -96,7 +96,8 @@ export type ParameterName =
   | 'normalizer'
   | 'ignore_above'
   | 'split_queries_on_whitespace'
-  | 'scaling_factor';
+  | 'scaling_factor'
+  | 'path';
 
 export interface Parameter {
   fieldConfig: FieldConfig;
@@ -137,6 +138,7 @@ export interface NormalizedFields {
     [id: string]: NormalizedField;
   };
   rootLevelFields: string[];
+  aliases: { [key: string]: string[] };
   maxNestedDepth: number;
 }
 
@@ -156,4 +158,9 @@ export type FieldsEditor = 'default' | 'json';
 export interface SelectOption {
   value: any;
   text: string;
+}
+
+export interface AliasOption {
+  id: string;
+  label: string;
 }

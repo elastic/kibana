@@ -16,12 +16,14 @@ import {
   SubType,
   ChildFieldName,
   ParameterName,
+  SelectOption,
 } from '../types';
 
 import {
   MAIN_DATA_TYPE_DEFINITION,
   MAX_DEPTH_DEFAULT_EDITOR,
   PARAMETERS_DEFINITION,
+  TYPE_NOT_ALLOWED_MULTIFIELD,
 } from '../constants';
 
 import { State } from '../reducer';
@@ -80,6 +82,42 @@ export const getFieldConfig = (param: ParameterName, prop?: string): FieldConfig
   }
 
   return (PARAMETERS_DEFINITION[param] as any).fieldConfig || {};
+};
+
+/**
+ * For "alias" field types, we work internaly by "id" references. When we normalize the fields, we need to
+ * replace the actual "path" parameter with the field (internal) `id` the alias points to.
+ * This method takes care of doing just that.
+ *
+ * @param byId The fields map by id
+ */
+
+const replaceAliasPathByAliasId = (
+  byId: NormalizedFields['byId']
+): {
+  aliases: NormalizedFields['aliases'];
+  byId: NormalizedFields['byId'];
+} => {
+  const aliases: NormalizedFields['aliases'] = {};
+
+  Object.entries(byId).forEach(([id, field]) => {
+    if (field.source.type === 'alias') {
+      const aliasTargetField = Object.values(byId).find(
+        _field => _field.path === field.source.path
+      );
+
+      if (aliasTargetField) {
+        // we set the path to the aliasTargetField "id"
+        field.source.path = aliasTargetField.id;
+
+        // We add the alias field to our "aliases" map
+        aliases[aliasTargetField.id] = aliases[aliasTargetField.id] || [];
+        aliases[aliasTargetField.id].push(id);
+      }
+    }
+  });
+
+  return { aliases, byId };
 };
 
 /**
@@ -161,66 +199,114 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
     props: Fields,
     to: NormalizedFields['byId'],
     paths: string[],
-    idsArray: string[],
+    arrayToKeepRef: string[],
     nestedDepth: number,
     isMultiField: boolean = false,
     parentId?: string
   ): Record<string, any> =>
-    Object.entries(props).reduce((acc, [propName, value]) => {
-      const id = getUniqueId();
-      idsArray.push(id);
-      const field = { name: propName, ...value } as Field;
-      const meta = getFieldMeta(field, isMultiField);
-      const { childFieldsName, hasChildFields, hasMultiFields } = meta;
+    Object.entries(props)
+      .sort(([a], [b]) => (a > b ? 1 : a < b ? -1 : 0))
+      .reduce((acc, [propName, value]) => {
+        const id = getUniqueId();
+        arrayToKeepRef.push(id);
+        const field = { name: propName, ...value } as Field;
 
-      if (hasChildFields || hasMultiFields) {
-        const nextDepth =
-          meta.canHaveChildFields || meta.canHaveMultiFields ? nestedDepth + 1 : nestedDepth;
-        meta.childFields = [];
-        maxNestedDepth = Math.max(maxNestedDepth, nextDepth);
+        // In some cases for object, the "type" is not defined but the field
+        // has properties defined. The mappings editor requires a "type" to be defined
+        // so we add it here.
+        if (field.type === undefined && field.properties !== undefined) {
+          field.type = 'object';
+        }
 
-        normalizeFields(
-          field[childFieldsName!]!,
-          to,
-          [...paths, propName],
-          meta.childFields,
-          nextDepth,
-          meta.canHaveMultiFields,
-          id
-        );
-      }
+        const meta = getFieldMeta(field, isMultiField);
+        const { childFieldsName, hasChildFields, hasMultiFields } = meta;
 
-      const { properties, fields, ...rest } = field;
+        if (hasChildFields || hasMultiFields) {
+          const nextDepth =
+            meta.canHaveChildFields || meta.canHaveMultiFields ? nestedDepth + 1 : nestedDepth;
+          meta.childFields = [];
+          maxNestedDepth = Math.max(maxNestedDepth, nextDepth);
 
-      const normalizedField: NormalizedField = {
-        id,
-        parentId,
-        nestedDepth,
-        isMultiField,
-        path: paths.length ? `${paths.join('.')}.${propName}` : propName,
-        source: rest,
-        ...meta,
-      };
+          normalizeFields(
+            field[childFieldsName!]!,
+            to,
+            [...paths, propName],
+            meta.childFields,
+            nextDepth,
+            meta.canHaveMultiFields,
+            id
+          );
+        }
 
-      acc[id] = normalizedField;
+        const { properties, fields, ...rest } = field;
 
-      return acc;
-    }, to);
+        const normalizedField: NormalizedField = {
+          id,
+          parentId,
+          nestedDepth,
+          isMultiField,
+          path: paths.length ? `${paths.join('.')}.${propName}` : propName,
+          source: rest,
+          ...meta,
+        };
+
+        acc[id] = normalizedField;
+
+        return acc;
+      }, to);
 
   const rootLevelFields: string[] = [];
-  const byId = normalizeFields(fieldsToNormalize, {}, [], rootLevelFields, 0);
+  const { byId, aliases } = replaceAliasPathByAliasId(
+    normalizeFields(fieldsToNormalize, {}, [], rootLevelFields, 0)
+  );
 
   return {
     byId,
+    aliases,
     rootLevelFields,
     maxNestedDepth,
   };
 };
 
-export const deNormalize = (normalized: NormalizedFields): Fields => {
+/**
+ * The alias "path" value internally point to a field "id" (not its path). When we deNormalize the fields,
+ * we need to replace the target field "id" by its actual "path", making sure to not mutate our state "fields" object.
+ *
+ * @param aliases The aliases map
+ * @param byId The fields map by id
+ */
+const replaceAliasIdByAliasPath = (
+  aliases: NormalizedFields['aliases'],
+  byId: NormalizedFields['byId']
+): NormalizedFields['byId'] => {
+  const updatedById = { ...byId };
+
+  Object.entries(aliases).forEach(([targetId, aliasesIds]) => {
+    const path = updatedById[targetId] ? updatedById[targetId].path : '';
+
+    aliasesIds.forEach(id => {
+      const aliasField = updatedById[id];
+      if (!aliasField) {
+        return;
+      }
+      const fieldWithUpdatedPath: NormalizedField = {
+        ...aliasField,
+        source: { ...aliasField.source, path },
+      };
+
+      updatedById[id] = fieldWithUpdatedPath;
+    });
+  });
+
+  return updatedById;
+};
+
+export const deNormalize = ({ rootLevelFields, byId, aliases }: NormalizedFields): Fields => {
   const deNormalizePaths = (ids: string[], to: Fields = {}) => {
+    const serializedFieldsById = replaceAliasIdByAliasPath(aliases, byId);
+
     ids.forEach(id => {
-      const { source, childFields, childFieldsName } = normalized.byId[id];
+      const { source, childFields, childFieldsName } = serializedFieldsById[id];
       const { name, ...normalizedField } = source;
       const field: Omit<Field, 'name'> = normalizedField;
       to[name] = field;
@@ -232,7 +318,7 @@ export const deNormalize = (normalized: NormalizedFields): Fields => {
     return to;
   };
 
-  return deNormalizePaths(normalized.rootLevelFields);
+  return deNormalizePaths(rootLevelFields);
 };
 
 /**
@@ -245,7 +331,7 @@ export const deNormalize = (normalized: NormalizedFields): Fields => {
 export const updateFieldsPathAfterFieldNameChange = (
   field: NormalizedField,
   byId: NormalizedFields['byId']
-): { path: string; byId: NormalizedFields['byId'] } => {
+): { updatedFieldPath: string; updatedById: NormalizedFields['byId'] } => {
   const updatedById = { ...byId };
   const paths = field.parentId ? byId[field.parentId].path.split('.') : [];
 
@@ -269,7 +355,7 @@ export const updateFieldsPathAfterFieldNameChange = (
 
   updateFieldPath(field, paths);
 
-  return { path: updatedById[field.id].path, byId: updatedById };
+  return { updatedFieldPath: updatedById[field.id].path, updatedById };
 };
 
 /**
@@ -296,6 +382,45 @@ export const getAllChildFields = (
 
   return getChildFields(field);
 };
+
+/**
+ * If we delete an object or a field with multifield, we need to know if any of its "child"
+ * fields has an `alias` that points to it.
+ * This method traverse the field descendant tree and returns all the aliases found.
+ */
+export const getAllDescendantAliases = (
+  field: NormalizedField,
+  fields: NormalizedFields,
+  aliasesIds: string[] = []
+): string[] => {
+  const hasAliases = fields.aliases[field.id] && Boolean(fields.aliases[field.id].length);
+
+  if (!hasAliases && !field.hasChildFields && !field.hasMultiFields) {
+    return aliasesIds;
+  }
+
+  if (hasAliases) {
+    fields.aliases[field.id].forEach(id => {
+      aliasesIds.push(id);
+    });
+  }
+
+  if (field.childFields) {
+    field.childFields.forEach(id => {
+      if (!fields.byId[id]) {
+        return;
+      }
+      getAllDescendantAliases(fields.byId[id], fields, aliasesIds);
+    });
+  }
+
+  return aliasesIds;
+};
+
+export const filterTypesForMultiField = (options: SelectOption[]): SelectOption[] =>
+  options.filter(
+    option => TYPE_NOT_ALLOWED_MULTIFIELD.includes(option.value as MainType) === false
+  );
 
 /**
  * Return the max nested depth of the document fields

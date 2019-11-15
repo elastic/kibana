@@ -39,7 +39,7 @@ export const DocumentFields = () => {
       return null;
     }
 
-    return <CreateField isCancelable={fields.length > 0} />;
+    return <CreateField isCancelable={fields.length > 0} allFields={byId} />;
   };
 
   const renderAddFieldButton = () => {
@@ -61,7 +61,7 @@ export const DocumentFields = () => {
       return null;
     }
     const field = byId[fieldToEdit!];
-    return <EditField field={field} />;
+    return <EditField field={field} allFields={byId} />;
   };
 
   return (

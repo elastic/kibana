@@ -35,7 +35,7 @@ export interface FormHook<T extends object = FormData> {
   getFields: () => FieldsMap;
   getFormData: (options?: { unflatten?: boolean }) => T;
   getFieldDefaultValue: (fieldName: string) => unknown;
-  reset: () => void;
+  reset: (options?: { resetValues?: boolean }) => void;
   readonly __options: Required<FormOptions>;
   readonly __formData$: MutableRefObject<Subject<T>>;
   __addField: (field: FieldHook) => void;
@@ -109,16 +109,16 @@ export interface FieldHook {
     value?: unknown;
     validationType?: string;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
-  reset: ({ resetValue }: { resetValue: boolean }) => void;
+  reset: (options?: { resetValue: boolean }) => unknown;
   __serializeOutput: (rawValue?: unknown) => unknown;
 }
 
-export interface FieldConfig<T extends object = any> {
+export interface FieldConfig<T extends object = any, ValueType = unknown> {
   readonly path?: string;
   readonly label?: string;
   readonly helpText?: string | ReactNode;
   readonly type?: HTMLInputElement['type'];
-  readonly defaultValue?: unknown;
+  readonly defaultValue?: ValueType;
   readonly validations?: Array<ValidationConfig<T>>;
   readonly formatters?: FormatterFunc[];
   readonly deserializer?: SerializerFunc;
