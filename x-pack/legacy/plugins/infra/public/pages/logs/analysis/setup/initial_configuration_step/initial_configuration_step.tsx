@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer, EuiForm, EuiCallOut, EuiCode } from '@elastic/eui';
+import { EuiSpacer, EuiForm, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
@@ -95,42 +95,12 @@ function errorToI18n(error: ValidationIndicesUIError): React.ReactNode {
           defaultMessage="We couldn't load your index configuration"
         />
       );
+
     case 'TOO_FEW_SELECTED_INDICES':
       return (
         <FormattedMessage
           id="xpack.infra.analysisSetup.indicesSelectionTooFewSelectedIndicesDescription"
           defaultMessage="Select at least one index name."
-        />
-      );
-    case 'INDEX_NOT_FOUND':
-      return (
-        <FormattedMessage
-          id="xpack.infra.analysisSetup.indicesSelectionIndexNotFound"
-          defaultMessage="No indices match the pattern {index}"
-          values={{ index: <EuiCode>{error.index}</EuiCode> }}
-        />
-      );
-    case 'TIMESTAMP_NOT_FOUND':
-      return (
-        <FormattedMessage
-          id="xpack.infra.analysisSetup.indicesSelectionNoTimestampField"
-          defaultMessage="At least one index matching {index} lacks a field called {timestamp}. Go to settings and ensure the Timestamp field value is correct."
-          values={{
-            index: <EuiCode>{error.index}</EuiCode>,
-            timestamp: <EuiCode>{error.timestampField}</EuiCode>,
-          }}
-        />
-      );
-
-    case 'TIMESTAMP_NOT_VALID':
-      return (
-        <FormattedMessage
-          id="xpack.infra.analysisSetup.indicesSelectionTimestampNotValid"
-          defaultMessage="At least one index matching {index} has a field called {timestamp} which is not a date field. Go to settings and ensure the Timestamp field value is correct."
-          values={{
-            index: <EuiCode>{error.index}</EuiCode>,
-            timestamp: <EuiCode>{error.timestampField}</EuiCode>,
-          }}
         />
       );
 

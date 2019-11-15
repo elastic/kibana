@@ -10,11 +10,15 @@ import {
   EuiFormRow,
   EuiLoadingSpinner,
   EuiCheckbox,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
-import { ValidatedIndex } from '../../../../../containers/logs/log_analysis/log_analysis_setup_state';
+import {
+  ValidatedIndex,
+  ValidationIndicesUIError,
+} from '../../../../../containers/logs/log_analysis/log_analysis_setup_state';
 
 export const AnalysisSetupIndicesForm: React.FunctionComponent<{
   indices: ValidatedIndex[];
@@ -36,15 +40,25 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
 
   const choices = useMemo(
     () =>
-      indices.map(index => (
-        <EuiCheckbox
-          key={index.index}
-          id={index.index}
-          label={<EuiCode>{index.index}</EuiCode>}
-          onChange={handleCheckboxChange}
-          checked={index.checked}
-        />
-      )),
+      indices.map(index => {
+        const validIndex = index.validation === undefined;
+        const checkbox = (
+          <EuiCheckbox
+            key={index.index}
+            id={index.index}
+            label={<EuiCode>{index.index}</EuiCode>}
+            onChange={handleCheckboxChange}
+            checked={index.checked}
+            disabled={!validIndex}
+          />
+        );
+
+        return validIndex ? (
+          checkbox
+        ) : (
+          <EuiToolTip content={errorToI18n(index.validation!)}>{checkbox}</EuiToolTip>
+        );
+      }),
     [indices]
   );
 
@@ -86,3 +100,43 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
 const indicesSelectionLabel = i18n.translate('xpack.infra.analysisSetup.indicesSelectionLabel', {
   defaultMessage: 'Indices',
 });
+
+function errorToI18n(error: ValidationIndicesUIError): React.ReactNode {
+  switch (error.error) {
+    case 'INDEX_NOT_FOUND':
+      return (
+        <FormattedMessage
+          id="xpack.infra.analysisSetup.indicesSelectionIndexNotFound"
+          defaultMessage="No indices match the pattern {index}"
+          values={{ index: <EuiCode>{error.index}</EuiCode> }}
+        />
+      );
+
+    case 'TIMESTAMP_NOT_FOUND':
+      return (
+        <FormattedMessage
+          id="xpack.infra.analysisSetup.indicesSelectionNoTimestampField"
+          defaultMessage="At least one index matching {index} lacks a field called {timestamp}."
+          values={{
+            index: <EuiCode>{error.index}</EuiCode>,
+            timestamp: <EuiCode>{error.timestampField}</EuiCode>,
+          }}
+        />
+      );
+
+    case 'TIMESTAMP_NOT_VALID':
+      return (
+        <FormattedMessage
+          id="xpack.infra.analysisSetup.indicesSelectionTimestampNotValid"
+          defaultMessage="At least one index matching {index} has a field called {timestamp} which is not a date field."
+          values={{
+            index: <EuiCode>{error.index}</EuiCode>,
+            timestamp: <EuiCode>{error.timestampField}</EuiCode>,
+          }}
+        />
+      );
+
+    default:
+      return '';
+  }
+}
