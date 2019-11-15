@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { HashRouter, Switch } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import { EuiErrorBoundary } from '@elastic/eui';
@@ -29,23 +30,22 @@ export interface PluginCore {
   i18n: I18nStart;
   routes: JSX.Element[];
   theme: PluginTheme;
+  renderTo: HTMLElement;
 }
 
 export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
   // called when plugin is setting up during Kibana's startup sequence
-  public setup(core: CoreSetup) {}
+  public setup(core: CoreSetup) {
+    setClient(core.http.fetch);
+  }
   // called after all plugins are set up
   public start(core: PluginCore) {
-    setClient(core.http.fetch);
-
-    return {
-      root: <Root core={core} />,
-    };
+    ReactDOM.render(<App core={core} />, core.renderTo);
   }
 }
 
-function Root(props: { core: PluginCore }) {
+function App(props: { core: PluginCore }) {
   const { i18n, routes } = props.core;
 
   return (
