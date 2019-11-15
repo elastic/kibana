@@ -18,9 +18,6 @@
  */
 
 import { npSetup } from 'ui/new_platform';
-import { visualization } from './renderers/visualization';
-import { visualization as visualizationFn } from './functions/visualization';
+import { esaggs } from './esaggs';
 
-// TODO: This needs to be moved to `visualizations` plugin.
-npSetup.plugins.expressions.registerFunction(visualizationFn);
-npSetup.plugins.expressions.registerRenderer(visualization);
+npSetup.plugins.expressions.registerFunction(esaggs);

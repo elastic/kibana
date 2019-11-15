@@ -29,20 +29,25 @@ import {
   ExpressionFunction,
   KibanaDatatableColumn,
 } from 'src/plugins/expressions/public';
-import { SearchSource } from '../../../../ui/public/courier/search_source';
+import { SearchSource } from '../../../../../ui/public/courier/search_source';
 // @ts-ignore
 import {
   FilterBarQueryFilterProvider,
   QueryFilter,
-} from '../../../../ui/public/filter_manager/query_filter';
+} from '../../../../../ui/public/filter_manager/query_filter';
 
-import { buildTabularInspectorData } from '../../../../ui/public/inspector/build_tabular_inspector_data';
+import { buildTabularInspectorData } from '../../../../../ui/public/inspector/build_tabular_inspector_data';
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,
-} from '../../../../ui/public/courier/utils/courier_inspector_utils';
-import { calculateObjectHash } from '../../../../ui/public/vis/lib/calculate_object_hash';
-import { getTime } from '../../../../ui/public/timefilter';
+} from '../../../../../ui/public/courier/utils/courier_inspector_utils';
+import { calculateObjectHash } from '../../../../../ui/public/vis/lib/calculate_object_hash';
+import { getTime } from '../../../../../ui/public/timefilter';
+// @ts-ignore
+import { tabifyAggResponse } from '../../../../../ui/public/agg_response/tabify/tabify';
+import { start as data } from '../../../../data/public/legacy';
+import { PersistedState } from '../../../../../ui/public/persisted_state';
+import { Adapters } from '../../../../../../plugins/inspector/public';
 
 export interface RequestHandlerParams {
   searchSource: SearchSource;
@@ -59,12 +64,6 @@ export interface RequestHandlerParams {
   visParams?: any;
   abortSignal?: AbortSignal;
 }
-
-// @ts-ignore
-import { tabifyAggResponse } from '../../../../ui/public/agg_response/tabify/tabify';
-import { start as data } from '../../../data/public/legacy';
-import { PersistedState } from '../../../../ui/public/persisted_state';
-import { Adapters } from '../../../../../plugins/inspector/public';
 
 const name = 'esaggs';
 
