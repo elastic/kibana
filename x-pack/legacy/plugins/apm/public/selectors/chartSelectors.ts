@@ -16,7 +16,7 @@ import {
   RectCoordinate,
   TimeSeries
 } from '../../typings/timeseries';
-import { asDecimal, asMillis, tpmUnit } from '../utils/formatters';
+import { asDecimal, tpmUnit, convertTo } from '../utils/formatters';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { getEmptySeries } from '../components/shared/charts/CustomPlot/getEmptySeries';
 import { httpStatusCodeToColor } from '../utils/httpStatusCodeToColor';
@@ -70,6 +70,10 @@ export function getResponseTimeSeries({
 }: TimeSeriesAPIResponse) {
   const { overallAvgDuration } = apmTimeseries;
   const { avg, p95, p99 } = apmTimeseries.responseTimes;
+  const formattedDuration = convertTo({
+    unit: 'milliseconds',
+    microseconds: overallAvgDuration
+  }).formatted;
 
   const series: TimeSeries[] = [
     {
@@ -77,7 +81,7 @@ export function getResponseTimeSeries({
         defaultMessage: 'Avg.'
       }),
       data: avg,
-      legendValue: asMillis(overallAvgDuration),
+      legendValue: formattedDuration,
       type: 'linemark',
       color: theme.euiColorVis1
     },
