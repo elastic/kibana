@@ -116,7 +116,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       const jobConfig = getJobConfigFromFormState(form);
       delete jobConfig.dest;
       delete jobConfig.model_memory_limit;
-      const resp = await ml.dataFrameAnalytics.estimateMemoryUsage(jobConfig);
+      const resp = await ml.dataFrameAnalytics.estimateDataFrameAnalyticsMemoryUsage(jobConfig);
       setFormState({
         modelMemoryLimit: resp.expected_memory_without_disk,
       });
@@ -492,7 +492,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                   : DEFAULT_MODEL_MEMORY_LIMIT.outlier_detection
               }
               disabled={isJobCreated}
-              value={modelMemoryLimit}
+              value={modelMemoryLimit || ''}
               onChange={e => setFormState({ modelMemoryLimit: e.target.value })}
               isInvalid={modelMemoryLimit === ''}
             />

@@ -47,7 +47,7 @@ export const dataFrameAnalytics = {
       data: evaluateConfig
     });
   },
-  estimateMemoryUsage(jobConfig) {
+  estimateDataFrameAnalyticsMemoryUsage(jobConfig) {
     return http({
       url: `${basePath}/data_frame/analytics/_estimate_memory_usage`,
       method: 'POST',

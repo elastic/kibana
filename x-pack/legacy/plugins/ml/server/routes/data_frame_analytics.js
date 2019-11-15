@@ -96,7 +96,7 @@ export function dataFrameAnalyticsRoutes({ commonRouteConfig, elasticsearchPlugi
     path: '/api/ml/data_frame/analytics/_estimate_memory_usage',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return callWithRequest('ml.estimateMemoryUsage', { body: request.payload })
+      return callWithRequest('ml.estimateDataFrameAnalyticsMemoryUsage', { body: request.payload })
         .catch(resp => wrapError(resp));
     },
     config: {
