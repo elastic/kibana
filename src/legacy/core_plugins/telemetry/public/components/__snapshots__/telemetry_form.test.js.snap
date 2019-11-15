@@ -35,7 +35,7 @@ exports[`TelemetryForm renders as expected when allows to change optIn status 1`
         setting={
           Object {
             "ariaName": "Provide usage statistics",
-            "defVal": false,
+            "defVal": true,
             "description": <React.Fragment>
               <p>
                 Help us improve the Elastic Stack by providing usage statistics for basic features. We will not share this data outside of Elastic.
