@@ -33,11 +33,11 @@ export function renderOptedInBanner(telemetryOptInProvider, { _banners = banners
   const bannerId = _banners.add({
     component: (
       <OptedInBanner
-        onSeenBanner={() => console.log('IMPLEMENT ME')}
+        onSeenBanner={telemetryOptInProvider.setOptInNoticeSeen}
       />
     ),
     priority: 10000
   });
 
-  telemetryOptInProvider.setBannerId(bannerId);
+  telemetryOptInProvider.setOptInBannerNoticeId(bannerId);
 }
