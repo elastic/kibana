@@ -5,7 +5,7 @@
  */
 
 import { EuiLink } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import chrome from 'ui/chrome';
 
@@ -20,17 +20,21 @@ const Content: React.FC<HelpCenterContentProps> = ({ feedbackLink, feedbackLinkT
   </EuiLink>
 );
 
-export class HelpCenterContent extends React.Component<HelpCenterContentProps> {
-  public componentDidMount = () => {
+export const HelpCenterContent: React.FC<HelpCenterContentProps> = ({
+  feedbackLink,
+  feedbackLinkText,
+}) => {
+  useEffect(() => {
     chrome.helpExtension.set(domElement => {
-      ReactDOM.render(<Content {...this.props} />, domElement);
+      ReactDOM.render(
+        <Content feedbackLink={feedbackLink} feedbackLinkText={feedbackLinkText} />,
+        domElement
+      );
       return () => {
         ReactDOM.unmountComponentAtNode(domElement);
       };
     });
-  };
+  }, [feedbackLink, feedbackLinkText]);
 
-  public render = () => {
-    return null;
-  };
-}
+  return null;
+};
