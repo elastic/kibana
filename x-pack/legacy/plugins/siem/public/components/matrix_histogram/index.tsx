@@ -34,6 +34,7 @@ export const MatrixHistogram = ({
   totalCount,
   updateDateRange,
   yTickFormatter,
+  showLegend,
 }: MatrixHistogramProps<MatrixHistogramDataTypes>) => {
   const barchartConfigs = getBarchartConfigs({
     from: startDate,
@@ -41,6 +42,7 @@ export const MatrixHistogram = ({
     onBrushEnd: updateDateRange,
     scaleType,
     yTickFormatter,
+    showLegend,
   });
   const [showInspect, setShowInspect] = useState(false);
   const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);

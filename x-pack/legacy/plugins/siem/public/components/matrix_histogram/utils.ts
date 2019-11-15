@@ -16,12 +16,14 @@ export const getBarchartConfigs = ({
   scaleType,
   onBrushEnd,
   yTickFormatter,
+  showLegend,
 }: {
   from: number;
   to: number;
   scaleType: ScaleType;
   onBrushEnd: UpdateDateRange;
   yTickFormatter?: (value: number) => string;
+  showLegend?: boolean;
 }) => ({
   series: {
     xScaleType: scaleType || ScaleType.Time,
@@ -39,7 +41,7 @@ export const getBarchartConfigs = ({
   settings: {
     legendPosition: Position.Bottom,
     onBrushEnd,
-    showLegend: true,
+    showLegend: showLegend || true,
     theme: {
       scales: {
         barsPadding: 0.08,

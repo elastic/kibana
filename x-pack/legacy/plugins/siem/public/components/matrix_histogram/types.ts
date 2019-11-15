@@ -28,4 +28,5 @@ export interface MatrixHistogramProps<T> extends MatrixHistogramBasicProps<T> {
   subtitle?: string;
   title?: string;
   yTickFormatter?: (value: number) => string;
+  showLegend?: boolean;
 }

@@ -25,6 +25,7 @@ export const NetworkDnsHistogram = (
       dataKey={dataKey}
       scaleType={ScaleType.Ordinal}
       yTickFormatter={bytesFormatter}
+      showLegend={false}
       {...matrixOverTimeProps}
     />
   );
