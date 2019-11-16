@@ -18,7 +18,7 @@
  */
 
 import { registryMock } from './plugin.test.mocks';
-import { FeatureCataloguePlugin } from './plugin';
+import { HomePublicPlugin } from './plugin';
 
 describe('FeatureCataloguePlugin', () => {
   beforeEach(() => {
@@ -28,22 +28,22 @@ describe('FeatureCataloguePlugin', () => {
 
   describe('setup', () => {
     test('wires up and returns registry', async () => {
-      const setup = await new FeatureCataloguePlugin().setup();
+      const setup = await new HomePublicPlugin().setup();
       expect(registryMock.setup).toHaveBeenCalledWith();
-      expect(setup.register).toBeDefined();
+      expect(setup.featureCatalogue.register).toBeDefined();
     });
   });
 
   describe('start', () => {
     test('wires up and returns registry', async () => {
-      const service = new FeatureCataloguePlugin();
+      const service = new HomePublicPlugin();
       await service.setup();
       const core = { application: { capabilities: { catalogue: {} } } } as any;
       const start = await service.start(core);
       expect(registryMock.start).toHaveBeenCalledWith({
         capabilities: core.application.capabilities,
       });
-      expect(start.get).toBeDefined();
+      expect(start.featureCatalogue.get).toBeDefined();
     });
   });
 });

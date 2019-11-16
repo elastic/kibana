@@ -17,8 +17,13 @@
  * under the License.
  */
 
-export { FeatureCatalogueSetup, FeatureCatalogueStart } from './plugin';
+export {
+  FeatureCatalogueSetup,
+  FeatureCatalogueStart,
+  HomePublicPluginSetup,
+  HomePublicPluginStart,
+} from './plugin';
 export { FeatureCatalogueEntry, FeatureCatalogueCategory } from './services';
-import { FeatureCataloguePlugin } from './plugin';
+import { HomePublicPlugin } from './plugin';
 
-export const plugin = () => new FeatureCataloguePlugin();
+export const plugin = () => new HomePublicPlugin();

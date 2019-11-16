@@ -35,7 +35,7 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
       home,
     } = pluginSet;
 
-    home.register({
+    home.featureCatalogue.register({
       id: 'console',
       title: i18n.translate('console.devToolsTitle', {
         defaultMessage: 'Console',

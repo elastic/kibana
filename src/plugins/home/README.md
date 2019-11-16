@@ -12,7 +12,7 @@ UI capabilities for feature controls.
 ```ts
 // For legacy plugins
 import { npSetup } from 'ui/new_platform';
-npSetup.plugins.home.register(/* same details here */);
+npSetup.plugins.home.featureCatalogue.register(/* same details here */);
 
 // For new plugins: first add 'home` to the list of `optionalPlugins` 
 // in your kibana.json file. Then access the plugin directly in `setup`:
@@ -20,7 +20,7 @@ npSetup.plugins.home.register(/* same details here */);
 class MyPlugin {
   setup(core, plugins) {
     if (plugins.home) {
-      plugins.home.register(/* same details here. */);
+      plugins.home.featureCatalgoue.register(/* same details here. */);
     }
   }
 }
