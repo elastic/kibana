@@ -7,19 +7,16 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import React from 'react';
-import { StickyContainer } from 'react-sticky';
-import { FiltersGlobal } from './filters_global';
 
 import '../../mock/match_media';
+import { FiltersGlobal } from './filters_global';
 
 describe('rendering', () => {
   test('renders correctly', () => {
     const wrapper = shallow(
-      <StickyContainer>
-        <FiltersGlobal>
-          <p>{'Additional filters here.'}</p>
-        </FiltersGlobal>
-      </StickyContainer>
+      <FiltersGlobal>
+        <p>{'Additional filters here.'}</p>
+      </FiltersGlobal>
     );
 
     expect(toJson(wrapper)).toMatchSnapshot();
