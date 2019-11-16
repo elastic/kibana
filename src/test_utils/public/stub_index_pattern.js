@@ -18,7 +18,6 @@
  */
 
 import sinon from 'sinon';
-import { npStart } from 'ui/new_platform';
 // TODO: We should not be importing from the data plugin directly here; this is only necessary
 // because it is one of the few places that we need to access the IndexPattern class itself, rather
 // than just the type. Doing this as a temporary measure; it will be left behind when migrating to NP.
@@ -30,58 +29,14 @@ import {
   flattenHitWrapper,
 } from 'ui/index_patterns';
 import {
-  FieldFormatRegisty,
-  StringFormat,
   FIELD_FORMAT_IDS,
-  NumberFormat,
-  BytesFormat,
-  BoolFormat,
-  UrlFormat,
-  ColorFormat,
-  DateFormat,
-  DateNanosFormat,
-  DurationFormat,
-  IpFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat, TruncateFormat,
 } from '../../plugins/data/public';
-import { setFieldFormats } from '../../../src/legacy/core_plugins/data/public/index_patterns/services';
 
-function getFieldFormatsRegistry() {
-  if (!getFieldFormatsRegistry.fieldFormats) {
-    getFieldFormatsRegistry.fieldFormats = new FieldFormatRegisty();
-
-    getFieldFormatsRegistry.fieldFormats.register([
-      BoolFormat,
-      BytesFormat,
-      ColorFormat,
-      DateFormat,
-      DateNanosFormat,
-      DurationFormat,
-      IpFormat,
-      NumberFormat,
-      PercentFormat,
-      RelativeDateFormat,
-      SourceFormat,
-      StaticLookupFormat,
-      StringFormat,
-      TruncateFormat,
-      UrlFormat
-    ]);
-
-    getFieldFormatsRegistry.fieldFormats.init(npStart.core.uiSettings);
-
-    setFieldFormats(getFieldFormatsRegistry.fieldFormats);
-  }
-
-  return getFieldFormatsRegistry.fieldFormats;
-}
-
-getFieldFormatsRegistry();
+import { getFieldFormatsRegistry } from './stub_field_formats';
 
 export default  function StubIndexPattern(pattern, getConfig, timeField, fields) {
+  const registeredFieldFormats = getFieldFormatsRegistry(getConfig);
+
   this.id = pattern;
   this.title = pattern;
   this.popularizeField = sinon.stub();
@@ -98,7 +53,7 @@ export default  function StubIndexPattern(pattern, getConfig, timeField, fields)
 
   this.getComputedFields = IndexPattern.prototype.getComputedFields.bind(this);
   this.flattenHit = flattenHitWrapper(this, this.metaFields);
-  this.formatHit = formatHitProvider(this, getFieldFormatsRegistry().getDefaultInstance(FIELD_FORMAT_IDS.STRING));
+  this.formatHit = formatHitProvider(this, registeredFieldFormats.getDefaultInstance(FIELD_FORMAT_IDS.STRING));
   this.fieldsFetcher = { apiClient: { baseUrl: '' } };
   this.formatField = this.formatHit.formatField;
 
@@ -107,12 +62,10 @@ export default  function StubIndexPattern(pattern, getConfig, timeField, fields)
   };
 
   this.stubSetFieldFormat = function (fieldName, id, params) {
-    const FieldFormat = getFieldFormatsRegistry().getType(id);
+    const FieldFormat = registeredFieldFormats.getType(id);
     this.fieldFormatMap[fieldName] = new FieldFormat(params);
     this._reindexFields();
   };
 
   this._reindexFields();
 }
-
-export { getFieldFormatsRegistry };

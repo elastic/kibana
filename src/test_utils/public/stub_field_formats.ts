@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { UiSettingsClientContract } from 'kibana/public';
 
-import { FieldFormatRegisty } from './field_formats';
 import {
+  FieldFormatRegisty,
   BoolFormat,
   BytesFormat,
   ColorFormat,
@@ -34,9 +35,11 @@ import {
   StringFormat,
   TruncateFormat,
   UrlFormat,
-} from '../../common/';
+} from '../../plugins/data/public/';
 
-export function registerConverters(fieldFormats: FieldFormatRegisty): void {
+export const getFieldFormatsRegistry = (uiSettings: UiSettingsClientContract) => {
+  const fieldFormats = new FieldFormatRegisty();
+
   fieldFormats.register([
     BoolFormat,
     BytesFormat,
@@ -54,4 +57,8 @@ export function registerConverters(fieldFormats: FieldFormatRegisty): void {
     TruncateFormat,
     UrlFormat,
   ]);
-}
+
+  fieldFormats.init(uiSettings);
+
+  return fieldFormats;
+};

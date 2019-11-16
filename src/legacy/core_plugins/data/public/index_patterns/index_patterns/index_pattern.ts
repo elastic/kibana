@@ -28,6 +28,12 @@ import {
   MappingObject,
 } from '../../../../../../plugins/kibana_utils/public';
 
+import {
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  IIndexPattern,
+} from '../../../../../../plugins/data/public';
+
 import { findIndexPatternByTitle, getRoutes } from '../utils';
 import { IndexPatternMissingIndices } from '../errors';
 import { Field, FieldList, FieldListInterface, FieldType } from '../fields';
@@ -35,7 +41,6 @@ import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from './index_patterns_api_client';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 import { getNotifications, getFieldFormats } from '../services';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;

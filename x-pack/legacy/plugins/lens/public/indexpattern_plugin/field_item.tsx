@@ -42,7 +42,6 @@ import {
   FIELD_FORMAT_IDS,
   KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
-  Query,
   esQuery,
   IIndexPattern,
 } from '../../../../../../src/plugins/data/public';

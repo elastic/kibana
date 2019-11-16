@@ -73,9 +73,9 @@ export class MetricAggType<
     this.getFormat =
       config.getFormat ||
       (agg => {
-        const fieldFormats = npStart.plugins.data.fieldFormats;
+        const registeredFormats = npStart.plugins.data.fieldFormats;
         const field = agg.getField();
-        return field ? field.format : fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
+        return field ? field.format : registeredFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
       });
 
     this.subtype =

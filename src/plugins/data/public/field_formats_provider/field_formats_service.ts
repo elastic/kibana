@@ -17,10 +17,26 @@
  * under the License.
  */
 
-import { omit } from 'lodash';
 import { UiSettingsClientContract } from 'src/core/public';
 import { FieldFormatRegisty } from './field_formats';
-import { registerConverters } from './registry';
+
+import {
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  StringFormat,
+  TruncateFormat,
+  UrlFormat,
+} from '../../common/';
 
 /**
  * Field Format Service
@@ -36,13 +52,29 @@ export class FieldFormatsService {
   public setup({ uiSettings }: FieldFormatsServiceDependencies) {
     this.fieldFormats.init(uiSettings);
 
-    registerConverters(this.fieldFormats);
+    this.fieldFormats.register([
+      BoolFormat,
+      BytesFormat,
+      ColorFormat,
+      DateFormat,
+      DateNanosFormat,
+      DurationFormat,
+      IpFormat,
+      NumberFormat,
+      PercentFormat,
+      RelativeDateFormat,
+      SourceFormat,
+      StaticLookupFormat,
+      StringFormat,
+      TruncateFormat,
+      UrlFormat,
+    ]);
 
-    return omit(this.fieldFormats, ['init']) as FieldFormatsSetup;
+    return this.fieldFormats as FieldFormatsSetup;
   }
 
   public start() {
-    return omit(this.fieldFormats, ['init', 'register']) as FieldFormatsStart;
+    return this.fieldFormats as FieldFormatsStart;
   }
 
   public stop() {

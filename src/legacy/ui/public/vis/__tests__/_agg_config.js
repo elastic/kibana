@@ -24,10 +24,7 @@ import { Vis } from '..';
 import { AggType } from '../../agg_types/agg_type';
 import { AggConfig } from '../../agg_types/agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import {
-  FIELD_FORMAT_IDS
-} from '../../../../../plugins/data/public';
-import { getFieldFormatsRegistry } from '../../../../../test_utils/public/stub_index_pattern';
+import { StringFormat } from '../../../../../plugins/data/public';
 
 describe('AggConfig', function () {
 
@@ -443,13 +440,11 @@ describe('AggConfig', function () {
         ]
       });
 
-      expect(vis.aggs.aggs[0].fieldFormatter()).to.be(getFieldFormatsRegistry()
-        .getDefaultInstance(FIELD_FORMAT_IDS.NUMBER).getConverterFor());
+      expect(vis.aggs.aggs[0].fieldFormatter()).to.be(Object.create(StringFormat).textConvert);
     });
   });
 
   describe('#fieldFormatter - no custom getFormat handler', function () {
-
     const visStateAggWithoutCustomGetFormat = {
       aggs: [
         {
@@ -472,13 +467,13 @@ describe('AggConfig', function () {
     it('returns the string format if the field does not have a format', function () {
       const agg = vis.aggs.aggs[0];
       agg.params.field = { type: 'number', format: null };
-      expect(agg.fieldFormatter()).to.be(getFieldFormatsRegistry().getDefaultInstance(FIELD_FORMAT_IDS.STRING).getConverterFor());
+      expect(agg.fieldFormatter()).to.be(Object.create(StringFormat).textConvert);
     });
 
     it('returns the string format if their is no field', function () {
       const agg = vis.aggs.aggs[0];
       delete agg.params.field;
-      expect(agg.fieldFormatter()).to.be(getFieldFormatsRegistry().getDefaultInstance(FIELD_FORMAT_IDS.STRING).getConverterFor());
+      expect(agg.fieldFormatter()).to.be(Object.create(StringFormat).textConvert);
     });
 
     it('returns the html converter if "html" is passed in', function () {

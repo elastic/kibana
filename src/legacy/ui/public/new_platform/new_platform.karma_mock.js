@@ -18,6 +18,7 @@
  */
 
 import sinon from 'sinon';
+import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_field_formats';
 
 const mockObservable = () => {
   return {
@@ -25,9 +26,23 @@ const mockObservable = () => {
   };
 };
 
+export const mockUiSettings = {
+  get: (item) => {
+    return mockUiSettings[item];
+  },
+  get$: () => ({
+    subscribe: sinon.fake(),
+  }),
+  'query:allowLeadingWildcards': true,
+  'query:queryString:options': {},
+  'courier:ignoreFilterIfFieldNotInIndex': true,
+  'dateFormat:tz': 'Browser',
+};
+
 export const npSetup = {
   core: {
-    chrome: {}
+    chrome: {},
+    uiSettings: mockUiSettings,
   },
   plugins: {
     embeddable: {
@@ -61,6 +76,7 @@ export const npSetup = {
           history: sinon.fake(),
         }
       },
+      fieldFormats: getFieldFormatsRegistry(mockUiSettings),
     },
     devTools: {
       register: () => {},
