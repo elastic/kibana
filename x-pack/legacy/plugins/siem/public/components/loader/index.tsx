@@ -16,7 +16,12 @@ import { rgba } from 'polished';
 import React from 'react';
 import styled, { css } from 'styled-components';
 
-const Aside = styled.aside<{ overlay?: boolean; overlayBackground?: string }>`
+interface AsideProps {
+  overlay?: boolean;
+  overlayBackground?: string;
+}
+
+const Aside = styled.aside<AsideProps>`
   ${({ overlay, overlayBackground, theme }) => css`
     padding: ${theme.eui.paddingSizes.m};
 
@@ -56,6 +61,7 @@ export interface LoaderProps {
   overlay?: boolean;
   overlayBackground?: string;
   size?: EuiLoadingSpinnerSize;
+  children?: React.ReactChild;
 }
 
 export const Loader = React.memo<LoaderProps>(({ children, overlay, overlayBackground, size }) => (

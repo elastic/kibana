@@ -14,11 +14,7 @@ import { TestProviders } from '../../../mock/test_providers';
 describe('Empty', () => {
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
-      const wrapper = shallow(
-        <TestProviders>
-          <Empty />
-        </TestProviders>
-      );
+      const wrapper = shallow(<Empty />);
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 

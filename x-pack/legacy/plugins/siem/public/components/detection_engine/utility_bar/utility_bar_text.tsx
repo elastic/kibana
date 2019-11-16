@@ -15,4 +15,5 @@ export interface UtilityBarTextProps {
 export const UtilityBarText = React.memo<UtilityBarTextProps>(({ children }) => (
   <BarText>{children}</BarText>
 ));
+
 UtilityBarText.displayName = 'UtilityBarText';

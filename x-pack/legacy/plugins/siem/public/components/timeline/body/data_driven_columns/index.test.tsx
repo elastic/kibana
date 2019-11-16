@@ -8,7 +8,7 @@ import toJson from 'enzyme-to-json';
 
 import * as React from 'react';
 
-import { mockTimelineData, TestProviders } from '../../../../mock';
+import { mockTimelineData } from '../../../../mock';
 import { defaultHeaders } from '../column_headers/default_headers';
 import { columnRenderers } from '../renderers';
 
@@ -19,16 +19,14 @@ describe('Columns', () => {
 
   test('it renders the expected columns', () => {
     const wrapper = shallow(
-      <TestProviders>
-        <DataDrivenColumns
-          _id={mockTimelineData[0]._id}
-          columnHeaders={headersSansTimestamp}
-          columnRenderers={columnRenderers}
-          data={mockTimelineData[0].data}
-          onColumnResized={jest.fn()}
-          timelineId="test"
-        />
-      </TestProviders>
+      <DataDrivenColumns
+        _id={mockTimelineData[0]._id}
+        columnHeaders={headersSansTimestamp}
+        columnRenderers={columnRenderers}
+        data={mockTimelineData[0].data}
+        onColumnResized={jest.fn()}
+        timelineId="test"
+      />
     );
 
     expect(toJson(wrapper)).toMatchSnapshot();

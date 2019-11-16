@@ -67,7 +67,7 @@ describe('Hosts Table', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('HostsTable'))).toMatchSnapshot();
     });
 
     describe('Sorting on Table', () => {

@@ -38,13 +38,11 @@ describe('PointToolTipContent', () => {
     const closeTooltip = jest.fn();
 
     const wrapper = shallow(
-      <TestProviders>
-        <PointToolTipContent
-          contextId={'contextId'}
-          featureProps={mockFeatureProps}
-          closeTooltip={closeTooltip}
-        />
-      </TestProviders>
+      <PointToolTipContent
+        contextId={'contextId'}
+        featureProps={mockFeatureProps}
+        closeTooltip={closeTooltip}
+      />
     );
     expect(toJson(wrapper)).toMatchSnapshot();
   });

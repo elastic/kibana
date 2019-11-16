@@ -1,18 +1,51 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`PointToolTipContent renders correctly against snapshot 1`] = `
-<Component>
-  <PointToolTipContent
-    closeTooltip={[MockFunction]}
-    contextId="contextId"
-    featureProps={
-      Array [
-        Object {
-          "_propertyKey": "host.name",
-          "_rawValue": "testPropValue",
-        },
-      ]
-    }
-  />
-</Component>
+<DescriptionListStyled
+  listItems={
+    Array [
+      Object {
+        "description": <Memo(AddFilterToGlobalSearchBar)
+          data-test-subj="add-to-kql-host.name"
+          filter={
+            Object {
+              "meta": Object {
+                "alias": null,
+                "disabled": false,
+                "key": "host.name",
+                "negate": false,
+                "params": Object {
+                  "query": "testPropValue",
+                },
+                "type": "phrase",
+                "value": "testPropValue",
+              },
+              "query": Object {
+                "match": Object {
+                  "host.name": Object {
+                    "query": "testPropValue",
+                    "type": "phrase",
+                  },
+                },
+              },
+            }
+          }
+          onFilterAdded={[MockFunction]}
+        >
+          <Memo(DefaultFieldRenderer)
+            attrName="host.name"
+            idPrefix="map-point-tooltip-contextId-host.name-testPropValue"
+            render={[Function]}
+            rowItems={
+              Array [
+                "testPropValue",
+              ]
+            }
+          />
+        </Memo(AddFilterToGlobalSearchBar)>,
+        "title": "Host",
+      },
+    ]
+  }
+/>
 `;

@@ -15,4 +15,5 @@ export interface UtilityBarGroupProps {
 export const UtilityBarGroup = React.memo<UtilityBarGroupProps>(({ children }) => (
   <BarGroup>{children}</BarGroup>
 ));
+
 UtilityBarGroup.displayName = 'UtilityBarGroup';

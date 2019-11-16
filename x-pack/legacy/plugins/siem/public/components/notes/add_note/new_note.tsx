@@ -18,14 +18,22 @@ const NewNoteTabs = styled(EuiTabbedContent)`
 
 NewNoteTabs.displayName = 'NewNoteTabs';
 
-const MarkdownContainer = styled(EuiPanel)<{ height: number }>`
+interface MarkdownContainerProps {
+  height: number;
+}
+
+const MarkdownContainer = styled(EuiPanel)<MarkdownContainerProps>`
   height: ${({ height }) => height}px;
   overflow: auto;
 `;
 
 MarkdownContainer.displayName = 'MarkdownContainer';
 
-const TextArea = styled(EuiTextArea)<{ height: number }>`
+interface TextAreaProps {
+  height: number;
+}
+
+const TextArea = styled(EuiTextArea)<TextAreaProps>`
   min-height: ${({ height }) => `${height}px`};
   width: 100%;
 `;

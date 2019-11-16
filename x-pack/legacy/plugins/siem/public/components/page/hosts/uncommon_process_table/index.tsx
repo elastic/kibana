@@ -143,6 +143,8 @@ export const UncommonProcessTable = connect(makeMapStateToProps, {
   updateTableLimit: hostsActions.updateTableLimit,
 })(UncommonProcessTableComponent);
 
+UncommonProcessTable.displayName = 'UncommonProcessTable';
+
 const getUncommonColumns = (): UncommonProcessTableColumns => [
   {
     name: i18n.NAME,

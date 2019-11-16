@@ -36,33 +36,31 @@ describe('AddFilterToGlobalSearchBar Component', () => {
 
   test('Rendering', async () => {
     const wrapper = shallow(
-      <TestProviders store={store}>
-        <AddFilterToGlobalSearchBar
-          filter={{
-            meta: {
-              alias: null,
-              negate: false,
-              disabled: false,
-              type: 'phrase',
-              key: 'host.name',
-              value: 'siem-kibana',
-              params: {
+      <AddFilterToGlobalSearchBar
+        filter={{
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: 'host.name',
+            value: 'siem-kibana',
+            params: {
+              query: 'siem-kibana',
+            },
+          },
+          query: {
+            match: {
+              'host.name': {
                 query: 'siem-kibana',
+                type: 'phrase',
               },
             },
-            query: {
-              match: {
-                'host.name': {
-                  query: 'siem-kibana',
-                  type: 'phrase',
-                },
-              },
-            },
-          }}
-        >
-          <>{'siem-kibana'}</>
-        </AddFilterToGlobalSearchBar>
-      </TestProviders>
+          },
+        }}
+      >
+        <>{'siem-kibana'}</>
+      </AddFilterToGlobalSearchBar>
     );
 
     expect(toJson(wrapper)).toMatchSnapshot();

@@ -124,3 +124,5 @@ const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
 export const Flyout = connect(mapStateToProps, {
   showTimeline: timelineActions.showTimeline,
 })(FlyoutComponent);
+
+Flyout.displayName = 'Flyout';

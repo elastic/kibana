@@ -214,3 +214,5 @@ export const HostsTable = connect(makeMapStateToProps, {
   updateTableActivePage: hostsActions.updateTableActivePage,
   updateTableLimit: hostsActions.updateTableLimit,
 })(HostsTableComponent);
+
+HostsTable.displayName = 'HostsTable';

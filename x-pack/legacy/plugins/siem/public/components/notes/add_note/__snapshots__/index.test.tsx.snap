@@ -1,12 +1,45 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AddNote renders correctly 1`] = `
-<Component
-  associateNote={[MockFunction]}
-  getNewNoteId={[MockFunction]}
-  newNote="The contents of a new note"
-  onCancelAddNote={[MockFunction]}
-  updateNewNote={[MockFunction]}
-  updateNote={[MockFunction]}
-/>
+<AddNotesContainer
+  alignItems="flexEnd"
+  direction="column"
+  gutterSize="none"
+>
+  <NewNote
+    note="The contents of a new note"
+    noteInputHeight={200}
+    updateNewNote={[MockFunction]}
+  />
+  <EuiFlexItem
+    grow={true}
+  >
+    <MarkdownHint
+      show={true}
+    />
+  </EuiFlexItem>
+  <ButtonsContainer
+    gutterSize="none"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <CancelButton
+        onCancelAddNote={[MockFunction]}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        data-test-subj="add-note"
+        fill={true}
+        isDisabled={false}
+        onClick={[Function]}
+      >
+        Add Note
+      </EuiButton>
+    </EuiFlexItem>
+  </ButtonsContainer>
+</AddNotesContainer>
 `;

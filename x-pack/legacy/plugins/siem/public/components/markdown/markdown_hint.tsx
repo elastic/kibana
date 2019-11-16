@@ -23,7 +23,11 @@ const Bold = styled.span`
 
 Bold.displayName = 'Bold';
 
-const MarkdownHintContainer = styled(EuiText)<{ visibility: string }>`
+interface MarkdownHintContainerProps {
+  visibility: string;
+}
+
+const MarkdownHintContainer = styled(EuiText)<MarkdownHintContainerProps>`
   visibility: ${({ visibility }) => visibility};
 `;
 

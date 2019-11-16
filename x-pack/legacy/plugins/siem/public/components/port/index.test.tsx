@@ -16,9 +16,7 @@ import { Port } from '.';
 describe('Port', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <TestProviders>
-        <Port contextId="test" eventId="abcd" fieldName="destination.port" value="443" />
-      </TestProviders>
+      <Port contextId="test" eventId="abcd" fieldName="destination.port" value="443" />
     );
     expect(toJson(wrapper)).toMatchSnapshot();
   });

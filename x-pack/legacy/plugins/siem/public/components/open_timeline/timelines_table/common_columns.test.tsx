@@ -225,9 +225,7 @@ describe('#getCommonColumns', () => {
       const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
       const itemIdToExpandedNotesRowMap = {
-        [mockResults[0].savedObjectId!]: (
-          <NotePreviews isModal={false} notes={mockResults[0].notes} />
-        ),
+        [mockResults[0].savedObjectId!]: <NotePreviews notes={mockResults[0].notes} />,
       };
 
       const wrapper = mountWithIntl(
@@ -296,7 +294,7 @@ describe('#getCommonColumns', () => {
 
       expect(onToggleShowNotes).toBeCalledWith({
         abc: <div />,
-        'saved-timeline-11': <NotePreviews isModal={false} notes={hasNotes[0].notes} />,
+        'saved-timeline-11': <NotePreviews notes={hasNotes[0].notes} />,
       });
     });
 
@@ -307,7 +305,7 @@ describe('#getCommonColumns', () => {
       // the saved object id exists in the map yet, so the row is expanded:
       const itemIdToExpandedNotesRowMap = {
         abc: <div />,
-        'saved-timeline-11': <NotePreviews isModal={false} notes={hasNotes[0].notes} />,
+        'saved-timeline-11': <NotePreviews notes={hasNotes[0].notes} />,
       };
 
       const wrapper = mountWithIntl(

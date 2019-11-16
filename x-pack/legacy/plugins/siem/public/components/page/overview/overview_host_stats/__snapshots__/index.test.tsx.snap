@@ -1,26 +1,233 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Overview Host Stat Data rendering it renders the default OverviewHostStats 1`] = `
-<Component
-  data={
-    Object {
-      "auditbeatAuditd": 73847,
-      "auditbeatFIM": 107307,
-      "auditbeatLogin": 60015,
-      "auditbeatPackage": 2003,
-      "auditbeatProcess": 1200,
-      "auditbeatUser": 1979,
-      "endgameDns": 39123,
-      "endgameFile": 39456,
-      "endgameImageLoad": 39789,
-      "endgameNetwork": 39101112,
-      "endgameProcess": 39131415,
-      "endgameRegistry": 39161718,
-      "endgameSecurity": 39202122,
-      "filebeatSystemModule": 568,
-      "winlogbeat": 296999,
-    }
-  }
-  loading={false}
-/>
+<EuiDescriptionList
+  type="column"
+>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Auditbeat Audit"
+      id="xpack.siem.overview.auditBeatAuditTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="host-stat-auditbeatAuditd"
+  >
+    <StatValue
+      isLoading={false}
+      value="73,847"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Auditbeat File Integrity Module"
+      id="xpack.siem.overview.auditBeatFimTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="host-stat-auditbeatFIM"
+  >
+    <StatValue
+      isLoading={false}
+      value="107,307"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Auditbeat Login"
+      id="xpack.siem.overview.auditBeatLoginTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="host-stat-auditbeatLogin"
+  >
+    <StatValue
+      isLoading={false}
+      value="60,015"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Auditbeat Package"
+      id="xpack.siem.overview.auditBeatPackageTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="host-stat-auditbeatPackage"
+  >
+    <StatValue
+      isLoading={false}
+      value="2,003"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Auditbeat Process"
+      id="xpack.siem.overview.auditBeatProcessTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="host-stat-auditbeatProcess"
+  >
+    <StatValue
+      isLoading={false}
+      value="1,200"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Auditbeat User"
+      id="xpack.siem.overview.auditBeatUserTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="host-stat-auditbeatUser"
+  >
+    <StatValue
+      isLoading={false}
+      value="1,979"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Endgame DNS"
+      id="xpack.siem.overview.endgameDnsTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="host-stat-endgameDns"
+  >
+    <StatValue
+      isLoading={false}
+      value="39,123"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Endgame File"
+      id="xpack.siem.overview.endgameFileTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="host-stat-endgameFile"
+  >
+    <StatValue
+      isLoading={false}
+      value="39,456"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Endgame Image Load"
+      id="xpack.siem.overview.endgameImageLoadTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="host-stat-endgameImageLoad"
+  >
+    <StatValue
+      isLoading={false}
+      value="39,789"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Endgame Network"
+      id="xpack.siem.overview.endgameNetworkTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="host-stat-endgameNetwork"
+  >
+    <StatValue
+      isLoading={false}
+      value="39,101,112"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Endgame Process"
+      id="xpack.siem.overview.endgameProcessTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="host-stat-endgameProcess"
+  >
+    <StatValue
+      isLoading={false}
+      value="39,131,415"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Endgame Registry"
+      id="xpack.siem.overview.endgameRegistryTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="host-stat-endgameRegistry"
+  >
+    <StatValue
+      isLoading={false}
+      value="39,161,718"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Endgame Security"
+      id="xpack.siem.overview.endgameSecurityTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="host-stat-endgameSecurity"
+  >
+    <StatValue
+      isLoading={false}
+      value="39,202,122"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Filebeat System Module"
+      id="xpack.siem.overview.filebeatSystemModuleTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="host-stat-filebeatSystemModule"
+  >
+    <StatValue
+      isLoading={false}
+      value="568"
+    />
+  </DescriptionListDescription>
+  <EuiDescriptionListTitle>
+    <FormattedMessage
+      defaultMessage="Winlogbeat"
+      id="xpack.siem.overview.winlogbeatTitle"
+      values={Object {}}
+    />
+  </EuiDescriptionListTitle>
+  <DescriptionListDescription
+    data-test-subj="host-stat-winlogbeat"
+  >
+    <StatValue
+      isLoading={false}
+      value="296,999"
+    />
+  </DescriptionListDescription>
+</EuiDescriptionList>
 `;

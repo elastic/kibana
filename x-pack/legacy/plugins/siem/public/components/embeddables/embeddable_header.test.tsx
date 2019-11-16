@@ -16,11 +16,7 @@ jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 describe('EmbeddableHeader', () => {
   test('it renders', () => {
-    const wrapper = shallow(
-      <TestProviders>
-        <EmbeddableHeader title="Test title" />
-      </TestProviders>
-    );
+    const wrapper = shallow(<EmbeddableHeader title="Test title" />);
 
     expect(toJson(wrapper)).toMatchSnapshot();
   });

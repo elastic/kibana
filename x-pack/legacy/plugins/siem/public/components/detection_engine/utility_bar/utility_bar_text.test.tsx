@@ -22,6 +22,6 @@ describe('UtilityBarText', () => {
       </TestProviders>
     );
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(toJson(wrapper.find('UtilityBarText'))).toMatchSnapshot();
   });
 });

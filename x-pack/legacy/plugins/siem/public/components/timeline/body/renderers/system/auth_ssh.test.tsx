@@ -7,109 +7,93 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-import { TestProviders } from '../../../../../mock';
 import { AuthSsh } from './auth_ssh';
 
 describe('AuthSsh', () => {
   describe('rendering', () => {
     test('it renders against shallow snapshot', () => {
       const wrapper = shallow(
-        <TestProviders>
-          <AuthSsh
-            contextId="[context-123]"
-            eventId="[event-123]"
-            sshSignature="[ssh-signature]"
-            sshMethod="[ssh-method]"
-          />
-        </TestProviders>
+        <AuthSsh
+          contextId="[context-123]"
+          eventId="[event-123]"
+          sshSignature="[ssh-signature]"
+          sshMethod="[ssh-method]"
+        />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
     test('it returns null if sshSignature and sshMethod are both null', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <AuthSsh
-            contextId="[context-123]"
-            eventId="[event-123]"
-            sshSignature={null}
-            sshMethod={null}
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <AuthSsh
+          contextId="[context-123]"
+          eventId="[event-123]"
+          sshSignature={null}
+          sshMethod={null}
+        />
       );
-      expect(wrapper.isEmptyRender()).toBeTruthy();
+      expect(wrapper.children().length).toEqual(0);
     });
 
     test('it returns null if sshSignature and sshMethod are both undefined', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <AuthSsh
-            contextId="[context-123]"
-            eventId="[event-123]"
-            sshSignature={undefined}
-            sshMethod={undefined}
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <AuthSsh
+          contextId="[context-123]"
+          eventId="[event-123]"
+          sshSignature={undefined}
+          sshMethod={undefined}
+        />
       );
-      expect(wrapper.isEmptyRender()).toBeTruthy();
+      expect(wrapper.children().length).toEqual(0);
     });
 
     test('it returns null if sshSignature is null and sshMethod is undefined', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <AuthSsh
-            contextId="[context-123]"
-            eventId="[event-123]"
-            sshSignature={null}
-            sshMethod={undefined}
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <AuthSsh
+          contextId="[context-123]"
+          eventId="[event-123]"
+          sshSignature={null}
+          sshMethod={undefined}
+        />
       );
-      expect(wrapper.isEmptyRender()).toBeTruthy();
+      expect(wrapper.children().length).toEqual(0);
     });
 
     test('it returns null if sshSignature is undefined and sshMethod is null', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <AuthSsh
-            contextId="[context-123]"
-            eventId="[event-123]"
-            sshSignature={undefined}
-            sshMethod={null}
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <AuthSsh
+          contextId="[context-123]"
+          eventId="[event-123]"
+          sshSignature={undefined}
+          sshMethod={null}
+        />
       );
-      expect(wrapper.isEmptyRender()).toBeTruthy();
+      expect(wrapper.children().length).toEqual(0);
     });
 
     test('it returns sshSignature if sshMethod is null', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <AuthSsh
-            contextId="[context-123]"
-            eventId="[event-123]"
-            sshSignature="[sshSignature-1]"
-            sshMethod={null}
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <AuthSsh
+          contextId="[context-123]"
+          eventId="[event-123]"
+          sshSignature="[sshSignature-1]"
+          sshMethod={null}
+        />
       );
-      expect(wrapper.text()).toEqual('[sshSignature-1]');
+      expect(wrapper.find('DraggableBadge').prop('value')).toEqual('[sshSignature-1]');
     });
 
     test('it returns sshMethod if sshSignature is null', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <AuthSsh
-            contextId="[context-123]"
-            eventId="[event-123]"
-            sshSignature={null}
-            sshMethod="[sshMethod-1]"
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <AuthSsh
+          contextId="[context-123]"
+          eventId="[event-123]"
+          sshSignature={null}
+          sshMethod="[sshMethod-1]"
+        />
       );
-      expect(wrapper.text()).toEqual('[sshMethod-1]');
+      expect(wrapper.find('DraggableBadge').prop('value')).toEqual('[sshMethod-1]');
     });
   });
 });

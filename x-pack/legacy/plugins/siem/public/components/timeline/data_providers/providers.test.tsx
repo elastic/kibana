@@ -21,19 +21,17 @@ describe('Providers', () => {
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
-        <DroppableWrapper droppableId="unitTest">
-          <Providers
-            browserFields={{}}
-            dataProviders={mockDataProviders}
-            id="foo"
-            onChangeDataProviderKqlQuery={jest.fn()}
-            onChangeDroppableAndProvider={jest.fn()}
-            onDataProviderEdited={jest.fn()}
-            onDataProviderRemoved={jest.fn()}
-            onToggleDataProviderEnabled={jest.fn()}
-            onToggleDataProviderExcluded={jest.fn()}
-          />
-        </DroppableWrapper>
+        <Providers
+          browserFields={{}}
+          dataProviders={mockDataProviders}
+          id="foo"
+          onChangeDataProviderKqlQuery={jest.fn()}
+          onChangeDroppableAndProvider={jest.fn()}
+          onDataProviderEdited={jest.fn()}
+          onDataProviderRemoved={jest.fn()}
+          onToggleDataProviderEnabled={jest.fn()}
+          onToggleDataProviderExcluded={jest.fn()}
+        />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });

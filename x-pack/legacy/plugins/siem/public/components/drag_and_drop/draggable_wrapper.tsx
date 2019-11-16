@@ -235,6 +235,8 @@ export const DraggableWrapper = connect(null, {
   unRegisterProvider: dragAndDropActions.unRegisterProvider,
 })(DraggableWrapperComponent);
 
+DraggableWrapper.displayName = 'DraggableWrapper';
+
 interface ConditionalPortalProps {
   children: React.ReactNode;
   usePortal: boolean;

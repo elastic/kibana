@@ -82,7 +82,7 @@ interface GetRowItemDraggablesProps {
   maxOverflow?: number;
 }
 
-export const GetRowItemDraggables = ({
+export const getRowItemDraggables = ({
   rowItems,
   attrName,
   idPrefix,
@@ -90,7 +90,7 @@ export const GetRowItemDraggables = ({
   dragDisplayValue,
   displayCount = 5,
   maxOverflow = 5,
-}: getRowItemDraggablesProps): JSX.Element => {
+}: GetRowItemDraggablesProps): JSX.Element => {
   if (rowItems != null && rowItems.length > 0) {
     const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
       const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}-${index}`);

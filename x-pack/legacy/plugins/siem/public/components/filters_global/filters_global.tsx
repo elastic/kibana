@@ -17,7 +17,11 @@ const offsetChrome = 49;
 const disableSticky = 'screen and (max-width: ' + euiLightVars.euiBreakpoints.s + ')';
 const disableStickyMq = window.matchMedia(disableSticky);
 
-const Wrapper = styled.aside<{ isSticky?: boolean }>`
+interface WrapperProps {
+  isSticky?: boolean;
+}
+
+const Wrapper = styled.aside<WrapperProps>`
   ${props => css`
     position: relative;
     z-index: ${props.theme.eui.euiZNavigation};

@@ -43,7 +43,7 @@ describe('Uncommon Process Table Component', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('UncommonProcessTable'))).toMatchSnapshot();
     });
 
     test('it has a double dash (empty value) without any hosts at all', () => {

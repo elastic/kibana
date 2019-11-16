@@ -1,11 +1,35 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FlowTargetSelect Component rendering it renders the FlowTargetSelect 1`] = `
-<Component
-  id="TestFlowTargetId"
+<EuiSuperSelect
+  compressed={false}
+  fullWidth={false}
+  hasDividers={false}
+  isInvalid={false}
   isLoading={false}
-  selectedDirection="uniDirectional"
-  selectedTarget="source"
-  updateFlowTargetAction={[MockFunction]}
+  onChange={[Function]}
+  options={
+    Array [
+      Object {
+        "directions": Array [
+          "uniDirectional",
+          "biDirectional",
+        ],
+        "id": "TestFlowTargetId-select-flow-target-source",
+        "inputDisplay": "Source",
+        "value": "source",
+      },
+      Object {
+        "directions": Array [
+          "uniDirectional",
+          "biDirectional",
+        ],
+        "id": "TestFlowTargetId-select-flow-target-destination",
+        "inputDisplay": "Destination",
+        "value": "destination",
+      },
+    ]
+  }
+  valueOfSelected="source"
 />
 `;

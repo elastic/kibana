@@ -38,7 +38,7 @@ describe('NotePreviews', () => {
 
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <NotePreviews isModal={false} notes={hasNotes[0].notes} />
+        <NotePreviews notes={hasNotes[0].notes} />
       </ThemeProvider>
     );
 
@@ -52,7 +52,7 @@ describe('NotePreviews', () => {
 
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <NotePreviews isModal={true} notes={hasNotes[0].notes} />
+        <NotePreviews notes={hasNotes[0].notes} />
       </ThemeProvider>
     );
 
@@ -62,19 +62,19 @@ describe('NotePreviews', () => {
   });
 
   test('it does NOT render the preview container if notes is undefined', () => {
-    const wrapper = mountWithIntl(<NotePreviews isModal={false} />);
+    const wrapper = mountWithIntl(<NotePreviews />);
 
     expect(wrapper.find('[data-test-subj="note-previews-container"]').exists()).toBe(false);
   });
 
   test('it does NOT render the preview container if notes is null', () => {
-    const wrapper = mountWithIntl(<NotePreviews isModal={false} notes={null} />);
+    const wrapper = mountWithIntl(<NotePreviews notes={null} />);
 
     expect(wrapper.find('[data-test-subj="note-previews-container"]').exists()).toBe(false);
   });
 
   test('it does NOT render the preview container if notes is empty', () => {
-    const wrapper = mountWithIntl(<NotePreviews isModal={false} notes={[]} />);
+    const wrapper = mountWithIntl(<NotePreviews notes={[]} />);
 
     expect(wrapper.find('[data-test-subj="note-previews-container"]').exists()).toBe(false);
   });
@@ -103,7 +103,7 @@ describe('NotePreviews', () => {
 
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <NotePreviews isModal={false} notes={nonUniqueNotes} />
+        <NotePreviews notes={nonUniqueNotes} />
       </ThemeProvider>
     );
 
@@ -139,7 +139,7 @@ describe('NotePreviews', () => {
 
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <NotePreviews isModal={false} notes={nonUniqueNotes} />
+        <NotePreviews notes={nonUniqueNotes} />
       </ThemeProvider>
     );
 
@@ -174,7 +174,7 @@ describe('NotePreviews', () => {
 
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <NotePreviews isModal={false} notes={nonUniqueNotes} />
+        <NotePreviews notes={nonUniqueNotes} />
       </ThemeProvider>
     );
 

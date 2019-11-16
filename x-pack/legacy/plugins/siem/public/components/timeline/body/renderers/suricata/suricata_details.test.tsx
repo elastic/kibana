@@ -43,14 +43,12 @@ describe('SuricataDetails', () => {
     });
 
     test('it returns null for text if the data contains no suricata data', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <SuricataDetails
-            data={mockTimelineData[0].ecs}
-            browserFields={mockBrowserFields}
-            timelineId="test"
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <SuricataDetails
+          data={mockTimelineData[0].ecs}
+          browserFields={mockBrowserFields}
+          timelineId="test"
+        />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });

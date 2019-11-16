@@ -21,19 +21,17 @@ describe('EventDetails', () => {
   describe('rendering', () => {
     test('should match snapshot', () => {
       const wrapper = shallow(
-        <TestProviders>
-          <EventDetails
-            browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
-            data={mockDetailItemData}
-            id={mockDetailItemDataId}
-            view="table-view"
-            onUpdateColumns={jest.fn()}
-            onViewSelected={jest.fn()}
-            timelineId="test"
-            toggleColumn={jest.fn()}
-          />
-        </TestProviders>
+        <EventDetails
+          browserFields={mockBrowserFields}
+          columnHeaders={defaultHeaders}
+          data={mockDetailItemData}
+          id={mockDetailItemDataId}
+          view="table-view"
+          onUpdateColumns={jest.fn()}
+          onViewSelected={jest.fn()}
+          timelineId="test"
+          toggleColumn={jest.fn()}
+        />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });

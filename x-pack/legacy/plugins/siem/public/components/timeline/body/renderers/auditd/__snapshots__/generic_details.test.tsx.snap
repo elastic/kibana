@@ -1,114 +1,130 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`GenericDetails rendering it renders the default AuditAcquiredCredsDetails 1`] = `
-<Component
-  browserFields={Object {}}
-  contextId="contextid-123"
-  data={
-    Object {
-      "_id": "22",
-      "auditd": Object {
-        "data": Object {
-          "acct": Array [
-            "alice",
-          ],
-          "op": Array [
-            "PAM:setcred",
-          ],
-          "terminal": Array [
-            "ssh",
-          ],
-        },
-        "result": Array [
-          "success",
-        ],
-        "session": Array [
-          "340",
-        ],
-        "summary": Object {
-          "actor": Object {
-            "primary": Array [
+<Details>
+  <AuditdGenericLine
+    args={null}
+    contextId="contextid-123"
+    hostName="suricata-bangalore"
+    id="22"
+    primary="alice"
+    processExecutable="/usr/sbin/sshd"
+    processPid={21202}
+    result="success"
+    secondary="alice"
+    session="340"
+    text="generic-text-123"
+    userName="root"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <NetflowRenderer
+    data={
+      Object {
+        "_id": "22",
+        "auditd": Object {
+          "data": Object {
+            "acct": Array [
               "alice",
             ],
-            "secondary": Array [
-              "alice",
+            "op": Array [
+              "PAM:setcred",
             ],
-          },
-          "how": Array [
-            "/usr/sbin/sshd",
-          ],
-          "message_type": null,
-          "object": Object {
-            "primary": Array [
+            "terminal": Array [
               "ssh",
             ],
-            "secondary": Array [
-              "8.42.77.171",
-            ],
-            "type": Array [
-              "user-session",
-            ],
           },
-          "sequence": null,
+          "result": Array [
+            "success",
+          ],
+          "session": Array [
+            "340",
+          ],
+          "summary": Object {
+            "actor": Object {
+              "primary": Array [
+                "alice",
+              ],
+              "secondary": Array [
+                "alice",
+              ],
+            },
+            "how": Array [
+              "/usr/sbin/sshd",
+            ],
+            "message_type": null,
+            "object": Object {
+              "primary": Array [
+                "ssh",
+              ],
+              "secondary": Array [
+                "8.42.77.171",
+              ],
+              "type": Array [
+                "user-session",
+              ],
+            },
+            "sequence": null,
+          },
         },
-      },
-      "destination": null,
-      "event": Object {
-        "action": Array [
-          "disposed-credentials",
-        ],
-        "category": Array [
-          "user-login",
-        ],
-        "dataset": null,
-        "id": null,
-        "module": Array [
-          "auditd",
-        ],
-        "severity": null,
-      },
-      "geo": null,
-      "host": Object {
-        "id": Array [
-          "0a63559c1acf4c419d979c4b4d8b83ff",
-        ],
-        "ip": Array [
-          "139.59.11.147",
-          "10.47.0.5",
-          "fe80::ec0b:1bff:fe29:80bd",
-        ],
-        "name": Array [
-          "suricata-bangalore",
-        ],
-      },
-      "http": null,
-      "network": null,
-      "process": Object {
-        "args": null,
-        "executable": Array [
-          "/usr/sbin/sshd",
-        ],
-        "name": null,
-        "pid": Array [
-          21202,
-        ],
-        "ppid": null,
-        "title": null,
-        "working_directory": null,
-      },
-      "source": null,
-      "suricata": null,
-      "timestamp": "2019-03-13T03:35:21.614Z",
-      "url": null,
-      "user": Object {
-        "name": Array [
-          "root",
-        ],
-      },
-      "zeek": null,
+        "destination": null,
+        "event": Object {
+          "action": Array [
+            "disposed-credentials",
+          ],
+          "category": Array [
+            "user-login",
+          ],
+          "dataset": null,
+          "id": null,
+          "module": Array [
+            "auditd",
+          ],
+          "severity": null,
+        },
+        "geo": null,
+        "host": Object {
+          "id": Array [
+            "0a63559c1acf4c419d979c4b4d8b83ff",
+          ],
+          "ip": Array [
+            "139.59.11.147",
+            "10.47.0.5",
+            "fe80::ec0b:1bff:fe29:80bd",
+          ],
+          "name": Array [
+            "suricata-bangalore",
+          ],
+        },
+        "http": null,
+        "network": null,
+        "process": Object {
+          "args": null,
+          "executable": Array [
+            "/usr/sbin/sshd",
+          ],
+          "name": null,
+          "pid": Array [
+            21202,
+          ],
+          "ppid": null,
+          "title": null,
+          "working_directory": null,
+        },
+        "source": null,
+        "suricata": null,
+        "timestamp": "2019-03-13T03:35:21.614Z",
+        "url": null,
+        "user": Object {
+          "name": Array [
+            "root",
+          ],
+        },
+        "zeek": null,
+      }
     }
-  }
-  text="generic-text-123"
-  timelineId="test"
-/>
+    timelineId="test"
+  />
+</Details>
 `;

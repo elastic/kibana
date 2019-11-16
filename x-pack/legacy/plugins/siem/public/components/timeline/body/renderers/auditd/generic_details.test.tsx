@@ -49,16 +49,14 @@ describe('GenericDetails', () => {
     });
 
     test('it returns null for text if the data contains no auditd data', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <AuditdGenericDetails
-            contextId="contextid-123"
-            text="generic-text-123"
-            browserFields={mockBrowserFields}
-            data={mockTimelineData[0].ecs}
-            timelineId="test"
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <AuditdGenericDetails
+          contextId="contextid-123"
+          text="generic-text-123"
+          browserFields={mockBrowserFields}
+          data={mockTimelineData[0].ecs}
+          timelineId="test"
+        />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });

@@ -16,6 +16,13 @@ import { OnOpenTimeline, OnToggleShowNotes, OpenTimelineResult } from '../types'
 import { getEmptyTagValue } from '../../empty_value';
 import { FormattedRelativePreferenceDate } from '../../formatted_date';
 
+interface GetCommonColumnsProps {
+  onOpenTimeline: OnOpenTimeline;
+  onToggleShowNotes: OnToggleShowNotes;
+  showExtendedColumnsAndActions: boolean;
+  itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
+}
+
 /**
  * Returns the column definitions (passed as the `columns` prop to
  * `EuiBasicTable`) that are common to the compact `Open Timeline` modal view,
@@ -26,12 +33,7 @@ export const getCommonColumns = ({
   onOpenTimeline,
   onToggleShowNotes,
   showExtendedColumnsAndActions,
-}: {
-  onOpenTimeline: OnOpenTimeline;
-  onToggleShowNotes: OnToggleShowNotes;
-  showExtendedColumnsAndActions: boolean;
-  itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
-}) => [
+}: GetCommonColumnsProps) => [
   {
     isExpander: true,
     render: ({ notes, savedObjectId }: OpenTimelineResult) =>
@@ -43,9 +45,7 @@ export const getCommonColumns = ({
               ? onToggleShowNotes(omit(savedObjectId, itemIdToExpandedNotesRowMap))
               : onToggleShowNotes({
                   ...itemIdToExpandedNotesRowMap,
-                  [savedObjectId]: (
-                    <NotePreviews notes={notes} isModal={!showExtendedColumnsAndActions} />
-                  ),
+                  [savedObjectId]: <NotePreviews notes={notes} />,
                 })
           }
           aria-label={itemIdToExpandedNotesRowMap[savedObjectId] ? i18n.COLLAPSE : i18n.EXPAND}

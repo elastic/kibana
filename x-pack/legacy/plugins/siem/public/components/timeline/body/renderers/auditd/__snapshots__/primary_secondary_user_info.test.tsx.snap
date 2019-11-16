@@ -1,11 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`UserPrimarySecondary rendering it renders the default PrimarySecondaryUserInfo 1`] = `
-<Component
+<PrimarySecondary
   contextId="context-123"
   eventId="event-123"
   primary="primary-1"
   secondary="secondary-1"
-  userName="user-name-1"
 />
 `;

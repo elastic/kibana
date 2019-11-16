@@ -26,9 +26,10 @@ const Wrapper = styled.div`
     }
   `}
 `;
+
 Wrapper.displayName = 'Wrapper';
 
-export interface WrapperPageProps {
+interface WrapperPageProps {
   children: React.ReactNode;
   className?: string;
   restrictWidth?: boolean | number | string;
@@ -58,4 +59,5 @@ export const WrapperPage = React.memo<WrapperPageProps>(
     );
   }
 );
+
 WrapperPage.displayName = 'WrapperPage';

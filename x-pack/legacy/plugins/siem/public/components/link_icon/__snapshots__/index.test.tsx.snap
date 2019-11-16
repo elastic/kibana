@@ -1,14 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`LinkIcon it renders 1`] = `
-<Component>
-  <LinkIcon
-    href="#"
-    iconSide="right"
-    iconSize="xxl"
-    iconType="alert"
+<Link
+  className="siemLinkIcon"
+  href="#"
+  iconSide="right"
+>
+  <EuiIcon
+    size="xxl"
+    type="alert"
+  />
+  <span
+    className="siemLinkIcon__label"
   >
     Test link
-  </LinkIcon>
-</Component>
+  </span>
+</Link>
 `;

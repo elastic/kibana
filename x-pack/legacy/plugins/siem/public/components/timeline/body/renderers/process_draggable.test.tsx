@@ -30,35 +30,31 @@ describe('ProcessDraggable', () => {
     });
 
     test('it returns null if everything is null', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <ProcessDraggable
-            contextId="context-123"
-            endgamePid={null}
-            endgameProcessName={null}
-            eventId="event-123"
-            processExecutable={null}
-            processName={null}
-            processPid={null}
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <ProcessDraggable
+          contextId="context-123"
+          endgamePid={null}
+          endgameProcessName={null}
+          eventId="event-123"
+          processExecutable={null}
+          processName={null}
+          processPid={null}
+        />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns null if everything is undefined', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <ProcessDraggable
-            contextId="context-123"
-            endgamePid={undefined}
-            endgameProcessName={undefined}
-            eventId="event-123"
-            processExecutable={undefined}
-            processName={undefined}
-            processPid={undefined}
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <ProcessDraggable
+          contextId="context-123"
+          endgamePid={undefined}
+          endgameProcessName={undefined}
+          eventId="event-123"
+          processExecutable={undefined}
+          processName={undefined}
+          processPid={undefined}
+        />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });
