@@ -23,14 +23,13 @@ import { npStart } from 'ui/new_platform';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
-import { FieldFormat } from '../../../../../plugins/data/common/field_formats';
+import { FieldFormat, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { DateRangesParamEditor } from '../../vis/editors/default/controls/date_ranges';
 
 // @ts-ignore
 import { fieldFormats } from '../../registry/field_formats';
 // @ts-ignore
 import { dateRange } from '../../utils/date_range';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 
 const dateRangeTitle = i18n.translate('common.ui.aggTypes.buckets.dateRangeTitle', {
   defaultMessage: 'Date Range',

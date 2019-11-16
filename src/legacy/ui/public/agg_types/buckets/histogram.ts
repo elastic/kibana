@@ -28,7 +28,7 @@ import { NumberIntervalParamEditor } from '../../vis/editors/default/controls/nu
 import { MinDocCountParamEditor } from '../../vis/editors/default/controls/min_doc_count';
 import { HasExtendedBoundsParamEditor } from '../../vis/editors/default/controls/has_extended_bounds';
 import { ExtendedBoundsParamEditor } from '../../vis/editors/default/controls/extended_bounds';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 export interface AutoBounds {

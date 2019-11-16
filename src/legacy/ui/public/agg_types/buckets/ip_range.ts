@@ -24,13 +24,12 @@ import { IpRangeTypeParamEditor } from '../../vis/editors/default/controls/ip_ra
 import { IpRangesParamEditor } from '../../vis/editors/default/controls/ip_ranges';
 // @ts-ignore
 import { fieldFormats } from '../../registry/field_formats';
-import { FieldFormat } from '../../../../../plugins/data/common/field_formats';
+import { FieldFormat, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { ipRange } from '../../utils/ip_range';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 // @ts-ignore
 import { createFilterIpRange } from './create_filter/ip_range';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 
 const ipRangeTitle = i18n.translate('common.ui.aggTypes.buckets.ipRangeTitle', {
   defaultMessage: 'IPv4 Range',
