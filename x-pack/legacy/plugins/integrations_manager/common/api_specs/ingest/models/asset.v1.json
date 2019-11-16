@@ -1,0 +1,17 @@
+{
+  "title": "Asset",
+  "type": "object",
+  "description": "Item installed for Kibana (e.g. dashboard, visualization), Elasticsearch (e.g. ingest pipeline, ILM policy), or a Kibana plugin (e.g. ML job)",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "type": {
+      "$ref": "./asset_type.v1.json"
+    }
+  },
+  "required": [
+    "id",
+    "type"
+  ]
+}
