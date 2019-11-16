@@ -19,7 +19,7 @@
 import React from 'react';
 import { DocView } from 'ui/registry/doc_views_types';
 import { EuiTabbedContent } from '@elastic/eui';
-import { getServices, DocViewRenderProps } from '../kibana_services';
+import { getServices, DocViewRenderProps } from '../../kibana_services';
 import { DocViewerTab } from './doc_viewer_tab';
 
 /**

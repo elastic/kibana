@@ -65,7 +65,6 @@ import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 // @ts-ignore
 import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 import { configureAppAngularModule } from 'ui/legacy_compat';
-import { setAngularModule } from './kibana_services';
 // @ts-ignore
 
 import {
@@ -97,29 +96,34 @@ import { createFieldChooserDirective } from './components/field_chooser/field_ch
 
 // @ts-ignore
 import { createDiscoverFieldDirective } from './components/field_chooser/discover_field';
+import { DiscoverStartPlugins } from './plugin';
 
-const thirdPartyAngularDependencies = [
-  'ngSanitize',
-  'ngRoute',
-  'react',
-  'ui.bootstrap',
-  'elasticsearch',
-];
-
-export function getAngularModule(name: string, core: CoreStart, deps: any) {
-  const discoverUiModule = getInnerAngular(name, core, deps.navigation);
-  configureAppAngularModule(discoverUiModule, core as LegacyCoreStart, true);
-  setAngularModule(discoverUiModule);
+/**
+ * returns the main inner angular module, it contains all the parts of Angular Discover
+ * needs to render, so in the end the current 'kibana' angular module is no longer necessary
+ */
+export function getInnerAngularModule(name: string, core: CoreStart, deps: DiscoverStartPlugins) {
+  const module = initializeInnerAngularModule(name, core, deps.navigation);
+  configureAppAngularModule(module, core as LegacyCoreStart, true);
+  return module;
 }
 
-export function getAngularModuleEmbeddable(name: string, core: CoreStart, deps: any) {
-  const discoverUiModule = getInnerAngular(name, core, deps.navigation, true);
-  configureAppAngularModule(discoverUiModule, core as LegacyCoreStart, true);
+/**
+ * returns a slimmer inner angular module for embeddable rendering
+ */
+export function getInnerAngularModuleEmbeddable(
+  name: string,
+  core: CoreStart,
+  deps: DiscoverStartPlugins
+) {
+  const module = initializeInnerAngularModule(name, core, deps.navigation, true);
+  configureAppAngularModule(module, core as LegacyCoreStart, true);
+  return module;
 }
 
 let initialized = false;
 
-export function getInnerAngular(
+export function initializeInnerAngularModule(
   name = 'app/discover',
   core: CoreStart,
   navigation: NavigationStart,
@@ -164,7 +168,11 @@ export function getInnerAngular(
 
   return angular
     .module(name, [
-      ...thirdPartyAngularDependencies,
+      'ngSanitize',
+      'ngRoute',
+      'react',
+      'ui.bootstrap',
+      'elasticsearch',
       'discoverConfig',
       'discoverI18n',
       'discoverPrivate',

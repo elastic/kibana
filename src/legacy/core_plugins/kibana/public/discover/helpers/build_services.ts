@@ -18,7 +18,6 @@
  */
 import {
   Capabilities,
-  ChromeDocTitle,
   ChromeStart,
   CoreStart,
   DocLinksStart,
@@ -34,14 +33,14 @@ import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 // @ts-ignore
 import { StateProvider } from 'ui/state_management/state';
 // @ts-ignore
-import { createSavedSearchesService } from './saved_searches/saved_searches';
+import { createSavedSearchesService } from '../saved_searches/saved_searches';
 // @ts-ignore
-import { createSavedSearchFactory } from './saved_searches/_saved_search';
-import { DiscoverStartPlugins } from './plugin';
-import { start as legacyData } from '../../../data/public/legacy';
-import { IndexPatterns } from '../../../data/public/index_patterns/index_patterns';
-import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
-import { SavedSearch } from './types';
+import { createSavedSearchFactory } from '../saved_searches/_saved_search';
+import { DiscoverStartPlugins } from '../plugin';
+import { start as legacyData } from '../../../../data/public/legacy';
+import { IndexPatterns } from '../../../../data/public/index_patterns/index_patterns';
+import { EuiUtilsStart } from '../../../../../../plugins/eui_utils/public';
+import { SavedSearch } from '../types';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -49,7 +48,6 @@ export interface DiscoverServices {
   chrome: ChromeStart;
   core: CoreStart;
   docLinks: DocLinksStart;
-  docTitle: ChromeDocTitle;
   docViewsRegistry: docViewsRegistry.DocViewsRegistry;
   eui_utils: EuiUtilsStart;
   filterManager: unknown;
@@ -103,7 +101,6 @@ export async function buildServices(core: CoreStart, plugins: DiscoverStartPlugi
     chrome: core.chrome,
     core,
     docLinks: core.docLinks,
-    docTitle: core.chrome.docTitle,
     docViewsRegistry,
     eui_utils: plugins.eui_utils,
     filterManager: plugins.data.query.filterManager,

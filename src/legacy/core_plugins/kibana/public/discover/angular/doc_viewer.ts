@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { DocViewer } from '../doc_viewer/doc_viewer';
+import { DocViewer } from '../components/doc_viewer/doc_viewer';
 
 export function createDocViewerDirective(reactDirective: any) {
   return reactDirective(

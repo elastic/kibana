@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
 import { DocViewer } from '../doc_viewer/doc_viewer';
 import { ElasticRequestState, useEsDocSearch } from './use_es_doc_search';
-import { IndexPatterns, ElasticSearchHit, getServices } from '../kibana_services';
+import { IndexPatterns, ElasticSearchHit, getServices } from '../../kibana_services';
 
 export interface ElasticSearchResult {
   hits: {

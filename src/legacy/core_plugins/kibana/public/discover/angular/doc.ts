@@ -18,9 +18,9 @@
  */
 import { getAngularModule, wrapInI18nContext, getServices } from '../kibana_services';
 // @ts-ignore
-import { getRootBreadcrumbs } from '../breadcrumbs';
+import { getRootBreadcrumbs } from '../helpers/breadcrumbs';
 import html from './doc.html';
-import { Doc } from '../doc/doc';
+import { Doc } from '../components/doc/doc';
 const { timefilter } = getServices();
 const app = getAngularModule();
 app.directive('discoverDoc', function(reactDirective: any) {

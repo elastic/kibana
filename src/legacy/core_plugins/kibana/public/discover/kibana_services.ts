@@ -17,15 +17,21 @@
  * under the License.
  */
 import angular from 'angular'; // just used in embeddables and discover controller
-import { DiscoverServices } from './build_services';
+import { DiscoverServices } from './helpers/build_services';
 
 let angularModule: any = null;
 let services: DiscoverServices | null = null;
 
+/**
+ * set bootstrapped inner angular module
+ */
 export function setAngularModule(module: any) {
   angularModule = module;
 }
 
+/**
+ * get boostrapped inner angular module
+ */
 export function getAngularModule() {
   return angularModule;
 }
@@ -41,7 +47,7 @@ export function setServices(newServices: any) {
   services = newServices;
 }
 
-// EXPORT legacy static dependencies
+// EXPORT legacy static dependencies, should be migrated when available in a new version;
 export { angular };
 export { wrapInI18nContext } from 'ui/i18n';
 export { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';

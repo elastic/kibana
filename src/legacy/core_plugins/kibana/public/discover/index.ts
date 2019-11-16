@@ -29,7 +29,8 @@ export const plugin: PluginInitializer<DiscoverSetup, DiscoverStart> = (
 ) => {
   return new DiscoverPlugin(initializerContext);
 };
-// export is needed for legacy tests to work (to bootstrap angular)
+
+// Legacy compatiblity part - to be removed at cutover, replaced by a kibana.json file
 export const pluginInstance = plugin({} as PluginInitializerContext);
 (async () => {
   pluginInstance.setup(npSetup.core, {

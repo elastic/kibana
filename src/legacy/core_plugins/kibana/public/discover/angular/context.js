@@ -23,7 +23,7 @@ import { getAngularModule, getServices, subscribeWithScope } from './../kibana_s
 
 import './context_app';
 import contextAppRouteTemplate from './context.html';
-import { getRootBreadcrumbs } from '../breadcrumbs';
+import { getRootBreadcrumbs } from '../helpers/breadcrumbs';
 const { chrome } = getServices();
 
 const k7Breadcrumbs = $route => {

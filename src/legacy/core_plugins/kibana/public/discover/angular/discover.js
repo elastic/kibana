@@ -33,7 +33,7 @@ import * as columnActions from './doc_table/actions/columns';
 import * as filterActions from './doc_table/actions/filter';
 
 import indexTemplate from './discover.html';
-import { showOpenSearchPanel } from '../top_nav/show_open_search_panel';
+import { showOpenSearchPanel } from '../components/top_nav/show_open_search_panel';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
@@ -73,7 +73,7 @@ const {
   getUnhashableStates
 } = getServices();
 
-import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
+import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
 import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
 import { start as data } from '../../../../data/public/legacy';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
@@ -393,7 +393,7 @@ function discoverController(
   $scope.searchSource.setParent(timeRangeSearchSource);
 
   const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
-  docTitle.change(`Discover${pageTitleSuffix}`);
+  chrome.docTitle.change(`Discover${pageTitleSuffix}`);
   const discoverBreadcrumbsTitle = i18n.translate('kbn.discover.discoverBreadcrumbTitle', {
     defaultMessage: 'Discover',
   });

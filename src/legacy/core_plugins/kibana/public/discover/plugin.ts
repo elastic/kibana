@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 import angular from 'angular';
 import { IUiActionsStart } from 'src/plugins/ui_actions/public';
@@ -27,13 +26,12 @@ import {
   Start as EmbeddableStart,
   Setup as EmbeddableSetup,
 } from '../../../../../plugins/embeddable/public';
-
 import { LocalApplicationService } from '../local_application_service';
-import { getAngularModule, getAngularModuleEmbeddable } from './get_inner_angular';
-import { setServices } from './kibana_services';
+import { getInnerAngularModule, getInnerAngularModuleEmbeddable } from './get_inner_angular';
+import { setAngularModule, setServices } from './kibana_services';
 import { NavigationStart } from '../../../navigation/public';
 import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
-import { buildServices } from './build_services';
+import { buildServices } from './helpers/build_services';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -58,6 +56,11 @@ export interface DiscoverStartPlugins {
 const innerAngularName = 'app/discover';
 const embeddableAngularName = 'app/discoverEmbeddable';
 
+/**
+ * Contains Discover, one of the oldest parts of Kibana
+ * There are 2 kinds of Angular bootstrapped for rendering, additionally to the main Angular
+ * Discover provides also saved searches for embeddables, those contain a slimmer Angular
+ */
 export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   private servicesInitialized: boolean = false;
   private innerAngularInitialized: boolean = false;
@@ -68,18 +71,17 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   public initializeServices?: () => void;
   constructor(initializerContext: PluginInitializerContext) {}
   setup(core: CoreSetup, plugins: DiscoverSetupPlugins): DiscoverSetup {
-    registerFeature();
     plugins.localApplicationService.register({
       id: 'discover',
       title: 'Discover',
       order: -1004,
       euiIconType: 'discoverApp',
       mount: async (context, params) => {
-        if (!this.initializeInnerAngular) {
-          throw Error('Discover plugin method initializeInnerAngular is undefined');
-        }
         if (!this.initializeServices) {
           throw Error('Discover plugin method initializeServices is undefined');
+        }
+        if (!this.initializeInnerAngular) {
+          throw Error('Discover plugin method initializeInnerAngular is undefined');
         }
         await this.initializeServices();
         await this.initializeInnerAngular();
@@ -95,7 +97,8 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
         return;
       }
       // this is used by application mount and tests
-      getAngularModule(innerAngularName, core, plugins);
+      const module = getInnerAngularModule(innerAngularName, core, plugins);
+      setAngularModule(module);
       this.innerAngularInitialized = true;
     };
 
@@ -109,8 +112,12 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
     };
 
     this.registerEmbeddable(core, plugins);
+    registerFeature();
   }
 
+  /**
+   * register embeddable with a slimmer embeddable version of inner angular
+   */
   private async registerEmbeddable(core: CoreStart, plugins: DiscoverStartPlugins) {
     const { SearchEmbeddableFactory } = await import('./embeddable');
     const getInjector = async () => {
@@ -118,7 +125,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
         throw Error('Discover plugin registerEmbeddable:  initializeServices is undefined');
       }
       await this.initializeServices();
-      getAngularModuleEmbeddable(embeddableAngularName, core, plugins);
+      getInnerAngularModuleEmbeddable(embeddableAngularName, core, plugins);
       const mountpoint = document.createElement('div');
       return angular.bootstrap(mountpoint, [embeddableAngularName]);
     };
