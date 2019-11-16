@@ -14,6 +14,7 @@ import {
 import { findSignalsRoute } from './find_signals_route';
 import { ServerInjectOptions } from 'hapi';
 import { getFindResult, getResult, getFindRequest } from './__mocks__/request_responses';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 
 describe('find_signals', () => {
   let { server, alertsClient, actionsClient } = createMockServer();
@@ -71,7 +72,7 @@ describe('find_signals', () => {
       alertsClient.get.mockResolvedValue(getResult());
       const request: ServerInjectOptions = {
         method: 'GET',
-        url: '/api/siem/signals/_find?invalid_value=500',
+        url: `${DETECTION_ENGINE_RULES_URL}/_find?invalid_value=500`,
       };
       const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(400);
@@ -82,8 +83,7 @@ describe('find_signals', () => {
       alertsClient.get.mockResolvedValue(getResult());
       const request: ServerInjectOptions = {
         method: 'GET',
-        url:
-          '/api/siem/signals/_find?page=2&per_page=20&sort_field=timestamp&fields=["field-1","field-2","field-3]',
+        url: `${DETECTION_ENGINE_RULES_URL}/_find?page=2&per_page=20&sort_field=timestamp&fields=["field-1","field-2","field-3]`,
       };
       const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(200);
