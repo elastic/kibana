@@ -18,7 +18,7 @@
  */
 
 import { Readable } from 'stream';
-import { SavedObjectsClientProvider, SavedObjectsRepository } from './lib';
+import { SavedObjectsClientProvider } from './lib';
 import { SavedObjectsClient } from './saved_objects_client';
 import { SavedObjectsExportOptions } from '../export';
 import { SavedObjectsImportOptions, SavedObjectsImportResponse } from '../import';
@@ -39,7 +39,7 @@ export interface SavedObjectsLegacyService<Request = any> {
   SavedObjectsClient: typeof SavedObjectsClient;
   types: string[];
   schema: SavedObjectsSchema;
-  getSavedObjectsRepository(...rest: any[]): SavedObjectsRepository;
+  getSavedObjectsRepository(...rest: any[]): any;
   importExport: {
     objectLimit: number;
     importSavedObjects(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
