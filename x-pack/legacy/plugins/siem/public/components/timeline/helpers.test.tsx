@@ -11,7 +11,7 @@ import { mockIndexPattern } from '../../mock';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { buildGlobalQuery, combineQueries } from './helpers';
 import { mockBrowserFields } from '../../containers/source/mock';
-import { EsQueryConfig } from '../../lib/keury';
+import { esQuery } from '../../../../../../../src/plugins/data/public';
 
 const cleanUpKqlQuery = (str: string) => str.replace(/\n/g, '').replace(/\s\s+/g, ' ');
 const startDate = new Date('2018-03-23T18:49:23.132Z').valueOf();
@@ -117,7 +117,7 @@ describe('Build KQL Query', () => {
 });
 
 describe('Combined Queries', () => {
-  const config: EsQueryConfig = {
+  const config: esQuery.EsQueryConfig = {
     allowLeadingWildcards: true,
     queryStringOptions: {},
     ignoreFilterIfFieldNotInIndex: true,

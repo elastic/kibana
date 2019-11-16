@@ -5,7 +5,6 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import { getEsQueryConfig } from '@kbn/es-query';
 import * as React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
@@ -30,6 +29,7 @@ import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { useKibanaCore } from '../../lib/compose/kibana_core';
 
+import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { HostsEmptyPage } from './hosts_empty_page';
 import { navTabsHosts } from './nav_tabs';
 import * as i18n from './translations';
@@ -58,7 +58,7 @@ const HostsComponent = React.memo<HostsComponentProps>(
         <WithSource sourceId="default">
           {({ indicesExist, indexPattern }) => {
             const filterQuery = convertToBuildEsQuery({
-              config: getEsQueryConfig(core.uiSettings),
+              config: esQuery.getEsQueryConfig(core.uiSettings),
               indexPattern,
               queries: [query],
               filters,

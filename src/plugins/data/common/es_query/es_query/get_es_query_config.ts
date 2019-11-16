@@ -17,10 +17,22 @@
  * under the License.
  */
 
-export function getEsQueryConfig(config) {
+import { EsQueryConfig } from './build_es_query';
+
+interface KibanaConfig {
+  get<T>(key: string): T;
+}
+
+export function getEsQueryConfig(config: KibanaConfig) {
   const allowLeadingWildcards = config.get('query:allowLeadingWildcards');
   const queryStringOptions = config.get('query:queryString:options');
   const ignoreFilterIfFieldNotInIndex = config.get('courier:ignoreFilterIfFieldNotInIndex');
   const dateFormatTZ = config.get('dateFormat:tz');
-  return { allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex, dateFormatTZ };
+
+  return {
+    allowLeadingWildcards,
+    queryStringOptions,
+    ignoreFilterIfFieldNotInIndex,
+    dateFormatTZ,
+  } as EsQueryConfig;
 }

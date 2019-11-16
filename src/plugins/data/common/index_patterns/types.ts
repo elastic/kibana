@@ -17,20 +17,20 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { decorateQuery } from './decorate_query';
-import { luceneStringToDsl } from './lucene_string_to_dsl';
+import { IFieldType } from './fields';
 
-export function buildQueryFromLucene(queries, queryStringOptions, dateFormatTZ = null) {
-  const combinedQueries = _.map(queries, (query) => {
-    const queryDsl = luceneStringToDsl(query.query);
-    return decorateQuery(queryDsl, queryStringOptions, dateFormatTZ);
-  });
-
-  return {
-    must: [].concat(combinedQueries),
-    filter: [],
-    should: [],
-    must_not: [],
-  };
+export interface IIndexPattern {
+  fields: IFieldType[];
+  title: string;
+  id?: string;
+  type?: string;
+  timeFieldName?: string;
+  intervalName?: string | null;
+  fieldFormatMap?: Record<
+    string,
+    {
+      id: string;
+      params: unknown;
+    }
+  >;
 }
