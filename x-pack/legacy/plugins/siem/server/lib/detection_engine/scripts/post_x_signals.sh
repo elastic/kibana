@@ -31,7 +31,7 @@ do {
     \"type\": \"query\",
     \"from\": \"now-6m\",
     \"to\": \"now\",
-    \"query\": \"user.name: root or user.name: admin\"
+    \"query\": \"user.name: root or user.name: admin\",
     \"language\": \"kuery\"
   }" \
   | jq .;
