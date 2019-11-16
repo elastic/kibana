@@ -93,7 +93,7 @@ describe('update_signals', () => {
     });
 
     test('returns 404 if the record does not exist yet', async () => {
-      alertsClient.find.mockResolvedValueOnce(getFindResult());
+      alertsClient.find.mockResolvedValue(getFindResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(getResult());
       const request: ServerInjectOptions = {

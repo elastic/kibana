@@ -81,10 +81,13 @@ export interface Clients {
 export type SignalParams = SignalAlertParams & Clients;
 
 export type UpdateSignalParams = Partial<SignalAlertParams> & {
-  id: string | undefined;
+  id: string | undefined | null;
 } & Clients;
 
-export type DeleteSignalParams = Clients & { id: string | undefined; ruleId: string | undefined };
+export type DeleteSignalParams = Clients & {
+  id: string | undefined;
+  ruleId: string | undefined | null;
+};
 
 export interface FindSignalsRequest extends Omit<Hapi.Request, 'query'> {
   query: {
@@ -106,7 +109,7 @@ export interface FindSignalParams {
 
 export interface ReadSignalParams {
   alertsClient: AlertsClient;
-  id?: string;
+  id?: string | undefined | null;
   ruleId?: string | undefined | null;
 }
 
