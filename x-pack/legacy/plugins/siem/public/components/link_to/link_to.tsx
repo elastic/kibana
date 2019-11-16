@@ -25,7 +25,7 @@ interface LinkToPageProps {
   match: RouteMatch<{}>;
 }
 
-export const LinkToPage = React.memo<LinkToPageProps>(({ match }) => (
+export const LinkToPage: React.FC<LinkToPageProps> = ({ match }) => (
   <Switch>
     <Route
       component={RedirectToOverviewPage}
@@ -87,6 +87,6 @@ export const LinkToPage = React.memo<LinkToPageProps>(({ match }) => (
     />
     <Redirect to="/" />
   </Switch>
-));
+);
 
 LinkToPage.displayName = 'LinkToPage';

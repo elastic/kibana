@@ -47,15 +47,17 @@ const usersViewing = ['elastic']; // TODO: get the users viewing this timeline f
 /** the global Kibana navigation at the top of every page */
 const globalHeaderHeightPx = 48;
 
+interface CalculateFlyoutHeightProps {
+  globalHeaderSize: number;
+  windowHeight: number;
+}
+
 const calculateFlyoutHeight = ({
   globalHeaderSize,
   windowHeight,
-}: {
-  globalHeaderSize: number;
-  windowHeight: number;
-}): number => Math.max(0, windowHeight - globalHeaderSize);
+}: CalculateFlyoutHeightProps): number => Math.max(0, windowHeight - globalHeaderSize);
 
-export const HomePage = React.memo(() => (
+export const HomePage: React.FC = () => (
   <AutoSizer detectAnyWindowResize={true} content>
     {({ measureRef, windowMeasurement: { height: windowHeight = 0 } }) => (
       <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" innerRef={measureRef}>
@@ -114,7 +116,7 @@ export const HomePage = React.memo(() => (
                     path={`/:pageName(${SiemPageName.timelines})`}
                     render={() => <Timelines />}
                   />
-                  <Route path="/link-to" component={LinkToPage} />
+                  <Route path="/link-to" render={props => <LinkToPage {...props} />} />
                   <Route
                     path="/ml-hosts"
                     render={({ location, match }) => (
@@ -127,7 +129,7 @@ export const HomePage = React.memo(() => (
                       <MlNetworkConditionalContainer location={location} url={match.url} />
                     )}
                   />
-                  <Route component={NotFoundPage} />
+                  <Route render={() => <NotFoundPage />} />
                 </Switch>
               </DragDropContextWrapper>
             )}
@@ -140,6 +142,6 @@ export const HomePage = React.memo(() => (
       </WrappedByAutoSizer>
     )}
   </AutoSizer>
-));
+);
 
 HomePage.displayName = 'HomePage';
