@@ -1,0 +1,18 @@
+
+exports['AgentsEventsRepository Api Keys allow to create and delete an api key - createApiKey (1)'] = {
+  "results": {
+    "id": "tLNEZW4B4KwD6w8oPuUl",
+    "name": "test api key",
+    "api_key": "RXqjPJhUQ8O7LWLMH4Wuvw"
+  }
+}
+
+exports['AgentsEventsRepository Api Keys allow to create and delete an api key - deleteApiKey (2)'] = {
+  "results": {
+    "invalidated_api_keys": [
+      "tLNEZW4B4KwD6w8oPuUl"
+    ],
+    "previously_invalidated_api_keys": [],
+    "error_count": 0
+  }
+}
