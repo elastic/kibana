@@ -43,6 +43,8 @@ import { transform } from './legacy/plugins/transform';
 import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
 import { lens } from './legacy/plugins/lens';
+import { ingest } from './legacy/plugins/ingest';
+import { fleet } from './legacy/plugins/fleet';
 
 module.exports = function (kibana) {
   return [
@@ -85,5 +87,7 @@ module.exports = function (kibana) {
     snapshotRestore(kibana),
     actions(kibana),
     alerting(kibana),
+    ingest(kibana),
+    fleet(kibana),
   ];
 };
