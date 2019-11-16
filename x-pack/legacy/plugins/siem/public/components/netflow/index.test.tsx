@@ -8,7 +8,7 @@ import toJson from 'enzyme-to-json';
 import { get } from 'lodash/fp';
 import * as React from 'react';
 import { shallow } from 'enzyme';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { asArrayIfExists } from '../../lib/helpers';
 import { getMockNetflowData } from '../../mock';
