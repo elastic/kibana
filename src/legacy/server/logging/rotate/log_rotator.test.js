@@ -46,9 +46,9 @@ const createLogRotatorConfig = (logFilePath) => {
   ]);
 };
 
-const mockServer = jest.fn(() => ({
+const mockServer = {
   log: jest.fn()
-}));
+};
 
 const writeBytesToFile = (filePath, numberOfBytes) => {
   writeFileSync(filePath, 'a'.repeat(numberOfBytes), { flag: 'a' });
