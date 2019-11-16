@@ -46,7 +46,8 @@ export class SessionTimeout {
     private sessionExpired: ISessionExpired,
     private http: HttpSetup
   ) {
-    this.channel = new BroadcastChannel('session_timeout', { webWorkerSupport: false });
+    const name = `${http.basePath.get()}/session_timeout`;
+    this.channel = new BroadcastChannel(name, { webWorkerSupport: false });
     this.elector = LeaderElection.create(this.channel, {
       fallbackInterval: 2000,
       responseTime: 1000,
@@ -55,6 +56,7 @@ export class SessionTimeout {
 
   init() {
     if (this.isAnon()) {
+      this.elector.die();
       return;
     }
 
