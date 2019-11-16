@@ -26,7 +26,7 @@ interface Props {
   timeRange: InfraTimerangeInput;
 }
 
-export const GroupOfGroups: React.SFC<Props> = props => {
+export const GroupOfGroups: React.FC<Props> = props => {
   return (
     <GroupOfGroupsContainer>
       <GroupName group={props.group} onDrilldown={props.onDrilldown} options={props.options} />

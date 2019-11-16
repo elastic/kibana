@@ -61,7 +61,7 @@ const CELL_CLICK_ENABLED = false;
 interface SourceIndexPreviewTitle {
   indexPatternTitle: string;
 }
-const SourceIndexPreviewTitle: React.SFC<SourceIndexPreviewTitle> = ({ indexPatternTitle }) => (
+const SourceIndexPreviewTitle: React.FC<SourceIndexPreviewTitle> = ({ indexPatternTitle }) => (
   <EuiTitle size="xs">
     <span>
       {i18n.translate('xpack.transform.sourceIndexPreview.sourceIndexPatternTitle', {
@@ -77,7 +77,7 @@ interface Props {
   cellClick?(search: string): void;
 }
 
-export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, query }) => {
+export const SourceIndexPreview: React.FC<Props> = React.memo(({ cellClick, query }) => {
   const [clearTable, setClearTable] = useState(false);
 
   const indexPattern = useCurrentIndexPattern();

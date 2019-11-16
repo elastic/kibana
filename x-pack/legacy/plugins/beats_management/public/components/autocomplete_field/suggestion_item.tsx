@@ -18,7 +18,7 @@ interface SuggestionItemProps {
   suggestion: AutocompleteSuggestion;
 }
 
-export const SuggestionItem: React.SFC<SuggestionItemProps> = props => {
+export const SuggestionItem: React.FC<SuggestionItemProps> = props => {
   const { isSelected, onClick, onMouseEnter, suggestion } = props;
 
   return (

@@ -21,7 +21,7 @@ The first thing that will probably happen when you convert a `.js` file in our s
 
 declare module '@elastic/eui' {
   // Add your types here
-  export const EuiPopoverTitle: React.SFC<EuiPopoverTitleProps>;
+  export const EuiPopoverTitle: React.FC<EuiPopoverTitleProps>;
   ...
 }
 ```

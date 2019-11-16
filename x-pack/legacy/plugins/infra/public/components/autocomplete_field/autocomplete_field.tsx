@@ -302,7 +302,7 @@ const withUnfocused = (state: AutocompleteFieldState) => ({
   isFocused: false,
 });
 
-const FixedEuiFieldSearch: React.SFC<React.InputHTMLAttributes<HTMLInputElement> &
+const FixedEuiFieldSearch: React.FC<React.InputHTMLAttributes<HTMLInputElement> &
   EuiFieldSearchProps & {
     inputRef?: (element: HTMLInputElement | null) => void;
     onSearch: (value: string) => void;

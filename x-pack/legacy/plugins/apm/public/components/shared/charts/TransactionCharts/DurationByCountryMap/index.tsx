@@ -10,7 +10,7 @@ import React from 'react';
 import { useAvgDurationByCountry } from '../../../../../hooks/useAvgDurationByCountry';
 import { ChoroplethMap } from '../ChoroplethMap';
 
-export const DurationByCountryMap: React.SFC = () => {
+export const DurationByCountryMap: React.FC = () => {
   const { data } = useAvgDurationByCountry();
 
   return (

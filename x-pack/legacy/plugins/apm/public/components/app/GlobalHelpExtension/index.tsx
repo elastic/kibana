@@ -16,7 +16,7 @@ const Container = styled.div`
   margin: ${px(units.minus)} 0;
 `;
 
-export const GlobalHelpExtension: React.SFC = () => {
+export const GlobalHelpExtension: React.FC = () => {
   const core = useKibanaCore();
 
   return (

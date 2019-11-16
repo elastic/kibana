@@ -40,7 +40,7 @@ import { unhashUrl } from '../../state_management/state_hashing';
 import { shortenUrl } from '../lib/url_shortener';
 
 // TODO: Remove once EuiIconTip supports "content" prop
-const FixedEuiIconTip = EuiIconTip as React.SFC<any>;
+const FixedEuiIconTip = EuiIconTip as React.FC<any>;
 
 interface Props {
   allowShortUrl: boolean;

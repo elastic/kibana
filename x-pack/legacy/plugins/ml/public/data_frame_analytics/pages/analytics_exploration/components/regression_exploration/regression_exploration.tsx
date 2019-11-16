@@ -24,7 +24,7 @@ const LoadingPanel: FC = () => (
   </EuiPanel>
 );
 
-export const ExplorationTitle: React.SFC<{ jobId: string }> = ({ jobId }) => (
+export const ExplorationTitle: React.FC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
     <span>
       {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.jobIdTitle', {
