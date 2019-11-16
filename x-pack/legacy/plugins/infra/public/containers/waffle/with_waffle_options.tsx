@@ -90,7 +90,7 @@ export const WithWaffleOptionsUrlState = () => (
       changeAutoBounds,
       changeBoundsOverride,
     }) => (
-      <UrlStateContainer
+      <UrlStateContainer<WaffleOptionsUrlState>
         urlState={urlState}
         urlStateKey="waffleOptions"
         mapToUrlState={mapToUrlState}
@@ -158,8 +158,10 @@ const mapToUrlState = (value: any): WaffleOptionsUrlState | undefined =>
       }
     : undefined;
 
+const isInfraNodeType = (value: any): value is InfraNodeType => value in InfraNodeType;
+
 const isInfraSnapshotMetricInput = (subject: any): subject is InfraSnapshotMetricInput => {
-  return subject != null && subject.type != null && InfraSnapshotMetricType[subject.type] != null;
+  return subject != null && subject.type in InfraSnapshotMetricType;
 };
 
 const isInfraSnapshotGroupbyInput = (subject: any): subject is InfraSnapshotGroupbyInput => {
@@ -181,7 +183,7 @@ const mapToGroupByUrlState = (subject: any) => {
 };
 
 const mapToNodeTypeUrlState = (subject: any) => {
-  return subject && InfraNodeType[subject] ? subject : undefined;
+  return isInfraNodeType(subject) ? subject : undefined;
 };
 
 const mapToViewUrlState = (subject: any) => {

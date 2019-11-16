@@ -143,6 +143,7 @@ export class BasePathProxyServer {
             return responseToolkit.continue;
           },
         ],
+        validate: { payload: true },
       },
       path: `${this.httpConfig.basePath}/{kbnPath*}`,
     });
@@ -175,6 +176,7 @@ export class BasePathProxyServer {
             return responseToolkit.continue;
           },
         ],
+        validate: { payload: true },
       },
       path: `/__UNSAFE_bypassBasePath/{kbnPath*}`,
     });
