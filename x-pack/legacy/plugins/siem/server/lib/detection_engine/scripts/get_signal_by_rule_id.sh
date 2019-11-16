@@ -9,8 +9,7 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./delete_signal.sh ${id}
+# Example: ./get_signal_by_rule_id.sh {rule_id}
 curl -s -k \
- -H 'kbn-xsrf: 123' \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- -X DELETE ${KIBANA_URL}/api/siem/signals/$1 | jq .
+ -X GET ${KIBANA_URL}/api/detection_engine/rules?rule_id="$1" | jq .
