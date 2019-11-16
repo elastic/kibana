@@ -36,13 +36,15 @@ import {
   TooltipType,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 import {
+  Query,
   esFilters,
   FIELD_FORMAT_IDS,
   KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
   Query,
+  esQuery,
+  IIndexPattern,
 } from '../../../../../../src/plugins/data/public';
 import { DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
@@ -132,7 +134,12 @@ export function FieldItem(props: FieldItemProps) {
     core.http
       .post(`/api/lens/index_stats/${indexPattern.title}/field`, {
         body: JSON.stringify({
-          dslQuery: buildEsQuery(indexPattern, query, filters, getEsQueryConfig(core.uiSettings)),
+          dslQuery: esQuery.buildEsQuery(
+            indexPattern as IIndexPattern,
+            query,
+            filters,
+            esQuery.getEsQueryConfig(core.uiSettings)
+          ),
           fromDate: dateRange.fromDate,
           toDate: dateRange.toDate,
           timeFieldName: indexPattern.timeFieldName,

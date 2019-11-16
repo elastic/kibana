@@ -27,7 +27,6 @@ import { RangesEditor } from './range_editor';
 // @ts-ignore
 import { createFilterRange } from './create_filter/range';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
 
 const keyCaches = new WeakMap();
 const formats = new WeakMap();

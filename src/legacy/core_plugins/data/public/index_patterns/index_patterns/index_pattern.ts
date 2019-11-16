@@ -41,15 +41,12 @@ import { getNotifications, getFieldFormats } from '../services';
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
 
-export interface StaticIndexPattern {
-  fields: FieldType[];
-  title: string;
-  id?: string;
-  type?: string;
-  timeFieldName?: string;
-}
+/** @deprecated
+ *  Please use IIndexPattern instead
+ * */
+export type StaticIndexPattern = IIndexPattern;
 
-export class IndexPattern implements StaticIndexPattern {
+export class IndexPattern implements IIndexPattern {
   [key: string]: any;
 
   public id?: string;
