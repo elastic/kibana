@@ -28,7 +28,7 @@ import {
   getDocViewsSorted as mockGetDocViewsSorted,
 } from 'ui/registry/doc_views';
 
-jest.mock('../kibana_services', () => {
+jest.mock('../../kibana_services', () => {
   return {
     getServices: () => ({
       docViewsRegistry: {
