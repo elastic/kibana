@@ -18,6 +18,7 @@ import { ESClient } from './es_client';
 import { StaticIndexPattern } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { getDynamicIndexPattern } from '../index_pattern/get_dynamic_index_pattern';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { ProcessorEvent } from '../../../typings/common';
 
 function decodeUiFilters(
   indexPattern: StaticIndexPattern | undefined,
@@ -35,7 +36,7 @@ export interface APMRequestQuery {
   start?: string;
   end?: string;
   uiFilters?: string;
-  processorEvent?: 'transaction' | 'error' | 'metric';
+  processorEvent?: ProcessorEvent;
 }
 // Explicitly type Setup to prevent TS initialization errors
 // https://github.com/microsoft/TypeScript/issues/34933
@@ -60,7 +61,6 @@ export async function setupRequest(req: Legacy.Request): Promise<Setup> {
   const config = server.config();
   const indices = await getApmIndices({ config, savedObjectsClient });
 
-  // TODO: `dynamicIndexPattern` should be cached by user. Currently it's not cached at all
   const dynamicIndexPattern = await getDynamicIndexPattern({
     request: req,
     indices,

@@ -7,9 +7,20 @@
 import { Legacy } from 'kibana';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { APICaller } from 'src/core/server';
-import { IndexPatternsFetcher } from '../../../../../../../src/plugins/data/server';
+import LRU from 'lru-cache';
+import {
+  IndexPatternsFetcher,
+  IIndexPattern
+} from '../../../../../../../src/plugins/data/server';
 import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
+import { ProcessorEvent } from '../../../typings/common';
 
+const cache = new LRU<string, IIndexPattern | undefined>({
+  max: 100,
+  maxAge: 1000 * 60
+});
+
+// TODO: this is currently cached globally. In the future we might want to cache this per user
 export const getDynamicIndexPattern = async ({
   request,
   indices,
@@ -17,8 +28,15 @@ export const getDynamicIndexPattern = async ({
 }: {
   request: Legacy.Request;
   indices: ApmIndicesConfig;
-  processorEvent: 'transaction' | 'error' | 'metric' | undefined;
+  processorEvent?: ProcessorEvent;
 }) => {
+  const patternIndices = getPatternIndices(indices, processorEvent);
+  const indexPatternTitle = patternIndices.join(',');
+  const CACHE_KEY = `apm_dynamic_index_pattern_${indexPatternTitle}`;
+  if (cache.has(CACHE_KEY)) {
+    return cache.get(CACHE_KEY);
+  }
+
   const indexPatternsFetcher = new IndexPatternsFetcher(
     (...rest: Parameters<APICaller>) =>
       request.server.plugins.elasticsearch
@@ -26,6 +44,43 @@ export const getDynamicIndexPattern = async ({
         .callWithRequest(request, ...rest)
   );
 
+  // Since `getDynamicIndexPattern` is called in setup_request (and thus by every endpoint)
+  // and since `getFieldsForWildcard` will throw if the specified indices don't exist,
+  // we have to catch errors here to avoid all endpoints returning 500 for users without APM data
+  // (would be a bad first time experience)
+  try {
+    const fields = await indexPatternsFetcher.getFieldsForWildcard({
+      pattern: patternIndices
+    });
+
+    const indexPattern: StaticIndexPattern = {
+      fields,
+      title: indexPatternTitle
+    };
+
+    cache.set(CACHE_KEY, indexPattern);
+    return indexPattern;
+  } catch (e) {
+    // since `getDynamicIndexPattern` can be called multiple times per request it can be expensive not to cache failed lookups
+    cache.set(CACHE_KEY, undefined);
+    const notExists = e.output?.statusCode === 404;
+    if (notExists) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `Could not get dynamic index pattern because indices "${indexPatternTitle}" don't exist`
+      );
+      return;
+    }
+
+    // re-throw
+    throw e;
+  }
+};
+
+function getPatternIndices(
+  indices: ApmIndicesConfig,
+  processorEvent?: ProcessorEvent
+) {
   const indexNames = processorEvent
     ? [processorEvent]
     : ['transaction' as const, 'metric' as const, 'error' as const];
@@ -36,22 +91,5 @@ export const getDynamicIndexPattern = async ({
     error: indices['apm_oss.errorIndices']
   };
 
-  const configuredIndices = indexNames.map(name => indicesMap[name]);
-
-  try {
-    const fields = await indexPatternsFetcher.getFieldsForWildcard({
-      pattern: configuredIndices
-    });
-
-    const pattern: StaticIndexPattern = {
-      fields,
-      title: configuredIndices.join(',')
-    };
-
-    return pattern;
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error('Could not get dynamic index pattern', e);
-    return;
-  }
-};
+  return indexNames.map(name => indicesMap[name]);
+}

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import { useFetcher } from './useFetcher';
 
 export function useDynamicIndexPattern(
@@ -26,7 +25,7 @@ export function useDynamicIndexPattern(
   );
 
   return {
-    indexPattern: idx(data, _ => _.dynamicIndexPattern),
+    indexPattern: data?.dynamicIndexPattern,
     status
   };
 }

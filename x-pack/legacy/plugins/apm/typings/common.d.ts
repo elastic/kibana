@@ -11,6 +11,8 @@ import {} from '../../reporting/public/components/report_listing';
 // .svg
 import '../../canvas/types/webpack';
 
+type ProcessorEvent = 'transaction' | 'error' | 'metric';
+
 // Allow unknown properties in an object
 export type AllowUnknownProperties<T> = T extends Array<infer X>
   ? Array<AllowUnknownObjectProperties<X>>

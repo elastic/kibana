@@ -12,18 +12,7 @@ export const staticIndexPatternRoute = createRoute((core, { server }) => ({
   method: 'POST',
   path: '/api/apm/index_pattern/static',
   handler: async (req, params, h) => {
-    try {
-      await createStaticIndexPattern(server);
-    } catch (e) {
-      // ignore error if the index pattern already existing
-      const alreadyExists = e.body.error.reason.includes(
-        'version conflict, document already exists'
-      );
-      if (!alreadyExists) {
-        // eslint-disable-next-line no-console
-        console.error('Could not create static index pattern', e);
-      }
-    }
+    await createStaticIndexPattern(server);
 
     // send empty response regardless of outcome
     return h.response().code(204);
