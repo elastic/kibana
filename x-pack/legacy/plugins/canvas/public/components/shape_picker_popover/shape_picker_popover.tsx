@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { MouseEvent } from 'react';
+import React, { FunctionComponent, MouseEvent } from 'react';
+import PropTypes from 'prop-types';
 import { EuiLink, EuiPanel } from '@elastic/eui';
 
 import { Popover } from '../popover';
@@ -19,7 +20,11 @@ interface Props {
   value?: string;
 }
 
-export const ShapePickerPopover = React.memo<Props>(({ shapes, onChange, value }) => {
+export const ShapePickerPopoverComponent: FunctionComponent<Props> = ({
+  shapes,
+  onChange,
+  value,
+}) => {
   const button = (handleClick: (ev: MouseEvent) => void) => (
     <EuiPanel paddingSize="s" hasShadow={false}>
       <EuiLink style={{ fontSize: 0 }} onClick={handleClick}>
@@ -33,6 +38,14 @@ export const ShapePickerPopover = React.memo<Props>(({ shapes, onChange, value }
       {() => <ShapePicker onChange={onChange} shapes={shapes} />}
     </Popover>
   );
-});
+};
+
+ShapePickerPopoverComponent.propTypes = {
+  shapes: PropTypes.object.isRequired,
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+};
+
+export const ShapePickerPopover = React.memo(ShapePickerPopoverComponent);
 
 ShapePickerPopover.displayName = 'ShapePickerPopover';
