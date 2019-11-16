@@ -140,7 +140,7 @@ export class Plugin {
     }
 
     if (plugins.home) {
-      plugins.home.addScopedTutorialContextFactory(
+      plugins.home.tutorials.addScopedTutorialContextFactory(
         createSpacesTutorialContextFactory(spacesService)
       );
     }

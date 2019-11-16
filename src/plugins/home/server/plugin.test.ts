@@ -35,8 +35,9 @@ describe('HomePlugin', () => {
 
     test('wires up and returns registerTutorial and addScopedTutorialContextFactory', () => {
       const setup = new HomePlugin().setup(mockCoreSetup);
-      expect(setup).toHaveProperty('registerTutorial');
-      expect(setup).toHaveProperty('addScopedTutorialContextFactory');
+      expect(setup).toHaveProperty('tutorials');
+      expect(setup.tutorials).toHaveProperty('registerTutorial');
+      expect(setup.tutorials).toHaveProperty('addScopedTutorialContextFactory');
     });
   });
 
@@ -44,6 +45,7 @@ describe('HomePlugin', () => {
     test('is defined', () => {
       const start = new HomePlugin().start();
       expect(start).toBeDefined();
+      expect(start).toHaveProperty('tutorials');
     });
   });
 });

@@ -33,7 +33,7 @@ export class TutorialsRegistry {
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
     router.get(
-      { path: '/api/kibana/home/NP_tutorials', validate: false },
+      { path: '/api/kibana/home/tutorials', validate: false },
       async (context, req, res) => {
         const initialContext = {};
         const scopedContext = this.scopedTutorialContextFactories.reduce(
