@@ -1151,31 +1151,6 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@14.10.0":
-  version "14.10.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-14.10.0.tgz#f9e9a3a8f1a44970575072f2312f1f4ccda84abf"
-  integrity sha512-JN+bW/utsxuaHax995wuIJ5tQHZtY4h3bu5V71ALDv9EX4GVHSbyukU3ER6lsSTC0C4srJ9h/mHrSFsV2FSM9A==
-  dependencies:
-    "@types/lodash" "^4.14.116"
-    "@types/numeral" "^0.0.25"
-    "@types/react-beautiful-dnd" "^10.1.0"
-    classnames "^2.2.5"
-    highlight.js "^9.12.0"
-    html "^1.0.0"
-    keymirror "^0.1.1"
-    lodash "^4.17.11"
-    numeral "^2.0.6"
-    prop-types "^15.6.0"
-    react-ace "^5.5.0"
-    react-beautiful-dnd "^10.1.0"
-    react-focus-lock "^1.17.7"
-    react-input-autosize "^2.2.2"
-    react-is "~16.3.0"
-    react-virtualized "^9.18.5"
-    resize-observer-polyfill "^1.5.0"
-    tabbable "^3.0.0"
-    uuid "^3.1.0"
-
 "@elastic/eui@14.8.0":
   version "14.8.0"
   resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-14.8.0.tgz#777d29852998e52e8fc6dfb1869a4b32d74c72bb"
@@ -22844,13 +22819,6 @@ react-input-autosize@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/react-input-autosize/-/react-input-autosize-2.2.1.tgz#ec428fa15b1592994fb5f9aa15bb1eb6baf420f8"
   integrity sha512-3+K4CD13iE4lQQ2WlF8PuV5htfmTRLH6MDnfndHM6LuBRszuXnuyIfE7nhSKt8AzRBZ50bu0sAhkNMeS5pxQQA==
-  dependencies:
-    prop-types "^15.5.8"
-
-react-input-autosize@^2.2.2:
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/react-input-autosize/-/react-input-autosize-2.2.2.tgz#fcaa7020568ec206bc04be36f4eb68e647c4d8c2"
-  integrity sha512-jQJgYCA3S0j+cuOwzuCd1OjmBmnZLdqQdiLKRYrsMMzbjUrVDS5RvJUDwJqA7sKuksDuzFtm6hZGKFu7Mjk5aw==
   dependencies:
     prop-types "^15.5.8"
 
