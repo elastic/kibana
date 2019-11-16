@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createSignalsSchema, updateSignalSchema, findSignalsSchema } from './schemas';
+import {
+  createSignalsSchema,
+  updateSignalSchema,
+  findSignalsSchema,
+  querySignalSchema,
+} from './schemas';
 import {
   SignalAlertParamsRest,
   FindParamsRest,
@@ -25,7 +30,7 @@ describe('schemas', () => {
       ).toBeTruthy();
     });
 
-    test('[id] does not validate', () => {
+    test('[rule_id] does not validate', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -33,7 +38,7 @@ describe('schemas', () => {
       ).toBeTruthy();
     });
 
-    test('[id, description] does not validate', () => {
+    test('[rule_id, description] does not validate', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -42,7 +47,7 @@ describe('schemas', () => {
       ).toBeTruthy();
     });
 
-    test('[id, description, from] does not validate', () => {
+    test('[rule_id, description, from] does not validate', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -52,7 +57,7 @@ describe('schemas', () => {
       ).toBeTruthy();
     });
 
-    test('[id, description, from, to] does not validate', () => {
+    test('[rule_id, description, from, to] does not validate', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -63,7 +68,7 @@ describe('schemas', () => {
       ).toBeTruthy();
     });
 
-    test('[id, description, from, to, name] does not validate', () => {
+    test('[rule_id, description, from, to, name] does not validate', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -75,7 +80,7 @@ describe('schemas', () => {
       ).toBeTruthy();
     });
 
-    test('[id, description, from, to, name, severity] does not validate', () => {
+    test('[rule_id, description, from, to, name, severity] does not validate', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -88,7 +93,7 @@ describe('schemas', () => {
       ).toBeTruthy();
     });
 
-    test('[id, description, from, to, name, severity, type] does not validate', () => {
+    test('[rule_id, description, from, to, name, severity, type] does not validate', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -102,7 +107,7 @@ describe('schemas', () => {
       ).toBeTruthy();
     });
 
-    test('[id, description, from, to, name, severity, type, interval] does not validate', () => {
+    test('[rule_id, description, from, to, name, severity, type, interval] does not validate', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -117,7 +122,7 @@ describe('schemas', () => {
       ).toBeTruthy();
     });
 
-    test('[id, description, from, to, name, severity, type, interval, index] does not validate', () => {
+    test('[rule_id, description, from, to, name, severity, type, interval, index] does not validate', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -133,7 +138,7 @@ describe('schemas', () => {
       ).toBeTruthy();
     });
 
-    test('[id, description, from, to, name, severity, type, query, index, interval] does not validate', () => {
+    test('[rule_id, description, from, to, name, severity, type, query, index, interval] does not validate', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -150,7 +155,7 @@ describe('schemas', () => {
       ).toBeTruthy();
     });
 
-    test('[id, description, from, to, index, name, severity, interval, type, query, language] does validate', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, query, language] does validate', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -168,7 +173,7 @@ describe('schemas', () => {
       ).toBeFalsy();
     });
 
-    test('[id, description, from, to, index, name, severity, interval, type, filter] does validate', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter] does validate', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -732,11 +737,39 @@ describe('schemas', () => {
       ).toBeFalsy();
     });
 
+    test('[id and rule_id] does not validate', () => {
+      expect(
+        updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
+          id: 'id-1',
+          rule_id: 'rule-1',
+        }).error
+      ).toBeTruthy();
+    });
+
+    test('[rule_id, description] does validate', () => {
+      expect(
+        updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+        }).error
+      ).toBeFalsy();
+    });
+
     test('[id, description] does validate', () => {
       expect(
         updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
           id: 'rule-1',
           description: 'some description',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('[rule_id, description, from] does validate', () => {
+      expect(
+        updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
         }).error
       ).toBeFalsy();
     });
@@ -751,6 +784,17 @@ describe('schemas', () => {
       ).toBeFalsy();
     });
 
+    test('[rule_id, description, from, to] does validate', () => {
+      expect(
+        updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+        }).error
+      ).toBeFalsy();
+    });
+
     test('[id, description, from, to] does validate', () => {
       expect(
         updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
@@ -758,6 +802,18 @@ describe('schemas', () => {
           description: 'some description',
           from: 'now-5m',
           to: 'now',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('[rule_id, description, from, to, name] does validate', () => {
+      expect(
+        updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          name: 'some-name',
         }).error
       ).toBeFalsy();
     });
@@ -774,6 +830,19 @@ describe('schemas', () => {
       ).toBeFalsy();
     });
 
+    test('[rule_id, description, from, to, name, severity] does validate', () => {
+      expect(
+        updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          name: 'some-name',
+          severity: 'severity',
+        }).error
+      ).toBeFalsy();
+    });
+
     test('[id, description, from, to, name, severity] does validate', () => {
       expect(
         updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
@@ -783,6 +852,20 @@ describe('schemas', () => {
           to: 'now',
           name: 'some-name',
           severity: 'severity',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('[rule_id, description, from, to, name, severity, type] does validate', () => {
+      expect(
+        updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          name: 'some-name',
+          severity: 'severity',
+          type: 'query',
         }).error
       ).toBeFalsy();
     });
@@ -801,6 +884,21 @@ describe('schemas', () => {
       ).toBeFalsy();
     });
 
+    test('[rule_id, description, from, to, name, severity, type, interval] does validate', () => {
+      expect(
+        updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+        }).error
+      ).toBeFalsy();
+    });
+
     test('[id, description, from, to, name, severity, type, interval] does validate', () => {
       expect(
         updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
@@ -808,6 +906,22 @@ describe('schemas', () => {
           description: 'some description',
           from: 'now-5m',
           to: 'now',
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type] does validate', () => {
+      expect(
+        updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
           name: 'some-name',
           severity: 'severity',
           interval: '5m',
@@ -832,6 +946,23 @@ describe('schemas', () => {
       ).toBeFalsy();
     });
 
+    test('[rule_id, description, from, to, index, name, severity, interval, type, query] does validate', () => {
+      expect(
+        updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          query: 'some query',
+        }).error
+      ).toBeFalsy();
+    });
+
     test('[id, description, from, to, index, name, severity, interval, type, query] does validate', () => {
       expect(
         updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
@@ -845,6 +976,24 @@ describe('schemas', () => {
           interval: '5m',
           type: 'query',
           query: 'some query',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type, query, language] does validate', () => {
+      expect(
+        updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          query: 'some query',
+          language: 'kuery',
         }).error
       ).toBeFalsy();
     });
@@ -863,6 +1012,23 @@ describe('schemas', () => {
           type: 'query',
           query: 'some query',
           language: 'kuery',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('[rule_id, description, from, to, index, name, severity, type, filter] does validate', () => {
+      expect(
+        updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'filter',
+          filter: {},
         }).error
       ).toBeFalsy();
     });
@@ -1338,6 +1504,33 @@ describe('schemas', () => {
 
     test('page has a default of 1', () => {
       expect(findSignalsSchema.validate<Partial<FindParamsRest>>({}).value.page).toEqual(1);
+    });
+  });
+
+  describe('querySignalSchema', () => {
+    test('empty objects do not validate', () => {
+      expect(
+        querySignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({}).error
+      ).toBeTruthy();
+    });
+
+    test('both rule_id and id being supplied dot not validate', () => {
+      expect(
+        querySignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({ rule_id: '1', id: '1' })
+          .error
+      ).toBeTruthy();
+    });
+
+    test('only id validates', () => {
+      expect(
+        querySignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({ id: '1' }).error
+      ).toBeFalsy();
+    });
+
+    test('only rule_id validates', () => {
+      expect(
+        querySignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({ rule_id: '1' }).error
+      ).toBeFalsy();
     });
   });
 });
