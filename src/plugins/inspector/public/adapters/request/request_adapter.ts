@@ -54,7 +54,7 @@ class RequestAdapter extends EventEmitter {
       name,
       startTime: Date.now(),
       status: RequestStatus.PENDING,
-      id: _.get(params, 'id', uuid()),
+      id: params.id ?? uuid(),
     };
     this.requests.set(req.id, req);
     this._onChange();
