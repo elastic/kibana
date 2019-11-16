@@ -78,6 +78,13 @@ export const getFindResultWithSingleHit = (): FindHit => ({
   data: [getResult()],
 });
 
+export const getFindResultWithMultiHits = (data: SignalAlertType[]): FindHit => ({
+  page: 1,
+  perPage: 1,
+  total: 2,
+  data,
+});
+
 export const getDeleteRequest = (): ServerInjectOptions => ({
   method: 'DELETE',
   url: `${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`,
