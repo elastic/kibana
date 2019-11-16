@@ -5,13 +5,12 @@
  */
 
 import React, { useState } from 'react';
-import { EuiConfirmModal, EuiOverlayMask, EuiBadge, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useMappingsState, useDispatch } from '../../../mappings_state';
 import { NormalizedField } from '../../../types';
-import { buildFieldTreeFromIds, getAllDescendantAliases } from '../../../lib';
-import { FieldsTree } from '../../fields_tree';
+import { getAllDescendantAliases } from '../../../lib';
+import { ModalConfirmationDeleteFields } from './modal_confirmation_delete_fields';
 
 type DeleteFieldFunc = (property: NormalizedField) => void;
 
@@ -31,9 +30,29 @@ export const DeleteFieldProvider = ({ children }: Props) => {
   const { fields } = useMappingsState();
   const { byId } = fields;
 
-  const closeModal = () => {
-    setState({ isModalOpen: false });
-  };
+  const confirmButtonText = i18n.translate(
+    'xpack.idxMgmt.mappingsEditor.deleteField.confirmationModal.removeButtonLabel',
+    {
+      defaultMessage: 'Remove',
+    }
+  );
+
+  let modalTitle: string | undefined;
+
+  if (state.field) {
+    const { isMultiField, source } = state.field;
+
+    modalTitle = i18n.translate(
+      'xpack.idxMgmt.mappingsEditor.deleteField.confirmationModal.title',
+      {
+        defaultMessage: "Remove {fieldType} '{fieldName}'?",
+        values: {
+          fieldType: isMultiField ? 'multi-field' : 'field',
+          fieldName: source.name,
+        },
+      }
+    );
+  }
 
   const deleteField: DeleteFieldFunc = field => {
     const { hasChildFields, hasMultiFields } = field;
@@ -49,104 +68,30 @@ export const DeleteFieldProvider = ({ children }: Props) => {
     }
   };
 
+  const closeModal = () => {
+    setState({ isModalOpen: false });
+  };
+
   const confirmDelete = () => {
     dispatch({ type: 'field.remove', value: state.field!.id });
     closeModal();
   };
 
-  const renderModal = () => {
-    const field = state.field!;
-    const { isMultiField, childFields } = field;
-
-    const title = i18n.translate(
-      'xpack.idxMgmt.mappingsEditor.deleteField.confirmationModal.title',
-      {
-        defaultMessage: "Remove {fieldType} '{fieldName}'?",
-        values: {
-          fieldType: isMultiField ? 'multi-field' : 'field',
-          fieldName: field.source.name,
-        },
-      }
-    );
-
-    const fieldsTree =
-      childFields && childFields.length
-        ? buildFieldTreeFromIds(childFields, byId, (fieldItem: NormalizedField) => (
-            <>
-              {fieldItem.source.name}
-              {fieldItem.isMultiField && (
-                <>
-                  {' '}
-                  <EuiBadge color="hollow">multi-field</EuiBadge>
-                </>
-              )}
-            </>
-          ))
-        : null;
-
-    return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={title}
-          onCancel={closeModal}
-          onConfirm={confirmDelete}
-          cancelButtonText={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.deleteField.confirmationModal.cancelButtonLabel',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
-          buttonColor="danger"
-          confirmButtonText={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.deleteField.confirmationModal.removeButtonLabel',
-            {
-              defaultMessage: 'Remove',
-            }
-          )}
-        >
-          <>
-            {fieldsTree && (
-              <>
-                <p>
-                  {i18n.translate(
-                    'xpack.idxMgmt.mappingsEditor.confirmationModal.deleteFieldsDescription',
-                    {
-                      defaultMessage: 'This will also delete the following fields.',
-                    }
-                  )}
-                </p>
-                <FieldsTree fields={fieldsTree} />
-              </>
-            )}
-            {state.aliases && (
-              <>
-                <p>
-                  {i18n.translate(
-                    'xpack.idxMgmt.mappingsEditor.confirmationModal.deleteAliasesDescription',
-                    {
-                      defaultMessage: 'The following aliases will also be deleted.',
-                    }
-                  )}
-                </p>
-                <ul>
-                  {state.aliases.map(path => (
-                    <li key={path}>
-                      <EuiCode>{path}</EuiCode>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-          </>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
-    );
-  };
-
   return (
     <>
       {children(deleteField)}
-      {state.isModalOpen && renderModal()}
+
+      {state.isModalOpen && (
+        <ModalConfirmationDeleteFields
+          title={modalTitle!}
+          childFields={state.field && state.field.childFields}
+          aliases={state.aliases}
+          byId={byId}
+          confirmButtonText={confirmButtonText}
+          onConfirm={confirmDelete}
+          onCancel={closeModal}
+        />
+      )}
     </>
   );
 };

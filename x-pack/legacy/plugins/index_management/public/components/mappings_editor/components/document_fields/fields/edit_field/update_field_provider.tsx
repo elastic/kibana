@@ -4,19 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, Fragment } from 'react';
-import { EuiConfirmModal, EuiOverlayMask, EuiBadge, EuiCode } from '@elastic/eui';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { useMappingsState, useDispatch } from '../../../../mappings_state';
-import {
-  shouldDeleteChildFieldsAfterTypeChange,
-  buildFieldTreeFromIds,
-  getAllDescendantAliases,
-} from '../../../../lib';
+import { shouldDeleteChildFieldsAfterTypeChange, getAllDescendantAliases } from '../../../../lib';
 import { NormalizedField, DataType } from '../../../../types';
 import { PARAMETERS_DEFINITION } from '../../../../constants';
-import { FieldsTree } from '../../../fields_tree';
+import { ModalConfirmationDeleteFields } from '../modal_confirmation_delete_fields';
 
 export type UpdateFieldFunc = (field: NormalizedField) => void;
 
@@ -38,6 +33,30 @@ export const UpdateFieldProvider = ({ children }: Props) => {
 
   const { fields } = useMappingsState();
   const { byId } = fields;
+
+  const confirmButtonText = i18n.translate(
+    'xpack.idxMgmt.mappingsEditor.updateField.confirmationModal.confirmDescription',
+    {
+      defaultMessage: 'Confirm type change',
+    }
+  );
+
+  let modalTitle: string | undefined;
+
+  if (state.field) {
+    const { source } = state.field;
+
+    modalTitle = i18n.translate(
+      'xpack.idxMgmt.mappingsEditor.updateField.confirmationModal.title',
+      {
+        defaultMessage: "Confirm change '{fieldName}' type to '{fieldType}'.",
+        values: {
+          fieldName: source.name,
+          fieldType: source.type,
+        },
+      }
+    );
+  }
 
   const closeModal = () => {
     setState({ isModalOpen: false });
@@ -88,99 +107,21 @@ export const UpdateFieldProvider = ({ children }: Props) => {
     closeModal();
   };
 
-  const renderModal = () => {
-    const field = state.field!;
-    const { childFields } = field;
-
-    const title = i18n.translate(
-      'xpack.idxMgmt.mappingsEditor.updateField.confirmationModal.title',
-      {
-        defaultMessage: "Confirm change '{fieldName}' type to '{fieldType}'.",
-        values: {
-          fieldName: field.source.name,
-          fieldType: field.source.type,
-        },
-      }
-    );
-
-    const fieldsTree =
-      childFields && childFields.length
-        ? buildFieldTreeFromIds(childFields, byId, (fieldItem: NormalizedField) => (
-            <>
-              {fieldItem.source.name}
-              {fieldItem.isMultiField && (
-                <>
-                  {' '}
-                  <EuiBadge color="hollow">multi-field</EuiBadge>
-                </>
-              )}
-            </>
-          ))
-        : null;
-
-    return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={title}
-          onCancel={closeModal}
-          onConfirm={confirmTypeUpdate}
-          cancelButtonText={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.updateField.confirmationModal.cancelButtonLabel',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
-          buttonColor="danger"
-          confirmButtonText={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.updateField.confirmationModal.confirmDescription',
-            {
-              defaultMessage: 'Confirm type change',
-            }
-          )}
-        >
-          <>
-            {fieldsTree && (
-              <>
-                <p>
-                  {i18n.translate(
-                    'xpack.idxMgmt.mappingsEditor.updateField.confirmationModal.deleteFieldsDescription',
-                    {
-                      defaultMessage: 'This will delete the following fields.',
-                    }
-                  )}
-                </p>
-                <FieldsTree fields={fieldsTree} />
-              </>
-            )}
-            {state.aliases && (
-              <>
-                <p>
-                  {i18n.translate(
-                    'xpack.idxMgmt.mappingsEditor.updateField.confirmationModal.deleteAliasesDescription',
-                    {
-                      defaultMessage: 'The following aliases will be deleted.',
-                    }
-                  )}
-                </p>
-                <ul>
-                  {state.aliases.map(path => (
-                    <li key={path}>
-                      <EuiCode>{path}</EuiCode>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-          </>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
-    );
-  };
-
   return (
-    <Fragment>
+    <>
       {children(updateField)}
-      {state.isModalOpen && renderModal()}
-    </Fragment>
+
+      {state.isModalOpen && (
+        <ModalConfirmationDeleteFields
+          title={modalTitle!}
+          childFields={state.field && state.field.childFields}
+          aliases={state.aliases}
+          byId={byId}
+          confirmButtonText={confirmButtonText}
+          onConfirm={confirmTypeUpdate}
+          onCancel={closeModal}
+        />
+      )}
+    </>
   );
 };
