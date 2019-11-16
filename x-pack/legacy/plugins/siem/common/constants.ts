@@ -30,3 +30,9 @@ export const DEFAULT_INTERVAL_VALUE = 300000; // ms
  * Id for the SIGNALS alerting type
  */
 export const SIGNALS_ID = `${APP_ID}.signals`;
+
+/**
+ * Detection engine route
+ */
+export const DETECTION_ENGINE_URL = '/api/detection_engine';
+export const DETECTION_ENGINE_RULES_URL = `${DETECTION_ENGINE_URL}/rules`;

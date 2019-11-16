@@ -11,13 +11,18 @@ import { SignalSourceHit, SignalSearchResponse, SignalAlertParams, BulkResponse 
 import { buildEventsSearchQuery } from './build_events_query';
 
 // format search_after result for signals index.
-export const buildBulkBody = (doc: SignalSourceHit, signalParams: SignalAlertParams): SignalHit => {
+export const buildBulkBody = (
+  doc: SignalSourceHit,
+  signalParams: SignalAlertParams,
+  id: string
+): SignalHit => {
   return {
     ...doc._source,
     signal: {
       '@timestamp': new Date().toISOString(),
+      id,
       rule_revision: 1,
-      rule_id: signalParams.id,
+      rule_id: signalParams.ruleId,
       rule_type: signalParams.type,
       parent: {
         id: doc._id,
@@ -40,7 +45,8 @@ export const singleBulkIndex = async (
   sr: SignalSearchResponse,
   params: SignalAlertParams,
   service: AlertServices,
-  logger: Logger
+  logger: Logger,
+  id: string
 ): Promise<boolean> => {
   if (sr.hits.hits.length === 0) {
     return true;
@@ -52,7 +58,7 @@ export const singleBulkIndex = async (
         _id: doc._id,
       },
     },
-    buildBulkBody(doc, params),
+    buildBulkBody(doc, params, id),
   ]);
   const time1 = performance.now();
   const firstResult: BulkResponse = await service.callCluster('bulk', {
@@ -102,14 +108,15 @@ export const searchAfterAndBulkIndex = async (
   someResult: SignalSearchResponse,
   params: SignalAlertParams,
   service: AlertServices,
-  logger: Logger
+  logger: Logger,
+  id: string
 ): Promise<boolean> => {
   if (someResult.hits.hits.length === 0) {
     return true;
   }
 
   logger.debug('[+] starting bulk insertion');
-  const firstBulkIndexSuccess = await singleBulkIndex(someResult, params, service, logger);
+  const firstBulkIndexSuccess = await singleBulkIndex(someResult, params, service, logger, id);
   if (!firstBulkIndexSuccess) {
     logger.error('First bulk index was unsuccessful');
     return false;
@@ -149,7 +156,7 @@ export const searchAfterAndBulkIndex = async (
       }
       sortId = sortIds[0];
       logger.debug('next bulk index');
-      const bulkSuccess = await singleBulkIndex(searchAfterResult, params, service, logger);
+      const bulkSuccess = await singleBulkIndex(searchAfterResult, params, service, logger, id);
       logger.debug('finished next bulk index');
       if (!bulkSuccess) {
         logger.error('[-] bulk index failed but continuing');
