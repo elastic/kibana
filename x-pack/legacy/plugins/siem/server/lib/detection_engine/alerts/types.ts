@@ -57,8 +57,8 @@ export type SignalAlertParamsRest = Omit<
 
 export type OutputSignalAlertRest = SignalAlertParamsRest & {
   id: string;
-  created_by: string | null;
-  updated_by: string | null;
+  created_by: string | undefined | null;
+  updated_by: string | undefined | null;
 };
 
 export type UpdateSignalAlertParamsRest = Partial<SignalAlertParamsRest> & {

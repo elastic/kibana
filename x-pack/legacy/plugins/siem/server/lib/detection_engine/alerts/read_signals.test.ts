@@ -42,7 +42,7 @@ describe('read_signals', () => {
       expect(signal).toEqual(getResult());
     });
 
-    test('should return the output from alertsClient if id is undefined but rule id is set', async () => {
+    test('should return the output from alertsClient if id is undefined but ruleId is set', async () => {
       const alertsClient = alertsClientMock.create();
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
@@ -56,7 +56,7 @@ describe('read_signals', () => {
       expect(signal).toEqual(getResult());
     });
 
-    test('should return the output from alertsClient if id is null but rule id is set', async () => {
+    test('should return the output from alertsClient if id is null but ruleId is set', async () => {
       const alertsClient = alertsClientMock.create();
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
@@ -68,6 +68,34 @@ describe('read_signals', () => {
         ruleId: 'rule-1',
       });
       expect(signal).toEqual(getResult());
+    });
+
+    test('should return null if id and ruleId are null', async () => {
+      const alertsClient = alertsClientMock.create();
+      alertsClient.get.mockResolvedValue(getResult());
+      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+
+      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
+      const signal = await readSignals({
+        alertsClient: unsafeCast,
+        id: null,
+        ruleId: null,
+      });
+      expect(signal).toEqual(null);
+    });
+
+    test('should return null if id and ruleId are undefined', async () => {
+      const alertsClient = alertsClientMock.create();
+      alertsClient.get.mockResolvedValue(getResult());
+      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+
+      const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
+      const signal = await readSignals({
+        alertsClient: unsafeCast,
+        id: undefined,
+        ruleId: undefined,
+      });
+      expect(signal).toEqual(null);
     });
   });
 

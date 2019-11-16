@@ -65,17 +65,17 @@ describe('create_signals', () => {
   });
 
   describe('validation', () => {
-    test('returns 200 if id is not given as the id is auto generated from the alert framework', async () => {
+    test('returns 200 if rule_id is not given as the id is auto generated from the alert framework', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(getResult());
-      // missing id should return 200 as it will be auto generated if not given
-      const { rule_id, ...noId } = typicalPayload();
+      // missing rule_id should return 200 as it will be auto generated if not given
+      const { rule_id, ...noRuleId } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'POST',
         url: DETECTION_ENGINE_RULES_URL,
-        payload: noId,
+        payload: noRuleId,
       };
       const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(200);

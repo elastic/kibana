@@ -26,7 +26,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         falsePositives: schema.arrayOf(schema.string(), { defaultValue: [] }),
         from: schema.string(),
         filter: schema.nullable(schema.object({}, { allowUnknowns: true })),
-        ruleId: schema.nullable(schema.string()),
+        ruleId: schema.string(),
         immutable: schema.boolean({ defaultValue: false }),
         index: schema.arrayOf(schema.string()),
         language: schema.nullable(schema.string()),

@@ -7,6 +7,7 @@
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 import Boom from 'boom';
+import uuid from 'uuid';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import { createSignals } from '../alerts/create_signals';
 import { SignalsRequest } from '../alerts/types';
@@ -68,7 +69,6 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
         return new Boom(`Signal rule_id ${ruleId} already exists`, { statusCode: 409 });
       }
     }
-
     const createdSignal = await createSignals({
       alertsClient,
       actionsClient,
@@ -82,7 +82,7 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       language,
       savedId,
       filters,
-      ruleId,
+      ruleId: ruleId != null ? ruleId : uuid.v4(),
       index,
       interval,
       maxSignals,
