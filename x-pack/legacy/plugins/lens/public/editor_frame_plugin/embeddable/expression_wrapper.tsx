@@ -46,6 +46,7 @@ export function ExpressionWrapper({
       ) : (
         <div className="lnsExpressionRenderer">
           <ExpressionRendererComponent
+            padding={'m'}
             expression={expression}
             searchContext={{ ...context, type: 'kibana_context' }}
           />
