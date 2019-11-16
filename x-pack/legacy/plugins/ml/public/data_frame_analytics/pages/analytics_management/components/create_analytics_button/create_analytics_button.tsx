@@ -14,12 +14,10 @@ import { createPermissionFailureMessage } from '../../../../../privilege/check_p
 
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 
-import { CreateAnalyticsAdvancedEditor } from '../create_analytics_advanced_editor';
-import { CreateAnalyticsForm } from '../create_analytics_form';
-import { CreateAnalyticsFlyout } from '../create_analytics_flyout';
+import { CreateAnalyticsFlyoutWrapper } from '../create_analytics_flyout_wrapper';
 
 export const CreateAnalyticsButton: FC<CreateAnalyticsFormProps> = props => {
-  const { disabled, isAdvancedEditorEnabled, isModalVisible } = props.state;
+  const { disabled } = props.state;
   const { openModal } = props.actions;
 
   const button = (
@@ -51,12 +49,7 @@ export const CreateAnalyticsButton: FC<CreateAnalyticsFormProps> = props => {
   return (
     <Fragment>
       {button}
-      {isModalVisible && (
-        <CreateAnalyticsFlyout {...props}>
-          {isAdvancedEditorEnabled === false && <CreateAnalyticsForm {...props} />}
-          {isAdvancedEditorEnabled === true && <CreateAnalyticsAdvancedEditor {...props} />}
-        </CreateAnalyticsFlyout>
-      )}
+      <CreateAnalyticsFlyoutWrapper {...props} />
     </Fragment>
   );
 };
