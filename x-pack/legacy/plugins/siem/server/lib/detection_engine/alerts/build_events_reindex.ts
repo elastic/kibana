@@ -22,7 +22,7 @@ interface BuildEventsReIndexParams {
   timeDetected: string;
   ruleRevision: number;
   id: string;
-  ruleId: string | undefined;
+  ruleId: string | undefined | null;
   type: string;
   references: string[];
 }

@@ -11,7 +11,7 @@ import {
   UpdateSignalAlertParamsRest,
 } from '../alerts/types';
 
-describe('update_signals', () => {
+describe('schemas', () => {
   describe('create signals schema', () => {
     test('empty objects do not validate', () => {
       expect(createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({}).error).toBeTruthy();

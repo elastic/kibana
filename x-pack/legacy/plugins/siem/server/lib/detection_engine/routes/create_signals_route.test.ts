@@ -16,7 +16,6 @@ import {
   getFindResult,
   getResult,
   createActionResult,
-  createAlertResult,
   getCreateRequest,
   typicalPayload,
 } from './__mocks__/request_responses';
@@ -36,7 +35,7 @@ describe('create_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
-      alertsClient.create.mockResolvedValue(createAlertResult());
+      alertsClient.create.mockResolvedValue(getResult());
       const { statusCode } = await server.inject(getCreateRequest());
       expect(statusCode).toBe(200);
     });
@@ -70,7 +69,7 @@ describe('create_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
-      alertsClient.create.mockResolvedValue(createAlertResult());
+      alertsClient.create.mockResolvedValue(getResult());
       // missing id should return 200 as it will be auto generated if not given
       const { rule_id, ...noId } = typicalPayload();
       const request: ServerInjectOptions = {
@@ -86,7 +85,7 @@ describe('create_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
-      alertsClient.create.mockResolvedValue(createAlertResult());
+      alertsClient.create.mockResolvedValue(getResult());
       const { type, ...noType } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'POST',
@@ -104,7 +103,7 @@ describe('create_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
-      alertsClient.create.mockResolvedValue(createAlertResult());
+      alertsClient.create.mockResolvedValue(getResult());
       // Cannot type request with a ServerInjectOptions as the type system complains
       // about the property filter involving Hapi types, so I left it off for now
       const { language, query, type, ...noType } = typicalPayload();
@@ -125,7 +124,7 @@ describe('create_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
-      alertsClient.create.mockResolvedValue(createAlertResult());
+      alertsClient.create.mockResolvedValue(getResult());
       const { type, ...noType } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'POST',

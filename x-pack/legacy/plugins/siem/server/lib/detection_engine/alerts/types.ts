@@ -25,21 +25,21 @@ export interface SignalAlertParams {
   description: string;
   enabled: boolean;
   falsePositives: string[];
-  filter: Record<string, {}> | undefined;
-  filters: PartialFilter[] | undefined;
+  filter: Record<string, {}> | undefined | null;
+  filters: PartialFilter[] | undefined | null;
   from: string;
   immutable: boolean;
   index: string[];
   interval: string;
-  ruleId: string | undefined;
-  language: string | undefined;
+  ruleId: string | undefined | null;
+  language: string | undefined | null;
   maxSignals: number;
   name: string;
-  query: string | undefined;
+  query: string | undefined | null;
   references: string[];
-  savedId: string | undefined;
+  savedId: string | undefined | null;
   severity: string;
-  size: number | undefined;
+  size: number | undefined | null;
   tags: string[];
   to: string;
   type: 'filter' | 'query' | 'saved_query';
@@ -107,7 +107,7 @@ export interface FindSignalParams {
 export interface ReadSignalParams {
   alertsClient: AlertsClient;
   id?: string;
-  ruleId?: string;
+  ruleId?: string | undefined | null;
 }
 
 export interface ReadSignalByRuleId {
@@ -115,9 +115,11 @@ export interface ReadSignalByRuleId {
   ruleId: string;
 }
 
+export type AlertTypeParams = Omit<SignalAlertParams, 'name' | 'enabled' | 'interval'>;
+
 export type SignalAlertType = Alert & {
   id: string;
-  alertTypeParams: SignalAlertParams;
+  alertTypeParams: AlertTypeParams;
 };
 
 export interface SignalsRequest extends Hapi.Request {

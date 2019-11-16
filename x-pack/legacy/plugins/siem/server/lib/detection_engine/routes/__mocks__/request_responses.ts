@@ -6,7 +6,7 @@
 
 import { ServerInjectOptions } from 'hapi';
 import { ActionResult } from '../../../../../../actions/server/types';
-import { SignalAlertParamsRest } from '../../alerts/types';
+import { SignalAlertParamsRest, SignalAlertType } from '../../alerts/types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 // The Omit of filter is because of a Hapi Server Typing issue that I am unclear
@@ -57,53 +57,25 @@ export const getFindRequest = (): ServerInjectOptions => ({
   url: `${DETECTION_ENGINE_RULES_URL}/_find`,
 });
 
-export const getFindResult = () => ({
+interface FindHit {
+  page: number;
+  perPage: number;
+  total: number;
+  data: SignalAlertType[];
+}
+
+export const getFindResult = (): FindHit => ({
   page: 1,
   perPage: 1,
   total: 0,
   data: [],
 });
 
-export const getFindResultWithSingleHit = () => ({
+export const getFindResultWithSingleHit = (): FindHit => ({
   page: 1,
   perPage: 1,
   total: 0,
-  data: [
-    {
-      id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-      name: 'Detect Root/Admin Users',
-      alertTypeId: 'siem.signals',
-      alertTypeParams: {
-        description: 'Detecting root and admin users',
-        ruleId: 'rule-1',
-        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        falsePositives: [],
-        from: 'now-6m',
-        filter: null,
-        immutable: false,
-        query: 'user.name: root or user.name: admin',
-        language: 'kuery',
-        savedId: null,
-        filters: null,
-        maxSignals: 100,
-        severity: 'high',
-        tags: [],
-        to: 'now',
-        type: 'query',
-        references: ['http://www.example.com', 'https://ww.example.com'],
-      },
-      interval: '5m',
-      enabled: true,
-      actions: [],
-      throttle: null,
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      apiKeyOwner: 'elastic',
-      muteAll: false,
-      mutedInstanceIds: [],
-      scheduledTaskId: '2dabe330-0702-11ea-8b50-773b89126888',
-    },
-  ],
+  data: [getResult()],
 });
 
 export const getDeleteRequest = (): ServerInjectOptions => ({
@@ -131,37 +103,7 @@ export const createActionResult = (): ActionResult => ({
   config: {},
 });
 
-export const createAlertResult = () => ({
-  id: 'rule-1',
-  alertTypeId: 'siem.signals',
-  alertTypeParams: {
-    description: 'Detecting root and admin users',
-    id: 'rule-1',
-    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-    from: 'now-6m',
-    filter: null,
-    query: 'user.name: root or user.name: admin',
-    maxSignals: 100,
-    name: 'Detect Root/Admin Users',
-    severity: 'high',
-    to: 'now',
-    type: 'query',
-    language: 'kuery',
-    references: [],
-  },
-  interval: '5m',
-  enabled: true,
-  actions: [],
-  throttle: null,
-  createdBy: 'elastic',
-  updatedBy: 'elastic',
-  apiKeyOwner: 'elastic',
-  muteAll: false,
-  mutedInstanceIds: [],
-  scheduledTaskId: '78d036d0-f042-11e9-a9ae-51b9a11630ec',
-});
-
-export const getResult = () => ({
+export const getResult = (): SignalAlertType => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
   alertTypeId: 'siem.signals',
@@ -171,13 +113,14 @@ export const getResult = () => ({
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
     falsePositives: [],
     from: 'now-6m',
-    filter: null,
+    filter: undefined,
     immutable: false,
     query: 'user.name: root or user.name: admin',
     language: 'kuery',
-    savedId: null,
-    filters: null,
+    savedId: undefined,
+    filters: undefined,
     maxSignals: 100,
+    size: 1,
     severity: 'high',
     tags: [],
     to: 'now',
@@ -201,34 +144,4 @@ export const updateActionResult = (): ActionResult => ({
   actionTypeId: 'action-id-1',
   description: '',
   config: {},
-});
-
-export const updateAlertResult = () => ({
-  id: 'rule-1',
-  alertTypeId: 'siem.signals',
-  alertTypeParams: {
-    description: 'Detecting root and admin users',
-    id: 'rule-1',
-    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-    from: 'now-6m',
-    filter: null,
-    query: 'user.name: root or user.name: admin',
-    maxSignals: 100,
-    name: 'Detect Root/Admin Users',
-    severity: 'high',
-    to: 'now',
-    type: 'query',
-    language: 'kuery',
-    references: [],
-  },
-  interval: '5m',
-  enabled: true,
-  actions: [],
-  throttle: null,
-  createdBy: 'elastic',
-  updatedBy: 'elastic',
-  apiKeyOwner: 'elastic',
-  muteAll: false,
-  mutedInstanceIds: [],
-  scheduledTaskId: '78d036d0-f042-11e9-a9ae-51b9a11630ec',
 });

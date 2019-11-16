@@ -12,8 +12,8 @@ export const getIdError = ({
   id,
   ruleId,
 }: {
-  id: string | undefined;
-  ruleId: string | undefined;
+  id: string | undefined | null;
+  ruleId: string | undefined | null;
 }) => {
   if (id != null) {
     return new Boom(`id of ${id} not found`, { statusCode: 404 });

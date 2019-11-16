@@ -17,7 +17,6 @@ import {
   getFindResult,
   getResult,
   updateActionResult,
-  updateAlertResult,
   getUpdateRequest,
   typicalPayload,
   getFindResultWithSingleHit,
@@ -39,7 +38,7 @@ describe('update_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
-      alertsClient.update.mockResolvedValue(updateAlertResult());
+      alertsClient.update.mockResolvedValue(getResult());
       const { statusCode } = await server.inject(getUpdateRequest());
       expect(statusCode).toBe(200);
     });
@@ -48,7 +47,7 @@ describe('update_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
-      alertsClient.update.mockResolvedValue(updateAlertResult());
+      alertsClient.update.mockResolvedValue(getResult());
       const { statusCode } = await server.inject(getUpdateRequest());
       expect(statusCode).toBe(404);
     });
@@ -96,7 +95,7 @@ describe('update_signals', () => {
     test('returns 404 if the record does not exist yet', async () => {
       alertsClient.find.mockResolvedValueOnce(getFindResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
-      alertsClient.update.mockResolvedValue(updateAlertResult());
+      alertsClient.update.mockResolvedValue(getResult());
       const request: ServerInjectOptions = {
         method: 'PUT',
         url: DETECTION_ENGINE_RULES_URL,
@@ -110,7 +109,7 @@ describe('update_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
-      alertsClient.update.mockResolvedValue(updateAlertResult());
+      alertsClient.update.mockResolvedValue(getResult());
       const request: ServerInjectOptions = {
         method: 'PUT',
         url: DETECTION_ENGINE_RULES_URL,
@@ -124,7 +123,7 @@ describe('update_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
-      alertsClient.update.mockResolvedValue(updateAlertResult());
+      alertsClient.update.mockResolvedValue(getResult());
       const request: ServerInjectOptions = {
         method: 'PUT',
         url: DETECTION_ENGINE_RULES_URL,
@@ -138,7 +137,7 @@ describe('update_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
-      alertsClient.update.mockResolvedValue(updateAlertResult());
+      alertsClient.update.mockResolvedValue(getResult());
       const { type, ...noType } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'PUT',

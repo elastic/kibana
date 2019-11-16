@@ -67,7 +67,7 @@ export interface SignalHit {
     '@timestamp': string;
     id: string;
     rule_revision: number;
-    rule_id: string | undefined;
+    rule_id: string | undefined | null;
     rule_type: string;
     parent: {
       id: string;
