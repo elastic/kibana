@@ -32,13 +32,15 @@ export const RuleSwitch = React.memo<RuleSwitchProps>(
     const [isLoading, setIsLoading] = useState(false);
 
     return (
-      <EuiFlexGroup justifyContent="spaceAround">
+      <EuiFlexGroup alignItems="center" justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
           {isLoading ? (
-            <EuiLoadingSpinner size="m" data-test-subj="job-switch-loader" />
+            <EuiLoadingSpinner size="m" data-test-subj="rule-switch-loader" />
           ) : (
             <StaticSwitch
-              data-test-subj="job-switch"
+              data-test-subj="rule-switch"
+              label="rule-switch"
+              showLabel={false}
               disabled={false}
               checked={isEnabled}
               onChange={e => {

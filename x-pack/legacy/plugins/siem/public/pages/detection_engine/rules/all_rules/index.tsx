@@ -11,7 +11,7 @@ import {
   EuiLoadingContent,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 
 import { HeaderSection } from '../../../../components/header_section';
 import {
@@ -27,7 +27,9 @@ import { Rule } from '../../../../containers/detection_engine/rules/types';
 import { Loader } from '../../../../components/loader';
 import { Panel } from '../../../../components/panel';
 import { getBatchItems } from './batch_actions';
+import { formatRules } from './helpers';
 
+// TODO Move/Consolidate Types
 export interface RuleTypes {
   href: string;
   name: string;
@@ -46,9 +48,10 @@ export interface ColumnTypes {
   severity: string;
   lastCompletedRun: string;
   lastResponse: LastResponseTypes;
-  tags: string | string[];
+  tags: string[];
   activate: boolean;
   sourceRule: Rule;
+  isLoading: boolean;
 }
 
 export interface SortTypes {
@@ -56,70 +59,85 @@ export interface SortTypes {
   direction: string;
 }
 
-export const AllRules = React.memo(() => {
-  // const sampleTableData = [
-  //   {
-  //     id: 1,
-  //     rule: {
-  //       href: '#/detection-engine/rules/rule-details',
-  //       name: 'Automated exfiltration',
-  //       status: 'Experimental',
-  //     },
-  //     method: 'Custom query',
-  //     severity: 'Low',
-  //     lastCompletedRun: '2019-12-28 00:00:00.000-05:00',
-  //     lastResponse: {
-  //       type: 'Success',
-  //     },
-  //     tags: ['attack.t1234', 'attack.t4321'],
-  //     activate: true,
-  //   },
-  // ];
+// Reducer types
+interface State {
+  isLoading: boolean;
+  rules: Rule[];
+  refreshToggle: boolean;
+  tableData: ColumnTypes[];
+}
 
-  const formatRules = (rules: Rule[]): ColumnTypes[] =>
-    rules.map(rule => ({
-      id: rule.id,
-      rule: {
-        href: `#/detection-engine/rules/rule-details/${rule.id}`,
-        name: rule.name,
-        status: 'Status Placeholder',
-      },
-      method: rule.alertTypeParams.type, // Map to i18n
-      severity: rule.alertTypeParams.severity,
-      lastCompletedRun: '--', // Frank Plumber
-      lastResponse: {
-        type: '--', // Frank Plumber
-      },
-      tags: ['Tags', 'Tags', 'Tags'], // Frank Plumber
-      activate: rule.enabled,
-      sourceRule: rule,
-    }));
+type Action =
+  | { type: 'refresh' }
+  | { type: 'updateTableData'; rules?: Rule[]; selectedRules?: ColumnTypes[] }
+  | { type: 'loading' }
+  | { type: 'bulkDelete'; selectedRules: Rule[] }
+  | { type: 'failure' };
+
+function allRulesReducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'refresh': {
+      return {
+        ...state,
+        refreshToggle: !state.refreshToggle,
+      };
+    }
+    case 'updateTableData': {
+      return {
+        ...state,
+        tableData: formatRules(action.rules ?? []),
+      };
+    }
+    case 'loading': {
+      return {
+        ...state,
+        isLoading: true,
+      };
+    }
+    case 'bulkDelete': {
+      return {
+        ...state,
+        isLoading: false,
+        rules: action.selectedRules,
+      };
+    }
+    case 'failure': {
+      return {
+        ...state,
+        isLoading: false,
+        rules: [],
+      };
+    }
+    default:
+      return state;
+  }
+}
+
+const initialState: State = {
+  isLoading: false,
+  refreshToggle: true,
+  tableData: [],
+  rules: [],
+};
+
+export const AllRules = React.memo(() => {
+  const [{ refreshToggle, tableData }, dispatch] = useReducer(allRulesReducer, initialState);
 
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedState, setSelectedState] = useState<ColumnTypes[]>([]);
-  const [refreshToggle, setRefreshToggle] = useState(true);
   const [sortState, setSortState] = useState<SortTypes>({ field: 'rule', direction: 'asc' });
   const [isLoadingRules, rules, setRules, updatePagination] = useRules(refreshToggle);
 
   const updateRule = useCallback(
     (isEnabled: boolean, ruleId: string) => {
-      console.log('Update Rule');
-      console.log('isEnabled', isEnabled);
-      console.log('ruleId', ruleId);
       const data = rules.data.map<Rule>(r => {
-        console.log(r.id === ruleId);
         return r.id === ruleId ? { ...r, enabled: isEnabled } : r;
       });
-      console.log('Setting rules', { ...rules, data });
       setRules({ ...rules, data });
     },
     [rules]
   );
-
-  const refreshRules = useCallback(() => {
-    setRefreshToggle(!refreshToggle);
-  }, [refreshToggle]);
 
   useEffect(() => {
     setIsLoading(isLoadingRules);
@@ -128,6 +146,10 @@ export const AllRules = React.memo(() => {
       setIsInitialLoad(false);
     }
   }, [isLoadingRules]);
+
+  useEffect(() => {
+    dispatch({ type: 'updateTableData', rules: rules.data });
+  }, [rules]);
 
   console.log('Rending AllRules Table');
   return (
@@ -158,7 +180,11 @@ export const AllRules = React.memo(() => {
                   >
                     {'Batch actions'}
                   </UtilityBarAction>
-                  <UtilityBarAction iconSide="right" iconType="refresh" onClick={refreshRules}>
+                  <UtilityBarAction
+                    iconSide="right"
+                    iconType="refresh"
+                    onClick={() => dispatch({ type: 'refresh' })}
+                  >
                     {'Refresh'}
                   </UtilityBarAction>
                 </UtilityBarGroup>
@@ -173,7 +199,7 @@ export const AllRules = React.memo(() => {
               columns={getColumns(updateRule)}
               isSelectable
               itemId="id"
-              items={formatRules(rules.data)}
+              items={tableData}
               onChange={({
                 page,
                 sort,

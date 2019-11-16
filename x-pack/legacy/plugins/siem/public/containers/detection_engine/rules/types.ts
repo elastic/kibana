@@ -12,7 +12,7 @@ export interface PaginationOptions {
 
 // Fetch Rules Types
 export interface FetchRulesProps {
-  paginationOptions: PaginationOptions;
+  paginationOptions?: PaginationOptions;
   ruleId?: string;
   kbnVersion: string;
 }
@@ -56,6 +56,7 @@ export interface RuleAlertTypeParams {
   to: string;
   type: string;
   references: string[];
+  tags: string[];
 }
 
 export interface RuleAction {
@@ -72,10 +73,6 @@ export interface EnableRulesProps {
   ruleIds: string[];
   enabled: boolean;
   kbnVersion: string;
-}
-
-export interface EnableRulesResponse {
-
 }
 
 // Delete Rules Types

@@ -32,14 +32,14 @@ const actions = [
     icon: 'visControls',
     name: 'Edit rule settings',
     onClick: editRuleAction,
-    disabled: true,
+    enabled: () => false,
   },
   {
     description: 'Run rule manually…',
     icon: 'play',
     name: 'Run rule manually…',
     onClick: runRuleAction,
-    disabled: true,
+    enabled: () => false,
   },
   {
     description: 'Duplicate rule…',
@@ -52,6 +52,7 @@ const actions = [
     icon: 'exportAction',
     name: 'Export rule',
     onClick: exportRuleAction,
+    enabled: () => false,
   },
   {
     description: 'Delete rule…',
@@ -140,17 +141,13 @@ export const getColumns = (updateRule: (isEnabled: boolean, ruleId: string) => v
     name: 'Tags',
     render: (value: ColumnTypes['tags']) => (
       <div>
-        {typeof value !== 'string' ? (
-          <>
-            {value.map((tag, i) => (
-              <EuiBadge color="hollow" key={i}>
-                {tag}
-              </EuiBadge>
-            ))}
-          </>
-        ) : (
-          <EuiBadge color="hollow">{value}</EuiBadge>
-        )}
+        <>
+          {value.map((tag, i) => (
+            <EuiBadge color="hollow" key={i}>
+              {tag}
+            </EuiBadge>
+          ))}
+        </>
       </div>
     ),
     truncateText: true,

@@ -8,7 +8,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
 import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
-import { FetchRulesResponse, PaginationOptions, Rule } from './types';
+import { FetchRulesResponse, PaginationOptions } from './types';
 import { useStateToaster } from '../../../components/toasters';
 import { fetchRules } from './api';
 import { errorToToaster } from '../../../components/ml/api/error_to_toaster';

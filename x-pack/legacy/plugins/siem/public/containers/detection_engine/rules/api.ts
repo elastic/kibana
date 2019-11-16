@@ -24,7 +24,11 @@ import { throwIfNotOk } from '../../../hooks/api/api';
  * @param kbnVersion current Kibana Version to use for headers
  */
 export const fetchRules = async ({
-  paginationOptions,
+  paginationOptions = {
+    page: 1,
+    perPage: 20,
+    sortField: 'name',
+  },
   ruleId = '_find',
   kbnVersion,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
@@ -36,7 +40,6 @@ export const fetchRules = async ({
       method: 'GET',
       credentials: 'same-origin',
       headers: {
-        'kbn-system-api': 'true',
         'content-type': 'application/json',
         'kbn-version': kbnVersion,
         'kbn-xsrf': kbnVersion,
@@ -71,7 +74,6 @@ export const enableRules = async ({
       method: 'PUT',
       credentials: 'same-origin',
       headers: {
-        'kbn-system-api': 'true',
         'content-type': 'application/json',
         'kbn-version': kbnVersion,
         'kbn-xsrf': kbnVersion,
@@ -82,7 +84,9 @@ export const enableRules = async ({
 
   const responses = await Promise.all(requests);
   // await throwIfNotOk(responses);
-  return responses.map<Rule>(response => response.json());
+  return Promise.all(
+    responses.map<Promise<Rule>>(response => response.json())
+  );
 };
 
 /**
@@ -97,7 +101,6 @@ export const deleteRules = async ({ ruleIds, kbnVersion }: DeleteRulesProps): Pr
       method: 'DELETE',
       credentials: 'same-origin',
       headers: {
-        'kbn-system-api': 'true',
         'content-type': 'application/json',
         'kbn-version': kbnVersion,
         'kbn-xsrf': kbnVersion,
@@ -106,7 +109,9 @@ export const deleteRules = async ({ ruleIds, kbnVersion }: DeleteRulesProps): Pr
   );
   // await throwIfNotOk(response);
   const responses = await Promise.all(requests);
-  return responses.map<Rule>(response => response.json());
+  return Promise.all(
+    responses.map<Promise<Rule>>(response => response.json())
+  );
 };
 
 /**
@@ -118,14 +123,13 @@ export const deleteRules = async ({ ruleIds, kbnVersion }: DeleteRulesProps): Pr
 export const duplicateRule = async ({ rule, kbnVersion }: DuplicateRuleProps): Promise<Rule> => {
   const newRuleId = `${rule.alertTypeParams.id} (1)`;
   // TODO: Check if exists before create
-  const existingRule = await fetchRules({ ruleId: encodeURIComponent(newRuleId), kbnVersion });
-  console.log('New Rule ID exists?', existingRule.data && existingRule.data.length !== 0);
+  // const existingRule = await fetchRules({ ruleId: encodeURIComponent(newRuleId), kbnVersion });
+  // console.log('New Rule ID exists?', existingRule.data && existingRule.data.length !== 0);
 
   const response = await fetch(`${chrome.getBasePath()}/api/siem/signals`, {
     method: 'POST',
     credentials: 'same-origin',
     headers: {
-      'kbn-system-api': 'true',
       'content-type': 'application/json',
       'kbn-version': kbnVersion,
       'kbn-xsrf': kbnVersion,
@@ -165,7 +169,6 @@ export const exportRules = async ({ ruleIds, kbnVersion }: ExportRulesProps): Pr
       method: 'POST',
       credentials: 'same-origin',
       headers: {
-        'kbn-system-api': 'true',
         'content-type': 'application/json',
         'kbn-version': kbnVersion,
         'kbn-xsrf': kbnVersion,
@@ -179,5 +182,7 @@ export const exportRules = async ({ ruleIds, kbnVersion }: ExportRulesProps): Pr
 
   const responses = await Promise.all(requests);
   // await throwIfNotOk(responses);
-  return responses.map<Rule>(response => response.json());
+  return Promise.all(
+    responses.map<Promise<Rule>>(response => response.json())
+  );
 };
