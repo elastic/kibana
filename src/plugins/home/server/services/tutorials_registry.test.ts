@@ -79,7 +79,7 @@ describe('TutorialsRegistry', () => {
   let testProvider: TutorialProvider;
   let testScopedTutorialContextFactory: ScopedTutorialContextFactory;
 
-  describe('GET /api/kibana/home/NP_tutorials', () => {
+  describe('GET /api/kibana/home/tutorials', () => {
     beforeEach(() => {
       mockCoreSetup = coreMock.createSetup();
     });

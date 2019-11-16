@@ -21,8 +21,8 @@ import _ from 'lodash';
 import { getServices } from './kibana_services';
 import { i18n } from '@kbn/i18n';
 
-const baseUrl = getServices().addBasePath('/api/kibana/home/tutorials');
-const baseUrlNP = getServices().addBasePath('/api/kibana/home/NP_tutorials');
+const baseUrl = getServices().addBasePath('/api/kibana/home/tutorials_LP');
+const baseUrlNP = getServices().addBasePath('/api/kibana/home/tutorials');
 const headers = new Headers();
 headers.append('Accept', 'application/json');
 headers.append('Content-Type', 'application/json');
@@ -40,16 +40,16 @@ async function loadTutorials() {
       credentials: 'include',
       headers: headers,
     });
-    const responseNewPlatform = await fetch(baseUrlNP, {
-      method: 'get',
-      credentials: 'include',
-      headers: headers,
-    });
     if (responseLegacyPlatform.status >= 300) {
       throw new Error(i18n.translate('kbn.home.loadTutorials.requestFailedErrorMessage', {
         defaultMessage: 'Request failed with status code: {status}', values: { status: responseLegacyPlatform.status } }
       ));
     }
+    const responseNewPlatform = await fetch(baseUrlNP, {
+      method: 'get',
+      credentials: 'include',
+      headers: headers,
+    });
     if (responseNewPlatform.status >= 300) {
       throw new Error(i18n.translate('kbn.home.loadTutorials.requestFailedErrorMessage', {
         defaultMessage: 'Request failed with status code: {status}', values: { status: responseNewPlatform.status } }

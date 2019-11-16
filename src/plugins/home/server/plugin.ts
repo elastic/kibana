@@ -19,24 +19,28 @@
 import { CoreSetup, Plugin } from 'src/core/server';
 import { TutorialsRegistry, TutorialsRegistrySetup, TutorialsRegistryStart } from './services';
 
-export class HomePlugin implements Plugin<TutorialsRegistrySetup, TutorialsRegistryStart> {
+export class HomePlugin implements Plugin<HomePluginSetup, HomePluginStart> {
   private readonly tutorialsRegistry = new TutorialsRegistry();
 
   public setup(core: CoreSetup) {
     return {
-      ...this.tutorialsRegistry.setup(core),
+      tutorials: { ...this.tutorialsRegistry.setup(core) },
     };
   }
 
   public start() {
     return {
-      ...this.tutorialsRegistry.start(),
+      tutorials: { ...this.tutorialsRegistry.start() },
     };
   }
 }
 
 /** @public */
-export type HomePluginSetup = TutorialsRegistrySetup;
+export interface HomePluginSetup {
+  tutorials: TutorialsRegistrySetup;
+}
 
 /** @public */
-export type HomePluginStart = TutorialsRegistryStart;
+export interface HomePluginStart {
+  tutorials: TutorialsRegistryStart;
+}
