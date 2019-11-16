@@ -17,22 +17,33 @@
  * under the License.
  */
 
-import React, { useMemo, useState, useCallback, KeyboardEventHandler } from 'react';
+import React, { useMemo, useState, useCallback, KeyboardEventHandler, useEffect } from 'react';
 import { get, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { keyCodes } from '@elastic/eui';
+import { keyCodes, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { Vis, VisState } from 'ui/vis';
 import { PersistedState } from 'ui/persisted_state';
 import { DefaultEditorNavBar, OptionTab } from './navbar';
-import { setStateParamValue, EditorAction, SetValidity, SetTouched } from '../../state';
+import { DefaultEditorControls } from './controls';
+import {
+  setStateParamValue,
+  EditorAction,
+  SetValidity,
+  SetTouched,
+  useEditorContext,
+} from '../../state';
 import { AggGroupNames } from '../../agg_groups';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
 
+const sidebarClassName = 'visEditor__collapsibleSidebar';
+
 interface DefaultEditorSideBarProps {
-  applyChanges(): void;
   dispatch: React.Dispatch<EditorAction>;
-  formIsTouched: boolean;
+  formState: {
+    touched: boolean;
+    invalid: boolean;
+  };
   optionTabs: OptionTab[];
   setTouched: SetTouched;
   setValidity: SetValidity;
@@ -42,9 +53,8 @@ interface DefaultEditorSideBarProps {
 }
 
 function DefaultEditorSideBar({
-  applyChanges,
   dispatch,
-  formIsTouched,
+  formState,
   optionTabs,
   setTouched,
   setValidity,
@@ -53,6 +63,7 @@ function DefaultEditorSideBar({
   vis,
 }: DefaultEditorSideBarProps) {
   const [selectedTab, setSelectedTab] = useState(optionTabs[0].name);
+  const { isDirty, setDirty } = useEditorContext();
 
   const responseAggs = useMemo(() => state.aggs.getResponseAggs(), [state.aggs]);
   const metricAggs = useMemo(
@@ -81,6 +92,22 @@ function DefaultEditorSideBar({
     [dispatch, state.params]
   );
 
+  const applyChanges = useCallback(() => {
+    if (formState.invalid || !isDirty) {
+      setTouched(true);
+
+      return;
+    }
+
+    vis.setCurrentState(state);
+    vis.updateState();
+    vis.emit('dirtyStateChange', {
+      isDirty: false,
+    });
+    setDirty(false);
+    setTouched(false);
+  }, [vis, state, formState.invalid, setDirty, setTouched]);
+
   const onSubmit: KeyboardEventHandler<HTMLFormElement> = useCallback(
     event => {
       if (event.ctrlKey && event.keyCode === keyCodes.ENTER) {
@@ -93,9 +120,15 @@ function DefaultEditorSideBar({
     [applyChanges]
   );
 
+  useEffect(() => {
+    vis.on('dirtyStateChange', ({ isDirty: dirty }: { isDirty: boolean }) => {
+      setDirty(dirty);
+    });
+  }, [vis]);
+
   const dataTabProps = {
     dispatch,
-    formIsTouched,
+    formIsTouched: formState.touched,
     metricAggs,
     state,
     schemas: vis.type.schemas,
@@ -116,41 +149,66 @@ function DefaultEditorSideBar({
   };
 
   return (
-    <form className="visEditorSidebar__form" name="visualizeEditor" onKeyDownCapture={onSubmit}>
-      {vis.type.requiresSearch && vis.type.options.showIndexSelection && (
-        <h2
-          aria-label={i18n.translate('common.ui.vis.editors.sidebar.indexPatternAriaLabel', {
-            defaultMessage: 'Index pattern: {title}',
-            values: {
-              title: vis.indexPattern.title,
-            },
-          })}
-          className="visEditorSidebar__indexPattern"
-          tabIndex={0}
-        >
-          {vis.indexPattern.title}
-        </h2>
-      )}
+    <EuiFlexGroup
+      className={`collapsible-sidebar ${sidebarClassName} ${
+        vis.type.editorConfig.defaultSize
+          ? `visEditor__collapsibleSidebar--${vis.type.editorConfig.defaultSize}`
+          : ''
+      }`}
+      direction="column"
+      justifyContent="spaceBetween"
+      gutterSize="none"
+      responsive={false}
+    >
+      <EuiFlexItem>
+        <form className="visEditorSidebar__form" name="visualizeEditor" onKeyDownCapture={onSubmit}>
+          {vis.type.requiresSearch && vis.type.options.showIndexSelection && (
+            <h2
+              aria-label={i18n.translate('common.ui.vis.editors.sidebar.indexPatternAriaLabel', {
+                defaultMessage: 'Index pattern: {title}',
+                values: {
+                  title: vis.indexPattern.title,
+                },
+              })}
+              className="visEditorSidebar__indexPattern"
+              tabIndex={0}
+            >
+              {vis.indexPattern.title}
+            </h2>
+          )}
 
-      {optionTabs.length > 1 && (
-        <DefaultEditorNavBar
-          optionTabs={optionTabs}
-          selectedTab={selectedTab}
-          setSelectedTab={setSelectedTab}
+          {optionTabs.length > 1 && (
+            <DefaultEditorNavBar
+              optionTabs={optionTabs}
+              selectedTab={selectedTab}
+              setSelectedTab={setSelectedTab}
+            />
+          )}
+
+          {optionTabs.map(({ editor: Editor, name }) => (
+            <div
+              key={name}
+              className={`visEditorSidebar__config ${
+                selectedTab === name ? '' : 'visEditorSidebar__config--hidden'
+              }`}
+            >
+              <Editor {...(name === 'data' ? dataTabProps : optionTabProps)} />
+            </div>
+          ))}
+        </form>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <DefaultEditorControls
+          applyChanges={applyChanges}
+          dispatch={dispatch}
+          isDirty={isDirty}
+          isTouched={formState.touched}
+          isInvalid={formState.invalid}
+          vis={vis}
         />
-      )}
-
-      {optionTabs.map(({ editor: Editor, name }) => (
-        <div
-          key={name}
-          className={`visEditorSidebar__config ${
-            selectedTab === name ? '' : 'visEditorSidebar__config--hidden'
-          }`}
-        >
-          <Editor {...(name === 'data' ? dataTabProps : optionTabProps)} />
-        </div>
-      ))}
-    </form>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 

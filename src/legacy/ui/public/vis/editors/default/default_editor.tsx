@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { start as embeddables } from '../../../../../core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { VisualizeEmbeddable } from '../../../../../core_plugins/kibana/public/visualize/embeddable';
@@ -26,11 +26,8 @@ import { EditorRenderProps } from '../../../../../core_plugins/kibana/public/vis
 
 import './vis_type_agg_filter';
 import { DefaultEditorSideBar } from './components/sidebar';
-import { DefaultEditorBottomBar } from './components/bottom_bar';
-import { useEditorReducer, useEditorContext, useEditorFormState } from './state';
+import { useEditorReducer, useEditorFormState } from './state';
 import { DefaultEditorControllerState } from './default_editor_controller';
-
-const sidebarClassName = 'visEditor__collapsibleSidebar';
 
 function DefaultEditor({
   savedObj,
@@ -42,11 +39,9 @@ function DefaultEditor({
   query,
 }: DefaultEditorControllerState & EditorRenderProps) {
   const visRef = useRef<HTMLDivElement>(null);
-  const sidebarRef = useRef<HTMLDivElement>(null);
   const [visHandler, setVisHandler] = useState<VisualizeEmbeddable | null>(null);
   const [factory, setFactory] = useState<VisualizeEmbeddableFactory | null>(null);
   const { vis } = savedObj;
-  const { isDirty, setDirty } = useEditorContext();
   const [state, dispatch] = useEditorReducer(vis);
   const { formState, setTouched, setValidity } = useEditorFormState();
 
@@ -87,65 +82,22 @@ function DefaultEditor({
     visualize();
   }, [visRef.current, visHandler, uiState, savedObj, timeRange, filters, appState, query]);
 
-  useEffect(() => {
-    vis.on('dirtyStateChange', ({ isDirty: dirty }: { isDirty: boolean }) => {
-      setDirty(dirty);
-    });
-  }, [vis]);
-
-  const applyChanges = useCallback(() => {
-    if (formState.invalid || !isDirty) {
-      setTouched(true);
-
-      return;
-    }
-
-    vis.setCurrentState(state);
-    vis.updateState();
-    vis.emit('dirtyStateChange', {
-      isDirty: false,
-    });
-    setDirty(false);
-    setTouched(false);
-  }, [vis, state, formState.invalid, setDirty, setTouched]);
-
   return (
     <>
       <div className="visEditor--default">
         <div className="visEditor__canvas" ref={visRef} />
 
-        {/* <Resizer direction="horizontal" element={sidebarRef} onResize={onResize} /> */}
-
-        <div
-          className={`collapsible-sidebar ${sidebarClassName} ${
-            vis.type.editorConfig.defaultSize
-              ? `visEditor__collapsibleSidebar--${vis.type.editorConfig.defaultSize}`
-              : ''
-          }`}
-          ref={sidebarRef}
-        >
-          <DefaultEditorSideBar
-            applyChanges={applyChanges}
-            dispatch={dispatch}
-            formIsTouched={formState.touched}
-            optionTabs={optionTabs}
-            setTouched={setTouched}
-            setValidity={setValidity}
-            state={state}
-            vis={vis}
-            uiState={uiState}
-          />
-        </div>
+        <DefaultEditorSideBar
+          dispatch={dispatch}
+          formState={formState}
+          optionTabs={optionTabs}
+          setTouched={setTouched}
+          setValidity={setValidity}
+          state={state}
+          vis={vis}
+          uiState={uiState}
+        />
       </div>
-
-      <DefaultEditorBottomBar
-        applyChanges={applyChanges}
-        dispatch={dispatch}
-        isDirty={isDirty}
-        isTouched={formState.touched}
-        isInvalid={formState.invalid}
-        vis={vis}
-      />
     </>
   );
 }

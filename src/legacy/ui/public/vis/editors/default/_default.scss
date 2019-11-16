@@ -12,8 +12,6 @@
  */
 
 .visEditor__collapsibleSidebar {
-  @include flex-parent(0, 0, auto);
-  flex-direction: row;
   min-width: $vis-editor-sidebar-min-width;
   width: $vis-editor-sidebar-min-width;
   max-width: 100%;
@@ -42,22 +40,6 @@
 
 .visEditor__collapsibleSidebar--large {
   width: 50%;
-}
-
-
-/**
- * Actual sidebar
- */
-
-.visEditor__sidebar {
-  @include flex-parent(1, 1, auto);
-  background-color: $euiColorLightestShade;
-
-  // overridden for tablet and desktop
-  @include euiBreakpoint('l', 'xl') {
-    flex-basis: $vis-editor-sidebar-basis;
-    max-width: 100%;
-  }
 }
 
 /**
