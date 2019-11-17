@@ -5,7 +5,6 @@
  */
 
 import { EuiHorizontalRule, EuiSpacer, EuiFlexItem } from '@elastic/eui';
-import { getEsQueryConfig } from '@kbn/es-query';
 import React, { useCallback, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
@@ -41,6 +40,7 @@ import { TlsQueryTable } from './tls_query_table';
 import { IPDetailsComponentProps } from './types';
 import { UsersQueryTable } from './users_query_table';
 import { AnomaliesQueryTabBody } from '../../../containers/anomalies/anomalies_query_tab_body';
+import { esQuery } from '../../../../../../../../src/plugins/data/public';
 
 export { getBreadcrumbs } from './utils';
 
@@ -83,7 +83,7 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
           {({ indicesExist, indexPattern }) => {
             const ip = decodeIpv6(detailName);
             const filterQuery = convertToBuildEsQuery({
-              config: getEsQueryConfig(core.uiSettings),
+              config: esQuery.getEsQueryConfig(core.uiSettings),
               indexPattern,
               queries: [query],
               filters,

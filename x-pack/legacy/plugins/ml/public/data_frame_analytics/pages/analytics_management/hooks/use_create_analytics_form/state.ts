@@ -6,6 +6,7 @@
 
 import { DeepPartial } from '../../../../../../common/types/common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
+import { mlNodesAvailable } from '../../../../../ml_nodes_check/check_ml_nodes';
 
 import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
 
@@ -102,6 +103,7 @@ export const getInitialState = (): State => ({
   },
   jobConfig: {},
   disabled:
+    !mlNodesAvailable() ||
     !checkPermission('canCreateDataFrameAnalytics') ||
     !checkPermission('canStartStopDataFrameAnalytics'),
   indexNames: [],

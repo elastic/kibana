@@ -6,9 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ANOMALIES_BY_JOB = i18n.translate('xpack.siem.anomaliesOverTime.anomaliesByJobTitle', {
-  defaultMessage: 'Anomalies by job',
-});
+export const ANOMALIES_COUNT_FREQUENCY_BY_ACTION = i18n.translate(
+  'xpack.siem.anomaliesOverTime.anomaliesCountFrequencyByJobTile',
+  {
+    defaultMessage: 'Anomalies count by job',
+  }
+);
 
 export const SHOWING = i18n.translate('xpack.siem.anomaliesOverTime.showing', {
   defaultMessage: 'Showing',

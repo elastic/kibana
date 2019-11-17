@@ -17,7 +17,7 @@ export const AnomaliesOverTimeHistogram = (props: MatrixOverTimeBasicProps) => {
 
   return (
     <MatrixOverTimeHistogram
-      title={i18n.ANOMALIES_BY_JOB}
+      title={i18n.ANOMALIES_COUNT_FREQUENCY_BY_ACTION}
       subtitle={subtitle}
       dataKey={dataKey}
       {...matrixOverTimeProps}
