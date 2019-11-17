@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiBadgeProps } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import classNames from 'classnames';
 import { isString } from 'lodash/fp';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
@@ -16,9 +16,7 @@ import { EXISTS_OPERATOR, QueryOperator } from './data_provider';
 
 import * as i18n from './translations';
 
-const ProviderBadgeStyled = styled((EuiBadge as unknown) as FunctionComponent)<
-  EuiBadgeProps & { className?: string; id?: string }
->`
+const ProviderBadgeStyled = styled(EuiBadge)`
   .euiToolTipAnchor {
     &::after {
       font-style: normal;
