@@ -80,8 +80,6 @@ $visLegendLineHeight: $euiSize;
 }
 
 .visLegend__value {
-  cursor: pointer;
-  padding: $euiSizeXS;
   display: flex;
   flex-shrink: 0;
   position: relative; /* 1 */
@@ -92,6 +90,11 @@ $visLegendLineHeight: $euiSize;
 
   &.disabled {
     opacity: 0.5;
+  }
+
+  &--item {
+    cursor: pointer;
+    padding: $euiSizeXS;
   }
 }
 

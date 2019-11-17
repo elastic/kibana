@@ -19,12 +19,10 @@
 import React, { useState, useEffect, BaseSyntheticEvent, KeyboardEvent, memo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { compact, uniq, map } from 'lodash';
 
-import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, keyCodes } from '@elastic/eui';
-
-import { getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eui';
 
 // @ts-ignore
 import { Data } from '../../../vislib/lib/data';
@@ -32,8 +30,9 @@ import { Data } from '../../../vislib/lib/data';
 import { createFiltersFromEvent } from '../../vis_filters';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './vislib_vis_legend_item';
+import { getTableAggs } from '../../../visualize/loader/pipeline_helpers/utilities';
 
-interface Props {
+export interface VisLegendComponentProps {
   vis: any;
   visData: any;
   uiState: any;
@@ -42,7 +41,7 @@ interface Props {
 
 let getColor: (label: string) => string;
 
-const VisLegendComponent = ({ vis, visData, uiState, refreshLegend }: Props) => {
+const VisLegendComponent = ({ vis, visData, uiState, refreshLegend }: VisLegendComponentProps) => {
   const [open, setOpen] = useState(uiState.get('vis.legendOpen', true));
   const [labels, setLabels] = useState<any[]>([]);
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
@@ -106,7 +105,7 @@ const VisLegendComponent = ({ vis, visData, uiState, refreshLegend }: Props) => 
   function getSeriesLabels(data: any[]) {
     const values = data.map(chart => chart.series).reduce((a, b) => a.concat(b), []);
 
-    return _.compact(_.uniq(values, 'label')).map((label: any) => ({
+    return compact(uniq(values, 'label')).map((label: any) => ({
       ...label,
       values: [label.values[0].seriesRaw],
     }));
@@ -143,7 +142,7 @@ const VisLegendComponent = ({ vis, visData, uiState, refreshLegend }: Props) => 
       const legendLabels = vislibVis.getLegendLabels();
       if (legendLabels) {
         setLabels(
-          _.map(legendLabels, label => {
+          map(legendLabels, label => {
             return { label };
           })
         );
@@ -193,8 +192,8 @@ const VisLegendComponent = ({ vis, visData, uiState, refreshLegend }: Props) => 
           legendId={legendId}
           setColor={setColor}
           getColor={getColor}
-          highlight={highlight}
-          unhighlight={unhighlight}
+          onHighlight={highlight}
+          onUnhighlight={unhighlight}
         />
       ))}
     </ul>

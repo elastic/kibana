@@ -33,8 +33,8 @@ interface Props {
   canFilter: boolean;
   onFilter: (item: LegendItem, negate: boolean) => () => void;
   onSelect: (label: string | null) => (event?: BaseSyntheticEvent) => void;
-  highlight: (event: BaseSyntheticEvent) => void;
-  unhighlight: (event: BaseSyntheticEvent) => void;
+  onHighlight: (event: BaseSyntheticEvent) => void;
+  onUnhighlight: (event: BaseSyntheticEvent) => void;
   setColor: (label: string, color: string) => (event: BaseSyntheticEvent) => void;
   getColor: (label: string) => string;
 }
@@ -46,8 +46,8 @@ const VisLegendItemComponent = ({
   canFilter,
   onFilter,
   onSelect,
-  highlight,
-  unhighlight,
+  onHighlight,
+  onUnhighlight,
   setColor,
   getColor,
 }: Props) => {
@@ -66,7 +66,7 @@ const VisLegendItemComponent = ({
   const renderFilterBar = (legendItem: LegendItem) => (
     <div className="kuiButtonGroup kuiButtonGroup--united kuiButtonGroup--fullWidth">
       <button
-        className="kuiButton kuiButton--basic kuiButton--small"
+        className="visLegend__filterIn kuiButton kuiButton--basic kuiButton--small"
         onClick={onFilter(legendItem, false)}
         aria-label={i18n.translate('common.ui.vis.visTypes.legend.filterForValueButtonAriaLabel', {
           defaultMessage: 'Filter for value {legendDataLabel}',
@@ -78,7 +78,7 @@ const VisLegendItemComponent = ({
       </button>
 
       <button
-        className="kuiButton kuiButton--basic kuiButton--small"
+        className="visLegend__filterOut kuiButton kuiButton--basic kuiButton--small"
         onClick={onFilter(legendItem, true)}
         aria-label={i18n.translate('common.ui.vis.visTypes.legend.filterOutValueButtonAriaLabel', {
           defaultMessage: 'Filter out value {legendDataLabel}',
@@ -103,7 +103,6 @@ const VisLegendItemComponent = ({
         </span>
         {legendColors.map(color => (
           <i
-            kbn-accessible-click="true"
             role="option"
             tabIndex={0}
             key={color}
@@ -129,12 +128,13 @@ const VisLegendItemComponent = ({
       <EuiKeyboardAccessible>
         <div
           tabIndex={0}
+          className="visLegend__value--item"
           onKeyDown={onLegendEntryKeydown}
-          onMouseEnter={highlight}
-          onFocus={highlight}
+          onMouseEnter={onHighlight}
+          onFocus={onHighlight}
           onClick={onSelect(item.label)}
-          onMouseLeave={unhighlight}
-          onBlur={unhighlight}
+          onMouseLeave={onUnhighlight}
+          onBlur={onUnhighlight}
           data-label={item.label}
         >
           <div

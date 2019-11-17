@@ -27,7 +27,6 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 describe('visualize_legend directive', function () {
   let $rootScope;
   let $compile;
-  let $timeout;
   let $el;
   let Vis;
   let indexPattern;
@@ -37,7 +36,6 @@ describe('visualize_legend directive', function () {
   beforeEach(ngMock.inject(function (Private, $injector) {
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
-    $timeout = $injector.get('$timeout');
     fixtures = require('fixtures/fake_hierarchical_data');
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
@@ -128,15 +126,11 @@ describe('visualize_legend directive', function () {
       $rootScope.open = true;
       $rootScope.toggleLegend();
       $rootScope.$digest();
-      $timeout.flush();
-      $timeout.verifyNoPendingTasks();
       let legendOpen = $rootScope.uiState.get('vis.legendOpen');
       expect(legendOpen).to.equal(false);
 
       $rootScope.toggleLegend();
       $rootScope.$digest();
-      $timeout.flush();
-      $timeout.verifyNoPendingTasks();
       legendOpen = $rootScope.uiState.get('vis.legendOpen');
       expect(legendOpen).to.equal(true);
     });

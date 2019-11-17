@@ -22,6 +22,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { uiModules } from '../../../modules';
 import { VisLegend } from './vislib_vis_legend';
+
 export { CUSTOM_LEGEND_VIS_TYPES } from './models';
 
 uiModules.get('kibana').directive('vislibLegend', function(reactDirective: any) {
