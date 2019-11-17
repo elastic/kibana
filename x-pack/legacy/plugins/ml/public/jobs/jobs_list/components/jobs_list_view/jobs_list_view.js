@@ -21,7 +21,7 @@ import { CreateWatchFlyout } from '../create_watch_flyout';
 import { MultiJobActions } from '../multi_job_actions';
 import { NewJobButton } from '../new_job_button';
 import { JobStatsBar } from '../jobs_stats_bar';
-import { NodeAvailableWarning } from '../node_available_warning';
+import { NodeAvailableWarning } from '../../../../components/node_available_warning';
 import { UpgradeWarning } from '../../../../components/upgrade';
 import { RefreshJobsListButton } from '../refresh_jobs_list_button';
 import { isEqual } from 'lodash';

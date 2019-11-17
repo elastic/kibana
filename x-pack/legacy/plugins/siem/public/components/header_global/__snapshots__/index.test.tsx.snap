@@ -30,7 +30,7 @@ exports[`HeaderGlobal it renders 1`] = `
         <FlexItem
           component="nav"
         >
-          <Memo()
+          <SiemNavigation
             display="condensed"
             navTabs={
               Object {

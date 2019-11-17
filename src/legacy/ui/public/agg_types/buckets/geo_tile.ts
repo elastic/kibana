@@ -24,7 +24,7 @@ import { AggConfigOptions } from 'ui/agg_types/agg_config';
 
 import { BucketAggType } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 const geotileGridTitle = i18n.translate('common.ui.aggTypes.buckets.geotileGridTitle', {
   defaultMessage: 'Geotile',

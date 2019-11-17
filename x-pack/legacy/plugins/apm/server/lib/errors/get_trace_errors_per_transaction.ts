@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import {
   ERROR_LOG_LEVEL,
   PROCESSOR_EVENT,
@@ -55,7 +54,7 @@ export async function getTraceErrorsPerTransaction(
 
   const resp = await client.search(params);
 
-  return (idx(resp.aggregations, _ => _.transactions.buckets) || []).reduce(
+  return (resp.aggregations?.transactions.buckets || []).reduce(
     (acc, bucket) => ({
       ...acc,
       [bucket.key]: bucket.doc_count
