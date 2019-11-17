@@ -18,21 +18,8 @@
  */
 
 import { EventEmitter } from 'events';
-import $ from 'jquery';
 import { isEqual } from 'lodash';
 import ResizeObserver from 'resize-observer-polyfill';
-
-function validateElArg(el: HTMLElement) {
-  // the ResizeChecker historically accepted jquery elements,
-  // so we wrap in jQuery then extract the element
-  const $el = $(el);
-
-  if ($el.length !== 1) {
-    throw new TypeError('ResizeChecker must be constructed with a single DOM element.');
-  }
-
-  return $el.get(0);
-}
 
 function getSize(el: HTMLElement): [number, number] {
   return [el.clientWidth, el.clientHeight];
@@ -50,7 +37,7 @@ export class ResizeChecker extends EventEmitter {
   constructor(el: HTMLElement, args: { disabled?: boolean } = {}) {
     super();
 
-    this.el = validateElArg(el);
+    this.el = el;
 
     this.observer = new ResizeObserver(() => {
       if (this.expectedSize) {
