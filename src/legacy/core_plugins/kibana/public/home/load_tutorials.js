@@ -21,8 +21,8 @@ import _ from 'lodash';
 import { getServices } from './kibana_services';
 import { i18n } from '@kbn/i18n';
 
-const baseUrl = getServices().addBasePath('/api/kibana/home/tutorials_LP');
-const baseUrlNP = getServices().addBasePath('/api/kibana/home/tutorials');
+const baseUrlLP = getServices().addBasePath('/api/kibana/home/tutorials_LP');
+const baseUrl = getServices().addBasePath('/api/kibana/home/tutorials');
 const headers = new Headers();
 headers.append('Accept', 'application/json');
 headers.append('Content-Type', 'application/json');
@@ -35,7 +35,7 @@ let tutorialsLoaded = false;
 
 async function loadTutorials() {
   try {
-    const responseLegacyPlatform = await fetch(baseUrl, {
+    const responseLegacyPlatform = await fetch(baseUrlLP, {
       method: 'get',
       credentials: 'include',
       headers: headers,
@@ -45,7 +45,7 @@ async function loadTutorials() {
         defaultMessage: 'Request failed with status code: {status}', values: { status: responseLegacyPlatform.status } }
       ));
     }
-    const responseNewPlatform = await fetch(baseUrlNP, {
+    const responseNewPlatform = await fetch(baseUrl, {
       method: 'get',
       credentials: 'include',
       headers: headers,
