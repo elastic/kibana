@@ -36,7 +36,6 @@
     "@kbn/test": "1.0.0",
     "@kbn/utility-types": "1.0.0",
     "@mattapperson/slapshot": "1.4.0",
-    "@reach/router": "^1.2.1",
     "@storybook/addon-actions": "^5.2.6",
     "@storybook/addon-console": "^1.2.1",
     "@storybook/addon-info": "^5.2.6",
