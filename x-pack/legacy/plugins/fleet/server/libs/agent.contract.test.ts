@@ -23,9 +23,11 @@ function getUser(apiKey?: string, apiKeyId?: string) {
   return ({
     kind: 'authenticated',
     [internalAuthData]: {
-      authorization: `ApiKey ${Buffer.from(`${apiKeyId || 'key_id'}:${apiKey}`).toString(
-        'base64'
-      )}`,
+      headers: {
+        authorization: `ApiKey ${Buffer.from(`${apiKeyId || 'key_id'}:${apiKey}`).toString(
+          'base64'
+        )}`,
+      },
     },
   } as unknown) as FrameworkUser;
 }

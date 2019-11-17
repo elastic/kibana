@@ -43,7 +43,7 @@ export class HapiFrameworkAdapter {
     return isAuthenticated
       ? {
           kind: 'authenticated',
-          [internalAuthData]: request.headers,
+          [internalAuthData]: request,
         }
       : {
           kind: 'unauthenticated',

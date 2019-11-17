@@ -51,7 +51,7 @@ export class ElasticsearchAdapter implements ElasticsearchAdapterType {
     }
 
     if (user.kind === 'authenticated') {
-      return await callWithRequest({ headers: user[internalAuthData] }, endpoint, params);
+      return await callWithRequest(user[internalAuthData], endpoint, params);
     }
 
     throw new Error('Elastic search call is not implemented for unauthenticated user');

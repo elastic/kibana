@@ -39,9 +39,7 @@ export class SODatabaseAdapter implements SODatabaseAdapterType {
 
   private getClient(user: FrameworkUser) {
     if (user.kind === 'authenticated') {
-      return this.savedObject.getScopedSavedObjectsClient({
-        headers: user[internalAuthData],
-      });
+      return this.savedObject.getScopedSavedObjectsClient(user[internalAuthData]);
     }
 
     if (user.kind === 'internal') {

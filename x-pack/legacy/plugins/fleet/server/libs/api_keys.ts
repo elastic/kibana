@@ -183,7 +183,7 @@ export class ApiKeyLib {
       throw new Error('Error must provide an authenticated user');
     }
 
-    const authorizationHeader = user[internalAuthData].authorization;
+    const authorizationHeader = user[internalAuthData].headers.authorization;
 
     if (!authorizationHeader) {
       throw new Error('Authorization header must be set');
