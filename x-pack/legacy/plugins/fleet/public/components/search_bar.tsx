@@ -78,11 +78,9 @@ function useSuggestions(fieldPrefix: string, search: string) {
 
   const fetchSuggestions = async () => {
     try {
-      const esSuggestions = (await elasticsearch.getSuggestions(
-        debouncedSearch,
-        debouncedSearch.length,
-        fieldPrefix
-      )).map(suggestion => ({
+      const esSuggestions = (
+        await elasticsearch.getSuggestions(debouncedSearch, debouncedSearch.length, fieldPrefix)
+      ).map(suggestion => ({
         label: suggestion.text,
         description: suggestion.description || '',
         type: transformSuggestionType(suggestion.type),

@@ -98,7 +98,10 @@ export class AgentLib {
       if (agents.length === 0) {
         hasMore = false;
       }
-      await this.unenroll(user, agents.map(a => a.id));
+      await this.unenroll(
+        user,
+        agents.map(a => a.id)
+      );
     }
   }
 

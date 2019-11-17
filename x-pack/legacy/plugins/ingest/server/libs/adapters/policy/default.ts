@@ -101,13 +101,15 @@ export class PolicyAdapter {
     page: number = 1,
     perPage: number = 25
   ): Promise<PolicyFile[]> {
-    const policys = (await this.so.find<any>({
-      type: 'policies',
-      search: sharedID,
-      searchFields: ['shared_id'],
-      page,
-      perPage,
-    })).saved_objects;
+    const policys = (
+      await this.so.find<any>({
+        type: 'policies',
+        search: sharedID,
+        searchFields: ['shared_id'],
+        page,
+        perPage,
+      })
+    ).saved_objects;
 
     if (!activeOnly) {
       const backupPolicies = await this.so.find<BackupPolicyFile>({

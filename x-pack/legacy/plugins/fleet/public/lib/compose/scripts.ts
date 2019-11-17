@@ -17,7 +17,11 @@ import { FrontendLibs } from '../types';
 
 export function compose(basePath: string): FrontendLibs {
   const api = new NodeAxiosAPIAdapter('elastic', 'changeme', basePath);
-  const esAdapter = new MemoryElasticsearchAdapter(() => true, () => '', []);
+  const esAdapter = new MemoryElasticsearchAdapter(
+    () => true,
+    () => '',
+    []
+  );
   const elasticsearchLib = new ElasticsearchLib(esAdapter);
 
   const agents = new AgentsLib(new RestAgentAdapter(api));
