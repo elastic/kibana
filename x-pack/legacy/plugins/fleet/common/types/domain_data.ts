@@ -6,7 +6,7 @@
 import * as t from 'io-ts';
 import { RuntimeAgent, RuntimeAgentAction } from '../../server/repositories/agents/types';
 import { RuntimeAgentEvent } from '../../server/repositories/agent_events/types';
-import { EnrollmentApiKey } from '../../server/repositories/enrollment_api_keys/types';
+export { EnrollmentApiKey } from '../../server/repositories/enrollment_api_keys/types';
 
 // Here we create the runtime check for a generic, unknown beat config type.
 // We can also pass in optional params to create spacific runtime checks that
@@ -35,8 +35,6 @@ export interface ConfigurationBlock
 export type Agent = t.TypeOf<typeof RuntimeAgent>;
 export type AgentAction = t.TypeOf<typeof RuntimeAgentAction>;
 export type AgentEvent = t.TypeOf<typeof RuntimeAgentEvent>;
-
-export type EnrollmentApiKey = EnrollmentApiKey;
 
 export type PolicyUpdatedEvent =
   | {
