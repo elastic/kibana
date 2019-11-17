@@ -29,6 +29,8 @@ import { DataFrameAnalyticsList } from './components/analytics_list';
 import { RefreshAnalyticsListButton } from './components/refresh_analytics_list_button';
 import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
 import { useCreateAnalyticsForm } from './hooks/use_create_analytics_form';
+import { NodeAvailableWarning } from '../../../components/node_available_warning';
+import { UpgradeWarning } from '../../../components/upgrade';
 
 export const Page: FC = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
@@ -68,6 +70,10 @@ export const Page: FC = () => {
                 </h1>
               </EuiTitle>
             </EuiPageContentHeaderSection>
+
+            <NodeAvailableWarning />
+            <UpgradeWarning />
+
             <EuiPageContentHeaderSection>
               <EuiFlexGroup alignItems="center">
                 {/* grow={false} fixes IE11 issue with nested flex */}
