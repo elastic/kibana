@@ -128,7 +128,7 @@ export function AgentConfigurationList({
       ),
       sortable: true,
       render: (value: number) => (
-        <TimestampTooltip time={value} precision="minutes" />
+        <TimestampTooltip time={value} timeUnit="minutes" />
       )
     },
     {
