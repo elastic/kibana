@@ -7,13 +7,12 @@
 import React, { useMemo, memo, useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
-import { Query } from 'src/plugins/data/common';
 import { DatasourceDataPanelProps, Datasource } from '../../../public';
 import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
 import { DragContext } from '../../drag_drop';
 import { StateSetter, FramePublicAPI } from '../../types';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
 interface DataPanelWrapperProps {
   datasourceState: unknown;

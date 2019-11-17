@@ -18,7 +18,7 @@ import {
 import { DraggableFieldBadge } from '../../../draggables/field_badge';
 import { StatefulFieldsBrowser } from '../../../fields_browser';
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
-import { isContainerResizing } from '../../../resize_handle/is_resizing';
+import { useIsContainerResizing } from '../../../resize_handle/is_resizing';
 import {
   OnColumnRemoved,
   OnColumnResized,
@@ -72,7 +72,7 @@ export const ColumnHeaders = React.memo<Props>(
     timelineId,
     toggleColumn,
   }) => {
-    const { isResizing, setIsResizing } = isContainerResizing();
+    const { isResizing, setIsResizing } = useIsContainerResizing();
 
     return (
       <EventsThead data-test-subj="column-headers">

@@ -20,8 +20,8 @@
 import _ from 'lodash';
 import expect from '@kbn/expect';
 import { fieldFormats } from 'ui/registry/field_formats';
-import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
 import { npStart } from 'ui/new_platform';
+import { FieldFormat } from '../../../../../../plugins/data/public';
 
 const config = npStart.core.uiSettings;
 
