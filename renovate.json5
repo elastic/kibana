@@ -514,6 +514,14 @@
         ],
       },
       {
+        groupSlug: '@reach/router',
+        groupName: '@reach/router related packages',
+        packageNames: [
+          '@reach/router',
+          '@types/reach__router',
+        ],
+      },
+      {
         groupSlug: 'request',
         groupName: 'request related packages',
         packageNames: [
