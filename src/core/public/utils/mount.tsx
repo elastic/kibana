@@ -32,13 +32,11 @@ export const MountWrapper: React.FunctionComponent<{ mount: MountPoint }> = ({ m
 };
 
 /**
- * Mount converter for react components.
+ * Mount converter for react node.
  *
- * @param component to get a mount for
+ * @param node to get a mount for
  */
-export const mountReactNode = (component: React.ReactNode): MountPoint => (
-  element: HTMLElement
-) => {
-  render(<I18nProvider>{component}</I18nProvider>, element);
+export const mountReactNode = (node: React.ReactNode): MountPoint => (element: HTMLElement) => {
+  render(<I18nProvider>{node}</I18nProvider>, element);
   return () => unmountComponentAtNode(element);
 };

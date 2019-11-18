@@ -26,7 +26,7 @@ import { Subject } from 'rxjs';
 import { I18nStart } from '../../i18n';
 import { MountPoint } from '../../types';
 import { OverlayRef } from '../types';
-import { MountWrapper } from '../utils';
+import { MountWrapper } from '../../utils';
 
 /**
  * A ModalRef is a reference to an opened modal. It offers methods to

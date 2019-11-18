@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { MountWrapper, mountForComponent } from './utils';
+import { MountWrapper, mountReactNode } from './mount';
 
 describe('MountWrapper', () => {
   it('renders an html element in react tree', () => {
@@ -60,7 +60,7 @@ describe('MountWrapper', () => {
   });
 
   it('can render a detached react component', () => {
-    const mountPoint = mountForComponent(<span>detached</span>);
+    const mountPoint = mountReactNode(<span>detached</span>);
     const wrapper = <MountWrapper mount={mountPoint} />;
     const container = mount(wrapper);
     expect(container.html()).toMatchInlineSnapshot(

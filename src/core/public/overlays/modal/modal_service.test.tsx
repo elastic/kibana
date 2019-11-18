@@ -22,7 +22,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { i18nServiceMock } from '../../i18n/i18n_service.mock';
 import { ModalService, OverlayModalStart } from './modal_service';
-import { mountForComponent } from '../utils';
+import { mountReactNode } from '../../utils';
 import { OverlayRef } from '../types';
 
 const i18nMock = i18nServiceMock.createStartContract();
@@ -61,11 +61,11 @@ describe('ModalService', () => {
       let ref1: OverlayRef;
 
       beforeEach(() => {
-        ref1 = modals.open(mountForComponent(<span>Modal content 1</span>));
+        ref1 = modals.open(mountReactNode(<span>Modal content 1</span>));
       });
 
       it('replaces the current modal with a new one', () => {
-        modals.open(mountForComponent(<span>Flyout content 2</span>));
+        modals.open(mountReactNode(<span>Flyout content 2</span>));
         expect(mockReactDomRender.mock.calls).toMatchSnapshot();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
         expect(() => ref1.close()).not.toThrowError();
@@ -75,7 +75,7 @@ describe('ModalService', () => {
       it('resolves onClose on the previous ref', async () => {
         const onCloseComplete = jest.fn();
         ref1.onClose.then(onCloseComplete);
-        modals.open(mountForComponent(<span>Flyout content 2</span>));
+        modals.open(mountReactNode(<span>Flyout content 2</span>));
         await ref1.onClose;
         expect(onCloseComplete).toBeCalledTimes(1);
       });
@@ -84,7 +84,7 @@ describe('ModalService', () => {
 
   describe('ModalRef#close()', () => {
     it('resolves the onClose Promise', async () => {
-      const ref = modals.open(mountForComponent(<span>Flyout content</span>));
+      const ref = modals.open(mountReactNode(<span>Flyout content</span>));
 
       const onCloseComplete = jest.fn();
       ref.onClose.then(onCloseComplete);
@@ -94,7 +94,7 @@ describe('ModalService', () => {
     });
 
     it('can be called multiple times on the same ModalRef', async () => {
-      const ref = modals.open(mountForComponent(<span>Flyout content</span>));
+      const ref = modals.open(mountReactNode(<span>Flyout content</span>));
       expect(mockReactDomUnmount).not.toHaveBeenCalled();
       await ref.close();
       expect(mockReactDomUnmount.mock.calls).toMatchSnapshot();
@@ -103,8 +103,8 @@ describe('ModalService', () => {
     });
 
     it("on a stale ModalRef doesn't affect the active flyout", async () => {
-      const ref1 = modals.open(mountForComponent(<span>Modal content 1</span>));
-      const ref2 = modals.open(mountForComponent(<span>Modal content 2</span>));
+      const ref1 = modals.open(mountReactNode(<span>Modal content 1</span>));
+      const ref2 = modals.open(mountReactNode(<span>Modal content 2</span>));
       const onCloseComplete = jest.fn();
       ref2.onClose.then(onCloseComplete);
       mockReactDomUnmount.mockClear();
