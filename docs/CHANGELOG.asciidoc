@@ -38,6 +38,8 @@ This section summarizes the changes in each release.
 === Breaking changes
 See also <<breaking-changes-7.5, breaking changes in 7.5>>.
 
+Code::
+* Removes experimental code app {pull}49404[#49404]
 Platform::
 * Default to _search instead of _msearch in courier {pull}45174[#45174]
 
@@ -64,8 +66,6 @@ APM::
 * Agent configuration GA {pull}46995[#46995]
 Canvas::
 * Adds ability to share workpads in other websites {pull}46278[#46278]
-Code::
-* Removes experimental code app {pull}49404[#49404]
 Discover::
 * Updates filter of fields UX allowing user to select and remove fields {pull}47847[#47847]
 * Shows field type name when hovering over them (#35391) {pull}44208[#44208]
