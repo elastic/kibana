@@ -26,6 +26,7 @@ function scan(pattern: string) {
 }
 
 const pattern = pathResolve(__dirname, '../../export_types/*/server/index.[jt]s');
+
 async function exportTypesRegistryFn(server: ServerFacade) {
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'exportTypes']);
   const exportTypesRegistry = new ExportTypesRegistry();

@@ -7,7 +7,7 @@
 import { notFound, notImplemented } from 'boom';
 import { get } from 'lodash';
 import { PLUGIN_ID, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
-import { cryptoFactory, LevelLogger, oncePerServer } from '../../../../server/lib';
+import { cryptoFactory, LevelLogger } from '../../../../server/lib';
 import { ServerFacade, RequestFacade } from '../../../../types';
 import {
   SavedObject,
@@ -33,7 +33,7 @@ type CreateJobFn = (
   req: RequestFacade
 ) => Promise<JobDocPayloadPanelCsv>;
 
-function createJobFn(server: ServerFacade): CreateJobFn {
+export function createJobFactory(server: ServerFacade): CreateJobFn {
   const crypto = cryptoFactory(server);
   const logger = LevelLogger.createForServer(server, [
     PLUGIN_ID,
@@ -100,5 +100,3 @@ function createJobFn(server: ServerFacade): CreateJobFn {
     };
   };
 }
-
-export const createJobFactory = oncePerServer(createJobFn);

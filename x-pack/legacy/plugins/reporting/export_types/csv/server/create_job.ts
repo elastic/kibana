@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { oncePerServer } from '../../../server/lib/once_per_server';
 import { cryptoFactory } from '../../../server/lib/crypto';
-import { ConditionalHeaders, CreateJobFactory, ServerFacade, RequestFacade } from '../../../types';
-import { JobParamsDiscoverCsv, ESQueueCreateJobFnDiscoverCsv } from '../types';
+import { ConditionalHeaders, ServerFacade, RequestFacade } from '../../../types';
+import { ESQueueCreateJobFnDiscoverCsv, JobParamsDiscoverCsv } from '../types';
 
-function createJobFn(server: ServerFacade) {
+export function createJobFactory(server: ServerFacade): ESQueueCreateJobFnDiscoverCsv {
   const crypto = cryptoFactory(server);
 
   return async function createJob(
@@ -33,7 +32,3 @@ function createJobFn(server: ServerFacade) {
     };
   };
 }
-
-export const createJobFactory: CreateJobFactory = oncePerServer(
-  createJobFn as (server: ServerFacade) => ESQueueCreateJobFnDiscoverCsv
-);
