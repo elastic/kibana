@@ -17,20 +17,26 @@
  * under the License.
  */
 
-import { CoreSetup } from 'src/core/server';
-import { registerTelemetryOptInRoutes } from './telemetry_opt_in';
-import { registerTelemetryUsageStatsRoutes } from './telemetry_usage_stats';
-import { registerTelemetryOptInStatsRoutes } from './telemetry_opt_in_stats';
-import { registerTelemetryUserHasSeenNotice } from './telemetry_user_has_seen_notice';
+import React from 'react';
 
-interface RegisterRoutesParams {
-  core: CoreSetup;
-  currentKibanaVersion: string;
-}
+import { banners } from 'ui/notify';
+import { OptedInBanner } from '../../components/opted_in_notice_banner';
 
-export function registerRoutes({ core, currentKibanaVersion }: RegisterRoutesParams) {
-  registerTelemetryOptInRoutes({ core, currentKibanaVersion });
-  registerTelemetryUsageStatsRoutes(core);
-  registerTelemetryOptInStatsRoutes(core);
-  registerTelemetryUserHasSeenNotice(core);
+/**
+ * Render the Telemetry Opt-in notice banner.
+ *
+ * @param {Object} telemetryOptInProvider The telemetry opt-in provider.
+ * @param {Object} _banners Banners singleton, which can be overridden for tests.
+ */
+export function renderOptedInBanner(telemetryOptInProvider, { _banners = banners } = {}) {
+  const bannerId = _banners.add({
+    component: (
+      <OptedInBanner
+        onSeenBanner={telemetryOptInProvider.setOptInNoticeSeen}
+      />
+    ),
+    priority: 10000
+  });
+
+  telemetryOptInProvider.setOptInBannerNoticeId(bannerId);
 }
