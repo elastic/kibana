@@ -108,7 +108,8 @@ export const createProxyRoute = ({
 
       let esIncomingMessage: IncomingMessage;
 
-      for (const host of hosts) {
+      for (let idx = 0; idx < hosts.length; ++idx) {
+        const host = hosts[idx];
         try {
           const uri = toURL(host, path);
 
@@ -136,8 +137,11 @@ export const createProxyRoute = ({
 
           break;
         } catch (e) {
-          if (e.code !== 'ECONNREFUSED') {
+          if (e && e.code !== 'ECONNREFUSED') {
             throw Boom.boomify(e);
+          }
+          if (idx === hosts.length - 1) {
+            throw Boom.badGateway('Could not reach any configured nodes.');
           }
           // Otherwise, try the next host...
         }
