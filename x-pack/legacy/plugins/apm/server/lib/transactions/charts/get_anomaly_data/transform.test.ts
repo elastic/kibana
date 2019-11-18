@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import { ESResponse } from './fetcher';
 import { mlAnomalyResponse } from './mock-responses/mlAnomalyResponse';
 import { anomalySeriesTransform, replaceFirstAndLastBucket } from './transform';
@@ -291,10 +290,12 @@ function getESResponse(buckets: any): ESResponse {
         buckets: buckets.map((bucket: any) => {
           return {
             ...bucket,
-            lower: { value: idx(bucket, _ => _.lower.value) || null },
-            upper: { value: idx(bucket, _ => _.upper.value) || null },
+            lower: { value: bucket?.lower?.value || null },
+            upper: { value: bucket?.upper?.value || null },
             anomaly_score: {
-              value: idx(bucket, _ => _.anomaly_score.value) || null
+              // TODO(TS-3.7-ESLINT)
+              // eslint-disable-next-line @typescript-eslint/camelcase
+              value: bucket?.anomaly_score?.value || null
             }
           };
         })
