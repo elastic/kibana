@@ -71,7 +71,7 @@ export interface RouteConfigOptionsBody {
    * payloads are a synthetic interface created on top of the entire multipart content loaded into memory. To avoid loading large multipart payloads into memory, set parse to false and handle the
    * multipart payload in the handler using a streaming parser (e.g. pez).
    *
-   * Default value: 'data'.
+   * Default value: 'data', unless no validation.body is provided in the route definition. In that case the default is 'stream' to alleviate memory pressure.
    */
   output?: 'data' | 'stream';
 
@@ -82,7 +82,7 @@ export interface RouteConfigOptionsBody {
    * * false - the raw payload is returned unmodified.
    * * 'gunzip' - the raw payload is returned unmodified after any known content encoding is decoded.
    *
-   * Default value: true.
+   * Default value: true, unless no validation.body is provided in the route definition. In that case the default is false to alleviate memory pressure.
    */
   parse?: boolean | 'gunzip';
 }
