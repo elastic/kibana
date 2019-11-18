@@ -90,7 +90,6 @@ export class GeojsonFileSource extends AbstractVectorSource {
           geoField,
           filterByMapBounds
         }, inspectorAdapters);
-        // addAndViewSource is AddLayerPanel._viewLayer
         addAndViewSource(source);
         importSuccessHandler(indexResponses);
       }
