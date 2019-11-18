@@ -47,7 +47,13 @@ export const useAnalysisSetupState = ({
   const [endTime, setEndTime] = useState<number | undefined>(undefined);
 
   // Prepare the validation
-  const [validatedIndices, setValidatedIndices] = useState<ValidatedIndex[]>([]);
+  const [validatedIndices, setValidatedIndices] = useState<ValidatedIndex[]>(
+    availableIndices.map(index => ({
+      index,
+      validation: undefined,
+      checked: false,
+    }))
+  );
   const [validateIndicesRequest, validateIndices] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',

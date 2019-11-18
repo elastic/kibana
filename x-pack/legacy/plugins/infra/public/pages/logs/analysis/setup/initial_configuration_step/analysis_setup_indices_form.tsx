@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiCode,
-  EuiDescribedFormGroup,
-  EuiFormRow,
-  EuiLoadingSpinner,
-  EuiCheckbox,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiCode, EuiDescribedFormGroup, EuiFormRow, EuiCheckbox, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
@@ -19,6 +12,7 @@ import {
   ValidatedIndex,
   ValidationIndicesUIError,
 } from '../../../../../containers/logs/log_analysis/log_analysis_setup_state';
+import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 
 export const AnalysisSetupIndicesForm: React.FunctionComponent<{
   indices: ValidatedIndex[];
@@ -56,7 +50,9 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
         return validIndex ? (
           checkbox
         ) : (
-          <EuiToolTip content={errorToI18n(index.validation!)}>{checkbox}</EuiToolTip>
+          <EuiToolTip key={index.index} content={errorToI18n(index.validation!)}>
+            {checkbox}
+          </EuiToolTip>
         );
       }),
     [indices]
@@ -78,21 +74,17 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
         />
       }
     >
-      {isValidating ? (
-        <EuiLoadingSpinner size="m" />
-      ) : (
-        choices.length > 0 && (
-          <EuiFormRow
-            describedByIds={['indices']}
-            fullWidth
-            isInvalid={!valid}
-            label={indicesSelectionLabel}
-            labelType="legend"
-          >
-            <>{choices}</>
-          </EuiFormRow>
-        )
-      )}
+      <LoadingOverlayWrapper isLoading={isValidating}>
+        <EuiFormRow
+          describedByIds={['indices']}
+          fullWidth
+          isInvalid={!valid}
+          label={indicesSelectionLabel}
+          labelType="legend"
+        >
+          <>{choices}</>
+        </EuiFormRow>
+      </LoadingOverlayWrapper>
     </EuiDescribedFormGroup>
   );
 };
