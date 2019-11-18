@@ -234,12 +234,6 @@ export interface SearchSourceFilter extends Filter {
   isSearchSourceFilter: boolean;
 }
 
-export interface ESQueryConfig {
-  allowLeadingWildcards: boolean;
-  queryStringOptions: boolean;
-  ignoreFilterIfFieldNotInIndex: boolean;
-}
-
 export interface IndexPatternField {
   scripted: boolean;
   lang?: string;
