@@ -21,15 +21,21 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { metadata } from 'ui/metadata';
 import { IndexPattern, INDEX_PATTERN_ILLEGAL_CHARACTERS } from 'ui/index_patterns';
+import { ml } from '../../../../../services/ml_api_service';
 import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
 
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useKibanaContext } from '../../../../../contexts/kibana';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
-import { JOB_TYPES } from '../../hooks/use_create_analytics_form/state';
+import {
+  JOB_TYPES,
+  DEFAULT_MODEL_MEMORY_LIMIT,
+  getJobConfigFromFormState,
+} from '../../hooks/use_create_analytics_form/state';
 import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
 import { Messages } from './messages';
 import { JobType } from './job_type';
+import { mmlUnitInvalidErrorMessage } from '../../hooks/use_create_analytics_form/reducer';
 
 // based on code used by `ui/index_patterns` internally
 // remove the space character from the list of illegal characters
@@ -73,6 +79,8 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     jobIdInvalidMaxLength,
     jobType,
     loadingDepFieldOptions,
+    modelMemoryLimit,
+    modelMemoryLimitUnitValid,
     sourceIndex,
     sourceIndexNameEmpty,
     sourceIndexNameValid,
@@ -99,6 +107,25 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     } catch (e) {
       setFormState({
         sourceIndexFieldsCheckFailed: true,
+      });
+    }
+  };
+
+  const loadModelMemoryLimitEstimate = async () => {
+    try {
+      const jobConfig = getJobConfigFromFormState(form);
+      delete jobConfig.dest;
+      delete jobConfig.model_memory_limit;
+      const resp = await ml.dataFrameAnalytics.estimateDataFrameAnalyticsMemoryUsage(jobConfig);
+      setFormState({
+        modelMemoryLimit: resp.expected_memory_without_disk,
+      });
+    } catch (e) {
+      setFormState({
+        modelMemoryLimit:
+          jobType !== undefined
+            ? DEFAULT_MODEL_MEMORY_LIMIT[jobType]
+            : DEFAULT_MODEL_MEMORY_LIMIT.outlier_detection,
       });
     }
   };
@@ -174,6 +201,21 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       validateSourceIndexFields();
     }
   }, [sourceIndex, jobType, sourceIndexNameEmpty]);
+
+  useEffect(() => {
+    const hasBasicRequiredFields =
+      jobType !== undefined && sourceIndex !== '' && sourceIndexNameValid === true;
+
+    const hasRequiredAnalysisFields =
+      (jobType === JOB_TYPES.REGRESSION &&
+        dependentVariable !== '' &&
+        trainingPercent !== undefined) ||
+      jobType === JOB_TYPES.OUTLIER_DETECTION;
+
+    if (hasBasicRequiredFields && hasRequiredAnalysisFields) {
+      loadModelMemoryLimitEstimate();
+    }
+  }, [jobType, sourceIndex, dependentVariable, trainingPercent]);
 
   return (
     <EuiForm className="mlDataFrameAnalyticsCreateForm">
@@ -277,7 +319,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                   placeholder={i18n.translate(
                     'xpack.ml.dataframe.analytics.create.sourceIndexPlaceholder',
                     {
-                      defaultMessage: 'Choose a source index pattern or saved search.',
+                      defaultMessage: 'Choose a source index pattern.',
                     }
                   )}
                   singleSelection={{ asPlainText: true }}
@@ -437,6 +479,24 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               </EuiFormRow>
             </Fragment>
           )}
+          <EuiFormRow
+            label={i18n.translate('xpack.ml.dataframe.analytics.create.modelMemoryLimitLabel', {
+              defaultMessage: 'Model memory limit',
+            })}
+            helpText={!modelMemoryLimitUnitValid && mmlUnitInvalidErrorMessage}
+          >
+            <EuiFieldText
+              placeholder={
+                jobType !== undefined
+                  ? DEFAULT_MODEL_MEMORY_LIMIT[jobType]
+                  : DEFAULT_MODEL_MEMORY_LIMIT.outlier_detection
+              }
+              disabled={isJobCreated}
+              value={modelMemoryLimit || ''}
+              onChange={e => setFormState({ modelMemoryLimit: e.target.value })}
+              isInvalid={modelMemoryLimit === ''}
+            />
+          </EuiFormRow>
           <EuiFormRow
             isInvalid={createIndexPattern && destinationIndexPatternTitleExists}
             error={

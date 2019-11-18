@@ -30,7 +30,7 @@ import { mapGeoBoundingBox } from './mappers/map_geo_bounding_box';
 import { mapGeoPolygon } from './mappers/map_geo_polygon';
 import { mapDefault } from './mappers/map_default';
 import { generateMappingChain } from './generate_mapping_chain';
-import { esFilters } from '../../../../../data/public';
+import { esFilters } from '../../../../common';
 
 export function mapFilter(filter: esFilters.Filter) {
   /** Mappers **/

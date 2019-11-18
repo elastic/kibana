@@ -18,7 +18,7 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { TimeRange } from 'src/plugins/data/public';
+import { TimeRange } from '../../../common';
 
 // TODO: remove this
 import { IndexPattern, Field } from '../../../../../legacy/core_plugins/data/public/index_patterns';
