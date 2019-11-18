@@ -42,7 +42,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         alertTypeId: 'test.noop',
         alertTypeParams: {},
         createdBy: null,
-        interval: '10s',
+        interval: '1m',
         scheduledTaskId: response.body.scheduledTaskId,
         updatedBy: null,
         throttle: '1m',
