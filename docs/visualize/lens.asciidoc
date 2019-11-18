@@ -8,11 +8,11 @@ beta[]
 
 * Quickly build visualizations by dragging and dropping data fields.
 
-* Understand your data with a summary view on each field
+* Understand your data with a summary view on each field.
 
 * Easily change the visualization type by selecting the automatically generated visualization suggestions.
 
-* Save your visualization for use in a dashboard
+* Save your visualization for use in a dashboard.
 
 [float]
 [[drag-drop]]
@@ -20,7 +20,7 @@ beta[]
 
 The data panel in the left column shows the data fields for the selected time period. When
 you drag a field from the data panel, Lens highlights where you can drop that field. The first time you drag a data field,
-you'll see there are two places highlighted in green:
+you'll see two places highlighted in green:
 
 * The visualization builder pane
 
@@ -32,7 +32,7 @@ to apply each one to the visualization.
 [role="screenshot"]
 image::images/lens_drag_drop.gif[]
 
-TIP: Drag and drop capabilities are available only when Lens knows how to use the data. You can still customize
+TIP: Drag-and-drop capabilities are available only when Lens knows how to use the data. You can still customize
 your visualization if Lens is unable to make a suggestion.
 
 [float]
@@ -45,9 +45,9 @@ the list of fields are updated.
 
 To narrow the list of fields you see in the left panel, you can:
 
-* Filter by the field name by selecting *Search field names*.
+* Enter the field name in *Search field names*.
 
-* Click *Filter by type*, which shows the data types supported by Lens, and an option
+* Click *Filter by type*, then select the filter. You can also select *Only show fields with data*
 to show the full list of fields from the index pattern.
 
 [float]
@@ -106,7 +106,7 @@ If there is a match, Lens displays the new data. All fields that do not match th
 
 The bar, line, and area charts allow you to layer two different series. To add a layer, click *+*.
 
-To remove a layer, click the chart icon next to the name of the index:
+To remove a layer, click the chart icon next to the index name:
 
 [role="screenshot"]
 image::images/lens_remove_layer.png[]
@@ -116,15 +116,26 @@ image::images/lens_remove_layer.png[]
 === Lens tutorial
 
 Ready to create your own visualization with Lens? Use the following tutorial to create a visualization that
-lets you compare your sales over time. To start, you'll need to add the <<add-sample-data, sample ecommerce data>>.
+lets you compare sales over time.
+
+[float]
+[[lens-before-begin]]
+==== Before you begin
+
+To start, you'll need to add the <<add-sample-data, sample ecommerce data>>.
+
+[float]
+==== Build the visualization
+
+Drag and drop your data onto the visualization builder pane.
 
 . Open *Visualize*, then click *Create visualization*.
 
 . On the *New Visualization* window, click *Lens*.
 
-. In the left column, select the index *kibana_sample_data_ecommerce* if it is not already selected.
+. In the left column, select the *kibana_sample_data_ecommerce* index.
 
-. Click image:images/time-filter-calendar.png[], then click *Last 7 days*. The list of fields are updated.
+. Click image:images/time-filter-calendar.png[], then click *Last 7 days*. The list of data fields are updated.
 
 . Drag and drop the *taxful_total_price* data field to the visualization builder pane.
 +
@@ -145,6 +156,8 @@ image::images/lens_tutorial_2.png[Lens tutorial]
 [[customize-lens-visualization]]
 ==== Further customization
 
+Customize your visualization to look exactly how you want.
+
 . In the right column, click *Average of taxful_total_price*.
 
 .. Change the *Label* to `Sales`, or a name that you prefer for the data.
@@ -163,3 +176,11 @@ might make sense. To switch the chart type:
 +
 [role="screenshot"]
 image::images/lens_tutorial_3.png[Lens tutorial]
+
+[float]
+[[lens-tutorial-next-steps]]
+==== Next steps
+
+Now that you've created your visualization in Lens, you can add it to a Dashboard.
+
+For more information, see <<dashboard,Dashboard>>.
