@@ -17,20 +17,22 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { buildEsQuery } from '@kbn/es-query';
+import { set } from 'lodash';
+import { esQuery } from '../../../../../../../../plugins/data/server';
+
 export function splitByTerms(req, panel, esQueryConfig, indexPattern) {
   return next => doc => {
     panel.series
       .filter(c => c.aggregate_by && c.aggregate_function)
       .forEach(column => {
-        _.set(doc, `aggs.pivot.aggs.${column.id}.terms.field`, column.aggregate_by);
-        _.set(doc, `aggs.pivot.aggs.${column.id}.terms.size`, 100);
+        set(doc, `aggs.pivot.aggs.${column.id}.terms.field`, column.aggregate_by);
+        set(doc, `aggs.pivot.aggs.${column.id}.terms.size`, 100);
+
         if (column.filter) {
-          _.set(
+          set(
             doc,
             `aggs.pivot.aggs.${column.id}.column_filter.filter`,
-            buildEsQuery(indexPattern, [column.filter], [], esQueryConfig)
+            esQuery.buildEsQuery(indexPattern, [column.filter], [], esQueryConfig)
           );
         }
       });

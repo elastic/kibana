@@ -61,9 +61,10 @@ export class DashboardEmbeddableContainerPublicPlugin
     const { application, notifications, overlays } = core;
     const { embeddable, inspector, uiActions } = plugins;
 
-    const SavedObjectFinder: React.FC<
-      Exclude<SavedObjectFinderProps, 'savedObjects' | 'uiSettings'>
-    > = props => (
+    const SavedObjectFinder: React.FC<Exclude<
+      SavedObjectFinderProps,
+      'savedObjects' | 'uiSettings'
+    >> = props => (
       <SavedObjectFinderUi
         {...props}
         savedObjects={core.savedObjects}
