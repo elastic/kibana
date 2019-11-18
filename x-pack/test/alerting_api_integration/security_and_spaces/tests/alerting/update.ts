@@ -237,7 +237,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .send({
               name: 'bcd',
               tags: ['bar'],
-              interval: '10s',
+              interval: '1m',
               throttle: '1m',
               alertTypeParams: {},
               actions: [],

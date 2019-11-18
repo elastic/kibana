@@ -162,14 +162,14 @@ type ColumnFromOperationDefinition<D> = D extends OperationDefinition<infer C> ?
  * typeguards possible that consider all available column types.
  */
 export type IndexPatternColumn = ColumnFromOperationDefinition<
-  (typeof internalOperationDefinitions)[number]
+  typeof internalOperationDefinitions[number]
 >;
 
 /**
  * A union type of all available operation types. The operation type is a unique id of an operation.
  * Each column is assigned to exactly one operation type.
  */
-export type OperationType = (typeof internalOperationDefinitions)[number]['type'];
+export type OperationType = typeof internalOperationDefinitions[number]['type'];
 
 /**
  * This is an operation definition of an unspecified column out of all possible
