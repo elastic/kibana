@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
-import { TimeRange } from '../../../../../../plugins/data/public';
 import { Adapters } from '../../../../../../plugins/inspector/public';
-import { Query } from '../../../../../../plugins/data/public';
+import { TimeRange, Query } from '../../../../../../plugins/data/public';
 
-export { TimeRange, Adapters, Filter, Query };
+export { TimeRange, Adapters, Query };
 export * from '../../../../../../plugins/expressions/public';

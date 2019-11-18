@@ -28,11 +28,12 @@ const path = require('path');
 // this type of information. You usually will want to make any hand edits after
 // doing a search to KQL conversion before posting it as a signal or checking it
 // into another repository.
-const INTERVAL = '24h';
+const INTERVAL = '5m';
 const SEVERITY = 'low';
 const TYPE = 'query';
-const FROM = 'now-24h';
+const FROM = 'now-6m';
 const TO = 'now';
+const IMMUTABLE = true;
 const INDEX = ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
 
 const walk = dir => {
@@ -117,8 +118,9 @@ async function main() {
 
       if (query != null && query.trim() !== '') {
         const outputMessage = {
-          id: fileToWrite,
+          rule_id: fileToWrite,
           description: description || title,
+          immutable: IMMUTABLE,
           index: INDEX,
           interval: INTERVAL,
           name: title,

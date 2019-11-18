@@ -8,7 +8,7 @@ import _ from 'lodash';
 import React, { useState, useEffect, useCallback } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { Query, DataPublicPluginStart } from 'src/plugins/data/public';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { CoreStart, NotificationsStart } from 'src/core/public';
 import {
@@ -16,9 +16,7 @@ import {
   IndexPattern as IndexPatternInstance,
   IndexPatterns as IndexPatternsService,
   SavedQuery,
-  Query,
 } from 'src/legacy/core_plugins/data/public';
-import { Filter } from '@kbn/es-query';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { start as navigation } from '../../../../../../src/legacy/core_plugins/navigation/public/legacy';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
@@ -26,6 +24,7 @@ import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
+import { esFilters } from '../../../../../../src/plugins/data/public';
 
 interface State {
   isLoading: boolean;
@@ -40,7 +39,7 @@ interface State {
     toDate: string;
   };
   query: Query;
-  filters: Filter[];
+  filters: esFilters.Filter[];
   savedQuery?: SavedQuery;
 }
 

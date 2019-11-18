@@ -40,14 +40,14 @@ export const getHumanReadableLogonType = (endgameLogonType: number | null | unde
 export const getHostNameSeparator = (eventAction: string | null | undefined): string =>
   eventAction === 'explicit_user_logon' ? i18n.TO : '@';
 
-export const useTargetUserAndTargetDomain = (eventAction: string | null | undefined): boolean =>
+export const getTargetUserAndTargetDomain = (eventAction: string | null | undefined): boolean =>
   eventAction === 'explicit_user_logon' || eventAction === 'user_logoff';
 
 export const getUserDomainField = (eventAction: string | null | undefined): string =>
-  useTargetUserAndTargetDomain(eventAction) ? 'endgame.target_domain_name' : 'user.domain';
+  getTargetUserAndTargetDomain(eventAction) ? 'endgame.target_domain_name' : 'user.domain';
 
 export const getUserNameField = (eventAction: string | null | undefined): string =>
-  useTargetUserAndTargetDomain(eventAction) ? 'endgame.target_user_name' : 'user.name';
+  getTargetUserAndTargetDomain(eventAction) ? 'endgame.target_user_name' : 'user.name';
 
 export const getEventDetails = (eventAction: string | null | undefined): string => {
   switch (eventAction) {

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useState } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { FC, useState } from 'react';
+import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   MlInMemoryTable,
@@ -25,7 +25,6 @@ import {
 } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/columns';
 import { AnalyticsViewAction } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/actions';
 import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
-import { AnalyticsStatsBar } from './analytics_stats_bar';
 
 interface Props {
   items: any[];
@@ -73,6 +72,7 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
       dataType: 'date',
       render: (time: number) => formatHumanReadableDateTimeSeconds(time),
       textOnly: true,
+      truncateText: true,
       sortable: true,
       width: '20%',
     },
@@ -114,36 +114,19 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
   };
 
   return (
-    <Fragment>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiText size="m">
-            <h3>
-              {i18n.translate('xpack.ml.overview.analyticsList.PanelTitle', {
-                defaultMessage: 'Analytics',
-              })}
-            </h3>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} className="mlOverviewPanel__statsBar">
-          <AnalyticsStatsBar analyticsList={items} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <MlInMemoryTable
-        allowNeutralSort={false}
-        className="mlAnalyticsTable"
-        columns={columns}
-        hasActions={false}
-        isExpandable={false}
-        isSelectable={false}
-        items={items}
-        itemId={DataFrameAnalyticsListColumn.id}
-        onTableChange={onTableChange}
-        pagination={pagination}
-        sorting={sorting}
-        data-test-subj="mlOverviewTableAnalytics"
-      />
-    </Fragment>
+    <MlInMemoryTable
+      allowNeutralSort={false}
+      className="mlAnalyticsTable"
+      columns={columns}
+      hasActions={false}
+      isExpandable={false}
+      isSelectable={false}
+      items={items}
+      itemId={DataFrameAnalyticsListColumn.id}
+      onTableChange={onTableChange}
+      pagination={pagination}
+      sorting={sorting}
+      data-test-subj="mlOverviewTableAnalytics"
+    />
   );
 };

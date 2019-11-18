@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React from 'react';
 
 import { I18nProvider } from '@kbn/i18n/react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
-import { TimeRange } from 'src/plugins/data/public';
-import { Query } from 'src/legacy/core_plugins/data/public';
-import { Filter } from '@kbn/es-query';
+import { TimeRange, esFilters, Query } from 'src/plugins/data/public';
 import { ExpressionRenderer } from 'src/legacy/core_plugins/expressions/public';
 
 export interface ExpressionWrapperProps {
@@ -21,7 +18,7 @@ export interface ExpressionWrapperProps {
   context: {
     timeRange?: TimeRange;
     query?: Query;
-    filters?: Filter[];
+    filters?: esFilters.Filter[];
     lastReloadRequestTime?: number;
   };
 }
