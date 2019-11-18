@@ -30,3 +30,13 @@ that search requests will use the `_search` {es} endpoint rather than `_msearch`
 *Impact:*
 Dashboard panels will load individually, and search requests will terminate 
 when users navigate away or update the query.
+
+[float]
+[[breaking_75_telemetry]]
+=== `xpack.telemetry.enabled` is no longer valid
+
+*Details:*
+The `xpack.telemetry.enabled` setting has been removed.  
+
+*Impact:*
+Use <<telemetry.enabled, `telemetry.enabled`>> instead.
