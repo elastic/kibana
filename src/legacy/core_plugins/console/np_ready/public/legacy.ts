@@ -29,7 +29,7 @@ import { I18nContext } from 'ui/i18n';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 export interface XPluginSet {
-  devTools: DevToolsSetup;
+  dev_tools: DevToolsSetup;
   feature_catalogue: FeatureCatalogueSetup;
   __LEGACY: {
     I18nContext: any;

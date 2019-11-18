@@ -31,7 +31,7 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
   async setup({ notifications }: CoreSetup, pluginSet: XPluginSet) {
     const {
       __LEGACY: { I18nContext },
-      devTools,
+      dev_tools,
       feature_catalogue,
     } = pluginSet;
 
@@ -49,7 +49,7 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
       category: FeatureCatalogueCategory.ADMIN,
     });
 
-    devTools.register({
+    dev_tools.register({
       id: 'console',
       order: 1,
       title: i18n.translate('console.consoleDisplayName', {

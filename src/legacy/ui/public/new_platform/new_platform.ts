@@ -42,7 +42,7 @@ export interface PluginsSetup {
   feature_catalogue: FeatureCatalogueSetup;
   inspector: InspectorSetup;
   uiActions: IUiActionsSetup;
-  devTools: DevToolsSetup;
+  dev_tools: DevToolsSetup;
   kibana_legacy: KibanaLegacySetup;
 }
 
@@ -54,7 +54,7 @@ export interface PluginsStart {
   feature_catalogue: FeatureCatalogueStart;
   inspector: InspectorStart;
   uiActions: IUiActionsStart;
-  devTools: DevToolsStart;
+  dev_tools: DevToolsStart;
   kibana_legacy: KibanaLegacyStart;
 }
 

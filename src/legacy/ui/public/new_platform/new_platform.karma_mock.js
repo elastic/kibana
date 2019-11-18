@@ -62,7 +62,7 @@ export const npSetup = {
         }
       },
     },
-    devTools: {
+    dev_tools: {
       register: () => {},
     },
     kibana_legacy: {
@@ -104,7 +104,7 @@ export const npStart = {
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
     },
-    devTools: {
+    dev_tools: {
       getSortedDevTools: () => [],
     },
     kibana_legacy: {
