@@ -6,7 +6,7 @@
 
 import { registerTestBed, TestBedConfig } from '../../../../../../test_utils';
 import { BASE_PATH } from '../../../common/constants';
-import { TemplateClone } from '../../../public/sections/template_clone';
+import { TemplateClone } from '../../../public/app/sections/template_clone';
 import { formSetup } from './template_form.helpers';
 import { TEMPLATE_NAME } from './constants';
 

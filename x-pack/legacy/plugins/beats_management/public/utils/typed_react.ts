@@ -43,7 +43,9 @@ export const asChildFunctionRenderer = <InjectedProps, OwnProps>(
       }
 
       public render() {
-        return this.props.children(this.getRendererArgs());
+        return (this.props.children as ChildFunctionRendererProps<InjectedProps>['children'])(
+          this.getRendererArgs()
+        );
       }
 
       private getRendererArgs = () =>
