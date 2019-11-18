@@ -43,3 +43,5 @@ export function processCreatedBy(customSettings: { created_by?: string }): void;
 export function mlFunctionToESAggregation(functionName: string): string | null;
 
 export function isModelPlotEnabled(job: Job, detectorIndex: number, entityFields: any[]): boolean;
+
+export function mlFunctionToESAggregation(functionName: string): string | null;

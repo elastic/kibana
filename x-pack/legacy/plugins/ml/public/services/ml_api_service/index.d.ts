@@ -66,6 +66,12 @@ declare interface Ml {
   annotations: {
     deleteAnnotation(id: string | undefined): Promise<any>;
     indexAnnotation(annotation: Annotation): Promise<object>;
+    getAnnotationsRx(obj: {
+      jobIds: string[];
+      earliestMs: number;
+      latestMs: number;
+      maxAnnotations: number;
+    }): Observable<{ annotations: Record<string, Annotation[]> }>;
   };
 
   dataFrameAnalytics: {

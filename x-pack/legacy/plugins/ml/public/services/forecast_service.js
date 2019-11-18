@@ -9,6 +9,7 @@
 // Service for carrying out requests to run ML forecasts and to obtain
 // data on forecasts that have been performed.
 import _ from 'lodash';
+import { map } from 'rxjs/operators';
 
 import { ML_RESULTS_INDEX_PATTERN } from '../../common/constants/index_patterns';
 import { ml } from './ml_api_service';
@@ -192,117 +193,112 @@ function getForecastData(
     }
   }
 
-  return new Promise((resolve, reject) => {
-    const obj = {
-      success: true,
-      results: {}
+  const obj = {
+    success: true,
+    results: {}
+  };
+
+  // Build the criteria to use in the bool filter part of the request.
+  // Add criteria for the job ID, forecast ID, detector index, result type and time range.
+  const filterCriteria = [{
+    query_string: {
+      query: 'result_type:model_forecast',
+      analyze_wildcard: true
+    }
+  },
+  {
+    term: { job_id: job.job_id }
+  },
+  {
+    term: { forecast_id: forecastId }
+  },
+  {
+    term: { detector_index: detectorIndex }
+  },
+  {
+    range: {
+      timestamp: {
+        gte: earliestMs,
+        lte: latestMs,
+        format: 'epoch_millis'
+      }
+    }
+  }];
+
+
+  // Add in term queries for each of the specified criteria.
+  _.each(criteriaFields, (criteria) => {
+    filterCriteria.push({
+      term: {
+        [criteria.fieldName]: criteria.fieldValue
+      }
+    });
+  });
+
+
+
+  // If an aggType object has been passed in, use it.
+  // Otherwise default to avg, min and max aggs for the
+  // forecast prediction, upper and lower
+  const forecastAggs = (aggType === undefined) ?
+    { avg: 'avg', max: 'max', min: 'min' } :
+    {
+      avg: aggType.avg,
+      max: aggType.max,
+      min: aggType.min
     };
 
-    // Build the criteria to use in the bool filter part of the request.
-    // Add criteria for the job ID, forecast ID, detector index, result type and time range.
-    const filterCriteria = [{
-      query_string: {
-        query: 'result_type:model_forecast',
-        analyze_wildcard: true
-      }
-    },
-    {
-      term: { job_id: job.job_id }
-    },
-    {
-      term: { forecast_id: forecastId }
-    },
-    {
-      term: { detector_index: detectorIndex }
-    },
-    {
-      range: {
-        timestamp: {
-          gte: earliestMs,
-          lte: latestMs,
-          format: 'epoch_millis'
+  ml.esSearchRx({
+    index: ML_RESULTS_INDEX_PATTERN,
+    size: 0,
+    body: {
+      query: {
+        bool: {
+          filter: filterCriteria
         }
-      }
-    }];
-
-
-    // Add in term queries for each of the specified criteria.
-    _.each(criteriaFields, (criteria) => {
-      filterCriteria.push({
-        term: {
-          [criteria.fieldName]: criteria.fieldValue
-        }
-      });
-    });
-
-
-
-    // If an aggType object has been passed in, use it.
-    // Otherwise default to avg, min and max aggs for the
-    // forecast prediction, upper and lower
-    const forecastAggs = (aggType === undefined) ?
-      { avg: 'avg', max: 'max', min: 'min' } :
-      {
-        avg: aggType.avg,
-        max: aggType.max,
-        min: aggType.min
-      };
-
-    ml.esSearch({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: filterCriteria
-          }
-        },
-        aggs: {
-          times: {
-            date_histogram: {
-              field: 'timestamp',
-              interval: interval,
-              min_doc_count: 1
+      },
+      aggs: {
+        times: {
+          date_histogram: {
+            field: 'timestamp',
+            interval: interval,
+            min_doc_count: 1
+          },
+          aggs: {
+            prediction: {
+              [forecastAggs.avg]: {
+                field: 'forecast_prediction'
+              }
             },
-            aggs: {
-              prediction: {
-                [forecastAggs.avg]: {
-                  field: 'forecast_prediction'
-                }
-              },
-              forecastUpper: {
-                [forecastAggs.max]: {
-                  field: 'forecast_upper'
-                }
-              },
-              forecastLower: {
-                [forecastAggs.min]: {
-                  field: 'forecast_lower'
-                }
+            forecastUpper: {
+              [forecastAggs.max]: {
+                field: 'forecast_upper'
+              }
+            },
+            forecastLower: {
+              [forecastAggs.min]: {
+                field: 'forecast_lower'
               }
             }
           }
         }
       }
-    })
-      .then((resp) => {
-        const aggregationsByTime = _.get(resp, ['aggregations', 'times', 'buckets'], []);
-        _.each(aggregationsByTime, (dataForTime) => {
-          const time = dataForTime.key;
-          obj.results[time] = {
-            prediction: _.get(dataForTime, ['prediction', 'value']),
-            forecastUpper: _.get(dataForTime, ['forecastUpper', 'value']),
-            forecastLower: _.get(dataForTime, ['forecastLower', 'value'])
-          };
-        });
-
-        resolve(obj);
-      })
-      .catch((resp) => {
-        reject(resp);
+    }
+  }).pipe(
+    map(resp => {
+      const aggregationsByTime = _.get(resp, ['aggregations', 'times', 'buckets'], []);
+      _.each(aggregationsByTime, (dataForTime) => {
+        const time = dataForTime.key;
+        obj.results[time] = {
+          prediction: _.get(dataForTime, ['prediction', 'value']),
+          forecastUpper: _.get(dataForTime, ['forecastUpper', 'value']),
+          forecastLower: _.get(dataForTime, ['forecastLower', 'value'])
+        };
       });
 
-  });
+      return obj;
+    })
+  );
 }
 
 // Runs a forecast
