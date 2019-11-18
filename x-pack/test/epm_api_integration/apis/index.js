@@ -10,5 +10,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./list'));
     loadTestFile(require.resolve('./file'));
     loadTestFile(require.resolve('./template'));
+    loadTestFile(require.resolve('./ilm'));
   });
 }
