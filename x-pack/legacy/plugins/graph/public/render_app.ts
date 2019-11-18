@@ -107,9 +107,9 @@ function mountGraphApp(appBasePath: string, element: HTMLElement) {
   return $injector;
 }
 
-function createLocalAngularModule(core: AppMountContext['core']) {
+function createLocalAngularModule(navigation: NavigationStart) {
   createLocalI18nModule();
-  createLocalTopNavModule();
+  createLocalTopNavModule(navigation);
   createLocalConfirmModalModule();
 
   const graphAngularModule = angular.module(moduleName, [
@@ -128,11 +128,11 @@ function createLocalConfirmModalModule() {
     .directive('confirmModal', reactDirective => reactDirective(EuiConfirmModal));
 }
 
-function createLocalTopNavModule() {
+function createLocalTopNavModule(navigation: NavigationStart) {
   angular
     .module('graphTopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper);
+    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
 }
 
 function createLocalI18nModule() {

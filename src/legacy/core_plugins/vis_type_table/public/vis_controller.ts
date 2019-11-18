@@ -88,7 +88,7 @@ export class TableVisualizationController {
     });
   }
 
-  initLocalAngular = async () => {
+  initLocalAngular = () => {
     if (!this.tableVisModule) {
       this.tableVisModule = getAngularModule(innerAngularName, npStart.core);
       initTableVisLegacyModule(this.tableVisModule);
