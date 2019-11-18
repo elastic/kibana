@@ -156,7 +156,6 @@ export {
   SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
   SavedObjectsResolveImportErrorsOptions,
-  SavedObjectsRepository,
   SavedObjectsSchema,
   SavedObjectsSerializer,
   SavedObjectsLegacyService,

@@ -19,7 +19,7 @@
 
 import { Legacy } from 'kibana';
 import { Request } from 'hapi';
-import { CoreSetup, SavedObjectsRepository } from 'src/core/server';
+import { CoreSetup } from 'src/core/server';
 import {
   TelemetrySavedObject,
   TelemetrySavedObjectAttributes,
@@ -27,7 +27,7 @@ import {
   updateTelemetrySavedObject,
 } from '../telemetry_repository';
 
-const getInternalRepository = (server: Legacy.Server): SavedObjectsRepository => {
+const getInternalRepository = (server: Legacy.Server) => {
   const { getSavedObjectsRepository } = server.savedObjects;
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const internalRepository = getSavedObjectsRepository(callWithInternalUser);
