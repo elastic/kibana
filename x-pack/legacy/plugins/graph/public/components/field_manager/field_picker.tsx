@@ -37,9 +37,9 @@ export function FieldPicker({
       // only update the field options if the popover is not open currently.
       // This is necessary because EuiSelectable assumes options don't change
       // on their own.
-      setFieldOptions(toOptions(allFields));
+      setFieldOptions(toOptions(Object.values(fieldMap)));
     }
-  }, [fieldMap]);
+  }, [fieldMap, open]);
 
   const badgeDescription = i18n.translate('xpack.graph.bar.pickFieldsLabel', {
     defaultMessage: 'Add fields',

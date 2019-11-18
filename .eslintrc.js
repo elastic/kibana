@@ -176,12 +176,6 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/graph/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['x-pack/legacy/plugins/index_management/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',

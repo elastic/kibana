@@ -83,7 +83,7 @@ export function SearchBarComponent(props: SearchBarProps) {
       }
     }
     fetchPattern();
-  }, [currentDatasource]);
+  }, [currentDatasource, indexPatternProvider]);
 
   const kibana = useKibana<IDataPluginServices>();
   const { overlays, savedObjects, uiSettings } = kibana.services;
