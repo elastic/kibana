@@ -63,7 +63,7 @@ export const MonitorPage = ({
         setHeadingText(heading);
       }
     });
-  }, [params]);
+  }, [monitorId, params, query, setBreadcrumbs, setHeadingText]);
 
   const [selectedLocation, setSelectedLocation] = useState(undefined);
 
@@ -76,7 +76,7 @@ export const MonitorPage = ({
 
   useEffect(() => {
     logMonitorPageLoad();
-  }, []);
+  }, [logMonitorPageLoad]);
 
   useTrackPageview({ app: 'uptime', path: 'monitor' });
   useTrackPageview({ app: 'uptime', path: 'monitor', delay: 15000 });

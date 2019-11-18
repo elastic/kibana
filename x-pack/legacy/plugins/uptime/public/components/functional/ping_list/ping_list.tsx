@@ -85,7 +85,7 @@ export const PingListComponent = ({
 
   useEffect(() => {
     onUpdateApp();
-  }, [selectedOption]);
+  }, [onUpdateApp, selectedOption]);
 
   const statusOptions = [
     {
@@ -181,21 +181,28 @@ export const PingListComponent = ({
       render: (error: string) => error ?? '-',
     },
   ];
-
-  const pings: Ping[] = data?.allPings?.pings ?? [];
-
-  const hasStatus: boolean = pings.some(
-    (currentPing: Ping) => !!currentPing?.http?.response?.status_code
-  );
-  if (hasStatus) {
-    columns.push({
-      field: 'http.response.status_code',
-      align: 'center',
-      name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
-        defaultMessage: 'Response code',
-      }),
-      render: (statusCode: string) => <EuiBadge>{statusCode}</EuiBadge>,
-    });
+  useEffect(() => {
+    onUpdateApp();
+  }, [onUpdateApp, selectedOption]);
+  let pings: Ping[] = [];
+  if (data && data.allPings && data.allPings.pings) {
+    pings = data.allPings.pings;
+    const hasStatus: boolean = pings.reduce(
+      (hasHttpStatus: boolean, currentPing: Ping) =>
+        hasHttpStatus || !!get(currentPing, 'http.response.status_code'),
+      false
+    );
+    if (hasStatus) {
+      columns.push({
+        field: 'http.response.status_code',
+        // @ts-ignore "align" property missing on type definition for column type
+        align: 'right',
+        name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
+          defaultMessage: 'Response code',
+        }),
+        render: (statusCode: string) => <EuiBadge>{statusCode}</EuiBadge>,
+      });
+    }
   }
 
   columns.push({
