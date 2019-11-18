@@ -17,7 +17,7 @@
     "moment": "^2.24.0"
   },
   "dependencies": {
-    "tslib": "^1.9.3"
+    "tslib": "^1.10.0"
   },
   "peerDependencies": {
     "moment": "^2.24.0"
