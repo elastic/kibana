@@ -86,7 +86,7 @@ export class ApiKeysGridPage extends Component<any, State> {
     if (isLoadingApp) {
       return (
         <EuiPageContent>
-          <SectionLoading>
+          <SectionLoading data-test-subj="apiKeysSectionLoading">
             <FormattedMessage
               id="xpack.security.management.apiKeys.table.loadingApiKeysDescription"
               defaultMessage="Loading API keys…"

@@ -54,8 +54,6 @@ import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { EuiCallOut } from '@elastic/eui';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SectionLoading } from '../../../../../../../../../src/plugins/es_ui_shared/public/components/section_loading';
 import { NotEnabled } from './not_enabled';
 import { PermissionDenied } from './permission_denied';
 
@@ -90,7 +88,7 @@ describe('ApiKeysGridPage', () => {
   it('renders a loading state when fetching API keys', async () => {
     const wrapper = mountWithIntl(<ApiKeysGridPage />);
 
-    expect(wrapper.find(SectionLoading)).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="apiKeysSectionLoading"]')).toHaveLength(1);
   });
 
   it('renders a callout when API keys are not enabled', async () => {
