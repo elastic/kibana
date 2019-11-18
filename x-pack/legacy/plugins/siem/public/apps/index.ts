@@ -13,4 +13,4 @@ new Plugin(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   { opaqueId: Symbol('siem'), env: {} as any, config: { create: () => of({} as any) } },
   chrome
-).start(npStart);
+).start(npStart.core, npStart.plugins);

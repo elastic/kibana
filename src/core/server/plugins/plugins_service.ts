@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { filter, first, map, mergeMap, tap, toArray } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
@@ -125,20 +125,24 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     uiPlugins: Map<string, DiscoveredPlugin>
   ): Map<PluginName, Observable<unknown>> {
     return new Map(
-      [...uiPlugins].map(([pluginId, plugin]) => {
-        const configDescriptor = this.pluginConfigDescriptors.get(pluginId);
-        if (configDescriptor && configDescriptor.exposeToBrowser) {
+      [...uiPlugins]
+        .filter(([pluginId, plugin]) => {
+          const configDescriptor = this.pluginConfigDescriptors.get(pluginId);
+          return (
+            configDescriptor &&
+            configDescriptor.exposeToBrowser &&
+            configDescriptor.exposeToBrowser.length > 0
+          );
+        })
+        .map(([pluginId, plugin]) => {
+          const configDescriptor = this.pluginConfigDescriptors.get(pluginId)!;
           return [
             pluginId,
             this.configService
               .atPath(plugin.configPath)
-              .pipe(
-                map((config: any) => pick(config || {}, configDescriptor.exposeToBrowser || []))
-              ),
+              .pipe(map((config: any) => pick(config || {}, configDescriptor.exposeToBrowser!))),
           ];
-        }
-        return [pluginId, of({})];
-      })
+        })
     );
   }
 
