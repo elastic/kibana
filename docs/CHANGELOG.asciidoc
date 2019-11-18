@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.5.0>>
 * <<release-notes-7.4.2>>
 * <<release-notes-7.4.1>>
 * <<release-notes-7.4.0>>
@@ -29,6 +30,306 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.5.0]]
+== {kib} 7.5.0
+
+[float]
+[[breaking-7.5.0]]
+=== Breaking changes
+See also <<breaking-changes-7.5, breaking changes in 7.5>>.
+
+Platform::
+* Default to _search instead of _msearch in courier {pull}45174[#45174]
+
+[float]
+[[enhancement-7.5.0]]
+=== Enhancements
+APM::
+* More descriptive page titles {pull}44296[#44296]
+* Removes 0 suffix if array contains only one element {pull}47036[#47036]
+* Changing status code colors on trace summary {pull}47114[#47114]
+* Shows `span.http.response.status_code` and `span.http` object in Span details flyout {pull}47322[#47322]
+* Metadata sections should show message when no data is available {pull}47842[#47842]
+* Removes rest_total_hits_as_int and changing hits.total type {pull}47814[#47814]
+* Consistent flyout headers {pull}46312[#46312]
+* Always show transaction breakdown {pull}46684[#46684]
+* JVM List view &amp; JVM metrics page {pull}46779[#46779]
+* Garbage collection metrics charts {pull}47023[#47023]
+* Replaces ui/kfetch with core.http {pull}47635[#47635]
+* One-line trace summary {pull}44842[#44842]
+* Documentation and alignment for impact column {pull}47602[#47602]
+* Keywords to select legend color in TPM graph {pull}47628[#47628]
+* Updates index pattern {pull}48066[#48066]
+* Increases breadcrumb `max` setting {pull}46595[#46595]
+* Agent configuration GA {pull}46995[#46995]
+Canvas::
+* Adds ability to share workpads in other websites {pull}46278[#46278]
+Discover::
+* Updates filter of fields UX allowing user to select and remove fields {pull}47847[#47847]
+* Shows field type name when hovering over them (#35391) {pull}44208[#44208]
+* De-angularize index pattern selection {pull}46347[#46347]
+* De-angularize side bar search field {pull}46679[#46679]
+* Replaces Discover chart with elastic-charts {pull}43788[#43788]
+Graph::
+* Removes the current inline-save menu from Graph and switches to a save modal as used in Visualize and Discover {pull}44261[#44261]
+* Settings EUI-ification {pull}44587[#44587]
+* EUI-ification of search bar {pull}45351[#45351]
+* Kql support for query bar {pull}45364[#45364]
+* Moves the field manager to react and EUI {pull}45384[#45384]
+* Empty workspace overlay {pull}45547[#45547]
+Logs::
+* Adapt log entry rate data visualizations {pull}47558[#47558]
+* Ensures 'unknown' setupStatus is handled {pull}45887[#45887]
+* Adds &quot;Analyze in ML&quot; buttons {pull}48268[#48268]
+* Changes 'View monitor status' to 'View status in Uptime' {pull}44518[#44518]
+* Improves live streaming behavior when scrolling {pull}44923[#44923]
+Machine Learning::
+* Enhances job id error message {pull}45349[#45349]
+* Severity cell with multi-bucket impact support {pull}46002[#46002]
+* Link to calendar settings from a job config {pull}46141[#46141]
+* Adds missing tooltips to Anomaly Explorer swimlane labels {pull}46324[#46324]
+* Custom urls enhancements {pull}46433[#46433]
+* Job type page {pull}46933[#46933]
+* Converts index and saved search selection to React {pull}47117[#47117]
+* Converts Recognizer job page to React {pull}47429[#47429]
+* Enhances created_by check for custom rules  {pull}47825[#47825]
+* Checks unsaved changes for Job edit form {pull}47926[#47926]
+* Renders Custom URL as textarea on focus {pull}48077[#48077]
+* Adds advanced job wizard {pull}46781[#46781]
+* Reorganizes ML navigation with top and sub level tabs {pull}45220[#45220]
+* Overview tab for ML {pull}45864[#45864]
+* Regression creation and results view {pull}48159[#48159]
+* Displays MSE and rSquared in expanded row {pull}48261[#48261]
+* Moves ML &quot;Data Frame Transforms&quot; to Kibana management section &quot;Transforms&quot;. {pull}45880[#45880]
+* Adds new SIEM auditbeat, winlogbeat and packetbeat modules {pull}47848[#47848]
+Management::
+* SLM retention UI {pull}45193[#45193]
+* Adds ability to execute snapshot retention manually {pull}47150[#47150]
+* Adds request flyouts to JSON watch form and Threshold Watch edit form {pull}43232[#43232]
+* SQL template with triple quote in completion {pull}45248[#45248]
+* Updates indentation behavior {pull}45249[#45249]
+* Adds IP, number, and boolean types to the static lookup field formatter {pull}45585[#45585]
+* Adds width and height as parameters to image url {pull}46917[#46917]
+* Integrates inside Template UI {pull}47567[#47567]
+* Adds json editor to edit field settings {pull}47674[#47674]
+* Console to NP ready {pull}43346[#43346]
+Maps::
+* Uses EuiPopover instead of mapbox tooltip {pull}45938[#45938]
+* Cancels SearchSource fetches that are no longer needed {pull}44436[#44436]
+* Provides isLoading and hasError feedback when legend is collapsed {pull}47157[#47157]
+* Uses pre-indexed shapes in shape filters when shape is stored in Elasticsearch {pull}47171[#47171]
+* Moves sort out of top hits configuration for ES documents source {pull}47361[#47361]
+* Provides drag-n-drop support to order tooltip properties {pull}46631[#46631]
+* Retrieves geo_point value from docvalue_fields instead of _source {pull}47389[#47389]
+* Increases tooltip max width and move feature pagination controls to top of tooltip {pull}47645[#47645]
+* Use field formatter to format value in legend {pull}48132[#48132]
+* Adds support for date fields in dynamic styles {pull}47903[#47903]
+* Use vector tiles for rendering EMS basemap {pull}47867[#47867]
+Metrics::
+* Adds bar chart option to Metrics Explorer {pull}43728[#43728]
+* Displays non-metric details on Node Detail page {pull}43551[#43551]
+* Adds Docker section to node details page {pull}43627[#43627]
+* Adds saved queries to maps {pull}44442[#44442]
+* Save and Load Views for Metrics Explorer and Inventory Page {pull}46713[#46713]
+* Converts button group to toggle. Refactor code structure for scalability {pull}47083[#47083]
+* Always display loading indicator when new data is loading {pull}48038[#48038]
+Monitoring::
+* Moves to OSS {pull}45769[#45769]
+* Metricbeat Migration Wizard {pull}45799[#45799]
+* Adds I/O metrics for Elasticsearch {pull}45870[#45870]
+Platform::
+* Moves highlight_html.js {pull}45372[#45372]
+* Moves as_pretty_string.js {pull}45356[#45356]
+* Timelion {pull}44039[#44039]
+* Adds url-param-decode to transform in string field {pull}25694[#25694]
+* Migrates field format utils to TS {pull}47124[#47124]
+Reporting::
+* Improves logging of doc-update events {pull}45077[#45077]
+* Removes Chrome stdout/stderr observables, Add Browser Logger observable {pull}44359[#44359]
+* Adds step to skip telemetry {pull}48312[#48312]
+SIEM::
+* Endgame events on the SIEM Overview page {pull}47774[#47774]
+* Endgame Row Renderers: DNS, File (FIM), Network, Security (Authentication), Process {pull}48277[#48277]
+* Adds events histogram {pull}45403[#45403]
+* Adds TLS to Network overview page {pull}48062[#48062]
+* Changed job links have the job configuration in the search when the user clicks on them {pull}46084[#46084]
+* Adds custom tooltip to map for dragging fields to timeline {pull}46879[#46879]
+* Show all SIEM ML Jobs in Anomaly Detection UI by default {pull}48067[#48067]
+* Updates Network Map layer styles {pull}48284[#48284]
+* Inspect tests {pull}45833[#45833]
+* Source/Destination Ip Table on Ip Details {pull}47608[#47608]
+* Op countries by source/dest tables {pull}48179[#48179]
+* Optimizes all hosts query {pull}49409[#49409]
+* Adds saved query in SIEM solution {pull}47306[#47306]
+Security::
+* Adds API Keys app to Management &gt; Security {pull}45740[#45740]
+* Custom space avatar images {pull}45148[#45148]
+* Allows sorting on user/roles 'reserved' column {pull}46283[#46283]
+* Supports space-specific default routes {pull}44678[#44678]
+* Preserves URL fragment during SAML handshake {pull}44513[#44513]
+Stack services::
+* Adds opt-in to telemetry by default {pull}50490[#50490]
+* Updates telemetry banner prompt behavior {pull}49644[#49644]
+* Adds data privacy notice text to welcome screen with link to opt-out of telemetry {pull}50189[#50189]
+* Provides telemetry on opt-in status {pull}50158[#50158]
+* Adds configureable server side telemetry {pull}50015[#50015]
+* Adds kibana.yml configurations for telemetry default status and UI behavior {pull}49798[#49798]
+* Adds Ask Elastic and Give feedback links to help section {pull}49797[#49797]
+* Adds newsfeed {pull}49579[#49579]
+Uptime::
+* Query Overhaul + Pagination {pull}42933[#42933]
+* Adds certificate expiration dates to uptime GQL schema {pull}43352[#43352]
+* Adds TLS cert expiry to GQL schema for individual docs {pull}44506[#44506]
+* Adds Kuery Bar {pull}43621[#43621]
+* Duration chart gaps {pull}45734[#45734]
+* Adds zero monitors down heading {pull}48257[#48257]
+* Updates pings chart colors {pull}46780[#46780]
+Visualizations::
+* Replaces TSVB timeseries charts with elastic-charts {pull}33558[#33558]
+* Adds percentile and median aggregations for timestamp fields {pull}46477[#46477]
+* Adds gte and lt symbols in range filter fields and tooltip {pull}46697[#46697]
+* Don't use placeholder visualization name {pull}46719[#46719]
+* Adds Lens visualization editor {pull}36437[#36437]
+
+[float]
+[[bug-7.5.0]]
+=== Bug fixes
+APM::
+* Widen filter used in logs link {pull}46252[#46252]
+* Correctly plurarlize view in discover link {pull}47618[#47618]
+* Log stacktrace comes from _.error.log and not _error.exception[0] {pull}48185[#48185]
+Canvas::
+* Improves Canvas controls accessibility {pull}48005[#48005]
+Dashboard::
+* Improve dashboard filters display to use color as well as text for negated filters {pull}49939[#49939]
+Discover::
+* Add numeric_type option for correct sort order on mixed date and date_nanos fields {pull}44212[#44212]
+* Fix Maximum call stack size exceeded warnings {pull}47829[#47829]
+* Convert value provided to PhraseValueInput to string to prevent Exception with numeric values {pull}45259[#45259]
+* Remove redundant request to fetch index patterns {pull}44998[#44998]
+* Allow filter editor to open when selectedField is undefined {pull}45402[#45402]
+Graph::
+* Do not carry over diversity field when switching data source {pull}47560[#47560]
+Logs::
+* Use theme colors for the timeline background {pull}46213[#46213]
+* Address non-blocking nature of job deletion ML API {pull}46040[#46040]
+* Fix ML link for &quot;unknown&quot; partition {pull}48779[#48779]
+* Use full time range for the x-axis domain {pull}48754[#48754]
+* Fix initial accuracy of logs minimap click {pull}48826[#48826]
+Logstash::
+* Remove formatted message component in favor of i18n translate function {pull}45658[#45658]
+Machine Learning::
+* Set y-axis domain of the Single Metric Viewer according to the model plot  {pull}48411[#48411]
+* Fix partitioning field value update {pull}48655[#48655]
+* Update Anomaly Explorer and SMV on the &quot;Refresh&quot; button click {pull}48773[#48773]
+* Overview Page - follow-ups {pull}47637[#47637]
+* Adds missing links to ML plugin from ML Analytics job list in Management app {pull}48432[#48432]
+* Ensure proper permissions check for empty prompt 'Create job' buttons {pull}49067[#49067]
+* Fixes reselection of same Anomaly Explorer swimlane cell {pull}48626[#48626]
+* Fix Group By and Aggregations validation in Transforms wizard {pull}48514[#48514]
+* Fix Transform pivot documentation link {pull}48522[#48522]
+* Show MSE and rSquared in expanded row only for regression jobs {pull}48390[#48390]
+* Fix custom results_field and prediction_field_name not considered in eval config {pull}48599[#48599]
+* Check source index contains numerical fields only once it has been selected {pull}48843[#48843]
+* Fix analytics source index selection {pull}48731[#48731]
+* Fix code editor console error {pull}49193[#49193]
+Management::
+* Migrate Console to use Node http instead of Hapi to support GET requests with bodies {pull}46200[#46200]
+* Fix leaky mappings subscription {pull}45646[#45646]
+* Fix Safari layout issue {pull}47100[#47100]
+* Fix stale value in editor shortcut command {pull}48484[#48484]
+* Fix disco filters #2 {pull}50061[#50061]
+Maps::
+* Parse geojson files in chunks to avoid thread blocking {pull}46710[#46710]
+* Fix adding filters in map embeddable {pull}45187[#45187]
+* Avoid resizing tooltip while loading next feature during pagination {pull}47517[#47517]
+* Clean features in locked tooltip after re-fetch {pull}48016[#48016]
+* Properly handle id collisions in {kib} index pattern {pull}48594[#48594]
+* Fix propType warnings for source with joins {pull}48905[#48905]
+* Ensure grid buckets are rendered correctly at high zoom levels {pull}44421[#44421]
+Metrics::
+* Tweak the z-index inventory toolbars {pull}49642[#49642]
+* Convert node detail page time range to date strings {pull}43881[#43881]
+* Add legends and points to charts on node detail page {pull}43787[#43787]
+* Limit Metric Explorer fields {pull}43322[#43322]
+* Create robust ID for contextual menus for inventory view {pull}46358[#46358]
+* Remove points from charts on Metrics Explorer and Detail Page {pull}49500[#49500]
+* Make sure that filter query bar can be set to null {pull}50070[#50070]
+* Use URL /infrastructure/metrics instead of /metrics {pull}44532[#44532]
+Monitoring::
+* Ensure cloud cannot see setup mode {pull}49223[#49223]
+* Standarize on 'JVM Heap' phrase for heap metrics {pull}48093[#48093]
+* Added resize listener after handler was created {pull}49452[#49452]
+Operations::
+* Use older systemd StartLimitInterval {pull}47909[#47909]
+* Variety of quick a11y fixes {pull}46569[#46569]
+* Main and nav landmark a11y fixes {pull}48381[#48381]
+* SearchSource: Fix docvalue_fields and fields intersection logic {pull}46724[#46724]
+Platform::
+* Time range per panel design fixes {pull}46630[#46630]
+* Use custom deep merging strategy on createCluster {pull}48836[#48836]
+* Honor current search criteria when exporting saved objects {pull}47223[#47223]
+* Allow plugins to register top nav menu items (regression fix) {pull}48542[#48542]
+* Index Pattern Date formatter - fixing sample data display {pull}48259[#48259]
+* Read warning to screen readers for duplicate saved objects {pull}47568[#47568]
+* Ignore missing references on saved object exports {pull}47685[#47685]
+* Kibana should start without task manager {pull}48568[#48568]
+* Fixes issue where query bar reverts changes on save if it hasn't been submitted {pull}47908[#47908]
+* Add event.dataset to sample web logs {pull}48150[#48150]
+Reporting::
+* Data read/write failures are error logs {pull}45478[#45478]
+* Cut down payload of _getPendingJobs query {pull}47768[#47768]
+* Fix Generating Reports with long `jobParams` RISON {pull}45603[#45603]
+SIEM::
+* Fix incorrect inspected query for kpi network {pull}49695[#49695]
+* Filter out &quot;loading&quot; from Panel to make it more React performant {pull}46258[#46258]
+* Start of deprecated lifecycle refactor {pull}46293[#46293]
+* Show getting started page on empty string or _all {pull}47166[#47166]
+* Top Countries network page tab change; fix column heading bug {pull}48526[#48526]
+* Events Histogram add time_zone argument to match Events Table {pull}48821[#48821]
+* Fields browser, auto selects category bugfix {pull}48999[#48999]
+* Fix bug that fails to match index patterns with leading wildcard {pull}49735[#49735]
+* Fix Firefox focus state in SIEM tab_navigation {pull}45996[#45996]
+* Fix AnomaliesNetworkTable and AnomaliesHostTable items count {pull}48634[#48634]
+Security::
+* Removes `&lt;form&gt;` tag that was breaking the EuiComboBox's enter key {pull}48184[#48184]
+* GUI enhancement: ability to sort the spaces table {pull}46421[#46421]
+Uptime::
+* Added aria label description for ping over time chart {pull}46689[#46689]
+* Use EuiSelect instead of ComboBox for ping history {pull}49700[#49700]
+* Handle filter dropdown button click {pull}48650[#48650]
+* Do not drop edge buckets {pull}48157[#48157]
+* Fix chart wrapping for monitor page {pull}49268[#49268]
+* Add different request lib to `telemetry_analytics` in place of `$http` {pull}49671[#49671]
+* Remove potential for flaky snapshot comparison in unit test {pull}49928[#49928]
+* Revert router base name for Uptime plugin {pull}50095[#50095]
+* Section headline should be inside panel {pull}43468[#43468]
+* Removed extra slash from integration urls {pull}44469[#44469]
+* Align uptime help menu with other apps {pull}44536[#44536]
+* App page title {pull}44818[#44818]
+* Show permission warning if no right for uptime {pull}44968[#44968]
+* Integration popup closes after refresh {pull}45759[#45759]
+* Make uptime filters responsive {pull}46560[#46560]
+* Update monitor list table description by adding aria-label for accessibility {pull}46696[#46696]
+* Change default status filter in ping list to all on monitor page {pull}47108[#47108]
+* Disable filter and Add link to location docs when no location exists {pull}49175[#49175]
+Visualizations::
+* Unable to deal with negative values {pull}43581[#43581]
+* Use correct color for circles in line chart {pull}47715[#47715]
+* Fix infinite loop in vega tooltips {pull}47700[#47700]
+* Improve error handling {pull}47958[#47958]
+* Show correct value in legend for step charts {pull}47863[#47863]
+* Input controls does not reset top level controls after clear {pull}47937[#47937]
+* Look up axis format from series instead of using default formatter {pull}47696[#47696]
+* Pass raw values and format afterwards {pull}48090[#48090]
+
+[float]
+[[deprecation-7.5.0]]
+=== Deprecations
+Discover::
+* De-angularize sidebar fields {pull}47559[#47559]
+Visualizations::
+* Deprecate scale metrics behavior {pull}47599[#47599]
 
 [[release-notes-7.4.2]]
 == {kib} 7.4.2
