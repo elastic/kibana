@@ -15,7 +15,6 @@ import {
   isEmpty,
   first
 } from 'lodash';
-import { idx } from '@kbn/elastic-idx';
 import { TraceAPIResponse } from '../../../../../../../../server/lib/traces/get_trace';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
@@ -224,7 +223,7 @@ function createGetTransactionById(itemsById: IWaterfallIndex) {
     }
 
     const item = itemsById[id];
-    const isTransaction = idx(item, _ => _.docType) === 'transaction';
+    const isTransaction = item?.docType === 'transaction';
     if (isTransaction) {
       return (item as IWaterfallItemTransaction).transaction;
     }

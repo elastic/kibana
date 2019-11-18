@@ -27,9 +27,8 @@ import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { Moment } from 'moment';
 
 import { DashboardContainer } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
-import { Query } from 'src/plugins/data/public';
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
-import { esFilters } from '../../../../../../src/plugins/data/public';
+import { Query, esFilters } from '../../../../../../src/plugins/data/public';
 
 import { getAppStateDefaults, migrateAppState } from './lib';
 import { convertPanelStateToSavedDashboardPanel } from './lib/embeddable_saved_object_converters';
