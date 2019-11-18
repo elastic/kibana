@@ -20,7 +20,7 @@
 import { registryMock } from './plugin.test.mocks';
 import { HomePublicPlugin } from './plugin';
 
-describe('FeatureCataloguePlugin', () => {
+describe('HomePublicPlugin', () => {
   beforeEach(() => {
     registryMock.setup.mockClear();
     registryMock.start.mockClear();
@@ -29,8 +29,8 @@ describe('FeatureCataloguePlugin', () => {
   describe('setup', () => {
     test('wires up and returns registry', async () => {
       const setup = await new HomePublicPlugin().setup();
-      expect(registryMock.setup).toHaveBeenCalledWith();
-      expect(setup.featureCatalogue.register).toBeDefined();
+      expect(setup).toHaveProperty('featureCatalogue');
+      expect(setup.featureCatalogue).toHaveProperty('register');
     });
   });
 
