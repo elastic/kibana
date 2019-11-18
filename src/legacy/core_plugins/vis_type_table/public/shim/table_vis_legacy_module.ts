@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { once } from 'lodash';
-
 // @ts-ignore
 import { TableVisController } from '../table_vis_controller.js';
 // @ts-ignore
@@ -31,11 +29,11 @@ import { KbnRows } from '../paginated_table/rows';
 import { PaginatedTable } from '../paginated_table/paginated_table';
 
 /** @internal */
-export const initTableVisLegacyModule = once((angularIns: any): void => {
+export const initTableVisLegacyModule = (angularIns: any): void => {
   angularIns
     .controller('KbnTableVisController', TableVisController)
     .directive('kbnAggTable', KbnAggTable)
     .directive('kbnAggTableGroup', KbnAggTableGroup)
     .directive('kbnRows', KbnRows)
     .directive('paginatedTable', PaginatedTable);
-});
+};
