@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { i18n } from '@kbn/i18n';
+
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
 
 export const EMS_FILES_CATALOGUE_PATH = 'ems/files';
@@ -113,7 +115,10 @@ export const METRIC_TYPE = {
 };
 
 export const COUNT_AGG_TYPE = METRIC_TYPE.COUNT;
-export const COUNT_PROP_LABEL = METRIC_TYPE.COUNT;
+export const COUNT_PROP_LABEL =  i18n.translate('xpack.maps.aggs.defaultCountLabel', {
+  defaultMessage: 'count'
+});
+
 export const COUNT_PROP_NAME = 'doc_count';
 
 export const STYLE_TYPE = {

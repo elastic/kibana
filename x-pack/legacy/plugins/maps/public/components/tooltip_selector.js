@@ -75,7 +75,6 @@ export class TooltipSelector extends Component {
     this._loadFieldProps();
   }
 
-
   async _loadTooltipFieldProps() {
 
     if (!this.props.tooltipFields) {

@@ -48,7 +48,7 @@ const defaultProps = {
 
 describe('TooltipSelector', () => {
 
-  test('should render component', (done) => {
+  test('should render component', async () => {
 
     const component = shallow(
       <TooltipSelector
@@ -56,13 +56,11 @@ describe('TooltipSelector', () => {
       />
     );
 
-    setTimeout(() => {
-      component.update();
-      expect(component)
-        .toMatchSnapshot();
-      done();
-    });
-
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+    expect(component).toMatchSnapshot();
 
   });
 
