@@ -12658,8 +12658,6 @@
     "xpack.lens.functions.mergeTables.help": "いくつかの Kibana 表を 1 つの表に結合するのをアシストします",
     "xpack.lens.functions.renameColumns.help": "データベースの列の名前の変更をアシストします",
     "xpack.lens.functions.renameColumns.idMap.help": "キーが古い列 ID で値が対応する新しい列 ID となるように JSON エンコーディングされたオブジェクトです。他の列 ID はすべてのそのままです。",
-    "xpack.lens.helpMenu.docLabel": "レンズドキュメンテーション",
-    "xpack.lens.helpMenu.feedbackLinkText": "レンズアプリケーションに関するフィードバックを提供",
     "xpack.lens.indexPattern.avg": "平均",
     "xpack.lens.indexPattern.avgOf": "{name} の平均",
     "xpack.lens.indexPattern.cardinality": "ユニークカウント",

@@ -12748,8 +12748,6 @@
     "xpack.lens.functions.mergeTables.help": "将任何数目的 kibana 表合并成单个表的助手",
     "xpack.lens.functions.renameColumns.help": "用于重命名数据表列的助手",
     "xpack.lens.functions.renameColumns.idMap.help": "旧列 ID 为键且相应新列 ID 为值的 JSON 编码对象。所有其他列 ID 都将保留。",
-    "xpack.lens.helpMenu.docLabel": "Lens 文档",
-    "xpack.lens.helpMenu.feedbackLinkText": "提供 Lens 应用程序的反馈",
     "xpack.lens.indexPattern.avg": "平均值",
     "xpack.lens.indexPattern.avgOf": "{name} 的平均值",
     "xpack.lens.indexPattern.cardinality": "唯一计数",
