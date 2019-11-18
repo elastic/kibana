@@ -124,6 +124,8 @@ export interface TimelineInput {
 
   description?: Maybe<string>;
 
+  filters?: Maybe<FilterTimelineInput[]>;
+
   kqlMode?: Maybe<string>;
 
   kqlQuery?: Maybe<SerializedFilterQueryInput>;
@@ -131,6 +133,8 @@ export interface TimelineInput {
   title?: Maybe<string>;
 
   dateRange?: Maybe<DateRangePickerInput>;
+
+  savedQueryId?: Maybe<string>;
 
   sort?: Maybe<SortTimelineInput>;
 }
@@ -185,6 +189,46 @@ export interface QueryMatchInput {
   displayValue?: Maybe<string>;
 
   operator?: Maybe<string>;
+}
+
+export interface FilterTimelineInput {
+  exists?: Maybe<string>;
+
+  meta?: Maybe<FilterMetaTimelineInput>;
+
+  match_all?: Maybe<string>;
+
+  missing?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  range?: Maybe<string>;
+
+  script?: Maybe<string>;
+}
+
+export interface FilterMetaTimelineInput {
+  alias?: Maybe<string>;
+
+  controlledBy?: Maybe<string>;
+
+  disabled?: Maybe<boolean>;
+
+  field?: Maybe<string>;
+
+  formattedValue?: Maybe<string>;
+
+  index?: Maybe<string>;
+
+  key?: Maybe<string>;
+
+  negate?: Maybe<boolean>;
+
+  params?: Maybe<string>;
+
+  type?: Maybe<string>;
+
+  value?: Maybe<string>;
 }
 
 export interface SerializedFilterQueryInput {
@@ -1762,9 +1806,11 @@ export interface SayMyName {
 }
 
 export interface TimelineResult {
-  savedObjectId: string;
-
   columns?: Maybe<ColumnHeaderResult[]>;
+
+  created?: Maybe<number>;
+
+  createdBy?: Maybe<string>;
 
   dataProviders?: Maybe<DataProviderResult[]>;
 
@@ -1775,6 +1821,8 @@ export interface TimelineResult {
   eventIdToNoteIds?: Maybe<NoteResult[]>;
 
   favorite?: Maybe<FavoriteTimelineResult[]>;
+
+  filters?: Maybe<FilterTimelineResult[]>;
 
   kqlMode?: Maybe<string>;
 
@@ -1788,13 +1836,13 @@ export interface TimelineResult {
 
   pinnedEventsSaveObject?: Maybe<PinnedEvent[]>;
 
-  title?: Maybe<string>;
+  savedQueryId?: Maybe<string>;
+
+  savedObjectId: string;
 
   sort?: Maybe<SortTimelineResult>;
 
-  created?: Maybe<number>;
-
-  createdBy?: Maybe<string>;
+  title?: Maybe<string>;
 
   updated?: Maybe<number>;
 
@@ -1867,6 +1915,46 @@ export interface FavoriteTimelineResult {
   userName?: Maybe<string>;
 
   favoriteDate?: Maybe<number>;
+}
+
+export interface FilterTimelineResult {
+  exists?: Maybe<string>;
+
+  meta?: Maybe<FilterMetaTimelineResult>;
+
+  match_all?: Maybe<string>;
+
+  missing?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  range?: Maybe<string>;
+
+  script?: Maybe<string>;
+}
+
+export interface FilterMetaTimelineResult {
+  alias?: Maybe<string>;
+
+  controlledBy?: Maybe<string>;
+
+  disabled?: Maybe<boolean>;
+
+  field?: Maybe<string>;
+
+  formattedValue?: Maybe<string>;
+
+  index?: Maybe<string>;
+
+  key?: Maybe<string>;
+
+  negate?: Maybe<boolean>;
+
+  params?: Maybe<string>;
+
+  type?: Maybe<string>;
+
+  value?: Maybe<string>;
 }
 
 export interface SerializedFilterQueryResult {
@@ -7469,9 +7557,11 @@ export namespace SayMyNameResolvers {
 
 export namespace TimelineResultResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TimelineResult> {
-    savedObjectId?: SavedObjectIdResolver<string, TypeParent, TContext>;
-
     columns?: ColumnsResolver<Maybe<ColumnHeaderResult[]>, TypeParent, TContext>;
+
+    created?: CreatedResolver<Maybe<number>, TypeParent, TContext>;
+
+    createdBy?: CreatedByResolver<Maybe<string>, TypeParent, TContext>;
 
     dataProviders?: DataProvidersResolver<Maybe<DataProviderResult[]>, TypeParent, TContext>;
 
@@ -7482,6 +7572,8 @@ export namespace TimelineResultResolvers {
     eventIdToNoteIds?: EventIdToNoteIdsResolver<Maybe<NoteResult[]>, TypeParent, TContext>;
 
     favorite?: FavoriteResolver<Maybe<FavoriteTimelineResult[]>, TypeParent, TContext>;
+
+    filters?: FiltersResolver<Maybe<FilterTimelineResult[]>, TypeParent, TContext>;
 
     kqlMode?: KqlModeResolver<Maybe<string>, TypeParent, TContext>;
 
@@ -7499,13 +7591,13 @@ export namespace TimelineResultResolvers {
       TContext
     >;
 
-    title?: TitleResolver<Maybe<string>, TypeParent, TContext>;
+    savedQueryId?: SavedQueryIdResolver<Maybe<string>, TypeParent, TContext>;
+
+    savedObjectId?: SavedObjectIdResolver<string, TypeParent, TContext>;
 
     sort?: SortResolver<Maybe<SortTimelineResult>, TypeParent, TContext>;
 
-    created?: CreatedResolver<Maybe<number>, TypeParent, TContext>;
-
-    createdBy?: CreatedByResolver<Maybe<string>, TypeParent, TContext>;
+    title?: TitleResolver<Maybe<string>, TypeParent, TContext>;
 
     updated?: UpdatedResolver<Maybe<number>, TypeParent, TContext>;
 
@@ -7514,13 +7606,18 @@ export namespace TimelineResultResolvers {
     version?: VersionResolver<string, TypeParent, TContext>;
   }
 
-  export type SavedObjectIdResolver<
-    R = string,
+  export type ColumnsResolver<
+    R = Maybe<ColumnHeaderResult[]>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type ColumnsResolver<
-    R = Maybe<ColumnHeaderResult[]>,
+  export type CreatedResolver<
+    R = Maybe<number>,
+    Parent = TimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type CreatedByResolver<
+    R = Maybe<string>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -7546,6 +7643,11 @@ export namespace TimelineResultResolvers {
   > = Resolver<R, Parent, TContext>;
   export type FavoriteResolver<
     R = Maybe<FavoriteTimelineResult[]>,
+    Parent = TimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type FiltersResolver<
+    R = Maybe<FilterTimelineResult[]>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -7579,8 +7681,13 @@ export namespace TimelineResultResolvers {
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type TitleResolver<
+  export type SavedQueryIdResolver<
     R = Maybe<string>,
+    Parent = TimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type SavedObjectIdResolver<
+    R = string,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -7589,12 +7696,7 @@ export namespace TimelineResultResolvers {
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type CreatedResolver<
-    R = Maybe<number>,
-    Parent = TimelineResult,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type CreatedByResolver<
+  export type TitleResolver<
     R = Maybe<string>,
     Parent = TimelineResult,
     TContext = SiemContext
@@ -7833,6 +7935,142 @@ export namespace FavoriteTimelineResultResolvers {
   export type FavoriteDateResolver<
     R = Maybe<number>,
     Parent = FavoriteTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace FilterTimelineResultResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = FilterTimelineResult> {
+    exists?: ExistsResolver<Maybe<string>, TypeParent, TContext>;
+
+    meta?: MetaResolver<Maybe<FilterMetaTimelineResult>, TypeParent, TContext>;
+
+    match_all?: MatchAllResolver<Maybe<string>, TypeParent, TContext>;
+
+    missing?: MissingResolver<Maybe<string>, TypeParent, TContext>;
+
+    query?: QueryResolver<Maybe<string>, TypeParent, TContext>;
+
+    range?: RangeResolver<Maybe<string>, TypeParent, TContext>;
+
+    script?: ScriptResolver<Maybe<string>, TypeParent, TContext>;
+  }
+
+  export type ExistsResolver<
+    R = Maybe<string>,
+    Parent = FilterTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type MetaResolver<
+    R = Maybe<FilterMetaTimelineResult>,
+    Parent = FilterTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type MatchAllResolver<
+    R = Maybe<string>,
+    Parent = FilterTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type MissingResolver<
+    R = Maybe<string>,
+    Parent = FilterTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type QueryResolver<
+    R = Maybe<string>,
+    Parent = FilterTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type RangeResolver<
+    R = Maybe<string>,
+    Parent = FilterTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ScriptResolver<
+    R = Maybe<string>,
+    Parent = FilterTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace FilterMetaTimelineResultResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = FilterMetaTimelineResult> {
+    alias?: AliasResolver<Maybe<string>, TypeParent, TContext>;
+
+    controlledBy?: ControlledByResolver<Maybe<string>, TypeParent, TContext>;
+
+    disabled?: DisabledResolver<Maybe<boolean>, TypeParent, TContext>;
+
+    field?: FieldResolver<Maybe<string>, TypeParent, TContext>;
+
+    formattedValue?: FormattedValueResolver<Maybe<string>, TypeParent, TContext>;
+
+    index?: IndexResolver<Maybe<string>, TypeParent, TContext>;
+
+    key?: KeyResolver<Maybe<string>, TypeParent, TContext>;
+
+    negate?: NegateResolver<Maybe<boolean>, TypeParent, TContext>;
+
+    params?: ParamsResolver<Maybe<string>, TypeParent, TContext>;
+
+    type?: TypeResolver<Maybe<string>, TypeParent, TContext>;
+
+    value?: ValueResolver<Maybe<string>, TypeParent, TContext>;
+  }
+
+  export type AliasResolver<
+    R = Maybe<string>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ControlledByResolver<
+    R = Maybe<string>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type DisabledResolver<
+    R = Maybe<boolean>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type FieldResolver<
+    R = Maybe<string>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type FormattedValueResolver<
+    R = Maybe<string>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type IndexResolver<
+    R = Maybe<string>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type KeyResolver<
+    R = Maybe<string>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type NegateResolver<
+    R = Maybe<boolean>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ParamsResolver<
+    R = Maybe<string>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TypeResolver<
+    R = Maybe<string>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ValueResolver<
+    R = Maybe<string>,
+    Parent = FilterMetaTimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -8484,6 +8722,8 @@ export type IResolvers<TContext = SiemContext> = {
   QueryMatchResult?: QueryMatchResultResolvers.Resolvers<TContext>;
   DateRangePickerResult?: DateRangePickerResultResolvers.Resolvers<TContext>;
   FavoriteTimelineResult?: FavoriteTimelineResultResolvers.Resolvers<TContext>;
+  FilterTimelineResult?: FilterTimelineResultResolvers.Resolvers<TContext>;
+  FilterMetaTimelineResult?: FilterMetaTimelineResultResolvers.Resolvers<TContext>;
   SerializedFilterQueryResult?: SerializedFilterQueryResultResolvers.Resolvers<TContext>;
   SerializedKueryQueryResult?: SerializedKueryQueryResultResolvers.Resolvers<TContext>;
   KueryFilterQueryResult?: KueryFilterQueryResultResolvers.Resolvers<TContext>;

@@ -19,7 +19,7 @@ import { ColumnHeaders } from '.';
 
 jest.mock('../../../resize_handle/is_resizing', () => ({
   ...jest.requireActual('../../../resize_handle/is_resizing'),
-  isContainerResizing: () => ({
+  useIsContainerResizing: () => ({
     isResizing: true,
     setIsResizing: jest.fn(),
   }),

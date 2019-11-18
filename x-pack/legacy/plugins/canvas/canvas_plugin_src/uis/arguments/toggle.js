@@ -19,8 +19,14 @@ const ToggleArgInput = ({ onValueChange, argValue, argId, renderError }) => {
     return null;
   }
   return (
-    <EuiFormRow display="rowCompressed">
-      <EuiSwitch compressed id={argId} checked={argValue} onChange={handleChange} />
+    <EuiFormRow display="columnCompressedSwitch">
+      <EuiSwitch
+        compressed
+        id={argId}
+        checked={argValue}
+        onChange={handleChange}
+        className="canvasArg__switch"
+      />
     </EuiFormRow>
   );
 };

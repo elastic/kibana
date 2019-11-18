@@ -19,12 +19,15 @@
 
 import moment from 'moment';
 import { setCanTrackUiMetrics } from 'ui/ui_metric';
-import { toastNotifications } from 'ui/notify';
+// @ts-ignore
+import { banners, toastNotifications } from 'ui/notify';
 import { npStart } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
 
 let bannerId: string | null = null;
+let optInBannerNoticeId: string | null = null;
 let currentOptInStatus = false;
+let telemetryNotifyUserAboutOptInDefault = true;
 
 async function sendOptInStatus($injector: any, chrome: any, enabled: boolean) {
   const telemetryOptInStatusUrl = npStart.core.injectedMetadata.getInjectedVar(
@@ -57,17 +60,57 @@ async function sendOptInStatus($injector: any, chrome: any, enabled: boolean) {
 }
 export function TelemetryOptInProvider($injector: any, chrome: any, sendOptInStatusChange = true) {
   currentOptInStatus = npStart.core.injectedMetadata.getInjectedVar('telemetryOptedIn') as boolean;
+
   const allowChangingOptInStatus = npStart.core.injectedMetadata.getInjectedVar(
     'allowChangingOptInStatus'
   ) as boolean;
 
+  telemetryNotifyUserAboutOptInDefault = npStart.core.injectedMetadata.getInjectedVar(
+    'telemetryNotifyUserAboutOptInDefault'
+  ) as boolean;
+
   setCanTrackUiMetrics(currentOptInStatus);
+
   const provider = {
     getBannerId: () => bannerId,
+    getOptInBannerNoticeId: () => optInBannerNoticeId,
     getOptIn: () => currentOptInStatus,
     canChangeOptInStatus: () => allowChangingOptInStatus,
+    notifyUserAboutOptInDefault: () => telemetryNotifyUserAboutOptInDefault,
     setBannerId(id: string) {
       bannerId = id;
+    },
+    setOptInBannerNoticeId(id: string) {
+      optInBannerNoticeId = id;
+    },
+    setOptInNoticeSeen: async () => {
+      const $http = $injector.get('$http');
+
+      // If they've seen the notice don't spam the API
+      if (!telemetryNotifyUserAboutOptInDefault) {
+        return telemetryNotifyUserAboutOptInDefault;
+      }
+
+      if (optInBannerNoticeId) {
+        banners.remove(optInBannerNoticeId);
+      }
+
+      try {
+        await $http.put(chrome.addBasePath('/api/telemetry/v2/userHasSeenNotice'));
+        telemetryNotifyUserAboutOptInDefault = false;
+      } catch (error) {
+        toastNotifications.addError(error, {
+          title: i18n.translate('telemetry.optInNoticeSeenErrorTitle', {
+            defaultMessage: 'Error',
+          }),
+          toastMessage: i18n.translate('telemetry.optInNoticeSeenErrorToastText', {
+            defaultMessage: 'An error occurred dismissing the notice',
+          }),
+        });
+        telemetryNotifyUserAboutOptInDefault = true;
+      }
+
+      return telemetryNotifyUserAboutOptInDefault;
     },
     setOptIn: async (enabled: boolean) => {
       if (!allowChangingOptInStatus) {
@@ -88,7 +131,8 @@ export function TelemetryOptInProvider($injector: any, chrome: any, sendOptInSta
             defaultMessage: 'Error',
           }),
           toastMessage: i18n.translate('telemetry.optInErrorToastText', {
-            defaultMessage: 'An error occured while trying to set the usage statistics preference.',
+            defaultMessage:
+              'An error occurred while trying to set the usage statistics preference.',
           }),
         });
         return false;
