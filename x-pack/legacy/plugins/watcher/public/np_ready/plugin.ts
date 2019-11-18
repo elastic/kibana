@@ -12,7 +12,6 @@ import {
   CoreStart,
   ChromeStart,
 } from 'src/core/public';
-import { boot } from './application/boot';
 
 interface LegacyPlugins {
   __LEGACY: {
@@ -32,10 +31,11 @@ export class WatcherUIPlugin implements Plugin<void, void, LegacyPlugins, any> {
     application.register({
       id: 'watcher',
       title: 'Watcher',
-      mount: (ctx, { element }) => {
+      mount: async (ctx, { element }) => {
         const docLinks = this.docLinks!;
         const chrome = this.chrome!;
         const euiUtils = this.euiUtils!;
+        const { boot } = await import('./application/boot');
         return boot({
           ...__LEGACY,
           element,

@@ -54,9 +54,6 @@ routes.when('/management/elasticsearch/watcher/:param1?/:param2?/:param3?/:param
       if (elem) {
         ((unmountApp as unknown) as AppUnmount)();
       }
-      // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
-      // e.g. to check license status per request.
-      // setHttpClient($http);
 
       $scope.$$postDigest(() => {
         elem = document.getElementById('watchReactRoot')!;
@@ -74,7 +71,7 @@ routes.when('/management/elasticsearch/watcher/:param1?/:param2?/:param3?/:param
 
         instance.start(npStart.core, npStart.plugins);
 
-        unmountApp = mountApp();
+        (mountApp() as Promise<AppUnmount>).then(fn => (unmountApp = fn));
 
         manageAngularLifecycle($scope, $route, elem);
       });
