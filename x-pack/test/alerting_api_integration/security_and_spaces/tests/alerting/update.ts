@@ -233,7 +233,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .auth(user.username, user.password)
             .send({
               name: 'bcd',
-              interval: '10s',
+              interval: '1m',
               throttle: '1m',
               alertTypeParams: {},
               actions: [],
