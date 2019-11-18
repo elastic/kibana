@@ -27,7 +27,7 @@ export interface HttpServiceSetup
 
 ## Example
 
-To handle an incoming request in your plugin you should: - Create a `Router` instance. Router is already configured to use `plugin-id` to prefix path segment for your routes.
+To handle an incoming request in your plugin you should: - Create a `Router` instance.
 
 ```ts
 const router = httpSetup.createRouter();
@@ -61,7 +61,7 @@ const handler = async (context: RequestHandlerContext, request: KibanaRequest, r
 }
 
 ```
-- Register route handler for GET request to 'my-app/path/<!-- -->{<!-- -->id<!-- -->}<!-- -->' path
+- Register route handler for GET request to 'path/<!-- -->{<!-- -->id<!-- -->}<!-- -->' path
 
 ```ts
 import { schema, TypeOf } from '@kbn/config-schema';

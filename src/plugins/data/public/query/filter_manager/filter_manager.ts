@@ -27,7 +27,7 @@ import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { uniqFilters } from './lib/uniq_filters';
 import { onlyDisabledFiltersChanged } from './lib/only_disabled';
 import { PartitionedFilters } from './types';
-import { esFilters } from '../../../common/es_query';
+import { esFilters } from '../../../common';
 
 export class FilterManager {
   private filters: esFilters.Filter[] = [];
