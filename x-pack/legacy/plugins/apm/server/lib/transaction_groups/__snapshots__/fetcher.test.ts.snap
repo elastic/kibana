@@ -8,44 +8,72 @@ Array [
         "aggs": Object {
           "transactions": Object {
             "aggs": Object {
-              "avg": Object {
-                "avg": Object {
-                  "field": "transaction.duration.us",
-                },
-              },
-              "p95": Object {
-                "percentiles": Object {
-                  "field": "transaction.duration.us",
-                  "percents": Array [
-                    95,
-                  ],
-                },
-              },
-              "sample": Object {
-                "top_hits": Object {
-                  "size": 1,
-                  "sort": Array [
-                    Object {
-                      "_score": "desc",
+              "filtered_transactions": Object {
+                "aggs": Object {
+                  "avg": Object {
+                    "avg": Object {
+                      "field": "transaction.duration.us",
                     },
-                    Object {
-                      "@timestamp": Object {
-                        "order": "desc",
+                  },
+                  "p95": Object {
+                    "percentiles": Object {
+                      "field": "transaction.duration.us",
+                      "percents": Array [
+                        95,
+                      ],
+                    },
+                  },
+                  "sample": Object {
+                    "top_hits": Object {
+                      "size": 1,
+                      "sort": Array [
+                        Object {
+                          "_score": "desc",
+                        },
+                        Object {
+                          "@timestamp": Object {
+                            "order": "desc",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  "sum": Object {
+                    "sum": Object {
+                      "field": "transaction.duration.us",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "exists": Object {
+                        "field": "parent.id",
                       },
                     },
-                  ],
+                    "should": Array [
+                      Object {
+                        "term": Object {
+                          "transaction.sampled": true,
+                        },
+                      },
+                    ],
+                  },
                 },
               },
-              "sum": Object {
-                "sum": Object {
-                  "field": "transaction.duration.us",
+              "select": Object {
+                "bucket_selector": Object {
+                  "buckets_path": Object {
+                    "filtered_transactions_count": "filtered_transactions._count",
+                  },
+                  "script": "params.filtered_transactions_count > 0",
                 },
               },
             },
             "terms": Object {
               "field": "transaction.name",
               "order": Object {
-                "sum": "desc",
+                "filtered_transactions>sum": "desc",
               },
               "size": 100,
             },
@@ -74,20 +102,6 @@ Array [
                 },
               },
             ],
-            "must_not": Array [
-              Object {
-                "exists": Object {
-                  "field": "parent.id",
-                },
-              },
-            ],
-            "should": Array [
-              Object {
-                "term": Object {
-                  "transaction.sampled": true,
-                },
-              },
-            ],
           },
         },
         "size": 0,
@@ -106,44 +120,67 @@ Array [
         "aggs": Object {
           "transactions": Object {
             "aggs": Object {
-              "avg": Object {
-                "avg": Object {
-                  "field": "transaction.duration.us",
-                },
-              },
-              "p95": Object {
-                "percentiles": Object {
-                  "field": "transaction.duration.us",
-                  "percents": Array [
-                    95,
-                  ],
-                },
-              },
-              "sample": Object {
-                "top_hits": Object {
-                  "size": 1,
-                  "sort": Array [
-                    Object {
-                      "_score": "desc",
+              "filtered_transactions": Object {
+                "aggs": Object {
+                  "avg": Object {
+                    "avg": Object {
+                      "field": "transaction.duration.us",
                     },
-                    Object {
-                      "@timestamp": Object {
-                        "order": "desc",
+                  },
+                  "p95": Object {
+                    "percentiles": Object {
+                      "field": "transaction.duration.us",
+                      "percents": Array [
+                        95,
+                      ],
+                    },
+                  },
+                  "sample": Object {
+                    "top_hits": Object {
+                      "size": 1,
+                      "sort": Array [
+                        Object {
+                          "_score": "desc",
+                        },
+                        Object {
+                          "@timestamp": Object {
+                            "order": "desc",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  "sum": Object {
+                    "sum": Object {
+                      "field": "transaction.duration.us",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "bool": Object {
+                    "should": Array [
+                      Object {
+                        "term": Object {
+                          "transaction.sampled": true,
+                        },
                       },
-                    },
-                  ],
+                    ],
+                  },
                 },
               },
-              "sum": Object {
-                "sum": Object {
-                  "field": "transaction.duration.us",
+              "select": Object {
+                "bucket_selector": Object {
+                  "buckets_path": Object {
+                    "filtered_transactions_count": "filtered_transactions._count",
+                  },
+                  "script": "params.filtered_transactions_count > 0",
                 },
               },
             },
             "terms": Object {
               "field": "transaction.name",
               "order": Object {
-                "sum": "desc",
+                "filtered_transactions>sum": "desc",
               },
               "size": 100,
             },
@@ -179,13 +216,6 @@ Array [
               Object {
                 "term": Object {
                   "service.environment": "test",
-                },
-              },
-            ],
-            "should": Array [
-              Object {
-                "term": Object {
-                  "transaction.sampled": true,
                 },
               },
             ],

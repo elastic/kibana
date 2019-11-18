@@ -29,15 +29,15 @@ function getTransactionGroup(
   bucket: Required<ESResponse>['aggregations']['transactions']['buckets'][0],
   minutes: number
 ) {
-  const averageResponseTime = bucket.avg.value;
+  const averageResponseTime = bucket.filtered_transactions.avg.value;
   const transactionsPerMinute = bucket.doc_count / minutes;
-  const impact = bucket.sum.value;
-  const sample = bucket.sample.hits.hits[0]._source;
+  const impact = bucket.filtered_transactions.sum.value;
+  const sample = bucket.filtered_transactions.sample.hits.hits[0]._source;
 
   return {
-    name: bucket.key as string,
+    name: sample.transaction.name,
     sample,
-    p95: bucket.p95.values['95.0'],
+    p95: bucket.filtered_transactions.p95.values['95.0'],
     averageResponseTime,
     transactionsPerMinute,
     impact

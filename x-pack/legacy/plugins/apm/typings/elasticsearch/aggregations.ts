@@ -96,6 +96,13 @@ export interface AggregationOptionsByType {
     buckets_path: BucketsPath;
     script?: Script;
   };
+  bucket_sort: {
+    sort: SortOptions;
+  };
+  bucket_selector: {
+    buckets_path: BucketsPath;
+    script: Script;
+  };
 }
 
 type AggregationType = keyof AggregationOptionsByType;
@@ -228,6 +235,8 @@ interface AggregationResponsePart<
         value: number | null;
       }
     | undefined;
+  bucket_selector: undefined;
+  bucket_sort: undefined;
 }
 
 // Type for debugging purposes. If you see an error in AggregationResponseMap

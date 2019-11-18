@@ -6,7 +6,8 @@
 
 import {
   TRANSACTION_DURATION,
-  TRANSACTION_SAMPLED
+  TRANSACTION_SAMPLED,
+  PARENT_ID
 } from '../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../typings/common';
 import { Setup } from '../helpers/setup_request';
@@ -43,34 +44,59 @@ export function transactionGroupsFetcher(options: Options, setup: Setup) {
     { '@timestamp': { order: 'desc' as const } }
   ];
 
+  const bool =
+    options.type === 'top_traces'
+      ? {
+          must_not: {
+            exists: {
+              field: PARENT_ID
+            }
+          }
+        }
+      : {};
+
   const params = mergeProjection(projection, {
     body: {
       size: 0,
-      query: {
-        bool: {
-          // prefer sampled transactions
-          should: [{ term: { [TRANSACTION_SAMPLED]: true } }]
-        }
-      },
       aggs: {
         transactions: {
           terms: {
             ...projection.body.aggs.transactions.terms,
-            order: { sum: 'desc' as const },
-            size: config.get<number>('xpack.apm.ui.transactionGroupBucketSize')
+            size: config.get<number>('xpack.apm.ui.transactionGroupBucketSize'),
+            order: {
+              'filtered_transactions>sum': 'desc'
+            }
           },
           aggs: {
-            sample: {
-              top_hits: {
-                size: 1,
-                sort
+            select: {
+              bucket_selector: {
+                buckets_path: {
+                  filtered_transactions_count: 'filtered_transactions._count'
+                },
+                script: 'params.filtered_transactions_count > 0'
               }
             },
-            avg: { avg: { field: TRANSACTION_DURATION } },
-            p95: {
-              percentiles: { field: TRANSACTION_DURATION, percents: [95] }
-            },
-            sum: { sum: { field: TRANSACTION_DURATION } }
+            filtered_transactions: {
+              filter: {
+                bool: {
+                  ...bool,
+                  should: [{ term: { [TRANSACTION_SAMPLED]: true } }]
+                }
+              },
+              aggs: {
+                sample: {
+                  top_hits: {
+                    size: 1,
+                    sort
+                  }
+                },
+                avg: { avg: { field: TRANSACTION_DURATION } },
+                p95: {
+                  percentiles: { field: TRANSACTION_DURATION, percents: [95] }
+                },
+                sum: { sum: { field: TRANSACTION_DURATION } }
+              }
+            }
           }
         }
       }

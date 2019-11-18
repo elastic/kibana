@@ -5,7 +5,7 @@
  */
 import { omit } from 'lodash';
 import { Setup } from '../../server/lib/helpers/setup_request';
-import { TRANSACTION_NAME, PARENT_ID } from '../elasticsearch_fieldnames';
+import { TRANSACTION_NAME } from '../elasticsearch_fieldnames';
 import { Options } from '../../server/lib/transaction_groups/fetcher';
 import { getTransactionsProjection } from './transactions';
 import { mergeProjection } from './util/merge_projection';
@@ -19,21 +19,11 @@ export function getTransactionGroupsProjection({
 }) {
   const transactionsProjection = getTransactionsProjection({
     setup,
-    ...(omit(options, 'type') as Omit<typeof options, 'type'>)
+    ...(omit(options, 'type') as Omit<Options, 'type'>)
   });
 
-  const bool =
-    options.type === 'top_traces'
-      ? {
-          must_not: [{ exists: { field: PARENT_ID } }]
-        }
-      : {};
-
-  return mergeProjection(transactionsProjection, {
+  const projection = mergeProjection(transactionsProjection, {
     body: {
-      query: {
-        bool
-      },
       aggs: {
         transactions: {
           terms: {
@@ -43,4 +33,6 @@ export function getTransactionGroupsProjection({
       }
     }
   });
+
+  return projection;
 }

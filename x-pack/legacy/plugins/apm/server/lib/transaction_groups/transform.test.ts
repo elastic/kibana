@@ -5,7 +5,8 @@
  */
 
 import { ESResponse } from './fetcher';
-import { transactionGroupsResponse } from './mock-responses/transactionGroupsResponse';
+// @ts-ignore
+import transactionGroupsResponse from './mock-responses/transactionGroupsResponse.json';
 import { transactionGroupsTransformer } from './transform';
 
 describe('transactionGroupsTransformer', () => {
@@ -23,13 +24,15 @@ describe('transactionGroupsTransformer', () => {
     const bucket = {
       key: 'POST /api/orders',
       doc_count: 180,
-      avg: { value: 255966.30555555556 },
-      p95: { values: { '95.0': 320238.5 } },
-      sum: { value: 3000000000 },
-      sample: {
-        hits: {
-          total: 180,
-          hits: [{ _source: 'sample source' }]
+      filtered_transactions: {
+        avg: { value: 255966.30555555556 },
+        p95: { values: { '95.0': 320238.5 } },
+        sum: { value: 3000000000 },
+        sample: {
+          hits: {
+            total: 180,
+            hits: [{ _source: { transaction: { name: 'POST /api/orders' } } }]
+          }
         }
       }
     };
@@ -50,7 +53,7 @@ describe('transactionGroupsTransformer', () => {
         impact: 0,
         name: 'POST /api/orders',
         p95: 320238.5,
-        sample: 'sample source',
+        sample: { transaction: { name: 'POST /api/orders' } },
         transactionsPerMinute: 542.713567839196
       }
     ]);
@@ -60,10 +63,17 @@ describe('transactionGroupsTransformer', () => {
     const getBucket = (sum: number) => ({
       key: 'POST /api/orders',
       doc_count: 180,
-      avg: { value: 300000 },
-      p95: { values: { '95.0': 320000 } },
-      sum: { value: sum },
-      sample: { hits: { total: 180, hits: [{ _source: 'sample source' }] } }
+      filtered_transactions: {
+        avg: { value: 300000 },
+        p95: { values: { '95.0': 320000 } },
+        sum: { value: sum },
+        sample: {
+          hits: {
+            total: 180,
+            hits: [{ _source: { transaction: { name: 'POST /api/orders' } } }]
+          }
+        }
+      }
     });
 
     const response = ({
