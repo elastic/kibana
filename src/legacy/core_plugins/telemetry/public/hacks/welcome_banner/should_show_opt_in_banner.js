@@ -17,20 +17,14 @@
  * under the License.
  */
 
-import { CoreSetup } from 'src/core/server';
-import { registerTelemetryOptInRoutes } from './telemetry_opt_in';
-import { registerTelemetryUsageStatsRoutes } from './telemetry_usage_stats';
-import { registerTelemetryOptInStatsRoutes } from './telemetry_opt_in_stats';
-import { registerTelemetryUserHasSeenNotice } from './telemetry_user_has_seen_notice';
-
-interface RegisterRoutesParams {
-  core: CoreSetup;
-  currentKibanaVersion: string;
-}
-
-export function registerRoutes({ core, currentKibanaVersion }: RegisterRoutesParams) {
-  registerTelemetryOptInRoutes({ core, currentKibanaVersion });
-  registerTelemetryUsageStatsRoutes(core);
-  registerTelemetryOptInStatsRoutes(core);
-  registerTelemetryUserHasSeenNotice(core);
+/**
+ * Determine if the notice banner should be displayed.
+ *
+ * This method can have side-effects related to deprecated config settings.
+ *
+ * @param {Object} telemetryOptInProvider The Telemetry opt-in provider singleton.
+ * @return {Boolean} {@code true} if the banner should be displayed. {@code false} otherwise.
+ */
+export async function shouldShowOptInBanner(telemetryOptInProvider) {
+  return telemetryOptInProvider.notifyUserAboutOptInDefault();
 }

@@ -17,20 +17,26 @@
  * under the License.
  */
 
-import { CoreSetup } from 'src/core/server';
-import { registerTelemetryOptInRoutes } from './telemetry_opt_in';
-import { registerTelemetryUsageStatsRoutes } from './telemetry_usage_stats';
-import { registerTelemetryOptInStatsRoutes } from './telemetry_opt_in_stats';
-import { registerTelemetryUserHasSeenNotice } from './telemetry_user_has_seen_notice';
+import '../../services/telemetry_opt_in.test.mocks';
+import { renderOptedInBanner } from './render_notice_banner';
 
-interface RegisterRoutesParams {
-  core: CoreSetup;
-  currentKibanaVersion: string;
-}
+describe('render_notice_banner', () => {
 
-export function registerRoutes({ core, currentKibanaVersion }: RegisterRoutesParams) {
-  registerTelemetryOptInRoutes({ core, currentKibanaVersion });
-  registerTelemetryUsageStatsRoutes(core);
-  registerTelemetryOptInStatsRoutes(core);
-  registerTelemetryUserHasSeenNotice(core);
-}
+  it('adds a banner to banners with priority of 10000', () => {
+    const bannerID = 'brucer-wayne';
+
+    const telemetryOptInProvider = { setOptInBannerNoticeId: jest.fn() };
+    const banners = { add: jest.fn().mockReturnValue(bannerID) };
+
+    renderOptedInBanner(telemetryOptInProvider, { _banners: banners });
+
+    expect(banners.add).toBeCalledTimes(1);
+    expect(telemetryOptInProvider.setOptInBannerNoticeId).toBeCalledWith(bannerID);
+
+    const bannerConfig = banners.add.mock.calls[0][0];
+
+    expect(bannerConfig.component).not.toBe(undefined);
+    expect(bannerConfig.priority).toBe(10000);
+  });
+
+});
