@@ -73,7 +73,7 @@ export class FeatureGeometryFilterForm extends Component {
     if (window.location.href.length + rison.encode(filter).length > urlOverflow.failLength()) {
       this.setState({
         errorMsg: i18n.translate('xpack.maps.tooltip.geometryFilterForm.filterTooLargeMessage', {
-          defaultMessage: 'Unable to create filter, too many vertices in shape.'
+          defaultMessage: 'Cannot create filter because filter will overflow URL.'
         })
       });
       return;
