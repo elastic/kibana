@@ -26,7 +26,7 @@ const AppRoot = React.memo(function Root() {
   return (
     <I18nProvider>
       <h1>
-        <FormattedMessage id="endpoint.welcome" defaultMessage="Hello World" />
+        <FormattedMessage id="xpack.endpoint.welcome" defaultMessage="Hello World" />
       </h1>
     </I18nProvider>
   );
