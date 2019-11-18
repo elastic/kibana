@@ -37,21 +37,18 @@ import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from './index_patterns_api_client';
-import { ES_FIELD_TYPES } from '../../../../../../plugins/data/common';
+import { ES_FIELD_TYPES, IIndexPattern } from '../../../../../../plugins/data/public';
 import { getNotifications } from '../services';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
 
-export interface StaticIndexPattern {
-  fields: FieldType[];
-  title: string;
-  id?: string;
-  type?: string;
-  timeFieldName?: string;
-}
+/** @deprecated
+ *  Please use IIndexPattern instead
+ * */
+export type StaticIndexPattern = IIndexPattern;
 
-export class IndexPattern implements StaticIndexPattern {
+export class IndexPattern implements IIndexPattern {
   [key: string]: any;
 
   public id?: string;
