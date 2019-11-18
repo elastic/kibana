@@ -26,7 +26,13 @@ export {
   LegacyRequest,
   ensureRawRequest,
 } from './request';
-export { RouteMethod, RouteConfig, RouteConfigOptions, RouteContentType } from './route';
+export {
+  RouteMethod,
+  RouteConfig,
+  RouteConfigOptions,
+  RouteContentType,
+  RouteConfigOptionsBody,
+} from './route';
 export { HapiResponseAdapter } from './response_adapter';
 export {
   CustomHttpResponseOptions,

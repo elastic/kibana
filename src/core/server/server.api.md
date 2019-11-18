@@ -1093,12 +1093,17 @@ export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B exten
 
 // @public
 export interface RouteConfigOptions<Method extends RouteMethod = any> {
-    accepts?: Method extends 'get' ? never : RouteContentType | RouteContentType[] | string | string[];
     authRequired?: boolean;
-    maxBytes?: Method extends 'get' ? never : number;
-    output?: Method extends 'get' ? never : 'data' | 'stream' | 'file';
-    parse?: Method extends 'get' ? never : boolean | 'gunzip';
+    body?: Method extends 'get' ? never : RouteConfigOptionsBody;
     tags?: readonly string[];
+}
+
+// @public
+export interface RouteConfigOptionsBody {
+    accepts?: RouteContentType | RouteContentType[] | string | string[];
+    maxBytes?: number;
+    output?: 'data' | 'stream';
+    parse?: boolean | 'gunzip';
 }
 
 // @public

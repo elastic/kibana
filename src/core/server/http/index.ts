@@ -45,6 +45,7 @@ export {
   IRouter,
   RouteMethod,
   RouteConfigOptions,
+  RouteConfigOptionsBody,
   RouteContentType,
 } from './router';
 export { BasePathProxyServer } from './base_path_proxy_server';
