@@ -24,6 +24,13 @@ export class AbstractESSource extends AbstractVectorSource {
 
   static icon = 'logoElasticsearch';
 
+  constructor(descriptor, inspectorAdapters) {
+    super({
+      ...descriptor,
+      applyGlobalQuery: _.get(descriptor, 'applyGlobalQuery', true),
+    }, inspectorAdapters);
+  }
+
   isFieldAware() {
     return true;
   }
@@ -38,6 +45,13 @@ export class AbstractESSource extends AbstractVectorSource {
 
   getIndexPatternIds() {
     return  [this._descriptor.indexPatternId];
+  }
+
+  getQueryableIndexPatternIds() {
+    if (this.getApplyGlobalQuery()) {
+      return  [this._descriptor.indexPatternId];
+    }
+    return [];
   }
 
   supportsElasticsearchFilters() {

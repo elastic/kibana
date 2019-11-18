@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { TooltipSelector } from '../../../components/tooltip_selector';
+import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
 
 import { indexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
@@ -115,6 +116,10 @@ export class UpdateSourceEditor extends Component {
 
   onTopHitsSizeChange = size => {
     this.props.onChange({ propName: 'topHitsSize', value: size });
+  };
+
+  _onApplyGlobalQueryChange = applyGlobalQuery => {
+    this.props.onChange({ propName: 'applyGlobalQuery', value: applyGlobalQuery });
   };
 
   renderTopHitsForm() {
@@ -246,6 +251,11 @@ export class UpdateSourceEditor extends Component {
             compressed
           />
         </EuiFormRow>
+
+        <GlobalFilterCheckbox
+          applyGlobalQuery={this.props.applyGlobalQuery}
+          setApplyGlobalQuery={this._onApplyGlobalQueryChange}
+        />
 
       </Fragment>
     );

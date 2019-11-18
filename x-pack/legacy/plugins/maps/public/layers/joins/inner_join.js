@@ -87,6 +87,10 @@ export class InnerJoin {
     return  this._rightSource.getIndexPatternIds();
   }
 
+  getQueryableIndexPatternIds() {
+    return  this._rightSource.getQueryableIndexPatternIds();
+  }
+
   getWhereQuery() {
     return this._rightSource.getWhereQuery();
   }
