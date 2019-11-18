@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ReactNode, OptionHTMLAttributes } from 'react';
+
 import { FieldConfig } from './shared_imports';
 import { PARAMETERS_DEFINITION } from './constants';
 
@@ -155,9 +157,17 @@ export type ChildFieldName = 'properties' | 'fields';
 
 export type FieldsEditor = 'default' | 'json';
 
-export interface SelectOption {
-  value: any;
-  text: string;
+export type SelectOption<T extends string = string> = {
+  value: unknown;
+  text: T | ReactNode;
+} & OptionHTMLAttributes<HTMLOptionElement>;
+
+export interface SuperSelectOption {
+  value: unknown;
+  inputDisplay?: ReactNode;
+  dropdownDisplay?: ReactNode;
+  disabled?: boolean;
+  'data-test-subj'?: string;
 }
 
 export interface AliasOption {

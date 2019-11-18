@@ -417,7 +417,9 @@ export const getAllDescendantAliases = (
   return aliasesIds;
 };
 
-export const filterTypesForMultiField = (options: SelectOption[]): SelectOption[] =>
+export const filterTypesForMultiField = <T extends string = string>(
+  options: Array<SelectOption<T>>
+): Array<SelectOption<T>> =>
   options.filter(
     option => TYPE_NOT_ALLOWED_MULTIFIELD.includes(option.value as MainType) === false
   );
@@ -479,18 +481,15 @@ const stateWithValidity: Array<keyof State> = ['configuration', 'fieldsJsonEdito
 export const isStateValid = (state: State): boolean | undefined =>
   Object.entries(state)
     .filter(([key]) => stateWithValidity.includes(key as keyof State))
-    .reduce(
-      (isValid, { 1: value }) => {
-        if (value === undefined) {
-          return isValid;
-        }
+    .reduce((isValid, { 1: value }) => {
+      if (value === undefined) {
+        return isValid;
+      }
 
-        // If one section validity of the state is "undefined", the mappings validity is also "undefined"
-        if (isValid === undefined || value.isValid === undefined) {
-          return undefined;
-        }
+      // If one section validity of the state is "undefined", the mappings validity is also "undefined"
+      if (isValid === undefined || value.isValid === undefined) {
+        return undefined;
+      }
 
-        return isValid && value.isValid;
-      },
-      true as undefined | boolean
-    );
+      return isValid && value.isValid;
+    }, true as undefined | boolean);

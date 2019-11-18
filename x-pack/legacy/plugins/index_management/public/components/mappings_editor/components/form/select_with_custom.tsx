@@ -7,20 +7,35 @@ import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { UseField, SelectField, TextField, FieldConfig, FieldHook } from '../../shared_imports';
-import { SelectOption } from '../../types';
+import {
+  UseField,
+  SelectField,
+  SuperSelectField,
+  TextField,
+  FieldConfig,
+  FieldHook,
+} from '../../shared_imports';
+import { SelectOption, SuperSelectOption } from '../../types';
 
 interface Props {
   path: string;
-  options: SelectOption[];
+  options: SuperSelectOption[] | SelectOption[];
   defaultValue: string | undefined;
   label?: string;
+  isSuperSelect?: boolean;
   config: FieldConfig;
 }
 
-export const SelectWithCustom = ({ path, options, defaultValue, config, label }: Props) => {
+export const SelectWithCustom = <IsSuperSelect extends true | false = true>({
+  path,
+  options,
+  defaultValue,
+  config,
+  label,
+  isSuperSelect = false,
+}: Props) => {
   const isDefaultValueInOptions =
-    defaultValue === undefined || options.some(option => option.value === defaultValue);
+    defaultValue === undefined || options.some((option: any) => option.value === defaultValue);
 
   const [isCustom, setIsCustom] = useState<boolean>(!isDefaultValueInOptions);
 
@@ -55,10 +70,16 @@ export const SelectWithCustom = ({ path, options, defaultValue, config, label }:
                   defaultMessage: 'Add custom',
                 })}
           </EuiButtonEmpty>
+
           {isCustom ? (
             <TextField field={field} />
+          ) : isSuperSelect ? (
+            <SuperSelectField field={field} euiFieldProps={{ options }} />
           ) : (
-            <SelectField field={field} euiFieldProps={{ options, hasNoInitialSelection: false }} />
+            <SelectField
+              field={field}
+              euiFieldProps={{ options: options as any, hasNoInitialSelection: false }}
+            />
           )}
         </div>
       )}

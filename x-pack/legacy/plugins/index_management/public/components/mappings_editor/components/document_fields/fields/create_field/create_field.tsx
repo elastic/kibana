@@ -30,7 +30,7 @@ import { TYPE_DEFINITION, FIELD_TYPES_OPTIONS, EUI_SIZE } from '../../../../cons
 
 import { useDispatch } from '../../../../mappings_state';
 import { fieldSerializer, getFieldConfig, filterTypesForMultiField } from '../../../../lib';
-import { Field, MainType, SubType, NormalizedFields } from '../../../../types';
+import { Field, MainType, SubType, NormalizedFields, SelectOption } from '../../../../types';
 import { NameParameter } from '../../field_parameters';
 import { getParametersFormForType } from './required_parameters_forms';
 
@@ -105,19 +105,22 @@ export const CreateField = React.memo(function CreateFieldComponent({
    */
   const getSubTypeMeta = (
     type: MainType
-  ): { subTypeLabel?: string; subTypeOptions?: Array<{ value: SubType; text: string }> } => {
+  ): { subTypeLabel?: string; subTypeOptions?: Array<SelectOption<SubType>> } => {
     const typeDefinition = TYPE_DEFINITION[type];
     const hasSubTypes = typeDefinition !== undefined && typeDefinition.subTypes;
 
     let subTypeOptions = hasSubTypes
       ? typeDefinition
           .subTypes!.types.map(subType => TYPE_DEFINITION[subType])
-          .map(subType => ({ value: subType.value as SubType, text: subType.label }))
+          .map(
+            subType =>
+              ({ value: subType.value as SubType, text: subType.label } as SelectOption<SubType>)
+          )
       : undefined;
 
     if (isMultiField && hasSubTypes) {
       // If it is a multi-field, we need to filter out non-allowed types
-      subTypeOptions = filterTypesForMultiField(subTypeOptions!);
+      subTypeOptions = filterTypesForMultiField<SubType>(subTypeOptions!);
     }
 
     return {

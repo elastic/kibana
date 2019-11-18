@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiSpacer, EuiRange, EuiDualRange, EuiFormRow, EuiCallOut } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiRange,
+  EuiDualRange,
+  EuiFormRow,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -180,6 +188,7 @@ export const TextType = React.memo(({ field }: Props) => {
                     options={PARAMETERS_OPTIONS.analyzer!}
                     config={getFieldConfig('analyzer')}
                     defaultValue={field.source.analyzer}
+                    isSuperSelect
                   />
                 </div>
                 {isOn && (
@@ -191,6 +200,7 @@ export const TextType = React.memo(({ field }: Props) => {
                         options={PARAMETERS_OPTIONS.analyzer!}
                         config={getFieldConfig('search_analyzer')}
                         defaultValue={field.source.search_analyzer}
+                        isSuperSelect
                       />
                     </div>
                   </>
@@ -202,6 +212,7 @@ export const TextType = React.memo(({ field }: Props) => {
                     options={PARAMETERS_OPTIONS.analyzer!}
                     config={getFieldConfig('search_quote_analyzer')}
                     defaultValue={field.source.search_quote_analyzer}
+                    isSuperSelect
                   />
                 </div>
               </>
@@ -341,7 +352,7 @@ export const TextType = React.memo(({ field }: Props) => {
                                 'xpack.idxMgmt.mappingsEditor.positionsErrorMessage',
                                 {
                                   defaultMessage:
-                                    'You need to set the index options (under the "Searchable" toggle) to "positions" or "offsets" in order to be able to change the position increment gap.',
+                                    'You need to set the index options (under the "Searchable" toggle) to "Positions" or "Offsets" in order to be able to change the position increment gap.',
                                 }
                               )}
                             </p>
@@ -379,12 +390,22 @@ export const TextType = React.memo(({ field }: Props) => {
             <FormDataProvider pathsToWatch="term_vector">
               {formData => (
                 <>
-                  <UseField
-                    path="term_vector"
-                    config={getFieldConfig('term_vector')}
-                    component={Field}
-                    componentProps={{ euiFieldProps: { options: PARAMETERS_OPTIONS.term_vector } }}
-                  />
+                  <EuiFlexGroup alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <UseField
+                        path="term_vector"
+                        config={getFieldConfig('term_vector')}
+                        component={Field}
+                        componentProps={{
+                          euiFieldProps: {
+                            options: PARAMETERS_OPTIONS.term_vector,
+                            style: { minWidth: 300 },
+                          },
+                        }}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+
                   {formData.term_vector === 'with_positions_offsets' && (
                     <>
                       <EuiSpacer size="s" />
