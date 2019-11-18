@@ -20,7 +20,7 @@ export interface SearchItems {
 
 export function createSearchItems(
   kibanaConfig: KibanaConfigTypeFix,
-  indexPattern: IndexPattern,
+  indexPattern: IIndexPattern,
   savedSearch: SavedSearch
 ) {
   // query is only used by the data visualizer as it needs
