@@ -4,32 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
 import { RouteDeps } from '.';
 import { CaseService } from '../../case_service';
 import { wrapError } from './utils';
 
-export function initGetCaseApi(deps: RouteDeps) {
+export function initGetAllApi(deps: RouteDeps) {
   const { caseIndex, log, router } = deps;
 
   router.get(
     {
-      path: '/api/cases/case/{id}',
-      validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
+      path: '/api/cases',
+      validate: false,
     },
     async (context, request, response) => {
       const requestClient = context.core.elasticsearch.dataClient;
       const service = new CaseService(requestClient.callAsCurrentUser, caseIndex, log);
       try {
-        log.debug(`Attempting to GET case ${request.params.id}`);
-        const theCase = await service.getCase(request.params.id);
-        return response.ok({ body: theCase });
+        log.debug(`Attempting to GET all cases`);
+        const cases = await service.getAllCases();
+        return response.ok({ body: cases });
       } catch (error) {
-        log.debug(`Error on GET case  ${request.params.id}: ${error}`);
+        log.debug(`Error on GET all cases: ${error}`);
         return response.customError(wrapError(error));
       }
     }

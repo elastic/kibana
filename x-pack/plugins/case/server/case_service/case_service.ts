@@ -4,133 +4,65 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { map, take } from 'rxjs/operators';
-import { Observable, Subscription, combineLatest } from 'rxjs';
-import { Legacy } from 'kibana';
-import { Logger, KibanaRequest, CoreSetup } from '../../../../../src/core/server';
-import { PluginSetupContract as SecurityPluginSetup } from '../../../security/server';
-import { LegacyAPI } from '../plugin';
-import { SpacesClient } from '../lib/spaces_client';
-import { ConfigType } from '../config';
-import { getSpaceIdFromPath, addSpaceIdToPath } from '../../common/lib/spaces_url_parser';
-import { DEFAULT_SPACE_ID } from '../../common/constants';
-import { spaceIdToNamespace, namespaceToSpaceId } from '../lib/utils/namespace';
-import { Space } from '../../common/model/space';
+import { APICaller, Logger } from 'kibana/server';
+import { SearchResponse } from 'elasticsearch';
+import { Case } from '../routes/api/types';
 
-type RequestFacade = KibanaRequest | Legacy.Request;
-
-export interface CaseServiceSetup {
-  scopedClient(request: RequestFacade): Promise<SpacesClient>;
-
-  getSpaceId(request: RequestFacade): string;
-
-  getBasePath(spaceId: string): string;
-
-  isInDefaultSpace(request: RequestFacade): boolean;
-
-  spaceIdToNamespace(spaceId: string): string | undefined;
-
-  namespaceToSpaceId(namespace: string | undefined): string;
-
-  getActiveSpace(request: RequestFacade): Promise<Space>;
+interface CaseAggregationResponse {
+  hits: {
+    total: { value: number };
+  };
+  aggregations: {
+    [aggName: string]: {
+      buckets: Array<{ key: string; doc_count: number }>;
+    };
+  };
 }
 
-interface CaseServiceDeps {
-  http: CoreSetup['http'];
-  elasticsearch: CoreSetup['elasticsearch'];
-  authorization: SecurityPluginSetup['authz'] | null;
-  config$: Observable<ConfigType>;
-  getSpacesAuditLogger(): any;
+export interface CaseServiceInterface {
+  getAllCases(): Promise<SearchResponse<CaseAggregationResponse>>;
+  getCase(id: string): Promise<CaseAggregationResponse>;
+  postCase(newCase: Case): Promise<CaseAggregationResponse>;
 }
 
-export class CaseService {
-  private configSubscription$?: Subscription;
+export class CaseService implements CaseServiceInterface {
+  constructor(
+    private readonly callDataCluster: APICaller,
+    private readonly caseIndex: string[] | string,
+    private readonly log: Logger
+  ) {}
 
-  constructor(private readonly log: Logger, private readonly getLegacyAPI: () => LegacyAPI) {}
-
-  public async setup({
-    http,
-    elasticsearch,
-    authorization,
-    config$,
-    getSpacesAuditLogger,
-  }: CaseServiceDeps): Promise<CaseServiceSetup> {
-    const getSpaceId = (request: RequestFacade) => {
-      // Currently utilized by reporting
-      const isFakeRequest = typeof (request as any).getBasePath === 'function';
-
-      const basePath = isFakeRequest
-        ? (request as Record<string, any>).getBasePath()
-        : http.basePath.get(request);
-
-      const spaceId = getSpaceIdFromPath(basePath, http.basePath.serverBasePath);
-
-      return spaceId;
-    };
-
-    const getScopedClient = async (request: KibanaRequest) => {
-      return combineLatest(elasticsearch.adminClient$, config$)
-        .pipe(
-          map(([clusterClient, config]) => {
-            const internalRepository = this.getLegacyAPI().savedObjects.getSavedObjectsRepository(
-              clusterClient.callAsInternalUser,
-              ['space']
-            );
-
-            const callCluster = clusterClient.asScoped(request).callAsCurrentUser;
-
-            const callWithRequestRepository = this.getLegacyAPI().savedObjects.getSavedObjectsRepository(
-              callCluster,
-              ['space']
-            );
-
-            return new SpacesClient(
-              getSpacesAuditLogger(),
-              (message: string) => {
-                this.log.debug(message);
-              },
-              authorization,
-              callWithRequestRepository,
-              config,
-              internalRepository,
-              request
-            );
-          }),
-          take(1)
-        )
-        .toPromise();
-    };
-
-    return {
-      getSpaceId,
-      getBasePath: (spaceId: string) => {
-        if (!spaceId) {
-          throw new TypeError(`spaceId is required to retrieve base path`);
-        }
-        return addSpaceIdToPath(http.basePath.serverBasePath, spaceId);
+  async getAllCases() {
+    this.log.debug(`CaseService - getAllCases`);
+    return await this.callDataCluster<CaseAggregationResponse>('search', {
+      index: this.caseIndex,
+      body: {
+        track_total_hits: true,
+        query: {
+          term: {
+            state: {
+              value: 'open',
+            },
+          },
+        },
       },
-      isInDefaultSpace: (request: RequestFacade) => {
-        const spaceId = getSpaceId(request);
-
-        return spaceId === DEFAULT_SPACE_ID;
-      },
-      spaceIdToNamespace,
-      namespaceToSpaceId,
-      scopedClient: getScopedClient,
-      getActiveSpace: async (request: RequestFacade) => {
-        const spaceId = getSpaceId(request);
-        const spacesClient = await getScopedClient(
-          request instanceof KibanaRequest ? request : KibanaRequest.from(request)
-        );
-        return spacesClient.get(spaceId);
-      },
-    };
+    });
   }
 
-  public async stop() {
-    if (this.configSubscription$) {
-      this.configSubscription$.unsubscribe();
-      this.configSubscription$ = undefined;
-    }
+  async getCase(id: string) {
+    this.log.debug(`CaseService - getCase/${id}`);
+    return await this.callDataCluster<CaseAggregationResponse>('get', {
+      index: this.caseIndex,
+      id,
+    });
+  }
+
+  async postCase(newCase: Case) {
+    this.log.debug(`CaseService - postCase:`, newCase);
+    console.log('BLARG', newCase);
+    return await this.callDataCluster<CaseAggregationResponse>('create', {
+      index: this.caseIndex,
+      ...newCase,
+    });
   }
 }

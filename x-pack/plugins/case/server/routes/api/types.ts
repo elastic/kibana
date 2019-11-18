@@ -27,7 +27,6 @@ export interface Case {
   comments: Comment[] | [];
   creation_date: number;
   description: string;
-  id: string;
   last_edit_date: number;
   name: string;
   reporter: User;

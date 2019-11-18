@@ -4,18 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, IRouter, CoreSetup } from 'src/core/server';
+import { Logger, IRouter } from 'src/core/server';
+import { initGetAllApi } from './get_all';
 import { initGetCaseApi } from './get_case';
 import { initPostCaseApi } from './post_case';
 
 export interface RouteDeps {
   caseIndex: string;
-  http: CoreSetup['http'];
   log: Logger;
   router: IRouter;
 }
 
 export function initCaseApi(deps: RouteDeps) {
+  initGetAllApi(deps);
   initGetCaseApi(deps);
   initPostCaseApi(deps);
 }
