@@ -114,19 +114,22 @@ export class VectorStyle extends AbstractStyle {
    */
   getDescriptorWithMissingStylePropsRemoved(nextOrdinalFields) {
 
-
     const originalProperties = this.getRawProperties();
     const updatedProperties = {};
 
+    const dynamicProperties = Object.keys(originalProperties).filter(key => {
+      const { type, options } = originalProperties[key] || {};
+      return type === STYLE_TYPE.DYNAMIC && options.field && options.field.name;
+    });
 
-    this.getDynamicPropertiesArray().forEach(dynamicProperty =>{
+    dynamicProperties.forEach(key => {
 
-      const field = dynamicProperty.getField();
-      if (!field || !field.isValid()) {
+      const dynamicProperty = originalProperties[key];
+      const fieldName = dynamicProperty && dynamicProperty.options.field && dynamicProperty.options.field.name;
+      if (!fieldName) {
         return;
       }
 
-      const fieldName = field.getName();
       const matchingOrdinalField = nextOrdinalFields.find(ordinalField => {
         return fieldName === ordinalField.getName();
       });
@@ -135,20 +138,20 @@ export class VectorStyle extends AbstractStyle {
         return;
       }
 
-      updatedProperties[dynamicProperty.getStyleName()] = {
+      updatedProperties[key] = {
         type: DynamicStyleProperty.type,
         options: {
-          ...originalProperties[dynamicProperty.getStyleName()].options
+          ...originalProperties[key].options
         }
       };
-      delete updatedProperties[dynamicProperty.getStyleName()].options.field;
+      delete updatedProperties[key].options.field;
 
     });
 
     if (Object.keys(updatedProperties).length === 0) {
       return {
         hasChanges: false,
-        nextStyleDescriptor: { ...this._descriptor },
+        nextStyleDescriptor: { ...this._descriptor }
       };
     }
 
