@@ -160,7 +160,7 @@ export class TaskStore {
       ...taskInstance,
     } as ConcreteTaskInstance; // Not sure why TS is requiring this `As`, looking into it
 
-    if (!taskInstance.hasOwnProperty('runAt') && taskInstance.hasOwnProperty('interval')) {
+    if (!taskInstance.runAt && taskInstance.interval) {
       taskUpdate.runAt =
         intervalFromDate(
           precedingDateByInterval(taskInStore.runAt, taskInStore.interval) ||
