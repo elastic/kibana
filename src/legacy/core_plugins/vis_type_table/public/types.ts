@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SchemaConfig } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
+import { SchemaConfig } from './legacy_imports';
 
 export enum AggTypes {
   SUM = 'sum',

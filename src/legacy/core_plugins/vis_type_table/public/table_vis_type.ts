@@ -18,13 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Vis } from 'ui/vis';
-// @ts-ignore
-import { visFactory } from 'ui/vis/vis_factory';
-
-// @ts-ignore
-import { Schemas } from 'ui/vis/editors/default/schemas';
-import { AggGroupNames } from 'ui/vis/editors/default';
+import { AggGroupNames, Schemas, Vis, visFactory } from './legacy_imports';
 import { tableVisResponseHandler } from './table_vis_request_handler';
 // @ts-ignore
 import tableVisTemplate from './table_vis.html';

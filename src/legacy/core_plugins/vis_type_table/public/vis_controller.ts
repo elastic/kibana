@@ -19,7 +19,7 @@
 
 import angular, { IModule, auto, IRootScopeService, IScope, ICompileService } from 'angular';
 import $ from 'jquery';
-import { npStart } from 'ui/new_platform';
+import { npStart } from './legacy_imports';
 import { getAngularModule } from './get_inner_angular';
 import { Vis, VisParams } from '../../visualizations/public';
 

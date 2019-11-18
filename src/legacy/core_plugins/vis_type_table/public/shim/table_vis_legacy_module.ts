@@ -20,12 +20,6 @@
 import { once } from 'lodash';
 
 // @ts-ignore
-import { uiModules } from 'ui/modules';
-
-import 'angular-recursion';
-import 'ui/directives/paginate';
-
-// @ts-ignore
 import { TableVisController } from '../table_vis_controller.js';
 // @ts-ignore
 import { KbnAggTable } from '../agg_table/agg_table';

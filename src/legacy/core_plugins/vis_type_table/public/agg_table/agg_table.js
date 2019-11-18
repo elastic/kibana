@@ -18,7 +18,7 @@
  */
 import _ from 'lodash';
 import aggTableTemplate from './agg_table.html';
-import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { getFormat } from '../legacy_imports';
 import { i18n } from '@kbn/i18n';
 
 export function KbnAggTable(config, RecursionHelper) {

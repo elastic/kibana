@@ -22,23 +22,18 @@
 // They can stay even after NP cutover
 import angular from 'angular';
 import 'ui/angular-bootstrap';
+import 'angular-recursion';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-// @ts-ignore
-import { PrivateProvider } from 'ui/private/private';
 import { CoreStart, LegacyCoreStart, UiSettingsClientContract } from 'kibana/public';
-// @ts-ignore
-import { watchMultiDecorator } from 'ui/directives/watch_multi/watch_multi';
-// @ts-ignore
-import { KbnAccessibleClickProvider } from 'ui/accessibility/kbn_accessible_click';
-// @ts-ignore
-import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
-import { configureAppAngularModule } from 'ui/legacy_compat';
-
 import {
+  PrivateProvider,
   PaginateDirectiveProvider,
   PaginateControlsDirectiveProvider,
-  // @ts-ignore
-} from 'ui/directives/paginate';
+  watchMultiDecorator,
+  KbnAccessibleClickProvider,
+  StateManagementConfigProvider,
+  configureAppAngularModule,
+} from './legacy_imports';
 
 const thirdPartyAngularDependencies = ['ngSanitize', 'ui.bootstrap', 'RecursionHelper'];
 

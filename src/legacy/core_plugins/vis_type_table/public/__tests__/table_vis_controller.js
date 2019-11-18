@@ -20,12 +20,14 @@
 import $ from 'jquery';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
-import { Vis } from 'ui/vis';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import {
+  AppStateProvider,
+  legacyResponseHandlerProvider,
+  Vis,
+  VisFactoryProvider,
+  tabifyAggResponse,
+} from '../legacy_imports';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { AppStateProvider } from 'ui/state_management/app_state';
-import { tabifyAggResponse } from 'ui/agg_response/tabify';
 
 import { createTableVisTypeDefinition } from '../table_vis_type';
 import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore
-import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
+import { legacyResponseHandlerProvider } from './legacy_imports';
 
 export const tableVisResponseHandler = legacyResponseHandlerProvider().handler;

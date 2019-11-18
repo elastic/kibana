@@ -18,7 +18,7 @@
  */
 
 import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from 'ui/new_platform';
+import { npSetup, npStart } from './legacy_imports';
 import { plugin } from '.';
 
 import { TablePluginSetupDependencies } from './plugin';

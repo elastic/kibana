@@ -23,13 +23,10 @@ import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import sinon from 'sinon';
-import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
+import { legacyResponseHandlerProvider, Vis, tabifyAggResponse, VisFactoryProvider } from '../../legacy_imports';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { Vis } from 'ui/vis';
-import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { round } from 'lodash';
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { createTableVisTypeDefinition } from '../../table_vis_type';
 import { setup as visualizationsSetup } from '../../../../visualizations/public/np_ready/public/legacy';
 
