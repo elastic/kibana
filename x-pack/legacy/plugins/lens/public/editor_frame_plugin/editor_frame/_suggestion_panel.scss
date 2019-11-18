@@ -23,6 +23,10 @@
   margin-right: $euiSizeS;
   margin-left: $euiSizeXS / 2;
   margin-bottom: $euiSizeXS / 2;
+
+  .lnsSuggestionPanel__expressionRenderer {
+    position: static; // Let the progress indicator position itself against the button
+  }
 }
 
 .lnsSuggestionPanel__button-isSelected {
@@ -62,5 +66,4 @@
   font-weight: $euiFontWeightBold;
   text-align: center;
   flex-grow: 0;
-  height: $euiSizeL;
 }
