@@ -2,13 +2,13 @@
 === Metrics overview
 
 The *Metrics* overview provides agent-specific metrics,
-which lets you perform more in-depth root cause analysis investigations within the APM UI.
+which lets you perform more in-depth root cause analysis investigations within the APM app.
 
 If you're experiencing a problem with your service, you can use this page to attempt to find the underlying cause.
 For example, you might be able to correlate a high number of errors with a long transaction duration, high CPU usage, or a memory leak.   
 
 [role="screenshot"]
-image::apm/images/apm-metrics.png[Example view of the Metrics overview in APM UI in Kibana]
+image::apm/images/apm-metrics.png[Example view of the Metrics overview in APM app in Kibana]
 
 [[machine-learning-integration]]
 === Machine Learning integration
@@ -17,7 +17,7 @@ The Machine Learning integration will initiate a new job predefined to calculate
 The response time graph will show the expected bounds and annotate the graph when the anomaly score is 75 or above.
 
 [role="screenshot"]
-image::apm/images/apm-ml-integration.png[Example view of anomaly scores on response times in APM UI in Kibana]
+image::apm/images/apm-ml-integration.png[Example view of anomaly scores on response times in APM app in Kibana]
 
 Jobs can be created per transaction type and based on the average response time.
 You can manage jobs in the *Machine Learning jobs management*.
