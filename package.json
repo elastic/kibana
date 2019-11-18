@@ -128,7 +128,6 @@
     "@kbn/ui-framework": "1.0.0",
     "@types/json-stable-stringify": "^1.0.32",
     "@types/lodash.clonedeep": "^4.5.4",
-    "@types/node-fetch": "2.5.3",
     "@types/react-grid-layout": "^0.16.7",
     "@types/recompose": "^0.30.5",
     "JSONStream": "1.3.5",
