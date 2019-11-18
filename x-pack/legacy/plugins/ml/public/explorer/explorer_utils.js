@@ -477,7 +477,7 @@ export async function loadAnomaliesTableData(
       ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
       MAX_CATEGORY_EXAMPLES,
       influencersFilterQuery
-    ).then((resp) => {
+    ).toPromise().then((resp) => {
       const anomalies = resp.anomalies;
       const detectorsByJob = mlJobService.detectorsByJob;
       anomalies.forEach((anomaly) => {

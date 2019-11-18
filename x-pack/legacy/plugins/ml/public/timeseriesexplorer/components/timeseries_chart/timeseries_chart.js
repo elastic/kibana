@@ -1081,9 +1081,9 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
     const that = this;
     function brushed() {
-      if (that.props.skipRefresh) {
-        return;
-      }
+      // if (that.props.skipRefresh) {
+      //   return;
+      // }
 
       const isEmpty = brush.empty();
 

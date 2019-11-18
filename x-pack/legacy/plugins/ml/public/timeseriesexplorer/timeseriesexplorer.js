@@ -8,9 +8,10 @@
  * React component for rendering Single Metric Viewer.
  */
 
-import { chain, difference, each, find, filter, first, get, has, isEqual, without } from 'lodash';
+import { chain, difference, each, find, first, get, has, isEqual, without } from 'lodash';
 import moment from 'moment-timezone';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, forkJoin } from 'rxjs';
+import { map, debounceTime, skipWhile, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import PropTypes from 'prop-types';
 import React, { createRef, Fragment } from 'react';
@@ -78,11 +79,12 @@ import {
   calculateInitialFocusRange,
   createTimeSeriesJobData,
   getAutoZoomDuration,
-  getFocusData,
   processForecastResults,
   processMetricPlotResults,
   processRecordScoreResults,
 } from './timeseriesexplorer_utils';
+
+import { getFocusData } from './resolvers';
 
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
@@ -179,6 +181,11 @@ export class TimeSeriesExplorer extends React.Component {
     });
   }
 
+  /**
+   * Subject for listening brush time range selection.
+   */
+  contextChart = new Subject();
+
   detectorIndexChangeHandler = (e) => {
     const id = e.target.value;
     if (id !== undefined) {
@@ -252,7 +259,87 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   contextChartSelectedInitCallDone = false;
+
+  /**
+   * Gets default range from component state.
+   */
+  getDefaultRangeFromState() {
+    const {
+      autoZoomDuration,
+      contextAggregationInterval,
+      contextChartData,
+      contextForecastData,
+    } = this.state;
+
+    return calculateDefaultFocusRange(
+      autoZoomDuration,
+      contextAggregationInterval,
+      contextChartData,
+      contextForecastData,
+    );
+  }
+
+  getFocusAggregationInterval(selection) {
+    const {
+      jobs,
+      selectedJob,
+    } = this.state;
+
+    // Calculate the aggregation interval for the focus chart.
+    const bounds = { min: moment(selection.from), max: moment(selection.to) };
+
+    return calculateAggregationInterval(
+      bounds,
+      CHARTS_POINT_TARGET,
+      jobs,
+      selectedJob,
+    );
+  }
+
+  /**
+   * Gets focus data for the current component state/
+   */
+  getFocusData(selection) {
+    const {
+      detectorId,
+      entities,
+      modelPlotEnabled,
+      selectedJob,
+    } = this.state;
+
+    const { appStateHandler } = this.props;
+
+    // Calculate the aggregation interval for the focus chart.
+    const bounds = { min: moment(selection.from), max: moment(selection.to) };
+
+    const focusAggregationInterval = this.getFocusAggregationInterval(selection);
+
+    // Ensure the search bounds align to the bucketing interval so that the first and last buckets are complete.
+    // For sum or count detectors, short buckets would hold smaller values, and model bounds would also be affected
+    // to some extent with all detector functions if not searching complete buckets.
+    const searchBounds = getBoundsRoundedToInterval(
+      bounds,
+      focusAggregationInterval,
+      false
+    );
+
+    return getFocusData(
+      this._criteriaFields,
+      +detectorId,
+      focusAggregationInterval,
+      appStateHandler(APP_STATE_ACTION.GET_FORECAST_ID),
+      modelPlotEnabled,
+      entities.filter(entity => entity.fieldValue.length > 0),
+      searchBounds,
+      selectedJob,
+      TIME_FIELD_NAME
+    );
+  }
+
   contextChartSelected = (selection) => {
+    this.contextChart.next(selection);
+    return;
+
     const { appStateHandler } = this.props;
 
     const {
@@ -336,7 +423,7 @@ export class TimeSeriesExplorer extends React.Component {
         focusAggregationInterval,
         appStateHandler(APP_STATE_ACTION.GET_FORECAST_ID),
         modelPlotEnabled,
-        filter(entities, entity => entity.fieldValue.length > 0),
+        entities.filter(entity => entity.fieldValue.length > 0),
         searchBounds,
         selectedJob,
         TIME_FIELD_NAME,
@@ -380,7 +467,7 @@ export class TimeSeriesExplorer extends React.Component {
     const { dateFormatTz } = this.props;
     const { selectedJob } = this.state;
 
-    ml.results.getAnomaliesTableData(
+    return ml.results.getAnomaliesTableData(
       [selectedJob.job_id],
       this._criteriaFields,
       [],
@@ -390,43 +477,43 @@ export class TimeSeriesExplorer extends React.Component {
       latestMs,
       dateFormatTz,
       ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
-    ).then((resp) => {
-      const anomalies = resp.anomalies;
-      const detectorsByJob = mlJobService.detectorsByJob;
-      anomalies.forEach((anomaly) => {
-        // Add a detector property to each anomaly.
-        // Default to functionDescription if no description available.
-        // TODO - when job_service is moved server_side, move this to server endpoint.
-        const jobId = anomaly.jobId;
-        const detector = get(detectorsByJob, [jobId, anomaly.detectorIndex]);
-        anomaly.detector = get(detector,
-          ['detector_description'],
-          anomaly.source.function_description);
+    ).pipe(
+      map(resp => {
+        const anomalies = resp.anomalies;
+        const detectorsByJob = mlJobService.detectorsByJob;
+        anomalies.forEach((anomaly) => {
+          // Add a detector property to each anomaly.
+          // Default to functionDescription if no description available.
+          // TODO - when job_service is moved server_side, move this to server endpoint.
+          const jobId = anomaly.jobId;
+          const detector = get(detectorsByJob, [jobId, anomaly.detectorIndex]);
+          anomaly.detector = get(detector,
+            ['detector_description'],
+            anomaly.source.function_description);
 
-        // For detectors with rules, add a property with the rule count.
-        const customRules = detector.custom_rules;
-        if (customRules !== undefined) {
-          anomaly.rulesLength = customRules.length;
-        }
+          // For detectors with rules, add a property with the rule count.
+          const customRules = detector.custom_rules;
+          if (customRules !== undefined) {
+            anomaly.rulesLength = customRules.length;
+          }
 
-        // Add properties used for building the links menu.
-        // TODO - when job_service is moved server_side, move this to server endpoint.
-        if (has(mlJobService.customUrlsByJob, jobId)) {
-          anomaly.customUrls = mlJobService.customUrlsByJob[jobId];
-        }
-      });
+          // Add properties used for building the links menu.
+          // TODO - when job_service is moved server_side, move this to server endpoint.
+          if (has(mlJobService.customUrlsByJob, jobId)) {
+            anomaly.customUrls = mlJobService.customUrlsByJob[jobId];
+          }
+        });
 
-      this.setState({
-        tableData: {
-          anomalies,
-          interval: resp.interval,
-          examplesByJobId: resp.examplesByJobId,
-          showViewSeriesLink: false
-        }
-      });
-    }).catch((resp) => {
-      console.log('Time series explorer - error loading data for anomalies table:', resp);
-    });
+        return {
+          tableData: {
+            anomalies,
+            interval: resp.interval,
+            examplesByJobId: resp.examplesByJobId,
+            showViewSeriesLink: false
+          }
+        };
+      })
+    );
   }
 
   loadEntityValues = (callback = () => {}) => {
@@ -604,7 +691,7 @@ export class TimeSeriesExplorer extends React.Component {
         }
       };
 
-      const nonBlankEntities = filter(currentEntities, (entity) => { return entity.fieldValue.length > 0; });
+      const nonBlankEntities = currentEntities.filter((entity) => { return entity.fieldValue.length > 0; });
 
       if (modelPlotEnabled === false &&
         isSourceDataChartableForDetector(selectedJob, detectorIndex) === false &&
@@ -702,7 +789,8 @@ export class TimeSeriesExplorer extends React.Component {
           searchBounds.min.valueOf(),
           searchBounds.max.valueOf(),
           stateUpdate.contextAggregationInterval.expression,
-          aggType)
+          aggType
+        ).toPromise()
           .then((resp) => {
             stateUpdate.contextForecastData = processForecastResults(resp.results);
             finish(counter);
@@ -762,7 +850,7 @@ export class TimeSeriesExplorer extends React.Component {
    */
   updateCriteriaFields(detectorIndex, entities) {
     // Only filter on the entity if the field has a value.
-    const nonBlankEntities = filter(entities, (entity) => { return entity.fieldValue.length > 0; });
+    const nonBlankEntities = entities.filter(entity => entity.fieldValue.length > 0);
     this._criteriaFields = [
       {
         fieldName: 'detector_index',
@@ -868,7 +956,8 @@ export class TimeSeriesExplorer extends React.Component {
     const tableControlsListener = () => {
       const { zoomFrom, zoomTo } = this.state;
       if (zoomFrom !== undefined && zoomTo !== undefined) {
-        this.loadAnomaliesTableData(zoomFrom.getTime(), zoomTo.getTime());
+        this.loadAnomaliesTableData(zoomFrom.getTime(), zoomTo.getTime()).subscribe(res =>
+          this.setState(res));
       }
     };
 
@@ -978,6 +1067,98 @@ export class TimeSeriesExplorer extends React.Component {
       this.resizeHandler();
     });
     this.resizeHandler();
+
+    // Listen for context chart updates.
+    this.contextChart
+      .pipe(
+        skipWhile(() => {
+          const {
+            contextChartData,
+            contextForecastData,
+          } = this.state;
+
+          return ((contextChartData === undefined || contextChartData.length === 0) &&
+            (contextForecastData === undefined || contextForecastData.length === 0));
+        }),
+        debounceTime(500),
+        tap((selection) => {
+          const {
+            focusChartData,
+            zoomFromFocusLoaded,
+            zoomToFocusLoaded,
+          } = this.state;
+
+          const defaultRange = this.getDefaultRangeFromState();
+
+          if ((selection.from.getTime() !== defaultRange[0].getTime() || selection.to.getTime() !== defaultRange[1].getTime()) &&
+            (isNaN(Date.parse(selection.from)) === false && isNaN(Date.parse(selection.to)) === false)) {
+            const zoomState = { from: selection.from.toISOString(), to: selection.to.toISOString() };
+            appStateHandler(APP_STATE_ACTION.SET_ZOOM, zoomState);
+          } else {
+            appStateHandler(APP_STATE_ACTION.UNSET_ZOOM);
+          }
+
+          this.setState({
+            zoomFrom: selection.from,
+            zoomTo: selection.to,
+          });
+
+          if (
+            (this.contextChartSelectedInitCallDone === false && focusChartData === undefined) ||
+              (zoomFromFocusLoaded.getTime() !== selection.from.getTime()) ||
+              (zoomToFocusLoaded.getTime() !== selection.to.getTime())
+          ) {
+            this.contextChartSelectedInitCallDone = true;
+
+            this.setState({
+              loading: true,
+              fullRefresh: false,
+            });
+          }
+        }),
+        switchMap(selection => {
+          const {
+            jobs,
+            selectedJob
+          } = this.state;
+
+          // Calculate the aggregation interval for the focus chart.
+          const bounds = { min: moment(selection.from), max: moment(selection.to) };
+          const focusAggregationInterval = calculateAggregationInterval(
+            bounds,
+            CHARTS_POINT_TARGET,
+            jobs,
+            selectedJob,
+          );
+
+          // Ensure the search bounds align to the bucketing interval so that the first and last buckets are complete.
+          // For sum or count detectors, short buckets would hold smaller values, and model bounds would also be affected
+          // to some extent with all detector functions if not searching complete buckets.
+          const searchBounds = getBoundsRoundedToInterval(bounds, focusAggregationInterval, false);
+          return forkJoin([
+            this.getFocusData(selection),
+            // Load the data for the anomalies table.
+            this.loadAnomaliesTableData(searchBounds.min.valueOf(), searchBounds.max.valueOf())
+          ]);
+        }),
+        withLatestFrom(this.contextChart)
+      )
+      .subscribe(([[refreshFocusData, tableData], selection]) => {
+        const {
+          modelPlotEnabled,
+        } = this.state;
+
+        // All the data is ready now for a state update.
+        this.setState({
+          focusAggregationInterval: this.getFocusAggregationInterval({ from: selection.from, to: selection.to }),
+          ...refreshFocusData,
+          loading: false,
+          showModelBoundsCheckbox: modelPlotEnabled && (refreshFocusData.focusChartData.length > 0),
+          zoomFromFocusLoaded: selection.from,
+          zoomToFocusLoaded: selection.to,
+          ...tableData
+        });
+      });
   }
 
   componentWillUnmount() {
