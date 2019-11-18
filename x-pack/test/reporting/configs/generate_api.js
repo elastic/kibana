@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { esTestConfig, kbnTestConfig } from '@kbn/test';
+import { esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
 import { format as formatUrl } from 'url';
 import { getApiIntegrationConfig } from '../../api_integration/config';
 import { getReportingApiConfig } from './api';
@@ -35,8 +35,8 @@ export default async function ({ readConfigFile }) {
         `--server.maxPayloadBytes=1679958`,
         `--server.port=${kbnTestConfig.getPort()}`,
         `--elasticsearch.hosts=${formatUrl(servers.elasticsearch)}`,
-        `--elasticsearch.password=${servers.elasticsearch.password}`,
-        `--elasticsearch.username=${servers.elasticsearch.username}`,
+        `--elasticsearch.username=${kibanaServerTestUser.username}`,
+        `--elasticsearch.password=${kibanaServerTestUser.password}`,
         `--xpack.reporting.csv.enablePanelActionDownload=true`,
         `--xpack.reporting.csv.maxSizeBytes=2850`,
         `--xpack.reporting.queue.pollInterval=3000`,
