@@ -23,5 +23,6 @@ export * from './checkbox_field';
 export * from './combobox_field';
 export * from './multi_select_field';
 export * from './select_field';
+export * from './super_select_field';
 export * from './toggle_field';
 export * from './text_area_field';

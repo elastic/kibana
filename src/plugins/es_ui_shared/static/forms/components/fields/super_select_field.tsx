@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import React, { ReactNode, OptionHTMLAttributes } from 'react';
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import React from 'react';
+import { EuiFormRow, EuiSuperSelect, EuiSuperSelectProps } from '@elastic/eui';
 
 import { FieldHook } from '../../hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '../helpers';
@@ -26,16 +26,14 @@ import { getFieldValidityAndErrorMessage } from '../helpers';
 interface Props {
   field: FieldHook;
   euiFieldProps: {
-    options: Array<
-      { text: string | ReactNode; [key: string]: any } & OptionHTMLAttributes<HTMLOptionElement>
-    >;
+    options: EuiSuperSelectProps<any>['options'];
     [key: string]: any;
   };
   idAria?: string;
   [key: string]: any;
 }
 
-export const SelectField = ({ field, euiFieldProps, ...rest }: Props) => {
+export const SuperSelectField = ({ field, euiFieldProps, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   return (
@@ -48,15 +46,17 @@ export const SelectField = ({ field, euiFieldProps, ...rest }: Props) => {
       data-test-subj={rest['data-test-subj']}
       describedByIds={rest.idAria ? [rest.idAria] : undefined}
     >
-      <EuiSelect
+      <EuiSuperSelect
         fullWidth
-        value={field.value as string}
-        onChange={e => {
-          field.setValue(e.target.value);
+        hasDividers
+        itemLayoutAlign="top"
+        valueOfSelected={field.value as string}
+        onChange={value => {
+          field.setValue(value);
         }}
-        hasNoInitialSelection={true}
         isInvalid={isInvalid}
-        data-test-subj="select"
+        data-test-subj="superSelect"
+        options
         {...euiFieldProps}
       />
     </EuiFormRow>

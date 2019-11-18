@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { ComponentType } from 'react';
 import { FieldHook, FIELD_TYPES } from '../hook_form_lib';
 
 interface Props {
   field: FieldHook;
-  euiFieldProps?: Record<string, any>;
+  euiFieldProps?: { [key: string]: any };
   idAria?: string;
   [key: string]: any;
 }
@@ -34,16 +34,18 @@ import {
   ComboBoxField,
   MultiSelectField,
   SelectField,
+  SuperSelectField,
   ToggleField,
 } from './fields';
 
-const mapTypeToFieldComponent = {
+const mapTypeToFieldComponent: { [key: string]: ComponentType<any> } = {
   [FIELD_TYPES.TEXT]: TextField,
   [FIELD_TYPES.NUMBER]: NumericField,
   [FIELD_TYPES.CHECKBOX]: CheckBoxField,
   [FIELD_TYPES.COMBO_BOX]: ComboBoxField,
   [FIELD_TYPES.MULTI_SELECT]: MultiSelectField,
   [FIELD_TYPES.SELECT]: SelectField,
+  [FIELD_TYPES.SUPER_SELECT]: SuperSelectField,
   [FIELD_TYPES.TOGGLE]: ToggleField,
 };
 
