@@ -1,5 +1,5 @@
 .lnsExpressionRenderer {
-  position: relative;
+  position: static; // Let the progress indicator position itself against the outer parent
   width: 100%;
   height: 100%;
   display: flex;

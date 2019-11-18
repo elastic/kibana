@@ -70,7 +70,8 @@ const PreviewRenderer = ({
       })}
     >
       <ExpressionRendererComponent
-        padding={'s'}
+        className="lnsSuggestionPanel__expressionRenderer"
+        padding="s"
         expression={expression}
         renderError={() => {
           return (

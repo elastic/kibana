@@ -29,6 +29,7 @@ import { ExpressionLoader } from './loader';
 // Accept all options of the runner as props except for the
 // dom element which is provided by the component itself
 export interface ExpressionRendererProps extends IExpressionLoaderParams {
+  className?: string;
   dataAttrs?: string[];
   expression: string | ExpressionAST;
   renderError?: (error?: string | null) => React.ReactElement | React.ReactElement[];
@@ -50,6 +51,7 @@ const defaultState: State = {
 };
 
 export const ExpressionRendererImplementation = ({
+  className,
   dataAttrs,
   expression,
   renderError,
@@ -122,6 +124,7 @@ export const ExpressionRendererImplementation = ({
   const classes = classNames('expExpressionRenderer', {
     'expExpressionRenderer-isEmpty': state.isEmpty,
     'expExpressionRenderer-hasError': !!state.error,
+    className,
   });
 
   const expressionStyles: React.CSSProperties = {};
