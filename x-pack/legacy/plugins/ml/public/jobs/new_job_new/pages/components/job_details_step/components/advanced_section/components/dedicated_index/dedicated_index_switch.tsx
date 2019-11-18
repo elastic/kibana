@@ -30,7 +30,6 @@ export const DedicatedIndexSwitch: FC = () => {
         checked={useDedicatedIndex}
         onChange={toggleModelPlot}
         data-test-subj="mlJobWizardSwitchUseDedicatedIndex"
-        showLabel={false}
         label={i18n.translate(
           'xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.useDedicatedIndex.title',
           {

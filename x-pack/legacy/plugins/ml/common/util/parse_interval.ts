@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-import moment from 'moment';
+import { duration, Duration, unitOfTime } from 'moment';
 import dateMath from '@elastic/datemath';
+
+type SupportedUnits = unitOfTime.Base;
 
 // Assume interval is in the form (value)(unit), such as "1h"
 const INTERVAL_STRING_RE = new RegExp('^([0-9]*)\\s*(' + dateMath.units.join('|') + ')$');
 
 // moment.js is only designed to allow fractional values between 0 and 1
 // for units of hour or less.
-const SUPPORT_ZERO_DURATION_UNITS = ['ms', 's', 'm', 'h'];
+const SUPPORT_ZERO_DURATION_UNITS: SupportedUnits[] = ['ms', 's', 'm', 'h'];
 
 // Parses an interval String, such as 7d, 1h or 30m to a moment duration.
 // Differs from the Kibana ui/utils/parse_interval in the following ways:
@@ -25,22 +25,25 @@ const SUPPORT_ZERO_DURATION_UNITS = ['ms', 's', 'm', 'h'];
 // to work with units less than 'day'.
 // 3. Fractional intervals e.g. 1.5h or 4.5d are not allowed, in line with the behaviour
 // of the Elasticsearch date histogram aggregation.
-export function parseInterval(interval) {
-  const matches = String(interval).trim().match(INTERVAL_STRING_RE);
-  if (!Array.isArray(matches)) return null;
-  if (matches.length < 3) return null;
+export function parseInterval(interval: string): Duration | null {
+  const matches = String(interval)
+    .trim()
+    .match(INTERVAL_STRING_RE);
+  if (!Array.isArray(matches) || matches.length < 3) {
+    return null;
+  }
 
   try {
-    const value = parseInt(matches[1]);
-    const unit = matches[2];
+    const value = parseInt(matches[1], 10);
+    const unit = matches[2] as SupportedUnits;
 
     // In line with moment.js, only allow zero value intervals when the unit is less than 'day'.
     // And check for isNaN as e.g. valueless 'm' will pass the regex test.
-    if (isNaN(value) || (value < 1 && SUPPORT_ZERO_DURATION_UNITS.indexOf(unit) === -1))  {
+    if (isNaN(value) || (value < 1 && SUPPORT_ZERO_DURATION_UNITS.indexOf(unit) === -1)) {
       return null;
     }
 
-    return moment.duration(value, unit);
+    return duration(value, unit);
   } catch (e) {
     return null;
   }

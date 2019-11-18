@@ -4,33 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 // A simple template renderer, it replaces mustache/angular style {{...}} tags with
 // the values provided via the data object
-export function renderTemplate(str, data) {
+export function renderTemplate(str: string, data?: Record<string, string>): string {
   const matches = str.match(/{{(.*?)}}/g);
 
-  if (Array.isArray(matches)) {
+  if (Array.isArray(matches) && data !== undefined) {
     matches.forEach(v => {
       str = str.replace(v, data[v.replace(/{{|}}/g, '')]);
     });
   }
 
   return str;
-}
-
-export function stringHash(str) {
-  let hash = 0;
-  let chr = '';
-  if (str.length === 0) {
-    return hash;
-  }
-  for (let i = 0; i < str.length; i++) {
-    chr = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
-    hash |= 0;
-  }
-  return hash < 0 ? hash * -2 : hash;
 }
