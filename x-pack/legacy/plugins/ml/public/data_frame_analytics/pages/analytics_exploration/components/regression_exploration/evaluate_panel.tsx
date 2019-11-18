@@ -19,15 +19,17 @@ import {
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 import { EvaluateStat } from './evaluate_stat';
+import { RegressionResultsSearchQuery } from '../../../../common/analytics';
 
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus: DATA_FRAME_TASK_STATE;
+  searchQuery: RegressionResultsSearchQuery;
 }
 
 const defaultEval: Eval = { meanSquaredError: '', rSquared: '', error: null };
 
-export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus }) => {
+export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) => {
   const [trainingEval, setTrainingEval] = useState<Eval>(defaultEval);
   const [generalizationEval, setGeneralizationEval] = useState<Eval>(defaultEval);
   const [isLoadingTraining, setIsLoadingTraining] = useState<boolean>(false);
@@ -39,9 +41,8 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus }) => {
   // default is 'ml'
   const resultsField = jobConfig.dest.results_field;
 
-  const loadData = async () => {
+  const loadGeneralizationData = async (ignoreDefaultQuery: boolean = true) => {
     setIsLoadingGeneralization(true);
-    setIsLoadingTraining(true);
 
     const genErrorEval = await loadEvalData({
       isTraining: false,
@@ -49,6 +50,8 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus }) => {
       dependentVariable,
       resultsField,
       predictionFieldName,
+      searchQuery,
+      ignoreDefaultQuery,
     });
 
     if (genErrorEval.success === true && genErrorEval.eval) {
@@ -67,6 +70,10 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus }) => {
         error: genErrorEval.error,
       });
     }
+  };
+
+  const loadTrainingData = async (ignoreDefaultQuery: boolean = true) => {
+    setIsLoadingTraining(true);
 
     const trainingErrorEval = await loadEvalData({
       isTraining: true,
@@ -74,6 +81,8 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus }) => {
       dependentVariable,
       resultsField,
       predictionFieldName,
+      searchQuery,
+      ignoreDefaultQuery,
     });
 
     if (trainingErrorEval.success === true && trainingErrorEval.eval) {
@@ -89,14 +98,46 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus }) => {
       setTrainingEval({
         meanSquaredError: '',
         rSquared: '',
-        error: genErrorEval.error,
+        error: trainingErrorEval.error,
       });
     }
   };
 
+  const loadData = async ({ isTraining }: { isTraining?: { query: string; operator: string } }) => {
+    if (isTraining !== undefined && isTraining.query === 'false') {
+      loadGeneralizationData();
+      setTrainingEval({
+        meanSquaredError: '--',
+        rSquared: '--',
+        error: null,
+      });
+    } else if (isTraining !== undefined && isTraining.query === 'true') {
+      loadTrainingData();
+      setGeneralizationEval({
+        meanSquaredError: '--',
+        rSquared: '--',
+        error: null,
+      });
+    } else {
+      // No is_training clause from search bar so load both
+      loadGeneralizationData(false);
+      loadTrainingData(false);
+    }
+  };
+
   useEffect(() => {
-    loadData();
-  }, []);
+    const hasIsTrainingClause =
+      searchQuery.bool &&
+      searchQuery.bool.must.filter(
+        (clause: any) => clause.match && clause.match[`${resultsField}.is_training`] !== undefined
+      );
+    const isTraining =
+      hasIsTrainingClause &&
+      hasIsTrainingClause[0] &&
+      hasIsTrainingClause[0].match[`${resultsField}.is_training`];
+
+    loadData({ isTraining });
+  }, [searchQuery]);
 
   return (
     <EuiPanel>

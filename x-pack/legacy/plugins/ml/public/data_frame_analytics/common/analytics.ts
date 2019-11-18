@@ -9,6 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import { filter, distinctUntilChanged } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 import { idx } from '@kbn/elastic-idx';
+import { cloneDeep } from 'lodash';
 import { ml } from '../../services/ml_api_service';
 import { getErrorMessage } from '../pages/analytics_management/hooks/use_create_analytics_form';
 
@@ -38,8 +39,8 @@ export enum INDEX_STATUS {
 }
 
 export interface Eval {
-  meanSquaredError: number | '';
-  rSquared: number | '';
+  meanSquaredError: number | string;
+  rSquared: number | string;
   error: null | string;
 }
 
@@ -213,18 +214,27 @@ export function getValuesFromResponse(response: RegressionEvaluateResponse) {
   return { meanSquaredError, rSquared };
 }
 
+export interface RegressionResultsSearchQuery {
+  bool?: { [key: string]: any };
+  term?: { [key: string]: any };
+}
+
 export const loadEvalData = async ({
   isTraining,
   index,
   dependentVariable,
   resultsField,
   predictionFieldName,
+  searchQuery,
+  ignoreDefaultQuery,
 }: {
   isTraining: boolean;
   index: string;
   dependentVariable: string;
   resultsField: string;
   predictionFieldName?: string;
+  searchQuery?: RegressionResultsSearchQuery | undefined;
+  ignoreDefaultQuery?: boolean;
 }) => {
   const results: LoadEvaluateResult = { success: false, eval: null, error: null };
   const defaultPredictionField = `${dependentVariable}_prediction`;
@@ -232,7 +242,18 @@ export const loadEvalData = async ({
     predictionFieldName ? predictionFieldName : defaultPredictionField
   }`;
 
-  const query = { term: { [`${resultsField}.is_training`]: { value: isTraining } } };
+  let query: RegressionResultsSearchQuery = {
+    term: { [`${resultsField}.is_training`]: { value: isTraining } },
+  };
+
+  if (searchQuery !== undefined && ignoreDefaultQuery === true) {
+    query = searchQuery;
+  } else if (searchQuery !== undefined && searchQuery.bool !== undefined) {
+    const searchQueryClone = cloneDeep(searchQuery);
+    // Doing an explicit check for undefined above so non-null assertion operator should be safe
+    searchQueryClone.bool!.must.push(query);
+    query = searchQueryClone;
+  }
 
   const config = {
     index,
