@@ -2,17 +2,17 @@
 
 ## Development
 ### Branch
-We're using a long-running feature branch [`feature-integrations-manager`](https://github.com/elastic/kibana/tree/feature-integrations-manager). 
+We're using a long-running feature branch [`feature-ingest`](https://github.com/elastic/kibana/tree/feature-ingest). 
 
 <details>
   <summary>Keeping up to date with upstream kibana</summary>
 
 ```bash
 ## checkout feature branch to your fork
-git checkout -B feature-integrations-manager origin/feature-integrations-manager
+git checkout -B feature-ingest origin/feature-ingest
 
 ## make sure your feature branch is current with upstream feature branch
-git pull upstream feature-integrations-manager
+git pull upstream feature-ingest
 
 ## pull in changes from upstream master
 git pull upstream master
@@ -29,12 +29,12 @@ git push upstream
 </details>
 
 ### Feature development
-In your own fork of `elastic/kibana`, create a feature branch based on `feature-integrations-manager`.
+In your own fork of `elastic/kibana`, create a feature branch based on `feature-ingest`.
 
 ```
-git checkout -b 1234-feature-description feature-integrations-manager
+git checkout -b 1234-feature-description feature-ingest
 # ... git commits for feature
-open https://github.com/elastic/kibana/compare/feature-integrations-manager...yourgithubname:1234-feature-description
+open https://github.com/elastic/kibana/compare/feature-ingest...yourgithubname:1234-feature-description
 ```
 
 See https://github.com/elastic/kibana/pull/37950 for an example.

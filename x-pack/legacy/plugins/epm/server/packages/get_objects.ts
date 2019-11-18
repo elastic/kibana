@@ -51,7 +51,7 @@ export async function getObjects(
 }
 
 // the assets from the registry are malformed
-// https://github.com/elastic/integrations-registry/issues/42
+// https://github.com/elastic/package-registry/issues/42
 function ensureJsonValues(obj: SavedObjectToBe) {
   const { attributes } = obj;
   if (
