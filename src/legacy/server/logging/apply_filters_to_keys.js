@@ -18,9 +18,6 @@
  */
 
 function toPojo(obj) {
-  if (obj.err && obj.err.data) {
-    delete obj.err.data;
-  }
   return JSON.parse(JSON.stringify(obj));
 }
 
