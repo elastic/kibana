@@ -55,7 +55,7 @@ function sign({
   features?: PublicFeatures;
   error?: string;
 }) {
-  return createHash('md5')
+  return createHash('sha256')
     .update(
       JSON.stringify({
         license,
