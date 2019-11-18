@@ -5,7 +5,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { CombinedJob } from '../jobs/new_job_new/common/job_creator/configs';
+import { CombinedJob } from '../jobs/new_job/common/job_creator/configs';
 
 export interface ExistingJobsAndGroups {
   jobIds: string[];
