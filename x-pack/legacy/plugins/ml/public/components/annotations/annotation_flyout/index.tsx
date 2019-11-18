@@ -344,6 +344,7 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
   }
 }
 
-export const AnnotationFlyout = injectObservablesAsProps({ annotation: annotation$ }, (injectI18n(
-  AnnotationFlyoutIntl
-) as any) as ComponentType);
+export const AnnotationFlyout = injectObservablesAsProps(
+  { annotation: annotation$ },
+  (injectI18n(AnnotationFlyoutIntl) as any) as ComponentType
+);

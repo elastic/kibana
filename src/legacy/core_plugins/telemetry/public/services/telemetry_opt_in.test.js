@@ -48,7 +48,7 @@ describe('TelemetryOptInProvider', () => {
       }
     };
 
-    const provider = new TelemetryOptInProvider(mockInjector, mockChrome);
+    const provider = new TelemetryOptInProvider(mockInjector, mockChrome, false);
     return {
       provider,
       mockHttp,

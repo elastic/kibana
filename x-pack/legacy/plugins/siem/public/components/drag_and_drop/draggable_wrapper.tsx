@@ -230,13 +230,10 @@ const DraggableWrapperComponent = React.memo<Props>(
 
 DraggableWrapperComponent.displayName = 'DraggableWrapperComponent';
 
-export const DraggableWrapper = connect(
-  null,
-  {
-    registerProvider: dragAndDropActions.registerProvider,
-    unRegisterProvider: dragAndDropActions.unRegisterProvider,
-  }
-)(DraggableWrapperComponent);
+export const DraggableWrapper = connect(null, {
+  registerProvider: dragAndDropActions.registerProvider,
+  unRegisterProvider: dragAndDropActions.unRegisterProvider,
+})(DraggableWrapperComponent);
 
 /**
  * Conditionally wraps children in an EuiPortal to ensure drag offsets are correct when dragging

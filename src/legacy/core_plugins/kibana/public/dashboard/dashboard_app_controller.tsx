@@ -50,15 +50,14 @@ import {
 import { KbnUrl } from 'ui/url/kbn_url';
 import { IndexPattern } from 'ui/index_patterns';
 import { IPrivate } from 'ui/private';
-import { Query, SavedQuery } from 'src/legacy/core_plugins/data/public';
+import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
 import { capabilities } from 'ui/capabilities';
 import { Subscription } from 'rxjs';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
-import { extractTimeFilter, changeTimeFilter } from '../../../../../plugins/data/public';
+import { Query } from '../../../../../plugins/data/public';
 import { start as data } from '../../../data/public/legacy';
-import { esFilters } from '../../../../../plugins/data/public';
 
 import {
   DashboardContainer,
@@ -417,31 +416,6 @@ export class DashboardAppController {
       queryFilter.setFilters(filters);
     };
 
-    $scope.onCancelApplyFilters = () => {
-      $scope.appState.$newFilters = [];
-    };
-
-    $scope.onApplyFilters = filters => {
-      if (filters.length) {
-        // All filters originated from one visualization.
-        const indexPatternId = filters[0].meta.index;
-        const indexPattern = _.find(
-          $scope.indexPatterns,
-          (p: IndexPattern) => p.id === indexPatternId
-        );
-        if (indexPattern && indexPattern.timeFieldName) {
-          const { timeRangeFilter, restOfFilters } = extractTimeFilter(
-            indexPattern.timeFieldName,
-            filters
-          );
-          queryFilter.addFilters(restOfFilters);
-          if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
-        }
-      }
-
-      $scope.appState.$newFilters = [];
-    };
-
     $scope.onQuerySaved = savedQuery => {
       $scope.savedQuery = savedQuery;
     };
@@ -513,12 +487,6 @@ export class DashboardAppController {
         }
       }
     );
-
-    $scope.$watch('appState.$newFilters', (filters: esFilters.Filter[] = []) => {
-      if (filters.length === 1) {
-        $scope.onApplyFilters(filters);
-      }
-    });
 
     $scope.indexPatterns = [];
 
