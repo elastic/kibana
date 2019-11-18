@@ -4,6 +4,8 @@
 
 ## PluginConfigSchema type
 
+Dedicated type for plugin configuration schema.
+
 <b>Signature:</b>
 
 ```typescript

@@ -4,6 +4,8 @@
 
 ## PluginConfigDescriptor interface
 
+Describes a plugin configuration schema and capabilities.
+
 <b>Signature:</b>
 
 ```typescript
@@ -14,6 +16,28 @@ export interface PluginConfigDescriptor<T = any>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [exposeToBrowser](./kibana-plugin-server.pluginconfigdescriptor.exposetobrowser.md) | <code>Array&lt;keyof T&gt;</code> |  |
-|  [schema](./kibana-plugin-server.pluginconfigdescriptor.schema.md) | <code>PluginConfigSchema&lt;T&gt;</code> |  |
+|  [exposeToBrowser](./kibana-plugin-server.pluginconfigdescriptor.exposetobrowser.md) | <code>Array&lt;keyof T&gt;</code> | List of configuration properties that will be available on the client-side plugin. |
+|  [schema](./kibana-plugin-server.pluginconfigdescriptor.schema.md) | <code>PluginConfigSchema&lt;T&gt;</code> | Schema to use to validate the plugin configuration.[PluginConfigSchema](./kibana-plugin-server.pluginconfigschema.md) |
+
+## Example
+
+
+```typescript
+// my_plugin/server/index.ts
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from 'kibana/server';
+
+const configSchema = schema.object({
+  secret: schema.string({ defaultValue: 'Only on server' }),
+  uiProp: schema.string({ defaultValue: 'Accessible from client' }),
+});
+
+type ConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<ConfigType> = {
+  exposeToBrowser: ['uiProp'],
+  schema: configSchema,
+};
+
+```
 

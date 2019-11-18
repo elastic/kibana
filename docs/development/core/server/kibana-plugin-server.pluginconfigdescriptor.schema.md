@@ -4,6 +4,10 @@
 
 ## PluginConfigDescriptor.schema property
 
+Schema to use to validate the plugin configuration.
+
+[PluginConfigSchema](./kibana-plugin-server.pluginconfigschema.md)
+
 <b>Signature:</b>
 
 ```typescript

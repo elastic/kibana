@@ -959,19 +959,13 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends obje
     stop?(): void;
 }
 
-// Warning: (ae-missing-release-tag) "PluginConfigDescriptor" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
 export interface PluginConfigDescriptor<T = any> {
-    // (undocumented)
     exposeToBrowser?: Array<keyof T>;
-    // (undocumented)
     schema: PluginConfigSchema<T>;
 }
 
-// Warning: (ae-missing-release-tag) "PluginConfigSchema" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @public
 export type PluginConfigSchema<T = unknown> = Type<T>;
 
 // @public
