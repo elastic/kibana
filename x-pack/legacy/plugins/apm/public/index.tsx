@@ -4,22 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
 import { npStart } from 'ui/new_platform';
 import 'react-vis/dist/style.css';
 import 'ui/autoload/all';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 
+import url from 'url';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { GlobalHelpExtension } from './components/app/GlobalHelpExtension';
 import { plugin } from './new-platform';
 import { REACT_APP_ROOT_ID } from './new-platform/plugin';
 import './style/global_overrides.css';
 import template from './templates/index.html';
-import { KibanaCoreContextProvider } from '../../observability/public';
 
 const { core } = npStart;
 
@@ -32,19 +29,17 @@ core.chrome.setHelpExtension({
     {
       linkType: 'discuss',
       href: 'https://discuss.elastic.co/c/apm'
+    },
+    {
+      linkType: 'custom',
+      href: url.format({
+        pathname: core.http.basePath.prepend('/app/kibana')
+      }),
+      text: i18n.translate('xpack.apm.helpMenu.upgradeAssistantLink', {
+        defaultMessage: 'Upgrade assistant'
+      })
     }
-  ],
-  content: domElement => {
-    ReactDOM.render(
-      <KibanaCoreContextProvider core={core}>
-        <GlobalHelpExtension />
-      </KibanaCoreContextProvider>,
-      domElement
-    );
-    return () => {
-      ReactDOM.unmountComponentAtNode(domElement);
-    };
-  }
+  ]
 });
 
 // @ts-ignore
