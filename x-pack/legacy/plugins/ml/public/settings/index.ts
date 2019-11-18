@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-import './directive';
+import './settings_directive';
+import './calendars';
+import './filter_lists';

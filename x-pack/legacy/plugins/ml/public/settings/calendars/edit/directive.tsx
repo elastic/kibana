@@ -4,21 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import 'ngreact';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+// @ts-ignore
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
+import uiRoutes from 'ui/routes';
+import { I18nContext } from 'ui/i18n';
 import { checkFullLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check';
 import { getCreateCalendarBreadcrumbs, getEditCalendarBreadcrumbs } from '../../breadcrumbs';
 
-import uiRoutes from 'ui/routes';
-import { I18nContext } from 'ui/i18n';
+import { NewCalendar } from './new_calendar';
 
 const template = `
   <div class="euiSpacer euiSpacer--s" />
@@ -33,7 +34,7 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       checkMlNodesAvailable,
-    }
+    },
   })
   .when('/settings/calendars_list/edit_calendar/:calendarId', {
     template,
@@ -42,21 +43,19 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       checkMlNodesAvailable,
-    }
+    },
   });
 
-import { NewCalendar } from './new_calendar.js';
-
-module.directive('mlNewCalendar', function ($route) {
+module.directive('mlNewCalendar', function($route: any) {
   return {
     restrict: 'E',
     replace: false,
     scope: {},
-    link: function (scope, element) {
+    link(scope: ng.IScope, element: ng.IAugmentedJQuery) {
       const props = {
         calendarId: $route.current.params.calendarId,
         canCreateCalendar: checkPermission('canCreateCalendar'),
-        canDeleteCalendar: checkPermission('canDeleteCalendar')
+        canDeleteCalendar: checkPermission('canDeleteCalendar'),
       };
 
       ReactDOM.render(
@@ -65,6 +64,6 @@ module.directive('mlNewCalendar', function ($route) {
         </I18nContext>,
         element[0]
       );
-    }
+    },
   };
 });
