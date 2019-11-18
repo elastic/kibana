@@ -126,11 +126,18 @@ export interface ChromeHelpExtension {
     appName: string;
     // (undocumented)
     content?: (element: HTMLDivElement) => () => void;
-    // Warning: (ae-forgotten-export) The symbol "HeaderHelpMenuUIExtraLink" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
-    links?: HeaderHelpMenuUIExtraLink[];
+    links?: ChromeHelpExtensionMenuExtraLink[];
 }
+
+// Warning: (ae-forgotten-export) The symbol "GitHubLink" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "DiscussLink" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "DocumentationLink" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "CustomLink" needs to be exported by the entry point index.d.ts
+// Warning: (ae-missing-release-tag) "ChromeHelpExtensionMenuExtraLink" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export type ChromeHelpExtensionMenuExtraLink = ExclusiveUnion<GitHubLink, ExclusiveUnion<DiscussLink, ExclusiveUnion<DocumentationLink, CustomLink>>>;
 
 // @public (undocumented)
 export interface ChromeNavControl {

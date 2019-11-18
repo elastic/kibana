@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-links?: HeaderHelpMenuUIExtraLink[];
+links?: ChromeHelpExtensionMenuExtraLink[];
 ```

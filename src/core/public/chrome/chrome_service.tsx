@@ -88,7 +88,7 @@ export class ChromeService {
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
 
-  constructor(private readonly params: ConstructorParams) { }
+  constructor(private readonly params: ConstructorParams) {}
 
   /**
    * These observables allow consumers to toggle the chrome visibility via either:

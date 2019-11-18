@@ -17,5 +17,5 @@ export interface ChromeHelpExtension
 |  --- | --- | --- |
 |  [appName](./kibana-plugin-public.chromehelpextension.appname.md) | <code>string</code> |  |
 |  [content](./kibana-plugin-public.chromehelpextension.content.md) | <code>(element: HTMLDivElement) =&gt; () =&gt; void</code> |  |
-|  [links](./kibana-plugin-public.chromehelpextension.links.md) | <code>HeaderHelpMenuUIExtraLink[]</code> |  |
+|  [links](./kibana-plugin-public.chromehelpextension.links.md) | <code>ChromeHelpExtensionMenuExtraLink[]</code> |  |
 
