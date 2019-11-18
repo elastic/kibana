@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiTitle, EuiIcon, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 import { entries } from '../../common/type_utils';
 import { RequirementsByServiceName } from '../../common/types';
@@ -21,15 +21,24 @@ export function Requirements(props: RequirementsProps) {
   const { requirements } = props;
   const { theme } = useCore();
 
-  const Text = styled.span`
-    padding-bottom: ${theme.eui.paddingSizes.m};
+  const FlexGroup = styled(EuiFlexGroup)`
+    padding: 0 0 ${theme.eui.paddingSizes.m} 0;
+    margin: 0;
   `;
-
   return (
     <Fragment>
-      <EuiTitle size="xs">
-        <Text>Compatibility</Text>
-      </EuiTitle>
+      <FlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={'logoElasticStack'} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle>
+            <EuiText>
+              <h4>Elastic Stack Compatibility</h4>
+            </EuiText>
+          </EuiTitle>
+        </EuiFlexItem>
+      </FlexGroup>
       {entries(requirements).map(([service, requirement]) => (
         <EuiFlexGroup key={service}>
           <EuiFlexItem grow={true}>
