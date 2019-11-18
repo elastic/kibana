@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { TimeRange, Query } from 'src/plugins/data/public';
 import { StaticIndexPattern, SavedQuery } from 'plugins/data';
 import moment from 'moment';
 import { Subscription } from 'rxjs';
@@ -32,7 +31,7 @@ import {
 import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
 import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
 import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn } from './types';
-import { esFilters } from '../../../../../../src/plugins/data/public';
+import { TimeRange, Query, esFilters } from '../../../../../../src/plugins/data/public';
 
 import { DashboardAppController } from './dashboard_app_controller';
 import { RenderDeps } from './application';

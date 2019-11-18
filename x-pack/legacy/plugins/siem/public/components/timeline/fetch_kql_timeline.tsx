@@ -50,7 +50,6 @@ const TimelineKqlFetchComponent = memo<OwnProps>(
           kueryFilterQuery,
           kueryFilterQueryDraft,
           storeType: 'timelineType',
-          type: null,
           timelineId: id,
         }),
       });

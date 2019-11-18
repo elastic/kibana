@@ -23,18 +23,18 @@ import _ from 'lodash';
 import { Moment } from 'moment';
 
 import { DashboardContainer } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
-import { Query } from 'src/plugins/data/public';
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
-import {
-  esFilters,
-  TimefilterContract as Timefilter,
-} from '../../../../../../src/plugins/data/public';
 import {
   stateMonitorFactory,
   StateMonitor,
   AppStateClass as TAppStateClass,
   migrateLegacyQuery,
 } from './legacy_imports';
+import {
+  Query,
+  esFilters,
+  TimefilterContract as Timefilter,
+} from '../../../../../../src/plugins/data/public';
 
 import { getAppStateDefaults, migrateAppState } from './lib';
 import { convertPanelStateToSavedDashboardPanel } from './lib/embeddable_saved_object_converters';
