@@ -29,8 +29,6 @@ const getTransactionResultSummaryItem = (transaction: Transaction) => {
 
   if (url) {
     const method = transaction.http?.request.method;
-    // TODO(TS-3.7-ESLINT)
-    // eslint-disable-next-line @typescript-eslint/camelcase
     const status = transaction.http?.response?.status_code;
 
     return <HttpInfoSummaryItem method={method} status={status} url={url} />;
