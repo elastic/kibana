@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardExpect.docTableFieldCount(150);
 
       // Set to time range with no data
-      await PageObjects.timePicker.setAbsoluteRange('2000-01-01 00:00:00.000', '2000-01-01 01:00:00.000');
+      await PageObjects.timePicker.setAbsoluteRange('Jan 1, 2000 @ 00:00:00.000', 'Jan 1, 2000 @ 01:00:00.000');
       await dashboardExpect.docTableFieldCount(0);
     });
 

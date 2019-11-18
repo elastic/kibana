@@ -43,8 +43,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
   class VisualBuilderPage {
     public async resetPage(
-      fromTime = '2015-09-19 06:31:44.000',
-      toTime = '2015-09-22 18:31:44.000'
+      fromTime = PageObjects.timePicker.defaultStartTime,
+      toTime = PageObjects.timePicker.defaultEndTime
     ) {
       await PageObjects.common.navigateToUrl('visualize', 'create?type=metrics');
       log.debug('Set absolute time range from "' + fromTime + '" to "' + toTime + '"');
