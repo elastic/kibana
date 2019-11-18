@@ -37,7 +37,7 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
   // id, type, status, progress, created time, view icon
-  const columns: ColumnType[] = [
+  const columns: Array<ColumnType<DataFrameAnalyticsListRow>> = [
     {
       field: DataFrameAnalyticsListColumn.id,
       name: i18n.translate('xpack.ml.overview.analyticsList.id', { defaultMessage: 'ID' }),
@@ -95,7 +95,7 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
 
     const { field, direction } = sort;
     setSortField(field);
-    setSortDirection(direction);
+    setSortDirection(direction as SORT_DIRECTION);
   };
 
   const pagination = {
@@ -121,7 +121,7 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
       hasActions={false}
       isExpandable={false}
       isSelectable={false}
-      items={items}
+      items={items as DataFrameAnalyticsListRow[]}
       itemId={DataFrameAnalyticsListColumn.id}
       onTableChange={onTableChange}
       pagination={pagination}

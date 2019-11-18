@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiInMemoryTableProps,
 } from '@elastic/eui';
 
 import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
@@ -271,7 +272,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     hidePerPageOptions: false,
   };
 
-  const search = {
+  const search: EuiInMemoryTableProps<DataFrameAnalyticsListRow>['search'] = {
     onChange: onQueryChange,
     box: {
       incremental: true,
@@ -323,7 +324,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
     const { field, direction } = sort;
     setSortField(field);
-    setSortDirection(direction);
+    setSortDirection(direction as SORT_DIRECTION);
   };
 
   return (

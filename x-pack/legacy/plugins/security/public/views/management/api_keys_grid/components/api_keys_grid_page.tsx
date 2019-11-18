@@ -21,6 +21,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  EuiInMemoryTableProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -191,7 +192,7 @@ export class ApiKeysGridPage extends Component<any, State> {
         field: 'expiration',
         direction: 'asc',
       },
-    };
+    } as const;
 
     const pagination = {
       initialPageSize: 20,
@@ -206,7 +207,7 @@ export class ApiKeysGridPage extends Component<any, State> {
       },
     };
 
-    const search = {
+    const search: EuiInMemoryTableProps<ApiKey>['search'] = {
       toolsLeft: selectedItems.length ? (
         <InvalidateProvider isAdmin={isAdmin}>
           {invalidateApiKeyPrompt => {

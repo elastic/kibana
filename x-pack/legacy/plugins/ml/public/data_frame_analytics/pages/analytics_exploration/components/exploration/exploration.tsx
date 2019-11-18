@@ -48,7 +48,6 @@ import {
   toggleSelectedField,
   DataFrameAnalyticsConfig,
   EsFieldName,
-  EsDoc,
   MAX_COLUMNS,
   INDEX_STATUS,
 } from '../../../../common';
@@ -169,7 +168,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
     docFieldsCount = docFields.length;
   }
 
-  const columns: ColumnType[] = [];
+  const columns: Array<ColumnType<typeof tableItems[number]>> = [];
 
   if (jobConfig !== undefined && selectedFields.length > 0 && tableItems.length > 0) {
     // table cell color coding takes into account:
@@ -190,14 +189,14 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
 
     columns.push(
       ...selectedFields.sort(sortColumns(tableItems[0], jobConfig.dest.results_field)).map(k => {
-        const column: ColumnType = {
+        const column: ColumnType<typeof tableItems[number]> = {
           field: k,
           name: k,
           sortable: true,
           truncateText: true,
         };
 
-        const render = (d: any, fullItem: EsDoc) => {
+        const render = (d: any, fullItem: typeof tableItems[number]) => {
           if (Array.isArray(d) && d.every(item => typeof item === 'string')) {
             // If the cells data is an array of strings, return as a comma separated list.
             // The list will get limited to 5 items with `…` at the end if there's more in the original array.
@@ -345,7 +344,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
 
       if (sort.field !== sortField || sort.direction !== sortDirection) {
         setClearTable(true);
-        loadExploreData(sort);
+        loadExploreData(sort as { field: string; direction: SORT_DIRECTION });
       }
     };
   }

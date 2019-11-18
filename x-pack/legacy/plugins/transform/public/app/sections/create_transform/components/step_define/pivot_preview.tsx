@@ -210,7 +210,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
   columnKeys.sort(sortColumns(groupByArr));
 
   const columns = columnKeys.map(k => {
-    const column: ColumnType = {
+    const column: ColumnType<typeof previewData[number]> = {
       field: k,
       name: k,
       sortable: true,
@@ -251,7 +251,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
 
   const sorting = {
     sort: {
-      field: columns[0].field,
+      field: columns[0].field as string,
       direction: SORT_DIRECTION.ASC,
     },
   };

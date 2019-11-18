@@ -26,6 +26,7 @@ import {
   Query,
 } from '@elastic/eui';
 
+import { EuiInMemoryTableProps } from '@elastic/eui/src/components/basic_table/in_memory_table';
 import { Query as QueryType } from '../../../analytics_management/components/analytics_list/common';
 
 import {
@@ -34,6 +35,7 @@ import {
   OnTableChangeArg,
   SortingPropType,
   SORT_DIRECTION,
+  SortDirection,
 } from '../../../../../components/ml_in_memory_table';
 
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
@@ -45,7 +47,6 @@ import {
   toggleSelectedField,
   DataFrameAnalyticsConfig,
   EsFieldName,
-  EsDoc,
   MAX_COLUMNS,
   getPredictedFieldName,
   INDEX_STATUS,
@@ -105,19 +106,19 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => 
     docFieldsCount = docFields.length;
   }
 
-  const columns: ColumnType[] = [];
+  const columns: Array<ColumnType<typeof tableItems[number]>> = [];
 
   if (jobConfig !== undefined && selectedFields.length > 0 && tableItems.length > 0) {
     columns.push(
       ...selectedFields.sort(sortRegressionResultsColumns(tableItems[0], jobConfig)).map(k => {
-        const column: ColumnType = {
+        const column: ColumnType<typeof tableItems[number]> = {
           field: k,
           name: k,
           sortable: true,
           truncateText: true,
         };
 
-        const render = (d: any, fullItem: EsDoc) => {
+        const render = (d: any, fullItem: typeof tableItems[number]) => {
           if (Array.isArray(d) && d.every(item => typeof item === 'string')) {
             // If the cells data is an array of strings, return as a comma separated list.
             // The list will get limited to 5 items with `…` at the end if there's more in the original array.
@@ -257,7 +258,11 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => 
       setPageSize(size);
 
       if (sort.field !== sortField || sort.direction !== sortDirection) {
-        loadExploreData({ ...sort, searchQuery });
+        loadExploreData({
+          field: sort.field,
+          direction: sort.direction as SortDirection,
+          searchQuery,
+        });
       }
     };
   }
@@ -285,7 +290,7 @@ export const ResultsTable: FC<Props> = React.memo(({ jobConfig, jobStatus }) => 
     }
   };
 
-  const search = {
+  const search: EuiInMemoryTableProps<typeof tableItems[number]>['search'] = {
     onChange: onQueryChange,
     defaultQuery: searchString,
     box: {

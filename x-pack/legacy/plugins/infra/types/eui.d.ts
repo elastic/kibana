@@ -43,17 +43,9 @@ declare module '@elastic/eui' {
   };
   export const EuiSideNav: React.SFC<EuiSideNavProps>;
 
-  type EuiErrorBoundaryProps = CommonProps & {
-    children: React.ReactNode;
-  };
-
   type EuiSizesResponsive = 'xs' | 's' | 'm' | 'l' | 'xl';
   type EuiResponsiveProps = CommonProps & {
     children: React.ReactNode;
     sizes: EuiSizesResponsive[];
   };
-
-  export const EuiHideFor: React.SFC<EuiResponsiveProps>;
-
-  export const EuiShowFor: React.SFC<EuiResponsiveProps>;
 }

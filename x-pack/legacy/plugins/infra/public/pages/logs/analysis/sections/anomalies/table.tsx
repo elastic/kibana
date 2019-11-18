@@ -22,8 +22,8 @@ interface TableItem {
 
 interface SortingOptions {
   sort: {
-    field: string;
-    direction: string;
+    field: keyof TableItem;
+    direction: 'asc' | 'desc';
   };
 }
 

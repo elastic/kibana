@@ -183,8 +183,8 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     docFieldsCount = docFields.length;
   }
 
-  const columns: ColumnType[] = selectedFields.map(k => {
-    const column: ColumnType = {
+  const columns: Array<ColumnType<typeof tableItems[number]>> = selectedFields.map(k => {
+    const column: ColumnType<typeof tableItems[number]> = {
       field: `_source["${k}"]`,
       name: k,
       sortable: true,

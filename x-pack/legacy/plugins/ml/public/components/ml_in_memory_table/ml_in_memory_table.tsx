@@ -73,7 +73,7 @@ const getInitialSorting = (columns: any, sorting: any) => {
 
 import { MlInMemoryTableBasic } from './types';
 
-export class MlInMemoryTable extends MlInMemoryTableBasic {
+export class MlInMemoryTable<T> extends MlInMemoryTableBasic<T> {
   static getDerivedStateFromProps(nextProps: any, prevState: any) {
     const derivedState = {
       ...prevState.prevProps,
