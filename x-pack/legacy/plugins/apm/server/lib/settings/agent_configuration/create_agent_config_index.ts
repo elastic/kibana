@@ -8,13 +8,19 @@ import { CoreSetup } from 'src/core/server';
 import { CallCluster } from '../../../../../../../../src/legacy/core_plugins/elasticsearch';
 import { getApmIndices } from '../apm_indices/get_apm_indices';
 import { LegacySetup } from '../../../new-platform/plugin';
+import { getInternalSavedObjectsClient } from '../../helpers/saved_objects_client';
 
 export async function createApmAgentConfigurationIndex(
   core: CoreSetup,
   { server }: LegacySetup
 ) {
   try {
-    const indices = await getApmIndices(server);
+    const config = server.config();
+    const internalSavedObjectsClient = getInternalSavedObjectsClient(server);
+    const indices = await getApmIndices({
+      savedObjectsClient: internalSavedObjectsClient,
+      config
+    });
     const index = indices['apm_oss.apmAgentConfigurationIndex'];
     const { callWithInternalUser } = server.plugins.elasticsearch.getCluster(
       'admin'

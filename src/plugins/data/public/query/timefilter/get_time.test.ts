@@ -17,8 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore
-import expect from '@kbn/expect';
 import moment from 'moment';
 import sinon from 'sinon';
 import { Filter, getTime } from './get_time';
@@ -46,7 +44,7 @@ describe('get_time', () => {
         } as any,
         { from: 'now-60y', to: 'now' }
       ) as Filter;
-      expect(filter.range.date).to.eql({
+      expect(filter.range.date).toEqual({
         gte: '1940-02-01T00:00:00.000Z',
         lte: '2000-02-01T00:00:00.000Z',
         format: 'strict_date_optional_time',

@@ -35,13 +35,17 @@ import {
 import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
-import { TimeRange, TimeHistoryContract } from 'src/plugins/data/public';
-import { useKibana } from '../../../../../../../plugins/kibana_react/public';
-import { PersistedLog } from '../../../../../../../plugins/data/public';
+import {
+  TimeRange,
+  TimeHistoryContract,
+  Query,
+  PersistedLog,
+  getQueryLog,
+} from '../../../../../../../plugins/data/public';
+import { useKibana, toMountPoint } from '../../../../../../../plugins/kibana_react/public';
 
 import { IndexPattern } from '../../../index_patterns';
 import { QueryBarInput } from './query_bar_input';
-import { Query, getQueryLog } from '../index';
 import { IDataPluginServices } from '../../../types';
 
 interface Props {
@@ -78,8 +82,11 @@ function QueryBarTopRowUI(props: Props) {
 
   const queryLanguage = props.query && props.query.language;
   const persistedLog: PersistedLog | undefined = React.useMemo(
-    () => (queryLanguage ? getQueryLog(uiSettings!, storage, appName, queryLanguage) : undefined),
-    [queryLanguage]
+    () =>
+      queryLanguage && uiSettings && storage && appName
+        ? getQueryLog(uiSettings!, storage, appName, queryLanguage)
+        : undefined,
+    [appName, queryLanguage, uiSettings, storage]
   );
 
   function onClickSubmitButton(event: React.MouseEvent<HTMLButtonElement>) {
@@ -298,7 +305,7 @@ function QueryBarTopRowUI(props: Props) {
           id: 'data.query.queryBar.luceneSyntaxWarningTitle',
           defaultMessage: 'Lucene syntax warning',
         }),
-        text: (
+        text: toMountPoint(
           <div>
             <p>
               <FormattedMessage

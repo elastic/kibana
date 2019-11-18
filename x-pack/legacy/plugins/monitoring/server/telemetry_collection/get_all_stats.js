@@ -11,7 +11,6 @@ import {
   KIBANA_SYSTEM_ID,
   BEATS_SYSTEM_ID,
 } from '../../common/constants';
-import { getClusterUuids } from './get_cluster_uuids';
 import { getElasticsearchStats } from './get_es_stats';
 import { getKibanaStats } from './get_kibana_stats';
 import { getBeatsStats } from './get_beats_stats';
@@ -26,22 +25,17 @@ import { getHighLevelStats } from './get_high_level_stats';
  * @param {Date} end The ending range to request data
  * @return {Promise} The array of clusters joined with the Kibana and Logstash instances.
  */
-export function getAllStats({ server, callCluster, start, end } = {}) {
-  return getClusterUuids(server, callCluster, start, end)
-    .then(clusterUuids => {
-    // don't bother doing a further lookup
-      if (clusterUuids.length === 0) {
-        return [];
-      }
+export async function getAllStats(clustersDetails, { server, callCluster, start, end }) {
+  const clusterUuids = clustersDetails.map(clusterDetails => clusterDetails.clusterUuid);
 
-      return Promise.all([
-        getElasticsearchStats(server, callCluster, clusterUuids),           // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
-        getKibanaStats(server, callCluster, clusterUuids, start, end),      // stack_stats.kibana
-        getHighLevelStats(server, callCluster, clusterUuids, start, end, LOGSTASH_SYSTEM_ID), // stack_stats.logstash
-        getBeatsStats(server, callCluster, clusterUuids, start, end),      // stack_stats.beats
-      ])
-        .then(([esClusters, kibana, logstash, beats]) => handleAllStats(esClusters, { kibana, logstash, beats }));
-    });
+  const [esClusters, kibana, logstash, beats] = await Promise.all([
+    getElasticsearchStats(server, callCluster, clusterUuids),           // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
+    getKibanaStats(server, callCluster, clusterUuids, start, end),      // stack_stats.kibana
+    getHighLevelStats(server, callCluster, clusterUuids, start, end, LOGSTASH_SYSTEM_ID), // stack_stats.logstash
+    getBeatsStats(server, callCluster, clusterUuids, start, end),      // stack_stats.beats
+  ]);
+
+  return handleAllStats(esClusters, { kibana, logstash, beats });
 }
 
 /**
