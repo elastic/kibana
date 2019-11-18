@@ -5,7 +5,7 @@
  */
 
 export function detectReasonFromException(exception) {
-  const reason = {};
+  const reason = { correctIndexName: true };
 
   if (exception) {
     if (exception.status === 400 && exception.message.indexOf('Fielddata is disabled on text fields by default') > -1) {
