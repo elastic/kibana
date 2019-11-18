@@ -77,10 +77,11 @@ export class TooltipSelector extends Component {
 
   async _loadTooltipFieldProps() {
 
-    if (!this.props.tooltipFields && this.props.fields === this._previousSelectedTooltips) {
+    if (!this.props.tooltipFields || this.props.tooltipFields === this._previousSelectedTooltips) {
       return;
     }
 
+    this._previousSelectedTooltips = this.props.tooltipFields;
     const selectedProps = this.props.tooltipFields.map(getProps);
     const selectedFieldProps = await Promise.all(selectedProps);
     if (this._isMounted) {
