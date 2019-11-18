@@ -10,6 +10,7 @@ import {
   assertValidInterval,
   intervalFromNow,
   intervalFromDate,
+  precedingDateByInterval,
   minutesFromNow,
   minutesFromDate,
   secondsFromNow,
@@ -160,6 +161,34 @@ describe('taskIntervals', () => {
       const expected = originalDate.valueOf() + secs * 1000;
       const nextRun = secondsFromDate(originalDate, secs).getTime();
       expect(expected).toEqual(nextRun);
+    });
+  });
+
+  describe('precedingDateByInterval', () => {
+    test('it rejects intervals are not of the form `Nm` or `Ns`', () => {
+      const date = new Date();
+      expect(() => precedingDateByInterval(date, `5m 2s`)).toThrow(
+        /Invalid interval "5m 2s"\. Intervals must be of the form {number}m. Example: 5m/
+      );
+      expect(() => precedingDateByInterval(date, `hello`)).toThrow(
+        /Invalid interval "hello"\. Intervals must be of the form {number}m. Example: 5m/
+      );
+    });
+
+    test('it returns the date preceding a given date by subtracting a minute interval from it', () => {
+      const succeedingDate = new Date(2019, 1, 1);
+      const mins = _.random(1, 100);
+      const expected = succeedingDate.valueOf() - mins * 60 * 1000;
+      const precedingTime = precedingDateByInterval(succeedingDate, `${mins}m`)!.getTime();
+      expect(expected).toEqual(precedingTime);
+    });
+
+    test('it returns the date preceding a given date by subtracting a seconds interval from it', () => {
+      const succeedingDate = new Date(2019, 1, 1);
+      const seconds = _.random(1, 1000);
+      const expected = succeedingDate.valueOf() - seconds * 1000;
+      const precedingTime = precedingDateByInterval(succeedingDate, `${seconds}s`)!.getTime();
+      expect(expected).toEqual(precedingTime);
     });
   });
 });

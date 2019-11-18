@@ -12,6 +12,7 @@ const createTaskManagerMock = () => {
     addMiddleware: jest.fn(),
     ensureScheduled: jest.fn(),
     schedule: jest.fn(),
+    reschedule: jest.fn(),
     fetch: jest.fn(),
     remove: jest.fn(),
     start: jest.fn(),

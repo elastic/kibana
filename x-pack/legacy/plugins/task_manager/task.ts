@@ -22,7 +22,7 @@ import Joi from 'joi';
  *    // This type is now defined as { id: string; name: string; }
  *    type TaskInstanceWithId = Require<TaskInstance, 'id'>;
  */
-type Require<T extends object, P extends keyof T> = Omit<T, P> & Required<Pick<T, P>>;
+export type Require<T extends object, P extends keyof T> = Omit<T, P> & Required<Pick<T, P>>;
 
 /**
  * A loosely typed definition of the elasticjs wrapper. It's beyond the scope

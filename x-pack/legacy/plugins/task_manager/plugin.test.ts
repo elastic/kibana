@@ -46,6 +46,7 @@ describe('Task Manager Plugin', () => {
           "fetch": [Function],
           "registerTaskDefinitions": [Function],
           "remove": [Function],
+          "reschedule": [Function],
           "schedule": [Function],
         }
       `);

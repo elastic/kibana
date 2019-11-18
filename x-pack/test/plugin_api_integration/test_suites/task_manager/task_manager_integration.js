@@ -58,7 +58,7 @@ export default function ({ getService }) {
     }
 
     function scheduleTask(task) {
-      return supertest.post('/api/sample_tasks')
+      return supertest.post('/api/sample_tasks/schedule')
         .set('kbn-xsrf', 'xxx')
         .send({ task })
         .expect(200)
@@ -66,9 +66,17 @@ export default function ({ getService }) {
     }
 
     function scheduleTaskIfNotExists(task) {
-      return supertest.post('/api/sample_tasks')
+      return supertest.post('/api/sample_tasks/ensure')
         .set('kbn-xsrf', 'xxx')
-        .send({ task, ensureScheduled: true })
+        .send({ task })
+        .expect(200)
+        .then((response) => response.body);
+    }
+
+    function rescheduleTask(task) {
+      return supertest.post('/api/sample_tasks/reschedule')
+        .set('kbn-xsrf', 'xxx')
+        .send({ task })
         .expect(200)
         .then((response) => response.body);
     }
@@ -177,8 +185,29 @@ export default function ({ getService }) {
       });
     });
 
-    it('should reschedule if task has an interval', async () => {
+    it('should reschedule after the first run if the task has an interval', async () => {
       const interval = _.random(5, 200);
+      const intervalMilliseconds = interval * 60000;
+
+      const originalTask = await scheduleTask({
+        taskType: 'sampleTask',
+        interval: `${interval}m`,
+        params: { },
+      });
+
+      return await retry.try(async () => {
+        expect((await historyDocs()).length).to.eql(1);
+
+        const [task] = (await currentTasks()).docs;
+        expect(task.attempts).to.eql(0);
+        expect(task.state.count).to.eql(1);
+
+        return expectReschedule(originalTask, task, intervalMilliseconds);
+      });
+    });
+
+    it('should adjust the scheduled interval when rescheduling an idle task', async () => {
+      const interval = _.random(150, 200);
       const intervalMilliseconds = interval * 60000;
 
       const originalTask = await scheduleTask({
@@ -190,11 +219,30 @@ export default function ({ getService }) {
       await retry.try(async () => {
         expect((await historyDocs()).length).to.eql(1);
 
-        const [task] = (await currentTasks()).docs;
-        expect(task.attempts).to.eql(0);
-        expect(task.state.count).to.eql(1);
+        const [automaticallyRescheduledTask] = (await currentTasks()).docs;
+        expect(automaticallyRescheduledTask.attempts).to.eql(0);
+        expect(automaticallyRescheduledTask.state.count).to.eql(1);
 
-        expectReschedule(originalTask, task, intervalMilliseconds);
+        return expectReschedule(originalTask, automaticallyRescheduledTask, intervalMilliseconds);
+      });
+
+      const updatedInterval = _.random(50, 100);
+      const updatedIntervalMilliseconds = updatedInterval * 60000;
+
+      await rescheduleTask({
+        id: originalTask.id,
+        interval: `${updatedInterval}m`
+      });
+
+      return await retry.try(async () => {
+        expect((await historyDocs()).length).to.eql(1);
+
+        const [manuallyRescheduledTask] = (await currentTasks()).docs;
+
+        expect(manuallyRescheduledTask.attempts).to.eql(0);
+        expect(manuallyRescheduledTask.state.count).to.eql(1);
+
+        return expectReschedule(originalTask, manuallyRescheduledTask, updatedIntervalMilliseconds);
       });
     });
 
@@ -204,5 +252,6 @@ export default function ({ getService }) {
       expect(Date.parse(currentTask.runAt) - originalRunAt).to.be.greaterThan(expectedDiff - buffer);
       expect(Date.parse(currentTask.runAt) - originalRunAt).to.be.lessThan(expectedDiff + buffer);
     }
+
   });
 }

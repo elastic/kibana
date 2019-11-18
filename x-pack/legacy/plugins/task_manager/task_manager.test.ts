@@ -146,7 +146,7 @@ describe('TaskManager', () => {
     expect(result.id).toEqual('my-foo-id');
   });
 
-  test('doesnt ignore failure to scheduling existing tasks for reasons other than already being scheduled', async () => {
+  test('doesnt ignore failure to schedule existing tasks for reasons other than already being scheduled', async () => {
     const client = new TaskManager(taskManagerOpts);
     client.registerTaskDefinitions({
       foo: {
@@ -198,6 +198,79 @@ describe('TaskManager', () => {
     ).rejects.toMatchObject({
       statusCode: 409,
     });
+  });
+
+  test('allows and queues rescheduling tasks before starting', async () => {
+    const savedObjectsRepository = savedObjectsClientMock.create();
+    const client = new TaskManager({
+      ...taskManagerOpts,
+      savedObjectsRepository,
+    });
+
+    const task = {
+      id: '1',
+      state: {},
+    };
+
+    const storedTask = {
+      id: '1',
+      type: 'task',
+      attributes: {
+        scheduledAt: Date.now(),
+        attempts: 0,
+        status: 'idle',
+        runAt: Date.now(),
+        state: '{}',
+      },
+      references: [],
+    };
+    savedObjectsRepository.get.mockResolvedValueOnce(storedTask);
+    savedObjectsRepository.update.mockResolvedValueOnce(storedTask);
+
+    const promise = client.reschedule(task);
+
+    expect(savedObjectsRepository.get).not.toHaveBeenCalled();
+
+    client.start();
+
+    await promise;
+
+    expect(savedObjectsRepository.get).toHaveBeenCalledWith('task', task.id);
+  });
+
+  test('allows rescheduling tasks after starting', async () => {
+    const savedObjectsRepository = savedObjectsClientMock.create();
+    const client = new TaskManager({
+      ...taskManagerOpts,
+      savedObjectsRepository,
+    });
+
+    client.start();
+
+    const task = {
+      id: '1',
+      state: {},
+    };
+
+    const storedTask = {
+      id: '1',
+      type: 'task',
+      attributes: {
+        scheduledAt: Date.now(),
+        attempts: 0,
+        status: 'idle',
+        runAt: Date.now(),
+        state: '{}',
+      },
+      references: [],
+    };
+
+    savedObjectsRepository.get.mockResolvedValueOnce(storedTask);
+    savedObjectsRepository.update.mockResolvedValueOnce(storedTask);
+
+    await client.reschedule(task);
+
+    expect(savedObjectsRepository.get).toHaveBeenCalledWith('task', task.id);
   });
 
   test('allows and queues removing tasks before starting', async () => {

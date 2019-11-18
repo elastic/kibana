@@ -27,7 +27,7 @@ export function initRoutes(server) {
   const taskManager = server.plugins.task_manager;
 
   server.route({
-    path: '/api/sample_tasks',
+    path: '/api/sample_tasks/schedule',
     method: 'POST',
     config: {
       validate: {
@@ -39,27 +39,73 @@ export function initRoutes(server) {
             state: Joi.object().optional(),
             id: Joi.string().optional()
           }),
-          ensureScheduled: Joi.boolean()
-            .default(false)
-            .optional(),
         }),
       },
     },
     async handler(request) {
       try {
-        const { ensureScheduled = false, task: taskFields } = request.payload;
+        const { task: taskFields } = request.payload;
         const task = {
           ...taskFields,
           scope: [scope],
         };
 
-        const taskResult = await (
-          ensureScheduled
-            ? taskManager.ensureScheduled(task, { request })
-            : taskManager.schedule(task, { request })
-        );
+        return await taskManager.schedule(task, { request });
+      } catch (err) {
+        return err;
+      }
+    },
+  });
 
-        return taskResult;
+  server.route({
+    path: '/api/sample_tasks/ensure',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: Joi.object({
+          task: Joi.object({
+            taskType: Joi.string().required(),
+            interval: Joi.string().optional(),
+            params: Joi.object().required(),
+            state: Joi.object().optional(),
+            id: Joi.string().optional()
+          })
+        }),
+      },
+    },
+    async handler(request) {
+      try {
+        const { task: taskFields } = request.payload;
+        const task = {
+          ...taskFields,
+          scope: [scope],
+        };
+
+        return await taskManager.ensureScheduled(task, { request });
+      } catch (err) {
+        return err;
+      }
+    },
+  });
+
+  server.route({
+    path: '/api/sample_tasks/reschedule',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: Joi.object({
+          task: Joi.object({
+            interval: Joi.string().optional(),
+            id: Joi.string().required()
+          })
+        }),
+      },
+    },
+    async handler(request) {
+      try {
+        const { task } = request.payload;
+
+        return await taskManager.reschedule(task);
       } catch (err) {
         return err;
       }

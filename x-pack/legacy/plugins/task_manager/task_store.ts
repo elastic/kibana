@@ -22,7 +22,9 @@ import {
   TaskDefinition,
   TaskDictionary,
   TaskInstance,
+  Require,
 } from './task';
+import { intervalFromDate, precedingDateByInterval } from './lib/intervals';
 
 export interface StoreOpts {
   callCluster: ElasticJs;
@@ -135,6 +137,42 @@ export class TaskStore {
     );
 
     return savedObjectToConcreteTaskInstance(savedObject);
+  }
+
+  /**
+   * Reschedules a previously scheduled task.
+   *
+   * @param task - The task being rescheduled.
+   */
+  public async reschedule(
+    taskInstance: Require<Partial<TaskInstance>, 'id'>
+  ): Promise<ConcreteTaskInstance> {
+    const taskInStore = await this.getTask(taskInstance.id);
+
+    if (taskInStore.status !== 'idle') {
+      throw new Error(
+        `Rescheduling Task ${taskInstance.id} failed, as only Idle tasks may be rescheduled`
+      );
+    }
+
+    const taskUpdate = {
+      ...omit(taskInStore, 'runAt'),
+      ...taskInstance,
+    } as ConcreteTaskInstance; // Not sure why TS is requiring this `As`, looking into it
+
+    if (!taskInstance.hasOwnProperty('runAt') && taskInstance.hasOwnProperty('interval')) {
+      taskUpdate.runAt =
+        intervalFromDate(
+          precedingDateByInterval(taskInStore.runAt, taskInStore.interval) ||
+            taskInStore.scheduledAt,
+          taskInstance.interval
+        ) || new Date();
+    } else if (!taskUpdate.runAt) {
+      taskUpdate.runAt = new Date();
+    }
+
+    const taskInStoreAfterUpdate = await this.update(taskUpdate);
+    return taskInStoreAfterUpdate;
   }
 
   /**
@@ -410,6 +448,9 @@ function taskInstanceToAttributes(doc: TaskInstance): SavedObjectAttributes {
     scheduledAt: (doc.scheduledAt || new Date()).toISOString(),
     startedAt: (doc.startedAt && doc.startedAt.toISOString()) || null,
     retryAt: (doc.retryAt && doc.retryAt.toISOString()) || null,
+    // if no runAt is specified this result in scheduling the task
+    // to be run "now - this should probably be more explicit as it gets lost
+    // in what is essentially "formatting" to become a saved object
     runAt: (doc.runAt || new Date()).toISOString(),
     status: (doc as ConcreteTaskInstance).status || 'idle',
   };

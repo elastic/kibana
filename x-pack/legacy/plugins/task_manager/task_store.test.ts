@@ -13,10 +13,19 @@ import {
   TaskInstance,
   TaskStatus,
   ConcreteTaskInstance,
+  Require,
 } from './task';
+
+import { intervalFromDate } from './lib/intervals';
+
 import { FetchOpts, StoreOpts, OwnershipClaimingOpts, TaskStore } from './task_store';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { SavedObjectsSerializer, SavedObjectsSchema, SavedObjectAttributes } from 'src/core/server';
+import {
+  SavedObjectsSerializer,
+  SavedObjectsSchema,
+  SavedObjectAttributes,
+  SavedObject,
+} from 'src/core/server';
 
 const taskDefinitions: TaskDictionary<TaskDefinition> = {
   report: {
@@ -42,9 +51,19 @@ const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
 beforeEach(() => jest.resetAllMocks());
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
+
+const anHourAgo = new Date();
+anHourAgo.setHours(anHourAgo.getHours() - 1);
+
+const anHourInTheFuture = new Date();
+anHourInTheFuture.setHours(anHourInTheFuture.getHours() + 1);
+
+const NodeDate = (global as any).Date;
+
 (global as any).Date = class Date {
-  constructor() {
-    return mockedDate;
+  constructor(date?: string) {
+    // use mock for empty Date()s, but not when wrapping a date string
+    return date ? new NodeDate(date) : mockedDate;
   }
   static now() {
     return mockedDate.getTime();
@@ -162,6 +181,395 @@ describe('TaskStore', () => {
       await expect(testSchedule({ taskType: 'nope', params: {}, state: {} })).rejects.toThrow(
         /Unsupported task type "nope"/i
       );
+    });
+  });
+
+  describe('reschedule', () => {
+    async function testReschedule(
+      taskBeingRescheduled: Require<Partial<ConcreteTaskInstance>, 'id'>,
+      taskCurrentlyInStore: ConcreteTaskInstance,
+      taskInStoreAfterUpdate: ConcreteTaskInstance = taskCurrentlyInStore
+    ) {
+      const callCluster = jest.fn();
+
+      savedObjectsClient.get.mockImplementation(async (type: string, id: string) =>
+        concreteTaskInstanceAsSavedObject(id, type, taskCurrentlyInStore)
+      );
+
+      savedObjectsClient.update.mockImplementation(
+        async (type: string, id: string, attributes: SavedObjectAttributes) => {
+          return concreteTaskInstanceAsSavedObject(id, type, taskInStoreAfterUpdate);
+        }
+      );
+
+      const store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        callCluster,
+        maxAttempts: 2,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+      });
+
+      const result = await store.reschedule(taskBeingRescheduled);
+
+      expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+
+      return result;
+    }
+
+    test('rescheduling a running task results in an error', async () => {
+      expect(
+        testReschedule(
+          // Task Reschedule updated fields
+          {
+            id: 'myTask',
+          },
+          // Current Task in Store
+          {
+            id: 'myTask',
+            taskType: 'foo',
+            version: '5a2a3c3e-a5a9-44ff-8aec-c3790c69b081',
+            scheduledAt: mockedDate,
+            attempts: 0,
+            status: 'running',
+            interval: '5m',
+            runAt: mockedDate,
+            startedAt: mockedDate,
+            retryAt: null,
+            state: { field: 456 },
+            params: {},
+            ownerId: null,
+          }
+        )
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Rescheduling Task myTask failed, as only Idle tasks may be rescheduled]`
+      );
+    });
+
+    test('rescheduling tasks merges the updated fields with the current task', async () => {
+      await testReschedule(
+        // Task Reschedule updated fields
+        {
+          id: 'myTask',
+          state: {
+            field: 123,
+          },
+          interval: '10m',
+        },
+        // Current Task in Store
+        {
+          id: 'myTask',
+          taskType: 'foo',
+          version: '5a2a3c3e-a5a9-44ff-8aec-c3790c69b081',
+          scheduledAt: mockedDate,
+          attempts: 0,
+          status: 'idle',
+          interval: '5m',
+          runAt: mockedDate,
+          startedAt: mockedDate,
+          retryAt: null,
+          state: { field: 456 },
+          params: {},
+          ownerId: null,
+        },
+        // Return from update of Task in Store
+        {
+          id: 'myTask',
+          taskType: 'foo',
+          version: '1f672d50-9fd8-44fa-b42c-1a5d9982dec7',
+          scheduledAt: mockedDate,
+          attempts: 0,
+          status: 'idle',
+          runAt: mockedDate,
+          startedAt: mockedDate,
+          retryAt: null,
+          interval: '10m',
+          state: {
+            field: 123,
+          },
+          params: {},
+          ownerId: null,
+        }
+      );
+
+      const [, id, attributes] = savedObjectsClient.update.mock.calls[0];
+      expect(id).toEqual('myTask');
+      expect(attributes).toMatchObject({
+        interval: '10m',
+        state: JSON.stringify({ field: 123 }),
+      });
+    });
+
+    test('rescheduling returns the updated task', async () => {
+      const taskReturnedByUpdate: ConcreteTaskInstance = {
+        id: 'myTask',
+        taskType: 'foo',
+        version: '1f672d50-9fd8-44fa-b42c-1a5d9982dec7',
+        scheduledAt: mockedDate,
+        attempts: 0,
+        status: 'idle',
+        runAt: mockedDate,
+        startedAt: mockedDate,
+        retryAt: null,
+        interval: '10m',
+        state: {
+          field: 123,
+        },
+        params: {},
+        ownerId: null,
+      };
+
+      const result = await testReschedule(
+        // Task Reschedule updated fields
+        {
+          id: 'myTask',
+          state: {
+            field: 123,
+          },
+          interval: '10m',
+        },
+        // Current Task in Store
+        {
+          id: 'myTask',
+          taskType: 'foo',
+          version: '5a2a3c3e-a5a9-44ff-8aec-c3790c69b081',
+          scheduledAt: mockedDate,
+          attempts: 0,
+          status: 'idle',
+          interval: '5m',
+          runAt: mockedDate,
+          startedAt: mockedDate,
+          retryAt: null,
+          state: { field: 456 },
+          params: {},
+          ownerId: null,
+        },
+        // Return from update of Task in Store
+        taskReturnedByUpdate
+      );
+
+      expect(result).toMatchObject(taskReturnedByUpdate);
+    });
+
+    test('serializes the params and state', async () => {
+      await testReschedule(
+        // Task Reschedule updated fields
+        {
+          id: 'myTask',
+          state: {
+            field: 123,
+          },
+          interval: '10m',
+        },
+        // Current Task in Store
+        {
+          id: 'myTask',
+          taskType: 'foo',
+          version: '5a2a3c3e-a5a9-44ff-8aec-c3790c69b081',
+          scheduledAt: mockedDate,
+          attempts: 0,
+          status: 'idle',
+          interval: '5m',
+          runAt: mockedDate,
+          startedAt: mockedDate,
+          retryAt: null,
+          state: { field: 456 },
+          params: { arg: true },
+          ownerId: null,
+        }
+      );
+
+      const [, id, attributes] = savedObjectsClient.update.mock.calls[0];
+      expect(id).toEqual('myTask');
+      expect(attributes).toMatchObject({
+        state: JSON.stringify({ field: 123 }),
+        params: JSON.stringify({ arg: true }),
+      });
+    });
+
+    test('resets runAt based on the original interval and previous runAt if a new interval is specified on rescheduled task', async () => {
+      const scheduledAt = mockedDate;
+
+      const originalInterval = 120;
+      const originalRunAt = intervalFromDate(anHourAgo, `${originalInterval}m`)!;
+
+      const updatedInterval = 90;
+      const expectedRunAt = intervalFromDate(anHourAgo, `${updatedInterval}m`)!;
+
+      await testReschedule(
+        // Task Reschedule updated fields
+        {
+          id: 'myTask',
+          interval: `${updatedInterval}m`,
+        },
+        // Current Task in Store
+        {
+          id: 'myTask',
+          taskType: 'foo',
+          version: '5a2a3c3e-a5a9-44ff-8aec-c3790c69b081',
+          scheduledAt,
+          attempts: 0,
+          status: 'idle',
+          interval: `${originalInterval}m`,
+          runAt: originalRunAt,
+          startedAt: null,
+          retryAt: null,
+          state: {},
+          params: {},
+          ownerId: null,
+        }
+      );
+
+      const [, , attributes] = savedObjectsClient.update.mock.calls[0];
+
+      expect(new Date(attributes.runAt as string).getTime()).toEqual(expectedRunAt.getTime());
+    });
+
+    test('resets runAt based on scheduledAt date if an interval is specified on rescheduled task', async () => {
+      const scheduledAt = mockedDate;
+
+      const updatedInterval = 90;
+      const expectedRunAt = intervalFromDate(scheduledAt, `${updatedInterval}m`)!;
+
+      await testReschedule(
+        // Task Reschedule updated fields
+        {
+          id: 'myTask',
+          interval: `${updatedInterval}m`,
+        },
+        // Current Task in Store
+        {
+          id: 'myTask',
+          taskType: 'foo',
+          version: '5a2a3c3e-a5a9-44ff-8aec-c3790c69b081',
+          scheduledAt,
+          attempts: 0,
+          status: 'idle',
+          interval: undefined,
+          runAt: anHourInTheFuture,
+          startedAt: null,
+          retryAt: null,
+          state: {},
+          params: {},
+          ownerId: null,
+        }
+      );
+
+      const [, , attributes] = savedObjectsClient.update.mock.calls[0];
+
+      expect(new Date(attributes.runAt as string).getTime()).toEqual(expectedRunAt.getTime());
+    });
+
+    test('when both a runAt and an interval are specified on rescheduled task, the runAt will be used', async () => {
+      await testReschedule(
+        // Task Reschedule updated fields
+        {
+          id: 'myTask',
+          interval: `90m`,
+          runAt: anHourInTheFuture,
+        },
+        // Current Task in Store
+        {
+          id: 'myTask',
+          taskType: 'foo',
+          version: '5a2a3c3e-a5a9-44ff-8aec-c3790c69b081',
+          scheduledAt: mockedDate,
+          attempts: 0,
+          status: 'idle',
+          interval: undefined,
+          runAt: anHourInTheFuture,
+          startedAt: null,
+          retryAt: null,
+          state: {},
+          params: {},
+          ownerId: null,
+        }
+      );
+
+      const [, , attributes] = savedObjectsClient.update.mock.calls[0];
+
+      expect(new Date(attributes.runAt as string).getTime()).toEqual(anHourInTheFuture.getTime());
+      expect(attributes.interval as string).toEqual(`90m`);
+    });
+
+    test('allows specifying custom startedAt, retryAt and runAt on rescheduled task', async () => {
+      await testReschedule(
+        // Task Reschedule updated fields
+        {
+          id: 'myTask',
+          interval: '10m',
+          scheduledAt: anHourInTheFuture,
+          retryAt: anHourInTheFuture,
+          runAt: anHourInTheFuture,
+          startedAt: anHourInTheFuture,
+        },
+        // Current Task in Store
+        {
+          id: 'myTask',
+          taskType: 'foo',
+          version: '5a2a3c3e-a5a9-44ff-8aec-c3790c69b081',
+          attempts: 0,
+          status: 'idle',
+          interval: '5m',
+          scheduledAt: anHourAgo,
+          runAt: anHourAgo,
+          startedAt: anHourAgo,
+          retryAt: null,
+          state: {},
+          params: {},
+          ownerId: null,
+        }
+      );
+
+      const [, , attributes] = savedObjectsClient.update.mock.calls[0];
+
+      expect(new Date(attributes.runAt as string).getTime()).toEqual(anHourInTheFuture.getTime());
+      expect(new Date(attributes.retryAt as string).getTime()).toEqual(anHourInTheFuture.getTime());
+      expect(new Date(attributes.startedAt as string).getTime()).toEqual(
+        anHourInTheFuture.getTime()
+      );
+      expect(new Date(attributes.scheduledAt as string).getTime()).toEqual(
+        anHourInTheFuture.getTime()
+      );
+    });
+
+    test('ensures params and state are not undefined', async () => {
+      const now = new Date(Date.now());
+      await testReschedule(
+        // Task Reschedule updated fields
+        {
+          id: 'myTask',
+          state: undefined,
+          params: undefined,
+          interval: '10m',
+        },
+        // Current Task in Store
+        {
+          id: 'myTask',
+          taskType: 'foo',
+          version: '5a2a3c3e-a5a9-44ff-8aec-c3790c69b081',
+          scheduledAt: now,
+          attempts: 0,
+          status: 'idle',
+          interval: '5m',
+          runAt: now,
+          startedAt: now,
+          retryAt: null,
+          state: { field: 456 },
+          params: {},
+          ownerId: null,
+        }
+      );
+
+      const [, id, attributes] = savedObjectsClient.update.mock.calls[0];
+      expect(id).toEqual('myTask');
+      expect(attributes).toMatchObject({
+        state: JSON.stringify({}),
+        params: JSON.stringify({}),
+      });
     });
   });
 
@@ -784,4 +1192,29 @@ function generateFakeTasks(count: number = 1) {
     _primary_term: _.random(1, 5),
     sort: ['a', _.random(1, 5)],
   }));
+}
+
+function concreteTaskInstanceAsSavedObject(
+  id: string,
+  type: string,
+  taskInstance: ConcreteTaskInstance
+): SavedObject {
+  return {
+    id,
+    type: 'task',
+    references: [],
+    version: taskInstance.version,
+    attributes: {
+      ...taskInstance,
+      ..._.mapValues(
+        _.pick(taskInstance, ['scheduledAt', 'startedAt', 'retryAt', 'runAt']),
+        (value: Date) => {
+          return value ? value.toISOString() : value;
+        }
+      ),
+      ..._.mapValues(_.pick(taskInstance, ['state', 'params']), (data: Record<string, any>) => {
+        return JSON.stringify(data);
+      }),
+    },
+  };
 }
