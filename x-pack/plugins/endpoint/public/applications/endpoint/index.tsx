@@ -7,6 +7,7 @@
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountContext, AppMountParameters } from 'kibana/public';
+import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
@@ -22,5 +23,11 @@ export function renderApp(appMountContext: AppMountContext, { element }: AppMoun
 }
 
 const AppRoot = React.memo(function Root() {
-  return <h1>Welcome to Endpoint</h1>;
+  return (
+    <I18nProvider>
+      <h1>
+        <FormattedMessage id="endpoint.welcome" defaultMessage="Hello World" />
+      </h1>
+    </I18nProvider>
+  );
 });
