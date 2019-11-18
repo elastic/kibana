@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
-export function natsLogsSpecProvider(server, context) {
+export function natsLogsSpecProvider(context) {
   const moduleName = 'nats';
   const geoipRequired = false;
   const uaRequired = false;

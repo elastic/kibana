@@ -16,14 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { CoreSetup, Plugin } from 'src/core/server';
+import { TutorialsRegistry, TutorialsRegistrySetup, TutorialsRegistryStart } from './services';
 
+export class HomePlugin implements Plugin<HomePluginSetup, HomePluginStart> {
+  private readonly tutorialsRegistry = new TutorialsRegistry();
 
-export function registerTutorials(server) {
-  server.route({
-    path: '/api/kibana/home/tutorials_LP',
-    method: ['GET'],
-    handler: function (req) {
-      return server.getTutorials(req);
-    }
-  });
+  public setup(core: CoreSetup) {
+    return {
+      tutorials: { ...this.tutorialsRegistry.setup(core) },
+    };
+  }
+
+  public start() {
+    return {
+      tutorials: { ...this.tutorialsRegistry.start() },
+    };
+  }
+}
+
+/** @public */
+export interface HomePluginSetup {
+  tutorials: TutorialsRegistrySetup;
+}
+
+/** @public */
+export interface HomePluginStart {
+  tutorials: TutorialsRegistryStart;
 }

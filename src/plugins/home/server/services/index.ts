@@ -16,14 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// provided to other plugins as APIs
+// should model the plugin lifecycle
 
-
-export function registerTutorials(server) {
-  server.route({
-    path: '/api/kibana/home/tutorials_LP',
-    method: ['GET'],
-    handler: function (req) {
-      return server.getTutorials(req);
-    }
-  });
-}
+export {
+  TutorialsRegistry,
+  TutorialsRegistrySetup,
+  TutorialsRegistryStart,
+} from './tutorials_registry';
+export * from '../lib/tutorials_registry_types';
