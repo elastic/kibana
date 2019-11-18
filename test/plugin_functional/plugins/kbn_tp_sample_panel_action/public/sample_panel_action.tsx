@@ -22,7 +22,7 @@ import { npStart, npSetup } from 'ui/new_platform';
 
 import { CONTEXT_MENU_TRIGGER, IEmbeddable } from '../../../../../src/plugins/embeddable/public';
 import { createAction } from '../../../../../src/plugins/ui_actions/public';
-import { reactMount } from '../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 
 interface ActionContext {
   embeddable: IEmbeddable;
@@ -37,7 +37,7 @@ function createSamplePanelAction() {
         return;
       }
       npStart.core.overlays.openFlyout(
-        reactMount(
+        toMountPoint(
           <React.Fragment>
             <EuiFlyoutHeader>
               <EuiTitle size="m" data-test-subj="samplePanelActionTitle">

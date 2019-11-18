@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { NotificationsStart, OverlayStart } from 'src/core/public';
-import { reactMount } from '../../../../../../../kibana_react/public';
+import { toMountPoint } from '../../../../../../../kibana_react/public';
 import { IContainer } from '../../../../containers';
 import { AddPanelFlyout } from './add_panel_flyout';
 import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
@@ -40,7 +40,7 @@ export async function openAddPanelFlyout(options: {
     SavedObjectFinder,
   } = options;
   const flyoutSession = overlays.openFlyout(
-    reactMount(
+    toMountPoint(
       <AddPanelFlyout
         container={embeddable}
         onClose={() => {

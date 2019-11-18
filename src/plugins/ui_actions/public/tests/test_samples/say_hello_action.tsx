@@ -21,7 +21,7 @@ import React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { CoreStart } from 'src/core/public';
 import { IAction, createAction } from '../../actions';
-import { reactMount } from '../../../../kibana_react/public';
+import { toMountPoint } from '../../../../kibana_react/public';
 
 export const SAY_HELLO_ACTION = 'SAY_HELLO_ACTION';
 
@@ -32,7 +32,7 @@ export function createSayHelloAction(overlays: CoreStart['overlays']): IAction<{
     isCompatible: async ({ name }) => name !== undefined,
     execute: async context => {
       const flyoutSession = overlays.openFlyout(
-        reactMount(
+        toMountPoint(
           <EuiFlyout ownFocus onClose={() => flyoutSession && flyoutSession.close()}>
             this.getDisplayName(context)
           </EuiFlyout>

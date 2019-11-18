@@ -20,7 +20,7 @@ import React from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
 import { createAction, IncompatibleActionError } from '../../ui_actions';
 import { CoreStart } from '../../../../../../core/public';
-import { reactMount } from '../../../../../kibana_react/public';
+import { toMountPoint } from '../../../../../kibana_react/public';
 import { Embeddable, EmbeddableInput } from '../../embeddables';
 import { GetMessageModal } from './get_message_modal';
 import { FullNameEmbeddableOutput, hasFullNameOutput } from './say_hello_action';
@@ -39,7 +39,7 @@ export function createSendMessageAction(overlays: CoreStart['overlays']) {
     const greeting = `Hello, ${context.embeddable.getOutput().fullName}`;
 
     const content = message ? `${greeting}. ${message}` : greeting;
-    overlays.openFlyout(reactMount(<EuiFlyoutBody>{content}</EuiFlyoutBody>));
+    overlays.openFlyout(toMountPoint(<EuiFlyoutBody>{content}</EuiFlyoutBody>));
   };
 
   return createAction<ActionContext>({
@@ -52,7 +52,7 @@ export function createSendMessageAction(overlays: CoreStart['overlays']) {
       }
 
       const modal = overlays.openModal(
-        reactMount(
+        toMountPoint(
           <GetMessageModal
             onCancel={() => modal.close()}
             onDone={message => {

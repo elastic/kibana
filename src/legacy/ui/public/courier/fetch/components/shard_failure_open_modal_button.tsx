@@ -22,7 +22,7 @@ import { npStart } from 'ui/new_platform';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiTextAlign } from '@elastic/eui';
 
-import { reactMount } from '../../../../../../plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../../plugins/kibana_react/public';
 import { ShardFailureModal } from './shard_failure_modal';
 import { ResponseWithShardFailure, Request } from './shard_failure_types';
 
@@ -35,7 +35,7 @@ interface Props {
 export function ShardFailureOpenModalButton({ request, response, title }: Props) {
   function onClick() {
     const modal = npStart.core.overlays.openModal(
-      reactMount(
+      toMountPoint(
         <ShardFailureModal
           request={request}
           response={response}

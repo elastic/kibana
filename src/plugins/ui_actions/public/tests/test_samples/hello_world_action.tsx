@@ -21,7 +21,7 @@ import React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { CoreStart } from 'src/core/public';
 import { createAction, IAction } from '../../actions';
-import { reactMount } from '../../../../kibana_react/public';
+import { toMountPoint } from '../../../../kibana_react/public';
 
 export const HELLO_WORLD_ACTION_ID = 'HELLO_WORLD_ACTION_ID';
 
@@ -30,7 +30,7 @@ export function createHelloWorldAction(overlays: CoreStart['overlays']): IAction
     type: HELLO_WORLD_ACTION_ID,
     execute: async () => {
       const flyoutSession = overlays.openFlyout(
-        reactMount(
+        toMountPoint(
           <EuiFlyout ownFocus onClose={() => flyoutSession && flyoutSession.close()}>
             Hello World, I am a hello world action!
           </EuiFlyout>
