@@ -7,7 +7,7 @@
 import React from 'react';
 import { MetricsTimeControls } from './time_controls';
 import { mount } from 'enzyme';
-import { MetricsTimeInput } from '../../containers/metrics/with_metrics_time';
+import { MetricsTimeInput } from '../containers/with_metrics_time';
 
 describe('MetricsTimeControls', () => {
   it('should set a valid from and to value for Today', () => {

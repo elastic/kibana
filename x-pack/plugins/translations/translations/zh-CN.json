@@ -5918,7 +5918,6 @@
     "xpack.infra.metrics.emptyViewTitle": "没有可显示的数据。",
     "xpack.infra.metrics.invalidNodeErrorDescription": "反复检查您的配置",
     "xpack.infra.metrics.invalidNodeErrorTitle": "似乎 {nodeName} 未在收集任何指标数据",
-    "xpack.infra.metrics.layoutLabelOverviewTitle": "{layoutLabel} 概览",
     "xpack.infra.metrics.loadingNodeDataText": "正在加载数据",
     "xpack.infra.metrics.refetchButtonLabel": "检查新数据",
     "xpack.infra.metricsExplorer.actionsLabel.aria": "适用于 {grouping} 的操作",
