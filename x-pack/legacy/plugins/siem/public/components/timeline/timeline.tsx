@@ -36,7 +36,7 @@ import { TimelineHeader } from './header';
 import { calculateBodyHeight, combineQueries } from './helpers';
 import { TimelineRefetch } from './refetch_timeline';
 import { ManageTimelineContext } from './timeline_context';
-import { esQuery } from '../../../../../../../src/plugins/data/public';
+import { esQuery, esFilters } from '../../../../../../../src/plugins/data/public';
 
 const WrappedByAutoSizer = styled.div`
   width: 100%;
@@ -61,6 +61,7 @@ interface Props {
   columns: ColumnHeader[];
   dataProviders: DataProvider[];
   end: number;
+  filters: esFilters.Filter[];
   flyoutHeaderHeight: number;
   flyoutHeight: number;
   id: string;
@@ -91,6 +92,7 @@ export const Timeline = React.memo<Props>(
     columns,
     dataProviders,
     end,
+    filters,
     flyoutHeaderHeight,
     flyoutHeight,
     id,
@@ -119,7 +121,7 @@ export const Timeline = React.memo<Props>(
       dataProviders,
       indexPattern,
       browserFields,
-      filters: [],
+      filters,
       kqlQuery: { query: kqlQueryExpression, language: 'kuery' },
       kqlMode,
       start,
