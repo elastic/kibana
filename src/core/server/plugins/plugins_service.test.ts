@@ -436,7 +436,7 @@ describe('PluginsService', () => {
       const uiConfig$ = uiPluginConfigs.get('plugin-with-expose');
       expect(uiConfig$).toBeDefined();
 
-      const uiConfig = await uiConfig$.pipe(take(1)).toPromise();
+      const uiConfig = await uiConfig$!.pipe(take(1)).toPromise();
       expect(uiConfig).toMatchInlineSnapshot(`
         Object {
           "sharedProp": "sharedProp default value",
