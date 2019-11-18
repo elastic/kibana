@@ -17,18 +17,18 @@ export const metric = () => ({
   requiresContext: false,
   args: [
     {
+      name: 'metricFormat',
+      displayName: strings.getMetricFormatDisplayName(),
+      help: strings.getMetricFormatHelp(),
+      argType: 'numberFormat',
+      default: `"${AdvancedSettings.get('format:number:defaultPattern')}"`,
+    },
+    {
       name: '_',
       displayName: strings.getLabelDisplayName(),
       help: strings.getLabelHelp(),
       argType: 'string',
       default: '""',
-    },
-    {
-      name: 'labelFont',
-      displayName: strings.getLabelFontDisplayName(),
-      help: strings.getLabelFontHelp(),
-      argType: 'font',
-      default: `{font size=18 family="${openSans.value}" color="#000000" align=center}`,
     },
     {
       name: 'metricFont',
@@ -38,11 +38,11 @@ export const metric = () => ({
       default: `{font size=48 family="${openSans.value}" color="#000000" align=center lHeight=48}`,
     },
     {
-      name: 'metricFormat',
-      displayName: strings.getMetricFormatDisplayName(),
-      help: strings.getMetricFormatHelp(),
-      argType: 'numberFormat',
-      default: `"${AdvancedSettings.get('format:number:defaultPattern')}"`,
+      name: 'labelFont',
+      displayName: strings.getLabelFontDisplayName(),
+      help: strings.getLabelFontHelp(),
+      argType: 'font',
+      default: `{font size=18 family="${openSans.value}" color="#000000" align=center}`,
     },
   ],
 });

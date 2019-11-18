@@ -34,19 +34,22 @@ export const useKibanaUiSetting = (key: string, defaultValue?: GenericValue) => 
   const core = useKibanaCore();
   const uiSettingsClient = core.uiSettings;
   const uiInjectedMetadata = core.injectedMetadata;
+  const uiSetting$ = useMemo(() => uiSettingsClient.get$(key, defaultValue), [uiSettingsClient]);
+  const uiSetting = useObservable(uiSetting$);
+  const setUiSetting = useCallback((value: GenericValue) => uiSettingsClient.set(key, value), [
+    uiSettingsClient,
+  ]);
+  const defaultTimezoneProvider = useMemo(() => timezoneProvider(uiSettingsClient)(), [
+    uiSettingsClient,
+  ]);
 
   if (key === DEFAULT_KBN_VERSION) {
     return [uiInjectedMetadata.getKibanaVersion()];
   }
 
   if (key === DEFAULT_TIMEZONE_BROWSER) {
-    return [useMemo(() => timezoneProvider(uiSettingsClient)(), [uiSettingsClient])];
+    return [defaultTimezoneProvider];
   }
 
-  const uiSetting$ = useMemo(() => uiSettingsClient.get$(key, defaultValue), [uiSettingsClient]);
-  const uiSetting = useObservable(uiSetting$);
-  const setUiSetting = useCallback((value: GenericValue) => uiSettingsClient.set(key, value), [
-    uiSettingsClient,
-  ]);
   return [uiSetting, setUiSetting];
 };
