@@ -55,6 +55,8 @@ export class LogRotator {
       return;
     }
 
+    this.running = true;
+
     // create exit listener for cleanup purposes
     this._createExitListener();
 
@@ -63,8 +65,6 @@ export class LogRotator {
 
     // init log file size monitor
     await this._startLogFileSizeMonitor();
-
-    this.running = true;
   }
 
   stop() {
