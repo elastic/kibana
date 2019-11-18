@@ -44,7 +44,10 @@ const initialState: EndpointsListState = {
   selectedItems: [],
 };
 
-export function endpointListReducer(state = initialState, action: EndpointListActions) {
+export function endpointListReducer(
+  state = initialState,
+  action: EndpointListActions
+): EndpointsListState {
   switch (action.type) {
     case actions.serverReturnedEndpointListData.type:
       return { ...state, data: action.payload[0] };

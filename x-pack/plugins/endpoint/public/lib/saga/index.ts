@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Dispatch } from 'redux';
+
 /**
  * See https://docs.microsoft.com/en-us/previous-versions/msp-n-p/jj591569(v%3dpandp.10)
  */
@@ -65,7 +67,7 @@ export function createSagaMiddleware(saga: () => Promise<void>) {
   }
 
   let runSaga: () => void;
-  function middleware({ getState, dispatch }: { getState: () => unknown; dispatch: () => void }) {
+  function middleware({ getState, dispatch }: { getState: () => unknown; dispatch: Dispatch }) {
     runSaga = saga.bind(null, {
       actionsAndState: iterator,
       dispatch,

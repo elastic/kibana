@@ -79,4 +79,6 @@ async function resourceSaga(
       // }
     }
   }
+
+  console.log("saga->endpointsListSaga()->resourceSaga(): EXITING"); //eslint-disable-line
 }
