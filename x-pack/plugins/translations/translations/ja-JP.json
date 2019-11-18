@@ -6700,7 +6700,6 @@
     "xpack.maps.tooltip.toolsControl.cancelDrawButtonLabel": "キャンセル",
     "xpack.maps.xyztmssource.attributionLink": "属性テキストにはリンクが必要です",
     "xpack.maps.xyztmssource.attributionText": "属性 URL にはテキストが必要です",
-    "xpack.maps.layerPanel.settingsPanel.layerGlobalFilterLabel": "グローバルフィルター",
     "xpack.maps.layerPanel.settingsPanel.percentageLabel": "%",
     "xpack.maps.layerPanel.settingsPanel.visibleZoom": "ズームレベル",
     "xpack.maps.source.esSearch.sortFieldSelectPlaceholder": "ソートフィールドを選択",
