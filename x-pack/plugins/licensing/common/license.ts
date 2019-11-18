@@ -11,37 +11,49 @@ import {
   LicenseStatus,
   LICENSE_CHECK_STATE,
   LICENSE_TYPE,
+  PublicLicenseJSON,
   PublicLicense,
+  PublicFeatures,
 } from './types';
 
 /**
  * @public
  */
 export class License implements ILicense {
-  private readonly license?: PublicLicense['license'];
-  private readonly features?: PublicLicense['features'];
+  private readonly license?: PublicLicense;
+  private readonly features?: PublicFeatures;
 
-  public error?: string;
-  public isActive: boolean;
-  public isAvailable: boolean;
-  public isBasic: boolean;
-  public isNotBasic: boolean;
+  public readonly error?: string;
+  public readonly isActive: boolean;
+  public readonly isAvailable: boolean;
+  public readonly isBasic: boolean;
+  public readonly isNotBasic: boolean;
 
-  public uid?: string;
-  public status?: LicenseStatus;
-  public expiryDateInMillis?: number;
-  public type?: LicenseType;
-  public signature: string;
+  public readonly uid?: string;
+  public readonly status?: LicenseStatus;
+  public readonly expiryDateInMillis?: number;
+  public readonly type?: LicenseType;
+  public readonly signature: string;
 
   /**
    * @internal
    * Generate a License instance from json representation.
    */
-  static fromJSON(json: PublicLicense) {
+  static fromJSON(json: PublicLicenseJSON) {
     return new License(json);
   }
 
-  constructor({ license, features, signature, error }: PublicLicense & { error?: string }) {
+  constructor({
+    license,
+    features,
+    error,
+    signature,
+  }: {
+    license?: PublicLicense;
+    features?: PublicFeatures;
+    error?: string;
+    signature: string;
+  }) {
     this.isAvailable = Boolean(license);
     this.license = license;
     this.features = features;
@@ -68,7 +80,7 @@ export class License implements ILicense {
     };
   }
 
-  public getUnavailableReason() {
+  getUnavailableReason() {
     if (this.error) return this.error;
     if (!this.isAvailable) {
       return 'X-Pack plugin is not installed on the Elasticsearch cluster.';

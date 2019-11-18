@@ -18,7 +18,7 @@ import {
   IClusterClient,
 } from 'src/core/server';
 
-import { ILicense, LicensingPluginSetup, PublicLicense } from '../common/types';
+import { ILicense, LicensingPluginSetup, PublicLicense, PublicFeatures } from '../common/types';
 import { License } from '../common/license';
 import { createLicenseUpdate } from '../common/license_update';
 
@@ -26,7 +26,7 @@ import { ElasticsearchError, RawLicense, RawFeatures } from './types';
 import { LicenseConfigType } from './licensing_config';
 import { createRouteHandlerContext } from './licensing_route_handler_context';
 
-function normalizeServerLicense(license: RawLicense): PublicLicense['license'] {
+function normalizeServerLicense(license: RawLicense): PublicLicense {
   return {
     uid: license.uid,
     type: license.type,
@@ -36,7 +36,7 @@ function normalizeServerLicense(license: RawLicense): PublicLicense['license'] {
 }
 
 function normalizeFeatures(rawFeatures: RawFeatures) {
-  const features: PublicLicense['features'] = {};
+  const features: PublicFeatures = {};
   for (const [name, feature] of Object.entries(rawFeatures)) {
     features[name] = {
       isAvailable: feature.available,
@@ -46,12 +46,23 @@ function normalizeFeatures(rawFeatures: RawFeatures) {
   return features;
 }
 
-function sign(
-  licenseJSON: Partial<Pick<PublicLicense, 'license' | 'features'>>,
-  error: string = ''
-) {
+function sign({
+  license,
+  features,
+  error,
+}: {
+  license?: PublicLicense;
+  features?: PublicFeatures;
+  error?: string;
+}) {
   return createHash('md5')
-    .update(JSON.stringify({ ...licenseJSON, error }))
+    .update(
+      JSON.stringify({
+        license,
+        features,
+        error,
+      })
+    )
     .digest('hex');
 }
 
@@ -126,7 +137,11 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
 
       const normalizedLicense = normalizeServerLicense(response.license);
       const normalizedFeatures = normalizeFeatures(response.features);
-      const signature = sign({ license: normalizedLicense, features: normalizedFeatures });
+      const signature = sign({
+        license: normalizedLicense,
+        features: normalizedFeatures,
+        error: '',
+      });
 
       return new License({
         license: normalizedLicense,
@@ -138,7 +153,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
         `License information could not be obtained from Elasticsearch due to ${error} error`
       );
       const errorMessage = this.getErrorMessage(error);
-      const signature = sign({}, errorMessage);
+      const signature = sign({ error: errorMessage });
 
       return new License({
         error: this.getErrorMessage(error),

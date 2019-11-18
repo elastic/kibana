@@ -9,7 +9,7 @@ import { PublicLicense } from './types';
 import { hasLicenseInfoChanged } from './has_license_info_changed';
 
 function license({ error, ...customLicense }: { error?: string; [key: string]: any } = {}) {
-  const defaultLicense: PublicLicense['license'] = {
+  const defaultLicense: PublicLicense = {
     uid: 'uid-000000001234',
     status: 'active',
     type: 'basic',

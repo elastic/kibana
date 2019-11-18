@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PublicLicense } from './types';
+import { PublicLicense, PublicFeatures } from './types';
 import { License } from './license';
 
 function createLicense({
@@ -11,8 +11,8 @@ function createLicense({
   features = {},
   signature = 'xxxxxxxxx',
 }: {
-  license?: Partial<PublicLicense['license']>;
-  features?: PublicLicense['features'];
+  license?: Partial<PublicLicense>;
+  features?: PublicFeatures;
   signature?: string;
 } = {}) {
   const defaultLicense = {

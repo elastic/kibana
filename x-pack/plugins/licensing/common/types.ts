@@ -38,28 +38,41 @@ export interface LicenseFeature {
  * @public
  * */
 export interface PublicLicense {
-  license?: {
-    /**
-     * UID for license.
-     */
-    uid: string;
+  /**
+   * UID for license.
+   */
+  uid: string;
 
-    /**
-     * The validity status of the license.
-     */
-    status: LicenseStatus;
+  /**
+   * The validity status of the license.
+   */
+  status: LicenseStatus;
 
-    /**
-     * Unix epoch of the expiration date of the license.
-     */
-    expiryDateInMillis: number;
+  /**
+   * Unix epoch of the expiration date of the license.
+   */
+  expiryDateInMillis: number;
 
-    /**
-     * The license type, being usually one of basic, standard, gold, platinum, or trial.
-     */
-    type: LicenseType;
-  };
-  features?: Record<string, LicenseFeature>;
+  /**
+   * The license type, being usually one of basic, standard, gold, platinum, or trial.
+   */
+  type: LicenseType;
+}
+
+/**
+ * Provides information about feature availability for the current license.
+ * @public
+ * */
+export type PublicFeatures = Record<string, LicenseFeature>;
+
+/**
+ * Subset of license & features data considered as non-sensitive information.
+ * Structured as json to be passed to the client.
+ * @public
+ * */
+export interface PublicLicenseJSON {
+  license?: PublicLicense;
+  features?: PublicFeatures;
   signature: string;
 }
 
@@ -129,7 +142,7 @@ export interface ILicense {
   /**
    * Returns
    */
-  toJSON: () => PublicLicense;
+  toJSON: () => PublicLicenseJSON;
 
   /**
    * A potential error denoting the failure of the license from being retrieved.
