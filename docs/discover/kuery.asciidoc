@@ -19,14 +19,13 @@ they appear. This means documents with "quick brown fox" will match, but so will
 to search for a phrase.
 
 The query parser will no longer split on whitespace. Multiple search terms must be separated by explicit
-boolean operators. Note that boolean operators are not case sensitive.
+boolean operators. Lucene will combine search terms with an `or` by default, so `response:200 extension:php` would 
+become `response:200 or extension:php` in KQL. This will match documents where response matches 200, extension matches php, or both. 
+Note that boolean operators are not case sensitive.
 
-`response:200 extension:php` in lucene would become `response:200 and extension:php`.
- This will match documents where response matches 200 and extension matches php.
+We can make terms required by using `and`.
 
-We can make terms optional by using `or`.
-
-`response:200 or extension:php` will match documents where response matches 200, extension matches php, or both.
+`response:200 and extension:php` will match documents where response matches 200 and extension matches php.
 
 By default, `and` has a higher precedence than `or`.
 
