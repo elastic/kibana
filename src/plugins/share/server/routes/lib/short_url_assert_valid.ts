@@ -17,19 +17,25 @@
  * under the License.
  */
 
-import { handleShortUrlError } from './lib/short_url_error';
-import { shortUrlAssertValid } from './lib/short_url_assert_valid';
+import { parse } from 'url';
+import { trim } from 'lodash';
+import Boom from 'boom';
 
-export const createShortenUrlRoute = ({ shortUrlLookup }) => ({
-  method: 'POST',
-  path: '/api/shorten_url',
-  handler: async function (request) {
-    try {
-      shortUrlAssertValid(request.payload.url);
-      const urlId = await shortUrlLookup.generateUrlId(request.payload.url, request);
-      return { urlId };
-    } catch (err) {
-      throw handleShortUrlError(err);
-    }
+export function shortUrlAssertValid(url: string) {
+  const { protocol, hostname, pathname } = parse(url);
+
+  if (protocol) {
+    throw Boom.notAcceptable(`Short url targets cannot have a protocol, found "${protocol}"`);
   }
-});
+
+  if (hostname) {
+    throw Boom.notAcceptable(`Short url targets cannot have a hostname, found "${hostname}"`);
+  }
+
+  const pathnameParts = trim(pathname, '/').split('/');
+  if (pathnameParts.length !== 2) {
+    throw Boom.notAcceptable(
+      `Short url target path must be in the format "/app/{{appId}}", found "${pathname}"`
+    );
+  }
+}

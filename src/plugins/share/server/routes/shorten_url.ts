@@ -17,29 +17,37 @@
  * under the License.
  */
 
+import { IRouter } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
+
 import { handleShortUrlError } from './lib/short_url_error';
 import { shortUrlAssertValid } from './lib/short_url_assert_valid';
+import { ShortUrlLookupService } from './lib/short_url_lookup';
 
-export const createGotoRoute = ({ router, shortUrlLookup }) => ({
-  method: 'GET',
-  path: '/goto/{urlId}',
-  handler: async function (request, h) {
-    try {
-      const url = await shortUrlLookup.getUrl(request.params.urlId, request);
-      shortUrlAssertValid(url);
-
-      const uiSettings = request.getUiSettingsService();
-      const stateStoreInSessionStorage = await uiSettings.get('state:storeInSessionStorage');
-      if (!stateStoreInSessionStorage) {
-        return h.redirect(request.getBasePath() + url);
+export const createShortenUrlRoute = ({
+  shortUrlLookup,
+  router,
+}: {
+  shortUrlLookup: ShortUrlLookupService;
+  router: IRouter;
+}) => {
+  router.post(
+    {
+      path: '/api/shorten_url',
+      validate: {
+        body: schema.object({ url: schema.string() }, { allowUnknowns: false }),
+      },
+    },
+    async function(context, request, response) {
+      try {
+        shortUrlAssertValid(request.body.url);
+        const urlId = await shortUrlLookup.generateUrlId(request.body.url, {
+          savedObjects: context.core.savedObjects.client,
+        });
+        return response.ok({ body: { urlId } });
+      } catch (err) {
+        throw handleShortUrlError(err);
       }
-
-      const app = server.getHiddenUiAppById('stateSessionStorageRedirect');
-      return h.renderApp(app, {
-        redirectUrl: url,
-      });
-    } catch (err) {
-      throw handleShortUrlError(err);
     }
-  }
-});
+  );
+};

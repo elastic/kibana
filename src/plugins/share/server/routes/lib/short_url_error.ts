@@ -17,19 +17,10 @@
  * under the License.
  */
 
-import { handleShortUrlError } from './lib/short_url_error';
-import { shortUrlAssertValid } from './lib/short_url_assert_valid';
+import Boom from 'boom';
 
-export const createShortenUrlRoute = ({ shortUrlLookup }) => ({
-  method: 'POST',
-  path: '/api/shorten_url',
-  handler: async function (request) {
-    try {
-      shortUrlAssertValid(request.payload.url);
-      const urlId = await shortUrlLookup.generateUrlId(request.payload.url, request);
-      return { urlId };
-    } catch (err) {
-      throw handleShortUrlError(err);
-    }
-  }
-});
+export function handleShortUrlError(error: Error) {
+  return Boom.boomify(error, {
+    statusCode: Boom.isBoom(error) ? error.output.statusCode : 500,
+  });
+}

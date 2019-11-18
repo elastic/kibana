@@ -18,12 +18,13 @@
  */
 
 import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
+import { createRoutes } from './routes/create_routes';
 
 export class SharePlugin implements Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public async setup({ http }: CoreSetup) {
-
+  public async setup(core: CoreSetup) {
+    createRoutes(core, this.initializerContext.logger.get());
   }
 
   public start() {
