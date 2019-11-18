@@ -283,7 +283,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
 
-              // Wait for test.authroization to index a document before disabling the alert and waiting for tasks to finish
+              // Wait for test.authorization to index a document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.authorization', reference);
               await alertUtils.disable(response.body.id);
               await taskManagerUtils.waitForIdle(testStart);
@@ -311,7 +311,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
 
-              // Wait for test.authroization to index a document before disabling the alert and waiting for tasks to finish
+              // Wait for test.authorization to index a document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.authorization', reference);
               await alertUtils.disable(response.body.id);
               await taskManagerUtils.waitForIdle(testStart);
