@@ -72,7 +72,7 @@ function createLocalPrivateModule() {
 function createLocalConfigModule(uiSettings: UiSettingsClientContract) {
   angular
     .module('tableVisConfig', ['tableVisPrivate'])
-    .provider('stateManagementConfig', StateManagementConfigProvider)
+    // .provider('stateManagementConfig', StateManagementConfigProvider)
     .provider('config', () => {
       return {
         $get: () => ({
