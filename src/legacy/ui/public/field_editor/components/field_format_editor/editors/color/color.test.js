@@ -20,7 +20,7 @@
 import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
-import { ColorFormatEditor, ColorFormatEditorComponent } from './color';
+import { ColorFormatEditor } from './color';
 import { DEFAULT_CONVERTER_COLOR } from '../../../../../../../../plugins/data/public';
 
 const fieldType = 'string';
