@@ -42,13 +42,13 @@ export const getQueryFilter = (
 
 interface GetFilterArgs {
   type: SignalAlertParams['type'];
-  filter: Record<string, {}> | undefined;
-  filters: PartialFilter[] | undefined;
-  language: string | undefined;
-  query: string | undefined;
-  savedId: string | undefined;
+  filter: Record<string, {}> | undefined | null;
+  filters: PartialFilter[] | undefined | null;
+  language: string | undefined | null;
+  query: string | undefined | null;
+  savedId: string | undefined | null;
   services: AlertServices;
-  index: string[] | undefined;
+  index: string[] | undefined | null;
 }
 
 export const getFilter = async ({

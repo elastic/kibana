@@ -14,10 +14,8 @@ import { timefilter } from 'ui/timefilter';
 import { IndexPatterns } from 'ui/index_patterns';
 
 import { I18nContext } from 'ui/i18n';
-import { IPrivate } from 'ui/private';
 import { InjectorService } from '../../../../../common/types/angular';
-
-import { SearchItemsProvider } from '../../../new_job_new/utils/new_job_utils';
+import { createSearchItems } from '../../../new_job_new/utils/new_job_utils';
 import { Page } from './page';
 
 import { KibanaContext, KibanaConfigTypeFix } from '../../../../contexts/kibana';
@@ -32,18 +30,19 @@ module.directive('mlJobTypePage', ($injector: InjectorService) => {
       timefilter.disableAutoRefreshSelector();
 
       const indexPatterns = $injector.get<IndexPatterns>('indexPatterns');
-      const kbnBaseUrl = $injector.get<string>('kbnBaseUrl');
       const kibanaConfig = $injector.get<KibanaConfigTypeFix>('config');
-      const Private = $injector.get<IPrivate>('Private');
+      const $route = $injector.get<any>('$route');
 
-      const createSearchItems = Private(SearchItemsProvider);
-      const { indexPattern, savedSearch, combinedQuery } = createSearchItems();
+      const { indexPattern, savedSearch, combinedQuery } = createSearchItems(
+        kibanaConfig,
+        $route.current.locals.indexPattern,
+        $route.current.locals.savedSearch
+      );
       const kibanaContext = {
         combinedQuery,
         currentIndexPattern: indexPattern,
         currentSavedSearch: savedSearch,
         indexPatterns,
-        kbnBaseUrl,
         kibanaConfig,
       };
 
