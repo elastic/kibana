@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import { Setup } from '../../helpers/setup_request';
 import {
   PROCESSOR_EVENT,
@@ -49,7 +48,9 @@ export async function getAgentNameByService({
   };
 
   const { aggregations } = await client.search(params);
-  const agentName = idx(aggregations, _ => _.agent_names.buckets[0].key) as
+  // TODO(TS-3.7-ESLINT)
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  const agentName = aggregations?.agent_names.buckets[0].key as
     | string
     | undefined;
   return { agentName };
