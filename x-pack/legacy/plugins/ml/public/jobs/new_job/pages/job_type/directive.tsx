@@ -14,14 +14,13 @@ import { timefilter } from 'ui/timefilter';
 import { IndexPatterns } from 'ui/index_patterns';
 
 import { I18nContext } from 'ui/i18n';
-import { InjectorService } from '../../../../common/types/angular';
-
-import { createSearchItems } from '../../new_job_new/utils/new_job_utils';
+import { InjectorService } from '../../../../../common/types/angular';
+import { createSearchItems } from '../../../new_job/utils/new_job_utils';
 import { Page } from './page';
 
-import { KibanaContext, KibanaConfigTypeFix } from '../../../contexts/kibana';
+import { KibanaContext, KibanaConfigTypeFix } from '../../../../contexts/kibana';
 
-module.directive('mlRecognizePage', ($injector: InjectorService) => {
+module.directive('mlJobTypePage', ($injector: InjectorService) => {
   return {
     scope: {},
     restrict: 'E',
@@ -33,9 +32,6 @@ module.directive('mlRecognizePage', ($injector: InjectorService) => {
       const indexPatterns = $injector.get<IndexPatterns>('indexPatterns');
       const kibanaConfig = $injector.get<KibanaConfigTypeFix>('config');
       const $route = $injector.get<any>('$route');
-
-      const moduleId = $route.current.params.id;
-      const existingGroupIds: string[] = $route.current.locals.existingJobsAndGroups.groupIds;
 
       const { indexPattern, savedSearch, combinedQuery } = createSearchItems(
         kibanaConfig,
@@ -53,7 +49,7 @@ module.directive('mlRecognizePage', ($injector: InjectorService) => {
       ReactDOM.render(
         <I18nContext>
           <KibanaContext.Provider value={kibanaContext}>
-            {React.createElement(Page, { moduleId, existingGroupIds })}
+            {React.createElement(Page)}
           </KibanaContext.Provider>
         </I18nContext>,
         element[0]
