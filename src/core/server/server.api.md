@@ -1018,10 +1018,11 @@ export interface PluginsServiceSetup {
     // (undocumented)
     contracts: Map<PluginName, unknown>;
     // (undocumented)
+    uiPluginConfigs: Map<PluginName, Observable<unknown>>;
+    // (undocumented)
     uiPlugins: {
         public: Map<PluginName, DiscoveredPlugin>;
         internal: Map<PluginName, DiscoveredPluginInternal>;
-        config: Map<PluginName, Observable<unknown> | null>;
     };
 }
 

@@ -234,7 +234,7 @@ export function uiRenderMixin(kbnServer, server, config) {
 
     // Get the list of new platform plugins.
     // Convert the Map into an array of objects so it is JSON serializable and order is preserved.
-    const uiPluginConfigs = kbnServer.newPlatform.__internals.uiPlugins.config;
+    const uiPluginConfigs = kbnServer.newPlatform.__internals.uiPluginConfigs;
     const uiPlugins = await Promise.all([
       ...kbnServer.newPlatform.__internals.uiPlugins.public.entries(),
     ].map(async ([id, plugin]) => {

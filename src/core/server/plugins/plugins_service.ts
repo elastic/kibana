@@ -43,8 +43,8 @@ export interface PluginsServiceSetup {
   uiPlugins: {
     public: Map<PluginName, DiscoveredPlugin>;
     internal: Map<PluginName, DiscoveredPluginInternal>;
-    config: Map<PluginName, Observable<unknown> | null>;
   };
+  uiPluginConfigs: Map<PluginName, Observable<unknown>>;
 }
 
 /** @public */
@@ -103,10 +103,8 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     const uiPlugins = this.pluginsSystem.uiPlugins();
     return {
       contracts,
-      uiPlugins: {
-        ...uiPlugins,
-        config: this.generateUiPluginsConfigs(uiPlugins.public),
-      },
+      uiPlugins,
+      uiPluginConfigs: this.generateUiPluginsConfigs(uiPlugins.public),
     };
   }
 
