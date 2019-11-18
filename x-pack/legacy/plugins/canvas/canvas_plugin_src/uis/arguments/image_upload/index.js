@@ -130,6 +130,7 @@ class ImageUpload extends React.Component {
           idSelected={urlType}
           onChange={this.changeUrlType}
           isFullWidth
+          className="canvasSidebar__buttonGroup"
         />
       </EuiFormRow>
     );
