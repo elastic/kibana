@@ -8,7 +8,7 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 
-import { omit } from 'lodash';
+import { omit, defaults, mapValues, isDate } from 'lodash';
 import {
   SavedObjectsClientContract,
   SavedObject,
@@ -155,24 +155,19 @@ export class TaskStore {
       );
     }
 
-    const taskUpdate = {
+    const taskUpdate = applyConcreteTaskInstanceDefaults({
       ...omit(taskInStore, 'runAt'),
       ...taskInstance,
-    } as ConcreteTaskInstance; // Not sure why TS is requiring this `As`, looking into it
+    });
 
     if (!taskInstance.runAt && taskInstance.interval) {
-      taskUpdate.runAt =
-        intervalFromDate(
-          precedingDateByInterval(taskInStore.runAt, taskInStore.interval) ||
-            taskInStore.scheduledAt,
-          taskInstance.interval
-        ) || new Date();
-    } else if (!taskUpdate.runAt) {
-      taskUpdate.runAt = new Date();
+      taskUpdate.runAt = intervalFromDate(
+        precedingDateByInterval(taskInStore.runAt, taskInStore.interval) || taskInStore.scheduledAt,
+        taskInstance.interval
+      )!;
     }
 
-    const taskInStoreAfterUpdate = await this.update(taskUpdate);
-    return taskInStoreAfterUpdate;
+    return await this.update(taskUpdate);
   }
 
   /**
@@ -440,20 +435,31 @@ function paginatableSort(sort: any[] = []) {
 }
 
 function taskInstanceToAttributes(doc: TaskInstance): SavedObjectAttributes {
+  return serializeTaskInstanceFields(applyConcreteTaskInstanceDefaults(doc));
+}
+
+function serializeTaskInstanceFields(doc: ConcreteTaskInstance): SavedObjectAttributes {
+  const { params, state, scheduledAt, startedAt, retryAt, runAt } = doc;
   return {
     ...omit(doc, 'id', 'version'),
-    params: JSON.stringify(doc.params || {}),
-    state: JSON.stringify(doc.state || {}),
-    attempts: (doc as ConcreteTaskInstance).attempts || 0,
-    scheduledAt: (doc.scheduledAt || new Date()).toISOString(),
-    startedAt: (doc.startedAt && doc.startedAt.toISOString()) || null,
-    retryAt: (doc.retryAt && doc.retryAt.toISOString()) || null,
-    // if no runAt is specified this result in scheduling the task
-    // to be run "now - this should probably be more explicit as it gets lost
-    // in what is essentially "formatting" to become a saved object
-    runAt: (doc.runAt || new Date()).toISOString(),
-    status: (doc as ConcreteTaskInstance).status || 'idle',
+    ...mapValues({ params, state }, objectProp => JSON.stringify(objectProp)),
+    ...mapValues({ scheduledAt, startedAt, retryAt, runAt }, dateProp =>
+      isDate(dateProp) ? dateProp.toISOString() : null
+    ),
   };
+}
+
+function applyConcreteTaskInstanceDefaults(doc: TaskInstance): ConcreteTaskInstance {
+  return defaults(doc, {
+    params: {},
+    state: {},
+    attempts: 0,
+    scheduledAt: new Date(),
+    runAt: new Date(),
+    startedAt: null,
+    retryAt: null,
+    status: 'idle',
+  });
 }
 
 function savedObjectToConcreteTaskInstance(
