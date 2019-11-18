@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Observable } from 'rxjs';
 import { Annotation } from '../../../common/types/annotations';
 import { AggFieldNamePair } from '../../../common/types/fields';
 import { ExistingJobsAndGroups } from '../job_service';
@@ -92,6 +93,7 @@ declare interface Ml {
   getJobStats(obj: object): Promise<any>;
   getDatafeedStats(obj: object): Promise<any>;
   esSearch(obj: object): any;
+  esSearchRx(obj: object): Observable<any>;
   getIndices(): Promise<EsIndex[]>;
   dataRecognizerModuleJobsExist(obj: { moduleId: string }): Promise<any>;
   getDataRecognizerModule(obj: { moduleId: string }): Promise<any>;
@@ -159,6 +161,7 @@ declare interface Ml {
 
   mlNodeCount(): Promise<{ count: number }>;
   mlInfo(): Promise<MlInfoResponse>;
+  getCardinalityOfFields(obj: Record<string, any>): any;
 }
 
 declare const ml: Ml;

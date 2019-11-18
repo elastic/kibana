@@ -9,6 +9,11 @@ export interface ModelPlotOutputResults {
   results: Record<time, { actual: number; modelUpper: number | null; modelLower: number | null }>;
 }
 
+export interface CriteriaField {
+  fieldName: string;
+  fieldValue: any;
+}
+
 declare interface MlResultsService {
   getScoresByBucket: (
     jobIds: string[],
@@ -33,7 +38,17 @@ declare interface MlResultsService {
   getRecordsForDetector: () => Promise<any>;
   getRecords: () => Promise<any>;
   getRecordsForCriteria: () => Promise<any>;
-  getMetricData: () => Promise<any>;
+  getMetricData: (
+    index: string,
+    entityField: any[],
+    query: object,
+    metricFunction: string,
+    metricFieldName: string,
+    timeFieldName: string,
+    earliestMs: number,
+    latestMs: number,
+    interval: string
+  ) => Promise<any>;
   getEventRateData: (
     index: string,
     query: any,
@@ -46,11 +61,11 @@ declare interface MlResultsService {
   getModelPlotOutput: (
     jobId: string,
     detectorIndex: number,
-    criteriaFields: string[],
+    criteriaFields: CriteriaField[],
     earliestMs: number,
     latestMs: number,
     interval: string | number,
-    aggType: {
+    aggType?: {
       min: string;
       max: string;
     }
