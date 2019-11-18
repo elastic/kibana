@@ -54,14 +54,9 @@ export const loadWatchDetail = (id: string) => {
 };
 
 export const loadWatchHistory = (id: string, startTime: string) => {
-  let path = `${basePath}/watch/${id}/history`;
-
-  if (startTime) {
-    path += `?startTime=${startTime}`;
-  }
-
   return useRequest({
-    path,
+    query: startTime ? { startTime } : undefined,
+    path: `${basePath}/watch/${id}/history`,
     method: 'get',
     deserializer: ({ watchHistoryItems = [] }: { watchHistoryItems: any }) => {
       return watchHistoryItems.map((historyItem: any) =>
@@ -84,9 +79,7 @@ export const deleteWatches = async (watchIds: string[]) => {
   const body = JSON.stringify({
     watchIds,
   });
-  const {
-    data: { results },
-  } = await getHttpClient().post(`${basePath}/watches/delete`, { body });
+  const { results } = await getHttpClient().post(`${basePath}/watches/delete`, { body });
   return results;
 };
 
@@ -105,7 +98,7 @@ export const activateWatch = async (id: string) => {
 };
 
 export const loadWatch = async (id: string) => {
-  const { data: watch } = await getHttpClient().get(`${basePath}/watch/${id}`);
+  const { watch } = await getHttpClient().get(`${basePath}/watch/${id}`);
   return Watch.fromUpstreamJson(watch.watch);
 };
 
@@ -117,32 +110,31 @@ export const getMatchingIndices = async (pattern: string) => {
     pattern = `${pattern}*`;
   }
   const body = JSON.stringify({ pattern });
-  const {
-    data: { indices },
-  } = await getHttpClient().post(`${basePath}/indices`, { body });
+  const { indices } = await getHttpClient().post(`${basePath}/indices`, { body });
   return indices;
 };
 
 export const fetchFields = async (indexes: string[]) => {
-  const {
-    data: { fields },
-  } = await getHttpClient().post(`${basePath}/fields`, { body: JSON.stringify({ indexes }) });
+  const { fields } = await getHttpClient().post(`${basePath}/fields`, {
+    body: JSON.stringify({ indexes }),
+  });
   return fields;
 };
 
 export const createWatch = async (watch: BaseWatch) => {
-  const { data } = await getHttpClient().put(`${basePath}/watch/${watch.id}`, watch.upstreamJson);
-  return data;
+  return await getHttpClient().put(`${basePath}/watch/${watch.id}`, {
+    body: JSON.stringify(watch.upstreamJson),
+  });
 };
 
 export const executeWatch = async (executeWatchDetails: ExecutedWatchDetails, watch: BaseWatch) => {
   return sendRequest({
     path: `${basePath}/watch/execute`,
     method: 'put',
-    body: {
+    body: JSON.stringify({
       executeDetails: executeWatchDetails.upstreamJson,
       watch: watch.upstreamJson,
-    },
+    }),
   });
 };
 
@@ -159,10 +151,10 @@ export const getWatchVisualizationData = (watchModel: BaseWatch, visualizeOption
   return useRequest({
     path: `${basePath}/watch/visualize`,
     method: 'post',
-    body: {
+    body: JSON.stringify({
       watch: watchModel.upstreamJson,
       options: visualizeOptions.upstreamJson,
-    },
+    }),
     deserializer: ({ visualizeData }: { visualizeData: any }) => visualizeData,
   });
 };
@@ -182,8 +174,8 @@ export const loadSettings = () => {
 };
 
 export const ackWatchAction = async (watchId: string, actionId: string) => {
-  const {
-    data: { watchStatus },
-  } = await getHttpClient().put(`${basePath}/watch/${watchId}/action/${actionId}/acknowledge`);
+  const { watchStatus } = await getHttpClient().put(
+    `${basePath}/watch/${watchId}/action/${actionId}/acknowledge`
+  );
   return WatchStatus.fromUpstreamJson(watchStatus);
 };

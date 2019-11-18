@@ -15,7 +15,6 @@ import {
 import { boot } from './application/boot';
 
 interface LegacyPlugins {
-  eui_utils: any;
   __LEGACY: {
     MANAGEMENT_BREADCRUMB: { text: string; href?: string };
     I18nContext: any;
@@ -25,26 +24,25 @@ interface LegacyPlugins {
   };
 }
 
-export class WatcherUIPlugin implements Plugin<void, void, any, any> {
+export class WatcherUIPlugin implements Plugin<void, void, LegacyPlugins, any> {
   docLinks: DocLinksStart | null = null;
   chrome: ChromeStart | null = null;
-  setup(
-    { application, notifications, http, uiSettings }: CoreSetup,
-    { __LEGACY, eui_utils }: LegacyPlugins
-  ) {
+  euiUtils: any = null;
+  setup({ application, notifications, http, uiSettings }: CoreSetup, { __LEGACY }: LegacyPlugins) {
     application.register({
       id: 'watcher',
       title: 'Watcher',
       mount: (ctx, { element }) => {
         const docLinks = this.docLinks!;
         const chrome = this.chrome!;
+        const euiUtils = this.euiUtils!;
         return boot({
           ...__LEGACY,
           element,
           toasts: notifications.toasts,
           http,
           uiSettings,
-          euiUtils: eui_utils,
+          euiUtils,
           docLinks,
           chrome,
         });
@@ -52,9 +50,11 @@ export class WatcherUIPlugin implements Plugin<void, void, any, any> {
     });
   }
 
-  start({ docLinks, chrome }: CoreStart) {
+  start({ docLinks, chrome }: CoreStart, { eui_utils }: any) {
     this.docLinks = docLinks;
     this.chrome = chrome;
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    this.euiUtils = eui_utils;
   }
 
   stop() {}

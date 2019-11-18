@@ -72,7 +72,7 @@ routes.when('/management/elasticsearch/watcher/:param1?/:param2?/:param3?/:param
           },
         });
 
-        instance.start(npStart.core, {});
+        instance.start(npStart.core, npStart.plugins);
 
         unmountApp = mountApp();
 
