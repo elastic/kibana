@@ -7,7 +7,7 @@
 import { isEmpty } from 'lodash';
 import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
-import { getAgentStatus } from './get_agent_status';
+import { hasHistoricalAgentData } from './has_historical_agent_data';
 import { getLegacyDataStatus } from './get_legacy_data_status';
 import { getServicesItems } from './get_services_items';
 
@@ -20,7 +20,7 @@ export async function getServices(setup: Setup) {
   const noDataInCurrentTimeRange = isEmpty(items);
   let hasHistorialAgentData = true;
   if (noDataInCurrentTimeRange) {
-    hasHistorialAgentData = await getAgentStatus(setup);
+    hasHistorialAgentData = await hasHistoricalAgentData(setup);
   }
 
   return {

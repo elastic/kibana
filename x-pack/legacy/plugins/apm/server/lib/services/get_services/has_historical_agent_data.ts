@@ -8,7 +8,7 @@ import { PROCESSOR_EVENT } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../helpers/setup_request';
 
 // Note: this logic is duplicated in tutorials/apm/envs/on_prem
-export async function getAgentStatus(setup: Setup) {
+export async function hasHistoricalAgentData(setup: Setup) {
   const { client, indices } = setup;
 
   const params = {

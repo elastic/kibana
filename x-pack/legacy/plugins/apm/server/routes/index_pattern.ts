@@ -12,7 +12,8 @@ export const staticIndexPatternRoute = createRoute((core, { server }) => ({
   method: 'POST',
   path: '/api/apm/index_pattern/static',
   handler: async (req, params, h) => {
-    await createStaticIndexPattern(server);
+    const setup = await setupRequest(req);
+    await createStaticIndexPattern(setup, server);
 
     // send empty response regardless of outcome
     return h.response().code(204);
