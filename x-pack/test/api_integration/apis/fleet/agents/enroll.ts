@@ -6,8 +6,6 @@
 
 import expect from '@kbn/expect';
 import uuid from 'uuid';
-import * as legacyElasticsearch from 'elasticsearch';
-
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getSupertestWithoutAuth } from './services';
 
