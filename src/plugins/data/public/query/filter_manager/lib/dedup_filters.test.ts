@@ -18,13 +18,26 @@
  */
 
 import { dedupFilters } from './dedup_filters';
-import { esFilters } from '../../../../common/es_query';
+import { esFilters, IIndexPattern, IFieldType } from '../../../../common';
 
 describe('filter manager utilities', () => {
+  let indexPattern: IIndexPattern;
+
+  beforeEach(() => {
+    indexPattern = {
+      id: 'index',
+    } as IIndexPattern;
+  });
+
   describe('dedupFilters(existing, filters)', () => {
     test('should return only filters which are not in the existing', () => {
       const existing: esFilters.Filter[] = [
-        esFilters.buildRangeFilter({ name: 'bytes' }, { from: 0, to: 1024 }, 'index', ''),
+        esFilters.buildRangeFilter(
+          { name: 'bytes' } as IFieldType,
+          { from: 0, to: 1024 },
+          indexPattern,
+          ''
+        ),
         esFilters.buildQueryFilter(
           { match: { _term: { query: 'apache', type: 'phrase' } } },
           'index',
@@ -32,7 +45,12 @@ describe('filter manager utilities', () => {
         ),
       ];
       const filters: esFilters.Filter[] = [
-        esFilters.buildRangeFilter({ name: 'bytes' }, { from: 1024, to: 2048 }, 'index', ''),
+        esFilters.buildRangeFilter(
+          { name: 'bytes' } as IFieldType,
+          { from: 1024, to: 2048 },
+          indexPattern,
+          ''
+        ),
         esFilters.buildQueryFilter(
           { match: { _term: { query: 'apache', type: 'phrase' } } },
           'index',
@@ -47,7 +65,12 @@ describe('filter manager utilities', () => {
 
     test('should ignore the disabled attribute when comparing ', () => {
       const existing: esFilters.Filter[] = [
-        esFilters.buildRangeFilter({ name: 'bytes' }, { from: 0, to: 1024 }, 'index', ''),
+        esFilters.buildRangeFilter(
+          { name: 'bytes' } as IFieldType,
+          { from: 0, to: 1024 },
+          indexPattern,
+          ''
+        ),
         {
           ...esFilters.buildQueryFilter(
             { match: { _term: { query: 'apache', type: 'phrase' } } },
@@ -58,7 +81,12 @@ describe('filter manager utilities', () => {
         },
       ];
       const filters: esFilters.Filter[] = [
-        esFilters.buildRangeFilter({ name: 'bytes' }, { from: 1024, to: 2048 }, 'index', ''),
+        esFilters.buildRangeFilter(
+          { name: 'bytes' } as IFieldType,
+          { from: 1024, to: 2048 },
+          indexPattern,
+          ''
+        ),
         esFilters.buildQueryFilter(
           { match: { _term: { query: 'apache', type: 'phrase' } } },
           'index1',
@@ -73,7 +101,12 @@ describe('filter manager utilities', () => {
 
     test('should ignore $state attribute', () => {
       const existing: esFilters.Filter[] = [
-        esFilters.buildRangeFilter({ name: 'bytes' }, { from: 0, to: 1024 }, 'index', ''),
+        esFilters.buildRangeFilter(
+          { name: 'bytes' } as IFieldType,
+          { from: 0, to: 1024 },
+          indexPattern,
+          ''
+        ),
         {
           ...esFilters.buildQueryFilter(
             { match: { _term: { query: 'apache', type: 'phrase' } } },
@@ -84,7 +117,12 @@ describe('filter manager utilities', () => {
         },
       ];
       const filters: esFilters.Filter[] = [
-        esFilters.buildRangeFilter({ name: 'bytes' }, { from: 1024, to: 2048 }, 'index', ''),
+        esFilters.buildRangeFilter(
+          { name: 'bytes' } as IFieldType,
+          { from: 1024, to: 2048 },
+          indexPattern,
+          ''
+        ),
         {
           ...esFilters.buildQueryFilter(
             { match: { _term: { query: 'apache', type: 'phrase' } } },

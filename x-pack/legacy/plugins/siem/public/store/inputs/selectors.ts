@@ -73,3 +73,6 @@ export const globalFiltersQuerySelector = () =>
   createSelector(selectGlobal, global => global.filters || []);
 
 export const getTimelineSelector = () => createSelector(selectTimeline, timeline => timeline);
+
+export const getTimelinePolicySelector = () =>
+  createSelector(selectTimeline, timeline => timeline.policy);

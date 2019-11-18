@@ -2,13 +2,17 @@
 
 exports[`Storyshots components/Sidebar/MultiElementSettings default 1`] = `
 <div
-  className="euiText euiText--small"
+  className="canvasSidebar__panel canvasSidebar__panel--isEmpty"
 >
-  <p>
-    Multiple elements are currently selected.
-  </p>
-  <p>
-    Deselect these elements to edit their individual settings, press (G) to group them, or save this selection as a new element to re-use it throughout your workpad.
-  </p>
+  <div
+    className="euiText euiText--small"
+  >
+    <p>
+      Multiple elements are currently selected.
+    </p>
+    <p>
+      Deselect these elements to edit their individual settings, press (G) to group them, or save this selection as a new element to re-use it throughout your workpad.
+    </p>
+  </div>
 </div>
 `;

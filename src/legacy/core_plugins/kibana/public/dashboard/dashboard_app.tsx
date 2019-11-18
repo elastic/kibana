@@ -26,16 +26,12 @@ import { IInjector } from 'ui/chrome';
 // @ts-ignore
 import * as filterActions from 'plugins/kibana/discover/doc_table/actions/filter';
 
-// @ts-ignore
-import { getFilterGenerator } from 'ui/filter_manager';
-
 import {
   AppStateClass as TAppStateClass,
   AppState as TAppState,
 } from 'ui/state_management/app_state';
 
 import { KbnUrl } from 'ui/url/kbn_url';
-import { TimeRange, Query } from 'src/plugins/data/public';
 import { IndexPattern } from 'ui/index_patterns';
 import { IPrivate } from 'ui/private';
 import { StaticIndexPattern, SavedQuery } from 'plugins/data';
@@ -45,7 +41,7 @@ import { Subscription } from 'rxjs';
 import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
 import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
 import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn } from './types';
-import { esFilters } from '../../../../../../src/plugins/data/public';
+import { TimeRange, Query, esFilters } from '../../../../../../src/plugins/data/public';
 
 import { DashboardAppController } from './dashboard_app_controller';
 
