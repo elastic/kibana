@@ -2,15 +2,17 @@
 
 exports[`MonitorStatusList component renders checks 1`] = `
 <Fragment>
-  <EuiHealth
-    color="#bd271e"
-  >
-    Down
-     in 
-    unnamed-location
-  </EuiHealth>
-  <EuiSpacer
-    size="s"
+  <MonitorStatusRow
+    locationNames={
+      Set {
+        "unnamed-location",
+      }
+    }
+    status="down"
+  />
+  <MonitorStatusRow
+    locationNames={Set {}}
+    status="up"
   />
   <EuiCallOut
     color="warning"
@@ -25,15 +27,17 @@ exports[`MonitorStatusList component renders checks 1`] = `
 
 exports[`MonitorStatusList component renders null in place of child status with missing ip 1`] = `
 <Fragment>
-  <EuiHealth
-    color="#bd271e"
-  >
-    Down
-     in 
-    unnamed-location
-  </EuiHealth>
-  <EuiSpacer
-    size="s"
+  <MonitorStatusRow
+    locationNames={
+      Set {
+        "unnamed-location",
+      }
+    }
+    status="down"
+  />
+  <MonitorStatusRow
+    locationNames={Set {}}
+    status="up"
   />
   <EuiCallOut
     color="warning"
