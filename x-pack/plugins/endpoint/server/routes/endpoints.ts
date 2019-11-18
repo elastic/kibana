@@ -5,19 +5,44 @@
  */
 
 import { IRouter } from 'kibana/server';
-import { endpoints2 } from './endpoints_stubs';
+import { schema } from '@kbn/config-schema';
 
-export function endpointsApi(router: IRouter) {
+export function registerEndpointsApi(router: IRouter) {
+  const endpointsHandler = async (context, req, res) => {
+    try {
+      if (!context.endpointPlugin) return res.internalError({ body: 'endpointPlugin is disabled' });
+      if ('id' in req.params) {
+        const endpointId = req.params.id as string;
+        const response = await context.endpointPlugin.findEndpoint(endpointId);
+        return res.ok({ body: response });
+      } else {
+        const response = await context.endpointPlugin.findLatestOfAllEndpoint();
+        return res.ok({ body: response });
+      }
+    } catch (err) {
+      return res.internalError({ body: err });
+    }
+  };
+
   router.get(
     {
-      path: '/endpoints',
-      validate: {},
+      path: '/api/endpoint/endpoints/{id}',
+      validate: {
+        params: schema.object({ id: schema.maybe(schema.string()) }),
+      },
+      options: { authRequired: false },
     },
-    function handleEndpoints(context, request, response) {
-      const responseData = endpoints2;
-      return response.ok({
-        body: responseData,
-      });
-    }
+    async (context, req, res) => endpointsHandler(context, req, res)
+  );
+
+  router.get(
+    {
+      path: '/api/endpoint/endpoints',
+      validate: {
+        params: schema.object({ id: schema.maybe(schema.string()) }),
+      },
+      options: { authRequired: false },
+    },
+    async (context, req, res) => endpointsHandler(context, req, res)
   );
 }
