@@ -63,7 +63,6 @@ const DEFAULT_INPUT_VALUE = `GET _search
 function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
   const {
     services: { history, notifications },
-    ResizeChecker,
     docLinkVersion,
   } = useAppContext();
 
@@ -130,7 +129,6 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
     mappings.retrieveAutoCompleteInfo();
 
     const unsubscribeResizer = subscribeResizeChecker(
-      ResizeChecker,
       editorRef.current!,
       editorInstanceRef.current
     );

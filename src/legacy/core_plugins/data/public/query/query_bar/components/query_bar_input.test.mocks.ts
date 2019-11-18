@@ -49,7 +49,7 @@ jest.mock('../../../../../../../plugins/data/public/query/persisted_log', () => 
   PersistedLog: mockPersistedLogFactory,
 }));
 
-jest.mock('../lib/fetch_index_patterns', () => ({
+jest.mock('./fetch_index_patterns', () => ({
   fetchIndexPatterns: mockFetchIndexPatterns,
 }));
 

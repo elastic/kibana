@@ -34,7 +34,7 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { Timefilter } from './timefilter';
 import { Subscription } from 'rxjs';
-import { TimeRange, RefreshInterval } from 'src/plugins/data/public';
+import { TimeRange, RefreshInterval } from '../../../common';
 
 import { timefilterServiceMock } from './timefilter_service.mock';
 const timefilterSetupMock = timefilterServiceMock.createSetupContract();
