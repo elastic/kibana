@@ -18,6 +18,7 @@
  */
 
 import React from 'react';
+import classnames from 'classnames';
 import { makeStyles } from '@material-ui/core/styles';
 import _ from 'lodash';
 import { EuiHorizontalRule, EuiIcon, EuiProgress, EuiTextColor, EuiToolTip } from '@elastic/eui';
@@ -131,7 +132,9 @@ const FileDownloadRow = (props: FileDownloadRowProps) => {
   return (
     <React.Fragment>
       <div className={classes.fileDownloadItem}>
-        <span className={classes.fileDownloadText}>{renderFileName()}</span>
+        <span className={classnames(classes.fileDownloadText, 'fileDownloadText')}>
+          {renderFileName()}
+        </span>
         <span className={classes.fileDownloadProgress}>{renderFileStatus()}</span>
       </div>
       <EuiHorizontalRule />
