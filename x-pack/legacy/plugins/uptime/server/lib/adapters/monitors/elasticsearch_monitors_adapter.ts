@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
-import { INDEX_NAMES } from '../../../../common/constants';
+import { set, reduce } from 'lodash';
+import { INDEX_NAMES, QUERY } from '../../../../common/constants';
 import {
   FilterBar,
   MonitorChart,
@@ -13,7 +13,7 @@ import {
   Ping,
   LocationDurationLine,
 } from '../../../../common/graphql/types';
-import { getHistogramIntervalFormatted } from '../../helper';
+import { getHistogramIntervalFormatted, parseFilterQuery, getFilterClause } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
 import { MonitorDetails, MonitorError } from '../../../../common/runtime_types';
@@ -98,7 +98,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
 
     const result = await this.database.search(request, params);
 
-    const dateHistogramBuckets = get<any[]>(result, 'aggregations.timeseries.buckets', []);
+    const dateHistogramBuckets = result?.aggregations?.timeseries?.buckets || [];
     /**
      * The code below is responsible for formatting the aggregation data we fetched above in a way
      * that the chart components used by the client understands.
@@ -131,9 +131,10 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     // a set of all the locations found for this result
     const resultLocations = new Set<string>();
     const linesByLocation: { [key: string]: LocationDurationLine } = {};
-    dateHistogramBuckets.forEach(dateHistogramBucket => {
-      const x = get(dateHistogramBucket, 'key');
-      const docCount = get(dateHistogramBucket, 'doc_count', 0);
+    dateHistogramBuckets.forEach((dateHistogramBucket: any) => {
+      const x = dateHistogramBucket?.key;
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      const docCount = dateHistogramBucket?.doc_count || 0;
       // a set of all the locations for the current bucket
       const bucketLocations = new Set<string>();
 
@@ -145,14 +146,14 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
           resultLocations.add(locationName);
 
           // create a new line for this location if it doesn't exist
-          let currentLine: LocationDurationLine = get(linesByLocation, locationName);
+          let currentLine: LocationDurationLine = linesByLocation[locationName];
           if (!currentLine) {
             currentLine = { name: locationName, line: [] };
             linesByLocation[locationName] = currentLine;
             monitorChartsData.locationDurationLines.push(currentLine);
           }
           // add the entry for the current location's duration average
-          currentLine.line.push({ x, y: get(locationBucket, 'duration.avg', null) });
+          currentLine.line.push({ x, y: locationBucket?.duration?.avg || null });
         }
       );
 
@@ -177,11 +178,161 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       }
 
       monitorChartsData.status.push(
-        formatStatusBuckets(x, get(dateHistogramBucket, 'status.buckets', []), docCount)
+        formatStatusBuckets(x, dateHistogramBucket?.status?.buckets || [], docCount)
       );
     });
 
     return monitorChartsData;
+  }
+
+  /**
+   * Provides a count of the current monitors
+   * @param request Kibana request
+   * @param dateRangeStart timestamp bounds
+   * @param dateRangeEnd timestamp bounds
+   * @param filters filters defined by client
+   */
+  public async getSnapshotCount(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null,
+    statusFilter?: string | null
+  ): Promise<any> {
+    const query = parseFilterQuery(filters);
+    const additionalFilters = [{ exists: { field: 'summary.up' } }];
+    if (query) {
+      additionalFilters.push(query);
+    }
+    const filter = getFilterClause(dateRangeStart, dateRangeEnd, additionalFilters);
+    const params = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        query: {
+          bool: {
+            filter,
+          },
+        },
+        size: 0,
+        aggs: {
+          ids: {
+            composite: {
+              sources: [
+                {
+                  id: {
+                    terms: {
+                      field: 'monitor.id',
+                    },
+                  },
+                },
+                {
+                  location: {
+                    terms: {
+                      field: 'observer.geo.name',
+                      missing_bucket: true,
+                    },
+                  },
+                },
+              ],
+              size: QUERY.DEFAULT_AGGS_CAP,
+            },
+            aggs: {
+              latest: {
+                top_hits: {
+                  sort: [{ '@timestamp': { order: 'desc' } }],
+                  _source: {
+                    includes: ['summary.*', 'monitor.id', '@timestamp', 'observer.geo.name'],
+                  },
+                  size: 1,
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    let searchAfter: any = null;
+
+    const summaryByIdLocation: {
+      // ID
+      [key: string]: {
+        // Location
+        [key: string]: { up: number; down: number; timestamp: number };
+      };
+    } = {};
+
+    do {
+      if (searchAfter) {
+        set(params, 'body.aggs.ids.composite.after', searchAfter);
+      }
+
+      const queryResult = await this.database.search(request, params);
+      const idBuckets = queryResult?.aggregations?.ids?.buckets || [];
+
+      idBuckets.forEach((bucket: any) => {
+        // We only get the latest doc
+        const source: any = bucket?.latest?.hits?.hits[0]?._source;
+        const {
+          summary: { up, down },
+          monitor: { id },
+        } = source;
+        const timestamp = source?.['@timestamp'] || 0;
+        const location = source?.observer?.geo?.name || '';
+
+        let idSummary = summaryByIdLocation[id];
+        if (!idSummary) {
+          idSummary = {};
+          summaryByIdLocation[id] = idSummary;
+        }
+        const locationSummary = idSummary[location];
+        if (!locationSummary || locationSummary.timestamp < timestamp) {
+          idSummary[location] = { timestamp, up, down };
+        }
+      });
+
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      searchAfter = queryResult?.aggregations?.ids?.after_key;
+    } while (searchAfter);
+
+    let up: number = 0;
+    let mixed: number = 0;
+    let down: number = 0;
+
+    for (const id in summaryByIdLocation) {
+      if (!summaryByIdLocation.hasOwnProperty(id)) {
+        continue;
+      }
+      const locationInfo = summaryByIdLocation[id];
+      const { up: locationUp, down: locationDown } = reduce(
+        locationInfo,
+        (acc, value, key) => {
+          acc.up += value.up;
+          acc.down += value.down;
+          return acc;
+        },
+        { up: 0, down: 0 }
+      );
+
+      if (locationDown === 0) {
+        up++;
+      } else if (locationUp > 0) {
+        mixed++;
+      } else {
+        down++;
+      }
+    }
+
+    const result: any = { up, down, mixed, total: up + down + mixed };
+    if (statusFilter) {
+      for (const status in result) {
+        if (status !== 'total' && status !== statusFilter) {
+          result[status] = 0;
+        }
+      }
+    }
+
+    return result;
   }
 
   /**
@@ -262,14 +413,14 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
 
     const result = await this.database.search(request, params);
-    const pageTitle: Ping | null = get(result, 'hits.hits[0]._source', null);
+    const pageTitle: Ping | null = result?.hits?.hits[0]?._source || null;
     if (pageTitle === null) {
       return null;
     }
     return {
-      id: get(pageTitle, 'monitor.id', null) || monitorId,
-      url: get(pageTitle, 'url.full', null),
-      name: get(pageTitle, 'monitor.name', null),
+      id: pageTitle?.monitor?.id || monitorId,
+      url: pageTitle?.url?.full || null,
+      name: pageTitle?.monitor?.name || null,
     };
   }
 

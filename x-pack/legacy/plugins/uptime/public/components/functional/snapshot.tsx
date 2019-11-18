@@ -6,7 +6,6 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React, { useEffect } from 'react';
-import { get } from 'lodash';
 import { connect } from 'react-redux';
 import { Snapshot as SnapshotType } from '../../../common/runtime_types';
 import { DonutChart } from './charts';
@@ -63,14 +62,15 @@ export const PresentationalComponent: React.FC<PresentationalComponentProps> = (
   loading,
 }) => (
   <ChartWrapper loading={loading} height={height}>
-    <SnapshotHeading down={get<number>(count, 'down', 0)} total={get<number>(count, 'total', 0)} />
+    <SnapshotHeading down={count.down || 0} total={count.total || 0} />
     <EuiSpacer size="xs" />
     <DonutChart
-      up={get<number>(count, 'up', 0)}
-      down={get<number>(count, 'down', 0)}
+      up={count.up || 0}
+      down={count.down || 0}
       height={SNAPSHOT_CHART_HEIGHT}
       width={SNAPSHOT_CHART_WIDTH}
     />
+    <EuiSpacer size="xs" />
   </ChartWrapper>
 );
 

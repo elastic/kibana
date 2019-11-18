@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set } from 'lodash';
+import { set } from 'lodash';
 import { QueryContext } from '../elasticsearch_monitor_states_adapter';
 import { CursorDirection } from '../../../../../common/graphql/types';
 import { INDEX_NAMES } from '../../../../../common/constants';
@@ -29,7 +29,7 @@ export const findPotentialMatches = async (
 
   const checkGroups = new Set<string>();
   const monitorIds: string[] = [];
-  get<any>(queryResult, 'aggregations.monitors.buckets', []).forEach((b: any) => {
+  (queryResult?.aggregations?.monitors?.buckets || []).forEach((b: any) => {
     const monitorId = b.key.monitor_id;
     monitorIds.push(monitorId);
 

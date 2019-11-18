@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { get } from 'lodash';
 import moment from 'moment';
 import React, { Fragment, useEffect, useState } from 'react';
 // @ts-ignore formatNumber
@@ -107,7 +106,7 @@ export const PingListComponent = ({
       value: 'down',
     },
   ];
-  const locations = get<string[]>(data, 'allPings.locations');
+  const locations = data?.allPings?.locations || [];
   const locationOptions = !locations
     ? [AllLocationOption]
     : [AllLocationOption].concat(
@@ -181,9 +180,11 @@ export const PingListComponent = ({
       render: (error: string) => error ?? '-',
     },
   ];
+  useEffect(() => {
+    onUpdateApp();
+  }, [selectedOption]);
 
   const pings: Ping[] = data?.allPings?.pings ?? [];
-
   const hasStatus: boolean = pings.some(
     (currentPing: Ping) => !!currentPing?.http?.response?.status_code
   );

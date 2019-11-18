@@ -7,7 +7,6 @@
 import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { get } from 'lodash';
 import { AutocompleteProviderRegister } from 'src/plugins/data/public';
 import { i18n as i18nFormatter } from '@kbn/i18n';
 import { CreateGraphQLClient } from './framework_adapter_types';
@@ -37,7 +36,9 @@ export const getKibanaFrameworkAdapter = (
     capabilities,
     INTEGRATED_SOLUTIONS
   );
-  const canSave = get(capabilities, 'uptime.save', false);
+  // TODO: fix the typing and remove this ignore comment
+  // @ts-ignore this key has an additional typing that we weren't handling before
+  const canSave: boolean = capabilities?.uptime?.save || false;
   const props: UptimeAppProps = {
     autocomplete,
     basePath: basePath.get(),

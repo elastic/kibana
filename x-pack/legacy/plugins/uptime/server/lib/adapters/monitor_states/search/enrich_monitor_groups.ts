@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, sortBy } from 'lodash';
+import { sortBy } from 'lodash';
 import { QueryContext } from '../elasticsearch_monitor_states_adapter';
 import { getHistogramIntervalFormatted } from '../../../helper';
 import { INDEX_NAMES, STATES } from '../../../../../common/constants';
@@ -245,13 +245,15 @@ export const enrichMonitorGroups: MonitorEnricher = async (
 
   const items = await queryContext.database.search(queryContext.request, params);
 
-  const monitorBuckets = get(items, 'aggregations.monitors.buckets', []);
+  const monitorBuckets = items?.aggregations?.monitors?.buckets || [];
 
   const monitorIds: string[] = [];
   const summaries: MonitorSummary[] = monitorBuckets.map((monitor: any) => {
-    const monitorId = get<string>(monitor, 'key.monitor_id');
+    // replies from ElasticSearch are oftentimes in snake_case
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    const monitorId = monitor?.key?.monitor_id;
     monitorIds.push(monitorId);
-    let state = get<any>(monitor, 'state.value');
+    let state = monitor?.state?.value;
     state = {
       ...state,
       timestamp: state['@timestamp'],
@@ -347,10 +349,12 @@ const getHistogramForMonitors = async (
   };
   const result = await queryContext.database.search(queryContext.request, params);
 
-  const buckets: any[] = get(result, 'aggregations.by_id.buckets', []);
+  // replies from ElasticSearch are oftentimes in snake_case
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  const buckets: any[] = result?.aggregations?.by_id?.buckets || [];
   return buckets.reduce((map: { [key: string]: any }, item: any) => {
-    const points = get(item, 'histogram.buckets', []).map((histogram: any) => {
-      const status = get(histogram, 'status.buckets', []).reduce(
+    const points = (item?.histogram?.buckets || []).map((histogram: any) => {
+      const status = (histogram?.status?.buckets || []).reduce(
         (statuses: { up: number; down: number }, bucket: any) => {
           if (bucket.key === 'up') {
             statuses.up = bucket.doc_count;
@@ -380,7 +384,4 @@ const cursorDirectionToOrder = (cd: CursorDirection): 'asc' | 'desc' => {
 };
 
 type SortChecks = (check: Check) => string[];
-const checksSortBy = (check: Check) => [
-  get<string>(check, 'observer.geo.name'),
-  get<string>(check, 'monitor.ip'),
-];
+const checksSortBy = (check: Check) => [check?.observer?.geo?.name || '', check?.monitor?.ip || ''];

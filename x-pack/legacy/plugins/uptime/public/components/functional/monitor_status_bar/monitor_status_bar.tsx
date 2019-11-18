@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiLink, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { get } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { Ping } from '../../../../common/graphql/types';
@@ -30,9 +29,10 @@ type Props = MonitorStatusBarProps & UptimeGraphQLQueryProps<MonitorStatusBarQue
 export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
   if (data && data.monitorStatus && data.monitorStatus.length) {
     const { monitor, timestamp, tls } = data.monitorStatus[0];
-    const duration: number | undefined = get(monitor, 'duration.us', undefined);
-    const status = get<'up' | 'down'>(monitor, 'status', 'down');
-    const full = get<string>(data.monitorStatus[0], 'url.full');
+    const duration = monitor?.duration?.us || undefined;
+    const status: 'up' | 'down' = monitor?.status === 'up' ? 'up' : 'down';
+    const statuses = data?.monitorStatus || [];
+    const full = statuses[0]?.url?.full || undefined;
 
     return (
       <EuiPanel>

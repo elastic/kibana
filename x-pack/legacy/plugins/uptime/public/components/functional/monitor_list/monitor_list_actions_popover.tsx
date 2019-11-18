@@ -7,7 +7,6 @@
 import { EuiButtonIcon, EuiPopover } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import { connect } from 'react-redux';
 import { MonitorSummary } from '../../../../common/graphql/types';
 import { IntegrationGroup } from '../integration_group';
@@ -37,7 +36,7 @@ const MonitorListActionsPopoverComponent = ({
     isLogsAvailable,
   } = useContext(UptimeSettingsContext);
 
-  const monitorUrl: string | undefined = get(summary, 'state.url.full', undefined);
+  const monitorUrl = summary?.state?.url?.full || undefined;
   const isPopoverOpen: boolean =
     !!popoverState && popoverState.open && popoverState.id === popoverId;
   return (

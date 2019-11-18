@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { get } from 'lodash';
 import moment from 'moment';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -25,12 +24,10 @@ const TextContainer = styled.div`
   margin-left: 20px;
 `;
 
-export const MonitorSSLCertificate = ({ tls }: Props) => {
-  const certificateValidity: string | undefined = get(
-    tls,
-    'certificate_not_valid_after',
-    undefined
-  );
+export const MonitorSSLCertificate = (props: Props) => {
+  // this camel_case key should be refactored if possible
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  const certificateValidity = props?.tls?.certificate_not_valid_after || undefined;
 
   const validExpiryDate = certificateValidity && !isNaN(new Date(certificateValidity).valueOf());
 

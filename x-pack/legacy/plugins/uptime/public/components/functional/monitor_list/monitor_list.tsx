@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import React, { useState, Fragment } from 'react';
 import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
 import { monitorStatesQuery } from '../../../queries/monitor_states_query';
@@ -61,11 +60,12 @@ export const MonitorListComponent = (props: Props) => {
     linkParameters,
     loading,
   } = props;
-  const [drawerIds, updateDrawerIds] = useState<string[]>([]);
-  const items = get<MonitorSummary[]>(data, 'monitorStates.summaries', []);
 
-  const nextPagePagination = get<string>(data, 'monitorStates.nextPagePagination');
-  const prevPagePagination = get<string>(data, 'monitorStates.prevPagePagination');
+  const [drawerIds, updateDrawerIds] = useState<string[]>([]);
+
+  const items = data?.monitorStates?.summaries || [];
+  const nextPagePagination = data?.monitorStates?.nextPagePagination || '';
+  const prevPagePagination = data?.monitorStates?.prevPagePagination || '';
 
   const getExpandedRowMap = () => {
     return drawerIds.reduce((map: ExpandedRowMap, id: string) => {

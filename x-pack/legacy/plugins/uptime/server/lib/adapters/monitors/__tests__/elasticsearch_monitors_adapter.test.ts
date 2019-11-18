@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set } from 'lodash';
+import { set } from 'lodash';
 import { ElasticsearchMonitorsAdapter } from '../elasticsearch_monitors_adapter';
 import { CountParams, CountResponse } from 'elasticsearch';
 import mockChartsData from './monitor_charts_mock.json';
@@ -39,12 +39,10 @@ describe('ElasticsearchMonitorsAdapter', () => {
     await adapter.getMonitorChartsData({}, 'fooID', 'now-15m', 'now');
     expect(searchMock).toHaveBeenCalledTimes(1);
     // protect against possible rounding errors polluting the snapshot comparison
+    const mockCall = searchMock.mock.calls[0][1];
     const fixedInterval = parseInt(
-      get(
-        searchMock.mock.calls[0][1],
-        'body.aggs.timeseries.date_histogram.fixed_interval',
-        ''
-      ).split('ms')[0],
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      (mockCall?.body?.aggs?.timeseries?.date_histogram?.fixed_interval || '').split('ms')[0],
       10
     );
     expect(fixedInterval).not.toBeNaN();
@@ -75,12 +73,10 @@ describe('ElasticsearchMonitorsAdapter', () => {
     await adapter.getMonitorChartsData({}, 'fooID', 'now-15m', 'now', 'Philadelphia');
     expect(searchMock).toHaveBeenCalledTimes(1);
     // protect against possible rounding errors polluting the snapshot comparison
+    const mockCall = searchMock.mock.calls[0][1];
     const fixedInterval = parseInt(
-      get(
-        searchMock.mock.calls[0][1],
-        'body.aggs.timeseries.date_histogram.fixed_interval',
-        ''
-      ).split('ms')[0],
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      (mockCall?.body?.aggs?.timeseries?.date_histogram?.fixed_interval || '').split('ms')[0],
       10
     );
     expect(fixedInterval).not.toBeNaN();

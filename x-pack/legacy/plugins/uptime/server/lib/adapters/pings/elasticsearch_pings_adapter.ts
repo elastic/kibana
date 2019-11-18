@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { DocCount, HttpBody, Ping, PingResults } from '../../../../common/graphql/types';
 import { parseFilterQuery, getFilterClause, getHistogramIntervalFormatted } from '../../helper';
@@ -81,7 +80,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
       aggregations: aggs,
     } = await this.database.search(request, params);
 
-    const locations = get(aggs, 'locations', { buckets: [{ key: 'N/A', doc_count: 0 }] });
+    const locations = aggs?.locations || { buckets: [{ key: 'N/A', doc_count: 0 }] };
 
     const pings: Ping[] = hits.map(({ _id, _source }: any) => {
       const timestamp = _source['@timestamp'];
@@ -89,7 +88,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
       // Calculate here the length of the content string in bytes, this is easier than in client JS, where
       // we don't have access to Buffer.byteLength. There are some hacky ways to do this in the
       // client but this is cleaner.
-      const httpBody = get<HttpBody>(_source, 'http.response.body');
+      const httpBody: HttpBody = _source?.http?.response?.body;
       if (httpBody && httpBody.content) {
         httpBody.content_bytes = Buffer.byteLength(httpBody.content);
       }
@@ -163,7 +162,8 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     };
 
     const result = await this.database.search(request, params);
-    const buckets: any[] = get(result, 'aggregations.by_id.buckets', []);
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    const buckets: any[] = result?.aggregations?.by_id?.buckets || [];
 
     // @ts-ignore TODO fix destructuring implicit any
     return buckets.map(
@@ -246,11 +246,13 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     };
 
     const result = await this.database.search(request, params);
-    const buckets: HistogramQueryResult[] = get(result, 'aggregations.timeseries.buckets', []);
+    const buckets: HistogramQueryResult[] = result?.aggregations?.timeseries?.buckets || [];
     const histogram = buckets.map(bucket => {
-      const x: number = get(bucket, 'key');
-      const downCount: number = get(bucket, 'down.doc_count');
-      const upCount: number = get(bucket, 'up.doc_count');
+      const x: number = bucket?.key || 0;
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      const downCount: number = bucket?.down?.doc_count || 0;
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      const upCount: number = bucket?.up?.doc_count || 0;
       return {
         x,
         downCount: statusFilter && statusFilter !== 'down' ? 0 : downCount,

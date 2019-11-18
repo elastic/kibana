@@ -6,7 +6,6 @@
 
 import { EuiFilterGroup } from '@elastic/eui';
 import React from 'react';
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FilterBar as FilterBarType } from '../../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
@@ -15,7 +14,7 @@ import { FilterPopoverProps, FilterPopover } from './filter_popover';
 import { FilterStatusButton } from './filter_status_button';
 
 interface FilterBarQueryResult {
-  filters?: FilterBarType;
+  filterBar?: FilterBarType;
 }
 
 interface FilterBarDropdownsProps {
@@ -31,9 +30,9 @@ export const FilterGroupComponent = ({
   data,
   onFilterUpdate,
 }: Props) => {
-  const locations = get<string[]>(data, 'filterBar.locations', []);
-  const ports = get<string[]>(data, 'filterBar.ports', []);
-  const schemes = get<string[]>(data, 'filterBar.schemes', []);
+  const locations = data?.filterBar?.locations || [];
+  const ports = data?.filterBar?.ports || [];
+  const schemes = data?.filterBar?.schemes || [];
 
   let filterKueries: Map<string, string[]>;
   try {
@@ -81,7 +80,7 @@ export const FilterGroupComponent = ({
       fieldName: 'url.port',
       id: 'port',
       isLoading,
-      items: ports,
+      items: ports.map(p => p.toString()),
       onFilterFieldChange,
       selectedItems: getSelectedItems('url.port'),
       title: i18n.translate('xpack.uptime.filterBar.options.portLabel', { defaultMessage: 'Port' }),

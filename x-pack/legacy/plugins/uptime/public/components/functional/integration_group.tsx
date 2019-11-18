@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IntegrationLink } from './integration_link';
 import {
@@ -40,10 +39,11 @@ export const IntegrationGroup = ({
   isLogsAvailable,
   summary,
 }: IntegrationGroupProps) => {
-  const domain = get<string>(summary, 'state.url.domain', '');
-  const podUid = get<string | undefined>(summary, 'state.checks[0].kubernetes.pod.uid', undefined);
-  const containerId = get<string | undefined>(summary, 'state.checks[0].container.id', undefined);
-  const ip = get<string | undefined>(summary, 'state.checks[0].monitor.ip', undefined);
+  const domain = summary?.state?.url?.domain;
+  const checks = summary?.state?.checks || [];
+  const podUid = checks[0]?.kubernetes?.pod?.uid;
+  const containerId = checks[0]?.container?.id;
+  const ip = checks[0]?.monitor?.ip;
   return isApmAvailable || isInfraAvailable || isLogsAvailable ? (
     <EuiFlexGroup direction="column">
       {isApmAvailable ? (

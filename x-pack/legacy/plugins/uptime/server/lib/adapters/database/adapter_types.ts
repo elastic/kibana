@@ -16,6 +16,13 @@ export interface HistogramQueryResult {
     bucket_count: {
       value: number;
     };
+    doc_count: number;
+  };
+  up: {
+    bucket_count: {
+      value: number;
+    };
+    doc_count: number;
   };
 }
 
