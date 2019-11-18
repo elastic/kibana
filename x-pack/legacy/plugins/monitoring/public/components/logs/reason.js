@@ -23,7 +23,7 @@ export const Reason = ({ reason }) => {
       defaultMessage="We did not find any log data and we are unable to diagnose why. {link}"
       values={{
         link: (
-          <EuiLink href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`}>
+          <EuiLink target="_blank" href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`}>
             <FormattedMessage
               id="xpack.monitoring.logs.reason.defaultMessageLink"
               defaultMessage="Please verify your setup is correct."
@@ -44,7 +44,7 @@ export const Reason = ({ reason }) => {
         defaultMessage="Set up {link}, then configure your Elasticsearch output to your monitoring cluster."
         values={{
           link: (
-            <EuiLink href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`}>
+            <EuiLink target="_blank" href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`}>
               {i18n.translate('xpack.monitoring.logs.reason.noIndexPatternLink', {
                 defaultMessage: 'Filebeat'
               })}
@@ -75,7 +75,10 @@ export const Reason = ({ reason }) => {
         defaultMessage="Follow {link} to set up Elasticsearch."
         values={{
           link: (
-            <EuiLink href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-module-elasticsearch.html`}>
+            <EuiLink
+              target="_blank"
+              href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-module-elasticsearch.html`}
+            >
               {i18n.translate('xpack.monitoring.logs.reason.noTypeLink', {
                 defaultMessage: 'these directions'
               })}
@@ -95,7 +98,7 @@ export const Reason = ({ reason }) => {
         defaultMessage="Check that your {link} is correct."
         values={{
           link: (
-            <EuiLink href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`}>
+            <EuiLink target="_blank" href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`}>
               {i18n.translate('xpack.monitoring.logs.reason.noClusterLink', {
                 defaultMessage: 'setup'
               })}
@@ -115,7 +118,7 @@ export const Reason = ({ reason }) => {
         defaultMessage="Check that your {link} is correct."
         values={{
           link: (
-            <EuiLink href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`}>
+            <EuiLink target="_blank" href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`}>
               {i18n.translate('xpack.monitoring.logs.reason.noNodeLink', {
                 defaultMessage: 'setup'
               })}
@@ -135,9 +138,32 @@ export const Reason = ({ reason }) => {
         defaultMessage="We found logs, but none for this index. If this problem continues, check that your {link} is correct."
         values={{
           link: (
-            <EuiLink href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html">
-              {i18n.translate('xpack.monitoring.logs.reason.noNodeLink', {
+            <EuiLink target="_blank" href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`}>
+              {i18n.translate('xpack.monitoring.logs.reason.noIndexLink', {
                 defaultMessage: 'setup'
+              })}
+            </EuiLink>
+          )
+        }}
+      />
+    );
+  }
+  else if (false === reason.correctIndexName) {
+    title = i18n.translate('xpack.monitoring.logs.reason.correctIndexNameTitle', {
+      defaultMessage: 'Corrupted filebeat index'
+    });
+    message = (
+      <FormattedMessage
+        id="xpack.monitoring.logs.reason.correctIndexNameMessage"
+        defaultMessage="There is an issue reading from your filebeat indices.  {link}."
+        values={{
+          link: (
+            <EuiLink
+              target="_blank"
+              href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/monitor-troubleshooting.html`}
+            >
+              {i18n.translate('xpack.monitoring.logs.reason.correctIndexNameLink', {
+                defaultMessage: 'Click here for more information'
               })}
             </EuiLink>
           )
