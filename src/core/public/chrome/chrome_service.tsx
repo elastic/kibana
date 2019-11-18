@@ -36,7 +36,7 @@ import { NavControlsService, ChromeNavControls } from './nav_controls';
 import { DocTitleService, ChromeDocTitle } from './doc_title';
 import { LoadingIndicator, HeaderWrapper as Header } from './ui';
 import { DocLinksStart } from '../doc_links';
-import { HeaderHelpMenuUIExtraLink } from './ui/header/header_help_menu';
+import { ChromeHelpExtensionMenuExtraLink } from './ui/header/header_help_menu';
 
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
@@ -61,7 +61,7 @@ export type ChromeBreadcrumb = EuiBreadcrumb;
 /** @public */
 export interface ChromeHelpExtension {
   appName: string;
-  links?: HeaderHelpMenuUIExtraLink[];
+  links?: ChromeHelpExtensionMenuExtraLink[];
   content?: (element: HTMLDivElement) => () => void;
 }
 
@@ -88,7 +88,7 @@ export class ChromeService {
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
 
-  constructor(private readonly params: ConstructorParams) {}
+  constructor(private readonly params: ConstructorParams) { }
 
   /**
    * These observables allow consumers to toggle the chrome visibility via either:

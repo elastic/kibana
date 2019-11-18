@@ -84,7 +84,7 @@ type CustomLink = EuiButtonEmptyProps & {
   text: React.ReactNode;
 };
 
-export type HeaderHelpMenuUIExtraLink = ExclusiveUnion<
+export type ChromeHelpExtensionMenuExtraLink = ExclusiveUnion<
   GitHubLink,
   ExclusiveUnion<DiscussLink, ExclusiveUnion<DocumentationLink, CustomLink>>
 >;
@@ -219,13 +219,11 @@ class HeaderHelpMenuUI extends Component<Props, State> {
     if (helpExtension) {
       const { appName, links, content } = helpExtension;
 
-      const feedbackText = i18n.translate(
-        'core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackOnApp',
-        {
+      const getFeedbackText = () =>
+        i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackOnApp', {
           defaultMessage: 'Give feedback on {appName}',
           values: { appName: helpExtension.appName },
-        }
-      );
+        });
 
       const customLinks =
         links &&
@@ -240,19 +238,25 @@ class HeaderHelpMenuUI extends Component<Props, State> {
                   defaultMessage="Documentation"
                 />,
                 index < links.length - 1,
-                { target: '_blank', ...rest }
+                {
+                  target: '_blank',
+                  rel: 'noopener',
+                  ...rest,
+                }
               );
             case 'github':
-              return this.createCustomLink(index, feedbackText, index < links.length - 1, {
+              return this.createCustomLink(index, getFeedbackText(), index < links.length - 1, {
                 iconType: 'logoGithub',
                 href: this.createGithubUrl(labels, title),
                 target: '_blank',
+                rel: 'noopener',
                 ...rest,
               });
             case 'discuss':
-              return this.createCustomLink(index, feedbackText, index < links.length - 1, {
+              return this.createCustomLink(index, getFeedbackText(), index < links.length - 1, {
                 iconType: 'editorComment',
                 target: '_blank',
+                rel: 'noopener',
                 ...rest,
               });
             case 'custom':

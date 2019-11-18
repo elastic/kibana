@@ -20,7 +20,6 @@ export const HelpCenterContent: React.FC<HelpCenterContentProps> = ({ feedbackLi
         {
           linkType: 'discuss',
           href: feedbackLink,
-          rel: 'noopener',
         },
       ],
     });

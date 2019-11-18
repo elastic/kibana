@@ -31,8 +31,7 @@ core.chrome.setHelpExtension({
   links: [
     {
       linkType: 'discuss',
-      href: 'https://discuss.elastic.co/c/apm',
-      rel: 'noopener'
+      href: 'https://discuss.elastic.co/c/apm'
     }
   ],
   content: domElement => {
