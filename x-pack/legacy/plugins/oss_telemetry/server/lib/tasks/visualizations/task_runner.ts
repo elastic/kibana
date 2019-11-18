@@ -5,9 +5,9 @@
  */
 
 import _, { countBy, groupBy, mapValues } from 'lodash';
+import { CoreSetup } from 'kibana/server';
 import {
   ESQueryResponse,
-  HapiServer,
   SavedObjectDoc,
   TaskInstance,
   VisState,
@@ -72,9 +72,12 @@ async function getStats(callCluster: (method: string, params: any) => Promise<an
   });
 }
 
-export function visualizationsTaskRunner(taskInstance: TaskInstance, server: HapiServer) {
-  const { callWithInternalUser: callCluster } = server.plugins.elasticsearch.getCluster('data');
-  const config = server.config();
+export function visualizationsTaskRunner(
+  taskInstance: TaskInstance,
+  config: any,
+  es: CoreSetup['elasticsearch']
+) {
+  const { callAsInternalUser: callCluster } = es.createClient('data');
   const index = config.get('kibana.index').toString(); // cast to string for TypeScript
 
   return async () => {

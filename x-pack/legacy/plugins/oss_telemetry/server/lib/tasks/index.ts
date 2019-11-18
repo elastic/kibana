@@ -4,15 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HapiServer } from '../../../';
+import { CoreSetup, Logger } from 'kibana/server';
+import { PluginSetupContract as TaskManagerPluginSetupContract } from '../../../../task_manager/plugin';
 import { PLUGIN_ID, VIS_TELEMETRY_TASK } from '../../../constants';
 import { visualizationsTaskRunner } from './visualizations/task_runner';
 
-export function registerTasks(server: HapiServer) {
-  const taskManager = server.plugins.task_manager;
-
+export function registerTasks({
+  taskManager,
+  logger,
+  elasticsearch,
+  config,
+}: {
+  taskManager?: TaskManagerPluginSetupContract;
+  logger: Logger;
+  elasticsearch: CoreSetup['elasticsearch'];
+  config: any;
+}) {
   if (!taskManager) {
-    server.log(['debug', 'telemetry'], `Task manager is not available`);
+    logger.debug('Task manager is not available');
     return;
   }
 
@@ -22,16 +31,28 @@ export function registerTasks(server: HapiServer) {
       type: VIS_TELEMETRY_TASK,
       createTaskRunner({ taskInstance }: { taskInstance: any }) {
         return {
-          run: visualizationsTaskRunner(taskInstance, server),
+          run: visualizationsTaskRunner(taskInstance, config, elasticsearch),
         };
       },
     },
   });
 }
 
-export function scheduleTasks(server: HapiServer) {
-  const taskManager = server.plugins.task_manager;
-  const { kbnServer } = server.plugins.xpack_main.status.plugin;
+export function scheduleTasks({
+  taskManager,
+  xpackMainStatus,
+  logger,
+}: {
+  taskManager?: TaskManagerPluginSetupContract;
+  xpackMainStatus: any;
+  logger: Logger;
+}) {
+  if (!taskManager) {
+    logger.debug('Task manager is not available');
+    return;
+  }
+
+  const { kbnServer } = xpackMainStatus;
 
   kbnServer.afterPluginsInit(() => {
     // The code block below can't await directly within "afterPluginsInit"
@@ -46,9 +67,10 @@ export function scheduleTasks(server: HapiServer) {
           id: `${PLUGIN_ID}-${VIS_TELEMETRY_TASK}`,
           taskType: VIS_TELEMETRY_TASK,
           state: { stats: {}, runs: 0 },
+          params: {},
         });
       } catch (e) {
-        server.log(['debug', 'telemetry'], `Error scheduling task, received ${e.message}`);
+        logger.debug(`Error scheduling task, received ${e.message}`);
       }
     })();
   });

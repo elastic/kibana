@@ -4,11 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HapiServer } from '../../../../';
+import { PluginSetupContract as TaskManagerPluginSetupContract } from '../../../../../task_manager/plugin';
 import { getUsageCollector } from './get_usage_collector';
+import { OssTelemetrySetupDependencies } from '../../../plugin';
 
-export function registerVisualizationsCollector(server: HapiServer): void {
-  const { usage } = server;
-  const collector = usage.collectorSet.makeUsageCollector(getUsageCollector(server));
-  usage.collectorSet.register(collector);
+export function registerVisualizationsCollector(
+  {
+    makeUsageCollector,
+    register,
+  }: OssTelemetrySetupDependencies['__LEGACY']['telemetry']['collectorSet'],
+  taskManager: TaskManagerPluginSetupContract | undefined
+): void {
+  const collector = makeUsageCollector(getUsageCollector(taskManager));
+  register(collector);
 }
