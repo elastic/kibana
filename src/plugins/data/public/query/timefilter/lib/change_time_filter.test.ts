@@ -17,9 +17,8 @@
  * under the License.
  */
 import { changeTimeFilter } from './change_time_filter';
-import { TimeRange } from 'src/plugins/data/public';
 import { timefilterServiceMock } from '../timefilter_service.mock';
-import { esFilters } from '../../../../../../plugins/data/public';
+import { TimeRange, esFilters } from '../../../../common';
 
 const timefilterMock = timefilterServiceMock.createSetupContract();
 const timefilter = timefilterMock.timefilter;

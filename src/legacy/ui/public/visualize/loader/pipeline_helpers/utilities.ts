@@ -22,7 +22,7 @@ import { identity } from 'lodash';
 import { AggConfig, Vis } from 'ui/vis';
 import { SerializedFieldFormat } from 'src/plugins/expressions/public';
 
-import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
+import { FieldFormat } from '../../../../../../plugins/data/public';
 
 import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
 import chrome from '../../../chrome';

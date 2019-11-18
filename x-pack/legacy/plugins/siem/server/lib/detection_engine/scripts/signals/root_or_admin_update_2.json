@@ -1,5 +1,5 @@
 {
-  "id": "rule-1",
+  "rule_id": "rule-1",
   "description": "Changed Description of only detecting root user",
   "index": ["auditbeat-*"],
   "interval": "50m",
