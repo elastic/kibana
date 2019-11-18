@@ -5,7 +5,7 @@
  */
 
 import { LocalUIFilterName } from '../../../server/lib/ui_filters/local_ui_filters/config';
-import { ProcessorEvent } from '../../../typings/common';
+import { ProcessorEvent } from '../../../common/processor_event';
 
 export type IUrlParams = {
   detailTab?: string;

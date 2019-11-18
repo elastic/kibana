@@ -18,7 +18,7 @@ import { ESClient } from './es_client';
 import { StaticIndexPattern } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { getDynamicIndexPattern } from '../index_pattern/get_dynamic_index_pattern';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
-import { ProcessorEvent } from '../../../typings/common';
+import { ProcessorEvent } from '../../../common/processor_event';
 
 function decodeUiFilters(
   indexPattern: StaticIndexPattern | undefined,

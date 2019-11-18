@@ -13,7 +13,7 @@ import {
   IIndexPattern
 } from '../../../../../../../src/plugins/data/server';
 import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
-import { ProcessorEvent } from '../../../typings/common';
+import { ProcessorEvent } from '../../../common/processor_event';
 
 const cache = new LRU<string, IIndexPattern | undefined>({
   max: 100,

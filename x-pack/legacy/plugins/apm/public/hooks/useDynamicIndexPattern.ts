@@ -5,9 +5,10 @@
  */
 
 import { useFetcher } from './useFetcher';
+import { ProcessorEvent } from '../../common/processor_event';
 
 export function useDynamicIndexPattern(
-  processorEvent: 'transaction' | 'metric' | 'error' | undefined
+  processorEvent: ProcessorEvent | undefined
 ) {
   const { data, status } = useFetcher(
     callApmApi => {
