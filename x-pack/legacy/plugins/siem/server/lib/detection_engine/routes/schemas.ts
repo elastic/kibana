@@ -14,6 +14,7 @@ const filter = Joi.object();
 const filters = Joi.array();
 const from = Joi.string();
 const immutable = Joi.boolean();
+const rule_id = Joi.string();
 const id = Joi.string();
 const index = Joi.array()
   .items(Joi.string())
@@ -50,7 +51,7 @@ export const createSignalsSchema = Joi.object({
   filter: filter.when('type', { is: 'filter', then: Joi.required(), otherwise: Joi.forbidden() }),
   filters: filters.when('type', { is: 'query', then: Joi.optional(), otherwise: Joi.forbidden() }),
   from: from.required(),
-  id: id.required(),
+  rule_id,
   immutable: immutable.default(false),
   index: index.required(),
   interval: interval.default('5m'),
@@ -81,6 +82,7 @@ export const updateSignalSchema = Joi.object({
   filter: filter.when('type', { is: 'filter', then: Joi.optional(), otherwise: Joi.forbidden() }),
   filters: filters.when('type', { is: 'query', then: Joi.optional(), otherwise: Joi.forbidden() }),
   from,
+  rule_id,
   id,
   immutable,
   index,
@@ -103,7 +105,12 @@ export const updateSignalSchema = Joi.object({
   to,
   type,
   references,
-});
+}).xor('id', 'rule_id');
+
+export const querySignalSchema = Joi.object({
+  rule_id,
+  id,
+}).xor('id', 'rule_id');
 
 export const findSignalsSchema = Joi.object({
   per_page,
