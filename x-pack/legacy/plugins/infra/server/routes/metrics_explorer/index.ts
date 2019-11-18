@@ -41,7 +41,7 @@ export const initMetricExplorerRoute = (libs: InfraBackendLibs) => {
             populateSeriesWithTSVBData(request, options, framework, requestContext)
           )
         );
-        return response.ok({ body: { ...response, series: seriesWithMetrics } });
+        return response.ok({ body: { ...groupings, series: seriesWithMetrics } });
       } catch (error) {
         return response.internalError({
           body: error.message,
