@@ -8,6 +8,7 @@ import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/serv
 import { PluginSetupContract as TaskManagerPluginSetupContract } from '../../task_manager/plugin';
 import { registerCollectors } from './lib/collectors';
 import { registerTasks, scheduleTasks } from './lib/tasks';
+import KbnServer from '../../../../../src/legacy/server/kbn_server';
 
 type UsageCollector = any;
 interface UsageCollectorDefinition {
@@ -25,7 +26,7 @@ export interface OssTelemetrySetupDependencies {
       };
     };
     config: any;
-    xpackMainStatus: any;
+    xpackMainStatus: { kbnServer: KbnServer };
   };
   taskManager?: TaskManagerPluginSetupContract;
 }

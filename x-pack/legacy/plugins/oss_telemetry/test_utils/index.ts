@@ -4,9 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESQueryResponse, HapiServer, SavedObjectDoc, TaskInstance } from '../';
+import { CoreSetup } from 'kibana/server';
 
-export const getMockTaskInstance = (): TaskInstance => ({ state: { runs: 0, stats: {} } });
+import { TaskInstance } from '../../task_manager';
+import { PluginSetupContract as TaskManagerPluginSetupContract } from '../../task_manager/plugin';
+
+export const getMockTaskInstance = (): TaskInstance => ({
+  state: { runs: 0, stats: {} },
+  taskType: 'test',
+  params: {},
+});
 
 const defaultMockSavedObjects = [
   {
@@ -20,8 +27,13 @@ const defaultMockSavedObjects = [
 
 const defaultMockTaskDocs = [getMockTaskInstance()];
 
-export const getMockCallWithInternal = (hits: SavedObjectDoc[] = defaultMockSavedObjects) => {
-  return (): Promise<ESQueryResponse> => {
+export const getMockEs = (mockCallWithInternal: any = getMockCallWithInternal()) =>
+  (({
+    createClient: () => ({ callAsInternalUser: mockCallWithInternal }),
+  } as unknown) as CoreSetup['elasticsearch']);
+
+export const getMockCallWithInternal = (hits: any[] = defaultMockSavedObjects) => {
+  return (): Promise<any> => {
     return Promise.resolve({ hits: { hits } });
   };
 };
@@ -36,30 +48,18 @@ export const getMockConfig = () => {
   };
 };
 
-export const getMockKbnServer = (
-  mockCallWithInternal = getMockCallWithInternal(),
-  mockTaskFetch = getMockTaskFetch(),
-  mockConfig = getMockConfig()
-): HapiServer => ({
-  plugins: {
-    elasticsearch: {
-      getCluster: (cluster: string) => ({
-        callWithInternalUser: mockCallWithInternal,
-      }),
-    },
-    xpack_main: {},
-    task_manager: {
-      registerTaskDefinitions: (opts: any) => undefined,
-      ensureScheduled: (opts: any) => Promise.resolve(),
-      fetch: mockTaskFetch,
-    },
-  },
-  usage: {
-    collectorSet: {
-      makeUsageCollector: () => '',
-      register: () => undefined,
-    },
-  },
-  config: () => mockConfig,
-  log: () => undefined,
+export const getMockTaskManager = (fetch: any = getMockTaskFetch()) =>
+  (({
+    registerTaskDefinitions: (opts: any) => undefined,
+    ensureScheduled: (opts: any) => Promise.resolve(),
+    fetch,
+  } as unknown) as TaskManagerPluginSetupContract);
+
+export const getCluster = (cluster: string) => ({
+  callWithInternalUser: getMockCallWithInternal(),
+});
+
+export const getMockCollectorSet = () => ({
+  makeUsageCollector: () => '',
+  register: () => undefined,
 });

@@ -5,15 +5,11 @@
  */
 
 import _, { countBy, groupBy, mapValues } from 'lodash';
-import { CoreSetup } from 'kibana/server';
-import {
-  ESQueryResponse,
-  SavedObjectDoc,
-  TaskInstance,
-  VisState,
-  Visualization,
-} from '../../../../';
+import { APICaller, CoreSetup } from 'kibana/server';
 import { getNextMidnight } from '../../get_next_midnight';
+import { VisState } from '../../../../../../../../src/legacy/core_plugins/visualizations/public';
+import { TaskInstance } from '../../../../../task_manager';
+import { ESSearchHit } from '../../../../../apm/typings/elasticsearch';
 
 interface VisSummary {
   type: string;
@@ -23,7 +19,7 @@ interface VisSummary {
 /*
  * Parse the response data into telemetry payload
  */
-async function getStats(callCluster: (method: string, params: any) => Promise<any>, index: string) {
+async function getStats(callCluster: APICaller, index: string) {
   const searchParams = {
     size: 10000, // elasticsearch index.max_result_window default value
     index,
@@ -35,24 +31,26 @@ async function getStats(callCluster: (method: string, params: any) => Promise<an
       },
     },
   };
-  const esResponse: ESQueryResponse = await callCluster('search', searchParams);
+  const esResponse = await callCluster('search', searchParams);
   const size = _.get<number>(esResponse, 'hits.hits.length');
   if (size < 1) {
     return;
   }
 
   // `map` to get the raw types
-  const visSummaries: VisSummary[] = esResponse.hits.hits.map((hit: SavedObjectDoc) => {
-    const spacePhrases: string[] = hit._id.split(':');
-    const space = spacePhrases.length === 3 ? spacePhrases[0] : 'default'; // if in a custom space, the format of a saved object ID is space:type:id
-    const visualization: Visualization = _.get(hit, '_source.visualization', { visState: '{}' });
-    const visState: VisState = JSON.parse(visualization.visState);
+  const visSummaries: VisSummary[] = esResponse.hits.hits.map(
+    (hit: ESSearchHit<{ visState: string }>) => {
+      const spacePhrases: string[] = hit._id.split(':');
+      const space = spacePhrases.length === 3 ? spacePhrases[0] : 'default'; // if in a custom space, the format of a saved object ID is space:type:id
+      const visualization = _.get(hit, '_source.visualization', { visState: '{}' });
+      const visState: VisState = JSON.parse(visualization.visState);
 
-    return {
-      type: visState.type || '_na_',
-      space,
-    };
-  });
+      return {
+        type: visState.type || '_na_',
+        space,
+      };
+    }
+  );
 
   // organize stats per type
   const visTypes = groupBy(visSummaries, 'type');

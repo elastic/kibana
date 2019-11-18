@@ -8,6 +8,7 @@ import { CoreSetup, Logger } from 'kibana/server';
 import { PluginSetupContract as TaskManagerPluginSetupContract } from '../../../../task_manager/plugin';
 import { PLUGIN_ID, VIS_TELEMETRY_TASK } from '../../../constants';
 import { visualizationsTaskRunner } from './visualizations/task_runner';
+import KbnServer from '../../../../../../../src/legacy/server/kbn_server';
 
 export function registerTasks({
   taskManager,
@@ -44,7 +45,7 @@ export function scheduleTasks({
   logger,
 }: {
   taskManager?: TaskManagerPluginSetupContract;
-  xpackMainStatus: any;
+  xpackMainStatus: { kbnServer: KbnServer };
   logger: Logger;
 }) {
   if (!taskManager) {
