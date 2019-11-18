@@ -28,8 +28,6 @@ import { signalsAlertType } from './server/lib/detection_engine/alerts/signals_a
 import { defaultIndexPattern } from './default_index_pattern';
 import { isAlertExecutor } from './server/lib/detection_engine/alerts/types';
 
-console.log('savedObjectMappings', JSON.stringify(savedObjectMappings, null, 2));
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const siem = (kibana: any) => {
   return new kibana.Plugin({
@@ -127,7 +125,7 @@ export const siem = (kibana: any) => {
       mappings: savedObjectMappings,
       savedObjectSchemas: {
         'signals-mapping': {
-          indexPattern: 'other-index',
+          indexPattern: '.siem-signals-saved', // TODO: Change this name and use kibana.yml settings to override it.
         },
       },
     },

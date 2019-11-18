@@ -12,8 +12,7 @@ import {
   timelineSavedObjectType,
   timelineSavedObjectMappings,
 } from './lib/timeline/saved_object_mappings';
-
-import { signalsMappings } from './lib/detection_engine/signals_mapping';
+import signalsMappings from './lib/detection_engine/signals_mapping.json';
 
 export { noteSavedObjectType, pinnedEventSavedObjectType, timelineSavedObjectType };
 export const savedObjectMappings = {

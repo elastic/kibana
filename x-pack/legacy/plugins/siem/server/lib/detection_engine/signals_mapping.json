@@ -1,5 +1,5 @@
 {
-  "mappings": {
+  "signals-mapping": {
     "dynamic": false,
     "properties": {
       "@timestamp": {
