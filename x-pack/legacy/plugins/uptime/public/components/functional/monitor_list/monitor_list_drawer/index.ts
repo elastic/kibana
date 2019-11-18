@@ -5,3 +5,4 @@
  */
 
 export { MonitorListDrawer } from './monitor_list_drawer';
+export { LocationLink } from './location_link';

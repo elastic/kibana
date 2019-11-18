@@ -32,13 +32,12 @@ export function monitorReducer(state = initialState, action: MonitorActionTypes)
         loading: true,
       };
     case FETCH_MONITOR_DETAILS_SUCCESS:
-      const monitorDetails = action.payload;
-      const { monitorId } = monitorDetails;
+      const { monitorId } = action.payload;
       return {
         ...state,
         monitorDetailsList: {
           ...state.monitorDetailsList,
-          [monitorId]: monitorDetails,
+          [monitorId]: action.payload,
         },
         loading: false,
       };
