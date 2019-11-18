@@ -37,8 +37,18 @@ const getComputedFields = () => ({
   scriptFields: [],
   docvalueFields: [],
 });
-const indexPattern = ({ title: 'foo', getComputedFields } as unknown) as IndexPattern;
-const indexPattern2 = ({ title: 'foo', getComputedFields } as unknown) as IndexPattern;
+const mockSource = { excludes: ['foo-*'] };
+const mockSource2 = { excludes: ['bar-*'] };
+const indexPattern = ({
+  title: 'foo',
+  getComputedFields,
+  getSourceFiltering: () => mockSource,
+} as unknown) as IndexPattern;
+const indexPattern2 = ({
+  title: 'foo',
+  getComputedFields,
+  getSourceFiltering: () => mockSource2,
+} as unknown) as IndexPattern;
 
 describe('SearchSource', function() {
   describe('#setField()', function() {
@@ -60,42 +70,42 @@ describe('SearchSource', function() {
   describe(`#setField('index')`, function() {
     describe('auto-sourceFiltering', function() {
       describe('new index pattern assigned', function() {
-        it('generates a searchSource filter', function() {
+        it('generates a searchSource filter', async function() {
           const searchSource = new SearchSource();
           expect(searchSource.getField('index')).toBe(undefined);
           expect(searchSource.getField('source')).toBe(undefined);
           searchSource.setField('index', indexPattern);
           expect(searchSource.getField('index')).toBe(indexPattern);
-          expect(typeof searchSource.getField('source')).toBe('function');
+          const request = await searchSource.getSearchRequestBody();
+          expect(request._source).toBe(mockSource);
         });
 
-        it('removes created searchSource filter on removal', function() {
+        it('removes created searchSource filter on removal', async function() {
           const searchSource = new SearchSource();
           searchSource.setField('index', indexPattern);
           searchSource.setField('index', undefined);
-          expect(searchSource.getField('index')).toBe(undefined);
-          expect(searchSource.getField('source')).toBe(undefined);
+          const request = await searchSource.getSearchRequestBody();
+          expect(request._source).toBe(undefined);
         });
       });
 
       describe('new index pattern assigned over another', function() {
-        it('replaces searchSource filter with new', function() {
+        it('replaces searchSource filter with new', async function() {
           const searchSource = new SearchSource();
           searchSource.setField('index', indexPattern);
-          const searchSourceFilter1 = searchSource.getField('source');
           searchSource.setField('index', indexPattern2);
           expect(searchSource.getField('index')).toBe(indexPattern2);
-          expect(typeof searchSource.getField('source')).toBe('function');
-          expect(searchSource.getField('source')).not.toBe(searchSourceFilter1);
+          const request = await searchSource.getSearchRequestBody();
+          expect(request._source).toBe(mockSource2);
         });
 
-        it('removes created searchSource filter on removal', function() {
+        it('removes created searchSource filter on removal', async function() {
           const searchSource = new SearchSource();
           searchSource.setField('index', indexPattern);
           searchSource.setField('index', indexPattern2);
           searchSource.setField('index', undefined);
-          expect(searchSource.getField('index')).toBe(undefined);
-          expect(searchSource.getField('source')).toBe(undefined);
+          const request = await searchSource.getSearchRequestBody();
+          expect(request._source).toBe(undefined);
         });
       });
     });
