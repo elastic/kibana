@@ -95,8 +95,16 @@ export class AbstractSource {
     return null;
   }
 
+  getApplyGlobalQuery() {
+    return !!this._descriptor.applyGlobalQuery;
+  }
+
   getIndexPatternIds() {
-    return  [];
+    return [];
+  }
+
+  getQueryableIndexPatternIds() {
+    return [];
   }
 
   getGeoGridPrecision() {
