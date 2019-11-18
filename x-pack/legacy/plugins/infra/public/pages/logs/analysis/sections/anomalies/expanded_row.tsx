@@ -14,7 +14,6 @@ import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import {
   getLogEntryRateSeriesForPartition,
   getAnnotationsForPartition,
-  formatAnomalyScore,
   getTotalNumberOfLogEntriesForPartition,
 } from '../helpers/data_formatters';
 import { AnalyzeInMlButton } from '../analyze_in_ml_button';
