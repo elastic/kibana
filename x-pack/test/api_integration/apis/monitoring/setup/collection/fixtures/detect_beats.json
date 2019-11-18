@@ -3,7 +3,6 @@
     "totalUniqueInstanceCount": 1,
     "totalUniqueFullyMigratedCount": 1,
     "totalUniquePartiallyMigratedCount": 0,
-    "totalUniqueInternallyCollectedCount": 0,
     "detected": null,
     "byUuid": {
       "5b2de169-2785-441b-ae8c-186a1936b17d": {
@@ -18,7 +17,6 @@
     "totalUniqueInstanceCount": 0,
     "totalUniqueFullyMigratedCount": 0,
     "totalUniquePartiallyMigratedCount": 0,
-    "totalUniqueInternallyCollectedCount": 0,
     "detected": {
       "mightExist": true
     },
@@ -28,7 +26,6 @@
     "totalUniqueInstanceCount": 0,
     "totalUniqueFullyMigratedCount": 0,
     "totalUniquePartiallyMigratedCount": 0,
-    "totalUniqueInternallyCollectedCount": 0,
     "detected": {
       "mightExist": false
     },
@@ -38,7 +35,6 @@
     "totalUniqueInstanceCount": 0,
     "totalUniqueFullyMigratedCount": 0,
     "totalUniquePartiallyMigratedCount": 0,
-    "totalUniqueInternallyCollectedCount": 0,
     "detected": {
       "mightExist": false
     },
@@ -48,7 +44,6 @@
     "totalUniqueInstanceCount": 1,
     "totalUniqueFullyMigratedCount": 0,
     "totalUniquePartiallyMigratedCount": 1,
-    "totalUniqueInternallyCollectedCount": 0,
     "detected": null,
     "byUuid": {
       "agI8JhXhShasvuDgq0VxRg": {

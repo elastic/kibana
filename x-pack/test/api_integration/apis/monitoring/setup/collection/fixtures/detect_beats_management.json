@@ -3,7 +3,6 @@
     "totalUniqueInstanceCount": 0,
     "totalUniqueFullyMigratedCount": 0,
     "totalUniquePartiallyMigratedCount": 0,
-    "totalUniqueInternallyCollectedCount": 0,
     "detected": {
       "doesExist": true
     },
@@ -13,7 +12,6 @@
     "totalUniqueInstanceCount": 0,
     "totalUniqueFullyMigratedCount": 0,
     "totalUniquePartiallyMigratedCount": 0,
-    "totalUniqueInternallyCollectedCount": 0,
     "detected": {
       "mightExist": true
     },
@@ -23,7 +21,6 @@
     "totalUniqueInstanceCount": 0,
     "totalUniqueFullyMigratedCount": 0,
     "totalUniquePartiallyMigratedCount": 0,
-    "totalUniqueInternallyCollectedCount": 0,
     "detected": {
       "mightExist": false
     },
@@ -33,7 +30,6 @@
     "totalUniqueInstanceCount": 0,
     "totalUniqueFullyMigratedCount": 0,
     "totalUniquePartiallyMigratedCount": 0,
-    "totalUniqueInternallyCollectedCount": 0,
     "detected": {
       "mightExist": false
     },
@@ -43,7 +39,6 @@
     "totalUniqueInstanceCount": 0,
     "totalUniqueFullyMigratedCount": 0,
     "totalUniquePartiallyMigratedCount": 0,
-    "totalUniqueInternallyCollectedCount": 0,
     "detected": {
       "doesExist": true
     },
