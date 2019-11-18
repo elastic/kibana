@@ -19,7 +19,6 @@ import {
   EuiText,
   EuiSpacer
 } from '@elastic/eui';
-import { idx } from '@kbn/elastic-idx';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isRight } from 'fp-ts/lib/Either';
@@ -89,18 +88,21 @@ export function AddEditFlyout({
 
   // config settings
   const [sampleRate, setSampleRate] = useState<string>(
+    // TODO(TS-3.7-ESLINT)
     (
-      idx(selectedConfig, _ => _.settings.transaction_sample_rate) ||
+      selectedConfig?.settings.transaction_sample_rate || // eslint-disable-line @typescript-eslint/camelcase
       defaultSettings.TRANSACTION_SAMPLE_RATE
     ).toString()
   );
   const [captureBody, setCaptureBody] = useState<string>(
-    idx(selectedConfig, _ => _.settings.capture_body) ||
-      defaultSettings.CAPTURE_BODY
+    // TODO(TS-3.7-ESLINT)
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    selectedConfig?.settings.capture_body || defaultSettings.CAPTURE_BODY
   );
   const [transactionMaxSpans, setTransactionMaxSpans] = useState<string>(
+    // TODO(TS-3.7-ESLINT)
     (
-      idx(selectedConfig, _ => _.settings.transaction_max_spans) ||
+      selectedConfig?.settings.transaction_max_spans || // eslint-disable-line @typescript-eslint/camelcase
       defaultSettings.TRANSACTION_MAX_SPANS
     ).toString()
   );

@@ -62,10 +62,6 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
           updateCurrentState: () => {},
         },
       },
-      // eslint-disable-next-line
-      ResizeChecker: function() {
-        return { on: () => {} };
-      },
       docLinkVersion: 'NA',
     };
     editor = mount(
