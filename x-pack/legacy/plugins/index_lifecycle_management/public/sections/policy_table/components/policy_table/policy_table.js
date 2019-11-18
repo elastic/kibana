@@ -36,7 +36,7 @@ import {
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 
-import { getIndexListUri } from '../../../../../../index_management/public/services/navigation';
+import { getIndexListUri } from '../../../../../../index_management/public/app/services/navigation';
 import { BASE_PATH, UIM_EDIT_CLICK } from '../../../../../common/constants';
 import { getPolicyPath } from '../../../../services/navigation';
 import { flattenPanelTree } from '../../../../services/flatten_panel_tree';
