@@ -27,8 +27,7 @@ export interface RequestFacade {
   headers: Legacy.Request['headers'];
   method: Legacy.Request['method'];
   params: Legacy.Request['params'];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  payload: any;
+  payload: unknown;
   query: Legacy.Request['query'];
   server: {
     plugins: { elasticsearch: Legacy.Request['server']['plugins']['elasticsearch'] };
