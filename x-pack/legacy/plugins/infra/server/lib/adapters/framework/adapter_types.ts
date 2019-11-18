@@ -11,7 +11,7 @@ import { Legacy } from 'kibana';
 
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { JsonObject } from '../../../../common/typed_json';
-import { InfraMetricModel } from '../metrics/adapter_types';
+import { TSVBMetricModel } from '../../../../common/inventory_models/types';
 
 export const internalInfraFrameworkRequest = Symbol('internalInfraFrameworkRequest');
 
@@ -63,7 +63,7 @@ export interface InfraBackendFrameworkAdapter {
   getSpaceId(request: InfraFrameworkRequest<any>): string;
   makeTSVBRequest(
     req: InfraFrameworkRequest,
-    model: InfraMetricModel,
+    model: TSVBMetricModel,
     timerange: { min: number; max: number },
     filters: JsonObject[]
   ): Promise<InfraTSVBResponse>;

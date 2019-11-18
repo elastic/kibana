@@ -11,9 +11,9 @@ import { InfraFormatterType } from '../../../../lib/lib';
 import { createFormatter } from '../../../../utils/formatters';
 import { InfraDataSeries, InfraMetricData } from '../../../../graphql/types';
 import {
-  InfraMetricLayoutVisualizationType,
-  InfraMetricLayoutSection,
-} from '../../../../pages/metrics/layouts/types';
+  InventoryDetailSection,
+  InventoryVisTypeRT,
+} from '../../../../../common/inventory_models/types';
 
 /**
  * Returns a formatter
@@ -47,11 +47,7 @@ export const getMaxMinTimestamp = (metric: InfraMetricData): [number, number] =>
  * Returns the chart name from the visConfig based on the series id, otherwise it
  * just returns the seriesId
  */
-export const getChartName = (
-  section: InfraMetricLayoutSection,
-  seriesId: string,
-  label: string
-) => {
+export const getChartName = (section: InventoryDetailSection, seriesId: string, label: string) => {
   return get(section, ['visConfig', 'seriesOverrides', seriesId, 'name'], label);
 };
 
@@ -59,7 +55,7 @@ export const getChartName = (
  * Returns the chart color from the visConfig based on the series id, otherwise it
  * just returns null if the color doesn't exists in the overrides.
  */
-export const getChartColor = (section: InfraMetricLayoutSection, seriesId: string) => {
+export const getChartColor = (section: InventoryDetailSection, seriesId: string) => {
   const rawColor: string | null = get(section, ['visConfig', 'seriesOverrides', seriesId, 'color']);
   if (!rawColor) {
     return null;
@@ -69,25 +65,16 @@ export const getChartColor = (section: InfraMetricLayoutSection, seriesId: strin
 };
 
 /**
- * Type guard for InfraMetricLayoutVisualizationType
- */
-const isInfraMetricLayoutVisualizationType = (
-  subject: any
-): subject is InfraMetricLayoutVisualizationType => {
-  return subject in InfraMetricLayoutVisualizationType;
-};
-
-/**
  * Gets the chart type based on the section and seriesId
  */
-export const getChartType = (section: InfraMetricLayoutSection, seriesId: string) => {
+export const getChartType = (section: InventoryDetailSection, seriesId: string) => {
   const value = get(section, ['visConfig', 'type']);
   const overrideValue = get(section, ['visConfig', 'seriesOverrides', seriesId, 'type']);
-  if (isInfraMetricLayoutVisualizationType(overrideValue)) {
+  if (InventoryVisTypeRT.is(overrideValue)) {
     return overrideValue;
   }
-  if (isInfraMetricLayoutVisualizationType(value)) {
+  if (InventoryVisTypeRT.is(value)) {
     return value;
   }
-  return InfraMetricLayoutVisualizationType.line;
+  return 'line';
 };

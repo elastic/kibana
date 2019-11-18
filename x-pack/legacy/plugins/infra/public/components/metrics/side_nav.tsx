@@ -9,13 +9,16 @@ import { EuiHideFor, EuiPageSideBar, EuiShowFor, EuiSideNav } from '@elastic/eui
 import React from 'react';
 
 import euiStyled from '../../../../../common/eui_styled_components';
-import { InfraMetricLayout, InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
+import {
+  InventoryDetailLayout,
+  InventoryDetailSection,
+} from '../../../common/inventory_models/types';
 
 interface Props {
-  layouts: InfraMetricLayout[];
+  layouts: InventoryDetailLayout[];
   loading: boolean;
   nodeName: string;
-  handleClick: (section: InfraMetricLayoutSection) => () => void;
+  handleClick: (section: InventoryDetailSection) => () => void;
 }
 
 export const MetricsSideNav = class extends React.PureComponent<Props> {
