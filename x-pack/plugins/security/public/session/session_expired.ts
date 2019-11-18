@@ -7,21 +7,23 @@
 import { HttpSetup } from 'src/core/public';
 
 export interface ISessionExpired {
-  logout(isMaximum: boolean): void;
+  logout(): void;
 }
 
 export class SessionExpired {
   constructor(private basePath: HttpSetup['basePath']) {}
 
-  logout(isMaximum: boolean) {
+  logout() {
     const next = this.basePath.remove(
       `${window.location.pathname}${window.location.search}${window.location.hash}`
     );
-    const msg = isMaximum ? 'SESSION_ENDED' : 'SESSION_EXPIRED';
-    const providerName = sessionStorage.getItem('session.provider');
-    const provider = providerName ? `&provider=${providerName}` : '';
+    const key = this.basePath.prepend('/session.provider');
+    const providerName = sessionStorage.getItem(key);
+    const provider = providerName ? `&provider=${encodeURIComponent(providerName)}` : '';
     window.location.assign(
-      this.basePath.prepend(`/logout?next=${encodeURIComponent(next)}&msg=${msg}${provider}`)
+      this.basePath.prepend(
+        `/logout?next=${encodeURIComponent(next)}&msg=SESSION_EXPIRED${provider}`
+      )
     );
   }
 }

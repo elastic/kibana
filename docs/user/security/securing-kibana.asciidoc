@@ -71,7 +71,7 @@ xpack.security.session.idleTimeout: 600000
 
 . Optional: Change the maximum session duration or "lifespan" -- also known as
 the "absolute timeout". By default, a session stays active until the browser is
-closed; also, if an idle timeout is defined, a session can still be extended
+closed. If an idle timeout is defined, a session can still be extended
 indefinitely. To define a maximum session lifespan, set the
 `xpack.security.session.lifespan` property in the `kibana.yml` configuration
 file. The lifespan is specified in milliseconds. For example, set the lifespan

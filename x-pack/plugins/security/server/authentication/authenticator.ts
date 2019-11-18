@@ -31,6 +31,7 @@ import {
 import { AuthenticationResult } from './authentication_result';
 import { DeauthenticationResult } from './deauthentication_result';
 import { Tokens } from './tokens';
+import { SessionInfo } from '../../public/types';
 
 /**
  * The shape of the session that is actually stored in the cookie.
@@ -45,13 +46,13 @@ export interface ProviderSession {
    * The Unix time in ms when the session should be considered expired. If `null`, session will stay
    * active until the browser is closed.
    */
-  expires: number | null;
+  idleTimeoutExpiration: number | null;
 
   /**
    * The Unix time in ms which is the max total lifespan of the session. If `null`, session expire
    * time can be extended indefinitely.
    */
-  maxExpires: number | null;
+  lifespanExpiration: number | null;
 
   /**
    * Session value that is fed to the authentication provider. The shape is unknown upfront and
@@ -270,12 +271,12 @@ export class Authenticator {
     if (existingSession && shouldClearSession) {
       sessionStorage.clear();
     } else if (!attempt.stateless && authenticationResult.shouldUpdateState()) {
-      const { expires, maxExpires } = this.calculateExpiry(existingSession);
+      const { idleTimeoutExpiration, lifespanExpiration } = this.calculateExpiry(existingSession);
       sessionStorage.set({
         state: authenticationResult.state,
         provider: attempt.provider,
-        expires,
-        maxExpires,
+        idleTimeoutExpiration,
+        lifespanExpiration,
       });
     }
 
@@ -361,13 +362,23 @@ export class Authenticator {
    * Returns session information for the current request.
    * @param request Request instance.
    */
-  async sessionInfo(request: KibanaRequest): Promise<ProviderSession | null> {
+  async getSessionInfo(request: KibanaRequest): Promise<SessionInfo | null> {
     assertRequest(request);
 
     const sessionStorage = this.options.sessionStorageFactory.asScoped(request);
     const sessionValue = await this.getSessionValue(sessionStorage);
 
-    return sessionValue;
+    if (sessionValue) {
+      // We can't rely on the client's system clock, so in addition to returning expiration timestamps, we also return
+      // the current server time -- that way the client can calculate the relative time to expiration.
+      return {
+        now: Date.now(),
+        idleTimeoutExpiration: sessionValue.idleTimeoutExpiration,
+        lifespanExpiration: sessionValue.lifespanExpiration,
+        provider: sessionValue.provider,
+      };
+    }
+    return null;
   }
 
   /**
@@ -446,14 +457,14 @@ export class Authenticator {
     ) {
       sessionStorage.clear();
     } else if (sessionCanBeUpdated) {
-      const { expires, maxExpires } = this.calculateExpiry(existingSession);
+      const { idleTimeoutExpiration, lifespanExpiration } = this.calculateExpiry(existingSession);
       sessionStorage.set({
         state: authenticationResult.shouldUpdateState()
           ? authenticationResult.state
           : existingSession!.state,
         provider: providerType,
-        expires,
-        maxExpires,
+        idleTimeoutExpiration,
+        lifespanExpiration,
       });
     }
   }
@@ -467,28 +478,13 @@ export class Authenticator {
 
   private calculateExpiry(
     existingSession: ProviderSession | null
-  ): { expires: number | null; maxExpires: number | null } {
-    let maxExpires = this.lifespan && Date.now() + this.lifespan;
-    if (existingSession) {
-      if (existingSession.maxExpires && this.lifespan) {
-        maxExpires = existingSession.maxExpires;
-      }
-      // otherwise, three cases:
-      // A. existing session has no max expiry, but server is configured for one -> set to now + lifespan
-      // B. existing session has a max expiry, but server is *not* configured for one -> set to null
-      // C. existing session has no max expiry, and server is *not* configured for one -> set to null
-      // all of these are already correct
+  ): { idleTimeoutExpiration: number | null; lifespanExpiration: number | null } {
+    let lifespanExpiration = this.lifespan && Date.now() + this.lifespan;
+    if (existingSession && existingSession.lifespanExpiration && this.lifespan) {
+      lifespanExpiration = existingSession.lifespanExpiration;
     }
-    let expires = this.idleTimeout && Date.now() + this.idleTimeout;
+    const idleTimeoutExpiration = this.idleTimeout && Date.now() + this.idleTimeout;
 
-    if (expires && maxExpires && expires > maxExpires) {
-      // renewed expiration exceeds lifespan
-      expires = maxExpires;
-    } else if (!expires && maxExpires) {
-      // idleTimeout is not set, but lifespan is, so expiration should equal lifespan
-      expires = maxExpires;
-    }
-
-    return { expires, maxExpires };
+    return { idleTimeoutExpiration, lifespanExpiration };
   }
 }

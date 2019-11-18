@@ -144,7 +144,6 @@
     "bluebird": "3.5.5",
     "boom": "^7.2.0",
     "brace": "0.11.1",
-    "broadcast-channel": "^2.3.2",
     "cache-loader": "^4.1.0",
     "chalk": "^2.4.2",
     "check-disk-space": "^2.1.0",

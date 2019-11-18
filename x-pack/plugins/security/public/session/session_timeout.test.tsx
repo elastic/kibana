@@ -20,44 +20,44 @@ const expectNoWarningToast = (
 
 const expectIdleTimeoutWarningToast = (
   notifications: ReturnType<typeof coreMock.createSetup>['notifications'],
-  toastLifeTimeMS: number = 60000
+  toastLifeTimeMs: number = 60000
 ) => {
   expect(notifications.toasts.add).toHaveBeenCalledTimes(1);
-  expect(notifications.toasts.add.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      Object {
-        "color": "warning",
-        "iconType": "clock",
-        "text": MountPoint {
-          "reactNode": <SessionIdleTimeoutWarning
-            onRefreshSession={[Function]}
-          />,
-        },
-        "title": "Warning",
-        "toastLifeTimeMs": ${toastLifeTimeMS},
-      },
-    ]
-  `);
+  expect(notifications.toasts.add.mock.calls[0][0]).toMatchInlineSnapshot(
+    {
+      text: expect.any(Function),
+    },
+    `
+    Object {
+      "color": "warning",
+      "iconType": "clock",
+      "text": Any<Function>,
+      "title": "Warning",
+      "toastLifeTimeMs": ${toastLifeTimeMs},
+    }
+    `
+  );
 };
 
 const expectLifespanWarningToast = (
   notifications: ReturnType<typeof coreMock.createSetup>['notifications'],
-  toastLifeTimeMS: number = 60000
+  toastLifeTimeMs: number = 60000
 ) => {
   expect(notifications.toasts.add).toHaveBeenCalledTimes(1);
-  expect(notifications.toasts.add.mock.calls[0]).toMatchInlineSnapshot(`
-  Array [
+  expect(notifications.toasts.add.mock.calls[0][0]).toMatchInlineSnapshot(
+    {
+      text: expect.any(Function),
+    },
+    `
     Object {
       "color": "danger",
       "iconType": "alert",
-      "text": MountPoint {
-        "reactNode": <SessionLifespanWarning />,
-      },
+      "text": Any<Function>,
       "title": "Warning",
-      "toastLifeTimeMs": ${toastLifeTimeMS},
-    },
-  ]
-`);
+      "toastLifeTimeMs": ${toastLifeTimeMs},
+    }
+    `
+  );
 };
 
 const expectWarningToastHidden = (
@@ -70,7 +70,11 @@ const expectWarningToastHidden = (
 
 describe('Session Timeout', () => {
   const now = new Date().getTime();
-  const defaultSessionInfo = { now, expires: now + 2 * 60 * 1000, maxExpires: null };
+  const defaultSessionInfo = {
+    now,
+    idleTimeoutExpiration: now + 2 * 60 * 1000,
+    lifespanExpiration: null,
+  };
   let notifications: ReturnType<typeof coreMock.createSetup>['notifications'];
   let http: ReturnType<typeof coreMock.createSetup>['http'];
   let sessionExpired: ReturnType<typeof createSessionExpiredMock>;
@@ -80,6 +84,12 @@ describe('Session Timeout', () => {
   beforeAll(() => {
     BroadcastChannel.enforceOptions({
       type: 'simulate',
+    });
+    Object.defineProperty(window, 'sessionStorage', {
+      value: {
+        setItem: jest.fn(() => null),
+      },
+      writable: true,
     });
   });
 
@@ -93,12 +103,6 @@ describe('Session Timeout', () => {
 
     // default mocked response for checking session info
     http.fetch.mockResolvedValue(defaultSessionInfo);
-
-    // the session timeout class uses a BroadcastChannel to communicate across tabs;
-    // we have to essentially disable part of this process so the tests will complete
-    // eslint-disable-next-line dot-notation
-    const elector = sessionTimeout['elector'];
-    jest.spyOn(elector, 'awaitLeadership').mockImplementation(() => Promise.resolve());
   });
 
   afterEach(async () => {
@@ -107,14 +111,17 @@ describe('Session Timeout', () => {
 
   afterAll(() => {
     BroadcastChannel.enforceOptions(null);
+    delete (window as any).sessionStorage;
   });
 
   describe('API calls', () => {
-    const updateTimeouts = jest.fn();
+    const methodName = 'handleSessionInfoAndResetTimers';
+    let method: jest.Mock;
 
     beforeEach(() => {
       // eslint-disable-next-line dot-notation
-      sessionTimeout['updateTimeouts'] = updateTimeouts;
+      method = jest.fn(sessionTimeout[methodName]);
+      sessionTimeout[methodName] = method;
     });
 
     test(`handles success`, async () => {
@@ -123,7 +130,7 @@ describe('Session Timeout', () => {
       expect(http.fetch).toHaveBeenCalledTimes(1);
       // eslint-disable-next-line dot-notation
       expect(sessionTimeout['sessionInfo']).toBe(defaultSessionInfo);
-      expect(updateTimeouts).toHaveBeenCalledTimes(2);
+      expect(method).toHaveBeenCalledTimes(1);
     });
 
     test(`handles error`, async () => {
@@ -134,7 +141,7 @@ describe('Session Timeout', () => {
       expect(http.fetch).toHaveBeenCalledTimes(1);
       // eslint-disable-next-line dot-notation
       expect(sessionTimeout['sessionInfo']).toBeUndefined();
-      expect(updateTimeouts).toHaveBeenCalledTimes(1);
+      expect(method).not.toHaveBeenCalled();
     });
   });
 
@@ -148,7 +155,11 @@ describe('Session Timeout', () => {
     });
 
     test(`shows lifespan warning toast`, async () => {
-      const sessionInfo = { now, expires: now + 2 * 60 * 1000, maxExpires: now + 2 * 60 * 1000 };
+      const sessionInfo = {
+        now,
+        idleTimeoutExpiration: now + 2 * 60 * 1000,
+        lifespanExpiration: now + 2 * 60 * 1000,
+      };
       http.fetch.mockResolvedValue(sessionInfo);
       await sessionTimeout.init();
 
@@ -164,20 +175,21 @@ describe('Session Timeout', () => {
       await sessionTimeout.extend('/foo');
       expect(http.fetch).toHaveBeenCalledTimes(1);
       jest.advanceTimersByTime(54 * 1000);
+      expect(http.fetch).toHaveBeenCalledTimes(2);
       expectNoWarningToast(notifications);
 
       await sessionTimeout.extend('/foo');
-      expect(http.fetch).toHaveBeenCalledTimes(1);
+      expect(http.fetch).toHaveBeenCalledTimes(2);
       jest.advanceTimersByTime(10 * 1000);
       expectIdleTimeoutWarningToast(notifications);
 
       http.fetch.mockResolvedValue({
         now: now + 55 * 1000,
-        expires: now + 55 * 1000 + 2 * 60 * 1000,
-        maxExpires: null,
+        idleTimeoutExpiration: now + 55 * 1000 + 2 * 60 * 1000,
+        lifespanExpiration: null,
       });
       await sessionTimeout.extend('/foo');
-      expect(http.fetch).toHaveBeenCalledTimes(2);
+      expect(http.fetch).toHaveBeenCalledTimes(3);
     });
 
     test(`extend hides displayed warning toast`, async () => {
@@ -191,11 +203,11 @@ describe('Session Timeout', () => {
 
       http.fetch.mockResolvedValue({
         now: now + elapsed,
-        expires: now + elapsed + 2 * 60 * 1000,
-        maxExpires: null,
+        idleTimeoutExpiration: now + elapsed + 2 * 60 * 1000,
+        lifespanExpiration: null,
       });
       await sessionTimeout.extend('/foo');
-      expect(http.fetch).toHaveBeenCalledTimes(2);
+      expect(http.fetch).toHaveBeenCalledTimes(3);
       expectWarningToastHidden(notifications, toast);
     });
 
@@ -206,39 +218,21 @@ describe('Session Timeout', () => {
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
       const elapsed = 55 * 1000;
       jest.advanceTimersByTime(elapsed);
+      expect(http.fetch).toHaveBeenCalledTimes(2);
       expectIdleTimeoutWarningToast(notifications);
 
-      await sessionTimeout.extend('/api/security/session/info');
-      expect(http.fetch).toHaveBeenCalledTimes(1);
-
-      await sessionTimeout.extend('/api/security/session/extend');
-      expect(http.fetch).toHaveBeenCalledTimes(1);
-    });
-
-    test(`the "leader" will check for updated session info before the warning displays`, async () => {
-      // eslint-disable-next-line dot-notation
-      const elector = sessionTimeout['elector'];
-      Object.defineProperty(elector, 'isLeader', {
-        get: jest.fn(() => true),
-      });
-
-      await sessionTimeout.init();
-      expect(http.fetch).toHaveBeenCalledTimes(1);
-
-      // the leader checks for updated session info 1 second before the warning is shown
-      const elapsed = 54 * 1000;
-      jest.advanceTimersByTime(elapsed);
+      await sessionTimeout.extend('/internal/security/session');
       expect(http.fetch).toHaveBeenCalledTimes(2);
     });
 
-    test(`any non-leader will *not* check for updated session info before the warning displays`, async () => {
+    test(`checks for updated session info before the warning displays`, async () => {
       await sessionTimeout.init();
       expect(http.fetch).toHaveBeenCalledTimes(1);
 
-      // the leader checks for updated session info 1 second before the warning is shown
+      // we check for updated session info 1 second before the warning is shown
       const elapsed = 54 * 1000;
       jest.advanceTimersByTime(elapsed);
-      expect(http.fetch).toHaveBeenCalledTimes(1);
+      expect(http.fetch).toHaveBeenCalledTimes(2);
     });
 
     test('clicking "extend" causes a new HTTP request (which implicitly extends the session)', async () => {
@@ -247,6 +241,7 @@ describe('Session Timeout', () => {
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
       jest.advanceTimersByTime(55 * 1000);
+      expect(http.fetch).toHaveBeenCalledTimes(2);
       expectIdleTimeoutWarningToast(notifications);
 
       const toastInput = notifications.toasts.add.mock.calls[0][0];
@@ -254,11 +249,15 @@ describe('Session Timeout', () => {
       const mountPoint = (toastInput as any).text;
       const wrapper = mountWithIntl(mountPoint.__reactMount__);
       wrapper.find('EuiButton[data-test-subj="refreshSessionButton"]').simulate('click');
-      expect(http.fetch).toHaveBeenCalledTimes(2);
+      expect(http.fetch).toHaveBeenCalledTimes(3);
     });
 
     test('when the session timeout is shorter than 65 seconds, display the warning immediately and for a shorter duration', async () => {
-      http.fetch.mockResolvedValue({ now, expires: now + 64 * 1000, maxExpires: null });
+      http.fetch.mockResolvedValue({
+        now,
+        idleTimeoutExpiration: now + 64 * 1000,
+        lifespanExpiration: null,
+      });
       await sessionTimeout.init();
       expect(http.fetch).toHaveBeenCalled();
 
@@ -284,16 +283,17 @@ describe('Session Timeout', () => {
 
       const elapsed = 114 * 1000;
       jest.advanceTimersByTime(elapsed);
+      expect(http.fetch).toHaveBeenCalledTimes(2);
       expectIdleTimeoutWarningToast(notifications);
 
       const sessionInfo = {
         now: now + elapsed,
-        expires: now + elapsed + 2 * 60 * 1000,
-        maxExpires: null,
+        idleTimeoutExpiration: now + elapsed + 2 * 60 * 1000,
+        lifespanExpiration: null,
       };
       http.fetch.mockResolvedValue(sessionInfo);
       await sessionTimeout.extend('/foo');
-      expect(http.fetch).toHaveBeenCalledTimes(2);
+      expect(http.fetch).toHaveBeenCalledTimes(3);
       // eslint-disable-next-line dot-notation
       expect(sessionTimeout['sessionInfo']).toEqual(sessionInfo);
 
@@ -308,7 +308,11 @@ describe('Session Timeout', () => {
     });
 
     test(`if the session timeout is shorter than 5 seconds, expire session immediately`, async () => {
-      http.fetch.mockResolvedValue({ now, expires: now + 4 * 1000, maxExpires: null });
+      http.fetch.mockResolvedValue({
+        now,
+        idleTimeoutExpiration: now + 4 * 1000,
+        lifespanExpiration: null,
+      });
       await sessionTimeout.init();
 
       jest.advanceTimersByTime(0);
@@ -316,7 +320,7 @@ describe('Session Timeout', () => {
     });
 
     test(`'null' sessionTimeout never logs you out`, async () => {
-      http.fetch.mockResolvedValue({ now, expires: null, maxExpires: null });
+      http.fetch.mockResolvedValue({ now, idleTimeoutExpiration: null, lifespanExpiration: null });
       await sessionTimeout.init();
 
       jest.advanceTimersByTime(Number.MAX_VALUE);

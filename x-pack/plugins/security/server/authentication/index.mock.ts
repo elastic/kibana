@@ -14,6 +14,6 @@ export const authenticationMock = {
     invalidateAPIKey: jest.fn(),
     isAuthenticated: jest.fn(),
     logout: jest.fn(),
-    sessionInfo: jest.fn(),
+    getSessionInfo: jest.fn(),
   }),
 };

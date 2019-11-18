@@ -6,7 +6,7 @@
 
 export interface SessionInfo {
   now: number;
-  expires: number | null;
-  maxExpires: number | null;
+  idleTimeoutExpiration: number | null;
+  lifespanExpiration: number | null;
   provider: string;
 }

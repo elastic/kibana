@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import { Plugin, CoreStart } from 'kibana/public';
+import { Plugin, CoreSetup } from 'kibana/public';
 
 export class StatusPagePlugin implements Plugin<StatusPagePluginSetup, StatusPagePluginStart> {
-  public setup() {}
-
-  public start(core: CoreStart) {
+  public setup(core: CoreSetup) {
     const isStatusPageAnonymous = core.injectedMetadata.getInjectedVar(
       'isStatusPageAnonymous'
     ) as boolean;
@@ -31,6 +29,8 @@ export class StatusPagePlugin implements Plugin<StatusPagePluginSetup, StatusPag
       core.http.anonymousPaths.register('/status');
     }
   }
+
+  public start() {}
 
   public stop() {}
 }

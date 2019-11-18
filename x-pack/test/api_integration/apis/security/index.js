@@ -14,5 +14,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./index_fields'));
     loadTestFile(require.resolve('./roles'));
     loadTestFile(require.resolve('./privileges'));
+    loadTestFile(require.resolve('./session'));
   });
 }

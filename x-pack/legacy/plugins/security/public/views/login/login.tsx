@@ -20,9 +20,6 @@ const messageMap = {
   SESSION_EXPIRED: i18n.translate('xpack.security.login.sessionExpiredDescription', {
     defaultMessage: 'Your session has timed out. Please log in again.',
   }),
-  SESSION_ENDED: i18n.translate('xpack.security.login.sessionEndedDescription', {
-    defaultMessage: 'Your session has exceeded the maximum time limit. Please log in again.',
-  }),
   LOGGED_OUT: i18n.translate('xpack.security.login.loggedOutDescription', {
     defaultMessage: 'You have logged out of Kibana.',
   }),

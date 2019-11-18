@@ -71,11 +71,11 @@ describe('Security Plugin', () => {
                 "authc": Object {
                   "createAPIKey": [Function],
                   "getCurrentUser": [Function],
+                  "getSessionInfo": [Function],
                   "invalidateAPIKey": [Function],
                   "isAuthenticated": [Function],
                   "login": [Function],
                   "logout": [Function],
-                  "sessionInfo": [Function],
                 },
                 "authz": Object {
                   "actions": Actions {

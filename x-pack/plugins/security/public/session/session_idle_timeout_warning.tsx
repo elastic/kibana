@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ToastInput } from 'src/core/public';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiProgress } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
+import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   onRefreshSession: () => void;
+  timeout: number;
 }
 
 export const SessionIdleTimeoutWarning = (props: Props) => {
@@ -19,7 +23,12 @@ export const SessionIdleTimeoutWarning = (props: Props) => {
       <p>
         <FormattedMessage
           id="xpack.security.components.sessionIdleTimeoutWarning.message"
-          defaultMessage="You will soon be logged out due to inactivity. Click OK to resume."
+          defaultMessage="You will be logged out {timeout} due to inactivity. Click OK to resume."
+          values={{
+            timeout: (
+              <FormattedRelative value={props.timeout} units="second" updateInterval={1000} />
+            ),
+          }}
         />
       </p>
       <div className="eui-textRight">
@@ -37,4 +46,19 @@ export const SessionIdleTimeoutWarning = (props: Props) => {
       </div>
     </>
   );
+};
+
+export const createToast = (toastLifeTimeMs: number, onRefreshSession: () => void): ToastInput => {
+  const timeout = toastLifeTimeMs + Date.now();
+  return {
+    color: 'warning',
+    text: toMountPoint(
+      <SessionIdleTimeoutWarning onRefreshSession={onRefreshSession} timeout={timeout} />
+    ),
+    title: i18n.translate('xpack.security.components.sessionIdleTimeoutWarning.title', {
+      defaultMessage: 'Warning',
+    }),
+    iconType: 'clock',
+    toastLifeTimeMs,
+  };
 };
