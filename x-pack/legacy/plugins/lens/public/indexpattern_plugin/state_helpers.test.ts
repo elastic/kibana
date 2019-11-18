@@ -11,11 +11,11 @@ import {
   deleteColumn,
   updateLayerIndexPattern,
 } from './state_helpers';
-import { IndexPatternPrivateState, IndexPattern, IndexPatternLayer } from './indexpattern';
 import { operationDefinitionMap } from './operations';
 import { TermsIndexPatternColumn } from './operations/definitions/terms';
 import { DateHistogramIndexPatternColumn } from './operations/definitions/date_histogram';
 import { AvgIndexPatternColumn } from './operations/definitions/metrics';
+import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
 
 jest.mock('ui/new_platform');
 jest.mock('./operations');
@@ -39,6 +39,8 @@ describe('state_helpers', () => {
       };
 
       const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
         showEmptyFields: false,
@@ -52,8 +54,7 @@ describe('state_helpers', () => {
                 label: 'Count',
                 dataType: 'number',
                 isBucketed: false,
-
-                // Private
+                sourceField: 'Records',
                 operationType: 'count',
               },
             },
@@ -85,6 +86,8 @@ describe('state_helpers', () => {
       };
 
       const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
         showEmptyFields: false,
@@ -98,8 +101,7 @@ describe('state_helpers', () => {
                 label: 'Count',
                 dataType: 'number',
                 isBucketed: false,
-
-                // Private
+                sourceField: 'Records',
                 operationType: 'count',
               },
             },
@@ -135,6 +137,8 @@ describe('state_helpers', () => {
       };
 
       const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
         showEmptyFields: false,
@@ -167,6 +171,8 @@ describe('state_helpers', () => {
   describe('changeColumn', () => {
     it('should update order on changing the column', () => {
       const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
         showEmptyFields: false,
@@ -227,6 +233,8 @@ describe('state_helpers', () => {
 
     it('should carry over params from old column if the operation type stays the same', () => {
       const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
         showEmptyFields: false,
@@ -303,6 +311,8 @@ describe('state_helpers', () => {
       };
 
       const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
         showEmptyFields: false,
@@ -316,8 +326,7 @@ describe('state_helpers', () => {
                 label: 'Count',
                 dataType: 'number',
                 isBucketed: false,
-
-                // Private
+                sourceField: 'Records',
                 operationType: 'count',
               },
             },
@@ -367,7 +376,7 @@ describe('state_helpers', () => {
       expect(
         getColumnOrder({
           col1: {
-            label: 'Top Values of category',
+            label: 'Top values of category',
             dataType: 'string',
             isBucketed: true,
 
@@ -392,7 +401,7 @@ describe('state_helpers', () => {
             sourceField: 'bytes',
           },
           col3: {
-            label: 'Date Histogram of timestamp',
+            label: 'Date histogram of timestamp',
             dataType: 'date',
             isBucketed: true,
 
@@ -411,7 +420,7 @@ describe('state_helpers', () => {
       expect(
         getColumnOrder({
           col1: {
-            label: 'Top Values of category',
+            label: 'Top values of category',
             dataType: 'string',
             isBucketed: true,
 
@@ -438,7 +447,7 @@ describe('state_helpers', () => {
             suggestedPriority: 0,
           },
           col3: {
-            label: 'Date Histogram of timestamp',
+            label: 'Date histogram of timestamp',
             dataType: 'date',
             isBucketed: true,
 

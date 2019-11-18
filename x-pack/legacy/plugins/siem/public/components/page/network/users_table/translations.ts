@@ -20,7 +20,7 @@ export const UNIT = (totalCount: number) =>
 export const USER_NAME = i18n.translate(
   'xpack.siem.network.ipDetails.usersTable.columns.userNameTitle',
   {
-    defaultMessage: 'Name',
+    defaultMessage: 'User',
   }
 );
 

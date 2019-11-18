@@ -264,7 +264,7 @@ export function resultsServiceProvider(callWithRequest) {
     const resp = await callWithRequest('search', query);
     const maxScore = _.get(resp, ['aggregations', 'max_score', 'value'], null);
 
-    return maxScore;
+    return { maxScore };
   }
 
   // Obtains the latest bucket result timestamp by job ID.

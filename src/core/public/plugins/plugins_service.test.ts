@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { omit } from 'lodash';
+import { omit, pick } from 'lodash';
 
 import {
   MockedPluginInitializer,
@@ -26,7 +26,7 @@ import {
 } from './plugins_service.test.mocks';
 
 import { PluginName, DiscoveredPlugin } from 'src/core/server';
-import { CoreContext } from '../core_system';
+import { coreMock } from '../mocks';
 import {
   PluginsService,
   PluginsServiceStartDeps,
@@ -56,7 +56,7 @@ let plugins: Array<{ id: string; plugin: DiscoveredPlugin }>;
 
 type DeeplyMocked<T> = { [P in keyof T]: jest.Mocked<T[P]> };
 
-const mockCoreContext: CoreContext = { coreId: Symbol() };
+const mockCoreContext = coreMock.createCoreContext();
 let mockSetupDeps: DeeplyMocked<PluginsServiceSetupDeps>;
 let mockSetupContext: DeeplyMocked<CoreSetup>;
 let mockStartDeps: DeeplyMocked<PluginsServiceStartDeps>;
@@ -76,12 +76,12 @@ beforeEach(() => {
     context: contextServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
     http: httpServiceMock.createSetupContract(),
-    injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
+    injectedMetadata: pick(injectedMetadataServiceMock.createStartContract(), 'getInjectedVar'),
     notifications: notificationServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
   };
   mockSetupContext = {
-    ...omit(mockSetupDeps, 'injectedMetadata'),
+    ...mockSetupDeps,
     application: expect.any(Object),
   };
   mockStartDeps = {
@@ -90,14 +90,14 @@ beforeEach(() => {
     http: httpServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
     i18n: i18nServiceMock.createStartContract(),
-    injectedMetadata: injectedMetadataServiceMock.createStartContract(),
+    injectedMetadata: pick(injectedMetadataServiceMock.createStartContract(), 'getInjectedVar'),
     notifications: notificationServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     savedObjects: savedObjectsMock.createStartContract(),
   };
   mockStartContext = {
-    ...omit(mockStartDeps, 'injectedMetadata'),
+    ...mockStartDeps,
     application: expect.any(Object),
     chrome: omit(mockStartDeps.chrome, 'getComponent'),
   };
@@ -223,10 +223,13 @@ test('`PluginsService.setup` exposes dependent setup contracts to plugins', asyn
 
 test('`PluginsService.setup` does not set missing dependent setup contracts', async () => {
   plugins = [{ id: 'pluginD', plugin: createManifest('pluginD', { optional: ['missing'] }) }];
-  mockPluginInitializers.set('pluginD', jest.fn(() => ({
-    setup: jest.fn(),
-    start: jest.fn(),
-  })) as any);
+  mockPluginInitializers.set(
+    'pluginD',
+    jest.fn(() => ({
+      setup: jest.fn(),
+      start: jest.fn(),
+    })) as any
+  );
 
   const pluginsService = new PluginsService(mockCoreContext, plugins);
   await pluginsService.setup(mockSetupDeps);
@@ -268,10 +271,13 @@ test('`PluginsService.start` exposes dependent start contracts to plugins', asyn
 
 test('`PluginsService.start` does not set missing dependent start contracts', async () => {
   plugins = [{ id: 'pluginD', plugin: createManifest('pluginD', { optional: ['missing'] }) }];
-  mockPluginInitializers.set('pluginD', jest.fn(() => ({
-    setup: jest.fn(),
-    start: jest.fn(),
-  })) as any);
+  mockPluginInitializers.set(
+    'pluginD',
+    jest.fn(() => ({
+      setup: jest.fn(),
+      start: jest.fn(),
+    })) as any
+  );
 
   const pluginsService = new PluginsService(mockCoreContext, plugins);
   await pluginsService.setup(mockSetupDeps);

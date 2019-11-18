@@ -9,24 +9,19 @@ import {
   SearchParams,
   IndexDocumentParams,
   IndicesDeleteParams,
-  IndicesCreateParams,
-  AggregationSearchResponse
+  IndicesCreateParams
 } from 'elasticsearch';
 import { Legacy } from 'kibana';
-import { cloneDeep, has, isString, set } from 'lodash';
+import { cloneDeep, has, isString, set, pick } from 'lodash';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
-import { StringMap } from '../../../typings/common';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
+import {
+  ESSearchResponse,
+  ESSearchRequest
+} from '../../../typings/elasticsearch';
 
-function getApmIndices(config: Legacy.KibanaConfig) {
-  return [
-    config.get<string>('apm_oss.errorIndices'),
-    config.get<string>('apm_oss.metricsIndices'),
-    config.get<string>('apm_oss.onboardingIndices'),
-    config.get<string>('apm_oss.sourcemapIndices'),
-    config.get<string>('apm_oss.spanIndices'),
-    config.get<string>('apm_oss.transactionIndices')
-  ];
-}
+// `type` was deprecated in 7.0
+export type APMIndexDocumentParams<T> = Omit<IndexDocumentParams<T>, 'type'>;
 
 export function isApmIndex(
   apmIndices: string[],
@@ -70,14 +65,30 @@ async function getParamsForSearchRequest(
   params: SearchParams,
   apmOptions?: APMOptions
 ) {
-  const config = req.server.config();
   const uiSettings = req.getUiSettingsService();
-  const apmIndices = getApmIndices(config);
-  const includeFrozen = await uiSettings.get('search:includeFrozen');
+  const { server } = req;
+  const [indices, includeFrozen] = await Promise.all([
+    getApmIndices({
+      config: server.config(),
+      savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(req)
+    }),
+    uiSettings.get('search:includeFrozen')
+  ]);
+
+  // Get indices for legacy data filter (only those which apply)
+  const apmIndices: string[] = Object.values(
+    pick(indices, [
+      'apm_oss.sourcemapIndices',
+      'apm_oss.errorIndices',
+      'apm_oss.onboardingIndices',
+      'apm_oss.spanIndices',
+      'apm_oss.transactionIndices',
+      'apm_oss.metricsIndices'
+    ])
+  );
   return {
     ...addFilterForLegacyData(apmIndices, params, apmOptions), // filter out pre-7.0 data
-    ignore_throttled: !includeFrozen, // whether to query frozen indices or not
-    rest_total_hits_as_int: true // ensure that ES returns accurate hits.total with pre-6.6 format
+    ignore_throttled: !includeFrozen // whether to query frozen indices or not
   };
 }
 
@@ -85,15 +96,31 @@ interface APMOptions {
   includeLegacyData: boolean;
 }
 
-export function getESClient(req: Legacy.Request) {
+interface ClientCreateOptions {
+  clientAsInternalUser?: boolean;
+}
+
+export type ESClient = ReturnType<typeof getESClient>;
+
+export function getESClient(
+  req: Legacy.Request,
+  { clientAsInternalUser = false }: ClientCreateOptions = {}
+) {
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
-  const query = req.query as StringMap;
+  const query = req.query as Record<string, unknown>;
+
+  const callMethod = clientAsInternalUser
+    ? cluster.callWithInternalUser.bind(cluster)
+    : cluster.callWithRequest.bind(cluster, req);
 
   return {
-    search: async <Hits = unknown, U extends SearchParams = {}>(
-      params: U,
+    search: async <
+      TDocument = unknown,
+      TSearchRequest extends ESSearchRequest = {}
+    >(
+      params: TSearchRequest,
       apmOptions?: APMOptions
-    ): Promise<AggregationSearchResponse<Hits, U>> => {
+    ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
       const nextParams = await getParamsForSearchRequest(
         req,
         params,
@@ -111,18 +138,18 @@ export function getESClient(req: Legacy.Request) {
         console.log(JSON.stringify(nextParams.body, null, 4));
       }
 
-      return cluster.callWithRequest(req, 'search', nextParams) as Promise<
-        AggregationSearchResponse<Hits, U>
+      return (callMethod('search', nextParams) as unknown) as Promise<
+        ESSearchResponse<TDocument, TSearchRequest>
       >;
     },
-    index: <Body>(params: IndexDocumentParams<Body>) => {
-      return cluster.callWithRequest(req, 'index', params);
+    index: <Body>(params: APMIndexDocumentParams<Body>) => {
+      return callMethod('index', params);
     },
     delete: (params: IndicesDeleteParams) => {
-      return cluster.callWithRequest(req, 'delete', params);
+      return callMethod('delete', params);
     },
     indicesCreate: (params: IndicesCreateParams) => {
-      return cluster.callWithRequest(req, 'indices.create', params);
+      return callMethod('indices.create', params);
     }
   };
 }

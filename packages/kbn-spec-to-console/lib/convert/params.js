@@ -34,7 +34,12 @@ module.exports = params => {
         result[param] = 0.0;
         break;
       case 'enum':
-        result[param] = options;
+        // This is to clean up entries like: "d (Days)". We only want the "d" part.
+        if (param === 'time') {
+          result[param] = options.map(option => option.split(' ')[0]);
+        } else {
+          result[param] = options;
+        }
         break;
       case 'boolean':
         result[param] = '__flag__';

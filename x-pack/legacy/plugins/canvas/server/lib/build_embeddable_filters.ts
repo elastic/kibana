@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { buildQueryFilter, Filter as ESFilterType } from '@kbn/es-query';
-import { TimeRange } from 'src/plugins/data/public';
 import { Filter } from '../../types';
 // @ts-ignore Untyped Local
 import { buildBoolArray } from './build_bool_array';
+import { TimeRange, esFilters } from '../../../../../../src/plugins/data/server';
 
 export interface EmbeddableFilterInput {
-  filters: ESFilterType[];
+  filters: esFilters.Filter[];
   timeRange?: TimeRange;
 }
 
@@ -30,8 +29,10 @@ function getTimeRangeFromFilters(filters: Filter[]): TimeRange | undefined {
     : undefined;
 }
 
-function getQueryFilters(filters: Filter[]): ESFilterType[] {
-  return buildBoolArray(filters.filter(filter => filter.type !== 'time')).map(buildQueryFilter);
+function getQueryFilters(filters: Filter[]): esFilters.Filter[] {
+  return buildBoolArray(filters.filter(filter => filter.type !== 'time')).map(
+    esFilters.buildQueryFilter
+  );
 }
 
 export function buildEmbeddableFilters(filters: Filter[]): EmbeddableFilterInput {

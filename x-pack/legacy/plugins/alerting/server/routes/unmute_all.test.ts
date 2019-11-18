@@ -8,7 +8,7 @@ import { createMockServer } from './_mock_server';
 import { unmuteAllAlertRoute } from './unmute_all';
 
 const { server, alertsClient } = createMockServer();
-unmuteAllAlertRoute(server);
+server.route(unmuteAllAlertRoute);
 
 test('unmutes an alert', async () => {
   const request = {

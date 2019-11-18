@@ -5,11 +5,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction, KibanaDatatable } from 'src/legacy/core_plugins/interpreter/public';
+import {
+  ExpressionFunction,
+  KibanaDatatable,
+  KibanaDatatableColumn,
+} from 'src/legacy/core_plugins/interpreter/public';
+import { IndexPatternColumn } from './operations';
 
 interface RemapArgs {
   idMap: string;
 }
+
+export type OriginalColumn = { id: string } & IndexPatternColumn;
 
 export const renameColumns: ExpressionFunction<
   'lens_rename_columns',
@@ -35,29 +42,62 @@ export const renameColumns: ExpressionFunction<
     types: ['kibana_datatable'],
   },
   fn(data: KibanaDatatable, { idMap: encodedIdMap }: RemapArgs) {
-    const idMap = JSON.parse(encodedIdMap) as Record<string, string>;
+    const idMap = JSON.parse(encodedIdMap) as Record<string, OriginalColumn>;
+
     return {
       type: 'kibana_datatable',
       rows: data.rows.map(row => {
         const mappedRow: Record<string, unknown> = {};
         Object.entries(idMap).forEach(([fromId, toId]) => {
-          mappedRow[toId] = row[fromId];
+          mappedRow[toId.id] = row[fromId];
         });
 
         Object.entries(row).forEach(([id, value]) => {
           if (id in idMap) {
-            mappedRow[idMap[id]] = value;
+            mappedRow[idMap[id].id] = sanitizeValue(value);
           } else {
-            mappedRow[id] = value;
+            mappedRow[id] = sanitizeValue(value);
           }
         });
 
         return mappedRow;
       }),
-      columns: data.columns.map(column => ({
-        ...column,
-        id: idMap[column.id] ? idMap[column.id] : column.id,
-      })),
+      columns: data.columns.map(column => {
+        const mappedItem = idMap[column.id];
+
+        if (!mappedItem) {
+          return column;
+        }
+
+        return {
+          ...column,
+          id: mappedItem.id,
+          name: getColumnName(mappedItem, column),
+        };
+      }),
     };
   },
 };
+
+function getColumnName(originalColumn: OriginalColumn, newColumn: KibanaDatatableColumn) {
+  if (originalColumn && originalColumn.operationType === 'date_histogram') {
+    const fieldName = originalColumn.sourceField;
+
+    // HACK: This is a hack, and introduces some fragility into
+    // column naming. Eventually, this should be calculated and
+    // built more systematically.
+    return newColumn.name.replace(fieldName, originalColumn.label);
+  }
+
+  return originalColumn.label;
+}
+
+function sanitizeValue(value: unknown) {
+  if (value === '') {
+    return i18n.translate('xpack.lens.indexpattern.emptyTextColumnValue', {
+      defaultMessage: '(empty)',
+    });
+  }
+
+  return value;
+}

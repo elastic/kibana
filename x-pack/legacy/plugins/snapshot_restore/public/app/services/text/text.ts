@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { REPOSITORY_TYPES } from '../../../../common/constants';
+import { REPOSITORY_TYPES, TIME_UNITS } from '../../../../common/constants';
 
 class TextService {
   public breadcrumbs: { [key: string]: string } = {};
@@ -111,6 +111,31 @@ class TextService {
         example4: '1024B',
       },
     });
+  }
+
+  public getTimeUnitLabel(timeUnit: 'd' | 'h' | 'm' | 's', timeValue: string) {
+    switch (timeUnit) {
+      case TIME_UNITS.SECOND:
+        return this.i18n.translate('xpack.snapshotRestore.policyForm.timeUnits.secondLabel', {
+          defaultMessage: '{timeValue, plural, one {second} other {seconds}}',
+          values: { timeValue },
+        });
+      case TIME_UNITS.MINUTE:
+        return this.i18n.translate('xpack.snapshotRestore.policyForm.timeUnits.minuteLabel', {
+          defaultMessage: '{timeValue, plural, one {minute} other {minutes}}',
+          values: { timeValue },
+        });
+      case TIME_UNITS.HOUR:
+        return this.i18n.translate('xpack.snapshotRestore.policyForm.timeUnits.hourLabel', {
+          defaultMessage: '{timeValue, plural, one {hour} other {hours}}',
+          values: { timeValue },
+        });
+      case TIME_UNITS.DAY:
+        return this.i18n.translate('xpack.snapshotRestore.policyForm.timeUnits.dayLabel', {
+          defaultMessage: '{timeValue, plural, one {day} other {days}}',
+          values: { timeValue },
+        });
+    }
   }
 }
 

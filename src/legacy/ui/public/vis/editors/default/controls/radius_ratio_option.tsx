@@ -26,7 +26,7 @@ import { AggControlProps } from './agg_control_props';
 const DEFAULT_VALUE = 50;
 const PARAM_NAME = 'radiusRatio';
 
-function RadiusRatioOptionControl({ editorStateParams, setValue }: AggControlProps<number>) {
+function RadiusRatioOptionControl({ editorStateParams, setValue }: AggControlProps) {
   const label = (
     <>
       <FormattedMessage

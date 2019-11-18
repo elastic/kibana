@@ -22,7 +22,6 @@ import { registerLanguage } from 'react-syntax-highlighter/dist/light';
 // @ts-ignore
 import { xcode } from 'react-syntax-highlighter/dist/styles';
 import styled from 'styled-components';
-import { idx } from '@kbn/elastic-idx';
 import { IStackframeWithLineContext } from '../../../../typings/es_schemas/raw/fields/Stackframe';
 import { borderRadius, px, unit, units } from '../../../style/variables';
 
@@ -32,7 +31,7 @@ registerLanguage('ruby', ruby);
 
 const ContextContainer = styled.div`
   position: relative;
-  border-radius: 0 0 ${borderRadius} ${borderRadius};
+  border-radius: ${borderRadius};
 `;
 
 const LINE_HEIGHT = units.eighth * 9;
@@ -49,7 +48,7 @@ const LineNumberContainer = styled.div<{ isLibraryFrame: boolean }>`
   position: absolute;
   top: 0;
   left: 0;
-  border-radius: 0 0 0 ${borderRadius};
+  border-radius: ${borderRadius};
   background: ${props =>
     props.isLibraryFrame
       ? theme.euiColorEmptyShade
@@ -106,13 +105,13 @@ const Code = styled.code`
 
 function getStackframeLines(stackframe: IStackframeWithLineContext) {
   const line = stackframe.line.context;
-  const preLines = idx(stackframe, _ => _.context.pre) || [];
-  const postLines = idx(stackframe, _ => _.context.post) || [];
+  const preLines = stackframe.context?.pre || [];
+  const postLines = stackframe.context?.post || [];
   return [...preLines, line, ...postLines];
 }
 
 function getStartLineNumber(stackframe: IStackframeWithLineContext) {
-  const preLines = size(idx(stackframe, _ => _.context.pre) || []);
+  const preLines = size(stackframe.context?.pre || []);
   return stackframe.line.number - preLines;
 }
 
@@ -125,7 +124,7 @@ interface Props {
 export function Context({ stackframe, codeLanguage, isLibraryFrame }: Props) {
   const lines = getStackframeLines(stackframe);
   const startLineNumber = getStartLineNumber(stackframe);
-  const highlightedLineIndex = size(idx(stackframe, _ => _.context.pre) || []);
+  const highlightedLineIndex = size(stackframe.context?.pre || []);
   const language = codeLanguage || 'javascript'; // TODO: Add support for more languages
 
   return (

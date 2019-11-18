@@ -14,7 +14,7 @@ image::user/monitoring/images/monitoring-beats.jpg["Monitoring Beats",link="imag
 To view an overview of the Beats data in the cluster, click *Overview*. The
 overview page has a section for activity in the last day, which is a real-time
 sample of data. Below that, a summary bar and charts follow the typical paradigm
-of data in the Monitoring UI, which is bound to the span of the time picker in
+of data in the Monitoring UI, which is bound to the span of the time filter in
 the top right corner of the page. This overview page can therefore show
 up-to-date or historical information.
 

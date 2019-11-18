@@ -495,6 +495,10 @@ export interface MonitorPageTitle {
 }
 /** The primary object returned for monitor states. */
 export interface MonitorSummaryResult {
+  /** Used to go to the next page of results */
+  prevPagePagination?: string | null;
+  /** Used to go to the previous page of results */
+  nextPagePagination?: string | null;
   /** The objects representing the state of a series of heartbeat monitors. */
   summaries?: MonitorSummary[] | null;
   /** The number of summaries. */
@@ -757,9 +761,25 @@ export interface GetMonitorStatesQueryArgs {
 
   dateRangeEnd: string;
 
+  pagination?: string | null;
+
   filters?: string | null;
 
   statusFilter?: string | null;
+}
+
+// ====================================================
+// Enums
+// ====================================================
+
+export enum CursorDirection {
+  AFTER = 'AFTER',
+  BEFORE = 'BEFORE',
+}
+
+export enum SortOrder {
+  ASC = 'ASC',
+  DESC = 'DESC',
 }
 
 // ====================================================

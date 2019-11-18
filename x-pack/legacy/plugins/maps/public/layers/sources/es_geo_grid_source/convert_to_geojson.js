@@ -6,7 +6,7 @@
 
 import { RENDER_AS } from './render_as';
 import { getTileBoundingBox } from './geo_tile_utils';
-import { EMPTY_FEATURE_COLLECTION } from '../../../../common/constants';
+import { EMPTY_FEATURE_COLLECTION, FEATURE_ID_PROPERTY_NAME } from '../../../../common/constants';
 
 export function convertToGeoJson({ table, renderAs }) {
 
@@ -20,8 +20,7 @@ export function convertToGeoJson({ table, renderAs }) {
   }
 
   const metricColumns = table.columns.filter(column => {
-    return column.aggConfig.type.type === 'metrics'
-      && column.aggConfig.type.dslName !== 'geo_centroid';
+    return column.aggConfig.type.type === 'metrics' && column.aggConfig.type.dslName !== 'geo_centroid';
   });
   const geocentroidColumn = table.columns.find(column => column.aggConfig.type.dslName === 'geo_centroid');
   if (!geocentroidColumn) {
@@ -35,7 +34,9 @@ export function convertToGeoJson({ table, renderAs }) {
       return;
     }
 
-    const properties = {};
+    const properties = {
+      [FEATURE_ID_PROPERTY_NAME]: gridKey
+    };
     metricColumns.forEach(metricColumn => {
       properties[metricColumn.aggConfig.id] = row[metricColumn.id];
     });

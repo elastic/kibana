@@ -22,11 +22,10 @@ import {
   EuiDescriptionListDescription,
   EuiHorizontalRule,
   EuiFlexGroup,
-  EuiToolTip,
-  EuiIcon
 } from '@elastic/eui';
 import { formatTimestampToDuration } from '../../../../common';
-import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
+import { CALCULATE_DURATION_SINCE, APM_SYSTEM_ID } from '../../../../common/constants';
+import { SetupModeTooltip } from '../../setup_mode/tooltip';
 
 export function ApmPanel(props) {
   const { setupMode } = props;
@@ -39,48 +38,16 @@ export function ApmPanel(props) {
   const goToApm = () => props.changeUrl('apm');
   const goToInstances = () => props.changeUrl('apm/instances');
 
-  const setupModeAPMData = get(setupMode.data, 'apm');
-  let setupModeInstancesData = null;
-  if (setupMode.enabled && setupMode.data) {
-    const {
-      totalUniqueInstanceCount,
-      totalUniqueFullyMigratedCount,
-      totalUniquePartiallyMigratedCount
-    } = setupModeAPMData;
-    const hasInstances = totalUniqueInstanceCount > 0 || get(setupModeAPMData, 'detected.mightExist', false);
-    const allMonitoredByMetricbeat = totalUniqueInstanceCount > 0 &&
-      (totalUniqueFullyMigratedCount === totalUniqueInstanceCount || totalUniquePartiallyMigratedCount === totalUniqueInstanceCount);
-    const internalCollectionOn = totalUniquePartiallyMigratedCount > 0;
-    if (hasInstances && (!allMonitoredByMetricbeat || internalCollectionOn)) {
-      let tooltipText = null;
-
-      if (!allMonitoredByMetricbeat) {
-        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.apmPanel.setupModeNodesTooltip.oneInternal', {
-          defaultMessage: `There's at least one server that isn't being monitored using Metricbeat. Click the flag
-          icon to visit the servers listing page and find out more information about the status of each server.`
-        });
-      }
-      else if (internalCollectionOn) {
-        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.apmPanel.setupModeNodesTooltip.disableInternal', {
-          defaultMessage: `All servers are being monitored using Metricbeat but internal collection still needs to be turned
-          off. Click the flag icon to visit the servers listing page and disable internal collection.`
-        });
-      }
-
-      setupModeInstancesData = (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            position="top"
-            content={tooltipText}
-          >
-            <EuiLink onClick={goToInstances}>
-              <EuiIcon type="flag" color="warning"/>
-            </EuiLink>
-          </EuiToolTip>
-        </EuiFlexItem>
-      );
-    }
-  }
+  const setupModeData = get(setupMode.data, 'apm');
+  const setupModeTooltip = setupMode && setupMode.enabled
+    ? (
+      <SetupModeTooltip
+        setupModeData={setupModeData}
+        badgeClickAction={goToInstances}
+        productName={APM_SYSTEM_ID}
+      />
+    )
+    : null;
 
   return (
     <ClusterItemContainer
@@ -97,7 +64,7 @@ export function ApmPanel(props) {
               <h3>
                 <DisabledIfNoDataAndInSetupModeLink
                   setupModeEnabled={setupMode.enabled}
-                  setupModeData={setupModeAPMData}
+                  setupModeData={setupModeData}
                   onClick={goToApm}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.apmPanel.overviewLinkAriaLabel', {
                     defaultMessage: 'APM Overview'
@@ -164,7 +131,7 @@ export function ApmPanel(props) {
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {setupModeInstancesData}
+              {setupModeTooltip}
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">

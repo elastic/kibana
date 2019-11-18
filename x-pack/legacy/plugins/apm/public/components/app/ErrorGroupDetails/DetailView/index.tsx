@@ -19,7 +19,6 @@ import { Location } from 'history';
 import React from 'react';
 import styled from 'styled-components';
 import { first } from 'lodash';
-import { idx } from '@kbn/elastic-idx';
 import { ErrorGroupAPIResponse } from '../../../../../server/lib/errors/get_error_group';
 import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
@@ -36,9 +35,11 @@ import {
   logStacktraceTab
 } from './ErrorTabs';
 import { Summary } from '../../../shared/Summary';
-import { TimestampSummaryItem } from '../../../shared/Summary/TimestampSummaryItem';
+import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { HttpInfoSummaryItem } from '../../../shared/Summary/HttpInfoSummaryItem';
 import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
+import { UserAgentSummaryItem } from '../../../shared/Summary/UserAgentSummaryItem';
+import { ExceptionStacktrace } from './ExceptionStacktrace';
 
 const HeaderContainer = styled.div`
   display: flex;
@@ -78,11 +79,12 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
   const tabs = getTabs(error);
   const currentTab = getCurrentTab(tabs, urlParams.detailTab);
 
-  const errorUrl =
-    idx(error, _ => _.error.page.url) || idx(error, _ => _.url.full);
+  const errorUrl = error.error.page?.url || error.url?.full;
 
-  const method = idx(error, _ => _.http.request.method);
-  const status = idx(error, _ => _.http.response.status_code);
+  const method = error.http?.request.method;
+  // TODO(TS-3.7-ESLINT)
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  const status = error.http?.response?.status_code;
 
   return (
     <EuiPanel>
@@ -103,7 +105,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
               'xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel',
               {
                 defaultMessage:
-                  'View {occurrencesCount} occurrences in Discover',
+                  'View {occurrencesCount} {occurrencesCount, plural, one {occurrence} other {occurrences}} in Discover.',
                 values: { occurrencesCount }
               }
             )}
@@ -113,13 +115,16 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
 
       <Summary
         items={[
-          <TimestampSummaryItem time={error.timestamp.us / 1000} />,
+          <TimestampTooltip time={error.timestamp.us / 1000} />,
           errorUrl && method ? (
             <HttpInfoSummaryItem
               url={errorUrl}
               method={method}
               status={status}
             />
+          ) : null,
+          transaction && transaction.user_agent ? (
+            <UserAgentSummaryItem {...transaction.user_agent} />
           ) : null,
           transaction && (
             <EuiToolTip
@@ -176,16 +181,16 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
   );
 }
 
-export function TabContent({
+function TabContent({
   error,
   currentTab
 }: {
   error: APMError;
   currentTab: ErrorTab;
 }) {
-  const codeLanguage = idx(error, _ => _.service.language.name);
-  const excStackframes = idx(error, _ => _.error.exception[0].stacktrace);
-  const logStackframes = idx(error, _ => _.error.exception[0].stacktrace);
+  const codeLanguage = error.service.language?.name;
+  const exceptions = error.error.exception || [];
+  const logStackframes = error.error.log?.stacktrace;
 
   switch (currentTab.key) {
     case logStacktraceTab.key:
@@ -194,7 +199,10 @@ export function TabContent({
       );
     case exceptionStacktraceTab.key:
       return (
-        <Stacktrace stackframes={excStackframes} codeLanguage={codeLanguage} />
+        <ExceptionStacktrace
+          codeLanguage={codeLanguage}
+          exceptions={exceptions}
+        />
       );
     default:
       return <ErrorMetadata error={error} />;

@@ -8,9 +8,8 @@ import * as Joi from 'joi';
 import { resolve } from 'path';
 import { LegacyPluginInitializer } from 'src/legacy/types';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
-import { CoreSetup } from 'src/core/server';
 import mappings from './mappings.json';
-import { PLUGIN_ID, getEditPath, BASE_API_URL } from './common';
+import { PLUGIN_ID, getEditPath } from './common';
 import { lensServerPlugin } from './server';
 
 const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
@@ -19,6 +18,7 @@ export const lens: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
     id: PLUGIN_ID,
     configPrefix: `xpack.${PLUGIN_ID}`,
+    // task_manager could be required, but is only used for telemetry
     require: ['kibana', 'elasticsearch', 'xpack_main', 'interpreter', 'data'],
     publicDir: resolve(__dirname, 'public'),
 
@@ -55,41 +55,15 @@ export const lens: LegacyPluginInitializer = kibana => {
     init(server: Server) {
       const kbnServer = (server as unknown) as KbnServer;
 
-      server.plugins.xpack_main.registerFeature({
-        id: PLUGIN_ID,
-        name: NOT_INTERNATIONALIZED_PRODUCT_NAME,
-        app: [PLUGIN_ID, 'kibana'],
-        catalogue: [PLUGIN_ID],
-        privileges: {
-          all: {
-            api: [PLUGIN_ID],
-            catalogue: [PLUGIN_ID],
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['save', 'show'],
-          },
-          read: {
-            api: [PLUGIN_ID],
-            catalogue: [PLUGIN_ID],
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['show'],
-          },
-        },
-      });
-
       // Set up with the new platform plugin lifecycle API.
       const plugin = lensServerPlugin();
-      plugin.setup(({
-        http: {
-          ...kbnServer.newPlatform.setup.core.http,
-          createRouter: () => kbnServer.newPlatform.setup.core.http.createRouter(BASE_API_URL),
-        },
-      } as unknown) as CoreSetup);
+      plugin.setup(kbnServer.newPlatform.setup.core, {
+        // Legacy APIs
+        savedObjects: server.savedObjects,
+        usage: server.usage,
+        config: server.config(),
+        server,
+      });
 
       server.events.on('stop', () => {
         plugin.stop();

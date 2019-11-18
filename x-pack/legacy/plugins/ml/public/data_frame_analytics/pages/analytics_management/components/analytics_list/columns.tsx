@@ -20,18 +20,21 @@ import {
 import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
 import {
   getDataFrameAnalyticsProgress,
+  isDataFrameAnalyticsFailed,
+  isDataFrameAnalyticsRunning,
+  isDataFrameAnalyticsStopped,
   DataFrameAnalyticsListColumn,
   DataFrameAnalyticsListRow,
   DataFrameAnalyticsStats,
-  DATA_FRAME_TASK_STATE,
 } from './common';
-import { getActions } from './actions';
+import { getActions, AnalyticsViewAction } from './actions';
 
 enum TASK_STATE_COLOR {
   analyzing = 'primary',
   failed = 'danger',
   reindexing = 'primary',
   started = 'primary',
+  starting = 'primary',
   stopped = 'hollow',
 }
 
@@ -41,7 +44,7 @@ export const getTaskStateBadge = (
 ) => {
   const color = TASK_STATE_COLOR[state];
 
-  if (state === DATA_FRAME_TASK_STATE.FAILED && reason !== undefined) {
+  if (isDataFrameAnalyticsFailed(state) && reason !== undefined) {
     return (
       <EuiToolTip content={reason}>
         <EuiBadge className="mlTaskStateBadge" color={color}>
@@ -91,10 +94,10 @@ export const progressColumn = {
         {!isBatchTransform && (
           <Fragment>
             <EuiFlexItem style={{ width: '40px' }} grow={false}>
-              {item.stats.state === DATA_FRAME_TASK_STATE.STARTED && (
+              {isDataFrameAnalyticsRunning(item.stats.state) && (
                 <EuiProgress color="primary" size="m" />
               )}
-              {item.stats.state === DATA_FRAME_TASK_STATE.STOPPED && (
+              {isDataFrameAnalyticsStopped(item.stats.state) && (
                 <EuiProgress value={0} max={100} color="primary" size="m" />
               )}
             </EuiFlexItem>
@@ -112,9 +115,10 @@ export const progressColumn = {
 export const getColumns = (
   expandedRowItemIds: DataFrameAnalyticsId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>,
-  isManagementTable: boolean = false
+  isManagementTable: boolean = false,
+  isMlEnabledInSpace: boolean = true
 ) => {
-  const actions = getActions();
+  const actions = isManagementTable === true ? [AnalyticsViewAction] : getActions();
 
   function toggleDetails(item: DataFrameAnalyticsListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);
@@ -218,24 +222,29 @@ export const getColumns = (
     },
     */
     progressColumn,
+    {
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.tableActionLabel', {
+        defaultMessage: 'Actions',
+      }),
+      actions,
+      width: isManagementTable === true ? '100px' : '200px',
+    },
   ];
 
   if (isManagementTable === true) {
-    columns.push({
+    // insert before last column
+    columns.splice(columns.length - 1, 0, {
       name: i18n.translate('xpack.ml.jobsList.analyticsSpacesLabel', {
         defaultMessage: 'Spaces',
       }),
       render: () => <EuiBadge color={'hollow'}>{'all'}</EuiBadge>,
       width: '75px',
     });
-  } else {
-    columns.push({
-      name: i18n.translate('xpack.ml.dataframe.analyticsList.tableActionLabel', {
-        defaultMessage: 'Actions',
-      }),
-      actions,
-      width: '200px',
-    });
+
+    // Remove actions if Ml not enabled in current space
+    if (isMlEnabledInSpace === false) {
+      columns.pop();
+    }
   }
 
   return columns;

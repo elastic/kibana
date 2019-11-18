@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import chrome from 'ui/chrome';
 import {
   ClusterSettingsChecker,
   NodeSettingsChecker,
@@ -78,6 +79,8 @@ export class NoDataController extends MonitoringViewBaseController {
       }
       this.render(enabler);
     }, true);
+
+    this.changePath = path => kbnUrl.changePath(path);
   }
 
   getDefaultModel() {
@@ -94,9 +97,15 @@ export class NoDataController extends MonitoringViewBaseController {
 
   render(enabler) {
     const props = this;
+
     this.renderReact(
       <I18nContext>
-        <NoData {...props} enabler={enabler} />
+        <NoData
+          {...props}
+          enabler={enabler}
+          changePath={this.changePath}
+          isOnCloud={chrome.getInjected('isOnCloud')}
+        />
       </I18nContext>
     );
   }

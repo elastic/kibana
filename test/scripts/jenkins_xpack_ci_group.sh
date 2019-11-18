@@ -1,14 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
-
-if [[ -z "$IS_PIPELINE_JOB" ]] ; then
-  trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
-else
-  source src/dev/ci_setup/setup_env.sh
-fi
-
-export TEST_BROWSER_HEADLESS=1
+source test/scripts/jenkins_test_setup.sh
 
 if [[ -z "$IS_PIPELINE_JOB" ]] ; then
   echo " -> Ensuring all functional tests are in a ciGroup"

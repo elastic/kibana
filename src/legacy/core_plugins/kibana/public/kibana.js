@@ -37,7 +37,6 @@ import 'uiExports/navbarExtensions';
 import 'uiExports/contextMenuActions';
 import 'uiExports/managementSections';
 import 'uiExports/indexManagement';
-import 'uiExports/devTools';
 import 'uiExports/docViews';
 import 'uiExports/embeddableFactories';
 import 'uiExports/embeddableActions';
@@ -52,14 +51,15 @@ import './discover';
 import './visualize';
 import './dashboard';
 import './management';
-import './doc';
 import './dev_tools';
-import './context';
 import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
 import { showAppRedirectNotification } from 'ui/notify';
 import 'leaflet';
+import { localApplicationService } from './local_application_service';
+
+localApplicationService.attachToAngular(routes);
 
 routes.enable();
 

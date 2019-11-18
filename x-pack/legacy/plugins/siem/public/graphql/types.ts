@@ -1,1565 +1,12 @@
 /* tslint:disable */
 /* eslint-disable */
 /*
-     * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-     * or more contributor license agreements. Licensed under the Elastic License;
-     * you may not use this file except in compliance with the Elastic License.
-     */
-
-// ====================================================
-// START: Typescript template
-// ====================================================
-
-// ====================================================
-// Scalars
-// ====================================================
-
-export type ToStringArray = string[];
-
-export type Date = string;
-
-export type ToNumberArray = number[];
-
-export type ToDateArray = string[];
-
-export type ToBooleanArray = boolean[];
-
-export type EsValue = any;
-
-// ====================================================
-// Types
-// ====================================================
-
-export interface Query {
-  getNote: NoteResult;
-
-  getNotesByTimelineId: NoteResult[];
-
-  getNotesByEventId: NoteResult[];
-
-  getAllNotes: ResponseNotes;
-
-  getAllPinnedEventsByTimelineId: PinnedEvent[];
-  /** Get a security data source by id */
-  source: Source;
-  /** Get a list of all security data sources */
-  allSources: Source[];
-
-  getOneTimeline: TimelineResult;
-
-  getAllTimeline: ResponseTimelines;
-}
-
-export interface NoteResult {
-  eventId?: string | null;
-
-  note?: string | null;
-
-  timelineId?: string | null;
-
-  noteId: string;
-
-  created?: number | null;
-
-  createdBy?: string | null;
-
-  timelineVersion?: string | null;
-
-  updated?: number | null;
-
-  updatedBy?: string | null;
-
-  version?: string | null;
-}
-
-export interface ResponseNotes {
-  notes: NoteResult[];
-
-  totalCount?: number | null;
-}
-
-export interface PinnedEvent {
-  code?: number | null;
-
-  message?: string | null;
-
-  pinnedEventId: string;
-
-  eventId?: string | null;
-
-  timelineId?: string | null;
-
-  timelineVersion?: string | null;
-
-  created?: number | null;
-
-  createdBy?: string | null;
-
-  updated?: number | null;
-
-  updatedBy?: string | null;
-
-  version?: string | null;
-}
-
-export interface Source {
-  /** The id of the source */
-  id: string;
-  /** The raw configuration of the source */
-  configuration: SourceConfiguration;
-  /** The status of the source */
-  status: SourceStatus;
-  /** Gets Authentication success and failures based on a timerange */
-  Authentications: AuthenticationsData;
-
-  Timeline: TimelineData;
-
-  TimelineDetails: TimelineDetailsData;
-
-  LastEventTime: LastEventTimeData;
-
-  EventsOverTime: EventsOverTimeData;
-  /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
-  Hosts: HostsData;
-
-  HostOverview: HostItem;
-
-  HostFirstLastSeen: FirstLastSeenHost;
-
-  IpOverview?: IpOverviewData | null;
-
-  Domains: DomainsData;
-
-  Tls: TlsData;
-
-  Users: UsersData;
-
-  KpiNetwork?: KpiNetworkData | null;
-
-  KpiHosts: KpiHostsData;
-
-  KpiHostDetails: KpiHostDetailsData;
-  /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
-  NetworkTopNFlow: NetworkTopNFlowData;
-
-  NetworkDns: NetworkDnsData;
-
-  OverviewNetwork?: OverviewNetworkData | null;
-
-  OverviewHost?: OverviewHostData | null;
-  /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
-  UncommonProcesses: UncommonProcessesData;
-  /** Just a simple example to get the app name */
-  whoAmI?: SayMyName | null;
-}
-/** A set of configuration options for a security data source */
-export interface SourceConfiguration {
-  /** The field mapping to use for this source */
-  fields: SourceFields;
-}
-/** A mapping of semantic fields to their document counterparts */
-export interface SourceFields {
-  /** The field to identify a container by */
-  container: string;
-  /** The fields to identify a host by */
-  host: string;
-  /** The fields that may contain the log event message. The first field found win. */
-  message: string[];
-  /** The field to identify a pod by */
-  pod: string;
-  /** The field to use as a tiebreaker for log events that have identical timestamps */
-  tiebreaker: string;
-  /** The field to use as a timestamp for metrics and logs */
-  timestamp: string;
-}
-/** The status of an infrastructure data source */
-export interface SourceStatus {
-  /** Whether the configured alias or wildcard pattern resolve to any auditbeat indices */
-  indicesExist: boolean;
-  /** The list of fields defined in the index mappings */
-  indexFields: IndexField[];
-}
-/** A descriptor of a field in an index */
-export interface IndexField {
-  /** Where the field belong */
-  category: string;
-  /** Example of field's value */
-  example?: string | null;
-  /** whether the field's belong to an alias index */
-  indexes: (string | null)[];
-  /** The name of the field */
-  name: string;
-  /** The type of the field's values as recognized by Kibana */
-  type: string;
-  /** Whether the field's values can be efficiently searched for */
-  searchable: boolean;
-  /** Whether the field's values can be aggregated */
-  aggregatable: boolean;
-  /** Description of the field */
-  description?: string | null;
-
-  format?: string | null;
-}
-
-export interface AuthenticationsData {
-  edges: AuthenticationsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Inspect | null;
-}
-
-export interface AuthenticationsEdges {
-  node: AuthenticationItem;
-
-  cursor: CursorType;
-}
-
-export interface AuthenticationItem {
-  _id: string;
-
-  failures: number;
-
-  successes: number;
-
-  user: UserEcsFields;
-
-  lastSuccess?: LastSourceHost | null;
-
-  lastFailure?: LastSourceHost | null;
-}
-
-export interface UserEcsFields {
-  id?: ToStringArray | null;
-
-  name?: ToStringArray | null;
-
-  full_name?: ToStringArray | null;
-
-  email?: ToStringArray | null;
-
-  hash?: ToStringArray | null;
-
-  group?: ToStringArray | null;
-}
-
-export interface LastSourceHost {
-  timestamp?: Date | null;
-
-  source?: SourceEcsFields | null;
-
-  host?: HostEcsFields | null;
-}
-
-export interface SourceEcsFields {
-  bytes?: ToNumberArray | null;
-
-  ip?: ToStringArray | null;
-
-  port?: ToNumberArray | null;
-
-  domain?: ToStringArray | null;
-
-  geo?: GeoEcsFields | null;
-
-  packets?: ToNumberArray | null;
-}
-
-export interface GeoEcsFields {
-  city_name?: ToStringArray | null;
-
-  continent_name?: ToStringArray | null;
-
-  country_iso_code?: ToStringArray | null;
-
-  country_name?: ToStringArray | null;
-
-  location?: Location | null;
-
-  region_iso_code?: ToStringArray | null;
-
-  region_name?: ToStringArray | null;
-}
-
-export interface Location {
-  lon?: ToNumberArray | null;
-
-  lat?: ToNumberArray | null;
-}
-
-export interface HostEcsFields {
-  architecture?: ToStringArray | null;
-
-  id?: ToStringArray | null;
-
-  ip?: ToStringArray | null;
-
-  mac?: ToStringArray | null;
-
-  name?: ToStringArray | null;
-
-  os?: OsEcsFields | null;
-
-  type?: ToStringArray | null;
-}
-
-export interface OsEcsFields {
-  platform?: ToStringArray | null;
-
-  name?: ToStringArray | null;
-
-  full?: ToStringArray | null;
-
-  family?: ToStringArray | null;
-
-  version?: ToStringArray | null;
-
-  kernel?: ToStringArray | null;
-}
-
-export interface CursorType {
-  value?: string | null;
-
-  tiebreaker?: string | null;
-}
-
-export interface PageInfoPaginated {
-  activePage: number;
-
-  fakeTotalCount: number;
-
-  showMorePagesIndicator: boolean;
-}
-
-export interface Inspect {
-  dsl: string[];
-
-  response: string[];
-}
-
-export interface TimelineData {
-  edges: TimelineEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfo;
-
-  inspect?: Inspect | null;
-}
-
-export interface TimelineEdges {
-  node: TimelineItem;
-
-  cursor: CursorType;
-}
-
-export interface TimelineItem {
-  _id: string;
-
-  _index?: string | null;
-
-  data: TimelineNonEcsData[];
-
-  ecs: Ecs;
-}
-
-export interface TimelineNonEcsData {
-  field: string;
-
-  value?: ToStringArray | null;
-}
-
-export interface Ecs {
-  _id: string;
-
-  _index?: string | null;
-
-  auditd?: AuditdEcsFields | null;
-
-  destination?: DestinationEcsFields | null;
-
-  event?: EventEcsFields | null;
-
-  geo?: GeoEcsFields | null;
-
-  host?: HostEcsFields | null;
-
-  network?: NetworkEcsField | null;
-
-  source?: SourceEcsFields | null;
-
-  suricata?: SuricataEcsFields | null;
-
-  tls?: TlsEcsFields | null;
-
-  zeek?: ZeekEcsFields | null;
-
-  http?: HttpEcsFields | null;
-
-  url?: UrlEcsFields | null;
-
-  timestamp?: Date | null;
-
-  message?: ToStringArray | null;
-
-  user?: UserEcsFields | null;
-
-  process?: ProcessEcsFields | null;
-
-  file?: FileFields | null;
-
-  system?: SystemEcsField | null;
-}
-
-export interface AuditdEcsFields {
-  result?: ToStringArray | null;
-
-  session?: ToStringArray | null;
-
-  data?: AuditdData | null;
-
-  summary?: Summary | null;
-
-  sequence?: ToStringArray | null;
-}
-
-export interface AuditdData {
-  acct?: ToStringArray | null;
-
-  terminal?: ToStringArray | null;
-
-  op?: ToStringArray | null;
-}
-
-export interface Summary {
-  actor?: PrimarySecondary | null;
-
-  object?: PrimarySecondary | null;
-
-  how?: ToStringArray | null;
-
-  message_type?: ToStringArray | null;
-
-  sequence?: ToStringArray | null;
-}
-
-export interface PrimarySecondary {
-  primary?: ToStringArray | null;
-
-  secondary?: ToStringArray | null;
-
-  type?: ToStringArray | null;
-}
-
-export interface DestinationEcsFields {
-  bytes?: ToNumberArray | null;
-
-  ip?: ToStringArray | null;
-
-  port?: ToNumberArray | null;
-
-  domain?: ToStringArray | null;
-
-  geo?: GeoEcsFields | null;
-
-  packets?: ToNumberArray | null;
-}
-
-export interface EventEcsFields {
-  action?: ToStringArray | null;
-
-  category?: ToStringArray | null;
-
-  created?: ToDateArray | null;
-
-  dataset?: ToStringArray | null;
-
-  duration?: ToNumberArray | null;
-
-  end?: ToDateArray | null;
-
-  hash?: ToStringArray | null;
-
-  id?: ToStringArray | null;
-
-  kind?: ToStringArray | null;
-
-  module?: ToStringArray | null;
-
-  original?: ToStringArray | null;
-
-  outcome?: ToStringArray | null;
-
-  risk_score?: ToNumberArray | null;
-
-  risk_score_norm?: ToNumberArray | null;
-
-  severity?: ToNumberArray | null;
-
-  start?: ToDateArray | null;
-
-  timezone?: ToStringArray | null;
-
-  type?: ToStringArray | null;
-}
-
-export interface NetworkEcsField {
-  bytes?: ToNumberArray | null;
-
-  community_id?: ToStringArray | null;
-
-  direction?: ToStringArray | null;
-
-  packets?: ToNumberArray | null;
-
-  protocol?: ToStringArray | null;
-
-  transport?: ToStringArray | null;
-}
-
-export interface SuricataEcsFields {
-  eve?: SuricataEveData | null;
-}
-
-export interface SuricataEveData {
-  alert?: SuricataAlertData | null;
-
-  flow_id?: ToNumberArray | null;
-
-  proto?: ToStringArray | null;
-}
-
-export interface SuricataAlertData {
-  signature?: ToStringArray | null;
-
-  signature_id?: ToNumberArray | null;
-}
-
-export interface TlsEcsFields {
-  client_certificate?: TlsClientCertificateData | null;
-
-  fingerprints?: TlsFingerprintsData | null;
-
-  server_certificate?: TlsServerCertificateData | null;
-}
-
-export interface TlsClientCertificateData {
-  fingerprint?: FingerprintData | null;
-}
-
-export interface FingerprintData {
-  sha1?: ToStringArray | null;
-}
-
-export interface TlsFingerprintsData {
-  ja3?: TlsJa3Data | null;
-}
-
-export interface TlsJa3Data {
-  hash?: ToStringArray | null;
-}
-
-export interface TlsServerCertificateData {
-  fingerprint?: FingerprintData | null;
-}
-
-export interface ZeekEcsFields {
-  session_id?: ToStringArray | null;
-
-  connection?: ZeekConnectionData | null;
-
-  notice?: ZeekNoticeData | null;
-
-  dns?: ZeekDnsData | null;
-
-  http?: ZeekHttpData | null;
-
-  files?: ZeekFileData | null;
-
-  ssl?: ZeekSslData | null;
-}
-
-export interface ZeekConnectionData {
-  local_resp?: ToBooleanArray | null;
-
-  local_orig?: ToBooleanArray | null;
-
-  missed_bytes?: ToNumberArray | null;
-
-  state?: ToStringArray | null;
-
-  history?: ToStringArray | null;
-}
-
-export interface ZeekNoticeData {
-  suppress_for?: ToNumberArray | null;
-
-  msg?: ToStringArray | null;
-
-  note?: ToStringArray | null;
-
-  sub?: ToStringArray | null;
-
-  dst?: ToStringArray | null;
-
-  dropped?: ToBooleanArray | null;
-
-  peer_descr?: ToStringArray | null;
-}
-
-export interface ZeekDnsData {
-  AA?: ToBooleanArray | null;
-
-  qclass_name?: ToStringArray | null;
-
-  RD?: ToBooleanArray | null;
-
-  qtype_name?: ToStringArray | null;
-
-  rejected?: ToBooleanArray | null;
-
-  qtype?: ToStringArray | null;
-
-  query?: ToStringArray | null;
-
-  trans_id?: ToNumberArray | null;
-
-  qclass?: ToStringArray | null;
-
-  RA?: ToBooleanArray | null;
-
-  TC?: ToBooleanArray | null;
-}
-
-export interface ZeekHttpData {
-  resp_mime_types?: ToStringArray | null;
-
-  trans_depth?: ToStringArray | null;
-
-  status_msg?: ToStringArray | null;
-
-  resp_fuids?: ToStringArray | null;
-
-  tags?: ToStringArray | null;
-}
-
-export interface ZeekFileData {
-  session_ids?: ToStringArray | null;
-
-  timedout?: ToBooleanArray | null;
-
-  local_orig?: ToBooleanArray | null;
-
-  tx_host?: ToStringArray | null;
-
-  source?: ToStringArray | null;
-
-  is_orig?: ToBooleanArray | null;
-
-  overflow_bytes?: ToNumberArray | null;
-
-  sha1?: ToStringArray | null;
-
-  duration?: ToNumberArray | null;
-
-  depth?: ToNumberArray | null;
-
-  analyzers?: ToStringArray | null;
-
-  mime_type?: ToStringArray | null;
-
-  rx_host?: ToStringArray | null;
-
-  total_bytes?: ToNumberArray | null;
-
-  fuid?: ToStringArray | null;
-
-  seen_bytes?: ToNumberArray | null;
-
-  missing_bytes?: ToNumberArray | null;
-
-  md5?: ToStringArray | null;
-}
-
-export interface ZeekSslData {
-  cipher?: ToStringArray | null;
-
-  established?: ToBooleanArray | null;
-
-  resumed?: ToBooleanArray | null;
-
-  version?: ToStringArray | null;
-}
-
-export interface HttpEcsFields {
-  version?: ToStringArray | null;
-
-  request?: HttpRequestData | null;
-
-  response?: HttpResponseData | null;
-}
-
-export interface HttpRequestData {
-  method?: ToStringArray | null;
-
-  body?: HttpBodyData | null;
-
-  referrer?: ToStringArray | null;
-
-  bytes?: ToNumberArray | null;
-}
-
-export interface HttpBodyData {
-  content?: ToStringArray | null;
-
-  bytes?: ToNumberArray | null;
-}
-
-export interface HttpResponseData {
-  status_code?: ToNumberArray | null;
-
-  body?: HttpBodyData | null;
-
-  bytes?: ToNumberArray | null;
-}
-
-export interface UrlEcsFields {
-  domain?: ToStringArray | null;
-
-  original?: ToStringArray | null;
-
-  username?: ToStringArray | null;
-
-  password?: ToStringArray | null;
-}
-
-export interface ProcessEcsFields {
-  pid?: ToNumberArray | null;
-
-  name?: ToStringArray | null;
-
-  ppid?: ToNumberArray | null;
-
-  args?: ToStringArray | null;
-
-  executable?: ToStringArray | null;
-
-  title?: ToStringArray | null;
-
-  thread?: Thread | null;
-
-  working_directory?: ToStringArray | null;
-}
-
-export interface Thread {
-  id?: ToNumberArray | null;
-
-  start?: ToStringArray | null;
-}
-
-export interface FileFields {
-  path?: ToStringArray | null;
-
-  target_path?: ToStringArray | null;
-
-  extension?: ToStringArray | null;
-
-  type?: ToStringArray | null;
-
-  device?: ToStringArray | null;
-
-  inode?: ToStringArray | null;
-
-  uid?: ToStringArray | null;
-
-  owner?: ToStringArray | null;
-
-  gid?: ToStringArray | null;
-
-  group?: ToStringArray | null;
-
-  mode?: ToStringArray | null;
-
-  size?: ToNumberArray | null;
-
-  mtime?: ToDateArray | null;
-
-  ctime?: ToDateArray | null;
-}
-
-export interface SystemEcsField {
-  audit?: AuditEcsFields | null;
-
-  auth?: AuthEcsFields | null;
-}
-
-export interface AuditEcsFields {
-  package?: PackageEcsFields | null;
-}
-
-export interface PackageEcsFields {
-  arch?: ToStringArray | null;
-
-  entity_id?: ToStringArray | null;
-
-  name?: ToStringArray | null;
-
-  size?: ToNumberArray | null;
-
-  summary?: ToStringArray | null;
-
-  version?: ToStringArray | null;
-}
-
-export interface AuthEcsFields {
-  ssh?: SshEcsFields | null;
-}
-
-export interface SshEcsFields {
-  method?: ToStringArray | null;
-
-  signature?: ToStringArray | null;
-}
-
-export interface PageInfo {
-  endCursor?: CursorType | null;
-
-  hasNextPage?: boolean | null;
-}
-
-export interface TimelineDetailsData {
-  data?: DetailItem[] | null;
-
-  inspect?: Inspect | null;
-}
-
-export interface DetailItem {
-  field: string;
-
-  values?: ToStringArray | null;
-
-  originalValue?: EsValue | null;
-}
-
-export interface LastEventTimeData {
-  lastSeen?: Date | null;
-
-  inspect?: Inspect | null;
-}
-
-export interface EventsOverTimeData {
-  inspect?: Inspect | null;
-
-  eventsOverTime: MatrixOverTimeHistogramData[];
-
-  totalCount: number;
-}
-
-export interface MatrixOverTimeHistogramData {
-  x: number;
-
-  y: number;
-
-  g: string;
-}
-
-export interface HostsData {
-  edges: HostsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Inspect | null;
-}
-
-export interface HostsEdges {
-  node: HostItem;
-
-  cursor: CursorType;
-}
-
-export interface HostItem {
-  _id?: string | null;
-
-  lastSeen?: Date | null;
-
-  host?: HostEcsFields | null;
-
-  cloud?: CloudFields | null;
-
-  inspect?: Inspect | null;
-}
-
-export interface CloudFields {
-  instance?: CloudInstance | null;
-
-  machine?: CloudMachine | null;
-
-  provider?: (string | null)[] | null;
-
-  region?: (string | null)[] | null;
-}
-
-export interface CloudInstance {
-  id?: (string | null)[] | null;
-}
-
-export interface CloudMachine {
-  type?: (string | null)[] | null;
-}
-
-export interface FirstLastSeenHost {
-  inspect?: Inspect | null;
-
-  firstSeen?: Date | null;
-
-  lastSeen?: Date | null;
-}
-
-export interface IpOverviewData {
-  client?: Overview | null;
-
-  destination?: Overview | null;
-
-  host: HostEcsFields;
-
-  server?: Overview | null;
-
-  source?: Overview | null;
-
-  inspect?: Inspect | null;
-}
-
-export interface Overview {
-  firstSeen?: Date | null;
-
-  lastSeen?: Date | null;
-
-  autonomousSystem: AutonomousSystem;
-
-  geo: GeoEcsFields;
-}
-
-export interface AutonomousSystem {
-  number?: number | null;
-
-  organization?: AutonomousSystemOrganization | null;
-}
-
-export interface AutonomousSystemOrganization {
-  name?: string | null;
-}
-
-export interface DomainsData {
-  edges: DomainsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Inspect | null;
-}
-
-export interface DomainsEdges {
-  node: DomainsNode;
-
-  cursor: CursorType;
-}
-
-export interface DomainsNode {
-  _id?: string | null;
-
-  timestamp?: Date | null;
-
-  source?: DomainsItem | null;
-
-  destination?: DomainsItem | null;
-
-  client?: DomainsItem | null;
-
-  server?: DomainsItem | null;
-
-  network?: DomainsNetworkField | null;
-}
-
-export interface DomainsItem {
-  uniqueIpCount?: number | null;
-
-  domainName?: string | null;
-
-  firstSeen?: Date | null;
-
-  lastSeen?: Date | null;
-}
-
-export interface DomainsNetworkField {
-  bytes?: number | null;
-
-  packets?: number | null;
-
-  transport?: string | null;
-
-  direction?: NetworkDirectionEcs[] | null;
-}
-
-export interface TlsData {
-  edges: TlsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Inspect | null;
-}
-
-export interface TlsEdges {
-  node: TlsNode;
-
-  cursor: CursorType;
-}
-
-export interface TlsNode {
-  _id?: string | null;
-
-  timestamp?: Date | null;
-
-  alternativeNames?: string[] | null;
-
-  notAfter?: string[] | null;
-
-  commonNames?: string[] | null;
-
-  ja3?: string[] | null;
-
-  issuerNames?: string[] | null;
-}
-
-export interface UsersData {
-  edges: UsersEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Inspect | null;
-}
-
-export interface UsersEdges {
-  node: UsersNode;
-
-  cursor: CursorType;
-}
-
-export interface UsersNode {
-  _id?: string | null;
-
-  timestamp?: Date | null;
-
-  user?: UsersItem | null;
-}
-
-export interface UsersItem {
-  name?: string | null;
-
-  id?: ToStringArray | null;
-
-  groupId?: ToStringArray | null;
-
-  groupName?: ToStringArray | null;
-
-  count?: number | null;
-}
-
-export interface KpiNetworkData {
-  networkEvents?: number | null;
-
-  uniqueFlowId?: number | null;
-
-  uniqueSourcePrivateIps?: number | null;
-
-  uniqueSourcePrivateIpsHistogram?: KpiNetworkHistogramData[] | null;
-
-  uniqueDestinationPrivateIps?: number | null;
-
-  uniqueDestinationPrivateIpsHistogram?: KpiNetworkHistogramData[] | null;
-
-  dnsQueries?: number | null;
-
-  tlsHandshakes?: number | null;
-
-  inspect?: Inspect | null;
-}
-
-export interface KpiNetworkHistogramData {
-  x?: number | null;
-
-  y?: number | null;
-}
-
-export interface KpiHostsData {
-  hosts?: number | null;
-
-  hostsHistogram?: KpiHostHistogramData[] | null;
-
-  authSuccess?: number | null;
-
-  authSuccessHistogram?: KpiHostHistogramData[] | null;
-
-  authFailure?: number | null;
-
-  authFailureHistogram?: KpiHostHistogramData[] | null;
-
-  uniqueSourceIps?: number | null;
-
-  uniqueSourceIpsHistogram?: KpiHostHistogramData[] | null;
-
-  uniqueDestinationIps?: number | null;
-
-  uniqueDestinationIpsHistogram?: KpiHostHistogramData[] | null;
-
-  inspect?: Inspect | null;
-}
-
-export interface KpiHostHistogramData {
-  x?: number | null;
-
-  y?: number | null;
-}
-
-export interface KpiHostDetailsData {
-  authSuccess?: number | null;
-
-  authSuccessHistogram?: KpiHostHistogramData[] | null;
-
-  authFailure?: number | null;
-
-  authFailureHistogram?: KpiHostHistogramData[] | null;
-
-  uniqueSourceIps?: number | null;
-
-  uniqueSourceIpsHistogram?: KpiHostHistogramData[] | null;
-
-  uniqueDestinationIps?: number | null;
-
-  uniqueDestinationIpsHistogram?: KpiHostHistogramData[] | null;
-
-  inspect?: Inspect | null;
-}
-
-export interface NetworkTopNFlowData {
-  edges: NetworkTopNFlowEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Inspect | null;
-}
-
-export interface NetworkTopNFlowEdges {
-  node: NetworkTopNFlowItem;
-
-  cursor: CursorType;
-}
-
-export interface NetworkTopNFlowItem {
-  _id?: string | null;
-
-  source?: TopNFlowItemSource | null;
-
-  destination?: TopNFlowItemDestination | null;
-
-  network?: TopNFlowNetworkEcsField | null;
-}
-
-export interface TopNFlowItemSource {
-  autonomous_system?: AutonomousSystemItem | null;
-
-  domain?: string[] | null;
-
-  ip?: string | null;
-
-  location?: GeoItem | null;
-
-  flows?: number | null;
-
-  destination_ips?: number | null;
-}
-
-export interface AutonomousSystemItem {
-  name?: string | null;
-
-  number?: number | null;
-}
-
-export interface GeoItem {
-  geo?: GeoEcsFields | null;
-
-  flowTarget?: FlowTarget | null;
-}
-
-export interface TopNFlowItemDestination {
-  autonomous_system?: AutonomousSystemItem | null;
-
-  domain?: string[] | null;
-
-  ip?: string | null;
-
-  location?: GeoItem | null;
-
-  flows?: number | null;
-
-  source_ips?: number | null;
-}
-
-export interface TopNFlowNetworkEcsField {
-  bytes_in?: number | null;
-
-  bytes_out?: number | null;
-}
-
-export interface NetworkDnsData {
-  edges: NetworkDnsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Inspect | null;
-}
-
-export interface NetworkDnsEdges {
-  node: NetworkDnsItem;
-
-  cursor: CursorType;
-}
-
-export interface NetworkDnsItem {
-  _id?: string | null;
-
-  dnsBytesIn?: number | null;
-
-  dnsBytesOut?: number | null;
-
-  dnsName?: string | null;
-
-  queryCount?: number | null;
-
-  uniqueDomains?: number | null;
-}
-
-export interface OverviewNetworkData {
-  auditbeatSocket?: number | null;
-
-  filebeatCisco?: number | null;
-
-  filebeatNetflow?: number | null;
-
-  filebeatPanw?: number | null;
-
-  filebeatSuricata?: number | null;
-
-  filebeatZeek?: number | null;
-
-  packetbeatDNS?: number | null;
-
-  packetbeatFlow?: number | null;
-
-  packetbeatTLS?: number | null;
-
-  inspect?: Inspect | null;
-}
-
-export interface OverviewHostData {
-  auditbeatAuditd?: number | null;
-
-  auditbeatFIM?: number | null;
-
-  auditbeatLogin?: number | null;
-
-  auditbeatPackage?: number | null;
-
-  auditbeatProcess?: number | null;
-
-  auditbeatUser?: number | null;
-
-  filebeatSystemModule?: number | null;
-
-  winlogbeat?: number | null;
-
-  inspect?: Inspect | null;
-}
-
-export interface UncommonProcessesData {
-  edges: UncommonProcessesEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfoPaginated;
-
-  inspect?: Inspect | null;
-}
-
-export interface UncommonProcessesEdges {
-  node: UncommonProcessItem;
-
-  cursor: CursorType;
-}
-
-export interface UncommonProcessItem {
-  _id: string;
-
-  instances: number;
-
-  process: ProcessEcsFields;
-
-  hosts: HostEcsFields[];
-
-  user?: UserEcsFields | null;
-}
-
-export interface SayMyName {
-  /** The id of the source */
-  appName: string;
-}
-
-export interface TimelineResult {
-  savedObjectId: string;
-
-  columns?: ColumnHeaderResult[] | null;
-
-  dataProviders?: DataProviderResult[] | null;
-
-  dateRange?: DateRangePickerResult | null;
-
-  description?: string | null;
-
-  eventIdToNoteIds?: NoteResult[] | null;
-
-  favorite?: FavoriteTimelineResult[] | null;
-
-  kqlMode?: string | null;
-
-  kqlQuery?: SerializedFilterQueryResult | null;
-
-  notes?: NoteResult[] | null;
-
-  noteIds?: string[] | null;
-
-  pinnedEventIds?: string[] | null;
-
-  pinnedEventsSaveObject?: PinnedEvent[] | null;
-
-  title?: string | null;
-
-  sort?: SortTimelineResult | null;
-
-  created?: number | null;
-
-  createdBy?: string | null;
-
-  updated?: number | null;
-
-  updatedBy?: string | null;
-
-  version: string;
-}
-
-export interface ColumnHeaderResult {
-  aggregatable?: boolean | null;
-
-  category?: string | null;
-
-  columnHeaderType?: string | null;
-
-  description?: string | null;
-
-  example?: string | null;
-
-  indexes?: string[] | null;
-
-  id?: string | null;
-
-  name?: string | null;
-
-  placeholder?: string | null;
-
-  searchable?: boolean | null;
-
-  type?: string | null;
-}
-
-export interface DataProviderResult {
-  id?: string | null;
-
-  name?: string | null;
-
-  enabled?: boolean | null;
-
-  excluded?: boolean | null;
-
-  kqlQuery?: string | null;
-
-  queryMatch?: QueryMatchResult | null;
-
-  and?: DataProviderResult[] | null;
-}
-
-export interface QueryMatchResult {
-  field?: string | null;
-
-  displayField?: string | null;
-
-  value?: string | null;
-
-  displayValue?: string | null;
-
-  operator?: string | null;
-}
-
-export interface DateRangePickerResult {
-  start?: number | null;
-
-  end?: number | null;
-}
-
-export interface FavoriteTimelineResult {
-  fullName?: string | null;
-
-  userName?: string | null;
-
-  favoriteDate?: number | null;
-}
-
-export interface SerializedFilterQueryResult {
-  filterQuery?: SerializedKueryQueryResult | null;
-}
-
-export interface SerializedKueryQueryResult {
-  kuery?: KueryFilterQueryResult | null;
-
-  serializedQuery?: string | null;
-}
-
-export interface KueryFilterQueryResult {
-  kind?: string | null;
-
-  expression?: string | null;
-}
-
-export interface SortTimelineResult {
-  columnId?: string | null;
-
-  sortDirection?: string | null;
-}
-
-export interface ResponseTimelines {
-  timeline: (TimelineResult | null)[];
-
-  totalCount?: number | null;
-}
-
-export interface Mutation {
-  /** Persists a note */
-  persistNote: ResponseNote;
-
-  deleteNote?: boolean | null;
-
-  deleteNoteByTimelineId?: boolean | null;
-  /** Persists a pinned event in a timeline */
-  persistPinnedEventOnTimeline?: PinnedEvent | null;
-  /** Remove a pinned events in a timeline */
-  deletePinnedEventOnTimeline: boolean;
-  /** Remove all pinned events in a timeline */
-  deleteAllPinnedEventsOnTimeline: boolean;
-  /** Persists a timeline */
-  persistTimeline: ResponseTimeline;
-
-  persistFavorite: ResponseFavoriteTimeline;
-
-  deleteTimeline: boolean;
-}
-
-export interface ResponseNote {
-  code?: number | null;
-
-  message?: string | null;
-
-  note: NoteResult;
-}
-
-export interface ResponseTimeline {
-  code?: number | null;
-
-  message?: string | null;
-
-  timeline: TimelineResult;
-}
-
-export interface ResponseFavoriteTimeline {
-  code?: number | null;
-
-  message?: string | null;
-
-  savedObjectId: string;
-
-  version: string;
-
-  favorite?: FavoriteTimelineResult[] | null;
-}
-
-export interface EcsEdges {
-  node: Ecs;
-
-  cursor: CursorType;
-}
-
-export interface EventsTimelineData {
-  edges: EcsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfo;
-
-  inspect?: Inspect | null;
-}
-
-export interface OsFields {
-  platform?: string | null;
-
-  name?: string | null;
-
-  full?: string | null;
-
-  family?: string | null;
-
-  version?: string | null;
-
-  kernel?: string | null;
-}
-
-export interface HostFields {
-  architecture?: string | null;
-
-  id?: string | null;
-
-  ip?: (string | null)[] | null;
-
-  mac?: (string | null)[] | null;
-
-  name?: string | null;
-
-  os?: OsFields | null;
-
-  type?: string | null;
-}
-
-// ====================================================
-// InputTypes
-// ====================================================
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+export type Maybe<T> = T | null;
 
 export interface PageInfoNote {
   pageIndex: number;
@@ -1597,9 +44,9 @@ export interface PaginationInput {
   /** The limit parameter allows you to configure the maximum amount of items to be returned */
   limit: number;
   /** The cursor parameter defines the next result you want to fetch */
-  cursor?: string | null;
+  cursor?: Maybe<string>;
   /** The tiebreaker parameter allow to be more precise to fetch the next item */
-  tiebreaker?: string | null;
+  tiebreaker?: Maybe<string>;
 }
 
 export interface SortField {
@@ -1609,25 +56,13 @@ export interface SortField {
 }
 
 export interface LastTimeDetails {
-  hostName?: string | null;
+  hostName?: Maybe<string>;
 
-  ip?: string | null;
+  ip?: Maybe<string>;
 }
 
 export interface HostsSortField {
   field: HostsFields;
-
-  direction: Direction;
-}
-
-export interface DomainsSortField {
-  field: DomainsFields;
-
-  direction: Direction;
-}
-
-export interface TlsSortField {
-  field: TlsFields;
 
   direction: Direction;
 }
@@ -1638,14 +73,24 @@ export interface UsersSortField {
   direction: Direction;
 }
 
-export interface NetworkTopNFlowSortField {
-  field: NetworkTopNFlowFields;
+export interface NetworkTopTablesSortField {
+  field: NetworkTopTablesFields;
 
   direction: Direction;
 }
 
 export interface NetworkDnsSortField {
   field: NetworkDnsFields;
+
+  direction: Direction;
+}
+
+export interface NetworkHttpSortField {
+  direction: Direction;
+}
+
+export interface TlsSortField {
+  field: TlsFields;
 
   direction: Direction;
 }
@@ -1663,429 +108,162 @@ export interface SortTimeline {
 }
 
 export interface NoteInput {
-  eventId?: string | null;
+  eventId?: Maybe<string>;
 
-  note?: string | null;
+  note?: Maybe<string>;
 
-  timelineId?: string | null;
+  timelineId?: Maybe<string>;
 }
 
 export interface TimelineInput {
-  columns?: ColumnHeaderInput[] | null;
+  columns?: Maybe<ColumnHeaderInput[]>;
 
-  dataProviders?: DataProviderInput[] | null;
+  dataProviders?: Maybe<DataProviderInput[]>;
 
-  description?: string | null;
+  description?: Maybe<string>;
 
-  kqlMode?: string | null;
+  filters?: Maybe<FilterTimelineInput[]>;
 
-  kqlQuery?: SerializedFilterQueryInput | null;
+  kqlMode?: Maybe<string>;
 
-  title?: string | null;
+  kqlQuery?: Maybe<SerializedFilterQueryInput>;
 
-  dateRange?: DateRangePickerInput | null;
+  title?: Maybe<string>;
 
-  sort?: SortTimelineInput | null;
+  dateRange?: Maybe<DateRangePickerInput>;
+
+  savedQueryId?: Maybe<string>;
+
+  sort?: Maybe<SortTimelineInput>;
 }
 
 export interface ColumnHeaderInput {
-  aggregatable?: boolean | null;
+  aggregatable?: Maybe<boolean>;
 
-  category?: string | null;
+  category?: Maybe<string>;
 
-  columnHeaderType?: string | null;
+  columnHeaderType?: Maybe<string>;
 
-  description?: string | null;
+  description?: Maybe<string>;
 
-  example?: string | null;
+  example?: Maybe<string>;
 
-  indexes?: string[] | null;
+  indexes?: Maybe<string[]>;
 
-  id?: string | null;
+  id?: Maybe<string>;
 
-  name?: string | null;
+  name?: Maybe<string>;
 
-  placeholder?: string | null;
+  placeholder?: Maybe<string>;
 
-  searchable?: boolean | null;
+  searchable?: Maybe<boolean>;
 
-  type?: string | null;
+  type?: Maybe<string>;
 }
 
 export interface DataProviderInput {
-  id?: string | null;
+  id?: Maybe<string>;
 
-  name?: string | null;
+  name?: Maybe<string>;
 
-  enabled?: boolean | null;
+  enabled?: Maybe<boolean>;
 
-  excluded?: boolean | null;
+  excluded?: Maybe<boolean>;
 
-  kqlQuery?: string | null;
+  kqlQuery?: Maybe<string>;
 
-  queryMatch?: QueryMatchInput | null;
+  queryMatch?: Maybe<QueryMatchInput>;
 
-  and?: DataProviderInput[] | null;
+  and?: Maybe<DataProviderInput[]>;
 }
 
 export interface QueryMatchInput {
-  field?: string | null;
+  field?: Maybe<string>;
 
-  displayField?: string | null;
+  displayField?: Maybe<string>;
 
-  value?: string | null;
+  value?: Maybe<string>;
 
-  displayValue?: string | null;
+  displayValue?: Maybe<string>;
 
-  operator?: string | null;
+  operator?: Maybe<string>;
+}
+
+export interface FilterTimelineInput {
+  exists?: Maybe<string>;
+
+  meta?: Maybe<FilterMetaTimelineInput>;
+
+  match_all?: Maybe<string>;
+
+  missing?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  range?: Maybe<string>;
+
+  script?: Maybe<string>;
+}
+
+export interface FilterMetaTimelineInput {
+  alias?: Maybe<string>;
+
+  controlledBy?: Maybe<string>;
+
+  disabled?: Maybe<boolean>;
+
+  field?: Maybe<string>;
+
+  formattedValue?: Maybe<string>;
+
+  index?: Maybe<string>;
+
+  key?: Maybe<string>;
+
+  negate?: Maybe<boolean>;
+
+  params?: Maybe<string>;
+
+  type?: Maybe<string>;
+
+  value?: Maybe<string>;
 }
 
 export interface SerializedFilterQueryInput {
-  filterQuery?: SerializedKueryQueryInput | null;
+  filterQuery?: Maybe<SerializedKueryQueryInput>;
 }
 
 export interface SerializedKueryQueryInput {
-  kuery?: KueryFilterQueryInput | null;
+  kuery?: Maybe<KueryFilterQueryInput>;
 
-  serializedQuery?: string | null;
+  serializedQuery?: Maybe<string>;
 }
 
 export interface KueryFilterQueryInput {
-  kind?: string | null;
+  kind?: Maybe<string>;
 
-  expression?: string | null;
+  expression?: Maybe<string>;
 }
 
 export interface DateRangePickerInput {
-  start?: number | null;
+  start?: Maybe<number>;
 
-  end?: number | null;
+  end?: Maybe<number>;
 }
 
 export interface SortTimelineInput {
-  columnId?: string | null;
+  columnId?: Maybe<string>;
 
-  sortDirection?: string | null;
+  sortDirection?: Maybe<string>;
 }
 
 export interface FavoriteTimelineInput {
-  fullName?: string | null;
+  fullName?: Maybe<string>;
 
-  userName?: string | null;
+  userName?: Maybe<string>;
 
-  favoriteDate?: number | null;
+  favoriteDate?: Maybe<number>;
 }
-
-// ====================================================
-// Arguments
-// ====================================================
-
-export interface GetNoteQueryArgs {
-  id: string;
-}
-export interface GetNotesByTimelineIdQueryArgs {
-  timelineId: string;
-}
-export interface GetNotesByEventIdQueryArgs {
-  eventId: string;
-}
-export interface GetAllNotesQueryArgs {
-  pageInfo?: PageInfoNote | null;
-
-  search?: string | null;
-
-  sort?: SortNote | null;
-}
-export interface GetAllPinnedEventsByTimelineIdQueryArgs {
-  timelineId: string;
-}
-export interface SourceQueryArgs {
-  /** The id of the source */
-  id: string;
-}
-export interface GetOneTimelineQueryArgs {
-  id: string;
-}
-export interface GetAllTimelineQueryArgs {
-  pageInfo?: PageInfoTimeline | null;
-
-  search?: string | null;
-
-  sort?: SortTimeline | null;
-
-  onlyUserFavorite?: boolean | null;
-}
-export interface AuthenticationsSourceArgs {
-  timerange: TimerangeInput;
-
-  pagination: PaginationInputPaginated;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface TimelineSourceArgs {
-  pagination: PaginationInput;
-
-  sortField: SortField;
-
-  fieldRequested: string[];
-
-  timerange?: TimerangeInput | null;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface TimelineDetailsSourceArgs {
-  eventId: string;
-
-  indexName: string;
-
-  defaultIndex: string[];
-}
-export interface LastEventTimeSourceArgs {
-  id?: string | null;
-
-  indexKey: LastEventIndexKey;
-
-  details: LastTimeDetails;
-
-  defaultIndex: string[];
-}
-export interface EventsOverTimeSourceArgs {
-  timerange: TimerangeInput;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface HostsSourceArgs {
-  id?: string | null;
-
-  timerange: TimerangeInput;
-
-  pagination: PaginationInputPaginated;
-
-  sort: HostsSortField;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface HostOverviewSourceArgs {
-  id?: string | null;
-
-  hostName: string;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
-export interface HostFirstLastSeenSourceArgs {
-  id?: string | null;
-
-  hostName: string;
-
-  defaultIndex: string[];
-}
-export interface IpOverviewSourceArgs {
-  id?: string | null;
-
-  filterQuery?: string | null;
-
-  ip: string;
-
-  defaultIndex: string[];
-}
-export interface DomainsSourceArgs {
-  filterQuery?: string | null;
-
-  id?: string | null;
-
-  ip: string;
-
-  pagination: PaginationInputPaginated;
-
-  sort: DomainsSortField;
-
-  flowDirection: FlowDirection;
-
-  flowTarget: FlowTarget;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
-export interface TlsSourceArgs {
-  filterQuery?: string | null;
-
-  id?: string | null;
-
-  ip: string;
-
-  pagination: PaginationInputPaginated;
-
-  sort: TlsSortField;
-
-  flowTarget: FlowTarget;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
-export interface UsersSourceArgs {
-  filterQuery?: string | null;
-
-  id?: string | null;
-
-  ip: string;
-
-  pagination: PaginationInputPaginated;
-
-  sort: UsersSortField;
-
-  flowTarget: FlowTarget;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
-export interface KpiNetworkSourceArgs {
-  id?: string | null;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface KpiHostsSourceArgs {
-  id?: string | null;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface KpiHostDetailsSourceArgs {
-  id?: string | null;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface NetworkTopNFlowSourceArgs {
-  id?: string | null;
-
-  filterQuery?: string | null;
-
-  flowTarget: FlowTargetNew;
-
-  pagination: PaginationInputPaginated;
-
-  sort: NetworkTopNFlowSortField;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
-export interface NetworkDnsSourceArgs {
-  filterQuery?: string | null;
-
-  id?: string | null;
-
-  isPtrIncluded: boolean;
-
-  pagination: PaginationInputPaginated;
-
-  sort: NetworkDnsSortField;
-
-  timerange: TimerangeInput;
-
-  defaultIndex: string[];
-}
-export interface OverviewNetworkSourceArgs {
-  id?: string | null;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface OverviewHostSourceArgs {
-  id?: string | null;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface UncommonProcessesSourceArgs {
-  timerange: TimerangeInput;
-
-  pagination: PaginationInputPaginated;
-
-  filterQuery?: string | null;
-
-  defaultIndex: string[];
-}
-export interface IndicesExistSourceStatusArgs {
-  defaultIndex: string[];
-}
-export interface IndexFieldsSourceStatusArgs {
-  defaultIndex: string[];
-}
-export interface PersistNoteMutationArgs {
-  noteId?: string | null;
-
-  version?: string | null;
-
-  note: NoteInput;
-}
-export interface DeleteNoteMutationArgs {
-  id: string[];
-}
-export interface DeleteNoteByTimelineIdMutationArgs {
-  timelineId: string;
-
-  version?: string | null;
-}
-export interface PersistPinnedEventOnTimelineMutationArgs {
-  pinnedEventId?: string | null;
-
-  eventId: string;
-
-  timelineId?: string | null;
-}
-export interface DeletePinnedEventOnTimelineMutationArgs {
-  id: string[];
-}
-export interface DeleteAllPinnedEventsOnTimelineMutationArgs {
-  timelineId: string;
-}
-export interface PersistTimelineMutationArgs {
-  id?: string | null;
-
-  version?: string | null;
-
-  timeline: TimelineInput;
-}
-export interface PersistFavoriteMutationArgs {
-  timelineId?: string | null;
-}
-export interface DeleteTimelineMutationArgs {
-  id: string[];
-}
-
-// ====================================================
-// Enums
-// ====================================================
 
 export enum SortFieldNote {
   updatedBy = 'updatedBy',
@@ -2109,17 +287,9 @@ export enum HostsFields {
   lastSeen = 'lastSeen',
 }
 
-export enum DomainsFields {
-  domainName = 'domainName',
-  direction = 'direction',
-  bytes = 'bytes',
-  packets = 'packets',
-  uniqueIpCount = 'uniqueIpCount',
-}
-
-export enum FlowDirection {
-  uniDirectional = 'uniDirectional',
-  biDirectional = 'biDirectional',
+export enum UsersFields {
+  name = 'name',
+  count = 'count',
 }
 
 export enum FlowTarget {
@@ -2129,32 +299,12 @@ export enum FlowTarget {
   source = 'source',
 }
 
-export enum NetworkDirectionEcs {
-  inbound = 'inbound',
-  outbound = 'outbound',
-  internal = 'internal',
-  external = 'external',
-  incoming = 'incoming',
-  outgoing = 'outgoing',
-  listening = 'listening',
-  unknown = 'unknown',
-}
-
-export enum TlsFields {
-  _id = '_id',
-}
-
-export enum UsersFields {
-  name = 'name',
-  count = 'count',
-}
-
-export enum FlowTargetNew {
+export enum FlowTargetSourceDest {
   destination = 'destination',
   source = 'source',
 }
 
-export enum NetworkTopNFlowFields {
+export enum NetworkTopTablesFields {
   bytes_in = 'bytes_in',
   bytes_out = 'bytes_out',
   flows = 'flows',
@@ -2170,6 +320,10 @@ export enum NetworkDnsFields {
   dnsBytesOut = 'dnsBytesOut',
 }
 
+export enum TlsFields {
+  _id = '_id',
+}
+
 export enum SortFieldTimeline {
   title = 'title',
   description = 'description',
@@ -2177,20 +331,2144 @@ export enum SortFieldTimeline {
   created = 'created',
 }
 
+export enum NetworkDirectionEcs {
+  inbound = 'inbound',
+  outbound = 'outbound',
+  internal = 'internal',
+  external = 'external',
+  incoming = 'incoming',
+  outgoing = 'outgoing',
+  listening = 'listening',
+  unknown = 'unknown',
+}
+
+export enum NetworkHttpFields {
+  domains = 'domains',
+  lastHost = 'lastHost',
+  lastSourceIp = 'lastSourceIp',
+  methods = 'methods',
+  path = 'path',
+  requestCount = 'requestCount',
+  statuses = 'statuses',
+}
+
+export enum FlowDirection {
+  uniDirectional = 'uniDirectional',
+  biDirectional = 'biDirectional',
+}
+
+export type ToStringArray = string[];
+
+export type Date = string;
+
+export type ToNumberArray = number[];
+
+export type ToDateArray = string[];
+
+export type ToBooleanArray = boolean[];
+
+export type EsValue = any;
+
 // ====================================================
-// END: Typescript template
+// Scalars
 // ====================================================
+
+// ====================================================
+// Types
+// ====================================================
+
+export interface Query {
+  getNote: NoteResult;
+
+  getNotesByTimelineId: NoteResult[];
+
+  getNotesByEventId: NoteResult[];
+
+  getAllNotes: ResponseNotes;
+
+  getAllPinnedEventsByTimelineId: PinnedEvent[];
+  /** Get a security data source by id */
+  source: Source;
+  /** Get a list of all security data sources */
+  allSources: Source[];
+
+  getOneTimeline: TimelineResult;
+
+  getAllTimeline: ResponseTimelines;
+}
+
+export interface NoteResult {
+  eventId?: Maybe<string>;
+
+  note?: Maybe<string>;
+
+  timelineId?: Maybe<string>;
+
+  noteId: string;
+
+  created?: Maybe<number>;
+
+  createdBy?: Maybe<string>;
+
+  timelineVersion?: Maybe<string>;
+
+  updated?: Maybe<number>;
+
+  updatedBy?: Maybe<string>;
+
+  version?: Maybe<string>;
+}
+
+export interface ResponseNotes {
+  notes: NoteResult[];
+
+  totalCount?: Maybe<number>;
+}
+
+export interface PinnedEvent {
+  code?: Maybe<number>;
+
+  message?: Maybe<string>;
+
+  pinnedEventId: string;
+
+  eventId?: Maybe<string>;
+
+  timelineId?: Maybe<string>;
+
+  timelineVersion?: Maybe<string>;
+
+  created?: Maybe<number>;
+
+  createdBy?: Maybe<string>;
+
+  updated?: Maybe<number>;
+
+  updatedBy?: Maybe<string>;
+
+  version?: Maybe<string>;
+}
+
+export interface Source {
+  /** The id of the source */
+  id: string;
+  /** The raw configuration of the source */
+  configuration: SourceConfiguration;
+  /** The status of the source */
+  status: SourceStatus;
+  /** Gets Authentication success and failures based on a timerange */
+  Authentications: AuthenticationsData;
+
+  AuthenticationsOverTime: AuthenticationsOverTimeData;
+
+  Timeline: TimelineData;
+
+  TimelineDetails: TimelineDetailsData;
+
+  LastEventTime: LastEventTimeData;
+
+  EventsOverTime: EventsOverTimeData;
+  /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
+  Hosts: HostsData;
+
+  HostOverview: HostItem;
+
+  HostFirstLastSeen: FirstLastSeenHost;
+
+  IpOverview?: Maybe<IpOverviewData>;
+
+  Users: UsersData;
+
+  KpiNetwork?: Maybe<KpiNetworkData>;
+
+  KpiHosts: KpiHostsData;
+
+  KpiHostDetails: KpiHostDetailsData;
+
+  NetworkTopCountries: NetworkTopCountriesData;
+
+  NetworkTopNFlow: NetworkTopNFlowData;
+
+  NetworkDns: NetworkDnsData;
+
+  NetworkHttp: NetworkHttpData;
+
+  OverviewNetwork?: Maybe<OverviewNetworkData>;
+
+  OverviewHost?: Maybe<OverviewHostData>;
+
+  Tls: TlsData;
+  /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
+  UncommonProcesses: UncommonProcessesData;
+  /** Just a simple example to get the app name */
+  whoAmI?: Maybe<SayMyName>;
+}
+
+/** A set of configuration options for a security data source */
+export interface SourceConfiguration {
+  /** The field mapping to use for this source */
+  fields: SourceFields;
+}
+
+/** A mapping of semantic fields to their document counterparts */
+export interface SourceFields {
+  /** The field to identify a container by */
+  container: string;
+  /** The fields to identify a host by */
+  host: string;
+  /** The fields that may contain the log event message. The first field found win. */
+  message: string[];
+  /** The field to identify a pod by */
+  pod: string;
+  /** The field to use as a tiebreaker for log events that have identical timestamps */
+  tiebreaker: string;
+  /** The field to use as a timestamp for metrics and logs */
+  timestamp: string;
+}
+
+/** The status of an infrastructure data source */
+export interface SourceStatus {
+  /** Whether the configured alias or wildcard pattern resolve to any auditbeat indices */
+  indicesExist: boolean;
+  /** The list of fields defined in the index mappings */
+  indexFields: IndexField[];
+}
+
+/** A descriptor of a field in an index */
+export interface IndexField {
+  /** Where the field belong */
+  category: string;
+  /** Example of field's value */
+  example?: Maybe<string>;
+  /** whether the field's belong to an alias index */
+  indexes: (Maybe<string>)[];
+  /** The name of the field */
+  name: string;
+  /** The type of the field's values as recognized by Kibana */
+  type: string;
+  /** Whether the field's values can be efficiently searched for */
+  searchable: boolean;
+  /** Whether the field's values can be aggregated */
+  aggregatable: boolean;
+  /** Description of the field */
+  description?: Maybe<string>;
+
+  format?: Maybe<string>;
+}
+
+export interface AuthenticationsData {
+  edges: AuthenticationsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface AuthenticationsEdges {
+  node: AuthenticationItem;
+
+  cursor: CursorType;
+}
+
+export interface AuthenticationItem {
+  _id: string;
+
+  failures: number;
+
+  successes: number;
+
+  user: UserEcsFields;
+
+  lastSuccess?: Maybe<LastSourceHost>;
+
+  lastFailure?: Maybe<LastSourceHost>;
+}
+
+export interface UserEcsFields {
+  domain?: Maybe<string[]>;
+
+  id?: Maybe<string[]>;
+
+  name?: Maybe<string[]>;
+
+  full_name?: Maybe<string[]>;
+
+  email?: Maybe<string[]>;
+
+  hash?: Maybe<string[]>;
+
+  group?: Maybe<string[]>;
+}
+
+export interface LastSourceHost {
+  timestamp?: Maybe<string>;
+
+  source?: Maybe<SourceEcsFields>;
+
+  host?: Maybe<HostEcsFields>;
+}
+
+export interface SourceEcsFields {
+  bytes?: Maybe<number[]>;
+
+  ip?: Maybe<string[]>;
+
+  port?: Maybe<number[]>;
+
+  domain?: Maybe<string[]>;
+
+  geo?: Maybe<GeoEcsFields>;
+
+  packets?: Maybe<number[]>;
+}
+
+export interface GeoEcsFields {
+  city_name?: Maybe<string[]>;
+
+  continent_name?: Maybe<string[]>;
+
+  country_iso_code?: Maybe<string[]>;
+
+  country_name?: Maybe<string[]>;
+
+  location?: Maybe<Location>;
+
+  region_iso_code?: Maybe<string[]>;
+
+  region_name?: Maybe<string[]>;
+}
+
+export interface Location {
+  lon?: Maybe<number[]>;
+
+  lat?: Maybe<number[]>;
+}
+
+export interface HostEcsFields {
+  architecture?: Maybe<string[]>;
+
+  id?: Maybe<string[]>;
+
+  ip?: Maybe<string[]>;
+
+  mac?: Maybe<string[]>;
+
+  name?: Maybe<string[]>;
+
+  os?: Maybe<OsEcsFields>;
+
+  type?: Maybe<string[]>;
+}
+
+export interface OsEcsFields {
+  platform?: Maybe<string[]>;
+
+  name?: Maybe<string[]>;
+
+  full?: Maybe<string[]>;
+
+  family?: Maybe<string[]>;
+
+  version?: Maybe<string[]>;
+
+  kernel?: Maybe<string[]>;
+}
+
+export interface CursorType {
+  value?: Maybe<string>;
+
+  tiebreaker?: Maybe<string>;
+}
+
+export interface PageInfoPaginated {
+  activePage: number;
+
+  fakeTotalCount: number;
+
+  showMorePagesIndicator: boolean;
+}
+
+export interface Inspect {
+  dsl: string[];
+
+  response: string[];
+}
+
+export interface AuthenticationsOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  authenticationsOverTime: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface MatrixOverTimeHistogramData {
+  x: number;
+
+  y: number;
+
+  g: string;
+}
+
+export interface TimelineData {
+  edges: TimelineEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface TimelineEdges {
+  node: TimelineItem;
+
+  cursor: CursorType;
+}
+
+export interface TimelineItem {
+  _id: string;
+
+  _index?: Maybe<string>;
+
+  data: TimelineNonEcsData[];
+
+  ecs: Ecs;
+}
+
+export interface TimelineNonEcsData {
+  field: string;
+
+  value?: Maybe<string[]>;
+}
+
+export interface Ecs {
+  _id: string;
+
+  _index?: Maybe<string>;
+
+  auditd?: Maybe<AuditdEcsFields>;
+
+  destination?: Maybe<DestinationEcsFields>;
+
+  dns?: Maybe<DnsEcsFields>;
+
+  endgame?: Maybe<EndgameEcsFields>;
+
+  event?: Maybe<EventEcsFields>;
+
+  geo?: Maybe<GeoEcsFields>;
+
+  host?: Maybe<HostEcsFields>;
+
+  network?: Maybe<NetworkEcsField>;
+
+  source?: Maybe<SourceEcsFields>;
+
+  suricata?: Maybe<SuricataEcsFields>;
+
+  tls?: Maybe<TlsEcsFields>;
+
+  zeek?: Maybe<ZeekEcsFields>;
+
+  http?: Maybe<HttpEcsFields>;
+
+  url?: Maybe<UrlEcsFields>;
+
+  timestamp?: Maybe<string>;
+
+  message?: Maybe<string[]>;
+
+  user?: Maybe<UserEcsFields>;
+
+  winlog?: Maybe<WinlogEcsFields>;
+
+  process?: Maybe<ProcessEcsFields>;
+
+  file?: Maybe<FileFields>;
+
+  system?: Maybe<SystemEcsField>;
+}
+
+export interface AuditdEcsFields {
+  result?: Maybe<string[]>;
+
+  session?: Maybe<string[]>;
+
+  data?: Maybe<AuditdData>;
+
+  summary?: Maybe<Summary>;
+
+  sequence?: Maybe<string[]>;
+}
+
+export interface AuditdData {
+  acct?: Maybe<string[]>;
+
+  terminal?: Maybe<string[]>;
+
+  op?: Maybe<string[]>;
+}
+
+export interface Summary {
+  actor?: Maybe<PrimarySecondary>;
+
+  object?: Maybe<PrimarySecondary>;
+
+  how?: Maybe<string[]>;
+
+  message_type?: Maybe<string[]>;
+
+  sequence?: Maybe<string[]>;
+}
+
+export interface PrimarySecondary {
+  primary?: Maybe<string[]>;
+
+  secondary?: Maybe<string[]>;
+
+  type?: Maybe<string[]>;
+}
+
+export interface DestinationEcsFields {
+  bytes?: Maybe<number[]>;
+
+  ip?: Maybe<string[]>;
+
+  port?: Maybe<number[]>;
+
+  domain?: Maybe<string[]>;
+
+  geo?: Maybe<GeoEcsFields>;
+
+  packets?: Maybe<number[]>;
+}
+
+export interface DnsEcsFields {
+  question?: Maybe<DnsQuestionData>;
+
+  resolved_ip?: Maybe<string[]>;
+
+  response_code?: Maybe<string[]>;
+}
+
+export interface DnsQuestionData {
+  name?: Maybe<string[]>;
+
+  type?: Maybe<string[]>;
+}
+
+export interface EndgameEcsFields {
+  exit_code?: Maybe<number[]>;
+
+  file_name?: Maybe<string[]>;
+
+  file_path?: Maybe<string[]>;
+
+  logon_type?: Maybe<number[]>;
+
+  parent_process_name?: Maybe<string[]>;
+
+  pid?: Maybe<number[]>;
+
+  process_name?: Maybe<string[]>;
+
+  subject_domain_name?: Maybe<string[]>;
+
+  subject_logon_id?: Maybe<string[]>;
+
+  subject_user_name?: Maybe<string[]>;
+
+  target_domain_name?: Maybe<string[]>;
+
+  target_logon_id?: Maybe<string[]>;
+
+  target_user_name?: Maybe<string[]>;
+}
+
+export interface EventEcsFields {
+  action?: Maybe<string[]>;
+
+  category?: Maybe<string[]>;
+
+  code?: Maybe<string[]>;
+
+  created?: Maybe<string[]>;
+
+  dataset?: Maybe<string[]>;
+
+  duration?: Maybe<number[]>;
+
+  end?: Maybe<string[]>;
+
+  hash?: Maybe<string[]>;
+
+  id?: Maybe<string[]>;
+
+  kind?: Maybe<string[]>;
+
+  module?: Maybe<string[]>;
+
+  original?: Maybe<string[]>;
+
+  outcome?: Maybe<string[]>;
+
+  risk_score?: Maybe<number[]>;
+
+  risk_score_norm?: Maybe<number[]>;
+
+  severity?: Maybe<number[]>;
+
+  start?: Maybe<string[]>;
+
+  timezone?: Maybe<string[]>;
+
+  type?: Maybe<string[]>;
+}
+
+export interface NetworkEcsField {
+  bytes?: Maybe<number[]>;
+
+  community_id?: Maybe<string[]>;
+
+  direction?: Maybe<string[]>;
+
+  packets?: Maybe<number[]>;
+
+  protocol?: Maybe<string[]>;
+
+  transport?: Maybe<string[]>;
+}
+
+export interface SuricataEcsFields {
+  eve?: Maybe<SuricataEveData>;
+}
+
+export interface SuricataEveData {
+  alert?: Maybe<SuricataAlertData>;
+
+  flow_id?: Maybe<number[]>;
+
+  proto?: Maybe<string[]>;
+}
+
+export interface SuricataAlertData {
+  signature?: Maybe<string[]>;
+
+  signature_id?: Maybe<number[]>;
+}
+
+export interface TlsEcsFields {
+  client_certificate?: Maybe<TlsClientCertificateData>;
+
+  fingerprints?: Maybe<TlsFingerprintsData>;
+
+  server_certificate?: Maybe<TlsServerCertificateData>;
+}
+
+export interface TlsClientCertificateData {
+  fingerprint?: Maybe<FingerprintData>;
+}
+
+export interface FingerprintData {
+  sha1?: Maybe<string[]>;
+}
+
+export interface TlsFingerprintsData {
+  ja3?: Maybe<TlsJa3Data>;
+}
+
+export interface TlsJa3Data {
+  hash?: Maybe<string[]>;
+}
+
+export interface TlsServerCertificateData {
+  fingerprint?: Maybe<FingerprintData>;
+}
+
+export interface ZeekEcsFields {
+  session_id?: Maybe<string[]>;
+
+  connection?: Maybe<ZeekConnectionData>;
+
+  notice?: Maybe<ZeekNoticeData>;
+
+  dns?: Maybe<ZeekDnsData>;
+
+  http?: Maybe<ZeekHttpData>;
+
+  files?: Maybe<ZeekFileData>;
+
+  ssl?: Maybe<ZeekSslData>;
+}
+
+export interface ZeekConnectionData {
+  local_resp?: Maybe<boolean[]>;
+
+  local_orig?: Maybe<boolean[]>;
+
+  missed_bytes?: Maybe<number[]>;
+
+  state?: Maybe<string[]>;
+
+  history?: Maybe<string[]>;
+}
+
+export interface ZeekNoticeData {
+  suppress_for?: Maybe<number[]>;
+
+  msg?: Maybe<string[]>;
+
+  note?: Maybe<string[]>;
+
+  sub?: Maybe<string[]>;
+
+  dst?: Maybe<string[]>;
+
+  dropped?: Maybe<boolean[]>;
+
+  peer_descr?: Maybe<string[]>;
+}
+
+export interface ZeekDnsData {
+  AA?: Maybe<boolean[]>;
+
+  qclass_name?: Maybe<string[]>;
+
+  RD?: Maybe<boolean[]>;
+
+  qtype_name?: Maybe<string[]>;
+
+  rejected?: Maybe<boolean[]>;
+
+  qtype?: Maybe<string[]>;
+
+  query?: Maybe<string[]>;
+
+  trans_id?: Maybe<number[]>;
+
+  qclass?: Maybe<string[]>;
+
+  RA?: Maybe<boolean[]>;
+
+  TC?: Maybe<boolean[]>;
+}
+
+export interface ZeekHttpData {
+  resp_mime_types?: Maybe<string[]>;
+
+  trans_depth?: Maybe<string[]>;
+
+  status_msg?: Maybe<string[]>;
+
+  resp_fuids?: Maybe<string[]>;
+
+  tags?: Maybe<string[]>;
+}
+
+export interface ZeekFileData {
+  session_ids?: Maybe<string[]>;
+
+  timedout?: Maybe<boolean[]>;
+
+  local_orig?: Maybe<boolean[]>;
+
+  tx_host?: Maybe<string[]>;
+
+  source?: Maybe<string[]>;
+
+  is_orig?: Maybe<boolean[]>;
+
+  overflow_bytes?: Maybe<number[]>;
+
+  sha1?: Maybe<string[]>;
+
+  duration?: Maybe<number[]>;
+
+  depth?: Maybe<number[]>;
+
+  analyzers?: Maybe<string[]>;
+
+  mime_type?: Maybe<string[]>;
+
+  rx_host?: Maybe<string[]>;
+
+  total_bytes?: Maybe<number[]>;
+
+  fuid?: Maybe<string[]>;
+
+  seen_bytes?: Maybe<number[]>;
+
+  missing_bytes?: Maybe<number[]>;
+
+  md5?: Maybe<string[]>;
+}
+
+export interface ZeekSslData {
+  cipher?: Maybe<string[]>;
+
+  established?: Maybe<boolean[]>;
+
+  resumed?: Maybe<boolean[]>;
+
+  version?: Maybe<string[]>;
+}
+
+export interface HttpEcsFields {
+  version?: Maybe<string[]>;
+
+  request?: Maybe<HttpRequestData>;
+
+  response?: Maybe<HttpResponseData>;
+}
+
+export interface HttpRequestData {
+  method?: Maybe<string[]>;
+
+  body?: Maybe<HttpBodyData>;
+
+  referrer?: Maybe<string[]>;
+
+  bytes?: Maybe<number[]>;
+}
+
+export interface HttpBodyData {
+  content?: Maybe<string[]>;
+
+  bytes?: Maybe<number[]>;
+}
+
+export interface HttpResponseData {
+  status_code?: Maybe<number[]>;
+
+  body?: Maybe<HttpBodyData>;
+
+  bytes?: Maybe<number[]>;
+}
+
+export interface UrlEcsFields {
+  domain?: Maybe<string[]>;
+
+  original?: Maybe<string[]>;
+
+  username?: Maybe<string[]>;
+
+  password?: Maybe<string[]>;
+}
+
+export interface WinlogEcsFields {
+  event_id?: Maybe<number[]>;
+}
+
+export interface ProcessEcsFields {
+  hash?: Maybe<ProcessHashData>;
+
+  pid?: Maybe<number[]>;
+
+  name?: Maybe<string[]>;
+
+  ppid?: Maybe<number[]>;
+
+  args?: Maybe<string[]>;
+
+  executable?: Maybe<string[]>;
+
+  title?: Maybe<string[]>;
+
+  thread?: Maybe<Thread>;
+
+  working_directory?: Maybe<string[]>;
+}
+
+export interface ProcessHashData {
+  md5?: Maybe<string[]>;
+
+  sha1?: Maybe<string[]>;
+
+  sha256?: Maybe<string[]>;
+}
+
+export interface Thread {
+  id?: Maybe<number[]>;
+
+  start?: Maybe<string[]>;
+}
+
+export interface FileFields {
+  name?: Maybe<string[]>;
+
+  path?: Maybe<string[]>;
+
+  target_path?: Maybe<string[]>;
+
+  extension?: Maybe<string[]>;
+
+  type?: Maybe<string[]>;
+
+  device?: Maybe<string[]>;
+
+  inode?: Maybe<string[]>;
+
+  uid?: Maybe<string[]>;
+
+  owner?: Maybe<string[]>;
+
+  gid?: Maybe<string[]>;
+
+  group?: Maybe<string[]>;
+
+  mode?: Maybe<string[]>;
+
+  size?: Maybe<number[]>;
+
+  mtime?: Maybe<string[]>;
+
+  ctime?: Maybe<string[]>;
+}
+
+export interface SystemEcsField {
+  audit?: Maybe<AuditEcsFields>;
+
+  auth?: Maybe<AuthEcsFields>;
+}
+
+export interface AuditEcsFields {
+  package?: Maybe<PackageEcsFields>;
+}
+
+export interface PackageEcsFields {
+  arch?: Maybe<string[]>;
+
+  entity_id?: Maybe<string[]>;
+
+  name?: Maybe<string[]>;
+
+  size?: Maybe<number[]>;
+
+  summary?: Maybe<string[]>;
+
+  version?: Maybe<string[]>;
+}
+
+export interface AuthEcsFields {
+  ssh?: Maybe<SshEcsFields>;
+}
+
+export interface SshEcsFields {
+  method?: Maybe<string[]>;
+
+  signature?: Maybe<string[]>;
+}
+
+export interface PageInfo {
+  endCursor?: Maybe<CursorType>;
+
+  hasNextPage?: Maybe<boolean>;
+}
+
+export interface TimelineDetailsData {
+  data?: Maybe<DetailItem[]>;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface DetailItem {
+  field: string;
+
+  values?: Maybe<string[]>;
+
+  originalValue?: Maybe<EsValue>;
+}
+
+export interface LastEventTimeData {
+  lastSeen?: Maybe<string>;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface EventsOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  eventsOverTime: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface HostsData {
+  edges: HostsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface HostsEdges {
+  node: HostItem;
+
+  cursor: CursorType;
+}
+
+export interface HostItem {
+  _id?: Maybe<string>;
+
+  lastSeen?: Maybe<string>;
+
+  host?: Maybe<HostEcsFields>;
+
+  cloud?: Maybe<CloudFields>;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface CloudFields {
+  instance?: Maybe<CloudInstance>;
+
+  machine?: Maybe<CloudMachine>;
+
+  provider?: Maybe<(Maybe<string>)[]>;
+
+  region?: Maybe<(Maybe<string>)[]>;
+}
+
+export interface CloudInstance {
+  id?: Maybe<(Maybe<string>)[]>;
+}
+
+export interface CloudMachine {
+  type?: Maybe<(Maybe<string>)[]>;
+}
+
+export interface FirstLastSeenHost {
+  inspect?: Maybe<Inspect>;
+
+  firstSeen?: Maybe<string>;
+
+  lastSeen?: Maybe<string>;
+}
+
+export interface IpOverviewData {
+  client?: Maybe<Overview>;
+
+  destination?: Maybe<Overview>;
+
+  host: HostEcsFields;
+
+  server?: Maybe<Overview>;
+
+  source?: Maybe<Overview>;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface Overview {
+  firstSeen?: Maybe<string>;
+
+  lastSeen?: Maybe<string>;
+
+  autonomousSystem: AutonomousSystem;
+
+  geo: GeoEcsFields;
+}
+
+export interface AutonomousSystem {
+  number?: Maybe<number>;
+
+  organization?: Maybe<AutonomousSystemOrganization>;
+}
+
+export interface AutonomousSystemOrganization {
+  name?: Maybe<string>;
+}
+
+export interface UsersData {
+  edges: UsersEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface UsersEdges {
+  node: UsersNode;
+
+  cursor: CursorType;
+}
+
+export interface UsersNode {
+  _id?: Maybe<string>;
+
+  timestamp?: Maybe<string>;
+
+  user?: Maybe<UsersItem>;
+}
+
+export interface UsersItem {
+  name?: Maybe<string>;
+
+  id?: Maybe<string[]>;
+
+  groupId?: Maybe<string[]>;
+
+  groupName?: Maybe<string[]>;
+
+  count?: Maybe<number>;
+}
+
+export interface KpiNetworkData {
+  networkEvents?: Maybe<number>;
+
+  uniqueFlowId?: Maybe<number>;
+
+  uniqueSourcePrivateIps?: Maybe<number>;
+
+  uniqueSourcePrivateIpsHistogram?: Maybe<KpiNetworkHistogramData[]>;
+
+  uniqueDestinationPrivateIps?: Maybe<number>;
+
+  uniqueDestinationPrivateIpsHistogram?: Maybe<KpiNetworkHistogramData[]>;
+
+  dnsQueries?: Maybe<number>;
+
+  tlsHandshakes?: Maybe<number>;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface KpiNetworkHistogramData {
+  x?: Maybe<number>;
+
+  y?: Maybe<number>;
+}
+
+export interface KpiHostsData {
+  hosts?: Maybe<number>;
+
+  hostsHistogram?: Maybe<KpiHostHistogramData[]>;
+
+  authSuccess?: Maybe<number>;
+
+  authSuccessHistogram?: Maybe<KpiHostHistogramData[]>;
+
+  authFailure?: Maybe<number>;
+
+  authFailureHistogram?: Maybe<KpiHostHistogramData[]>;
+
+  uniqueSourceIps?: Maybe<number>;
+
+  uniqueSourceIpsHistogram?: Maybe<KpiHostHistogramData[]>;
+
+  uniqueDestinationIps?: Maybe<number>;
+
+  uniqueDestinationIpsHistogram?: Maybe<KpiHostHistogramData[]>;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface KpiHostHistogramData {
+  x?: Maybe<number>;
+
+  y?: Maybe<number>;
+}
+
+export interface KpiHostDetailsData {
+  authSuccess?: Maybe<number>;
+
+  authSuccessHistogram?: Maybe<KpiHostHistogramData[]>;
+
+  authFailure?: Maybe<number>;
+
+  authFailureHistogram?: Maybe<KpiHostHistogramData[]>;
+
+  uniqueSourceIps?: Maybe<number>;
+
+  uniqueSourceIpsHistogram?: Maybe<KpiHostHistogramData[]>;
+
+  uniqueDestinationIps?: Maybe<number>;
+
+  uniqueDestinationIpsHistogram?: Maybe<KpiHostHistogramData[]>;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface NetworkTopCountriesData {
+  edges: NetworkTopCountriesEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface NetworkTopCountriesEdges {
+  node: NetworkTopCountriesItem;
+
+  cursor: CursorType;
+}
+
+export interface NetworkTopCountriesItem {
+  _id?: Maybe<string>;
+
+  source?: Maybe<TopCountriesItemSource>;
+
+  destination?: Maybe<TopCountriesItemDestination>;
+
+  network?: Maybe<TopNetworkTablesEcsField>;
+}
+
+export interface TopCountriesItemSource {
+  country?: Maybe<string>;
+
+  destination_ips?: Maybe<number>;
+
+  flows?: Maybe<number>;
+
+  location?: Maybe<GeoItem>;
+
+  source_ips?: Maybe<number>;
+}
+
+export interface GeoItem {
+  geo?: Maybe<GeoEcsFields>;
+
+  flowTarget?: Maybe<FlowTargetSourceDest>;
+}
+
+export interface TopCountriesItemDestination {
+  country?: Maybe<string>;
+
+  destination_ips?: Maybe<number>;
+
+  flows?: Maybe<number>;
+
+  location?: Maybe<GeoItem>;
+
+  source_ips?: Maybe<number>;
+}
+
+export interface TopNetworkTablesEcsField {
+  bytes_in?: Maybe<number>;
+
+  bytes_out?: Maybe<number>;
+}
+
+export interface NetworkTopNFlowData {
+  edges: NetworkTopNFlowEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface NetworkTopNFlowEdges {
+  node: NetworkTopNFlowItem;
+
+  cursor: CursorType;
+}
+
+export interface NetworkTopNFlowItem {
+  _id?: Maybe<string>;
+
+  source?: Maybe<TopNFlowItemSource>;
+
+  destination?: Maybe<TopNFlowItemDestination>;
+
+  network?: Maybe<TopNetworkTablesEcsField>;
+}
+
+export interface TopNFlowItemSource {
+  autonomous_system?: Maybe<AutonomousSystemItem>;
+
+  domain?: Maybe<string[]>;
+
+  ip?: Maybe<string>;
+
+  location?: Maybe<GeoItem>;
+
+  flows?: Maybe<number>;
+
+  destination_ips?: Maybe<number>;
+}
+
+export interface AutonomousSystemItem {
+  name?: Maybe<string>;
+
+  number?: Maybe<number>;
+}
+
+export interface TopNFlowItemDestination {
+  autonomous_system?: Maybe<AutonomousSystemItem>;
+
+  domain?: Maybe<string[]>;
+
+  ip?: Maybe<string>;
+
+  location?: Maybe<GeoItem>;
+
+  flows?: Maybe<number>;
+
+  source_ips?: Maybe<number>;
+}
+
+export interface NetworkDnsData {
+  edges: NetworkDnsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface NetworkDnsEdges {
+  node: NetworkDnsItem;
+
+  cursor: CursorType;
+}
+
+export interface NetworkDnsItem {
+  _id?: Maybe<string>;
+
+  dnsBytesIn?: Maybe<number>;
+
+  dnsBytesOut?: Maybe<number>;
+
+  dnsName?: Maybe<string>;
+
+  queryCount?: Maybe<number>;
+
+  uniqueDomains?: Maybe<number>;
+}
+
+export interface NetworkHttpData {
+  edges: NetworkHttpEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface NetworkHttpEdges {
+  node: NetworkHttpItem;
+
+  cursor: CursorType;
+}
+
+export interface NetworkHttpItem {
+  _id?: Maybe<string>;
+
+  domains: string[];
+
+  lastHost?: Maybe<string>;
+
+  lastSourceIp?: Maybe<string>;
+
+  methods: string[];
+
+  path?: Maybe<string>;
+
+  requestCount?: Maybe<number>;
+
+  statuses: string[];
+}
+
+export interface OverviewNetworkData {
+  auditbeatSocket?: Maybe<number>;
+
+  filebeatCisco?: Maybe<number>;
+
+  filebeatNetflow?: Maybe<number>;
+
+  filebeatPanw?: Maybe<number>;
+
+  filebeatSuricata?: Maybe<number>;
+
+  filebeatZeek?: Maybe<number>;
+
+  packetbeatDNS?: Maybe<number>;
+
+  packetbeatFlow?: Maybe<number>;
+
+  packetbeatTLS?: Maybe<number>;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface OverviewHostData {
+  auditbeatAuditd?: Maybe<number>;
+
+  auditbeatFIM?: Maybe<number>;
+
+  auditbeatLogin?: Maybe<number>;
+
+  auditbeatPackage?: Maybe<number>;
+
+  auditbeatProcess?: Maybe<number>;
+
+  auditbeatUser?: Maybe<number>;
+
+  endgameDns?: Maybe<number>;
+
+  endgameFile?: Maybe<number>;
+
+  endgameImageLoad?: Maybe<number>;
+
+  endgameNetwork?: Maybe<number>;
+
+  endgameProcess?: Maybe<number>;
+
+  endgameRegistry?: Maybe<number>;
+
+  endgameSecurity?: Maybe<number>;
+
+  filebeatSystemModule?: Maybe<number>;
+
+  winlogbeat?: Maybe<number>;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface TlsData {
+  edges: TlsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface TlsEdges {
+  node: TlsNode;
+
+  cursor: CursorType;
+}
+
+export interface TlsNode {
+  _id?: Maybe<string>;
+
+  timestamp?: Maybe<string>;
+
+  alternativeNames?: Maybe<string[]>;
+
+  notAfter?: Maybe<string[]>;
+
+  commonNames?: Maybe<string[]>;
+
+  ja3?: Maybe<string[]>;
+
+  issuerNames?: Maybe<string[]>;
+}
+
+export interface UncommonProcessesData {
+  edges: UncommonProcessesEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface UncommonProcessesEdges {
+  node: UncommonProcessItem;
+
+  cursor: CursorType;
+}
+
+export interface UncommonProcessItem {
+  _id: string;
+
+  instances: number;
+
+  process: ProcessEcsFields;
+
+  hosts: HostEcsFields[];
+
+  user?: Maybe<UserEcsFields>;
+}
+
+export interface SayMyName {
+  /** The id of the source */
+  appName: string;
+}
+
+export interface TimelineResult {
+  columns?: Maybe<ColumnHeaderResult[]>;
+
+  created?: Maybe<number>;
+
+  createdBy?: Maybe<string>;
+
+  dataProviders?: Maybe<DataProviderResult[]>;
+
+  dateRange?: Maybe<DateRangePickerResult>;
+
+  description?: Maybe<string>;
+
+  eventIdToNoteIds?: Maybe<NoteResult[]>;
+
+  favorite?: Maybe<FavoriteTimelineResult[]>;
+
+  filters?: Maybe<FilterTimelineResult[]>;
+
+  kqlMode?: Maybe<string>;
+
+  kqlQuery?: Maybe<SerializedFilterQueryResult>;
+
+  notes?: Maybe<NoteResult[]>;
+
+  noteIds?: Maybe<string[]>;
+
+  pinnedEventIds?: Maybe<string[]>;
+
+  pinnedEventsSaveObject?: Maybe<PinnedEvent[]>;
+
+  savedQueryId?: Maybe<string>;
+
+  savedObjectId: string;
+
+  sort?: Maybe<SortTimelineResult>;
+
+  title?: Maybe<string>;
+
+  updated?: Maybe<number>;
+
+  updatedBy?: Maybe<string>;
+
+  version: string;
+}
+
+export interface ColumnHeaderResult {
+  aggregatable?: Maybe<boolean>;
+
+  category?: Maybe<string>;
+
+  columnHeaderType?: Maybe<string>;
+
+  description?: Maybe<string>;
+
+  example?: Maybe<string>;
+
+  indexes?: Maybe<string[]>;
+
+  id?: Maybe<string>;
+
+  name?: Maybe<string>;
+
+  placeholder?: Maybe<string>;
+
+  searchable?: Maybe<boolean>;
+
+  type?: Maybe<string>;
+}
+
+export interface DataProviderResult {
+  id?: Maybe<string>;
+
+  name?: Maybe<string>;
+
+  enabled?: Maybe<boolean>;
+
+  excluded?: Maybe<boolean>;
+
+  kqlQuery?: Maybe<string>;
+
+  queryMatch?: Maybe<QueryMatchResult>;
+
+  and?: Maybe<DataProviderResult[]>;
+}
+
+export interface QueryMatchResult {
+  field?: Maybe<string>;
+
+  displayField?: Maybe<string>;
+
+  value?: Maybe<string>;
+
+  displayValue?: Maybe<string>;
+
+  operator?: Maybe<string>;
+}
+
+export interface DateRangePickerResult {
+  start?: Maybe<number>;
+
+  end?: Maybe<number>;
+}
+
+export interface FavoriteTimelineResult {
+  fullName?: Maybe<string>;
+
+  userName?: Maybe<string>;
+
+  favoriteDate?: Maybe<number>;
+}
+
+export interface FilterTimelineResult {
+  exists?: Maybe<string>;
+
+  meta?: Maybe<FilterMetaTimelineResult>;
+
+  match_all?: Maybe<string>;
+
+  missing?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  range?: Maybe<string>;
+
+  script?: Maybe<string>;
+}
+
+export interface FilterMetaTimelineResult {
+  alias?: Maybe<string>;
+
+  controlledBy?: Maybe<string>;
+
+  disabled?: Maybe<boolean>;
+
+  field?: Maybe<string>;
+
+  formattedValue?: Maybe<string>;
+
+  index?: Maybe<string>;
+
+  key?: Maybe<string>;
+
+  negate?: Maybe<boolean>;
+
+  params?: Maybe<string>;
+
+  type?: Maybe<string>;
+
+  value?: Maybe<string>;
+}
+
+export interface SerializedFilterQueryResult {
+  filterQuery?: Maybe<SerializedKueryQueryResult>;
+}
+
+export interface SerializedKueryQueryResult {
+  kuery?: Maybe<KueryFilterQueryResult>;
+
+  serializedQuery?: Maybe<string>;
+}
+
+export interface KueryFilterQueryResult {
+  kind?: Maybe<string>;
+
+  expression?: Maybe<string>;
+}
+
+export interface SortTimelineResult {
+  columnId?: Maybe<string>;
+
+  sortDirection?: Maybe<string>;
+}
+
+export interface ResponseTimelines {
+  timeline: (Maybe<TimelineResult>)[];
+
+  totalCount?: Maybe<number>;
+}
+
+export interface Mutation {
+  /** Persists a note */
+  persistNote: ResponseNote;
+
+  deleteNote?: Maybe<boolean>;
+
+  deleteNoteByTimelineId?: Maybe<boolean>;
+  /** Persists a pinned event in a timeline */
+  persistPinnedEventOnTimeline?: Maybe<PinnedEvent>;
+  /** Remove a pinned events in a timeline */
+  deletePinnedEventOnTimeline: boolean;
+  /** Remove all pinned events in a timeline */
+  deleteAllPinnedEventsOnTimeline: boolean;
+  /** Persists a timeline */
+  persistTimeline: ResponseTimeline;
+
+  persistFavorite: ResponseFavoriteTimeline;
+
+  deleteTimeline: boolean;
+}
+
+export interface ResponseNote {
+  code?: Maybe<number>;
+
+  message?: Maybe<string>;
+
+  note: NoteResult;
+}
+
+export interface ResponseTimeline {
+  code?: Maybe<number>;
+
+  message?: Maybe<string>;
+
+  timeline: TimelineResult;
+}
+
+export interface ResponseFavoriteTimeline {
+  code?: Maybe<number>;
+
+  message?: Maybe<string>;
+
+  savedObjectId: string;
+
+  version: string;
+
+  favorite?: Maybe<FavoriteTimelineResult[]>;
+}
+
+export interface EcsEdges {
+  node: Ecs;
+
+  cursor: CursorType;
+}
+
+export interface EventsTimelineData {
+  edges: EcsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface OsFields {
+  platform?: Maybe<string>;
+
+  name?: Maybe<string>;
+
+  full?: Maybe<string>;
+
+  family?: Maybe<string>;
+
+  version?: Maybe<string>;
+
+  kernel?: Maybe<string>;
+}
+
+export interface HostFields {
+  architecture?: Maybe<string>;
+
+  id?: Maybe<string>;
+
+  ip?: Maybe<(Maybe<string>)[]>;
+
+  mac?: Maybe<(Maybe<string>)[]>;
+
+  name?: Maybe<string>;
+
+  os?: Maybe<OsFields>;
+
+  type?: Maybe<string>;
+}
+
+// ====================================================
+// Arguments
+// ====================================================
+
+export interface GetNoteQueryArgs {
+  id: string;
+}
+export interface GetNotesByTimelineIdQueryArgs {
+  timelineId: string;
+}
+export interface GetNotesByEventIdQueryArgs {
+  eventId: string;
+}
+export interface GetAllNotesQueryArgs {
+  pageInfo?: Maybe<PageInfoNote>;
+
+  search?: Maybe<string>;
+
+  sort?: Maybe<SortNote>;
+}
+export interface GetAllPinnedEventsByTimelineIdQueryArgs {
+  timelineId: string;
+}
+export interface SourceQueryArgs {
+  /** The id of the source */
+  id: string;
+}
+export interface GetOneTimelineQueryArgs {
+  id: string;
+}
+export interface GetAllTimelineQueryArgs {
+  pageInfo?: Maybe<PageInfoTimeline>;
+
+  search?: Maybe<string>;
+
+  sort?: Maybe<SortTimeline>;
+
+  onlyUserFavorite?: Maybe<boolean>;
+}
+export interface AuthenticationsSourceArgs {
+  timerange: TimerangeInput;
+
+  pagination: PaginationInputPaginated;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
+export interface AuthenticationsOverTimeSourceArgs {
+  timerange: TimerangeInput;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
+export interface TimelineSourceArgs {
+  pagination: PaginationInput;
+
+  sortField: SortField;
+
+  fieldRequested: string[];
+
+  timerange?: Maybe<TimerangeInput>;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
+export interface TimelineDetailsSourceArgs {
+  eventId: string;
+
+  indexName: string;
+
+  defaultIndex: string[];
+}
+export interface LastEventTimeSourceArgs {
+  id?: Maybe<string>;
+
+  indexKey: LastEventIndexKey;
+
+  details: LastTimeDetails;
+
+  defaultIndex: string[];
+}
+export interface EventsOverTimeSourceArgs {
+  timerange: TimerangeInput;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
+export interface HostsSourceArgs {
+  id?: Maybe<string>;
+
+  timerange: TimerangeInput;
+
+  pagination: PaginationInputPaginated;
+
+  sort: HostsSortField;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
+export interface HostOverviewSourceArgs {
+  id?: Maybe<string>;
+
+  hostName: string;
+
+  timerange: TimerangeInput;
+
+  defaultIndex: string[];
+}
+export interface HostFirstLastSeenSourceArgs {
+  id?: Maybe<string>;
+
+  hostName: string;
+
+  defaultIndex: string[];
+}
+export interface IpOverviewSourceArgs {
+  id?: Maybe<string>;
+
+  filterQuery?: Maybe<string>;
+
+  ip: string;
+
+  defaultIndex: string[];
+}
+export interface UsersSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  id?: Maybe<string>;
+
+  ip: string;
+
+  pagination: PaginationInputPaginated;
+
+  sort: UsersSortField;
+
+  flowTarget: FlowTarget;
+
+  timerange: TimerangeInput;
+
+  defaultIndex: string[];
+}
+export interface KpiNetworkSourceArgs {
+  id?: Maybe<string>;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
+export interface KpiHostsSourceArgs {
+  id?: Maybe<string>;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
+export interface KpiHostDetailsSourceArgs {
+  id?: Maybe<string>;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
+export interface NetworkTopCountriesSourceArgs {
+  id?: Maybe<string>;
+
+  filterQuery?: Maybe<string>;
+
+  ip?: Maybe<string>;
+
+  flowTarget: FlowTargetSourceDest;
+
+  pagination: PaginationInputPaginated;
+
+  sort: NetworkTopTablesSortField;
+
+  timerange: TimerangeInput;
+
+  defaultIndex: string[];
+}
+export interface NetworkTopNFlowSourceArgs {
+  id?: Maybe<string>;
+
+  filterQuery?: Maybe<string>;
+
+  ip?: Maybe<string>;
+
+  flowTarget: FlowTargetSourceDest;
+
+  pagination: PaginationInputPaginated;
+
+  sort: NetworkTopTablesSortField;
+
+  timerange: TimerangeInput;
+
+  defaultIndex: string[];
+}
+export interface NetworkDnsSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  id?: Maybe<string>;
+
+  isPtrIncluded: boolean;
+
+  pagination: PaginationInputPaginated;
+
+  sort: NetworkDnsSortField;
+
+  timerange: TimerangeInput;
+
+  defaultIndex: string[];
+}
+export interface NetworkHttpSourceArgs {
+  id?: Maybe<string>;
+
+  filterQuery?: Maybe<string>;
+
+  ip?: Maybe<string>;
+
+  pagination: PaginationInputPaginated;
+
+  sort: NetworkHttpSortField;
+
+  timerange: TimerangeInput;
+
+  defaultIndex: string[];
+}
+export interface OverviewNetworkSourceArgs {
+  id?: Maybe<string>;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
+export interface OverviewHostSourceArgs {
+  id?: Maybe<string>;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
+export interface TlsSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  id?: Maybe<string>;
+
+  ip: string;
+
+  pagination: PaginationInputPaginated;
+
+  sort: TlsSortField;
+
+  flowTarget: FlowTargetSourceDest;
+
+  timerange: TimerangeInput;
+
+  defaultIndex: string[];
+}
+export interface UncommonProcessesSourceArgs {
+  timerange: TimerangeInput;
+
+  pagination: PaginationInputPaginated;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
+export interface IndicesExistSourceStatusArgs {
+  defaultIndex: string[];
+}
+export interface IndexFieldsSourceStatusArgs {
+  defaultIndex: string[];
+}
+export interface PersistNoteMutationArgs {
+  noteId?: Maybe<string>;
+
+  version?: Maybe<string>;
+
+  note: NoteInput;
+}
+export interface DeleteNoteMutationArgs {
+  id: string[];
+}
+export interface DeleteNoteByTimelineIdMutationArgs {
+  timelineId: string;
+
+  version?: Maybe<string>;
+}
+export interface PersistPinnedEventOnTimelineMutationArgs {
+  pinnedEventId?: Maybe<string>;
+
+  eventId: string;
+
+  timelineId?: Maybe<string>;
+}
+export interface DeletePinnedEventOnTimelineMutationArgs {
+  id: string[];
+}
+export interface DeleteAllPinnedEventsOnTimelineMutationArgs {
+  timelineId: string;
+}
+export interface PersistTimelineMutationArgs {
+  id?: Maybe<string>;
+
+  version?: Maybe<string>;
+
+  timeline: TimelineInput;
+}
+export interface PersistFavoriteMutationArgs {
+  timelineId?: Maybe<string>;
+}
+export interface DeleteTimelineMutationArgs {
+  id: string[];
+}
 
 // ====================================================
 // Documents
 // ====================================================
+
+export namespace GetAuthenticationsOverTimeQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    filterQuery?: Maybe<string>;
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    AuthenticationsOverTime: AuthenticationsOverTime;
+  };
+
+  export type AuthenticationsOverTime = {
+    __typename?: 'AuthenticationsOverTimeData';
+
+    authenticationsOverTime: _AuthenticationsOverTime[];
+
+    totalCount: number;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type _AuthenticationsOverTime = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+
+    g: string;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
 
 export namespace GetAuthenticationsQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;
     pagination: PaginationInputPaginated;
-    filterQuery?: string | null;
+    filterQuery?: Maybe<string>;
     defaultIndex: string[];
     inspect: boolean;
   };
@@ -2218,7 +2496,7 @@ export namespace GetAuthenticationsQuery {
 
     pageInfo: PageInfo;
 
-    inspect?: Inspect | null;
+    inspect: Maybe<Inspect>;
   };
 
   export type Edges = {
@@ -2240,186 +2518,69 @@ export namespace GetAuthenticationsQuery {
 
     user: User;
 
-    lastSuccess?: LastSuccess | null;
+    lastSuccess: Maybe<LastSuccess>;
 
-    lastFailure?: LastFailure | null;
+    lastFailure: Maybe<LastFailure>;
   };
 
   export type User = {
     __typename?: 'UserEcsFields';
 
-    name?: ToStringArray | null;
+    name: Maybe<string[]>;
   };
 
   export type LastSuccess = {
     __typename?: 'LastSourceHost';
 
-    timestamp?: Date | null;
+    timestamp: Maybe<string>;
 
-    source?: _Source | null;
+    source: Maybe<_Source>;
 
-    host?: Host | null;
+    host: Maybe<Host>;
   };
 
   export type _Source = {
     __typename?: 'SourceEcsFields';
 
-    ip?: ToStringArray | null;
+    ip: Maybe<string[]>;
   };
 
   export type Host = {
     __typename?: 'HostEcsFields';
 
-    id?: ToStringArray | null;
+    id: Maybe<string[]>;
 
-    name?: ToStringArray | null;
+    name: Maybe<string[]>;
   };
 
   export type LastFailure = {
     __typename?: 'LastSourceHost';
 
-    timestamp?: Date | null;
+    timestamp: Maybe<string>;
 
-    source?: __Source | null;
+    source: Maybe<__Source>;
 
-    host?: _Host | null;
+    host: Maybe<_Host>;
   };
 
   export type __Source = {
     __typename?: 'SourceEcsFields';
 
-    ip?: ToStringArray | null;
+    ip: Maybe<string[]>;
   };
 
   export type _Host = {
     __typename?: 'HostEcsFields';
 
-    id?: ToStringArray | null;
+    id: Maybe<string[]>;
 
-    name?: ToStringArray | null;
+    name: Maybe<string[]>;
   };
 
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value?: string | null;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetDomainsQuery {
-  export type Variables = {
-    sourceId: string;
-    filterQuery?: string | null;
-    flowDirection: FlowDirection;
-    flowTarget: FlowTarget;
-    ip: string;
-    pagination: PaginationInputPaginated;
-    sort: DomainsSortField;
-    timerange: TimerangeInput;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    Domains: Domains;
-  };
-
-  export type Domains = {
-    __typename?: 'DomainsData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-
-    inspect?: Inspect | null;
-  };
-
-  export type Edges = {
-    __typename?: 'DomainsEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
-    __typename?: 'DomainsNode';
-
-    source?: _Source | null;
-
-    destination?: Destination | null;
-
-    network?: Network | null;
-  };
-
-  export type _Source = {
-    __typename?: 'DomainsItem';
-
-    uniqueIpCount?: number | null;
-
-    domainName?: string | null;
-
-    firstSeen?: Date | null;
-
-    lastSeen?: Date | null;
-  };
-
-  export type Destination = {
-    __typename?: 'DomainsItem';
-
-    uniqueIpCount?: number | null;
-
-    domainName?: string | null;
-
-    firstSeen?: Date | null;
-
-    lastSeen?: Date | null;
-  };
-
-  export type Network = {
-    __typename?: 'DomainsNetworkField';
-
-    bytes?: number | null;
-
-    direction?: NetworkDirectionEcs[] | null;
-
-    packets?: number | null;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value?: string | null;
+    value: Maybe<string>;
   };
 
   export type PageInfo = {
@@ -2446,7 +2607,7 @@ export namespace GetEventsOverTimeQuery {
     sourceId: string;
     timerange: TimerangeInput;
     defaultIndex: string[];
-    filterQuery?: string | null;
+    filterQuery?: Maybe<string>;
     inspect: boolean;
   };
 
@@ -2471,7 +2632,7 @@ export namespace GetEventsOverTimeQuery {
 
     totalCount: number;
 
-    inspect?: Inspect | null;
+    inspect: Maybe<Inspect>;
   };
 
   export type _EventsOverTime = {
@@ -2518,7 +2679,7 @@ export namespace GetLastEventTimeQuery {
   export type LastEventTime = {
     __typename?: 'LastEventTimeData';
 
-    lastSeen?: Date | null;
+    lastSeen: Maybe<string>;
   };
 }
 
@@ -2546,9 +2707,9 @@ export namespace GetHostFirstLastSeenQuery {
   export type HostFirstLastSeen = {
     __typename?: 'FirstLastSeenHost';
 
-    firstSeen?: Date | null;
+    firstSeen: Maybe<string>;
 
-    lastSeen?: Date | null;
+    lastSeen: Maybe<string>;
   };
 }
 
@@ -2558,7 +2719,7 @@ export namespace GetHostsTableQuery {
     timerange: TimerangeInput;
     pagination: PaginationInputPaginated;
     sort: HostsSortField;
-    filterQuery?: string | null;
+    filterQuery?: Maybe<string>;
     defaultIndex: string[];
     inspect: boolean;
   };
@@ -2586,7 +2747,7 @@ export namespace GetHostsTableQuery {
 
     pageInfo: PageInfo;
 
-    inspect?: Inspect | null;
+    inspect: Maybe<Inspect>;
   };
 
   export type Edges = {
@@ -2600,35 +2761,35 @@ export namespace GetHostsTableQuery {
   export type Node = {
     __typename?: 'HostItem';
 
-    _id?: string | null;
+    _id: Maybe<string>;
 
-    lastSeen?: Date | null;
+    lastSeen: Maybe<string>;
 
-    host?: Host | null;
+    host: Maybe<Host>;
   };
 
   export type Host = {
     __typename?: 'HostEcsFields';
 
-    id?: ToStringArray | null;
+    id: Maybe<string[]>;
 
-    name?: ToStringArray | null;
+    name: Maybe<string[]>;
 
-    os?: Os | null;
+    os: Maybe<Os>;
   };
 
   export type Os = {
     __typename?: 'OsEcsFields';
 
-    name?: ToStringArray | null;
+    name: Maybe<string[]>;
 
-    version?: ToStringArray | null;
+    version: Maybe<string[]>;
   };
 
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value?: string | null;
+    value: Maybe<string>;
   };
 
   export type PageInfo = {
@@ -2676,67 +2837,67 @@ export namespace GetHostOverviewQuery {
   export type HostOverview = {
     __typename?: 'HostItem';
 
-    _id?: string | null;
+    _id: Maybe<string>;
 
-    host?: Host | null;
+    host: Maybe<Host>;
 
-    cloud?: Cloud | null;
+    cloud: Maybe<Cloud>;
 
-    inspect?: Inspect | null;
+    inspect: Maybe<Inspect>;
   };
 
   export type Host = {
     __typename?: 'HostEcsFields';
 
-    architecture?: ToStringArray | null;
+    architecture: Maybe<string[]>;
 
-    id?: ToStringArray | null;
+    id: Maybe<string[]>;
 
-    ip?: ToStringArray | null;
+    ip: Maybe<string[]>;
 
-    mac?: ToStringArray | null;
+    mac: Maybe<string[]>;
 
-    name?: ToStringArray | null;
+    name: Maybe<string[]>;
 
-    os?: Os | null;
+    os: Maybe<Os>;
 
-    type?: ToStringArray | null;
+    type: Maybe<string[]>;
   };
 
   export type Os = {
     __typename?: 'OsEcsFields';
 
-    family?: ToStringArray | null;
+    family: Maybe<string[]>;
 
-    name?: ToStringArray | null;
+    name: Maybe<string[]>;
 
-    platform?: ToStringArray | null;
+    platform: Maybe<string[]>;
 
-    version?: ToStringArray | null;
+    version: Maybe<string[]>;
   };
 
   export type Cloud = {
     __typename?: 'CloudFields';
 
-    instance?: Instance | null;
+    instance: Maybe<Instance>;
 
-    machine?: Machine | null;
+    machine: Maybe<Machine>;
 
-    provider?: (string | null)[] | null;
+    provider: Maybe<(Maybe<string>)[]>;
 
-    region?: (string | null)[] | null;
+    region: Maybe<(Maybe<string>)[]>;
   };
 
   export type Instance = {
     __typename?: 'CloudInstance';
 
-    id?: (string | null)[] | null;
+    id: Maybe<(Maybe<string>)[]>;
   };
 
   export type Machine = {
     __typename?: 'CloudMachine';
 
-    type?: (string | null)[] | null;
+    type: Maybe<(Maybe<string>)[]>;
   };
 
   export type Inspect = {
@@ -2751,7 +2912,7 @@ export namespace GetHostOverviewQuery {
 export namespace GetIpOverviewQuery {
   export type Variables = {
     sourceId: string;
-    filterQuery?: string | null;
+    filterQuery?: Maybe<string>;
     ip: string;
     defaultIndex: string[];
     inspect: boolean;
@@ -2768,27 +2929,27 @@ export namespace GetIpOverviewQuery {
 
     id: string;
 
-    IpOverview?: IpOverview | null;
+    IpOverview: Maybe<IpOverview>;
   };
 
   export type IpOverview = {
     __typename?: 'IpOverviewData';
 
-    source?: _Source | null;
+    source: Maybe<_Source>;
 
-    destination?: Destination | null;
+    destination: Maybe<Destination>;
 
     host: Host;
 
-    inspect?: Inspect | null;
+    inspect: Maybe<Inspect>;
   };
 
   export type _Source = {
     __typename?: 'Overview';
 
-    firstSeen?: Date | null;
+    firstSeen: Maybe<string>;
 
-    lastSeen?: Date | null;
+    lastSeen: Maybe<string>;
 
     autonomousSystem: AutonomousSystem;
 
@@ -2798,49 +2959,49 @@ export namespace GetIpOverviewQuery {
   export type AutonomousSystem = {
     __typename?: 'AutonomousSystem';
 
-    number?: number | null;
+    number: Maybe<number>;
 
-    organization?: Organization | null;
+    organization: Maybe<Organization>;
   };
 
   export type Organization = {
     __typename?: 'AutonomousSystemOrganization';
 
-    name?: string | null;
+    name: Maybe<string>;
   };
 
   export type Geo = {
     __typename?: 'GeoEcsFields';
 
-    continent_name?: ToStringArray | null;
+    continent_name: Maybe<string[]>;
 
-    city_name?: ToStringArray | null;
+    city_name: Maybe<string[]>;
 
-    country_iso_code?: ToStringArray | null;
+    country_iso_code: Maybe<string[]>;
 
-    country_name?: ToStringArray | null;
+    country_name: Maybe<string[]>;
 
-    location?: Location | null;
+    location: Maybe<Location>;
 
-    region_iso_code?: ToStringArray | null;
+    region_iso_code: Maybe<string[]>;
 
-    region_name?: ToStringArray | null;
+    region_name: Maybe<string[]>;
   };
 
   export type Location = {
     __typename?: 'Location';
 
-    lat?: ToNumberArray | null;
+    lat: Maybe<number[]>;
 
-    lon?: ToNumberArray | null;
+    lon: Maybe<number[]>;
   };
 
   export type Destination = {
     __typename?: 'Overview';
 
-    firstSeen?: Date | null;
+    firstSeen: Maybe<string>;
 
-    lastSeen?: Date | null;
+    lastSeen: Maybe<string>;
 
     autonomousSystem: _AutonomousSystem;
 
@@ -2850,71 +3011,71 @@ export namespace GetIpOverviewQuery {
   export type _AutonomousSystem = {
     __typename?: 'AutonomousSystem';
 
-    number?: number | null;
+    number: Maybe<number>;
 
-    organization?: _Organization | null;
+    organization: Maybe<_Organization>;
   };
 
   export type _Organization = {
     __typename?: 'AutonomousSystemOrganization';
 
-    name?: string | null;
+    name: Maybe<string>;
   };
 
   export type _Geo = {
     __typename?: 'GeoEcsFields';
 
-    continent_name?: ToStringArray | null;
+    continent_name: Maybe<string[]>;
 
-    city_name?: ToStringArray | null;
+    city_name: Maybe<string[]>;
 
-    country_iso_code?: ToStringArray | null;
+    country_iso_code: Maybe<string[]>;
 
-    country_name?: ToStringArray | null;
+    country_name: Maybe<string[]>;
 
-    location?: _Location | null;
+    location: Maybe<_Location>;
 
-    region_iso_code?: ToStringArray | null;
+    region_iso_code: Maybe<string[]>;
 
-    region_name?: ToStringArray | null;
+    region_name: Maybe<string[]>;
   };
 
   export type _Location = {
     __typename?: 'Location';
 
-    lat?: ToNumberArray | null;
+    lat: Maybe<number[]>;
 
-    lon?: ToNumberArray | null;
+    lon: Maybe<number[]>;
   };
 
   export type Host = {
     __typename?: 'HostEcsFields';
 
-    architecture?: ToStringArray | null;
+    architecture: Maybe<string[]>;
 
-    id?: ToStringArray | null;
+    id: Maybe<string[]>;
 
-    ip?: ToStringArray | null;
+    ip: Maybe<string[]>;
 
-    mac?: ToStringArray | null;
+    mac: Maybe<string[]>;
 
-    name?: ToStringArray | null;
+    name: Maybe<string[]>;
 
-    os?: Os | null;
+    os: Maybe<Os>;
 
-    type?: ToStringArray | null;
+    type: Maybe<string[]>;
   };
 
   export type Os = {
     __typename?: 'OsEcsFields';
 
-    family?: ToStringArray | null;
+    family: Maybe<string[]>;
 
-    name?: ToStringArray | null;
+    name: Maybe<string[]>;
 
-    platform?: ToStringArray | null;
+    platform: Maybe<string[]>;
 
-    version?: ToStringArray | null;
+    version: Maybe<string[]>;
   };
 
   export type Inspect = {
@@ -2930,7 +3091,7 @@ export namespace GetKpiHostDetailsQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;
-    filterQuery?: string | null;
+    filterQuery?: Maybe<string>;
     defaultIndex: string[];
     inspect: boolean;
   };
@@ -2952,23 +3113,23 @@ export namespace GetKpiHostDetailsQuery {
   export type KpiHostDetails = {
     __typename?: 'KpiHostDetailsData';
 
-    authSuccess?: number | null;
+    authSuccess: Maybe<number>;
 
-    authSuccessHistogram?: AuthSuccessHistogram[] | null;
+    authSuccessHistogram: Maybe<AuthSuccessHistogram[]>;
 
-    authFailure?: number | null;
+    authFailure: Maybe<number>;
 
-    authFailureHistogram?: AuthFailureHistogram[] | null;
+    authFailureHistogram: Maybe<AuthFailureHistogram[]>;
 
-    uniqueSourceIps?: number | null;
+    uniqueSourceIps: Maybe<number>;
 
-    uniqueSourceIpsHistogram?: UniqueSourceIpsHistogram[] | null;
+    uniqueSourceIpsHistogram: Maybe<UniqueSourceIpsHistogram[]>;
 
-    uniqueDestinationIps?: number | null;
+    uniqueDestinationIps: Maybe<number>;
 
-    uniqueDestinationIpsHistogram?: UniqueDestinationIpsHistogram[] | null;
+    uniqueDestinationIpsHistogram: Maybe<UniqueDestinationIpsHistogram[]>;
 
-    inspect?: Inspect | null;
+    inspect: Maybe<Inspect>;
   };
 
   export type AuthSuccessHistogram = KpiHostDetailsChartFields.Fragment;
@@ -2992,7 +3153,7 @@ export namespace GetKpiHostsQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;
-    filterQuery?: string | null;
+    filterQuery?: Maybe<string>;
     defaultIndex: string[];
     inspect: boolean;
   };
@@ -3014,27 +3175,27 @@ export namespace GetKpiHostsQuery {
   export type KpiHosts = {
     __typename?: 'KpiHostsData';
 
-    hosts?: number | null;
+    hosts: Maybe<number>;
 
-    hostsHistogram?: HostsHistogram[] | null;
+    hostsHistogram: Maybe<HostsHistogram[]>;
 
-    authSuccess?: number | null;
+    authSuccess: Maybe<number>;
 
-    authSuccessHistogram?: AuthSuccessHistogram[] | null;
+    authSuccessHistogram: Maybe<AuthSuccessHistogram[]>;
 
-    authFailure?: number | null;
+    authFailure: Maybe<number>;
 
-    authFailureHistogram?: AuthFailureHistogram[] | null;
+    authFailureHistogram: Maybe<AuthFailureHistogram[]>;
 
-    uniqueSourceIps?: number | null;
+    uniqueSourceIps: Maybe<number>;
 
-    uniqueSourceIpsHistogram?: UniqueSourceIpsHistogram[] | null;
+    uniqueSourceIpsHistogram: Maybe<UniqueSourceIpsHistogram[]>;
 
-    uniqueDestinationIps?: number | null;
+    uniqueDestinationIps: Maybe<number>;
 
-    uniqueDestinationIpsHistogram?: UniqueDestinationIpsHistogram[] | null;
+    uniqueDestinationIpsHistogram: Maybe<UniqueDestinationIpsHistogram[]>;
 
-    inspect?: Inspect | null;
+    inspect: Maybe<Inspect>;
   };
 
   export type HostsHistogram = KpiHostChartFields.Fragment;
@@ -3060,7 +3221,7 @@ export namespace GetKpiNetworkQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;
-    filterQuery?: string | null;
+    filterQuery?: Maybe<string>;
     defaultIndex: string[];
     inspect: boolean;
   };
@@ -3076,29 +3237,29 @@ export namespace GetKpiNetworkQuery {
 
     id: string;
 
-    KpiNetwork?: KpiNetwork | null;
+    KpiNetwork: Maybe<KpiNetwork>;
   };
 
   export type KpiNetwork = {
     __typename?: 'KpiNetworkData';
 
-    networkEvents?: number | null;
+    networkEvents: Maybe<number>;
 
-    uniqueFlowId?: number | null;
+    uniqueFlowId: Maybe<number>;
 
-    uniqueSourcePrivateIps?: number | null;
+    uniqueSourcePrivateIps: Maybe<number>;
 
-    uniqueSourcePrivateIpsHistogram?: UniqueSourcePrivateIpsHistogram[] | null;
+    uniqueSourcePrivateIpsHistogram: Maybe<UniqueSourcePrivateIpsHistogram[]>;
 
-    uniqueDestinationPrivateIps?: number | null;
+    uniqueDestinationPrivateIps: Maybe<number>;
 
-    uniqueDestinationPrivateIpsHistogram?: UniqueDestinationPrivateIpsHistogram[] | null;
+    uniqueDestinationPrivateIpsHistogram: Maybe<UniqueDestinationPrivateIpsHistogram[]>;
 
-    dnsQueries?: number | null;
+    dnsQueries: Maybe<number>;
 
-    tlsHandshakes?: number | null;
+    tlsHandshakes: Maybe<number>;
 
-    inspect?: Inspect | null;
+    inspect: Maybe<Inspect>;
   };
 
   export type UniqueSourcePrivateIpsHistogram = KpiNetworkChartFields.Fragment;
@@ -3121,7 +3282,7 @@ export namespace GetNetworkDnsQuery {
     isPtrIncluded: boolean;
     timerange: TimerangeInput;
     pagination: PaginationInputPaginated;
-    filterQuery?: string | null;
+    filterQuery?: Maybe<string>;
     defaultIndex: string[];
     inspect: boolean;
   };
@@ -3149,7 +3310,7 @@ export namespace GetNetworkDnsQuery {
 
     pageInfo: PageInfo;
 
-    inspect?: Inspect | null;
+    inspect: Maybe<Inspect>;
   };
 
   export type Edges = {
@@ -3163,23 +3324,226 @@ export namespace GetNetworkDnsQuery {
   export type Node = {
     __typename?: 'NetworkDnsItem';
 
-    _id?: string | null;
+    _id: Maybe<string>;
 
-    dnsBytesIn?: number | null;
+    dnsBytesIn: Maybe<number>;
 
-    dnsBytesOut?: number | null;
+    dnsBytesOut: Maybe<number>;
 
-    dnsName?: string | null;
+    dnsName: Maybe<string>;
 
-    queryCount?: number | null;
+    queryCount: Maybe<number>;
 
-    uniqueDomains?: number | null;
+    uniqueDomains: Maybe<number>;
   };
 
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value?: string | null;
+    value: Maybe<string>;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfoPaginated';
+
+    activePage: number;
+
+    fakeTotalCount: number;
+
+    showMorePagesIndicator: boolean;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
+export namespace GetNetworkHttpQuery {
+  export type Variables = {
+    sourceId: string;
+    ip?: Maybe<string>;
+    filterQuery?: Maybe<string>;
+    pagination: PaginationInputPaginated;
+    sort: NetworkHttpSortField;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    NetworkHttp: NetworkHttp;
+  };
+
+  export type NetworkHttp = {
+    __typename?: 'NetworkHttpData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type Edges = {
+    __typename?: 'NetworkHttpEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'NetworkHttpItem';
+
+    domains: string[];
+
+    lastHost: Maybe<string>;
+
+    lastSourceIp: Maybe<string>;
+
+    methods: string[];
+
+    path: Maybe<string>;
+
+    requestCount: Maybe<number>;
+
+    statuses: string[];
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: Maybe<string>;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfoPaginated';
+
+    activePage: number;
+
+    fakeTotalCount: number;
+
+    showMorePagesIndicator: boolean;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
+export namespace GetNetworkTopCountriesQuery {
+  export type Variables = {
+    sourceId: string;
+    ip?: Maybe<string>;
+    filterQuery?: Maybe<string>;
+    pagination: PaginationInputPaginated;
+    sort: NetworkTopTablesSortField;
+    flowTarget: FlowTargetSourceDest;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    NetworkTopCountries: NetworkTopCountries;
+  };
+
+  export type NetworkTopCountries = {
+    __typename?: 'NetworkTopCountriesData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type Edges = {
+    __typename?: 'NetworkTopCountriesEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'NetworkTopCountriesItem';
+
+    source: Maybe<_Source>;
+
+    destination: Maybe<Destination>;
+
+    network: Maybe<Network>;
+  };
+
+  export type _Source = {
+    __typename?: 'TopCountriesItemSource';
+
+    country: Maybe<string>;
+
+    destination_ips: Maybe<number>;
+
+    flows: Maybe<number>;
+
+    source_ips: Maybe<number>;
+  };
+
+  export type Destination = {
+    __typename?: 'TopCountriesItemDestination';
+
+    country: Maybe<string>;
+
+    destination_ips: Maybe<number>;
+
+    flows: Maybe<number>;
+
+    source_ips: Maybe<number>;
+  };
+
+  export type Network = {
+    __typename?: 'TopNetworkTablesEcsField';
+
+    bytes_in: Maybe<number>;
+
+    bytes_out: Maybe<number>;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: Maybe<string>;
   };
 
   export type PageInfo = {
@@ -3204,10 +3568,11 @@ export namespace GetNetworkDnsQuery {
 export namespace GetNetworkTopNFlowQuery {
   export type Variables = {
     sourceId: string;
-    filterQuery?: string | null;
+    ip?: Maybe<string>;
+    filterQuery?: Maybe<string>;
     pagination: PaginationInputPaginated;
-    sort: NetworkTopNFlowSortField;
-    flowTarget: FlowTargetNew;
+    sort: NetworkTopTablesSortField;
+    flowTarget: FlowTargetSourceDest;
     timerange: TimerangeInput;
     defaultIndex: string[];
     inspect: boolean;
@@ -3236,7 +3601,7 @@ export namespace GetNetworkTopNFlowQuery {
 
     pageInfo: PageInfo;
 
-    inspect?: Inspect | null;
+    inspect: Maybe<Inspect>;
   };
 
   export type Edges = {
@@ -3250,121 +3615,121 @@ export namespace GetNetworkTopNFlowQuery {
   export type Node = {
     __typename?: 'NetworkTopNFlowItem';
 
-    source?: _Source | null;
+    source: Maybe<_Source>;
 
-    destination?: Destination | null;
+    destination: Maybe<Destination>;
 
-    network?: Network | null;
+    network: Maybe<Network>;
   };
 
   export type _Source = {
     __typename?: 'TopNFlowItemSource';
 
-    autonomous_system?: AutonomousSystem | null;
+    autonomous_system: Maybe<AutonomousSystem>;
 
-    domain?: string[] | null;
+    domain: Maybe<string[]>;
 
-    ip?: string | null;
+    ip: Maybe<string>;
 
-    location?: Location | null;
+    location: Maybe<Location>;
 
-    flows?: number | null;
+    flows: Maybe<number>;
 
-    destination_ips?: number | null;
+    destination_ips: Maybe<number>;
   };
 
   export type AutonomousSystem = {
     __typename?: 'AutonomousSystemItem';
 
-    name?: string | null;
+    name: Maybe<string>;
 
-    number?: number | null;
+    number: Maybe<number>;
   };
 
   export type Location = {
     __typename?: 'GeoItem';
 
-    geo?: Geo | null;
+    geo: Maybe<Geo>;
 
-    flowTarget?: FlowTarget | null;
+    flowTarget: Maybe<FlowTargetSourceDest>;
   };
 
   export type Geo = {
     __typename?: 'GeoEcsFields';
 
-    continent_name?: ToStringArray | null;
+    continent_name: Maybe<string[]>;
 
-    country_name?: ToStringArray | null;
+    country_name: Maybe<string[]>;
 
-    country_iso_code?: ToStringArray | null;
+    country_iso_code: Maybe<string[]>;
 
-    city_name?: ToStringArray | null;
+    city_name: Maybe<string[]>;
 
-    region_iso_code?: ToStringArray | null;
+    region_iso_code: Maybe<string[]>;
 
-    region_name?: ToStringArray | null;
+    region_name: Maybe<string[]>;
   };
 
   export type Destination = {
     __typename?: 'TopNFlowItemDestination';
 
-    autonomous_system?: _AutonomousSystem | null;
+    autonomous_system: Maybe<_AutonomousSystem>;
 
-    domain?: string[] | null;
+    domain: Maybe<string[]>;
 
-    ip?: string | null;
+    ip: Maybe<string>;
 
-    location?: _Location | null;
+    location: Maybe<_Location>;
 
-    flows?: number | null;
+    flows: Maybe<number>;
 
-    source_ips?: number | null;
+    source_ips: Maybe<number>;
   };
 
   export type _AutonomousSystem = {
     __typename?: 'AutonomousSystemItem';
 
-    name?: string | null;
+    name: Maybe<string>;
 
-    number?: number | null;
+    number: Maybe<number>;
   };
 
   export type _Location = {
     __typename?: 'GeoItem';
 
-    geo?: _Geo | null;
+    geo: Maybe<_Geo>;
 
-    flowTarget?: FlowTarget | null;
+    flowTarget: Maybe<FlowTargetSourceDest>;
   };
 
   export type _Geo = {
     __typename?: 'GeoEcsFields';
 
-    continent_name?: ToStringArray | null;
+    continent_name: Maybe<string[]>;
 
-    country_name?: ToStringArray | null;
+    country_name: Maybe<string[]>;
 
-    country_iso_code?: ToStringArray | null;
+    country_iso_code: Maybe<string[]>;
 
-    city_name?: ToStringArray | null;
+    city_name: Maybe<string[]>;
 
-    region_iso_code?: ToStringArray | null;
+    region_iso_code: Maybe<string[]>;
 
-    region_name?: ToStringArray | null;
+    region_name: Maybe<string[]>;
   };
 
   export type Network = {
-    __typename?: 'TopNFlowNetworkEcsField';
+    __typename?: 'TopNetworkTablesEcsField';
 
-    bytes_in?: number | null;
+    bytes_in: Maybe<number>;
 
-    bytes_out?: number | null;
+    bytes_out: Maybe<number>;
   };
 
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value?: string | null;
+    value: Maybe<string>;
   };
 
   export type PageInfo = {
@@ -3390,7 +3755,7 @@ export namespace GetOverviewHostQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;
-    filterQuery?: string | null;
+    filterQuery?: Maybe<string>;
     defaultIndex: string[];
     inspect: boolean;
   };
@@ -3406,29 +3771,43 @@ export namespace GetOverviewHostQuery {
 
     id: string;
 
-    OverviewHost?: OverviewHost | null;
+    OverviewHost: Maybe<OverviewHost>;
   };
 
   export type OverviewHost = {
     __typename?: 'OverviewHostData';
 
-    auditbeatAuditd?: number | null;
+    auditbeatAuditd: Maybe<number>;
 
-    auditbeatFIM?: number | null;
+    auditbeatFIM: Maybe<number>;
 
-    auditbeatLogin?: number | null;
+    auditbeatLogin: Maybe<number>;
 
-    auditbeatPackage?: number | null;
+    auditbeatPackage: Maybe<number>;
 
-    auditbeatProcess?: number | null;
+    auditbeatProcess: Maybe<number>;
 
-    auditbeatUser?: number | null;
+    auditbeatUser: Maybe<number>;
 
-    filebeatSystemModule?: number | null;
+    endgameDns: Maybe<number>;
 
-    winlogbeat?: number | null;
+    endgameFile: Maybe<number>;
 
-    inspect?: Inspect | null;
+    endgameImageLoad: Maybe<number>;
+
+    endgameNetwork: Maybe<number>;
+
+    endgameProcess: Maybe<number>;
+
+    endgameRegistry: Maybe<number>;
+
+    endgameSecurity: Maybe<number>;
+
+    filebeatSystemModule: Maybe<number>;
+
+    winlogbeat: Maybe<number>;
+
+    inspect: Maybe<Inspect>;
   };
 
   export type Inspect = {
@@ -3444,7 +3823,7 @@ export namespace GetOverviewNetworkQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;
-    filterQuery?: string | null;
+    filterQuery?: Maybe<string>;
     defaultIndex: string[];
     inspect: boolean;
   };
@@ -3460,31 +3839,31 @@ export namespace GetOverviewNetworkQuery {
 
     id: string;
 
-    OverviewNetwork?: OverviewNetwork | null;
+    OverviewNetwork: Maybe<OverviewNetwork>;
   };
 
   export type OverviewNetwork = {
     __typename?: 'OverviewNetworkData';
 
-    auditbeatSocket?: number | null;
+    auditbeatSocket: Maybe<number>;
 
-    filebeatCisco?: number | null;
+    filebeatCisco: Maybe<number>;
 
-    filebeatNetflow?: number | null;
+    filebeatNetflow: Maybe<number>;
 
-    filebeatPanw?: number | null;
+    filebeatPanw: Maybe<number>;
 
-    filebeatSuricata?: number | null;
+    filebeatSuricata: Maybe<number>;
 
-    filebeatZeek?: number | null;
+    filebeatZeek: Maybe<number>;
 
-    packetbeatDNS?: number | null;
+    packetbeatDNS: Maybe<number>;
 
-    packetbeatFlow?: number | null;
+    packetbeatFlow: Maybe<number>;
 
-    packetbeatTLS?: number | null;
+    packetbeatTLS: Maybe<number>;
 
-    inspect?: Inspect | null;
+    inspect: Maybe<Inspect>;
   };
 
   export type Inspect = {
@@ -3498,7 +3877,7 @@ export namespace GetOverviewNetworkQuery {
 
 export namespace SourceQuery {
   export type Variables = {
-    sourceId?: string | null;
+    sourceId?: Maybe<string>;
     defaultIndex: string[];
   };
 
@@ -3529,11 +3908,11 @@ export namespace SourceQuery {
 
     category: string;
 
-    description?: string | null;
+    description: Maybe<string>;
 
-    example?: string | null;
+    example: Maybe<string>;
 
-    indexes: (string | null)[];
+    indexes: (Maybe<string>)[];
 
     name: string;
 
@@ -3543,16 +3922,16 @@ export namespace SourceQuery {
 
     aggregatable: boolean;
 
-    format?: string | null;
+    format: Maybe<string>;
   };
 }
 
 export namespace GetAllTimeline {
   export type Variables = {
     pageInfo: PageInfoTimeline;
-    search?: string | null;
-    sort?: SortTimeline | null;
-    onlyUserFavorite?: boolean | null;
+    search?: Maybe<string>;
+    sort?: Maybe<SortTimeline>;
+    onlyUserFavorite?: Maybe<boolean>;
   };
 
   export type Query = {
@@ -3564,9 +3943,9 @@ export namespace GetAllTimeline {
   export type GetAllTimeline = {
     __typename?: 'ResponseTimelines';
 
-    totalCount?: number | null;
+    totalCount: Maybe<number>;
 
-    timeline: (Timeline | null)[];
+    timeline: (Maybe<Timeline>)[];
   };
 
   export type Timeline = {
@@ -3574,27 +3953,27 @@ export namespace GetAllTimeline {
 
     savedObjectId: string;
 
-    description?: string | null;
+    description: Maybe<string>;
 
-    favorite?: Favorite[] | null;
+    favorite: Maybe<Favorite[]>;
 
-    eventIdToNoteIds?: EventIdToNoteIds[] | null;
+    eventIdToNoteIds: Maybe<EventIdToNoteIds[]>;
 
-    notes?: Notes[] | null;
+    notes: Maybe<Notes[]>;
 
-    noteIds?: string[] | null;
+    noteIds: Maybe<string[]>;
 
-    pinnedEventIds?: string[] | null;
+    pinnedEventIds: Maybe<string[]>;
 
-    title?: string | null;
+    title: Maybe<string>;
 
-    created?: number | null;
+    created: Maybe<number>;
 
-    createdBy?: string | null;
+    createdBy: Maybe<string>;
 
-    updated?: number | null;
+    updated: Maybe<number>;
 
-    updatedBy?: string | null;
+    updatedBy: Maybe<string>;
 
     version: string;
   };
@@ -3602,59 +3981,59 @@ export namespace GetAllTimeline {
   export type Favorite = {
     __typename?: 'FavoriteTimelineResult';
 
-    fullName?: string | null;
+    fullName: Maybe<string>;
 
-    userName?: string | null;
+    userName: Maybe<string>;
 
-    favoriteDate?: number | null;
+    favoriteDate: Maybe<number>;
   };
 
   export type EventIdToNoteIds = {
     __typename?: 'NoteResult';
 
-    eventId?: string | null;
+    eventId: Maybe<string>;
 
-    note?: string | null;
+    note: Maybe<string>;
 
-    timelineId?: string | null;
+    timelineId: Maybe<string>;
 
     noteId: string;
 
-    created?: number | null;
+    created: Maybe<number>;
 
-    createdBy?: string | null;
+    createdBy: Maybe<string>;
 
-    timelineVersion?: string | null;
+    timelineVersion: Maybe<string>;
 
-    updated?: number | null;
+    updated: Maybe<number>;
 
-    updatedBy?: string | null;
+    updatedBy: Maybe<string>;
 
-    version?: string | null;
+    version: Maybe<string>;
   };
 
   export type Notes = {
     __typename?: 'NoteResult';
 
-    eventId?: string | null;
+    eventId: Maybe<string>;
 
-    note?: string | null;
+    note: Maybe<string>;
 
-    timelineId?: string | null;
+    timelineId: Maybe<string>;
 
-    timelineVersion?: string | null;
+    timelineVersion: Maybe<string>;
 
     noteId: string;
 
-    created?: number | null;
+    created: Maybe<number>;
 
-    createdBy?: string | null;
+    createdBy: Maybe<string>;
 
-    updated?: number | null;
+    updated: Maybe<number>;
 
-    updatedBy?: string | null;
+    updatedBy: Maybe<string>;
 
-    version?: string | null;
+    version: Maybe<string>;
   };
 }
 
@@ -3695,7 +4074,7 @@ export namespace GetTimelineDetailsQuery {
   export type TimelineDetails = {
     __typename?: 'TimelineDetailsData';
 
-    data?: Data[] | null;
+    data: Maybe<Data[]>;
   };
 
   export type Data = {
@@ -3703,15 +4082,15 @@ export namespace GetTimelineDetailsQuery {
 
     field: string;
 
-    values?: ToStringArray | null;
+    values: Maybe<string[]>;
 
-    originalValue?: EsValue | null;
+    originalValue: Maybe<EsValue>;
   };
 }
 
 export namespace PersistTimelineFavoriteMutation {
   export type Variables = {
-    timelineId?: string | null;
+    timelineId?: Maybe<string>;
   };
 
   export type Mutation = {
@@ -3727,17 +4106,17 @@ export namespace PersistTimelineFavoriteMutation {
 
     version: string;
 
-    favorite?: Favorite[] | null;
+    favorite: Maybe<Favorite[]>;
   };
 
   export type Favorite = {
     __typename?: 'FavoriteTimelineResult';
 
-    fullName?: string | null;
+    fullName: Maybe<string>;
 
-    userName?: string | null;
+    userName: Maybe<string>;
 
-    favoriteDate?: number | null;
+    favoriteDate: Maybe<number>;
   };
 }
 
@@ -3747,7 +4126,7 @@ export namespace GetTimelineQuery {
     fieldRequested: string[];
     pagination: PaginationInput;
     sortField: SortField;
-    filterQuery?: string | null;
+    filterQuery?: Maybe<string>;
     defaultIndex: string[];
     inspect: boolean;
   };
@@ -3771,7 +4150,7 @@ export namespace GetTimelineQuery {
 
     totalCount: number;
 
-    inspect?: Inspect | null;
+    inspect: Maybe<Inspect>;
 
     pageInfo: PageInfo;
 
@@ -3789,17 +4168,17 @@ export namespace GetTimelineQuery {
   export type PageInfo = {
     __typename?: 'PageInfo';
 
-    endCursor?: EndCursor | null;
+    endCursor: Maybe<EndCursor>;
 
-    hasNextPage?: boolean | null;
+    hasNextPage: Maybe<boolean>;
   };
 
   export type EndCursor = {
     __typename?: 'CursorType';
 
-    value?: string | null;
+    value: Maybe<string>;
 
-    tiebreaker?: string | null;
+    tiebreaker: Maybe<string>;
   };
 
   export type Edges = {
@@ -3813,7 +4192,7 @@ export namespace GetTimelineQuery {
 
     _id: string;
 
-    _index?: string | null;
+    _index: Maybe<string>;
 
     data: Data[];
 
@@ -3825,7 +4204,7 @@ export namespace GetTimelineQuery {
 
     field: string;
 
-    value?: ToStringArray | null;
+    value: Maybe<string[]>;
   };
 
   export type Ecs = {
@@ -3833,606 +4212,684 @@ export namespace GetTimelineQuery {
 
     _id: string;
 
-    _index?: string | null;
+    _index: Maybe<string>;
 
-    timestamp?: Date | null;
+    timestamp: Maybe<string>;
 
-    message?: ToStringArray | null;
+    message: Maybe<string[]>;
 
-    system?: System | null;
+    system: Maybe<System>;
 
-    event?: Event | null;
+    event: Maybe<Event>;
 
-    auditd?: Auditd | null;
+    auditd: Maybe<Auditd>;
 
-    file?: File | null;
+    file: Maybe<File>;
 
-    host?: Host | null;
+    host: Maybe<Host>;
 
-    source?: _Source | null;
+    source: Maybe<_Source>;
 
-    destination?: Destination | null;
+    destination: Maybe<Destination>;
 
-    geo?: __Geo | null;
+    dns: Maybe<Dns>;
 
-    suricata?: Suricata | null;
+    endgame: Maybe<Endgame>;
 
-    network?: Network | null;
+    geo: Maybe<__Geo>;
 
-    http?: Http | null;
+    suricata: Maybe<Suricata>;
 
-    tls?: Tls | null;
+    network: Maybe<Network>;
 
-    url?: Url | null;
+    http: Maybe<Http>;
 
-    user?: User | null;
+    tls: Maybe<Tls>;
 
-    process?: Process | null;
+    url: Maybe<Url>;
 
-    zeek?: Zeek | null;
+    user: Maybe<User>;
+
+    winlog: Maybe<Winlog>;
+
+    process: Maybe<Process>;
+
+    zeek: Maybe<Zeek>;
   };
 
   export type System = {
     __typename?: 'SystemEcsField';
 
-    auth?: Auth | null;
+    auth: Maybe<Auth>;
 
-    audit?: Audit | null;
+    audit: Maybe<Audit>;
   };
 
   export type Auth = {
     __typename?: 'AuthEcsFields';
 
-    ssh?: Ssh | null;
+    ssh: Maybe<Ssh>;
   };
 
   export type Ssh = {
     __typename?: 'SshEcsFields';
 
-    signature?: ToStringArray | null;
+    signature: Maybe<string[]>;
 
-    method?: ToStringArray | null;
+    method: Maybe<string[]>;
   };
 
   export type Audit = {
     __typename?: 'AuditEcsFields';
 
-    package?: Package | null;
+    package: Maybe<Package>;
   };
 
   export type Package = {
     __typename?: 'PackageEcsFields';
 
-    arch?: ToStringArray | null;
+    arch: Maybe<string[]>;
 
-    entity_id?: ToStringArray | null;
+    entity_id: Maybe<string[]>;
 
-    name?: ToStringArray | null;
+    name: Maybe<string[]>;
 
-    size?: ToNumberArray | null;
+    size: Maybe<number[]>;
 
-    summary?: ToStringArray | null;
+    summary: Maybe<string[]>;
 
-    version?: ToStringArray | null;
+    version: Maybe<string[]>;
   };
 
   export type Event = {
     __typename?: 'EventEcsFields';
 
-    action?: ToStringArray | null;
+    action: Maybe<string[]>;
 
-    category?: ToStringArray | null;
+    category: Maybe<string[]>;
 
-    created?: ToDateArray | null;
+    code: Maybe<string[]>;
 
-    dataset?: ToStringArray | null;
+    created: Maybe<string[]>;
 
-    duration?: ToNumberArray | null;
+    dataset: Maybe<string[]>;
 
-    end?: ToDateArray | null;
+    duration: Maybe<number[]>;
 
-    hash?: ToStringArray | null;
+    end: Maybe<string[]>;
 
-    id?: ToStringArray | null;
+    hash: Maybe<string[]>;
 
-    kind?: ToStringArray | null;
+    id: Maybe<string[]>;
 
-    module?: ToStringArray | null;
+    kind: Maybe<string[]>;
 
-    original?: ToStringArray | null;
+    module: Maybe<string[]>;
 
-    outcome?: ToStringArray | null;
+    original: Maybe<string[]>;
 
-    risk_score?: ToNumberArray | null;
+    outcome: Maybe<string[]>;
 
-    risk_score_norm?: ToNumberArray | null;
+    risk_score: Maybe<number[]>;
 
-    severity?: ToNumberArray | null;
+    risk_score_norm: Maybe<number[]>;
 
-    start?: ToDateArray | null;
+    severity: Maybe<number[]>;
 
-    timezone?: ToStringArray | null;
+    start: Maybe<string[]>;
 
-    type?: ToStringArray | null;
+    timezone: Maybe<string[]>;
+
+    type: Maybe<string[]>;
   };
 
   export type Auditd = {
     __typename?: 'AuditdEcsFields';
 
-    result?: ToStringArray | null;
+    result: Maybe<string[]>;
 
-    session?: ToStringArray | null;
+    session: Maybe<string[]>;
 
-    data?: _Data | null;
+    data: Maybe<_Data>;
 
-    summary?: Summary | null;
+    summary: Maybe<Summary>;
   };
 
   export type _Data = {
     __typename?: 'AuditdData';
 
-    acct?: ToStringArray | null;
+    acct: Maybe<string[]>;
 
-    terminal?: ToStringArray | null;
+    terminal: Maybe<string[]>;
 
-    op?: ToStringArray | null;
+    op: Maybe<string[]>;
   };
 
   export type Summary = {
     __typename?: 'Summary';
 
-    actor?: Actor | null;
+    actor: Maybe<Actor>;
 
-    object?: Object | null;
+    object: Maybe<Object>;
 
-    how?: ToStringArray | null;
+    how: Maybe<string[]>;
 
-    message_type?: ToStringArray | null;
+    message_type: Maybe<string[]>;
 
-    sequence?: ToStringArray | null;
+    sequence: Maybe<string[]>;
   };
 
   export type Actor = {
     __typename?: 'PrimarySecondary';
 
-    primary?: ToStringArray | null;
+    primary: Maybe<string[]>;
 
-    secondary?: ToStringArray | null;
+    secondary: Maybe<string[]>;
   };
 
   export type Object = {
     __typename?: 'PrimarySecondary';
 
-    primary?: ToStringArray | null;
+    primary: Maybe<string[]>;
 
-    secondary?: ToStringArray | null;
+    secondary: Maybe<string[]>;
 
-    type?: ToStringArray | null;
+    type: Maybe<string[]>;
   };
 
   export type File = {
     __typename?: 'FileFields';
 
-    path?: ToStringArray | null;
+    name: Maybe<string[]>;
 
-    target_path?: ToStringArray | null;
+    path: Maybe<string[]>;
 
-    extension?: ToStringArray | null;
+    target_path: Maybe<string[]>;
 
-    type?: ToStringArray | null;
+    extension: Maybe<string[]>;
 
-    device?: ToStringArray | null;
+    type: Maybe<string[]>;
 
-    inode?: ToStringArray | null;
+    device: Maybe<string[]>;
 
-    uid?: ToStringArray | null;
+    inode: Maybe<string[]>;
 
-    owner?: ToStringArray | null;
+    uid: Maybe<string[]>;
 
-    gid?: ToStringArray | null;
+    owner: Maybe<string[]>;
 
-    group?: ToStringArray | null;
+    gid: Maybe<string[]>;
 
-    mode?: ToStringArray | null;
+    group: Maybe<string[]>;
 
-    size?: ToNumberArray | null;
+    mode: Maybe<string[]>;
 
-    mtime?: ToDateArray | null;
+    size: Maybe<number[]>;
 
-    ctime?: ToDateArray | null;
+    mtime: Maybe<string[]>;
+
+    ctime: Maybe<string[]>;
   };
 
   export type Host = {
     __typename?: 'HostEcsFields';
 
-    id?: ToStringArray | null;
+    id: Maybe<string[]>;
 
-    name?: ToStringArray | null;
+    name: Maybe<string[]>;
 
-    ip?: ToStringArray | null;
+    ip: Maybe<string[]>;
   };
 
   export type _Source = {
     __typename?: 'SourceEcsFields';
 
-    bytes?: ToNumberArray | null;
+    bytes: Maybe<number[]>;
 
-    ip?: ToStringArray | null;
+    ip: Maybe<string[]>;
 
-    packets?: ToNumberArray | null;
+    packets: Maybe<number[]>;
 
-    port?: ToNumberArray | null;
+    port: Maybe<number[]>;
 
-    geo?: Geo | null;
+    geo: Maybe<Geo>;
   };
 
   export type Geo = {
     __typename?: 'GeoEcsFields';
 
-    continent_name?: ToStringArray | null;
+    continent_name: Maybe<string[]>;
 
-    country_name?: ToStringArray | null;
+    country_name: Maybe<string[]>;
 
-    country_iso_code?: ToStringArray | null;
+    country_iso_code: Maybe<string[]>;
 
-    city_name?: ToStringArray | null;
+    city_name: Maybe<string[]>;
 
-    region_iso_code?: ToStringArray | null;
+    region_iso_code: Maybe<string[]>;
 
-    region_name?: ToStringArray | null;
+    region_name: Maybe<string[]>;
   };
 
   export type Destination = {
     __typename?: 'DestinationEcsFields';
 
-    bytes?: ToNumberArray | null;
+    bytes: Maybe<number[]>;
 
-    ip?: ToStringArray | null;
+    ip: Maybe<string[]>;
 
-    packets?: ToNumberArray | null;
+    packets: Maybe<number[]>;
 
-    port?: ToNumberArray | null;
+    port: Maybe<number[]>;
 
-    geo?: _Geo | null;
+    geo: Maybe<_Geo>;
   };
 
   export type _Geo = {
     __typename?: 'GeoEcsFields';
 
-    continent_name?: ToStringArray | null;
+    continent_name: Maybe<string[]>;
 
-    country_name?: ToStringArray | null;
+    country_name: Maybe<string[]>;
 
-    country_iso_code?: ToStringArray | null;
+    country_iso_code: Maybe<string[]>;
 
-    city_name?: ToStringArray | null;
+    city_name: Maybe<string[]>;
 
-    region_iso_code?: ToStringArray | null;
+    region_iso_code: Maybe<string[]>;
 
-    region_name?: ToStringArray | null;
+    region_name: Maybe<string[]>;
+  };
+
+  export type Dns = {
+    __typename?: 'DnsEcsFields';
+
+    question: Maybe<Question>;
+
+    resolved_ip: Maybe<string[]>;
+
+    response_code: Maybe<string[]>;
+  };
+
+  export type Question = {
+    __typename?: 'DnsQuestionData';
+
+    name: Maybe<string[]>;
+
+    type: Maybe<string[]>;
+  };
+
+  export type Endgame = {
+    __typename?: 'EndgameEcsFields';
+
+    exit_code: Maybe<number[]>;
+
+    file_name: Maybe<string[]>;
+
+    file_path: Maybe<string[]>;
+
+    logon_type: Maybe<number[]>;
+
+    parent_process_name: Maybe<string[]>;
+
+    pid: Maybe<number[]>;
+
+    process_name: Maybe<string[]>;
+
+    subject_domain_name: Maybe<string[]>;
+
+    subject_logon_id: Maybe<string[]>;
+
+    subject_user_name: Maybe<string[]>;
+
+    target_domain_name: Maybe<string[]>;
+
+    target_logon_id: Maybe<string[]>;
+
+    target_user_name: Maybe<string[]>;
   };
 
   export type __Geo = {
     __typename?: 'GeoEcsFields';
 
-    region_name?: ToStringArray | null;
+    region_name: Maybe<string[]>;
 
-    country_iso_code?: ToStringArray | null;
+    country_iso_code: Maybe<string[]>;
   };
 
   export type Suricata = {
     __typename?: 'SuricataEcsFields';
 
-    eve?: Eve | null;
+    eve: Maybe<Eve>;
   };
 
   export type Eve = {
     __typename?: 'SuricataEveData';
 
-    proto?: ToStringArray | null;
+    proto: Maybe<string[]>;
 
-    flow_id?: ToNumberArray | null;
+    flow_id: Maybe<number[]>;
 
-    alert?: Alert | null;
+    alert: Maybe<Alert>;
   };
 
   export type Alert = {
     __typename?: 'SuricataAlertData';
 
-    signature?: ToStringArray | null;
+    signature: Maybe<string[]>;
 
-    signature_id?: ToNumberArray | null;
+    signature_id: Maybe<number[]>;
   };
 
   export type Network = {
     __typename?: 'NetworkEcsField';
 
-    bytes?: ToNumberArray | null;
+    bytes: Maybe<number[]>;
 
-    community_id?: ToStringArray | null;
+    community_id: Maybe<string[]>;
 
-    direction?: ToStringArray | null;
+    direction: Maybe<string[]>;
 
-    packets?: ToNumberArray | null;
+    packets: Maybe<number[]>;
 
-    protocol?: ToStringArray | null;
+    protocol: Maybe<string[]>;
 
-    transport?: ToStringArray | null;
+    transport: Maybe<string[]>;
   };
 
   export type Http = {
     __typename?: 'HttpEcsFields';
 
-    version?: ToStringArray | null;
+    version: Maybe<string[]>;
 
-    request?: Request | null;
+    request: Maybe<Request>;
 
-    response?: Response | null;
+    response: Maybe<Response>;
   };
 
   export type Request = {
     __typename?: 'HttpRequestData';
 
-    method?: ToStringArray | null;
+    method: Maybe<string[]>;
 
-    body?: Body | null;
+    body: Maybe<Body>;
 
-    referrer?: ToStringArray | null;
+    referrer: Maybe<string[]>;
   };
 
   export type Body = {
     __typename?: 'HttpBodyData';
 
-    bytes?: ToNumberArray | null;
+    bytes: Maybe<number[]>;
 
-    content?: ToStringArray | null;
+    content: Maybe<string[]>;
   };
 
   export type Response = {
     __typename?: 'HttpResponseData';
 
-    status_code?: ToNumberArray | null;
+    status_code: Maybe<number[]>;
 
-    body?: _Body | null;
+    body: Maybe<_Body>;
   };
 
   export type _Body = {
     __typename?: 'HttpBodyData';
 
-    bytes?: ToNumberArray | null;
+    bytes: Maybe<number[]>;
 
-    content?: ToStringArray | null;
+    content: Maybe<string[]>;
   };
 
   export type Tls = {
     __typename?: 'TlsEcsFields';
 
-    client_certificate?: ClientCertificate | null;
+    client_certificate: Maybe<ClientCertificate>;
 
-    fingerprints?: Fingerprints | null;
+    fingerprints: Maybe<Fingerprints>;
 
-    server_certificate?: ServerCertificate | null;
+    server_certificate: Maybe<ServerCertificate>;
   };
 
   export type ClientCertificate = {
     __typename?: 'TlsClientCertificateData';
 
-    fingerprint?: Fingerprint | null;
+    fingerprint: Maybe<Fingerprint>;
   };
 
   export type Fingerprint = {
     __typename?: 'FingerprintData';
 
-    sha1?: ToStringArray | null;
+    sha1: Maybe<string[]>;
   };
 
   export type Fingerprints = {
     __typename?: 'TlsFingerprintsData';
 
-    ja3?: Ja3 | null;
+    ja3: Maybe<Ja3>;
   };
 
   export type Ja3 = {
     __typename?: 'TlsJa3Data';
 
-    hash?: ToStringArray | null;
+    hash: Maybe<string[]>;
   };
 
   export type ServerCertificate = {
     __typename?: 'TlsServerCertificateData';
 
-    fingerprint?: _Fingerprint | null;
+    fingerprint: Maybe<_Fingerprint>;
   };
 
   export type _Fingerprint = {
     __typename?: 'FingerprintData';
 
-    sha1?: ToStringArray | null;
+    sha1: Maybe<string[]>;
   };
 
   export type Url = {
     __typename?: 'UrlEcsFields';
 
-    original?: ToStringArray | null;
+    original: Maybe<string[]>;
 
-    domain?: ToStringArray | null;
+    domain: Maybe<string[]>;
 
-    username?: ToStringArray | null;
+    username: Maybe<string[]>;
 
-    password?: ToStringArray | null;
+    password: Maybe<string[]>;
   };
 
   export type User = {
     __typename?: 'UserEcsFields';
 
-    name?: ToStringArray | null;
+    domain: Maybe<string[]>;
+
+    name: Maybe<string[]>;
+  };
+
+  export type Winlog = {
+    __typename?: 'WinlogEcsFields';
+
+    event_id: Maybe<number[]>;
   };
 
   export type Process = {
     __typename?: 'ProcessEcsFields';
 
-    pid?: ToNumberArray | null;
+    hash: Maybe<Hash>;
 
-    name?: ToStringArray | null;
+    pid: Maybe<number[]>;
 
-    ppid?: ToNumberArray | null;
+    name: Maybe<string[]>;
 
-    args?: ToStringArray | null;
+    ppid: Maybe<number[]>;
 
-    executable?: ToStringArray | null;
+    args: Maybe<string[]>;
 
-    title?: ToStringArray | null;
+    executable: Maybe<string[]>;
 
-    working_directory?: ToStringArray | null;
+    title: Maybe<string[]>;
+
+    working_directory: Maybe<string[]>;
+  };
+
+  export type Hash = {
+    __typename?: 'ProcessHashData';
+
+    md5: Maybe<string[]>;
+
+    sha1: Maybe<string[]>;
+
+    sha256: Maybe<string[]>;
   };
 
   export type Zeek = {
     __typename?: 'ZeekEcsFields';
 
-    session_id?: ToStringArray | null;
+    session_id: Maybe<string[]>;
 
-    connection?: Connection | null;
+    connection: Maybe<Connection>;
 
-    notice?: Notice | null;
+    notice: Maybe<Notice>;
 
-    dns?: Dns | null;
+    dns: Maybe<_Dns>;
 
-    http?: _Http | null;
+    http: Maybe<_Http>;
 
-    files?: Files | null;
+    files: Maybe<Files>;
 
-    ssl?: Ssl | null;
+    ssl: Maybe<Ssl>;
   };
 
   export type Connection = {
     __typename?: 'ZeekConnectionData';
 
-    local_resp?: ToBooleanArray | null;
+    local_resp: Maybe<boolean[]>;
 
-    local_orig?: ToBooleanArray | null;
+    local_orig: Maybe<boolean[]>;
 
-    missed_bytes?: ToNumberArray | null;
+    missed_bytes: Maybe<number[]>;
 
-    state?: ToStringArray | null;
+    state: Maybe<string[]>;
 
-    history?: ToStringArray | null;
+    history: Maybe<string[]>;
   };
 
   export type Notice = {
     __typename?: 'ZeekNoticeData';
 
-    suppress_for?: ToNumberArray | null;
+    suppress_for: Maybe<number[]>;
 
-    msg?: ToStringArray | null;
+    msg: Maybe<string[]>;
 
-    note?: ToStringArray | null;
+    note: Maybe<string[]>;
 
-    sub?: ToStringArray | null;
+    sub: Maybe<string[]>;
 
-    dst?: ToStringArray | null;
+    dst: Maybe<string[]>;
 
-    dropped?: ToBooleanArray | null;
+    dropped: Maybe<boolean[]>;
 
-    peer_descr?: ToStringArray | null;
+    peer_descr: Maybe<string[]>;
   };
 
-  export type Dns = {
+  export type _Dns = {
     __typename?: 'ZeekDnsData';
 
-    AA?: ToBooleanArray | null;
+    AA: Maybe<boolean[]>;
 
-    qclass_name?: ToStringArray | null;
+    qclass_name: Maybe<string[]>;
 
-    RD?: ToBooleanArray | null;
+    RD: Maybe<boolean[]>;
 
-    qtype_name?: ToStringArray | null;
+    qtype_name: Maybe<string[]>;
 
-    rejected?: ToBooleanArray | null;
+    rejected: Maybe<boolean[]>;
 
-    qtype?: ToStringArray | null;
+    qtype: Maybe<string[]>;
 
-    query?: ToStringArray | null;
+    query: Maybe<string[]>;
 
-    trans_id?: ToNumberArray | null;
+    trans_id: Maybe<number[]>;
 
-    qclass?: ToStringArray | null;
+    qclass: Maybe<string[]>;
 
-    RA?: ToBooleanArray | null;
+    RA: Maybe<boolean[]>;
 
-    TC?: ToBooleanArray | null;
+    TC: Maybe<boolean[]>;
   };
 
   export type _Http = {
     __typename?: 'ZeekHttpData';
 
-    resp_mime_types?: ToStringArray | null;
+    resp_mime_types: Maybe<string[]>;
 
-    trans_depth?: ToStringArray | null;
+    trans_depth: Maybe<string[]>;
 
-    status_msg?: ToStringArray | null;
+    status_msg: Maybe<string[]>;
 
-    resp_fuids?: ToStringArray | null;
+    resp_fuids: Maybe<string[]>;
 
-    tags?: ToStringArray | null;
+    tags: Maybe<string[]>;
   };
 
   export type Files = {
     __typename?: 'ZeekFileData';
 
-    session_ids?: ToStringArray | null;
+    session_ids: Maybe<string[]>;
 
-    timedout?: ToBooleanArray | null;
+    timedout: Maybe<boolean[]>;
 
-    local_orig?: ToBooleanArray | null;
+    local_orig: Maybe<boolean[]>;
 
-    tx_host?: ToStringArray | null;
+    tx_host: Maybe<string[]>;
 
-    source?: ToStringArray | null;
+    source: Maybe<string[]>;
 
-    is_orig?: ToBooleanArray | null;
+    is_orig: Maybe<boolean[]>;
 
-    overflow_bytes?: ToNumberArray | null;
+    overflow_bytes: Maybe<number[]>;
 
-    sha1?: ToStringArray | null;
+    sha1: Maybe<string[]>;
 
-    duration?: ToNumberArray | null;
+    duration: Maybe<number[]>;
 
-    depth?: ToNumberArray | null;
+    depth: Maybe<number[]>;
 
-    analyzers?: ToStringArray | null;
+    analyzers: Maybe<string[]>;
 
-    mime_type?: ToStringArray | null;
+    mime_type: Maybe<string[]>;
 
-    rx_host?: ToStringArray | null;
+    rx_host: Maybe<string[]>;
 
-    total_bytes?: ToNumberArray | null;
+    total_bytes: Maybe<number[]>;
 
-    fuid?: ToStringArray | null;
+    fuid: Maybe<string[]>;
 
-    seen_bytes?: ToNumberArray | null;
+    seen_bytes: Maybe<number[]>;
 
-    missing_bytes?: ToNumberArray | null;
+    missing_bytes: Maybe<number[]>;
 
-    md5?: ToStringArray | null;
+    md5: Maybe<string[]>;
   };
 
   export type Ssl = {
     __typename?: 'ZeekSslData';
 
-    cipher?: ToStringArray | null;
+    cipher: Maybe<string[]>;
 
-    established?: ToBooleanArray | null;
+    established: Maybe<boolean[]>;
 
-    resumed?: ToBooleanArray | null;
+    resumed: Maybe<boolean[]>;
 
-    version?: ToStringArray | null;
+    version: Maybe<string[]>;
   };
 }
 
 export namespace PersistTimelineNoteMutation {
   export type Variables = {
-    noteId?: string | null;
-    version?: string | null;
+    noteId?: Maybe<string>;
+    version?: Maybe<string>;
     note: NoteInput;
   };
 
@@ -4445,9 +4902,9 @@ export namespace PersistTimelineNoteMutation {
   export type PersistNote = {
     __typename?: 'ResponseNote';
 
-    code?: number | null;
+    code: Maybe<number>;
 
-    message?: string | null;
+    message: Maybe<string>;
 
     note: Note;
   };
@@ -4455,25 +4912,25 @@ export namespace PersistTimelineNoteMutation {
   export type Note = {
     __typename?: 'NoteResult';
 
-    eventId?: string | null;
+    eventId: Maybe<string>;
 
-    note?: string | null;
+    note: Maybe<string>;
 
-    timelineId?: string | null;
+    timelineId: Maybe<string>;
 
-    timelineVersion?: string | null;
+    timelineVersion: Maybe<string>;
 
     noteId: string;
 
-    created?: number | null;
+    created: Maybe<number>;
 
-    createdBy?: string | null;
+    createdBy: Maybe<string>;
 
-    updated?: number | null;
+    updated: Maybe<number>;
 
-    updatedBy?: string | null;
+    updatedBy: Maybe<string>;
 
-    version?: string | null;
+    version: Maybe<string>;
   };
 }
 
@@ -4493,41 +4950,45 @@ export namespace GetOneTimeline {
 
     savedObjectId: string;
 
-    columns?: Columns[] | null;
+    columns: Maybe<Columns[]>;
 
-    dataProviders?: DataProviders[] | null;
+    dataProviders: Maybe<DataProviders[]>;
 
-    dateRange?: DateRange | null;
+    dateRange: Maybe<DateRange>;
 
-    description?: string | null;
+    description: Maybe<string>;
 
-    eventIdToNoteIds?: EventIdToNoteIds[] | null;
+    eventIdToNoteIds: Maybe<EventIdToNoteIds[]>;
 
-    favorite?: Favorite[] | null;
+    favorite: Maybe<Favorite[]>;
 
-    kqlMode?: string | null;
+    filters: Maybe<Filters[]>;
 
-    kqlQuery?: KqlQuery | null;
+    kqlMode: Maybe<string>;
 
-    notes?: Notes[] | null;
+    kqlQuery: Maybe<KqlQuery>;
 
-    noteIds?: string[] | null;
+    notes: Maybe<Notes[]>;
 
-    pinnedEventIds?: string[] | null;
+    noteIds: Maybe<string[]>;
 
-    pinnedEventsSaveObject?: PinnedEventsSaveObject[] | null;
+    pinnedEventIds: Maybe<string[]>;
 
-    title?: string | null;
+    pinnedEventsSaveObject: Maybe<PinnedEventsSaveObject[]>;
 
-    sort?: Sort | null;
+    title: Maybe<string>;
 
-    created?: number | null;
+    savedQueryId: Maybe<string>;
 
-    createdBy?: string | null;
+    sort: Maybe<Sort>;
 
-    updated?: number | null;
+    created: Maybe<number>;
 
-    updatedBy?: string | null;
+    createdBy: Maybe<string>;
+
+    updated: Maybe<number>;
+
+    updatedBy: Maybe<string>;
 
     version: string;
   };
@@ -4535,175 +4996,219 @@ export namespace GetOneTimeline {
   export type Columns = {
     __typename?: 'ColumnHeaderResult';
 
-    aggregatable?: boolean | null;
+    aggregatable: Maybe<boolean>;
 
-    category?: string | null;
+    category: Maybe<string>;
 
-    columnHeaderType?: string | null;
+    columnHeaderType: Maybe<string>;
 
-    description?: string | null;
+    description: Maybe<string>;
 
-    example?: string | null;
+    example: Maybe<string>;
 
-    indexes?: string[] | null;
+    indexes: Maybe<string[]>;
 
-    id?: string | null;
+    id: Maybe<string>;
 
-    name?: string | null;
+    name: Maybe<string>;
 
-    searchable?: boolean | null;
+    searchable: Maybe<boolean>;
 
-    type?: string | null;
+    type: Maybe<string>;
   };
 
   export type DataProviders = {
     __typename?: 'DataProviderResult';
 
-    id?: string | null;
+    id: Maybe<string>;
 
-    name?: string | null;
+    name: Maybe<string>;
 
-    enabled?: boolean | null;
+    enabled: Maybe<boolean>;
 
-    excluded?: boolean | null;
+    excluded: Maybe<boolean>;
 
-    kqlQuery?: string | null;
+    kqlQuery: Maybe<string>;
 
-    queryMatch?: QueryMatch | null;
+    queryMatch: Maybe<QueryMatch>;
 
-    and?: And[] | null;
+    and: Maybe<And[]>;
   };
 
   export type QueryMatch = {
     __typename?: 'QueryMatchResult';
 
-    field?: string | null;
+    field: Maybe<string>;
 
-    displayField?: string | null;
+    displayField: Maybe<string>;
 
-    value?: string | null;
+    value: Maybe<string>;
 
-    displayValue?: string | null;
+    displayValue: Maybe<string>;
 
-    operator?: string | null;
+    operator: Maybe<string>;
   };
 
   export type And = {
     __typename?: 'DataProviderResult';
 
-    id?: string | null;
+    id: Maybe<string>;
 
-    name?: string | null;
+    name: Maybe<string>;
 
-    enabled?: boolean | null;
+    enabled: Maybe<boolean>;
 
-    excluded?: boolean | null;
+    excluded: Maybe<boolean>;
 
-    kqlQuery?: string | null;
+    kqlQuery: Maybe<string>;
 
-    queryMatch?: _QueryMatch | null;
+    queryMatch: Maybe<_QueryMatch>;
   };
 
   export type _QueryMatch = {
     __typename?: 'QueryMatchResult';
 
-    field?: string | null;
+    field: Maybe<string>;
 
-    displayField?: string | null;
+    displayField: Maybe<string>;
 
-    value?: string | null;
+    value: Maybe<string>;
 
-    displayValue?: string | null;
+    displayValue: Maybe<string>;
 
-    operator?: string | null;
+    operator: Maybe<string>;
   };
 
   export type DateRange = {
     __typename?: 'DateRangePickerResult';
 
-    start?: number | null;
+    start: Maybe<number>;
 
-    end?: number | null;
+    end: Maybe<number>;
   };
 
   export type EventIdToNoteIds = {
     __typename?: 'NoteResult';
 
-    eventId?: string | null;
+    eventId: Maybe<string>;
 
-    note?: string | null;
+    note: Maybe<string>;
 
-    timelineId?: string | null;
+    timelineId: Maybe<string>;
 
     noteId: string;
 
-    created?: number | null;
+    created: Maybe<number>;
 
-    createdBy?: string | null;
+    createdBy: Maybe<string>;
 
-    timelineVersion?: string | null;
+    timelineVersion: Maybe<string>;
 
-    updated?: number | null;
+    updated: Maybe<number>;
 
-    updatedBy?: string | null;
+    updatedBy: Maybe<string>;
 
-    version?: string | null;
+    version: Maybe<string>;
   };
 
   export type Favorite = {
     __typename?: 'FavoriteTimelineResult';
 
-    fullName?: string | null;
+    fullName: Maybe<string>;
 
-    userName?: string | null;
+    userName: Maybe<string>;
 
-    favoriteDate?: number | null;
+    favoriteDate: Maybe<number>;
+  };
+
+  export type Filters = {
+    __typename?: 'FilterTimelineResult';
+
+    meta: Maybe<Meta>;
+
+    query: Maybe<string>;
+
+    exists: Maybe<string>;
+
+    match_all: Maybe<string>;
+
+    missing: Maybe<string>;
+
+    range: Maybe<string>;
+
+    script: Maybe<string>;
+  };
+
+  export type Meta = {
+    __typename?: 'FilterMetaTimelineResult';
+
+    alias: Maybe<string>;
+
+    controlledBy: Maybe<string>;
+
+    disabled: Maybe<boolean>;
+
+    field: Maybe<string>;
+
+    formattedValue: Maybe<string>;
+
+    index: Maybe<string>;
+
+    key: Maybe<string>;
+
+    negate: Maybe<boolean>;
+
+    params: Maybe<string>;
+
+    type: Maybe<string>;
+
+    value: Maybe<string>;
   };
 
   export type KqlQuery = {
     __typename?: 'SerializedFilterQueryResult';
 
-    filterQuery?: FilterQuery | null;
+    filterQuery: Maybe<FilterQuery>;
   };
 
   export type FilterQuery = {
     __typename?: 'SerializedKueryQueryResult';
 
-    kuery?: Kuery | null;
+    kuery: Maybe<Kuery>;
 
-    serializedQuery?: string | null;
+    serializedQuery: Maybe<string>;
   };
 
   export type Kuery = {
     __typename?: 'KueryFilterQueryResult';
 
-    kind?: string | null;
+    kind: Maybe<string>;
 
-    expression?: string | null;
+    expression: Maybe<string>;
   };
 
   export type Notes = {
     __typename?: 'NoteResult';
 
-    eventId?: string | null;
+    eventId: Maybe<string>;
 
-    note?: string | null;
+    note: Maybe<string>;
 
-    timelineId?: string | null;
+    timelineId: Maybe<string>;
 
-    timelineVersion?: string | null;
+    timelineVersion: Maybe<string>;
 
     noteId: string;
 
-    created?: number | null;
+    created: Maybe<number>;
 
-    createdBy?: string | null;
+    createdBy: Maybe<string>;
 
-    updated?: number | null;
+    updated: Maybe<number>;
 
-    updatedBy?: string | null;
+    updatedBy: Maybe<string>;
 
-    version?: string | null;
+    version: Maybe<string>;
   };
 
   export type PinnedEventsSaveObject = {
@@ -4711,34 +5216,34 @@ export namespace GetOneTimeline {
 
     pinnedEventId: string;
 
-    eventId?: string | null;
+    eventId: Maybe<string>;
 
-    timelineId?: string | null;
+    timelineId: Maybe<string>;
 
-    created?: number | null;
+    created: Maybe<number>;
 
-    createdBy?: string | null;
+    createdBy: Maybe<string>;
 
-    updated?: number | null;
+    updated: Maybe<number>;
 
-    updatedBy?: string | null;
+    updatedBy: Maybe<string>;
 
-    version?: string | null;
+    version: Maybe<string>;
   };
 
   export type Sort = {
     __typename?: 'SortTimelineResult';
 
-    columnId?: string | null;
+    columnId: Maybe<string>;
 
-    sortDirection?: string | null;
+    sortDirection: Maybe<string>;
   };
 }
 
 export namespace PersistTimelineMutation {
   export type Variables = {
-    timelineId?: string | null;
-    version?: string | null;
+    timelineId?: Maybe<string>;
+    version?: Maybe<string>;
     timeline: TimelineInput;
   };
 
@@ -4751,9 +5256,9 @@ export namespace PersistTimelineMutation {
   export type PersistTimeline = {
     __typename?: 'ResponseTimeline';
 
-    code?: number | null;
+    code: Maybe<number>;
 
-    message?: string | null;
+    message: Maybe<string>;
 
     timeline: Timeline;
   };
@@ -4765,179 +5270,227 @@ export namespace PersistTimelineMutation {
 
     version: string;
 
-    columns?: Columns[] | null;
+    columns: Maybe<Columns[]>;
 
-    dataProviders?: DataProviders[] | null;
+    dataProviders: Maybe<DataProviders[]>;
 
-    description?: string | null;
+    description: Maybe<string>;
 
-    favorite?: Favorite[] | null;
+    favorite: Maybe<Favorite[]>;
 
-    kqlMode?: string | null;
+    filters: Maybe<Filters[]>;
 
-    kqlQuery?: KqlQuery | null;
+    kqlMode: Maybe<string>;
 
-    title?: string | null;
+    kqlQuery: Maybe<KqlQuery>;
 
-    dateRange?: DateRange | null;
+    title: Maybe<string>;
 
-    sort?: Sort | null;
+    dateRange: Maybe<DateRange>;
 
-    created?: number | null;
+    savedQueryId: Maybe<string>;
 
-    createdBy?: string | null;
+    sort: Maybe<Sort>;
 
-    updated?: number | null;
+    created: Maybe<number>;
 
-    updatedBy?: string | null;
+    createdBy: Maybe<string>;
+
+    updated: Maybe<number>;
+
+    updatedBy: Maybe<string>;
   };
 
   export type Columns = {
     __typename?: 'ColumnHeaderResult';
 
-    aggregatable?: boolean | null;
+    aggregatable: Maybe<boolean>;
 
-    category?: string | null;
+    category: Maybe<string>;
 
-    columnHeaderType?: string | null;
+    columnHeaderType: Maybe<string>;
 
-    description?: string | null;
+    description: Maybe<string>;
 
-    example?: string | null;
+    example: Maybe<string>;
 
-    indexes?: string[] | null;
+    indexes: Maybe<string[]>;
 
-    id?: string | null;
+    id: Maybe<string>;
 
-    name?: string | null;
+    name: Maybe<string>;
 
-    searchable?: boolean | null;
+    searchable: Maybe<boolean>;
 
-    type?: string | null;
+    type: Maybe<string>;
   };
 
   export type DataProviders = {
     __typename?: 'DataProviderResult';
 
-    id?: string | null;
+    id: Maybe<string>;
 
-    name?: string | null;
+    name: Maybe<string>;
 
-    enabled?: boolean | null;
+    enabled: Maybe<boolean>;
 
-    excluded?: boolean | null;
+    excluded: Maybe<boolean>;
 
-    kqlQuery?: string | null;
+    kqlQuery: Maybe<string>;
 
-    queryMatch?: QueryMatch | null;
+    queryMatch: Maybe<QueryMatch>;
 
-    and?: And[] | null;
+    and: Maybe<And[]>;
   };
 
   export type QueryMatch = {
     __typename?: 'QueryMatchResult';
 
-    field?: string | null;
+    field: Maybe<string>;
 
-    displayField?: string | null;
+    displayField: Maybe<string>;
 
-    value?: string | null;
+    value: Maybe<string>;
 
-    displayValue?: string | null;
+    displayValue: Maybe<string>;
 
-    operator?: string | null;
+    operator: Maybe<string>;
   };
 
   export type And = {
     __typename?: 'DataProviderResult';
 
-    id?: string | null;
+    id: Maybe<string>;
 
-    name?: string | null;
+    name: Maybe<string>;
 
-    enabled?: boolean | null;
+    enabled: Maybe<boolean>;
 
-    excluded?: boolean | null;
+    excluded: Maybe<boolean>;
 
-    kqlQuery?: string | null;
+    kqlQuery: Maybe<string>;
 
-    queryMatch?: _QueryMatch | null;
+    queryMatch: Maybe<_QueryMatch>;
   };
 
   export type _QueryMatch = {
     __typename?: 'QueryMatchResult';
 
-    field?: string | null;
+    field: Maybe<string>;
 
-    displayField?: string | null;
+    displayField: Maybe<string>;
 
-    value?: string | null;
+    value: Maybe<string>;
 
-    displayValue?: string | null;
+    displayValue: Maybe<string>;
 
-    operator?: string | null;
+    operator: Maybe<string>;
   };
 
   export type Favorite = {
     __typename?: 'FavoriteTimelineResult';
 
-    fullName?: string | null;
+    fullName: Maybe<string>;
 
-    userName?: string | null;
+    userName: Maybe<string>;
 
-    favoriteDate?: number | null;
+    favoriteDate: Maybe<number>;
+  };
+
+  export type Filters = {
+    __typename?: 'FilterTimelineResult';
+
+    meta: Maybe<Meta>;
+
+    query: Maybe<string>;
+
+    exists: Maybe<string>;
+
+    match_all: Maybe<string>;
+
+    missing: Maybe<string>;
+
+    range: Maybe<string>;
+
+    script: Maybe<string>;
+  };
+
+  export type Meta = {
+    __typename?: 'FilterMetaTimelineResult';
+
+    alias: Maybe<string>;
+
+    controlledBy: Maybe<string>;
+
+    disabled: Maybe<boolean>;
+
+    field: Maybe<string>;
+
+    formattedValue: Maybe<string>;
+
+    index: Maybe<string>;
+
+    key: Maybe<string>;
+
+    negate: Maybe<boolean>;
+
+    params: Maybe<string>;
+
+    type: Maybe<string>;
+
+    value: Maybe<string>;
   };
 
   export type KqlQuery = {
     __typename?: 'SerializedFilterQueryResult';
 
-    filterQuery?: FilterQuery | null;
+    filterQuery: Maybe<FilterQuery>;
   };
 
   export type FilterQuery = {
     __typename?: 'SerializedKueryQueryResult';
 
-    kuery?: Kuery | null;
+    kuery: Maybe<Kuery>;
 
-    serializedQuery?: string | null;
+    serializedQuery: Maybe<string>;
   };
 
   export type Kuery = {
     __typename?: 'KueryFilterQueryResult';
 
-    kind?: string | null;
+    kind: Maybe<string>;
 
-    expression?: string | null;
+    expression: Maybe<string>;
   };
 
   export type DateRange = {
     __typename?: 'DateRangePickerResult';
 
-    start?: number | null;
+    start: Maybe<number>;
 
-    end?: number | null;
+    end: Maybe<number>;
   };
 
   export type Sort = {
     __typename?: 'SortTimelineResult';
 
-    columnId?: string | null;
+    columnId: Maybe<string>;
 
-    sortDirection?: string | null;
+    sortDirection: Maybe<string>;
   };
 }
 
 export namespace PersistTimelinePinnedEventMutation {
   export type Variables = {
-    pinnedEventId?: string | null;
+    pinnedEventId?: Maybe<string>;
     eventId: string;
-    timelineId?: string | null;
+    timelineId?: Maybe<string>;
   };
 
   export type Mutation = {
     __typename?: 'Mutation';
 
-    persistPinnedEventOnTimeline?: PersistPinnedEventOnTimeline | null;
+    persistPinnedEventOnTimeline: Maybe<PersistPinnedEventOnTimeline>;
   };
 
   export type PersistPinnedEventOnTimeline = {
@@ -4945,29 +5498,29 @@ export namespace PersistTimelinePinnedEventMutation {
 
     pinnedEventId: string;
 
-    eventId?: string | null;
+    eventId: Maybe<string>;
 
-    timelineId?: string | null;
+    timelineId: Maybe<string>;
 
-    timelineVersion?: string | null;
+    timelineVersion: Maybe<string>;
 
-    created?: number | null;
+    created: Maybe<number>;
 
-    createdBy?: string | null;
+    createdBy: Maybe<string>;
 
-    updated?: number | null;
+    updated: Maybe<number>;
 
-    updatedBy?: string | null;
+    updatedBy: Maybe<string>;
 
-    version?: string | null;
+    version: Maybe<string>;
   };
 }
 
 export namespace GetTlsQuery {
   export type Variables = {
     sourceId: string;
-    filterQuery?: string | null;
-    flowTarget: FlowTarget;
+    filterQuery?: Maybe<string>;
+    flowTarget: FlowTargetSourceDest;
     ip: string;
     pagination: PaginationInputPaginated;
     sort: TlsSortField;
@@ -4999,7 +5552,7 @@ export namespace GetTlsQuery {
 
     pageInfo: PageInfo;
 
-    inspect?: Inspect | null;
+    inspect: Maybe<Inspect>;
   };
 
   export type Edges = {
@@ -5013,23 +5566,23 @@ export namespace GetTlsQuery {
   export type Node = {
     __typename?: 'TlsNode';
 
-    _id?: string | null;
+    _id: Maybe<string>;
 
-    alternativeNames?: string[] | null;
+    alternativeNames: Maybe<string[]>;
 
-    commonNames?: string[] | null;
+    commonNames: Maybe<string[]>;
 
-    ja3?: string[] | null;
+    ja3: Maybe<string[]>;
 
-    issuerNames?: string[] | null;
+    issuerNames: Maybe<string[]>;
 
-    notAfter?: string[] | null;
+    notAfter: Maybe<string[]>;
   };
 
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value?: string | null;
+    value: Maybe<string>;
   };
 
   export type PageInfo = {
@@ -5056,7 +5609,7 @@ export namespace GetUncommonProcessesQuery {
     sourceId: string;
     timerange: TimerangeInput;
     pagination: PaginationInputPaginated;
-    filterQuery?: string | null;
+    filterQuery?: Maybe<string>;
     defaultIndex: string[];
     inspect: boolean;
   };
@@ -5084,7 +5637,7 @@ export namespace GetUncommonProcessesQuery {
 
     pageInfo: PageInfo;
 
-    inspect?: Inspect | null;
+    inspect: Maybe<Inspect>;
   };
 
   export type Edges = {
@@ -5104,7 +5657,7 @@ export namespace GetUncommonProcessesQuery {
 
     process: Process;
 
-    user?: User | null;
+    user: Maybe<User>;
 
     hosts: Hosts[];
   };
@@ -5112,29 +5665,29 @@ export namespace GetUncommonProcessesQuery {
   export type Process = {
     __typename?: 'ProcessEcsFields';
 
-    args?: ToStringArray | null;
+    args: Maybe<string[]>;
 
-    name?: ToStringArray | null;
+    name: Maybe<string[]>;
   };
 
   export type User = {
     __typename?: 'UserEcsFields';
 
-    id?: ToStringArray | null;
+    id: Maybe<string[]>;
 
-    name?: ToStringArray | null;
+    name: Maybe<string[]>;
   };
 
   export type Hosts = {
     __typename?: 'HostEcsFields';
 
-    name?: ToStringArray | null;
+    name: Maybe<string[]>;
   };
 
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value?: string | null;
+    value: Maybe<string>;
   };
 
   export type PageInfo = {
@@ -5159,7 +5712,7 @@ export namespace GetUncommonProcessesQuery {
 export namespace GetUsersQuery {
   export type Variables = {
     sourceId: string;
-    filterQuery?: string | null;
+    filterQuery?: Maybe<string>;
     flowTarget: FlowTarget;
     ip: string;
     pagination: PaginationInputPaginated;
@@ -5192,7 +5745,7 @@ export namespace GetUsersQuery {
 
     pageInfo: PageInfo;
 
-    inspect?: Inspect | null;
+    inspect: Maybe<Inspect>;
   };
 
   export type Edges = {
@@ -5206,27 +5759,27 @@ export namespace GetUsersQuery {
   export type Node = {
     __typename?: 'UsersNode';
 
-    user?: User | null;
+    user: Maybe<User>;
   };
 
   export type User = {
     __typename?: 'UsersItem';
 
-    name?: string | null;
+    name: Maybe<string>;
 
-    id?: ToStringArray | null;
+    id: Maybe<string[]>;
 
-    groupId?: ToStringArray | null;
+    groupId: Maybe<string[]>;
 
-    groupName?: ToStringArray | null;
+    groupName: Maybe<string[]>;
 
-    count?: number | null;
+    count: Maybe<number>;
   };
 
   export type Cursor = {
     __typename?: 'CursorType';
 
-    value?: string | null;
+    value: Maybe<string>;
   };
 
   export type PageInfo = {
@@ -5252,9 +5805,9 @@ export namespace KpiHostDetailsChartFields {
   export type Fragment = {
     __typename?: 'KpiHostHistogramData';
 
-    x?: number | null;
+    x: Maybe<number>;
 
-    y?: number | null;
+    y: Maybe<number>;
   };
 }
 
@@ -5262,9 +5815,9 @@ export namespace KpiHostChartFields {
   export type Fragment = {
     __typename?: 'KpiHostHistogramData';
 
-    x?: number | null;
+    x: Maybe<number>;
 
-    y?: number | null;
+    y: Maybe<number>;
   };
 }
 
@@ -5272,8 +5825,8 @@ export namespace KpiNetworkChartFields {
   export type Fragment = {
     __typename?: 'KpiNetworkHistogramData';
 
-    x?: number | null;
+    x: Maybe<number>;
 
-    y?: number | null;
+    y: Maybe<number>;
   };
 }

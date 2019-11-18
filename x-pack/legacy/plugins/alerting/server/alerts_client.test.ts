@@ -6,22 +6,22 @@
 
 import { schema } from '@kbn/config-schema';
 import { AlertsClient } from './alerts_client';
-import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 
 const taskManager = taskManagerMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
-const savedObjectsClient = SavedObjectsClientMock.create();
+const savedObjectsClient = savedObjectsClientMock.create();
 
 const alertsClientParams = {
-  log: jest.fn(),
   taskManager,
   alertTypeRegistry,
   savedObjectsClient,
   spaceId: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
+  logger: loggingServiceMock.create().get(),
 };
 
 beforeEach(() => {
@@ -43,6 +43,7 @@ const mockedDate = new Date('2019-02-12T21:01:22.479Z');
 function getMockData(overwrites: Record<string, any> = {}) {
   return {
     enabled: true,
+    name: 'abc',
     alertTypeId: '123',
     interval: '10s',
     throttle: null,
@@ -110,6 +111,7 @@ describe('create()', () => {
       retryAt: null,
       state: {},
       params: {},
+      ownerId: null,
     });
     savedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
@@ -171,6 +173,7 @@ describe('create()', () => {
         "interval": "10s",
         "muteAll": false,
         "mutedInstanceIds": Array [],
+        "name": "abc",
         "throttle": null,
         "updatedBy": "elastic",
       }
@@ -207,23 +210,12 @@ describe('create()', () => {
                                                                         ]
                                                 `);
     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.update.mock.calls[0]).toHaveLength(4);
+    expect(savedObjectsClient.update.mock.calls[0]).toHaveLength(3);
     expect(savedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
     expect(savedObjectsClient.update.mock.calls[0][1]).toEqual('1');
     expect(savedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
                                                                                                                   Object {
                                                                                                                     "scheduledTaskId": "task-123",
-                                                                                                                  }
-                                                                            `);
-    expect(savedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
-                                                                                                                  Object {
-                                                                                                                    "references": Array [
-                                                                                                                      Object {
-                                                                                                                        "id": "1",
-                                                                                                                        "name": "action_0",
-                                                                                                                        "type": "action",
-                                                                                                                      },
-                                                                                                                    ],
                                                                                                                   }
                                                                             `);
   });
@@ -417,16 +409,9 @@ describe('create()', () => {
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Task manager error"`
     );
-    expect(alertsClientParams.log).toHaveBeenCalledTimes(1);
-    expect(alertsClientParams.log.mock.calls[0]).toMatchInlineSnapshot(`
-                                                                                                                  Array [
-                                                                                                                    Array [
-                                                                                                                      "alerting",
-                                                                                                                      "error",
-                                                                                                                    ],
-                                                                                                                    "Failed to cleanup alert \\"1\\" after scheduling task failed. Error: Saved object delete error",
-                                                                                                                  ]
-                                                                            `);
+    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+      'Failed to cleanup alert "1" after scheduling task failed. Error: Saved object delete error'
+    );
   });
 
   test('throws an error if alert type not registerd', async () => {
@@ -491,6 +476,7 @@ describe('create()', () => {
       retryAt: null,
       state: {},
       params: {},
+      ownerId: null,
     });
     savedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
@@ -520,6 +506,7 @@ describe('create()', () => {
           },
         ],
         alertTypeId: '123',
+        name: 'abc',
         alertTypeParams: { bar: true },
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
@@ -555,6 +542,7 @@ describe('enable()', () => {
         alertTypeId: '2',
         enabled: false,
       },
+      version: '123',
       references: [],
     });
     taskManager.schedule.mockResolvedValueOnce({
@@ -568,6 +556,7 @@ describe('enable()', () => {
       taskType: '',
       startedAt: null,
       retryAt: null,
+      ownerId: null,
     });
 
     await alertsClient.enable({ id: '1' });
@@ -584,7 +573,7 @@ describe('enable()', () => {
         apiKeyOwner: null,
       },
       {
-        references: [],
+        version: '123',
       }
     );
     expect(taskManager.schedule).toHaveBeenCalledWith({
@@ -630,6 +619,7 @@ describe('enable()', () => {
         alertTypeId: '2',
         enabled: false,
       },
+      version: '123',
       references: [],
     });
     taskManager.schedule.mockResolvedValueOnce({
@@ -643,6 +633,7 @@ describe('enable()', () => {
       taskType: '',
       startedAt: null,
       retryAt: null,
+      ownerId: null,
     });
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
       created: true,
@@ -663,7 +654,7 @@ describe('enable()', () => {
         updatedBy: 'elastic',
       },
       {
-        references: [],
+        version: '123',
       }
     );
     expect(taskManager.schedule).toHaveBeenCalledWith({
@@ -694,6 +685,7 @@ describe('disable()', () => {
         enabled: true,
         scheduledTaskId: 'task-123',
       },
+      version: '123',
       references: [],
     });
 
@@ -711,7 +703,7 @@ describe('disable()', () => {
         updatedBy: 'elastic',
       },
       {
-        references: [],
+        version: '123',
       }
     );
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
@@ -750,27 +742,11 @@ describe('muteAll()', () => {
     });
 
     await alertsClient.muteAll({ id: '1' });
-    expect(savedObjectsClient.update).toHaveBeenCalledWith(
-      'alert',
-      '1',
-      { muteAll: true, mutedInstanceIds: [], updatedBy: 'elastic' },
-      { references: [] }
-    );
-  });
-
-  test('skips muting when alert already muted', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        muteAll: true,
-      },
-      references: [],
+    expect(savedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
+      muteAll: true,
+      mutedInstanceIds: [],
+      updatedBy: 'elastic',
     });
-
-    await alertsClient.muteAll({ id: '1' });
-    expect(savedObjectsClient.update).not.toHaveBeenCalled();
   });
 });
 
@@ -787,27 +763,11 @@ describe('unmuteAll()', () => {
     });
 
     await alertsClient.unmuteAll({ id: '1' });
-    expect(savedObjectsClient.update).toHaveBeenCalledWith(
-      'alert',
-      '1',
-      { muteAll: false, mutedInstanceIds: [], updatedBy: 'elastic' },
-      { references: [] }
-    );
-  });
-
-  test(`skips unmuting when alert isn't unmuted`, async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        muteAll: false,
-      },
-      references: [],
+    expect(savedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
+      muteAll: false,
+      mutedInstanceIds: [],
+      updatedBy: 'elastic',
     });
-
-    await alertsClient.unmuteAll({ id: '1' });
-    expect(savedObjectsClient.update).not.toHaveBeenCalled();
   });
 });
 
@@ -824,6 +784,7 @@ describe('muteInstance()', () => {
         scheduledTaskId: 'task-123',
         mutedInstanceIds: [],
       },
+      version: '123',
       references: [],
     });
 
@@ -835,7 +796,7 @@ describe('muteInstance()', () => {
         mutedInstanceIds: ['2'],
         updatedBy: 'elastic',
       },
-      { version: undefined, references: [] }
+      { version: '123' }
     );
   });
 
@@ -892,6 +853,7 @@ describe('unmuteInstance()', () => {
         scheduledTaskId: 'task-123',
         mutedInstanceIds: ['2'],
       },
+      version: '123',
       references: [],
     });
 
@@ -903,7 +865,7 @@ describe('unmuteInstance()', () => {
         mutedInstanceIds: [],
         updatedBy: 'elastic',
       },
-      { version: undefined, references: [] }
+      { version: '123' }
     );
   });
 
@@ -1214,6 +1176,7 @@ describe('update()', () => {
       id: '1',
       data: {
         interval: '10s',
+        name: 'abc',
         alertTypeParams: {
           bar: true,
         },
@@ -1271,6 +1234,7 @@ describe('update()', () => {
         "apiKeyOwner": null,
         "enabled": true,
         "interval": "10s",
+        "name": "abc",
         "scheduledTaskId": "task-123",
         "updatedBy": "elastic",
       }
@@ -1345,6 +1309,7 @@ describe('update()', () => {
       id: '1',
       data: {
         interval: '10s',
+        name: 'abc',
         alertTypeParams: {
           bar: true,
         },
@@ -1403,6 +1368,7 @@ describe('update()', () => {
         "apiKeyOwner": "elastic",
         "enabled": true,
         "interval": "10s",
+        "name": "abc",
         "scheduledTaskId": "task-123",
         "updatedBy": "elastic",
       }
@@ -1447,6 +1413,7 @@ describe('update()', () => {
         id: '1',
         data: {
           interval: '10s',
+          name: 'abc',
           alertTypeParams: {
             bar: true,
           },
@@ -1478,6 +1445,7 @@ describe('updateApiKey()', () => {
         alertTypeId: '2',
         enabled: true,
       },
+      version: '123',
       references: [],
     });
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
@@ -1497,7 +1465,7 @@ describe('updateApiKey()', () => {
         apiKeyOwner: 'elastic',
         updatedBy: 'elastic',
       },
-      { references: [] }
+      { version: '123' }
     );
   });
 });

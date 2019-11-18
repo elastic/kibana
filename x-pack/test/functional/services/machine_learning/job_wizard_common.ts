@@ -12,16 +12,18 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
-  return {
-    async waitForNextButtonVisible() {
-      await retry.waitFor(
-        'next button to be visible',
-        async () => await testSubjects.isDisplayed('mlJobWizardNavButtonNext')
-      );
-    },
+  interface SectionOptions {
+    withAdvancedSection: boolean;
+  }
 
+  function advancedSectionSelector(subSelector?: string) {
+    const subj = 'mlJobWizardAdvancedSection';
+    return !subSelector ? subj : `${subj} > ${subSelector}`;
+  }
+
+  return {
     async clickNextButton() {
-      await this.waitForNextButtonVisible();
+      await testSubjects.existOrFail('mlJobWizardNavButtonNext');
       await testSubjects.clickWhenNotDisabled('mlJobWizardNavButtonNext');
     },
 
@@ -43,6 +45,10 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
 
     async assertSummarySectionExists() {
       await testSubjects.existOrFail('mlJobWizardStepTitleSummary');
+    },
+
+    async assertConfigureDatafeedSectionExists() {
+      await testSubjects.existOrFail('mlJobWizardStepTitleConfigureDatafeed');
     },
 
     async advanceToPickFieldsSection() {
@@ -77,17 +83,16 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
       await testSubjects.existOrFail('mlJobWizardAggSelection > comboBoxInput');
     },
 
-    async assertAggAndFieldSelection(expectedIdentifier: string) {
+    async assertAggAndFieldSelection(expectedIdentifier: string[]) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlJobWizardAggSelection > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions.length).to.eql(1);
-      expect(comboBoxSelectedOptions[0]).to.eql(expectedIdentifier);
+      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
     },
 
     async selectAggAndField(identifier: string, isIdentifierKeptInField: boolean) {
       await comboBox.set('mlJobWizardAggSelection > comboBoxInput', identifier);
-      await this.assertAggAndFieldSelection(isIdentifierKeptInField ? identifier : '');
+      await this.assertAggAndFieldSelection(isIdentifierKeptInField ? [identifier] : []);
     },
 
     async assertBucketSpanInputExists() {
@@ -103,7 +108,10 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async setBucketSpan(bucketSpan: string) {
-      await testSubjects.setValue('mlJobWizardInputBucketSpan', bucketSpan, { withKeyboard: true });
+      await testSubjects.setValue('mlJobWizardInputBucketSpan', bucketSpan, {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
       await this.assertBucketSpanValue(bucketSpan);
     },
 
@@ -117,7 +125,7 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async setJobId(jobId: string) {
-      await testSubjects.setValue('mlJobWizardInputJobId', jobId, { withKeyboard: true });
+      await testSubjects.setValue('mlJobWizardInputJobId', jobId, { clearWithKeyboard: true });
       await this.assertJobIdValue(jobId);
     },
 
@@ -134,7 +142,7 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
 
     async setJobDescription(jobDescription: string) {
       await testSubjects.setValue('mlJobWizardInputJobDescription', jobDescription, {
-        withKeyboard: true,
+        clearWithKeyboard: true,
       });
       await this.assertJobDescriptionValue(jobDescription);
     },
@@ -158,83 +166,137 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
       expect(await this.getSelectedJobGroups()).to.contain(jobGroup);
     },
 
-    async assertModelPlotSwitchExists() {
-      await this.ensureAdvancedSectionOpen();
-      await testSubjects.existOrFail('mlJobWizardAdvancedSection > mlJobWizardSwitchModelPlot', {
-        allowHidden: true,
+    async assertModelPlotSwitchExists(
+      sectionOptions: SectionOptions = { withAdvancedSection: true }
+    ) {
+      let subj = 'mlJobWizardSwitchModelPlot';
+      if (sectionOptions.withAdvancedSection === true) {
+        await this.ensureAdvancedSectionOpen();
+        subj = advancedSectionSelector(subj);
+      }
+      await testSubjects.existOrFail(subj, { allowHidden: true });
+    },
+
+    async getModelPlotSwitchCheckedState(
+      sectionOptions: SectionOptions = { withAdvancedSection: true }
+    ): Promise<boolean> {
+      let subj = 'mlJobWizardSwitchModelPlot';
+      const isSelected = await testSubjects.getAttribute(subj, 'aria-checked');
+      if (sectionOptions.withAdvancedSection === true) {
+        await this.ensureAdvancedSectionOpen();
+        subj = advancedSectionSelector(subj);
+      }
+      return isSelected === 'true';
+    },
+
+    async assertModelPlotSwitchCheckedState(
+      expectedValue: boolean,
+      sectionOptions: SectionOptions = { withAdvancedSection: true }
+    ) {
+      const actualCheckedState = await this.getModelPlotSwitchCheckedState({
+        withAdvancedSection: sectionOptions.withAdvancedSection,
+      });
+      expect(actualCheckedState).to.eql(expectedValue);
+    },
+
+    async assertDedicatedIndexSwitchExists(
+      sectionOptions: SectionOptions = { withAdvancedSection: true }
+    ) {
+      let subj = 'mlJobWizardSwitchUseDedicatedIndex';
+      if (sectionOptions.withAdvancedSection === true) {
+        await this.ensureAdvancedSectionOpen();
+        subj = advancedSectionSelector(subj);
+      }
+      await testSubjects.existOrFail(subj, { allowHidden: true });
+    },
+
+    async getDedicatedIndexSwitchCheckedState(
+      sectionOptions: SectionOptions = { withAdvancedSection: true }
+    ): Promise<boolean> {
+      let subj = 'mlJobWizardSwitchUseDedicatedIndex';
+      const isSelected = await testSubjects.getAttribute(subj, 'aria-checked');
+      if (sectionOptions.withAdvancedSection === true) {
+        await this.ensureAdvancedSectionOpen();
+        subj = advancedSectionSelector(subj);
+      }
+      return isSelected === 'true';
+    },
+
+    async assertDedicatedIndexSwitchCheckedState(
+      expectedValue: boolean,
+      sectionOptions: SectionOptions = { withAdvancedSection: true }
+    ) {
+      const actualCheckedState = await this.getDedicatedIndexSwitchCheckedState({
+        withAdvancedSection: sectionOptions.withAdvancedSection,
+      });
+      expect(actualCheckedState).to.eql(expectedValue);
+    },
+
+    async activateDedicatedIndexSwitch(
+      sectionOptions: SectionOptions = { withAdvancedSection: true }
+    ) {
+      let subj = 'mlJobWizardSwitchUseDedicatedIndex';
+      if (sectionOptions.withAdvancedSection === true) {
+        await this.ensureAdvancedSectionOpen();
+        subj = advancedSectionSelector(subj);
+      }
+      if (
+        (await this.getDedicatedIndexSwitchCheckedState({
+          withAdvancedSection: sectionOptions.withAdvancedSection,
+        })) === false
+      ) {
+        await testSubjects.clickWhenNotDisabled(subj);
+      }
+      await this.assertDedicatedIndexSwitchCheckedState(true, {
+        withAdvancedSection: sectionOptions.withAdvancedSection,
       });
     },
 
-    async getModelPlotSwitchCheckedState(): Promise<boolean> {
-      await this.ensureAdvancedSectionOpen();
-      return await testSubjects.isSelected(
-        'mlJobWizardAdvancedSection > mlJobWizardSwitchModelPlot'
-      );
-    },
-
-    async assertModelPlotSwitchCheckedState(expectedValue: boolean) {
-      await this.ensureAdvancedSectionOpen();
-      const actualCheckedState = await this.getModelPlotSwitchCheckedState();
-      expect(actualCheckedState).to.eql(expectedValue);
-    },
-
-    async assertDedicatedIndexSwitchExists() {
-      await this.ensureAdvancedSectionOpen();
-      await testSubjects.existOrFail(
-        'mlJobWizardAdvancedSection > mlJobWizardSwitchUseDedicatedIndex',
-        { allowHidden: true }
-      );
-    },
-
-    async getDedicatedIndexSwitchCheckedState(): Promise<boolean> {
-      await this.ensureAdvancedSectionOpen();
-      return await testSubjects.isSelected(
-        'mlJobWizardAdvancedSection > mlJobWizardSwitchUseDedicatedIndex'
-      );
-    },
-
-    async assertDedicatedIndexSwitchCheckedState(expectedValue: boolean) {
-      await this.ensureAdvancedSectionOpen();
-      const actualCheckedState = await this.getDedicatedIndexSwitchCheckedState();
-      expect(actualCheckedState).to.eql(expectedValue);
-    },
-
-    async activateDedicatedIndexSwitch() {
-      if ((await this.getDedicatedIndexSwitchCheckedState()) === false) {
-        await testSubjects.clickWhenNotDisabled('mlJobWizardSwitchUseDedicatedIndex');
+    async assertModelMemoryLimitInputExists(
+      sectionOptions: SectionOptions = { withAdvancedSection: true }
+    ) {
+      let subj = 'mlJobWizardInputModelMemoryLimit';
+      if (sectionOptions.withAdvancedSection === true) {
+        await this.ensureAdvancedSectionOpen();
+        subj = advancedSectionSelector(subj);
       }
-      await this.assertDedicatedIndexSwitchCheckedState(true);
+      await testSubjects.existOrFail(subj);
     },
 
-    async assertModelMemoryLimitInputExists() {
-      await this.ensureAdvancedSectionOpen();
-      await testSubjects.existOrFail(
-        'mlJobWizardAdvancedSection > mlJobWizardInputModelMemoryLimit'
-      );
-    },
-
-    async assertModelMemoryLimitValue(expectedValue: string) {
-      await this.ensureAdvancedSectionOpen();
-      const actualModelMemoryLimit = await testSubjects.getAttribute(
-        'mlJobWizardAdvancedSection > mlJobWizardInputModelMemoryLimit',
-        'value'
-      );
+    async assertModelMemoryLimitValue(
+      expectedValue: string,
+      sectionOptions: SectionOptions = { withAdvancedSection: true }
+    ) {
+      let subj = 'mlJobWizardInputModelMemoryLimit';
+      if (sectionOptions.withAdvancedSection === true) {
+        await this.ensureAdvancedSectionOpen();
+        subj = advancedSectionSelector(subj);
+      }
+      const actualModelMemoryLimit = await testSubjects.getAttribute(subj, 'value');
       expect(actualModelMemoryLimit).to.eql(expectedValue);
     },
 
-    async setModelMemoryLimit(modelMemoryLimit: string) {
-      await testSubjects.setValue('mlJobWizardInputModelMemoryLimit', modelMemoryLimit, {
-        withKeyboard: true,
+    async setModelMemoryLimit(
+      modelMemoryLimit: string,
+      sectionOptions: SectionOptions = { withAdvancedSection: true }
+    ) {
+      let subj = 'mlJobWizardInputModelMemoryLimit';
+      if (sectionOptions.withAdvancedSection === true) {
+        await this.ensureAdvancedSectionOpen();
+        subj = advancedSectionSelector(subj);
+      }
+      await testSubjects.setValue(subj, modelMemoryLimit, { clearWithKeyboard: true });
+      await this.assertModelMemoryLimitValue(modelMemoryLimit, {
+        withAdvancedSection: sectionOptions.withAdvancedSection,
       });
-      await this.assertModelMemoryLimitValue(modelMemoryLimit);
     },
 
     async assertInfluencerInputExists() {
-      await testSubjects.existOrFail('influencerSelect > comboBoxInput');
+      await testSubjects.existOrFail('mlInfluencerSelect > comboBoxInput');
     },
 
     async getSelectedInfluencers(): Promise<string[]> {
-      return await comboBox.getComboBoxSelectedOptions('influencerSelect > comboBoxInput');
+      return await comboBox.getComboBoxSelectedOptions('mlInfluencerSelect > comboBoxInput');
     },
 
     async assertInfluencerSelection(influencers: string[]) {
@@ -242,7 +304,7 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async addInfluencer(influencer: string) {
-      await comboBox.setCustom('influencerSelect > comboBoxInput', influencer);
+      await comboBox.set('mlInfluencerSelect > comboBoxInput', influencer);
       expect(await this.getSelectedInfluencers()).to.contain(influencer);
     },
 
@@ -256,31 +318,13 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
       detectorPosition: number,
       chartType: string
     ) {
-      await testSubjects.existOrFail(`detector ${detectorPosition}`);
-      await testSubjects.existOrFail(`detector ${detectorPosition} > detectorTitle`);
+      await testSubjects.existOrFail(`mlDetector ${detectorPosition}`);
+      await testSubjects.existOrFail(`mlDetector ${detectorPosition} > mlDetectorTitle`);
       expect(
-        await testSubjects.getVisibleText(`detector ${detectorPosition} > detectorTitle`)
+        await testSubjects.getVisibleText(`mlDetector ${detectorPosition} > mlDetectorTitle`)
       ).to.eql(aggAndFieldIdentifier);
 
-      await this.assertAnomalyChartExists(chartType, `detector ${detectorPosition}`);
-    },
-
-    async assertDetectorSplitExists(splitField: string) {
-      await testSubjects.existOrFail(`dataSplit > dataSplitTitle ${splitField}`);
-      await testSubjects.existOrFail(`dataSplit > splitCard front`);
-      await testSubjects.existOrFail(`dataSplit > splitCard back`);
-    },
-
-    async assertDetectorSplitFrontCardTitle(frontCardTitle: string) {
-      expect(
-        await testSubjects.getVisibleText(`dataSplit > splitCard front > splitCardTitle`)
-      ).to.eql(frontCardTitle);
-    },
-
-    async assertDetectorSplitNumberOfBackCards(numberOfBackCards: number) {
-      expect(await testSubjects.findAll(`dataSplit > splitCard back`)).to.have.length(
-        numberOfBackCards
-      );
+      await this.assertAnomalyChartExists(chartType, `mlDetector ${detectorPosition}`);
     },
 
     async assertCreateJobButtonExists() {
@@ -288,11 +332,11 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async assertDateRangeSelectionExists() {
-      await testSubjects.existOrFail('jobWizardDateRange');
+      await testSubjects.existOrFail('mlJobWizardDateRange');
     },
 
     async getSelectedDateRange() {
-      const dateRange = await testSubjects.find('jobWizardDateRange');
+      const dateRange = await testSubjects.find('mlJobWizardDateRange');
       const [startPicker, endPicker] = await dateRange.findAllByClassName('euiFieldText');
       return {
         startDate: await startPicker.getAttribute('value'),
@@ -301,9 +345,11 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async assertDateRangeSelection(expectedStartDate: string, expectedEndDate: string) {
-      expect(await this.getSelectedDateRange()).to.eql({
-        startDate: expectedStartDate,
-        endDate: expectedEndDate,
+      await retry.tryForTime(5000, async () => {
+        expect(await this.getSelectedDateRange()).to.eql({
+          startDate: expectedStartDate,
+          endDate: expectedEndDate,
+        });
       });
     },
 
@@ -313,21 +359,17 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async ensureAdvancedSectionOpen() {
-      await retry.try(async () => {
-        if ((await testSubjects.exists('mlJobWizardAdvancedSection')) === false) {
+      await retry.tryForTime(5000, async () => {
+        if ((await testSubjects.exists(advancedSectionSelector())) === false) {
           await testSubjects.click('mlJobWizardToggleAdvancedSection');
-          await testSubjects.existOrFail('mlJobWizardAdvancedSection');
+          await testSubjects.existOrFail(advancedSectionSelector(), { timeout: 1000 });
         }
       });
     },
 
     async createJobAndWaitForCompletion() {
       await testSubjects.clickWhenNotDisabled('mlJobWizardButtonCreateJob');
-      await retry.waitForWithTimeout(
-        'job processing to finish',
-        5 * 60 * 1000,
-        async () => await testSubjects.exists('mlJobWizardButtonRunInRealTime')
-      );
+      await testSubjects.existOrFail('mlJobWizardButtonRunInRealTime', { timeout: 2 * 60 * 1000 });
     },
   };
 }

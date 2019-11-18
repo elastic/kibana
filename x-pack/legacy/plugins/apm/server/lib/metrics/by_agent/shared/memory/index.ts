@@ -44,10 +44,15 @@ const percentUsedScript = {
   source: `1 - doc['${METRIC_SYSTEM_FREE_MEMORY}'] / doc['${METRIC_SYSTEM_TOTAL_MEMORY}']`
 };
 
-export async function getMemoryChartData(setup: Setup, serviceName: string) {
+export async function getMemoryChartData(
+  setup: Setup,
+  serviceName: string,
+  serviceNodeName?: string
+) {
   return fetchAndTransformMetrics({
     setup,
     serviceName,
+    serviceNodeName,
     chartBase,
     aggs: {
       memoryUsedAvg: { avg: { script: percentUsedScript } },

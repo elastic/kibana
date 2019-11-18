@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { setup as visualizations } from '../../visualizations/public/legacy';
+import { setup as visualizations } from '../../visualizations/public/np_ready/public/legacy';
 
 import histogramVisTypeProvider from './histogram';
 import lineVisTypeProvider from './line';

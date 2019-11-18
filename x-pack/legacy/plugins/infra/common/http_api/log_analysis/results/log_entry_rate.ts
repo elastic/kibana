@@ -6,13 +6,7 @@
 
 import * as rt from 'io-ts';
 
-import {
-  badRequestErrorRT,
-  conflictErrorRT,
-  forbiddenErrorRT,
-  metricStatisticsRT,
-  timeRangeRT,
-} from '../../shared';
+import { badRequestErrorRT, conflictErrorRT, forbiddenErrorRT, timeRangeRT } from '../../shared';
 
 export const LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH =
   '/api/infra/log_analysis/results/log_entry_rate';
@@ -43,12 +37,17 @@ export const logEntryRateAnomaly = rt.type({
   typicalLogEntryRate: rt.number,
 });
 
-export const logEntryRateHistogramBucket = rt.type({
+export const logEntryRatePartitionRT = rt.type({
+  analysisBucketCount: rt.number,
   anomalies: rt.array(logEntryRateAnomaly),
-  duration: rt.number,
-  logEntryRateStats: metricStatisticsRT,
-  modelLowerBoundStats: metricStatisticsRT,
-  modelUpperBoundStats: metricStatisticsRT,
+  averageActualLogEntryRate: rt.number,
+  maximumAnomalyScore: rt.number,
+  numberOfLogEntries: rt.number,
+  partitionId: rt.string,
+});
+
+export const logEntryRateHistogramBucket = rt.type({
+  partitions: rt.array(logEntryRatePartitionRT),
   startTime: rt.number,
 });
 
@@ -56,6 +55,7 @@ export const getLogEntryRateSuccessReponsePayloadRT = rt.type({
   data: rt.type({
     bucketDuration: rt.number,
     histogramBuckets: rt.array(logEntryRateHistogramBucket),
+    totalNumberOfLogEntries: rt.number,
   }),
 });
 

@@ -17,6 +17,8 @@
  * under the License.
  */
 import { Plugin } from '.';
+import { searchSetupMock } from './search/mocks';
+import { queryServiceMock } from './query/mocks';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
@@ -28,16 +30,23 @@ const autocompleteMock: any = {
 };
 
 const createSetupContract = (): Setup => {
-  const setupContract: Setup = {
-    autocomplete: autocompleteMock as Setup['autocomplete'],
+  const querySetupMock = queryServiceMock.createSetupContract();
+  const setupContract = {
+    autocomplete: autocompleteMock,
+    search: searchSetupMock,
+    query: querySetupMock,
   };
 
   return setupContract;
 };
 
 const createStartContract = (): Start => {
-  const startContract: Start = {
-    autocomplete: autocompleteMock as Start['autocomplete'],
+  const queryStartMock = queryServiceMock.createStartContract();
+  const startContract = {
+    autocomplete: autocompleteMock,
+    getSuggestions: jest.fn(),
+    search: { search: jest.fn() },
+    query: queryStartMock,
   };
   return startContract;
 };

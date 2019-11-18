@@ -30,8 +30,7 @@ export function BlacklistForm({
       {blacklistedNodes && blacklistedNodes.length > 0 ? (
         <EuiText size="s">
           {i18n.translate('xpack.graph.settings.blacklist.blacklistHelpText', {
-            defaultMessage:
-              'These terms are currently blacklisted from re-appearing in the workspace',
+            defaultMessage: 'These terms are not allowed in the graph.',
           })}
         </EuiText>
       ) : (
@@ -39,8 +38,8 @@ export function BlacklistForm({
           title={
             <FormattedMessage
               id="xpack.graph.blacklist.noEntriesDescription"
-              defaultMessage="You don't have any blacklisted nodes. Select nodes and press the {stopSign} in the side bar to blacklist them."
-              values={{ stopSign: <span className="kuiIcon fa-ban"></span> }}
+              defaultMessage="You don't have any blocked terms. Select vertices and click {stopSign} in the control panel on the right to block them. Documents that match blocked terms are no longer explored and relationships to them are hidden."
+              values={{ stopSign: <span className="kuiIcon fa-ban" /> }}
             />
           }
         />
@@ -57,10 +56,10 @@ export function BlacklistForm({
                 extraAction={{
                   iconType: 'trash',
                   'aria-label': i18n.translate('xpack.graph.blacklist.removeButtonAriaLabel', {
-                    defaultMessage: 'Remove',
+                    defaultMessage: 'Delete',
                   }),
                   title: i18n.translate('xpack.graph.blacklist.removeButtonAriaLabel', {
-                    defaultMessage: 'Remove',
+                    defaultMessage: 'Delete',
                   }),
                   color: 'danger',
                   onClick: () => {
@@ -84,7 +83,7 @@ export function BlacklistForm({
             }}
           >
             {i18n.translate('xpack.graph.settings.blacklist.clearButtonLabel', {
-              defaultMessage: 'Remove all',
+              defaultMessage: 'Delete all',
             })}
           </EuiButton>
         </>

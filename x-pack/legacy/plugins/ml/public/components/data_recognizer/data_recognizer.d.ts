@@ -7,9 +7,14 @@
 import { FC } from 'react';
 
 import { IndexPattern } from 'ui/index_patterns';
+import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 
 declare const DataRecognizer: FC<{
   indexPattern: IndexPattern;
-  results: any;
-  className: string;
+  savedSearch?: SavedSearch;
+  results: {
+    count: number;
+    onChange?: Function;
+  };
+  className?: string;
 }>;

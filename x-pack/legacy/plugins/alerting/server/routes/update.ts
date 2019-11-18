@@ -15,6 +15,7 @@ interface UpdateRequest extends Hapi.Request {
   };
   payload: {
     alertTypeId: string;
+    name: string;
     interval: string;
     actions: AlertAction[];
     alertTypeParams: Record<string, any>;
@@ -22,40 +23,39 @@ interface UpdateRequest extends Hapi.Request {
   };
 }
 
-export function updateAlertRoute(server: Hapi.Server) {
-  server.route({
-    method: 'PUT',
-    path: '/api/alert/{id}',
-    options: {
-      tags: ['access:alerting-all'],
-      validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: Joi.object()
-          .keys({
-            throttle: getDurationSchema()
-              .required()
-              .allow(null),
-            interval: getDurationSchema().required(),
-            alertTypeParams: Joi.object().required(),
-            actions: Joi.array()
-              .items(
-                Joi.object().keys({
-                  group: Joi.string().required(),
-                  id: Joi.string().required(),
-                  params: Joi.object().required(),
-                })
-              )
-              .required(),
-          })
-          .required(),
+export const updateAlertRoute = {
+  method: 'PUT',
+  path: '/api/alert/{id}',
+  options: {
+    tags: ['access:alerting-all'],
+    validate: {
+      options: {
+        abortEarly: false,
       },
+      payload: Joi.object()
+        .keys({
+          throttle: getDurationSchema()
+            .required()
+            .allow(null),
+          name: Joi.string().required(),
+          interval: getDurationSchema().required(),
+          alertTypeParams: Joi.object().required(),
+          actions: Joi.array()
+            .items(
+              Joi.object().keys({
+                group: Joi.string().required(),
+                id: Joi.string().required(),
+                params: Joi.object().required(),
+              })
+            )
+            .required(),
+        })
+        .required(),
     },
-    async handler(request: UpdateRequest) {
-      const { id } = request.params;
-      const alertsClient = request.getAlertsClient!();
-      return await alertsClient.update({ id, data: request.payload });
-    },
-  });
-}
+  },
+  async handler(request: UpdateRequest) {
+    const { id } = request.params;
+    const alertsClient = request.getAlertsClient!();
+    return await alertsClient.update({ id, data: request.payload });
+  },
+};

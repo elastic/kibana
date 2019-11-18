@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import { monitorChartsQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
-import monitorCharts from './fixtures/monitor_charts';
-import monitorChartsEmptySet from './fixtures/monitor_charts_empty_set';
+import { expectFixtureEql } from './helpers/expect_fixture_eql';
 
 export default function ({ getService }) {
   describe('monitorCharts query', () => {
+    before('load heartbeat data', () => getService('esArchiver').load('uptime/full_heartbeat'));
+    after('unload heartbeat index', () => getService('esArchiver').unload('uptime/full_heartbeat'));
+
     const supertest = getService('supertest');
 
     it('will fetch a series of data points for monitor duration and status', async () => {
@@ -18,9 +19,9 @@ export default function ({ getService }) {
         operationName: 'MonitorCharts',
         query: monitorChartsQueryString,
         variables: {
-          dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
-          monitorId: 'auto-http-0X131221E73F825974',
+          dateRangeStart: '2019-09-11T03:31:04.380Z',
+          dateRangeEnd: '2019-09-11T03:40:34.410Z',
+          monitorId: '0002-up',
         },
       };
       const {
@@ -29,7 +30,8 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorChartsQuery });
-      expect(data).to.eql(monitorCharts);
+
+      expectFixtureEql(data, 'monitor_charts');
     });
 
     it('will fetch empty sets for a date range with no data', async () => {
@@ -37,9 +39,9 @@ export default function ({ getService }) {
         operationName: 'MonitorCharts',
         query: monitorChartsQueryString,
         variables: {
-          dateRangeStart: '2002-01-28T17:40:08.078Z',
-          dateRangeEnd: '2002-01-28T19:00:16.078Z',
-          monitorId: 'auto-http-0X131221E73F825974',
+          dateRangeStart: '1999-09-11T03:31:04.380Z',
+          dateRangeEnd: '1999-09-11T03:40:34.410Z',
+          monitorId: '0002-up',
         },
       };
       const {
@@ -48,7 +50,9 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorChartsQuery });
-      expect(data).to.eql(monitorChartsEmptySet);
+
+
+      expectFixtureEql(data, 'monitor_charts_empty_sets');
     });
   });
 }

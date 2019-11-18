@@ -7,13 +7,10 @@
 import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import { resolve } from 'path';
-import {
-  InternalCoreSetup,
-  PluginInitializerContext
-} from '../../../../src/core/server';
+import { PluginInitializerContext } from '../../../../src/core/server';
 import { LegacyPluginInitializer } from '../../../../src/legacy/types';
 import mappings from './mappings.json';
-import { plugin } from './server/new-platform/index';
+import { plugin } from './server/new-platform';
 
 export const apm: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -43,12 +40,15 @@ export const apm: LegacyPluginInitializer = kibana => {
           apmUiEnabled: config.get('xpack.apm.ui.enabled'),
           // TODO: rename to apm_oss.indexPatternTitle in 7.0 (breaking change)
           apmIndexPatternTitle: config.get('apm_oss.indexPattern'),
-          apmTransactionIndices: config.get('apm_oss.transactionIndices')
+          apmServiceMapEnabled: config.get('xpack.apm.serviceMapEnabled')
         };
       },
       hacks: ['plugins/apm/hacks/toggle_app_link_in_nav'],
       savedObjectSchemas: {
-        'apm-telemetry': {
+        'apm-services-telemetry': {
+          isNamespaceAgnostic: true
+        },
+        'apm-indices': {
           isNamespaceAgnostic: true
         }
       },
@@ -70,7 +70,10 @@ export const apm: LegacyPluginInitializer = kibana => {
 
         // buckets
         minimumBucketSize: Joi.number().default(15),
-        bucketTargetCount: Joi.number().default(15)
+        bucketTargetCount: Joi.number().default(15),
+
+        // service map
+        serviceMapEnabled: Joi.boolean().default(false)
       }).default();
     },
 
@@ -87,7 +90,7 @@ export const apm: LegacyPluginInitializer = kibana => {
         catalogue: ['apm'],
         privileges: {
           all: {
-            api: ['apm'],
+            api: ['apm', 'apm_write'],
             catalogue: ['apm'],
             savedObject: {
               all: [],
@@ -108,12 +111,13 @@ export const apm: LegacyPluginInitializer = kibana => {
       });
 
       const initializerContext = {} as PluginInitializerContext;
-      const core = {
-        http: {
-          server
-        }
-      } as InternalCoreSetup;
-      plugin(initializerContext).setup(core);
+      const legacySetup = {
+        server
+      };
+      plugin(initializerContext).setup(
+        server.newPlatform.setup.core,
+        legacySetup
+      );
     }
   });
 };

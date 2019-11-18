@@ -4,6 +4,7 @@
 
 ## OnPreAuthHandler type
 
+See [OnPreAuthToolkit](./kibana-plugin-server.onpreauthtoolkit.md)<!-- -->.
 
 <b>Signature:</b>
 

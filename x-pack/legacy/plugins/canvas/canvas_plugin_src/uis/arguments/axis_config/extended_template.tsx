@@ -10,7 +10,7 @@ import { EuiSelect, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import { ExpressionAST } from '../../../../types';
-import { ArgumentStrings } from '../../../strings';
+import { ArgumentStrings } from '../../../../i18n';
 
 const { AxisConfig: strings } = ArgumentStrings;
 
@@ -71,7 +71,11 @@ export class ExtendedTemplate extends PureComponent<Props> {
     const isDisabled = typeof this.props.argValue === 'boolean' && this.props.argValue === false;
 
     if (isDisabled) {
-      return <EuiText color="subdued">The axis is disabled</EuiText>;
+      return (
+        <EuiText color="subdued" size="xs">
+          <p>{strings.getDisabledText()}</p>
+        </EuiText>
+      );
     }
 
     const positions = {
@@ -85,7 +89,7 @@ export class ExtendedTemplate extends PureComponent<Props> {
 
     return (
       <Fragment>
-        <EuiFormRow label={strings.getPositionLabel()} display="rowCompressed">
+        <EuiFormRow label={strings.getPositionLabel()} display="columnCompressed">
           <EuiSelect
             compressed
             value={position}

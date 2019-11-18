@@ -8,7 +8,7 @@ import { createMockServer } from './_mock_server';
 import { deleteAlertRoute } from './delete';
 
 const { server, alertsClient } = createMockServer();
-deleteAlertRoute(server);
+server.route(deleteAlertRoute);
 
 beforeEach(() => jest.resetAllMocks());
 

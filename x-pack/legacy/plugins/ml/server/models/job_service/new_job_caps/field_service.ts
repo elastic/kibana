@@ -13,10 +13,10 @@ import {
   NewJobCaps,
   METRIC_AGG_TYPE,
 } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/common';
-import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
+import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/server';
+import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { rollupServiceProvider, RollupJob, RollupFields } from './rollup';
-import { aggregations } from './aggregations';
+import { aggregations, mlOnlyAggregations } from './aggregations';
 
 const supportedTypes: string[] = [
   ES_FIELD_TYPES.DATE,
@@ -31,6 +31,8 @@ const supportedTypes: string[] = [
   ES_FIELD_TYPES.SCALED_FLOAT,
   ES_FIELD_TYPES.SHORT,
   ES_FIELD_TYPES.IP,
+  ES_FIELD_TYPES.GEO_POINT,
+  ES_FIELD_TYPES.GEO_SHAPE,
 ];
 
 export function fieldServiceProvider(
@@ -118,7 +120,7 @@ class FieldsService {
       }
     }
 
-    const aggs = cloneDeep(aggregations);
+    const aggs = cloneDeep([...aggregations, ...mlOnlyAggregations]);
     const fields: Field[] = await this.createFields();
 
     return await combineFieldsAndAggs(fields, aggs, rollupFields);
@@ -135,24 +137,24 @@ async function combineFieldsAndAggs(
   const keywordFields = getKeywordFields(fields);
   const numericalFields = getNumericalFields(fields);
   const ipFields = getIpFields(fields);
+  const geoFields = getGeoFields(fields);
 
-  const mix = mixFactory(rollupFields);
+  const isRollup = Object.keys(rollupFields).length > 0;
+  const mix = mixFactory(isRollup, rollupFields);
 
   aggs.forEach(a => {
-    if (a.type === METRIC_AGG_TYPE) {
-      switch (a.dslName) {
-        case ES_AGGREGATION.COUNT:
-          // count doesn't take any fields, so break here
+    if (a.type === METRIC_AGG_TYPE && a.fields !== undefined) {
+      switch (a.id) {
+        case ML_JOB_AGGREGATION.LAT_LONG:
+          geoFields.forEach(f => mix(f, a));
           break;
-        case ES_AGGREGATION.CARDINALITY:
+        case ML_JOB_AGGREGATION.DISTINCT_COUNT:
+        case ML_JOB_AGGREGATION.HIGH_DISTINCT_COUNT:
+        case ML_JOB_AGGREGATION.LOW_DISTINCT_COUNT:
           // distinct count (i.e. cardinality) takes keywords, ips
           // as well as numerical fields
-          keywordFields.forEach(f => {
-            mix(f, a);
-          });
-          ipFields.forEach(f => {
-            mix(f, a);
-          });
+          keywordFields.forEach(f => mix(f, a));
+          ipFields.forEach(f => mix(f, a));
         // note, no break to fall through to add numerical fields.
         default:
           // all other aggs take numerical fields
@@ -165,26 +167,21 @@ async function combineFieldsAndAggs(
   });
 
   return {
-    aggs: filterAggs(aggs),
-    fields: filterFields(fields),
+    aggs,
+    fields: isRollup ? filterFields(fields) : fields,
   };
 }
 
-// remove fields that have no aggs associated to them
+// remove fields that have no aggs associated to them, unless they are date fields
 function filterFields(fields: Field[]): Field[] {
-  return fields.filter(f => f.aggs && f.aggs.length);
-}
-
-// remove aggs that have no fields associated to them
-function filterAggs(aggs: Aggregation[]): Aggregation[] {
-  return aggs.filter(a => a.fields && a.fields.length);
+  return fields.filter(
+    f => f.aggs && (f.aggs.length > 0 || (f.aggs.length === 0 && f.type === ES_FIELD_TYPES.DATE))
+  );
 }
 
 // returns a mix function that is used to cross-reference aggs and fields.
 // wrapped in a provider to allow filtering based on rollup job capabilities
-function mixFactory(rollupFields: RollupFields) {
-  const isRollup = Object.keys(rollupFields).length > 0;
-
+function mixFactory(isRollup: boolean, rollupFields: RollupFields) {
   return function mix(field: Field, agg: Aggregation): void {
     if (
       isRollup === false ||
@@ -238,5 +235,11 @@ function getNumericalFields(fields: Field[]): Field[] {
       f.type === ES_FIELD_TYPES.FLOAT ||
       f.type === ES_FIELD_TYPES.HALF_FLOAT ||
       f.type === ES_FIELD_TYPES.SCALED_FLOAT
+  );
+}
+
+function getGeoFields(fields: Field[]): Field[] {
+  return fields.filter(
+    f => f.type === ES_FIELD_TYPES.GEO_POINT || f.type === ES_FIELD_TYPES.GEO_SHAPE
   );
 }

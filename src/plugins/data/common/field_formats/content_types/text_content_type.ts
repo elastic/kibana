@@ -18,21 +18,15 @@
  */
 
 import { isFunction } from 'lodash';
-import { IFieldFormat, FieldFormatConvert, TextContextTypeConvert } from '../types';
-
+import { IFieldFormat, TextContextTypeConvert } from '../types';
 import { asPrettyString } from '../utils';
 
 export const TEXT_CONTEXT_TYPE = 'text';
 
-const getConvertFn = (fieldFormatConvert: Partial<FieldFormatConvert>): TextContextTypeConvert =>
-  (fieldFormatConvert[TEXT_CONTEXT_TYPE] || asPrettyString) as TextContextTypeConvert;
-
 export const setup = (
   format: IFieldFormat,
-  fieldFormatConvert: Partial<FieldFormatConvert>
+  convert: TextContextTypeConvert = asPrettyString
 ): TextContextTypeConvert => {
-  const convert = getConvertFn(fieldFormatConvert);
-
   const recurse: TextContextTypeConvert = value => {
     if (!value || !isFunction(value.map)) {
       return convert.call(format, value);

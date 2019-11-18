@@ -25,18 +25,17 @@ import fixtures from 'fixtures/fake_hierarchical_data';
 import sinon from 'sinon';
 import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { VisProvider } from 'ui/vis';
+import { Vis } from 'ui/vis';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { round } from 'lodash';
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { createTableVisTypeDefinition } from '../../table_vis_type';
-import { setup as visualizationsSetup } from '../../../../visualizations/public/legacy';
+import { setup as visualizationsSetup } from '../../../../visualizations/public/np_ready/public/legacy';
 
 describe('Table Vis - AggTable Directive', function () {
   let $rootScope;
   let $compile;
-  let Vis;
   let indexPattern;
   let settings;
   let tableAggResponse;
@@ -113,7 +112,6 @@ describe('Table Vis - AggTable Directive', function () {
     ngMock.inject(function ($injector, Private, config) {
       tableAggResponse = legacyResponseHandlerProvider().handler;
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      Vis = Private(VisProvider);
       settings = config;
 
       $rootScope = $injector.get('$rootScope');

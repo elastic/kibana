@@ -18,7 +18,7 @@
  */
 
 import { indexBy, Dictionary } from 'lodash';
-import { FieldFormat } from '../../../../plugins/data/common/field_formats';
+import { FieldFormat } from '../../../../plugins/data/public';
 
 interface FieldFormatConfig {
   id: string;
@@ -27,9 +27,9 @@ interface FieldFormatConfig {
 
 export class FieldFormatsService {
   getConfig: any;
-  _fieldFormats: Dictionary<FieldFormat>;
+  _fieldFormats: Dictionary<FieldFormat['constructor']>;
 
-  constructor(fieldFormatClasses: FieldFormat[], getConfig: Function) {
+  constructor(fieldFormatClasses: Array<FieldFormat['constructor']>, getConfig: Function) {
     this._fieldFormats = indexBy(fieldFormatClasses, 'id');
     this.getConfig = getConfig;
   }

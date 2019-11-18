@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -17,6 +16,7 @@ import { APMError } from '../../../typings/es_schemas/ui/APMError';
 import { Setup } from '../helpers/setup_request';
 import { getErrorGroupsProjection } from '../../../common/projections/errors';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { SortOptions } from '../../../typings/elasticsearch/aggregations';
 
 export type ErrorGroupListAPIResponse = PromiseReturnType<
   typeof getErrorGroups
@@ -30,7 +30,7 @@ export async function getErrorGroups({
 }: {
   serviceName: string;
   sortField?: string;
-  sortDirection?: string;
+  sortDirection?: 'asc' | 'desc';
   setup: Setup;
 }) {
   const { client } = setup;
@@ -40,18 +40,21 @@ export async function getErrorGroups({
 
   const projection = getErrorGroupsProjection({ setup, serviceName });
 
+  const order: SortOptions = sortByLatestOccurrence
+    ? {
+        max_timestamp: sortDirection
+      }
+    : { _count: sortDirection };
+
   const params = mergeProjection(projection, {
     body: {
       size: 0,
       aggs: {
         error_groups: {
           terms: {
+            ...projection.body.aggs.error_groups.terms,
             size: 500,
-            order: sortByLatestOccurrence
-              ? {
-                  max_timestamp: sortDirection
-                }
-              : { _count: sortDirection }
+            order
           },
           aggs: {
             sample: {
@@ -64,7 +67,7 @@ export async function getErrorGroups({
                   ERROR_GROUP_ID,
                   '@timestamp'
                 ],
-                sort: [{ '@timestamp': 'desc' }],
+                sort: [{ '@timestamp': 'desc' as const }],
                 size: 1
               }
             },
@@ -98,27 +101,26 @@ export async function getErrorGroups({
     };
   }
 
-  const resp = await client.search(params);
+  const resp = await client.search<SampleError, typeof params>(params);
 
   // aggregations can be undefined when no matching indices are found.
   // this is an exception rather than the rule so the ES type does not account for this.
-  const hits = (idx(resp, _ => _.aggregations.error_groups.buckets) || []).map(
-    bucket => {
-      const source = bucket.sample.hits.hits[0]._source as SampleError;
-      const message =
-        idx(source, _ => _.error.log.message) ||
-        idx(source, _ => _.error.exception[0].message);
+  // TODO(TS-3.7-ESLINT)
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  const hits = (resp.aggregations?.error_groups.buckets || []).map(bucket => {
+    const source = bucket.sample.hits.hits[0]._source;
+    const message =
+      source.error.log?.message || source.error.exception?.[0]?.message;
 
-      return {
-        message,
-        occurrenceCount: bucket.doc_count,
-        culprit: source.error.culprit,
-        groupId: source.error.grouping_key,
-        latestOccurrenceAt: source['@timestamp'],
-        handled: idx(source, _ => _.error.exception[0].handled)
-      };
-    }
-  );
+    return {
+      message,
+      occurrenceCount: bucket.doc_count,
+      culprit: source.error.culprit,
+      groupId: source.error.grouping_key,
+      latestOccurrenceAt: source['@timestamp'],
+      handled: source.error.exception?.[0].handled
+    };
+  });
 
   return hits;
 }

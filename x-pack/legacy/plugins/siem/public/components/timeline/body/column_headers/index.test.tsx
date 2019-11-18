@@ -19,7 +19,7 @@ import { ColumnHeaders } from '.';
 
 jest.mock('../../../resize_handle/is_resizing', () => ({
   ...jest.requireActual('../../../resize_handle/is_resizing'),
-  isContainerResizing: () => ({
+  useIsContainerResizing: () => ({
     isResizing: true,
     setIsResizing: jest.fn(),
   }),
@@ -38,7 +38,6 @@ describe('ColumnHeaders', () => {
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           browserFields={mockBrowserFields}
           columnHeaders={defaultHeaders}
-          minWidth={1000}
           onColumnSorted={jest.fn()}
           onColumnRemoved={jest.fn()}
           onColumnResized={jest.fn()}
@@ -59,7 +58,6 @@ describe('ColumnHeaders', () => {
             actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
-            minWidth={1000}
             onColumnSorted={jest.fn()}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
@@ -87,7 +85,6 @@ describe('ColumnHeaders', () => {
             actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
-            minWidth={1000}
             onColumnSorted={jest.fn()}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
@@ -117,7 +114,6 @@ describe('ColumnHeaders', () => {
             actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
-            minWidth={1000}
             onColumnSorted={jest.fn()}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}

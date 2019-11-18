@@ -8,7 +8,7 @@ import { getAnomaliesHostTableColumnsCurated } from './get_anomalies_host_table_
 import { HostsType } from '../../../store/hosts/model';
 import * as i18n from './translations';
 import { AnomaliesByHost, Anomaly } from '../types';
-import { Columns } from '../../load_more_table';
+import { Columns } from '../../paginated_table';
 import { TestProviders } from '../../../mock';
 import { mount } from 'enzyme';
 import React from 'react';

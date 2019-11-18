@@ -13,15 +13,19 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/api_integration/config_security_basic.js'),
   require.resolve('../test/api_integration/config.js'),
   require.resolve('../test/alerting_api_integration/spaces_only/config.ts'),
-  require.resolve('../test/alerting_api_integration/security_and_spaces/config.ts'),
+  // FLAKY: https://github.com/elastic/kibana/issues/50079
+  // FLAKY: https://github.com/elastic/kibana/issues/50074
+  // FLAKY: https://github.com/elastic/kibana/issues/48709
+  // FLAKY: https://github.com/elastic/kibana/issues/50078
+  // require.resolve('../test/alerting_api_integration/security_and_spaces/config.ts'),
   require.resolve('../test/plugin_api_integration/config.js'),
   require.resolve('../test/kerberos_api_integration/config'),
   require.resolve('../test/kerberos_api_integration/anonymous_access.config'),
-  require.resolve('../test/saml_api_integration/config.js'),
-  require.resolve('../test/token_api_integration/config.js'),
-  require.resolve('../test/oidc_api_integration/config.ts'),
-  require.resolve('../test/oidc_api_integration/implicit_flow.config.ts'),
-  require.resolve('../test/pki_api_integration/config.ts'),
+  require.resolve('../test/saml_api_integration/config'),
+  require.resolve('../test/token_api_integration/config'),
+  require.resolve('../test/oidc_api_integration/config'),
+  require.resolve('../test/oidc_api_integration/implicit_flow.config'),
+  require.resolve('../test/pki_api_integration/config'),
   require.resolve('../test/spaces_api_integration/spaces_only/config'),
   require.resolve('../test/spaces_api_integration/security_and_spaces/config_trial'),
   require.resolve('../test/spaces_api_integration/security_and_spaces/config_basic'),

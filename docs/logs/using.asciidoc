@@ -17,7 +17,7 @@ image::logs/images/logs-console.png[Logs Console in Kibana]
 Use the search bar to perform ad hoc searches for specific text.
 You can also create structured queries using {kibana-ref}/kuery-query.html[Kibana Query Language].
 For example, enter `host.hostname : "host1"` to see only the information for `host1`.
-// ++ this isn't quite the same as the corresponding infrastructure description now.
+// ++ this isn't quite the same as the corresponding metrics description now.
 
 [float]
 [[logs-configure-source]]
@@ -30,8 +30,9 @@ If so, <<xpack-logs-configuring, configure the logs source data>> to change the 
 [[logs-time]]
 === Specify the time and date
 
-Click the time selector image:logs/images/logs-time-selector.png[time selector icon] to choose the timeframe for the logs.
-Log entries for the time you specify appear in the middle of the page, with the earlier entries above and the later entries below.
+Click image:images/time-filter-calendar.png[time filter calendar], then choose the time range for the logs.
+
+Log entries for the specified time appear in the middle of the page, with the earlier entries above and the later entries below.
 
 To quickly jump to a nearby point in time, click the minimap timeline to the right.
 // ++ what's this thing called? It's minimap in the UI. Would timeline be better?
@@ -41,6 +42,11 @@ To quickly jump to a nearby point in time, click the minimap timeline to the rig
 === Customize your view
 Click *Customize* to customize the view.
 Here, you can set the scale to use for the minimap timeline, choose whether to wrap long lines, and choose your preferred text size.
+
+[float]
+=== Configuring the data to use for your logs
+
+If your logs have custom index patterns, use non-default field settings, or contain parsed fields which you want to expose as individual columns, you can <<xpack-logs-configuring, override the default configuration settings>>.
 
 [float]
 [[logs-stream]]
@@ -69,10 +75,10 @@ To highlight a word or phrase in the logs stream, click *Highlights* and enter y
 To inspect a log event, hover over it, then click the *View details* icon image:logs/images/logs-view-event.png[View event icon] beside the event.
 This opens the *Log event document details* fly-out that shows the fields associated with the log event.
 
-To quickly filter the logs stream by one of the field values, click the *View event with filter* icon image:logs/images/logs-view-event-with-filter.png[View event icon] beside the field.
+To quickly filter the logs stream by one of the field values, in the log event details, click the *View event with filter* icon image:logs/images/logs-view-event-with-filter.png[View event icon] beside the field.
 This automatically adds a search filter to the logs stream to filter the entries by this field and value.
 
-In the log event details, click *Actions* to see the other actions related to the event.
+To see other actions related to the event, in the log event details, click *Actions*.
 Depending on the event and the features you have installed and configured, you may also be able to:
 
 * Select *View status in Uptime* to <<uptime-overview, view related uptime information>> in the *Uptime* app.

@@ -61,6 +61,14 @@ const omitTypename = (key: string, value: keyof TimelineModel) =>
 const omitTypenameInTimeline = (timeline: TimelineResult): TimelineResult =>
   JSON.parse(JSON.stringify(timeline), omitTypename);
 
+const parseString = (params: string) => {
+  try {
+    return JSON.parse(params);
+  } catch {
+    return params;
+  }
+};
+
 export const defaultTimelineToTimelineModel = (
   timeline: TimelineResult,
   duplicate: boolean
@@ -97,6 +105,32 @@ export const defaultTimelineToTimelineModel = (
           return acc;
         }, {})
       : {},
+    filters:
+      timeline.filters != null
+        ? timeline.filters.map(filter => ({
+            $state: {
+              store: 'appState',
+            },
+            meta: {
+              ...filter.meta,
+              ...(filter.meta && filter.meta.field != null
+                ? { params: parseString(filter.meta.field) }
+                : {}),
+              ...(filter.meta && filter.meta.params != null
+                ? { params: parseString(filter.meta.params) }
+                : {}),
+              ...(filter.meta && filter.meta.value != null
+                ? { value: parseString(filter.meta.value) }
+                : {}),
+            },
+            ...(filter.exists != null ? { exists: parseString(filter.exists) } : {}),
+            ...(filter.match_all != null ? { exists: parseString(filter.match_all) } : {}),
+            ...(filter.missing != null ? { exists: parseString(filter.missing) } : {}),
+            ...(filter.query != null ? { query: parseString(filter.query) } : {}),
+            ...(filter.range != null ? { range: parseString(filter.range) } : {}),
+            ...(filter.script != null ? { exists: parseString(filter.script) } : {}),
+          }))
+        : [],
     isFavorite: duplicate
       ? false
       : timeline.favorite != null
@@ -147,6 +181,7 @@ export interface QueryTimelineById<TCache> {
   apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   duplicate: boolean;
   timelineId: string;
+  openTimeline?: boolean;
   updateIsLoading: ActionCreator<{ id: string; isLoading: boolean }>;
   updateTimeline: DispatchUpdateTimeline;
 }
@@ -155,6 +190,7 @@ export const queryTimelineById = <TCache>({
   apolloClient,
   duplicate = false,
   timelineId,
+  openTimeline = true,
   updateIsLoading,
   updateTimeline,
 }: QueryTimelineById<TCache>) => {
@@ -179,7 +215,10 @@ export const queryTimelineById = <TCache>({
             from: getOr(getDefaultFromValue(), 'dateRange.start', timeline),
             id: 'timeline-1',
             notes,
-            timeline,
+            timeline: {
+              ...timeline,
+              show: openTimeline,
+            },
             to: getOr(getDefaultToValue(), 'dateRange.end', timeline),
           })();
         }

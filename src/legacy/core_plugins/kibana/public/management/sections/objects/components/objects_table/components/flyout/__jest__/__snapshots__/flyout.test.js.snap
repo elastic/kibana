@@ -31,6 +31,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
       />
       <EuiCallOut
         color="warning"
+        data-test-subj="importSavedObjectsConflictsWarning"
         iconType="help"
         title={
           <FormattedMessage
@@ -46,17 +47,15 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
             id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
             values={
               Object {
-                "indexPatternLink": <EuiLink
-                  color="primary"
+                "indexPatternLink": <ForwardRef
                   href=""
-                  type="button"
                 >
                   <FormattedMessage
                     defaultMessage="create a new index pattern"
                     id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                     values={Object {}}
                   />
-                </EuiLink>,
+                </ForwardRef>,
               }
             }
           />
@@ -240,6 +239,7 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
 exports[`Flyout conflicts should handle errors 1`] = `
 <EuiCallOut
   color="warning"
+  data-test-subj="importSavedObjectsFailedWarning"
   iconType="help"
   title={
     <FormattedMessage
@@ -268,6 +268,7 @@ exports[`Flyout conflicts should handle errors 1`] = `
 exports[`Flyout errors should display unsupported type errors properly 1`] = `
 <EuiCallOut
   color="warning"
+  data-test-subj="importSavedObjectsFailedWarning"
   iconType="help"
   title={
     <FormattedMessage
@@ -326,6 +327,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
       />
       <EuiCallOut
         color="warning"
+        data-test-subj="importSavedObjectsLegacyWarning"
         iconType="help"
         title={
           <FormattedMessage
@@ -350,6 +352,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
       />
       <EuiCallOut
         color="warning"
+        data-test-subj="importSavedObjectsConflictsWarning"
         iconType="help"
         title={
           <FormattedMessage
@@ -365,17 +368,15 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
             id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
             values={
               Object {
-                "indexPatternLink": <EuiLink
-                  color="primary"
+                "indexPatternLink": <ForwardRef
                   href=""
-                  type="button"
                 >
                   <FormattedMessage
                     defaultMessage="create a new index pattern"
                     id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                     values={Object {}}
                   />
-                </EuiLink>,
+                </ForwardRef>,
               }
             }
           />
@@ -494,6 +495,7 @@ exports[`Flyout legacy conflicts should handle errors 1`] = `
 Array [
   <EuiCallOut
     color="warning"
+    data-test-subj="importSavedObjectsLegacyWarning"
     iconType="help"
     title={
       <FormattedMessage
@@ -513,6 +515,7 @@ Array [
   </EuiCallOut>,
   <EuiCallOut
     color="warning"
+    data-test-subj="importSavedObjectsConflictsWarning"
     iconType="help"
     title={
       <FormattedMessage
@@ -528,17 +531,15 @@ Array [
         id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
         values={
           Object {
-            "indexPatternLink": <EuiLink
-              color="primary"
+            "indexPatternLink": <ForwardRef
               href=""
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="create a new index pattern"
                 id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                 values={Object {}}
               />
-            </EuiLink>,
+            </ForwardRef>,
           }
         }
       />
@@ -591,6 +592,7 @@ exports[`Flyout should render import step 1`] = `
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -618,6 +620,7 @@ exports[`Flyout should render import step 1`] = `
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         labelType="label"
       >

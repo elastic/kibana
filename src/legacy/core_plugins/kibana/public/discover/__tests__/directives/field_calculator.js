@@ -22,7 +22,6 @@ import _ from 'lodash';
 import ngMock from 'ng_mock';
 import { fieldCalculator } from '../../components/field_chooser/lib/field_calculator';
 import expect from '@kbn/expect';
-import 'ui/private';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 // Load the kibana app dependencies.
@@ -114,14 +113,14 @@ describe('fieldCalculator', function () {
     });
 
     it('Should return an array of values for _source fields', function () {
-      const extensions = fieldCalculator.getFieldValues(hits, indexPattern.fields.byName.extension);
+      const extensions = fieldCalculator.getFieldValues(hits, indexPattern.fields.getByName('extension'));
       expect(extensions).to.be.an(Array);
       expect(_.filter(extensions, function (v) { return v === 'html'; }).length).to.be(8);
       expect(_.uniq(_.clone(extensions)).sort()).to.eql(['gif', 'html', 'php', 'png']);
     });
 
     it('Should return an array of values for core meta fields', function () {
-      const types = fieldCalculator.getFieldValues(hits, indexPattern.fields.byName._type);
+      const types = fieldCalculator.getFieldValues(hits, indexPattern.fields.getByName('_type'));
       expect(types).to.be.an(Array);
       expect(_.filter(types, function (v) { return v === 'apache'; }).length).to.be(18);
       expect(_.uniq(_.clone(types)).sort()).to.eql(['apache', 'nginx']);
@@ -134,7 +133,7 @@ describe('fieldCalculator', function () {
     beforeEach(function () {
       params = {
         hits: require('fixtures/real_hits.js'),
-        field: indexPattern.fields.byName.extension,
+        field: indexPattern.fields.getByName('extension'),
         count: 3
       };
     });
@@ -149,18 +148,18 @@ describe('fieldCalculator', function () {
     });
 
     it('fails to analyze geo and attachment types', function () {
-      params.field = indexPattern.fields.byName.point;
+      params.field = indexPattern.fields.getByName('point');
       expect(fieldCalculator.getFieldValueCounts(params).error).to.not.be(undefined);
 
-      params.field = indexPattern.fields.byName.area;
+      params.field = indexPattern.fields.getByName('area');
       expect(fieldCalculator.getFieldValueCounts(params).error).to.not.be(undefined);
 
-      params.field = indexPattern.fields.byName.request_body;
+      params.field = indexPattern.fields.getByName('request_body');
       expect(fieldCalculator.getFieldValueCounts(params).error).to.not.be(undefined);
     });
 
     it('fails to analyze fields that are in the mapping, but not the hits', function () {
-      params.field = indexPattern.fields.byName.ip;
+      params.field = indexPattern.fields.getByName('ip');
       expect(fieldCalculator.getFieldValueCounts(params).error).to.not.be(undefined);
     });
 
@@ -169,7 +168,7 @@ describe('fieldCalculator', function () {
     });
 
     it('counts the hits the field exists in', function () {
-      params.field = indexPattern.fields.byName.phpmemory;
+      params.field = indexPattern.fields.getByName('phpmemory');
       expect(fieldCalculator.getFieldValueCounts(params).exists).to.be(5);
     });
   });

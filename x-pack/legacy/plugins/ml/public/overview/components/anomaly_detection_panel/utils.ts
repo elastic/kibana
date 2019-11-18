@@ -19,6 +19,7 @@ export function getGroupsFromJobs(
       docs_processed: 0,
       latest_timestamp: 0,
       max_anomaly_score: null,
+      jobs_in_group: 0,
     },
   };
 
@@ -33,10 +34,12 @@ export function getGroupsFromJobs(
             docs_processed: job.processed_record_count,
             latest_timestamp: job.latestTimestampMs,
             max_anomaly_score: null,
+            jobs_in_group: 1,
           };
         } else {
           groups[g].jobIds.push(job.id);
           groups[g].docs_processed += job.processed_record_count;
+          groups[g].jobs_in_group++;
           // if incoming job latest timestamp is greater than the last saved one, replace it
           if (groups[g].latest_timestamp === undefined) {
             groups[g].latest_timestamp = job.latestTimestampMs;
@@ -48,6 +51,7 @@ export function getGroupsFromJobs(
     } else {
       groups.ungrouped.jobIds.push(job.id);
       groups.ungrouped.docs_processed += job.processed_record_count;
+      groups.ungrouped.jobs_in_group++;
       // if incoming job latest timestamp is greater than the last saved one, replace it
       if (job.latestTimestampMs > groups.ungrouped.latest_timestamp) {
         groups.ungrouped.latest_timestamp = job.latestTimestampMs;

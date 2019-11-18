@@ -9,7 +9,6 @@ import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useUiFilters } from '../context/UrlParamsContext';
 import { useFetcher } from './useFetcher';
 import { TransactionGroupListAPIResponse } from '../../server/lib/transaction_groups';
-import { callApmApi } from '../services/rest/callApmApi';
 
 const getRelativeImpact = (
   impact: number,
@@ -43,22 +42,25 @@ function getWithRelativeImpact(items: TransactionGroupListAPIResponse) {
 export function useTransactionList(urlParams: IUrlParams) {
   const { serviceName, transactionType, start, end } = urlParams;
   const uiFilters = useUiFilters(urlParams);
-  const { data = [], error, status } = useFetcher(() => {
-    if (serviceName && start && end && transactionType) {
-      return callApmApi({
-        pathname: '/api/apm/services/{serviceName}/transaction_groups',
-        params: {
-          path: { serviceName },
-          query: {
-            start,
-            end,
-            transactionType,
-            uiFilters: JSON.stringify(uiFilters)
+  const { data = [], error, status } = useFetcher(
+    callApmApi => {
+      if (serviceName && start && end && transactionType) {
+        return callApmApi({
+          pathname: '/api/apm/services/{serviceName}/transaction_groups',
+          params: {
+            path: { serviceName },
+            query: {
+              start,
+              end,
+              transactionType,
+              uiFilters: JSON.stringify(uiFilters)
+            }
           }
-        }
-      });
-    }
-  }, [serviceName, start, end, transactionType, uiFilters]);
+        });
+      }
+    },
+    [serviceName, start, end, transactionType, uiFilters]
+  );
 
   const memoizedData = useMemo(() => getWithRelativeImpact(data), [data]);
   return {

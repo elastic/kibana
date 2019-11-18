@@ -8,12 +8,12 @@ import { errors } from 'elasticsearch';
 
 import { elasticsearchServiceMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 
-import { ClusterClient, ElasticsearchErrorHelpers } from '../../../../../src/core/server';
+import { IClusterClient, ElasticsearchErrorHelpers } from '../../../../../src/core/server';
 import { Tokens } from './tokens';
 
 describe('Tokens', () => {
   let tokens: Tokens;
-  let mockClusterClient: jest.Mocked<PublicMethodsOf<ClusterClient>>;
+  let mockClusterClient: jest.Mocked<IClusterClient>;
   beforeEach(() => {
     mockClusterClient = elasticsearchServiceMock.createClusterClient();
 

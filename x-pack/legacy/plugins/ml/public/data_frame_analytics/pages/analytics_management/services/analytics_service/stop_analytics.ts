@@ -11,7 +11,7 @@ import { ml } from '../../../../../services/ml_api_service';
 import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../../common';
 
 import {
-  DATA_FRAME_TASK_STATE,
+  isDataFrameAnalyticsFailed,
   DataFrameAnalyticsListRow,
 } from '../../components/analytics_list/common';
 
@@ -19,7 +19,7 @@ export const stopAnalytics = async (d: DataFrameAnalyticsListRow) => {
   try {
     await ml.dataFrameAnalytics.stopDataFrameAnalytics(
       d.config.id,
-      d.stats.state === DATA_FRAME_TASK_STATE.FAILED,
+      isDataFrameAnalyticsFailed(d.stats.state),
       true
     );
     toastNotifications.addSuccess(

@@ -31,6 +31,10 @@ export interface SpanRaw extends APMBaseDoc {
       url?: {
         original?: string;
       };
+      response: {
+        status_code: number;
+      };
+      method?: string;
     };
     db?: {
       statement?: string;

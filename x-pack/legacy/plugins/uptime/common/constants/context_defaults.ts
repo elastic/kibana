@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SortOrder, CursorDirection } from '../graphql/types';
+
 /**
  * The Uptime UI utilizes a settings context, the defaults for which are stored here.
  */
@@ -28,4 +30,9 @@ export const CONTEXT_DEFAULTS = {
    * The end of the default date range is now.
    */
   DATE_RANGE_END: 'now',
+
+  CURSOR_PAGINATION: {
+    cursorDirection: CursorDirection.AFTER,
+    sortOrder: SortOrder.ASC,
+  },
 };

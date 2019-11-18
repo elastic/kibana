@@ -13,12 +13,7 @@ import {
   Ping,
   LocationDurationLine,
 } from '../../../../common/graphql/types';
-import {
-  dropLatestBucket,
-  getFilterClause,
-  getHistogramInterval,
-  parseFilterQuery,
-} from '../../helper';
+import { getFilterClause, parseFilterQuery, getHistogramIntervalFormatted } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
 
@@ -80,7 +75,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
           timeseries: {
             date_histogram: {
               field: '@timestamp',
-              fixed_interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
+              fixed_interval: getHistogramIntervalFormatted(dateRangeStart, dateRangeEnd),
               min_doc_count: 0,
             },
             aggs: {
@@ -101,10 +96,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
 
     const result = await this.database.search(request, params);
-    const dateHistogramBuckets = dropLatestBucket(
-      get(result, 'aggregations.timeseries.buckets', [])
-    );
 
+    const dateHistogramBuckets = get<any[]>(result, 'aggregations.timeseries.buckets', []);
     /**
      * The code below is responsible for formatting the aggregation data we fetched above in a way
      * that the chart components used by the client understands.

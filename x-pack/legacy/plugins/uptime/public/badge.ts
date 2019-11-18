@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Badge } from 'ui/chrome/api/badge';
-export type UMBadge = Badge | undefined;
+import { ChromeBadge } from 'src/core/public';
+export type UMBadge = ChromeBadge | undefined;

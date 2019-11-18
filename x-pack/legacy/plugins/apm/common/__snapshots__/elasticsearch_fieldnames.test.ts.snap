@@ -12,6 +12,8 @@ exports[`Error ERROR_EXC_MESSAGE 1`] = `undefined`;
 
 exports[`Error ERROR_GROUP_ID 1`] = `"grouping key"`;
 
+exports[`Error ERROR_LOG_LEVEL 1`] = `undefined`;
+
 exports[`Error ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
@@ -19,6 +21,12 @@ exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
 exports[`Error HOST_NAME 1`] = `"my hostname"`;
 
 exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
+
+exports[`Error LABEL_NAME 1`] = `undefined`;
+
+exports[`Error METRIC_JAVA_GC_COUNT 1`] = `undefined`;
+
+exports[`Error METRIC_JAVA_GC_TIME 1`] = `undefined`;
 
 exports[`Error METRIC_JAVA_HEAP_MEMORY_COMMITTED 1`] = `undefined`;
 
@@ -57,6 +65,8 @@ exports[`Error SERVICE_AGENT_NAME 1`] = `"java"`;
 exports[`Error SERVICE_ENVIRONMENT 1`] = `undefined`;
 
 exports[`Error SERVICE_NAME 1`] = `"service name"`;
+
+exports[`Error SERVICE_NODE_NAME 1`] = `undefined`;
 
 exports[`Error SPAN_ACTION 1`] = `undefined`;
 
@@ -106,6 +116,8 @@ exports[`Span ERROR_EXC_MESSAGE 1`] = `undefined`;
 
 exports[`Span ERROR_GROUP_ID 1`] = `undefined`;
 
+exports[`Span ERROR_LOG_LEVEL 1`] = `undefined`;
+
 exports[`Span ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
@@ -113,6 +125,12 @@ exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
 exports[`Span HOST_NAME 1`] = `undefined`;
 
 exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
+
+exports[`Span LABEL_NAME 1`] = `undefined`;
+
+exports[`Span METRIC_JAVA_GC_COUNT 1`] = `undefined`;
+
+exports[`Span METRIC_JAVA_GC_TIME 1`] = `undefined`;
 
 exports[`Span METRIC_JAVA_HEAP_MEMORY_COMMITTED 1`] = `undefined`;
 
@@ -151,6 +169,8 @@ exports[`Span SERVICE_AGENT_NAME 1`] = `"java"`;
 exports[`Span SERVICE_ENVIRONMENT 1`] = `undefined`;
 
 exports[`Span SERVICE_NAME 1`] = `"service name"`;
+
+exports[`Span SERVICE_NODE_NAME 1`] = `undefined`;
 
 exports[`Span SPAN_ACTION 1`] = `"my action"`;
 
@@ -200,6 +220,8 @@ exports[`Transaction ERROR_EXC_MESSAGE 1`] = `undefined`;
 
 exports[`Transaction ERROR_GROUP_ID 1`] = `undefined`;
 
+exports[`Transaction ERROR_LOG_LEVEL 1`] = `undefined`;
+
 exports[`Transaction ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
@@ -207,6 +229,12 @@ exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
 exports[`Transaction HOST_NAME 1`] = `"my hostname"`;
 
 exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
+
+exports[`Transaction LABEL_NAME 1`] = `undefined`;
+
+exports[`Transaction METRIC_JAVA_GC_COUNT 1`] = `undefined`;
+
+exports[`Transaction METRIC_JAVA_GC_TIME 1`] = `undefined`;
 
 exports[`Transaction METRIC_JAVA_HEAP_MEMORY_COMMITTED 1`] = `undefined`;
 
@@ -245,6 +273,8 @@ exports[`Transaction SERVICE_AGENT_NAME 1`] = `"java"`;
 exports[`Transaction SERVICE_ENVIRONMENT 1`] = `undefined`;
 
 exports[`Transaction SERVICE_NAME 1`] = `"service name"`;
+
+exports[`Transaction SERVICE_NODE_NAME 1`] = `undefined`;
 
 exports[`Transaction SPAN_ACTION 1`] = `undefined`;
 

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createRoute } from './create';
-export { deleteRoute } from './delete';
-export { findRoute } from './find';
-export { getRoute } from './get';
-export { updateRoute } from './update';
+export { createActionRoute } from './create';
+export { deleteActionRoute } from './delete';
+export { findActionRoute } from './find';
+export { getActionRoute } from './get';
+export { updateActionRoute } from './update';
 export { listActionTypesRoute } from './list_action_types';
-export { executeRoute } from './execute';
+export { getExecuteActionRoute } from './execute';

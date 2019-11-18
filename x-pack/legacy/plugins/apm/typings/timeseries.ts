@@ -3,10 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Maybe } from '../typings/common';
 
 export interface Coordinate {
   x: number;
-  y: number | null | undefined;
+  y: Maybe<number>;
 }
 
 export interface RectCoordinate {
@@ -27,4 +28,4 @@ export interface TimeSeries {
 }
 
 export type ChartType = 'area' | 'linemark';
-export type YUnit = 'percent' | 'bytes' | 'number';
+export type YUnit = 'percent' | 'bytes' | 'number' | 'time' | 'integer';

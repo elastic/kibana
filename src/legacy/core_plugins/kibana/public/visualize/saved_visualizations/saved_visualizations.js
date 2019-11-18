@@ -21,7 +21,7 @@ import './_saved_vis';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
-import { start as visualizations } from '../../../../visualizations/public/legacy';
+import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 import { createVisualizeEditUrl } from '../visualize_constants';
 import { findListItems } from './find_list_items';
 
@@ -67,7 +67,6 @@ app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) 
     source.icon = source.type.icon;
     source.image = source.type.image;
     source.typeTitle = source.type.title;
-    source.isExperimental = source.type.shouldMarkAsExperimentalInUI();
     source.editUrl = `#${createVisualizeEditUrl(id)}`;
 
     return source;

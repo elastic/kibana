@@ -3,6 +3,8 @@
 exports[`ProcessDraggable rendering it renders against shallow snapshot 1`] = `
 <Component
   contextId="context-123"
+  endgamePid={456}
+  endgameProcessName="endgame-process-name-123"
   eventId="event-123"
   processExecutable="process-executable-1"
   processName="process-name-1"

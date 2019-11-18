@@ -157,7 +157,7 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
         />
 
         <SwitchOption
-          dataTestSubj="heatmapUseCustomRanges"
+          data-test-subj="heatmapUseCustomRanges"
           label={i18n.translate('kbnVislibVisTypes.controls.heatmapOptions.useCustomRangesLabel', {
             defaultMessage: 'Use custom ranges',
           })}
@@ -167,16 +167,13 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
         />
 
         {stateParams.setColorRange && (
-          <>
-            <EuiSpacer size="s" />
-            <ColorRanges
-              data-test-subj="heatmapColorRange"
-              colorsRange={stateParams.colorsRange}
-              setValue={setValue}
-              setTouched={setTouched}
-              setValidity={setIsColorRangesValid}
-            />
-          </>
+          <ColorRanges
+            data-test-subj="heatmapColorRange"
+            colorsRange={stateParams.colorsRange}
+            setValue={setValue}
+            setTouched={setTouched}
+            setValidity={setIsColorRangesValid}
+          />
         )}
       </EuiPanel>
 

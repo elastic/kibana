@@ -29,7 +29,7 @@ import { format as formatUrl } from 'url';
 import readline from 'readline';
 
 import { Command } from 'commander';
-import elasticsearch from 'elasticsearch';
+import * as legacyElasticsearch from 'elasticsearch';
 
 import { EsArchiver } from './es_archiver';
 import { ToolingLog } from '@kbn/dev-utils';
@@ -139,7 +139,7 @@ async function execute(fn) {
     }
 
     // run!
-    const client = new elasticsearch.Client({
+    const client = new legacyElasticsearch.Client({
       host: cmd.esUrl,
       log: cmd.verbose ? 'trace' : []
     });

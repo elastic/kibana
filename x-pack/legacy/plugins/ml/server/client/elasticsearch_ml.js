@@ -160,6 +160,16 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'PUT'
   });
 
+  ml.evaluateDataFrameAnalytics = ca({
+    urls: [
+      {
+        fmt: '/_ml/data_frame/_evaluate',
+      }
+    ],
+    needBody: true,
+    method: 'POST'
+  });
+
   ml.deleteDataFrameAnalytics = ca({
     urls: [
       {
@@ -199,122 +209,6 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
           force: {
             type: 'boolean'
           },
-        }
-      }
-    ],
-    method: 'POST'
-  });
-
-  // Currently the endpoint uses a default size of 100 unless a size is supplied.
-  // So until paging is supported in the UI, explicitly supply a size of 1000
-  // to match the max number of docs that the endpoint can return.
-  ml.getDataFrameTransforms = ca({
-    urls: [
-      {
-        fmt: '/_data_frame/transforms/<%=transformId%>',
-        req: {
-          transformId: {
-            type: 'string'
-          }
-        }
-      },
-      {
-        fmt: '/_data_frame/transforms/_all?size=1000',
-      }
-    ],
-    method: 'GET'
-  });
-
-  ml.getDataFrameTransformsStats = ca({
-    urls: [
-      {
-        fmt: '/_data_frame/transforms/<%=transformId%>/_stats',
-        req: {
-          transformId: {
-            type: 'string'
-          }
-        }
-      },
-      {
-        // Currently the endpoint uses a default size of 100 unless a size is supplied.
-        // So until paging is supported in the UI, explicitly supply a size of 1000
-        // to match the max number of docs that the endpoint can return.
-        fmt: '/_data_frame/transforms/_all/_stats?size=1000',
-      }
-    ],
-    method: 'GET'
-  });
-
-  ml.createDataFrameTransform = ca({
-    urls: [
-      {
-        fmt: '/_data_frame/transforms/<%=transformId%>',
-        req: {
-          transformId: {
-            type: 'string'
-          }
-        }
-      }
-    ],
-    needBody: true,
-    method: 'PUT'
-  });
-
-  ml.deleteDataFrameTransform = ca({
-    urls: [
-      {
-        fmt: '/_data_frame/transforms/<%=transformId%>',
-        req: {
-          transformId: {
-            type: 'string'
-          }
-        }
-      }
-    ],
-    method: 'DELETE'
-  });
-
-  ml.getDataFrameTransformsPreview = ca({
-    urls: [
-      {
-        fmt: '/_data_frame/transforms/_preview'
-      }
-    ],
-    needBody: true,
-    method: 'POST'
-  });
-
-  ml.startDataFrameTransform = ca({
-    urls: [
-      {
-        fmt: '/_data_frame/transforms/<%=transformId%>/_start?&force=<%=force%>',
-        req: {
-          transformId: {
-            type: 'string'
-          },
-          force: {
-            type: 'boolean'
-          }
-        }
-      }
-    ],
-    method: 'POST'
-  });
-
-  ml.stopDataFrameTransform = ca({
-    urls: [
-      {
-        fmt: '/_data_frame/transforms/<%=transformId%>/_stop?&force=<%=force%>&wait_for_completion=<%waitForCompletion%>',
-        req: {
-          transformId: {
-            type: 'string'
-          },
-          force: {
-            type: 'boolean'
-          },
-          waitForCompletion: {
-            type: 'boolean'
-          }
         }
       }
     ],

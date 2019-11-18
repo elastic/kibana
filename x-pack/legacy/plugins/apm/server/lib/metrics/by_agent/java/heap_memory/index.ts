@@ -50,10 +50,15 @@ const chartBase: ChartBase = {
   series
 };
 
-export async function getHeapMemoryChart(setup: Setup, serviceName: string) {
+export async function getHeapMemoryChart(
+  setup: Setup,
+  serviceName: string,
+  serviceNodeName?: string
+) {
   return fetchAndTransformMetrics({
     setup,
     serviceName,
+    serviceNodeName,
     chartBase,
     aggs: {
       heapMemoryMax: { avg: { field: METRIC_JAVA_HEAP_MEMORY_MAX } },

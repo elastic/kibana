@@ -21,7 +21,6 @@ export function getTabs(tabId: TabId, disableLinks: boolean): Tab[] {
   const TAB_MAP: Partial<Record<TabId, Tab[]>> = {
     overview: [],
     datavisualizer: [],
-    data_frames: [],
     data_frame_analytics: [],
     anomaly_detection: [
       {

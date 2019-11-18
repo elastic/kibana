@@ -20,18 +20,16 @@
 import Hapi from 'hapi';
 import { createMockServer } from './_mock_server';
 import { createImportRoute } from './import';
+import { savedObjectsClientMock } from '../../../../core/server/mocks';
 
 describe('POST /api/saved_objects/_import', () => {
   let server: Hapi.Server;
-  const savedObjectsClient = {
-    errors: {} as any,
-    bulkCreate: jest.fn(),
-    bulkGet: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
+  const savedObjectsClient = savedObjectsClientMock.create();
+  const emptyResponse = {
+    saved_objects: [],
+    total: 0,
+    per_page: 0,
+    page: 0,
   };
 
   beforeEach(() => {
@@ -68,7 +66,7 @@ describe('POST /api/saved_objects/_import', () => {
         'content-Type': 'multipart/form-data; boundary=BOUNDARY',
       },
     };
-    savedObjectsClient.find.mockResolvedValueOnce({ saved_objects: [] });
+    savedObjectsClient.find.mockResolvedValueOnce(emptyResponse);
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
     expect(statusCode).toBe(200);
@@ -95,7 +93,7 @@ describe('POST /api/saved_objects/_import', () => {
         'content-Type': 'multipart/form-data; boundary=EXAMPLE',
       },
     };
-    savedObjectsClient.find.mockResolvedValueOnce({ saved_objects: [] });
+    savedObjectsClient.find.mockResolvedValueOnce(emptyResponse);
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -104,6 +102,7 @@ describe('POST /api/saved_objects/_import', () => {
           attributes: {
             title: 'my-pattern-*',
           },
+          references: [],
         },
       ],
     });
@@ -141,7 +140,7 @@ describe('POST /api/saved_objects/_import', () => {
         'content-Type': 'multipart/form-data; boundary=EXAMPLE',
       },
     };
-    savedObjectsClient.find.mockResolvedValueOnce({ saved_objects: [] });
+    savedObjectsClient.find.mockResolvedValueOnce(emptyResponse);
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -150,6 +149,7 @@ describe('POST /api/saved_objects/_import', () => {
           attributes: {
             title: 'my-pattern-*',
           },
+          references: [],
         },
         {
           type: 'dashboard',
@@ -157,6 +157,7 @@ describe('POST /api/saved_objects/_import', () => {
           attributes: {
             title: 'Look at my dashboard',
           },
+          references: [],
         },
       ],
     });
@@ -187,7 +188,7 @@ describe('POST /api/saved_objects/_import', () => {
         'content-Type': 'multipart/form-data; boundary=EXAMPLE',
       },
     };
-    savedObjectsClient.find.mockResolvedValueOnce({ saved_objects: [] });
+    savedObjectsClient.find.mockResolvedValueOnce(emptyResponse);
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -256,6 +257,8 @@ describe('POST /api/saved_objects/_import', () => {
             statusCode: 404,
             message: 'Not found',
           },
+          references: [],
+          attributes: {},
         },
       ],
     });

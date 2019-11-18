@@ -36,7 +36,7 @@ exports[`DetailView should render Discover button 1`] = `
   <EuiButtonEmpty
     iconType="discoverApp"
   >
-    View 10 occurrences in Discover
+    View 10 occurrences in Discover.
   </EuiButtonEmpty>
 </DiscoverErrorLink>
 `;
@@ -46,12 +46,13 @@ exports[`DetailView should render TabContent 1`] = `
   currentTab={
     Object {
       "key": "exception_stacktrace",
-      "label": "Exception stacktrace",
+      "label": "Exception stack trace",
     }
   }
   error={
     Object {
       "context": Object {},
+      "error": Object {},
       "timestamp": Object {
         "us": 0,
       },
@@ -71,7 +72,7 @@ exports[`DetailView should render tabs 1`] = `
     key="exception_stacktrace"
     onClick={[Function]}
   >
-    Exception stacktrace
+    Exception stack trace
   </EuiTab>
   <EuiTab
     isSelected={false}

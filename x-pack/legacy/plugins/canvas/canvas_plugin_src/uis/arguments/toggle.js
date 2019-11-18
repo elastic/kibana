@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
-import { ArgumentStrings } from '../../strings';
+import { ArgumentStrings } from '../../../i18n';
 
 const { Toggle: strings } = ArgumentStrings;
 
@@ -19,8 +19,14 @@ const ToggleArgInput = ({ onValueChange, argValue, argId, renderError }) => {
     return null;
   }
   return (
-    <EuiFormRow display="rowCompressed">
-      <EuiSwitch compressed id={argId} checked={argValue} onChange={handleChange} />
+    <EuiFormRow display="columnCompressedSwitch">
+      <EuiSwitch
+        compressed
+        id={argId}
+        checked={argValue}
+        onChange={handleChange}
+        className="canvasArg__switch"
+      />
     </EuiFormRow>
   );
 };

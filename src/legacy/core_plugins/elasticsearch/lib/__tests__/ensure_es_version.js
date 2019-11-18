@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 
@@ -74,13 +74,13 @@ describe('plugins/elasticsearch', () => {
       }
 
       const cluster = server.plugins.elasticsearch.getCluster('admin');
-      cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Promise.resolve({ nodes: nodes }));
+      cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Bluebird.resolve({ nodes: nodes }));
     }
 
     function setNodeWithoutHTTP(version) {
       const nodes = { 'node-without-http': { version, ip: 'ip' } };
       const cluster = server.plugins.elasticsearch.getCluster('admin');
-      cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Promise.resolve({ nodes: nodes }));
+      cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Bluebird.resolve({ nodes: nodes }));
     }
 
     it('returns true with single a node that matches', async () => {
@@ -100,6 +100,51 @@ describe('plugins/elasticsearch', () => {
       setNodes('5.1.0', '5.2.0', '5.0.0');
       try {
         await ensureEsVersion(server, KIBANA_VERSION);
+      } catch (e) {
+        expect(e).to.be.a(Error);
+      }
+    });
+
+    it('does not throw on outdated nodes, if `ignoreVersionMismatch` is enabled in development mode', async () => {
+      // set config values
+      server.config = () => ({
+        get: name => {
+          switch (name) {
+            case 'env.dev':
+              return true;
+            default:
+              throw new Error(`Unknown option "${name}"`);
+          }
+        },
+      });
+
+      // 5.0.0 ES is too old to work with a 5.1.0 version of Kibana.
+      setNodes('5.1.0', '5.2.0', '5.0.0');
+
+      const ignoreVersionMismatch = true;
+      const result =  await ensureEsVersion(server, KIBANA_VERSION, ignoreVersionMismatch);
+      expect(result).to.be(true);
+    });
+
+    it('throws an error if `ignoreVersionMismatch` is enabled in production mode', async () => {
+      // set config values
+      server.config = () => ({
+        get: name => {
+          switch (name) {
+            case 'env.dev':
+              return false;
+            default:
+              throw new Error(`Unknown option "${name}"`);
+          }
+        },
+      });
+
+      // 5.0.0 ES is too old to work with a 5.1.0 version of Kibana.
+      setNodes('5.1.0', '5.2.0', '5.0.0');
+
+      try {
+        const ignoreVersionMismatch = true;
+        await ensureEsVersion(server, KIBANA_VERSION, ignoreVersionMismatch);
       } catch (e) {
         expect(e).to.be.a(Error);
       }

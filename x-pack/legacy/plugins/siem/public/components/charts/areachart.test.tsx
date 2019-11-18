@@ -7,13 +7,135 @@
 import { ShallowWrapper, shallow } from 'enzyme';
 import * as React from 'react';
 
-import { AreaChartBaseComponent, AreaChartWithCustomPrompt, AreaChart } from './areachart';
-import { ChartHolder, ChartSeriesData } from './common';
+import { AreaChartBaseComponent, AreaChart } from './areachart';
+import { ChartSeriesData } from './common';
 import { ScaleType, AreaSeries, Axis } from '@elastic/charts';
 
-jest.mock('@elastic/charts');
 const customHeight = '100px';
 const customWidth = '120px';
+const chartDataSets = [
+  [
+    [
+      {
+        key: 'uniqueSourceIpsHistogram',
+        value: [
+          { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 580213 },
+          { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: null },
+          { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
+        ],
+        color: '#DB1374',
+      },
+      {
+        key: 'uniqueDestinationIpsHistogram',
+        value: [
+          { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
+          { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
+          { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
+        ],
+        color: '#490092',
+      },
+    ],
+  ],
+  [
+    [
+      {
+        key: 'uniqueSourceIpsHistogram',
+        value: [
+          { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 580213 },
+          { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1096175 },
+          { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
+        ],
+        color: '#DB1374',
+      },
+      {
+        key: 'uniqueDestinationIpsHistogram',
+        value: [
+          { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
+          { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
+          { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
+        ],
+        color: '#490092',
+      },
+    ],
+  ],
+  [
+    [
+      {
+        key: 'uniqueSourceIpsHistogram',
+        value: [
+          { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 580213 },
+          { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: {} },
+          { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
+        ],
+        color: '#DB1374',
+      },
+      {
+        key: 'uniqueDestinationIpsHistogram',
+        value: [
+          { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
+          { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
+          { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
+        ],
+        color: '#490092',
+      },
+    ],
+  ],
+  [
+    [
+      {
+        key: 'uniqueSourceIpsHistogram',
+        value: [],
+        color: '#DB1374',
+      },
+      {
+        key: 'uniqueDestinationIpsHistogram',
+        value: [
+          { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
+          { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
+          { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
+        ],
+        color: '#490092',
+      },
+    ],
+  ],
+];
+
+const chartHolderDataSets = [
+  [null],
+  [[]],
+  [
+    {
+      key: 'uniqueSourceIpsHistogram',
+      value: null,
+      color: '#DB1374',
+    },
+    {
+      key: 'uniqueDestinationIpsHistogram',
+      value: null,
+      color: '#490092',
+    },
+  ],
+  [
+    {
+      key: 'uniqueSourceIpsHistogram',
+      value: [
+        { x: new Date('2019-05-03T13:00:00.000Z').valueOf() },
+        { x: new Date('2019-05-04T01:00:00.000Z').valueOf() },
+        { x: new Date('2019-05-04T13:00:00.000Z').valueOf() },
+      ],
+      color: '#DB1374',
+    },
+    {
+      key: 'uniqueDestinationIpsHistogram',
+      value: [
+        { x: new Date('2019-05-03T13:00:00.000Z').valueOf() },
+        { x: new Date('2019-05-04T01:00:00.000Z').valueOf() },
+        { x: new Date('2019-05-04T13:00:00.000Z').valueOf() },
+      ],
+      color: '#490092',
+    },
+  ],
+];
 describe('AreaChartBaseComponent', () => {
   let shallowWrapper: ShallowWrapper;
   const mockAreaChartData: ChartSeriesData[] = [
@@ -186,137 +308,6 @@ describe('AreaChartBaseComponent', () => {
   });
 });
 
-describe('AreaChartWithCustomPrompt', () => {
-  let shallowWrapper: ShallowWrapper;
-  describe.each([
-    [
-      [
-        {
-          key: 'uniqueSourceIpsHistogram',
-          value: [
-            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 580213 },
-            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1096175 },
-            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
-          ],
-          color: '#DB1374',
-        },
-        {
-          key: 'uniqueDestinationIpsHistogram',
-          value: [
-            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
-            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
-            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
-          ],
-          color: '#490092',
-        },
-      ],
-    ],
-  ] as Array<[ChartSeriesData[]]>)('renders areachart', data => {
-    beforeAll(() => {
-      shallowWrapper = shallow(
-        <AreaChartWithCustomPrompt height={customHeight} width={customWidth} data={data} />
-      );
-    });
-
-    it('render AreaChartBaseComponent', () => {
-      expect(shallowWrapper.find(AreaChartBaseComponent)).toHaveLength(1);
-      expect(shallowWrapper.find(ChartHolder)).toHaveLength(0);
-    });
-  });
-
-  describe.each([
-    null,
-    [],
-    [
-      {
-        key: 'uniqueSourceIpsHistogram',
-        value: null,
-        color: '#DB1374',
-      },
-      {
-        key: 'uniqueDestinationIpsHistogram',
-        value: null,
-        color: '#490092',
-      },
-    ],
-    [
-      {
-        key: 'uniqueSourceIpsHistogram',
-        value: [
-          { x: new Date('2019-05-03T13:00:00.000Z').valueOf() },
-          { x: new Date('2019-05-04T01:00:00.000Z').valueOf() },
-          { x: new Date('2019-05-04T13:00:00.000Z').valueOf() },
-        ],
-        color: '#DB1374',
-      },
-      {
-        key: 'uniqueDestinationIpsHistogram',
-        value: [
-          { x: new Date('2019-05-03T13:00:00.000Z').valueOf() },
-          { x: new Date('2019-05-04T01:00:00.000Z').valueOf() },
-          { x: new Date('2019-05-04T13:00:00.000Z').valueOf() },
-        ],
-        color: '#490092',
-      },
-    ],
-    [
-      [
-        {
-          key: 'uniqueSourceIpsHistogram',
-          value: [
-            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 580213 },
-            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: null },
-            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
-          ],
-          color: '#DB1374',
-        },
-        {
-          key: 'uniqueDestinationIpsHistogram',
-          value: [
-            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
-            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
-            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
-          ],
-          color: '#490092',
-        },
-      ],
-    ],
-    [
-      [
-        {
-          key: 'uniqueSourceIpsHistogram',
-          value: [
-            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 580213 },
-            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: {} },
-            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
-          ],
-          color: '#DB1374',
-        },
-        {
-          key: 'uniqueDestinationIpsHistogram',
-          value: [
-            { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 565975 },
-            { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
-            { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
-          ],
-          color: '#490092',
-        },
-      ],
-    ],
-  ] as Array<[ChartSeriesData[] | null | undefined]>)('renders prompt', data => {
-    beforeAll(() => {
-      shallowWrapper = shallow(
-        <AreaChartWithCustomPrompt height={customHeight} width={customWidth} data={data} />
-      );
-    });
-
-    it('render Chart Holder', () => {
-      expect(shallowWrapper.find(AreaChartBaseComponent)).toHaveLength(0);
-      expect(shallowWrapper.find(ChartHolder)).toHaveLength(1);
-    });
-  });
-});
-
 describe('AreaChart', () => {
   let shallowWrapper: ShallowWrapper;
   const mockConfig = {
@@ -332,20 +323,28 @@ describe('AreaChart', () => {
     },
     customHeight: 324,
   };
+  describe.each(chartDataSets as Array<[ChartSeriesData[]]>)('with valid data [%o]', data => {
+    beforeAll(() => {
+      shallowWrapper = shallow(<AreaChart configs={mockConfig} areaChart={data} />);
+    });
 
-  it('should render if data exist', () => {
-    const mockData = [
-      { key: 'uniqueSourceIps', value: [{ y: 100, x: 100, g: 'group' }], color: '#DB1374' },
-    ];
-    shallowWrapper = shallow(<AreaChart configs={mockConfig} areaChart={mockData} />);
-    expect(shallowWrapper.find('AutoSizer')).toHaveLength(1);
-    expect(shallowWrapper.find('ChartHolder')).toHaveLength(0);
+    it(`should render area chart`, () => {
+      expect(shallowWrapper.find('AutoSizer')).toHaveLength(1);
+      expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(0);
+    });
   });
 
-  it('should render a chartHolder if no data given', () => {
-    const mockData = [{ key: 'uniqueSourceIps', value: [], color: '#DB1374' }];
-    shallowWrapper = shallow(<AreaChart configs={mockConfig} areaChart={mockData} />);
-    expect(shallowWrapper.find('AutoSizer')).toHaveLength(0);
-    expect(shallowWrapper.find('ChartHolder')).toHaveLength(1);
-  });
+  describe.each(chartHolderDataSets as Array<[ChartSeriesData[] | null | undefined]>)(
+    'with invalid data [%o]',
+    data => {
+      beforeAll(() => {
+        shallowWrapper = shallow(<AreaChart configs={mockConfig} areaChart={data} />);
+      });
+
+      it(`should render a chart place holder`, () => {
+        expect(shallowWrapper.find('AutoSizer')).toHaveLength(0);
+        expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(1);
+      });
+    }
+  );
 });

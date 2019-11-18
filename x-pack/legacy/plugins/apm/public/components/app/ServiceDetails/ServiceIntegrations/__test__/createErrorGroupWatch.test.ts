@@ -7,13 +7,10 @@
 import { isArray, isObject, isString } from 'lodash';
 import mustache from 'mustache';
 import uuid from 'uuid';
-import { StringMap } from '../../../../../../typings/common';
 // @ts-ignore
 import * as rest from '../../../../../services/rest/watcher';
 import { createErrorGroupWatch } from '../createErrorGroupWatch';
 import { esResponse } from './esResponse';
-
-jest.mock('ui/kfetch');
 
 // disable html escaping since this is also disabled in watcher\s mustache implementation
 mustache.escape = value => value;
@@ -87,8 +84,11 @@ describe('createErrorGroupWatch', () => {
 });
 
 // Recursively iterate a nested structure and render strings as mustache templates
-type InputOutput = string | string[] | StringMap<any>;
-function renderMustache(input: InputOutput, ctx: StringMap): InputOutput {
+type InputOutput = string | string[] | Record<string, any>;
+function renderMustache(
+  input: InputOutput,
+  ctx: Record<string, unknown>
+): InputOutput {
   if (isString(input)) {
     return mustache.render(input, {
       ctx,

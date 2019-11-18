@@ -8,7 +8,7 @@ import React, { Fragment } from 'react';
 
 import { timefilter } from 'ui/timefilter';
 
-import { NavigationMenu } from '../../components/navigation_menu/navigation_menu';
+import { NavigationMenu } from '../../components/navigation_menu';
 
 import { FileDataVisualizerView } from './components/file_datavisualizer_view';
 

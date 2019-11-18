@@ -27,42 +27,45 @@ import { DocViewTable } from './table';
 // @ts-ignore
 const indexPattern = {
   fields: {
-    byName: {
-      _index: {
-        name: '_index',
-        type: 'string',
-        scripted: false,
-        filterable: true,
-      },
-      message: {
-        name: 'message',
-        type: 'string',
-        scripted: false,
-        filterable: false,
-      },
-      extension: {
-        name: 'extension',
-        type: 'string',
-        scripted: false,
-        filterable: true,
-      },
-      bytes: {
-        name: 'bytes',
-        type: 'number',
-        scripted: false,
-        filterable: true,
-      },
-      scripted: {
-        name: 'scripted',
-        type: 'number',
-        scripted: true,
-        filterable: false,
-      },
+    getByName: (name: string) => {
+      const fields: { [name: string]: {} } = {
+        _index: {
+          name: '_index',
+          type: 'string',
+          scripted: false,
+          filterable: true,
+        },
+        message: {
+          name: 'message',
+          type: 'string',
+          scripted: false,
+          filterable: false,
+        },
+        extension: {
+          name: 'extension',
+          type: 'string',
+          scripted: false,
+          filterable: true,
+        },
+        bytes: {
+          name: 'bytes',
+          type: 'number',
+          scripted: false,
+          filterable: true,
+        },
+        scripted: {
+          name: 'scripted',
+          type: 'number',
+          scripted: true,
+          filterable: false,
+        },
+      };
+      return fields[name];
     },
   },
   metaFields: ['_index', '_score'],
   flattenHit: undefined,
-  formatHit: jest.fn(hit => hit),
+  formatHit: jest.fn(hit => hit._source),
 } as IndexPattern;
 
 indexPattern.flattenHit = flattenHitWrapper(indexPattern, indexPattern.metaFields);

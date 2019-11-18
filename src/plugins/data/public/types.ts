@@ -18,3 +18,22 @@
  */
 
 export * from './autocomplete_provider/types';
+
+import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
+import { ISearchSetup, ISearchStart } from './search';
+import { IGetSuggestions } from './suggestions_provider/types';
+import { QuerySetup, QueryStart } from './query';
+export interface DataPublicPluginSetup {
+  autocomplete: AutocompletePublicPluginSetup;
+  search: ISearchSetup;
+  query: QuerySetup;
+}
+
+export interface DataPublicPluginStart {
+  autocomplete: AutocompletePublicPluginStart;
+  getSuggestions: IGetSuggestions;
+  search: ISearchStart;
+  query: QueryStart;
+}
+
+export { IGetSuggestions } from './suggestions_provider/types';

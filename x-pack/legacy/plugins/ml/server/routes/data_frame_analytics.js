@@ -79,6 +79,19 @@ export function dataFrameAnalyticsRoutes({ commonRouteConfig, elasticsearchPlugi
   });
 
   route({
+    method: 'POST',
+    path: '/api/ml/data_frame/_evaluate',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+      return callWithRequest('ml.evaluateDataFrameAnalytics', { body: request.payload })
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  route({
     method: 'DELETE',
     path: '/api/ml/data_frame/analytics/{analyticsId}',
     handler(request) {

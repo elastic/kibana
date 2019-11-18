@@ -16,11 +16,6 @@ describe('StickyProperties', () => {
   it('should render entire component', () => {
     const stickyProperties = [
       {
-        label: 'Timestamp',
-        fieldName: '@timestamp',
-        val: 1536405447640
-      },
-      {
         fieldName: URL_FULL,
         label: 'URL',
         val: 'https://www.elastic.co/test',
@@ -51,22 +46,6 @@ describe('StickyProperties', () => {
   });
 
   describe('values', () => {
-    it('should render timestamp when fieldName is `@timestamp`', () => {
-      const stickyProperties = [
-        {
-          label: 'My Timestamp',
-          fieldName: '@timestamp',
-          val: 1536405447640
-        }
-      ];
-
-      const wrapper = shallow(
-        <StickyProperties stickyProperties={stickyProperties} />
-      ).find('TimestampValue');
-
-      expect(wrapper).toMatchSnapshot();
-    });
-
     it('should render numbers', () => {
       const stickyProperties = [
         {

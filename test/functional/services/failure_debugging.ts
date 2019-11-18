@@ -17,22 +17,19 @@
  * under the License.
  */
 
-import mkdirp from 'mkdirp';
 import { resolve } from 'path';
-import { writeFile } from 'fs';
+import { writeFile, mkdir } from 'fs';
+import { promisify } from 'util';
+
 import del from 'del';
-import Bluebird, { promisify } from 'bluebird';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 interface Test {
   fullTitle(): string;
 }
 
-type WriteFileAsync = (path: string | number | Buffer | URL, data: any) => Bluebird<void>;
-type MkDirAsync = (dirName: string) => Bluebird<mkdirp.Made>;
-
-const writeFileAsync = promisify(writeFile) as WriteFileAsync;
-const mkdirAsync = promisify(mkdirp) as MkDirAsync;
+const writeFileAsync = promisify(writeFile);
+const mkdirAsync = promisify(mkdir);
 
 export async function FailureDebuggingProvider({ getService }: FtrProviderContext) {
   const screenshots = getService('screenshots');
@@ -51,7 +48,7 @@ export async function FailureDebuggingProvider({ getService }: FtrProviderContex
   }
 
   async function savePageHtml(name: string) {
-    await mkdirAsync(config.get('failureDebugging.htmlDirectory'));
+    await mkdirAsync(config.get('failureDebugging.htmlDirectory'), { recursive: true });
     const htmlOutputFileName = resolve(
       config.get('failureDebugging.htmlDirectory'),
       `${name}.html`

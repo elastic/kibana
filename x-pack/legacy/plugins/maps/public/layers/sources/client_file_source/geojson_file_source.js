@@ -31,23 +31,36 @@ export class GeojsonFileSource extends AbstractVectorSource {
   });
   static icon = 'importAction';
   static isIndexingSource = true;
-  static isBeta = true;
   static layerDefaults = {
     applyGlobalQuery: DEFAULT_APPLY_GLOBAL_QUERY
   }
 
   static createDescriptor(geoJson, name) {
     // Wrap feature as feature collection if needed
-    const featureCollection = (geoJson.type === 'Feature')
-      ? {
+    let featureCollection;
+
+    if (!geoJson) {
+      featureCollection = {
         type: 'FeatureCollection',
-        features: [{ ...geoJson }]
-      }
-      : geoJson;
+        features: []
+      };
+    } else if (geoJson.type === 'FeatureCollection') {
+      featureCollection = geoJson;
+    } else if (geoJson.type === 'Feature') {
+      featureCollection = {
+        type: 'FeatureCollection',
+        features: [geoJson]
+      };
+    } else { // Missing or incorrect type
+      featureCollection = {
+        type: 'FeatureCollection',
+        features: []
+      };
+    }
 
     return {
       type: GeojsonFileSource.type,
-      featureCollection,
+      __featureCollection: featureCollection,
       name
     };
   }
@@ -129,7 +142,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
   }
 
   async getGeoJsonWithMeta() {
-    const copiedPropsFeatures = this._descriptor.featureCollection.features
+    const copiedPropsFeatures = this._descriptor.__featureCollection.features
       .map(feature => ({
         type: 'Feature',
         geometry: feature.geometry,
@@ -155,5 +168,4 @@ export class GeojsonFileSource extends AbstractVectorSource {
   shouldBeIndexed() {
     return GeojsonFileSource.isIndexingSource;
   }
-
 }

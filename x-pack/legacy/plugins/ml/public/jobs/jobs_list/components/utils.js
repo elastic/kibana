@@ -6,7 +6,7 @@
 
 import { each } from 'lodash';
 import { toastNotifications } from 'ui/notify';
-import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
+import { mlMessageBarService } from 'plugins/ml/components/messagebar';
 import rison from 'rison-node';
 import chrome from 'ui/chrome';
 
@@ -178,10 +178,10 @@ export function cloneJob(jobId) {
           mlJobService.tempJobCloningObjects.end = end;
         }
       } else {
-        // otherwise use the currentJob
-        mlJobService.currentJob = job;
+        // otherwise use the tempJobCloningObjects
+        mlJobService.tempJobCloningObjects.job = job;
       }
-      window.location.href = `#/jobs/new_job`;
+      window.location.href = '#/jobs/new_job';
     })
     .catch((error) => {
       mlMessageBarService.notify.error(error);
@@ -284,13 +284,13 @@ export function filterJobs(jobs, clauses) {
   return filteredJobs;
 }
 
-// check to see if a job has been stored in mlJobService.currentJob
+// check to see if a job has been stored in mlJobService.tempJobCloningObjects
 // if it has, return an object with the minimum properties needed for the
 // start datafeed modal.
 export function checkForAutoStartDatafeed() {
-  const job = mlJobService.currentJob;
+  const job = mlJobService.tempJobCloningObjects.job;
   if (job !== undefined) {
-    mlJobService.currentJob = undefined;
+    mlJobService.tempJobCloningObjects.job = undefined;
     const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0);
     const datafeedId = hasDatafeed ? job.datafeed_config.datafeed_id : '';
     return {

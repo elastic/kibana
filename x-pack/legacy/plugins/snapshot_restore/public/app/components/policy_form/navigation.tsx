@@ -41,13 +41,22 @@ export const PolicyNavigation: React.FunctionComponent<Props> = ({
       onClick: () => updateCurrentStep(2),
     },
     {
-      title: i18n.translate('xpack.snapshotRestore.policyForm.navigation.stepReviewName', {
-        defaultMessage: 'Review',
+      title: i18n.translate('xpack.snapshotRestore.policyForm.navigation.stepRetentionName', {
+        defaultMessage: 'Snapshot retention',
       }),
-      isComplete: maxCompletedStep >= 2,
+      isComplete: maxCompletedStep >= 3,
       isSelected: currentStep === 3,
       disabled: maxCompletedStep < 2,
       onClick: () => updateCurrentStep(3),
+    },
+    {
+      title: i18n.translate('xpack.snapshotRestore.policyForm.navigation.stepReviewName', {
+        defaultMessage: 'Review',
+      }),
+      isComplete: maxCompletedStep >= 3,
+      isSelected: currentStep === 4,
+      disabled: maxCompletedStep < 3,
+      onClick: () => updateCurrentStep(4),
     },
   ];
 

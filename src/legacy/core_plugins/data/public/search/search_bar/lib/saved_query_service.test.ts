@@ -19,11 +19,19 @@
 
 import { SavedQueryAttributes } from '../index';
 import { createSavedQueryService } from './saved_query_service';
-import { FilterStateStore } from '@kbn/es-query';
+import { esFilters } from '../../../../../../../plugins/data/public';
 
 const savedQueryAttributes: SavedQueryAttributes = {
   title: 'foo',
   description: 'bar',
+  query: {
+    language: 'kuery',
+    query: 'response:200',
+  },
+};
+const savedQueryAttributesBar: SavedQueryAttributes = {
+  title: 'bar',
+  description: 'baz',
   query: {
     language: 'kuery',
     query: 'response:200',
@@ -35,7 +43,7 @@ const savedQueryAttributesWithFilters: SavedQueryAttributes = {
   filters: [
     {
       query: { match_all: {} },
-      $state: { store: FilterStateStore.APP_STATE },
+      $state: { store: esFilters.FilterStateStore.APP_STATE },
       meta: {
         disabled: false,
         negate: false,
@@ -61,7 +69,14 @@ const mockSavedObjectsClient = {
   delete: jest.fn(),
 };
 
-const { deleteSavedQuery, getSavedQuery, findSavedQueries, saveQuery } = createSavedQueryService(
+const {
+  deleteSavedQuery,
+  getSavedQuery,
+  findSavedQueries,
+  saveQuery,
+  getAllSavedQueries,
+  getSavedQueryCount,
+} = createSavedQueryService(
   // @ts-ignore
   mockSavedObjectsClient
 );
@@ -151,7 +166,7 @@ describe('saved query service', () => {
     });
   });
   describe('findSavedQueries', function() {
-    it('should find and return saved queries without search text', async () => {
+    it('should find and return saved queries without search text or pagination parameters', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
         savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
       });
@@ -166,6 +181,8 @@ describe('saved query service', () => {
       });
       const response = await findSavedQueries('foo');
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        page: 1,
+        perPage: 50,
         search: 'foo',
         searchFields: ['title^5', 'description'],
         sortField: '_score',
@@ -203,6 +220,43 @@ describe('saved query service', () => {
         ])
       );
     });
+    it('should accept perPage and page properties', async () => {
+      mockSavedObjectsClient.find.mockReturnValue({
+        savedObjects: [
+          { id: 'foo', attributes: savedQueryAttributes },
+          { id: 'bar', attributes: savedQueryAttributesBar },
+        ],
+      });
+      const response = await findSavedQueries(undefined, 2, 1);
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        page: 1,
+        perPage: 2,
+        search: '',
+        searchFields: ['title^5', 'description'],
+        sortField: '_score',
+        type: 'query',
+      });
+      expect(response).toEqual(
+        expect.objectContaining([
+          {
+            attributes: {
+              description: 'bar',
+              query: { language: 'kuery', query: 'response:200' },
+              title: 'foo',
+            },
+            id: 'foo',
+          },
+          {
+            attributes: {
+              description: 'baz',
+              query: { language: 'kuery', query: 'response:200' },
+              title: 'bar',
+            },
+            id: 'bar',
+          },
+        ])
+      );
+    });
   });
 
   describe('getSavedQuery', function() {
@@ -224,6 +278,42 @@ describe('saved query service', () => {
     it('should delete the saved query for the given ID', async () => {
       await deleteSavedQuery('foo');
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith('query', 'foo');
+    });
+  });
+
+  describe('getAllSavedQueries', function() {
+    it('should return all the saved queries', async () => {
+      mockSavedObjectsClient.find.mockReturnValue({
+        savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
+      });
+      const response = await getAllSavedQueries();
+      expect(response).toEqual(
+        expect.objectContaining([
+          {
+            attributes: {
+              description: 'bar',
+              query: { language: 'kuery', query: 'response:200' },
+              title: 'foo',
+            },
+            id: 'foo',
+          },
+        ])
+      );
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        page: 1,
+        perPage: 0,
+        type: 'query',
+      });
+    });
+  });
+
+  describe('getSavedQueryCount', function() {
+    it('should return the total number of saved queries', async () => {
+      mockSavedObjectsClient.find.mockReturnValue({
+        total: 1,
+      });
+      const response = await getSavedQueryCount();
+      expect(response).toEqual(1);
     });
   });
 });

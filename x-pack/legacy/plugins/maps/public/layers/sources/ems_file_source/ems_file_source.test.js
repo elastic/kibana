@@ -26,24 +26,34 @@ function makeEMSFileSource(tooltipProperties) {
   return emsFileSource;
 }
 
-
-
 describe('EMS file source', () => {
 
-  it('should create tooltip-properties with human readable label', async () => {
+  describe('filterAndFormatPropertiesToHtml', () => {
+    it('should create tooltip-properties with human readable label', async () => {
+      const mockEMSFileSource = makeEMSFileSource(['iso2']);
+      const out = await mockEMSFileSource.filterAndFormatPropertiesToHtml({
+        'iso2': 'US'
+      });
 
-
-    const mockEMSFileSource = makeEMSFileSource(['iso2']);
-    const tooltipProperties = await mockEMSFileSource.filterAndFormatPropertiesToHtml({
-      'iso2': 'US'
+      expect(out.length).toEqual(1);
+      expect(out[0].getPropertyKey()).toEqual('iso2');
+      expect(out[0].getPropertyName()).toEqual('ISO 2 CODE');
+      expect(out[0].getHtmlDisplayValue()).toEqual('US');
     });
 
-    expect(tooltipProperties.length).toEqual(1);
-    expect(tooltipProperties[0].getPropertyKey()).toEqual('iso2');
-    expect(tooltipProperties[0].getPropertyName()).toEqual('ISO 2 CODE');
-    expect(tooltipProperties[0].getHtmlDisplayValue()).toEqual('US');
+    it('should order tooltip-properties', async () => {
+      const tooltipProperties = ['iso3', 'iso2', 'name'];
+      const mockEMSFileSource = makeEMSFileSource(tooltipProperties);
+      const out = await mockEMSFileSource.filterAndFormatPropertiesToHtml({
+        'name': 'United States',
+        'iso3': 'USA',
+        'iso2': 'US',
+      });
 
+      expect(out.length).toEqual(3);
+      expect(out[0].getPropertyKey()).toEqual(tooltipProperties[0]);
+      expect(out[1].getPropertyKey()).toEqual(tooltipProperties[1]);
+      expect(out[2].getPropertyKey()).toEqual(tooltipProperties[2]);
+    });
   });
-
-
 });

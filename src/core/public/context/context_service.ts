@@ -18,7 +18,7 @@
  */
 
 import { PluginOpaqueId } from '../../server';
-import { IContextContainer, ContextContainer } from '../../utils/context';
+import { IContextContainer, ContextContainer, HandlerFunction } from '../../utils/context';
 import { CoreContext } from '../core_system';
 
 interface StartDeps {
@@ -31,15 +31,8 @@ export class ContextService {
 
   public setup({ pluginDependencies }: StartDeps): ContextSetup {
     return {
-      createContextContainer: <
-        TContext extends {},
-        THandlerReturn,
-        THandlerParameters extends any[] = []
-      >() =>
-        new ContextContainer<TContext, THandlerReturn, THandlerParameters>(
-          pluginDependencies,
-          this.core.coreId
-        ),
+      createContextContainer: <THandler extends HandlerFunction<any>>() =>
+        new ContextContainer<THandler>(pluginDependencies, this.core.coreId),
     };
   }
 }
@@ -60,18 +53,17 @@ export class ContextService {
  * }
  *
  * export type VizRenderer = (context: VizRenderContext, domElement: HTMLElement) => () => void;
+ * // When a renderer is bound via `contextContainer.createHandler` this is the type that will be returned.
+ * type BoundVizRenderer = (domElement: HTMLElement) => () => void;
  *
  * class VizRenderingPlugin {
- *   private readonly vizRenderers = new Map<string, ((domElement: HTMLElement) => () => void)>();
+ *   private readonly contextContainer?: IContextContainer<VizRenderer>;
+ *   private readonly vizRenderers = new Map<string, BoundVizRenderer>();
  *
  *   constructor(private readonly initContext: PluginInitializerContext) {}
  *
  *   setup(core) {
- *     this.contextContainer = core.context.createContextContainer<
- *       VizRenderContext,
- *       ReturnType<VizRenderer>,
- *       [HTMLElement]
- *     >();
+ *     this.contextContainer = core.context.createContextContainer();
  *
  *     return {
  *       registerContext: this.contextContainer.registerContext,
@@ -111,9 +103,5 @@ export interface ContextSetup {
   /**
    * Creates a new {@link IContextContainer} for a service owner.
    */
-  createContextContainer<
-    TContext extends {},
-    THandlerReturn,
-    THandlerParmaters extends any[] = []
-  >(): IContextContainer<TContext, THandlerReturn, THandlerParmaters>;
+  createContextContainer<THandler extends HandlerFunction<any>>(): IContextContainer<THandler>;
 }

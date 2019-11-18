@@ -24,7 +24,6 @@ const { pipeline, Transform } = require('stream');
 const Fs = require('fs');
 
 const getopts = require('getopts');
-const mkdirp = require('mkdirp');
 const del = require('del');
 
 const { buildSnapshot, log } = require('../utils');
@@ -49,7 +48,7 @@ exports.run = async (defaults = {}) => {
 
   const outputDir = resolve(process.cwd(), options.output);
   del.sync(outputDir);
-  mkdirp.sync(outputDir);
+  Fs.mkdirSync(outputDir, { recursive: true });
 
   for (const license of ['oss', 'trial']) {
     for (const platform of ['darwin', 'win32', 'linux']) {

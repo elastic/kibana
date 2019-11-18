@@ -9,8 +9,9 @@ Object {
   "dateRangeEnd": "now",
   "dateRangeStart": "now-15m",
   "filters": "",
+  "pagination": undefined,
   "search": "",
-  "selectedPingStatus": "down",
+  "selectedPingStatus": "",
   "statusFilter": "",
 }
 `;
@@ -24,8 +25,9 @@ Object {
   "dateRangeEnd": "now",
   "dateRangeStart": "now-15m",
   "filters": "",
+  "pagination": undefined,
   "search": "",
-  "selectedPingStatus": "down",
+  "selectedPingStatus": "",
   "statusFilter": "",
 }
 `;
@@ -39,6 +41,7 @@ Object {
   "dateRangeEnd": "now",
   "dateRangeStart": "now-15m",
   "filters": "",
+  "pagination": undefined,
   "search": "monitor.status: down",
   "selectedPingStatus": "up",
   "statusFilter": "",
@@ -54,8 +57,9 @@ Object {
   "dateRangeEnd": "now",
   "dateRangeStart": "now-15m",
   "filters": "",
+  "pagination": undefined,
   "search": "",
-  "selectedPingStatus": "down",
+  "selectedPingStatus": "",
   "statusFilter": "",
 }
 `;
@@ -69,8 +73,9 @@ Object {
   "dateRangeEnd": "now",
   "dateRangeStart": "now-18d",
   "filters": "",
+  "pagination": undefined,
   "search": "",
-  "selectedPingStatus": "down",
+  "selectedPingStatus": "",
   "statusFilter": "",
 }
 `;

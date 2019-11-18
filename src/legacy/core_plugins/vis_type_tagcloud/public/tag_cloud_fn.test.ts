@@ -39,7 +39,7 @@ describe('interpreter/functions#tagcloud', () => {
   };
 
   it('returns an object with the correct structure', () => {
-    const actual = fn(context, visConfig);
+    const actual = fn(context, visConfig, undefined);
     expect(actual).toMatchSnapshot();
   });
 });

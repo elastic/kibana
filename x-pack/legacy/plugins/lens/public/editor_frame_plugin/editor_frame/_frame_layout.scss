@@ -42,8 +42,7 @@
   @include euiScrollBar;
   min-width: $lnsPanelMinWidth + $euiSize;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: scroll;
   padding-top: $euiSize;
-  padding-right: $euiSize;
   max-height: 100%;
 }

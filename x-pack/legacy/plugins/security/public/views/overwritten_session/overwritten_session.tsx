@@ -8,7 +8,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
 import { render } from 'react-dom';
-import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 import { I18nContext } from 'ui/i18n';
 import { AuthenticatedUser } from '../../../common/model';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import { chain, find, get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query.js';
@@ -30,7 +30,7 @@ export function getKibanasForClusters(req, kbnIndexPattern, clusters) {
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
 
-  return Promise.map(clusters, cluster => {
+  return Bluebird.map(clusters, cluster => {
     const clusterUuid = cluster.cluster_uuid;
     const metric = KibanaClusterMetric.getMetricFields();
     const params = {

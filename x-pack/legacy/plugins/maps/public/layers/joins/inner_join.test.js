@@ -97,7 +97,7 @@ describe('joinPropertiesToFeature', () => {
 
   it('Should handle undefined values', () => {
 
-    const feature = {//this feature does not have the iso2 field
+    const feature = { //this feature does not have the iso2 field
       properties: {
         zipcode: 40204
       }

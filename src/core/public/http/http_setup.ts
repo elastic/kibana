@@ -36,6 +36,7 @@ import { HttpInterceptController } from './http_intercept_controller';
 import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
 import { BasePath } from './base_path_service';
+import { AnonymousPaths } from './anonymous_paths';
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const NDJSON_CONTENT = /^(application\/ndjson)(;.*)?$/;
@@ -57,6 +58,7 @@ export const setup = (
   const interceptors = new Set<HttpInterceptor>();
   const kibanaVersion = injectedMetadata.getKibanaVersion();
   const basePath = new BasePath(injectedMetadata.getBasePath());
+  const anonymousPaths = new AnonymousPaths(basePath);
 
   function intercept(interceptor: HttpInterceptor) {
     interceptors.add(interceptor);
@@ -110,15 +112,14 @@ export const setup = (
       (promise, interceptor) =>
         promise.then(
           async (current: Request) => {
+            next = current;
             checkHalt(controller);
 
             if (!interceptor.request) {
               return current;
             }
 
-            next = (await interceptor.request(current, controller)) || current;
-
-            return next;
+            return (await interceptor.request(current, controller)) || current;
           },
           async error => {
             checkHalt(controller, error);
@@ -155,17 +156,21 @@ export const setup = (
       (promise, interceptor) =>
         promise.then(
           async httpResponse => {
+            current = httpResponse;
             checkHalt(controller);
 
             if (!interceptor.response) {
               return httpResponse;
             }
 
-            current = (await interceptor.response(httpResponse, controller)) || httpResponse;
-
-            return current;
+            return {
+              ...httpResponse,
+              ...((await interceptor.response(httpResponse, controller)) || {}),
+            };
           },
           async error => {
+            const request = error.request || (current && current.request);
+
             checkHalt(controller, error);
 
             if (!interceptor.responseError) {
@@ -176,7 +181,7 @@ export const setup = (
               const next = await interceptor.responseError(
                 {
                   error,
-                  request: error.request || (current && current.request),
+                  request,
                   response: error.response || (current && current.response),
                   body: error.body || (current && current.body),
                 },
@@ -189,17 +194,14 @@ export const setup = (
                 throw error;
               }
 
-              return next;
+              return { ...next, request };
             } catch (err) {
               checkHalt(controller, err);
               throw err;
             }
           }
         ),
-      responsePromise.then(httpResponse => {
-        current = httpResponse;
-        return httpResponse;
-      })
+      responsePromise
     );
 
     return finalHttpResponse.body;
@@ -249,17 +251,22 @@ export const setup = (
     // We wrap the interception in a separate promise to ensure that when
     // a halt is called we do not resolve or reject, halting handling of the promise.
     return new Promise(async (resolve, reject) => {
-      try {
-        const value = await interceptResponse(
-          interceptRequest(initialRequest, controller).then(fetcher),
-          controller
-        );
-
-        resolve(value);
-      } catch (err) {
+      function rejectIfNotHalted(err: any) {
         if (!(err instanceof HttpInterceptHaltError)) {
           reject(err);
         }
+      }
+
+      try {
+        const request = await interceptRequest(initialRequest, controller);
+
+        try {
+          resolve(await interceptResponse(fetcher(request), controller));
+        } catch (err) {
+          rejectIfNotHalted(err);
+        }
+      } catch (err) {
+        rejectIfNotHalted(err);
       }
     });
   }
@@ -313,6 +320,7 @@ export const setup = (
   return {
     stop,
     basePath,
+    anonymousPaths,
     intercept,
     removeAllInterceptors,
     fetch,

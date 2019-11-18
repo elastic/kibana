@@ -8,7 +8,7 @@ import { createMockServer } from './_mock_server';
 import { enableAlertRoute } from './enable';
 
 const { server, alertsClient } = createMockServer();
-enableAlertRoute(server);
+server.route(enableAlertRoute);
 
 test('enables an alert', async () => {
   const request = {

@@ -24,11 +24,10 @@ import {
   SavedObjectReference,
   SavedObjectsMigrationVersion,
   SavedObjectsBaseOptions,
+  MutatingOperationRefreshSetting,
   SavedObjectsFindOptions,
 } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
-
-type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 /**
  *
@@ -42,6 +41,8 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
 }
 
 /**
@@ -55,6 +56,20 @@ export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = 
   references?: SavedObjectReference[];
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsBulkUpdateObject<T extends SavedObjectAttributes = any>
+  extends Pick<SavedObjectsUpdateOptions, 'version' | 'references'> {
+  /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
+  id: string;
+  /**  The type of this Saved Object. Each plugin can define it's own custom Saved Object types. */
+  type: string;
+  /** {@inheritdoc SavedObjectAttributes} */
+  attributes: Partial<T>;
 }
 
 /**
@@ -85,9 +100,39 @@ export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any>
  * @public
  */
 export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
-  /** Ensures version matches that of persisted object */
+  /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
   version?: string;
+  /** {@inheritdoc SavedObjectReference} */
   references?: SavedObjectReference[];
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
 }
 
 /**
@@ -113,14 +158,23 @@ export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = any>
  *
  * @public
  */
-export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = any>
-  extends Omit<SavedObject<T>, 'attributes'> {
-  attributes: Partial<T>;
+export interface SavedObjectsBulkUpdateResponse<T extends SavedObjectAttributes = any> {
+  saved_objects: Array<SavedObjectsUpdateResponse<T>>;
 }
 
 /**
  *
- * @internal
+ * @public
+ */
+export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = any>
+  extends Omit<SavedObject<T>, 'attributes' | 'references'> {
+  attributes: Partial<T>;
+  references: SavedObjectReference[] | undefined;
+}
+
+/**
+ *
+ * @public
  */
 export class SavedObjectsClient {
   public static errors = SavedObjectsErrorHelpers;
@@ -167,7 +221,7 @@ export class SavedObjectsClient {
    * @param id
    * @param options
    */
-  async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
+  async delete(type: string, id: string, options: SavedObjectsDeleteOptions = {}) {
     return await this._repository.delete(type, id, options);
   }
 
@@ -229,5 +283,17 @@ export class SavedObjectsClient {
     options: SavedObjectsUpdateOptions = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
     return await this._repository.update(type, id, attributes, options);
+  }
+
+  /**
+   * Bulk Updates multiple SavedObject at once
+   *
+   * @param objects
+   */
+  async bulkUpdate<T extends SavedObjectAttributes = any>(
+    objects: Array<SavedObjectsBulkUpdateObject<T>>,
+    options?: SavedObjectsBulkUpdateOptions
+  ): Promise<SavedObjectsBulkUpdateResponse<T>> {
+    return await this._repository.bulkUpdate(objects, options);
   }
 }

@@ -14,10 +14,10 @@ import { useListKeys } from './use_list_keys';
 const generateId = htmlIdGenerator();
 
 export function UrlTemplateList({
-  removeUrlTemplate,
-  saveUrlTemplate,
+  removeTemplate,
+  saveTemplate,
   urlTemplates,
-}: Pick<SettingsProps, 'removeUrlTemplate' | 'saveUrlTemplate' | 'urlTemplates'>) {
+}: Pick<SettingsProps, 'removeTemplate' | 'saveTemplate' | 'urlTemplates'>) {
   const [uncommittedForms, setUncommittedForms] = useState<string[]>([]);
   const getListKey = useListKeys(urlTemplates);
 
@@ -30,7 +30,7 @@ export function UrlTemplateList({
       <EuiText size="s">
         {i18n.translate('xpack.graph.drilldowns.description', {
           defaultMessage:
-            'Drilldown links configured here can be used to link to other applications and carry over the selected nodes as part of the URL',
+            'Use drilldowns to link to other applications. The selected vertices become part of the URL.',
         })}
       </EuiText>
       <EuiSpacer />
@@ -40,10 +40,10 @@ export function UrlTemplateList({
           id={getListKey(template)}
           initialTemplate={template}
           onSubmit={newTemplate => {
-            saveUrlTemplate(index, newTemplate);
+            saveTemplate({ index, template: newTemplate });
           }}
           onRemove={() => {
-            removeUrlTemplate(template);
+            removeTemplate(template);
           }}
         />
       ))}
@@ -53,7 +53,7 @@ export function UrlTemplateList({
           id={`accordion-new-${id}`}
           key={id}
           onSubmit={newTemplate => {
-            saveUrlTemplate(-1, newTemplate);
+            saveTemplate({ index: -1, template: newTemplate });
             removeUncommittedForm(id);
           }}
           onRemove={removeUncommittedForm.bind(undefined, id)}
@@ -73,7 +73,7 @@ export function UrlTemplateList({
           }}
         >
           {i18n.translate('xpack.graph.templates.newTemplateFormLabel', {
-            defaultMessage: 'Add template',
+            defaultMessage: 'Add drilldown',
           })}
         </EuiButton>
       </EuiTextAlign>

@@ -81,7 +81,7 @@ describe('SavedObjectsFinder', () => {
 
     expect(core.savedObjects.client.find).toHaveBeenCalledWith({
       type: ['search'],
-      fields: ['title', 'visState'],
+      fields: ['title'],
       search: undefined,
       page: 1,
       perPage: 10,
@@ -239,7 +239,49 @@ describe('SavedObjectsFinder', () => {
 
       expect(core.savedObjects.client.find).toHaveBeenCalledWith({
         type: ['search'],
-        fields: ['title', 'visState'],
+        fields: ['title'],
+        search: 'abc*',
+        page: 1,
+        perPage: 10,
+        searchFields: ['title^3', 'description'],
+        defaultSearchOperator: 'AND',
+      });
+    });
+
+    it('should include additional fields in search if listed in meta data', async () => {
+      const core = coreMock.createStart();
+      core.uiSettings.get.mockImplementation(() => 10);
+
+      const wrapper = shallow(
+        <SavedObjectFinder
+          savedObjects={core.savedObjects}
+          uiSettings={core.uiSettings}
+          savedObjectMetaData={[
+            {
+              type: 'type1',
+              name: '',
+              getIconForSavedObject: () => 'search',
+              includeFields: ['field1', 'field2'],
+            },
+            {
+              type: 'type2',
+              name: '',
+              getIconForSavedObject: () => 'search',
+              includeFields: ['field2', 'field3'],
+            },
+          ]}
+        />
+      );
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+      wrapper
+        .find('[data-test-subj="savedObjectFinderSearchInput"]')
+        .first()
+        .simulate('change', { target: { value: 'abc' } });
+
+      expect(core.savedObjects.client.find).toHaveBeenCalledWith({
+        type: ['type1', 'type2'],
+        fields: ['title', 'field1', 'field2', 'field3'],
         search: 'abc*',
         page: 1,
         perPage: 10,
@@ -305,7 +347,7 @@ describe('SavedObjectsFinder', () => {
 
     expect(core.savedObjects.client.find).toHaveBeenCalledWith({
       type: ['search', 'vis'],
-      fields: ['title', 'visState'],
+      fields: ['title'],
       search: undefined,
       page: 1,
       perPage: 10,

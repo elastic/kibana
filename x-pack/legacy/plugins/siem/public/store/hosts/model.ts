@@ -5,7 +5,6 @@
  */
 
 import { Direction, HostsFields } from '../../graphql/types';
-import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 export enum HostsType {
   page = 'page',
@@ -39,8 +38,6 @@ export interface Queries {
 }
 
 export interface GenericHostsModel {
-  filterQuery: SerializedFilterQuery | null;
-  filterQueryDraft: KueryFilterQuery | null;
   queries: Queries;
 }
 

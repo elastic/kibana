@@ -10,8 +10,6 @@ import React from 'react';
 import { mockMoment } from '../../../../utils/testHelpers';
 import { DetailView } from './index';
 
-jest.mock('ui/kfetch');
-
 describe('DetailView', () => {
   beforeEach(() => {
     // Avoid timezone issues
@@ -62,6 +60,7 @@ describe('DetailView', () => {
     const errorGroup = {
       occurrencesCount: 10,
       error: {
+        error: {},
         timestamp: {
           us: 0
         }
@@ -87,6 +86,7 @@ describe('DetailView', () => {
         timestamp: {
           us: 0
         },
+        error: {},
         service: {},
         user: {}
       } as any
@@ -111,6 +111,7 @@ describe('DetailView', () => {
         timestamp: {
           us: 0
         },
+        error: {},
         context: {}
       } as any
     };

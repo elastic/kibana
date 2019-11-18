@@ -11,6 +11,7 @@ import { fromQuery, toQuery } from '../Links/url_helpers';
 import { history } from '../../../utils/history';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { clearCache } from '../../../services/rest/callApi';
 
 export function DatePicker() {
   const location = useLocation();
@@ -113,6 +114,7 @@ export function DatePicker() {
       refreshInterval={refreshInterval}
       onTimeChange={onTimeChange}
       onRefresh={({ start, end }) => {
+        clearCache();
         refreshTimeRange({ rangeFrom: start, rangeTo: end });
       }}
       onRefreshChange={onRefreshChange}

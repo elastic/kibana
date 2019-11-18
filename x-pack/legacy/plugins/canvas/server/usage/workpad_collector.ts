@@ -159,11 +159,10 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
   };
 }
 
-const workpadCollector: TelemetryCollector = async function(server, callCluster) {
-  const index = server.config().get<string>('kibana.index');
+const workpadCollector: TelemetryCollector = async function(kibanaIndex, callCluster) {
   const searchParams: SearchParams = {
     size: 10000, // elasticsearch index.max_result_window default value
-    index,
+    index: kibanaIndex,
     ignoreUnavailable: true,
     filterPath: ['hits.hits._source.canvas-workpad', '-hits.hits._source.canvas-workpad.assets'],
     body: { query: { bool: { filter: { term: { type: CANVAS_TYPE } } } } },

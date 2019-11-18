@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer, useMemo } from 'react';
 import {
   EuiTitle,
   EuiDragDropContext,
@@ -26,20 +26,27 @@ import {
   EuiDraggable,
   EuiSpacer,
   EuiPanel,
+  EuiFormErrorText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { AggConfig } from '../../../../agg_types/agg_config';
 import { aggGroupNamesMap, AggGroupNames } from '../agg_groups';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
 import { DefaultEditorAggCommonProps } from './agg_common_props';
-import { isInvalidAggsTouched, isAggRemovable, calcAggIsTooLow } from './agg_group_helper';
+import {
+  isInvalidAggsTouched,
+  isAggRemovable,
+  calcAggIsTooLow,
+  getEnabledMetricAggsCount,
+} from './agg_group_helper';
 import { aggGroupReducer, initAggsState, AGGS_ACTION_KEYS } from './agg_group_state';
 import { Schema } from '../schemas';
 
 export interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {
   schemas: Schema[];
-  addSchema: (schems: Schema) => void;
+  addSchema: (schemas: Schema) => void;
   reorderAggs: (group: AggConfig[]) => void;
 }
 
@@ -75,8 +82,20 @@ function DefaultEditorAggGroup({
 
   const [aggsState, setAggsState] = useReducer(aggGroupReducer, group, initAggsState);
 
-  const isGroupValid = Object.values(aggsState).every(item => item.valid);
+  const bucketsError =
+    lastParentPipelineAggTitle && groupName === AggGroupNames.Buckets && !group.length
+      ? i18n.translate('common.ui.aggTypes.buckets.mustHaveBucketErrorMessage', {
+          defaultMessage: 'Add a bucket with "Date Histogram" or "Histogram" aggregation.',
+          description: 'Date Histogram and Histogram should not be translated',
+        })
+      : undefined;
+
+  const isGroupValid = !bucketsError && Object.values(aggsState).every(item => item.valid);
   const isAllAggsTouched = isInvalidAggsTouched(aggsState);
+  const isMetricAggregationDisabled = useMemo(
+    () => groupName === AggGroupNames.Metrics && getEnabledMetricAggsCount(group) === 1,
+    [groupName, group]
+  );
 
   useEffect(() => {
     // when isAllAggsTouched is true, it means that all invalid aggs are touched and we will set ngModel's touched to true
@@ -132,9 +151,15 @@ function DefaultEditorAggGroup({
     <EuiDragDropContext onDragEnd={onDragEnd}>
       <EuiPanel paddingSize="s">
         <EuiTitle size="xs">
-          <div>{groupNameLabel}</div>
+          <h3>{groupNameLabel}</h3>
         </EuiTitle>
         <EuiSpacer size="s" />
+        {bucketsError && (
+          <>
+            <EuiFormErrorText>{bucketsError}</EuiFormErrorText>
+            <EuiSpacer size="s" />
+          </>
+        )}
         <EuiDroppable droppableId={`agg_group_dnd_${groupName}`}>
           <>
             {group.map((agg: AggConfig, index: number) => (
@@ -155,6 +180,7 @@ function DefaultEditorAggGroup({
                     isDraggable={stats.count > 1}
                     isLastBucket={groupName === AggGroupNames.Buckets && index === group.length - 1}
                     isRemovable={isAggRemovable(agg, group)}
+                    isDisabled={agg.schema.name === 'metric' && isMetricAggregationDisabled}
                     lastParentPipelineAggTitle={lastParentPipelineAggTitle}
                     metricAggs={metricAggs}
                     state={state}

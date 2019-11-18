@@ -7,13 +7,113 @@
 import { shallow, ShallowWrapper } from 'enzyme';
 import * as React from 'react';
 
-import { BarChartBaseComponent, BarChartWithCustomPrompt, BarChart } from './barchart';
-import { ChartSeriesData, ChartHolder } from './common';
+import { BarChartBaseComponent, BarChart } from './barchart';
+import { ChartSeriesData } from './common';
 import { BarSeries, ScaleType, Axis } from '@elastic/charts';
 
-jest.mock('@elastic/charts');
 const customHeight = '100px';
 const customWidth = '120px';
+const chartDataSets = [
+  [
+    [
+      { key: 'uniqueSourceIps', value: [{ y: 1714, x: 'uniqueSourceIps' }], color: '#DB1374' },
+      {
+        key: 'uniqueDestinationIps',
+        value: [{ y: 2354, x: 'uniqueDestinationIps' }],
+        color: '#490092',
+      },
+    ],
+  ],
+  [
+    [
+      { key: 'uniqueSourceIps', value: [{ y: 1714, x: '' }], color: '#DB1374' },
+      {
+        key: 'uniqueDestinationIps',
+        value: [{ y: 2354, x: '' }],
+        color: '#490092',
+      },
+    ],
+  ],
+  [
+    [
+      { key: 'uniqueSourceIps', value: [{ y: 1714, x: 'uniqueSourceIps' }], color: '#DB1374' },
+      {
+        key: 'uniqueDestinationIps',
+        value: [{ y: 0, x: 'uniqueDestinationIps' }],
+        color: '#490092',
+      },
+    ],
+  ],
+  [
+    [
+      { key: 'uniqueSourceIps', value: [{ y: null, x: 'uniqueSourceIps' }], color: '#DB1374' },
+      {
+        key: 'uniqueDestinationIps',
+        value: [{ y: 2354, x: 'uniqueDestinationIps' }],
+        color: '#490092',
+      },
+    ],
+  ],
+];
+
+const chartHolderDataSets: Array<[ChartSeriesData[] | undefined | null]> = [
+  [[]],
+  [null],
+  [
+    [
+      { key: 'uniqueSourceIps', color: '#DB1374' },
+      {
+        key: 'uniqueDestinationIps',
+        color: '#490092',
+      },
+    ],
+  ],
+  [
+    [
+      { key: 'uniqueSourceIps', value: [], color: '#DB1374' },
+      {
+        key: 'uniqueDestinationIps',
+        value: [],
+        color: '#490092',
+      },
+    ],
+  ],
+  [
+    [
+      { key: 'uniqueSourceIps', value: [{}], color: '#DB1374' },
+      {
+        key: 'uniqueDestinationIps',
+        value: [{}],
+        color: '#490092',
+      },
+    ],
+  ],
+  [
+    [
+      { key: 'uniqueSourceIps', value: [{ y: 0, x: 'uniqueSourceIps' }], color: '#DB1374' },
+      {
+        key: 'uniqueDestinationIps',
+        value: [{ y: 0, x: 'uniqueDestinationIps' }],
+        color: '#490092',
+      },
+    ],
+  ],
+] as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+const mockConfig = {
+  series: {
+    xScaleType: ScaleType.Time,
+    yScaleType: ScaleType.Linear,
+    stackAccessors: ['g'],
+  },
+  axis: {
+    xTickFormatter: jest.fn(),
+    yTickFormatter: jest.fn(),
+    tickSize: 8,
+  },
+  customHeight: 324,
+};
+
 describe('BarChartBaseComponent', () => {
   let shallowWrapper: ShallowWrapper;
   const mockBarChartData: ChartSeriesData[] = [
@@ -168,164 +268,28 @@ describe('BarChartBaseComponent', () => {
   });
 });
 
-describe.each([
-  [
-    [
-      { key: 'uniqueSourceIps', value: [{ y: 1714, x: 'uniqueSourceIps' }], color: '#DB1374' },
-      {
-        key: 'uniqueDestinationIps',
-        value: [{ y: 2354, x: 'uniqueDestinationIps' }],
-        color: '#490092',
-      },
-    ],
-  ],
-  [
-    [
-      { key: 'uniqueSourceIps', value: [{ y: 1714, x: '' }], color: '#DB1374' },
-      {
-        key: 'uniqueDestinationIps',
-        value: [{ y: 2354, x: '' }],
-        color: '#490092',
-      },
-    ],
-  ],
-  [
-    [
-      { key: 'uniqueSourceIps', value: [{ y: 1714, x: 'uniqueSourceIps' }], color: '#DB1374' },
-      {
-        key: 'uniqueDestinationIps',
-        value: [{ y: 0, x: 'uniqueDestinationIps' }],
-        color: '#490092',
-      },
-    ],
-  ],
-])('BarChartWithCustomPrompt', mockBarChartData => {
+describe.each(chartDataSets)('BarChart with valid data [%o]', data => {
   let shallowWrapper: ShallowWrapper;
-  describe('renders barchart', () => {
-    beforeAll(() => {
-      shallowWrapper = shallow(
-        <BarChartWithCustomPrompt
-          height={customHeight}
-          width={customWidth}
-          data={mockBarChartData}
-        />
-      );
-    });
 
-    it('render BarChartBaseComponent', () => {
-      expect(shallowWrapper.find(BarChartBaseComponent)).toHaveLength(1);
-      expect(shallowWrapper.find(ChartHolder)).toHaveLength(0);
-    });
-  });
-});
-
-const table: Array<[ChartSeriesData[] | undefined | null]> = [
-  [],
-  null,
-  [
-    [
-      { key: 'uniqueSourceIps', color: '#DB1374' },
-      {
-        key: 'uniqueDestinationIps',
-        color: '#490092',
-      },
-    ],
-  ],
-  [
-    [
-      { key: 'uniqueSourceIps', value: [], color: '#DB1374' },
-      {
-        key: 'uniqueDestinationIps',
-        value: [],
-        color: '#490092',
-      },
-    ],
-  ],
-  [
-    [
-      { key: 'uniqueSourceIps', value: [{}], color: '#DB1374' },
-      {
-        key: 'uniqueDestinationIps',
-        value: [{}],
-        color: '#490092',
-      },
-    ],
-  ],
-  [
-    [
-      { key: 'uniqueSourceIps', value: [{ y: 0, x: 'uniqueSourceIps' }], color: '#DB1374' },
-      {
-        key: 'uniqueDestinationIps',
-        value: [{ y: 0, x: 'uniqueDestinationIps' }],
-        color: '#490092',
-      },
-    ],
-  ],
-  [
-    [
-      { key: 'uniqueSourceIps', value: [{ y: null, x: 'uniqueSourceIps' }], color: '#DB1374' },
-      {
-        key: 'uniqueDestinationIps',
-        value: [{ y: 2354, x: 'uniqueDestinationIps' }],
-        color: '#490092',
-      },
-    ],
-  ],
-  [
-    [
-      { key: 'uniqueSourceIps', value: [{ y: null, x: 'uniqueSourceIps' }], color: '#DB1374' },
-      {
-        key: 'uniqueDestinationIps',
-        value: [{ y: null, x: 'uniqueDestinationIps' }],
-        color: '#490092',
-      },
-    ],
-  ],
-] as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-describe.each(table)('renders prompt', data => {
-  let shallowWrapper: ShallowWrapper;
   beforeAll(() => {
-    shallowWrapper = shallow(
-      <BarChartWithCustomPrompt height={customHeight} width={customWidth} data={data} />
-    );
+    shallowWrapper = shallow(<BarChart configs={mockConfig} barChart={data} />);
   });
 
-  it('render Chart Holder', () => {
-    expect(shallowWrapper.find(BarChartBaseComponent)).toHaveLength(0);
-    expect(shallowWrapper.find(ChartHolder)).toHaveLength(1);
+  it(`should render chart`, () => {
+    expect(shallowWrapper.find('AutoSizer')).toHaveLength(1);
+    expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(0);
   });
 });
 
-describe('BarChart', () => {
+describe.each(chartHolderDataSets)('BarChart with invalid data [%o]', data => {
   let shallowWrapper: ShallowWrapper;
-  const mockConfig = {
-    series: {
-      xScaleType: ScaleType.Time,
-      yScaleType: ScaleType.Linear,
-      stackAccessors: ['g'],
-    },
-    axis: {
-      xTickFormatter: jest.fn(),
-      yTickFormatter: jest.fn(),
-      tickSize: 8,
-    },
-    customHeight: 324,
-  };
 
-  it('should render if data exist', () => {
-    const mockData = [
-      { key: 'uniqueSourceIps', value: [{ y: 100, x: 100, g: 'group' }], color: '#DB1374' },
-    ];
-    shallowWrapper = shallow(<BarChart configs={mockConfig} barChart={mockData} />);
-    expect(shallowWrapper.find('AutoSizer')).toHaveLength(1);
-    expect(shallowWrapper.find('ChartHolder')).toHaveLength(0);
+  beforeAll(() => {
+    shallowWrapper = shallow(<BarChart configs={mockConfig} barChart={data} />);
   });
 
-  it('should render a chartHolder if no data given', () => {
-    const mockData = [{ key: 'uniqueSourceIps', value: [], color: '#DB1374' }];
-    shallowWrapper = shallow(<BarChart configs={mockConfig} barChart={mockData} />);
+  it(`should render chart holder`, () => {
     expect(shallowWrapper.find('AutoSizer')).toHaveLength(0);
-    expect(shallowWrapper.find('ChartHolder')).toHaveLength(1);
+    expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(1);
   });
 });

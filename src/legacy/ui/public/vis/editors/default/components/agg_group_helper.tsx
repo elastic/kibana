@@ -17,20 +17,26 @@
  * under the License.
  */
 
-import { findIndex, reduce, isEmpty } from 'lodash';
+import { findIndex, isEmpty } from 'lodash';
 import { AggConfig } from '../../../../agg_types/agg_config';
 import { AggsState } from './agg_group_state';
 
 const isAggRemovable = (agg: AggConfig, group: AggConfig[]) => {
-  const metricCount = reduce(
-    group,
-    (count, aggregation: AggConfig) => {
-      return aggregation.schema.name === agg.schema.name ? ++count : count;
-    },
+  const metricCount = group.reduce(
+    (count, aggregation: AggConfig) =>
+      aggregation.schema.name === agg.schema.name ? ++count : count,
     0
   );
   // make sure the the number of these aggs is above the min
   return metricCount > agg.schema.min;
+};
+
+const getEnabledMetricAggsCount = (group: AggConfig[]) => {
+  return group.reduce(
+    (count, aggregation: AggConfig) =>
+      aggregation.schema.name === 'metric' && aggregation.enabled ? ++count : count,
+    0
+  );
 };
 
 const calcAggIsTooLow = (agg: AggConfig, aggIndex: number, group: AggConfig[]) => {
@@ -59,4 +65,4 @@ function isInvalidAggsTouched(aggsState: AggsState) {
   return invalidAggs.every(agg => agg.touched);
 }
 
-export { isAggRemovable, calcAggIsTooLow, isInvalidAggsTouched };
+export { isAggRemovable, calcAggIsTooLow, isInvalidAggsTouched, getEnabledMetricAggsCount };

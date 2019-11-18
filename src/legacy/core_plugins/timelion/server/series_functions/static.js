@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import Datasource from '../lib/classes/datasource';
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 
 export default new Datasource ('static', {
   aliases: ['value'],
@@ -63,7 +63,7 @@ export default new Datasource ('static', {
       });
     }
 
-    return Promise.resolve({
+    return Bluebird.resolve({
       type: 'seriesList',
       list: [
         {

@@ -4,7 +4,7 @@
 
 ## BasePath.prepend property
 
-returns a new `basePath` value, prefixed with passed `url`<!-- -->.
+Prepends `path` with the basePath.
 
 <b>Signature:</b>
 

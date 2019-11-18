@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { fromEvent, Observable, Subscription } from 'rxjs';
 import { concatMap, takeUntil } from 'rxjs/operators';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export type OnResize = ({ delta, id }: { delta: number; id: string }) => void;
 
@@ -20,28 +20,39 @@ export const calculateDeltaX = ({ prevX, screenX }: { prevX: number; screenX: nu
 
 const isSafari = /^((?!chrome|android|crios|fxios|Firefox).)*safari/i.test(navigator.userAgent);
 
-interface Props {
-  /** the `onResize` callback will be invoked with this id */
-  id: string;
-  /** The resizeable content to render */
-  render: (isResizing: boolean) => React.ReactNode;
-  /** a (styled) resize handle */
-  handle: React.ReactNode;
+interface ResizeHandleContainerProps {
+  bottom?: string | number;
   /** optionally provide a height style ResizeHandleContainer */
   height?: string;
+  left?: string | number;
+  positionAbsolute?: boolean;
+  right?: string | number;
+  top?: string | number;
+}
+
+interface Props extends ResizeHandleContainerProps {
+  /** a (styled) resize handle */
+  handle: React.ReactNode;
+  /** the `onResize` callback will be invoked with this id */
+  id: string;
   /** invoked when the handle is resized */
   onResize: OnResize;
+  /** The resizeable content to render */
+  render: (isResizing: boolean) => React.ReactNode;
 }
 
-interface State {
-  isResizing: boolean;
-}
-
-const ResizeHandleContainer = styled.div<{ height?: string }>`
-  cursor: ${resizeCursorStyle};
-  ${({ height }) => (height != null ? `height: ${height}` : '')}
+const ResizeHandleContainer = styled.div<ResizeHandleContainerProps>`
+  ${({ bottom, height, left, positionAbsolute, right, theme, top }) => css`
+    bottom: ${positionAbsolute && bottom};
+    cursor: ${resizeCursorStyle};
+    height: ${height};
+    left: ${positionAbsolute && left};
+    position: ${positionAbsolute && 'absolute'};
+    right: ${positionAbsolute && right};
+    top: ${positionAbsolute && top};
+    z-index: ${positionAbsolute && theme.eui.euiZLevel1};
+  `}
 `;
-
 ResizeHandleContainer.displayName = 'ResizeHandleContainer';
 
 export const addGlobalResizeCursorStyleToBody = () => {
@@ -52,99 +63,85 @@ export const removeGlobalResizeCursorStyleFromBody = () => {
   document.body.classList.remove(globalResizeCursorClassName);
 };
 
-export class Resizeable extends React.PureComponent<Props, State> {
-  private drag$: Observable<MouseEvent> | null;
-  private dragEventTargets: Array<{ htmlElement: HTMLElement; prevCursor: string }>;
-  private dragSubscription: Subscription | null;
-  private prevX: number = 0;
-  private ref: React.RefObject<HTMLElement>;
-  private upSubscription: Subscription | null;
+export const Resizeable = React.memo<Props>(
+  ({ bottom, handle, height, id, left, onResize, positionAbsolute, render, right, top }) => {
+    const drag$ = useRef<Observable<MouseEvent> | null>(null);
+    const dragEventTargets = useRef<Array<{ htmlElement: HTMLElement; prevCursor: string }>>([]);
+    const dragSubscription = useRef<Subscription | null>(null);
+    const prevX = useRef(0);
+    const ref = useRef<React.RefObject<HTMLElement>>(React.createRef<HTMLElement>());
+    const upSubscription = useRef<Subscription | null>(null);
+    const isResizingRef = useRef(false);
 
-  constructor(props: Props) {
-    super(props);
-
-    // NOTE: the ref and observable below are NOT stored in component `State`
-    this.ref = React.createRef<HTMLElement>();
-    this.drag$ = null;
-    this.dragSubscription = null;
-    this.upSubscription = null;
-    this.dragEventTargets = [];
-
-    this.state = {
-      isResizing: false,
+    const calculateDelta = (e: MouseEvent) => {
+      const deltaX = calculateDeltaX({ prevX: prevX.current, screenX: e.screenX });
+      prevX.current = e.screenX;
+      return deltaX;
     };
-  }
+    useEffect(() => {
+      const move$ = fromEvent<MouseEvent>(document, 'mousemove');
+      const down$ = fromEvent<MouseEvent>(ref.current.current!, 'mousedown');
+      const up$ = fromEvent<MouseEvent>(document, 'mouseup');
 
-  public componentDidMount() {
-    const { id, onResize } = this.props;
-
-    const move$ = fromEvent<MouseEvent>(document, 'mousemove');
-    const down$ = fromEvent<MouseEvent>(this.ref.current!, 'mousedown');
-    const up$ = fromEvent<MouseEvent>(document, 'mouseup');
-
-    this.drag$ = down$.pipe(concatMap(() => move$.pipe(takeUntil(up$))));
-    this.dragSubscription = this.drag$.subscribe(event => {
-      // We do a feature detection of event.movementX here and if it is missing
-      // we calculate the delta manually. Browsers IE-11 and Safari will call calculateDelta
-      const delta =
-        event.movementX == null || isSafari ? this.calculateDelta(event) : event.movementX;
-      if (!this.state.isResizing) {
-        this.setState({ isResizing: true });
-      }
-      onResize({ id, delta });
-      if (event.target != null && event.target instanceof HTMLElement) {
-        const htmlElement: HTMLElement = event.target;
-        this.dragEventTargets = [
-          ...this.dragEventTargets,
-          { htmlElement, prevCursor: htmlElement.style.cursor },
-        ];
-        htmlElement.style.cursor = resizeCursorStyle;
-      }
-    });
-
-    this.upSubscription = up$.subscribe(() => {
-      if (this.state.isResizing) {
-        this.dragEventTargets.reverse().forEach(eventTarget => {
-          eventTarget.htmlElement.style.cursor = eventTarget.prevCursor;
+      drag$.current = down$.pipe(concatMap(() => move$.pipe(takeUntil(up$))));
+      dragSubscription.current =
+        drag$.current &&
+        drag$.current.subscribe(event => {
+          // We do a feature detection of event.movementX here and if it is missing
+          // we calculate the delta manually. Browsers IE-11 and Safari will call calculateDelta
+          const delta =
+            event.movementX == null || isSafari ? calculateDelta(event) : event.movementX;
+          if (!isResizingRef.current) {
+            isResizingRef.current = true;
+          }
+          onResize({ id, delta });
+          if (event.target != null && event.target instanceof HTMLElement) {
+            const htmlElement: HTMLElement = event.target;
+            dragEventTargets.current = [
+              ...dragEventTargets.current,
+              { htmlElement, prevCursor: htmlElement.style.cursor },
+            ];
+            htmlElement.style.cursor = resizeCursorStyle;
+          }
         });
-        this.dragEventTargets = [];
-        this.setState({ isResizing: false });
-      }
-    });
-  }
 
-  public componentWillUnmount() {
-    if (this.dragSubscription != null) {
-      this.dragSubscription.unsubscribe();
-    }
-
-    if (this.upSubscription != null) {
-      this.upSubscription.unsubscribe();
-    }
-  }
-
-  public render() {
-    const { handle, height, render } = this.props;
+      upSubscription.current = up$.subscribe(() => {
+        if (isResizingRef.current) {
+          dragEventTargets.current.reverse().forEach(eventTarget => {
+            eventTarget.htmlElement.style.cursor = eventTarget.prevCursor;
+          });
+          dragEventTargets.current = [];
+          isResizingRef.current = false;
+        }
+      });
+      return () => {
+        if (dragSubscription.current != null) {
+          dragSubscription.current.unsubscribe();
+        }
+        if (upSubscription.current != null) {
+          upSubscription.current.unsubscribe();
+        }
+      };
+    }, []);
 
     return (
       <>
-        {render(this.state.isResizing)}
+        {render(isResizingRef.current)}
         <ResizeHandleContainer
+          bottom={bottom}
           data-test-subj="resize-handle-container"
           height={height}
-          innerRef={this.ref}
+          innerRef={ref.current}
+          left={left}
+          positionAbsolute={positionAbsolute}
+          right={right}
+          top={top}
         >
           {handle}
         </ResizeHandleContainer>
       </>
     );
   }
+);
 
-  private calculateDelta = (e: MouseEvent) => {
-    const deltaX = calculateDeltaX({ prevX: this.prevX, screenX: e.screenX });
-
-    this.prevX = e.screenX;
-
-    return deltaX;
-  };
-}
+Resizeable.displayName = 'Resizeable';

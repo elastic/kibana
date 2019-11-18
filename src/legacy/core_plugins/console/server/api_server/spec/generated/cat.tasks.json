@@ -9,6 +9,15 @@
       "h": [],
       "help": "__flag__",
       "s": [],
+      "time": [
+        "d",
+        "h",
+        "m",
+        "s",
+        "ms",
+        "micros",
+        "nanos"
+      ],
       "v": "__flag__"
     },
     "methods": [

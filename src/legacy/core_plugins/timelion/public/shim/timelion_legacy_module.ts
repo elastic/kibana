@@ -26,6 +26,7 @@ import 'ui/vis/map/service_settings';
 import { once } from 'lodash';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
+import { Panel } from '../panels/panel';
 // @ts-ignore
 import { Chart } from '../directives/chart/chart';
 // @ts-ignore
@@ -36,7 +37,7 @@ import { TimelionExpInput } from '../directives/timelion_expression_input';
 import { TimelionExpressionSuggestions } from '../directives/timelion_expression_suggestions/timelion_expression_suggestions';
 
 /** @internal */
-export const initTimelionLegacyModule = once((): void => {
+export const initTimelionLegacyModule = once((timelionPanels: Map<string, Panel>): void => {
   require('ui/state_management/app_state');
 
   uiModules
@@ -47,6 +48,7 @@ export const initTimelionLegacyModule = once((): void => {
         $scope.renderComplete();
       });
     })
+    .constant('timelionPanels', timelionPanels)
     .directive('chart', Chart)
     .directive('timelionInterval', TimelionInterval)
     .directive('timelionExpressionSuggestions', TimelionExpressionSuggestions)

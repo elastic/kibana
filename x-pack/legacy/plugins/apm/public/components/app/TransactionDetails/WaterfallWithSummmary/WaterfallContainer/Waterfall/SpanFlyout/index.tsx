@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiBasicTable,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,13 +19,11 @@ import {
   EuiToolTip
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { get, keys } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { idx } from '@kbn/elastic-idx';
 import { px, units } from '../../../../../../../style/variables';
 import { Summary } from '../../../../../../shared/Summary';
-import { TimestampSummaryItem } from '../../../../../../shared/Summary/TimestampSummaryItem';
+import { TimestampTooltip } from '../../../../../../shared/TimestampTooltip';
 import { DurationSummaryItem } from '../../../../../../shared/Summary/DurationSummaryItem';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
@@ -34,8 +31,9 @@ import { DiscoverSpanLink } from '../../../../../../shared/Links/DiscoverLinks/D
 import { Stacktrace } from '../../../../../../shared/Stacktrace';
 import { ResponsiveFlyout } from '../ResponsiveFlyout';
 import { DatabaseContext } from './DatabaseContext';
-import { HttpContext } from './HttpContext';
 import { StickySpanProperties } from './StickySpanProperties';
+import { HttpInfoSummaryItem } from '../../../../../../shared/Summary/HttpInfoSummaryItem';
+import { SpanMetadata } from '../../../../../../shared/MetadataTable/SpanMetadata';
 
 function formatType(type: string) {
   switch (type) {
@@ -72,12 +70,12 @@ function getSpanTypes(span: Span) {
   };
 }
 
-const TagName = styled.div`
-  font-weight: bold;
-`;
-
 const SpanBadge = styled(EuiBadge)`
   display: inline-block;
+  margin-right: ${px(units.quarter)};
+`;
+
+const HttpInfoContainer = styled('div')`
   margin-right: ${px(units.quarter)};
 `;
 
@@ -99,15 +97,15 @@ export function SpanFlyout({
   }
 
   const stackframes = span.span.stacktrace;
-  const codeLanguage = idx(parentTransaction, _ => _.service.language.name);
-  const dbContext = idx(span, _ => _.span.db);
-  const httpContext = idx(span, _ => _.span.http);
-  const spanLabels = span.labels;
-  const labels = keys(spanLabels).map(key => ({
-    key,
-    value: get(spanLabels, key)
-  }));
+  const codeLanguage = parentTransaction?.service.language?.name;
+  const dbContext = span.span.db;
+  const httpContext = span.span.http;
   const spanTypes = getSpanTypes(span);
+  // TODO(TS-3.7-ESLINT)
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  const spanHttpStatusCode = httpContext?.response.status_code;
+  const spanHttpUrl = httpContext?.url?.original;
+  const spanHttpMethod = httpContext?.method;
 
   return (
     <EuiPortal>
@@ -146,13 +144,22 @@ export function SpanFlyout({
           <EuiSpacer size="m" />
           <Summary
             items={[
-              <TimestampSummaryItem time={span.timestamp.us / 1000} />,
+              <TimestampTooltip time={span.timestamp.us / 1000} />,
               <DurationSummaryItem
                 duration={span.span.duration.us}
                 totalDuration={totalDuration}
                 parentType="transaction"
               />,
               <>
+                {spanHttpUrl && (
+                  <HttpInfoContainer>
+                    <HttpInfoSummaryItem
+                      method={spanHttpMethod}
+                      url={spanHttpUrl}
+                      status={spanHttpStatusCode}
+                    />
+                  </HttpInfoContainer>
+                )}
                 <EuiToolTip
                   content={i18n.translate(
                     'xpack.apm.transactionDetails.spanFlyout.spanType',
@@ -187,7 +194,6 @@ export function SpanFlyout({
             ]}
           />
           <EuiHorizontalRule />
-          <HttpContext httpContext={httpContext} />
           <DatabaseContext dbContext={dbContext} />
           <EuiTabbedContent
             tabs={[
@@ -210,29 +216,17 @@ export function SpanFlyout({
                 )
               },
               {
-                id: 'labels',
+                id: 'metadata',
                 name: i18n.translate(
-                  'xpack.apm.propertiesTable.tabs.labelsLabel',
+                  'xpack.apm.propertiesTable.tabs.metadataLabel',
                   {
-                    defaultMessage: 'Labels'
+                    defaultMessage: 'Metadata'
                   }
                 ),
                 content: (
                   <Fragment>
-                    <EuiBasicTable
-                      columns={[
-                        {
-                          name: '',
-                          field: 'key',
-                          render: (key: string) => <TagName>{key}</TagName>
-                        },
-                        {
-                          name: '',
-                          field: 'value'
-                        }
-                      ]}
-                      items={labels}
-                    />
+                    <EuiSpacer size="m" />
+                    <SpanMetadata span={span} />
                   </Fragment>
                 )
               }

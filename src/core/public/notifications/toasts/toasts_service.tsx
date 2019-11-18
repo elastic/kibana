@@ -20,11 +20,10 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
 import { I18nStart } from '../../i18n';
 import { UiSettingsClientContract } from '../../ui_settings';
 import { GlobalToastList } from './global_toast_list';
-import { ToastsApi } from './toasts_api';
+import { ToastsApi, IToasts } from './toasts_api';
 import { OverlayStart } from '../../overlays';
 
 interface SetupDeps {
@@ -37,11 +36,17 @@ interface StartDeps {
   targetDomElement: HTMLElement;
 }
 
-/** @public */
-export type ToastsSetup = Pick<ToastsApi, Exclude<keyof ToastsApi, 'registerOverlays'>>;
+/**
+ * {@link IToasts}
+ * @public
+ */
+export type ToastsSetup = IToasts;
 
-/** @public */
-export type ToastsStart = ToastsSetup;
+/**
+ * {@link IToasts}
+ * @public
+ */
+export type ToastsStart = IToasts;
 
 export class ToastsService {
   private api?: ToastsApi;
@@ -59,7 +64,7 @@ export class ToastsService {
     render(
       <i18n.Context>
         <GlobalToastList
-          dismissToast={(toast: Toast) => this.api!.remove(toast)}
+          dismissToast={(toastId: string) => this.api!.remove(toastId)}
           toasts$={this.api!.get$()}
         />
       </i18n.Context>,

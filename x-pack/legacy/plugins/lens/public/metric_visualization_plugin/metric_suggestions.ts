@@ -6,6 +6,7 @@
 
 import { SuggestionRequest, VisualizationSuggestion, TableSuggestion } from '../types';
 import { State } from './types';
+import chartMetricSVG from '../assets/chart_metric.svg';
 
 /**
  * Generate suggestions for the metric chart.
@@ -15,11 +16,14 @@ import { State } from './types';
 export function getSuggestions({
   table,
   state,
+  keptLayerIds,
 }: SuggestionRequest<State>): Array<VisualizationSuggestion<State>> {
   // We only render metric charts for single-row queries. We require a single, numeric column.
   if (
     table.isMultiRow ||
-    table.columns.length > 1 ||
+    keptLayerIds.length > 1 ||
+    (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
+    table.columns.length !== 1 ||
     table.columns[0].operation.dataType !== 'number'
   ) {
     return [];
@@ -40,7 +44,7 @@ function getSuggestion(table: TableSuggestion): VisualizationSuggestion<State> {
   return {
     title,
     score: 0.5,
-    previewIcon: 'visMetric',
+    previewIcon: chartMetricSVG,
     state: {
       layerId: table.layerId,
       accessor: col.columnId,

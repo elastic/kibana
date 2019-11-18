@@ -12,9 +12,10 @@ import {
   createHandler,
   updateHandler,
   getIndicesHandler,
+  updateRetentionSettingsHandler,
 } from './policy';
 
-describe('[Snapshot and Restore API Routes] Restore', () => {
+describe('[Snapshot and Restore API Routes] Policy', () => {
   const mockRequest = {} as Request;
   const mockResponseToolkit = {} as ResponseToolkit;
   const mockEsPolicy = {
@@ -25,6 +26,11 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
       schedule: '0 30 1 * * ?',
       repository: 'my-backups',
       config: {},
+      retention: {
+        expire_after: '15d',
+        min_count: 5,
+        max_count: 10,
+      },
     },
     next_execution_millis: 1562722200000,
   };
@@ -35,6 +41,12 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
     schedule: '0 30 1 * * ?',
     repository: 'my-backups',
     config: {},
+    retention: {
+      expireAfterValue: 15,
+      expireAfterUnit: 'd',
+      minCount: 5,
+      maxCount: 10,
+    },
     nextExecutionMillis: 1562722200000,
   };
 
@@ -320,6 +332,31 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
       const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
       await expect(
         getIndicesHandler(mockRequest, callWithRequest, mockResponseToolkit)
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('updateRetentionSettingsHandler()', () => {
+    const retentionSettings = {
+      retentionSchedule: '0 30 1 * * ?',
+    };
+    const mockCreateRequest = ({
+      payload: retentionSettings,
+    } as unknown) as Request;
+
+    it('should return successful ES response', async () => {
+      const mockEsResponse = { acknowledged: true };
+      const callWithRequest = jest.fn().mockReturnValueOnce(mockEsResponse);
+      const expectedResponse = { ...mockEsResponse };
+      await expect(
+        updateRetentionSettingsHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
+    });
+
+    it('should throw if ES error', async () => {
+      const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
+      await expect(
+        updateRetentionSettingsHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
       ).rejects.toThrow();
     });
   });

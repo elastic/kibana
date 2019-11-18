@@ -80,6 +80,27 @@ exports[`MonitorList component renders a no items message when no data is provid
       noItemsMessage="No uptime monitors found"
       responsive={true}
     />
+    <EuiSpacer
+      size="s"
+    />
+    <EuiFlexGroup>
+      <EuiFlexItem
+        grow={false}
+      >
+        <OverviewPageLink
+          dataTestSubj="xpack.uptime.monitorList.prevButton"
+          direction="prev"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <OverviewPageLink
+          dataTestSubj="xpack.uptime.monitorList.nextButton"
+          direction="next"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </EuiPanel>
 </Fragment>
 `;
@@ -226,6 +247,27 @@ exports[`MonitorList component renders the monitor list 1`] = `
       noItemsMessage="No uptime monitors found"
       responsive={true}
     />
+    <EuiSpacer
+      size="s"
+    />
+    <EuiFlexGroup>
+      <EuiFlexItem
+        grow={false}
+      >
+        <OverviewPageLink
+          dataTestSubj="xpack.uptime.monitorList.prevButton"
+          direction="prev"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <OverviewPageLink
+          dataTestSubj="xpack.uptime.monitorList.nextButton"
+          direction="next"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </EuiPanel>
 </Fragment>
 `;

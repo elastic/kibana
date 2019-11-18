@@ -20,6 +20,6 @@ export const registerRoutes = (router: Router, plugins: Plugins): void => {
   registerRestoreRoutes(router);
 
   if (isSlmEnabled) {
-    registerPolicyRoutes(router);
+    registerPolicyRoutes(router, plugins);
   }
 };

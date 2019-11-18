@@ -53,7 +53,7 @@ export function createMockDatasource(): DatasourceMock {
     getDatasourceSuggestionsForField: jest.fn((_state, item) => []),
     getDatasourceSuggestionsFromCurrentState: jest.fn(_state => []),
     getPersistableState: jest.fn(),
-    getPublicAPI: jest.fn((_state, _setState, _layerId) => publicAPIMock),
+    getPublicAPI: jest.fn().mockReturnValue(publicAPIMock),
     initialize: jest.fn((_state?) => Promise.resolve()),
     renderDataPanel: jest.fn(),
     toExpression: jest.fn((_frame, _state) => null),
@@ -77,6 +77,7 @@ export function createMockFramePublicAPI(): FrameMock {
     removeLayers: jest.fn(),
     dateRange: { fromDate: 'now-7d', toDate: 'now' },
     query: { query: '', language: 'lucene' },
+    filters: [],
   };
 }
 

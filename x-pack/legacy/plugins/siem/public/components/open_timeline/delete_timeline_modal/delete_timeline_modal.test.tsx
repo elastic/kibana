@@ -17,7 +17,7 @@ describe('DeleteTimelineModal', () => {
       <DeleteTimelineModal
         title="Privilege Escalation"
         onDelete={jest.fn()}
-        toggleShowModal={jest.fn()}
+        closeModal={jest.fn()}
       />
     );
 
@@ -34,7 +34,7 @@ describe('DeleteTimelineModal', () => {
       <DeleteTimelineModal
         title="    Leading and trailing whitespace    "
         onDelete={jest.fn()}
-        toggleShowModal={jest.fn()}
+        closeModal={jest.fn()}
       />
     );
 
@@ -48,7 +48,7 @@ describe('DeleteTimelineModal', () => {
 
   test('it displays `Untitled Timeline` in the title when title is undefined', () => {
     const wrapper = mountWithIntl(
-      <DeleteTimelineModal onDelete={jest.fn()} toggleShowModal={jest.fn()} />
+      <DeleteTimelineModal onDelete={jest.fn()} closeModal={jest.fn()} />
     );
 
     expect(
@@ -61,7 +61,7 @@ describe('DeleteTimelineModal', () => {
 
   test('it displays `Untitled Timeline` in the title when title is null', () => {
     const wrapper = mountWithIntl(
-      <DeleteTimelineModal onDelete={jest.fn()} title={null} toggleShowModal={jest.fn()} />
+      <DeleteTimelineModal onDelete={jest.fn()} title={null} closeModal={jest.fn()} />
     );
 
     expect(
@@ -74,7 +74,7 @@ describe('DeleteTimelineModal', () => {
 
   test('it displays `Untitled Timeline` in the title when title is just whitespace', () => {
     const wrapper = mountWithIntl(
-      <DeleteTimelineModal onDelete={jest.fn()} title={'    '} toggleShowModal={jest.fn()} />
+      <DeleteTimelineModal onDelete={jest.fn()} title={'    '} closeModal={jest.fn()} />
     );
 
     expect(
@@ -90,7 +90,7 @@ describe('DeleteTimelineModal', () => {
       <DeleteTimelineModal
         title="Privilege Escalation"
         onDelete={jest.fn()}
-        toggleShowModal={jest.fn()}
+        closeModal={jest.fn()}
       />
     );
 
@@ -102,14 +102,14 @@ describe('DeleteTimelineModal', () => {
     ).toEqual(i18n.DELETE_WARNING);
   });
 
-  test('it invokes toggleShowModal when the Cancel button is clicked', () => {
-    const toggleShowModal = jest.fn();
+  test('it invokes closeModal when the Cancel button is clicked', () => {
+    const closeModal = jest.fn();
 
     const wrapper = mountWithIntl(
       <DeleteTimelineModal
         title="Privilege Escalation"
         onDelete={jest.fn()}
-        toggleShowModal={toggleShowModal}
+        closeModal={closeModal}
       />
     );
 
@@ -118,7 +118,7 @@ describe('DeleteTimelineModal', () => {
       .first()
       .simulate('click');
 
-    expect(toggleShowModal).toBeCalled();
+    expect(closeModal).toBeCalled();
   });
 
   test('it invokes onDelete when the Delete button is clicked', () => {
@@ -128,7 +128,7 @@ describe('DeleteTimelineModal', () => {
       <DeleteTimelineModal
         title="Privilege Escalation"
         onDelete={onDelete}
-        toggleShowModal={jest.fn()}
+        closeModal={jest.fn()}
       />
     );
 

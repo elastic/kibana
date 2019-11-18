@@ -5,55 +5,49 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import {
   EuiButtonEmpty,
-  EuiIconTip,
   EuiPopover,
+  EuiPopoverTitle,
   EuiSelectable,
   EuiButtonEmptyProps,
 } from '@elastic/eui';
 import { EuiSelectableProps } from '@elastic/eui/src/components/selectable/selectable';
-import { i18n } from '@kbn/i18n';
-import { IndexPatternPrivateState, IndexPatternLayer } from './indexpattern';
-import { isLayerTransferable } from './state_helpers';
+import { IndexPatternRef } from './types';
+import { trackUiEvent } from '../lens_ui_telemetry';
 
-export interface ChangeIndexPatternTriggerProps extends EuiButtonEmptyProps {
+export type ChangeIndexPatternTriggerProps = EuiButtonEmptyProps & {
   label: string;
-}
+  title?: string;
+};
 
 export function ChangeIndexPattern({
-  indexPatterns,
-  currentIndexPatternId,
+  indexPatternRefs,
+  indexPatternId,
   onChangeIndexPattern,
   trigger,
-  layer,
   selectableProps,
 }: {
   trigger: ChangeIndexPatternTriggerProps;
-  indexPatterns: IndexPatternPrivateState['indexPatterns'];
+  indexPatternRefs: IndexPatternRef[];
   onChangeIndexPattern: (newId: string) => void;
-  currentIndexPatternId?: string;
-  layer?: IndexPatternLayer;
+  indexPatternId?: string;
   selectableProps?: EuiSelectableProps;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-  const [selectedID, setSelectedID] = useState(
-    layer ? layer.indexPatternId : currentIndexPatternId
-  );
-
-  const indexPatternList = Object.values(indexPatterns).map(indexPattern => ({
-    ...indexPattern,
-    isTransferable: layer ? isLayerTransferable(layer, indexPattern) : undefined,
-  }));
 
   const createTrigger = function() {
-    const { label, ...rest } = trigger;
+    const { label, title, ...rest } = trigger;
     return (
       <EuiButtonEmpty
-        flush="left"
         className="eui-textTruncate"
-        size="xs"
+        flush="left"
+        color="text"
+        iconSide="right"
+        iconType="arrowDown"
+        title={title}
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
         {...rest}
       >
@@ -75,36 +69,26 @@ export function ChangeIndexPattern({
         ownFocus
       >
         <div style={{ width: 320 }}>
+          <EuiPopoverTitle>
+            {i18n.translate('xpack.lens.indexPattern.changeIndexPatternTitle', {
+              defaultMessage: 'Change index pattern',
+            })}
+          </EuiPopoverTitle>
           <EuiSelectable
             {...selectableProps}
             searchable
             singleSelection="always"
-            options={indexPatternList.map(indexPattern => ({
-              id: indexPattern.id,
-              label: indexPattern.title,
-              checked: indexPattern.id === selectedID ? 'on' : undefined,
-              append:
-                indexPattern && indexPattern.isTransferable !== false ? (
-                  undefined
-                ) : (
-                  <EuiIconTip
-                    color="warning"
-                    type="minusInCircle"
-                    content={i18n.translate(
-                      'xpack.lens.indexPattern.lossyIndexPatternSwitchDescription',
-                      {
-                        defaultMessage:
-                          'Not all operations are compatible with this index pattern and will be removed on switching.',
-                      }
-                    )}
-                  />
-                ),
+            options={indexPatternRefs.map(({ title, id }) => ({
+              label: title,
+              value: id,
+              checked: id === indexPatternId ? 'on' : undefined,
             }))}
             onChange={choices => {
-              // @ts-ignore
-              const newSelectedID = choices.find(({ checked }) => checked)!.id;
-              onChangeIndexPattern(newSelectedID);
-              setSelectedID(newSelectedID);
+              const choice = (choices.find(({ checked }) => checked) as unknown) as {
+                value: string;
+              };
+              trackUiEvent('indexpattern_changed');
+              onChangeIndexPattern(choice.value);
               setPopoverIsOpen(false);
             }}
             searchProps={{

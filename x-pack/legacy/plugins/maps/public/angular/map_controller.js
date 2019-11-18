@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import chrome from 'ui/chrome';
 import 'ui/directives/listen';
+import 'ui/directives/storage';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -52,8 +53,9 @@ import {
   MAP_SAVED_OBJECT_TYPE,
   MAP_APP_PATH
 } from '../../common/constants';
-import { FilterStateStore } from '@kbn/es-query';
-import { setup as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
+import { start as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
+import { npStart } from 'ui/new_platform';
+import { esFilters } from '../../../../../../src/plugins/data/public';
 
 const { savedQueryService } = data.search.services;
 
@@ -62,7 +64,7 @@ const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 const app = uiModules.get(MAP_APP_PATH, []);
 
 app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppState, globalState) => {
-
+  const { filterManager } = npStart.plugins.data.query;
   const savedMap = $route.current.locals.map;
   let unsubscribe;
   let initialLayerListConfig;
@@ -98,7 +100,7 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
     $scope.$evalAsync(() => {
       // appState
       $state.query = $scope.query;
-      $state.filters = data.filter.filterManager.getAppFilters();
+      $state.filters = filterManager.getAppFilters();
       $state.save();
 
       // globalState
@@ -107,7 +109,7 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
         pause: $scope.refreshConfig.isPaused,
         value: $scope.refreshConfig.interval,
       };
-      globalState.filters = data.filter.filterManager.getGlobalFilters();
+      globalState.filters = filterManager.getGlobalFilters();
       globalState.save();
     });
   }
@@ -196,10 +198,10 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
     }
   });
   /* End of Saved Queries */
-  async function onQueryChange({ filters, query, time }) {
+  async function onQueryChange({ filters, query, time, refresh }) {
     if (filters) {
-      await data.filter.filterManager.setFilters(filters); // Maps and merges filters
-      $scope.filters = data.filter.filterManager.getFilters();
+      filterManager.setFilters(filters); // Maps and merges filters
+      $scope.filters = filterManager.getFilters();
     }
     if (query) {
       $scope.query = query;
@@ -208,22 +210,24 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
       $scope.time = time;
     }
     syncAppAndGlobalState();
-    dispatchSetQuery();
+    dispatchSetQuery(refresh);
   }
 
-  function dispatchSetQuery() {
+  function dispatchSetQuery(refresh) {
     store.dispatch(setQuery({
       filters: $scope.filters,
       query: $scope.query,
-      timeFilters: $scope.time
+      timeFilters: $scope.time,
+      refresh,
     }));
   }
 
   $scope.indexPatterns = [];
-  $scope.updateQueryAndDispatch = function ({ dateRange, query }) {
+  $scope.onQuerySubmit = function ({ dateRange, query }) {
     onQueryChange({
       query,
       time: dateRange,
+      refresh: true,
     });
   };
   $scope.updateFiltersAndDispatch = function (filters) {
@@ -243,7 +247,7 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
 
   function addFilters(newFilters) {
     newFilters.forEach(filter => {
-      filter.$state = FilterStateStore.APP_STATE;
+      filter.$state = esFilters.FilterStateStore.APP_STATE;
     });
     $scope.updateFiltersAndDispatch([...$scope.filters, ...newFilters]);
   }
@@ -514,12 +518,12 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
           isTitleDuplicateConfirmed,
           onTitleDuplicate,
         };
-        return doSave(saveOptions).then(({ id, error }) => {
+        return doSave(saveOptions).then((response) => {
           // If the save wasn't successful, put the original values back.
-          if (!id || error) {
+          if (!response.id || response.error) {
             savedMap.title = currentTitle;
           }
-          return { id, error };
+          return response;
         });
       };
 

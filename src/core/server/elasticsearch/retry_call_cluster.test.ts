@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import elasticsearch from 'elasticsearch';
+import * as legacyElasticsearch from 'elasticsearch';
+
 import { retryCallCluster } from './retry_call_cluster';
 
 describe('retryCallCluster', () => {
@@ -26,7 +27,7 @@ describe('retryCallCluster', () => {
     let i = 0;
     callEsApi.mockImplementation(() => {
       return i++ <= 2
-        ? Promise.reject(new elasticsearch.errors.NoConnections())
+        ? Promise.reject(new legacyElasticsearch.errors.NoConnections())
         : Promise.resolve('success');
     });
     const retried = retryCallCluster(callEsApi);
@@ -45,7 +46,7 @@ describe('retryCallCluster', () => {
         : i === 2
         ? Promise.resolve('success')
         : i === 3 || i === 4
-        ? Promise.reject(new elasticsearch.errors.NoConnections())
+        ? Promise.reject(new legacyElasticsearch.errors.NoConnections())
         : i === 5
         ? Promise.reject(new Error('unknown error'))
         : null;

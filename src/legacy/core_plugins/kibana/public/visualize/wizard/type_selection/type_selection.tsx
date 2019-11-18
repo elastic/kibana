@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { sortByOrder } from 'lodash';
 import React, { ChangeEvent } from 'react';
-import chrome from 'ui/chrome';
 
 import {
   EuiFieldSearch,
@@ -36,23 +35,23 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { memoizeLast } from 'ui/utils/memoize';
-import { VisType } from 'ui/vis';
+import { VisType } from '../../kibana_services';
 import { VisTypeAlias } from '../../../../../visualizations/public';
 import { NewVisHelp } from './new_vis_help';
 import { VisHelpText } from './vis_help_text';
 import { VisTypeIcon } from './vis_type_icon';
-import { TypesStart } from '../../../../../visualizations/public/np_ready/types';
+import { TypesStart } from '../../../../../visualizations/public/np_ready/public/types';
 
-interface VisTypeListEntry extends VisType {
+export interface VisTypeListEntry extends VisType {
   highlighted: boolean;
 }
 
-interface VisTypeAliasListEntry extends VisTypeAlias {
+export interface VisTypeAliasListEntry extends VisTypeAlias {
   highlighted: boolean;
 }
 
 interface TypeSelectionProps {
-  onVisTypeSelected: (visType: VisType) => void;
+  onVisTypeSelected: (visType: VisType | VisTypeAlias) => void;
   visTypesRegistry: TypesStart;
   showExperimental: boolean;
 }
@@ -152,7 +151,9 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                     </h2>
                   </EuiTitle>
                   <EuiSpacer size="m" />
-                  <NewVisHelp />
+                  <NewVisHelp
+                    promotedTypes={(visTypes as VisTypeAliasListEntry[]).filter(t => t.promotion)}
+                  />
                 </React.Fragment>
               )}
             </EuiFlexItem>
@@ -196,7 +197,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       });
     }
 
-    return sortByOrder(entries, ['highlighted', 'isPromoted', 'title'], ['desc', 'asc', 'asc']);
+    return sortByOrder(entries, ['highlighted', 'promotion', 'title'], ['desc', 'asc', 'asc']);
   }
 
   private renderVisType = (visType: VisTypeListEntry | VisTypeAliasListEntry) => {
@@ -217,29 +218,39 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
           'This visualization is experimental. The design and implementation are less mature than stable visualizations and might be subject to change.',
       });
     } else if ('aliasUrl' in visType) {
-      const aliasDescription = i18n.translate(
-        'kbn.visualize.newVisWizard.visTypeAliasDescription',
-        {
-          defaultMessage: 'Opens a Kibana application that is outside of Visualize.',
-        }
-      );
-      stage = {
-        betaBadgeLabel: i18n.translate('kbn.visualize.newVisWizard.visTypeAliasTitle', {
-          defaultMessage: 'Kibana application',
-        }),
-        betaBadgeTooltipContent: aliasDescription,
-        betaBadgeIconType: 'popout',
-      };
-      highlightMsg = aliasDescription;
+      if (visType.stage === 'beta') {
+        const aliasDescription = i18n.translate('kbn.visualize.newVisWizard.betaDescription', {
+          defaultMessage:
+            'This visualization is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features',
+        });
+        stage = {
+          betaBadgeLabel: i18n.translate('kbn.visualize.newVisWizard.betaTitle', {
+            defaultMessage: 'Beta',
+          }),
+          betaBadgeTooltipContent: aliasDescription,
+          // betaBadgeIconType: 'popout',
+        };
+        highlightMsg = aliasDescription;
+      } else {
+        const aliasDescription = i18n.translate(
+          'kbn.visualize.newVisWizard.visTypeAliasDescription',
+          {
+            defaultMessage: 'Opens a Kibana application that is outside of Visualize.',
+          }
+        );
+        stage = {
+          betaBadgeLabel: i18n.translate('kbn.visualize.newVisWizard.visTypeAliasTitle', {
+            defaultMessage: 'Kibana application',
+          }),
+          betaBadgeTooltipContent: aliasDescription,
+          betaBadgeIconType: 'popout',
+        };
+        highlightMsg = aliasDescription;
+      }
     }
 
     const isDisabled = this.state.query !== '' && !visType.highlighted;
-    const onClick =
-      'aliasUrl' in visType
-        ? () => {
-            window.location = chrome.addBasePath(visType.aliasUrl);
-          }
-        : () => this.props.onVisTypeSelected(visType);
+    const onClick = () => this.props.onVisTypeSelected(visType);
 
     const highlightedType: HighlightedType = {
       title: visType.title,

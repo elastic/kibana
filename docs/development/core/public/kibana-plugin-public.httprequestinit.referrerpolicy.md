@@ -4,6 +4,8 @@
 
 ## HttpRequestInit.referrerPolicy property
 
+The referrer policy associated with request. This is used during fetching to compute the value of the request's referrer.
+
 <b>Signature:</b>
 
 ```typescript

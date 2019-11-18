@@ -24,6 +24,8 @@ import url from 'url';
 import { has, isEmpty, head, pick } from 'lodash';
 
 // @ts-ignore
+import { addProcessorDefinition } from './server/api_server/es_6_0/ingest';
+// @ts-ignore
 import { resolveApi } from './server/api_server/server';
 // @ts-ignore
 import { addExtensionSpecFilePath } from './server/api_server/spec';
@@ -54,7 +56,6 @@ export default function(kibana: any) {
   const npSrc = resolve(__dirname, 'np_ready/public');
 
   let defaultVars: any;
-  const apps: any[] = [];
   return new kibana.Plugin({
     id: 'console',
     require: ['elasticsearch'],
@@ -119,12 +120,14 @@ export default function(kibana: any) {
 
     async init(server: any, options: any) {
       server.expose('addExtensionSpecFilePath', addExtensionSpecFilePath);
+      server.expose('addProcessorDefinition', addProcessorDefinition);
+
       if (options.ssl && options.ssl.verify) {
         throw new Error('sense.ssl.verify is no longer supported.');
       }
 
       const config = server.config();
-      const legacyEsConfig = await server.newPlatform.setup.core.elasticsearch.legacy.config$
+      const legacyEsConfig = await server.newPlatform.__internals.elasticsearch.legacy.config$
         .pipe(first())
         .toPromise();
       const proxyConfigCollection = new ProxyConfigCollection(options.proxyConfig);
@@ -177,8 +180,6 @@ export default function(kibana: any) {
     },
 
     uiExports: {
-      apps,
-      hacks: ['plugins/console/quarantined/hacks/register'],
       devTools: [`${npSrc}/legacy`],
       styleSheetPaths: resolve(__dirname, 'public/quarantined/index.scss'),
 

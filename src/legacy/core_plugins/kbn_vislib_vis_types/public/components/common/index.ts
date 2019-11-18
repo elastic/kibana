@@ -19,7 +19,7 @@
 
 export { BasicOptions } from './basic_options';
 export { ColorRanges } from './color_ranges';
-export { ColorSchemaOptions } from './color_schema';
+export { ColorSchemaOptions, SetColorSchemaOptionsValue } from './color_schema';
 export { NumberInputOption } from './number_input';
 export { RangeOption } from './range';
 export { SelectOption } from './select';

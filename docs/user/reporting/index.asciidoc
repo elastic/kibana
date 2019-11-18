@@ -32,8 +32,8 @@ for different operating systems.
 
 . Open {kib} in your web browser and log in. If you are running {kib}
 locally, go to `http://localhost:5601`. To access {kib} and generate
-reports, you need the `kibana_user` and `reporting_user` roles. For more
-information, see <<secure-reporting>>.
+reports, you need the `reporting_user` role, and an additional role with succifient <<kibana-privileges, Kibana privileges>>, such as the `kibana_user` role.
+For more information, see <<secure-reporting>>.
 
 . Open the dashboard, visualization, or saved search you want to include
 in the report.

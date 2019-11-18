@@ -36,9 +36,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ES_FIELD_TYPES } from '../../../../../../../plugins/data/common';
+import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
-const RESTRICT_FIELDS = [ES_FIELD_TYPES.NUMBER];
+const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER];
 
 export const PercentileRankAgg = props => {
   const { series, panel, fields } = props;

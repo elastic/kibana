@@ -19,7 +19,7 @@
 import React, { useState } from 'react';
 import { DocViewRenderProps } from 'ui/registry/doc_views';
 import { DocViewTableRow } from './table_row';
-import { formatValue, arrayContainsObjects } from './table_helper';
+import { arrayContainsObjects, trimAngularSpan } from './table_helper';
 
 const COLLAPSE_LINE_LENGTH = 350;
 
@@ -31,7 +31,7 @@ export function DocViewTable({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) {
-  const mapping = indexPattern.fields.byName;
+  const mapping = indexPattern.fields.getByName;
   const flattened = indexPattern.flattenHit(hit);
   const formatted = indexPattern.formatHit(hit, 'html');
   const [fieldRowOpen, setFieldRowOpen] = useState({} as Record<string, boolean>);
@@ -48,8 +48,9 @@ export function DocViewTable({
           .sort()
           .map(field => {
             const valueRaw = flattened[field];
-            const value = formatValue(valueRaw, formatted[field]);
-            const isCollapsible = typeof value === 'string' && value.length > COLLAPSE_LINE_LENGTH;
+            const value = trimAngularSpan(String(formatted[field]));
+
+            const isCollapsible = value.length > COLLAPSE_LINE_LENGTH;
             const isCollapsed = isCollapsible && !fieldRowOpen[field];
             const toggleColumn =
               onRemoveColumn && onAddColumn && Array.isArray(columns)
@@ -63,15 +64,15 @@ export function DocViewTable({
                 : undefined;
             const isArrayOfObjects =
               Array.isArray(flattened[field]) && arrayContainsObjects(flattened[field]);
-            const displayUnderscoreWarning = !mapping[field] && field.indexOf('_') === 0;
+            const displayUnderscoreWarning = !mapping(field) && field.indexOf('_') === 0;
             const displayNoMappingWarning =
-              !mapping[field] && !displayUnderscoreWarning && !isArrayOfObjects;
+              !mapping(field) && !displayUnderscoreWarning && !isArrayOfObjects;
 
             return (
               <DocViewTableRow
                 key={field}
                 field={field}
-                fieldMapping={mapping[field]}
+                fieldMapping={mapping(field)}
                 displayUnderscoreWarning={displayUnderscoreWarning}
                 displayNoMappingWarning={displayNoMappingWarning}
                 isCollapsed={isCollapsed}

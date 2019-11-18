@@ -30,7 +30,7 @@ interface SwitchParamEditorProps extends AggParamEditorProps<boolean> {
 }
 
 function SwitchParamEditor({
-  value,
+  value = false,
   setValue,
   dataTestSubj,
   displayToolTip,
@@ -41,6 +41,7 @@ function SwitchParamEditor({
     <EuiFormRow fullWidth={true}>
       <EuiToolTip content={displayToolTip} delay="long" position="right">
         <EuiSwitch
+          compressed={true}
           label={displayLabel}
           checked={value}
           disabled={disabled}

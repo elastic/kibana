@@ -8,14 +8,15 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
-
+import { compose } from 'redux';
 import chrome from 'ui/chrome';
+
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
-  FlowTargetNew,
+  FlowTargetSourceDest,
   GetNetworkTopNFlowQuery,
   NetworkTopNFlowEdges,
-  NetworkTopNFlowSortField,
+  NetworkTopTablesSortField,
   PageInfoPaginated,
 } from '../../graphql/types';
 import { inputsModel, inputsSelectors, networkModel, networkSelectors, State } from '../../store';
@@ -28,6 +29,7 @@ const ID = 'networkTopNFlowQuery';
 
 export interface NetworkTopNFlowArgs {
   id: string;
+  ip?: string;
   inspect: inputsModel.InspectQuery;
   isInspected: boolean;
   loading: boolean;
@@ -40,7 +42,8 @@ export interface NetworkTopNFlowArgs {
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
   children: (args: NetworkTopNFlowArgs) => React.ReactNode;
-  flowTarget: FlowTargetNew;
+  flowTarget: FlowTargetSourceDest;
+  ip?: string;
   type: networkModel.NetworkType;
 }
 
@@ -48,7 +51,7 @@ export interface NetworkTopNFlowComponentReduxProps {
   activePage: number;
   isInspected: boolean;
   limit: number;
-  topNFlowSort: NetworkTopNFlowSortField;
+  sort: NetworkTopTablesSortField;
 }
 
 type NetworkTopNFlowProps = OwnProps & NetworkTopNFlowComponentReduxProps;
@@ -66,20 +69,22 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
       flowTarget,
       filterQuery,
       id = `${ID}-${flowTarget}`,
+      ip,
       isInspected,
       limit,
       skip,
       sourceId,
       startDate,
-      topNFlowSort,
+      sort,
     } = this.props;
     const variables: GetNetworkTopNFlowQuery.Variables = {
       defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
       filterQuery: createFilter(filterQuery),
       flowTarget,
       inspect: isInspected,
+      ip,
       pagination: generateTablePaginationOptions(activePage, limit),
-      sort: topNFlowSort,
+      sort,
       sourceId,
       timerange: {
         interval: '12h',
@@ -136,14 +141,18 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
   }
 }
 
-const mapStateToProps = (state: State, { flowTarget, id = `${ID}-${flowTarget}` }: OwnProps) => {
-  const getNetworkTopNFlowSelector = networkSelectors.topNFlowSelector(flowTarget);
+const makeMapStateToProps = () => {
+  const getTopNFlowSelector = networkSelectors.topNFlowSelector();
   const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const { isInspected } = getQuery(state, id);
-  return {
-    ...getNetworkTopNFlowSelector(state),
-    isInspected,
+  return (state: State, { flowTarget, id = `${ID}-${flowTarget}`, type }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      ...getTopNFlowSelector(state, type, flowTarget),
+      isInspected,
+    };
   };
 };
 
-export const NetworkTopNFlowQuery = connect(mapStateToProps)(NetworkTopNFlowComponentQuery);
+export const NetworkTopNFlowQuery = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps)
+)(NetworkTopNFlowComponentQuery);

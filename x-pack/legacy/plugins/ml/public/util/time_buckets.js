@@ -149,12 +149,11 @@ TimeBuckets.prototype.getDuration = function () {
  * generated.
  *
  * Input can be one of the following:
- *  - Any object from src/legacy/ui/agg_types/buckets/_interval_options.js
  *  - "auto"
- *  - Pass a valid moment unit
+ *  - an interval String, such as 7d, 1h or 30m which can be parsed to a moment duration using ml/common/util/parse_interval
  *  - a moment.duration object.
  *
- * @param {object|string|moment.duration} input - see desc
+ * @param {string|moment.duration} input - see desc
  */
 TimeBuckets.prototype.setInterval = function (input) {
   // Preserve the original units because they're lost when the interval is converted to a
@@ -162,11 +161,6 @@ TimeBuckets.prototype.setInterval = function (input) {
   this.originalInterval = input;
 
   let interval = input;
-
-  // selection object -> val
-  if (_.isObject(input)) {
-    interval = input.val;
-  }
 
   if (!interval || interval === 'auto') {
     this._i = 'auto';

@@ -12,7 +12,7 @@ import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiLoadingContent } from '@elastic/eui';
 import { BarChart } from '../charts/barchart';
-import { HeaderPanel } from '../header_panel';
+import { HeaderSection } from '../header_section';
 import { ChartSeriesData, UpdateDateRange } from '../charts/common';
 import { MatrixOverTimeHistogramData } from '../../graphql/types';
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
@@ -31,8 +31,9 @@ export interface MatrixOverTimeBasicProps {
 }
 
 export interface MatrixOverTimeProps extends MatrixOverTimeBasicProps {
+  customChartData?: ChartSeriesData[];
   title: string;
-  subtitle: string;
+  subtitle?: string;
   dataKey: string;
 }
 
@@ -53,7 +54,7 @@ const getBarchartConfigs = (from: number, to: number, onBrushEnd: UpdateDateRang
     showLegend: true,
     theme: {
       scales: {
-        barsPadding: 0.05,
+        barsPadding: 0.08,
       },
       chartMargins: {
         left: 0,
@@ -73,6 +74,7 @@ const getBarchartConfigs = (from: number, to: number, onBrushEnd: UpdateDateRang
 });
 
 export const MatrixOverTimeHistogram = ({
+  customChartData,
   id,
   loading,
   data,
@@ -91,7 +93,7 @@ export const MatrixOverTimeHistogram = ({
   const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
   const [loadingInitial, setLoadingInitial] = useState(false);
 
-  const barChartData: ChartSeriesData[] = [
+  const barChartData: ChartSeriesData[] = customChartData || [
     {
       key: dataKey,
       value: data,
@@ -111,7 +113,7 @@ export const MatrixOverTimeHistogram = ({
       onMouseEnter={() => setShowInspect(true)}
       onMouseLeave={() => setShowInspect(false)}
     >
-      <HeaderPanel
+      <HeaderSection
         id={id}
         title={title}
         showInspect={!loadingInitial && showInspect}

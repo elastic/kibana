@@ -1,4 +1,5 @@
-/*@notice
+/* @notice
+ *
  * Pretty handling of logarithmic axes.
  * Copyright (c) 2007-2014 IOLA and Ole Laursen.
  * Licensed under the MIT license.

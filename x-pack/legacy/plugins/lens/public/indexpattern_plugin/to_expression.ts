@@ -5,13 +5,13 @@
  */
 
 import _ from 'lodash';
-
-import { IndexPatternPrivateState, IndexPatternColumn, IndexPattern } from './indexpattern';
-import { buildColumn, operationDefinitionMap } from './operations';
+import { IndexPatternColumn } from './indexpattern';
+import { operationDefinitionMap } from './operations';
+import { IndexPattern, IndexPatternPrivateState } from './types';
+import { OriginalColumn } from './rename_columns';
 
 function getExpressionForLayer(
   indexPattern: IndexPattern,
-  layerId: string,
   columns: Record<string, IndexPatternColumn>,
   columnOrder: string[]
 ) {
@@ -30,46 +30,24 @@ function getExpressionForLayer(
       return getEsAggsConfig(col, colId);
     });
 
-    const idMap = columnEntries.reduce(
-      (currentIdMap, [colId], index) => {
-        return {
-          ...currentIdMap,
-          [`col-${index}-${colId}`]: colId,
-        };
-      },
-      {} as Record<string, string>
-    );
-
-    const filterRatios = columnEntries.filter(
-      ([colId, col]) => col.operationType === 'filter_ratio'
-    );
-
-    if (filterRatios.length) {
-      const countColumn = buildColumn({
-        op: 'count',
-        columns,
-        suggestedPriority: 2,
-        layerId,
-        indexPattern,
-      });
-      aggs.push(getEsAggsConfig(countColumn, 'filter-ratio'));
-
-      return `esaggs
-        index="${indexPattern.id}"
-        metricsAtAllLevels=false
-        partialRows=false
-        includeFormatHints=true
-        aggConfigs='${JSON.stringify(aggs)}' | lens_rename_columns idMap='${JSON.stringify(
-        idMap
-      )}' | ${filterRatios.map(([id]) => `lens_calculate_filter_ratio id=${id}`).join(' | ')}`;
-    }
+    const idMap = columnEntries.reduce((currentIdMap, [colId], index) => {
+      return {
+        ...currentIdMap,
+        [`col-${index}-${colId}`]: {
+          ...columns[colId],
+          id: colId,
+        },
+      };
+    }, {} as Record<string, OriginalColumn>);
 
     return `esaggs
       index="${indexPattern.id}"
       metricsAtAllLevels=false
       partialRows=false
       includeFormatHints=true
-      aggConfigs='${JSON.stringify(aggs)}' | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
+      aggConfigs={lens_auto_date aggConfigs='${JSON.stringify(
+        aggs
+      )}'} | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
   }
 
   return null;
@@ -79,7 +57,6 @@ export function toExpression(state: IndexPatternPrivateState, layerId: string) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(
       state.indexPatterns[state.layers[layerId].indexPatternId],
-      layerId,
       state.layers[layerId].columns,
       state.layers[layerId].columnOrder
     );

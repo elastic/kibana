@@ -24,7 +24,8 @@ import {
   mockPluginsService,
   mockConfigService,
   mockSavedObjectsService,
-} from './index.test.mocks';
+  mockContextService,
+} from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
 import { Env, Config, ObjectToConfigAdapter } from './config';
@@ -38,6 +39,7 @@ const logger = loggingServiceMock.create();
 
 beforeEach(() => {
   mockConfigService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
+  mockPluginsService.discover.mockResolvedValue(new Map());
 });
 
 afterEach(() => {
@@ -61,6 +63,28 @@ test('sets up services on "setup"', async () => {
   expect(mockPluginsService.setup).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.setup).toHaveBeenCalledTimes(1);
   expect(mockSavedObjectsService.setup).toHaveBeenCalledTimes(1);
+});
+
+test('injects legacy dependency to context#setup()', async () => {
+  const server = new Server(config$, env, logger);
+
+  const pluginA = Symbol();
+  const pluginB = Symbol();
+  const pluginDependencies = new Map<symbol, symbol[]>([
+    [pluginA, []],
+    [pluginB, [pluginA]],
+  ]);
+  mockPluginsService.discover.mockResolvedValue(pluginDependencies);
+
+  await server.setup();
+
+  expect(mockContextService.setup).toHaveBeenCalledWith({
+    pluginDependencies: new Map([
+      [pluginA, []],
+      [pluginB, [pluginA]],
+      [mockLegacyService.legacyId, [pluginA, pluginB]],
+    ]),
+  });
 });
 
 test('runs services on "start"', async () => {

@@ -23,17 +23,18 @@
     'release_note:skip',
     'renovate',
     'v8.0.0',
-    'v7.5.0',
+    'v7.6.0',
   ],
   major: {
     labels: [
       'release_note:skip',
       'renovate',
       'v8.0.0',
-      'v7.5.0',
+      'v7.6.0',
       'renovate:major',
     ],
   },
+  separateMajorMinor: false,
   masterIssue: true,
   masterIssueApproval: true,
   rangeStrategy: 'bump',
@@ -66,6 +67,18 @@
         packagePatterns: [
           '(\\b|_)jest(\\b|_)',
         ],
+      },
+      {
+        groupSlug: '@elastic/charts',
+        groupName: '@elastic/charts related packages',
+        packageNames: [
+          '@elastic/charts',
+          '@types/elastic__charts',
+        ],
+        reviewers: [
+          'markov00',
+        ],
+        masterIssueApproval: false,
       },
       {
         groupSlug: 'mocha',
@@ -217,7 +230,7 @@
           'release_note:skip',
           'renovate',
           'v8.0.0',
-          'v7.5.0',
+          'v7.6.0',
           ':ml',
         ],
       },
@@ -246,6 +259,18 @@
         groupName: 'storybook related packages',
         packagePatterns: [
           '(\\b|_)storybook(\\b|_)',
+        ],
+      },
+      {
+        groupSlug: 'typescript',
+        groupName: 'typescript related packages',
+        packagePatterns: [
+          '(\\b|_)ts(\\b|_)',
+          '(\\b|_)typescript(\\b|_)',
+        ],
+        packageNames: [
+          'tslib',
+          '@types/tslib',
         ],
       },
       {
@@ -329,14 +354,6 @@
         ],
       },
       {
-        groupSlug: 'execa',
-        groupName: 'execa related packages',
-        packageNames: [
-          'execa',
-          '@types/execa',
-        ],
-      },
-      {
         groupSlug: 'fetch-mock',
         groupName: 'fetch-mock related packages',
         packageNames: [
@@ -382,14 +399,6 @@
         packageNames: [
           'history',
           '@types/history',
-        ],
-      },
-      {
-        groupSlug: 'humps',
-        groupName: 'humps related packages',
-        packageNames: [
-          'humps',
-          '@types/humps',
         ],
       },
       {
@@ -465,14 +474,6 @@
         ],
       },
       {
-        groupSlug: 'mkdirp',
-        groupName: 'mkdirp related packages',
-        packageNames: [
-          'mkdirp',
-          '@types/mkdirp',
-        ],
-      },
-      {
         groupSlug: 'mustache',
         groupName: 'mustache related packages',
         packageNames: [
@@ -513,19 +514,19 @@
         ],
       },
       {
+        groupSlug: '@reach/router',
+        groupName: '@reach/router related packages',
+        packageNames: [
+          '@reach/router',
+          '@types/reach__router',
+        ],
+      },
+      {
         groupSlug: 'request',
         groupName: 'request related packages',
         packageNames: [
           'request',
           '@types/request',
-        ],
-      },
-      {
-        groupSlug: 'rimraf',
-        groupName: 'rimraf related packages',
-        packageNames: [
-          'rimraf',
-          '@types/rimraf',
         ],
       },
       {
@@ -577,6 +578,14 @@
         ],
       },
       {
+        groupSlug: 'supertest-as-promised',
+        groupName: 'supertest-as-promised related packages',
+        packageNames: [
+          'supertest-as-promised',
+          '@types/supertest-as-promised',
+        ],
+      },
+      {
         groupSlug: 'type-detect',
         groupName: 'type-detect related packages',
         packageNames: [
@@ -593,11 +602,27 @@
         ],
       },
       {
+        groupSlug: 'vinyl-fs',
+        groupName: 'vinyl-fs related packages',
+        packageNames: [
+          'vinyl-fs',
+          '@types/vinyl-fs',
+        ],
+      },
+      {
         groupSlug: 'zen-observable',
         groupName: 'zen-observable related packages',
         packageNames: [
           'zen-observable',
           '@types/zen-observable',
+        ],
+      },
+      {
+        groupSlug: 'archiver',
+        groupName: 'archiver related packages',
+        packageNames: [
+          'archiver',
+          '@types/archiver',
         ],
       },
       {
@@ -625,11 +650,35 @@
         ],
       },
       {
+        groupSlug: 'cytoscape',
+        groupName: 'cytoscape related packages',
+        packageNames: [
+          'cytoscape',
+          '@types/cytoscape',
+        ],
+      },
+      {
+        groupSlug: 'fancy-log',
+        groupName: 'fancy-log related packages',
+        packageNames: [
+          'fancy-log',
+          '@types/fancy-log',
+        ],
+      },
+      {
         groupSlug: 'file-saver',
         groupName: 'file-saver related packages',
         packageNames: [
           'file-saver',
           '@types/file-saver',
+        ],
+      },
+      {
+        groupSlug: 'getos',
+        groupName: 'getos related packages',
+        packageNames: [
+          'getos',
+          '@types/getos',
         ],
       },
       {
@@ -761,6 +810,22 @@
         ],
       },
       {
+        groupSlug: 'xml-crypto',
+        groupName: 'xml-crypto related packages',
+        packageNames: [
+          'xml-crypto',
+          '@types/xml-crypto',
+        ],
+      },
+      {
+        groupSlug: 'xml2js',
+        groupName: 'xml2js related packages',
+        packageNames: [
+          'xml2js',
+          '@types/xml2js',
+        ],
+      },
+      {
         groupSlug: 'intl-relativeformat',
         groupName: 'intl-relativeformat related packages',
         packageNames: [
@@ -862,6 +927,14 @@
         packageNames: [
           'write-pkg',
           '@types/write-pkg',
+        ],
+      },
+      {
+        groupSlug: 'parse-link-header',
+        groupName: 'parse-link-header related packages',
+        packageNames: [
+          'parse-link-header',
+          '@types/parse-link-header',
         ],
       },
       {

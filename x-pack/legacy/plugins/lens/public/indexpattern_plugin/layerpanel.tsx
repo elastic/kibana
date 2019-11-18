@@ -7,36 +7,31 @@
 import _ from 'lodash';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
-import { DatasourceLayerPanelProps, StateSetter } from '../types';
-import { IndexPatternPrivateState } from './indexpattern';
-import { updateLayerIndexPattern } from './state_helpers';
+import { DatasourceLayerPanelProps } from '../types';
+import { IndexPatternPrivateState } from './types';
 import { ChangeIndexPattern } from './change_indexpattern';
 
 export interface IndexPatternLayerPanelProps extends DatasourceLayerPanelProps {
   state: IndexPatternPrivateState;
-  setState: StateSetter<IndexPatternPrivateState>;
+  onChangeIndexPattern: (newId: string) => void;
 }
-export function LayerPanel({ state, setState, layerId }: IndexPatternLayerPanelProps) {
+
+export function LayerPanel({ state, layerId, onChangeIndexPattern }: IndexPatternLayerPanelProps) {
+  const layer = state.layers[layerId];
+
   return (
     <I18nProvider>
       <ChangeIndexPattern
         data-test-subj="indexPattern-switcher"
         trigger={{
-          label: state.indexPatterns[state.layers[layerId].indexPatternId].title,
+          label: state.indexPatterns[layer.indexPatternId].title,
+          title: state.indexPatterns[layer.indexPatternId].title,
           'data-test-subj': 'lns_layerIndexPatternLabel',
+          size: 'xs',
         }}
-        layer={state.layers[layerId]}
-        indexPatterns={state.indexPatterns}
-        onChangeIndexPattern={newId => {
-          setState({
-            ...state,
-            currentIndexPatternId: newId,
-            layers: {
-              ...state.layers,
-              [layerId]: updateLayerIndexPattern(state.layers[layerId], state.indexPatterns[newId]),
-            },
-          });
-        }}
+        indexPatternId={layer.indexPatternId}
+        indexPatternRefs={state.indexPatternRefs}
+        onChangeIndexPattern={onChangeIndexPattern}
       />
     </I18nProvider>
   );

@@ -5,9 +5,21 @@
  */
 
 import { createMockedIndexPattern, createMockedRestrictedIndexPattern } from '../mocks';
+import { IndexPatternPrivateState } from '../types';
 
-export function getIndexPatterns() {
-  return new Promise(resolve => {
-    resolve([createMockedIndexPattern(), createMockedRestrictedIndexPattern()]);
-  });
+export function loadInitialState() {
+  const indexPattern = createMockedIndexPattern();
+  const restricted = createMockedRestrictedIndexPattern();
+  const result: IndexPatternPrivateState = {
+    currentIndexPatternId: indexPattern.id,
+    indexPatternRefs: [],
+    existingFields: {},
+    indexPatterns: {
+      [indexPattern.id]: indexPattern,
+      [restricted.id]: restricted,
+    },
+    layers: {},
+    showEmptyFields: false,
+  };
+  return result;
 }

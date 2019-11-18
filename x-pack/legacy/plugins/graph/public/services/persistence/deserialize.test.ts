@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GraphWorkspaceSavedObject } from '../../types';
+import { GraphWorkspaceSavedObject, Workspace } from '../../types';
 import { savedWorkspaceToAppState } from './deserialize';
 import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { createWorkspace } from '../../angular/graph_client_workspace';
@@ -12,6 +12,7 @@ import { outlinkEncoders } from '../../helpers/outlink_encoders';
 
 describe('deserialize', () => {
   let savedWorkspace: GraphWorkspaceSavedObject;
+  let workspace: Workspace;
 
   beforeEach(() => {
     savedWorkspace = {
@@ -90,8 +91,8 @@ describe('deserialize', () => {
           },
         ],
         links: [
-          { inferred: false, label: '', weight: 5, width: 5, source: 2, target: 0 },
-          { inferred: false, label: '', weight: 5, width: 5, source: 2, target: 4 },
+          { label: '', weight: 5, width: 5, source: 2, target: 0 },
+          { label: '', weight: 5, width: 5, source: 2, target: 4 },
         ],
         urlTemplates: [
           {
@@ -110,6 +111,7 @@ describe('deserialize', () => {
         },
       }),
     } as GraphWorkspaceSavedObject;
+    workspace = createWorkspace({});
   });
 
   function callSavedWorkspaceToAppState() {
@@ -122,7 +124,7 @@ describe('deserialize', () => {
           { name: 'field3', type: 'string' },
         ],
       } as IndexPattern,
-      createWorkspace({})
+      workspace
     );
   }
 
@@ -133,7 +135,7 @@ describe('deserialize', () => {
   });
 
   it('should deserialize fields', () => {
-    const { allFields, selectedFields } = callSavedWorkspaceToAppState();
+    const { allFields } = callSavedWorkspaceToAppState();
 
     expect(allFields).toMatchInlineSnapshot(`
       Array [
@@ -156,7 +158,7 @@ describe('deserialize', () => {
           "type": "string",
         },
         Object {
-          "color": "#FCA5D3",
+          "color": "#CE0060",
           "hopSize": 5,
           "icon": Object {
             "class": "fa-folder-open-o",
@@ -175,9 +177,6 @@ describe('deserialize', () => {
         },
       ]
     `);
-
-    expect(selectedFields.length).toEqual(2);
-    selectedFields.forEach(field => expect(allFields.includes(field)).toEqual(true));
   });
 
   it('should deserialize url templates', () => {
@@ -188,7 +187,7 @@ describe('deserialize', () => {
   });
 
   it('should deserialize nodes and edges', () => {
-    const { workspace } = callSavedWorkspaceToAppState();
+    callSavedWorkspaceToAppState();
 
     expect(workspace.blacklistedNodes.length).toEqual(1);
     expect(workspace.nodes.length).toEqual(5);

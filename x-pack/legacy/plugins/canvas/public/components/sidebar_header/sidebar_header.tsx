@@ -20,8 +20,12 @@ import {
 import { Popover } from '../popover';
 import { CustomElementModal } from '../custom_element_modal';
 import { ToolTipShortcut } from '../tool_tip_shortcut/';
+import { ComponentStrings, ShortcutStrings } from '../../../i18n';
 
 const topBorderClassName = 'canvasContextMenu--topBorder';
+
+const { SidebarHeader: strings } = ComponentStrings;
+const shortcutHelp = ShortcutStrings.getShortcutHelp();
 
 interface Props {
   /**
@@ -139,7 +143,7 @@ const contextMenuButton = (handleClick: (event: MouseEvent) => void) => (
     color="text"
     iconType="boxesVertical"
     onClick={handleClick}
-    aria-label="Element options"
+    aria-label={strings.getContextMenuTitle()}
   />
 );
 
@@ -202,7 +206,7 @@ export class SidebarHeader extends Component<Props, State> {
             position="bottom"
             content={
               <span>
-                Bring to front
+                {shortcutHelp.BRING_TO_FRONT}
                 <ToolTipShortcut namespace="ELEMENT" action="BRING_TO_FRONT" />
               </span>
             }
@@ -211,7 +215,7 @@ export class SidebarHeader extends Component<Props, State> {
               color="text"
               iconType="sortUp"
               onClick={bringToFront}
-              aria-label="Move element to top layer"
+              aria-label={strings.getBringToFrontAriaLabel()}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -220,7 +224,7 @@ export class SidebarHeader extends Component<Props, State> {
             position="bottom"
             content={
               <span>
-                Bring forward
+                {shortcutHelp.BRING_FORWARD}
                 <ToolTipShortcut namespace="ELEMENT" action="BRING_FORWARD" />
               </span>
             }
@@ -229,7 +233,7 @@ export class SidebarHeader extends Component<Props, State> {
               color="text"
               iconType="arrowUp"
               onClick={bringForward}
-              aria-label="Move element up one layer"
+              aria-label={strings.getBringForwardAriaLabel()}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -238,7 +242,7 @@ export class SidebarHeader extends Component<Props, State> {
             position="bottom"
             content={
               <span>
-                Send backward
+                {shortcutHelp.SEND_BACKWARD}
                 <ToolTipShortcut namespace="ELEMENT" action="SEND_BACKWARD" />
               </span>
             }
@@ -247,7 +251,7 @@ export class SidebarHeader extends Component<Props, State> {
               color="text"
               iconType="arrowDown"
               onClick={sendBackward}
-              aria-label="Move element down one layer"
+              aria-label={strings.getSendBackwardAriaLabel()}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -256,7 +260,7 @@ export class SidebarHeader extends Component<Props, State> {
             position="bottom"
             content={
               <span>
-                Send to back
+                {shortcutHelp.SEND_TO_BACK}
                 <ToolTipShortcut namespace="ELEMENT" action="SEND_TO_BACK" />
               </span>
             }
@@ -265,7 +269,7 @@ export class SidebarHeader extends Component<Props, State> {
               color="text"
               iconType="sortDown"
               onClick={sendToBack}
-              aria-label="Move element to bottom layer"
+              aria-label={strings.getSendToBackAriaLabel()}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -277,28 +281,28 @@ export class SidebarHeader extends Component<Props, State> {
     const { bringToFront, bringForward, sendBackward, sendToBack } = this.props;
 
     return {
-      menuItem: { name: 'Order', className: topBorderClassName, panel: 1 },
+      menuItem: { name: strings.getOrderMenuItemLabel(), className: topBorderClassName, panel: 1 },
       panel: {
         id: 1,
-        title: 'Order',
+        title: strings.getOrderMenuItemLabel(),
         items: [
           {
-            name: 'Bring to front', // TODO: check against current element position and disable if already top layer
+            name: shortcutHelp.BRING_TO_FRONT, // TODO: check against current element position and disable if already top layer
             icon: 'sortUp',
             onClick: bringToFront,
           },
           {
-            name: 'Bring forward', // TODO: same as above
+            name: shortcutHelp.BRING_TO_FRONT, // TODO: same as above
             icon: 'arrowUp',
             onClick: bringForward,
           },
           {
-            name: 'Send backward', // TODO: check against current element position and disable if already bottom layer
+            name: shortcutHelp.SEND_BACKWARD, // TODO: check against current element position and disable if already bottom layer
             icon: 'arrowDown',
             onClick: sendBackward,
           },
           {
-            name: 'Send to back', // TODO: same as above
+            name: shortcutHelp.SEND_TO_BACK, // TODO: same as above
             icon: 'sortDown',
             onClick: sendToBack,
           },
@@ -311,38 +315,42 @@ export class SidebarHeader extends Component<Props, State> {
     const { alignLeft, alignCenter, alignRight, alignTop, alignMiddle, alignBottom } = this.props;
 
     return {
-      menuItem: { name: 'Align elements', className: 'canvasContextMenu', panel: 2 },
+      menuItem: {
+        name: strings.getAlignmentMenuItemLabel(),
+        className: 'canvasContextMenu',
+        panel: 2,
+      },
       panel: {
         id: 2,
-        title: 'Alignment',
+        title: strings.getAlignmentMenuItemLabel(),
         items: [
           {
-            name: 'Left',
+            name: strings.getLeftAlignMenuItemLabel(),
             icon: 'editorItemAlignLeft',
             onClick: close(alignLeft),
           },
           {
-            name: 'Center',
+            name: strings.getCenterAlignMenuItemLabel(),
             icon: 'editorItemAlignCenter',
             onClick: close(alignCenter),
           },
           {
-            name: 'Right',
+            name: strings.getRightAlignMenuItemLabel(),
             icon: 'editorItemAlignRight',
             onClick: close(alignRight),
           },
           {
-            name: 'Top',
+            name: strings.getTopAlignMenuItemLabel(),
             icon: 'editorItemAlignTop',
             onClick: close(alignTop),
           },
           {
-            name: 'Middle',
+            name: strings.getMiddleAlignMenuItemLabel(),
             icon: 'editorItemAlignMiddle',
             onClick: close(alignMiddle),
           },
           {
-            name: 'Bottom',
+            name: strings.getBottomAlignMenuItemLabel(),
             icon: 'editorItemAlignBottom',
             onClick: close(alignBottom),
           },
@@ -355,18 +363,22 @@ export class SidebarHeader extends Component<Props, State> {
     const { distributeHorizontally, distributeVertically } = this.props;
 
     return {
-      menuItem: { name: 'Distribute elements', className: 'canvasContextMenu', panel: 3 },
+      menuItem: {
+        name: strings.getDistributionMenuItemLabel(),
+        className: 'canvasContextMenu',
+        panel: 3,
+      },
       panel: {
         id: 3,
-        title: 'Distribution',
+        title: strings.getDistributionMenuItemLabel(),
         items: [
           {
-            name: 'Horizontal',
+            name: strings.getHorizontalDistributionMenuItemLabel(),
             icon: 'editorDistributeHorizontal',
             onClick: close(distributeHorizontally),
           },
           {
-            name: 'Vertical',
+            name: strings.getVerticalDistributionMenuItemLabel(),
             icon: 'editorDistributeVertical',
             onClick: close(distributeVertically),
           },
@@ -382,7 +394,7 @@ export class SidebarHeader extends Component<Props, State> {
     return groupIsSelected
       ? [
           {
-            name: 'Ungroup',
+            name: strings.getUngroupMenuItemLabel(),
             className: topBorderClassName,
             onClick: close(ungroupNodes),
           },
@@ -390,7 +402,7 @@ export class SidebarHeader extends Component<Props, State> {
       : selectedNodes.length > 1
       ? [
           {
-            name: 'Group',
+            name: strings.getGroupMenuItemLabel(),
             className: topBorderClassName,
             onClick: close(groupNodes),
           },
@@ -416,27 +428,27 @@ export class SidebarHeader extends Component<Props, State> {
 
     const items: EuiContextMenuPanelItemDescriptor[] = [
       {
-        name: 'Cut',
+        name: shortcutHelp.CUT,
         icon: 'cut',
         onClick: close(cutNodes),
       },
       {
-        name: 'Copy',
+        name: shortcutHelp.COPY,
         icon: 'copy',
         onClick: copyNodes,
       },
       {
-        name: 'Paste', // TODO: can this be disabled if clipboard is empty?
+        name: shortcutHelp.PASTE, // TODO: can this be disabled if clipboard is empty?
         icon: 'copyClipboard',
         onClick: close(pasteNodes),
       },
       {
-        name: 'Delete',
+        name: shortcutHelp.DELETE,
         icon: 'trash',
         onClick: close(deleteNodes),
       },
       {
-        name: 'Clone',
+        name: shortcutHelp.CLONE,
         onClick: close(cloneNodes),
       },
       ...this._getGroupMenuItems(close),
@@ -445,7 +457,7 @@ export class SidebarHeader extends Component<Props, State> {
     const panels: EuiContextMenuPanelDescriptor[] = [
       {
         id: 0,
-        title: 'Element options',
+        title: strings.getContextMenuTitle(),
         items,
       },
     ];
@@ -468,7 +480,7 @@ export class SidebarHeader extends Component<Props, State> {
     }
 
     items.push({
-      name: 'Save as new element',
+      name: strings.getSaveElementMenuItemLabel(),
       icon: 'indexOpen',
       className: topBorderClassName,
       onClick: this._showModal,
@@ -483,7 +495,7 @@ export class SidebarHeader extends Component<Props, State> {
       className="canvasContextMenu"
       button={contextMenuButton}
       panelPaddingSize="none"
-      tooltip="Element options"
+      tooltip={strings.getContextMenuTitle()}
       tooltipPosition="bottom"
     >
       {({ closePopover }: { closePopover: () => void }) => (
@@ -519,12 +531,12 @@ export class SidebarHeader extends Component<Props, State> {
             <EuiFlexGroup alignItems="center" gutterSize="none">
               {showLayerControls ? this._renderLayoutControls() : null}
               <EuiFlexItem grow={false}>
-                <EuiToolTip position="bottom" content="Save as new element">
+                <EuiToolTip position="bottom" content={strings.getSaveElementMenuItemLabel()}>
                   <EuiButtonIcon
                     color="text"
                     iconType="indexOpen"
                     onClick={this._showModal}
-                    aria-label="Save as new element"
+                    aria-label={strings.getSaveElementMenuItemLabel()}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
@@ -535,7 +547,7 @@ export class SidebarHeader extends Component<Props, State> {
         {isModalVisible ? (
           <EuiOverlayMask>
             <CustomElementModal
-              title="Create new element"
+              title={strings.getCreateElementModalTitle()}
               onSave={this._handleSave}
               onCancel={this._hideModal}
             />

@@ -48,7 +48,7 @@ export class NotificationsService {
   public setup({ uiSettings }: SetupDeps): NotificationsSetup {
     const notificationSetup = { toasts: this.toasts.setup({ uiSettings }) };
 
-    this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe(error => {
+    this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe((error: Error) => {
       notificationSetup.toasts.addDanger({
         title: i18n.translate('core.notifications.unableUpdateUISettingNotificationMessageTitle', {
           defaultMessage: 'Unable to update UI setting',
@@ -85,10 +85,12 @@ export class NotificationsService {
 
 /** @public */
 export interface NotificationsSetup {
+  /** {@link ToastsSetup} */
   toasts: ToastsSetup;
 }
 
 /** @public */
 export interface NotificationsStart {
+  /** {@link ToastsStart} */
   toasts: ToastsStart;
 }

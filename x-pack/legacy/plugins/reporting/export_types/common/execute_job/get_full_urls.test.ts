@@ -25,6 +25,107 @@ test(`fails if no URL is passed`, async () => {
   );
 });
 
+test(`fails if URLs are file-protocols for PNGs`, async () => {
+  const forceNow = '2000-01-01T00:00:00.000Z';
+  const relativeUrl = 'file://etc/passwd/#/something';
+  await expect(
+    getFullUrls({
+      job: {
+        relativeUrl,
+        forceNow,
+      } as JobDocPayloadPNG,
+      server: mockServer,
+    })
+  ).rejects.toMatchInlineSnapshot(
+    `[Error: Found invalid URL(s), all URLs must be relative: ${relativeUrl}]`
+  );
+});
+
+test(`fails if URLs are absolute for PNGs`, async () => {
+  const forceNow = '2000-01-01T00:00:00.000Z';
+  const relativeUrl =
+    'http://169.254.169.254/latest/meta-data/iam/security-credentials/profileName/#/something';
+  await expect(
+    getFullUrls({
+      job: {
+        relativeUrl,
+        forceNow,
+      } as JobDocPayloadPNG,
+      server: mockServer,
+    })
+  ).rejects.toMatchInlineSnapshot(
+    `[Error: Found invalid URL(s), all URLs must be relative: ${relativeUrl}]`
+  );
+});
+
+test(`fails if URLs are file-protocols for PDF`, async () => {
+  const forceNow = '2000-01-01T00:00:00.000Z';
+  const relativeUrl = 'file://etc/passwd/#/something';
+  await expect(
+    getFullUrls({
+      job: {
+        objects: [
+          {
+            relativeUrl,
+          },
+        ],
+        forceNow,
+      } as JobDocPayloadPDF,
+      server: mockServer,
+    })
+  ).rejects.toMatchInlineSnapshot(
+    `[Error: Found invalid URL(s), all URLs must be relative: ${relativeUrl}]`
+  );
+});
+
+test(`fails if URLs are absolute for PDF`, async () => {
+  const forceNow = '2000-01-01T00:00:00.000Z';
+  const relativeUrl =
+    'http://169.254.169.254/latest/meta-data/iam/security-credentials/profileName/#/something';
+  await expect(
+    getFullUrls({
+      job: {
+        objects: [
+          {
+            relativeUrl,
+          },
+        ],
+        forceNow,
+      } as JobDocPayloadPDF,
+      server: mockServer,
+    })
+  ).rejects.toMatchInlineSnapshot(
+    `[Error: Found invalid URL(s), all URLs must be relative: ${relativeUrl}]`
+  );
+});
+
+test(`fails if any URLs are absolute or file's for PDF`, async () => {
+  const forceNow = '2000-01-01T00:00:00.000Z';
+  const objects = [
+    {
+      relativeUrl: '/app/kibana#/something_aaa',
+    },
+    {
+      relativeUrl:
+        'http://169.254.169.254/latest/meta-data/iam/security-credentials/profileName/#/something',
+    },
+    {
+      relativeUrl: 'file://etc/passwd/#/something',
+    },
+  ];
+  await expect(
+    getFullUrls({
+      job: {
+        objects,
+        forceNow,
+      } as JobDocPayloadPDF,
+      server: mockServer,
+    })
+  ).rejects.toMatchInlineSnapshot(
+    `[Error: Found invalid URL(s), all URLs must be relative: ${objects[1].relativeUrl} ${objects[2].relativeUrl}]`
+  );
+});
+
 test(`fails if URL does not route to a visualization`, async () => {
   await expect(
     getFullUrls({

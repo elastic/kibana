@@ -21,13 +21,19 @@ describe('MonitoringViewBaseController', function () {
   let opts;
   let titleService;
   let executorService;
+  let configService;
   const httpCall = (ms) => new Promise((resolve) => setTimeout(() => resolve(), ms));
 
   before(() => {
     titleService = spy();
     executorService = {
       register: spy(),
-      start: spy()
+      start: spy(),
+      cancel: spy(),
+      run: spy()
+    };
+    configService = {
+      get: spy()
     };
 
     const windowMock = () => {
@@ -47,6 +53,7 @@ describe('MonitoringViewBaseController', function () {
     injectorGetStub.withArgs('$executor').returns(executorService);
     injectorGetStub.withArgs('localStorage').throws('localStorage should not be used by this class');
     injectorGetStub.withArgs('$window').returns(windowMock());
+    injectorGetStub.withArgs('config').returns(configService);
     $injector = { get: injectorGetStub };
 
     $scope = {

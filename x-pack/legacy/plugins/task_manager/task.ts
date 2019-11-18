@@ -11,6 +11,20 @@ import Joi from 'joi';
  */
 
 /**
+ * Require
+ * @desc Create a Subtype of type T `T` such that the property under key `P` becomes required
+ * @example
+ *    type TaskInstance = {
+ *      id?: string;
+ *      name: string;
+ *    };
+ *
+ *    // This type is now defined as { id: string; name: string; }
+ *    type TaskInstanceWithId = Require<TaskInstance, 'id'>;
+ */
+type Require<T extends object, P extends keyof T> = Omit<T, P> & Required<Pick<T, P>>;
+
+/**
  * A loosely typed definition of the elasticjs wrapper. It's beyond the scope
  * of this work to try to make a comprehensive type definition of this.
  */
@@ -136,7 +150,7 @@ export interface TaskDictionary<T extends TaskDefinition> {
   [taskType: string]: T;
 }
 
-export type TaskStatus = 'idle' | 'running' | 'failed';
+export type TaskStatus = 'idle' | 'claiming' | 'running' | 'failed';
 
 /*
  * A task instance represents all of the data required to store, fetch,
@@ -209,7 +223,17 @@ export interface TaskInstance {
    * and then query such tasks to provide a glimpse at only reporting tasks, rather than at all tasks.
    */
   scope?: string[];
+
+  /**
+   * The random uuid of the Kibana instance which claimed ownership of the task last
+   */
+  ownerId?: string | null;
 }
+
+/**
+ * A task instance that has an id.
+ */
+export type TaskInstanceWithId = Require<TaskInstance, 'id'>;
 
 /**
  * A task instance that has an id and is ready for storage.
@@ -268,4 +292,9 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * any state, this will be the empy object: {}
    */
   state: Record<string, any>;
+
+  /**
+   * The random uuid of the Kibana instance which claimed ownership of the task last
+   */
+  ownerId: string | null;
 }

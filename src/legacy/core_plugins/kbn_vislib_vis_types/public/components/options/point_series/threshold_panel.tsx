@@ -21,11 +21,16 @@ import { EuiPanel, EuiTitle, EuiColorPicker, EuiFormRow, EuiSpacer } from '@elas
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from 'ui/vis/editors/default';
-import { NumberInputOption, SelectOption, SwitchOption } from '../../common';
+import { SelectOption, SwitchOption, ValidationVisOptionsProps } from '../../common';
+import { NumberInputOption } from '../../common/required_number_input';
 import { BasicVislibParams } from '../../../types';
 
-function ThresholdPanel({ stateParams, setValue, vis }: VisOptionsProps<BasicVislibParams>) {
+function ThresholdPanel({
+  stateParams,
+  setValue,
+  setMultipleValidity,
+  vis,
+}: ValidationVisOptionsProps<BasicVislibParams>) {
   const setThresholdLine = useCallback(
     <T extends keyof BasicVislibParams['thresholdLine']>(
       paramName: T,
@@ -39,15 +44,21 @@ function ThresholdPanel({ stateParams, setValue, vis }: VisOptionsProps<BasicVis
     [setThresholdLine]
   );
 
+  const setThresholdLineValidity = useCallback(
+    (paramName: keyof BasicVislibParams['thresholdLine'], isValid: boolean) =>
+      setMultipleValidity(`thresholdLine__${paramName}`, isValid),
+    [setMultipleValidity]
+  );
+
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
-        <h2>
+        <h3>
           <FormattedMessage
             id="kbnVislibVisTypes.editors.pointSeries.thresholdLineSettingsTitle"
             defaultMessage="Threshold line"
           />
-        </h2>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
 
@@ -72,6 +83,7 @@ function ThresholdPanel({ stateParams, setValue, vis }: VisOptionsProps<BasicVis
             paramName="value"
             value={stateParams.thresholdLine.value}
             setValue={setThresholdLine}
+            setValidity={setThresholdLineValidity}
           />
 
           <NumberInputOption
@@ -86,6 +98,7 @@ function ThresholdPanel({ stateParams, setValue, vis }: VisOptionsProps<BasicVis
             step={1}
             value={stateParams.thresholdLine.width}
             setValue={setThresholdLine}
+            setValidity={setThresholdLineValidity}
           />
 
           <SelectOption

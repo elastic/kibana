@@ -8,8 +8,9 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonIcon, EuiButtonEmpty, EuiPanel, EuiSpacer, EuiTextAlign } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, EuiTextAlign } from '@elastic/eui';
 import { MetricEditor } from './metric_editor';
+import { METRIC_TYPE } from '../../common/constants';
 
 export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics, metricsFilter }) {
   function renderMetrics() {
@@ -25,23 +26,26 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
       let removeButton;
       if (index > 0) {
         removeButton = (
-          <EuiButtonIcon
-            iconType="trash"
-            size="s"
-            iconSize="s"
-            color="danger"
-            aria-label={i18n.translate('xpack.maps.metricsEditor.deleteMetricAriaLabel', {
-              defaultMessage: 'Delete metric',
-            })}
-            title={i18n.translate('xpack.maps.metricsEditor.deleteMetricButtonLabel', {
-              defaultMessage: 'Delete metric',
-            })}
-            onClick={onRemove}
-          />
+          <div className="mapMetricEditorPanel__metricRemoveButton">
+            <EuiButtonEmpty
+              iconType="trash"
+              size="xs"
+              color="danger"
+              onClick={onRemove}
+              aria-label={i18n.translate('xpack.maps.metricsEditor.deleteMetricAriaLabel', {
+                defaultMessage: 'Delete metric',
+              })}
+            >
+              <FormattedMessage
+                id="xpack.maps.metricsEditor.deleteMetricButtonLabel"
+                defaultMessage="Delete metric"
+              />
+            </EuiButtonEmpty>
+          </div>
         );
       }
       return (
-        <EuiPanel key={index} className="mapMetricEditorPanel" paddingSize="s">
+        <div key={index} className="mapMetricEditorPanel__metricEditor">
           <MetricEditor
             onChange={onMetricChange}
             metric={metric}
@@ -49,7 +53,7 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
             metricsFilter={metricsFilter}
             removeButton={removeButton}
           />
-        </EuiPanel>
+        </div>
       );
     });
   }
@@ -80,7 +84,7 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
 
   return (
     <Fragment>
-      {renderMetrics()}
+      <div className="mapMapLayerPanel__metrics">{renderMetrics()}</div>
 
       {renderAddMetricButton()}
     </Fragment>
@@ -89,13 +93,13 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
 
 MetricsEditor.propTypes = {
   metrics: PropTypes.array,
-  fields: PropTypes.object, // indexPattern.fields IndexedArray object
+  fields: PropTypes.array,
   onChange: PropTypes.func.isRequired,
   allowMultipleMetrics: PropTypes.bool,
   metricsFilter: PropTypes.func,
 };
 
 MetricsEditor.defaultProps = {
-  metrics: [{ type: 'count' }],
+  metrics: [{ type: METRIC_TYPE.COUNT }],
   allowMultipleMetrics: true,
 };

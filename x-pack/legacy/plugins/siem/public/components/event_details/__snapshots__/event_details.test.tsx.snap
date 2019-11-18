@@ -367,6 +367,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
               "format": "",
               "indexes": Array [
                 "auditbeat-*",
+                "endgame-*",
                 "filebeat-*",
                 "packetbeat-*",
                 "winlogbeat-*",

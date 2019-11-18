@@ -7,18 +7,20 @@
 import dateMath from '@elastic/datemath';
 import {
   EuiSuperDatePicker,
-  EuiSuperDatePickerProps,
   OnRefreshChangeProps,
+  EuiSuperDatePickerRecentRange,
   OnRefreshProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import { getOr, take } from 'lodash/fp';
-import React, { Component } from 'react';
+import { getOr, take, isEmpty } from 'lodash/fp';
+import React, { useState, useCallback } from 'react';
 import { connect } from 'react-redux';
-
 import { Dispatch } from 'redux';
+
+import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../common/constants';
+import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { inputsModel, State } from '../../store';
-import { inputsActions, timelineActions, hostsActions, networkActions } from '../../store/actions';
+import { inputsActions, timelineActions } from '../../store/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import {
   policySelector,
@@ -36,33 +38,17 @@ import { InputsRange, Policy } from '../../store/inputs/model';
 
 const MAX_RECENTLY_USED_RANGES = 9;
 
-type MyEuiSuperDatePickerProps = Pick<
-  EuiSuperDatePickerProps,
-  | 'end'
-  | 'isPaused'
-  | 'onTimeChange'
-  | 'onRefreshChange'
-  | 'onRefresh'
-  | 'recentlyUsedRanges'
-  | 'refreshInterval'
-  | 'showUpdateButton'
-  | 'start'
-> & {
-  isLoading?: boolean;
-};
-const MyEuiSuperDatePicker: React.SFC<MyEuiSuperDatePickerProps> = EuiSuperDatePicker;
-
 interface SuperDatePickerStateRedux {
   duration: number;
-  policy: Policy['kind'];
-  kind: string;
-  fromStr: string;
-  toStr: string;
-  start: number;
   end: number;
+  fromStr: string;
   isLoading: boolean;
-  queries: inputsModel.GlobalGraphqlQuery[];
+  kind: string;
   kqlQuery: inputsModel.GlobalKqlQuery;
+  policy: Policy['kind'];
+  queries: inputsModel.GlobalGraphqlQuery[];
+  start: number;
+  toStr: string;
 }
 
 interface UpdateReduxTime extends OnTimeChangeProps {
@@ -72,10 +58,10 @@ interface UpdateReduxTime extends OnTimeChangeProps {
 }
 
 interface ReturnUpdateReduxTime {
-  kqlHasBeenUpdated: boolean;
+  kqlHaveBeenUpdated: boolean;
 }
 
-type DispatchUpdateReduxTime = ({
+export type DispatchUpdateReduxTime = ({
   end,
   id,
   isQuickSelection,
@@ -85,147 +71,159 @@ type DispatchUpdateReduxTime = ({
 }: UpdateReduxTime) => ReturnUpdateReduxTime;
 
 interface SuperDatePickerDispatchProps {
+  setDuration: ({ id, duration }: { id: InputsModelId; duration: number }) => void;
   startAutoReload: ({ id }: { id: InputsModelId }) => void;
   stopAutoReload: ({ id }: { id: InputsModelId }) => void;
-  setDuration: ({ id, duration }: { id: InputsModelId; duration: number }) => void;
   updateReduxTime: DispatchUpdateReduxTime;
 }
 
 interface OwnProps {
-  id: InputsModelId;
   disabled?: boolean;
+  id: InputsModelId;
   timelineId?: string;
-}
-
-interface TimeArgs {
-  start: string;
-  end: string;
 }
 
 export type SuperDatePickerProps = OwnProps &
   SuperDatePickerDispatchProps &
   SuperDatePickerStateRedux;
 
-export interface SuperDatePickerState {
-  isQuickSelection: boolean;
-  recentlyUsedRanges: TimeArgs[];
-  showUpdateButton: boolean;
-}
+export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
+  ({
+    duration,
+    end,
+    fromStr,
+    id,
+    isLoading,
+    kind,
+    kqlQuery,
+    policy,
+    queries,
+    setDuration,
+    start,
+    startAutoReload,
+    stopAutoReload,
+    timelineId,
+    toStr,
+    updateReduxTime,
+  }) => {
+    const [isQuickSelection, setIsQuickSelection] = useState(true);
+    const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<EuiSuperDatePickerRecentRange[]>(
+      []
+    );
+    const onRefresh = useCallback(
+      ({ start: newStart, end: newEnd }: OnRefreshProps): void => {
+        const { kqlHaveBeenUpdated } = updateReduxTime({
+          end: newEnd,
+          id,
+          isInvalid: false,
+          isQuickSelection,
+          kql: kqlQuery,
+          start: newStart,
+          timelineId,
+        });
+        const currentStart = formatDate(newStart);
+        const currentEnd = isQuickSelection
+          ? formatDate(newEnd, { roundUp: true })
+          : formatDate(newEnd);
+        if (
+          !kqlHaveBeenUpdated &&
+          (!isQuickSelection || (start === currentStart && end === currentEnd))
+        ) {
+          refetchQuery(queries);
+        }
+      },
+      [end, id, isQuickSelection, kqlQuery, start, timelineId]
+    );
 
-export const SuperDatePickerComponent = class extends Component<
-  SuperDatePickerProps,
-  SuperDatePickerState
-> {
-  constructor(props: SuperDatePickerProps) {
-    super(props);
+    const onRefreshChange = useCallback(
+      ({ isPaused, refreshInterval }: OnRefreshChangeProps): void => {
+        if (duration !== refreshInterval) {
+          setDuration({ id, duration: refreshInterval });
+        }
 
-    this.state = {
-      isQuickSelection: true,
-      recentlyUsedRanges: [],
-      showUpdateButton: true,
+        if (isPaused && policy === 'interval') {
+          stopAutoReload({ id });
+        } else if (!isPaused && policy === 'manual') {
+          startAutoReload({ id });
+        }
+
+        if (!isPaused && (!isQuickSelection || (isQuickSelection && toStr !== 'now'))) {
+          refetchQuery(queries);
+        }
+      },
+      [id, isQuickSelection, duration, policy, toStr]
+    );
+
+    const refetchQuery = (newQueries: inputsModel.GlobalGraphqlQuery[]) => {
+      newQueries.forEach(q => q.refetch && (q.refetch as inputsModel.Refetch)());
     };
-  }
 
-  public render() {
-    const { duration, end, start, kind, fromStr, policy, toStr, isLoading } = this.props;
+    const onTimeChange = useCallback(
+      ({
+        start: newStart,
+        end: newEnd,
+        isQuickSelection: newIsQuickSelection,
+        isInvalid,
+      }: OnTimeChangeProps) => {
+        if (!isInvalid) {
+          updateReduxTime({
+            end: newEnd,
+            id,
+            isInvalid,
+            isQuickSelection: newIsQuickSelection,
+            kql: kqlQuery,
+            start: newStart,
+            timelineId,
+          });
+          const newRecentlyUsedRanges = [
+            { start: newStart, end: newEnd },
+            ...take(
+              MAX_RECENTLY_USED_RANGES,
+              recentlyUsedRanges.filter(
+                recentlyUsedRange =>
+                  !(recentlyUsedRange.start === newStart && recentlyUsedRange.end === newEnd)
+              )
+            ),
+          ];
+
+          setRecentlyUsedRanges(newRecentlyUsedRanges);
+          setIsQuickSelection(newIsQuickSelection);
+        }
+      },
+      [recentlyUsedRanges, kqlQuery]
+    );
+
     const endDate = kind === 'relative' ? toStr : new Date(end).toISOString();
     const startDate = kind === 'relative' ? fromStr : new Date(start).toISOString();
 
+    const [quickRanges] = useKibanaUiSetting(DEFAULT_TIMEPICKER_QUICK_RANGES);
+    const commonlyUsedRanges = isEmpty(quickRanges)
+      ? []
+      : quickRanges.map(({ from, to, display }: { from: string; to: string; display: string }) => ({
+          start: from,
+          end: to,
+          label: display,
+        }));
+
     return (
-      <MyEuiSuperDatePicker
+      <EuiSuperDatePicker
+        commonlyUsedRanges={commonlyUsedRanges}
         end={endDate}
         isLoading={isLoading}
         isPaused={policy === 'manual'}
-        onTimeChange={this.onTimeChange}
-        onRefreshChange={this.onRefreshChange}
-        onRefresh={this.onRefresh}
-        recentlyUsedRanges={this.state.recentlyUsedRanges}
+        onRefresh={onRefresh}
+        onRefreshChange={onRefreshChange}
+        onTimeChange={onTimeChange}
+        recentlyUsedRanges={recentlyUsedRanges}
         refreshInterval={duration}
-        showUpdateButton={this.state.showUpdateButton}
+        showUpdateButton={true}
         start={startDate}
       />
     );
   }
-  private onRefresh = ({ start, end }: OnRefreshProps): void => {
-    const { kqlHasBeenUpdated } = this.props.updateReduxTime({
-      end,
-      id: this.props.id,
-      isInvalid: false,
-      isQuickSelection: this.state.isQuickSelection,
-      kql: this.props.kqlQuery,
-      start,
-      timelineId: this.props.timelineId,
-    });
-    const currentStart = formatDate(start);
-    const currentEnd = this.state.isQuickSelection
-      ? formatDate(end, { roundUp: true })
-      : formatDate(end);
-    if (
-      !kqlHasBeenUpdated &&
-      (!this.state.isQuickSelection ||
-        (this.props.start === currentStart && this.props.end === currentEnd))
-    ) {
-      this.refetchQuery(this.props.queries);
-    }
-  };
+);
 
-  private onRefreshChange = ({ isPaused, refreshInterval }: OnRefreshChangeProps): void => {
-    const { id, duration, policy, stopAutoReload, startAutoReload } = this.props;
-    if (duration !== refreshInterval) {
-      this.props.setDuration({ id, duration: refreshInterval });
-    }
-
-    if (isPaused && policy === 'interval') {
-      stopAutoReload({ id });
-    } else if (!isPaused && policy === 'manual') {
-      startAutoReload({ id });
-    }
-
-    if (
-      !isPaused &&
-      (!this.state.isQuickSelection || (this.state.isQuickSelection && this.props.toStr !== 'now'))
-    ) {
-      this.refetchQuery(this.props.queries);
-    }
-  };
-
-  private refetchQuery = (queries: inputsModel.GlobalGraphqlQuery[]) => {
-    queries.forEach(q => q.refetch && (q.refetch as inputsModel.Refetch)());
-  };
-
-  private onTimeChange = ({ start, end, isQuickSelection, isInvalid }: OnTimeChangeProps) => {
-    if (!isInvalid) {
-      this.props.updateReduxTime({
-        end,
-        id: this.props.id,
-        isInvalid,
-        isQuickSelection,
-        kql: this.props.kqlQuery,
-        start,
-        timelineId: this.props.timelineId,
-      });
-      this.setState((prevState: SuperDatePickerState) => {
-        const recentlyUsedRanges = [
-          { start, end },
-          ...take(
-            MAX_RECENTLY_USED_RANGES,
-            prevState.recentlyUsedRanges.filter(
-              recentlyUsedRange =>
-                !(recentlyUsedRange.start === start && recentlyUsedRange.end === end)
-            )
-          ),
-        ];
-
-        return {
-          recentlyUsedRanges,
-          isQuickSelection,
-        };
-      });
-    }
-  };
-};
-
-const formatDate = (
+export const formatDate = (
   date: string,
   options?: {
     roundUp?: boolean;
@@ -235,7 +233,7 @@ const formatDate = (
   return momentDate != null && momentDate.isValid() ? momentDate.valueOf() : 0;
 };
 
-const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({
+export const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({
   end,
   id,
   isQuickSelection,
@@ -274,50 +272,46 @@ const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({
       })
     );
   }
-
-  let kqlHasBeenUpdated = false;
   if (kql) {
-    // if refetch is successful, it will have a side effect
-    // to set all the tables on its activePage to zero (meaning pagination)
-    kqlHasBeenUpdated = kql.refetch(dispatch);
-  }
-  if (!kqlHasBeenUpdated) {
-    // Date picker is global to all the page in the app
-    // (Hosts/Network are the only one having tables)
-    dispatch(hostsActions.setHostTablesActivePageToZero());
-    dispatch(networkActions.setNetworkTablesActivePageToZero());
+    return {
+      kqlHaveBeenUpdated: kql.refetch(dispatch),
+    };
   }
 
-  return { kqlHasBeenUpdated };
+  return {
+    kqlHaveBeenUpdated: false,
+  };
 };
 
 export const makeMapStateToProps = () => {
-  const getPolicySelector = policySelector();
   const getDurationSelector = durationSelector();
-  const getKindSelector = kindSelector();
-  const getStartSelector = startSelector();
   const getEndSelector = endSelector();
   const getFromStrSelector = fromStrSelector();
-  const getToStrSelector = toStrSelector();
   const getIsLoadingSelector = isLoadingSelector();
-  const getQueriesSelector = queriesSelector();
+  const getKindSelector = kindSelector();
   const getKqlQuerySelector = kqlQuerySelector();
+  const getPolicySelector = policySelector();
+  const getQueriesSelector = queriesSelector();
+  const getStartSelector = startSelector();
+  const getToStrSelector = toStrSelector();
   return (state: State, { id }: OwnProps) => {
     const inputsRange: InputsRange = getOr({}, `inputs.${id}`, state);
     return {
-      policy: getPolicySelector(inputsRange),
       duration: getDurationSelector(inputsRange),
-      kind: getKindSelector(inputsRange),
-      start: getStartSelector(inputsRange),
       end: getEndSelector(inputsRange),
       fromStr: getFromStrSelector(inputsRange),
-      toStr: getToStrSelector(inputsRange),
       isLoading: getIsLoadingSelector(inputsRange),
-      queries: getQueriesSelector(inputsRange),
+      kind: getKindSelector(inputsRange),
       kqlQuery: getKqlQuerySelector(inputsRange),
+      policy: getPolicySelector(inputsRange),
+      queries: getQueriesSelector(inputsRange),
+      start: getStartSelector(inputsRange),
+      toStr: getToStrSelector(inputsRange),
     };
   };
 };
+
+SuperDatePickerComponent.displayName = 'SuperDatePickerComponent';
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   startAutoReload: ({ id }: { id: InputsModelId }) =>

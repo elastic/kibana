@@ -5,195 +5,81 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React from 'react';
-import { compose } from 'redux';
+import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 
 import { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
-import { CONSTANTS } from '../url_state/constants';
-import {
-  inputsSelectors,
-  hostsSelectors,
-  networkSelectors,
-  timelineSelectors,
-  State,
-  hostsModel,
-  networkModel,
-} from '../../store';
-
+import { makeMapStateToProps } from '../url_state/helpers';
 import { setBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
 import { TabNavigationProps } from './tab_navigation/types';
 import { SiemNavigationComponentProps } from './types';
 
-export class SiemNavigationComponent extends React.Component<TabNavigationProps & RouteSpyState> {
-  public shouldComponentUpdate(nextProps: Readonly<TabNavigationProps & RouteSpyState>): boolean {
-    if (
-      this.props.pathName === nextProps.pathName &&
-      this.props.search === nextProps.search &&
-      isEqual(this.props.hosts, nextProps.hosts) &&
-      isEqual(this.props.hostDetails, nextProps.hostDetails) &&
-      isEqual(this.props.network, nextProps.network) &&
-      isEqual(this.props.navTabs, nextProps.navTabs) &&
-      isEqual(this.props.timerange, nextProps.timerange) &&
-      isEqual(this.props.timelineId, nextProps.timelineId)
-    ) {
-      return false;
-    }
-    return true;
-  }
-
-  public componentWillMount(): void {
-    const {
-      detailName,
-      hosts,
-      hostDetails,
-      navTabs,
-      network,
-      pageName,
-      pathName,
-      search,
-      tabName,
-      timerange,
-      timelineId,
-    } = this.props;
-    if (pathName) {
-      setBreadcrumbs({
-        detailName,
-        hosts,
-        hostDetails,
-        navTabs,
-        network,
-        pageName,
-        pathName,
-        search,
-        tabName,
-        timerange,
-        timelineId,
-      });
-    }
-  }
-
-  public componentWillReceiveProps(nextProps: Readonly<RouteSpyState & TabNavigationProps>): void {
-    if (
-      this.props.pathName !== nextProps.pathName ||
-      this.props.search !== nextProps.search ||
-      !isEqual(this.props.hosts, nextProps.hosts) ||
-      !isEqual(this.props.hostDetails, nextProps.hostDetails) ||
-      !isEqual(this.props.network, nextProps.network) ||
-      !isEqual(this.props.navTabs, nextProps.navTabs) ||
-      !isEqual(this.props.timerange, nextProps.timerange) ||
-      !isEqual(this.props.timelineId, nextProps.timelineId)
-    ) {
-      const {
-        detailName,
-        hosts,
-        hostDetails,
-        navTabs,
-        network,
-        pageName,
-        pathName,
-        search,
-        tabName,
-        timelineId,
-        timerange,
-      } = nextProps;
+export const SiemNavigationComponent = React.memo<TabNavigationProps & RouteSpyState>(
+  ({
+    query,
+    detailName,
+    display,
+    filters,
+    navTabs,
+    pageName,
+    pathName,
+    savedQuery,
+    search,
+    tabName,
+    timeline,
+    timerange,
+  }) => {
+    useEffect(() => {
       if (pathName) {
         setBreadcrumbs({
+          query,
           detailName,
-          hosts,
-          hostDetails,
+          filters,
           navTabs,
-          network,
           pageName,
           pathName,
+          savedQuery,
           search,
           tabName,
           timerange,
-          timelineId,
+          timeline,
         });
       }
-    }
-  }
+    }, [query, pathName, search, filters, navTabs, savedQuery, timerange, timeline]);
 
-  public render() {
-    const {
-      display,
-      hostDetails,
-      hosts,
-      navTabs,
-      network,
-      pageName,
-      pathName,
-      showBorder,
-      tabName,
-      timelineId,
-      timerange,
-    } = this.props;
     return (
       <TabNavigation
+        query={query}
         display={display}
-        hosts={hosts}
-        hostDetails={hostDetails}
+        filters={filters}
         navTabs={navTabs}
-        network={network}
         pageName={pageName}
         pathName={pathName}
-        showBorder={showBorder}
+        savedQuery={savedQuery}
         tabName={tabName}
-        timelineId={timelineId}
+        timeline={timeline}
         timerange={timerange}
       />
     );
-  }
-}
-
-const makeMapStateToProps = () => {
-  const getInputsSelector = inputsSelectors.inputsSelector();
-  const getHostsFilterQueryAsKuery = hostsSelectors.hostsFilterQueryAsKuery();
-  const getNetworkFilterQueryAsKuery = networkSelectors.networkFilterQueryAsKuery();
-  const getTimelines = timelineSelectors.getTimelines();
-  const mapStateToProps = (state: State) => {
-    const inputState = getInputsSelector(state);
-    const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
-    const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
-
-    const openTimelineId = Object.entries(getTimelines(state)).reduce(
-      (useTimelineId, [timelineId, timelineObj]) =>
-        timelineObj.savedObjectId != null ? timelineObj.savedObjectId : useTimelineId,
-      ''
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.pathName === nextProps.pathName &&
+      prevProps.search === nextProps.search &&
+      prevProps.savedQuery === nextProps.savedQuery &&
+      isEqual(prevProps.query, nextProps.query) &&
+      isEqual(prevProps.filters, nextProps.filters) &&
+      isEqual(prevProps.navTabs, nextProps.navTabs) &&
+      isEqual(prevProps.timerange, nextProps.timerange) &&
+      isEqual(prevProps.timeline, nextProps.timeline)
     );
+  }
+);
 
-    return {
-      hosts: {
-        filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.page),
-        queryLocation: CONSTANTS.hostsPage,
-      },
-      hostDetails: {
-        filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.details),
-        queryLocation: CONSTANTS.hostsDetails,
-      },
-      network: {
-        filterQuery: getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.page),
-        queryLocation: CONSTANTS.networkPage,
-      },
-      [CONSTANTS.timerange]: {
-        global: {
-          [CONSTANTS.timerange]: globalTimerange,
-          linkTo: globalLinkTo,
-        },
-        timeline: {
-          [CONSTANTS.timerange]: timelineTimerange,
-          linkTo: timelineLinkTo,
-        },
-      },
-      [CONSTANTS.timelineId]: openTimelineId,
-    };
-  };
-
-  return mapStateToProps;
-};
+SiemNavigationComponent.displayName = 'SiemNavigationComponent';
 
 export const SiemNavigationRedux = compose<
   React.ComponentClass<SiemNavigationComponentProps & RouteSpyState>

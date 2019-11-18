@@ -11,7 +11,7 @@ import { canRedirectRequest, wrapError, OIDCAuthenticationFlow } from '../../../
 import { KibanaRequest } from '../../../../../../../../src/core/server';
 import { createCSPRuleString } from '../../../../../../../../src/legacy/server/csp';
 
-export function initAuthenticateApi({ authc: { login, logout }, config }, server) {
+export function initAuthenticateApi({ authc: { login, logout }, __legacyCompat: { config } }, server) {
   function prepareCustomResourceResponse(response, contentType) {
     return response
       .header('cache-control', 'private, no-cache, no-store')
@@ -54,37 +54,6 @@ export function initAuthenticateApi({ authc: { login, logout }, config }, server
         return h.response();
       } catch(err) {
         throw wrapError(err);
-      }
-    }
-  });
-
-  server.route({
-    method: 'POST',
-    path: '/api/security/v1/saml',
-    config: {
-      auth: false,
-      validate: {
-        payload: Joi.object({
-          SAMLResponse: Joi.string().required(),
-          RelayState: Joi.string().allow('')
-        })
-      }
-    },
-    async handler(request, h) {
-      try {
-        // When authenticating using SAML we _expect_ to redirect to the SAML Identity provider.
-        const authenticationResult = await login(KibanaRequest.from(request), {
-          provider: 'saml',
-          value: { samlResponse: request.payload.SAMLResponse }
-        });
-
-        if (authenticationResult.redirected()) {
-          return h.redirect(authenticationResult.redirectURL);
-        }
-
-        return Boom.unauthorized(authenticationResult.error);
-      } catch (err) {
-        return wrapError(err);
       }
     }
   });

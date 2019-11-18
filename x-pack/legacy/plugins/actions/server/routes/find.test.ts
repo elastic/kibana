@@ -5,10 +5,10 @@
  */
 
 import { createMockServer } from './_mock_server';
-import { findRoute } from './find';
+import { findActionRoute } from './find';
 
 const { server, actionsClient } = createMockServer();
-findRoute(server);
+server.route(findActionRoute);
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -41,23 +41,24 @@ it('sends proper arguments to action find function', async () => {
   expect(response).toEqual(expectedResult);
   expect(actionsClient.find).toHaveBeenCalledTimes(1);
   expect(actionsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "options": Object {
-      "defaultSearchOperator": "AND",
-      "fields": Array [
-        "description",
-      ],
-      "hasReference": undefined,
-      "page": 1,
-      "perPage": 1,
-      "search": "text*",
-      "searchFields": Array [
-        "description",
-      ],
-      "sortField": "description",
-    },
-  },
-]
-`);
+    Array [
+      Object {
+        "options": Object {
+          "defaultSearchOperator": "AND",
+          "fields": Array [
+            "description",
+          ],
+          "filter": undefined,
+          "hasReference": undefined,
+          "page": 1,
+          "perPage": 1,
+          "search": "text*",
+          "searchFields": Array [
+            "description",
+          ],
+          "sortField": "description",
+        },
+      },
+    ]
+  `);
 });

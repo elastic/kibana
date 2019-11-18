@@ -21,25 +21,24 @@ import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from 'ui/vis/editors/default';
-import { BasicOptions, SwitchOption } from '../../common';
+import { BasicOptions, SwitchOption, ValidationVisOptionsProps } from '../../common';
 import { GridPanel } from './grid_panel';
 import { ThresholdPanel } from './threshold_panel';
 import { BasicVislibParams } from '../../../types';
 
-function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
+function PointSeriesOptions(props: ValidationVisOptionsProps<BasicVislibParams>) {
   const { stateParams, setValue, vis } = props;
 
   return (
     <>
       <EuiPanel paddingSize="s">
         <EuiTitle size="xs">
-          <h2>
+          <h3>
             <FormattedMessage
               id="kbnVislibVisTypes.editors.pointSeries.settingsTitle"
               defaultMessage="Settings"
             />
-          </h2>
+          </h3>
         </EuiTitle>
         <EuiSpacer size="m" />
 

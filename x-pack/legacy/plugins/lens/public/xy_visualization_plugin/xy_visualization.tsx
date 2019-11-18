@@ -16,8 +16,11 @@ import { Visualization } from '../types';
 import { State, PersistableState, SeriesType, visualizationTypes } from './types';
 import { toExpression, toPreviewExpression } from './to_expression';
 import { generateId } from '../id_generator';
+import chartBarStackedSVG from '../assets/chart_bar_stacked.svg';
+import chartMixedSVG from '../assets/chart_mixed_xy.svg';
+import { isHorizontalChart } from './state_helpers';
 
-const defaultIcon = 'visBarVertical';
+const defaultIcon = chartBarStackedSVG;
 const defaultSeriesType = 'bar_stacked';
 
 function getDescription(state?: State) {
@@ -25,25 +28,36 @@ function getDescription(state?: State) {
     return {
       icon: defaultIcon,
       label: i18n.translate('xpack.lens.xyVisualization.xyLabel', {
-        defaultMessage: 'XY Chart',
+        defaultMessage: 'XY',
       }),
     };
   }
 
   if (!state.layers.length) {
-    return visualizationTypes.find(v => v.id === state.preferredSeriesType)!;
+    const visualizationType = visualizationTypes.find(v => v.id === state.preferredSeriesType)!;
+    return {
+      icon: visualizationType.largeIcon || visualizationType.icon,
+      label: visualizationType.label,
+    };
   }
 
   const visualizationType = visualizationTypes.find(t => t.id === state.layers[0].seriesType)!;
   const seriesTypes = _.unique(state.layers.map(l => l.seriesType));
 
   return {
-    icon: visualizationType.icon,
+    icon:
+      seriesTypes.length === 1
+        ? visualizationType.largeIcon || visualizationType.icon
+        : chartMixedSVG,
     label:
       seriesTypes.length === 1
         ? visualizationType.label
+        : isHorizontalChart(state.layers)
+        ? i18n.translate('xpack.lens.xyVisualization.mixedBarHorizontalLabel', {
+            defaultMessage: 'Mixed horizontal bar',
+          })
         : i18n.translate('xpack.lens.xyVisualization.mixedLabel', {
-            defaultMessage: 'Mixed XY Chart',
+            defaultMessage: 'Mixed XY',
           }),
   };
 }
@@ -55,9 +69,14 @@ export const xyVisualization: Visualization<State, PersistableState> = {
 
   getDescription(state) {
     const { icon, label } = getDescription(state);
+    const chartLabel = i18n.translate('xpack.lens.xyVisualization.chartLabel', {
+      defaultMessage: '{label} chart',
+      values: { label },
+    });
+
     return {
       icon: icon || defaultIcon,
-      label,
+      label: chartLabel,
     };
   },
 
@@ -74,8 +93,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
   initialize(frame, state) {
     return (
       state || {
-        title: 'Empty XY Chart',
-        isHorizontal: false,
+        title: 'Empty XY chart',
         legend: { isVisible: true, position: Position.Right },
         preferredSeriesType: defaultSeriesType,
         layers: [

@@ -23,7 +23,7 @@ import { ControlEditor } from './control_editor';
 import { addControl, moveControl, newControl, removeControl, setControl } from '../../editor_utils';
 import { getLineageMap, getParentCandidates } from '../../lineage';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { setup as data } from '../../../../../core_plugins/data/public/legacy';
+import { start as data } from '../../../../../core_plugins/data/public/legacy';
 
 import {
   EuiButton,

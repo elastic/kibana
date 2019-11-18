@@ -97,10 +97,13 @@ jest.mock('./components/field_format_editor', () => ({
 const fields = [{
   name: 'foobar',
 }];
-fields.byName = {
-  foobar: {
-    name: 'foobar',
-  },
+fields.getByName = name => {
+  const fields = {
+    foobar: {
+      name: 'foobar',
+    },
+  };
+  return fields[name];
 };
 
 class Format {
@@ -153,7 +156,12 @@ describe('FieldEditor', () => {
       script: 'doc.test.value',
     };
     indexPattern.fields.push(testField);
-    indexPattern.fields.byName[testField.name] = testField;
+    indexPattern.fields.getByName = (name) => {
+      const fields = {
+        [testField.name]: testField
+      };
+      return fields[name];
+    };
 
     const component = shallowWithIntl(
       <FieldEditorComponent
@@ -176,7 +184,12 @@ describe('FieldEditor', () => {
       lang: 'testlang'
     };
     indexPattern.fields.push(testField);
-    indexPattern.fields.byName[testField.name] = testField;
+    indexPattern.fields.getByName = (name) => {
+      const fields = {
+        [testField.name]: testField
+      };
+      return fields[name];
+    };
 
     const component = shallowWithIntl(
       <FieldEditorComponent

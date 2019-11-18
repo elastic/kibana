@@ -6,6 +6,7 @@
 
 import { AlertType } from '../types';
 import { createExecutionHandler } from './create_execution_handler';
+import { loggingServiceMock } from '../../../../../../src/core/server/mocks';
 
 const alertType: AlertType = {
   id: 'test',
@@ -15,7 +16,6 @@ const alertType: AlertType = {
 };
 
 const createExecutionHandlerParams = {
-  log: jest.fn(),
   executeAction: jest.fn(),
   spaceId: 'default',
   alertId: '1',
@@ -23,6 +23,7 @@ const createExecutionHandlerParams = {
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
   getBasePath: jest.fn().mockReturnValue(undefined),
   alertType,
+  logger: loggingServiceMock.create().get(),
   actions: [
     {
       id: '1',
@@ -133,8 +134,7 @@ test(`logs an error when action group isn't part of actionGroups available for t
     alertInstanceId: '2',
   });
   expect(result).toBeUndefined();
-  expect(createExecutionHandlerParams.log).toHaveBeenCalledWith(
-    ['error', 'alerting'],
+  expect(createExecutionHandlerParams.logger.error).toHaveBeenCalledWith(
     'Invalid action group "invalid-group" for alert "test".'
   );
 });

@@ -34,6 +34,7 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -120,6 +121,7 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -206,6 +208,7 @@ exports[`AddItemPopover renders the popover 1`] = `
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage

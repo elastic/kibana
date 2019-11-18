@@ -12,7 +12,6 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { mockBrowserFields, mocksSource } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_providers';
-
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 import { DraggableWrapper } from './draggable_wrapper';
 
@@ -50,14 +49,12 @@ describe('DraggableWrapper', () => {
   });
 
   describe('text truncation styling', () => {
-    test('it applies text truncation styling when a width IS specified (implicit: and the user is not dragging)', () => {
-      const width = '100px';
-
+    test('it applies text truncation styling when truncate IS specified (implicit: and the user is not dragging)', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocksSource} addTypename={false}>
             <DragDropContextWrapper browserFields={mockBrowserFields}>
-              <DraggableWrapper dataProvider={dataProvider} width={width} render={() => message} />
+              <DraggableWrapper dataProvider={dataProvider} render={() => message} truncate />
             </DragDropContextWrapper>
           </MockedProvider>
         </TestProviders>
@@ -68,7 +65,7 @@ describe('DraggableWrapper', () => {
       );
     });
 
-    test('it does NOT apply text truncation styling when a width is NOT specified', () => {
+    test('it does NOT apply text truncation styling when truncate is NOT specified', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocksSource} addTypename={false}>

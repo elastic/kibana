@@ -9,18 +9,25 @@ import { Root } from 'joi';
 import { init } from './server';
 import mappings from './mappings.json';
 
-export { AlertingPlugin, AlertsClient, AlertType, AlertExecutorOptions } from './server';
+export {
+  AlertingPlugin,
+  AlertsClient,
+  AlertType,
+  AlertExecutorOptions,
+  PluginSetupContract,
+  PluginStartContract,
+} from './server';
 
 export function alerting(kibana: any) {
   return new kibana.Plugin({
     id: 'alerting',
     configPrefix: 'xpack.alerting',
-    require: ['kibana', 'elasticsearch', 'actions', 'task_manager', 'encrypted_saved_objects'],
+    require: ['kibana', 'elasticsearch', 'actions', 'task_manager', 'encryptedSavedObjects'],
     isEnabled(config: Legacy.KibanaConfig) {
       return (
         config.get('xpack.alerting.enabled') === true &&
         config.get('xpack.actions.enabled') === true &&
-        config.get('xpack.encrypted_saved_objects.enabled') === true &&
+        config.get('xpack.encryptedSavedObjects.enabled') === true &&
         config.get('xpack.task_manager.enabled') === true
       );
     },

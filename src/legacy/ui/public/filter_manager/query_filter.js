@@ -18,12 +18,10 @@
  */
 
 import { FilterStateManager } from 'plugins/data';
+import { npStart } from 'ui/new_platform';
 
 export function FilterBarQueryFilterProvider(getAppState, globalState) {
-  // TODO: this is imported here to avoid circular imports.
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { setup } = require('../../../core_plugins/data/public/legacy');
-  const filterManager = setup.filter.filterManager;
+  const { filterManager } = npStart.plugins.data.query;
   const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
 
   const queryFilter = {};
@@ -35,7 +33,6 @@ export function FilterBarQueryFilterProvider(getAppState, globalState) {
   queryFilter.removeFilter = filterManager.removeFilter.bind(filterManager);
   queryFilter.addFilters = filterManager.addFilters.bind(filterManager);
   queryFilter.setFilters = filterManager.setFilters.bind(filterManager);
-  queryFilter.addFiltersAndChangeTimeFilter = filterManager.addFiltersAndChangeTimeFilter.bind(filterManager);
   queryFilter.removeAll = filterManager.removeAll.bind(filterManager);
 
   queryFilter.destroy = () => {

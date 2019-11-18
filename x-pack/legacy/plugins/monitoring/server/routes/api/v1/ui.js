@@ -52,6 +52,7 @@ export {
   logstashNodeRoute,
   logstashNodesRoute,
   logstashOverviewRoute,
-  logstashPipelineRoute
+  logstashPipelineRoute,
+  logstashClusterPipelineIdsRoute
 } from './logstash';
 export * from './setup';

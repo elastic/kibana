@@ -149,7 +149,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
           elements = [];
         }
         // Force isStale checks for all the retrieved elements.
-        await Promise.all(elements.map(async (element: any) => await element.isEnabled()));
+        await Promise.all(elements.map(async element => await element.isEnabled()));
         await this._withTimeout(defaultFindTimeout);
         return elements;
       });
@@ -209,6 +209,17 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       log.debug(`Find.allDescendantDisplayedByCssSelector('${selector}')`);
       const allElements = await wrapAll(
         await parentElement._webElement.findElements(By.css(selector))
+      );
+      return await this.filterElementIsDisplayed(allElements);
+    }
+
+    public async allDescendantDisplayedByTagName(
+      tagName: string,
+      parentElement: WebElementWrapper
+    ): Promise<WebElementWrapper[]> {
+      log.debug(`Find.allDescendantDisplayedByTagName('${tagName}')`);
+      const allElements = await wrapAll(
+        await parentElement._webElement.findElements(By.tagName(tagName))
       );
       return await this.filterElementIsDisplayed(allElements);
     }
@@ -292,10 +303,22 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       timeout: number = WAIT_FOR_EXISTS_TIME
     ): Promise<boolean> {
       log.debug(`Find.existsByDisplayedByCssSelector('${selector}') with timeout=${timeout}`);
-      return await this.exists(async drive => {
-        const elements = wrapAll(await drive.findElements(By.css(selector)));
-        return await this.filterElementIsDisplayed(elements);
-      }, timeout);
+      try {
+        await retry.tryForTime(timeout, async () => {
+          // make sure that the find timeout is not longer than the retry timeout
+          await this._withTimeout(Math.min(timeout, WAIT_FOR_EXISTS_TIME));
+          const elements = await driver.findElements(By.css(selector));
+          await this._withTimeout(defaultFindTimeout);
+          const displayed = await this.filterElementIsDisplayed(wrapAll(elements));
+          if (displayed.length === 0) {
+            throw new Error(`${selector} is not displayed`);
+          }
+        });
+      } catch (err) {
+        await this._withTimeout(defaultFindTimeout);
+        return false;
+      }
+      return true;
     }
 
     public async existsByCssSelector(
@@ -330,7 +353,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       log.debug(`Find.clickByPartialLinkText('${linkText}') with timeout=${timeout}`);
       await retry.try(async () => {
         const element = await this.byPartialLinkText(linkText, timeout);
-        await (element as any).moveMouseTo();
+        await element.moveMouseTo();
         await element.click();
       });
     }
@@ -342,7 +365,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       log.debug(`Find.clickByLinkText('${linkText}') with timeout=${timeout}`);
       await retry.try(async () => {
         const element = await this.byLinkText(linkText, timeout);
-        await (element as any).moveMouseTo();
+        await element.moveMouseTo();
         await element.click();
       });
     }
@@ -478,7 +501,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
     private async _withTimeout(timeout: number) {
       if (timeout !== this.currentWait) {
         this.currentWait = timeout;
-        await (driver.manage() as any).setTimeouts({ implicit: timeout });
+        await driver.manage().setTimeouts({ implicit: timeout });
       }
     }
   }

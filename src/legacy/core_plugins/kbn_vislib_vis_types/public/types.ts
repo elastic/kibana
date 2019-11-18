@@ -41,13 +41,21 @@ export interface ColorSchemaVislibParams {
   invertColors: boolean;
 }
 
-interface Labels {
-  color: string;
-  filter: boolean;
+export interface Labels {
+  color?: string;
+  filter?: boolean;
   overwriteColor?: boolean;
   rotate?: Rotates;
   show: boolean;
-  truncate: number | null;
+  truncate?: number | null;
+}
+
+export interface Style {
+  bgFill: string;
+  bgColor: boolean;
+  labelColor: boolean;
+  subText: string;
+  fontSize: number;
 }
 
 export interface Scale {
@@ -62,8 +70,8 @@ export interface Scale {
 
 interface ThresholdLine {
   show: boolean;
-  value: number;
-  width: number;
+  value: number | null;
+  width: number | null;
   style: ThresholdLineStyles;
   color: string;
 }
@@ -74,7 +82,7 @@ export interface Axis {
   position: Positions;
   scale: Scale;
   show: boolean;
-  style: object;
+  style: Style;
   title: { text: string };
   type: AxisTypes;
 }

@@ -7,9 +7,9 @@
 import Boom from 'boom';
 import DateMath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
-import { AggregationSearchResponse } from 'elasticsearch';
 import { CoreSetup } from 'src/core/server';
-import { FieldStatsResponse } from '../../common';
+import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
+import { FieldStatsResponse, BASE_API_URL } from '../../common';
 
 const SHARD_SIZE = 5000;
 
@@ -17,14 +17,14 @@ export async function initFieldsRoute(setup: CoreSetup) {
   const router = setup.http.createRouter();
   router.post(
     {
-      path: '/index_stats/{indexPatternTitle}/field',
+      path: `${BASE_API_URL}/index_stats/{indexPatternTitle}/field`,
       validate: {
         params: schema.object({
           indexPatternTitle: schema.string(),
         }),
         body: schema.object(
           {
-            query: schema.object({}, { allowUnknowns: true }),
+            dslQuery: schema.object({}, { allowUnknowns: true }),
             fromDate: schema.string(),
             toDate: schema.string(),
             timeFieldName: schema.string(),
@@ -43,10 +43,10 @@ export async function initFieldsRoute(setup: CoreSetup) {
     },
     async (context, req, res) => {
       const requestClient = context.core.elasticsearch.dataClient;
-      const { fromDate, toDate, timeFieldName, field, query } = req.body;
+      const { fromDate, toDate, timeFieldName, field, dslQuery } = req.body;
 
       try {
-        const filters = {
+        const query = {
           bool: {
             filter: [
               {
@@ -57,7 +57,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
                   },
                 },
               },
-              query,
+              dslQuery,
             ],
           },
         };
@@ -66,7 +66,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
           requestClient.callAsCurrentUser('search', {
             index: req.params.indexPatternTitle,
             body: {
-              query: filters,
+              query,
               aggs,
             },
             // The hits total changed in 7.0 from number to object, unless this flag is set
@@ -135,9 +135,10 @@ export async function getNumberHistogram(
     },
   };
 
-  const minMaxResult = (await aggSearchWithBody(searchBody)) as AggregationSearchResponse<
+  const minMaxResult = (await aggSearchWithBody(searchBody)) as ESSearchResponse<
     unknown,
-    { body: { aggs: typeof searchBody } }
+    { body: { aggs: typeof searchBody } },
+    { restTotalHitsAsInt: true }
   >;
 
   const minValue = minMaxResult.aggregations!.sample.min_value.value;
@@ -179,9 +180,10 @@ export async function getNumberHistogram(
       },
     },
   };
-  const histogramResult = (await aggSearchWithBody(histogramBody)) as AggregationSearchResponse<
+  const histogramResult = (await aggSearchWithBody(histogramBody)) as ESSearchResponse<
     unknown,
-    { body: { aggs: typeof histogramBody } }
+    { body: { aggs: typeof histogramBody } },
+    { restTotalHitsAsInt: true }
   >;
 
   return {
@@ -213,9 +215,10 @@ export async function getStringSamples(
       },
     },
   };
-  const topValuesResult = (await aggSearchWithBody(topValuesBody)) as AggregationSearchResponse<
+  const topValuesResult = (await aggSearchWithBody(topValuesBody)) as ESSearchResponse<
     unknown,
-    { body: { aggs: typeof topValuesBody } }
+    { body: { aggs: typeof topValuesBody } },
+    { restTotalHitsAsInt: true }
   >;
 
   return {
@@ -260,9 +263,10 @@ export async function getDateHistogram(
   const histogramBody = {
     histo: { date_histogram: { field: field.name, fixed_interval: fixedInterval } },
   };
-  const results = (await aggSearchWithBody(histogramBody)) as AggregationSearchResponse<
+  const results = (await aggSearchWithBody(histogramBody)) as ESSearchResponse<
     unknown,
-    { body: { aggs: typeof histogramBody } }
+    { body: { aggs: typeof histogramBody } },
+    { restTotalHitsAsInt: true }
   >;
 
   return {

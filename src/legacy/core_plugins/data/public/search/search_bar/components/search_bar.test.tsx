@@ -18,35 +18,35 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { SearchBar } from './search_bar';
 import { IndexPattern } from '../../../index_patterns';
+
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { I18nProvider } from '@kbn/i18n/react';
 
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 const startMock = coreMock.createStart();
 
-import { timefilterServiceMock } from '../../../timefilter/timefilter_service.mock';
-const timefilterSetupMock = timefilterServiceMock.createSetupContract();
+import { mount } from 'enzyme';
+
+const mockTimeHistory = {
+  get: () => {
+    return [];
+  },
+};
 
 jest.mock('../../../../../data/public', () => {
   return {
-    FilterBar: () => <div className="filterBar"></div>,
-    QueryBarInput: () => <div className="queryBar"></div>,
+    FilterBar: () => <div className="filterBar" />,
+    QueryBarInput: () => <div className="queryBar" />,
   };
 });
 
 jest.mock('../../../query/query_bar', () => {
   return {
-    QueryBarTopRow: () => <div className="queryBar"></div>,
+    QueryBarTopRow: () => <div className="queryBar" />,
   };
 });
-
-jest.mock('ui/notify', () => ({
-  toastNotifications: {
-    addSuccess: () => {},
-    addDanger: () => {},
-  },
-}));
 
 const noop = jest.fn();
 
@@ -60,7 +60,7 @@ const createMockWebStorage = () => ({
 });
 
 const createMockStorage = () => ({
-  store: createMockWebStorage(),
+  storage: createMockWebStorage(),
   get: jest.fn(),
   set: jest.fn(),
   remove: jest.fn(),
@@ -87,26 +87,44 @@ const kqlQuery = {
   language: 'kuery',
 };
 
+function wrapSearchBarInContext(testProps: any) {
+  const defaultOptions = {
+    appName: 'test',
+    timeHistory: mockTimeHistory,
+    intl: null as any,
+  };
+
+  const services = {
+    uiSettings: startMock.uiSettings,
+    savedObjects: startMock.savedObjects,
+    notifications: startMock.notifications,
+    http: startMock.http,
+    storage: createMockStorage(),
+  };
+
+  return (
+    <I18nProvider>
+      <KibanaContextProvider services={services}>
+        <SearchBar.WrappedComponent {...defaultOptions} {...testProps} />
+      </KibanaContextProvider>
+    </I18nProvider>
+  );
+}
+
 describe('SearchBar', () => {
   const SEARCH_BAR_ROOT = '.globalQueryBar';
   const FILTER_BAR = '.filterBar';
   const QUERY_BAR = '.queryBar';
-
-  const options = {
-    appName: 'test',
-    savedObjects: startMock.savedObjects,
-    notifications: startMock.notifications,
-    timeHistory: timefilterSetupMock.history,
-    intl: null as any,
-  };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('Should render query bar when no options provided (in reality - timepicker)', () => {
-    const component = mountWithIntl(
-      <SearchBar.WrappedComponent {...options} indexPatterns={[mockIndexPattern]} />
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+      })
     );
 
     expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
@@ -115,12 +133,11 @@ describe('SearchBar', () => {
   });
 
   it('Should render empty when timepicker is off and no options provided', () => {
-    const component = mountWithIntl(
-      <SearchBar.WrappedComponent
-        {...options}
-        indexPatterns={[mockIndexPattern]}
-        showDatePicker={false}
-      />
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        showDatePicker: false,
+      })
     );
 
     expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
@@ -129,14 +146,13 @@ describe('SearchBar', () => {
   });
 
   it('Should render filter bar, when required fields are provided', () => {
-    const component = mountWithIntl(
-      <SearchBar.WrappedComponent
-        {...options}
-        indexPatterns={[mockIndexPattern]}
-        filters={[]}
-        onFiltersUpdated={noop}
-        showDatePicker={false}
-      />
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        showDatePicker: false,
+        onFiltersUpdated: noop,
+        filters: [],
+      })
     );
 
     expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
@@ -145,15 +161,14 @@ describe('SearchBar', () => {
   });
 
   it('Should NOT render filter bar, if disabled', () => {
-    const component = mountWithIntl(
-      <SearchBar.WrappedComponent
-        {...options}
-        indexPatterns={[mockIndexPattern]}
-        showFilterBar={false}
-        filters={[]}
-        onFiltersUpdated={noop}
-        showDatePicker={false}
-      />
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        showFilterBar: false,
+        filters: [],
+        onFiltersUpdated: noop,
+        showDatePicker: false,
+      })
     );
 
     expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
@@ -162,15 +177,13 @@ describe('SearchBar', () => {
   });
 
   it('Should render query bar, when required fields are provided', () => {
-    const component = mountWithIntl(
-      <SearchBar.WrappedComponent
-        {...options}
-        indexPatterns={[mockIndexPattern]}
-        screenTitle={'test screen'}
-        store={createMockStorage()}
-        onQuerySubmit={noop}
-        query={kqlQuery}
-      />
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        screenTitle: 'test screen',
+        onQuerySubmit: noop,
+        query: kqlQuery,
+      })
     );
 
     expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
@@ -179,16 +192,14 @@ describe('SearchBar', () => {
   });
 
   it('Should NOT render query bar, if disabled', () => {
-    const component = mountWithIntl(
-      <SearchBar.WrappedComponent
-        {...options}
-        indexPatterns={[mockIndexPattern]}
-        screenTitle={'test screen'}
-        store={createMockStorage()}
-        onQuerySubmit={noop}
-        query={kqlQuery}
-        showQueryBar={false}
-      />
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        screenTitle: 'test screen',
+        onQuerySubmit: noop,
+        query: kqlQuery,
+        showQueryBar: false,
+      })
     );
 
     expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
@@ -197,17 +208,15 @@ describe('SearchBar', () => {
   });
 
   it('Should render query bar and filter bar', () => {
-    const component = mountWithIntl(
-      <SearchBar.WrappedComponent
-        {...options}
-        indexPatterns={[mockIndexPattern]}
-        screenTitle={'test screen'}
-        store={createMockStorage()}
-        onQuerySubmit={noop}
-        query={kqlQuery}
-        filters={[]}
-        onFiltersUpdated={noop}
-      />
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        screenTitle: 'test screen',
+        onQuerySubmit: noop,
+        query: kqlQuery,
+        filters: [],
+        onFiltersUpdated: noop,
+      })
     );
 
     expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);

@@ -19,7 +19,12 @@
 
 import { get } from 'lodash';
 import { DiscoveredPlugin, PluginName } from '../../server';
-import { UiSettingsState } from '../ui_settings';
+import {
+  EnvironmentMode,
+  PackageInfo,
+  UiSettingsParams,
+  UserProvidedValues,
+} from '../../server/types';
 import { deepFreeze } from '../../utils/';
 import { Capabilities } from '..';
 
@@ -46,6 +51,10 @@ export interface InjectedMetadataParams {
     vars: {
       [key: string]: unknown;
     };
+    env: {
+      mode: Readonly<EnvironmentMode>;
+      packageInfo: Readonly<PackageInfo>;
+    };
     uiPlugins: Array<{
       id: PluginName;
       plugin: DiscoveredPlugin;
@@ -64,8 +73,8 @@ export interface InjectedMetadataParams {
       serverName: string;
       devMode: boolean;
       uiSettings: {
-        defaults: UiSettingsState;
-        user?: UiSettingsState;
+        defaults: Record<string, UiSettingsParams>;
+        user?: Record<string, UserProvidedValues>;
       };
     };
   };
@@ -174,8 +183,8 @@ export interface InjectedMetadataSetup {
     serverName: string;
     devMode: boolean;
     uiSettings: {
-      defaults: UiSettingsState;
-      user?: UiSettingsState | undefined;
+      defaults: Record<string, UiSettingsParams>;
+      user?: Record<string, UserProvidedValues> | undefined;
     };
   };
   getInjectedVar: (name: string, defaultValue?: any) => unknown;

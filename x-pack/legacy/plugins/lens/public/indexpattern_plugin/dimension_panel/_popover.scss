@@ -13,6 +13,8 @@
   width: 100%;
   display: flex;
   align-items: center;
+  padding: $euiSizeS;
+  min-height: $euiSizeXXL;
 }
 
 .lnsPopoverEditor__left,
@@ -22,7 +24,7 @@
 
 .lnsPopoverEditor__left {
   padding-top: 0;
-  background-color: $euiColorLightestShade;
+  background-color: $euiPageBackgroundColor;
 }
 
 .lnsPopoverEditor__right {
@@ -30,14 +32,20 @@
 }
 
 .lnsPopoverEditor__operation {
-  padding: $euiSizeXS;
-  font-size: .875rem;
+  @include euiFontSizeS;
+  color: $euiColorPrimary;
+
+  // TODO: Fix in EUI or don't use EuiSideNav
+  .euiSideNavItemButton__label {
+    color: inherit;
+  }
 }
 
 .lnsPopoverEditor__operation--selected {
-  background-color: $euiColorLightShade;
+  font-weight: bold;
+  color: $euiTextColor;
 }
 
 .lnsPopoverEditor__operation--incompatible {
-  opacity: .7;
+  color: $euiColorMediumShade;
 }

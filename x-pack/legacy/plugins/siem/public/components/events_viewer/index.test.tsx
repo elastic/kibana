@@ -8,29 +8,41 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 
-import { TestProviders } from '../../mock';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { wait } from '../../lib/helpers';
-import '../../mock/ui_settings';
+import { TestProviders } from '../../mock';
+import { mockUiSettings } from '../../mock/ui_settings';
 
 import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
+const mockUseKibanaCore = useKibanaCore as jest.Mock;
+jest.mock('../../lib/compose/kibana_core');
+mockUseKibanaCore.mockImplementation(() => ({
+  uiSettings: mockUiSettings,
+}));
+
 const from = 1566943856794;
 const to = 1566857456791;
 
+// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
+/* eslint-disable no-console */
+const originalError = console.error;
 describe('StatefulEventsViewer', () => {
+  beforeAll(() => {
+    console.error = jest.fn();
+  });
+
+  afterAll(() => {
+    console.error = originalError;
+  });
   test('it renders the events viewer', async () => {
     const wrapper = mount(
       <TestProviders>
         <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer
-            end={to}
-            id={'test-stateful-events-viewer'}
-            kqlQueryExpression={''}
-            start={from}
-          />
+          <StatefulEventsViewer end={to} id={'test-stateful-events-viewer'} start={from} />
         </MockedProvider>
       </TestProviders>
     );
@@ -50,12 +62,7 @@ describe('StatefulEventsViewer', () => {
     const wrapper = mount(
       <TestProviders>
         <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer
-            end={to}
-            id={'test-stateful-events-viewer'}
-            kqlQueryExpression={''}
-            start={from}
-          />
+          <StatefulEventsViewer end={to} id={'test-stateful-events-viewer'} start={from} />
         </MockedProvider>
       </TestProviders>
     );
@@ -75,12 +82,7 @@ describe('StatefulEventsViewer', () => {
     const wrapper = mount(
       <TestProviders>
         <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer
-            end={to}
-            id={'test-stateful-events-viewer'}
-            kqlQueryExpression={''}
-            start={from}
-          />
+          <StatefulEventsViewer end={to} id={'test-stateful-events-viewer'} start={from} />
         </MockedProvider>
       </TestProviders>
     );

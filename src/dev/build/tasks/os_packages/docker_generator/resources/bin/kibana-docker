@@ -174,12 +174,14 @@ kibana_vars=(
     xpack.security.authc.providers
     xpack.security.authc.oidc.realm
     xpack.security.authc.saml.realm
+    xpack.security.authc.saml.maxRedirectURLSize
     xpack.security.cookieName
     xpack.security.enabled
     xpack.security.encryptionKey
     xpack.security.secureCookies
     xpack.security.sessionTimeout
-    xpack.telemetry.enabled
+    telemetry.enabled
+    telemetry.sendUsageFrom
 )
 
 longopts=''

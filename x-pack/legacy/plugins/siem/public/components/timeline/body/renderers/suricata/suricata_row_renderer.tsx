@@ -8,7 +8,6 @@ import { get } from 'lodash/fp';
 import React from 'react';
 
 import { RowRenderer, RowRendererContainer } from '../row_renderer';
-import { Row } from '../helpers';
 import { SuricataDetails } from './suricata_details';
 
 export const suricataRowRenderer: RowRenderer = {
@@ -18,12 +17,13 @@ export const suricataRowRenderer: RowRenderer = {
   },
   renderRow: ({ browserFields, data, children, timelineId }) => {
     return (
-      <Row className="euiTableRow">
+      <>
         {children}
+
         <RowRendererContainer>
           <SuricataDetails data={data} browserFields={browserFields} timelineId={timelineId} />
         </RowRendererContainer>
-      </Row>
+      </>
     );
   },
 };

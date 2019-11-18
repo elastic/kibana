@@ -10,12 +10,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSelect, EuiSpacer, EuiText } fro
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-// @ts-ignore
-import { ordinalSuffix } from 'ui/utils/ordinal_suffix';
-
 import { FieldDataCardProps } from '../field_data_card';
 import { DisplayValue } from '../../../../../components/display_value';
 import { kibanaFieldFormat } from '../../../../../formatters/kibana_field_format';
+import { numberAsOrdinal } from '../../../../../formatters/number_as_ordinal';
 // @ts-ignore
 import { roundToDecimalPlace } from '../../../../../formatters/round_to_decimal_place';
 import {
@@ -36,9 +34,6 @@ const DEFAULT_TOP_VALUES_THRESHOLD = 100;
 
 export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
   const { stats, fieldFormat } = config;
-  if (stats === undefined) {
-    return null;
-  }
 
   useEffect(() => {
     const chartData = buildChartDataFromStats(stats, METRIC_DISTRIBUTION_CHART_WIDTH);
@@ -162,8 +157,8 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
                   id="xpack.ml.fieldDataCard.cardNumber.displayingPercentilesLabel"
                   defaultMessage="Displaying {minPercent} - {maxPercent} percentiles"
                   values={{
-                    minPercent: ordinalSuffix(distribution.minPercentile),
-                    maxPercent: ordinalSuffix(distribution.maxPercentile),
+                    minPercent: numberAsOrdinal(distribution.minPercentile),
+                    maxPercent: numberAsOrdinal(distribution.maxPercentile),
                   }}
                 />
               </EuiText>

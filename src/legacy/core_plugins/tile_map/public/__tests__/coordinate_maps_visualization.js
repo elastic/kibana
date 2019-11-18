@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import * as visModule from 'ui/vis';
+import { Vis } from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 import dummyESResponse from './dummy_es_response.json';
 import initial from './initial.png';
@@ -33,7 +33,7 @@ import EMS_TILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_
 import EMS_STYLE_ROAD_MAP_BRIGHT from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_bright';
 import EMS_STYLE_ROAD_MAP_DESATURATED from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_desaturated';
 import EMS_STYLE_DARK_MAP from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_dark';
-import { setup as visualizationsSetup } from '../../../visualizations/public/legacy';
+import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
 
 import { createTileMapVisualization } from '../tile_map_visualization';
 import { createTileMapTypeDefinition } from '../tile_map_type';
@@ -65,7 +65,6 @@ let visRegComplete = false;
 describe('CoordinateMapsVisualizationTest', function () {
   let domNode;
   let CoordinateMapsVisualization;
-  let Vis;
   let indexPattern;
   let vis;
   let dependencies;
@@ -91,7 +90,6 @@ describe('CoordinateMapsVisualizationTest', function () {
       }
 
 
-      Vis = Private(visModule.VisProvider);
       CoordinateMapsVisualization = createTileMapVisualization(dependencies);
       indexPattern = Private(LogstashIndexPatternStubProvider);
 
@@ -136,6 +134,16 @@ describe('CoordinateMapsVisualizationTest', function () {
         legendPosition: 'bottomright',
         mapZoom: 2,
         mapCenter: [0, 0],
+        dimensions: {
+          metric: {
+            accessor: 1,
+            label: 'test',
+            format: { id: 'string' }
+          },
+          bucket: {
+            accessor: 0
+          }
+        }
       };
       const mockAggs = {
         byType: type => {

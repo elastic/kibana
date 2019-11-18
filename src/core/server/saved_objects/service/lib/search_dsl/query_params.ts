@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { toElasticsearchQuery, KueryNode } from '@kbn/es-query';
 
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
@@ -76,25 +77,41 @@ function getClauseForType(schema: SavedObjectsSchema, namespace: string | undefi
   };
 }
 
+interface HasReferenceQueryParams {
+  type: string;
+  id: string;
+}
+
+interface QueryParams {
+  mappings: IndexMapping;
+  schema: SavedObjectsSchema;
+  namespace?: string;
+  type?: string | string[];
+  search?: string;
+  searchFields?: string[];
+  defaultSearchOperator?: string;
+  hasReference?: HasReferenceQueryParams;
+  kueryNode?: KueryNode;
+}
+
 /**
  *  Get the "query" related keys for the search body
  */
-export function getQueryParams(
-  mappings: IndexMapping,
-  schema: SavedObjectsSchema,
-  namespace?: string,
-  type?: string | string[],
-  search?: string,
-  searchFields?: string[],
-  defaultSearchOperator?: string,
-  hasReference?: {
-    type: string;
-    id: string;
-  }
-) {
+export function getQueryParams({
+  mappings,
+  schema,
+  namespace,
+  type,
+  search,
+  searchFields,
+  defaultSearchOperator,
+  hasReference,
+  kueryNode,
+}: QueryParams) {
   const types = getTypes(mappings, type);
   const bool: any = {
     filter: [
+      ...(kueryNode != null ? [toElasticsearchQuery(kueryNode)] : []),
       {
         bool: {
           must: hasReference

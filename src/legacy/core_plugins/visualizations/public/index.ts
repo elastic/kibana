@@ -39,7 +39,6 @@ export { DefaultEditorSize } from 'ui/vis/editor_size';
 import * as types from 'ui/vis/vis';
 export type Vis = types.Vis;
 export type VisParams = types.VisParams;
-export type VisProvider = types.VisProvider;
 export type VisState = types.VisState;
 export { VisualizationController } from 'ui/vis/vis_types/vis_type';
 export { Status } from 'ui/vis/update_status';
@@ -50,7 +49,7 @@ export { Status } from 'ui/vis/update_status';
  *
  * @public
  */
-export * from './np_ready';
+export * from './np_ready/public';
 
 // for backwards compatibility with 7.3
-export { setup as visualizations } from './legacy';
+export { setup as visualizations } from './np_ready/public/legacy';

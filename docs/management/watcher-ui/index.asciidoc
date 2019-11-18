@@ -31,7 +31,7 @@ watch&#8212;input, schedule, condition, and actions.
 === Watcher security
 
 If the {es} {security-features} are enabled, you must have the
-{stack-ov}/security-privileges.html[`manage_watcher` or `monitor_watcher`]
+{ref}/security-privileges.html[`manage_watcher` or `monitor_watcher`]
 cluster privileges to use Watcher in {kib}.
 
 Alternately, you can have the built-in `kibana_user` role

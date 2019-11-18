@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import {
   SuggestionRequest,
   VisualizationSuggestion,
@@ -17,29 +16,16 @@ import {
 } from '../types';
 import { State, SeriesType, XYState } from './types';
 import { generateId } from '../id_generator';
+import { getIconForSeries } from './state_helpers';
 
 const columnSortOrder = {
-  date: 0,
-  string: 1,
-  ip: 2,
-  boolean: 3,
-  number: 4,
+  document: 0,
+  date: 1,
+  string: 2,
+  ip: 3,
+  boolean: 4,
+  number: 5,
 };
-
-function getIconForSeries(type: SeriesType): EuiIconType {
-  switch (type) {
-    case 'area':
-    case 'area_stacked':
-      return 'visArea';
-    case 'bar':
-    case 'bar_stacked':
-      return 'visBarVertical';
-    case 'line':
-      return 'visLine';
-    default:
-      throw new Error('unknown series type');
-  }
-}
 
 /**
  * Generate suggestions for the xy chart.
@@ -49,6 +35,7 @@ function getIconForSeries(type: SeriesType): EuiIconType {
 export function getSuggestions({
   table,
   state,
+  keptLayerIds,
 }: SuggestionRequest<State>): Array<VisualizationSuggestion<State>> {
   if (
     // We only render line charts for multi-row queries. We require at least
@@ -62,7 +49,7 @@ export function getSuggestions({
     return [];
   }
 
-  const suggestions = getSuggestionForColumns(table, state);
+  const suggestions = getSuggestionForColumns(table, keptLayerIds, state);
 
   if (suggestions && suggestions instanceof Array) {
     return suggestions;
@@ -73,32 +60,35 @@ export function getSuggestions({
 
 function getSuggestionForColumns(
   table: TableSuggestion,
+  keptLayerIds: string[],
   currentState?: State
 ): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> | undefined {
   const [buckets, values] = partition(table.columns, col => col.operation.isBucketed);
 
   if (buckets.length === 1 || buckets.length === 2) {
     const [x, splitBy] = getBucketMappings(table, currentState);
-    return getSuggestionsForLayer(
-      table.layerId,
-      table.changeType,
-      x,
-      values,
+    return getSuggestionsForLayer({
+      layerId: table.layerId,
+      changeType: table.changeType,
+      xValue: x,
+      yValues: values,
       splitBy,
       currentState,
-      table.label
-    );
+      tableLabel: table.label,
+      keptLayerIds,
+    });
   } else if (buckets.length === 0) {
     const [x, ...yValues] = prioritizeColumns(values);
-    return getSuggestionsForLayer(
-      table.layerId,
-      table.changeType,
-      x,
+    return getSuggestionsForLayer({
+      layerId: table.layerId,
+      changeType: table.changeType,
+      xValue: x,
       yValues,
-      undefined,
+      splitBy: undefined,
       currentState,
-      table.label
-    );
+      tableLabel: table.label,
+      keptLayerIds,
+    });
   }
 }
 
@@ -152,21 +142,29 @@ function prioritizeColumns(columns: TableSuggestionColumn[]) {
   );
 }
 
-function getSuggestionsForLayer(
-  layerId: string,
-  changeType: TableChangeType,
-  xValue: TableSuggestionColumn,
-  yValues: TableSuggestionColumn[],
-  splitBy?: TableSuggestionColumn,
-  currentState?: State,
-  tableLabel?: string
-): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> {
+function getSuggestionsForLayer({
+  layerId,
+  changeType,
+  xValue,
+  yValues,
+  splitBy,
+  currentState,
+  tableLabel,
+  keptLayerIds,
+}: {
+  layerId: string;
+  changeType: TableChangeType;
+  xValue: TableSuggestionColumn;
+  yValues: TableSuggestionColumn[];
+  splitBy?: TableSuggestionColumn;
+  currentState?: State;
+  tableLabel?: string;
+  keptLayerIds: string[];
+}): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
   const seriesType: SeriesType = getSeriesType(currentState, layerId, xValue, changeType);
-  const isHorizontal = currentState ? currentState.isHorizontal : false;
 
   const options = {
-    isHorizontal,
     currentState,
     seriesType,
     layerId,
@@ -175,6 +173,7 @@ function getSuggestionsForLayer(
     splitBy,
     changeType,
     xValue,
+    keptLayerIds,
   };
 
   const isSameState = currentState && changeType === 'unchanged';
@@ -186,14 +185,18 @@ function getSuggestionsForLayer(
   const sameStateSuggestions: Array<VisualizationSuggestion<State>> = [];
 
   // if current state is using the same data, suggest same chart with different presentational configuration
-
   if (seriesType !== 'line' && xValue.operation.scale === 'ordinal') {
     // flip between horizontal/vertical for ordinal scales
     sameStateSuggestions.push(
       buildSuggestion({
         ...options,
         title: i18n.translate('xpack.lens.xySuggestions.flipTitle', { defaultMessage: 'Flip' }),
-        isHorizontal: !options.isHorizontal,
+        seriesType:
+          seriesType === 'bar_horizontal'
+            ? 'bar'
+            : seriesType === 'bar_horizontal_stacked'
+            ? 'bar_stacked'
+            : 'bar_horizontal',
       })
     );
   } else {
@@ -328,7 +331,6 @@ function getSuggestionTitle(
 }
 
 function buildSuggestion({
-  isHorizontal,
   currentState,
   seriesType,
   layerId,
@@ -337,9 +339,9 @@ function buildSuggestion({
   splitBy,
   changeType,
   xValue,
+  keptLayerIds,
 }: {
   currentState: XYState | undefined;
-  isHorizontal: boolean;
   seriesType: SeriesType;
   title: string;
   yValues: TableSuggestionColumn[];
@@ -347,6 +349,7 @@ function buildSuggestion({
   splitBy: TableSuggestionColumn | undefined;
   layerId: string;
   changeType: TableChangeType;
+  keptLayerIds: string[];
 }) {
   const newLayer = {
     ...(getExistingLayer(currentState, layerId) || {}),
@@ -357,14 +360,16 @@ function buildSuggestion({
     accessors: yValues.map(col => col.columnId),
   };
 
+  const keptLayers = currentState
+    ? currentState.layers.filter(
+        layer => layer.layerId !== layerId && keptLayerIds.includes(layer.layerId)
+      )
+    : [];
+
   const state: State = {
-    isHorizontal,
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     preferredSeriesType: seriesType,
-    layers: [
-      ...(currentState ? currentState.layers.filter(layer => layer.layerId !== layerId) : []),
-      newLayer,
-    ],
+    layers: [...keptLayers, newLayer],
   };
 
   return {

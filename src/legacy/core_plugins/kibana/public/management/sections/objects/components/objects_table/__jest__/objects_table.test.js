@@ -18,12 +18,14 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { Query } from '@elastic/eui';
 
 import { ObjectsTable, POSSIBLE_TYPES } from '../objects_table';
 import { Flyout } from '../components/flyout/';
 import { Relationships } from '../components/relationships/';
 import { findObjects } from '../../../lib';
+import { extractExportDetails } from '../../../lib/extract_export_details';
 
 jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
 
@@ -44,19 +46,23 @@ jest.mock('../../../lib/fetch_export_objects', () => ({
   fetchExportObjects: jest.fn(),
 }));
 
-jest.mock('../../../lib/fetch_export_by_type', () => ({
-  fetchExportByType: jest.fn(),
+jest.mock('../../../lib/fetch_export_by_type_and_search', () => ({
+  fetchExportByTypeAndSearch: jest.fn(),
+}));
+
+jest.mock('../../../lib/extract_export_details', () => ({
+  extractExportDetails: jest.fn(),
 }));
 
 jest.mock('../../../lib/get_saved_object_counts', () => ({
   getSavedObjectCounts: jest.fn().mockImplementation(() => {
     return {
       'index-pattern': 0,
-      'visualization': 0,
-      'dashboard': 0,
-      'search': 0,
+      visualization: 0,
+      dashboard: 0,
+      search: 0,
     };
-  })
+  }),
 }));
 
 jest.mock('@elastic/filesaver', () => ({
@@ -74,36 +80,36 @@ const allSavedObjects = [
     id: '1',
     type: 'index-pattern',
     attributes: {
-      title: `MyIndexPattern*`
-    }
+      title: `MyIndexPattern*`,
+    },
   },
   {
     id: '2',
     type: 'search',
     attributes: {
-      title: `MySearch`
-    }
+      title: `MySearch`,
+    },
   },
   {
     id: '3',
     type: 'dashboard',
     attributes: {
-      title: `MyDashboard`
-    }
+      title: `MyDashboard`,
+    },
   },
   {
     id: '4',
     type: 'visualization',
     attributes: {
-      title: `MyViz`
-    }
+      title: `MyViz`,
+    },
   },
 ];
 
-const $http = () => {};
-$http.post = jest.fn().mockImplementation(() => ([]));
+const $http = () => { };
+$http.post = jest.fn().mockImplementation(() => []);
 const defaultProps = {
-  goInspectObject: () => {},
+  goInspectObject: () => { },
   confirmModalPromise: jest.fn(),
   savedObjectsClient: {
     find: jest.fn(),
@@ -122,7 +128,7 @@ const defaultProps = {
       read: true,
       edit: false,
       delete: false,
-    }
+    },
   },
   canDelete: true,
 };
@@ -189,12 +195,14 @@ beforeEach(() => {
 
 let addDangerMock;
 let addSuccessMock;
+let addWarningMock;
 
 describe('ObjectsTable', () => {
   beforeEach(() => {
     defaultProps.savedObjectsClient.find.mockClear();
+    extractExportDetails.mockReset();
     // mock _.debounce to fire immediately with no internal timer
-    require('lodash').debounce = function (func) {
+    require('lodash').debounce = func => {
       function debounced(...args) {
         return func.apply(this, args);
       }
@@ -202,18 +210,17 @@ describe('ObjectsTable', () => {
     };
     addDangerMock = jest.fn();
     addSuccessMock = jest.fn();
+    addWarningMock = jest.fn();
     require('ui/notify').toastNotifications = {
       addDanger: addDangerMock,
       addSuccess: addSuccessMock,
+      addWarning: addWarningMock,
     };
   });
 
   it('should render normally', async () => {
-    const component = shallowWithIntl(
-      <ObjectsTable.WrappedComponent
-        {...defaultProps}
-        perPageConfig={15}
-      />
+    const component = shallowWithI18nProvider(
+      <ObjectsTable {...defaultProps} perPageConfig={15} />
     );
 
     // Ensure all promises resolve
@@ -228,11 +235,8 @@ describe('ObjectsTable', () => {
     findObjects.mockImplementation(() => {
       throw new Error('Simulated find error');
     });
-    const component = shallowWithIntl(
-      <ObjectsTable.WrappedComponent
-        {...defaultProps}
-        perPageConfig={15}
-      />
+    const component = shallowWithI18nProvider(
+      <ObjectsTable {...defaultProps} perPageConfig={15} />
     );
 
     // Ensure all promises resolve
@@ -247,12 +251,11 @@ describe('ObjectsTable', () => {
     it('should export selected objects', async () => {
       const mockSelectedSavedObjects = [
         { id: '1', type: 'index-pattern' },
-        { id: '3', type: 'dashboard' }
+        { id: '3', type: 'dashboard' },
       ];
 
       const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
         _id: obj.id,
-        _type: obj._type,
         _source: {},
       }));
 
@@ -260,16 +263,13 @@ describe('ObjectsTable', () => {
         ...defaultProps.savedObjectsClient,
         bulkGet: jest.fn().mockImplementation(() => ({
           savedObjects: mockSavedObjects,
-        }))
+        })),
       };
 
       const { fetchExportObjects } = require('../../../lib/fetch_export_objects');
 
-      const component = shallowWithIntl(
-        <ObjectsTable.WrappedComponent
-          {...defaultProps}
-          savedObjectsClient={mockSavedObjectsClient}
-        />
+      const component = shallowWithI18nProvider(
+        <ObjectsTable {...defaultProps} savedObjectsClient={mockSavedObjectsClient} />
       );
 
       // Ensure all promises resolve
@@ -283,15 +283,61 @@ describe('ObjectsTable', () => {
       await component.instance().onExport(true);
 
       expect(fetchExportObjects).toHaveBeenCalledWith(mockSelectedSavedObjects, true);
-      expect(addSuccessMock).toHaveBeenCalledWith({ title: 'Your file is downloading in the background' });
+      expect(addSuccessMock).toHaveBeenCalledWith({
+        title: 'Your file is downloading in the background',
+      });
+    });
+
+    it('should display a warning is export contains missing references', async () => {
+      const mockSelectedSavedObjects = [
+        { id: '1', type: 'index-pattern' },
+        { id: '3', type: 'dashboard' },
+      ];
+
+      const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
+        _id: obj.id,
+        _source: {},
+      }));
+
+      const mockSavedObjectsClient = {
+        ...defaultProps.savedObjectsClient,
+        bulkGet: jest.fn().mockImplementation(() => ({
+          savedObjects: mockSavedObjects,
+        })),
+      };
+
+      const { fetchExportObjects } = require('../../../lib/fetch_export_objects');
+      extractExportDetails.mockImplementation(() => ({
+        exportedCount: 2,
+        missingRefCount: 1,
+        missingReferences: [{ id: '7', type: 'visualisation' }],
+      }));
+
+      const component = shallowWithI18nProvider(
+        <ObjectsTable {...defaultProps} savedObjectsClient={mockSavedObjectsClient} />
+      );
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      // Set some as selected
+      component.instance().onSelectionChanged(mockSelectedSavedObjects);
+
+      await component.instance().onExport(true);
+
+      expect(fetchExportObjects).toHaveBeenCalledWith(mockSelectedSavedObjects, true);
+      expect(addWarningMock).toHaveBeenCalledWith({
+        title:
+          'Your file is downloading in the background. ' +
+          'Some related objects could not be found. ' +
+          'Please see the last line in the exported file for a list of missing objects.',
+      });
     });
 
     it('should allow the user to choose when exporting all', async () => {
-      const component = shallowWithIntl(
-        <ObjectsTable.WrappedComponent
-          {...defaultProps}
-        />
-      );
+      const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -305,13 +351,11 @@ describe('ObjectsTable', () => {
     });
 
     it('should export all', async () => {
-      const { fetchExportByType } = require('../../../lib/fetch_export_by_type');
+      const {
+        fetchExportByTypeAndSearch,
+      } = require('../../../lib/fetch_export_by_type_and_search');
       const { saveAs } = require('@elastic/filesaver');
-      const component = shallowWithIntl(
-        <ObjectsTable.WrappedComponent
-          {...defaultProps}
-        />
-      );
+      const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -320,23 +364,50 @@ describe('ObjectsTable', () => {
 
       // Set up mocks
       const blob = new Blob([JSON.stringify(allSavedObjects)], { type: 'application/ndjson' });
-      fetchExportByType.mockImplementation(() => blob);
+      fetchExportByTypeAndSearch.mockImplementation(() => blob);
 
       await component.instance().onExportAll();
 
-      expect(fetchExportByType).toHaveBeenCalledWith(POSSIBLE_TYPES, true);
+      expect(fetchExportByTypeAndSearch).toHaveBeenCalledWith(POSSIBLE_TYPES, undefined, true);
       expect(saveAs).toHaveBeenCalledWith(blob, 'export.ndjson');
-      expect(addSuccessMock).toHaveBeenCalledWith({ title: 'Your file is downloading in the background' });
+      expect(addSuccessMock).toHaveBeenCalledWith({
+        title: 'Your file is downloading in the background',
+      });
+    });
+
+    it('should export all, accounting for the current search criteria', async () => {
+      const {
+        fetchExportByTypeAndSearch,
+      } = require('../../../lib/fetch_export_by_type_and_search');
+      const { saveAs } = require('@elastic/filesaver');
+      const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
+
+      component.instance().onQueryChange({
+        query: Query.parse('test'),
+      });
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      // Set up mocks
+      const blob = new Blob([JSON.stringify(allSavedObjects)], { type: 'application/ndjson' });
+      fetchExportByTypeAndSearch.mockImplementation(() => blob);
+
+      await component.instance().onExportAll();
+
+      expect(fetchExportByTypeAndSearch).toHaveBeenCalledWith(POSSIBLE_TYPES, 'test*', true);
+      expect(saveAs).toHaveBeenCalledWith(blob, 'export.ndjson');
+      expect(addSuccessMock).toHaveBeenCalledWith({
+        title: 'Your file is downloading in the background',
+      });
     });
   });
 
   describe('import', () => {
     it('should show the flyout', async () => {
-      const component = shallowWithIntl(
-        <ObjectsTable.WrappedComponent
-          {...defaultProps}
-        />
-      );
+      const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -350,11 +421,7 @@ describe('ObjectsTable', () => {
     });
 
     it('should hide the flyout', async () => {
-      const component = shallowWithIntl(
-        <ObjectsTable.WrappedComponent
-          {...defaultProps}
-        />
-      );
+      const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -372,11 +439,7 @@ describe('ObjectsTable', () => {
     it('should fetch relationships', async () => {
       const { getRelationships } = require('../../../lib/get_relationships');
 
-      const component = shallowWithIntl(
-        <ObjectsTable.WrappedComponent
-          {...defaultProps}
-        />
-      );
+      const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -385,15 +448,17 @@ describe('ObjectsTable', () => {
 
       await component.instance().getRelationships('search', '1');
       const savedObjectTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
-      expect(getRelationships).toHaveBeenCalledWith('search', '1', savedObjectTypes, defaultProps.$http, defaultProps.basePath);
+      expect(getRelationships).toHaveBeenCalledWith(
+        'search',
+        '1',
+        savedObjectTypes,
+        defaultProps.$http,
+        defaultProps.basePath
+      );
     });
 
     it('should show the flyout', async () => {
-      const component = shallowWithIntl(
-        <ObjectsTable.WrappedComponent
-          {...defaultProps}
-        />
-      );
+      const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -432,11 +497,7 @@ describe('ObjectsTable', () => {
     });
 
     it('should hide the flyout', async () => {
-      const component = shallowWithIntl(
-        <ObjectsTable.WrappedComponent
-          {...defaultProps}
-        />
-      );
+      const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -455,15 +516,11 @@ describe('ObjectsTable', () => {
 
   describe('delete', () => {
     it('should show a confirm modal', async () => {
-      const component = shallowWithIntl(
-        <ObjectsTable.WrappedComponent
-          {...defaultProps}
-        />
-      );
+      const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
 
       const mockSelectedSavedObjects = [
         { id: '1', type: 'index-pattern', title: 'Title 1' },
-        { id: '3', type: 'dashboard', title: 'Title 2' }
+        { id: '3', type: 'dashboard', title: 'Title 2' },
       ];
 
       // Ensure all promises resolve
@@ -482,7 +539,7 @@ describe('ObjectsTable', () => {
     it('should delete selected objects', async () => {
       const mockSelectedSavedObjects = [
         { id: '1', type: 'index-pattern' },
-        { id: '3', type: 'dashboard' }
+        { id: '3', type: 'dashboard' },
       ];
 
       const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
@@ -499,11 +556,8 @@ describe('ObjectsTable', () => {
         delete: jest.fn(),
       };
 
-      const component = shallowWithIntl(
-        <ObjectsTable.WrappedComponent
-          {...defaultProps}
-          savedObjectsClient={mockSavedObjectsClient}
-        />
+      const component = shallowWithI18nProvider(
+        <ObjectsTable {...defaultProps} savedObjectsClient={mockSavedObjectsClient} />
       );
 
       // Ensure all promises resolve
@@ -518,8 +572,14 @@ describe('ObjectsTable', () => {
 
       expect(defaultProps.indexPatterns.clearCache).toHaveBeenCalled();
       expect(mockSavedObjectsClient.bulkGet).toHaveBeenCalledWith(mockSelectedSavedObjects);
-      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(mockSavedObjects[0].type, mockSavedObjects[0].id);
-      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(mockSavedObjects[1].type, mockSavedObjects[1].id);
+      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
+        mockSavedObjects[0].type,
+        mockSavedObjects[0].id
+      );
+      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
+        mockSavedObjects[1].type,
+        mockSavedObjects[1].id
+      );
       expect(component.state('selectedSavedObjects').length).toBe(0);
     });
   });

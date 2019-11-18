@@ -21,9 +21,10 @@ import _ from 'lodash';
 import * as ast from '../ast';
 import * as literal from '../node_types/literal';
 import * as wildcard from '../node_types/wildcard';
-import { getPhraseScript } from '../../filters';
+import { getPhraseScript } from '../../utils/filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings } from '../../utils/get_time_zone_from_settings';
+import { getFullFieldNameNode } from './utils/get_full_field_name_node';
 
 export function buildNodeParams(fieldName, value, isPhrase = false) {
   if (_.isUndefined(fieldName)) {
@@ -32,7 +33,6 @@ export function buildNodeParams(fieldName, value, isPhrase = false) {
   if (_.isUndefined(value)) {
     throw new Error('value is a required argument');
   }
-
   const fieldNode = typeof fieldName === 'string' ? ast.fromLiteralExpression(fieldName) : literal.buildNode(fieldName);
   const valueNode = typeof value === 'string' ? ast.fromLiteralExpression(value) : literal.buildNode(value);
   const isPhraseNode = literal.buildNode(isPhrase);
@@ -41,12 +41,13 @@ export function buildNodeParams(fieldName, value, isPhrase = false) {
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
-  const { arguments: [ fieldNameArg, valueArg, isPhraseArg ] } = node;
-  const fieldName = ast.toElasticsearchQuery(fieldNameArg);
+export function toElasticsearchQuery(node, indexPattern = null, config = {}, context = {}) {
+  const { arguments: [fieldNameArg, valueArg, isPhraseArg] } = node;
+  const fullFieldNameArg = getFullFieldNameNode(fieldNameArg, indexPattern, context.nested ? context.nested.path : undefined);
+  const fieldName = ast.toElasticsearchQuery(fullFieldNameArg);
   const value = !_.isUndefined(valueArg) ? ast.toElasticsearchQuery(valueArg) : valueArg;
   const type = isPhraseArg.value ? 'phrase' : 'best_fields';
-  if (fieldNameArg.value === null) {
+  if (fullFieldNameArg.value === null) {
     if (valueArg.type === 'wildcard') {
       return {
         query_string: {
@@ -64,7 +65,7 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
     };
   }
 
-  const fields = indexPattern ? getFields(fieldNameArg, indexPattern) : [];
+  const fields = indexPattern ? getFields(fullFieldNameArg, indexPattern) : [];
   // If no fields are found in the index pattern we send through the given field name as-is. We do this to preserve
   // the behaviour of lucene on dashboards where there are panels based on different index patterns that have different
   // fields. If a user queries on a field that exists in one pattern but not the other, the index pattern without the
@@ -72,14 +73,14 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
   // keep things familiar for now.
   if (fields && fields.length === 0) {
     fields.push({
-      name: ast.toElasticsearchQuery(fieldNameArg),
+      name: ast.toElasticsearchQuery(fullFieldNameArg),
       scripted: false,
     });
   }
 
   const isExistsQuery = valueArg.type === 'wildcard' && value === '*';
   const isAllFieldsQuery =
-    (fieldNameArg.type === 'wildcard' && fieldName === '*')
+    (fullFieldNameArg.type === 'wildcard' && fieldName === '*')
     || (fields && indexPattern && fields.length === indexPattern.fields.length);
   const isMatchAllQuery = isExistsQuery && isAllFieldsQuery;
 
@@ -88,6 +89,27 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
   }
 
   const queries = fields.reduce((accumulator, field) => {
+    const wrapWithNestedQuery = (query) => {
+      // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
+      // users handle this themselves so we automatically add nested queries in this scenario.
+      if (
+        !(fullFieldNameArg.type === 'wildcard')
+        || !_.get(field, 'subType.nested')
+        || context.nested
+      ) {
+        return query;
+      }
+      else {
+        return {
+          nested: {
+            path: field.subType.nested.path,
+            query,
+            score_mode: 'none'
+          }
+        };
+      }
+    };
+
     if (field.scripted) {
       // Exists queries don't make sense for scripted fields
       if (!isExistsQuery) {
@@ -99,19 +121,19 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
       }
     }
     else if (isExistsQuery) {
-      return [...accumulator, {
+      return [...accumulator, wrapWithNestedQuery({
         exists: {
           field: field.name
         }
-      }];
+      })];
     }
     else if (valueArg.type === 'wildcard') {
-      return [...accumulator, {
+      return [...accumulator, wrapWithNestedQuery({
         query_string: {
           fields: [field.name],
           query: wildcard.toQueryStringQuery(valueArg),
         }
-      }];
+      })];
     }
     /*
       If we detect that it's a date field and the user wants an exact date, we need to convert the query to both >= and <= the value provided to force a range query. This is because match and match_phrase queries do not accept a timezone parameter.
@@ -119,7 +141,7 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
     */
     else if (field.type === 'date') {
       const timeZoneParam = config.dateFormatTZ ? { time_zone: getTimeZoneFromSettings(config.dateFormatTZ) } : {};
-      return [...accumulator, {
+      return [...accumulator, wrapWithNestedQuery({
         range: {
           [field.name]: {
             gte: value,
@@ -127,15 +149,15 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
             ...timeZoneParam,
           },
         }
-      }];
+      })];
     }
     else {
       const queryType = type === 'phrase' ? 'match_phrase' : 'match';
-      return [...accumulator, {
+      return [...accumulator, wrapWithNestedQuery({
         [queryType]: {
           [field.name]: value
         }
-      }];
+      })];
     }
   }, []);
 
@@ -146,5 +168,4 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
     }
   };
 }
-
 

@@ -10,12 +10,12 @@ import {
   MachineLearningAnomalyExplorerProvider,
   MachineLearningAPIProvider,
   MachineLearningDataFrameAnalyticsProvider,
-  MachineLearningDataFramesProvider,
   MachineLearningDataVisualizerProvider,
   MachineLearningJobManagementProvider,
   MachineLearningJobSourceSelectionProvider,
   MachineLearningJobTableProvider,
   MachineLearningJobTypeSelectionProvider,
+  MachineLearningJobWizardAdvancedProvider,
   MachineLearningJobWizardCommonProvider,
   MachineLearningJobWizardMultiMetricProvider,
   MachineLearningJobWizardPopulationProvider,
@@ -28,12 +28,12 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const anomalyExplorer = MachineLearningAnomalyExplorerProvider(context);
   const api = MachineLearningAPIProvider(context);
   const dataFrameAnalytics = MachineLearningDataFrameAnalyticsProvider(context);
-  const dataFrames = MachineLearningDataFramesProvider(context);
   const dataVisualizer = MachineLearningDataVisualizerProvider(context);
-  const jobManagement = MachineLearningJobManagementProvider(context);
+  const jobManagement = MachineLearningJobManagementProvider(context, api);
   const jobSourceSelection = MachineLearningJobSourceSelectionProvider(context);
   const jobTable = MachineLearningJobTableProvider(context);
   const jobTypeSelection = MachineLearningJobTypeSelectionProvider(context);
+  const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context);
   const jobWizardCommon = MachineLearningJobWizardCommonProvider(context);
   const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(context);
   const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(context);
@@ -45,12 +45,12 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     anomalyExplorer,
     api,
     dataFrameAnalytics,
-    dataFrames,
     dataVisualizer,
     jobManagement,
     jobSourceSelection,
     jobTable,
     jobTypeSelection,
+    jobWizardAdvanced,
     jobWizardCommon,
     jobWizardMultiMetric,
     jobWizardPopulation,

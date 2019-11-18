@@ -10,9 +10,20 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
   const testSubjects = getService('testSubjects');
 
   return {
-    async selectSourceIndexPattern(indexPattern: string) {
-      const subj = 'paginatedListItem-' + indexPattern;
-      await testSubjects.clickWhenNotDisabled(subj);
+    async assertSourceListContainsEntry(sourceName: string) {
+      await testSubjects.existOrFail(`savedObjectTitle${sourceName}`);
+    },
+
+    async filterSourceSelection(sourceName: string) {
+      await testSubjects.setValue('savedObjectFinderSearchInput', sourceName, {
+        clearWithKeyboard: true,
+      });
+      await this.assertSourceListContainsEntry(sourceName);
+    },
+
+    async selectSource(sourceName: string) {
+      await this.filterSourceSelection(sourceName);
+      await testSubjects.clickWhenNotDisabled(`savedObjectTitle${sourceName}`);
       await testSubjects.existOrFail('mlPageJobTypeSelection');
     },
   };

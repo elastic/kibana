@@ -21,7 +21,6 @@ const tabSupport: TabSupport = {
   overview: null,
   jobs: 'anomaly_detection',
   settings: 'anomaly_detection',
-  data_frames: null,
   data_frame_analytics: null,
   datavisualizer: null,
   filedatavisualizer: null,

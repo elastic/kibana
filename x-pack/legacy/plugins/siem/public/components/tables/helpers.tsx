@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import styled from 'styled-components';
 import { EuiLink, EuiPopover, EuiToolTip, EuiText, EuiTextColor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
+import styled from 'styled-components';
 
-import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
-import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
-import { Provider } from '../timeline/data_providers/provider';
+import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems, Spacer } from '../page';
+import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
+import { Provider } from '../timeline/data_providers/provider';
 
 const Subtext = styled.div`
   font-size: ${props => props.theme.eui.euiFontSizeXS};
@@ -89,7 +89,7 @@ export const getRowItemDraggables = ({
 }): JSX.Element => {
   if (rowItems != null && rowItems.length > 0) {
     const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
-      const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}`);
+      const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}-${index}`);
       return (
         <React.Fragment key={id}>
           {index !== 0 && (

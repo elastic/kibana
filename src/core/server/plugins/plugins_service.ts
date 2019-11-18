@@ -21,15 +21,14 @@ import { Observable } from 'rxjs';
 import { filter, first, map, mergeMap, tap, toArray } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
-import { ElasticsearchServiceSetup } from '../elasticsearch/elasticsearch_service';
-import { HttpServiceSetup } from '../http/http_service';
+
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
 import { DiscoveredPlugin, DiscoveredPluginInternal, PluginName } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
-import { ContextSetup } from '../context';
+import { InternalCoreSetup } from '../internal_types';
 
 /** @public */
 export interface PluginsServiceSetup {
@@ -46,11 +45,7 @@ export interface PluginsServiceStart {
 }
 
 /** @internal */
-export interface PluginsServiceSetupDeps {
-  context: ContextSetup;
-  elasticsearch: ElasticsearchServiceSetup;
-  http: HttpServiceSetup;
-}
+export type PluginsServiceSetupDeps = InternalCoreSetup;
 
 /** @internal */
 export interface PluginsServiceStartDeps {} // eslint-disable-line @typescript-eslint/no-empty-interface
@@ -175,15 +170,18 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
   private shouldEnablePlugin(
     pluginName: PluginName,
-    pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>
+    pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>,
+    parents: PluginName[] = []
   ): boolean {
     const pluginInfo = pluginEnableStatuses.get(pluginName);
     return (
       pluginInfo !== undefined &&
       pluginInfo.isEnabled &&
-      pluginInfo.plugin.requiredPlugins.every(dependencyName =>
-        this.shouldEnablePlugin(dependencyName, pluginEnableStatuses)
-      )
+      pluginInfo.plugin.requiredPlugins
+        .filter(dep => !parents.includes(dep))
+        .every(dependencyName =>
+          this.shouldEnablePlugin(dependencyName, pluginEnableStatuses, [...parents, pluginName])
+        )
     );
   }
 }

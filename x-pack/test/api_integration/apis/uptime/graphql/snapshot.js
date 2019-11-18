@@ -5,10 +5,13 @@
  */
 
 import { snapshotQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
-import { expectFixtureEql } from './expect_fixture_eql';
+import { expectFixtureEql } from './helpers/expect_fixture_eql';
 
 export default function ({ getService }) {
   describe('snapshot query', () => {
+    before('load heartbeat data', () => getService('esArchiver').load('uptime/full_heartbeat'));
+    after('unload heartbeat index', () => getService('esArchiver').unload('uptime/full_heartbeat'));
+
     const supertest = getService('supertest');
 
     it('will fetch a monitor snapshot summary', async () => {
@@ -17,7 +20,7 @@ export default function ({ getService }) {
         query: snapshotQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          dateRangeEnd: '2025-01-28T19:00:16.078Z',
         },
       };
       const {
@@ -36,7 +39,8 @@ export default function ({ getService }) {
         query: snapshotQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          dateRangeEnd: '2025-01-28T19:00:16.078Z',
+          filters: `{"bool":{"must":[{"match":{"monitor.status":{"query":"down","operator":"and"}}}]}}`,
           statusFilter: 'down',
         },
       };
@@ -56,7 +60,8 @@ export default function ({ getService }) {
         query: snapshotQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
-          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          dateRangeEnd: '2025-01-28T19:00:16.078Z',
+          filters: `{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}}]}}`,
           statusFilter: 'up',
         },
       };
@@ -77,7 +82,7 @@ export default function ({ getService }) {
         query: snapshotQueryString,
         variables: {
           dateRangeStart: '2019-01-25T04:30:54.740Z',
-          dateRangeEnd: '2019-01-28T04:50:54.740Z',
+          dateRangeEnd: '2025-01-28T04:50:54.740Z',
           filters: `{"bool":{"must":[{"match":{"monitor.status":{"query":"down","operator":"and"}}}]}}`,
         },
       };

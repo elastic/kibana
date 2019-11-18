@@ -20,50 +20,57 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../infra/public';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { callApmApi } from '../../../services/rest/callApmApi';
 
 const ErrorGroupOverview: React.SFC = () => {
   const { urlParams, uiFilters } = useUrlParams();
 
   const { serviceName, start, end, sortField, sortDirection } = urlParams;
 
-  const { data: errorDistributionData } = useFetcher(() => {
-    if (serviceName && start && end) {
-      return callApmApi({
-        pathname: '/api/apm/services/{serviceName}/errors/distribution',
-        params: {
-          path: {
-            serviceName
-          },
-          query: {
-            start,
-            end,
-            uiFilters: JSON.stringify(uiFilters)
+  const { data: errorDistributionData } = useFetcher(
+    callApmApi => {
+      if (serviceName && start && end) {
+        return callApmApi({
+          pathname: '/api/apm/services/{serviceName}/errors/distribution',
+          params: {
+            path: {
+              serviceName
+            },
+            query: {
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters)
+            }
           }
-        }
-      });
-    }
-  }, [serviceName, start, end, uiFilters]);
+        });
+      }
+    },
+    [serviceName, start, end, uiFilters]
+  );
 
-  const { data: errorGroupListData } = useFetcher(() => {
-    if (serviceName && start && end) {
-      return callApmApi({
-        pathname: '/api/apm/services/{serviceName}/errors',
-        params: {
-          path: {
-            serviceName
-          },
-          query: {
-            start,
-            end,
-            sortField,
-            sortDirection,
-            uiFilters: JSON.stringify(uiFilters)
+  const { data: errorGroupListData } = useFetcher(
+    callApmApi => {
+      const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
+
+      if (serviceName && start && end) {
+        return callApmApi({
+          pathname: '/api/apm/services/{serviceName}/errors',
+          params: {
+            path: {
+              serviceName
+            },
+            query: {
+              start,
+              end,
+              sortField,
+              sortDirection: normalizedSortDirection,
+              uiFilters: JSON.stringify(uiFilters)
+            }
           }
-        }
-      });
-    }
-  }, [serviceName, start, end, sortField, sortDirection, uiFilters]);
+        });
+      }
+    },
+    [serviceName, start, end, sortField, sortDirection, uiFilters]
+  );
 
   useTrackPageview({
     app: 'apm',

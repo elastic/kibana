@@ -7,3 +7,4 @@
 export { init } from './init';
 export { AlertType, AlertingPlugin, AlertExecutorOptions } from './types';
 export { AlertsClient } from './alerts_client';
+export { PluginSetupContract, PluginStartContract } from './plugin';

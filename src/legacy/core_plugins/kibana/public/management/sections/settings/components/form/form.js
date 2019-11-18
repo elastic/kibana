@@ -29,13 +29,12 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { getCategoryName } from '../../lib';
 import { Field } from '../field';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-class FormUI extends PureComponent {
-
+export class Form extends PureComponent {
   static propTypes = {
     settings: PropTypes.object.isRequired,
     categories: PropTypes.array.isRequired,
@@ -45,7 +44,7 @@ class FormUI extends PureComponent {
     clear: PropTypes.func.isRequired,
     showNoResultsMessage: PropTypes.bool.isRequired,
     enableSaving: PropTypes.bool.isRequired,
-  }
+  };
 
   renderClearQueryLink(totalSettings, currentSettings) {
     const { clearQuery } = this.props;
@@ -58,7 +57,7 @@ class FormUI extends PureComponent {
               id="kbn.management.settings.form.searchResultText"
               defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
               values={{
-                settingsCount: (totalSettings - currentSettings),
+                settingsCount: totalSettings - currentSettings,
                 clearSearch: (
                   <EuiLink onClick={clearQuery}>
                     <em>
@@ -147,16 +146,12 @@ class FormUI extends PureComponent {
 
     return (
       <Fragment>
-        {
-          currentCategories.length ? currentCategories.map((category) => {
-            return (
-              this.renderCategory(category, settings[category], categoryCounts[category]) // fix this
-            );
-          }) : this.maybeRenderNoSettings(clearQuery)
-        }
+        {currentCategories.length
+          ? currentCategories.map(category => {
+            return this.renderCategory(category, settings[category], categoryCounts[category]); // fix this
+          })
+          : this.maybeRenderNoSettings(clearQuery)}
       </Fragment>
     );
   }
 }
-
-export const Form = injectI18n(FormUI);

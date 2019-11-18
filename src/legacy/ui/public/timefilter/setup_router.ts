@@ -22,15 +22,14 @@ import { IScope } from 'angular';
 import moment from 'moment';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import chrome from 'ui/chrome';
-import { RefreshInterval, TimeRange } from 'src/plugins/data/public';
-import { TimefilterContract } from '../../../core_plugins/data/public/timefilter';
+import { RefreshInterval, TimeRange, TimefilterContract } from 'src/plugins/data/public';
 
 // TODO
 // remove everything underneath once globalState is no longer an angular service
 // and listener can be registered without angular.
 function convertISO8601(stringTime: string): string {
   const obj = moment(stringTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
-  return obj.isValid() ? obj.toString() : stringTime;
+  return obj.isValid() ? obj.toISOString() : stringTime;
 }
 
 export function getTimefilterConfig() {

@@ -994,6 +994,9 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               },
                               "customHeight": 74,
                               "series": Object {
+                                "stackAccessors": Array [
+                                  "y0",
+                                ],
                                 "xScaleType": "ordinal",
                                 "yScaleType": "linear",
                               },

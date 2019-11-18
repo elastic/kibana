@@ -18,3 +18,13 @@
  */
 
 export * from './ast';
+export { nodeTypes } from './node_types';
+
+export type JsonValue = null | boolean | number | string | JsonObject | JsonArray;
+
+export interface JsonObject {
+  [key: string]: JsonValue;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface JsonArray extends Array<JsonValue> {}

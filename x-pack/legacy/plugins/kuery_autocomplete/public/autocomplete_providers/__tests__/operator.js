@@ -31,7 +31,7 @@ describe('Kuery operator suggestions', function () {
     const fieldName = 'custom_user_field';
     const suggestions = getSuggestions({ fieldName });
     expect(suggestions.length).to.eql(1);
-    expect(suggestions[0].text).to.be(':* ');
+    expect(suggestions[0].text).to.be(': * ');
   });
 
   it('should return equals for string fields', () => {
@@ -55,5 +55,10 @@ describe('Kuery operator suggestions', function () {
     suggestions.forEach(suggestion => {
       expect(suggestion).to.have.property('description');
     });
+  });
+
+  it('should handle nested paths', () => {
+    const suggestions = getSuggestions({ fieldName: 'child', nestedPath: 'nestedField' });
+    expect(suggestions.length).to.be.greaterThan(0);
   });
 });

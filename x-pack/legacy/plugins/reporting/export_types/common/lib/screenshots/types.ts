@@ -5,7 +5,6 @@
  */
 
 import { ElementPosition, ConditionalHeaders } from '../../../../types';
-import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
 import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
 
@@ -18,8 +17,7 @@ export interface ScreenshotObservableOpts {
 }
 
 export interface TimeRange {
-  from: any;
-  to: any;
+  duration: string;
 }
 
 export interface AttributesMap {
@@ -32,19 +30,7 @@ export interface ElementsPositionAndAttribute {
 }
 
 export interface Screenshot {
-  base64EncodedData: any;
-  title: any;
-  description: any;
-}
-
-export interface ScreenShotOpts {
-  elementsPositionAndAttributes: ElementsPositionAndAttribute[];
-}
-
-export interface BrowserOpts {
-  browser: HeadlessBrowser;
-}
-
-export interface TimeRangeOpts {
-  timeRange: TimeRange;
+  base64EncodedData: string;
+  title: string;
+  description: string;
 }

@@ -26,12 +26,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { memoize, padLeft, range } from 'lodash';
+import { padLeft, range } from 'lodash';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import { toastNotifications } from 'ui/notify';
-import { LegacyCoreStart } from 'src/core/public';
+import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { KibanaCoreContext } from '../../../../../../observability/public';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { KibanaLink } from '../../../shared/Links/KibanaLink';
@@ -39,12 +38,6 @@ import { createErrorGroupWatch, Schedule } from './createErrorGroupWatch';
 import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
 
 type ScheduleKey = keyof Schedule;
-
-const getUserTimezone = memoize((core: LegacyCoreStart): string => {
-  return core.uiSettings.get('dateFormat:tz') === 'Browser'
-    ? moment.tz.guess()
-    : core.uiSettings.get('dateFormat:tz');
-});
 
 const SmallInput = styled.div`
   .euiFormRow {
@@ -218,14 +211,16 @@ export class WatcherFlyout extends Component<
   };
 
   public addErrorToast = () => {
-    toastNotifications.addWarning({
+    const core = this.context;
+
+    core.notifications.toasts.addWarning({
       title: i18n.translate(
         'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreationFailedNotificationTitle',
         {
           defaultMessage: 'Watch creation failed'
         }
       ),
-      text: (
+      text: toMountPoint(
         <p>
           {i18n.translate(
             'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreationFailedNotificationText',
@@ -240,14 +235,16 @@ export class WatcherFlyout extends Component<
   };
 
   public addSuccessToast = (id: string) => {
-    toastNotifications.addSuccess({
+    const core = this.context;
+
+    core.notifications.toasts.addSuccess({
       title: i18n.translate(
         'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationTitle',
         {
           defaultMessage: 'New watch created!'
         }
       ),
-      text: (
+      text: toMountPoint(
         <p>
           {i18n.translate(
             'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationText',
@@ -259,16 +256,18 @@ export class WatcherFlyout extends Component<
               }
             }
           )}{' '}
-          <KibanaLink
-            path={`/management/elasticsearch/watcher/watches/watch/${id}`}
-          >
-            {i18n.translate(
-              'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationText.viewWatchLinkText',
-              {
-                defaultMessage: 'View watch'
-              }
-            )}
-          </KibanaLink>
+          <KibanaCoreContext.Provider value={core}>
+            <KibanaLink
+              path={`/management/elasticsearch/watcher/watches/watch/${id}`}
+            >
+              {i18n.translate(
+                'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationText.viewWatchLinkText',
+                {
+                  defaultMessage: 'View watch'
+                }
+              )}
+            </KibanaLink>
+          </KibanaCoreContext.Provider>
         </p>
       )
     });
@@ -279,17 +278,13 @@ export class WatcherFlyout extends Component<
       return null;
     }
 
-    const core = this.context;
-    const userTimezoneSetting = getUserTimezone(core);
     const dailyTime = this.state.daily;
     const inputTime = `${dailyTime}Z`; // Add tz to make into UTC
     const inputFormat = 'HH:mmZ'; // Parse as 24 hour w. tz
-    const dailyTimeFormatted = moment(inputTime, inputFormat)
-      .tz(userTimezoneSetting)
-      .format('HH:mm'); // Format as 24h
-    const dailyTime12HourFormatted = moment(inputTime, inputFormat)
-      .tz(userTimezoneSetting)
-      .format('hh:mm A (z)'); // Format as 12h w. tz
+    const dailyTimeFormatted = moment(inputTime, inputFormat).format('HH:mm'); // Format as 24h
+    const dailyTime12HourFormatted = moment(inputTime, inputFormat).format(
+      'hh:mm A (z)'
+    ); // Format as 12h w. tz
 
     // Generate UTC hours for Daily Report select field
     const intervalHours = range(24).map(i => {

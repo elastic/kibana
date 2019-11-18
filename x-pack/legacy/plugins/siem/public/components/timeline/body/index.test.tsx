@@ -80,7 +80,7 @@ describe('Body', () => {
       ).toEqual(true);
     });
 
-    test('it renders the vertical scroll container', () => {
+    test('it renders the scroll container', () => {
       const wrapper = mount(
         <TestProviders>
           <Body
@@ -112,7 +112,7 @@ describe('Body', () => {
 
       expect(
         wrapper
-          .find('[data-test-subj="vertical-scroll-container"]')
+          .find('[data-test-subj="timeline-body"]')
           .first()
           .exists()
       ).toEqual(true);
@@ -208,13 +208,14 @@ describe('Body', () => {
 
     const addaNoteToEvent = (wrapper: ReactWrapper, note: string) => {
       wrapper
-        .find('[data-test-subj="timeline-notes-icon"]')
+        .find('[data-test-subj="add-note"]')
         .first()
+        .find('button')
         .simulate('click');
       wrapper.update();
       wrapper
         .find('[data-test-subj="new-note-tabs"] textarea')
-        .simulate('change', { target: { value: 'hello world' } });
+        .simulate('change', { target: { value: note } });
       wrapper.update();
       wrapper
         .find('button[data-test-subj="add-note"]')
@@ -313,13 +314,11 @@ describe('Body', () => {
         />
       );
       addaNoteToEvent(wrapper, 'hello world');
-
       dispatchAddNoteToEvent.mockClear();
       dispatchOnPinEvent.mockClear();
       wrapper.setProps({ pinnedEventIds: { 1: true } });
       wrapper.update();
       addaNoteToEvent(wrapper, 'new hello world');
-
       expect(dispatchAddNoteToEvent).toHaveBeenCalled();
       expect(dispatchOnPinEvent).not.toHaveBeenCalled();
     });

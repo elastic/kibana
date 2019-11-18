@@ -7,7 +7,7 @@
 import { xyVisualization } from './xy_visualization';
 import { Position } from '@elastic/charts';
 import { Operation } from '../types';
-import { State } from './types';
+import { State, SeriesType } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_plugin/mocks';
 import { generateId } from '../id_generator';
 import { Ast } from '@kbn/interpreter/target/common';
@@ -16,7 +16,6 @@ jest.mock('../id_generator');
 
 function exampleState(): State {
   return {
-    isHorizontal: false,
     legend: { position: Position.Bottom, isVisible: true },
     preferredSeriesType: 'bar',
     layers: [
@@ -32,6 +31,60 @@ function exampleState(): State {
 }
 
 describe('xy_visualization', () => {
+  describe('getDescription', () => {
+    function mixedState(...types: SeriesType[]) {
+      const state = exampleState();
+      return {
+        ...state,
+        layers: types.map((t, i) => ({
+          ...state.layers[0],
+          layerId: `layer_${i}`,
+          seriesType: t,
+        })),
+      };
+    }
+
+    it('should show mixed xy chart when multilple series types', () => {
+      const desc = xyVisualization.getDescription(mixedState('bar', 'line'));
+
+      expect(desc.label).toEqual('Mixed XY chart');
+    });
+
+    it('should show the preferredSeriesType if there are no layers', () => {
+      const desc = xyVisualization.getDescription(mixedState());
+
+      // 'test-file-stub' is a hack, but it at least means we aren't using
+      // a standard icon here.
+      expect(desc.icon).toEqual('test-file-stub');
+      expect(desc.label).toEqual('Bar chart');
+    });
+
+    it('should show mixed horizontal bar chart when multiple horizontal bar types', () => {
+      const desc = xyVisualization.getDescription(
+        mixedState('bar_horizontal', 'bar_horizontal_stacked')
+      );
+
+      expect(desc.label).toEqual('Mixed horizontal bar chart');
+    });
+
+    it('should show bar chart when bar only', () => {
+      const desc = xyVisualization.getDescription(mixedState('bar_horizontal', 'bar_horizontal'));
+
+      expect(desc.label).toEqual('Horizontal bar chart');
+    });
+
+    it('should show the chart description if not mixed', () => {
+      expect(xyVisualization.getDescription(mixedState('area')).label).toEqual('Area chart');
+      expect(xyVisualization.getDescription(mixedState('line')).label).toEqual('Line chart');
+      expect(xyVisualization.getDescription(mixedState('area_stacked')).label).toEqual(
+        'Stacked area chart'
+      );
+      expect(xyVisualization.getDescription(mixedState('bar_horizontal_stacked')).label).toEqual(
+        'Stacked horizontal bar chart'
+      );
+    });
+  });
+
   describe('#initialize', () => {
     it('loads default state', () => {
       (generateId as jest.Mock)
@@ -48,7 +101,6 @@ describe('xy_visualization', () => {
 
       expect(initialState).toMatchInlineSnapshot(`
         Object {
-          "isHorizontal": false,
           "layers": Array [
             Object {
               "accessors": Array [
@@ -67,7 +119,7 @@ describe('xy_visualization', () => {
             "position": "right",
           },
           "preferredSeriesType": "bar_stacked",
-          "title": "Empty XY Chart",
+          "title": "Empty XY chart",
         }
       `);
     });

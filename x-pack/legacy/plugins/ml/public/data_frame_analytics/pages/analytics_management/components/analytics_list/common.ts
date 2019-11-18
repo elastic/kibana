@@ -11,6 +11,7 @@ export enum DATA_FRAME_TASK_STATE {
   FAILED = 'failed',
   REINDEXING = 'reindexing',
   STARTED = 'started',
+  STARTING = 'starting',
   STOPPED = 'stopped',
 }
 
@@ -53,12 +54,21 @@ export interface DataFrameAnalyticsStats {
   state: DATA_FRAME_TASK_STATE;
 }
 
-export function isDataFrameAnalyticsRunning(stats: DataFrameAnalyticsStats) {
+export function isDataFrameAnalyticsFailed(state: DATA_FRAME_TASK_STATE) {
+  return state === DATA_FRAME_TASK_STATE.FAILED;
+}
+
+export function isDataFrameAnalyticsRunning(state: DATA_FRAME_TASK_STATE) {
   return (
-    stats.state === DATA_FRAME_TASK_STATE.ANALYZING ||
-    stats.state === DATA_FRAME_TASK_STATE.STARTED ||
-    stats.state === DATA_FRAME_TASK_STATE.REINDEXING
+    state === DATA_FRAME_TASK_STATE.ANALYZING ||
+    state === DATA_FRAME_TASK_STATE.REINDEXING ||
+    state === DATA_FRAME_TASK_STATE.STARTED ||
+    state === DATA_FRAME_TASK_STATE.STARTING
   );
+}
+
+export function isDataFrameAnalyticsStopped(state: DATA_FRAME_TASK_STATE) {
+  return state === DATA_FRAME_TASK_STATE.STOPPED;
 }
 
 export function isDataFrameAnalyticsStats(arg: any): arg is DataFrameAnalyticsStats {
@@ -107,6 +117,6 @@ export function isCompletedAnalyticsJob(stats: DataFrameAnalyticsStats) {
   return stats.state === DATA_FRAME_TASK_STATE.STOPPED && progress === 100;
 }
 
-export function getResultsUrl(jobId: string) {
-  return `ml#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId}))`;
+export function getResultsUrl(jobId: string, analysisType: string, status: DATA_FRAME_TASK_STATE) {
+  return `ml#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType},jobStatus:${status}))`;
 }

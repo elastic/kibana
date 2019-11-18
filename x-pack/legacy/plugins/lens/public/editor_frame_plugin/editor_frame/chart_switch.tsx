@@ -12,13 +12,13 @@ import {
   EuiKeyPadMenu,
   EuiKeyPadMenuItemButton,
   EuiButtonEmpty,
-  EuiTitle,
 } from '@elastic/eui';
 import { flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Visualization, FramePublicAPI, Datasource } from '../../types';
 import { Action } from './state_management';
 import { getSuggestions, switchToSuggestion, Suggestion } from './suggestion_helpers';
+import { trackUiEvent } from '../../lens_ui_telemetry';
 
 interface VisualizationSelection {
   visualizationId: string;
@@ -28,6 +28,7 @@ interface VisualizationSelection {
   dataLoss: 'nothing' | 'layers' | 'everything' | 'columns';
   datasourceId?: string;
   datasourceState?: unknown;
+  sameDatasources?: boolean;
 }
 
 interface Props {
@@ -52,8 +53,8 @@ function VisualizationSummary(props: Props) {
   if (!visualization) {
     return (
       <>
-        {i18n.translate('xpack.lens.configPanel.chooseVisualization', {
-          defaultMessage: 'Choose a visualization',
+        {i18n.translate('xpack.lens.configPanel.selectVisualization', {
+          defaultMessage: 'Select a visualization',
         })}
       </>
     );
@@ -64,7 +65,7 @@ function VisualizationSummary(props: Props) {
   return (
     <>
       {description.icon && (
-        <EuiIcon className="lnsChartSwitch__summaryIcon" type={description.icon} />
+        <EuiIcon size="xl" className="lnsChartSwitch__summaryIcon" type={description.icon} />
       )}
       {description.label}
     </>
@@ -77,6 +78,8 @@ export function ChartSwitch(props: Props) {
   const commitSelection = (selection: VisualizationSelection) => {
     setFlyoutOpen(false);
 
+    trackUiEvent(`chart_switch`);
+
     switchToSuggestion(
       props.framePublicAPI,
       props.dispatch,
@@ -86,6 +89,13 @@ export function ChartSwitch(props: Props) {
       },
       'SWITCH_VISUALIZATION'
     );
+
+    if (
+      (!selection.datasourceId && !selection.sameDatasources) ||
+      selection.dataLoss === 'everything'
+    ) {
+      props.framePublicAPI.removeLayers(Object.keys(props.framePublicAPI.datasourceLayers));
+    }
   };
 
   function getSelection(
@@ -103,6 +113,7 @@ export function ChartSwitch(props: Props) {
         dataLoss: 'nothing',
         keptLayerIds: Object.keys(props.framePublicAPI.datasourceLayers),
         getVisualizationState: () => switchVisType(subVisualizationId, props.visualizationState),
+        sameDatasources: true,
       };
     }
 
@@ -157,6 +168,7 @@ export function ChartSwitch(props: Props) {
           v.visualizationTypes.map(t => ({
             visualizationId: v.id,
             ...t,
+            icon: t.largeIcon || t.icon,
           }))
         )
       ).map(visualizationType => ({
@@ -178,27 +190,28 @@ export function ChartSwitch(props: Props) {
       ownFocus
       initialFocus=".lnsChartSwitch__popoverPanel"
       panelClassName="lnsChartSwitch__popoverPanel"
+      anchorClassName="eui-textTruncate"
       panelPaddingSize="s"
       button={
         <EuiButtonEmpty
-          size="xs"
+          className="lnsChartSwitch__triggerButton"
           onClick={() => setFlyoutOpen(!flyoutOpen)}
           data-test-subj="lnsChartSwitchPopover"
+          flush="left"
+          iconSide="right"
+          iconType="arrowDown"
+          color="text"
         >
-          (
-          {i18n.translate('xpack.lens.configPanel.changeVisualization', {
-            defaultMessage: 'change',
-          })}
-          )
+          <VisualizationSummary {...props} />
         </EuiButtonEmpty>
       }
       isOpen={flyoutOpen}
       closePopover={() => setFlyoutOpen(false)}
-      anchorPosition="leftUp"
+      anchorPosition="downLeft"
     >
       <EuiPopoverTitle>
-        {i18n.translate('xpack.lens.configPanel.chooseVisualization', {
-          defaultMessage: 'Choose a visualization',
+        {i18n.translate('xpack.lens.configPanel.selectVisualization', {
+          defaultMessage: 'Select a visualization',
         })}
       </EuiPopoverTitle>
       <EuiKeyPadMenu>
@@ -225,22 +238,14 @@ export function ChartSwitch(props: Props) {
             }
             betaBadgeIconType={v.selection.dataLoss !== 'nothing' ? 'alert' : undefined}
           >
-            <EuiIcon type={v.icon || 'empty'} size="l" />
+            <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} size="l" />
           </EuiKeyPadMenuItemButton>
         ))}
       </EuiKeyPadMenu>
     </EuiPopover>
   );
 
-  return (
-    <div className="lnsChartSwitch__header">
-      <EuiTitle size="xs">
-        <h3>
-          <VisualizationSummary {...props} /> {popover}
-        </h3>
-      </EuiTitle>
-    </div>
-  );
+  return <div className="lnsChartSwitch__header">{popover}</div>;
 }
 
 function getTopSuggestion(

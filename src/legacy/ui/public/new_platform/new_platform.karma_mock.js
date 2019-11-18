@@ -19,6 +19,12 @@
 
 import sinon from 'sinon';
 
+const mockObservable = () => {
+  return {
+    subscribe: () => {}
+  };
+};
+
 export const npSetup = {
   core: {
     chrome: {}
@@ -31,8 +37,33 @@ export const npSetup = {
       registerFunction: sinon.fake(),
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
+      __LEGACY: {
+        renderers: {
+          register: () => undefined,
+          get: () => null,
+        },
+        getExecutor: () => ({
+          interpreter: {
+            interpretAst: () => {},
+          },
+        }),
+      },
     },
     data: {
+      autocomplete: {
+        addProvider: sinon.fake(),
+        getProvider: sinon.fake(),
+      },
+      query: {
+        filterManager: sinon.fake(),
+        timefilter: {
+          timefilter: sinon.fake(),
+          history: sinon.fake(),
+        }
+      },
+    },
+    devTools: {
+      register: () => {},
     },
     inspector: {
       registerView: () => undefined,
@@ -50,6 +81,10 @@ export const npSetup = {
   },
 };
 
+let refreshInterval = undefined;
+let isTimeRangeSelectorEnabled = true;
+let isAutoRefreshSelectorEnabled = true;
+
 export const npStart = {
   core: {
     chrome: {}
@@ -65,7 +100,68 @@ export const npStart = {
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
     },
-    data: {},
+    devTools: {
+      getSortedDevTools: () => [],
+    },
+    data: {
+      autocomplete: {
+        getProvider: sinon.fake(),
+      },
+      getSuggestions: sinon.fake(),
+      query: {
+        filterManager: {
+          getFetches$: sinon.fake(),
+          getFilters: sinon.fake(),
+          getAppFilters: sinon.fake(),
+          getGlobalFilters: sinon.fake(),
+          removeFilter: sinon.fake(),
+          addFilters: sinon.fake(),
+          setFilters: sinon.fake(),
+          removeAll: sinon.fake(),
+          getUpdates$: mockObservable,
+
+        },
+        timefilter: {
+          timefilter: {
+            getFetch$: mockObservable,
+            getAutoRefreshFetch$: mockObservable,
+            getEnabledUpdated$: mockObservable,
+            getTimeUpdate$: mockObservable,
+            getRefreshIntervalUpdate$: mockObservable,
+            isTimeRangeSelectorEnabled: () => {
+              return isTimeRangeSelectorEnabled;
+            },
+            isAutoRefreshSelectorEnabled: () => {
+              return isAutoRefreshSelectorEnabled;
+            },
+            disableAutoRefreshSelector: () => {
+              isAutoRefreshSelectorEnabled = false;
+            },
+            enableAutoRefreshSelector: () => {
+              isAutoRefreshSelectorEnabled = true;
+            },
+            getRefreshInterval: () => {
+              return refreshInterval;
+            },
+            setRefreshInterval: (interval) => {
+              refreshInterval = interval;
+            },
+            enableTimeRangeSelector: () => {
+              isTimeRangeSelectorEnabled = true;
+            },
+            disableTimeRangeSelector: () => {
+              isTimeRangeSelectorEnabled = false;
+            },
+            getTime: sinon.fake(),
+            setTime: sinon.fake(),
+            getBounds: sinon.fake(),
+            calculateBounds: sinon.fake(),
+            createFilter: sinon.fake(),
+          },
+          history: sinon.fake(),
+        },
+      },
+    },
     inspector: {
       isAvailable: () => false,
       open: () => ({
@@ -88,6 +184,10 @@ export const npStart = {
 
 export function __setup__(coreSetup) {
   npSetup.core = coreSetup;
+
+  // no-op application register calls (this is overwritten to
+  // bootstrap an LP plugin outside of tests)
+  npSetup.core.application.register = () => {};
 }
 
 export function __start__(coreStart) {

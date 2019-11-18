@@ -105,9 +105,5 @@ export class EmbeddableFlyoutPortal extends React.Component<Props> {
 }
 
 export const AddEmbeddablePanel = compose<Props, { onClose: () => void }>(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
-  )
+  connect(mapStateToProps, mapDispatchToProps, mergeProps)
 )(EmbeddableFlyoutPortal);

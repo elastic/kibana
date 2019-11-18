@@ -6,17 +6,15 @@
 
 import { EuiBasicTable } from '@elastic/eui';
 import { sortByOrder } from 'lodash';
-import React, { useMemo, useCallback } from 'react';
-import { idx } from '@kbn/elastic-idx';
-import { StringMap } from '../../../../typings/common';
+import React, { useMemo, useCallback, ReactNode } from 'react';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 
 // TODO: this should really be imported from EUI
 export interface ITableColumn<T> {
-  name: string;
-  actions?: StringMap[];
+  name: ReactNode;
+  actions?: Array<Record<string, unknown>>;
   field?: string;
   dataType?: string;
   align?: string;
@@ -43,7 +41,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     columns,
     initialPageIndex = 0,
     initialPageSize = 10,
-    initialSortField = idx(props, _ => _.columns[0].field) || '',
+    initialSortField = props.columns[0]?.field || '',
     initialSortDirection = 'asc',
     hidePerPageOptions = true,
     noItemsMessage,

@@ -27,6 +27,7 @@ import Stats from 'webpack/lib/Stats';
 import * as threadLoader from 'thread-loader';
 import webpackMerge from 'webpack-merge';
 import { DynamicDllPlugin } from './dynamic_dll_plugin';
+import WrapperPlugin from 'wrapper-webpack-plugin';
 
 import { defaults } from 'lodash';
 
@@ -36,6 +37,7 @@ import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 
 const POSTCSS_CONFIG_PATH = require.resolve('./postcss.config');
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
+const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
 const BABEL_EXCLUDE_RE = [
   /[\/\\](webpackShims|node_modules|bower_components)[\/\\]/,
 ];
@@ -43,6 +45,7 @@ const STATS_WARNINGS_FILTER = new RegExp([
   '(export .* was not found in)',
   '|(chunk .* \\[mini-css-extract-plugin\\]\\\nConflicting order between:)'
 ].join(''));
+const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 
 function recursiveIssuer(m) {
   if (m.issuer) {
@@ -383,9 +386,7 @@ export default class BaseOptimizer {
                 loader: 'babel-loader',
                 options: {
                   babelrc: false,
-                  presets: [
-                    BABEL_PRESET_PATH,
-                  ],
+                  presets: this.getPresets()
                 },
               }
             ]),
@@ -455,6 +456,22 @@ export default class BaseOptimizer {
       ]
     };
 
+    const coverageConfig = {
+      plugins: [
+        new WrapperPlugin({
+          test: /commons\.bundle\.js$/, // only wrap output of bundle files with '.js' extension
+          header: `
+            window.flushCoverageToLog = function () {
+              if (window.__coverage__) {
+                console.log('coveragejson:' + btoa(JSON.stringify(window.__coverage__)));
+              }
+            };
+            window.addEventListener('beforeunload', window.flushCoverageToLog);
+          `
+        }),
+      ]
+    };
+
     // in production we set the process.env.NODE_ENV and run
     // the terser minimizer over our bundles
     const productionConfig = {
@@ -462,8 +479,10 @@ export default class BaseOptimizer {
       optimization: {
         minimizer: [
           new TerserPlugin({
-            parallel: true,
+            parallel: this.getThreadLoaderPoolConfig().workers,
             sourceMap: false,
+            cache: false,
+            extractComments: false,
             terserOptions: {
               compress: false,
               mangle: false
@@ -475,6 +494,9 @@ export default class BaseOptimizer {
 
     return this.uiBundles.getExtendedConfig(
       webpackMerge(
+        IS_CODE_COVERAGE
+          ? coverageConfig
+          : {},
         commonConfig,
         IS_KIBANA_DISTRIBUTABLE
           ? isDistributableConfig
@@ -521,7 +543,8 @@ export default class BaseOptimizer {
       `Optimizations failure.\n${details.split('\n').join('\n    ')}\n`,
       stats.toJson(defaults({
         warningsFilter: STATS_WARNINGS_FILTER,
-        ...Stats.presetToOptions('detailed')
+        ...Stats.presetToOptions('detailed'),
+        maxModules: 1000,
       }))
     );
   }
@@ -533,5 +556,11 @@ export default class BaseOptimizer {
         entryPoints[`plugin/${pluginId}`] = `${plugin.path}/public`;
         return entryPoints;
       }, {});
+  }
+
+  getPresets() {
+    return IS_CODE_COVERAGE
+      ? [ ISTANBUL_PRESET_PATH, BABEL_PRESET_PATH, ]
+      : [ BABEL_PRESET_PATH, ];
   }
 }

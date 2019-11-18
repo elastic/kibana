@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { noop } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
-import * as React from 'react';
-import styled from 'styled-components';
+import React, { useEffect, useCallback } from 'react';
+import { noop } from 'lodash/fp';
+import styled, { css } from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
-
+import { CategoriesPane } from './categories_pane';
+import { FieldsPane } from './fields_pane';
+import { Header } from './header';
 import {
   CATEGORY_PANE_WIDTH,
   FIELDS_PANE_WIDTH,
@@ -20,27 +22,26 @@ import {
   getFieldBrowserSearchInputClassName,
   PANES_FLEX_GROUP_WIDTH,
 } from './helpers';
-import { FieldBrowserProps, OnFieldSelected, OnHideFieldBrowser } from './types';
-import { Header } from './header';
-import { CategoriesPane } from './categories_pane';
-import { FieldsPane } from './fields_pane';
-const FieldsBrowserContainer = styled.div<{ width: number }>`
-  background-color: ${props => props.theme.eui.euiColorLightestShade};
-  border: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};
-  border-radius: 4px;
-  padding: 8px 8px 16px 8px;
-  position: absolute;
-  top: 25px;
-  ${({ width }) => `width: ${width}px`};
-  z-index: 9990;
-`;
+import { FieldBrowserProps, OnHideFieldBrowser } from './types';
 
+const FieldsBrowserContainer = styled.div<{ width: number }>`
+  ${({ theme, width }) => css`
+    background-color: ${theme.eui.euiColorLightestShade};
+    border: ${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiColorMediumShade};
+    border-radius: ${theme.eui.euiBorderRadius};
+    left: 0;
+    padding: ${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.m};
+    position: absolute;
+    top: calc(100% + ${theme.eui.euiSize});
+    width: ${width}px;
+    z-index: 9990;
+  `}
+`;
 FieldsBrowserContainer.displayName = 'FieldsBrowserContainer';
 
 const PanesFlexGroup = styled(EuiFlexGroup)`
   width: ${PANES_FLEX_GROUP_WIDTH}px;
 `;
-
 PanesFlexGroup.displayName = 'PanesFlexGroup';
 
 type Props = Pick<
@@ -101,34 +102,86 @@ type Props = Pick<
  * This component has no internal state, but it uses lifecycle methods to
  * set focus to the search input, scroll to the selected category, etc
  */
-export class FieldsBrowser extends React.PureComponent<Props> {
-  public componentDidMount() {
-    this.scrollViews();
-    this.focusInput();
-  }
+export const FieldsBrowser = React.memo<Props>(
+  ({
+    browserFields,
+    columnHeaders,
+    filteredBrowserFields,
+    isEventViewer,
+    isSearching,
+    onCategorySelected,
+    onFieldSelected,
+    onHideFieldBrowser,
+    onSearchInputChange,
+    onOutsideClick,
+    onUpdateColumns,
+    searchInput,
+    selectedCategoryId,
+    timelineId,
+    toggleColumn,
+    width,
+  }) => {
+    /** Focuses the input that filters the field browser */
+    const focusInput = () => {
+      const elements = document.getElementsByClassName(
+        getFieldBrowserSearchInputClassName(timelineId)
+      );
 
-  public componentDidUpdate() {
-    this.scrollViews();
-    this.focusInput(); // always re-focus the input to enable additional filtering
-  }
+      if (elements.length > 0) {
+        (elements[0] as HTMLElement).focus(); // this cast is required because focus() does not exist on every `Element` returned by `getElementsByClassName`
+      }
+    };
 
-  public render() {
-    const {
-      columnHeaders,
-      browserFields,
-      filteredBrowserFields,
-      searchInput,
-      isEventViewer,
-      isSearching,
-      onCategorySelected,
-      onFieldSelected,
-      onOutsideClick,
-      onUpdateColumns,
-      selectedCategoryId,
-      timelineId,
-      toggleColumn,
-      width,
-    } = this.props;
+    /** Invoked when the user types in the input to filter the field browser */
+    const onInputChange = useCallback(
+      (event: React.ChangeEvent<HTMLInputElement>) => {
+        onSearchInputChange(event.target.value);
+      },
+      [onSearchInputChange]
+    );
+
+    const selectFieldAndHide = useCallback(
+      (fieldId: string) => {
+        if (onFieldSelected != null) {
+          onFieldSelected(fieldId);
+        }
+
+        onHideFieldBrowser();
+      },
+      [onFieldSelected, onHideFieldBrowser]
+    );
+
+    const scrollViews = () => {
+      if (selectedCategoryId !== '') {
+        const categoryPaneTitles = document.getElementsByClassName(
+          getCategoryPaneCategoryClassName({
+            categoryId: selectedCategoryId,
+            timelineId,
+          })
+        );
+
+        if (categoryPaneTitles.length > 0) {
+          categoryPaneTitles[0].scrollIntoView();
+        }
+
+        const fieldPaneTitles = document.getElementsByClassName(
+          getFieldBrowserCategoryTitleClassName({
+            categoryId: selectedCategoryId,
+            timelineId,
+          })
+        );
+
+        if (fieldPaneTitles.length > 0) {
+          fieldPaneTitles[0].scrollIntoView();
+        }
+      }
+
+      focusInput(); // always re-focus the input to enable additional filtering
+    };
+
+    useEffect(() => {
+      scrollViews();
+    }, [selectedCategoryId, timelineId]);
 
     return (
       <EuiOutsideClickDetector
@@ -143,7 +196,7 @@ export class FieldsBrowser extends React.PureComponent<Props> {
             isEventViewer={isEventViewer}
             isSearching={isSearching}
             onOutsideClick={onOutsideClick}
-            onSearchInputChange={this.onInputChange}
+            onSearchInputChange={onInputChange}
             onUpdateColumns={onUpdateColumns}
             searchInput={searchInput}
             timelineId={timelineId}
@@ -169,7 +222,7 @@ export class FieldsBrowser extends React.PureComponent<Props> {
                 data-test-subj="fields-pane"
                 filteredBrowserFields={filteredBrowserFields}
                 onCategorySelected={onCategorySelected}
-                onFieldSelected={this.selectFieldAndHide}
+                onFieldSelected={selectFieldAndHide}
                 onUpdateColumns={onUpdateColumns}
                 searchInput={searchInput}
                 selectedCategoryId={selectedCategoryId}
@@ -183,59 +236,4 @@ export class FieldsBrowser extends React.PureComponent<Props> {
       </EuiOutsideClickDetector>
     );
   }
-
-  /** Focuses the input that filters the field browser */
-  private focusInput = () => {
-    const elements = document.getElementsByClassName(
-      getFieldBrowserSearchInputClassName(this.props.timelineId)
-    );
-
-    if (elements.length > 0) {
-      (elements[0] as HTMLElement).focus(); // this cast is required because focus() does not exist on every `Element` returned by `getElementsByClassName`
-    }
-  };
-
-  /** Invoked when the user types in the input to filter the field browser */
-  private onInputChange = (event: React.ChangeEvent<HTMLInputElement>) =>
-    this.props.onSearchInputChange(event.target.value);
-
-  private selectFieldAndHide: OnFieldSelected = (fieldId: string) => {
-    const { onFieldSelected, onHideFieldBrowser } = this.props;
-
-    if (onFieldSelected != null) {
-      onFieldSelected(fieldId);
-    }
-
-    onHideFieldBrowser();
-  };
-
-  private scrollViews = () => {
-    const { selectedCategoryId, timelineId } = this.props;
-
-    if (this.props.selectedCategoryId !== '') {
-      const categoryPaneTitles = document.getElementsByClassName(
-        getCategoryPaneCategoryClassName({
-          categoryId: selectedCategoryId,
-          timelineId,
-        })
-      );
-
-      if (categoryPaneTitles.length > 0) {
-        categoryPaneTitles[0].scrollIntoView();
-      }
-
-      const fieldPaneTitles = document.getElementsByClassName(
-        getFieldBrowserCategoryTitleClassName({
-          categoryId: selectedCategoryId,
-          timelineId,
-        })
-      );
-
-      if (fieldPaneTitles.length > 0) {
-        fieldPaneTitles[0].scrollIntoView();
-      }
-    }
-
-    this.focusInput(); // always re-focus the input to enable additional filtering
-  };
-}
+);

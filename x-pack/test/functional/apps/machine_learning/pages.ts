@@ -55,11 +55,6 @@ export default function({ getService }: FtrProviderContext) {
       await ml.settings.assertSettingsFilterlistLinkExists();
     });
 
-    it('loads the data frame page', async () => {
-      await ml.navigation.navigateToDataFrames();
-      await ml.dataFrames.assertDataFrameEmptyListMessageExists();
-    });
-
     it('loads the data frame analytics page', async () => {
       await ml.navigation.navigateToDataFrameAnalytics();
       await ml.dataFrameAnalytics.assertEmptyListMessageExists();

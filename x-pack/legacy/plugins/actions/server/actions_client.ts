@@ -4,10 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, SavedObjectAttributes, SavedObject } from 'src/core/server';
+import {
+  IScopedClusterClient,
+  SavedObjectsClientContract,
+  SavedObjectAttributes,
+  SavedObject,
+} from 'src/core/server';
+
 import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets } from './lib';
-import { ActionResult } from './types';
+import { ActionResult, FindActionResult, RawAction } from './types';
 
 interface ActionUpdate extends SavedObjectAttributes {
   description: string;
@@ -36,6 +42,7 @@ interface FindOptions {
       id: string;
     };
     fields?: string[];
+    filter?: string;
   };
 }
 
@@ -43,10 +50,12 @@ interface FindResult {
   page: number;
   perPage: number;
   total: number;
-  data: ActionResult[];
+  data: FindActionResult[];
 }
 
 interface ConstructorOptions {
+  defaultKibanaIndex: string;
+  scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
   savedObjectsClient: SavedObjectsClientContract;
 }
@@ -57,12 +66,21 @@ interface UpdateOptions {
 }
 
 export class ActionsClient {
+  private readonly defaultKibanaIndex: string;
+  private readonly scopedClusterClient: IScopedClusterClient;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly actionTypeRegistry: ActionTypeRegistry;
 
-  constructor({ actionTypeRegistry, savedObjectsClient }: ConstructorOptions) {
+  constructor({
+    actionTypeRegistry,
+    defaultKibanaIndex,
+    scopedClusterClient,
+    savedObjectsClient,
+  }: ConstructorOptions) {
     this.actionTypeRegistry = actionTypeRegistry;
     this.savedObjectsClient = savedObjectsClient;
+    this.scopedClusterClient = scopedClusterClient;
+    this.defaultKibanaIndex = defaultKibanaIndex;
   }
 
   /**
@@ -133,16 +151,22 @@ export class ActionsClient {
    * Find actions
    */
   public async find({ options = {} }: FindOptions): Promise<FindResult> {
-    const findResult = await this.savedObjectsClient.find({
+    const findResult = await this.savedObjectsClient.find<RawAction>({
       ...options,
       type: 'action',
     });
+
+    const data = await injectExtraFindData(
+      this.defaultKibanaIndex,
+      this.scopedClusterClient,
+      findResult.saved_objects.map(actionFromSavedObject)
+    );
 
     return {
       page: findResult.page,
       perPage: findResult.per_page,
       total: findResult.total,
-      data: findResult.saved_objects.map(actionFromSavedObject),
+      data,
     };
   }
 
@@ -154,9 +178,64 @@ export class ActionsClient {
   }
 }
 
-function actionFromSavedObject(savedObject: SavedObject) {
+function actionFromSavedObject(savedObject: SavedObject<RawAction>): ActionResult {
   return {
     id: savedObject.id,
     ...savedObject.attributes,
   };
+}
+
+async function injectExtraFindData(
+  defaultKibanaIndex: string,
+  scopedClusterClient: IScopedClusterClient,
+  actionResults: ActionResult[]
+): Promise<FindActionResult[]> {
+  const aggs: Record<string, any> = {};
+  for (const actionResult of actionResults) {
+    aggs[actionResult.id] = {
+      filter: {
+        bool: {
+          must: {
+            nested: {
+              path: 'references',
+              query: {
+                bool: {
+                  filter: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'references.id': actionResult.id,
+                          },
+                        },
+                        {
+                          term: {
+                            'references.type': 'action',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+  }
+  const aggregationResult = await scopedClusterClient.callAsInternalUser('search', {
+    index: defaultKibanaIndex,
+    body: {
+      aggs,
+      size: 0,
+      query: {
+        match_all: {},
+      },
+    },
+  });
+  return actionResults.map(actionResult => ({
+    ...actionResult,
+    referencedByCount: aggregationResult.aggregations[actionResult.id].doc_count,
+  }));
 }

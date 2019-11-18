@@ -9,115 +9,120 @@ import React from 'react';
 import { APMError } from '../../../../../../typings/es_schemas/ui/APMError';
 import { Span } from '../../../../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../../../../typings/es_schemas/ui/Transaction';
-import * as savedObjects from '../../../../../services/rest/savedObjects';
 import { getRenderedHref } from '../../../../../utils/testHelpers';
 import { DiscoverErrorLink } from '../DiscoverErrorLink';
 import { DiscoverSpanLink } from '../DiscoverSpanLink';
 import { DiscoverTransactionLink } from '../DiscoverTransactionLink';
 import * as kibanaCore from '../../../../../../../observability/public/context/kibana_core';
+import * as useAPMIndexPattern from '../../../../../hooks/useAPMIndexPattern';
 import { LegacyCoreStart } from 'src/core/public';
+import { FETCH_STATUS } from '../../../../../hooks/useFetcher';
 
-jest.mock('ui/kfetch');
+jest.spyOn(useAPMIndexPattern, 'useAPMIndexPattern').mockReturnValue({
+  status: FETCH_STATUS.SUCCESS,
+  apmIndexPattern: { id: 'apm-index-pattern-id' }
+} as any);
 
-jest
-  .spyOn(savedObjects, 'getAPMIndexPattern')
-  .mockResolvedValue({ id: 'apm-index-pattern-id' } as any);
+describe('DiscoverLinks', () => {
+  beforeAll(() => {
+    jest.spyOn(console, 'error').mockImplementation(() => null);
 
-beforeAll(() => {
-  jest.spyOn(console, 'error').mockImplementation(() => null);
-
-  const coreMock = ({
-    http: {
-      basePath: {
-        prepend: (path: string) => `/basepath${path}`
+    const coreMock = ({
+      http: {
+        notifications: {
+          toasts: {}
+        },
+        basePath: {
+          prepend: (path: string) => `/basepath${path}`
+        }
       }
-    }
-  } as unknown) as LegacyCoreStart;
+    } as unknown) as LegacyCoreStart;
 
-  jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
-});
+    spyOn(kibanaCore, 'useKibanaCore').and.returnValue(coreMock);
+  });
 
-afterAll(() => {
-  jest.restoreAllMocks();
-});
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
 
-test('DiscoverTransactionLink should produce the correct URL', async () => {
-  const transaction = {
-    transaction: {
-      id: '8b60bd32ecc6e150'
-    },
-    trace: {
-      id: '8b60bd32ecc6e1506735a8b6cfcf175c'
-    }
-  } as Transaction;
+  it('produces the correct URL for a transaction', async () => {
+    const transaction = {
+      transaction: {
+        id: '8b60bd32ecc6e150'
+      },
+      trace: {
+        id: '8b60bd32ecc6e1506735a8b6cfcf175c'
+      }
+    } as Transaction;
 
-  const href = await getRenderedHref(
-    () => <DiscoverTransactionLink transaction={transaction} />,
-    {
+    const href = await getRenderedHref(
+      () => <DiscoverTransactionLink transaction={transaction} />,
+      {
+        search: '?rangeFrom=now/w&rangeTo=now'
+      } as Location
+    );
+
+    expect(href).toEqual(
+      `/basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm-index-pattern-id,interval:auto,query:(language:kuery,query:'processor.event:"transaction" AND transaction.id:"8b60bd32ecc6e150" AND trace.id:"8b60bd32ecc6e1506735a8b6cfcf175c"'))`
+    );
+  });
+
+  it('produces the correct URL for a span', async () => {
+    const span = {
+      span: {
+        id: 'test-span-id'
+      }
+    } as Span;
+
+    const href = await getRenderedHref(() => <DiscoverSpanLink span={span} />, {
       search: '?rangeFrom=now/w&rangeTo=now'
-    } as Location
-  );
+    } as Location);
 
-  expect(href).toEqual(
-    `/basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm-index-pattern-id,interval:auto,query:(language:lucene,query:'processor.event:"transaction" AND transaction.id:"8b60bd32ecc6e150" AND trace.id:"8b60bd32ecc6e1506735a8b6cfcf175c"'))`
-  );
-});
+    expect(href).toEqual(
+      `/basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm-index-pattern-id,interval:auto,query:(language:kuery,query:'span.id:"test-span-id"'))`
+    );
+  });
 
-test('DiscoverSpanLink should produce the correct URL', async () => {
-  const span = {
-    span: {
-      id: 'test-span-id'
-    }
-  } as Span;
+  test('DiscoverErrorLink should produce the correct URL', async () => {
+    const error = {
+      service: {
+        name: 'service-name'
+      },
+      error: {
+        grouping_key: 'grouping-key'
+      }
+    } as APMError;
+    const href = await getRenderedHref(
+      () => <DiscoverErrorLink error={error} />,
+      {
+        search: '?rangeFrom=now/w&rangeTo=now'
+      } as Location
+    );
 
-  const href = await getRenderedHref(() => <DiscoverSpanLink span={span} />, {
-    search: '?rangeFrom=now/w&rangeTo=now'
-  } as Location);
+    expect(href).toEqual(
+      `/basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm-index-pattern-id,interval:auto,query:(language:kuery,query:'service.name:"service-name" AND error.grouping_key:"grouping-key"'),sort:('@timestamp':desc))`
+    );
+  });
 
-  expect(href).toEqual(
-    `/basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm-index-pattern-id,interval:auto,query:(language:lucene,query:'span.id:"test-span-id"'))`
-  );
-});
+  test('DiscoverErrorLink should include optional kuery string in URL', async () => {
+    const error = {
+      service: {
+        name: 'service-name'
+      },
+      error: {
+        grouping_key: 'grouping-key'
+      }
+    } as APMError;
 
-test('DiscoverErrorLink should produce the correct URL', async () => {
-  const error = {
-    service: {
-      name: 'service-name'
-    },
-    error: {
-      grouping_key: 'grouping-key'
-    }
-  } as APMError;
-  const href = await getRenderedHref(
-    () => <DiscoverErrorLink error={error} />,
-    {
-      search: '?rangeFrom=now/w&rangeTo=now'
-    } as Location
-  );
+    const href = await getRenderedHref(
+      () => <DiscoverErrorLink error={error} kuery="some:kuery-string" />,
+      {
+        search: '?rangeFrom=now/w&rangeTo=now'
+      } as Location
+    );
 
-  expect(href).toEqual(
-    `/basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm-index-pattern-id,interval:auto,query:(language:lucene,query:'service.name:"service-name" AND error.grouping_key:"grouping-key"'),sort:('@timestamp':desc))`
-  );
-});
-
-test('DiscoverErrorLink should include optional kuery string in URL', async () => {
-  const error = {
-    service: {
-      name: 'service-name'
-    },
-    error: {
-      grouping_key: 'grouping-key'
-    }
-  } as APMError;
-
-  const href = await getRenderedHref(
-    () => <DiscoverErrorLink error={error} kuery="some:kuery-string" />,
-    {
-      search: '?rangeFrom=now/w&rangeTo=now'
-    } as Location
-  );
-
-  expect(href).toEqual(
-    `/basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm-index-pattern-id,interval:auto,query:(language:lucene,query:'service.name:"service-name" AND error.grouping_key:"grouping-key" AND some:kuery-string'),sort:('@timestamp':desc))`
-  );
+    expect(href).toEqual(
+      `/basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm-index-pattern-id,interval:auto,query:(language:kuery,query:'service.name:"service-name" AND error.grouping_key:"grouping-key" AND some:kuery-string'),sort:('@timestamp':desc))`
+    );
+  });
 });

@@ -24,7 +24,7 @@ import { OptionsTab } from './components/editor/options_tab';
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 import { Status } from 'ui/vis/update_status';
 import { i18n } from '@kbn/i18n';
-import { setup as visualizations } from '../../visualizations/public/legacy';
+import { setup as visualizations } from '../../visualizations/public/np_ready/public/legacy';
 
 function InputControlVisProvider() {
 

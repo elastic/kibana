@@ -29,6 +29,13 @@ cd apm-integration-testing/
 
 _Docker Compose is required_
 
+### Debugging Elasticsearch queries
+
+All APM api endpoints accept `_debug=true` as a query param that will result in the underlying ES query being outputted in the Kibana backend process.
+
+Example:
+`/api/apm/services/my_service?_debug=true`
+
 ### Unit testing
 
 Note: Run the following commands from `kibana/x-pack`.
@@ -45,10 +52,6 @@ node scripts/jest.js plugins/apm --watch
 node scripts/jest.js plugins/apm --updateSnapshot
 ```
 
-### Cypress E2E tests
-
-See the Cypress-specific [readme.md](cypress/README.md)
-
 ### Linting
 
 _Note: Run the following commands from `kibana/`._
@@ -64,3 +67,9 @@ yarn prettier  "./x-pack/legacy/plugins/apm/**/*.{tsx,ts,js}" --write
 ```
 yarn eslint ./x-pack/legacy/plugins/apm --fix
 ```
+
+#### Further resources
+
+- [Cypress integration tests](cypress/README.md)
+- [VSCode setup instructions](./dev_docs/vscode_setup.md)
+- [Github PR commands](./dev_docs/github_commands.md)

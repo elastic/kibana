@@ -8,8 +8,14 @@
 
 # App Architecture
 /src/plugins/data/ @elastic/kibana-app-arch
-/src/plugins/kibana_utils/ @elastic/kibana-app-arch
+/src/plugins/embeddable/ @elastic/kibana-app-arch
+/src/plugins/expressions/ @elastic/kibana-app-arch
 /src/plugins/kibana_react/ @elastic/kibana-app-arch
+/src/plugins/kibana_utils/ @elastic/kibana-app-arch
+/src/plugins/navigation/ @elastic/kibana-app-arch
+/src/plugins/ui_actions/ @elastic/kibana-app-arch
+/src/plugins/visualizations/ @elastic/kibana-app-arch
+/x-pack/plugins/advanced_ui_actions/ @elastic/kibana-app-arch
 
 # APM
 /x-pack/legacy/plugins/apm/  @elastic/apm-ui
@@ -22,39 +28,47 @@
 # Canvas
 /x-pack/legacy/plugins/canvas/  @elastic/kibana-canvas
 
-# Code
-/x-pack/legacy/plugins/code/  @teams/code
-/x-pack/test/functional/apps/code/  @teams/code
-/x-pack/test/api_integration/apis/code/  @teams/code
-
-# Infrastructure and Logs UI
-/x-pack/legacy/plugins/infra/ @elastic/infra-logs-ui
+# Logs & Metrics UI
+/x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
+/x-pack/legacy/plugins/integrations_manager/ @elastic/epm
 
 # Machine Learning
 /x-pack/legacy/plugins/ml/  @elastic/ml-ui
 /x-pack/test/functional/apps/machine_learning/  @elastic/ml-ui
 /x-pack/test/functional/services/machine_learning/  @elastic/ml-ui
 /x-pack/test/functional/services/ml.ts  @elastic/ml-ui
+# ML team owns the transform plugin, ES team added here for visibility
+# because the plugin lives in Kibana's Elasticsearch management section.
+/x-pack/legacy/plugins/transform/  @elastic/ml-ui @elastic/es-ui
 
 # Operations
 /renovate.json5 @elastic/kibana-operations
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
 /src/optimize/ @elastic/kibana-operations
+/packages/*eslint*/ @elastic/kibana-operations
+/packages/*babel*/ @elastic/kibana-operations
+/packages/kbn-dev-utils*/ @elastic/kibana-operations
+/packages/kbn-es/ @elastic/kibana-operations
+/packages/kbn-pm/ @elastic/kibana-operations
+/packages/kbn-test/ @elastic/kibana-operations
 
 # Platform
 /src/core/  @elastic/kibana-platform
 /src/legacy/server/saved_objects/  @elastic/kibana-platform
-/src/legacy/ui/public/saved_objects  @elastic/kibana-platform
 /config/kibana.yml @elastic/kibana-platform
 /x-pack/plugins/features/  @elastic/kibana-platform
+/x-pack/plugins/licensing/  @elastic/kibana-platform
 
 # Security
 /x-pack/legacy/plugins/security/  @elastic/kibana-security
 /x-pack/legacy/plugins/spaces/  @elastic/kibana-security
+/x-pack/plugins/spaces/  @elastic/kibana-security
 /x-pack/legacy/plugins/encrypted_saved_objects/  @elastic/kibana-security
+/x-pack/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /src/legacy/server/csp/ @elastic/kibana-security
 /x-pack/plugins/security/  @elastic/kibana-security
+/x-pack/test/api_integration/apis/security/ @elastic/kibana-security
 
 # Kibana Stack Services
 /packages/kbn-analytics/ @elastic/kibana-stack-services

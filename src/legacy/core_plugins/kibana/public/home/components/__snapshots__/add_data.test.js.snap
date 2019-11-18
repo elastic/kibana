@@ -106,7 +106,7 @@ exports[`apmUiEnabled 1`] = `
         }
         layout="vertical"
         textAlign="center"
-        title="Logging"
+        title="Logs"
         titleElement="span"
       />
     </EuiFlexItem>
@@ -209,7 +209,6 @@ exports[`apmUiEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          color="primary"
           href="#/home/tutorial_directory/sampleData"
           style={
             Object {
@@ -217,7 +216,6 @@ exports[`apmUiEnabled 1`] = `
               "textAlign": "center",
             }
           }
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Load a data set and a Kibana dashboard"
@@ -247,7 +245,6 @@ exports[`apmUiEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          color="primary"
           href="#/management/kibana/index_pattern"
           style={
             Object {
@@ -255,7 +252,6 @@ exports[`apmUiEnabled 1`] = `
               "textAlign": "center",
             }
           }
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Connect to your Elasticsearch index"
@@ -338,7 +334,7 @@ exports[`isNewKibanaInstance 1`] = `
         }
         layout="vertical"
         textAlign="center"
-        title="Logging"
+        title="Logs"
         titleElement="span"
       />
     </EuiFlexItem>
@@ -441,7 +437,6 @@ exports[`isNewKibanaInstance 1`] = `
           />
         </strong>
         <EuiLink
-          color="primary"
           href="#/home/tutorial_directory/sampleData"
           style={
             Object {
@@ -449,7 +444,6 @@ exports[`isNewKibanaInstance 1`] = `
               "textAlign": "center",
             }
           }
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Load a data set and a Kibana dashboard"
@@ -479,7 +473,6 @@ exports[`isNewKibanaInstance 1`] = `
           />
         </strong>
         <EuiLink
-          color="primary"
           href="#/management/kibana/index_pattern"
           style={
             Object {
@@ -487,7 +480,6 @@ exports[`isNewKibanaInstance 1`] = `
               "textAlign": "center",
             }
           }
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Connect to your Elasticsearch index"
@@ -607,7 +599,7 @@ exports[`mlEnabled 1`] = `
         }
         layout="vertical"
         textAlign="center"
-        title="Logging"
+        title="Logs"
         titleElement="span"
       />
     </EuiFlexItem>
@@ -710,7 +702,6 @@ exports[`mlEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          color="primary"
           href="#/home/tutorial_directory/sampleData"
           style={
             Object {
@@ -718,7 +709,6 @@ exports[`mlEnabled 1`] = `
               "textAlign": "center",
             }
           }
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Load a data set and a Kibana dashboard"
@@ -748,7 +738,6 @@ exports[`mlEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          color="primary"
           href="path/app/ml#/filedatavisualizer"
           style={
             Object {
@@ -756,7 +745,6 @@ exports[`mlEnabled 1`] = `
               "textAlign": "center",
             }
           }
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Import a CSV, NDJSON, or log file"
@@ -786,7 +774,6 @@ exports[`mlEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          color="primary"
           href="#/management/kibana/index_pattern"
           style={
             Object {
@@ -794,7 +781,6 @@ exports[`mlEnabled 1`] = `
               "textAlign": "center",
             }
           }
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Connect to your Elasticsearch index"
@@ -877,7 +863,7 @@ exports[`render 1`] = `
         }
         layout="vertical"
         textAlign="center"
-        title="Logging"
+        title="Logs"
         titleElement="span"
       />
     </EuiFlexItem>
@@ -980,7 +966,6 @@ exports[`render 1`] = `
           />
         </strong>
         <EuiLink
-          color="primary"
           href="#/home/tutorial_directory/sampleData"
           style={
             Object {
@@ -988,7 +973,6 @@ exports[`render 1`] = `
               "textAlign": "center",
             }
           }
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Load a data set and a Kibana dashboard"
@@ -1018,7 +1002,6 @@ exports[`render 1`] = `
           />
         </strong>
         <EuiLink
-          color="primary"
           href="#/management/kibana/index_pattern"
           style={
             Object {
@@ -1026,7 +1009,6 @@ exports[`render 1`] = `
               "textAlign": "center",
             }
           }
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Connect to your Elasticsearch index"

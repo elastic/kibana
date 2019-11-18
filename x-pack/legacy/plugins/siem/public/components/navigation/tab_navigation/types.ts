@@ -6,8 +6,9 @@
 
 import { UrlInputsModel } from '../../../store/inputs/model';
 import { CONSTANTS } from '../../url_state/constants';
-import { KqlQuery } from '../../url_state/types';
+import { Timeline } from '../../url_state/types';
 import { HostsTableType } from '../../../store/hosts/model';
+import { esFilters, Query } from '../../../../../../../../src/plugins/data/public';
 
 import { SiemNavigationComponentProps } from '../types';
 
@@ -15,9 +16,9 @@ export interface TabNavigationProps extends SiemNavigationComponentProps {
   pathName: string;
   pageName: string;
   tabName: HostsTableType | undefined;
-  hosts: KqlQuery;
-  hostDetails: KqlQuery;
-  network: KqlQuery;
+  [CONSTANTS.appQuery]?: Query;
+  [CONSTANTS.filters]?: esFilters.Filter[];
+  [CONSTANTS.savedQuery]?: string;
   [CONSTANTS.timerange]: UrlInputsModel;
-  [CONSTANTS.timelineId]: string;
+  [CONSTANTS.timeline]: Timeline;
 }

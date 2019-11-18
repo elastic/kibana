@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import TestUtilsStubIndexPatternProvider from 'test_utils/stub_index_pattern';
+import StubIndexPattern from 'test_utils/stub_index_pattern';
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 
 import { getKbnFieldType } from '../plugins/data/common';
 
-export default function stubbedLogstashIndexPatternService(Private) {
-  const StubIndexPattern = Private(TestUtilsStubIndexPatternProvider);
+export default function stubbedLogstashIndexPatternService() {
   const mockLogstashFields = stubbedLogstashFields();
 
   const fields = mockLogstashFields.map(function (field) {

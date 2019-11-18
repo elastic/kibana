@@ -250,7 +250,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async changeDataFormatter(
       formatter: 'Bytes' | 'Number' | 'Percent' | 'Duration' | 'Custom'
     ) {
-      const formatterEl = await find.byCssSelector('[id$="row"] .euiComboBox');
+      const formatterEl = await testSubjects.find('tsvbDataFormatPicker');
       await comboBox.setElement(formatterEl, formatter, { clickWithMouse: true });
     }
 
@@ -305,9 +305,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async getRhythmChartLegendValue(nth = 0) {
       await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-      const metricValue = (await find.allByCssSelector(
-        `.echLegendItem .echLegendItem__displayValue`
-      ))[nth];
+      const metricValue = (
+        await find.allByCssSelector(`.echLegendItem .echLegendItem__displayValue`)
+      )[nth];
       await metricValue.moveMouseTo();
       return await metricValue.getVisibleText();
     }
@@ -457,10 +457,22 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      * @memberof VisualBuilderPage
      */
     public async setFieldForAggregation(field: string, aggNth: number = 0): Promise<void> {
+      const fieldEl = await this.getFieldForAggregation(aggNth);
+
+      await comboBox.setElement(fieldEl, field);
+    }
+
+    public async checkFieldForAggregationValidity(aggNth: number = 0): Promise<boolean> {
+      const fieldEl = await this.getFieldForAggregation(aggNth);
+
+      return await comboBox.checkValidity(fieldEl);
+    }
+
+    public async getFieldForAggregation(aggNth: number = 0): Promise<WebElementWrapper> {
       const labels = await testSubjects.findAll('aggRow');
       const label = labels[aggNth];
-      const fieldEl = (await label.findAllByCssSelector('[data-test-subj = "comboBoxInput"]'))[1];
-      await comboBox.setElement(fieldEl, field);
+
+      return (await label.findAllByCssSelector('[data-test-subj = "comboBoxInput"]'))[1];
     }
 
     public async clickColorPicker(): Promise<void> {

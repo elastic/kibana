@@ -23,7 +23,7 @@ import {
 import { getAnomalyExplorerBreadcrumbs } from './breadcrumbs';
 import { checkFullLicense } from '../license/check_license';
 import { checkGetJobsPrivilege } from '../privilege/check_privilege';
-import { getIndexPatterns, loadIndexPatterns } from '../util/index_utils';
+import { loadIndexPatterns } from '../util/index_utils';
 import { TimeBuckets } from 'plugins/ml/util/time_buckets';
 import { explorer$ } from './explorer_dashboard_service';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
@@ -39,7 +39,7 @@ import { subscribeAppStateToObservable } from '../util/app_state_utils';
 
 import { APP_STATE_ACTION, EXPLORER_ACTION } from './explorer_constants';
 
-const template = `<ml-chart-tooltip /><ml-explorer-react-wrapper class="ml-explorer" data-test-subj="mlPageAnomalyExplorer" />`;
+const template = `<ml-explorer-react-wrapper class="ml-explorer" data-test-subj="mlPageAnomalyExplorer" />`;
 
 uiRoutes
   .when('/explorer/?', {
@@ -114,7 +114,7 @@ module.controller('MlExplorerController', function (
     }
 
     // Populate the map of jobs / detectors / field formatters for the selected IDs.
-    mlFieldFormatService.populateFormats(selectedJobIds, getIndexPatterns())
+    mlFieldFormatService.populateFormats(selectedJobIds)
       .catch((err) => {
         console.log('Error populating field formats:', err);
       })

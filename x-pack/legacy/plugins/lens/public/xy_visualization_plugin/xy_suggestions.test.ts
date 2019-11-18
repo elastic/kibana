@@ -100,7 +100,9 @@ describe('xy_suggestions', () => {
           layerId: 'first',
           changeType: 'unchanged',
         },
-      ] as TableSuggestion[]).map(table => expect(getSuggestions({ table })).toEqual([]))
+      ] as TableSuggestion[]).map(table =>
+        expect(getSuggestions({ table, keptLayerIds: [] })).toEqual([])
+      )
     );
   });
 
@@ -113,6 +115,7 @@ describe('xy_suggestions', () => {
         layerId: 'first',
         changeType: 'unchanged',
       },
+      keptLayerIds: [],
     });
 
     expect(rest).toHaveLength(0);
@@ -144,6 +147,7 @@ describe('xy_suggestions', () => {
         layerId: 'first',
         changeType: 'unchanged',
       },
+      keptLayerIds: [],
     });
 
     expect(suggestions).toHaveLength(0);
@@ -157,6 +161,7 @@ describe('xy_suggestions', () => {
         layerId: 'first',
         changeType: 'unchanged',
       },
+      keptLayerIds: [],
     });
 
     expect(rest).toHaveLength(0);
@@ -184,6 +189,7 @@ describe('xy_suggestions', () => {
         changeType: 'unchanged',
         label: 'Datasource title',
       },
+      keptLayerIds: [],
     });
 
     expect(rest).toHaveLength(0);
@@ -199,7 +205,6 @@ describe('xy_suggestions', () => {
         changeType: 'reduced',
       },
       state: {
-        isHorizontal: false,
         legend: { isVisible: true, position: 'bottom' },
         preferredSeriesType: 'bar',
         layers: [
@@ -212,6 +217,7 @@ describe('xy_suggestions', () => {
           },
         ],
       },
+      keptLayerIds: [],
     });
 
     expect(rest).toHaveLength(0);
@@ -226,6 +232,7 @@ describe('xy_suggestions', () => {
         layerId: 'first',
         changeType: 'reduced',
       },
+      keptLayerIds: [],
     });
 
     expect(rest).toHaveLength(0);
@@ -235,7 +242,6 @@ describe('xy_suggestions', () => {
   test('only makes a seriesType suggestion for unchanged table without split', () => {
     (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
-      isHorizontal: false,
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       layers: [
@@ -256,6 +262,7 @@ describe('xy_suggestions', () => {
         changeType: 'unchanged',
       },
       state: currentState,
+      keptLayerIds: ['first'],
     });
 
     expect(suggestions).toHaveLength(1);
@@ -270,7 +277,6 @@ describe('xy_suggestions', () => {
 
   test('suggests seriesType and stacking when there is a split', () => {
     const currentState: XYState = {
-      isHorizontal: false,
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       layers: [
@@ -291,6 +297,7 @@ describe('xy_suggestions', () => {
         changeType: 'unchanged',
       },
       state: currentState,
+      keptLayerIds: [],
     });
 
     expect(rest).toHaveLength(0);
@@ -311,7 +318,6 @@ describe('xy_suggestions', () => {
   test('suggests a flipped chart for unchanged table and existing bar chart on ordinal x axis', () => {
     (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
-      isHorizontal: false,
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       layers: [
@@ -332,19 +338,17 @@ describe('xy_suggestions', () => {
         changeType: 'unchanged',
       },
       state: currentState,
+      keptLayerIds: [],
     });
 
     expect(rest).toHaveLength(0);
-    expect(suggestion.state).toEqual({
-      ...currentState,
-      isHorizontal: true,
-    });
+    expect(suggestion.state.preferredSeriesType).toEqual('bar_horizontal');
+    expect(suggestion.state.layers.every(l => l.seriesType === 'bar_horizontal')).toBeTruthy();
     expect(suggestion.title).toEqual('Flip');
   });
 
   test('suggests stacking for unchanged table that has a split', () => {
     const currentState: XYState = {
-      isHorizontal: false,
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       layers: [
@@ -365,6 +369,7 @@ describe('xy_suggestions', () => {
         changeType: 'unchanged',
       },
       state: currentState,
+      keptLayerIds: [],
     });
 
     const suggestion = suggestions[suggestions.length - 1];
@@ -379,7 +384,6 @@ describe('xy_suggestions', () => {
 
   test('keeps column to dimension mappings on extended tables', () => {
     const currentState: XYState = {
-      isHorizontal: false,
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       layers: [
@@ -400,6 +404,7 @@ describe('xy_suggestions', () => {
         changeType: 'extended',
       },
       state: currentState,
+      keptLayerIds: [],
     });
 
     expect(rest).toHaveLength(0);
@@ -418,7 +423,6 @@ describe('xy_suggestions', () => {
   test('overwrites column to dimension mappings if a date dimension is added', () => {
     (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
-      isHorizontal: false,
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       layers: [
@@ -439,6 +443,7 @@ describe('xy_suggestions', () => {
         changeType: 'extended',
       },
       state: currentState,
+      keptLayerIds: [],
     });
 
     expect(rest).toHaveLength(0);
@@ -463,6 +468,7 @@ describe('xy_suggestions', () => {
         layerId: 'first',
         changeType: 'unchanged',
       },
+      keptLayerIds: [],
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
@@ -499,6 +505,7 @@ describe('xy_suggestions', () => {
         layerId: 'first',
         changeType: 'unchanged',
       },
+      keptLayerIds: [],
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
@@ -534,6 +541,7 @@ describe('xy_suggestions', () => {
         layerId: 'first',
         changeType: 'unchanged',
       },
+      keptLayerIds: [],
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`

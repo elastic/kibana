@@ -25,12 +25,14 @@ import {
 
 import { EuiFieldText } from '@elastic/eui';
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { QueryBarInput, QueryBarInputUI } from './query_bar_input';
 import { coreMock } from '../../../../../../../core/public/mocks';
 const startMock = coreMock.createStart();
 import { IndexPattern } from '../../../index';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { I18nProvider } from '@kbn/i18n/react';
+import { mount } from 'enzyme';
 
 const noop = () => {
   return;
@@ -56,7 +58,7 @@ const createMockWebStorage = () => ({
 });
 
 const createMockStorage = () => ({
-  store: createMockWebStorage(),
+  storage: createMockWebStorage(),
   get: jest.fn(),
   set: jest.fn(),
   remove: jest.fn(),
@@ -78,64 +80,64 @@ const mockIndexPattern = {
   ],
 } as IndexPattern;
 
+function wrapQueryBarInputInContext(testProps: any, storage?: any) {
+  const defaultOptions = {
+    screenTitle: 'Another Screen',
+    intl: null as any,
+  };
+
+  const services = {
+    ...startMock,
+    appName: testProps.appName || 'test',
+    storage: storage || createMockStorage(),
+  };
+
+  return (
+    <I18nProvider>
+      <KibanaContextProvider services={services}>
+        <QueryBarInput {...defaultOptions} {...testProps} />
+      </KibanaContextProvider>
+    </I18nProvider>
+  );
+}
+
 describe('QueryBarInput', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('Should render the given query', () => {
-    const component = mountWithIntl(
-      <QueryBarInput.WrappedComponent
-        query={kqlQuery}
-        onSubmit={noop}
-        appName={'discover'}
-        screenTitle={'Another Screen'}
-        indexPatterns={[mockIndexPattern]}
-        store={createMockStorage()}
-        intl={null as any}
-        uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
-        http={startMock.http}
-      />
+    const component = mount(
+      wrapQueryBarInputInContext({
+        query: kqlQuery,
+        onSubmit: noop,
+        indexPatterns: [mockIndexPattern],
+      })
     );
 
     expect(component).toMatchSnapshot();
   });
 
   it('Should pass the query language to the language switcher', () => {
-    const component = mountWithIntl(
-      <QueryBarInput.WrappedComponent
-        query={luceneQuery}
-        onSubmit={noop}
-        appName={'discover'}
-        screenTitle={'Another Screen'}
-        indexPatterns={[mockIndexPattern]}
-        store={createMockStorage()}
-        intl={null as any}
-        uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
-        http={startMock.http}
-      />
+    const component = mount(
+      wrapQueryBarInputInContext({
+        query: luceneQuery,
+        onSubmit: noop,
+        indexPatterns: [mockIndexPattern],
+      })
     );
 
     expect(component).toMatchSnapshot();
   });
 
   it('Should disable autoFocus on EuiFieldText when disableAutoFocus prop is true', () => {
-    const component = mountWithIntl(
-      <QueryBarInput.WrappedComponent
-        query={kqlQuery}
-        onSubmit={noop}
-        appName={'discover'}
-        screenTitle={'Another Screen'}
-        indexPatterns={[mockIndexPattern]}
-        store={createMockStorage()}
-        disableAutoFocus={true}
-        intl={null as any}
-        uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
-        http={startMock.http}
-      />
+    const component = mount(
+      wrapQueryBarInputInContext({
+        query: kqlQuery,
+        onSubmit: noop,
+        indexPatterns: [mockIndexPattern],
+        disableAutoFocus: true,
+      })
     );
 
     expect(component).toMatchSnapshot();
@@ -144,43 +146,32 @@ describe('QueryBarInput', () => {
   it('Should create a unique PersistedLog based on the appName and query language', () => {
     mockPersistedLogFactory.mockClear();
 
-    mountWithIntl(
-      <QueryBarInput.WrappedComponent
-        query={kqlQuery}
-        onSubmit={noop}
-        appName={'discover'}
-        screenTitle={'Another Screen'}
-        indexPatterns={[mockIndexPattern]}
-        store={createMockStorage()}
-        disableAutoFocus={true}
-        intl={null as any}
-        uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
-        http={startMock.http}
-      />
+    mount(
+      wrapQueryBarInputInContext({
+        query: kqlQuery,
+        onSubmit: noop,
+        indexPatterns: [mockIndexPattern],
+        disableAutoFocus: true,
+        appName: 'discover',
+      })
     );
-
     expect(mockPersistedLogFactory.mock.calls[0][0]).toBe('typeahead:discover-kuery');
   });
 
   it("On language selection, should store the user's preference in localstorage and reset the query", () => {
     const mockStorage = createMockStorage();
     const mockCallback = jest.fn();
-
-    const component = mountWithIntl(
-      <QueryBarInput.WrappedComponent
-        query={kqlQuery}
-        onSubmit={mockCallback}
-        appName={'discover'}
-        screenTitle={'Another Screen'}
-        indexPatterns={[mockIndexPattern]}
-        store={mockStorage}
-        disableAutoFocus={true}
-        intl={null as any}
-        uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
-        http={startMock.http}
-      />
+    const component = mount(
+      wrapQueryBarInputInContext(
+        {
+          query: kqlQuery,
+          onSubmit: mockCallback,
+          indexPatterns: [mockIndexPattern],
+          disableAutoFocus: true,
+          appName: 'discover',
+        },
+        mockStorage
+      )
     );
 
     component
@@ -194,23 +185,16 @@ describe('QueryBarInput', () => {
   it('Should call onSubmit when the user hits enter inside the query bar', () => {
     const mockCallback = jest.fn();
 
-    const component = mountWithIntl(
-      <QueryBarInput.WrappedComponent
-        query={kqlQuery}
-        onSubmit={mockCallback}
-        appName={'discover'}
-        screenTitle={'Another Screen'}
-        indexPatterns={[mockIndexPattern]}
-        store={createMockStorage()}
-        disableAutoFocus={true}
-        intl={null as any}
-        uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
-        http={startMock.http}
-      />
+    const component = mount(
+      wrapQueryBarInputInContext({
+        query: kqlQuery,
+        onSubmit: mockCallback,
+        indexPatterns: [mockIndexPattern],
+        disableAutoFocus: true,
+      })
     );
 
-    const instance = component.instance() as QueryBarInputUI;
+    const instance = component.find('QueryBarInputUI').instance() as QueryBarInputUI;
     const input = instance.inputRef;
     const inputWrapper = component.find(EuiFieldText).find('input');
     inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
@@ -220,23 +204,17 @@ describe('QueryBarInput', () => {
   });
 
   it('Should use PersistedLog for recent search suggestions', async () => {
-    const component = mountWithIntl(
-      <QueryBarInput.WrappedComponent
-        query={kqlQuery}
-        onSubmit={noop}
-        appName={'discover'}
-        screenTitle={'Another Screen'}
-        indexPatterns={[mockIndexPattern]}
-        store={createMockStorage()}
-        disableAutoFocus={true}
-        intl={null as any}
-        uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
-        http={startMock.http}
-      />
+    const component = mount(
+      wrapQueryBarInputInContext({
+        query: kqlQuery,
+        onSubmit: noop,
+        indexPatterns: [mockIndexPattern],
+        disableAutoFocus: true,
+        persistedLog: mockPersistedLog,
+      })
     );
 
-    const instance = component.instance() as QueryBarInputUI;
+    const instance = component.find('QueryBarInputUI').instance() as QueryBarInputUI;
     const input = instance.inputRef;
     const inputWrapper = component.find(EuiFieldText).find('input');
     inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
@@ -250,22 +228,15 @@ describe('QueryBarInput', () => {
 
   it('Should accept index pattern strings and fetch the full object', () => {
     mockFetchIndexPatterns.mockClear();
-
-    mountWithIntl(
-      <QueryBarInput.WrappedComponent
-        query={kqlQuery}
-        onSubmit={noop}
-        appName={'discover'}
-        screenTitle={'Another Screen'}
-        indexPatterns={['logstash-*']}
-        store={createMockStorage()}
-        disableAutoFocus={true}
-        intl={null as any}
-        uiSettings={startMock.uiSettings}
-        savedObjectsClient={startMock.savedObjects.client}
-        http={startMock.http}
-      />
+    mount(
+      wrapQueryBarInputInContext({
+        query: kqlQuery,
+        onSubmit: noop,
+        indexPatterns: ['logstash-*'],
+        disableAutoFocus: true,
+      })
     );
+
     expect(mockFetchIndexPatterns).toHaveBeenCalledWith(
       startMock.savedObjects.client,
       ['logstash-*'],

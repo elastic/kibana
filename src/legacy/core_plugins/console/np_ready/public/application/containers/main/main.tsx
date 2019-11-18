@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { debounce } from 'lodash';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
 import { EditorOutput, Editor, ConsoleHistory } from '../editor';
 import { Settings } from '../settings';
@@ -52,8 +53,6 @@ export function Main() {
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
 
-  const containerRef = useRef<null | HTMLDivElement>(null);
-
   const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [
     INITIAL_PANEL_WIDTH,
     INITIAL_PANEL_WIDTH,
@@ -71,14 +70,21 @@ export function Main() {
   };
 
   return (
-    <div className="consoleContainer" style={{ height: '100%', width: '100%' }} ref={containerRef}>
+    <div id="consoleRoot">
       <EuiFlexGroup
-        style={{ height: '100%' }}
+        className="consoleContainer"
         gutterSize="none"
         direction="column"
         responsive={false}
       >
         <EuiFlexItem grow={false}>
+          <EuiTitle className="euiScreenReaderOnly">
+            <h1>
+              {i18n.translate('console.pageHeading', {
+                defaultMessage: 'Console',
+              })}
+            </h1>
+          </EuiTitle>
           <TopNavMenu
             items={getTopNavConfig({
               onClickHistory: () => setShowHistory(!showingHistory),

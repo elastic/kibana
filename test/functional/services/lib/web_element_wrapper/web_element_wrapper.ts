@@ -18,7 +18,7 @@
  */
 
 import { delay } from 'bluebird';
-import { WebElement, WebDriver, By, IKey, until } from 'selenium-webdriver';
+import { WebElement, WebDriver, By, Key, until } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
 // @ts-ignore not supported yet
 import cheerio from 'cheerio';
@@ -32,9 +32,7 @@ import { Browsers } from '../../remote/browsers';
 interface Driver {
   driver: WebDriver;
   By: typeof By;
-  Key: IKey;
   until: typeof until;
-  LegacyActionSequence: any;
 }
 
 interface TypeOptions {
@@ -53,10 +51,9 @@ const RETRY_CLICK_RETRY_ON_ERRORS = [
 ];
 
 export class WebElementWrapper {
-  private By: typeof By = this.webDriver.By;
-  private Keys: IKey = this.webDriver.Key;
+  private By = this.webDriver.By;
   private driver: WebDriver = this.webDriver.driver;
-  public LegacyAction: any = this.webDriver.LegacyActionSequence;
+  private Keys = Key;
   public isW3CEnabled: boolean = (this.webDriver.driver as any).executor_.w3c === true;
 
   public static create(
@@ -98,11 +95,11 @@ export class WebElementWrapper {
     timeout?: number
   ) {
     if (timeout && timeout !== this.timeout) {
-      await (this.driver.manage() as any).setTimeouts({ implicit: timeout });
+      await this.driver.manage().setTimeouts({ implicit: timeout });
     }
     const elements = await findFunction();
     if (timeout && timeout !== this.timeout) {
-      await (this.driver.manage() as any).setTimeouts({ implicit: this.timeout });
+      await this.driver.manage().setTimeouts({ implicit: this.timeout });
     }
     return elements;
   }
@@ -149,10 +146,8 @@ export class WebElementWrapper {
     }
   }
 
-  private getActions(): any {
-    return this.isW3CEnabled
-      ? (this.driver as any).actions()
-      : (this.driver as any).actions({ bridge: true });
+  private getActions() {
+    return this.isW3CEnabled ? this.driver.actions() : this.driver.actions({ bridge: true });
   }
 
   /**
@@ -225,6 +220,17 @@ export class WebElementWrapper {
   }
 
   /**
+   * Check if webelement wrapper has a specific class.
+   *
+   * @return {Promise<boolean>}
+   */
+  public async elementHasClass(className: string): Promise<boolean> {
+    const classes: string = await this._webElement.getAttribute('class');
+
+    return classes.includes(className);
+  }
+
+  /**
    * Clear the value of this element. This command has no effect if the underlying DOM element
    * is neither a text INPUT element nor a TEXTAREA element.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#clear
@@ -233,6 +239,9 @@ export class WebElementWrapper {
    * @default { withJS: false }
    */
   async clearValue(options: ClearOptions = { withJS: false }) {
+    if (this.browserType === Browsers.InternetExplorer) {
+      return this.clearValueWithKeyboard();
+    }
     await this.retryCall(async function clearValue(wrapper) {
       if (wrapper.browserType === Browsers.Chrome || options.withJS) {
         // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
@@ -249,6 +258,16 @@ export class WebElementWrapper {
    * @default { charByChar: false }
    */
   async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }) {
+    if (this.browserType === Browsers.InternetExplorer) {
+      const value = await this.getAttribute('value');
+      // For IE testing, the text field gets clicked in the middle so
+      // first go HOME and then DELETE all chars
+      await this.pressKeys(this.Keys.HOME);
+      for (let i = 0; i <= value.length; i++) {
+        await this.pressKeys(this.Keys.DELETE);
+      }
+      return;
+    }
     if (options.charByChar === true) {
       const value = await this.getAttribute('value');
       for (let i = 0; i <= value.length; i++) {
@@ -309,7 +328,7 @@ export class WebElementWrapper {
    * @param  {string|string[]} keys
    * @return {Promise<void>}
    */
-  public async pressKeys<T extends IKey>(keys: T | T[]): Promise<void>;
+  public async pressKeys<T extends typeof Key>(keys: T | T[]): Promise<void>;
   public async pressKeys<T extends string>(keys: T | T[]): Promise<void>;
   public async pressKeys(keys: string): Promise<void> {
     await this.retryCall(async function pressKeys(wrapper) {
@@ -390,7 +409,7 @@ export class WebElementWrapper {
    */
   public async getPosition(): Promise<{ height: number; width: number; x: number; y: number }> {
     return await this.retryCall(async function getPosition(wrapper) {
-      return await (wrapper._webElement as any).getRect();
+      return await wrapper._webElement.getRect();
     });
   }
 
@@ -403,7 +422,7 @@ export class WebElementWrapper {
    */
   public async getSize(): Promise<{ height: number; width: number; x: number; y: number }> {
     return await this.retryCall(async function getSize(wrapper) {
-      return await (wrapper._webElement as any).getRect();
+      return await wrapper._webElement.getRect();
     });
   }
 
@@ -443,7 +462,7 @@ export class WebElementWrapper {
    * @param { xOffset: 0, yOffset: 0 } options Optional
    * @return {Promise<void>}
    */
-  public async clickMouseButton(options = { xOffset: 0, yOffset: 0 }): Promise<void> {
+  public async clickMouseButton(options = { xOffset: 0, yOffset: 0 }) {
     await this.retryCall(async function clickMouseButton(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
       if (wrapper.isW3CEnabled) {
@@ -473,7 +492,7 @@ export class WebElementWrapper {
    * @param {WebElementWrapper} element
    * @return {Promise<void>}
    */
-  public async doubleClick(): Promise<void> {
+  public async doubleClick() {
     await this.retryCall(async function clickMouseButton(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
       await wrapper
@@ -679,7 +698,7 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   public async waitForDeletedByCssSelector(selector: string): Promise<void> {
-    await (this.driver.manage() as any).setTimeouts({ implicit: 1000 });
+    await this.driver.manage().setTimeouts({ implicit: 1000 });
     await this.driver.wait(
       async () => {
         const found = await this._webElement.findElements(this.By.css(selector));
@@ -688,7 +707,7 @@ export class WebElementWrapper {
       this.timeout,
       `The element with ${selector} selector was still present after ${this.timeout} sec.`
     );
-    await (this.driver.manage() as any).setTimeouts({ implicit: this.timeout });
+    await this.driver.manage().setTimeouts({ implicit: this.timeout });
   }
 
   /**
@@ -744,7 +763,7 @@ export class WebElementWrapper {
    */
   public async takeScreenshot(): Promise<Buffer> {
     const screenshot = await this.driver.takeScreenshot();
-    const buffer = Buffer.from(screenshot.toString(), 'base64');
+    const buffer = Buffer.from(screenshot, 'base64');
     const { width, height, x, y } = await this.getPosition();
     const windowWidth: number = await this.driver.executeScript(
       'return window.document.body.clientWidth'

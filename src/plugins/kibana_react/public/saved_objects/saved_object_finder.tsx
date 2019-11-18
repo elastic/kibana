@@ -63,6 +63,7 @@ export interface SavedObjectMetaData<T extends SavedObjectAttributes> {
   getIconForSavedObject(savedObject: SimpleSavedObject<T>): IconType;
   getTooltipForSavedObject?(savedObject: SimpleSavedObject<T>): string;
   showSavedObject?(savedObject: SimpleSavedObject<T>): boolean;
+  includeFields?: string[];
 }
 
 interface SavedObjectFinderState {
@@ -103,7 +104,7 @@ interface SavedObjectFinderInitialPageSize extends BaseSavedObjectFinder {
   initialPageSize?: 5 | 10 | 15 | 25;
   fixedPageSize?: undefined;
 }
-type SavedObjectFinderProps = {
+export type SavedObjectFinderProps = {
   savedObjects: CoreStart['savedObjects'];
   uiSettings: CoreStart['uiSettings'];
 } & (SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize);
@@ -123,10 +124,14 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
   private debouncedFetch = _.debounce(async (query: string) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
 
+    const fields = Object.values(metaDataMap)
+      .map(metaData => metaData.includeFields || [])
+      .reduce((allFields, currentFields) => allFields.concat(currentFields), ['title']);
+
     const perPage = this.props.uiSettings.get('savedObjects:listingLimit');
     const resp = await this.props.savedObjects.client.find({
       type: Object.keys(metaDataMap),
-      fields: ['title', 'visState'],
+      fields: [...new Set(fields)],
       search: query ? `${query}*` : undefined,
       page: 1,
       perPage,

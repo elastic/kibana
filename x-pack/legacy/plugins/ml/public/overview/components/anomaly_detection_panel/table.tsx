@@ -9,9 +9,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -40,6 +42,7 @@ export enum AnomalyDetectionListColumns {
   jobIds = 'jobIds',
   latestTimestamp = 'latest_timestamp',
   docsProcessed = 'docs_processed',
+  jobsInGroup = 'jobs_in_group',
 }
 
 interface Props {
@@ -70,13 +73,47 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
     },
     {
       field: AnomalyDetectionListColumns.maxAnomalyScore,
-      name: i18n.translate('xpack.ml.overview.anomalyDetection.tableMaxScore', {
-        defaultMessage: 'Max anomaly score',
-      }),
+      name: (
+        <EuiToolTip
+          content={i18n.translate('xpack.ml.overview.anomalyDetection.tableMaxScoreTooltip', {
+            defaultMessage:
+              'Maximum score across all jobs in the group over its most recent 24 hour period',
+          })}
+        >
+          <span>
+            {i18n.translate('xpack.ml.overview.anomalyDetection.tableMaxScore', {
+              defaultMessage: 'Max anomaly score',
+            })}{' '}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
       sortable: true,
       render: (score: Group['max_anomaly_score']) => {
-        if (score === null) {
+        if (score === undefined) {
+          // score is not loaded yet
           return <EuiLoadingSpinner />;
+        } else if (score === null) {
+          // an error occurred loading this group's score
+          return (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.ml.overview.anomalyDetection.tableMaxScoreErrorTooltip',
+                {
+                  defaultMessage: 'There was a problem loading the maximum anomaly score',
+                }
+              )}
+            >
+              <EuiIcon type="alert" />
+            </EuiToolTip>
+          );
+        } else if (score === 0) {
+          return (
+            // @ts-ignore
+            <EuiHealth color={'transparent'} compressed="true">
+              {score}
+            </EuiHealth>
+          );
         } else {
           const color: string = getSeverityColor(score);
           return (
@@ -91,11 +128,10 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
       width: '150px',
     },
     {
-      field: AnomalyDetectionListColumns.jobIds,
+      field: AnomalyDetectionListColumns.jobsInGroup,
       name: i18n.translate('xpack.ml.overview.anomalyDetection.tableNumJobs', {
         defaultMessage: 'Jobs in group',
       }),
-      render: (jobIds: Group['jobIds']) => jobIds.length,
       sortable: true,
       truncateText: true,
       width: '100px',
@@ -108,6 +144,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
       dataType: 'date',
       render: (time: number) => formatHumanReadableDateTimeSeconds(time),
       textOnly: true,
+      truncateText: true,
       sortable: true,
       width: '20%',
     },
@@ -127,6 +164,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
       }),
       render: (group: Group) => <ExplorerLink jobsList={getJobsFromGroup(group, jobsList)} />,
       width: '100px',
+      align: 'right',
     },
   ];
 

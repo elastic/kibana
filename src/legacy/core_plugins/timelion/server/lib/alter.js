@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import _ from 'lodash';
 
 /* @param {Array} args
@@ -29,7 +29,7 @@ import _ from 'lodash';
 
 export default function alter(args, fn) {
   // In theory none of the args should ever be promises. This is probably a waste.
-  return Promise.all(args).then(function (args) {
+  return Bluebird.all(args).then(function (args) {
 
     const seriesList = args.shift();
 

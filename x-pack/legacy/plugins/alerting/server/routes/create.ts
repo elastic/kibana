@@ -12,6 +12,7 @@ import { getDurationSchema } from '../lib';
 interface ScheduleRequest extends Hapi.Request {
   payload: {
     enabled: boolean;
+    name: string;
     alertTypeId: string;
     interval: string;
     actions: AlertAction[];
@@ -20,39 +21,38 @@ interface ScheduleRequest extends Hapi.Request {
   };
 }
 
-export function createAlertRoute(server: Hapi.Server) {
-  server.route({
-    method: 'POST',
-    path: '/api/alert',
-    options: {
-      tags: ['access:alerting-all'],
-      validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: Joi.object()
-          .keys({
-            enabled: Joi.boolean().default(true),
-            alertTypeId: Joi.string().required(),
-            throttle: getDurationSchema().default(null),
-            interval: getDurationSchema().required(),
-            alertTypeParams: Joi.object().required(),
-            actions: Joi.array()
-              .items(
-                Joi.object().keys({
-                  group: Joi.string().required(),
-                  id: Joi.string().required(),
-                  params: Joi.object().required(),
-                })
-              )
-              .required(),
-          })
-          .required(),
+export const createAlertRoute = {
+  method: 'POST',
+  path: '/api/alert',
+  options: {
+    tags: ['access:alerting-all'],
+    validate: {
+      options: {
+        abortEarly: false,
       },
+      payload: Joi.object()
+        .keys({
+          enabled: Joi.boolean().default(true),
+          name: Joi.string().required(),
+          alertTypeId: Joi.string().required(),
+          throttle: getDurationSchema().default(null),
+          interval: getDurationSchema().required(),
+          alertTypeParams: Joi.object().required(),
+          actions: Joi.array()
+            .items(
+              Joi.object().keys({
+                group: Joi.string().required(),
+                id: Joi.string().required(),
+                params: Joi.object().required(),
+              })
+            )
+            .required(),
+        })
+        .required(),
     },
-    async handler(request: ScheduleRequest) {
-      const alertsClient = request.getAlertsClient!();
-      return await alertsClient.create({ data: request.payload });
-    },
-  });
-}
+  },
+  async handler(request: ScheduleRequest) {
+    const alertsClient = request.getAlertsClient!();
+    return await alertsClient.create({ data: request.payload });
+  },
+};

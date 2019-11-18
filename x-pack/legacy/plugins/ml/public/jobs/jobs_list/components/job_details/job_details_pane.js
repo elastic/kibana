@@ -47,7 +47,7 @@ function Section({ section }) {
   return (
     <React.Fragment>
       <EuiTitle size="xs"><h4>{section.title}</h4></EuiTitle>
-      <div className="job-section"  data-test-subj={section.id}>
+      <div className="job-section"  data-test-subj={`mlJobRowDetailsSection-${section.id}`}>
         <EuiTable compressed={true}>
           <EuiTableBody>
             { section.items.map((item, i) => (<SectionItem item={item} key={i} />)) }

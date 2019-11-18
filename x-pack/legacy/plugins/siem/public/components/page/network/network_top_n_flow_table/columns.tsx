@@ -12,16 +12,16 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { CountryFlag } from '../../../source_destination/country_flag';
 import {
   AutonomousSystemItem,
-  FlowTargetNew,
+  FlowTargetSourceDest,
   NetworkTopNFlowEdges,
-  TopNFlowNetworkEcsField,
+  TopNetworkTablesEcsField,
 } from '../../../../graphql/types';
 import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../empty_value';
 import { IPDetailsLink } from '../../../links';
-import { Columns } from '../../../load_more_table';
+import { Columns } from '../../../paginated_table';
 import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
 import * as i18n from './translations';
@@ -32,15 +32,24 @@ export type NetworkTopNFlowColumns = [
   Columns<NetworkTopNFlowEdges>,
   Columns<NetworkTopNFlowEdges>,
   Columns<NetworkTopNFlowEdges>,
-  Columns<TopNFlowNetworkEcsField['bytes_in']>,
-  Columns<TopNFlowNetworkEcsField['bytes_out']>,
+  Columns<TopNetworkTablesEcsField['bytes_in']>,
+  Columns<TopNetworkTablesEcsField['bytes_out']>,
   Columns<NetworkTopNFlowEdges>,
+  Columns<NetworkTopNFlowEdges>
+];
+
+export type NetworkTopNFlowColumnsIpDetails = [
+  Columns<NetworkTopNFlowEdges>,
+  Columns<NetworkTopNFlowEdges>,
+  Columns<NetworkTopNFlowEdges>,
+  Columns<TopNetworkTablesEcsField['bytes_in']>,
+  Columns<TopNetworkTablesEcsField['bytes_out']>,
   Columns<NetworkTopNFlowEdges>
 ];
 
 export const getNetworkTopNFlowColumns = (
   indexPattern: StaticIndexPattern,
-  flowTarget: FlowTargetNew,
+  flowTarget: FlowTargetSourceDest,
   type: networkModel.NetworkType,
   tableId: string
 ): NetworkTopNFlowColumns => [
@@ -111,7 +120,7 @@ export const getNetworkTopNFlowColumns = (
         return getEmptyTagValue();
       }
     },
-    width: '15%',
+    width: '20%',
   },
   {
     name: i18n.DOMAIN,
@@ -150,12 +159,17 @@ export const getNetworkTopNFlowColumns = (
                 attrName: `${flowTarget}.as.organization.name`,
                 idPrefix: `${id}-name`,
               })}
-            {as.number &&
-              getRowItemDraggable({
-                rowItem: `${as.number}`,
-                attrName: `${flowTarget}.as.number`,
-                idPrefix: `${id}-number`,
-              })}
+
+            {as.number && (
+              <>
+                {' '}
+                {getRowItemDraggable({
+                  rowItem: `${as.number}`,
+                  attrName: `${flowTarget}.as.number`,
+                  idPrefix: `${id}-number`,
+                })}
+              </>
+            )}
           </>
         );
       } else {
@@ -206,7 +220,7 @@ export const getNetworkTopNFlowColumns = (
   {
     align: 'right',
     field: `node.${flowTarget}.${getOppositeField(flowTarget)}_ips`,
-    name: flowTarget === FlowTargetNew.source ? i18n.DESTINATION_IPS : i18n.SOURCE_IPS,
+    name: flowTarget === FlowTargetSourceDest.source ? i18n.DESTINATION_IPS : i18n.SOURCE_IPS,
     sortable: true,
     render: ips => {
       if (ips != null) {
@@ -218,5 +232,24 @@ export const getNetworkTopNFlowColumns = (
   },
 ];
 
-const getOppositeField = (flowTarget: FlowTargetNew): FlowTargetNew =>
-  flowTarget === FlowTargetNew.source ? FlowTargetNew.destination : FlowTargetNew.source;
+export const getNFlowColumnsCurated = (
+  indexPattern: StaticIndexPattern,
+  flowTarget: FlowTargetSourceDest,
+  type: networkModel.NetworkType,
+  tableId: string
+): NetworkTopNFlowColumns | NetworkTopNFlowColumnsIpDetails => {
+  const columns = getNetworkTopNFlowColumns(indexPattern, flowTarget, type, tableId);
+
+  // Columns to exclude from host details pages
+  if (type === networkModel.NetworkType.details) {
+    columns.pop();
+    return columns;
+  }
+
+  return columns;
+};
+
+const getOppositeField = (flowTarget: FlowTargetSourceDest): FlowTargetSourceDest =>
+  flowTarget === FlowTargetSourceDest.source
+    ? FlowTargetSourceDest.destination
+    : FlowTargetSourceDest.source;

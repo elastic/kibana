@@ -103,6 +103,7 @@ export const barchartConfigs = (config?: { onElementClick?: ElementClickListener
   series: {
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
+    stackAccessors: ['y0'],
   },
   axis: {
     xTickFormatter: numberFormatter,
@@ -145,6 +146,7 @@ export const addValueToBarChart = (
         x,
         y,
         g: key,
+        y0: 0,
       },
     ];
 

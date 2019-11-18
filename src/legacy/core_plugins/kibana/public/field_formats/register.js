@@ -18,34 +18,36 @@
  */
 
 import { fieldFormats } from 'ui/registry/field_formats';
-import { createUrlFormat } from '../../common/field_formats/types/url';
-import { createBytesFormat } from '../../common/field_formats/types/bytes';
-import { createDateFormat } from '../../common/field_formats/types/date';
-import { createDateNanosFormat } from '../../common/field_formats/types/date_nanos';
-import { createRelativeDateFormat } from '../../common/field_formats/types/relative_date';
-import { createDurationFormat } from '../../common/field_formats/types/duration';
-import { createIpFormat } from '../../common/field_formats/types/ip';
-import { createNumberFormat } from '../../common/field_formats/types/number';
-import { createPercentFormat } from '../../common/field_formats/types/percent';
-import { createStringFormat } from '../../common/field_formats/types/string';
-import { createSourceFormat } from '../../common/field_formats/types/source';
-import { createColorFormat } from '../../common/field_formats/types/color';
-import { createTruncateFormat } from '../../common/field_formats/types/truncate';
-import { createBoolFormat } from '../../common/field_formats/types/boolean';
-import { createStaticLookupFormat } from '../../common/field_formats/types/static_lookup';
+import {
+  UrlFormat,
+  StringFormat,
+  NumberFormat,
+  BytesFormat,
+  TruncateFormat,
+  RelativeDateFormat,
+  PercentFormat,
+  IpFormat,
+  DurationFormat,
+  DateNanosFormat,
+  DateFormat,
+  ColorFormat,
+  BoolFormat,
+  SourceFormat,
+  StaticLookupFormat
+} from '../../../../../plugins/data/public';
 
-fieldFormats.register(createUrlFormat);
-fieldFormats.register(createBytesFormat);
-fieldFormats.register(createDateFormat);
-fieldFormats.register(createDateNanosFormat);
-fieldFormats.register(createRelativeDateFormat);
-fieldFormats.register(createDurationFormat);
-fieldFormats.register(createIpFormat);
-fieldFormats.register(createNumberFormat);
-fieldFormats.register(createPercentFormat);
-fieldFormats.register(createStringFormat);
-fieldFormats.register(createSourceFormat);
-fieldFormats.register(createColorFormat);
-fieldFormats.register(createTruncateFormat);
-fieldFormats.register(createBoolFormat);
-fieldFormats.register(createStaticLookupFormat);
+fieldFormats.register(UrlFormat);
+fieldFormats.register(BytesFormat);
+fieldFormats.register(DateFormat);
+fieldFormats.register(DateNanosFormat);
+fieldFormats.register(RelativeDateFormat);
+fieldFormats.register(DurationFormat);
+fieldFormats.register(IpFormat);
+fieldFormats.register(NumberFormat);
+fieldFormats.register(PercentFormat);
+fieldFormats.register(StringFormat);
+fieldFormats.register(SourceFormat);
+fieldFormats.register(ColorFormat);
+fieldFormats.register(TruncateFormat);
+fieldFormats.register(BoolFormat);
+fieldFormats.register(StaticLookupFormat);

@@ -18,18 +18,12 @@ export interface JobStatsBarStats extends Stats {
   activeDatafeeds: StatsBarStat;
 }
 
-export interface TransformStatsBarStats extends Stats {
-  batch: StatsBarStat;
-  continuous: StatsBarStat;
-  started: StatsBarStat;
-}
-
 export interface AnalyticStatsBarStats extends Stats {
   started: StatsBarStat;
   stopped: StatsBarStat;
 }
 
-type StatsBarStats = TransformStatsBarStats | JobStatsBarStats | AnalyticStatsBarStats;
+export type StatsBarStats = JobStatsBarStats | AnalyticStatsBarStats;
 type StatsKey = keyof StatsBarStats;
 
 interface StatsBarProps {

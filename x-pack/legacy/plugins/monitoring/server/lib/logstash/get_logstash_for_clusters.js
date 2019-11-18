@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import { get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query.js';
@@ -45,7 +45,7 @@ export function getLogstashForClusters(req, lsIndexPattern, clusters) {
   const end = req.payload.timeRange.max;
   const config = req.server.config();
 
-  return Promise.map(clusters, cluster => {
+  return Bluebird.map(clusters, cluster => {
     const clusterUuid = cluster.cluster_uuid;
     const params = {
       index: lsIndexPattern,

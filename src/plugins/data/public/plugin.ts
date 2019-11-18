@@ -18,30 +18,41 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import { Storage } from '../../kibana_utils/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from './types';
 import { AutocompleteProviderRegister } from './autocomplete_provider';
-
-export interface DataPublicPluginSetup {
-  autocomplete: Pick<AutocompleteProviderRegister, 'addProvider' | 'getProvider'>;
-}
-
-export interface DataPublicPluginStart {
-  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
-}
+import { getSuggestionsProvider } from './suggestions_provider';
+import { SearchService } from './search/search_service';
+import { QueryService } from './query';
 
 export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
   private readonly autocomplete = new AutocompleteProviderRegister();
+  private readonly searchService: SearchService;
+  private readonly queryService: QueryService;
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(initializerContext: PluginInitializerContext) {
+    this.searchService = new SearchService(initializerContext);
+    this.queryService = new QueryService();
+  }
 
   public setup(core: CoreSetup): DataPublicPluginSetup {
+    const storage = new Storage(window.localStorage);
     return {
       autocomplete: this.autocomplete,
+      search: this.searchService.setup(core),
+      query: this.queryService.setup({
+        uiSettings: core.uiSettings,
+        storage,
+      }),
     };
   }
 
   public start(core: CoreStart): DataPublicPluginStart {
     return {
       autocomplete: this.autocomplete,
+      getSuggestions: getSuggestionsProvider(core.uiSettings, core.http),
+      search: this.searchService.start(core),
+      query: this.queryService.start(),
     };
   }
 

@@ -47,7 +47,10 @@ export function createPluginInitializerContext(
     /**
      * Environment information that is safe to expose to plugins and may be beneficial for them.
      */
-    env: { mode: coreContext.env.mode },
+    env: {
+      mode: coreContext.env.mode,
+      packageInfo: coreContext.env.packageInfo,
+    },
 
     /**
      * Plugin-scoped logger
@@ -119,6 +122,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerOnPostAuth: deps.http.registerOnPostAuth,
       basePath: deps.http.basePath,
       isTlsEnabled: deps.http.isTlsEnabled,
+    },
+    uiSettings: {
+      register: deps.uiSettings.register,
     },
   };
 }

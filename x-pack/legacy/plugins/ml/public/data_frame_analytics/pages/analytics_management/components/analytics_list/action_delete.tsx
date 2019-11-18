@@ -21,14 +21,14 @@ import {
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
 
-import { DataFrameAnalyticsListRow, DATA_FRAME_TASK_STATE } from './common';
+import { isDataFrameAnalyticsRunning, DataFrameAnalyticsListRow } from './common';
 
 interface DeleteActionProps {
   item: DataFrameAnalyticsListRow;
 }
 
 export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
-  const disabled = item.stats.state === DATA_FRAME_TASK_STATE.STARTED;
+  const disabled = isDataFrameAnalyticsRunning(item.stats.state);
 
   const canDeleteDataFrameAnalytics: boolean = checkPermission('canDeleteDataFrameAnalytics');
 

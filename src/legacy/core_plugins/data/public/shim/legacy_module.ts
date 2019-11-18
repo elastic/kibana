@@ -20,20 +20,15 @@
 import { once } from 'lodash';
 
 import { wrapInI18nContext } from 'ui/i18n';
-import { Filter } from '@kbn/es-query';
 
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { npSetup, npStart } from 'ui/new_platform';
-import { FilterBar, ApplyFiltersPopover } from '../filter';
-import template from './apply_filter_directive.html';
-
-// @ts-ignore
-import { mapAndFlattenFilters } from '../filter/filter_manager/lib/map_and_flatten_filters';
+import { npStart } from 'ui/new_platform';
+import { FilterBar } from '../filter';
 import { IndexPatterns } from '../index_patterns/index_patterns';
 
 /** @internal */
-export const initLegacyModule = once((): void => {
+export const initLegacyModule = once((indexPatterns: IndexPatterns): void => {
   uiModules
     .get('app/kibana', ['react'])
     .directive('filterBar', () => {
@@ -49,14 +44,16 @@ export const initLegacyModule = once((): void => {
           }
 
           child.setAttribute('ui-settings', 'uiSettings');
-          child.setAttribute('http', 'http');
+          child.setAttribute('doc-links', 'docLinks');
+          child.setAttribute('plugin-data-start', 'pluginDataStart');
 
           // Append helper directive
           elem.append(child);
 
           const linkFn = ($scope: any) => {
-            $scope.uiSettings = npSetup.core.uiSettings;
-            $scope.http = npSetup.core.http;
+            $scope.uiSettings = npStart.core.uiSettings;
+            $scope.docLinks = npStart.core.docLinks;
+            $scope.pluginDataStart = npStart.plugins.data;
           };
 
           return linkFn;
@@ -66,51 +63,14 @@ export const initLegacyModule = once((): void => {
     .directive('filterBarHelper', (reactDirective: any) => {
       return reactDirective(wrapInI18nContext(FilterBar), [
         ['uiSettings', { watchDepth: 'reference' }],
-        ['http', { watchDepth: 'reference' }],
+        ['docLinks', { watchDepth: 'reference' }],
         ['onFiltersUpdated', { watchDepth: 'reference' }],
         ['indexPatterns', { watchDepth: 'collection' }],
         ['filters', { watchDepth: 'collection' }],
         ['className', { watchDepth: 'reference' }],
+        ['pluginDataStart', { watchDepth: 'reference' }],
       ]);
-    })
-    .directive('applyFiltersPopoverComponent', (reactDirective: any) =>
-      reactDirective(wrapInI18nContext(ApplyFiltersPopover))
-    )
-    .directive('applyFiltersPopover', (indexPatterns: IndexPatterns) => {
-      return {
-        template,
-        restrict: 'E',
-        scope: {
-          filters: '=',
-          onCancel: '=',
-          onSubmit: '=',
-        },
-        link($scope: any) {
-          $scope.state = {};
-
-          // Each time the new filters change we want to rebuild (not just re-render) the "apply filters"
-          // popover, because it has to reset its state whenever the new filters change. Setting a `key`
-          // property on the component accomplishes this due to how React handles the `key` property.
-          $scope.$watch('filters', async (filters: any) => {
-            const mappedFilters: Filter[] = await mapAndFlattenFilters(indexPatterns, filters);
-            $scope.state = {
-              filters: mappedFilters,
-              key: Date.now(),
-            };
-          });
-        },
-      };
     });
 
-  const module = uiModules.get('kibana/index_patterns');
-  let _service: any;
-  module.service('indexPatterns', function(chrome: any) {
-    if (!_service)
-      _service = new IndexPatterns(
-        npStart.core.uiSettings,
-        npStart.core.savedObjects.client,
-        npStart.core.http
-      );
-    return _service;
-  });
+  uiModules.get('kibana/index_patterns').value('indexPatterns', indexPatterns);
 });

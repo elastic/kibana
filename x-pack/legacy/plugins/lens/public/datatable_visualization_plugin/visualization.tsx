@@ -19,6 +19,7 @@ import {
 } from '../types';
 import { generateId } from '../id_generator';
 import { NativeRenderer } from '../native_renderer';
+import chartTableSVG from '../assets/chart_datatable.svg';
 
 export interface LayerState {
   layerId: string;
@@ -57,6 +58,11 @@ export function DataTableLayer({
   dragDropContext,
 }: { layer: LayerState } & VisualizationProps<DatatableVisualizationState>) {
   const datasource = frame.datasourceLayers[layer.layerId];
+
+  const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
+  // When we add a column it could be empty, and therefore have no order
+  const sortedColumns = Array.from(new Set(originalOrder.concat(layer.columns)));
+
   return (
     <EuiPanel className="lnsConfigPanel__panel" paddingSize="s">
       <NativeRenderer
@@ -70,7 +76,7 @@ export function DataTableLayer({
         label={i18n.translate('xpack.lens.datatable.columns', { defaultMessage: 'Columns' })}
       >
         <MultiColumnEditor
-          accessors={layer.columns}
+          accessors={sortedColumns}
           datasource={datasource}
           dragDropContext={dragDropContext}
           filterOperations={allOperations}
@@ -97,17 +103,18 @@ export const datatableVisualization: Visualization<
     {
       id: 'lnsDatatable',
       icon: 'visTable',
+      largeIcon: chartTableSVG,
       label: i18n.translate('xpack.lens.datatable.label', {
-        defaultMessage: 'Datatable',
+        defaultMessage: 'Data table',
       }),
     },
   ],
 
   getDescription(state) {
     return {
-      icon: 'visTable',
+      icon: chartTableSVG,
       label: i18n.translate('xpack.lens.datatable.label', {
-        defaultMessage: 'Datatable',
+        defaultMessage: 'Data table',
       }),
     };
   },
@@ -127,10 +134,15 @@ export const datatableVisualization: Visualization<
   getSuggestions({
     table,
     state,
+    keptLayerIds,
   }: SuggestionRequest<DatatableVisualizationState>): Array<
     VisualizationSuggestion<DatatableVisualizationState>
   > {
-    if (state && table.changeType === 'unchanged') {
+    if (
+      keptLayerIds.length > 1 ||
+      (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
+      (state && table.changeType === 'unchanged')
+    ) {
       return [];
     }
     const title =
@@ -168,7 +180,7 @@ export const datatableVisualization: Visualization<
             },
           ],
         },
-        previewIcon: 'visTable',
+        previewIcon: chartTableSVG,
         // dont show suggestions for reduced versions or single-line tables
         hide: table.changeType === 'reduced' || !table.isMultiRow,
       },
@@ -210,13 +222,6 @@ export const datatableVisualization: Visualization<
                     function: 'lens_datatable_columns',
                     arguments: {
                       columnIds: operations.map(o => o.columnId),
-                      labels: operations.map(
-                        o =>
-                          o.operation.label ||
-                          i18n.translate('xpack.lens.datatable.na', {
-                            defaultMessage: 'N/A',
-                          })
-                      ),
                     },
                   },
                 ],

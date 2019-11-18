@@ -4,15 +4,23 @@
 <titleabbrev>Import objects</titleabbrev>
 ++++
 
-experimental[] Create a set of {kib} saved objects from a file created by the export API.
+experimental[] Create sets of {kib} saved objects from a file created by the export API.
 
 [[saved-objects-api-import-request]]
 ==== Request
 
 `POST /api/saved_objects/_import`
 
+`POST /s/<space_id>/api/saved_objects/_import`
+
+[[saved-objects-api-import-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
 [[saved-objects-api-import-query-params]]
-==== Query parameter
+==== Query parameters
 
 `overwrite`::
   (Optional, boolean) Overwrites saved objects.
@@ -28,19 +36,19 @@ The request body must include the multipart/form-data type.
 [[saved-objects-api-import-response-body]]
 ==== Response body
 
-`success`:: 
-  Top-level property that indicates if the import was successful. 
+`success`::
+  Top-level property that indicates if the import was successful.
 
-`successCount`:: 
+`successCount`::
   Indicates the number of successfully imported records.
 
 `errors`::
   (array) Indicates the import was unsuccessful and specifies the objects that failed to import.
-  
+
 [[saved-objects-api-import-codes]]
 ==== Response code
 
-`200`:: 
+`200`::
     Indicates a successful call.
 
 ==== Examples

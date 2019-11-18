@@ -17,6 +17,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions
 |  --- | --- | --- |
 |  [defaultSearchOperator](./kibana-plugin-server.savedobjectsfindoptions.defaultsearchoperator.md) | <code>'AND' &#124; 'OR'</code> |  |
 |  [fields](./kibana-plugin-server.savedobjectsfindoptions.fields.md) | <code>string[]</code> | An array of fields to include in the results |
+|  [filter](./kibana-plugin-server.savedobjectsfindoptions.filter.md) | <code>string</code> |  |
 |  [hasReference](./kibana-plugin-server.savedobjectsfindoptions.hasreference.md) | <code>{</code><br/><code>        type: string;</code><br/><code>        id: string;</code><br/><code>    }</code> |  |
 |  [page](./kibana-plugin-server.savedobjectsfindoptions.page.md) | <code>number</code> |  |
 |  [perPage](./kibana-plugin-server.savedobjectsfindoptions.perpage.md) | <code>number</code> |  |

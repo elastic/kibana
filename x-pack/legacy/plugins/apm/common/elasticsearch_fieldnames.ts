@@ -6,6 +6,7 @@
 export const SERVICE_NAME = 'service.name';
 export const SERVICE_ENVIRONMENT = 'service.environment';
 export const SERVICE_AGENT_NAME = 'agent.name';
+export const SERVICE_NODE_NAME = 'service.node.name';
 export const URL_FULL = 'url.full';
 export const HTTP_REQUEST_METHOD = 'http.request.method';
 export const USER_ID = 'user.id';
@@ -38,6 +39,7 @@ export const PARENT_ID = 'parent.id';
 
 export const ERROR_GROUP_ID = 'error.grouping_key';
 export const ERROR_CULPRIT = 'error.culprit';
+export const ERROR_LOG_LEVEL = 'error.log.level';
 export const ERROR_LOG_MESSAGE = 'error.log.message';
 export const ERROR_EXC_MESSAGE = 'error.exception.message'; // only to be used in es queries, since error.exception is now an array
 export const ERROR_EXC_HANDLED = 'error.exception.handled'; // only to be used in es queries, since error.exception is now an array
@@ -57,6 +59,10 @@ export const METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED =
   'jvm.memory.non_heap.committed';
 export const METRIC_JAVA_NON_HEAP_MEMORY_USED = 'jvm.memory.non_heap.used';
 export const METRIC_JAVA_THREAD_COUNT = 'jvm.thread.count';
+export const METRIC_JAVA_GC_COUNT = 'jvm.gc.count';
+export const METRIC_JAVA_GC_TIME = 'jvm.gc.time';
+
+export const LABEL_NAME = 'labels.name';
 
 export const HOST_NAME = 'host.hostname';
 export const CONTAINER_ID = 'container.id';

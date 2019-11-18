@@ -2,11 +2,18 @@
   "cat.health": {
     "url_params": {
       "format": "",
-      "local": "__flag__",
-      "master_timeout": "",
       "h": [],
       "help": "__flag__",
       "s": [],
+      "time": [
+        "d",
+        "h",
+        "m",
+        "s",
+        "ms",
+        "micros",
+        "nanos"
+      ],
       "ts": "__flag__",
       "v": "__flag__"
     },

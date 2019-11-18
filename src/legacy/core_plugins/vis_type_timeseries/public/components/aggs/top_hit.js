@@ -35,7 +35,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { ES_FIELD_TYPES } from '../../../../../../plugins/data/common';
+import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 import { PANEL_TYPES } from '../../../common/panel_types';
 
 const isFieldTypeEnabled = (fieldRestrictions, fieldType) =>
@@ -44,7 +44,7 @@ const isFieldTypeEnabled = (fieldRestrictions, fieldType) =>
 const getAggWithOptions = (field = {}, fieldTypesRestriction) => {
   if (isFieldTypeEnabled(fieldTypesRestriction, field.type)) {
     switch (field.type) {
-      case ES_FIELD_TYPES.NUMBER:
+      case KBN_FIELD_TYPES.NUMBER:
         return [
           {
             label: i18n.translate('visTypeTimeseries.topHit.aggWithOptions.averageLabel', {
@@ -71,8 +71,7 @@ const getAggWithOptions = (field = {}, fieldTypesRestriction) => {
             value: 'sum',
           },
         ];
-      case ES_FIELD_TYPES.KEYWORD:
-      case ES_FIELD_TYPES.STRING:
+      case KBN_FIELD_TYPES.STRING:
         return [
           {
             label: i18n.translate('visTypeTimeseries.topHit.aggWithOptions.concatenate', {
@@ -102,7 +101,7 @@ const getOrderOptions = () => [
   },
 ];
 
-const ORDER_DATE_RESTRICT_FIELDS = [ES_FIELD_TYPES.DATE];
+const ORDER_DATE_RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 
 const TopHitAggUi = props => {
   const { fields, series, panel } = props;
@@ -120,8 +119,8 @@ const TopHitAggUi = props => {
     PANEL_TYPES.METRIC,
     PANEL_TYPES.MARKDOWN,
   ].includes(panel.type)
-    ? [ES_FIELD_TYPES.NUMBER, ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.STRING]
-    : [ES_FIELD_TYPES.NUMBER];
+    ? [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING]
+    : [KBN_FIELD_TYPES.NUMBER];
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);

@@ -10,6 +10,7 @@ import { CreateSourceEditor } from './create_source_editor';
 import { getKibanaRegionList } from '../../../meta';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { FEATURE_ID_PROPERTY_NAME } from '../../../../common/constants';
 
 export class KibanaRegionmapSource extends AbstractVectorSource {
 
@@ -79,6 +80,9 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
       format: vectorFileMeta.format.type,
       featureCollectionPath: vectorFileMeta.meta.feature_collection_path,
       fetchUrl: vectorFileMeta.url
+    });
+    featureCollection.features.forEach((feature, index) => {
+      feature.properties[FEATURE_ID_PROPERTY_NAME] = index;
     });
     return {
       data: featureCollection

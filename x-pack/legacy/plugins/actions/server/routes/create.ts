@@ -23,31 +23,29 @@ interface CreateRequest extends WithoutQueryAndParams<Hapi.Request> {
   };
 }
 
-export function createRoute(server: Hapi.Server) {
-  server.route({
-    method: 'POST',
-    path: `/api/action`,
-    options: {
-      tags: ['access:actions-all'],
-      validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: Joi.object()
-          .keys({
-            description: Joi.string().required(),
-            actionTypeId: Joi.string().required(),
-            config: Joi.object().default({}),
-            secrets: Joi.object().default({}),
-          })
-          .required(),
+export const createActionRoute = {
+  method: 'POST',
+  path: `/api/action`,
+  config: {
+    tags: ['access:actions-all'],
+    validate: {
+      options: {
+        abortEarly: false,
       },
+      payload: Joi.object()
+        .keys({
+          description: Joi.string().required(),
+          actionTypeId: Joi.string().required(),
+          config: Joi.object().default({}),
+          secrets: Joi.object().default({}),
+        })
+        .required(),
     },
-    async handler(request: CreateRequest): Promise<ActionResult> {
-      const actionsClient = request.getActionsClient!();
+  },
+  async handler(request: CreateRequest): Promise<ActionResult> {
+    const actionsClient = request.getActionsClient!();
 
-      const action = request.payload;
-      return await actionsClient.create({ action });
-    },
-  });
-}
+    const action = request.payload;
+    return await actionsClient.create({ action });
+  },
+};

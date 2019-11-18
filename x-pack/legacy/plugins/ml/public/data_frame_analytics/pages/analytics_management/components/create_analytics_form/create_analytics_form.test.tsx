@@ -38,17 +38,24 @@ describe('Data Frame Analytics: <CreateAnalyticsForm />', () => {
   test('Minimal initialization', () => {
     const { getLastHookValue } = getMountedHook();
     const props = getLastHookValue();
-    const wrapper = mount(<CreateAnalyticsForm {...props} />);
+    const wrapper = mount(
+      <KibanaContext.Provider value={kibanaContextValueMock}>
+        <CreateAnalyticsForm {...props} />
+      </KibanaContext.Provider>
+    );
 
     const euiFormRows = wrapper.find('EuiFormRow');
-    expect(euiFormRows.length).toBe(5);
+    expect(euiFormRows.length).toBe(6);
 
     const row1 = euiFormRows.at(0);
     expect(row1.find('label').text()).toBe('Job type');
-    expect(row1.find('EuiText').text()).toBe('Outlier detection');
-    expect(row1.find('EuiLink').text()).toBe('advanced editor');
+
+    const options = row1.find('option');
+    expect(options.at(0).props().value).toBe('');
+    expect(options.at(1).props().value).toBe('outlier_detection');
+    expect(options.at(2).props().value).toBe('regression');
 
     const row2 = euiFormRows.at(1);
-    expect(row2.find('label').text()).toBe('Job ID');
+    expect(row2.find('p').text()).toBe('Enable advanced editor');
   });
 });

@@ -27,5 +27,5 @@ export const IN = i18n.translate('xpack.siem.auditd.inDescription', {
 });
 
 export const NON_EXISTENT = i18n.translate('xpack.siem.auditd.nonExistentDescription', {
-  defaultMessage: 'to an unknown process',
+  defaultMessage: 'an unknown process',
 });

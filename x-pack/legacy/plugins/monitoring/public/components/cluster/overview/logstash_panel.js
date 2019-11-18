@@ -7,7 +7,7 @@
 import React from 'react';
 import { formatNumber } from 'plugins/monitoring/lib/format_number';
 import { ClusterItemContainer, BytesPercentageUsage, DisabledIfNoDataAndInSetupModeLink } from './helpers';
-import { LOGSTASH } from '../../../../common/constants';
+import { LOGSTASH, LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
 
 import {
   EuiFlexGrid,
@@ -21,12 +21,11 @@ import {
   EuiDescriptionListDescription,
   EuiHorizontalRule,
   EuiIconTip,
-  EuiToolTip,
-  EuiIcon
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
+import { SetupModeTooltip } from '../../setup_mode/tooltip';
 
 export function LogstashPanel(props) {
   const { setupMode } = props;
@@ -42,48 +41,16 @@ export function LogstashPanel(props) {
   const goToNodes = () => props.changeUrl('logstash/nodes');
   const goToPipelines = () => props.changeUrl('logstash/pipelines');
 
-  const setupModeLogstashData = get(setupMode.data, 'logstash');
-  let setupModeInstancesData = null;
-  if (setupMode.enabled && setupMode.data) {
-    const {
-      totalUniqueInstanceCount,
-      totalUniqueFullyMigratedCount,
-      totalUniquePartiallyMigratedCount
-    } = setupModeLogstashData;
-    const hasInstances = totalUniqueInstanceCount > 0 || get(setupModeLogstashData, 'detected.mightExist', false);
-    const allMonitoredByMetricbeat = totalUniqueInstanceCount > 0 &&
-      (totalUniqueFullyMigratedCount === totalUniqueInstanceCount || totalUniquePartiallyMigratedCount === totalUniqueInstanceCount);
-    const internalCollectionOn = totalUniquePartiallyMigratedCount > 0;
-    if (hasInstances && (!allMonitoredByMetricbeat || internalCollectionOn)) {
-      let tooltipText = null;
-
-      if (!allMonitoredByMetricbeat) {
-        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.logstashPanel.setupModeNodesTooltip.oneInternal', {
-          defaultMessage: `There's at least one node that isn't being monitored using Metricbeat. Click the flag
-          icon to visit the nodes listing page and find out more information about the status of each node.`
-        });
-      }
-      else if (internalCollectionOn) {
-        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.logstashPanel.setupModeNodesTooltip.disableInternal', {
-          defaultMessage: `All nodes are being monitored using Metricbeat but internal collection still needs to be turned
-          off. Click the flag icon to visit the nodes listing page and disable internal collection.`
-        });
-      }
-
-      setupModeInstancesData = (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            position="top"
-            content={tooltipText}
-          >
-            <EuiLink onClick={goToNodes}>
-              <EuiIcon type="flag" color="warning"/>
-            </EuiLink>
-          </EuiToolTip>
-        </EuiFlexItem>
-      );
-    }
-  }
+  const setupModeData = get(setupMode.data, 'logstash');
+  const setupModeTooltip = setupMode && setupMode.enabled
+    ? (
+      <SetupModeTooltip
+        setupModeData={setupModeData}
+        productName={LOGSTASH_SYSTEM_ID}
+        badgeClickAction={goToNodes}
+      />
+    )
+    : null;
 
   return (
     <ClusterItemContainer
@@ -100,7 +67,7 @@ export function LogstashPanel(props) {
               <h3>
                 <DisabledIfNoDataAndInSetupModeLink
                   setupModeEnabled={setupMode.enabled}
-                  setupModeData={setupModeLogstashData}
+                  setupModeData={setupModeData}
                   onClick={goToLogstash}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.logstashPanel.overviewLinkAriaLabel', {
                     defaultMessage: 'Logstash Overview'
@@ -163,7 +130,7 @@ export function LogstashPanel(props) {
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {setupModeInstancesData}
+              {setupModeTooltip}
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
@@ -198,7 +165,7 @@ export function LogstashPanel(props) {
                   <h3>
                     <DisabledIfNoDataAndInSetupModeLink
                       setupModeEnabled={setupMode.enabled}
-                      setupModeData={setupModeLogstashData}
+                      setupModeData={setupModeData}
                       onClick={goToPipelines}
                       data-test-subj="lsPipelines"
                       aria-label={i18n.translate(

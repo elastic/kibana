@@ -10,7 +10,7 @@ import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore untyped local
 import { pivotObjectArray } from '../../../common/lib/pivot_object_array';
 import { Datatable, isDatatable } from '../../../types';
-import { getFunctionHelp, getFunctionErrors } from '../../strings';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   expression: string;
@@ -44,7 +44,10 @@ export function math(): ExpressionFunction<'math', Context, Arguments, number> {
       }
 
       const mathContext = isDatatable(context)
-        ? pivotObjectArray(context.rows, context.columns.map(col => col.name))
+        ? pivotObjectArray(
+            context.rows,
+            context.columns.map(col => col.name)
+          )
         : { value: context };
 
       try {

@@ -18,7 +18,7 @@ import {
   Resizeable,
   calculateDeltaX,
 } from '.';
-import { CellResizeHandle } from './styled_handles';
+import { CommonResizeHandle } from './styled_handles';
 
 describe('Resizeable', () => {
   afterEach(() => {
@@ -29,7 +29,7 @@ describe('Resizeable', () => {
     const wrapper = mount(
       <TestProviders>
         <Resizeable
-          handle={<CellResizeHandle data-test-subj="test-resize-handle" />}
+          handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
           height="100%"
           id="test"
           onResize={jest.fn()}
@@ -44,11 +44,64 @@ describe('Resizeable', () => {
     );
   });
 
+  test('it applies positioning styles to the ResizeHandleContainer when positionAbsolute is true and bottom/left/right/top is specified', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Resizeable
+          bottom={0}
+          handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
+          id="test"
+          left={0}
+          onResize={jest.fn()}
+          positionAbsolute
+          render={() => <></>}
+          right={0}
+          top={0}
+        />
+      </TestProviders>
+    );
+    const resizeHandleContainer = wrapper
+      .find('[data-test-subj="resize-handle-container"]')
+      .first();
+
+    expect(resizeHandleContainer).toHaveStyleRule('bottom', '0');
+    expect(resizeHandleContainer).toHaveStyleRule('left', '0');
+    expect(resizeHandleContainer).toHaveStyleRule('position', 'absolute');
+    expect(resizeHandleContainer).toHaveStyleRule('right', '0');
+    expect(resizeHandleContainer).toHaveStyleRule('top', '0');
+  });
+
+  test('it DOES NOT apply positioning styles to the ResizeHandleContainer when positionAbsolute is false, regardless if bottom/left/right/top is specified', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Resizeable
+          bottom={0}
+          handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
+          id="test"
+          left={0}
+          onResize={jest.fn()}
+          render={() => <></>}
+          right={0}
+          top={0}
+        />
+      </TestProviders>
+    );
+    const resizeHandleContainer = wrapper
+      .find('[data-test-subj="resize-handle-container"]')
+      .first();
+
+    expect(resizeHandleContainer).not.toHaveStyleRule('bottom', '0');
+    expect(resizeHandleContainer).not.toHaveStyleRule('left', '0');
+    expect(resizeHandleContainer).not.toHaveStyleRule('position', 'absolute');
+    expect(resizeHandleContainer).not.toHaveStyleRule('right', '0');
+    expect(resizeHandleContainer).not.toHaveStyleRule('top', '0');
+  });
+
   test('it renders', () => {
     const wrapper = shallow(
       <TestProviders>
         <Resizeable
-          handle={<CellResizeHandle data-test-subj="test-resize-handle" />}
+          handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
           height="100%"
           id="test"
           onResize={jest.fn()}
@@ -65,7 +118,7 @@ describe('Resizeable', () => {
       mount(
         <TestProviders>
           <Resizeable
-            handle={<CellResizeHandle data-test-subj="test-resize-handle" />}
+            handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
             height="100%"
             id="test"
             onResize={jest.fn()}
@@ -82,7 +135,7 @@ describe('Resizeable', () => {
         mount(
           <TestProviders>
             <Resizeable
-              handle={<CellResizeHandle data-test-subj="test-resize-handle" />}
+              handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
               height="100%"
               id="test"
               onResize={jest.fn()}
@@ -102,7 +155,7 @@ describe('Resizeable', () => {
         mount(
           <TestProviders>
             <Resizeable
-              handle={<CellResizeHandle data-test-subj="test-resize-handle" />}
+              handle={<CommonResizeHandle data-test-subj="test-resize-handle" />}
               height="100%"
               id="test"
               onResize={jest.fn()}

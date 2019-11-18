@@ -20,10 +20,10 @@
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import BluebirdPromise from 'bluebird';
+import Bluebird from 'bluebird';
 
 import { SavedObjectProvider } from '../saved_object';
-import StubIndexPatternProv from 'test_utils/stub_index_pattern';
+import StubIndexPattern from 'test_utils/stub_index_pattern';
 import { SavedObjectsClientProvider } from '../saved_objects_client_provider';
 import { InvalidJSONProperty } from '../../../../../plugins/kibana_utils/public';
 
@@ -33,7 +33,6 @@ describe('Saved Object', function () {
   require('test_utils/no_digest_promises').activateForSuite();
 
   let SavedObject;
-  let IndexPattern;
   let esDataStub;
   let savedObjectsClientStub;
   let window;
@@ -61,11 +60,11 @@ describe('Saved Object', function () {
    */
   function stubESResponse(mockDocResponse) {
     // Stub out search for duplicate title:
-    sinon.stub(savedObjectsClientStub, 'get').returns(BluebirdPromise.resolve(mockDocResponse));
-    sinon.stub(savedObjectsClientStub, 'update').returns(BluebirdPromise.resolve(mockDocResponse));
+    sinon.stub(savedObjectsClientStub, 'get').returns(Bluebird.resolve(mockDocResponse));
+    sinon.stub(savedObjectsClientStub, 'update').returns(Bluebird.resolve(mockDocResponse));
 
-    sinon.stub(savedObjectsClientStub, 'find').returns(BluebirdPromise.resolve({ savedObjects: [], total: 0 }));
-    sinon.stub(savedObjectsClientStub, 'bulkGet').returns(BluebirdPromise.resolve({ savedObjects: [mockDocResponse] }));
+    sinon.stub(savedObjectsClientStub, 'find').returns(Bluebird.resolve({ savedObjects: [], total: 0 }));
+    sinon.stub(savedObjectsClientStub, 'bulkGet').returns(Bluebird.resolve({ savedObjects: [mockDocResponse] }));
   }
 
   /**
@@ -98,7 +97,6 @@ describe('Saved Object', function () {
 
   beforeEach(ngMock.inject(function (es, Private, $window) {
     SavedObject = Private(SavedObjectProvider);
-    IndexPattern = Private(StubIndexPatternProv);
     esDataStub = es;
     savedObjectsClientStub = Private(SavedObjectsClientProvider);
     window = $window;
@@ -108,7 +106,7 @@ describe('Saved Object', function () {
     describe('with confirmOverwrite', function () {
       function stubConfirmOverwrite() {
         window.confirm = sinon.stub().returns(true);
-        sinon.stub(esDataStub, 'create').returns(BluebirdPromise.reject(mock409FetchError));
+        sinon.stub(esDataStub, 'create').returns(Bluebird.reject(mock409FetchError));
       }
 
       describe('when true', function () {
@@ -116,8 +114,8 @@ describe('Saved Object', function () {
           stubESResponse(getMockedDocResponse('myId'));
           return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
             const createStub = sinon.stub(savedObjectsClientStub, 'create');
-            createStub.onFirstCall().returns(BluebirdPromise.reject(mock409FetchError));
-            createStub.onSecondCall().returns(BluebirdPromise.resolve({ id: 'myId' }));
+            createStub.onFirstCall().returns(Bluebird.reject(mock409FetchError));
+            createStub.onSecondCall().returns(Bluebird.resolve({ id: 'myId' }));
 
             stubConfirmOverwrite();
 
@@ -139,7 +137,7 @@ describe('Saved Object', function () {
           return createInitializedSavedObject({ type: 'dashboard', id: 'HI' }).then(savedObject => {
             window.confirm = sinon.stub().returns(false);
 
-            sinon.stub(savedObjectsClientStub, 'create').returns(BluebirdPromise.reject(mock409FetchError));
+            sinon.stub(savedObjectsClientStub, 'create').returns(Bluebird.reject(mock409FetchError));
 
             savedObject.lastSavedTitle = 'original title';
             savedObject.title = 'new title';
@@ -158,7 +156,7 @@ describe('Saved Object', function () {
           return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
             stubConfirmOverwrite();
 
-            sinon.stub(savedObjectsClientStub, 'create').returns(BluebirdPromise.reject(mock409FetchError));
+            sinon.stub(savedObjectsClientStub, 'create').returns(Bluebird.reject(mock409FetchError));
 
             return savedObject.save({ confirmOverwrite: true })
               .then(() => {
@@ -178,7 +176,7 @@ describe('Saved Object', function () {
         return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
           stubConfirmOverwrite();
 
-          sinon.stub(savedObjectsClientStub, 'create').returns(BluebirdPromise.resolve({ id: 'myId' }));
+          sinon.stub(savedObjectsClientStub, 'create').returns(Bluebird.resolve({ id: 'myId' }));
 
           return savedObject.save({ confirmOverwrite: false }).then(() => {
             expect(window.confirm.called).to.be(false);
@@ -193,7 +191,7 @@ describe('Saved Object', function () {
         stubESResponse(mockDocResponse);
         return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
           sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-            return BluebirdPromise.resolve({ type: 'dashboard', id: 'newUniqueId' });
+            return Bluebird.resolve({ type: 'dashboard', id: 'newUniqueId' });
           });
 
           savedObject.copyOnSave = true;
@@ -209,7 +207,7 @@ describe('Saved Object', function () {
         stubESResponse(mockDocResponse);
         return createInitializedSavedObject({ type: 'dashboard', id: originalId }).then(savedObject => {
           sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-            return BluebirdPromise.reject('simulated error');
+            return Bluebird.reject('simulated error');
           });
           savedObject.copyOnSave = true;
           return savedObject.save().then(() => {
@@ -228,7 +226,7 @@ describe('Saved Object', function () {
         return createInitializedSavedObject({ type: 'dashboard', id: id }).then(savedObject => {
           sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
             expect(savedObject.id).to.be(id);
-            return BluebirdPromise.resolve(id);
+            return Bluebird.resolve(id);
           });
           savedObject.copyOnSave = false;
           return savedObject.save().then((id) => {
@@ -242,7 +240,7 @@ describe('Saved Object', function () {
       return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
         const mockDocResponse = getMockedDocResponse('myId');
         sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-          return BluebirdPromise.resolve({
+          return Bluebird.resolve({
             type: 'dashboard',
             id: 'myId',
             _version: 'foo'
@@ -264,7 +262,7 @@ describe('Saved Object', function () {
         return createInitializedSavedObject({ type: 'dashboard', id: id }).then(savedObject => {
           sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
             expect(savedObject.isSaving).to.be(true);
-            return BluebirdPromise.resolve({
+            return Bluebird.resolve({
               type: 'dashboard',
               id,
               version: 'foo'
@@ -282,7 +280,7 @@ describe('Saved Object', function () {
         return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
           sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
             expect(savedObject.isSaving).to.be(true);
-            return BluebirdPromise.reject();
+            return Bluebird.reject();
           });
           expect(savedObject.isSaving).to.be(false);
           return savedObject.save().catch(() => {
@@ -307,7 +305,7 @@ describe('Saved Object', function () {
         return createInitializedSavedObject({ type: 'dashboard', extractReferences })
           .then((savedObject) => {
             sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-              return BluebirdPromise.resolve({
+              return Bluebird.resolve({
                 id,
                 version: 'foo',
                 type: 'dashboard',
@@ -333,13 +331,13 @@ describe('Saved Object', function () {
         return createInitializedSavedObject({ type: 'dashboard', searchSource: true })
           .then((savedObject) => {
             sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-              return BluebirdPromise.resolve({
+              return Bluebird.resolve({
                 id,
                 version: 2,
                 type: 'dashboard',
               });
             });
-            const indexPattern = new IndexPattern('my-index', getConfig, null, []);
+            const indexPattern = new StubIndexPattern('my-index', getConfig, null, []);
             indexPattern.title = indexPattern.id;
             savedObject.searchSource.setField('index', indexPattern);
             return savedObject
@@ -369,7 +367,7 @@ describe('Saved Object', function () {
         return createInitializedSavedObject({ type: 'dashboard', searchSource: true })
           .then((savedObject) => {
             sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-              return BluebirdPromise.resolve({
+              return Bluebird.resolve({
                 id,
                 version: 2,
                 type: 'dashboard',
@@ -403,7 +401,7 @@ describe('Saved Object', function () {
         return createInitializedSavedObject({ type: 'dashboard', searchSource: true })
           .then((savedObject) => {
             sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-              return BluebirdPromise.resolve({
+              return Bluebird.resolve({
                 id,
                 version: 2,
                 type: 'dashboard',
@@ -727,7 +725,7 @@ describe('Saved Object', function () {
 
         const savedObject = new SavedObject(config);
         sinon.stub(savedObject, 'hydrateIndexPattern').callsFake(() => {
-          const indexPattern = new IndexPattern(indexPatternId, getConfig, null, []);
+          const indexPattern = new StubIndexPattern(indexPatternId, getConfig, null, []);
           indexPattern.title = indexPattern.id;
           savedObject.searchSource.setField('index', indexPattern);
           return Promise.resolve(indexPattern);
@@ -737,7 +735,7 @@ describe('Saved Object', function () {
         return savedObject.init().then(() => {
           expect(afterESRespCallback.called).to.be(true);
           const index = savedObject.searchSource.getField('index');
-          expect(index instanceof IndexPattern).to.be(true);
+          expect(index instanceof StubIndexPattern).to.be(true);
           expect(index.id).to.equal(indexPatternId);
         });
       });

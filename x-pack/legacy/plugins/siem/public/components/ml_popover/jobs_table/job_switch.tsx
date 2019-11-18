@@ -7,7 +7,7 @@
 import styled from 'styled-components';
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
-import { Job } from '../types';
+import { SiemJob } from '../types';
 
 const StaticSwitch = styled(EuiSwitch)`
   .euiSwitch__thumb,
@@ -19,9 +19,9 @@ const StaticSwitch = styled(EuiSwitch)`
 StaticSwitch.displayName = 'StaticSwitch';
 
 export interface JobSwitchProps {
-  job: Job;
-  isSummaryLoading: boolean;
-  onJobStateChange: (jobName: string, latestTimestampMs: number, enable: boolean) => void;
+  job: SiemJob;
+  isSiemJobsLoading: boolean;
+  onJobStateChange: (job: SiemJob, latestTimestampMs: number, enable: boolean) => void;
 }
 
 // Based on ML Job/Datafeed States from x-pack/legacy/plugins/ml/common/constants/states.js
@@ -42,13 +42,13 @@ export const isFailure = (jobState: string, datafeedState: string): boolean => {
 };
 
 export const JobSwitch = React.memo<JobSwitchProps>(
-  ({ job, isSummaryLoading, onJobStateChange }) => {
+  ({ job, isSiemJobsLoading, onJobStateChange }) => {
     const [isLoading, setIsLoading] = useState(false);
 
     return (
       <EuiFlexGroup justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
-          {isSummaryLoading || isLoading || isJobLoading(job.jobState, job.datafeedId) ? (
+          {isSiemJobsLoading || isLoading || isJobLoading(job.jobState, job.datafeedId) ? (
             <EuiLoadingSpinner size="m" data-test-subj="job-switch-loader" />
           ) : (
             <StaticSwitch
@@ -57,8 +57,10 @@ export const JobSwitch = React.memo<JobSwitchProps>(
               checked={isChecked(job.jobState, job.datafeedState)}
               onChange={e => {
                 setIsLoading(true);
-                onJobStateChange(job.id, job.latestTimestampMs || 0, e.target.checked);
+                onJobStateChange(job, job.latestTimestampMs || 0, e.target.checked);
               }}
+              showLabel={false}
+              label=""
             />
           )}
         </EuiFlexItem>

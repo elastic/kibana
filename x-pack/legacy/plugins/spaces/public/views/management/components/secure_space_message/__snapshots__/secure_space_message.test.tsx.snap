@@ -14,18 +14,16 @@ exports[`SecureSpaceMessage renders if security is enabled 1`] = `
         id="xpack.spaces.management.secureSpaceMessage.howToAssignRoleToSpaceDescription"
         values={
           Object {
-            "rolesLink": <EuiLink
+            "rolesLink": <ForwardRef
               aria-label="Roles management page"
-              color="primary"
               href="#/management/security/roles"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Roles"
                 id="xpack.spaces.management.secureSpaceMessage.rolesLinkText"
                 values={Object {}}
               />
-            </EuiLink>,
+            </ForwardRef>,
           }
         }
       />

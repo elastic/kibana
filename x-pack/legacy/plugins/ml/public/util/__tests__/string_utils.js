@@ -15,7 +15,6 @@ import {
   toLocaleString,
   mlEscape,
   escapeForElasticsearchQuery,
-  isWebUrl
 } from '../string_utils';
 
 
@@ -229,34 +228,6 @@ describe('ML - string utils', () => {
       expect(escapeForElasticsearchQuery('foo:bar')).to.be('foo\\:bar');
       expect(escapeForElasticsearchQuery('foo\\bar')).to.be('foo\\\\bar');
       expect(escapeForElasticsearchQuery('foo/bar')).to.be('foo\\/bar');
-    });
-  });
-
-  describe('isWebUrl', () => {
-    it('returns true for http URLs', () => {
-      expect(isWebUrl('http://airlinecodes.info/airline-code-$airline$')).to.be(true);
-      expect(isWebUrl('http://www.google.co.uk/search?q=airline+code+$airline$')).to.be(true);
-      expect(isWebUrl('http://showcase.server.com:5601/')).to.be(true);
-      expect(isWebUrl('http://10.1.2.3/myapp/query=test')).to.be(true);
-    });
-
-    it('returns true for https URLs', () => {
-      expect(isWebUrl('https://www.google.co.uk/search?q=airline+code+$airline$')).to.be(true);
-    });
-
-    it('returns true for relative web URLs', () => {
-      expect(isWebUrl('kibana#/discover?_g=(time:(from:\'$earliest$\',mode:absolute,to:\'$latest$\'))' +
-        '&_a=(index:\'38288750-1884-11e8-b207-d9cfd2566581\',query:(language:lucene,query:\'airline:$airline$\'))')).to.be(true);
-      expect(isWebUrl('kibana#/dashboard/cc295990-1d19-11e8-b271-015e33f55cb6?' +
-        '_g=(time:(from:\'$earliest$\',mode:absolute,to:\'$latest$\'))' +
-        '&_a=(filters:!(),query:(language:lucene,query:\'instance:$instance$ AND region:$region$\'))')).to.be(true);
-
-    });
-
-    it('returns false for non web URLs', () => {
-      expect(isWebUrl('javascript:console.log(window)')).to.be(false);  // eslint-disable-line no-script-url
-      expect(isWebUrl('ftp://admin@10.1.2.3/')).to.be(false);
-      expect(isWebUrl('mailto:someone@example.com?Subject=Hello%20again')).to.be(false);
     });
   });
 

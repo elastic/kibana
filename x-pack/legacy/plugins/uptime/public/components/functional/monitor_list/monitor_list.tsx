@@ -4,8 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBasicTable, EuiPanel, EuiTitle, EuiButtonIcon, EuiIcon, EuiLink } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiPanel,
+  EuiTitle,
+  EuiButtonIcon,
+  EuiIcon,
+  EuiLink,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
@@ -25,6 +34,7 @@ import { CLIENT_DEFAULTS } from '../../../../common/constants';
 import { MonitorBarSeries } from '../charts';
 import { MonitorPageLink } from '../monitor_page_link';
 import { MonitorListActionsPopover } from './monitor_list_actions_popover';
+import { OverviewPageLink } from '../overview_page_link';
 
 interface MonitorListQueryResult {
   monitorStates?: MonitorSummaryResult;
@@ -37,14 +47,6 @@ interface MonitorListProps {
   hasActiveFilters: boolean;
   successColor: string;
   linkParameters?: string;
-  // TODO: reintegrate pagination in a future release
-  // pageIndex: number;
-  // pageSize: number;
-  // TODO: reintroduce for pagination and sorting
-  // onChange: (criteria: Criteria) => void;
-  // TODO: reintegrate sorting in a future release
-  // sortField: string;
-  // sortDirection: string;
 }
 
 type Props = UptimeGraphQLQueryProps<MonitorListQueryResult> & MonitorListProps;
@@ -60,37 +62,12 @@ export const MonitorListComponent = (props: Props) => {
     hasActiveFilters,
     linkParameters,
     loading,
-    // TODO: reintroduce for pagination and sorting
-    // onChange,
-    // TODO: reintegrate pagination in future release
-    // pageIndex,
-    // pageSize,
-    // TODO: reintegrate sorting in future release
-    // sortDirection,
-    // sortField,
   } = props;
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
-
   const items = get<MonitorSummary[]>(data, 'monitorStates.summaries', []);
-  // TODO: use with pagination
-  // const count = get<number>(data, 'monitorStates.totalSummaryCount.count', 0);
 
-  // TODO: reintegrate pagination in future release
-  // const pagination: Pagination = {
-  //   pageIndex,
-  //   pageSize,
-  //   pageSizeOptions: [5, 10, 20, 50],
-  //   totalItemCount: count,
-  //   hidePerPageOptions: false,
-  // };
-
-  // TODO: reintegrate sorting in future release
-  // const sorting = {
-  //   sort: {
-  //     field: sortField,
-  //     direction: sortDirection,
-  //   },
-  // };
+  const nextPagePagination = get<string>(data, 'monitorStates.nextPagePagination');
+  const prevPagePagination = get<string>(data, 'monitorStates.prevPagePagination');
 
   return (
     <Fragment>
@@ -111,7 +88,10 @@ export const MonitorListComponent = (props: Props) => {
             values: { length: items.length },
           })}
           error={errors ? formatUptimeGraphQLErrorList(errors) : errors}
-          loading={loading}
+          // Only set loading to true when there are no items present to prevent the bug outlined in
+          // in https://github.com/elastic/eui/issues/2393 . Once that is fixed we can simply set the value here to
+          // loading={loading}
+          loading={loading && (!items || items.length < 1)}
           isExpandable={true}
           hasActions={true}
           itemId="monitor_id"
@@ -265,6 +245,23 @@ export const MonitorListComponent = (props: Props) => {
             },
           ]}
         />
+        <EuiSpacer size="s" />
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <OverviewPageLink
+              dataTestSubj="xpack.uptime.monitorList.prevButton"
+              direction="prev"
+              pagination={prevPagePagination}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <OverviewPageLink
+              dataTestSubj="xpack.uptime.monitorList.nextButton"
+              direction="next"
+              pagination={nextPagePagination}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
     </Fragment>
   );

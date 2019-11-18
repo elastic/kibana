@@ -100,7 +100,7 @@ xpack.security.authc.saml.realm: realm-name
 +
 [source,yaml]
 --------------------------------------------------------------------------------
-server.xsrf.whitelist: [/api/security/v1/saml]
+server.xsrf.whitelist: [/api/security/saml/callback]
 --------------------------------------------------------------------------------
 
 Users will be able to log in to {kib} via SAML Single Sign-On by navigating directly to the {kib} URL. Users who aren't authenticated are redirected to the Identity Provider for login. Most Identity Providers maintain a long-lived session—users who logged in to a different application using the same Identity Provider in the same browser are automatically authenticated. An exception is if {es} or the Identity Provider is configured to force user to re-authenticate. This login scenario is called _Service Provider initiated login_.
@@ -119,11 +119,26 @@ The order of `saml` and `basic` is important. Users who open {kib} will go throu
 
 Basic authentication is supported _only_ if `basic` authentication provider is explicitly declared in `xpack.security.authc.providers` setting in addition to `saml`.
 
+[float]
+===== SAML and long URLs
+
+At the beginning of the SAML handshake, {kib} stores the initial URL in the session cookie, so it can redirect the user back to that URL after successful SAML authentication.
+If the URL is long, the session cookie might exceed the maximum size supported by the browser--typically 4KB for all cookies per domain. When this happens, the session cookie is truncated,
+or dropped completely, and you might experience sporadic failures during SAML authentication. 
+
+To remedy this issue, you can decrease the maximum
+size of the URL that {kib} is allowed to store during the SAML handshake. The default value is 2KB.
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.authc.saml.maxRedirectURLSize: 1kb
+--------------------------------------------------------------------------------
+
 [[oidc]]
 ==== OpenID Connect Single Sign-On
 
 Similar to SAML, authentication with OpenID Connect allows users to log in to {kib} using an OpenID Connect Provider such as Google, or Okta. OpenID Connect
-should also be configured in {es}, see {xpack-ref}/saml-guide.html[Configuring OpenID Connect Single-Sign-On on the Elastic Stack] for more details.
+should also be configured in {es}. For more details, see {ref}/oidc-guide.html[Configuring single sign-on to the {stack} using OpenID Connect].
 
 Set the configuration values in `kibana.yml` as follows:
 

@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-import './field_title_bar_directive';
-
 export { FieldTitleBar } from './field_title_bar';

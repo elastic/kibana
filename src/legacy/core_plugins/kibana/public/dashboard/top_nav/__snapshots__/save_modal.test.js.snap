@@ -11,6 +11,7 @@ exports[`renders DashboardSaveModal 1`] = `
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -33,6 +34,7 @@ exports[`renders DashboardSaveModal 1`] = `
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={
           <FormattedMessage

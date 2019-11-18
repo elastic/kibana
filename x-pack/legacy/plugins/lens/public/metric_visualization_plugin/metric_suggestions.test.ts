@@ -80,7 +80,9 @@ describe('metric_suggestions', () => {
           layerId: 'l1',
           changeType: 'unchanged',
         },
-      ] as TableSuggestion[]).map(table => expect(getSuggestions({ table })).toEqual([]))
+      ] as TableSuggestion[]).map(table =>
+        expect(getSuggestions({ table, keptLayerIds: ['l1'] })).toEqual([])
+      )
     );
   });
 
@@ -92,12 +94,13 @@ describe('metric_suggestions', () => {
         layerId: 'l1',
         changeType: 'unchanged',
       },
+      keptLayerIds: [],
     });
 
     expect(rest).toHaveLength(0);
     expect(suggestion).toMatchInlineSnapshot(`
       Object {
-        "previewIcon": "visMetric",
+        "previewIcon": "test-file-stub",
         "score": 0.5,
         "state": Object {
           "accessor": "bytes",
@@ -106,5 +109,33 @@ describe('metric_suggestions', () => {
         "title": "Avg bytes",
       }
     `);
+  });
+
+  test('does not suggest for multiple layers', () => {
+    const suggestions = getSuggestions({
+      table: {
+        columns: [numCol('bytes')],
+        isMultiRow: false,
+        layerId: 'l1',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: ['l1', 'l2'],
+    });
+
+    expect(suggestions).toHaveLength(0);
+  });
+
+  test('does not suggest when the suggestion keeps a different layer', () => {
+    const suggestions = getSuggestions({
+      table: {
+        columns: [numCol('bytes')],
+        isMultiRow: false,
+        layerId: 'newer',
+        changeType: 'initial',
+      },
+      keptLayerIds: ['older'],
+    });
+
+    expect(suggestions).toHaveLength(0);
   });
 });

@@ -35,15 +35,15 @@ export const InfrastructurePage = injectUICapabilities(
       <ColumnarPage>
         <DocumentTitle
           title={i18n.translate('xpack.infra.homePage.documentTitle', {
-            defaultMessage: 'Infrastructure',
+            defaultMessage: 'Metrics',
           })}
         />
 
         <HelpCenterContent
-          feedbackLink="https://discuss.elastic.co/c/infrastructure"
+          feedbackLink="https://discuss.elastic.co/c/metrics"
           feedbackLinkText={i18n.translate(
             'xpack.infra.infrastructure.infrastructureHelpContent.feedbackLinkText',
-            { defaultMessage: 'Provide feedback for Infrastructure' }
+            { defaultMessage: 'Provide feedback for Metrics' }
           )}
         />
 
@@ -51,14 +51,18 @@ export const InfrastructurePage = injectUICapabilities(
           breadcrumbs={[
             {
               text: i18n.translate('xpack.infra.header.infrastructureTitle', {
-                defaultMessage: 'Infrastructure',
+                defaultMessage: 'Metrics',
               }),
             },
           ]}
           readOnlyBadge={!uiCapabilities.infrastructure.save}
         />
 
-        <AppNavigation>
+        <AppNavigation
+          aria-label={i18n.translate('xpack.infra.header.infrastructureNavigationTitle', {
+            defaultMessage: 'Metrics',
+          })}
+        >
           <RoutedTabs
             tabs={[
               {

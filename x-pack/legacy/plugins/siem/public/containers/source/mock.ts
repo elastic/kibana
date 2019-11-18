@@ -6,6 +6,7 @@
 
 import { BrowserFields } from '.';
 import { sourceQuery } from './index.gql_query';
+import { defaultIndexPattern } from '../../../default_index_pattern';
 
 export const mocksSource = [
   {
@@ -13,7 +14,7 @@ export const mocksSource = [
       query: sourceQuery,
       variables: {
         sourceId: 'default',
-        defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+        defaultIndex: defaultIndexPattern,
       },
     },
     result: {
@@ -332,7 +333,7 @@ export const mocksSource = [
                   'event.end contains the date when the event ended or when the activity was last observed.',
                 example: null,
                 format: '',
-                indexes: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+                indexes: defaultIndexPattern,
                 name: 'event.end',
                 searchable: true,
                 type: 'date',
@@ -660,7 +661,7 @@ export const mockBrowserFields: BrowserFields = {
           'event.end contains the date when the event ended or when the activity was last observed.',
         example: null,
         format: '',
-        indexes: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+        indexes: defaultIndexPattern,
         name: 'event.end',
         searchable: true,
         type: 'date',

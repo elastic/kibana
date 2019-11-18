@@ -39,6 +39,8 @@ export default {
     '<rootDir>/test/functional/services/remote',
   ],
   collectCoverageFrom: [
+    'src/plugins/**/*.{ts,tsx}',
+    '!src/plugins/**/*.d.ts',
     'packages/kbn-ui-framework/src/components/**/*.js',
     '!packages/kbn-ui-framework/src/components/index.js',
     '!packages/kbn-ui-framework/src/components/**/*/index.js',
@@ -101,6 +103,7 @@ export default {
     'packages/kbn-pm/dist/index.js'
   ],
   snapshotSerializers: [
+    '<rootDir>/src/plugins/kibana_react/public/util/test_helpers/react_mount_serializer.ts',
     '<rootDir>/node_modules/enzyme-to-json/serializer',
   ],
   reporters: [

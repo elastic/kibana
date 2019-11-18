@@ -8,6 +8,13 @@ import { compact, pick } from 'lodash';
 import datemath from '@elastic/datemath';
 import { IUrlParams } from './types';
 
+interface PathParams {
+  processorEvent?: 'error' | 'metric' | 'transaction';
+  serviceName?: string;
+  errorGroupId?: string;
+  serviceNodeName?: string;
+}
+
 export function getParsedDate(rawDate?: string, opts = {}) {
   if (rawDate) {
     const parsed = datemath.parse(rawDate, opts);
@@ -56,15 +63,22 @@ export function removeUndefinedProps<T>(obj: T): Partial<T> {
   return pick(obj, value => value !== undefined);
 }
 
-export function getPathParams(pathname: string = '') {
+export function getPathParams(pathname: string = ''): PathParams {
   const paths = getPathAsArray(pathname);
   const pageName = paths[0];
 
   // TODO: use react router's real match params instead of guessing the path order
+
   switch (pageName) {
     case 'services':
-      const servicePageName = paths[2];
+      let servicePageName = paths[2];
       const serviceName = paths[1];
+      const serviceNodeName = paths[3];
+
+      if (servicePageName === 'nodes' && paths.length > 3) {
+        servicePageName = 'metrics';
+      }
+
       switch (servicePageName) {
         case 'transactions':
           return {
@@ -80,12 +94,20 @@ export function getPathParams(pathname: string = '') {
         case 'metrics':
           return {
             processorEvent: 'metric',
+            serviceName,
+            serviceNodeName
+          };
+        case 'nodes':
+          return {
+            processorEvent: 'metric',
+            serviceName
+          };
+        case 'service-map':
+          return {
             serviceName
           };
         default:
-          return {
-            processorEvent: 'transaction'
-          };
+          return {};
       }
 
     case 'traces':

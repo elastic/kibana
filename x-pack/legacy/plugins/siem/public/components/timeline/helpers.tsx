@@ -8,10 +8,11 @@ import { isEmpty, isNumber, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { convertKueryToElasticSearchQuery, escapeQueryValue } from '../../lib/keury';
+import { escapeQueryValue, convertToBuildEsQuery } from '../../lib/keury';
 
 import { DataProvider, DataProvidersAnd, EXISTS_OPERATOR } from './data_providers/data_provider';
 import { BrowserFields } from '../../containers/source';
+import { Query, esQuery, esFilters } from '../../../../../../../src/plugins/data/public';
 
 const convertDateFieldToQuery = (field: string, value: string | number) =>
   `${field}: ${isNumber(value) ? value : new Date(value).valueOf()}`;
@@ -88,45 +89,63 @@ export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: B
     }, '')
     .trim();
 
-export const combineQueries = (
-  dataProviders: DataProvider[],
-  indexPattern: StaticIndexPattern,
-  browserFields: BrowserFields,
-  kqlQuery: string,
-  kqlMode: string,
-  start: number,
-  end: number,
-  isEventViewer?: boolean
-): { filterQuery: string } | null => {
-  let kuery: string;
-  if (isEmpty(dataProviders) && isEmpty(kqlQuery) && !isEventViewer) {
+export const combineQueries = ({
+  config,
+  dataProviders,
+  indexPattern,
+  browserFields,
+  filters = [],
+  kqlQuery,
+  kqlMode,
+  start,
+  end,
+  isEventViewer,
+}: {
+  config: esQuery.EsQueryConfig;
+  dataProviders: DataProvider[];
+  indexPattern: StaticIndexPattern;
+  browserFields: BrowserFields;
+  filters: esFilters.Filter[];
+  kqlQuery: Query;
+  kqlMode: string;
+  start: number;
+  end: number;
+  isEventViewer?: boolean;
+}): { filterQuery: string } | null => {
+  const kuery: Query = { query: '', language: kqlQuery.language };
+  if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters) && !isEventViewer) {
     return null;
-  } else if (isEmpty(dataProviders) && isEmpty(kqlQuery) && isEventViewer) {
-    kuery = `@timestamp >= ${start} and @timestamp <= ${end}`;
+  } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEventViewer) {
+    kuery.query = `@timestamp >= ${start} and @timestamp <= ${end}`;
     return {
-      filterQuery: convertKueryToElasticSearchQuery(kuery, indexPattern),
+      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
     };
-  } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery)) {
-    kuery = `(${kqlQuery}) and @timestamp >= ${start} and @timestamp <= ${end}`;
+  } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
+    kuery.query = `@timestamp >= ${start} and @timestamp <= ${end}`;
     return {
-      filterQuery: convertKueryToElasticSearchQuery(kuery, indexPattern),
+      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+    };
+  } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery.query)) {
+    kuery.query = `(${kqlQuery.query}) and @timestamp >= ${start} and @timestamp <= ${end}`;
+    return {
+      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
     };
   } else if (!isEmpty(dataProviders) && isEmpty(kqlQuery)) {
-    kuery = `(${buildGlobalQuery(
+    kuery.query = `(${buildGlobalQuery(
       dataProviders,
       browserFields
     )}) and @timestamp >= ${start} and @timestamp <= ${end}`;
     return {
-      filterQuery: convertKueryToElasticSearchQuery(kuery, indexPattern),
+      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
     };
   }
   const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
   const postpend = (q: string) => `${!isEmpty(q) ? ` ${operatorKqlQuery} (${q})` : ''}`;
-  kuery = `((${buildGlobalQuery(dataProviders, browserFields)})${postpend(
-    kqlQuery
+  kuery.query = `((${buildGlobalQuery(dataProviders, browserFields)})${postpend(
+    kqlQuery.query as string
   )}) and @timestamp >= ${start} and @timestamp <= ${end}`;
   return {
-    filterQuery: convertKueryToElasticSearchQuery(kuery, indexPattern),
+    filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
   };
 };
 

@@ -17,33 +17,34 @@
  * under the License.
  */
 
+import { JsonObject } from '..';
+
 /**
  * WARNING: these typings are incomplete
  */
 
 export type KueryNode = any;
 
+export type DslQuery = any;
+
 export interface KueryParseOptions {
   helpers: {
     [key: string]: any;
   };
   startRule: string;
+  allowLeadingWildcards: boolean;
 }
-
-type JsonValue = null | boolean | number | string | JsonObject | JsonArray;
-
-interface JsonObject {
-  [key: string]: JsonValue;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface JsonArray extends Array<JsonValue> {}
 
 export function fromKueryExpression(
-  expression: string,
-  parseOptions?: KueryParseOptions
+  expression: string | DslQuery,
+  parseOptions?: Partial<KueryParseOptions>
 ): KueryNode;
 
-export function toElasticsearchQuery(node: KueryNode, indexPattern: any): JsonObject;
+export function toElasticsearchQuery(
+  node: KueryNode,
+  indexPattern?: any,
+  config?: Record<string, any>,
+  context?: Record<string, any>
+): JsonObject;
 
 export function doesKueryExpressionHaveLuceneSyntaxError(expression: string): boolean;

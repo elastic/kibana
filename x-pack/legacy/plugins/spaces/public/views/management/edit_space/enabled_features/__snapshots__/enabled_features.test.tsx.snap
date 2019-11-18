@@ -169,17 +169,15 @@ exports[`EnabledFeatures renders as expected 1`] = `
             id="xpack.spaces.management.enabledSpaceFeatures.goToRolesLink"
             values={
               Object {
-                "rolesLink": <EuiLink
-                  color="primary"
+                "rolesLink": <ForwardRef
                   href="#/management/security/roles"
-                  type="button"
                 >
                   <FormattedMessage
                     defaultMessage="Roles"
                     id="xpack.spaces.management.enabledSpaceFeatures.rolesLinkText"
                     values={Object {}}
                   />
-                </EuiLink>,
+                </ForwardRef>,
               }
             }
           />

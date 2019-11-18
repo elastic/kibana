@@ -8,7 +8,6 @@ import { useMemo } from 'react';
 import { getTransactionCharts } from '../selectors/chartSelectors';
 import { useFetcher } from './useFetcher';
 import { useUrlParams } from './useUrlParams';
-import { callApmApi } from '../services/rest/callApmApi';
 
 export function useTransactionCharts() {
   const {
@@ -16,23 +15,26 @@ export function useTransactionCharts() {
     uiFilters
   } = useUrlParams();
 
-  const { data, error, status } = useFetcher(() => {
-    if (serviceName && start && end) {
-      return callApmApi({
-        pathname: '/api/apm/services/{serviceName}/transaction_groups/charts',
-        params: {
-          path: { serviceName },
-          query: {
-            start,
-            end,
-            transactionType,
-            transactionName,
-            uiFilters: JSON.stringify(uiFilters)
+  const { data, error, status } = useFetcher(
+    callApmApi => {
+      if (serviceName && start && end) {
+        return callApmApi({
+          pathname: '/api/apm/services/{serviceName}/transaction_groups/charts',
+          params: {
+            path: { serviceName },
+            query: {
+              start,
+              end,
+              transactionType,
+              transactionName,
+              uiFilters: JSON.stringify(uiFilters)
+            }
           }
-        }
-      });
-    }
-  }, [serviceName, start, end, transactionName, transactionType, uiFilters]);
+        });
+      }
+    },
+    [serviceName, start, end, transactionName, transactionType, uiFilters]
+  );
 
   const memoizedData = useMemo(
     () => getTransactionCharts({ transactionType }, data),

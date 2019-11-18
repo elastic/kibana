@@ -67,7 +67,7 @@ describe('interpreter/functions#metric', () => {
   };
 
   it('returns an object with the correct structure', () => {
-    const actual = fn(context, args);
+    const actual = fn(context, args, undefined);
 
     expect(actual).toMatchSnapshot();
   });

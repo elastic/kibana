@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
 import { createVegaVisualization } from '../vega_visualization';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import * as visModule from 'ui/vis';
+import { Vis } from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 
 import vegaliteGraph from '!!raw-loader!./vegalite_graph.hjson';
@@ -41,7 +41,7 @@ import vegaMapImage256 from './vega_map_image_256.png';
 import { VegaParser } from '../data_model/vega_parser';
 import { SearchCache } from '../data_model/search_cache';
 
-import { setup as visualizationsSetup } from '../../../visualizations/public/legacy';
+import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
 import { createVegaTypeDefinition } from '../vega_type';
 
 const THRESHOLD = 0.1;
@@ -50,7 +50,6 @@ const PIXEL_DIFF = 30;
 describe('VegaVisualizations', () => {
   let domNode;
   let VegaVisualization;
-  let Vis;
   let indexPattern;
   let vis;
   let imageComparator;
@@ -73,7 +72,6 @@ describe('VegaVisualizations', () => {
         );
       }
 
-      Vis = Private(visModule.VisProvider);
 
       VegaVisualization = createVegaVisualization(vegaVisualizationDependencies);
       indexPattern = Private(LogstashIndexPatternStubProvider);
@@ -153,7 +151,7 @@ describe('VegaVisualizations', () => {
 
         $el.find('canvas')[0].dispatchEvent(event);
 
-        await Promise.delay(10);
+        await Bluebird.delay(10);
 
         let tooltip = document.getElementById('vega-kibana-tooltip');
         expect(tooltip).to.be.ok();

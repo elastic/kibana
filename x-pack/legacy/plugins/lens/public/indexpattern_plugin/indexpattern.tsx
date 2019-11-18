@@ -8,100 +8,50 @@ import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { CoreSetup, SavedObjectsClientContract } from 'src/core/public';
-import { Storage } from 'ui/storage';
+import { CoreStart, SavedObjectsClientContract } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
   Operation,
   DatasourceLayerPanelProps,
+  PublicAPIProps,
 } from '../types';
-import { getIndexPatterns } from './loader';
+import { loadInitialState, changeIndexPattern, changeLayerIndexPattern } from './loader';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
-import { IndexPatternDatasourcePluginPlugins } from './plugin';
+import { IndexPatternDatasourceSetupPlugins } from './plugin';
 import { IndexPatternDataPanel } from './datapanel';
 import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,
 } from './indexpattern_suggestions';
 
-import { isDraggedField } from './utils';
+import { isDraggedField, normalizeOperationDataType } from './utils';
 import { LayerPanel } from './layerpanel';
 import { IndexPatternColumn } from './operations';
+import {
+  IndexPatternField,
+  IndexPatternLayer,
+  IndexPatternPrivateState,
+  IndexPatternPersistedState,
+} from './types';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { Plugin as DataPlugin } from '../../../../../../src/plugins/data/public';
 import { Datasource, StateSetter } from '..';
 
 export { OperationType, IndexPatternColumn } from './operations';
-
-export interface IndexPattern {
-  id: string;
-  fields: IndexPatternField[];
-  title: string;
-  timeFieldName?: string | null;
-  fieldFormatMap?: Record<
-    string,
-    {
-      id: string;
-      params: unknown;
-    }
-  >;
-
-  // TODO: Load index patterns and existence data in one API call
-  hasExistence?: boolean;
-}
-
-export interface IndexPatternField {
-  name: string;
-  type: string;
-  esTypes?: string[];
-  aggregatable: boolean;
-  searchable: boolean;
-  aggregationRestrictions?: Partial<
-    Record<
-      string,
-      {
-        agg: string;
-        interval?: number;
-        fixed_interval?: string;
-        calendar_interval?: string;
-        delay?: string;
-        time_zone?: string;
-      }
-    >
-  >;
-
-  // TODO: This is loaded separately, but should be combined into one API
-  exists?: boolean;
-  cardinality?: number;
-  count?: number;
-}
 
 export interface DraggedField {
   field: IndexPatternField;
   indexPatternId: string;
 }
 
-export interface IndexPatternLayer {
-  columnOrder: string[];
-  columns: Record<string, IndexPatternColumn>;
-  // Each layer is tied to the index pattern that created it
-  indexPatternId: string;
-}
-export interface IndexPatternPersistedState {
-  currentIndexPatternId: string;
-  layers: Record<string, IndexPatternLayer>;
-}
-
-export type IndexPatternPrivateState = IndexPatternPersistedState & {
-  indexPatterns: Record<string, IndexPattern>;
-  showEmptyFields: boolean;
-};
-
 export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: string): Operation {
   const { dataType, label, isBucketed, scale } = column;
   return {
-    dataType,
+    dataType: normalizeOperationDataType(dataType),
     isBucketed,
     scale,
     label: uniqueLabel || label,
@@ -139,42 +89,6 @@ export function uniqueLabels(layers: Record<string, IndexPatternLayer>) {
   return columnLabelMap;
 }
 
-type UnwrapPromise<T> = T extends Promise<infer P> ? P : T;
-type InferFromArray<T> = T extends Array<infer P> ? P : T;
-
-function addRestrictionsToFields(
-  indexPattern: InferFromArray<Exclude<UnwrapPromise<ReturnType<typeof getIndexPatterns>>, void>>
-): IndexPattern {
-  const { typeMeta } = indexPattern;
-  if (!typeMeta) {
-    return indexPattern;
-  }
-
-  const aggs = Object.keys(typeMeta.aggs);
-
-  const newFields = [...(indexPattern.fields as IndexPatternField[])];
-  newFields.forEach((field, index) => {
-    const restrictionsObj: IndexPatternField['aggregationRestrictions'] = {};
-    aggs.forEach(agg => {
-      if (typeMeta.aggs[agg] && typeMeta.aggs[agg][field.name]) {
-        restrictionsObj[agg] = typeMeta.aggs[agg][field.name];
-      }
-    });
-    if (Object.keys(restrictionsObj).length) {
-      newFields[index] = { ...field, aggregationRestrictions: restrictionsObj };
-    }
-  });
-
-  const { id, title, timeFieldName } = indexPattern;
-
-  return {
-    id,
-    title,
-    timeFieldName: timeFieldName || undefined,
-    fields: newFields,
-  };
-}
-
 function removeProperty<T>(prop: string, object: Record<string, T>): Record<string, T> {
   const result = { ...object };
   delete result[prop];
@@ -182,43 +96,31 @@ function removeProperty<T>(prop: string, object: Record<string, T>): Record<stri
 }
 
 export function getIndexPatternDatasource({
-  core,
   chrome,
+  core,
   storage,
   savedObjectsClient,
-}: IndexPatternDatasourcePluginPlugins & {
-  core: CoreSetup;
-  storage: Storage;
+  data,
+}: Pick<IndexPatternDatasourceSetupPlugins, 'chrome'> & {
+  // Core start is being required here because it contains the savedObject client
+  // In the new platform, this plugin wouldn't be initialized until after setup
+  core: CoreStart;
+  storage: IStorageWrapper;
   savedObjectsClient: SavedObjectsClientContract;
+  data: ReturnType<DataPlugin['start']>;
 }) {
   const uiSettings = chrome.getUiSettingsClient();
+  const onIndexPatternLoadError = (err: Error) =>
+    core.notifications.toasts.addError(err, {
+      title: i18n.translate('xpack.lens.indexPattern.indexPatternLoadError', {
+        defaultMessage: 'Error loading index pattern',
+      }),
+    });
+
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
-    async initialize(state?: IndexPatternPersistedState) {
-      // TODO: The initial request should only load index pattern names because each saved object is large
-      //       Followup requests should load a single index pattern + existence information
-      const indexPatternObjects = await getIndexPatterns(chrome, core.notifications);
-      const indexPatterns: Record<string, IndexPattern> = {};
-
-      if (indexPatternObjects) {
-        indexPatternObjects.forEach(obj => {
-          indexPatterns[obj.id] = addRestrictionsToFields(obj);
-        });
-      }
-
-      if (state) {
-        return {
-          ...state,
-          indexPatterns,
-          showEmptyFields: false,
-        };
-      }
-      return {
-        currentIndexPatternId: indexPatternObjects ? indexPatternObjects[0].id : '',
-        indexPatterns,
-        layers: {},
-        showEmptyFields: false,
-      };
+    initialize(state?: IndexPatternPersistedState) {
+      return loadInitialState({ state, savedObjectsClient });
     },
 
     getPersistableState({ currentIndexPatternId, layers }: IndexPatternPrivateState) {
@@ -274,17 +176,33 @@ export function getIndexPatternDatasource({
     ) {
       render(
         <I18nProvider>
-          <IndexPatternDataPanel {...props} />
+          <IndexPatternDataPanel
+            changeIndexPattern={(
+              id: string,
+              state: IndexPatternPrivateState,
+              setState: StateSetter<IndexPatternPrivateState>
+            ) => {
+              changeIndexPattern({
+                id,
+                state,
+                setState,
+                savedObjectsClient,
+                onError: onIndexPatternLoadError,
+              });
+            }}
+            {...props}
+          />
         </I18nProvider>,
         domElement
       );
     },
 
-    getPublicAPI(
-      state: IndexPatternPrivateState,
-      setState: StateSetter<IndexPatternPrivateState>,
-      layerId: string
-    ) {
+    getPublicAPI({
+      state,
+      setState,
+      layerId,
+      dateRange,
+    }: PublicAPIProps<IndexPatternPrivateState>) {
       const columnLabelMap = uniqueLabels(state.layers);
 
       return {
@@ -302,24 +220,53 @@ export function getIndexPatternDatasource({
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
           render(
             <I18nProvider>
-              <IndexPatternDimensionPanel
-                state={state}
-                setState={setState}
-                uiSettings={uiSettings}
-                storage={storage}
-                savedObjectsClient={savedObjectsClient}
-                layerId={props.layerId}
-                http={core.http}
-                uniqueLabel={columnLabelMap[props.columnId]}
-                {...props}
-              />
+              <KibanaContextProvider
+                services={{
+                  appName: 'lens',
+                  storage,
+                  uiSettings,
+                  data,
+                  savedObjects: core.savedObjects,
+                  docLinks: core.docLinks,
+                }}
+              >
+                <IndexPatternDimensionPanel
+                  state={state}
+                  setState={setState}
+                  uiSettings={uiSettings}
+                  storage={storage}
+                  savedObjectsClient={core.savedObjects.client}
+                  layerId={props.layerId}
+                  http={core.http}
+                  uniqueLabel={columnLabelMap[props.columnId]}
+                  dateRange={dateRange}
+                  {...props}
+                />
+              </KibanaContextProvider>
             </I18nProvider>,
             domElement
           );
         },
 
         renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => {
-          render(<LayerPanel state={state} setState={setState} {...props} />, domElement);
+          render(
+            <LayerPanel
+              state={state}
+              onChangeIndexPattern={indexPatternId => {
+                changeLayerIndexPattern({
+                  savedObjectsClient,
+                  indexPatternId,
+                  setState,
+                  state,
+                  layerId: props.layerId,
+                  onError: onIndexPatternLoadError,
+                  replaceIfPossible: true,
+                });
+              }}
+              {...props}
+            />,
+            domElement
+          );
         },
 
         removeColumnInTableSpec: (columnId: string) => {

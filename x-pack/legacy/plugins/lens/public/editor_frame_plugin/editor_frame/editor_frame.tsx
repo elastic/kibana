@@ -6,9 +6,14 @@
 
 import React, { useEffect, useReducer } from 'react';
 import { CoreSetup, CoreStart } from 'src/core/public';
-import { Query } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
-import { Datasource, DatasourcePublicAPI, FramePublicAPI, Visualization } from '../../types';
+import {
+  Datasource,
+  DatasourcePublicAPI,
+  FramePublicAPI,
+  Visualization,
+  DatasourceMetaData,
+} from '../../types';
 import { reducer, getInitialState } from './state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel_wrapper';
@@ -19,6 +24,8 @@ import { Document } from '../../persistence/saved_object_store';
 import { getSavedObjectFormat } from './save';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { generateId } from '../../id_generator';
+import { SavedQuery } from '../../../../../../../src/legacy/core_plugins/data/public';
+import { esFilters, Query } from '../../../../../../../src/plugins/data/public';
 
 export interface EditorFrameProps {
   doc?: Document;
@@ -34,7 +41,12 @@ export interface EditorFrameProps {
     toDate: string;
   };
   query: Query;
-  onChange: (arg: { indexPatternTitles: string[]; doc: Document }) => void;
+  filters: esFilters.Filter[];
+  savedQuery?: SavedQuery;
+  onChange: (arg: {
+    filterableIndexPatterns: DatasourceMetaData['filterableIndexPatterns'];
+    doc: Document;
+  }) => void;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
@@ -77,9 +89,9 @@ export function EditorFrame(props: EditorFrameProps) {
 
       const layers = datasource.getLayers(datasourceState);
       layers.forEach(layer => {
-        const publicAPI = props.datasourceMap[id].getPublicAPI(
-          datasourceState,
-          (newState: unknown) => {
+        const publicAPI = props.datasourceMap[id].getPublicAPI({
+          state: datasourceState,
+          setState: (newState: unknown) => {
             dispatch({
               type: 'UPDATE_DATASOURCE_STATE',
               datasourceId: id,
@@ -87,8 +99,9 @@ export function EditorFrame(props: EditorFrameProps) {
               clearStagedPreview: true,
             });
           },
-          layer
-        );
+          layerId: layer,
+          dateRange: props.dateRange,
+        });
 
         datasourceLayers[layer] = publicAPI;
       });
@@ -98,6 +111,7 @@ export function EditorFrame(props: EditorFrameProps) {
     datasourceLayers,
     dateRange: props.dateRange,
     query: props.query,
+    filters: props.filters,
 
     addNewLayer() {
       const newLayerId = generateId();
@@ -170,7 +184,7 @@ export function EditorFrame(props: EditorFrameProps) {
       return;
     }
 
-    const indexPatternTitles: string[] = [];
+    const indexPatterns: DatasourceMetaData['filterableIndexPatterns'] = [];
     Object.entries(props.datasourceMap)
       .filter(([id, datasource]) => {
         const stateWrapper = state.datasourceStates[id];
@@ -181,10 +195,8 @@ export function EditorFrame(props: EditorFrameProps) {
         );
       })
       .forEach(([id, datasource]) => {
-        indexPatternTitles.push(
-          ...datasource
-            .getMetaData(state.datasourceStates[id].state)
-            .filterableIndexPatterns.map(pattern => pattern.title)
+        indexPatterns.push(
+          ...datasource.getMetaData(state.datasourceStates[id].state).filterableIndexPatterns
         );
       });
 
@@ -201,8 +213,16 @@ export function EditorFrame(props: EditorFrameProps) {
       framePublicAPI,
     });
 
-    props.onChange({ indexPatternTitles, doc });
-  }, [state.datasourceStates, state.visualization, props.query, props.dateRange, state.title]);
+    props.onChange({ filterableIndexPatterns: indexPatterns, doc });
+  }, [
+    state.datasourceStates,
+    state.visualization,
+    props.query,
+    props.dateRange,
+    props.filters,
+    props.savedQuery,
+    state.title,
+  ]);
 
   return (
     <FrameLayout
@@ -222,6 +242,7 @@ export function EditorFrame(props: EditorFrameProps) {
           core={props.core}
           query={props.query}
           dateRange={props.dateRange}
+          filters={props.filters}
         />
       }
       configPanel={
@@ -239,7 +260,7 @@ export function EditorFrame(props: EditorFrameProps) {
       }
       workspacePanel={
         allLoaded && (
-          <WorkspacePanelWrapper title={state.title} dispatch={dispatch}>
+          <WorkspacePanelWrapper title={state.title}>
             <WorkspacePanel
               activeDatasourceId={state.activeDatasourceId}
               activeVisualizationId={state.visualization.activeId}
@@ -250,6 +271,7 @@ export function EditorFrame(props: EditorFrameProps) {
               visualizationMap={props.visualizationMap}
               dispatch={dispatch}
               ExpressionRenderer={props.ExpressionRenderer}
+              core={props.core}
             />
           </WorkspacePanelWrapper>
         )

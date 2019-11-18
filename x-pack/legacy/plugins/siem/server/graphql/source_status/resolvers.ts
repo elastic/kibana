@@ -31,9 +31,21 @@ export const createSourceStatusResolvers = (libs: {
 } => ({
   SourceStatus: {
     async indicesExist(source, args, { req }) {
+      if (
+        args.defaultIndex.length === 1 &&
+        (args.defaultIndex[0] === '' || args.defaultIndex[0] === '_all')
+      ) {
+        return false;
+      }
       return libs.sourceStatus.hasIndices(req, args.defaultIndex);
     },
     async indexFields(source, args, { req }) {
+      if (
+        args.defaultIndex.length === 1 &&
+        (args.defaultIndex[0] === '' || args.defaultIndex[0] === '_all')
+      ) {
+        return [];
+      }
       return libs.fields.getFields(req, args.defaultIndex);
     },
   },

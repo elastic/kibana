@@ -33,7 +33,7 @@ function ofName(name: string) {
 }
 
 function isSortableByColumn(column: IndexPatternColumn) {
-  return !column.isBucketed && column.operationType !== 'filter_ratio';
+  return !column.isBucketed;
 }
 
 const DEFAULT_SIZE = 3;
@@ -51,7 +51,7 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
 export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
   type: 'terms',
   displayName: i18n.translate('xpack.lens.indexPattern.terms', {
-    defaultMessage: 'Top Values',
+    defaultMessage: 'Top values',
   }),
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
