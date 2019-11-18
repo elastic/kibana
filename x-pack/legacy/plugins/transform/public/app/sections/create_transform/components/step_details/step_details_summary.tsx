@@ -33,44 +33,42 @@ export const StepDetailsSummary: SFC<StepDetailsExposedState> = React.memo(
       : '';
 
     return (
-      <Fragment>
-        <div data-test-subj="transformStepDetailsSummary">
+      <div data-test-subj="transformStepDetailsSummary">
+        <EuiFormRow
+          label={i18n.translate('xpack.transform.stepDetailsSummary.transformIdLabel', {
+            defaultMessage: 'Transform ID',
+          })}
+        >
+          <EuiFieldText defaultValue={transformId} disabled={true} />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('xpack.transform.stepDetailsSummary.transformDescriptionLabel', {
+            defaultMessage: 'Transform description',
+          })}
+        >
+          <EuiFieldText defaultValue={transformDescription} disabled={true} />
+        </EuiFormRow>
+        <EuiFormRow
+          helpText={destinationIndexHelpText}
+          label={i18n.translate('xpack.transform.stepDetailsSummary.destinationIndexLabel', {
+            defaultMessage: 'Destination index',
+          })}
+        >
+          <EuiFieldText defaultValue={destinationIndex} disabled={true} />
+        </EuiFormRow>
+        {isContinuousModeEnabled && (
           <EuiFormRow
-            label={i18n.translate('xpack.transform.stepDetailsSummary.transformIdLabel', {
-              defaultMessage: 'Transform ID',
-            })}
+            label={i18n.translate(
+              'xpack.transform.stepDetailsSummary.continuousModeDateFieldLabel',
+              {
+                defaultMessage: 'Continuous mode date field',
+              }
+            )}
           >
-            <EuiFieldText defaultValue={transformId} disabled={true} />
+            <EuiFieldText defaultValue={continuousModeDateField} disabled={true} />
           </EuiFormRow>
-          <EuiFormRow
-            label={i18n.translate('xpack.transform.stepDetailsSummary.transformDescriptionLabel', {
-              defaultMessage: 'Transform description',
-            })}
-          >
-            <EuiFieldText defaultValue={transformDescription} disabled={true} />
-          </EuiFormRow>
-          <EuiFormRow
-            helpText={destinationIndexHelpText}
-            label={i18n.translate('xpack.transform.stepDetailsSummary.destinationIndexLabel', {
-              defaultMessage: 'Destination index',
-            })}
-          >
-            <EuiFieldText defaultValue={destinationIndex} disabled={true} />
-          </EuiFormRow>
-          {isContinuousModeEnabled && (
-            <EuiFormRow
-              label={i18n.translate(
-                'xpack.transform.stepDetailsSummary.continuousModeDateFieldLabel',
-                {
-                  defaultMessage: 'Continuous mode date field',
-                }
-              )}
-            >
-              <EuiFieldText defaultValue={continuousModeDateField} disabled={true} />
-            </EuiFormRow>
-          )}
-        </div>
-      </Fragment>
+        )}
+      </div>
     );
   }
 );

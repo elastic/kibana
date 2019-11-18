@@ -375,35 +375,33 @@ export const TransformList: FC<Props> = ({
   };
 
   return (
-    <Fragment>
-      <div data-test-subj="transformListTableContainer">
-        <ProgressBar isLoading={isLoading || transformsLoading} />
-        <TransformTable
-          allowNeutralSort={false}
-          className="transform__TransformTable"
-          columns={columns}
-          error={searchError}
-          hasActions={false}
-          isExpandable={true}
-          isSelectable={false}
-          items={filterActive ? filteredTransforms : transforms}
-          itemId={TRANSFORM_LIST_COLUMN.ID}
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          onTableChange={onTableChange}
-          pagination={pagination}
-          rowProps={item => ({
-            'data-test-subj': `transformListRow row-${item.id}`,
-          })}
-          selection={selection}
-          sorting={sorting}
-          search={search}
-          data-test-subj={
-            isLoading || transformsLoading
-              ? 'transformListTable loading'
-              : 'transformListTable loaded'
-          }
-        />
-      </div>
-    </Fragment>
+    <div data-test-subj="transformListTableContainer">
+      <ProgressBar isLoading={isLoading || transformsLoading} />
+      <TransformTable
+        allowNeutralSort={false}
+        className="transform__TransformTable"
+        columns={columns}
+        error={searchError}
+        hasActions={false}
+        isExpandable={true}
+        isSelectable={false}
+        items={filterActive ? filteredTransforms : transforms}
+        itemId={TRANSFORM_LIST_COLUMN.ID}
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+        onTableChange={onTableChange}
+        pagination={pagination}
+        rowProps={item => ({
+          'data-test-subj': `transformListRow row-${item.id}`,
+        })}
+        selection={selection}
+        sorting={sorting}
+        search={search}
+        data-test-subj={
+          isLoading || transformsLoading
+            ? 'transformListTable loading'
+            : 'transformListTable loaded'
+        }
+      />
+    </div>
   );
 };
