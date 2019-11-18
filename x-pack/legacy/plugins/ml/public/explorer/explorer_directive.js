@@ -20,8 +20,6 @@ const module = uiModules.get('apps/ml');
 
 import { I18nContext } from 'ui/i18n';
 
-import { TimeBuckets } from 'plugins/ml/util/time_buckets';
-
 import { jobSelectServiceFactory } from '../components/job_selector/job_select_service_utils';
 
 import { interval$ } from '../components/controls/select_interval';
@@ -44,7 +42,6 @@ module.directive('mlExplorerDirective', function (globalState, $rootScope, AppSt
         <Explorer {...{
           globalState,
           jobSelectService$,
-          TimeBuckets,
         }}
         />
       </I18nContext>,

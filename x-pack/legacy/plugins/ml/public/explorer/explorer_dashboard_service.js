@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
  * Service for firing and registering for events across the different
  * components in the Explorer dashboard.
@@ -162,12 +160,6 @@ const reducer = (state, nextAction) => {
     case EXPLORER_ACTION.INITIALIZE:
       return initialize(state, payload);
 
-    case EXPLORER_ACTION.FIELD_FORMATS_LOADING:
-      return { ...state, fieldFormatsLoading: true };
-
-    case EXPLORER_ACTION.FIELD_FORMATS_LOADED:
-      return { ...state, fieldFormatsLoading: false };
-
     case EXPLORER_ACTION.APP_STATE_SET:
       return { ...state, appState: { ...state.appState, ...payload } };
 
@@ -186,6 +178,9 @@ const reducer = (state, nextAction) => {
     case EXPLORER_ACTION.APP_STATE_CLEAR_INFLUENCER_FILTER_SETTINGS:
       return { ...state, appState: appStateClearInfluencerFilterSettings(cloneDeep(state.appState)) };
 
+    case EXPLORER_ACTION.SET_STATE:
+      console.warn('reducer set state', payload);
+      return { ...state, ...payload };
     default:
       return state;
   }
@@ -229,6 +224,7 @@ export const explorer$ = explorerFilteredAction$.pipe(
   distinctUntilChanged(((prev, curr) => (prev !== null && curr !== null && prev.action === curr.action))),
 );
 
+// applies action and returns state
 export const explorerState$ = explorerFilteredAction$.pipe(
   scan(reducer, getExplorerDefaultState())
 );

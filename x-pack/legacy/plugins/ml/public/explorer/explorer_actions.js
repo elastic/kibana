@@ -11,7 +11,8 @@ import { mlFieldFormatService } from '../services/field_format_service';
 import { mlJobService } from '../services/job_service';
 
 import { EXPLORER_ACTION } from './explorer_constants';
-import { createJobs, restoreAppState } from './explorer_utils';
+import { explorerAction$ } from './explorer_dashboard_service';
+import { createJobs, loadOverallData, restoreAppState } from './explorer_utils';
 
 export function jobSelectionActionCreator(actionName, selectedJobIds, appState) {
   return from(mlFieldFormatService.populateFormats(selectedJobIds)).pipe(
@@ -19,7 +20,7 @@ export function jobSelectionActionCreator(actionName, selectedJobIds, appState) 
     map(resp => {
       if (resp.error) {
         console.log('Error populating field formats:', resp.error);
-        return { action: EXPLORER_ACTION.FIELD_FORMATS_LOADED };
+        return null;
       }
 
       const { selectedCells, filterData } = restoreAppState(appState);
@@ -33,7 +34,7 @@ export function jobSelectionActionCreator(actionName, selectedJobIds, appState) 
 
       const noJobsFound = (jobs.length === 0);
 
-      const payload = from([{
+      return {
         action: actionName,
         payload: {
           loading: false,
@@ -43,9 +44,23 @@ export function jobSelectionActionCreator(actionName, selectedJobIds, appState) 
           swimlaneViewByFieldName: appState.mlExplorerSwimlane.viewByFieldName,
           filterData
         }
-      }]);
-
-      return { action: EXPLORER_ACTION.FIELD_FORMATS_LOADED, payload };
+      };
     })
+  );
+}
+
+// Load the overall data - if the FieldFormats failed to populate
+// the default formatting will be used for metric values.
+export function loadOverallDataActionCreator(selectedJobs, swimlaneBucketInterval, bounds, showOverallLoadingIndicator = true) {
+  if (showOverallLoadingIndicator) {
+    explorerAction$.next({ action: EXPLORER_ACTION.SET_STATE, payload: { hasResults: false, loading: true } });
+  }
+
+  return from(loadOverallData(
+    selectedJobs,
+    swimlaneBucketInterval,
+    bounds,
+  )).pipe(
+    map(payload => ({ action: EXPLORER_ACTION.SET_STATE, payload })),
   );
 }

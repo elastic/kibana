@@ -8,17 +8,26 @@
  * utils for Anomaly Explorer.
  */
 
-import { chain, each, get, union, uniq } from 'lodash';
+import { chain, each, isEqual, get, union, uniq } from 'lodash';
 import moment from 'moment-timezone';
 
-import { npStart } from 'ui/new_platform';
+import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
 
+import { npStart } from 'ui/new_platform';
+import { timefilter } from 'ui/timefilter';
+
+import {
+  ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+  ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
+} from '../../common/constants/search';
 import { getEntityFieldList } from '../../common/util/anomaly_utils';
 import { isSourceDataChartableForDetector, isModelPlotEnabled } from '../../common/util/job_utils';
 import { parseInterval } from '../../common/util/parse_interval';
 import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
-import { mlResultsService } from 'plugins/ml/services/results_service';
+import { mlResultsService } from '../services/results_service';
+import { getBoundsRoundedToInterval, TimeBuckets } from '../util/time_buckets';
 
 import {
   MAX_CATEGORY_EXAMPLES,
@@ -26,13 +35,7 @@ import {
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
-import {
-  ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-  ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
-} from '../../common/constants/search';
 
-import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 // create new job objects based on standard job config objects
@@ -202,6 +205,38 @@ export function getSelectionInfluencers(selectedCells, fieldName) {
   }
 
   return [];
+}
+
+export function getSwimlaneBucketInterval(selectedJobs, swimlaneWidth) {
+  // Bucketing interval should be the maximum of the chart related interval (i.e. time range related)
+  // and the max bucket span for the jobs shown in the chart.
+  const bounds = timefilter.getActiveBounds();
+  const buckets = new TimeBuckets();
+  buckets.setInterval('auto');
+  buckets.setBounds(bounds);
+
+  const intervalSeconds = buckets.getInterval().asSeconds();
+
+  // if the swimlane cell widths are too small they will not be visible
+  // calculate how many buckets will be drawn before the swimlanes are actually rendered
+  // and increase the interval to widen the cells if they're going to be smaller than 8px
+  // this has to be done at this stage so all searches use the same interval
+  const timerangeSeconds = (bounds.max.valueOf() - bounds.min.valueOf()) / 1000;
+  const numBuckets = parseInt(timerangeSeconds / intervalSeconds);
+  const cellWidth = Math.floor(swimlaneWidth / numBuckets * 100) / 100;
+
+  // if the cell width is going to be less than 8px, double the interval
+  if (cellWidth < 8) {
+    buckets.setInterval((intervalSeconds * 2) + 's');
+  }
+
+  const maxBucketSpanSeconds = selectedJobs.reduce((memo, job) => Math.max(memo, job.bucketSpanSeconds), 0);
+  if (maxBucketSpanSeconds > intervalSeconds) {
+    buckets.setInterval(maxBucketSpanSeconds + 's');
+    buckets.setBounds(bounds);
+  }
+
+  return buckets.getInterval();
 }
 
 // Obtain the list of 'View by' fields per job and swimlaneViewByFieldName
@@ -570,6 +605,87 @@ export async function loadDataForCharts(jobIds, earliestMs, latestMs, influencer
 
         resolve(undefined);
       });
+  });
+}
+
+let loadOverallDataPreviousArgs = null;
+let loadOverallDataPreviousData = null;
+export function loadOverallData(selectedJobs, interval, bounds) {
+  return new Promise((resolve) => {
+    // Loads the overall data components i.e. the overall swimlane and influencers list.
+    if (selectedJobs === null) {
+      resolve({
+        loading: false,
+        hasResuts: false
+      });
+      return;
+    }
+
+    // check if we can just return existing cached data
+    const compareArgs = {
+      selectedJobs,
+      intervalAsSeconds: interval.asSeconds(),
+      boundsMin: bounds.min.valueOf(),
+      boundsMax: bounds.max.valueOf(),
+    };
+
+    if (isEqual(compareArgs, loadOverallDataPreviousArgs)) {
+      const overallSwimlaneData = loadOverallDataPreviousData;
+      const hasResults = (overallSwimlaneData.points && overallSwimlaneData.points.length > 0);
+      resolve({
+        hasResults,
+        loading: false,
+        overallSwimlaneData,
+      });
+      return;
+    }
+
+    // Ensure the search bounds align to the bucketing interval used in the swimlane so
+    // that the first and last buckets are complete.
+    const searchBounds = getBoundsRoundedToInterval(
+      bounds,
+      interval,
+      false
+    );
+    const selectedJobIds = selectedJobs.map(d => d.id);
+
+    // Load the overall bucket scores by time.
+    // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
+    // which wouldn't be the case if e.g. '1M' was used.
+    // Pass 'true' when obtaining bucket bounds due to the way the overall_buckets endpoint works
+    // to ensure the search is inclusive of end time.
+    const overallBucketsBounds = getBoundsRoundedToInterval(
+      bounds,
+      interval,
+      true
+    );
+    mlResultsService.getOverallBucketScores(
+      selectedJobIds,
+      // Note there is an optimization for when top_n == 1.
+      // If top_n > 1, we should test what happens when the request takes long
+      // and refactor the loading calls, if necessary, to avoid delays in loading other components.
+      1,
+      overallBucketsBounds.min.valueOf(),
+      overallBucketsBounds.max.valueOf(),
+      interval.asSeconds() + 's'
+    ).then((resp) => {
+      // this.skipCellClicks = false;
+      const overallSwimlaneData = processOverallResults(
+        resp.results,
+        searchBounds,
+        interval.asSeconds(),
+      );
+      loadOverallDataPreviousArgs = compareArgs;
+      loadOverallDataPreviousData = overallSwimlaneData;
+
+      console.log('Explorer overall swimlane data set:', overallSwimlaneData);
+      const hasResults = (overallSwimlaneData.points && overallSwimlaneData.points.length > 0);
+      resolve({
+        hasResults,
+        loading: false,
+        overallSwimlaneData,
+      });
+    });
   });
 }
 

@@ -23,14 +23,13 @@ export const EXPLORER_ACTION = {
   APP_STATE_SAVE_SELECTION: 'appStateSaveSelection',
   APP_STATE_SAVE_SWIMLANE_VIEW_BY_FIELD_NAME: 'appStateSaveSwimlaneViewByFieldName',
   APP_STATE_SAVE_INFLUENCER_FILTER_SETTINGS: 'appStateSaveInfluencerFilterSettings',
-  FIELD_FORMATS_LOADING: 'fieldFormatsLoading',
-  FIELD_FORMATS_LOADED: 'fieldFormatsLoaded',
   IDLE: 'idle',
   INITIALIZE: 'initialize',
   JOB_SELECTION_CHANGE: 'jobSelectionChange',
   LOAD_JOBS: 'loadJobs',
   REDRAW: 'redraw',
   RELOAD: 'reload',
+  SET_STATE: 'setState',
 };
 
 export const FILTER_ACTION = {
