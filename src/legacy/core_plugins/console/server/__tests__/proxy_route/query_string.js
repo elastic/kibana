@@ -38,7 +38,7 @@ describe('Console Proxy Route', () => {
       const server = new Server();
       server.route(
         createProxyRoute({
-          baseUrl: 'http://localhost:9200',
+          hosts: ['http://localhost:9200'],
         })
       );
 

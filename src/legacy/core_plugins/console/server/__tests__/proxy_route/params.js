@@ -72,7 +72,7 @@ describe('Console Proxy Route', () => {
           const { server } = setup();
           server.route(
             createProxyRoute({
-              baseUrl: 'http://localhost:9200',
+              hosts: ['http://localhost:9200'],
               pathFilters: [/^\/foo\//, /^\/bar\//],
             })
           );
@@ -91,7 +91,7 @@ describe('Console Proxy Route', () => {
           const { server } = setup();
           server.route(
             createProxyRoute({
-              baseUrl: 'http://localhost:9200',
+              hosts: ['http://localhost:9200'],
               pathFilters: [/^\/foo\//, /^\/bar\//],
             })
           );
@@ -113,7 +113,7 @@ describe('Console Proxy Route', () => {
 
         const getConfigForReq = sinon.stub().returns({});
 
-        server.route(createProxyRoute({ baseUrl: 'http://localhost:9200', getConfigForReq }));
+        server.route(createProxyRoute({ hosts: ['http://localhost:9200'], getConfigForReq }));
         await server.inject({
           method: 'POST',
           url: '/api/console/proxy?method=HEAD&path=/index/id',
@@ -142,7 +142,7 @@ describe('Console Proxy Route', () => {
 
         server.route(
           createProxyRoute({
-            baseUrl: 'http://localhost:9200',
+            hosts: ['http://localhost:9200'],
             getConfigForReq: () => ({
               timeout,
               agent,
@@ -164,20 +164,6 @@ describe('Console Proxy Route', () => {
         expect(opts).to.have.property('rejectUnauthorized', rejectUnauthorized);
         expect(opts.headers).to.have.property('foo', 'bar');
         expect(opts.headers).to.have.property('baz', 'bop');
-      });
-    });
-
-    describe('baseUrl', () => {
-      describe('default', () => {
-        it('ensures that the path starts with a /');
-      });
-      describe('url ends with a slash', () => {
-        it('combines clean with paths that start with a slash');
-        it(`combines clean with paths that don't start with a slash`);
-      });
-      describe(`url doesn't end with a slash`, () => {
-        it('combines clean with paths that start with a slash');
-        it(`combines clean with paths that don't start with a slash`);
       });
     });
   });

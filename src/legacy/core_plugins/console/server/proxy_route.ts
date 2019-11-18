@@ -18,12 +18,13 @@
  */
 
 import Joi from 'joi';
+import * as url from 'url';
+import { IncomingMessage } from 'http';
 import Boom from 'boom';
 import { trimLeft, trimRight } from 'lodash';
 import { sendRequest } from './request';
-import * as url from 'url';
 
-function toURL(base, path) {
+function toURL(base: string, path: string) {
   const urlResult = new url.URL(`${trimRight(base, '/')}/${trimLeft(path, '/')}`);
   // Appending pretty here to have Elasticsearch do the JSON formatting, as doing
   // in JS can lead to data loss (7.0 will get munged into 7, thus losing indication of
@@ -34,11 +35,11 @@ function toURL(base, path) {
   return urlResult;
 }
 
-function getProxyHeaders(req) {
+function getProxyHeaders(req: any) {
   const headers = Object.create(null);
 
   // Scope this proto-unsafe functionality to where it is being used.
-  function extendCommaList(obj, property, value) {
+  function extendCommaList(obj: Record<string, any>, property: string, value: any) {
     obj[property] = (obj[property] ? obj[property] + ',' : '') + value;
   }
 
@@ -58,9 +59,13 @@ function getProxyHeaders(req) {
 }
 
 export const createProxyRoute = ({
-  liveHostsManager,
+  hosts,
   pathFilters = [/.*/],
   getConfigForReq = () => ({}),
+}: {
+  hosts: string[];
+  pathFilters: RegExp[];
+  getConfigForReq: (...args: any[]) => any;
 }) => ({
   path: '/api/console/proxy',
   method: 'POST',
@@ -83,7 +88,7 @@ export const createProxyRoute = ({
     },
 
     pre: [
-      function filterPath(req) {
+      function filterPath(req: any) {
         const { path } = req.query;
 
         if (pathFilters.some(re => re.test(path))) {
@@ -91,56 +96,70 @@ export const createProxyRoute = ({
         }
 
         const err = Boom.forbidden();
-        err.output.payload = `Error connecting to '${path}':\n\nUnable to send requests to that path.`;
+        err.output.payload = `Error connecting to '${path}':\n\nUnable to send requests to that path.` as any;
         err.output.headers['content-type'] = 'text/plain';
         throw err;
       },
     ],
 
-    handler: async (req, h) => {
+    handler: async (req: any, h: any) => {
       const { payload, query } = req;
       const { path, method } = query;
-      const baseUrl = await liveHostsManager.getLiveHost();
-      const uri = toURL(baseUrl, path);
 
-      // Because this can technically be provided by a settings-defined proxy config, we need to
-      // preserve these property names to maintain BWC.
-      const { timeout, agent, headers, rejectUnauthorized } = getConfigForReq(req, uri.toString());
+      let esIncomingMessage: IncomingMessage;
 
-      const requestHeaders = {
-        ...headers,
-        ...getProxyHeaders(req),
-      };
+      for (const host of hosts) {
+        try {
+          const uri = toURL(host, path);
 
-      const esIncomingMessage = await sendRequest({
-        method,
-        headers: requestHeaders,
-        uri,
-        timeout,
-        payload,
-        rejectUnauthorized,
-        agent,
-      });
+          // Because this can technically be provided by a settings-defined proxy config, we need to
+          // preserve these property names to maintain BWC.
+          const { timeout, agent, headers, rejectUnauthorized } = getConfigForReq(
+            req,
+            uri.toString()
+          );
+
+          const requestHeaders = {
+            ...headers,
+            ...getProxyHeaders(req),
+          };
+
+          esIncomingMessage = await sendRequest({
+            method,
+            headers: requestHeaders,
+            uri,
+            timeout,
+            payload,
+            rejectUnauthorized,
+            agent,
+          });
+
+          break;
+        } catch (e) {
+          if (e.code !== 'ECONNREFUSED') {
+            throw Boom.boomify(e);
+          }
+          // Otherwise, try the next host...
+        }
+      }
 
       const {
         statusCode,
         statusMessage,
-        headers: responseHeaders,
-      } = esIncomingMessage;
-
-      const { warning } = responseHeaders;
+        headers: { warning },
+      } = esIncomingMessage!;
 
       if (method.toUpperCase() !== 'HEAD') {
         return h
-          .response(esIncomingMessage)
+          .response(esIncomingMessage!)
           .code(statusCode)
-          .header('warning', warning);
+          .header('warning', warning!);
       } else {
         return h
           .response(`${statusCode} - ${statusMessage}`)
           .code(statusCode)
           .type('text/plain')
-          .header('warning', warning);
+          .header('warning', warning!);
       }
     },
   },
