@@ -87,7 +87,7 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('superDatePickerAbsoluteTab');
       await testSubjects.click('superDatePickerAbsoluteDateInput');
       await this.inputValue('superDatePickerAbsoluteDateInput', toTime);
-      await PageObjects.common.sleep(1000);
+      await PageObjects.common.sleep(500);
 
       // set from time
       await testSubjects.click('superDatePickerstartDatePopoverButton');
