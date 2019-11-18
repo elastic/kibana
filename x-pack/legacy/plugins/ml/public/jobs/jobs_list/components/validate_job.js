@@ -6,7 +6,7 @@
 
 
 import { getNewJobLimits } from '../../../services/ml_server_info';
-import { populateValidationMessages } from '../../new_job_new/common/job_validator/util';
+import { populateValidationMessages } from '../../new_job/common/job_validator/util';
 
 import {
   validateModelMemoryLimit as validateModelMemoryLimitUtils,
