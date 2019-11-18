@@ -4,7 +4,6 @@
 
 ## OverlayStart.modals property
 
-[OverlayModalStart](./kibana-plugin-public.overlaymodalstart.md)
 
 <b>Signature:</b>
 

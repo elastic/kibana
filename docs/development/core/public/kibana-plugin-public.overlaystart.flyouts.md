@@ -4,7 +4,6 @@
 
 ## OverlayStart.flyouts property
 
-[OverlayFlyoutStart](./kibana-plugin-public.overlayflyoutstart.md)
 
 <b>Signature:</b>
 

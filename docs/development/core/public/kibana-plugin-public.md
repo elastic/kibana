@@ -70,10 +70,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [NotificationsSetup](./kibana-plugin-public.notificationssetup.md) |  |
 |  [NotificationsStart](./kibana-plugin-public.notificationsstart.md) |  |
 |  [OverlayBannersStart](./kibana-plugin-public.overlaybannersstart.md) |  |
-|  [OverlayFlyoutOpenOptions](./kibana-plugin-public.overlayflyoutopenoptions.md) |  |
-|  [OverlayFlyoutStart](./kibana-plugin-public.overlayflyoutstart.md) | APIs to open and manage fly-out dialogs. |
-|  [OverlayModalOpenOptions](./kibana-plugin-public.overlaymodalopenoptions.md) |  |
-|  [OverlayModalStart](./kibana-plugin-public.overlaymodalstart.md) | APIs to open and manage modal dialogs. |
 |  [OverlayRef](./kibana-plugin-public.overlayref.md) | Returned by [OverlayStart](./kibana-plugin-public.overlaystart.md) methods for closing a mounted overlay. |
 |  [OverlayStart](./kibana-plugin-public.overlaystart.md) |  |
 |  [PackageInfo](./kibana-plugin-public.packageinfo.md) |  |
