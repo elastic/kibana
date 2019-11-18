@@ -55,7 +55,7 @@ describe('createApi', () => {
   });
 
   it('should throw if no provider is found for the given name', () => {
-    expect(api.search({}, 'noneByThisName')).rejects.toThrowErrorMatchingInlineSnapshot(
+    expect(api.search({}, {}, 'noneByThisName')).rejects.toThrowErrorMatchingInlineSnapshot(
       `"No strategy found for noneByThisName"`
     );
   });
