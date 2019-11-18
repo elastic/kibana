@@ -47,8 +47,12 @@ export class Home extends Component {
   constructor(props) {
     super(props);
 
-    const isWelcomeEnabled = !(chrome.getInjected('disableWelcomeScreen') || props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false');
-    const showTelemetryDisclaimer = chrome.getInjected('allowChangingOptInStatus');
+    const isWelcomeEnabled = !(
+      chrome.getInjected('disableWelcomeScreen') ||
+      props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false'
+    );
+    const showTelemetryDisclaimer = chrome.getInjected('telemetryNotifyUserAboutOptInDefault');
+
     this.state = {
       // If welcome is enabled, we wait for loading to complete
       // before rendering. This prevents an annoying flickering
@@ -227,6 +231,7 @@ export class Home extends Component {
         onSkip={this.skipWelcome}
         urlBasePath={this.props.urlBasePath}
         showTelemetryDisclaimer={this.state.showTelemetryDisclaimer}
+        onOptInSeen={this.props.onOptInSeen}
       />
     );
   }
@@ -265,4 +270,5 @@ Home.propTypes = {
   localStorage: PropTypes.object.isRequired,
   urlBasePath: PropTypes.string.isRequired,
   mlEnabled: PropTypes.bool.isRequired,
+  onOptInSeen: PropTypes.func.isRequired,
 };
