@@ -129,14 +129,8 @@ export class HttpServer {
         this.log.debug(`registering route handler for [${route.path}]`);
         // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
         const validate = ['head', 'get'].includes(route.method) ? undefined : { payload: true };
-        const {
-          authRequired = true,
-          tags,
-          accepts: allow,
-          maxBytes,
-          output,
-          parse,
-        } = route.options;
+        const { authRequired = true, tags, body = {} } = route.options;
+        const { accepts: allow, maxBytes, output, parse } = body;
         this.server.route({
           handler: route.handler,
           method: route.method,

@@ -140,6 +140,43 @@ function routeSchemasFromRouteConfig<
 }
 
 /**
+ * Create a valid options object with "sensible" defaults + adding some validation to the options fields
+ *
+ * @param method HTTP verb for these options
+ * @param routeConfig The route config definition
+ */
+function validOptions<Method extends RouteMethod>(
+  method: Method,
+  routeConfig: RouteConfig<ObjectType, ObjectType, ObjectType, Method>
+) {
+  const shouldNotHavePayload = ['head', 'get'].includes(method);
+  const { options = {}, validate } = routeConfig;
+  const shouldValidateBody = validate && validate.body;
+
+  const { output } = options.body || {};
+  if (typeof output === 'string' && !['data', 'stream'].includes(output)) {
+    throw new Error(
+      `[options.body.output: '${output}'] in route ${method.toUpperCase()} ${
+        routeConfig.path
+      } is not valid. Only 'data' or 'stream' are valid.`
+    );
+  }
+
+  const body = shouldNotHavePayload
+    ? undefined
+    : {
+        // If it's not a GET (requires payload) but no body validation is required, use the memory-cheapest approach (stream and no parsing)
+        output: !shouldValidateBody ? ('stream' as 'stream') : undefined,
+        parse: !shouldValidateBody ? false : undefined,
+
+        // User's settings should overwrite any of the "desired" values
+        ...options.body,
+      };
+
+  return { ...options, body };
+}
+
+/**
  * @internal
  */
 export class Router implements IRouter {
@@ -162,7 +199,6 @@ export class Router implements IRouter {
       route: RouteConfig<P, Q, B, Method>,
       handler: RequestHandler<P, Q, B>
     ) => {
-      const { path, options = {} } = route;
       const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
       this.routes.push({
@@ -174,8 +210,8 @@ export class Router implements IRouter {
             handler: this.enhanceWithContext(handler),
           }),
         method,
-        path: getRouteFullPath(this.routerPath, path),
-        options,
+        path: getRouteFullPath(this.routerPath, route.path),
+        options: validOptions(method, route),
       });
     };
 

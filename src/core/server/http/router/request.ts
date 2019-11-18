@@ -152,18 +152,16 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
 
   private getRouteInfo() {
     const request = this[requestSymbol];
-    const payload = request.route.settings.payload || {};
-    const { parse, maxBytes, allow, output } = payload;
+    const { parse, maxBytes, allow, output } = request.route.settings.payload || {};
     return {
       path: request.path,
       method: request.method,
       options: {
         authRequired: request.route.settings.auth !== false,
         tags: request.route.settings.tags || [],
-        parse,
-        maxBytes,
-        accepts: allow,
-        output,
+        body: [allow, maxBytes, output, parse].some(v => typeof v !== 'undefined')
+          ? { parse, maxBytes, accepts: allow, output }
+          : undefined,
       },
     };
   }

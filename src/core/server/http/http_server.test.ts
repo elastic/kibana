@@ -584,8 +584,8 @@ test('exposes route details of incoming request to a route handler (POST + paylo
   router.post(
     {
       path: '/',
-      validate: false,
-      options: { accepts: 'application/json' },
+      validate: { body: schema.object({ test: schema.number() }) },
+      options: { body: { accepts: 'application/json' } },
     },
     (context, req, res) => res.ok({ body: req.route })
   );
@@ -601,10 +601,12 @@ test('exposes route details of incoming request to a route handler (POST + paylo
       options: {
         authRequired: true,
         tags: [],
-        parse: true, // hapi populates the default
-        maxBytes: 1024, // hapi populates the default
-        accepts: ['application/json'],
-        output: 'data',
+        body: {
+          parse: true, // hapi populates the default
+          maxBytes: 1024, // hapi populates the default
+          accepts: ['application/json'],
+          output: 'data',
+        },
       },
     });
 });
