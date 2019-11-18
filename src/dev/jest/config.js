@@ -82,7 +82,6 @@ export default {
   ],
   modulePathIgnorePatterns: [
     '__fixtures__/',
-    '__mocks__/',
     'target/',
   ],
   testMatch: [
