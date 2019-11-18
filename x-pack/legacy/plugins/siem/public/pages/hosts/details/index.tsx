@@ -5,7 +5,6 @@
  */
 
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import { getEsQueryConfig } from '@kbn/es-query';
 import React, { useContext, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
@@ -35,6 +34,8 @@ import { inputsSelectors, State } from '../../../store';
 import { setHostDetailsTablesActivePageToZero as dispatchHostDetailsTablesActivePageToZero } from '../../../store/hosts/actions';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../store/inputs/actions';
 import { SpyRoute } from '../../../utils/route/spy_routes';
+import { esQuery } from '../../../../../../../../src/plugins/data/public';
+
 import { HostsEmptyPage } from '../hosts_empty_page';
 import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
@@ -69,7 +70,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
         <WithSource sourceId="default">
           {({ indicesExist, indexPattern }) => {
             const filterQuery = convertToBuildEsQuery({
-              config: getEsQueryConfig(core.uiSettings),
+              config: esQuery.getEsQueryConfig(core.uiSettings),
               indexPattern,
               queries: [query],
               filters: [

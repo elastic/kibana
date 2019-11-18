@@ -77,8 +77,11 @@ export const getIPFromBucket = (
   const ip = get(bucket, `ip.hits.hits[0]._source.${inventoryModel.fields.ip}`, null);
   if (Array.isArray(ip)) {
     return ip.find(isIPv4) || null;
+  } else if (typeof ip === 'string') {
+    return ip;
   }
-  return ip;
+
+  return null;
 };
 
 export const getNodePath = (

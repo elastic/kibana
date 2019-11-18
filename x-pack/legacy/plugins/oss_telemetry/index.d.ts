@@ -46,7 +46,7 @@ export interface HapiServer {
     };
     task_manager: {
       registerTaskDefinitions: (opts: any) => void;
-      schedule: (opts: any) => Promise<void>;
+      ensureScheduled: (opts: any) => Promise<void>;
       fetch: (
         opts: any
       ) => Promise<{

@@ -26,7 +26,6 @@ import 'brace/mode/text';
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { npSetup, npStart } from 'ui/new_platform';
 import { I18nContext } from 'ui/i18n';
-import { ResizeChecker } from 'ui/resize_checker';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 export interface XPluginSet {
@@ -34,7 +33,6 @@ export interface XPluginSet {
   feature_catalogue: FeatureCatalogueSetup;
   __LEGACY: {
     I18nContext: any;
-    ResizeChecker: any;
   };
 }
 
@@ -48,7 +46,6 @@ pluginInstance.setup(npSetup.core, {
   ...npSetup.plugins,
   __LEGACY: {
     I18nContext,
-    ResizeChecker,
   },
 });
 pluginInstance.start(npStart.core);
