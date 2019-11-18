@@ -181,6 +181,7 @@ kibana_vars=(
     xpack.security.secureCookies
     xpack.security.sessionTimeout
     telemetry.enabled
+    telemetry.sendUsageFrom
 )
 
 longopts=''

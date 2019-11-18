@@ -6,9 +6,6 @@
 
 import React, { FC, Fragment, useEffect, useState } from 'react';
 import { merge } from 'rxjs';
-
-// @ts-ignore
-import { decorateQuery, luceneStringToDsl } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
 import { FieldType } from 'ui/index_patterns';
@@ -25,9 +22,8 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-
+import { KBN_FIELD_TYPES, esQuery } from '../../../../../../../src/plugins/data/public';
 import { NavigationMenu } from '../../components/navigation_menu';
-import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';
 // @ts-ignore
@@ -194,8 +190,8 @@ export const Page: FC = () => {
           },
         };
       } else {
-        qry = luceneStringToDsl(qryString);
-        decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
+        qry = esQuery.luceneStringToDsl(qryString);
+        esQuery.decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
       }
 
       setSearchQuery(qry);
@@ -403,7 +399,8 @@ export const Page: FC = () => {
     let allMetricFields = indexPatternFields.filter(f => {
       return (
         f.type === KBN_FIELD_TYPES.NUMBER &&
-        (f.displayName !== undefined && dataLoader.isDisplayField(f.displayName) === true)
+        f.displayName !== undefined &&
+        dataLoader.isDisplayField(f.displayName) === true
       );
     });
     if (metricFieldQuery !== undefined) {
@@ -477,7 +474,8 @@ export const Page: FC = () => {
       allNonMetricFields = indexPatternFields.filter(f => {
         return (
           f.type !== KBN_FIELD_TYPES.NUMBER &&
-          (f.displayName !== undefined && dataLoader.isDisplayField(f.displayName) === true)
+          f.displayName !== undefined &&
+          dataLoader.isDisplayField(f.displayName) === true
         );
       });
     } else {

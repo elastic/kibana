@@ -24,11 +24,11 @@ import {
   NotificationsStart,
 } from 'src/core/public';
 import { Field, FieldList, FieldListInterface, FieldType } from './fields';
-import { createFlattenHitWrapper } from './index_patterns';
 import { createIndexPatternSelect } from './components';
 import { setNotifications } from './services';
 
 import {
+  createFlattenHitWrapper,
   formatHitProvider,
   IndexPattern,
   IndexPatterns,
@@ -92,8 +92,6 @@ export {
   INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
   isFilterable,
   validateIndexPattern,
-  mockFields,
-  mockIndexPattern,
 } from './utils';
 
 /** @public */

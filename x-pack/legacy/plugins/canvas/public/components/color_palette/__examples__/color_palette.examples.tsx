@@ -29,14 +29,18 @@ class Interactive extends React.Component<{}, { value: string }> {
 }
 
 storiesOf('components/Color/ColorPalette', module)
-  .add('three colors', () => [
-    <ColorPalette key="1" onChange={action('onChange')} colors={THREE_COLORS} />,
-    <ColorPalette key="2" value="#fff" onChange={action('onChange')} colors={THREE_COLORS} />,
-  ])
-  .add('six colors', () => [
-    <ColorPalette key="1" onChange={action('onChange')} colors={SIX_COLORS} />,
-    <ColorPalette key="2" value="#fff" onChange={action('onChange')} colors={SIX_COLORS} />,
-  ])
+  .add('three colors', () => (
+    <>
+      <ColorPalette key="1" onChange={action('onChange')} colors={THREE_COLORS} />
+      <ColorPalette key="2" value="#fff" onChange={action('onChange')} colors={THREE_COLORS} />
+    </>
+  ))
+  .add('six colors', () => (
+    <>
+      <ColorPalette key="1" onChange={action('onChange')} colors={SIX_COLORS} />
+      <ColorPalette key="2" value="#fff" onChange={action('onChange')} colors={SIX_COLORS} />
+    </>
+  ))
   .add('six colors, wrap at 4', () => (
     <ColorPalette value="#fff" onChange={action('onChange')} colors={SIX_COLORS} colorsPerRow={4} />
   ))

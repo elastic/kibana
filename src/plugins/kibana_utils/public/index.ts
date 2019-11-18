@@ -21,6 +21,7 @@ export * from './core';
 export * from './errors';
 export * from './store';
 export * from './parse';
+export * from './resize_checker';
 export * from './render_complete';
 export * from './store';
 export * from './errors';
