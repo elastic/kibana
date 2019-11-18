@@ -5,13 +5,12 @@
  */
 
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
-import { IndexPattern } from 'ui/index_patterns';
-import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 import { KibanaConfigTypeFix } from '../../../contexts/kibana';
 import { InjectorService } from '../../../../common/types/angular';
+import { esQuery, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 export interface SearchItems {
-  indexPattern: IndexPattern;
+  indexPattern: IIndexPattern;
   savedSearch: SavedSearch;
   query: any;
   combinedQuery: any;
@@ -55,8 +54,8 @@ export function SearchItemsProvider($injector: InjectorService) {
 
       const filters = fs.length ? fs : [];
 
-      const esQueryConfigs = getEsQueryConfig(kibanaConfig);
-      combinedQuery = buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
+      const esQueryConfigs = esQuery.getEsQueryConfig(kibanaConfig);
+      combinedQuery = esQuery.buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
     }
 
     return {

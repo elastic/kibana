@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Maybe } from '../../typings/common';
 
-export const isValidCoordinateValue = (
-  value: number | null | undefined
-): value is number => value !== null && value !== undefined;
+export const isValidCoordinateValue = (value: Maybe<number>): value is number =>
+  value !== null && value !== undefined;
