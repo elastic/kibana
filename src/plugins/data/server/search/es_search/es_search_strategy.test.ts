@@ -66,7 +66,7 @@ describe('ES search strategy', () => {
     expect(spy).toBeCalled();
   });
 
-  it('calls the API caller with the params', () => {
+  it('calls the API caller with the params with defaults', () => {
     const params = { index: 'logstash-*' };
     const esSearch = esSearchStrategyProvider(
       {
@@ -80,7 +80,31 @@ describe('ES search strategy', () => {
 
     expect(mockApiCaller).toBeCalled();
     expect(mockApiCaller.mock.calls[0][0]).toBe('search');
-    expect(mockApiCaller.mock.calls[0][1]).toEqual(params);
+    expect(mockApiCaller.mock.calls[0][1]).toEqual({
+      ...params,
+      ignoreUnavailable: true,
+      restTotalHitsAsInt: true,
+    });
+  });
+
+  it('calls the API caller with overridden defaults', () => {
+    const params = { index: 'logstash-*', ignoreUnavailable: false };
+    const esSearch = esSearchStrategyProvider(
+      {
+        core: mockCoreSetup,
+      },
+      mockApiCaller,
+      mockSearch
+    );
+
+    esSearch.search({ params });
+
+    expect(mockApiCaller).toBeCalled();
+    expect(mockApiCaller.mock.calls[0][0]).toBe('search');
+    expect(mockApiCaller.mock.calls[0][1]).toEqual({
+      ...params,
+      restTotalHitsAsInt: true,
+    });
   });
 
   it('returns total, loaded, and raw response', async () => {

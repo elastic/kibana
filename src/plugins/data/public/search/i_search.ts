@@ -49,11 +49,11 @@ export interface IResponseTypesMap {
 
 export type ISearchGeneric = <T extends TStrategyTypes = typeof DEFAULT_SEARCH_STRATEGY>(
   request: IRequestTypesMap[T],
-  options: ISearchOptions,
+  options?: ISearchOptions,
   strategy?: T
 ) => Observable<IResponseTypesMap[T]>;
 
 export type ISearch<T extends TStrategyTypes = typeof DEFAULT_SEARCH_STRATEGY> = (
   request: IRequestTypesMap[T],
-  options: ISearchOptions
+  options?: ISearchOptions
 ) => Observable<IResponseTypesMap[T]>;
