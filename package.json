@@ -85,7 +85,8 @@
     "**/typescript": "3.7.2",
     "**/graphql-toolkit/lodash": "^4.17.13",
     "**/isomorphic-git/**/base64-js": "^1.2.1",
-    "**/image-diff/gm/debug": "^2.6.9"
+    "**/image-diff/gm/debug": "^2.6.9",
+    "**/deepmerge": "^4.2.2"
   },
   "workspaces": {
     "packages": [
