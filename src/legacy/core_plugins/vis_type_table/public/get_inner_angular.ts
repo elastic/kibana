@@ -38,9 +38,9 @@ import {
 const thirdPartyAngularDependencies = ['ngSanitize', 'ui.bootstrap', 'RecursionHelper'];
 
 export function getAngularModule(name: string, core: CoreStart) {
-  const discoverUiModule = getInnerAngular(name, core);
-  configureAppAngularModule(discoverUiModule, core as LegacyCoreStart, true);
-  return discoverUiModule;
+  const uiModule = getInnerAngular(name, core);
+  configureAppAngularModule(uiModule, core as LegacyCoreStart, true);
+  return uiModule;
 }
 
 let initialized = false;
