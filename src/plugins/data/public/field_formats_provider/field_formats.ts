@@ -31,15 +31,11 @@ import { FieldType } from './types';
 export class FieldFormatRegisty {
   private fieldFormats: Map<FIELD_FORMAT_IDS, IFieldFormatType>;
   private uiSettings!: UiSettingsClientContract;
-  private defaultMap: Record<string, FieldType> & {
-    _default_: FieldType;
-  };
+  private defaultMap: Record<string, FieldType>;
 
   constructor() {
     this.fieldFormats = new Map();
-    this.defaultMap = {
-      _default_: { id: FIELD_FORMAT_IDS.STRING, params: {} },
-    };
+    this.defaultMap = {};
   }
 
   getConfig = (key: string, override?: any) => this.uiSettings.get(key, override);
@@ -67,7 +63,9 @@ export class FieldFormatRegisty {
   getDefaultConfig = (fieldType: KBN_FIELD_TYPES, esTypes?: ES_FIELD_TYPES[]): FieldType => {
     const type = this.getDefaultTypeName(fieldType, esTypes);
 
-    return this.defaultMap[type] || this.defaultMap._default_;
+    return (
+      (this.defaultMap && this.defaultMap[type]) || { id: FIELD_FORMAT_IDS.STRING, params: {} }
+    );
   };
 
   /**

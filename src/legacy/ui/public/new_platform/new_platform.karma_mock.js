@@ -37,6 +37,7 @@ export const mockUiSettings = {
   'query:queryString:options': {},
   'courier:ignoreFilterIfFieldNotInIndex': true,
   'dateFormat:tz': 'Browser',
+  'format:defaultTypeMap': {},
 };
 
 export const npSetup = {
@@ -93,6 +94,9 @@ export const npSetup = {
       attachAction: sinon.fake(),
       registerAction: sinon.fake(),
       registerTrigger: sinon.fake(),
+    },
+    feature_catalogue: {
+      register: sinon.fake(),
     },
   },
 };
@@ -177,6 +181,7 @@ export const npStart = {
           history: sinon.fake(),
         },
       },
+      fieldFormats: getFieldFormatsRegistry(mockUiSettings),
     },
     inspector: {
       isAvailable: () => false,
@@ -194,6 +199,9 @@ export const npStart = {
       getTrigger: sinon.fake(),
       getTriggerActions: sinon.fake(),
       getTriggerCompatibleActions: sinon.fake(),
+    },
+    feature_catalogue: {
+      register: sinon.fake(),
     },
   },
 };

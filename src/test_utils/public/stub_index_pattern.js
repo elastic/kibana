@@ -34,8 +34,8 @@ import {
 
 import { getFieldFormatsRegistry } from './stub_field_formats';
 
-export default  function StubIndexPattern(pattern, getConfig, timeField, fields) {
-  const registeredFieldFormats = getFieldFormatsRegistry(getConfig);
+export default  function StubIndexPattern(pattern, getConfig, timeField, fields, uiSettings) {
+  const registeredFieldFormats = getFieldFormatsRegistry(uiSettings);
 
   this.id = pattern;
   this.title = pattern;
