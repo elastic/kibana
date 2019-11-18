@@ -49,9 +49,3 @@ export enum FILTERS {
   GEO_BOUNDING_BOX = 'geo_bounding_box',
   GEO_POLYGON = 'geo_polygon',
 }
-
-// We can't import the real types from the data plugin, so need to either duplicate
-// them here or figure out another solution, perhaps housing them in this package
-// will be replaces after Fieds / IndexPattern will be moved into new platform
-export type Field = any;
-export type IndexPattern = any;

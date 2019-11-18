@@ -49,11 +49,13 @@ describe('Agent lib', () => {
     const agentIds: string[] = [];
     for (const agent of agents) {
       agentIds.push(
-        (await soAdapter.create(getUser(), 'agents', {
-          ...agent,
-          local_metadata: JSON.stringify(agent.local_metadata || {}),
-          user_provided_metadata: JSON.stringify(agent.user_provided_metadata || {}),
-        })).id
+        (
+          await soAdapter.create(getUser(), 'agents', {
+            ...agent,
+            local_metadata: JSON.stringify(agent.local_metadata || {}),
+            user_provided_metadata: JSON.stringify(agent.user_provided_metadata || {}),
+          })
+        ).id
       );
     }
     return agentIds;

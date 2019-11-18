@@ -5,8 +5,7 @@
  */
 
 import { Embeddable } from './embeddable';
-import { TimeRange, esFilters } from 'src/plugins/data/public';
-import { Query } from 'src/legacy/core_plugins/data/public';
+import { Query, TimeRange, esFilters } from 'src/plugins/data/public';
 import { ExpressionRendererProps } from 'src/legacy/core_plugins/expressions/public';
 import { Document } from '../../persistence';
 

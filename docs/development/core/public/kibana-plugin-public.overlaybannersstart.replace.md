@@ -9,7 +9,7 @@ Replace a banner in place
 <b>Signature:</b>
 
 ```typescript
-replace(id: string | undefined, mount: OverlayBannerMount, priority?: number): string;
+replace(id: string | undefined, mount: MountPoint, priority?: number): string;
 ```
 
 ## Parameters
@@ -17,7 +17,7 @@ replace(id: string | undefined, mount: OverlayBannerMount, priority?: number): s
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  id | <code>string &#124; undefined</code> |  |
-|  mount | <code>OverlayBannerMount</code> |  |
+|  mount | <code>MountPoint</code> |  |
 |  priority | <code>number</code> |  |
 
 <b>Returns:</b>
