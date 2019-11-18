@@ -658,18 +658,12 @@ export interface OverlayStart {
     // (undocumented)
     banners: OverlayBannersStart;
     // Warning: (ae-forgotten-export) The symbol "OverlayFlyoutStart" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "OverlayFlyoutStart"
     // 
     // (undocumented)
-    flyouts: OverlayFlyoutStart;
-    // Warning: (ae-forgotten-export) The symbol "OverlayModalStart" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "OverlayModalStart"
-    // 
-    // (undocumented)
-    modals: OverlayModalStart;
-    // @deprecated (undocumented)
     openFlyout: OverlayFlyoutStart['open'];
-    // @deprecated (undocumented)
+    // Warning: (ae-forgotten-export) The symbol "OverlayModalStart" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
     openModal: OverlayModalStart['open'];
 }
 

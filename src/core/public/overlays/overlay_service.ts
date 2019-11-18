@@ -48,9 +48,6 @@ export class OverlayService {
 
     return {
       banners,
-      flyouts,
-      modals,
-
       openFlyout: flyouts.open.bind(flyouts),
       openModal: modals.open.bind(modals),
     };
@@ -61,17 +58,8 @@ export class OverlayService {
 export interface OverlayStart {
   /** {@link OverlayBannersStart} */
   banners: OverlayBannersStart;
-  /** {@link OverlayModalStart} */
-  modals: OverlayModalStart;
-  /** {@link OverlayFlyoutStart} */
-  flyouts: OverlayFlyoutStart;
-
-  /**
-   * @deprecated Use {@link OverlayStart.flyouts} instead
-   */
+  /** {@link OverlayFlyoutStart#open} */
   openFlyout: OverlayFlyoutStart['open'];
-  /**
-   * @deprecated Use {@link OverlayStart.modals} instead
-   */
+  /** {@link OverlayModalStart#open} */
   openModal: OverlayModalStart['open'];
 }

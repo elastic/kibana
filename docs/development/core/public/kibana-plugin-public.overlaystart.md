@@ -16,8 +16,6 @@ export interface OverlayStart
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [banners](./kibana-plugin-public.overlaystart.banners.md) | <code>OverlayBannersStart</code> | [OverlayBannersStart](./kibana-plugin-public.overlaybannersstart.md) |
-|  [flyouts](./kibana-plugin-public.overlaystart.flyouts.md) | <code>OverlayFlyoutStart</code> |  |
-|  [modals](./kibana-plugin-public.overlaystart.modals.md) | <code>OverlayModalStart</code> |  |
 |  [openFlyout](./kibana-plugin-public.overlaystart.openflyout.md) | <code>OverlayFlyoutStart['open']</code> |  |
 |  [openModal](./kibana-plugin-public.overlaystart.openmodal.md) | <code>OverlayModalStart['open']</code> |  |
 

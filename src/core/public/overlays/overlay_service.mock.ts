@@ -23,16 +23,10 @@ import { overlayModalServiceMock } from './modal/modal_service.mock';
 
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<OverlayStart> = {
-    openFlyout: jest.fn(),
-    openModal: jest.fn(),
+    openFlyout: overlayFlyoutServiceMock.createStartContract().open,
+    openModal: overlayModalServiceMock.createStartContract().open,
     banners: overlayBannersServiceMock.createStartContract(),
-    flyouts: overlayFlyoutServiceMock.createStartContract(),
-    modals: overlayModalServiceMock.createStartContract(),
   };
-  startContract.openModal.mockReturnValue({
-    close: jest.fn(),
-    onClose: Promise.resolve(),
-  });
   return startContract;
 };
 

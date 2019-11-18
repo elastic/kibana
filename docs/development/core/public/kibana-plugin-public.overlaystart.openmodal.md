@@ -4,10 +4,6 @@
 
 ## OverlayStart.openModal property
 
-> Warning: This API is now obsolete.
-> 
-> Use [OverlayStart.modals](./kibana-plugin-public.overlaystart.modals.md) instead
-> 
 
 <b>Signature:</b>
 

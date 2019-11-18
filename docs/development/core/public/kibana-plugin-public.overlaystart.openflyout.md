@@ -4,10 +4,6 @@
 
 ## OverlayStart.openFlyout property
 
-> Warning: This API is now obsolete.
-> 
-> Use [OverlayStart.flyouts](./kibana-plugin-public.overlaystart.flyouts.md) instead
-> 
 
 <b>Signature:</b>
 
