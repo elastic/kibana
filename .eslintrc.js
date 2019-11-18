@@ -190,11 +190,51 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/uptime/**/*.{js,ts,tsx}'],
+      files: ['x-pack/legacy/plugins/watcher/**/*.{js,ts,tsx}'],
       rules: {
-        'react-hooks/exhaustive-deps': 'off',
         'react-hooks/rules-of-hooks': 'off',
+        'react-hooks/exhaustive-deps': 'off',
       },
+    },
+
+    /**
+     * Prettier
+     */
+    {
+      files: [
+        '.eslintrc.js',
+        'packages/kbn-utility-types/**/*',
+        'packages/kbn-eslint-plugin-eslint/**/*',
+        'packages/kbn-config-schema/**/*',
+        'packages/kbn-pm/**/*',
+        'packages/kbn-es/**/*',
+        'packages/elastic-datemath/**/*',
+        'packages/kbn-i18n/**/*',
+        'packages/kbn-dev-utils/**/*',
+        'packages/kbn-plugin-helpers/**/*',
+        'packages/kbn-plugin-generator/**/*',
+        'packages/kbn-test-subj-selector/**/*',
+        'packages/kbn-test/**/*',
+        'packages/kbn-eslint-import-resolver-kibana/**/*',
+        'src/legacy/server/saved_objects/**/*',
+        'x-pack/legacy/plugins/apm/**/*',
+        'x-pack/legacy/plugins/canvas/**/*',
+        '**/*.{ts,tsx}',
+        'src/legacy/core_plugins/metrics/**/*.js',
+      ],
+      plugins: ['prettier'],
+      rules: Object.assign(
+        {
+          'prettier/prettier': [
+            'error',
+            {
+              endOfLine: 'auto',
+            },
+          ],
+        },
+        require('eslint-config-prettier').rules,
+        require('eslint-config-prettier/react').rules
+      ),
     },
 
     /**
