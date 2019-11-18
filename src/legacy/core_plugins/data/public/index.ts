@@ -59,13 +59,3 @@ export {
   NoDefaultIndexPattern,
   NoDefinedIndexPatterns,
 } from './index_patterns';
-
-/**
- * These functions can be used to register the angular wrappers for react components
- * in a separate module to use them without relying on the uiModules module tree.
- * */
-export {
-  createFilterBarHelper,
-  createFilterBarDirective,
-  createApplyFiltersPopoverDirective,
-} from './shim/legacy_module';

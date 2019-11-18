@@ -58,6 +58,7 @@ test('migrate app state from 6.0', async () => {
 });
 
 test('migrate sort from 6.1', async () => {
+  const TARGET_VERSION = '8.0';
   const mockSave = jest.fn();
   const appState = {
     uiState: {
@@ -80,7 +81,7 @@ test('migrate sort from 6.1', async () => {
     save: mockSave,
     useMargins: false,
   };
-  migrateAppState(appState, '8.0');
+  migrateAppState(appState, TARGET_VERSION);
   expect(appState.uiState).toBeUndefined();
 
   const newPanel = (appState.panels[0] as unknown) as SavedDashboardPanel;

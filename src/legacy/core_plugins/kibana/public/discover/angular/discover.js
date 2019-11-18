@@ -74,7 +74,6 @@ const {
 }  = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
-import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
 import { start as data } from '../../../../data/public/legacy';
 import { generateFilters } from '../../../../../../plugins/data/public';
 
@@ -422,21 +421,6 @@ function discoverController(
     // The filters will automatically be set when the queryFilter emits an update event (see below)
     queryFilter.setFilters(filters);
   };
-
-  // TODO this isnt used anymore here, just in visualize and dashboards
-  $scope.applyFilters = filters => {
-    const { timeRangeFilter, restOfFilters } = extractTimeFilter($scope.indexPattern.timeFieldName, filters);
-    queryFilter.addFilters(restOfFilters);
-    if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
-
-    $scope.state.$newFilters = [];
-  };
-
-  $scope.$watch('state.$newFilters', (filters = []) => {
-    if (filters.length === 1) {
-      $scope.applyFilters(filters);
-    }
-  });
 
   const getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
