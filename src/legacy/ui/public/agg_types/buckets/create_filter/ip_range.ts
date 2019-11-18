@@ -17,25 +17,24 @@
  * under the License.
  */
 
-import { buildRangeFilter, RangeFilterParams } from '@kbn/es-query';
 import { CidrMask } from '../../../utils/cidr_mask';
 import { IBucketAggConfig } from '../_bucket_agg_type';
+import { IpRangeKey } from '../ip_range';
+import { esFilters } from '../../../../../../plugins/data/public';
 
-export const createFilterIpRange = (aggConfig: IBucketAggConfig, key: string) => {
-  let range: RangeFilterParams;
+export const createFilterIpRange = (aggConfig: IBucketAggConfig, key: IpRangeKey) => {
+  let range: esFilters.RangeFilterParams;
 
-  if (aggConfig.params.ipRangeType === 'mask') {
-    range = new CidrMask(key).getRange();
+  if (key.type === 'mask') {
+    range = new CidrMask(key.mask).getRange();
   } else {
-    const [from, to] = key.split(/\s+to\s+/);
-
     range = {
-      from: from === '-Infinity' ? -Infinity : from,
-      to: to === 'Infinity' ? Infinity : to,
+      from: key.from ? key.from : -Infinity,
+      to: key.to ? key.to : Infinity,
     };
   }
 
-  return buildRangeFilter(
+  return esFilters.buildRangeFilter(
     aggConfig.params.field,
     { gte: range.from, lte: range.to },
     aggConfig.getIndexPattern()

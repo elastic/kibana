@@ -9,10 +9,11 @@ import uiRoutes from 'ui/routes';
 // @ts-ignore
 import { checkFullLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege } from '../../../privilege/check_privilege';
+import { loadMlServerInfo } from '../../../services/ml_server_info';
+import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import {
   loadCurrentIndexPattern,
   loadCurrentSavedSearch,
-  loadIndexPatterns,
   // @ts-ignore
 } from '../../../util/index_utils';
 import { getDataFrameAnalyticsBreadcrumbs } from '../../breadcrumbs';
@@ -26,7 +27,8 @@ uiRoutes.when('/data_frame_analytics/?', {
     CheckLicense: checkFullLicense,
     privileges: checkGetJobsPrivilege,
     indexPattern: loadCurrentIndexPattern,
-    indexPatterns: loadIndexPatterns,
     savedSearch: loadCurrentSavedSearch,
+    mlNodeCount: getMlNodeCount,
+    loadMlServerInfo,
   },
 });

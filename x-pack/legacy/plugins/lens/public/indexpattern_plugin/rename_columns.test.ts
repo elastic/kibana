@@ -11,8 +11,16 @@ describe('rename_columns', () => {
   it('should rename columns of a given datatable', () => {
     const input: KibanaDatatable = {
       type: 'kibana_datatable',
-      columns: [{ id: 'a', name: 'A' }, { id: 'b', name: 'B' }],
-      rows: [{ a: 1, b: 2 }, { a: 3, b: 4 }, { a: 5, b: 6 }, { a: 7, b: 8 }],
+      columns: [
+        { id: 'a', name: 'A' },
+        { id: 'b', name: 'B' },
+      ],
+      rows: [
+        { a: 1, b: 2 },
+        { a: 3, b: 4 },
+        { a: 5, b: 6 },
+        { a: 7, b: 8 },
+      ],
     };
 
     const idMap = {
@@ -61,11 +69,38 @@ describe('rename_columns', () => {
     `);
   });
 
+  it('should replace "" with a visible value', () => {
+    const input: KibanaDatatable = {
+      type: 'kibana_datatable',
+      columns: [{ id: 'a', name: 'A' }],
+      rows: [{ a: '' }],
+    };
+
+    const idMap = {
+      a: {
+        id: 'a',
+        label: 'Austrailia',
+      },
+    };
+
+    expect(renameColumns.fn(input, { idMap: JSON.stringify(idMap) }, {}).rows[0].a).toEqual(
+      '(empty)'
+    );
+  });
+
   it('should keep columns which are not mapped', () => {
     const input: KibanaDatatable = {
       type: 'kibana_datatable',
-      columns: [{ id: 'a', name: 'A' }, { id: 'b', name: 'B' }],
-      rows: [{ a: 1, b: 2 }, { a: 3, b: 4 }, { a: 5, b: 6 }, { a: 7, b: 8 }],
+      columns: [
+        { id: 'a', name: 'A' },
+        { id: 'b', name: 'B' },
+      ],
+      rows: [
+        { a: 1, b: 2 },
+        { a: 3, b: 4 },
+        { a: 5, b: 6 },
+        { a: 7, b: 8 },
+      ],
     };
 
     const idMap = {
@@ -110,8 +145,16 @@ describe('rename_columns', () => {
   it('should rename date histograms', () => {
     const input: KibanaDatatable = {
       type: 'kibana_datatable',
-      columns: [{ id: 'a', name: 'A' }, { id: 'b', name: 'banana per 30 seconds' }],
-      rows: [{ a: 1, b: 2 }, { a: 3, b: 4 }, { a: 5, b: 6 }, { a: 7, b: 8 }],
+      columns: [
+        { id: 'a', name: 'A' },
+        { id: 'b', name: 'banana per 30 seconds' },
+      ],
+      rows: [
+        { a: 1, b: 2 },
+        { a: 3, b: 4 },
+        { a: 5, b: 6 },
+        { a: 7, b: 8 },
+      ],
     };
 
     const idMap = {

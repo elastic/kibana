@@ -28,14 +28,14 @@ import * as exportMock from '../../../../core/server/saved_objects/export';
 import { createMockServer } from './_mock_server';
 import { createExportRoute } from './export';
 import { createListStream } from '../../../utils/streams';
-import { SavedObjectsClientMock } from '../../../../core/server/mocks';
+import { savedObjectsClientMock } from '../../../../core/server/mocks';
 
 const getSortedObjectsForExport = exportMock.getSortedObjectsForExport as jest.Mock;
 
 describe('POST /api/saved_objects/_export', () => {
   let server: Hapi.Server;
   const savedObjectsClient = {
-    ...SavedObjectsClientMock.create(),
+    ...savedObjectsClientMock.create(),
     errors: {} as any,
   };
 

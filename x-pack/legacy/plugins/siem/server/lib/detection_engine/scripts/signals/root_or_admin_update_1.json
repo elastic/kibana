@@ -1,13 +1,14 @@
 {
-  "id": "rule-1",
-  "description": "Only watch winlogbeat users",
-  "index": ["winlogbeat-*"],
-  "interval": "9m",
-  "name": "Just watch other winlogbeat users",
-  "severity": "low",
-  "enabled": false,
-  "type": "filter",
-  "from": "now-5d",
-  "to": "now-1d",
-  "kql": "user.name: something_else"
+  "rule_id": "rule-1",
+  "description": "Changed Description of only detecting root user",
+  "index": ["auditbeat-*"],
+  "interval": "50m",
+  "name": "A different name",
+  "severity": "high",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now-5m",
+  "query": "user.name: root",
+  "language": "kuery",
+  "references": ["https://update1.example.com", "https://update2.example.com"]
 }

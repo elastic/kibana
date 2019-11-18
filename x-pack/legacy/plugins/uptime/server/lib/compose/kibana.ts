@@ -13,25 +13,26 @@ import { UMAuthDomain } from '../domains';
 import { UMDomainLibs, UMServerLibs } from '../lib';
 import { ElasticsearchMonitorStatesAdapter } from '../adapters/monitor_states';
 import { UMKibanaSavedObjectsAdapter } from '../adapters/saved_objects/kibana_saved_objects_adapter';
+import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters/framework';
 
-export function compose(hapiServer: any): UMServerLibs {
-  const framework = new UMKibanaBackendFrameworkAdapter(hapiServer);
-  const database = new UMKibanaDatabaseAdapter(hapiServer.plugins.elasticsearch);
-  const authDomain = new UMAuthDomain(new UMXPackAuthAdapter(hapiServer.plugins.xpack_main), {});
+export function compose(server: UptimeCoreSetup, plugins: UptimeCorePlugins): UMServerLibs {
+  const { elasticsearch, savedObjects, xpack } = plugins;
+  const framework = new UMKibanaBackendFrameworkAdapter(server, plugins);
+  const database = new UMKibanaDatabaseAdapter(elasticsearch);
+
+  const authDomain = new UMAuthDomain(new UMXPackAuthAdapter(xpack), {});
 
   const domainLibs: UMDomainLibs = {
     auth: authDomain,
     monitors: new ElasticsearchMonitorsAdapter(database),
     monitorStates: new ElasticsearchMonitorStatesAdapter(database),
     pings: new ElasticsearchPingsAdapter(database),
-    savedObjects: new UMKibanaSavedObjectsAdapter(hapiServer),
+    savedObjects: new UMKibanaSavedObjectsAdapter(savedObjects, elasticsearch),
   };
 
-  const libs: UMServerLibs = {
+  return {
     framework,
     database,
     ...domainLibs,
   };
-
-  return libs;
 }

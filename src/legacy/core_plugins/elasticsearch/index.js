@@ -98,10 +98,14 @@ export default function (kibana) {
       createProxy(server);
 
       // Set up the health check service and start it.
-      const { start, waitUntilReady } = healthCheck(this, server, esConfig.healthCheckDelay.asMilliseconds());
+      const { start, waitUntilReady } = healthCheck(
+        this,
+        server,
+        esConfig.healthCheckDelay.asMilliseconds(),
+        esConfig.ignoreVersionMismatch
+      );
       server.expose('waitUntilReady', waitUntilReady);
       start();
-    }
+    },
   });
-
 }

@@ -32,6 +32,12 @@ export const DescriptionListStyled = styled(EuiDescriptionList)`
     dt {
       font-size: ${theme.eui.euiFontSizeXS} !important;
     }
+    dd {
+      width: fit-content;
+    }
+    dd > div {
+      width: fit-content;
+    }
   `}
 `;
 

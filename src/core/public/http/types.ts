@@ -30,6 +30,11 @@ export interface HttpServiceBase {
   basePath: IBasePath;
 
   /**
+   * APIs for denoting certain paths for not requiring authentication
+   */
+  anonymousPaths: IAnonymousPaths;
+
+  /**
    * Adds a new {@link HttpInterceptor} to the global HTTP client.
    * @param interceptor a {@link HttpInterceptor}
    * @returns a function for removing the attached interceptor.
@@ -90,6 +95,21 @@ export interface IBasePath {
    * Removes the prepended basePath from the `path`.
    */
   remove: (url: string) => string;
+}
+
+/**
+ * APIs for denoting paths as not requiring authentication
+ */
+export interface IAnonymousPaths {
+  /**
+   * Determines whether the provided path doesn't require authentication. `path` should include the current basePath.
+   */
+  isAnonymous(path: string): boolean;
+
+  /**
+   * Register `path` as not requiring authentication. `path` should not include the current basePath.
+   */
+  register(path: string): void;
 }
 
 /**

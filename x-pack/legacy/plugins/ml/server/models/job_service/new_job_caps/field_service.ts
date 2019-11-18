@@ -13,7 +13,7 @@ import {
   NewJobCaps,
   METRIC_AGG_TYPE,
 } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/common';
+import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/server';
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { rollupServiceProvider, RollupJob, RollupFields } from './rollup';
 import { aggregations, mlOnlyAggregations } from './aggregations';
@@ -136,7 +136,8 @@ async function combineFieldsAndAggs(
   const numericalFields = getNumericalFields(fields);
   const ipFields = getIpFields(fields);
 
-  const mix = mixFactory(rollupFields);
+  const isRollup = Object.keys(rollupFields).length > 0;
+  const mix = mixFactory(isRollup, rollupFields);
 
   aggs.forEach(a => {
     if (a.type === METRIC_AGG_TYPE && a.fields !== undefined) {
@@ -165,7 +166,7 @@ async function combineFieldsAndAggs(
 
   return {
     aggs,
-    fields: filterFields(fields),
+    fields: isRollup ? filterFields(fields) : fields,
   };
 }
 
@@ -178,9 +179,7 @@ function filterFields(fields: Field[]): Field[] {
 
 // returns a mix function that is used to cross-reference aggs and fields.
 // wrapped in a provider to allow filtering based on rollup job capabilities
-function mixFactory(rollupFields: RollupFields) {
-  const isRollup = Object.keys(rollupFields).length > 0;
-
+function mixFactory(isRollup: boolean, rollupFields: RollupFields) {
   return function mix(field: Field, agg: Aggregation): void {
     if (
       isRollup === false ||

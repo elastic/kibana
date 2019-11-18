@@ -4,20 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
-import { KbnServer, ConditionalHeaders, CreateJobFactory } from '../../../../types';
+import {
+  ServerFacade,
+  RequestFacade,
+  ConditionalHeaders,
+  CreateJobFactory,
+} from '../../../../types';
 import { validateUrls } from '../../../../common/validate_urls';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { JobParamsPNG, ESQueueCreateJobFnPNG } from '../../types';
 
-function createJobFn(server: KbnServer) {
+function createJobFn(server: ServerFacade) {
   const crypto = cryptoFactory(server);
 
   return async function createJob(
     { objectType, title, relativeUrl, browserTimezone, layout }: JobParamsPNG,
     headers: ConditionalHeaders,
-    request: Request
+    request: RequestFacade
   ) {
     const serializedEncryptedHeaders = await crypto.encrypt(headers);
 
@@ -36,6 +40,6 @@ function createJobFn(server: KbnServer) {
   };
 }
 
-export const createJobFactory: CreateJobFactory = oncePerServer(createJobFn as (
-  server: KbnServer
-) => ESQueueCreateJobFnPNG);
+export const createJobFactory: CreateJobFactory = oncePerServer(
+  createJobFn as (server: ServerFacade) => ESQueueCreateJobFnPNG
+);

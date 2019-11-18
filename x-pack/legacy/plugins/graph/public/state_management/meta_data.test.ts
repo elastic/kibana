@@ -6,7 +6,6 @@
 
 import { createMockGraphStore, MockedGraphEnvironment } from './mocks';
 import { syncBreadcrumbSaga, updateMetaData } from './meta_data';
-import { Chrome } from 'ui/chrome';
 
 describe('breadcrumb sync saga', () => {
   let env: MockedGraphEnvironment;
@@ -14,22 +13,15 @@ describe('breadcrumb sync saga', () => {
   beforeEach(() => {
     env = createMockGraphStore({
       sagas: [syncBreadcrumbSaga],
-      mockedDepsOverwrites: {
-        chrome: ({
-          breadcrumbs: {
-            set: jest.fn(),
-          },
-        } as unknown) as Chrome,
-      },
     });
   });
 
   it('syncs breadcrumb initially', () => {
-    expect(env.mockedDeps.chrome.breadcrumbs.set).toHaveBeenCalled();
+    expect(env.mockedDeps.chrome.setBreadcrumbs).toHaveBeenCalled();
   });
 
   it('syncs breadcrumb with each change to meta data', () => {
     env.store.dispatch(updateMetaData({}));
-    expect(env.mockedDeps.chrome.breadcrumbs.set).toHaveBeenCalledTimes(2);
+    expect(env.mockedDeps.chrome.setBreadcrumbs).toHaveBeenCalledTimes(2);
   });
 });

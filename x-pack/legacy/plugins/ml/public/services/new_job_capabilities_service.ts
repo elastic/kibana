@@ -50,18 +50,23 @@ export function loadNewJobCapabilities(
 const categoryFieldTypes = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.IP];
 
 class NewJobCapsService {
-  private _fields: Field[];
-  private _aggs: Aggregation[];
-  private _includeEventRateField: boolean;
-
-  constructor(includeEventRateField = true) {
-    this._fields = [];
-    this._aggs = [];
-    this._includeEventRateField = includeEventRateField;
-  }
+  private _fields: Field[] = [];
+  private _catFields: Field[] = [];
+  private _dateFields: Field[] = [];
+  private _aggs: Aggregation[] = [];
+  private _includeEventRateField: boolean = true;
+  private _removeTextFields: boolean = true;
 
   public get fields(): Field[] {
     return this._fields;
+  }
+
+  public get catFields(): Field[] {
+    return this._catFields;
+  }
+
+  public get dateFields(): Field[] {
+    return this._dateFields;
   }
 
   public get aggs(): Aggregation[] {
@@ -79,16 +84,38 @@ class NewJobCapsService {
     return this._fields.filter(f => categoryFieldTypes.includes(f.type));
   }
 
-  public async initializeFromIndexPattern(indexPattern: IndexPattern) {
+  public async initializeFromIndexPattern(
+    indexPattern: IndexPattern,
+    includeEventRateField = true,
+    removeTextFields = true
+  ) {
     try {
+      this._includeEventRateField = includeEventRateField;
+      this._removeTextFields = removeTextFields;
+
       const resp = await ml.jobs.newJobCaps(indexPattern.title, indexPattern.type === 'rollup');
-      const { fields, aggs } = createObjects(resp, indexPattern.title);
+      const { fields: allFields, aggs } = createObjects(resp, indexPattern.title);
 
       if (this._includeEventRateField === true) {
-        addEventRateField(aggs, fields);
+        addEventRateField(aggs, allFields);
       }
 
+      const { fieldsPreferringKeyword, fieldsPreferringText } = processTextAndKeywordFields(
+        allFields
+      );
+      const catFields = fieldsPreferringText.filter(
+        f => f.type === ES_FIELD_TYPES.KEYWORD || f.type === ES_FIELD_TYPES.TEXT
+      );
+      const dateFields = fieldsPreferringText.filter(f => f.type === ES_FIELD_TYPES.DATE);
+      const fields = this._removeTextFields ? fieldsPreferringKeyword : allFields;
+
+      // set the main fields list to contain fields which have been filtered to prefer
+      // keyword fields over text fields.
+      // e.g. if foo.keyword and foo exist, don't add foo to the list.
       this._fields = fields;
+      // set the category fields to contain fields which have been filtered to prefer text fields.
+      this._catFields = catFields;
+      this._dateFields = dateFields;
       this._aggs = aggs;
     } catch (error) {
       console.error('Unable to load new job capabilities', error); // eslint-disable-line no-console
@@ -197,6 +224,27 @@ function addEventRateField(aggs: Aggregation[], fields: Field[]) {
     }
   });
   fields.splice(0, 0, eventRateField);
+}
+
+// create two lists, one removing text fields if there are keyword equivalents and vice versa
+function processTextAndKeywordFields(fields: Field[]) {
+  const keywordIds = fields.filter(f => f.type === ES_FIELD_TYPES.KEYWORD).map(f => f.id);
+  const textIds = fields.filter(f => f.type === ES_FIELD_TYPES.TEXT).map(f => f.id);
+
+  const fieldsPreferringKeyword = fields.filter(
+    f =>
+      f.type !== ES_FIELD_TYPES.TEXT ||
+      (f.type === ES_FIELD_TYPES.TEXT && keywordIds.includes(`${f.id}.keyword`) === false)
+  );
+
+  const fieldsPreferringText = fields.filter(
+    f =>
+      f.type !== ES_FIELD_TYPES.KEYWORD ||
+      (f.type === ES_FIELD_TYPES.KEYWORD &&
+        textIds.includes(f.id.replace(/\.keyword$/, '')) === false)
+  );
+
+  return { fieldsPreferringKeyword, fieldsPreferringText };
 }
 
 export const newJobCapsService = new NewJobCapsService();

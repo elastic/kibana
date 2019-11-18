@@ -13,6 +13,8 @@ import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPrivateState } from './types';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ChangeIndexPattern } from './change_indexpattern';
+import { EuiProgress } from '@elastic/eui';
+import { documentField } from './document_field';
 
 jest.mock('ui/new_platform');
 jest.mock('../../../../../../src/legacy/ui/public/registry/field_formats');
@@ -120,6 +122,7 @@ const initialState: IndexPatternPrivateState = {
           aggregatable: true,
           searchable: true,
         },
+        documentField,
       ],
     },
     '2': {
@@ -173,6 +176,7 @@ const initialState: IndexPatternPrivateState = {
             },
           },
         },
+        documentField,
       ],
     },
     '3': {
@@ -198,6 +202,7 @@ const initialState: IndexPatternPrivateState = {
           aggregatable: true,
           searchable: true,
         },
+        documentField,
       ],
     },
   },
@@ -265,7 +270,14 @@ describe('IndexPattern Data Panel', () => {
   });
 
   describe('loading existence data', () => {
-    async function testExistenceLoading(stateChanges?: unknown, propChanges?: unknown) {
+    function waitForPromises() {
+      return Promise.resolve()
+        .catch(() => {})
+        .then(() => {})
+        .then(() => {});
+    }
+
+    function testProps() {
       const setState = jest.fn();
       core.http.get = jest.fn(async (url: string) => {
         const parts = url.split('/');
@@ -277,7 +289,7 @@ describe('IndexPattern Data Panel', () => {
           ),
         };
       });
-      const props = {
+      return {
         ...defaultProps,
         changeIndexPattern: jest.fn(),
         setState,
@@ -301,24 +313,34 @@ describe('IndexPattern Data Panel', () => {
           },
         } as IndexPatternPrivateState,
       };
+    }
+
+    async function testExistenceLoading(stateChanges?: unknown, propChanges?: unknown) {
+      const props = testProps();
       const inst = mountWithIntl(<IndexPatternDataPanel {...props} />);
-      inst.update();
+
+      act(() => {
+        inst.update();
+      });
+
+      await waitForPromises();
 
       if (stateChanges || propChanges) {
         act(() => {
           ((inst.setProps as unknown) as (props: unknown) => {})({
             ...props,
-            ...(propChanges || {}),
+            ...((propChanges as object) || {}),
             state: {
               ...props.state,
-              ...(stateChanges || {}),
+              ...((stateChanges as object) || {}),
             },
           });
           inst.update();
         });
+        await waitForPromises();
       }
 
-      return setState;
+      return props.setState;
     }
 
     it('loads existence data', async () => {
@@ -446,6 +468,98 @@ describe('IndexPattern Data Panel', () => {
         },
       });
     });
+
+    it('shows a loading indicator when loading', async () => {
+      const inst = mountWithIntl(<IndexPatternDataPanel {...testProps()} />);
+
+      expect(inst.find(EuiProgress).length).toEqual(1);
+
+      await waitForPromises();
+      inst.update();
+
+      expect(inst.find(EuiProgress).length).toEqual(0);
+    });
+
+    it('does not perform multiple queries at once', async () => {
+      let queryCount = 0;
+      let overlapCount = 0;
+      const props = testProps();
+
+      core.http.get = jest.fn((url: string) => {
+        if (queryCount) {
+          ++overlapCount;
+        }
+        ++queryCount;
+
+        const parts = url.split('/');
+        const indexPatternTitle = parts[parts.length - 1];
+        const result = Promise.resolve({
+          indexPatternTitle,
+          existingFieldNames: ['field_1', 'field_2'].map(
+            fieldName => `${indexPatternTitle}_${fieldName}`
+          ),
+        });
+
+        result.then(() => --queryCount);
+
+        return result;
+      });
+
+      const inst = mountWithIntl(<IndexPatternDataPanel {...props} />);
+
+      inst.update();
+
+      act(() => {
+        ((inst.setProps as unknown) as (props: unknown) => {})({
+          ...props,
+          dateRange: { fromDate: '2019-01-01', toDate: '2020-01-02' },
+        });
+        inst.update();
+      });
+
+      act(() => {
+        ((inst.setProps as unknown) as (props: unknown) => {})({
+          ...props,
+          dateRange: { fromDate: '2019-01-01', toDate: '2020-01-03' },
+        });
+        inst.update();
+      });
+
+      await waitForPromises();
+
+      expect(core.http.get).toHaveBeenCalledTimes(2);
+      expect(overlapCount).toEqual(0);
+    });
+
+    it('shows all fields if empty state button is clicked', async () => {
+      const props = testProps();
+
+      core.http.get = jest.fn((url: string) => {
+        return Promise.resolve({
+          indexPatternTitle: props.currentIndexPatternId,
+          existingFieldNames: [],
+        });
+      });
+
+      const inst = mountWithIntl(<IndexPatternDataPanel {...props} />);
+
+      inst.update();
+      await waitForPromises();
+
+      expect(inst.find('[data-test-subj="lnsFieldListPanelField"]').length).toEqual(0);
+
+      act(() => {
+        inst
+          .find('[data-test-subj="lnsDataPanelShowAllFields"]')
+          .first()
+          .simulate('click');
+        inst.update();
+      });
+
+      expect(
+        props.setState.mock.calls.map(([fn]) => fn(props.state)).filter(s => s.showEmptyFields)
+      ).toHaveLength(1);
+    });
   });
 
   describe('while showing empty fields', () => {
@@ -455,6 +569,7 @@ describe('IndexPattern Data Panel', () => {
       );
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
+        'Records',
         'bytes',
         'client',
         'memory',
@@ -520,6 +635,7 @@ describe('IndexPattern Data Panel', () => {
         .simulate('click');
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
+        'Records',
         'bytes',
         'client',
         'memory',
@@ -588,6 +704,7 @@ describe('IndexPattern Data Panel', () => {
       const wrapper = shallowWithIntl(<InnerIndexPatternDataPanel {...props} />);
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
+        'Records',
         'bytes',
         'memory',
       ]);

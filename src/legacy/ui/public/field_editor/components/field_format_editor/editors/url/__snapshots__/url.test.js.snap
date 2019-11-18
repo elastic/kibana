@@ -125,6 +125,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     />
   </EuiFormRow>
   <FormatEditorSamples
+    sampleType="html"
     samples={Array []}
   />
 </Fragment>
@@ -255,6 +256,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     />
   </EuiFormRow>
   <FormatEditorSamples
+    sampleType="html"
     samples={Array []}
   />
 </Fragment>
@@ -385,6 +387,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     />
   </EuiFormRow>
   <FormatEditorSamples
+    sampleType="html"
     samples={Array []}
   />
 </Fragment>
@@ -564,6 +567,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     />
   </EuiFormRow>
   <FormatEditorSamples
+    sampleType="html"
     samples={
       Array [
         Object {

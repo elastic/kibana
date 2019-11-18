@@ -98,6 +98,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
 
       schemaConfig = {
         accessor: 0,
+        label: '',
         format: {},
         params: {},
         aggType: '',
@@ -171,7 +172,10 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         const visState = { ...visStateDef, params: { foo: 'bar' } };
         const schemas = {
           ...schemasDef,
-          metric: [{ ...schemaConfig, accessor: 0 }, { ...schemaConfig, accessor: 1 }],
+          metric: [
+            { ...schemaConfig, accessor: 0 },
+            { ...schemaConfig, accessor: 1 },
+          ],
         };
         const actual = buildPipelineVisFunction.table(visState, schemas, uiState);
         expect(actual).toMatchSnapshot();
@@ -191,7 +195,10 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         const visState = { ...visStateDef, params: { foo: 'bar' } };
         const schemas = {
           ...schemasDef,
-          metric: [{ ...schemaConfig, accessor: 0 }, { ...schemaConfig, accessor: 1 }],
+          metric: [
+            { ...schemaConfig, accessor: 0 },
+            { ...schemaConfig, accessor: 1 },
+          ],
           split_row: [2, 4],
           bucket: [3],
         };
@@ -249,7 +256,10 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         const visState = { ...visStateDef, params: { metric: {} } };
         const schemas = {
           ...schemasDef,
-          metric: [{ ...schemaConfig, accessor: 0 }, { ...schemaConfig, accessor: 1 }],
+          metric: [
+            { ...schemaConfig, accessor: 0 },
+            { ...schemaConfig, accessor: 1 },
+          ],
         };
         const actual = buildPipelineVisFunction.metric(visState, schemas, uiState);
         expect(actual).toMatchSnapshot();
@@ -259,7 +269,10 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         const visState = { ...visStateDef, params: { metric: {} } };
         const schemas = {
           ...schemasDef,
-          metric: [{ ...schemaConfig, accessor: 0 }, { ...schemaConfig, accessor: 1 }],
+          metric: [
+            { ...schemaConfig, accessor: 0 },
+            { ...schemaConfig, accessor: 1 },
+          ],
           group: [{ accessor: 2 }],
         };
         const actual = buildPipelineVisFunction.metric(visState, schemas, uiState);

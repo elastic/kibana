@@ -13,18 +13,28 @@ function getSetup() {
     client: {
       search: jest.fn()
     } as any,
+    internalClient: {
+      search: jest.fn()
+    } as any,
     config: {
       get: jest.fn<any, string[]>((key: string) => {
         switch (key) {
-          case 'apm_oss.transactionIndices':
-            return 'myIndex';
           case 'xpack.apm.ui.transactionGroupBucketSize':
             return 100;
         }
       }),
       has: () => true
     },
-    uiFiltersES: [{ term: { 'service.environment': 'test' } }]
+    uiFiltersES: [{ term: { 'service.environment': 'test' } }],
+    indices: {
+      'apm_oss.sourcemapIndices': 'myIndex',
+      'apm_oss.errorIndices': 'myIndex',
+      'apm_oss.onboardingIndices': 'myIndex',
+      'apm_oss.spanIndices': 'myIndex',
+      'apm_oss.transactionIndices': 'myIndex',
+      'apm_oss.metricsIndices': 'myIndex',
+      'apm_oss.apmAgentConfigurationIndex': 'myIndex'
+    }
   };
 }
 

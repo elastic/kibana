@@ -52,6 +52,8 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       ? WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED
       : WIZARD_STEPS.TIME_RANGE;
 
+  let autoSetTimeRange = false;
+
   if (mlJobService.tempJobCloningObjects.job !== undefined) {
     // cloning a job
     const clonedJob = mlJobService.cloneJob(mlJobService.tempJobCloningObjects.job);
@@ -79,6 +81,10 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       );
       mlJobService.tempJobCloningObjects.start = undefined;
       mlJobService.tempJobCloningObjects.end = undefined;
+    } else {
+      // if not start and end times are set and this is an advanced job,
+      // auto set the time range based on the index
+      autoSetTimeRange = isAdvancedJobCreator(jobCreator);
     }
   } else {
     // creating a new job
@@ -99,19 +105,22 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       jobCreator.createdBy = null;
     }
 
-    if (isAdvancedJobCreator(jobCreator)) {
-      // for advanced jobs, load the full time range start and end times
-      // so they can be used for job validation and bucket span estimation
-      try {
-        jobCreator.autoSetTimeRange();
-      } catch (error) {
-        toastNotifications.addDanger({
-          title: i18n.translate('xpack.ml.newJob.wizard.autoSetJobCreatorTimeRange.error', {
-            defaultMessage: `Error retrieving beginning and end times of index`,
-          }),
-          text: error,
-        });
-      }
+    // auto set the time range if creating a new advanced job
+    autoSetTimeRange = isAdvancedJobCreator(jobCreator);
+  }
+
+  if (autoSetTimeRange && isAdvancedJobCreator(jobCreator)) {
+    // for advanced jobs, load the full time range start and end times
+    // so they can be used for job validation and bucket span estimation
+    try {
+      jobCreator.autoSetTimeRange();
+    } catch (error) {
+      toastNotifications.addDanger({
+        title: i18n.translate('xpack.ml.newJob.wizard.autoSetJobCreatorTimeRange.error', {
+          defaultMessage: `Error retrieving beginning and end times of index`,
+        }),
+        text: error,
+      });
     }
   }
 

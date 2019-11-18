@@ -9,8 +9,6 @@ import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
-import { Provider as ReduxStoreProvider } from 'react-redux';
-import { npSetup } from 'ui/new_platform';
 
 import {
   apolloClientObservable,
@@ -18,15 +16,27 @@ import {
   mockGlobalState,
   TestProviders,
 } from '../../../../mock';
-import { MockNpSetUp, mockUiSettings } from '../../../../mock/ui_settings';
+import { mockUiSettings } from '../../../../mock/ui_settings';
+import { useKibanaCore } from '../../../../lib/compose/kibana_core';
 import { createStore, hostsModel, State } from '../../../../store';
 import { HostsTableType } from '../../../../store/hosts/model';
 import { HostsTable } from './index';
 import { mockData } from './mock';
 
-const mockNpSetup: MockNpSetUp = (npSetup as unknown) as MockNpSetUp;
-jest.mock('ui/new_platform');
-mockNpSetup.core.uiSettings = mockUiSettings;
+const mockUseKibanaCore = useKibanaCore as jest.Mock;
+jest.mock('../../../../lib/compose/kibana_core');
+mockUseKibanaCore.mockImplementation(() => ({
+  uiSettings: mockUiSettings,
+}));
+
+// Test will fail because we will to need to mock some core services to make the test work
+// For now let's forget about SiemSearchBar and QueryBar
+jest.mock('../../../search_bar', () => ({
+  SiemSearchBar: () => null,
+}));
+jest.mock('../../../query_bar', () => ({
+  QueryBar: () => null,
+}));
 
 describe('Hosts Table', () => {
   const loadPage = jest.fn();
@@ -41,7 +51,7 @@ describe('Hosts Table', () => {
   describe('rendering', () => {
     test('it renders the default Hosts table', () => {
       const wrapper = shallow(
-        <ReduxStoreProvider store={store}>
+        <TestProviders store={store}>
           <HostsTable
             data={mockData.Hosts.edges}
             id="hostsQuery"
@@ -54,7 +64,7 @@ describe('Hosts Table', () => {
             totalCount={mockData.Hosts.totalCount}
             type={hostsModel.HostsType.page}
           />
-        </ReduxStoreProvider>
+        </TestProviders>
       );
 
       expect(toJson(wrapper)).toMatchSnapshot();

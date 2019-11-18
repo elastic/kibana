@@ -26,6 +26,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export class FormatEditorSamples extends PureComponent {
+  static defaultProps = {
+    sampleType: 'text'
+  };
   static propTypes = {
     samples: PropTypes.arrayOf(
       PropTypes.shape({
@@ -33,10 +36,11 @@ export class FormatEditorSamples extends PureComponent {
         output: PropTypes.any.isRequired,
       })
     ).isRequired,
+    sampleType: PropTypes.oneOf(['html', 'text']),
   };
 
   render() {
-    const { samples } = this.props;
+    const { samples, sampleType } = this.props;
 
     const columns = [
       {
@@ -54,15 +58,16 @@ export class FormatEditorSamples extends PureComponent {
           defaultMessage: 'Output',
         }),
         render: output => {
-          return (
-            <div
+          return sampleType === 'html' ?
+            (
+              <div
               /*
                * Justification for dangerouslySetInnerHTML:
                * Sample output may contain HTML tags, like URL image/audio format.
                */
-              dangerouslySetInnerHTML={{ __html: output }} //eslint-disable-line react/no-danger
-            />
-          );
+                dangerouslySetInnerHTML={{ __html: output }} //eslint-disable-line react/no-danger
+              />
+            ) : (<div>{output}</div>);
         },
       },
     ];

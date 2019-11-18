@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import rimraf from 'rimraf';
+import del from 'del';
 import { join } from 'path';
 import { execFileSync as exec } from 'child_process';
 
@@ -46,7 +46,7 @@ export default function (grunt) {
     ], { env })).trim();
 
     grunt.log.write('Clearing old docs ... ');
-    rimraf.sync(htmlDocsDir);
+    del.sync(htmlDocsDir);
     grunt.log.writeln('done');
 
     grunt.log.write('Copying new docs ... ');

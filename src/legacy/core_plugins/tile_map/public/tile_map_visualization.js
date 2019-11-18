@@ -21,8 +21,8 @@ import { get } from 'lodash';
 import { GeohashLayer } from './geohash_layer';
 import { BaseMapsVisualizationProvider } from './base_maps_visualization';
 import { TileMapTooltipFormatterProvider } from './editors/_tooltip_formatter';
-import { start as data } from '../../../core_plugins/data/public/legacy';
-const filterManager = data.filter.filterManager;
+import { npStart } from 'ui/new_platform';
+import { getFormat } from '../../../ui/public/visualize/loader/pipeline_helpers/utilities';
 
 export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
   const BaseMapsVisualization = new BaseMapsVisualizationProvider(serviceSettings);
@@ -79,6 +79,7 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
           return;
         }
         if (precisionChange) {
+          updateGeohashAgg();
           this.vis.updateState();
         } else {
           //when we filter queries by collar
@@ -158,12 +159,14 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
 
     _getGeohashOptions() {
       const newParams = this._getMapsParams();
-      const metricAgg = this._getMetricAgg();
-      const boundTooltipFormatter = tooltipFormatter.bind(null, this.vis.getAggConfig(), metricAgg);
+      const metricDimension = this._params.dimensions.metric;
+      const metricLabel = metricDimension ? metricDimension.label : '';
+      const metricFormat = getFormat(metricDimension && metricDimension.format);
+      const boundTooltipFormatter = tooltipFormatter.bind(null, metricLabel, metricFormat.getConverterFor('text'));
 
       return {
-        label: metricAgg ? metricAgg.makeLabel() : '',
-        valueFormatter: this._geoJsonFeatureCollectionAndMeta ? (metricAgg && metricAgg.fieldFormatter()) : null,
+        label: metricLabel,
+        valueFormatter: this._geoJsonFeatureCollectionAndMeta ? (metricFormat.getConverterFor('text')) : null,
         tooltipFormatter: this._geoJsonFeatureCollectionAndMeta ? boundTooltipFormatter : null,
         mapType: newParams.mapType,
         isFilteredByCollar: this._isFilteredByCollar(),
@@ -186,6 +189,7 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
       filter[filterName] = { ignore_unmapped: true };
       filter[filterName][field] = filterData;
 
+      const { filterManager } = npStart.plugins.data.query;
       filterManager.addFilters([filter]);
 
       this.vis.updateState();
@@ -195,10 +199,6 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
       return this.vis.getAggConfig().aggs.find((agg) => {
         return get(agg, 'type.dslName') === 'geohash_grid';
       });
-    }
-
-    _getMetricAgg() {
-      return this.vis.getAggConfig().byType('metrics')[0];
     }
 
     _isFilteredByCollar() {

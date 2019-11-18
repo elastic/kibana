@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
+import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 import {
   ML_JOB_AGGREGATION,
   KIBANA_AGGREGATION,
   ES_AGGREGATION,
 } from '../../common/constants/aggregation_types';
+import { MLCATEGORY } from '../../common/constants/field_types';
 
 export const EVENT_RATE_FIELD_ID = '__ml_event_rate_count__';
 export const METRIC_AGG_TYPE = 'metrics';
@@ -81,3 +82,10 @@ export interface AggFieldNamePair {
   };
   excludeFrequent?: string;
 }
+
+export const mlCategory: Field = {
+  id: MLCATEGORY,
+  name: MLCATEGORY,
+  type: ES_FIELD_TYPES.KEYWORD,
+  aggregatable: false,
+};

@@ -22,7 +22,7 @@ const series = {
 
 const chartBase: ChartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.java.gcRateChartTitle', {
-    defaultMessage: 'Garbage collection rate per minute'
+    defaultMessage: 'Garbage collection per minute'
   }),
   key: 'gc_rate_line_chart',
   type: 'linemark',

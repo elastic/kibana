@@ -14,18 +14,21 @@ export const snapshotHistogramQueryString = `
     $monitorId: String
     $statusFilter: String
   ) {
-    histogram: getSnapshotHistogram(
+    queryResult: getSnapshotHistogram(
       dateRangeStart: $dateRangeStart
       dateRangeEnd: $dateRangeEnd
       filters: $filters
       statusFilter: $statusFilter
       monitorId: $monitorId
     ) {
+      histogram {
       upCount
         downCount
         x
         x0
         y
+      }
+      interval
     }
   }
 `;

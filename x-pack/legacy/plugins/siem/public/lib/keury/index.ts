@@ -4,23 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  buildEsQuery,
-  getEsQueryConfig,
-  Filter,
-  fromKueryExpression,
-  toElasticsearchQuery,
-} from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery, JsonObject } from '@kbn/es-query';
 import { isEmpty, isString, flow } from 'lodash/fp';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { npSetup } from 'ui/new_platform';
-import { Query } from 'src/plugins/data/common';
+import {
+  Query,
+  esFilters,
+  esQuery,
+  IIndexPattern,
+} from '../../../../../../../src/plugins/data/public';
 
 import { KueryFilterQuery } from '../../store';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
-  indexPattern: StaticIndexPattern
+  indexPattern: IIndexPattern
 ) => {
   try {
     return kueryExpression
@@ -28,6 +25,19 @@ export const convertKueryToElasticSearchQuery = (
       : '';
   } catch (err) {
     return '';
+  }
+};
+
+export const convertKueryToDslFilter = (
+  kueryExpression: string,
+  indexPattern: IIndexPattern
+): JsonObject => {
+  try {
+    return kueryExpression
+      ? toElasticsearchQuery(fromKueryExpression(kueryExpression), indexPattern)
+      : {};
+  } catch (err) {
+    return {};
   }
 };
 
@@ -67,29 +77,29 @@ const escapeAndOr = (val: string) => val.replace(/(\s+)(and|or)(\s+)/gi, '$1\\$2
 
 const escapeNot = (val: string) => val.replace(/not(\s+)/gi, '\\$&');
 
-export const escapeKuery = flow(
-  escapeSpecialCharacters,
-  escapeAndOr,
-  escapeNot,
-  escapeWhitespace
-);
+export const escapeKuery = flow(escapeSpecialCharacters, escapeAndOr, escapeNot, escapeWhitespace);
 
 export const convertToBuildEsQuery = ({
+  config,
   indexPattern,
   queries,
   filters,
 }: {
-  indexPattern: StaticIndexPattern;
+  config: esQuery.EsQueryConfig;
+  indexPattern: IIndexPattern;
   queries: Query[];
-  filters: Filter[];
+  filters: esFilters.Filter[];
 }) => {
   try {
     return JSON.stringify(
-      buildEsQuery(
+      esQuery.buildEsQuery(
         indexPattern,
         queries,
         filters.filter(f => f.meta.disabled === false),
-        getEsQueryConfig(npSetup.core.uiSettings)
+        {
+          ...config,
+          dateFormatTZ: undefined,
+        }
       )
     );
   } catch (exp) {

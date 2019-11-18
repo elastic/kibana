@@ -198,5 +198,3 @@ export class UrlFormat extends FieldFormat {
     }
   };
 }
-
-// console.log(UrlFormat);

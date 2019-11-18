@@ -9,6 +9,8 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { EmbeddedMap } from './embedded_map';
 import { SetQuery } from './types';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
+import { useIndexPatterns } from '../../hooks/use_index_patterns';
 
 jest.mock('../search_bar', () => ({
   siemFilterManager: {
@@ -16,27 +18,25 @@ jest.mock('../search_bar', () => ({
   },
 }));
 
-jest.mock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      injectedMetadata: {
-        getKibanaVersion: () => '8.0.0',
-      },
-    },
-    plugins: {
-      uiActions: require('../../../../../../../src/plugins/ui_actions/public/mocks').uiActionsPluginMock.createSetupContract(),
-    },
+const mockUseIndexPatterns = useIndexPatterns as jest.Mock;
+jest.mock('../../hooks/use_index_patterns');
+mockUseIndexPatterns.mockImplementation(() => [true, []]);
+
+const mockUseKibanaCore = useKibanaCore as jest.Mock;
+jest.mock('../../lib/compose/kibana_core');
+mockUseKibanaCore.mockImplementation(() => ({
+  uiSettings: {
+    get$: () => 'world',
   },
-  npSetup: {
-    core: {
-      uiSettings: {
-        get$: () => 'world',
-      },
-    },
-    plugins: {
-      uiActions: require('../../../../../../../src/plugins/ui_actions/public/mocks').uiActionsPluginMock.createStartContract(),
-    },
+  injectedMetadata: {
+    getKibanaVersion: () => '8.0.0',
   },
+}));
+
+jest.mock('../../lib/compose/kibana_plugins');
+
+jest.mock('ui/vis/lib/timezone', () => ({
+  timezoneProvider: () => () => 'America/New_York',
 }));
 
 describe('EmbeddedMap', () => {

@@ -61,9 +61,8 @@ export const validateAdvancedEditor = (state: State): State => {
   const destinationIndexName = idx(jobConfig, _ => _.dest.index) || '';
   const destinationIndexNameEmpty = destinationIndexName === '';
   const destinationIndexNameValid = isValidIndexName(destinationIndexName);
-  const destinationIndexPatternTitleExists = state.indexPatternTitles.some(
-    name => destinationIndexName === name
-  );
+  const destinationIndexPatternTitleExists =
+    state.indexPatternsMap[destinationIndexName] !== undefined;
 
   let dependentVariableEmpty = false;
   if (isRegressionAnalysis(jobConfig.analysis)) {
@@ -207,9 +206,8 @@ export function reducer(state: State, action: Action): State {
         );
         newFormState.destinationIndexNameEmpty = newFormState.destinationIndex === '';
         newFormState.destinationIndexNameValid = isValidIndexName(newFormState.destinationIndex);
-        newFormState.destinationIndexPatternTitleExists = state.indexPatternTitles.some(
-          name => newFormState.destinationIndex === name
-        );
+        newFormState.destinationIndexPatternTitleExists =
+          state.indexPatternsMap[newFormState.destinationIndex] !== undefined;
       }
 
       if (action.payload.jobId !== undefined) {
@@ -244,9 +242,8 @@ export function reducer(state: State, action: Action): State {
         ...state,
         ...action.payload,
       };
-      newState.form.destinationIndexPatternTitleExists = newState.indexPatternTitles.some(
-        name => newState.form.destinationIndex === name
-      );
+      newState.form.destinationIndexPatternTitleExists =
+        newState.indexPatternsMap[newState.form.destinationIndex] !== undefined;
       return newState;
     }
 

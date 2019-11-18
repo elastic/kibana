@@ -5,52 +5,40 @@
  */
 
 import Hapi from 'hapi';
-import Joi from 'joi';
 import { isFunction } from 'lodash/fp';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import { updateSignal } from '../alerts/update_signals';
-import { SignalsRequest } from '../alerts/types';
+import { UpdateSignalsRequest } from '../alerts/types';
+import { updateSignalSchema } from './schemas';
+import { getIdError, transformOrError } from './utils';
 
 export const createUpdateSignalsRoute: Hapi.ServerRoute = {
   method: 'PUT',
-  path: '/api/siem/signals/{id?}',
+  path: DETECTION_ENGINE_RULES_URL,
   options: {
     tags: ['access:signals-all'],
     validate: {
       options: {
         abortEarly: false,
       },
-      params: {
-        id: Joi.when(Joi.ref('$payload.id'), {
-          is: Joi.exist(),
-          then: Joi.string().optional(),
-          otherwise: Joi.string().required(),
-        }),
-      },
-      payload: Joi.object({
-        description: Joi.string(),
-        enabled: Joi.boolean(),
-        filter: Joi.object(),
-        from: Joi.string(),
-        id: Joi.string(),
-        index: Joi.array(),
-        interval: Joi.string(),
-        kql: Joi.string(),
-        max_signals: Joi.number().default(100),
-        name: Joi.string(),
-        severity: Joi.string(),
-        to: Joi.string(),
-        type: Joi.string().valid('filter', 'kql'),
-        references: Joi.array().default([]),
-      }).nand('filter', 'kql'),
+      payload: updateSignalSchema,
     },
   },
-  async handler(request: SignalsRequest, headers) {
+  async handler(request: UpdateSignalsRequest, headers) {
     const {
       description,
       enabled,
+      false_positives: falsePositives,
       filter,
-      kql,
       from,
+      immutable,
+      query,
+      language,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      saved_id: savedId,
+      filters,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      rule_id: ruleId,
       id,
       index,
       interval,
@@ -58,36 +46,51 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
       max_signals: maxSignals,
       name,
       severity,
+      size,
+      tags,
       to,
       type,
       references,
     } = request.payload;
-    const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
 
+    const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
     const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
 
     if (!alertsClient || !actionsClient) {
       return headers.response().code(404);
     }
 
-    return updateSignal({
+    const signal = await updateSignal({
       alertsClient,
       actionsClient,
       description,
       enabled,
+      falsePositives,
       filter,
       from,
-      id: request.params.id ? request.params.id : id,
+      immutable,
+      query,
+      language,
+      savedId,
+      filters,
+      id,
+      ruleId,
       index,
       interval,
-      kql,
       maxSignals,
       name,
       severity,
+      size,
+      tags,
       to,
       type,
       references,
     });
+    if (signal != null) {
+      return transformOrError(signal);
+    } else {
+      return getIdError({ id, ruleId });
+    }
   },
 };
 

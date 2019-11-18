@@ -55,7 +55,7 @@ export interface GetPinOnClickParams {
   eventId: string;
   onPinEvent: OnPinEvent;
   onUnPinEvent: OnUnPinEvent;
-  pinnedEventIds: Readonly<Record<string, boolean>>;
+  isEventPinned: boolean;
 }
 
 export const getPinOnClick = ({
@@ -63,15 +63,12 @@ export const getPinOnClick = ({
   eventId,
   onPinEvent,
   onUnPinEvent,
-  pinnedEventIds,
+  isEventPinned,
 }: GetPinOnClickParams): (() => void) => {
   if (!allowUnpinning) {
     return noop;
   }
-
-  return eventIsPinned({ eventId, pinnedEventIds })
-    ? () => onUnPinEvent(eventId)
-    : () => onPinEvent(eventId);
+  return isEventPinned ? () => onUnPinEvent(eventId) : () => onPinEvent(eventId);
 };
 
 export const getColumnWidthFromType = (type: string): number =>

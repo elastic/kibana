@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Filter } from '@kbn/es-query';
+
 import { Location } from 'history';
 import { isEqual, difference, isEmpty } from 'lodash/fp';
 import { useEffect, useRef, useState } from 'react';
-import { Query } from 'src/plugins/data/common';
+import { Query, esFilters } from 'src/plugins/data/public';
 
 import { UrlInputsModel } from '../../store/inputs/model';
 import { useApolloClient } from '../../utils/apollo_context';
@@ -59,7 +59,7 @@ export const useUrlStateHooks = ({
   const prevProps = usePrevious({ pathName, urlState });
 
   const replaceStateInLocation = (
-    urlStateToReplace: UrlInputsModel | Query | Filter[] | Timeline | string,
+    urlStateToReplace: UrlInputsModel | Query | esFilters.Filter[] | Timeline | string,
     urlStateKey: string,
     latestLocation: Location = {
       hash: '',
@@ -75,9 +75,10 @@ export const useUrlStateHooks = ({
         search,
         state: '',
       },
-      replaceStateKeyInQueryString(urlStateKey, urlStateToReplace)(
-        getQueryStringFromLocation(latestLocation)
-      )
+      replaceStateKeyInQueryString(
+        urlStateKey,
+        urlStateToReplace
+      )(getQueryStringFromLocation(latestLocation))
     );
     if (history) {
       history.replace(newLocation);
@@ -94,7 +95,10 @@ export const useUrlStateHooks = ({
         urlKey
       );
       if (newUrlStateString) {
-        const queryState: Query | Timeline | Filter[] = decodeRisonUrlState(newUrlStateString);
+        const queryState: Query | Timeline | esFilters.Filter[] = decodeRisonUrlState(
+          newUrlStateString
+        );
+
         if (
           urlKey === CONSTANTS.appQuery &&
           queryState != null &&
