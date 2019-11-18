@@ -6,12 +6,13 @@
 
 --
 
-You can generate reports that contain {kib} dashboards,
-visualizations, and saved searches. Dashboards and visualizations are
-exported as PDF documents, while saved searches in Discover
-are exported to CSV.
+You can generate a report that contains a {kib} dashboard, visualization, 
+saved search, or Canvas workpad.  You can create the report on demand, 
+schedule it for later, or trigger a report based on specified conditions. 
+You can keep the report for yourself, or automatically share it with others via email.
 
-Reporting is located in the share menu from the {kib} toolbar:
+Reporting is located in the *Share* menu 
+in *Discover*, *Visualize*, *Dashboard*, and *Canvas*.
 
 [role="screenshot"]
 image::user/reporting/images/share-button.png["Share"]
@@ -24,47 +25,69 @@ runs on the server in headless mode to load {kib} and capture the rendered {kib}
 
 Chromium is an open-source project not related to Elastic, but the Chromium binary for {kib} has been custom-built by Elastic to ensure it
 works with minimal setup. However, the {kib} server OS might still require additional dependencies for Chromium. See the
-<<reporting-troubleshooting-system-dependencies, Reporting Troubleshooting>> section for more information about the system dependencies
+<<reporting-troubleshooting-system-dependencies, Reporting troubleshooting>> section for more information about the system dependencies
 for different operating systems.
 
 [float]
-== Manually generate reports
+[[reporting-required-privileges]]
+== Required privileges
 
-. Open {kib} in your web browser and log in. If you are running {kib}
-locally, go to `http://localhost:5601`. To access {kib} and generate
-reports, you need the `reporting_user` role, and an additional role with succifient <<kibana-privileges, Kibana privileges>>, such as the `kibana_user` role.
-For more information, see <<secure-reporting>>.
+To generate a report, you need the following:
 
-. Open the dashboard, visualization, or saved search you want to include
-in the report.
-
-. Click *Share* in the {kib} toolbar:
-+
-[role="screenshot"]
-image:user/reporting/images/share-button.png["Reporting Button",link="share-button.png"]
-
-. Depending on the {kib} application, choose the appropriate options:
-
-. If you're on Discover, select *CSV Reports*, then click *Generate CSV*.
-
-. If you're on Visualize or Dashboard:
-
-.. Select *PDF Reports*
-
-.. Dashboard only: Choose to enable *Optimize for printing* layout mode. For an explanation of the different layout modes, see <<pdf-layout-modes, PDF Layout Modes>>.
-
-.. Click *Generate PDF*.
+* The `reporting_user` role.
+* The appropriate <<kibana-privileges, {kib} privileges>> to access the objects that you
+want to report on.
+* Access to the {es} indices with the underlying data.
 
 [float]
-== Automatically generate reports
+[[manually-generate-reports]]
+== Generate a report manually
 
-If you want to automatically generate reports from a script or with
-{watcher}, see <<automating-report-generation, Automating Report Generation>>
+. Open the dashboard, visualization, Canvas workpad, or saved search that you want to include in the report. 
+
+. In the toolbar, click *Share*.  If in Canvas, 
+click the share icon image:user/reporting/images/canvas-share-button.png["Canvas Share button"].
+
+. Select the appropriate option for generating the report:
++
+You can export a dashboard or visualization as either a PNG or PDF document, 
+a Canvas workspad as a PDF document, and a saved search as a CSV document.
+
+. Generate the report.
++
+A notification appears when the report is complete.
+
+[float]
+[[optimize-pdf]]
+== Optimize PDF for print&mdash;dashboard only
+
+By default, {kib} creates a PDF  
+using the existing layout and size of the dashboard. To create a 
+print-friendly PDF with multiple A4 portrait pages and two visualizations 
+per page, turn on *Optimize for printing*.
+
+[role="screenshot"]
+image::user/reporting/images/preserve-layout-switch.png["Share"]
+
+
+[float]
+[[manage-report-history]]
+== View and manage report history
+
+For a list of reports that you generated, go to *Management > Reporting*.  
+From this view, you can monitor generation of your reports and 
+download reports that you previously generated.
+
+[float]
+[[automatically-generate-reports]]
+== Automatically generate a report
+
+To automatically generate a report from a script or with
+{watcher}, see <<automating-report-generation, Automating report generation>>.
 
 --
 
 include::automating-report-generation.asciidoc[]
-include::pdf-layout-modes.asciidoc[]
 include::configuring-reporting.asciidoc[]
 include::chromium-sandbox.asciidoc[]
 include::reporting-troubleshooting.asciidoc[]
