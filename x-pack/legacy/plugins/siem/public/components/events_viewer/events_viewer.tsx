@@ -16,7 +16,7 @@ import { Direction } from '../../graphql/types';
 import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { KqlMode } from '../../store/timeline/model';
 import { AutoSizer } from '../auto_sizer';
-import { HeaderPanel } from '../header_panel';
+import { HeaderSection } from '../header_section';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 import { Sort } from '../timeline/body/sort';
@@ -130,7 +130,7 @@ export const EventsViewer = React.memo<Props>(
                     totalCount = 0,
                   }) => (
                     <>
-                      <HeaderPanel
+                      <HeaderSection
                         id={id}
                         showInspect={showInspect}
                         subtitle={`${i18n.SHOWING}: ${totalCount.toLocaleString()} ${i18n.UNIT(
