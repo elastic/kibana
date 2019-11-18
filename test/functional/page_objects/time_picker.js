@@ -112,8 +112,8 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
-    defaultStartTime: 'Sep 19, 2015 @ 06:31:44.000'
-    defaultEndTime: 'Sep 23, 2015 @ 18:31:44.000'
+    get defaultStartTime() { return 'Sep 19, 2015 @ 06:31:44.000'; }
+    get defaultEndTime() { return 'Sep 23, 2015 @ 18:31:44.000'; }
 
     async setDefaultAbsoluteRange() {
       this.setAbsoluteRange(this.defaultStartTime, this.defaultEndTime);
