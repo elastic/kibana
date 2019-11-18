@@ -32,6 +32,8 @@ import { PluginWrapper } from './plugin';
 import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
 import { config } from './plugins_config';
+import { take } from 'rxjs/operators';
+import { DiscoveredPluginInternal } from './types';
 
 const MockPluginsSystem: jest.Mock<PluginsSystem> = PluginsSystem as any;
 
@@ -128,16 +130,16 @@ describe('PluginsService', () => {
       });
 
       await expect(pluginsService.discover()).rejects.toMatchInlineSnapshot(`
-[Error: Failed to initialize plugins:
-	Invalid JSON (invalid-manifest, path-1)]
-`);
+              [Error: Failed to initialize plugins:
+              	Invalid JSON (invalid-manifest, path-1)]
+            `);
       expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
-Array [
-  Array [
-    [Error: Invalid JSON (invalid-manifest, path-1)],
-  ],
-]
-`);
+        Array [
+          Array [
+            [Error: Invalid JSON (invalid-manifest, path-1)],
+          ],
+        ]
+      `);
     });
 
     it('throws if plugin required Kibana version is incompatible with the current version', async () => {
@@ -149,16 +151,16 @@ Array [
       });
 
       await expect(pluginsService.discover()).rejects.toMatchInlineSnapshot(`
-[Error: Failed to initialize plugins:
-	Incompatible version (incompatible-version, path-3)]
-`);
+              [Error: Failed to initialize plugins:
+              	Incompatible version (incompatible-version, path-3)]
+            `);
       expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
-Array [
-  Array [
-    [Error: Incompatible version (incompatible-version, path-3)],
-  ],
-]
-`);
+        Array [
+          Array [
+            [Error: Incompatible version (incompatible-version, path-3)],
+          ],
+        ]
+      `);
     });
 
     it('throws if discovered plugins with conflicting names', async () => {
@@ -235,21 +237,21 @@ Array [
       expect(mockPluginSystem.setupPlugins).toHaveBeenCalledWith(setupDeps);
 
       expect(loggingServiceMock.collect(logger).info).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "Plugin \\"explicitly-disabled-plugin\\" is disabled.",
-  ],
-  Array [
-    "Plugin \\"plugin-with-missing-required-deps\\" has been disabled since some of its direct or transitive dependencies are missing or disabled.",
-  ],
-  Array [
-    "Plugin \\"plugin-with-disabled-transitive-dep\\" has been disabled since some of its direct or transitive dependencies are missing or disabled.",
-  ],
-  Array [
-    "Plugin \\"another-explicitly-disabled-plugin\\" is disabled.",
-  ],
-]
-`);
+        Array [
+          Array [
+            "Plugin \\"explicitly-disabled-plugin\\" is disabled.",
+          ],
+          Array [
+            "Plugin \\"plugin-with-missing-required-deps\\" has been disabled since some of its direct or transitive dependencies are missing or disabled.",
+          ],
+          Array [
+            "Plugin \\"plugin-with-disabled-transitive-dep\\" has been disabled since some of its direct or transitive dependencies are missing or disabled.",
+          ],
+          Array [
+            "Plugin \\"another-explicitly-disabled-plugin\\" is disabled.",
+          ],
+        ]
+      `);
     });
 
     it('does not throw in case of mutual plugin dependencies', async () => {
@@ -384,6 +386,95 @@ Array [
       });
       await pluginsService.discover();
       expect(configService.setSchema).toBeCalledWith('path', configSchema);
+    });
+  });
+
+  describe('#generateUiPluginsConfigs()', () => {
+    const pluginToDiscoveredEntry = (plugin: PluginWrapper): [string, DiscoveredPluginInternal] => [
+      plugin.name,
+      {
+        id: plugin.name,
+        path: plugin.path,
+        configPath: plugin.manifest.configPath,
+        requiredPlugins: [],
+        optionalPlugins: [],
+      },
+    ];
+
+    it('properly generates client configs for plugins according to `exposeToBrowser`', async () => {
+      jest.doMock(
+        join('plugin-with-expose', 'server'),
+        () => ({
+          config: {
+            exposeToBrowser: ['sharedProp'],
+            schema: schema.object({
+              serverProp: schema.string({ defaultValue: 'serverProp default value' }),
+              sharedProp: schema.string({ defaultValue: 'sharedProp default value' }),
+            }),
+          },
+        }),
+        {
+          virtual: true,
+        }
+      );
+      const plugin = createPlugin('plugin-with-expose', {
+        path: 'plugin-with-expose',
+        configPath: 'path',
+      });
+      mockDiscover.mockReturnValue({
+        error$: from([]),
+        plugin$: from([plugin]),
+      });
+      mockPluginSystem.uiPlugins.mockReturnValue({
+        public: new Map([pluginToDiscoveredEntry(plugin)]),
+        internal: new Map([pluginToDiscoveredEntry(plugin)]),
+      });
+
+      await pluginsService.discover();
+      const { uiPluginConfigs } = await pluginsService.setup(setupDeps);
+
+      const uiConfig$ = uiPluginConfigs.get('plugin-with-expose');
+      expect(uiConfig$).toBeDefined();
+
+      const uiConfig = await uiConfig$.pipe(take(1)).toPromise();
+      expect(uiConfig).toMatchInlineSnapshot(`
+        Object {
+          "sharedProp": "sharedProp default value",
+        }
+      `);
+    });
+
+    it('does not generate config for plugins not exposing to client', async () => {
+      jest.doMock(
+        join('plugin-without-expose', 'server'),
+        () => ({
+          config: {
+            schema: schema.object({
+              serverProp: schema.string({ defaultValue: 'serverProp default value' }),
+            }),
+          },
+        }),
+        {
+          virtual: true,
+        }
+      );
+      const plugin = createPlugin('plugin-without-expose', {
+        path: 'plugin-without-expose',
+        configPath: 'path',
+      });
+      mockDiscover.mockReturnValue({
+        error$: from([]),
+        plugin$: from([plugin]),
+      });
+      mockPluginSystem.uiPlugins.mockReturnValue({
+        public: new Map([pluginToDiscoveredEntry(plugin)]),
+        internal: new Map([pluginToDiscoveredEntry(plugin)]),
+      });
+
+      await pluginsService.discover();
+      const { uiPluginConfigs } = await pluginsService.setup(setupDeps);
+
+      expect([...uiPluginConfigs.entries()]).toHaveLength(0);
     });
   });
 

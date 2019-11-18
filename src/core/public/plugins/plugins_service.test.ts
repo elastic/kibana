@@ -42,10 +42,11 @@ import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.moc
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
-import { CoreSetup, CoreStart } from '..';
+import { CoreSetup, CoreStart, PluginInitializerContext } from '..';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { savedObjectsMock } from '../saved_objects/saved_objects_service.mock';
 import { contextServiceMock } from '../context/context_service.mock';
+import { take } from 'rxjs/operators';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
@@ -208,13 +209,31 @@ describe('PluginsService', () => {
       );
     });
 
-    it('initalizes plugins with PluginIntitializerContext', async () => {
+    it('initializes plugins with PluginInitializerContext', async () => {
       const pluginsService = new PluginsService(mockCoreContext, plugins);
       await pluginsService.setup(mockSetupDeps);
 
       expect(mockPluginInitializers.get('pluginA')).toHaveBeenCalledWith(expect.any(Object));
       expect(mockPluginInitializers.get('pluginB')).toHaveBeenCalledWith(expect.any(Object));
       expect(mockPluginInitializers.get('pluginC')).toHaveBeenCalledWith(expect.any(Object));
+    });
+
+    it('initializes plugins with associated client configuration', async () => {
+      const pluginConfig = {
+        clientProperty: 'some value',
+      };
+      plugins[0].config = pluginConfig;
+
+      const pluginsService = new PluginsService(mockCoreContext, plugins);
+      await pluginsService.setup(mockSetupDeps);
+
+      const initializerContext = mockPluginInitializers.get('pluginA')!.mock
+        .calls[0][0] as PluginInitializerContext;
+      const config = await initializerContext.config
+        .create()
+        .pipe(take(1))
+        .toPromise();
+      expect(config).toMatchObject(pluginConfig);
     });
 
     it('exposes dependent setup contracts to plugins', async () => {
