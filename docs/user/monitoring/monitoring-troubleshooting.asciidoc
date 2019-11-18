@@ -24,6 +24,23 @@ To resolve this issue, upgrade {kib} to 6.3 or later. See
 {stack-ref}/upgrading-elastic-stack.html[Upgrading the {stack}]. 
 
 [float]
+=== {filebeat} index is corrupt
+
+*Symptoms:*
+
+The *Stack Monitoring* application displays a Monitoring Request error indicating
+that an illegal argument exception has occurred because fielddata is disabled on
+text fields by default.
+
+*Resolution*
+
+ . Stop all your {filebeat} instances.
+ . Delete indices beginning with `filebeat-$VERSION`, where `VERSION` corresponds
+   to the version of {filebeat} running.
+. Restart all your {filebeat} instances.
+
+
+[float]
 === No monitoring data is visible in {kib}
 
 *Symptoms:*

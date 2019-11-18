@@ -20,13 +20,12 @@
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import { VisProvider } from '..';
+import { Vis } from '..';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { start as visualizations } from '../../../../core_plugins/visualizations/public/np_ready/public/legacy';
 
 describe('Vis Class', function () {
   let indexPattern;
-  let Vis;
   let visTypes;
 
   let vis;
@@ -43,7 +42,6 @@ describe('Vis Class', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     visTypes = visualizations.types;
   }));
