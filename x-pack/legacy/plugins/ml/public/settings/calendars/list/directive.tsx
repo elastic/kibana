@@ -8,16 +8,18 @@ import 'ngreact';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+// @ts-ignore
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
+import uiRoutes from 'ui/routes';
+import { I18nContext } from 'ui/i18n';
 import { checkFullLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { getCalendarManagementBreadcrumbs } from '../../breadcrumbs';
 
-import uiRoutes from 'ui/routes';
-import { I18nContext } from 'ui/i18n';
+import { CalendarsList } from './calendars_list';
 
 const template = `
   <div class="euiSpacer euiSpacer--s" />
@@ -34,14 +36,12 @@ uiRoutes.when('/settings/calendars_list', {
   },
 });
 
-import { CalendarsList } from './calendars_list';
-
-module.directive('mlCalendarsList', function () {
+module.directive('mlCalendarsList', function() {
   return {
     restrict: 'E',
     replace: false,
     scope: {},
-    link: function (scope, element) {
+    link(scope: ng.IScope, element: ng.IAugmentedJQuery) {
       const props = {
         canCreateCalendar: checkPermission('canCreateCalendar'),
         canDeleteCalendar: checkPermission('canDeleteCalendar'),
