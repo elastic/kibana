@@ -161,7 +161,6 @@ const removeFieldFromMap = (fieldId: string, fields: NormalizedFields): Normaliz
   let { rootLevelFields } = fields;
 
   const updatedById = { ...fields.byId };
-
   const { parentId } = updatedById[fieldId];
 
   // Remove the field from the map
@@ -379,7 +378,6 @@ export const reducer = (state: State, action: Action): State => {
             ),
           };
         } else {
-          // const aliases = getAllDescendantAliases(previousField, updatedFields);
           const nextTypeCanHaveAlias = !PARAMETERS_DEFINITION.path.targetTypesNotAllowed.includes(
             newField.source.type
           );
