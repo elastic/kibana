@@ -10,25 +10,24 @@ describe('the InfraSources lib', () => {
     test('returns a source configuration if it exists', async () => {
       const sourcesLib = new InfraSources({
         config: createMockStaticConfiguration({}),
-        savedObjects: createMockSavedObjectsService({
-          id: 'TEST_ID',
-          version: 'foo',
-          updated_at: '2000-01-01T00:00:00.000Z',
-          attributes: {
-            metricAlias: 'METRIC_ALIAS',
-            logAlias: 'LOG_ALIAS',
-            fields: {
-              container: 'CONTAINER',
-              host: 'HOST',
-              pod: 'POD',
-              tiebreaker: 'TIEBREAKER',
-              timestamp: 'TIMESTAMP',
-            },
-          },
-        }),
       });
 
-      const request: any = Symbol();
+      const request: any = createRequestContext({
+        id: 'TEST_ID',
+        version: 'foo',
+        updated_at: '2000-01-01T00:00:00.000Z',
+        attributes: {
+          metricAlias: 'METRIC_ALIAS',
+          logAlias: 'LOG_ALIAS',
+          fields: {
+            container: 'CONTAINER',
+            host: 'HOST',
+            pod: 'POD',
+            tiebreaker: 'TIEBREAKER',
+            timestamp: 'TIMESTAMP',
+          },
+        },
+      });
 
       expect(await sourcesLib.getSourceConfiguration(request, 'TEST_ID')).toMatchObject({
         id: 'TEST_ID',
@@ -62,19 +61,18 @@ describe('the InfraSources lib', () => {
             },
           },
         }),
-        savedObjects: createMockSavedObjectsService({
-          id: 'TEST_ID',
-          version: 'foo',
-          updated_at: '2000-01-01T00:00:00.000Z',
-          attributes: {
-            fields: {
-              container: 'CONTAINER',
-            },
-          },
-        }),
       });
 
-      const request: any = Symbol();
+      const request: any = createRequestContext({
+        id: 'TEST_ID',
+        version: 'foo',
+        updated_at: '2000-01-01T00:00:00.000Z',
+        attributes: {
+          fields: {
+            container: 'CONTAINER',
+          },
+        },
+      });
 
       expect(await sourcesLib.getSourceConfiguration(request, 'TEST_ID')).toMatchObject({
         id: 'TEST_ID',
@@ -97,15 +95,14 @@ describe('the InfraSources lib', () => {
     test('adds missing attributes from the default configuration to a source configuration', async () => {
       const sourcesLib = new InfraSources({
         config: createMockStaticConfiguration({}),
-        savedObjects: createMockSavedObjectsService({
-          id: 'TEST_ID',
-          version: 'foo',
-          updated_at: '2000-01-01T00:00:00.000Z',
-          attributes: {},
-        }),
       });
 
-      const request: any = Symbol();
+      const request: any = createRequestContext({
+        id: 'TEST_ID',
+        version: 'foo',
+        updated_at: '2000-01-01T00:00:00.000Z',
+        attributes: {},
+      });
 
       expect(await sourcesLib.getSourceConfiguration(request, 'TEST_ID')).toMatchObject({
         id: 'TEST_ID',
@@ -136,19 +133,21 @@ const createMockStaticConfiguration = (sources: any) => ({
   sources,
 });
 
-const createMockSavedObjectsService = (savedObject?: any) => ({
-  getScopedSavedObjectsClient() {
-    return {
-      async get() {
-        return savedObject;
-      },
-    } as any;
-  },
-  SavedObjectsClient: {
-    errors: {
-      isNotFoundError() {
-        return typeof savedObject === 'undefined';
+const createRequestContext = (savedObject?: any) => {
+  return {
+    core: {
+      savedObjects: {
+        client: {
+          async get() {
+            return savedObject;
+          },
+          errors: {
+            isNotFoundError() {
+              return typeof savedObject === 'undefined';
+            },
+          },
+        },
       },
     },
-  },
-});
+  };
+};
