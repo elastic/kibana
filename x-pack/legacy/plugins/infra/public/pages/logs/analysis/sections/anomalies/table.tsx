@@ -168,8 +168,8 @@ export const AnomaliesTable: React.FunctionComponent<{
   );
 };
 
-const StyledEuiBasicTable = euiStyled(EuiBasicTable)`
+const StyledEuiBasicTable: typeof EuiBasicTable = euiStyled(EuiBasicTable)`
   & .euiTable {
     table-layout: auto;
   }
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
