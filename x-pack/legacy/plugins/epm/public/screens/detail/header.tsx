@@ -23,7 +23,7 @@ import { useTrackedPromise } from '../../../../infra/public/utils/use_tracked_pr
 import { installPackage } from '../../data';
 import { PLUGIN } from '../../../common/constants';
 import { PackageInfo } from '../../../common/types';
-import { VersionBadge } from '../../components/version_badge';
+import { Version } from '../../components/version';
 import { IconPanel } from '../../components/icon_panel';
 import { useBreadcrumbs, useCore, useLinks } from '../../hooks';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
@@ -42,7 +42,12 @@ export function Header(props: HeaderProps) {
   `;
 
   const Text = styled.span`
-    margin-right: ${theme.eui.spacerSizes.xl};
+    margin-right: ${theme.eui.euiSizeM};
+  `;
+
+  const StyledVersion = styled(Version)`
+    font-size: ${theme.eui.euiFontSizeS};
+    color: ${theme.eui.euiColorDarkShade};
   `;
 
   return (
@@ -60,7 +65,7 @@ export function Header(props: HeaderProps) {
           <EuiTitle size="l">
             <h1>
               <Text>{title}</Text>
-              <VersionBadge version={version} />
+              <StyledVersion version={version} />
             </h1>
           </EuiTitle>
         </CenterColumn>

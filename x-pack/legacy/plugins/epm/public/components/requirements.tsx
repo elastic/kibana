@@ -11,7 +11,7 @@ import { entries } from '../../common/type_utils';
 import { RequirementsByServiceName } from '../../common/types';
 import { ServiceTitleMap } from '../constants';
 import { useCore } from '../hooks/use_core';
-import { VersionBadge } from './version_badge';
+import { Version } from './version';
 
 export interface RequirementsProps {
   requirements: RequirementsByServiceName;
@@ -24,6 +24,9 @@ export function Requirements(props: RequirementsProps) {
   const FlexGroup = styled(EuiFlexGroup)`
     padding: 0 0 ${theme.eui.paddingSizes.m} 0;
     margin: 0;
+  `;
+  const StyledVersion = styled(Version)`
+    font-size: ${theme.eui.euiFontSizeXS};
   `;
   return (
     <Fragment>
@@ -47,9 +50,7 @@ export function Requirements(props: RequirementsProps) {
             </EuiTextColor>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <div>
-              <VersionBadge version={requirement.versions} />
-            </div>
+            <StyledVersion version={requirement.versions} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ))}
