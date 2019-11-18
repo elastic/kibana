@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFormRow, EuiSelect, EuiFieldText, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiTextArea, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { getSimpleArg, setSimpleArg } from '../../lib/arg_helpers';
 import { ESFieldsSelect } from '../../components/es_fields_select';
 import { ESFieldSelect } from '../../components/es_field_select';
@@ -74,45 +74,66 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
 
   return (
     <div>
-      <EuiCallOut size="s" title={strings.getWarningTitle()} color="warning">
+      <EuiCallOut size="s" title={strings.getWarningTitle()} iconType="alert" color="warning">
         <p>{strings.getWarning()}</p>
       </EuiCallOut>
 
       <EuiSpacer size="m" />
 
-      <EuiFormRow label={strings.getIndexTitle()} helpText={strings.getIndexLabel()}>
+      <EuiFormRow
+        label={strings.getIndexTitle()}
+        helpText={strings.getIndexLabel()}
+        display="rowCompressed"
+      >
         <ESIndexSelect value={index} onChange={index => setArg('index', index)} />
       </EuiFormRow>
 
-      <EuiFormRow label={strings.getQueryTitle()} helpText={strings.getQueryLabel()} compressed>
-        <EuiFieldText value={getQuery()} onChange={e => setArg(getArgName(), e.target.value)} />
+      <EuiFormRow
+        label={strings.getQueryTitle()}
+        helpText={strings.getQueryLabel()}
+        display="rowCompressed"
+      >
+        <EuiTextArea
+          value={getQuery()}
+          onChange={e => setArg(getArgName(), e.target.value)}
+          compressed
+        />
       </EuiFormRow>
-      <EuiFormRow label={strings.getSortFieldTitle()} helpText={strings.getSortFieldLabel()}>
+
+      <EuiFormRow
+        label={strings.getFieldsTitle()}
+        helpText={fields.length <= 10 ? strings.getFieldsLabel() : strings.getFieldsWarningLabel()}
+        display="rowCompressed"
+      >
+        <ESFieldsSelect
+          index={index}
+          onChange={fields => setArg('fields', fields.join(', '))}
+          selected={fields}
+        />
+      </EuiFormRow>
+
+      <EuiFormRow
+        label={strings.getSortFieldTitle()}
+        helpText={strings.getSortFieldLabel()}
+        display="columnCompressed"
+      >
         <ESFieldSelect
           index={index}
           value={sortField}
           onChange={field => setArg('sort', [field, sortOrder].join(', '))}
         />
       </EuiFormRow>
+
       <EuiFormRow
         label={strings.getSortOrderTitle()}
         helpText={strings.getSortOrderLabel()}
-        compressed
+        display="columnCompressed"
       >
         <EuiSelect
           value={sortOrder.toLowerCase()}
           onChange={e => setArg('sort', [sortField, e.target.value].join(', '))}
           options={sortOptions}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={strings.getFieldsTitle()}
-        helpText={fields.length <= 10 ? strings.getFieldsLabel() : strings.getFieldsWarningLabel()}
-      >
-        <ESFieldsSelect
-          index={index}
-          onChange={fields => setArg('fields', fields.join(', '))}
-          selected={fields}
+          compressed
         />
       </EuiFormRow>
     </div>

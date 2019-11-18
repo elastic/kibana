@@ -1,5 +1,5 @@
 {
-  "id": "rule-2",
+  "rule_id": "rule-2",
   "description": "Detecting root and admin users over a long period of time",
   "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "24h",
