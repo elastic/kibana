@@ -9,5 +9,5 @@ The set of supported parseable Content-Types
 <b>Signature:</b>
 
 ```typescript
-export declare type RouteContentType = 'application/json' | 'application/*+json' | 'application/octec-stream' | 'application/x-www-form-urlencoded' | 'multipart/form-data' | 'text/*';
+export declare type RouteContentType = 'application/json' | 'application/*+json' | 'application/octet-stream' | 'application/x-www-form-urlencoded' | 'multipart/form-data' | 'text/*';
 ```

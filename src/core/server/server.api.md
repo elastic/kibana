@@ -1102,7 +1102,7 @@ export interface RouteConfigOptions<Method extends RouteMethod = any> {
 }
 
 // @public
-export type RouteContentType = 'application/json' | 'application/*+json' | 'application/octec-stream' | 'application/x-www-form-urlencoded' | 'multipart/form-data' | 'text/*';
+export type RouteContentType = 'application/json' | 'application/*+json' | 'application/octet-stream' | 'application/x-www-form-urlencoded' | 'multipart/form-data' | 'text/*';
 
 // @public
 export type RouteMethod = 'get' | 'post' | 'put' | 'delete';

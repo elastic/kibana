@@ -4,7 +4,9 @@
 
 ## RouteConfigOptions.accepts property
 
-Default value: allows parsing of the following mime types: \* application/json \* application/\*+json \* application/octet-stream \* application/x-www-form-urlencoded \* multipart/form-data \* text/\* A string or an array of strings with the allowed mime types for the endpoint. Use this settings to limit the set of allowed mime types. Note that allowing additional mime types not listed above will not enable them to be parsed, and if parse is true, the request will result in an error response.
+A string or an array of strings with the allowed mime types for the endpoint. Use this settings to limit the set of allowed mime types. Note that allowing additional mime types not listed above will not enable them to be parsed, and if parse is true, the request will result in an error response.
+
+Default value: allows parsing of the following mime types: \* application/json \* application/\*+json \* application/octet-stream \* application/x-www-form-urlencoded \* multipart/form-data \* text/\*
 
 <b>Signature:</b>
 
