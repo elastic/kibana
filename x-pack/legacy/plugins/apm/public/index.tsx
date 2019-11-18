@@ -33,7 +33,8 @@ core.chrome.setHelpExtension({
     {
       linkType: 'custom',
       href: url.format({
-        pathname: core.http.basePath.prepend('/app/kibana')
+        pathname: core.http.basePath.prepend('/app/kibana'),
+        hash: '/management/elasticsearch/upgrade_assistant'
       }),
       text: i18n.translate('xpack.apm.helpMenu.upgradeAssistantLink', {
         defaultMessage: 'Upgrade assistant'
