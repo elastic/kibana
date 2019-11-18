@@ -67,4 +67,13 @@ describe('MountWrapper', () => {
       `"<div class=\\"kbnMountWrapper\\"><span>detached</span></div>"`
     );
   });
+
+  it('accepts a className prop to override default className', () => {
+    const mountPoint = mountReactNode(<span>detached</span>);
+    const wrapper = <MountWrapper mount={mountPoint} className="customClass" />;
+    const container = mount(wrapper);
+    expect(container.html()).toMatchInlineSnapshot(
+      `"<div class=\\"customClass\\"><span>detached</span></div>"`
+    );
+  });
 });

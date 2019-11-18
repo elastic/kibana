@@ -22,13 +22,18 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { MountPoint } from '../types';
 
+const defaultWrapperClass = 'kbnMountWrapper';
+
 /**
  * MountWrapper is a react component to mount a {@link MountPoint} inside a react tree.
  */
-export const MountWrapper: React.FunctionComponent<{ mount: MountPoint }> = ({ mount }) => {
+export const MountWrapper: React.FunctionComponent<{ mount: MountPoint; className?: string }> = ({
+  mount,
+  className = defaultWrapperClass,
+}) => {
   const element = useRef(null);
   useEffect(() => mount(element.current!), [mount]);
-  return <div className="kbnMountWrapper" ref={element} />;
+  return <div className={className} ref={element} />;
 };
 
 /**

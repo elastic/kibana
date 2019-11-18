@@ -119,7 +119,7 @@ export class ModalService {
           <EuiOverlayMask>
             <i18n.Context>
               <EuiModal {...options} onClose={() => modal.close()}>
-                <MountWrapper mount={mount} />
+                <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
               </EuiModal>
             </i18n.Context>
           </EuiOverlayMask>,
