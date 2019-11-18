@@ -9,5 +9,5 @@ import { EuiBadge } from '@elastic/eui';
 import { RequirementVersion } from '../../common/types';
 
 export function VersionBadge({ version }: { version: RequirementVersion }) {
-  return <EuiBadge color="hollow">v{version}</EuiBadge>;
+  return <EuiBadge color="hollow">{version}</EuiBadge>;
 }
