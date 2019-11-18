@@ -6,11 +6,10 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-export const ConfigSchema = {
-  schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-    secret: schema.string({ defaultValue: 'Cool secret huh?' }),
-  }),
-};
+export const ConfigSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+  indexPattern: schema.string({ defaultValue: '.case-test-2' }),
+  secret: schema.string({ defaultValue: 'Cool secret huh?' }),
+});
 
-export type ConfigType = TypeOf<typeof ConfigSchema.schema>;
+export type ConfigType = TypeOf<typeof ConfigSchema>;

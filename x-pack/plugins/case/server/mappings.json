@@ -1,0 +1,92 @@
+{
+  "mappings" : {
+    "dynamic": false,
+    "properties" : {
+      "assignees" : {
+        "properties" : {
+          "id" : {
+            "type" : "keyword",
+            "ignore_above" : 1024
+          },
+          "name" : {
+            "type" : "keyword",
+            "ignore_above" : 1024
+          }
+        }
+      },
+      "comments" : {
+        "properties" : {
+          "comment" : {
+            "type" : "keyword",
+            "ignore_above" : 1024
+          },
+          "creation_date" : {
+            "type" : "date"
+          },
+          "id" : {
+            "type" : "keyword",
+            "ignore_above" : 1024
+          },
+          "last_edit_date" : {
+            "type" : "date"
+          },
+          "user" : {
+            "properties" : {
+              "id" : {
+                "type" : "keyword",
+                "ignore_above" : 1024
+              },
+              "name" : {
+                "type" : "keyword",
+                "ignore_above" : 1024
+              }
+            }
+          }
+        }
+      },
+      "creation_date" : {
+        "type" : "date"
+      },
+      "description" : {
+        "type" : "keyword",
+        "ignore_above" : 1024
+      },
+      "id" : {
+        "type" : "keyword",
+        "ignore_above" : 1024
+      },
+      "last_edit_date" : {
+        "type" : "date"
+      },
+      "name" : {
+        "type" : "keyword",
+        "ignore_above" : 1024
+      },
+      "reporter" : {
+        "properties" : {
+          "id" : {
+            "type" : "keyword",
+            "ignore_above" : 1024
+          },
+          "name" : {
+            "type" : "keyword",
+            "ignore_above" : 1024
+          }
+        }
+      },
+      "state" : {
+        "type" : "keyword",
+        "ignore_above" : 1024
+      },
+      "tags" : {
+        "type" : "keyword",
+        "ignore_above" : 1024
+      },
+      "type" : {
+        "type" : "keyword",
+        "ignore_above" : 1024
+      }
+    }
+  }
+}
+

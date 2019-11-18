@@ -12,7 +12,7 @@ export function initGetCaseApi(deps: RouteDeps) {
 
   router.get(
     {
-      path: '/api/case/case/{id}',
+      path: '/api/cases/case/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -24,6 +24,8 @@ export function initGetCaseApi(deps: RouteDeps) {
 
       // const { SavedObjectsClient } = getSavedObjects();
       // const spacesClient = await spacesService.scopedClient(request);
+      const resp = await context.core.savedObjects.client.find({ type: 'CASE' });
+      console.log('request.params', request.params);
 
       try {
         // const space = await spacesClient.get(spaceId);
