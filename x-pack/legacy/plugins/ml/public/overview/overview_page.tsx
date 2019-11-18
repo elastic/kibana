@@ -11,10 +11,13 @@ import { mlNodesAvailable } from '../ml_nodes_check/check_ml_nodes';
 import { NavigationMenu } from '../components/navigation_menu';
 import { OverviewSideBar } from './components/sidebar';
 import { OverviewContent } from './components/content';
+import { NodeAvailableWarning } from '../components/node_available_warning';
+import { UpgradeWarning } from '../components/upgrade';
 
 export const OverviewPage: FC = () => {
   const disableCreateAnomalyDetectionJob = !checkPermission('canCreateJob') || !mlNodesAvailable();
   const disableCreateAnalyticsButton =
+    !mlNodesAvailable() ||
     !checkPermission('canCreateDataFrameAnalytics') ||
     !checkPermission('canStartStopDataFrameAnalytics');
   return (
@@ -22,6 +25,9 @@ export const OverviewPage: FC = () => {
       <NavigationMenu tabId="overview" />
       <EuiPage data-test-subj="mlPageOverview">
         <EuiPageBody>
+          <NodeAvailableWarning />
+          <UpgradeWarning />
+
           <EuiFlexGroup>
             <OverviewSideBar createAnomalyDetectionJobDisabled={disableCreateAnomalyDetectionJob} />
             <OverviewContent

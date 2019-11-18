@@ -32,7 +32,7 @@ import {
 
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
-import { ResizeChecker } from 'ui/resize_checker';
+import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../common/constants/search';
 import { parseInterval } from '../../common/util/parse_interval';

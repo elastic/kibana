@@ -12,4 +12,4 @@ set -e
 # Example: ./find_signals.sh
 curl -s -k \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- -X GET ${KIBANA_URL}/api/siem/signals/_find | jq .
+ -X GET ${KIBANA_URL}/api/detection_engine/rules/_find | jq .
