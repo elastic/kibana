@@ -30,7 +30,7 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
 
   async setup({ notifications }: CoreSetup, pluginSet: XPluginSet) {
     const {
-      __LEGACY: { I18nContext, ResizeChecker },
+      __LEGACY: { I18nContext },
       devTools,
       feature_catalogue,
     } = pluginSet;
@@ -62,7 +62,6 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
           boot({
             docLinkVersion: ctx.core.docLinks.DOC_LINK_VERSION,
             I18nContext,
-            ResizeChecker,
             notifications,
           }),
           element
