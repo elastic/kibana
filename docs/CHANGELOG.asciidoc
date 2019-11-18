@@ -64,6 +64,8 @@ APM::
 * Agent configuration GA {pull}46995[#46995]
 Canvas::
 * Adds ability to share workpads in other websites {pull}46278[#46278]
+Code::
+* Removes experimental code app {pull}49404[#49404]
 Discover::
 * Updates filter of fields UX allowing user to select and remove fields {pull}47847[#47847]
 * Shows field type name when hovering over them (#35391) {pull}44208[#44208]
