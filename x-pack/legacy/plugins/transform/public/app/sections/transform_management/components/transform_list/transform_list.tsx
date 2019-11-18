@@ -216,7 +216,11 @@ export const TransformList: FC<Props> = ({
             </h2>
           }
           actions={[
-            <EuiButtonEmpty onClick={onCreateTransform} isDisabled={disabled}>
+            <EuiButtonEmpty
+              onClick={onCreateTransform}
+              isDisabled={disabled}
+              data-test-subj="transformCreateFirstButton"
+            >
               {i18n.translate('xpack.transform.list.emptyPromptButtonText', {
                 defaultMessage: 'Create your first transform',
               })}
@@ -371,7 +375,7 @@ export const TransformList: FC<Props> = ({
   };
 
   return (
-    <Fragment>
+    <div data-test-subj="transformListTableContainer">
       <ProgressBar isLoading={isLoading || transformsLoading} />
       <TransformTable
         allowNeutralSort={false}
@@ -386,11 +390,18 @@ export const TransformList: FC<Props> = ({
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         onTableChange={onTableChange}
         pagination={pagination}
+        rowProps={item => ({
+          'data-test-subj': `transformListRow row-${item.id}`,
+        })}
         selection={selection}
         sorting={sorting}
         search={search}
-        data-test-subj="transformTableTransforms"
+        data-test-subj={
+          isLoading || transformsLoading
+            ? 'transformListTable loading'
+            : 'transformListTable loaded'
+        }
       />
-    </Fragment>
+    </div>
   );
 };
