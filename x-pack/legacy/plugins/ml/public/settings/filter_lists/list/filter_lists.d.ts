@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FC } from 'react';
 
-
-import './directive';
+declare const FilterLists: FC<{
+  canCreateFilter: boolean;
+  canDeleteFilter: boolean;
+}>;

@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function isValidJson(json: string): boolean;
+import { FC } from 'react';
+
+declare const CalendarsList: FC<{
+  canCreateCalendar: boolean;
+  canDeleteCalendar: boolean;
+}>;

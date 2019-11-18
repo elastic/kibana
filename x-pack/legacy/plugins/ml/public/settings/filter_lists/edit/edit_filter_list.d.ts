@@ -3,4 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export function tabColor(name: string): string;
+
+import { FC } from 'react';
+
+declare const EditFilterList: FC<{
+  filterId: string;
+  canCreateFilter: boolean;
+  canDeleteFilter: boolean;
+}>;

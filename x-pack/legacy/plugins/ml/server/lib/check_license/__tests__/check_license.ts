@@ -4,20 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { set } from 'lodash';
+import { XPackInfo } from '../../../../../../../legacy/plugins/xpack_main/server/lib/xpack_info';
 import { checkLicense } from '../check_license';
 
 describe('check_license', () => {
-
-  let mockLicenseInfo;
-  beforeEach(() => mockLicenseInfo = {});
+  let mockLicenseInfo: XPackInfo;
+  beforeEach(() => (mockLicenseInfo = {} as XPackInfo));
 
   describe('license information is undefined', () => {
-    beforeEach(() => mockLicenseInfo = undefined);
+    beforeEach(() => (mockLicenseInfo = {} as XPackInfo));
 
     it('should set isAvailable to false', () => {
       expect(checkLicense(mockLicenseInfo).isAvailable).to.be(false);
@@ -37,7 +35,7 @@ describe('check_license', () => {
   });
 
   describe('license information is not available', () => {
-    beforeEach(() => mockLicenseInfo.isAvailable = () => false);
+    beforeEach(() => (mockLicenseInfo.isAvailable = () => false));
 
     it('should set isAvailable to false', () => {
       expect(checkLicense(mockLicenseInfo).isAvailable).to.be(false);
@@ -64,14 +62,21 @@ describe('check_license', () => {
 
     describe('& ML is disabled in Elasticsearch', () => {
       beforeEach(() => {
-        set(mockLicenseInfo, 'feature', sinon.stub().withArgs('ml').returns({ isEnabled: () => false }));
+        set(
+          mockLicenseInfo,
+          'feature',
+          sinon
+            .stub()
+            .withArgs('ml')
+            .returns({ isEnabled: () => false })
+        );
       });
 
-      it ('should set showLinks to false', () => {
+      it('should set showLinks to false', () => {
         expect(checkLicense(mockLicenseInfo).showLinks).to.be(false);
       });
 
-      it ('should set isAvailable to false', () => {
+      it('should set isAvailable to false', () => {
         expect(checkLicense(mockLicenseInfo).isAvailable).to.be(false);
       });
 
@@ -86,7 +91,14 @@ describe('check_license', () => {
 
     describe('& ML is enabled in Elasticsearch', () => {
       beforeEach(() => {
-        set(mockLicenseInfo, 'feature', sinon.stub().withArgs('ml').returns({ isEnabled: () => true }));
+        set(
+          mockLicenseInfo,
+          'feature',
+          sinon
+            .stub()
+            .withArgs('ml')
+            .returns({ isEnabled: () => true })
+        );
       });
 
       describe('& license is trial or platinum', () => {
@@ -99,11 +111,11 @@ describe('check_license', () => {
             expect(checkLicense(mockLicenseInfo).isAvailable).to.be(true);
           });
 
-          it ('should set showLinks to true', () => {
+          it('should set showLinks to true', () => {
             expect(checkLicense(mockLicenseInfo).showLinks).to.be(true);
           });
 
-          it ('should set enableLinks to true', () => {
+          it('should set enableLinks to true', () => {
             expect(checkLicense(mockLicenseInfo).enableLinks).to.be(true);
           });
 
@@ -119,11 +131,11 @@ describe('check_license', () => {
             expect(checkLicense(mockLicenseInfo).isAvailable).to.be(true);
           });
 
-          it ('should set showLinks to true', () => {
+          it('should set showLinks to true', () => {
             expect(checkLicense(mockLicenseInfo).showLinks).to.be(true);
           });
 
-          it ('should set enableLinks to true', () => {
+          it('should set enableLinks to true', () => {
             expect(checkLicense(mockLicenseInfo).enableLinks).to.be(true);
           });
 
@@ -143,7 +155,7 @@ describe('check_license', () => {
             expect(checkLicense(mockLicenseInfo).isAvailable).to.be(true);
           });
 
-          it ('should set showLinks to true', () => {
+          it('should set showLinks to true', () => {
             expect(checkLicense(mockLicenseInfo).showLinks).to.be(true);
           });
         });
