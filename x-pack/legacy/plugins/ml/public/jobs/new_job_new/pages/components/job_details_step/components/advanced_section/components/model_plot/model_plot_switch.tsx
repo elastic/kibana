@@ -30,7 +30,6 @@ export const ModelPlotSwitch: FC = () => {
         checked={modelPlotEnabled}
         onChange={toggleModelPlot}
         data-test-subj="mlJobWizardSwitchModelPlot"
-        showLabel={false}
         label={i18n.translate(
           'xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.enableModelPlot.title',
           {
