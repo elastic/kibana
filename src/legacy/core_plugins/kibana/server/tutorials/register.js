@@ -127,7 +127,6 @@ export function registerTutorials(server) {
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(cloudwatchLogsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(awsMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(mssqlMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(natsMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(natsLogsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(zeekLogsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(corednsMetricsSpecProvider);
@@ -139,5 +138,4 @@ export function registerTutorials(server) {
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(couchdbMetricsSpecProvider);
   server.registerTutorial(emsBoundariesSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(consulMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(cockroachdbMetricsSpecProvider);
 }
