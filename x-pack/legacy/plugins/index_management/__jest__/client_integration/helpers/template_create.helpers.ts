@@ -6,7 +6,7 @@
 
 import { registerTestBed, TestBedConfig } from '../../../../../../test_utils';
 import { BASE_PATH } from '../../../common/constants';
-import { TemplateCreate } from '../../../public/sections/template_create';
+import { TemplateCreate } from '../../../public/app/sections/template_create';
 import { formSetup, TestSubjects } from './template_form.helpers';
 
 const testBedConfig: TestBedConfig = {
