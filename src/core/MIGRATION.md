@@ -1112,6 +1112,7 @@ import { npStart: { core } } from 'ui/new_platform';
 | `ui/routes`                                           | --                                                                                                                                                                                         | There is no global routing mechanism. Each app [configures its own routing](/rfcs/text/0004_application_service_mounting.md#complete-example). |
 | `ui/saved_objects`                                    | [`core.savedObjects`](/docs/development/core/public/kibana-plugin-public.savedobjectsstart.md)                                                                                             | Client API is the same                                                                                                                         |
 | `ui/doc_title`                                        | [`core.chrome.docTitle`](/docs/development/core/public/kibana-plugin-public.chromedoctitle.md)                                                                                             |                                                                                                                                                |
+| `uiExports/injectedVars`                              | [Configure plugin](#configure-plugin) and [`PluginConfigDescriptor.exposeToBrowser`](/docs/development/core/server/kibana-plugin-server.pluginconfigdescriptor.exposetobrowser.md)         | Can only be used to expose configuration properties                                                                                            |
 
 _See also: [Public's CoreStart API Docs](/docs/development/core/public/kibana-plugin-public.corestart.md)_
 
@@ -1240,6 +1241,43 @@ class MyPlugin {
     this.config$ = initializerContext.config.create<MyPluginConfigType>();
     // or if config is optional:
     this.config$ = initializerContext.config.createIfExists<MyPluginConfigType>();
+  }
+```
+
+If your plugin also have a client-side part, you can also expose configuration properties to it using a whitelisting mechanism with the configuration `exposeToBrowser` property.
+```typescript
+// my_plugin/server/index.ts
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from 'kibana/server';
+
+const configSchema = schema.object({
+  secret: schema.string({ defaultValue: 'Only on server' }),
+  uiProp: schema.string({ defaultValue: 'Accessible from client' }),
+});
+
+type ConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<ConfigType> = {
+  exposeToBrowser: ['uiProp'],
+  schema: configSchema,
+};
+
+export type ClientConfigType = Pick<ConfigType, 'uiProp'>
+```
+
+Configuration containing only the exposed properties will be then available on the client-side plugin using the same API as the server-side:
+```typescript
+// my_plugin/public/index.ts
+import { ClientConfigType } from '../server';
+
+export class Plugin implements Plugin<PluginSetup, PluginStart> {
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
+
+  public async setup(core: CoreSetup, deps: {}) {
+    const config = await this.initializerContext.config
+      .create<ClientConfigType>()
+      .pipe(take(1))
+      .toPromise();
   }
 ```
 
