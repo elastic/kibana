@@ -83,10 +83,7 @@ describe('#get$', () => {
     const { config } = setup();
     const values = await config
       .get$('dateFormat')
-      .pipe(
-        take(1),
-        toArray()
-      )
+      .pipe(take(1), toArray())
       .toPromise();
 
     expect(values).toEqual(['Browser']);
@@ -122,10 +119,7 @@ You can use \`config.get("unknown key", defaultValue)\`, which will just return
 
     const values = await config
       .get$('dateFormat')
-      .pipe(
-        take(2),
-        toArray()
-      )
+      .pipe(take(2), toArray())
       .toPromise();
 
     expect(values).toEqual(['Browser', 'new format']);
@@ -144,10 +138,7 @@ You can use \`config.get("unknown key", defaultValue)\`, which will just return
 
     const values = await config
       .get$('dateFormat', 'my default')
-      .pipe(
-        take(3),
-        toArray()
-      )
+      .pipe(take(3), toArray())
       .toPromise();
 
     expect(values).toEqual(['my default', 'new format', 'my default']);

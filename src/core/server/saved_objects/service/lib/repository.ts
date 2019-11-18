@@ -246,15 +246,17 @@ export class SavedObjectsRepository {
       const expectedResult = {
         esRequestIndex: requestIndexCounter++,
         requestedId: object.id,
-        rawMigratedDoc: this._serializer.savedObjectToRaw(this._migrator.migrateDocument({
-          id: object.id,
-          type: object.type,
-          attributes: object.attributes,
-          migrationVersion: object.migrationVersion,
-          namespace,
-          updated_at: time,
-          references: object.references || [],
-        }) as SanitizedSavedObjectDoc),
+        rawMigratedDoc: this._serializer.savedObjectToRaw(
+          this._migrator.migrateDocument({
+            id: object.id,
+            type: object.type,
+            attributes: object.attributes,
+            migrationVersion: object.migrationVersion,
+            namespace,
+            updated_at: time,
+            references: object.references || [],
+          }) as SanitizedSavedObjectDoc
+        ),
       };
 
       bulkCreateParams.push(

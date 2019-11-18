@@ -173,7 +173,7 @@ test('Can set title to an empty string', async () => {
   );
 
   const inputField = findTestSubject(component, 'customizePanelHideTitle');
-  inputField.simulate('change');
+  inputField.simulate('click');
 
   findTestSubject(component, 'saveNewTitleButton').simulate('click');
   expect(inputField.props().value).toBeUndefined();

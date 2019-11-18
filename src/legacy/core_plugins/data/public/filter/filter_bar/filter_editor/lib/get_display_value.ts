@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import { Filter } from '@kbn/es-query';
+import { esFilters } from '../../../../../../../../plugins/data/public';
 import { IndexPattern } from '../../../../index_patterns/index_patterns';
 import { Field } from '../../../../index_patterns/fields';
 import { getIndexPatternFromFilter } from './filter_editor_utils';
@@ -33,7 +33,10 @@ function getValueFormatter(indexPattern?: IndexPattern, key?: string) {
   return format;
 }
 
-export function getDisplayValueFromFilter(filter: Filter, indexPatterns: IndexPattern[]): string {
+export function getDisplayValueFromFilter(
+  filter: esFilters.Filter,
+  indexPatterns: IndexPattern[]
+): string {
   const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
 
   if (typeof filter.meta.value === 'function') {
