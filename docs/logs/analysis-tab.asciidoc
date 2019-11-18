@@ -5,12 +5,12 @@
 beta::[]
 
 With the {ml} {anomaly-detect} features enabled,
-you can use the *Analysis* page in the Logs app to automatically detect and inspect log anomalies and
+you can use the *Log rate* page in the Logs app to automatically detect and inspect log anomalies and
 the log partitions in which they occurred.
 This helps you to spot suspicious behavior without significant human intervention --
 no more manually sampling log data, calculating rates, and determining if rates are normal.
 
-Analysis automatically highlights periods of time where the log rate is outside expected bounds and therefore may be anomalous.
+*Log rate* automatically highlights periods of time where the log rate is outside expected bounds and therefore may be anomalous.
 You can use this information as a basis for further investigations.
 For example:
 * A significant drop in the log rate might suggest that some some piece of infrastructure has stopped responding,
@@ -20,9 +20,6 @@ This may lead to an investigation of IP addresses from incoming requests.
 
 TIP: You can also view log anomalies directly in the <<xpack-ml-anomalies,Machine Learning app>>.
 
-[role="screenshot"]
-image::logs/images/analysis-tab.png[Analysis tab in Logs app in Kibana]
-
 [float]
 [[logs-analysis-create-ml-job]]
 === Create a machine learning job for logs analysis
@@ -31,13 +28,13 @@ To enable log analysis and anomaly detection, you must first create your own {ki
 Within a space, you can create a machine learning job which will carry out the logs analysis.
 
 [role="screenshot"]
-image::logs/images/analysis-tab-partition-anomalies.png[Analysis tab partition anomalies]
+image::logs/images/analysis-tab-create-ml-job.png[Create machine learning job]
 
 1. Select the time range for the analysis.
 By default, the analysis uses logs no older than four weeks, and continues indefinitely.
 You cannot change the time range for the analysis after the machine learning job has been created.
 2. Add the indices containing the logs you want to analyze.
-3. Click *Create ML job*.
+3. Click *Create ML job*.d
 
 Even though the analyze time range is fixed,
 you can still use the time filter to adjust the results that are shown.
@@ -46,11 +43,13 @@ you can still use the time filter to adjust the results that are shown.
 [[logs-analysis-view-log-entries]]
 === View log entries
 
-The *Analysis* page displays the following:
+The *Log rate* page displays the following:
 
-* <<logs-analysis-entries-chart>>.
+* <<logs-analysis-entries-chart>>
 * <<logs-analysis-anomalies-chart>>
-* <<logs-analysis-partition-anomaly>>
+
+[role="screenshot"]
+image::logs/images/analysis-tab.png[Analysis tab in Logs app in Kibana]
 
 [float]
 [[logs-analysis-entries-chart]]
@@ -59,6 +58,7 @@ The *Analysis* page displays the following:
 The log entries chart shows an overall visualization of the log entry rate,
 partitioned and color-coded according to the value of the Elastic Common Schema (ECS)
 {ecs-ref}/ecs-event.html[`event.dataset`] field.
+
 
 If you have a lot of log partitions, the default view may not be the best way to examine your logs.
 You can filter the data shown by:
@@ -69,7 +69,7 @@ You can filter the data shown by:
 
 [float]
 [[logs-analysis-anomalies-chart]]
-==== Anomalies chart
+==== Anomalies charts
 
 The Anomalies chart shows the time period where anomalies were detected in the overall log entry rate across all log partitions.
 The underlying rate values are shown in grey, while the anomalous regions are color-coded and superimposed on top.
@@ -79,7 +79,7 @@ it means that the machine learning algorithms detected something unusual about t
 This may be because the log rate was significantly higher than usual, significantly lower than usual,
 or because some other anomalous behavior was detected.
 
-The level of anomaly detected in a time period is color-coded: red, orange, yellow, or blue.
+The level of anomaly detected in a time period is color-coded, from red, orange, yellow, to blue.
 Red indicates a critical anomaly level, while blue is a warning level.
 
 Hover over an underlying log rate value to see the average log rate for that time period,
@@ -90,20 +90,10 @@ Anomaly scores range from 0 (no anomalies) to 100 (critical).
 *Analyze in ML* will open the {kibana-ref}/xpack-ml.html[Anomaly Explorer in Machine Learning],
 where you can analyze the anomalies in more detail.
 
-[float]
-[[logs-analysis-partition-anomaly]]
-==== Partition anomaly charts
-
-You can also view the anomaly chart for an individual partition.
-Below the main anomalies chart,
-click the dropdown beside a partition name to see the anomaly distribution for only that partition.
-In this example, we are viewing the anomaly chart for the `elasticsearch.server` partition.
+You can also view the anomaly chart for an individual partition:
 
 [role="screenshot"]
 image::logs/images/analysis-tab-partition-anomalies.png[Analysis tab partition anomalies]
 
-You can hover over an underlying log rate value to see the average log rate for that partition in that time period,
+Hover over an underlying log rate value to see the average log rate for that partition in that time period,
 or hover over an anomalous region to see the anomaly score for that partition in that time period.
-
-You can also click *Analyze in ML* to open the Anomaly Explorer in Machine Learning and
-{kibana-ref}/xpack-ml.html[analyze the anomalies in this partition in more detail].

@@ -82,14 +82,14 @@ This automatically adds a search filter to the logs stream to filter the entries
 [[view-log-anomalies]]
 === View log anomalies
 
-If the {ml} {anomaly-detect} features are enabled, you can click *Analysis* to <<xpack-logs-analysis-page, use machine learning to detect and inspect anomalies>> in your log data.
+If the {ml} {anomaly-detect} features are enabled, you can click *Log rate* to <<xpack-logs-analysis, use machine learning to detect and inspect anomalies>> in your log data.
 
 [float]
-[[using-logs-other-actions]]
-=== Other actions
+[[logs-integrations]]
+=== Logs app integrations
 
-To see other actions related to the event, in the log event details, click *Actions*.
-Depending on the event and the features you have installed and configured, you may also be able to:
+To see other actions related to the event, click *Actions* in the log event details.
+Depending on the event and the features you have configured, you may also be able to:
 
 * Select *View status in Uptime* to <<uptime-overview, view related uptime information>> in the *Uptime* app.
 * Select *View in APM* to <<traces, view related APM traces>> in the *APM* app.
