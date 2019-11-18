@@ -22,6 +22,7 @@ export async function getApiIntegrationConfig({ readConfigFile }) {
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=false',
+        '--xpack.endpoint.enabled=true',
       ],
     },
     esTestCluster: {
