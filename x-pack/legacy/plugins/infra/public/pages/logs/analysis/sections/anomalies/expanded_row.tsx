@@ -25,7 +25,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
   jobId: string;
-}> = ({ results, timeRange, setTimeRange, topAnomalyScore, partitionId, jobId }) => {
+}> = ({ results, timeRange, setTimeRange, partitionId, jobId }) => {
   const logEntryRateSeries = useMemo(
     () =>
       results && results.histogramBuckets
