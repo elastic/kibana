@@ -115,7 +115,7 @@ export class DashboardAppController {
         timefilter: { timefilter },
       },
     },
-    core: { notifications, overlays, chrome, savedObjects, uiSettings, injectedMetadata },
+    core: { notifications, overlays, chrome, injectedMetadata },
   }: DashboardAppControllerDependencies) {
     new FilterStateManager(globalState, getAppState, filterManager);
     const queryFilter = filterManager;
@@ -776,7 +776,9 @@ export class DashboardAppController {
     });
 
     const visibleSubscription = chrome.getIsVisible$().subscribe(isVisible => {
-      $scope.isVisible = isVisible;
+      $scope.$evalAsync(() => {
+        $scope.isVisible = isVisible;
+      });
     });
 
     $scope.$on('$destroy', () => {
