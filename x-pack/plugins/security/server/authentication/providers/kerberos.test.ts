@@ -574,7 +574,7 @@ describe('KerberosAuthenticationProvider', () => {
       sinon.assert.calledWithExactly(mockOptions.tokens.invalidate, tokenPair);
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/base-path/logged_out');
+      expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
     });
   });
 });
