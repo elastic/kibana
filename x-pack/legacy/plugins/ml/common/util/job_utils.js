@@ -405,10 +405,11 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
 
     if (skipMmlChecks === false) {
       // model memory limit
+      const mml = job.analysis_limits && job.analysis_limits.model_memory_limit;
       const {
         messages: mmlUnitMessages,
         valid: mmlUnitValid,
-      } = validateModelMemoryLimitUnits(job);
+      } = validateModelMemoryLimitUnits(mml);
 
       messages.push(...mmlUnitMessages);
       valid = (valid && mmlUnitValid);
@@ -494,12 +495,12 @@ export function validateModelMemoryLimit(job, limits) {
   };
 }
 
-export function validateModelMemoryLimitUnits(job) {
+export function validateModelMemoryLimitUnits(modelMemoryLimit) {
   const messages = [];
   let valid = true;
 
-  if (typeof job.analysis_limits !== 'undefined' && typeof job.analysis_limits.model_memory_limit !== 'undefined') {
-    const mml = job.analysis_limits.model_memory_limit.toUpperCase();
+  if (modelMemoryLimit !== undefined) {
+    const mml = modelMemoryLimit.toUpperCase();
     const mmlSplit = mml.match(/\d+(\w+)$/);
     const unit = (mmlSplit && mmlSplit.length === 2) ? mmlSplit[1] : null;
 
