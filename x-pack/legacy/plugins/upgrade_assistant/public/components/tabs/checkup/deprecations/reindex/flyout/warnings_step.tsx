@@ -83,13 +83,10 @@ export class WarningsFlyoutStep extends React.Component<
     super(props);
 
     this.state = {
-      checkedIds: props.warnings.reduce(
-        (checkedIds, warning) => {
-          checkedIds[idForWarning(warning)] = false;
-          return checkedIds;
-        },
-        {} as { [id: string]: boolean }
-      ),
+      checkedIds: props.warnings.reduce((checkedIds, warning) => {
+        checkedIds[idForWarning(warning)] = false;
+        return checkedIds;
+      }, {} as { [id: string]: boolean }),
     };
   }
 
@@ -195,8 +192,8 @@ export class WarningsFlyoutStep extends React.Component<
                   values={{
                     true: <EuiCode>true</EuiCode>,
                     false: <EuiCode>false</EuiCode>,
-                    yes: <EuiCode>"yes"</EuiCode>,
-                    on: <EuiCode>"on"</EuiCode>,
+                    yes: <EuiCode>&quot;yes&quot;</EuiCode>,
+                    on: <EuiCode>&quot;on&quot;</EuiCode>,
                     one: <EuiCode>1</EuiCode>,
                   }}
                 />

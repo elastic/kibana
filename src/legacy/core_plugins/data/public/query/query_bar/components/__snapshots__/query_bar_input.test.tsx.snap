@@ -310,12 +310,12 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                 "update": [MockFunction],
               },
             },
-            "store": Object {
+            "storage": Object {
               "clear": [MockFunction],
               "get": [MockFunction],
               "remove": [MockFunction],
               "set": [MockFunction],
-              "store": Object {
+              "storage": Object {
                 "clear": [MockFunction],
                 "getItem": [MockFunction],
                 "key": [MockFunction],
@@ -355,7 +355,7 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
           }
         }
       >
-        <InjectIntl(enhancedType)
+        <InjectIntl(EnhancedType)
           disableAutoFocus={true}
           indexPatterns={
             Array [
@@ -387,7 +387,7 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
           }
           screenTitle="Another Screen"
         >
-          <enhancedType
+          <EnhancedType
             disableAutoFocus={true}
             indexPatterns={
               Array [
@@ -879,12 +879,12 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                         "update": [MockFunction],
                       },
                     },
-                    "store": Object {
+                    "storage": Object {
                       "clear": [MockFunction],
                       "get": [MockFunction],
                       "remove": [MockFunction],
                       "set": [MockFunction],
-                      "store": Object {
+                      "storage": Object {
                         "clear": [MockFunction],
                         "getItem": [MockFunction],
                         "key": [MockFunction],
@@ -1118,8 +1118,8 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                 </div>
               </EuiOutsideClickDetector>
             </QueryBarInputUI>
-          </enhancedType>
-        </InjectIntl(enhancedType)>
+          </EnhancedType>
+        </InjectIntl(EnhancedType)>
       </Provider>
     </PseudoLocaleWrapper>
   </IntlProvider>
@@ -1436,12 +1436,12 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                 "update": [MockFunction],
               },
             },
-            "store": Object {
+            "storage": Object {
               "clear": [MockFunction],
               "get": [MockFunction],
               "remove": [MockFunction],
               "set": [MockFunction],
-              "store": Object {
+              "storage": Object {
                 "clear": [MockFunction],
                 "getItem": [MockFunction],
                 "key": [MockFunction],
@@ -1481,7 +1481,7 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
           }
         }
       >
-        <InjectIntl(enhancedType)
+        <InjectIntl(EnhancedType)
           indexPatterns={
             Array [
               Object {
@@ -1512,7 +1512,7 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
           }
           screenTitle="Another Screen"
         >
-          <enhancedType
+          <EnhancedType
             indexPatterns={
               Array [
                 Object {
@@ -2002,12 +2002,12 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                         "update": [MockFunction],
                       },
                     },
-                    "store": Object {
+                    "storage": Object {
                       "clear": [MockFunction],
                       "get": [MockFunction],
                       "remove": [MockFunction],
                       "set": [MockFunction],
-                      "store": Object {
+                      "storage": Object {
                         "clear": [MockFunction],
                         "getItem": [MockFunction],
                         "key": [MockFunction],
@@ -2241,8 +2241,8 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                 </div>
               </EuiOutsideClickDetector>
             </QueryBarInputUI>
-          </enhancedType>
-        </InjectIntl(enhancedType)>
+          </EnhancedType>
+        </InjectIntl(EnhancedType)>
       </Provider>
     </PseudoLocaleWrapper>
   </IntlProvider>
@@ -2559,12 +2559,12 @@ exports[`QueryBarInput Should render the given query 1`] = `
                 "update": [MockFunction],
               },
             },
-            "store": Object {
+            "storage": Object {
               "clear": [MockFunction],
               "get": [MockFunction],
               "remove": [MockFunction],
               "set": [MockFunction],
-              "store": Object {
+              "storage": Object {
                 "clear": [MockFunction],
                 "getItem": [MockFunction],
                 "key": [MockFunction],
@@ -2604,7 +2604,7 @@ exports[`QueryBarInput Should render the given query 1`] = `
           }
         }
       >
-        <InjectIntl(enhancedType)
+        <InjectIntl(EnhancedType)
           indexPatterns={
             Array [
               Object {
@@ -2635,7 +2635,7 @@ exports[`QueryBarInput Should render the given query 1`] = `
           }
           screenTitle="Another Screen"
         >
-          <enhancedType
+          <EnhancedType
             indexPatterns={
               Array [
                 Object {
@@ -3125,12 +3125,12 @@ exports[`QueryBarInput Should render the given query 1`] = `
                         "update": [MockFunction],
                       },
                     },
-                    "store": Object {
+                    "storage": Object {
                       "clear": [MockFunction],
                       "get": [MockFunction],
                       "remove": [MockFunction],
                       "set": [MockFunction],
-                      "store": Object {
+                      "storage": Object {
                         "clear": [MockFunction],
                         "getItem": [MockFunction],
                         "key": [MockFunction],
@@ -3364,8 +3364,8 @@ exports[`QueryBarInput Should render the given query 1`] = `
                 </div>
               </EuiOutsideClickDetector>
             </QueryBarInputUI>
-          </enhancedType>
-        </InjectIntl(enhancedType)>
+          </EnhancedType>
+        </InjectIntl(EnhancedType)>
       </Provider>
     </PseudoLocaleWrapper>
   </IntlProvider>

@@ -5,7 +5,6 @@
  */
 
 import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 
 export enum DATA_FRAME_TASK_STATE {
   ANALYZING = 'analyzing',
@@ -118,17 +117,6 @@ export function isCompletedAnalyticsJob(stats: DataFrameAnalyticsStats) {
   return stats.state === DATA_FRAME_TASK_STATE.STOPPED && progress === 100;
 }
 
-export function getResultsUrl(
-  jobId: string,
-  analysisType: string,
-  destIndex: string = '',
-  dependentVariable: string = ''
-) {
-  const destIndexParam = `,destIndex:${destIndex}`;
-  const depVarParam = `,depVar:${dependentVariable}`;
-  const isRegression = analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION;
-
-  return `ml#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType}${
-    isRegression && destIndex !== '' ? destIndexParam : ''
-  }${isRegression && dependentVariable !== '' ? depVarParam : ''}))`;
+export function getResultsUrl(jobId: string, analysisType: string, status: DATA_FRAME_TASK_STATE) {
+  return `ml#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType},jobStatus:${status}))`;
 }

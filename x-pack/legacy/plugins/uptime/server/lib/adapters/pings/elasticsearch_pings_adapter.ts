@@ -166,13 +166,19 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     const buckets: any[] = get(result, 'aggregations.by_id.buckets', []);
 
     // @ts-ignore TODO fix destructuring implicit any
-    return buckets.map(({ latest: { hits: { hits } } }) => {
-      const timestamp = hits[0]._source[`@timestamp`];
-      return {
-        ...hits[0]._source,
-        timestamp,
-      };
-    });
+    return buckets.map(
+      ({
+        latest: {
+          hits: { hits },
+        },
+      }) => {
+        const timestamp = hits[0]._source[`@timestamp`];
+        return {
+          ...hits[0]._source,
+          timestamp,
+        };
+      }
+    );
   }
 
   /**

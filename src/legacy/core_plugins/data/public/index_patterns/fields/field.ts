@@ -22,36 +22,24 @@ import { fieldFormats } from 'ui/registry/field_formats';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { ObjDefine } from './obj_define';
-import { FieldFormat } from '../../../../../../plugins/data/common/field_formats';
 // @ts-ignore
 import { shortenDottedString } from '../../../../../core_plugins/kibana/common/utils/shorten_dotted_string';
 import { IndexPattern } from '../index_patterns';
 import { getNotifications } from '../services';
 
-import { getKbnFieldType } from '../../../../../../plugins/data/public';
+import {
+  FieldFormat,
+  getKbnFieldType,
+  IFieldType,
+  IFieldSubType,
+} from '../../../../../../plugins/data/public';
 
 export type FieldSpec = Record<string, any>;
-export interface FieldType {
-  name: string;
-  type: string;
-  script?: string;
-  lang?: string;
-  count?: number;
-  // esTypes might be undefined on old index patterns that have not been refreshed since we added
-  // this prop. It is also undefined on scripted fields.
-  esTypes?: string[];
-  aggregatable?: boolean;
-  filterable?: boolean;
-  searchable?: boolean;
-  sortable?: boolean;
-  visualizable?: boolean;
-  readFromDocValues?: boolean;
-  scripted?: boolean;
-  parent?: string;
-  subType?: string;
-  displayName?: string;
-  format?: any;
-}
+
+/** @deprecated
+ *  Please use IFieldType instead
+ * */
+export type FieldType = IFieldType;
 
 export class Field implements FieldType {
   name: string;
@@ -68,8 +56,7 @@ export class Field implements FieldType {
   sortable?: boolean;
   visualizable?: boolean;
   scripted?: boolean;
-  parent?: string;
-  subType?: string;
+  subType?: IFieldSubType;
   displayName?: string;
   format: any;
   routes: Record<string, string> = {
@@ -165,7 +152,6 @@ export class Field implements FieldType {
     obj.writ('conflictDescriptions');
 
     // multi info
-    obj.fact('parent');
     obj.fact('subType');
 
     return obj.create();

@@ -5,17 +5,18 @@
 ```ts
 
 import { Breadcrumb } from '@elastic/eui';
+import { EuiGlobalToastListToast } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { ShallowPromise } from '@kbn/utility-types';
-import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
 import { UiSettingsParams as UiSettingsParams_2 } from 'src/core/server/types';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @public
 export interface App extends AppBase {
+    chromeless?: boolean;
     mount: (context: AppMountContext, params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
 }
 
@@ -643,38 +644,7 @@ export interface OverlayBannersStart {
     // (undocumented)
     getComponent(): JSX.Element;
     remove(id: string): boolean;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "OverlayBannerMount"
     replace(id: string | undefined, mount: MountPoint, priority?: number): string;
-}
-
-// @public (undocumented)
-export interface OverlayFlyoutOpenOptions {
-    // (undocumented)
-    'data-test-subj'?: string;
-    // (undocumented)
-    className?: string;
-    // (undocumented)
-    closeButtonAriaLabel?: string;
-}
-
-// @public
-export interface OverlayFlyoutStart {
-    open(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
-}
-
-// @public (undocumented)
-export interface OverlayModalOpenOptions {
-    // (undocumented)
-    'data-test-subj'?: string;
-    // (undocumented)
-    className?: string;
-    // (undocumented)
-    closeButtonAriaLabel?: string;
-}
-
-// @public
-export interface OverlayModalStart {
-    open(mount: MountPoint, options?: OverlayModalOpenOptions): OverlayRef;
 }
 
 // @public
@@ -941,35 +911,36 @@ export class SimpleSavedObject<T extends SavedObjectAttributes> {
     _version?: SavedObject<T>['version'];
 }
 
-export { Toast }
+// Warning: (ae-missing-release-tag) "Toast" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export type Toast = ToastInputFields & {
+    id: string;
+};
 
 // @public
-export type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
+export type ToastInput = string | ToastInputFields;
 
 // @public
-export type ToastInputFields = Pick<Toast, Exclude<keyof Toast, 'id'>>;
+export type ToastInputFields = Pick<EuiGlobalToastListToast, Exclude<keyof EuiGlobalToastListToast, 'id' | 'text' | 'title'>> & {
+    title?: string | MountPoint;
+    text?: string | MountPoint;
+};
 
 // @public
 export class ToastsApi implements IToasts {
     constructor(deps: {
         uiSettings: UiSettingsClientContract;
     });
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     add(toastOrTitle: ToastInput): Toast;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     addDanger(toastOrTitle: ToastInput): Toast;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     addError(error: Error, options: ErrorToastOptions): Toast;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     addSuccess(toastOrTitle: ToastInput): Toast;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     addWarning(toastOrTitle: ToastInput): Toast;
     get$(): Rx.Observable<Toast[]>;
     // @internal (undocumented)
     registerOverlays(overlays: OverlayStart): void;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ToastApi"
-    remove(toast: Toast): void;
+    remove(toastOrId: Toast | string): void;
     }
 
 // @public (undocumented)

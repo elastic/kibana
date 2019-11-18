@@ -8,7 +8,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable } from '@elastic/eui';
-import { ExpressionFunction } from '../../../../../../src/plugins/expressions/common';
+import { ExpressionFunction } from '../../../../../../src/plugins/expressions/public';
 import { KibanaDatatable } from '../../../../../../src/legacy/core_plugins/interpreter/public';
 import { LensMultiTable } from '../types';
 import {

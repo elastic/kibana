@@ -17,7 +17,6 @@
  * under the License.
  */
 
-export { MountPoint, UnmountCallback, OverlayRef } from './types';
 export { OverlayBannersStart } from './banners';
 export { OverlayFlyoutStart, OverlayFlyoutOpenOptions } from './flyout';
 export { OverlayModalStart, OverlayModalOpenOptions } from './modal';

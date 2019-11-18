@@ -73,7 +73,10 @@ describe('assign_tags_to_beats', () => {
         authorization: 'loggedin',
       },
       payload: {
-        assignments: [{ beatId: 'foo', tag: 'development' }, { beatId: 'bar', tag: 'development' }],
+        assignments: [
+          { beatId: 'foo', tag: 'development' },
+          { beatId: 'bar', tag: 'development' },
+        ],
       },
     });
 
@@ -115,7 +118,10 @@ describe('assign_tags_to_beats', () => {
         authorization: 'loggedin',
       },
       payload: {
-        assignments: [{ beatId: 'bar', tag: 'development' }, { beatId: 'bar', tag: 'production' }],
+        assignments: [
+          { beatId: 'bar', tag: 'development' },
+          { beatId: 'bar', tag: 'production' },
+        ],
       },
     });
 

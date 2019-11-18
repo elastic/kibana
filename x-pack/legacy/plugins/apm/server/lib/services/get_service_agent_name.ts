@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { idx } from '@kbn/elastic-idx';
 import {
   PROCESSOR_EVENT,
   SERVICE_AGENT_NAME,
@@ -13,14 +12,14 @@ import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
 export async function getServiceAgentName(serviceName: string, setup: Setup) {
-  const { start, end, client, config } = setup;
+  const { start, end, client, indices } = setup;
 
   const params = {
     terminateAfter: 1,
     index: [
-      config.get<string>('apm_oss.errorIndices'),
-      config.get<string>('apm_oss.transactionIndices'),
-      config.get<string>('apm_oss.metricsIndices')
+      indices['apm_oss.errorIndices'],
+      indices['apm_oss.transactionIndices'],
+      indices['apm_oss.metricsIndices']
     ],
     body: {
       size: 0,
@@ -44,8 +43,6 @@ export async function getServiceAgentName(serviceName: string, setup: Setup) {
   };
 
   const { aggregations } = await client.search(params);
-  const agentName = idx(aggregations, _ => _.agents.buckets[0].key) as
-    | string
-    | undefined;
+  const agentName = aggregations?.agents.buckets[0]?.key as string | undefined;
   return { agentName };
 }

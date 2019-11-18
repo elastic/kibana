@@ -117,17 +117,7 @@ export {
   InterceptedHttpResponse,
 } from './http';
 
-export {
-  MountPoint,
-  UnmountCallback,
-  OverlayStart,
-  OverlayBannersStart,
-  OverlayModalStart,
-  OverlayModalOpenOptions,
-  OverlayFlyoutStart,
-  OverlayFlyoutOpenOptions,
-  OverlayRef,
-} from './overlays';
+export { OverlayStart, OverlayBannersStart, OverlayRef } from './overlays';
 
 export {
   Toast,
@@ -139,6 +129,8 @@ export {
   ToastsStart,
   ErrorToastOptions,
 } from './notifications';
+
+export { MountPoint, UnmountCallback } from './types';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle

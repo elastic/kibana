@@ -25,7 +25,7 @@ describe('kql syntax errors', () => {
   it('should throw an error for a field query missing a value', () => {
     expect(() => {
       fromKueryExpression('response:');
-    }).toThrow('Expected "(", value, whitespace but end of input found.\n' +
+    }).toThrow('Expected "(", "{", value, whitespace but end of input found.\n' +
       'response:\n' +
       '---------^');
   });
@@ -65,7 +65,7 @@ describe('kql syntax errors', () => {
   it('should throw an error for unbalanced quotes', () => {
     expect(() => {
       fromKueryExpression('foo:"ba ');
-    }).toThrow('Expected "(", value, whitespace but "\"" found.\n' +
+    }).toThrow('Expected "(", "{", value, whitespace but """ found.\n' +
       'foo:"ba \n' +
       '----^');
   });

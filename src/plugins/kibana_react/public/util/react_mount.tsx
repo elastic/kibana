@@ -23,11 +23,18 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { MountPoint } from 'kibana/public';
 
 /**
- * Mount converter for react components.
+ * MountPoint converter for react nodes.
  *
- * @param component to get a mount for
+ * @param node to get a mount point for
  */
-export const reactMount = (component: React.ReactNode): MountPoint => (element: HTMLElement) => {
-  ReactDOM.render(<I18nProvider>{component}</I18nProvider>, element);
-  return () => ReactDOM.unmountComponentAtNode(element);
+export const toMountPoint = (node: React.ReactNode): MountPoint => {
+  const mount = (element: HTMLElement) => {
+    ReactDOM.render(<I18nProvider>{node}</I18nProvider>, element);
+    return () => ReactDOM.unmountComponentAtNode(element);
+  };
+  // only used for tests and snapshots serialization
+  if (process.env.NODE_ENV !== 'production') {
+    mount.__reactMount__ = node;
+  }
+  return mount;
 };

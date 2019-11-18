@@ -113,13 +113,14 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpStart](./kibana-plugin-public.httpstart.md) | See [HttpServiceBase](./kibana-plugin-public.httpservicebase.md) |
 |  [IContextProvider](./kibana-plugin-public.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [IToasts](./kibana-plugin-public.itoasts.md) | Methods for adding and removing global toast messages. See [ToastsApi](./kibana-plugin-public.toastsapi.md)<!-- -->. |
-|  [MountPoint](./kibana-plugin-public.mountpoint.md) | A function that will mount the banner inside the provided element. |
+|  [MountPoint](./kibana-plugin-public.mountpoint.md) | A function that should mount DOM content inside the provided container element and return a handler to unmount it. |
 |  [PluginInitializer](./kibana-plugin-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
 |  [PluginOpaqueId](./kibana-plugin-public.pluginopaqueid.md) |  |
 |  [RecursiveReadonly](./kibana-plugin-public.recursivereadonly.md) |  |
 |  [SavedObjectAttribute](./kibana-plugin-public.savedobjectattribute.md) | Type definition for a Saved Object attribute value |
 |  [SavedObjectAttributeSingle](./kibana-plugin-public.savedobjectattributesingle.md) | Don't use this type, it's simply a helper type for [SavedObjectAttribute](./kibana-plugin-public.savedobjectattribute.md) |
 |  [SavedObjectsClientContract](./kibana-plugin-public.savedobjectsclientcontract.md) | SavedObjectsClientContract as implemented by the [SavedObjectsClient](./kibana-plugin-public.savedobjectsclient.md) |
+|  [Toast](./kibana-plugin-public.toast.md) |  |
 |  [ToastInput](./kibana-plugin-public.toastinput.md) | Inputs for [IToasts](./kibana-plugin-public.itoasts.md) APIs. |
 |  [ToastInputFields](./kibana-plugin-public.toastinputfields.md) | Allowed fields for [ToastInput](./kibana-plugin-public.toastinput.md)<!-- -->. |
 |  [ToastsSetup](./kibana-plugin-public.toastssetup.md) | [IToasts](./kibana-plugin-public.itoasts.md) |

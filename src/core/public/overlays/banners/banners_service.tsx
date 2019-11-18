@@ -25,8 +25,8 @@ import { PriorityMap } from './priority_map';
 import { BannersList } from './banners_list';
 import { UiSettingsClientContract } from '../../ui_settings';
 import { I18nStart } from '../../i18n';
+import { MountPoint } from '../../types';
 import { UserBannerService } from './user_banner_service';
-import { MountPoint } from '../types';
 
 /** @public */
 export interface OverlayBannersStart {
@@ -52,7 +52,7 @@ export interface OverlayBannersStart {
    * Replace a banner in place
    *
    * @param id the unique identifier for the banner returned by {@link OverlayBannersStart.add}
-   * @param mount {@link OverlayBannerMount}
+   * @param mount {@link MountPoint}
    * @param priority optional priority order to display this banner. Higher priority values are shown first.
    * @returns a new identifier for the given banner to be used with {@link OverlayBannersStart.remove} and
    *          {@link OverlayBannersStart.replace}

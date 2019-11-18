@@ -20,10 +20,11 @@
 import React, { useState } from 'react';
 import { EuiForm, EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Query, QueryBarInput } from 'plugins/data';
+import { QueryBarInput } from 'plugins/data';
+import { Query } from 'src/plugins/data/public';
 import { AggConfig } from '../../..';
 import { npStart } from '../../../../new_platform';
-import { Storage } from '../../../../storage';
+import { Storage } from '../../../../../../../plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../../../../plugins/kibana_react/public';
 const localStorage = new Storage(window.localStorage);
 
@@ -94,7 +95,7 @@ function FilterRow({
         <KibanaContextProvider
           services={{
             appName: 'filtersAgg',
-            store: localStorage,
+            storage: localStorage,
             data: npStart.plugins.data,
             ...npStart.core,
           }}

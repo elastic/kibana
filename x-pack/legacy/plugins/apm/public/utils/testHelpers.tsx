@@ -97,11 +97,21 @@ interface MockSetup {
   start: number;
   end: number;
   client: any;
+  internalClient: any;
   config: {
     get: any;
     has: any;
   };
   uiFiltersES: ESFilter[];
+  indices: {
+    'apm_oss.sourcemapIndices': string;
+    'apm_oss.errorIndices': string;
+    'apm_oss.onboardingIndices': string;
+    'apm_oss.spanIndices': string;
+    'apm_oss.transactionIndices': string;
+    'apm_oss.metricsIndices': string;
+    'apm_oss.apmAgentConfigurationIndex': string;
+  };
 }
 
 export async function inspectSearchParams(
@@ -113,11 +123,20 @@ export async function inspectSearchParams(
     }
   });
 
+  const internalClientSpy = jest.fn().mockReturnValueOnce({
+    hits: {
+      total: 0
+    }
+  });
+
   const mockSetup = {
     start: 1528113600000,
     end: 1528977600000,
     client: {
       search: clientSpy
+    } as any,
+    internalClient: {
+      search: internalClientSpy
     } as any,
     config: {
       get: () => 'myIndex' as any,
@@ -127,7 +146,16 @@ export async function inspectSearchParams(
       {
         term: { 'service.environment': 'prod' }
       }
-    ]
+    ],
+    indices: {
+      'apm_oss.sourcemapIndices': 'myIndex',
+      'apm_oss.errorIndices': 'myIndex',
+      'apm_oss.onboardingIndices': 'myIndex',
+      'apm_oss.spanIndices': 'myIndex',
+      'apm_oss.transactionIndices': 'myIndex',
+      'apm_oss.metricsIndices': 'myIndex',
+      'apm_oss.apmAgentConfigurationIndex': 'myIndex'
+    }
   };
   try {
     await fn(mockSetup);
@@ -135,8 +163,15 @@ export async function inspectSearchParams(
     // we're only extracting the search params
   }
 
+  let params;
+  if (clientSpy.mock.calls.length) {
+    params = clientSpy.mock.calls[0][0];
+  } else {
+    params = internalClientSpy.mock.calls[0][0];
+  }
+
   return {
-    params: clientSpy.mock.calls[0][0],
+    params,
     teardown: () => clientSpy.mockClear()
   };
 }
