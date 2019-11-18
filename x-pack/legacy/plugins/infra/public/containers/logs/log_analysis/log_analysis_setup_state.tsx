@@ -52,7 +52,7 @@ export const useAnalysisSetupState = ({
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return await callIndexPatternsValidate(timestampField, availableIndices.join(','));
+        return await callIndexPatternsValidate(timestampField, availableIndices);
       },
       onResolve: ({ data }) => {
         setValidatedIndices(

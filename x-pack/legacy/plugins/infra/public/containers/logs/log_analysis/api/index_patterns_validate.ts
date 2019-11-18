@@ -17,7 +17,7 @@ import {
 
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 
-export const callIndexPatternsValidate = async (timestampField: string, indices: string) => {
+export const callIndexPatternsValidate = async (timestampField: string, indices: string[]) => {
   const response = await kfetch({
     method: 'POST',
     pathname: LOG_ANALYSIS_VALIDATION_INDICES_PATH,

@@ -14,7 +14,7 @@ export const LOG_ANALYSIS_VALIDATION_INDICES_PATH = '/api/infra/log_analysis/val
 export const validationIndicesRequestPayloadRT = rt.type({
   data: rt.type({
     timestampField: rt.string,
-    indices: rt.string,
+    indices: rt.array(rt.string),
   }),
 });
 

@@ -30,7 +30,7 @@ export const initIndexPatternsValidateRoute = ({ framework }: InfraBackendLibs) 
       );
 
       const { timestampField } = payload.data;
-      const indices = payload.data.indices.split(',');
+      const indices = payload.data.indices;
       const errors: ValidationIndicesError[] = [];
 
       // Query each pattern individually, to map correctly the errors
