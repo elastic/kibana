@@ -30,7 +30,7 @@ export const mockUiSettings = {
   get: (item) => {
     return mockUiSettings[item];
   },
-  get$: () => ({
+  getUpdate$: () => ({
     subscribe: sinon.fake(),
   }),
   'query:allowLeadingWildcards': true,
