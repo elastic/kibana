@@ -8,6 +8,14 @@
 
 .canvasSidebar__panel {
   .canvasArg--expandable:last-child {
+    .canvasArg__accordion {
+      margin-bottom: (-$euiSizeS);
+    }
+
+    .canvasArg__accordion:after {
+      content: none;
+    }
+
     .canvasArg__accordion.euiAccordion-isOpen:after {
       display: none;
     }
@@ -15,12 +23,12 @@
 }
 
 .canvasArg {
-  margin-top: $euiSize;
+  margin-top: $euiSizeS;
+}
 
-
-  .canvasArg--remove {
-    visibility: hidden;
-  }
+.canvasArg__remove {
+  min-width: $euiSize;
+  padding: $euiSizeXS 0;
 }
 
 .canvasArg__content {
@@ -29,46 +37,17 @@
 
 .canvasArg__form {
   position: relative;
-
-}
-
-.canvasArg__form,
-.canvasArg__accordion {
-  &:hover {
-    .canvasArg__remove {
-      opacity: 1;
-      visibility: visible;
-    }
-  }
 }
 
 .canvasArg__tooltip {
   margin-left: -$euiSizeXL;
 }
 
-.canvasArg__remove {
-  position: absolute;
-  right: -$euiSizeL;
-  top: $euiSizeS - 2px;
-  border-radius: $euiBorderRadius;
-  border: $euiBorderThin;
-  background: $euiColorEmptyShade;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity $euiAnimSpeedNormal $euiAnimSlightResistance;
-  transition-delay: $euiAnimSpeedSlow;
-}
-
 .canvasArg__accordion {
-  padding: $euiSizeS $euiSize;
-  margin: 0 (-$euiSize);
+  padding: $euiSizeS $euiSizeM;
+  margin: 0 (-$euiSizeM);
   background: $euiColorLightestShade;
   position: relative;
-
-  // different spacing means leff shift
-  .canvasArg__remove {
-    right: -$euiSizeM;
-  }
 
   // don't let remove button position here if this is nested in an accordion
   .canvasArg__form {
@@ -96,4 +75,9 @@
   &:after {
     bottom: 0;
   }
+}
+
+// this is a workaround since an EuiFormRow label cannot be passed in toggle.js
+.canvasArg__switch {
+  padding-top: calc(#{$euiSizeS} * .75);
 }

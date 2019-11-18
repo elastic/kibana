@@ -24,6 +24,16 @@ export const pie = () => ({
       argType: 'palette',
     },
     {
+      name: 'legend',
+      displayName: strings.getLegendDisplayName(),
+      help: strings.getLegendHelp(),
+      argType: 'select',
+      default: 'ne',
+      options: {
+        choices: legendOptions,
+      },
+    },
+    {
       name: 'hole',
       displayName: strings.getHoleDisplayName(),
       help: strings.getHoleHelp(),
@@ -33,13 +43,6 @@ export const pie = () => ({
         min: 0,
         max: 100,
       },
-    },
-    {
-      name: 'labels',
-      displayName: strings.getLabelsDisplayName(),
-      help: strings.getLabelsHelp(),
-      argType: 'toggle',
-      default: true,
     },
     {
       name: 'labelRadius',
@@ -53,21 +56,25 @@ export const pie = () => ({
       },
     },
     {
-      name: 'legend',
-      displayName: strings.getLegendDisplayName(),
-      help: strings.getLegendHelp(),
-      argType: 'select',
-      default: 'ne',
-      options: {
-        choices: legendOptions,
-      },
-    },
-    {
       name: 'radius',
       displayName: strings.getRadiusDisplayName(),
       help: strings.getRadiusHelp(),
       argType: 'percentage',
       default: 1,
+    },
+    {
+      name: 'tilt',
+      displayName: strings.getTiltDisplayName(),
+      help: strings.getTiltHelp(),
+      argType: 'percentage',
+      default: 1,
+    },
+    {
+      name: 'labels',
+      displayName: strings.getLabelsDisplayName(),
+      help: strings.getLabelsHelp(),
+      argType: 'toggle',
+      default: true,
     },
     {
       name: 'seriesStyle',
@@ -77,13 +84,6 @@ export const pie = () => ({
     {
       name: 'font',
       argType: 'font',
-    },
-    {
-      name: 'tilt',
-      displayName: strings.getTiltDisplayName(),
-      help: strings.getTiltHelp(),
-      argType: 'percentage',
-      default: 1,
     },
   ],
   resolve({ context }) {
