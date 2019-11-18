@@ -17,13 +17,8 @@
  * under the License.
  */
 
+export { HomePluginSetup, HomePluginStart } from './plugin';
+export { TutorialProvider } from './services';
+import { HomePlugin } from './plugin';
 
-export function registerTutorials(server) {
-  server.route({
-    path: '/api/kibana/home/tutorials_LP',
-    method: ['GET'],
-    handler: function (req) {
-      return server.getTutorials(req);
-    }
-  });
-}
+export const plugin = () => new HomePlugin();
