@@ -222,9 +222,6 @@ export class LogRotator {
     // 3. rename all files to the correct index +1
     // 4. rename + compress current log into 1
     // 5. send SIGHUP to reload log config
-    if (this.isRotating) {
-      return false;
-    }
 
     // rotate process is starting
     this.isRotating = true;
