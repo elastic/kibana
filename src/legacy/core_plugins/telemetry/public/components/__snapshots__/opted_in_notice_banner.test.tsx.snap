@@ -43,7 +43,7 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
   >
     <FormattedMessage
       defaultMessage="Dismiss"
-      id="telemetry.welcomeBanner.enableButtonLabel"
+      id="telemetry.telemetryOptedInDismissMessage"
       values={Object {}}
     />
   </EuiButton>

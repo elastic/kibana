@@ -231,7 +231,7 @@ export class Home extends Component {
         onSkip={this.skipWelcome}
         urlBasePath={this.props.urlBasePath}
         showTelemetryDisclaimer={this.state.showTelemetryDisclaimer}
-        optInSeen={this.props.optInSeen}
+        onOptInSeen={this.props.onOptInSeen}
       />
     );
   }
@@ -270,5 +270,5 @@ Home.propTypes = {
   localStorage: PropTypes.object.isRequired,
   urlBasePath: PropTypes.string.isRequired,
   mlEnabled: PropTypes.bool.isRequired,
-  optInSeen: PropTypes.func.isRequired,
+  onOptInSeen: PropTypes.func.isRequired,
 };

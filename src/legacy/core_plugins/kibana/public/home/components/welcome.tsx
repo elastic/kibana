@@ -43,7 +43,7 @@ import { SampleDataCard } from './sample_data';
 interface Props {
   urlBasePath: string;
   onSkip: () => void;
-  optInSeen: () => any;
+  onOptInSeen: () => any;
   showTelemetryDisclaimer: boolean;
 }
 
@@ -76,7 +76,7 @@ export class Welcome extends React.Component<Props> {
 
   componentDidMount() {
     this.services.trackUiMetric(this.services.METRIC_TYPE.LOADED, 'welcomeScreenMount');
-    this.props.optInSeen();
+    this.props.onOptInSeen();
     document.addEventListener('keydown', this.hideOnEsc);
   }
 

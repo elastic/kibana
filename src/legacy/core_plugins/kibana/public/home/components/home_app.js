@@ -86,7 +86,7 @@ export function HomeApp({ directories }) {
               find={savedObjectsClient.find}
               localStorage={localStorage}
               urlBasePath={getBasePath()}
-              optInSeen={setOptInNoticeSeen}
+              onOptInSeen={setOptInNoticeSeen}
             />
           </Route>
           <Route path="/home">
