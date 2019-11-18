@@ -19,7 +19,6 @@ import {
 import { AddTooltipFieldPopover } from './add_tooltip_field_popover';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
 
 // TODO import reorder from EUI once its exposed as service
 // https://github.com/elastic/eui/issues/2372
@@ -50,7 +49,6 @@ const getProps = async field => {
 export class TooltipSelector extends Component {
 
   state = {
-    previousFields: null,
     fieldProps: [],
     selectedFieldProps: []
   };
@@ -58,6 +56,8 @@ export class TooltipSelector extends Component {
   constructor() {
     super();
     this._isMounted = false;
+    this._previousFields = null;
+    this._previousSelectedTooltips = null;
   }
 
   componentDidMount() {
@@ -77,36 +77,29 @@ export class TooltipSelector extends Component {
 
   async _loadTooltipFieldProps() {
 
-    if (!this.props.tooltipFields) {
+    if (!this.props.tooltipFields && this.props.fields === this._previousSelectedTooltips) {
       return;
     }
 
     const selectedProps = this.props.tooltipFields.map(getProps);
     const selectedFieldProps = await Promise.all(selectedProps);
     if (this._isMounted) {
-      if (!_.isEqual(this.state.selectedFieldProps, selectedFieldProps)) {
-        this.setState({ selectedFieldProps });
-      }
+      this.setState({ selectedFieldProps });
     }
 
   }
 
   async _loadFieldProps() {
 
-    if (!this.props.fields || this.props.fields === this.state.previousFields) {
+    if (!this.props.fields || this.props.fields === this._previousFields) {
       return;
     }
 
-    const previousFields = this.props.fields;
+    this._previousFields = this.props.fields;
     const props = this.props.fields.map(getProps);
     const fieldProps =  await Promise.all(props);
     if (this._isMounted) {
-      if (!_.isEqual(this.state.fieldProps, fieldProps)) {
-        this.setState({
-          fieldProps,
-          previousFields: previousFields
-        });
-      }
+      this.setState({ fieldProps });
     }
 
   }
