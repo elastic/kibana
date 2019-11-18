@@ -34,7 +34,7 @@ image::logs/images/analysis-tab-create-ml-job.png[Create machine learning job]
 By default, the analysis uses logs no older than four weeks, and continues indefinitely.
 You cannot change the time range for the analysis after the machine learning job has been created.
 2. Add the indices containing the logs you want to analyze.
-3. Click *Create ML job*.d
+3. Click *Create ML job*.
 
 Even though the analyze time range is fixed,
 you can still use the time filter to adjust the results that are shown.
