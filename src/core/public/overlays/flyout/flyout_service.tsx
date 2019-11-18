@@ -24,7 +24,8 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
 import { I18nStart } from '../../i18n';
-import { MountPoint, OverlayRef } from '../types';
+import { MountPoint } from '../../types';
+import { OverlayRef } from '../types';
 import { MountWrapper } from '../utils';
 
 /**
