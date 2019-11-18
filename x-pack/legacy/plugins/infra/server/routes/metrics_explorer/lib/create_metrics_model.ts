@@ -5,10 +5,10 @@
  */
 
 import { InfraMetricModelMetricType } from '../../../lib/adapters/metrics';
-import { MetricsExplorerAggregation, MetricsExplorerRequest } from '../types';
+import { MetricsExplorerAggregation, MetricsExplorerRequestBody } from '../types';
 import { InfraMetric } from '../../../graphql/types';
 import { TSVBMetricModel } from '../../../../common/inventory_models/types';
-export const createMetricModel = (options: MetricsExplorerRequest): TSVBMetricModel => {
+export const createMetricModel = (options: MetricsExplorerRequestBody): TSVBMetricModel => {
   return {
     id: InfraMetric.custom,
     requires: [],

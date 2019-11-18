@@ -5,6 +5,7 @@
  */
 
 import { RequestHandlerContext } from 'src/core/server';
+import { KibanaFramework } from '../lib/adapters/framework/kibana_framework_adapter';
 
 interface Options {
   indexPattern: string;
@@ -20,7 +21,7 @@ interface Options {
  * This is useful for visualizing metric modules like s3 that only send metrics once per day.
  */
 export const calculateMetricInterval = async (
-  framework: InfraBackendFrameworkAdapter,
+  framework: KibanaFramework,
   requestContext: RequestHandlerContext,
   options: Options,
   modules: string[]

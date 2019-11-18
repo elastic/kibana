@@ -6,12 +6,10 @@
 
 import * as runtimeTypes from 'io-ts';
 import { failure } from 'io-ts/lib/PathReporter';
-import { Legacy } from 'kibana';
 import { identity, constant } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { RequestHandlerContext } from 'src/core/server';
-import { Pick3 } from '../../../common/utility_types';
 import { defaultSourceConfiguration } from './defaults';
 import { NotFoundError } from './errors';
 import { infraSourceConfigurationSavedObjectType } from './saved_object_mappings';

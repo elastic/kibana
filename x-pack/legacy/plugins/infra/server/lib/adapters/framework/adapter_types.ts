@@ -31,6 +31,10 @@ export interface CallWithRequestParams extends GenericParams {
   max_concurrent_shard_requests?: number;
   name?: string;
   index?: string;
+  ignore_unavailable?: boolean;
+  allow_no_indices?: boolean;
+  size?: number;
+  terminate_after?: number;
 }
 
 export type InfraResponse = Lifecycle.ReturnValue;
