@@ -5,8 +5,6 @@
  */
 
 import React from 'react';
-
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EditFieldFormRow } from '../fields/edit_field';

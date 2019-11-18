@@ -5,20 +5,17 @@
  */
 
 import React from 'react';
-
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 
 import { EditFieldFormRow } from '../fields/edit_field';
 import { PARAMETERS_OPTIONS } from '../../../constants';
 import { getFieldConfig } from '../../../lib';
-import { SelectOption } from '../../../types';
+import { SuperSelectOption } from '../../../types';
 import { UseField, Field } from '../../../shared_imports';
 
 interface Props {
   hasIndexOptions?: boolean;
-  indexOptions?: SelectOption[];
+  indexOptions?: SuperSelectOption[];
 }
 
 export const IndexParameter = ({
