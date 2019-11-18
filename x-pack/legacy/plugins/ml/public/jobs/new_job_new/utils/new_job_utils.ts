@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IndexPattern } from 'ui/index_patterns';
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { KibanaConfigTypeFix } from '../../../contexts/kibana';
 import { esQuery, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
@@ -20,7 +21,7 @@ export interface SearchItems {
 
 export function createSearchItems(
   kibanaConfig: KibanaConfigTypeFix,
-  indexPattern: IIndexPattern,
+  indexPattern: IndexPattern,
   savedSearch: SavedSearch
 ) {
   // query is only used by the data visualizer as it needs
