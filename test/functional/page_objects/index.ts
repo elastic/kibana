@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore not TS yet
 import { CommonPageProvider } from './common_page';
 // @ts-ignore not TS yet
 import { ConsolePageProvider } from './console_page';
