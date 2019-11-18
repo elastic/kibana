@@ -60,7 +60,7 @@ export interface SourceDestinationIpProps {
   destinationGeoRegionName?: string[] | null;
   destinationGeoCityName?: string[] | null;
   destinationIp?: string[] | null;
-  destinationPort?: string[] | null;
+  destinationPort?: Array<number | string | null> | null;
   eventId: string;
   sourceGeoContinentName?: string[] | null;
   sourceGeoCountryName?: string[] | null;
@@ -68,7 +68,7 @@ export interface SourceDestinationIpProps {
   sourceGeoRegionName?: string[] | null;
   sourceGeoCityName?: string[] | null;
   sourceIp?: string[] | null;
-  sourcePort?: string[] | null;
+  sourcePort?: Array<number | string | null> | null;
   type: SourceDestinationType;
 }
 
