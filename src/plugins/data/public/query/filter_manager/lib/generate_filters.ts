@@ -18,7 +18,8 @@
  */
 
 import _ from 'lodash';
-import { FilterManager, esFilters, Field } from '../../..';
+import { esFilters, IFieldType, IIndexPattern } from '../../../../common';
+import { FilterManager } from '../filter_manager';
 
 function getExistingFilter(
   appFilters: esFilters.Filter[],
@@ -67,17 +68,17 @@ function updateExistingFilter(existingFilter: esFilters.Filter, negate: boolean)
  */
 export function generateFilters(
   filterManager: FilterManager,
-  field: Field | string,
+  field: IFieldType | string,
   values: any,
   operation: string,
   index: string
 ): esFilters.Filter[] {
   values = Array.isArray(values) ? values : [values];
-  const fieldObj = _.isObject(field)
+  const fieldObj = (_.isObject(field)
     ? field
     : {
         name: field,
-      };
+      }) as IFieldType;
   const fieldName = fieldObj.name;
   const newFilters: esFilters.Filter[] = [];
   const appFilters = filterManager.getAppFilters();
@@ -92,7 +93,8 @@ export function generateFilters(
       updateExistingFilter(existing, negate);
       filter = existing;
     } else {
-      const tmpIndexPattern = { id: index };
+      const tmpIndexPattern = { id: index } as IIndexPattern;
+
       switch (fieldName) {
         case '_exists_':
           filter = esFilters.buildExistsFilter(fieldObj, tmpIndexPattern);

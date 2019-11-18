@@ -20,7 +20,7 @@
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
-} from '../../../../../src/plugins/data/common/search';
+} from '../../../../../src/plugins/data/public';
 
 export const DEMO_SEARCH_STRATEGY = 'DEMO_SEARCH_STRATEGY';
 

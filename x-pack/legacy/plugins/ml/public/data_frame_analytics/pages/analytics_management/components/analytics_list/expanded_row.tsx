@@ -27,7 +27,7 @@ import {
 } from '../../../../common';
 import { isCompletedAnalyticsJob } from './common';
 import { isRegressionAnalysis } from '../../../../common/analytics';
-// import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
+import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 
 function getItemDescription(value: any) {
   if (typeof value === 'object') {
@@ -235,19 +235,16 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       name: 'JSON',
       content: <ExpandedRowJsonPane json={item.config} />,
     },
-    // Audit messages are not yet supported by the analytics API.
-    /*
     {
       id: 'ml-analytics-job-messages',
       name: i18n.translate(
         'xpack.ml.dataframe.analyticsList.analyticsDetails.tabs.analyticsMessagesLabel',
         {
-          defaultMessage: 'Messages',
+          defaultMessage: 'Job messages',
         }
       ),
       content: <ExpandedRowMessagesPane analyticsId={item.id} />,
     },
-    */
   ];
 
   // Using `expand=false` here so the tabs themselves don't spread
