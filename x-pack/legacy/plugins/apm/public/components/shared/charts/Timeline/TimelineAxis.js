@@ -12,7 +12,7 @@ import { XYPlot, XAxis } from 'react-vis';
 import LastTickValue from './LastTickValue';
 import AgentMarker from './AgentMarker';
 import { px } from '../../../../style/variables';
-import { getTimeFormatter } from '../../../../utils/formatters';
+import { getDurationFormatter } from '../../../../utils/formatters';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 // Remove any tick that is too close to topTraceDuration
@@ -33,8 +33,9 @@ const getXAxisTickValues = (tickValues, topTraceDuration) => {
 
 function TimelineAxis({ plotValues, agentMarks, topTraceDuration }) {
   const { margins, tickValues, width, xDomain, xMax, xScale } = plotValues;
-  const tickFormat = getTimeFormatter(xMax);
+  const tickFormatter = getDurationFormatter(xMax);
   const xAxisTickValues = getXAxisTickValues(tickValues, topTraceDuration);
+  const topTraceDurationFormatted = tickFormatter(topTraceDuration).formatted;
 
   return (
     <Sticky disableCompensation>
@@ -66,7 +67,7 @@ function TimelineAxis({ plotValues, agentMarks, topTraceDuration }) {
                 orientation="top"
                 tickSize={0}
                 tickValues={xAxisTickValues}
-                tickFormat={tickFormat}
+                tickFormat={time => tickFormatter(time).formatted}
                 tickPadding={20}
                 style={{
                   text: { fill: theme.euiColorDarkShade }
@@ -76,7 +77,7 @@ function TimelineAxis({ plotValues, agentMarks, topTraceDuration }) {
               {topTraceDuration > 0 && (
                 <LastTickValue
                   x={xScale(topTraceDuration)}
-                  value={tickFormat(topTraceDuration)}
+                  value={topTraceDurationFormatted}
                   marginTop={28}
                 />
               )}

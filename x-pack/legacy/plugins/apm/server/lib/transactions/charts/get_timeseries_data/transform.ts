@@ -5,7 +5,6 @@
  */
 
 import { isNumber, round, sortBy } from 'lodash';
-import { idx } from '@kbn/elastic-idx';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { ESResponse } from './fetcher';
@@ -20,14 +19,16 @@ export function timeseriesTransformer({
   bucketSize: number;
 }) {
   const aggs = timeseriesResponse.aggregations;
-  const overallAvgDuration =
-    idx(aggs, _ => _.overall_avg_duration.value) || null;
-  const responseTimeBuckets = idx(aggs, _ => _.response_times.buckets);
+  // TODO(TS-3.7-ESLINT)
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  const overallAvgDuration = aggs?.overall_avg_duration.value || null;
+  // TODO(TS-3.7-ESLINT)
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  const responseTimeBuckets = aggs?.response_times.buckets || [];
   const { avg, p95, p99 } = getResponseTime(responseTimeBuckets);
-  const transactionResultBuckets = idx(
-    aggs,
-    _ => _.transaction_results.buckets
-  );
+  // TODO(TS-3.7-ESLINT)
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  const transactionResultBuckets = aggs?.transaction_results.buckets || [];
   const tpmBuckets = getTpmBuckets(transactionResultBuckets, bucketSize);
 
   return {

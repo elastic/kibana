@@ -20,9 +20,9 @@ do {
  -H 'Content-Type: application/json' \
  -H 'kbn-xsrf: 123' \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- -X POST ${KIBANA_URL}/api/siem/signals \
+ -X POST ${KIBANA_URL}/api/detection_engine/rules \
   --data "{
-    \"id\": \"${i}\",
+    \"rule_id\": \"${i}\",
     \"description\": \"Detecting root and admin users\",
     \"index\": [\"auditbeat-*\", \"filebeat-*\", \"packetbeat-*\", \"winlogbeat-*\"],
     \"interval\": \"24h\",
@@ -31,7 +31,7 @@ do {
     \"type\": \"query\",
     \"from\": \"now-6m\",
     \"to\": \"now\",
-    \"query\": \"user.name: root or user.name: admin\"
+    \"query\": \"user.name: root or user.name: admin\",
     \"language\": \"kuery\"
   }" \
   | jq .;

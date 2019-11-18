@@ -31,7 +31,6 @@ import './doc_table';
 import { getSort } from './doc_table/lib/get_sort';
 import { getSortForSearchSource } from './doc_table/lib/get_sort_for_search_source';
 import * as columnActions from './doc_table/actions/columns';
-import * as filterActions from './doc_table/actions/filter';
 
 import indexTemplate from './discover.html';
 import { showOpenSearchPanel } from '../top_nav/show_open_search_panel';
@@ -41,7 +40,6 @@ import { getPainlessError } from './get_painless_error';
 import {
   angular,
   buildVislibDimensions,
-  getFilterGenerator,
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
@@ -57,7 +55,7 @@ import {
   subscribeWithScope,
   tabifyAggResponse,
   vislibSeriesResponseHandlerProvider,
-  VisProvider,
+  Vis,
   SavedObjectSaveModal,
 } from '../kibana_services';
 
@@ -76,7 +74,7 @@ const {
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
 import { start as data } from '../../../../data/public/legacy';
-
+import { generateFilters } from '../../../../../../plugins/data/public';
 
 const { savedQueryService } = data.search.services;
 
@@ -190,13 +188,11 @@ function discoverController(
   localStorage,
   uiCapabilities
 ) {
-  const Vis = Private(VisProvider);
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
   const getUnhashableStates = Private(getUnhashableStatesProvider);
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
 
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const filterGen = getFilterGenerator(queryFilter);
 
   const inspectorAdapters = {
     requests: new RequestAdapter()
@@ -901,7 +897,8 @@ function discoverController(
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function (field, values, operation) {
     $scope.indexPattern.popularizeField(field, 1);
-    filterActions.addFilter(field, values, operation, $scope.indexPattern.id, $scope.state, filterGen);
+    const newFilters = generateFilters(queryFilter, field, values, operation, $scope.indexPattern.id);
+    return queryFilter.addFilters(newFilters);
   };
 
   $scope.addColumn = function addColumn(columnName) {
