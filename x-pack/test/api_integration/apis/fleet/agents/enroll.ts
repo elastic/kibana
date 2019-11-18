@@ -20,7 +20,7 @@ export default function(providerContext: FtrProviderContext) {
   const supertest = getSupertestWithoutAuth(providerContext);
   let apiKey: { id: string; api_key: string };
 
-  describe('fleet_agents_enroll', () => {
+  describe.skip('fleet_agents_enroll', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
 
