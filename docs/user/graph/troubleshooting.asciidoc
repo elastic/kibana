@@ -1,12 +1,12 @@
 [role="xpack"]
 [[graph-troubleshooting]]
-=== Graph Troubleshooting
+== Graph troubleshooting
 ++++
 <titleabbrev>Troubleshooting</titleabbrev>
 ++++
 
-[float]
-==== Why are results missing?
+[discrete]
+=== Why are results missing?
 
 The default settings in Graph API requests are configured to tune out noisy
 results by using the following strategies:
@@ -29,8 +29,8 @@ of any statistical correlation with the sample.
 * Set the `min_doc_count` for your vertices to 1 to ensure only one document is
 required to assert a relationship.
 
-[float]
-==== What can I do to to improve performance?
+[discrete]
+=== What can I do to to improve performance?
 
 With the default setting of `use_significance` set to `true`, the Graph API
 performs a background frequency check of the terms it discovers as part of

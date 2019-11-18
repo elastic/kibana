@@ -21,7 +21,7 @@ export async function createOrUpdateConfiguration({
   >;
   setup: Setup;
 }) {
-  const { client, config } = setup;
+  const { internalClient, config } = setup;
 
   const params: IndexDocumentParams<AgentConfiguration> = {
     type: '_doc',
@@ -45,5 +45,5 @@ export async function createOrUpdateConfiguration({
     params.id = configurationId;
   }
 
-  return client.index(params);
+  return internalClient.index(params);
 }

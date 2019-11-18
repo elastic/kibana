@@ -50,3 +50,14 @@ This page has moved. Please see {stack-ov}/create-jobs.html[Creating {anomaly-jo
 == Machine learning job tips
 
 This page has moved. Please see {stack-ov}/create-jobs.html#job-tips[Machine learning job tips].
+
+[role="exclude",id="extend"]
+== Extend your use case
+
+This page was deleted. See <<xpack-graph>> and <<xpack-ml>>.
+
+[role="exclude",id="xpack-dashboard-only-mode"]
+== Dashboard-only mode
+
+Using the `kibana_dashboard_only_user` role is deprecated. 
+Use <<kibana-feature-privileges,feature privileges>> instead.
