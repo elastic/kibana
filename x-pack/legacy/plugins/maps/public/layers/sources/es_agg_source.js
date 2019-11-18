@@ -5,7 +5,6 @@
  */
 
 import { AbstractESSource } from './es_source';
-import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
 import { ESAggMetricField } from '../fields/es_agg_field';
 import { ESDocField } from '../fields/es_doc_field';
 import { METRIC_TYPE, COUNT_AGG_TYPE, COUNT_PROP_LABEL, COUNT_PROP_NAME } from '../../../common/constants';
@@ -107,13 +106,6 @@ export class AbstractESAggSource extends AbstractESSource {
   }
 
   async filterAndFormatPropertiesToHtmlForMetricFields(properties) {
-    let indexPattern;
-    try {
-      indexPattern = await this.getIndexPattern();
-    } catch(error) {
-      console.warn(`Unable to find Index pattern ${this._descriptor.indexPatternId}, values are not formatted`);
-      return properties;
-    }
 
     const metricFields = this.getMetricFields();
     const tooltipPropertiesPromises = [];
@@ -127,13 +119,7 @@ export class AbstractESAggSource extends AbstractESSource {
       }
 
       const tooltipPromise = new Promise(async (resolve) => {
-        const tooltipProperty  = new ESAggMetricTooltipProperty(
-          metricField.getName(),
-          await metricField.getLabel(),
-          value,
-          indexPattern,
-          metricField
-        );
+        const tooltipProperty = await metricField.createTooltipProperty(value);
         resolve(tooltipProperty);
       });
 

@@ -7,6 +7,7 @@
 
 import { AbstractField } from './field';
 import { COUNT_AGG_TYPE } from '../../../common/constants';
+import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
 
 export class ESAggMetricField extends AbstractField {
 
@@ -42,6 +43,18 @@ export class ESAggMetricField extends AbstractField {
   getRequestDescription() {
     return this.getAggType() !== COUNT_AGG_TYPE ? `${this.getAggType()} ${this.getESDocFieldName()}` : COUNT_AGG_TYPE;
   }
+
+  async createTooltipProperty(value) {
+    const indexPattern = await this._source.getIndexPattern();
+    return new ESAggMetricTooltipProperty(
+      this.getName(),
+      await this.getLabel(),
+      value,
+      indexPattern,
+      this
+    );
+  }
+
 
   makeMetricAggConfig() {
     const metricAggConfig = {
