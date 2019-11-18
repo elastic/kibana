@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, EuiIcon } from '@elastic/eui';
 import angular, { IModule } from 'angular';
 import { IPrivate } from 'ui/private';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
@@ -122,6 +122,7 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
   createLocalPersistedStateModule();
   createLocalTopNavModule(navigation);
   createLocalConfirmModalModule();
+  createLocalIconModule();
 
   const dashboardAngularModule = angular.module(moduleName, [
     ...thirdPartyAngularDependencies,
@@ -132,8 +133,15 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
     'app/dashboard/TopNav',
     'app/dashboard/State',
     'app/dashboard/ConfirmModal',
+    'app/dashboard/icon',
   ]);
   return dashboardAngularModule;
+}
+
+function createLocalIconModule() {
+  angular
+    .module('app/dashboard/icon', ['react'])
+    .directive('icon', reactDirective => reactDirective(EuiIcon));
 }
 
 function createLocalConfirmModalModule() {
