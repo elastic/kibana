@@ -15,7 +15,7 @@ export default function(providerContext: FtrProviderContext) {
   const { getService } = providerContext;
 
   const esArchiver = getService('esArchiver');
-  const esClient = getService('es') as legacyElasticsearch.Client;
+  const esClient = getService('es');
 
   const supertest = getSupertestWithoutAuth(providerContext);
   let apiKey: { id: string; api_key: string };
@@ -37,14 +37,12 @@ export default function(providerContext: FtrProviderContext) {
       const { _source: enrollmentApiKeyDoc } = await esClient.get({
         index: '.kibana',
         id: 'enrollment_api_keys:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0',
-        type: '_doc',
       });
       // @ts-ignore
       enrollmentApiKeyDoc.enrollment_api_keys.api_key_id = apiKey.id;
       await esClient.update({
         index: '.kibana',
         id: 'enrollment_api_keys:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0',
-        type: '_doc',
         body: {
           doc: enrollmentApiKeyDoc,
         },
