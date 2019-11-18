@@ -418,7 +418,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async clickMetricEditor() {
-      await find.clickByCssSelector('[group-name="metrics"] .euiAccordion__button');
+      await find.clickByCssSelector('[data-test-subj="metricsAggGroup"] .euiAccordion__button');
     }
 
     async clickMetricByIndex(index) {
@@ -460,7 +460,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async selectAggregation(myString, groupName = 'buckets', childAggregationType = null) {
       const comboBoxElement = await find.byCssSelector(`
-        [group-name="${groupName}"]
+        [data-test-subj="${groupName}AggGroup"]
         [data-test-subj^="visEditorAggAccordion"].euiAccordion-isOpen
         ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="defaultEditorAggSelect"]
@@ -549,8 +549,8 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     async selectField(fieldValue, groupName = 'buckets', childAggregationType = null) {
       log.debug(`selectField ${fieldValue}`);
       const selector = `
-        [group-name="${groupName}"]
-        [data-test-subj^="visEditorAggAccordion"].euiAccordion-isOpen
+      [data-test-subj="${groupName}AggGroup"]
+      [data-test-subj^="visEditorAggAccordion"].euiAccordion-isOpen
         [data-test-subj="visAggEditorParams"]
         ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="visDefaultEditorField"]
@@ -1232,7 +1232,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getBucketErrorMessage() {
-      const error = await find.byCssSelector('[group-name="buckets"] [data-test-subj="defaultEditorAggSelect"] + .euiFormErrorText');
+      const error = await find.byCssSelector(
+        '[data-test-subj="bucketsAggGroup"] [data-test-subj="defaultEditorAggSelect"] + .euiFormErrorText'
+      );
       const errorMessage = await error.getAttribute('innerText');
       log.debug(errorMessage);
       return errorMessage;
