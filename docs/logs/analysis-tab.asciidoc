@@ -82,6 +82,12 @@ or because some other anomalous behavior was detected.
 The level of anomaly detected in a time period is color-coded, from red, orange, yellow, to blue.
 Red indicates a critical anomaly level, while blue is a warning level.
 
+To help you further dig into a potential anomaly,
+you can view an anomaly chart for each individual partition:
+
+[role="screenshot"]
+image::logs/images/analysis-tab-partition-anomalies.png[Analysis tab partition anomalies]
+
 Hover over an underlying log rate value to see the average log rate for that time period,
 or hover over an anomalous region to see the partitions that had anomalies in that time period,
 and their anomaly scores.
@@ -89,11 +95,3 @@ Anomaly scores range from 0 (no anomalies) to 100 (critical).
 
 *Analyze in ML* will open the {kibana-ref}/xpack-ml.html[Anomaly Explorer in Machine Learning],
 where you can analyze the anomalies in more detail.
-
-You can also view the anomaly chart for an individual partition:
-
-[role="screenshot"]
-image::logs/images/analysis-tab-partition-anomalies.png[Analysis tab partition anomalies]
-
-Hover over an underlying log rate value to see the average log rate for that partition in that time period,
-or hover over an anomalous region to see the anomaly score for that partition in that time period.
