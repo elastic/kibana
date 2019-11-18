@@ -5,7 +5,6 @@
  */
 
 import { EuiHorizontalRule, EuiSpacer, EuiFlexItem } from '@elastic/eui';
-import { getEsQueryConfig } from '@kbn/es-query';
 import React, { useCallback, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
@@ -40,6 +39,7 @@ import { UsersQueryTable } from './users_query_table';
 import { NetworkTopNFlowQueryTable } from './network_top_n_flow_query_table';
 import { NetworkHttpQueryTable } from './network_http_query_table';
 import { NetworkTopCountriesQueryTable } from './network_top_countries_query_table';
+import { esQuery } from '../../../../../../../../src/plugins/data/public';
 import { useKibanaCore } from '../../../lib/compose/kibana_core';
 
 const IpOverviewManage = manageQuery(IpOverview);
@@ -80,7 +80,7 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
           {({ indicesExist, indexPattern }) => {
             const ip = decodeIpv6(detailName);
             const filterQuery = convertToBuildEsQuery({
-              config: getEsQueryConfig(core.uiSettings),
+              config: esQuery.getEsQueryConfig(core.uiSettings),
               indexPattern,
               queries: [query],
               filters,
