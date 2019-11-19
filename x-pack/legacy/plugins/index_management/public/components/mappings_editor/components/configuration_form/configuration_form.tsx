@@ -35,7 +35,7 @@ export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
   }, [form]);
 
   return (
-    <Form form={form} className="mappings-editor__configuration">
+    <Form form={form}>
       <FormRow
         title={i18n.translate('xpack.idxMgmt.mappingsEditor.configurationTitle', {
           defaultMessage: 'Configuration',

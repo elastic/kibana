@@ -15,14 +15,17 @@ import {
   DocumentFields,
   DocumentFieldsJsonEditor,
 } from './components';
+import { IndexSettings } from './types';
 import { MappingsState, Props as MappingsStateProps, Types } from './mappings_state';
+import { IndexSettingsProvider } from './index_settings_context';
 
 interface Props {
   onUpdate: MappingsStateProps['onUpdate'];
   defaultValue?: { [key: string]: any };
+  indexSettings?: IndexSettings;
 }
 
-export const MappingsEditor = React.memo(({ onUpdate, defaultValue }: Props) => {
+export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSettings }: Props) => {
   const configurationDefaultValue = useMemo(
     () =>
       (defaultValue === undefined
@@ -34,27 +37,29 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue }: Props) => 
   const fieldsDefaultValue = defaultValue === undefined ? {} : defaultValue.properties;
 
   return (
-    <MappingsState onUpdate={onUpdate} defaultValue={{ fields: fieldsDefaultValue }}>
-      {({ editor, getProperties }) => {
-        const renderEditor = () => {
-          if (editor === 'json') {
-            return <DocumentFieldsJsonEditor defaultValue={getProperties()} />;
-          }
-          return <DocumentFields />;
-        };
+    <IndexSettingsProvider indexSettings={indexSettings}>
+      <MappingsState onUpdate={onUpdate} defaultValue={{ fields: fieldsDefaultValue }}>
+        {({ editor, getProperties }) => {
+          const renderEditor = () => {
+            if (editor === 'json') {
+              return <DocumentFieldsJsonEditor defaultValue={getProperties()} />;
+            }
+            return <DocumentFields />;
+          };
 
-        return (
-          <div className="mappings-editor">
-            <ConfigurationForm defaultValue={configurationDefaultValue} />
-            <EuiSpacer />
-            <DocumentFieldsHeaders />
-            <EuiSpacer />
-            {renderEditor()}
-            {/* <EuiSpacer size={'l'} />
+          return (
+            <div className="mappingsEditor">
+              <ConfigurationForm defaultValue={configurationDefaultValue} />
+              <EuiSpacer />
+              <DocumentFieldsHeaders />
+              <EuiSpacer />
+              {renderEditor()}
+              {/* <EuiSpacer size={'l'} />
             <EditorToggleControls editor={editor} /> */}
-          </div>
-        );
-      }}
-    </MappingsState>
+            </div>
+          );
+        }}
+      </MappingsState>
+    </IndexSettingsProvider>
   );
 });

@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { UseField, FormDataProvider } from '../../../../shared_imports';
+import {
+  UseField,
+  FormDataProvider,
+  NumericField,
+  fieldFormatters,
+} from '../../../../shared_imports';
 import {
   StoreParameter,
   IndexParameter,
@@ -29,8 +34,7 @@ const getDefaultValueToggle = (param: string, field: FieldType) => {
       return field.null_value !== undefined && field.null_value !== '';
     }
     case 'ignore_malformed': {
-      // we are inverting the underlying setting by setting the label to "Reject malformed"
-      return field.ignore_malformed !== undefined ? !field.ignore_malformed : true;
+      return field.ignore_malformed !== undefined ? field.ignore_malformed : false;
     }
     default:
       return false;
@@ -95,39 +99,34 @@ export const NumericType = ({ field }: Props) => {
           {/* null_value */}
           <NullValueParameter
             defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
-          />
+          >
+            <UseField
+              path="null_value"
+              component={NumericField}
+              config={{ formatters: [fieldFormatters.toInt] }}
+            />
+          </NullValueParameter>
 
           {/* coerce */}
           <CoerceParameter />
 
           {/* ignore_malformed */}
-          <UseField path="ignore_malformed">
-            {ignoreMalformedField => (
-              <EditFieldFormRow
-                title={
-                  <h3>
-                    {i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreMalformedFieldTitle', {
-                      defaultMessage: 'Reject malformed data',
-                    })}
-                  </h3>
-                }
-                description={i18n.translate(
-                  'xpack.idxMgmt.mappingsEditor.ignoredMalformedFieldDescription',
-                  {
-                    defaultMessage: 'Whether to ignore malformed numbers.',
-                  }
-                )}
-                toggleDefaultValue={getDefaultValueToggle('ignore_malformed', field.source)}
-              >
-                {isOn => {
-                  // As we labeled the field "Reject malformed" instead of "Ignore..."
-                  // we invert the value.
-                  ignoreMalformedField.setValue(!isOn);
-                  return null;
-                }}
-              </EditFieldFormRow>
+          <EditFieldFormRow
+            title={
+              <h3>
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreMalformedFieldTitle', {
+                  defaultMessage: 'Ignore malformed data',
+                })}
+              </h3>
+            }
+            description={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.ignoredMalformedFieldDescription',
+              {
+                defaultMessage: 'Whether to ignore malformed numbers.',
+              }
             )}
-          </UseField>
+            formFieldPath="ignore_malformed"
+          />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

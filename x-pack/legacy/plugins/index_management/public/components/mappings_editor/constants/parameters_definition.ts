@@ -317,7 +317,10 @@ export const PARAMETERS_DEFINITION = {
         defaultMessage: 'Index options',
       }),
       defaultValue: 'docs',
-      type: FIELD_TYPES.SELECT,
+      type: FIELD_TYPES.SUPER_SELECT,
+      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.indexOptionsHelpText', {
+        defaultMessage: 'Information that should be stored in the index.',
+      }),
     },
   },
   eager_global_ordinals: {
@@ -337,7 +340,7 @@ export const PARAMETERS_DEFINITION = {
   },
   term_vector: {
     fieldConfig: {
-      type: FIELD_TYPES.SELECT,
+      type: FIELD_TYPES.SUPER_SELECT,
       defaultValue: 'no',
     },
   },
@@ -414,7 +417,10 @@ export const PARAMETERS_DEFINITION = {
   similarity: {
     fieldConfig: {
       defaultValue: 'BM25',
-      type: FIELD_TYPES.SELECT,
+      type: FIELD_TYPES.SUPER_SELECT,
+      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.similarityHelpText', {
+        defaultMessage: 'Defaults to BM25.',
+      }),
     },
   },
   split_queries_on_whitespace: {

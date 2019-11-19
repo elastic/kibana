@@ -5,8 +5,6 @@
  */
 
 import React from 'react';
-
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EditFieldFormRow } from '../fields/edit_field';
@@ -33,27 +31,15 @@ export const SimilarityParameter = ({ defaultToggleValue }: Props) => (
     direction="column"
     toggleDefaultValue={defaultToggleValue}
   >
-    <EuiFlexGroup alignItems="center">
-      <EuiFlexItem>
-        <UseField
-          path="similarity"
-          config={getFieldConfig('similarity')}
-          component={Field}
-          componentProps={{
-            euiFieldProps: {
-              options: PARAMETERS_OPTIONS.similarity,
-              style: { maxWidth: 300 },
-            },
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText size="s" color="subdued">
-          {i18n.translate('xpack.idxMgmt.mappingsEditor.setSimilarityFieldDefaultDescription', {
-            defaultMessage: 'Defaults to BM25.',
-          })}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <UseField
+      path="similarity"
+      config={getFieldConfig('similarity')}
+      component={Field}
+      componentProps={{
+        euiFieldProps: {
+          options: PARAMETERS_OPTIONS.similarity,
+        },
+      }}
+    />
   </EditFieldFormRow>
 );

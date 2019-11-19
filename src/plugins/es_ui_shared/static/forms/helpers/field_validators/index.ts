@@ -25,3 +25,4 @@ export * from './index_name';
 export * from './contains_char';
 export * from './starts_with';
 export * from './index_pattern_field';
+export * from './lowercase_string';

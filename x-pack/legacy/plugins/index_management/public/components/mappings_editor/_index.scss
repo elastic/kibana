@@ -10,22 +10,22 @@
  border-bottom is always visible, even when mouseovering and changing the background color.
  */
 
-.mappings-editor {
-  &__fields-list-item {
-    &--dotted-line {
-      > .mappings-editor__fields-list-item__field {
+.mappingsEditor {
+  &__fieldsListItem {
+    &--dottedLine {
+      > .mappingsEditor__fieldsListItem__field {
         border-bottom-style: dashed;
       }
     }
 
     &__field {
       border-bottom: $euiBorderThin;
-      margin-top: 4px; // [3]
+      margin-top: $euiSizeXS; // [3]
 
       &:hover {
         background-color: $euiColorLightestShade;
-        .mappings-editor__fields-list-item__actions,
-        .mappings-editor__fields-list-item__multi-field-button {
+        .mappingsEditor__fieldsListItem__actions,
+        .mappingsEditor__fieldsListItem__multiFieldButton {
           opacity: 1;
         }
       }
@@ -69,14 +69,14 @@
     }
 
     &__actions,
-    &__multi-field-button {
+    &__multiFieldButton {
       opacity: 0;
       padding-right: $euiSizeS;
       transition: opacity $euiAnimSpeedNormal $euiAnimSlightResistance;
     }
   }
 
-  &__create-field-wrapper {
+  &__createFieldWrapper {
     background-color: $euiColorLightestShade;
     border-right: $euiBorderThin;
     border-bottom: $euiBorderThin;
@@ -84,17 +84,17 @@
     padding: $euiSize;
   }
 
-  &__create-field-content {
+  &__createFieldContent {
     position: relative;
   }
 
-  &__create-field-required-props {
+  &__createFieldRequiredProps {
     margin-top: $euiSizeL;
     padding-top: $euiSize;
     border-top: 1px solid $euiColorLightShade;
   }
 
-  &__edit-field {
+  &__editField {
     min-width: 680px;
 
     &__section {
@@ -106,7 +106,7 @@
         margin-bottom: 0;
       }
 
-      + .mappings-editor__edit-field__advanced-settings {
+      + .mappingsEditor__editField__advancedSettings {
         margin-top: $euiSizeL * -1;
       }
     }
@@ -128,25 +128,25 @@
 
       &__title {
         line-height: 1;
-        margin-bottom: 8px;
+        margin-bottom: $euiSizeS;
       }
     }
   }
 
-  &__select-with-custom {
+  &__selectWithCustom {
     position: relative;
 
     &__button {
       position: absolute;
       right: 0;
-      top: $euiSizeXS * -1;
+      top: 0;
     }
   }
 }
 
-.mappings-editor__fields-list {
-  .mappings-editor__fields-list .mappings-editor__fields-list-item__content,
-  .mappings-editor__create-field-content {
+.mappingsEditor__fieldsList {
+  .mappingsEditor__fieldsList .mappingsEditor__fieldsListItem__content,
+  .mappingsEditor__createFieldContent {
       &::before {
         border-bottom: 1px solid $euiColorMediumShade;
         content: '';
@@ -165,17 +165,17 @@
       }
     }
 
-    .mappings-editor__create-field-content {
+    .mappingsEditor__createFieldContent {
       padding-left: $euiSizeXXL - $euiSizeXS; // [1]
     }
 
-    .mappings-editor__create-field-wrapper {
-      &--multi-field {
-        .mappings-editor__create-field-content {
+    .mappingsEditor__createFieldWrapper {
+      &--multiField {
+        .mappingsEditor__createFieldContent {
           padding-left: $euiSize;
         }
 
-        .mappings-editor__create-field-content {
+        .mappingsEditor__createFieldContent {
           &::before, &::after {
             content: none;
           }
@@ -183,16 +183,16 @@
       }
 
       &--toggle {
-        .mappings-editor__create-field-content {
+        .mappingsEditor__createFieldContent {
           padding-left: $euiSizeXXL - $euiSizeXS; // [1]
         }
       }
     }
 
-    .mappings-editor__fields-list .mappings-editor__fields-list-item__content {
+    .mappingsEditor__fieldsList .mappingsEditor__fieldsListItem__content {
       padding-left: $euiSizeXL; // [2]
 
-      &--toggle, &--multi-field {
+      &--toggle, &--multiField {
         &::before, &::after {
           content: none;
         }
@@ -202,26 +202,26 @@
         padding-left: 0;
       }
 
-      &--multi-field {
+      &--multiField {
         padding-left: $euiSizeS;
       }
     }
 }
 
-ul.tree {
+ul.esUiTree {
   padding: 0;
   margin: 0;
   list-style-type: none;
   position: relative;
   padding-top: $euiSizeXS;
 
-  li.tree-item {
+  li.esUiTreeItem {
     list-style-type: none;
     border-left: $euiBorderThin;
     margin-left: $euiSizeL;
     padding-bottom: $euiSizeS;
 
-    div {
+    &__label {
       padding-left: $euiSizeL;
       position: relative;
 
@@ -239,10 +239,11 @@ ul.tree {
     }
   }
 
-  > li.tree-item:first-child {
+  > li.esUiTreeItem:first-child {
     padding-top: $euiSizeS;
   }
-  > li.tree-item:last-child {
+
+  > li.esUiTreeItem:last-child {
     border-left-color: transparent;
     padding-bottom: 0;
   }

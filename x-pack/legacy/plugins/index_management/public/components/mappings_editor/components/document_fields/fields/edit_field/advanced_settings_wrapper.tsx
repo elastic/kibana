@@ -19,19 +19,17 @@ export const AdvancedSettingsWrapper = ({ children }: Props) => {
   };
 
   return (
-    <div className="mappings-editor__edit-field__advanced-settings">
+    <div className="mappingsEditor__editField__advancedSettings">
       <div>
         <EuiButtonEmpty onClick={toggleIsVisilbe}>
           {isVisible ? 'Hide' : 'Show'} advanced settings
         </EuiButtonEmpty>
       </div>
-      {isVisible && (
-        <>
-          <EuiSpacer size="s" />
-          {/* We ned to wrap the children inside a "div" to have our css :first-child rule */}
-          <div>{children}</div>
-        </>
-      )}
+      <div style={{ display: isVisible ? 'block' : 'none' }}>
+        <EuiSpacer size="s" />
+        {/* We ned to wrap the children inside a "div" to have our css :first-child rule */}
+        <div>{children}</div>
+      </div>
     </div>
   );
 };

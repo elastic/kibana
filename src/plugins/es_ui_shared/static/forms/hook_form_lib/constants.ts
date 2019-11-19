@@ -26,6 +26,7 @@ export const FIELD_TYPES = {
   COMBO_BOX: 'comboBox',
   SELECT: 'select',
   MULTI_SELECT: 'multiSelect',
+  SUPER_SELECT: 'superSelect',
 };
 
 // Validation types

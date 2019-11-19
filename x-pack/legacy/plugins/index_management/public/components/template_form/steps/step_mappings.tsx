@@ -80,7 +80,11 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
       <EuiSpacer size="l" />
 
       {/* Mappings code editor */}
-      <MappingsEditor defaultValue={template.mappings} onUpdate={onMappingsEditorUpdate} />
+      <MappingsEditor
+        defaultValue={template.mappings}
+        onUpdate={onMappingsEditorUpdate}
+        indexSettings={template.settings}
+      />
 
       <EuiSpacer size="m" />
     </div>

@@ -142,36 +142,35 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
 
   return (
     <li
-      className={classNames('mappings-editor__fields-list-item', {
-        'mappings-editor__fields-list-item--dotted-line': hasDottedLine,
+      className={classNames('mappingsEditor__fieldsListItem', {
+        'mappingsEditor__fieldsListItem--dottedLine': hasDottedLine,
       })}
     >
       <div
         style={{ paddingLeft: `${indent}px` }}
-        className={classNames('mappings-editor__fields-list-item__field', {
-          'mappings-editor__fields-list-item__field--selected': isHighlighted,
-          'mappings-editor__fields-list-item__field--dim': isDimmed,
+        className={classNames('mappingsEditor__fieldsListItem__field', {
+          'mappingsEditor__fieldsListItem__field--selected': isHighlighted,
+          'mappingsEditor__fieldsListItem__field--dim': isDimmed,
         })}
       >
         <div
-          className={classNames('mappings-editor__fields-list-item__wrapper', {
-            'mappings-editor__fields-list-item__wrapper--indent':
+          className={classNames('mappingsEditor__fieldsListItem__wrapper', {
+            'mappingsEditor__fieldsListItem__wrapper--indent':
               treeDepth === 0 && maxNestedDepth === 0,
           })}
         >
           <EuiFlexGroup
             gutterSize="s"
             alignItems="center"
-            className={classNames('mappings-editor__fields-list-item__content', {
-              'mappings-editor__fields-list-item__content--toggle':
-                hasChildFields || hasMultiFields,
-              'mappings-editor__fields-list-item__content--multi-field': isMultiField,
-              'mappings-editor__fields-list-item__content--indent':
+            className={classNames('mappingsEditor__fieldsListItem__content', {
+              'mappingsEditor__fieldsListItem__content--toggle': hasChildFields || hasMultiFields,
+              'mappingsEditor__fieldsListItem__content--multiField': isMultiField,
+              'mappingsEditor__fieldsListItem__content--indent':
                 !hasChildFields && !hasMultiFields && maxNestedDepth > treeDepth,
             })}
           >
             {(hasChildFields || hasMultiFields) && (
-              <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__toggle">
+              <EuiFlexItem grow={false} className="mappingsEditor__fieldsListItem__toggle">
                 <EuiButtonIcon
                   color="text"
                   onClick={toggleExpand}
@@ -181,11 +180,11 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
               </EuiFlexItem>
             )}
             {isMultiField && (
-              <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__icon">
+              <EuiFlexItem grow={false} className="mappingsEditor__fieldsListItem__icon">
                 <EuiIcon color="subdued" type="link" />
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false} className="mappings-editor__fields-list-item__name">
+            <EuiFlexItem grow={false} className="mappingsEditor__fieldsListItem__name">
               {source.name}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -203,16 +202,18 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
                 {areActionButtonsVisible && (
                   <EuiFlexItem
                     grow={false}
-                    className="mappings-editor__fields-list-item__multi-field-button"
+                    className="mappingsEditor__fieldsListItem__multiFieldButton"
                   >
                     <EuiButtonEmpty onClick={addField} iconType="plusInCircleFilled">
-                      Add multi-field
+                      {i18n.translate('xpack.idxMgmt.mappingsEditor.addMultiFieldButtonLabel', {
+                        defaultMessage: 'Add multi-field',
+                      })}
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                 )}
               </>
             )}
-            <EuiFlexItem className="mappings-editor__fields-list-item__actions">
+            <EuiFlexItem className="mappingsEditor__fieldsListItem__actions">
               {renderActionButtons()}
             </EuiFlexItem>
           </EuiFlexGroup>

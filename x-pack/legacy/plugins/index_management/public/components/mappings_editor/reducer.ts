@@ -14,7 +14,6 @@ import {
   isStateValid,
   normalize,
   updateFieldsPathAfterFieldNameChange,
-  getAllDescendantAliases,
 } from './lib';
 import { PARAMETERS_DEFINITION } from './constants';
 
@@ -191,11 +190,28 @@ const removeFieldFromMap = (fieldId: string, fields: NormalizedFields): Normaliz
     rootLevelFields = rootLevelFields.filter(childId => childId !== fieldId);
   }
 
-  return {
+  let updatedFields = {
     ...fields,
     rootLevelFields,
     byId: updatedById,
   };
+
+  if (updatedFields.aliases[fieldId]) {
+    // Recursively remove all the alias fields pointing to this field being removed.
+    updatedFields = updatedFields.aliases[fieldId].reduce(
+      (_updatedFields, aliasId) => removeFieldFromMap(aliasId, _updatedFields),
+      updatedFields
+    );
+    const upddatedAliases = { ...updatedFields.aliases };
+    delete upddatedAliases[fieldId];
+
+    return {
+      ...updatedFields,
+      aliases: upddatedAliases,
+    };
+  }
+
+  return updatedFields;
 };
 
 export const reducer = (state: State, action: Action): State => {
@@ -300,20 +316,6 @@ export const reducer = (state: State, action: Action): State => {
           ...updatedFields.aliases,
           [targetId]: updatedFields.aliases[targetId].filter(aliasId => aliasId !== id),
         };
-      } else if (field.source.type !== 'alias') {
-        /**
-         * A field can have one or multiple aliases that point to it.
-         * An "object" tyep field for example can have multiple of its child fields that have
-         * aliases pointed to them.
-         *
-         * The `getAllDescendantAliases()` is in charge of returning all the aliases pointing to
-         * the field being deleted and its child fields.
-         */
-        const aliases = getAllDescendantAliases(field, state.fields);
-        aliases.forEach(aliasId => {
-          updatedFields = removeFieldFromMap(aliasId, updatedFields);
-        });
-        delete state.fields.aliases[id];
       }
 
       updatedFields.maxNestedDepth = getMaxNestedDepth(updatedFields.byId);
@@ -376,15 +378,15 @@ export const reducer = (state: State, action: Action): State => {
             ),
           };
         } else {
-          const aliases = getAllDescendantAliases(previousField, updatedFields);
           const nextTypeCanHaveAlias = !PARAMETERS_DEFINITION.path.targetTypesNotAllowed.includes(
             newField.source.type
           );
 
-          if (shouldDeleteChildFields && !nextTypeCanHaveAlias && Boolean(aliases.length)) {
-            aliases.forEach(aliasId => {
+          if (!nextTypeCanHaveAlias && updatedFields.aliases[fieldToEdit]) {
+            updatedFields.aliases[fieldToEdit].forEach(aliasId => {
               updatedFields = removeFieldFromMap(aliasId, updatedFields);
             });
+            delete updatedFields.aliases[fieldToEdit];
           }
         }
 

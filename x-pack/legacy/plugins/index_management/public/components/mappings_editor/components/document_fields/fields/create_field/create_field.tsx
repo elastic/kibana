@@ -23,7 +23,7 @@ import { TYPE_DEFINITION, FIELD_TYPES_OPTIONS, EUI_SIZE } from '../../../../cons
 
 import { useDispatch } from '../../../../mappings_state';
 import { fieldSerializer, getFieldConfig, filterTypesForMultiField } from '../../../../lib';
-import { Field, MainType, NormalizedFields } from '../../../../types';
+import { Field, MainType, SubType, NormalizedFields, SelectOption } from '../../../../types';
 import { NameParameter } from '../../field_parameters';
 import { getParametersFormForType } from './required_parameters_forms';
 
@@ -36,6 +36,8 @@ interface Props {
   isCancelable?: boolean;
   maxNestedDepth?: number;
 }
+
+const typeFieldConfig = getFieldConfig('type');
 
 export const CreateField = React.memo(function CreateFieldComponent({
   allFields,
@@ -89,16 +91,46 @@ export const CreateField = React.memo(function CreateFieldComponent({
     }
   };
 
-  const renderFormFields = (type: MainType) => {
+  /**
+   * When we change the type, we need to check if there is a subType array to choose from.
+   * If there is a subType array, we build the options list for the select (and in case the field is a multi-field
+   * we also filter out blacklisted types).
+   *
+   * @param type The selected field type
+   */
+  const getSubTypeMeta = (
+    type: MainType
+  ): { subTypeLabel?: string; subTypeOptions?: Array<SelectOption<SubType>> } => {
     const typeDefinition = TYPE_DEFINITION[type];
-    const hasSubType = typeDefinition && typeDefinition.subTypes !== undefined;
+    const hasSubTypes = typeDefinition !== undefined && typeDefinition.subTypes;
 
-    const subTypeOptions =
-      typeDefinition && typeDefinition.subTypes
-        ? typeDefinition.subTypes.types
-            .map(subType => TYPE_DEFINITION[subType])
-            .map(subType => ({ value: subType.value, text: subType.label }))
-        : undefined;
+    let subTypeOptions = hasSubTypes
+      ? typeDefinition
+          .subTypes!.types.map(subType => TYPE_DEFINITION[subType])
+          .map(
+            subType =>
+              ({ value: subType.value as SubType, text: subType.label } as SelectOption<SubType>)
+          )
+      : undefined;
+
+    if (isMultiField && hasSubTypes) {
+      // If it is a multi-field, we need to filter out non-allowed types
+      subTypeOptions = filterTypesForMultiField<SubType>(subTypeOptions!);
+    }
+
+    return {
+      subTypeOptions,
+      subTypeLabel: hasSubTypes ? typeDefinition.subTypes!.label : undefined,
+    };
+  };
+
+  const onTypeChange = (nextType: unknown) => {
+    const { subTypeOptions } = getSubTypeMeta(nextType as MainType);
+    form.setFieldValue('subType', subTypeOptions ? subTypeOptions[0].value : undefined);
+  };
+
+  const renderFormFields = (type: MainType) => {
+    const { subTypeOptions, subTypeLabel } = getSubTypeMeta(type);
 
     return (
       <EuiFlexGroup gutterSize="s">
@@ -111,7 +143,8 @@ export const CreateField = React.memo(function CreateFieldComponent({
         <EuiFlexItem>
           <UseField
             path="type"
-            config={getFieldConfig('type')}
+            config={typeFieldConfig}
+            onChange={onTypeChange}
             component={SelectField}
             componentProps={{
               euiFieldProps: {
@@ -124,21 +157,19 @@ export const CreateField = React.memo(function CreateFieldComponent({
         </EuiFlexItem>
 
         {/* Field sub type (if any) */}
-        {hasSubType && (
+        {subTypeOptions && (
           <EuiFlexItem grow={false}>
             <UseField
               path="subType"
-              defaultValue={typeDefinition.subTypes!.types[0]}
+              defaultValue={subTypeOptions[0].value}
               config={{
-                ...getFieldConfig('type'),
-                label: typeDefinition.subTypes!.label,
+                ...typeFieldConfig,
+                label: subTypeLabel,
               }}
               component={SelectField}
               componentProps={{
                 euiFieldProps: {
-                  options: isMultiField
-                    ? filterTypesForMultiField(subTypeOptions!)
-                    : subTypeOptions,
+                  options: subTypeOptions,
                   hasNoInitialSelection: false,
                 },
               }}
@@ -174,10 +205,10 @@ export const CreateField = React.memo(function CreateFieldComponent({
     <EuiOutsideClickDetector onOutsideClick={onClickOutside}>
       <Form form={form} FormWrapper={formWrapper} onSubmit={submitForm}>
         <div
-          className={classNames('mappings-editor__create-field-wrapper', {
-            'mappings-editor__create-field-wrapper--toggle':
+          className={classNames('mappingsEditor__createFieldWrapper', {
+            'mappingsEditor__createFieldWrapper--toggle':
               Boolean(maxNestedDepth) && maxNestedDepth! > 0,
-            'mappings-editor__create-field-wrapper--multi-field': isMultiField,
+            'mappingsEditor__createFieldWrapper--multiField': isMultiField,
           })}
           style={{
             paddingLeft: `${
@@ -187,10 +218,10 @@ export const CreateField = React.memo(function CreateFieldComponent({
             }px`,
           }}
         >
-          <div className="mappings-editor__create-field-content">
+          <div className="mappingsEditor__createFieldContent">
             <EuiFlexGroup gutterSize="s" alignItems="center">
               {isMultiField && (
-                <EuiFlexItem grow={false} className="mappings-editor__create-field-content__icon">
+                <EuiFlexItem grow={false} className="mappingsEditor__createFieldContent__icon">
                   <EuiIcon type="link" />
                 </EuiFlexItem>
               )}
@@ -206,7 +237,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
               {({ type, subType }) => {
                 const ParametersForm = getParametersFormForType(type, subType);
                 return ParametersForm ? (
-                  <div className="mappings-editor__create-field-required-props">
+                  <div className="mappingsEditor__createFieldRequiredProps">
                     <ParametersForm allFields={allFields} />
                   </div>
                 ) : null;

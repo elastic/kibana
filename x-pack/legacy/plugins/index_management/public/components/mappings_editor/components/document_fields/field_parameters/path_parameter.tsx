@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiComboBox } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { FormRow, UseField, SerializerFunc } from '../../../shared_imports';
@@ -58,53 +58,76 @@ interface Props {
   field?: NormalizedField;
 }
 
-export const PathParameter = ({ field, allFields }: Props) => (
-  <UseField
-    path="path"
-    config={{
-      ...getFieldConfig('path'),
-      deserializer: getDeserializer(allFields),
-    }}
-  >
-    {pathField => {
-      const error = pathField.getErrorsMessages();
-      const isInvalid = error ? Boolean(error.length) : false;
+export const PathParameter = ({ field, allFields }: Props) => {
+  const suggestedFields = getSuggestedFields(allFields, field);
 
-      return (
-        <FormRow
-          title={
-            <h3>
-              {i18n.translate('xpack.idxMgmt.mappingsEditor.aliasType.aliasTargetFieldTitle', {
-                defaultMessage: 'Alias target',
-              })}
-            </h3>
-          }
-          description={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.aliasType.aliasTargetFieldDescription',
-            {
-              defaultMessage:
-                'Select the field you want your alias to point to. You will then be able to use the alias instead of the target field in search requests, and selected other APIs like field capabilities.',
+  return (
+    <UseField
+      path="path"
+      config={{
+        ...getFieldConfig('path'),
+        deserializer: getDeserializer(allFields),
+      }}
+    >
+      {pathField => {
+        const error = pathField.getErrorsMessages();
+        const isInvalid = error ? Boolean(error.length) : false;
+
+        return (
+          <FormRow
+            title={
+              <h3>
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.aliasType.aliasTargetFieldTitle', {
+                  defaultMessage: 'Alias target',
+                })}
+              </h3>
             }
-          )}
-          idAria="mappingsEditorPathParameter"
-        >
-          <EuiFormRow
-            label={pathField.label}
-            helpText={pathField.helpText}
-            error={error}
-            isInvalid={isInvalid}
+            description={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.aliasType.aliasTargetFieldDescription',
+              {
+                defaultMessage:
+                  'Select the field you want your alias to point to. You will then be able to use the alias instead of the target field in search requests, and selected other APIs like field capabilities.',
+              }
+            )}
+            idAria="mappingsEditorPathParameter"
           >
-            <EuiComboBox
-              placeholder="Select a field"
-              singleSelection={{ asPlainText: true }}
-              options={getSuggestedFields(allFields, field)}
-              selectedOptions={pathField.value as AliasOption[]}
-              onChange={value => pathField.setValue(value)}
-              isClearable={false}
-            />
-          </EuiFormRow>
-        </FormRow>
-      );
-    }}
-  </UseField>
-);
+            <>
+              {!Boolean(suggestedFields.length) && (
+                <>
+                  <EuiCallOut color="warning">
+                    <p>
+                      {i18n.translate(
+                        'xpack.idxMgmt.mappingsEditor.aliasType.noFieldsAddedWarningMessage',
+                        {
+                          defaultMessage:
+                            'You need to add at least one field before creating an alias.',
+                        }
+                      )}
+                    </p>
+                  </EuiCallOut>
+                  <EuiSpacer />
+                </>
+              )}
+
+              <EuiFormRow
+                label={pathField.label}
+                helpText={pathField.helpText}
+                error={error}
+                isInvalid={isInvalid}
+              >
+                <EuiComboBox
+                  placeholder="Select a field"
+                  singleSelection={{ asPlainText: true }}
+                  options={suggestedFields}
+                  selectedOptions={pathField.value as AliasOption[]}
+                  onChange={value => pathField.setValue(value)}
+                  isClearable={false}
+                />
+              </EuiFormRow>
+            </>
+          </FormRow>
+        );
+      }}
+    </UseField>
+  );
+};

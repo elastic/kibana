@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ReactNode, OptionHTMLAttributes } from 'react';
+
 import { FieldConfig } from './shared_imports';
 import { PARAMETERS_DEFINITION } from './constants';
 
@@ -121,6 +123,7 @@ interface FieldBasic {
 type FieldParams = {
   [K in ParameterName]: typeof PARAMETERS_DEFINITION[K]['fieldConfig']['defaultValue'];
 };
+
 export type Field = FieldBasic & FieldParams;
 
 export interface FieldMeta {
@@ -155,12 +158,41 @@ export type ChildFieldName = 'properties' | 'fields';
 
 export type FieldsEditor = 'default' | 'json';
 
-export interface SelectOption {
-  value: any;
-  text: string;
+export type SelectOption<T extends string = string> = {
+  value: unknown;
+  text: T | ReactNode;
+} & OptionHTMLAttributes<HTMLOptionElement>;
+
+export interface SuperSelectOption {
+  value: unknown;
+  inputDisplay?: ReactNode;
+  dropdownDisplay?: ReactNode;
+  disabled?: boolean;
+  'data-test-subj'?: string;
 }
 
 export interface AliasOption {
   id: string;
   label: string;
 }
+
+export interface IndexSettingsInterface {
+  analysis?: {
+    analyzer: {
+      [key: string]: {
+        type: string;
+        tokenizer: string;
+        char_filter?: string[];
+        filter?: string[];
+        position_increment_gap?: number;
+      };
+    };
+  };
+}
+
+/**
+ * When we define the index settings we can skip
+ * the "index" property and directly add the "analysis".
+ * ES always returns the settings wrapped under "index".
+ */
+export type IndexSettings = IndexSettingsInterface | { index: IndexSettingsInterface };

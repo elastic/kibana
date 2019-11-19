@@ -22,7 +22,12 @@ import { useState, useEffect, useRef } from 'react';
 import { FormHook, FieldHook, FieldConfig, FieldValidateResponse, ValidationError } from '../types';
 import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
 
-export const useField = (form: FormHook, path: string, config: FieldConfig = {}) => {
+export const useField = (
+  form: FormHook,
+  path: string,
+  config: FieldConfig = {},
+  valueChangeListener?: (value: unknown) => void
+) => {
   const {
     type = FIELD_TYPES.TEXT,
     defaultValue = '',
@@ -49,6 +54,7 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
   const changeCounter = useRef(0);
   const inflightValidation = useRef<Promise<any> | null>(null);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  const isUnmounted = useRef<boolean>(false);
 
   // -- HELPERS
   // ----------------------------------
@@ -96,11 +102,22 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
       setIsChangingValue(true);
     }
 
+    const newValue = serializeOutput(value);
+
+    // Notify listener
+    if (valueChangeListener) {
+      valueChangeListener(newValue);
+    }
+
     // Update the form data observable
-    form.__updateFormDataAt(path, serializeOutput(value));
+    form.__updateFormDataAt(path, newValue);
 
     // Validate field(s) and set form.isValid flag
     await form.__validateFields(fieldsToValidateOnChange);
+
+    if (isUnmounted.current) {
+      return;
+    }
 
     /**
      * If we have set a delay to display the error message after the field value has changed,
@@ -397,6 +414,15 @@ export const useField = (form: FormHook, path: string, config: FieldConfig = {})
       }
     };
   }, [value]);
+
+  /**
+   * On unmount
+   */
+  useEffect(() => {
+    return () => {
+      isUnmounted.current = true;
+    };
+  }, []);
 
   const field: FieldHook = {
     path,

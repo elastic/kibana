@@ -12,50 +12,56 @@ const { containsCharsField } = fieldValidators;
 
 export const schema: FormSchema<MappingsConfiguration> = {
   dynamic: {
-    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicFieldLabel', {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.dynamicFieldLabel', {
       defaultMessage: 'Dynamic field',
     }),
-    helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicFieldDescription', {
+    helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.dynamicFieldDescription', {
       defaultMessage: 'Allow new fields discovery in document.',
     }),
     type: FIELD_TYPES.SELECT,
     defaultValue: true,
   },
   date_detection: {
-    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dateDetectionFieldLabel', {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.dateDetectionFieldLabel', {
       defaultMessage: 'Date detection',
     }),
-    helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.dateDetectionFieldDescription', {
-      defaultMessage: 'Check if the string field is a date.',
-    }),
+    helpText: i18n.translate(
+      'xpack.idxMgmt.mappingsEditor.configuration.dateDetectionFieldDescription',
+      {
+        defaultMessage: 'Check if the string field is a date.',
+      }
+    ),
     type: FIELD_TYPES.TOGGLE,
     defaultValue: true,
   },
   numeric_detection: {
-    label: i18n.translate('xpack.idxMgmt.mappingsEditor.numericFieldLabel', {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.numericFieldLabel', {
       defaultMessage: 'Numeric field',
     }),
-    helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.numericFieldDescription', {
+    helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.numericFieldDescription', {
       defaultMessage: 'Check if the string field is a numeric value.',
     }),
     type: FIELD_TYPES.TOGGLE,
     defaultValue: true,
   },
   dynamic_date_formats: {
-    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicDatesFieldLabel', {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.dynamicDatesFieldLabel', {
       defaultMessage: 'Dynamic dates format',
     }),
-    helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicDatesFieldDescription', {
-      defaultMessage:
-        'The dynamic_date_formats can be customised to support your own date formats.',
-    }),
+    helpText: i18n.translate(
+      'xpack.idxMgmt.mappingsEditor.configuration.dynamicDatesFieldDescription',
+      {
+        defaultMessage:
+          'The dynamic_date_formats can be customised to support your own date formats.',
+      }
+    ),
     type: FIELD_TYPES.COMBO_BOX,
     defaultValue: [],
     validations: [
       {
         validator: containsCharsField({
           message: i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.dynamicDatesFieldValidationErrorMessage',
+            'xpack.idxMgmt.mappingsEditor.configuration.dynamicDatesFieldValidationErrorMessage',
             {
               defaultMessage: 'Spaces are not allowed.',
             }
