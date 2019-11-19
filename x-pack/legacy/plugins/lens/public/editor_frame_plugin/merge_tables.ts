@@ -6,11 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import dateMath from '@elastic/datemath';
-import {
-  ExpressionFunction,
-  KibanaContext,
-} from '../../../../../../src/legacy/core_plugins/interpreter/types';
-import { KibanaDatatable } from '../../../../../../src/legacy/core_plugins/interpreter/common';
+import { ExpressionFunction, KibanaContext, KibanaDatatable } from 'src/plugins/expressions/public';
 import { LensMultiTable } from '../types';
 
 interface MergeTables {
