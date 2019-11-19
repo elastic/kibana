@@ -32,6 +32,9 @@ export * from './phrases_filter';
 export * from './query_string_filter';
 export * from './range_filter';
 
+export * from './build_filter';
+export * from './filter_operators';
+
 export * from './types';
 
 /**

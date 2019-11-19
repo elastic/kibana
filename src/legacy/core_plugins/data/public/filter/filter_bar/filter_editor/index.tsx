@@ -39,22 +39,17 @@ import React, { Component } from 'react';
 import { Field, IndexPattern } from '../../../index_patterns';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {
-  buildCustomFilter,
-  buildFilter,
   getFieldFromFilter,
   getFilterableFields,
   getFilterParams,
-  getIndexPatternFromFilter,
   getOperatorFromFilter,
-  getOperatorOptions,
   getQueryDslFromFilter,
   isFilterValid,
 } from './lib/filter_editor_utils';
-import { Operator } from './lib/filter_operators';
 import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
-import { esFilters } from '../../../../../../../plugins/data/public';
+import { esFilters, getIndexPatternFromFilter } from '../../../../../../../plugins/data/public';
 
 interface Props {
   filter: esFilters.Filter;
@@ -67,7 +62,7 @@ interface Props {
 interface State {
   selectedIndexPattern?: IndexPattern;
   selectedField?: Field;
-  selectedOperator?: Operator;
+  selectedOperator?: esFilters.Operator;
   params: any;
   useCustomLabel: boolean;
   customLabel: string | null;
@@ -79,8 +74,8 @@ class FilterEditorUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      selectedIndexPattern: this.getIndexPatternFromFilter(),
-      selectedField: this.getFieldFromFilter(),
+      selectedIndexPattern: this.getIndexPatternFromFilter() as IndexPattern,
+      selectedField: this.getFieldFromFilter() as Field,
       selectedOperator: this.getSelectedOperator(),
       params: getFilterParams(props.filter),
       useCustomLabel: props.filter.meta.alias !== null,
@@ -276,7 +271,7 @@ class FilterEditorUI extends Component<Props, State> {
 
   private renderOperatorInput() {
     const { selectedField, selectedOperator } = this.state;
-    const operators = selectedField ? getOperatorOptions(selectedField) : [];
+    const operators = selectedField ? esFilters.getOperatorOptions(selectedField) : [];
     return (
       <EuiFormRow
         label={this.props.intl.formatMessage({
@@ -425,7 +420,7 @@ class FilterEditorUI extends Component<Props, State> {
     this.setState({ selectedField, selectedOperator, params });
   };
 
-  private onOperatorChange = ([selectedOperator]: Operator[]) => {
+  private onOperatorChange = ([selectedOperator]: esFilters.Operator[]) => {
     // Only reset params when the operator type changes
     const params =
       get(this.state.selectedOperator, 'type') === get(selectedOperator, 'type')
@@ -475,10 +470,17 @@ class FilterEditorUI extends Component<Props, State> {
       const { index, disabled, negate } = this.props.filter.meta;
       const newIndex = index || this.props.indexPatterns[0].id!;
       const body = JSON.parse(queryDsl);
-      const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
+      const filter = esFilters.buildCustomFilter(
+        newIndex,
+        body,
+        disabled,
+        negate,
+        alias,
+        $state.store
+      );
       this.props.onSubmit(filter);
     } else if (indexPattern && field && operator) {
-      const filter = buildFilter(
+      const filter = esFilters.buildFilter(
         indexPattern,
         field,
         operator,
@@ -500,7 +502,7 @@ function FieldComboBox(props: GenericComboBoxProps<Field>) {
   return GenericComboBox(props);
 }
 
-function OperatorComboBox(props: GenericComboBoxProps<Operator>) {
+function OperatorComboBox(props: GenericComboBoxProps<esFilters.Operator>) {
   return GenericComboBox(props);
 }
 

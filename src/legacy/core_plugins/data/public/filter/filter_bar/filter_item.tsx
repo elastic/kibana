@@ -25,8 +25,7 @@ import { UiSettingsClientContract } from 'src/core/public';
 import { IndexPattern } from '../../index_patterns';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
-import { getDisplayValueFromFilter } from './filter_editor/lib/get_display_value';
-import { esFilters } from '../../../../../../plugins/data/public';
+import { esFilters, getDisplayValueFromFilter } from '../../../../../../plugins/data/public';
 
 interface Props {
   id: string;

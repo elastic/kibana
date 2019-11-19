@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { IFieldType, esFilters } from '../..';
 
 export interface Operator {
   message: string;
@@ -104,3 +105,9 @@ export const FILTER_OPERATORS: Operator[] = [
   existsOperator,
   doesNotExistOperator,
 ];
+
+export function getOperatorOptions(field: IFieldType) {
+  return esFilters.FILTER_OPERATORS.filter(operator => {
+    return !operator.fieldTypes || operator.fieldTypes.includes(field.type);
+  });
+}

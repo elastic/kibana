@@ -17,6 +17,12 @@
  * under the License.
  */
 
-export { stubIndexPattern } from './index_patterns/index_pattern.stub';
-export { stubFields } from './index_patterns/field.stub';
-export * from '../common/es_query/filters/stubs';
+import { getIndexPatternFromFilter } from './get_index_pattern_from_filter';
+import { stubIndexPattern, phraseFilter } from '../../../../stubs';
+
+describe('getIndexPatternFromFilter', () => {
+  it('should return the index pattern from the filter', () => {
+    const indexPattern = getIndexPatternFromFilter(phraseFilter, [stubIndexPattern]);
+    expect(indexPattern).toBe(stubIndexPattern);
+  });
+});

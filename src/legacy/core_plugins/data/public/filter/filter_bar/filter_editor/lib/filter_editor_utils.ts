@@ -21,22 +21,15 @@ import dateMath from '@elastic/datemath';
 import { omit } from 'lodash';
 import { Ipv4Address } from '../../../../../../../../plugins/kibana_utils/public';
 import { Field, IndexPattern, isFilterable } from '../../../../index_patterns';
-import { FILTER_OPERATORS, Operator } from './filter_operators';
-import { esFilters } from '../../../../../../../../plugins/data/public';
+import { esFilters, IIndexPattern } from '../../../../../../../../plugins/data/public';
 
-export function getIndexPatternFromFilter(
-  filter: esFilters.Filter,
-  indexPatterns: IndexPattern[]
-): IndexPattern | undefined {
-  return indexPatterns.find(indexPattern => indexPattern.id === filter.meta.index);
-}
-
-export function getFieldFromFilter(filter: esFilters.FieldFilter, indexPattern: IndexPattern) {
+export function getFieldFromFilter(filter: esFilters.FieldFilter, indexPattern: IIndexPattern) {
   return indexPattern.fields.find(field => field.name === filter.meta.key);
 }
 
+// internal
 export function getOperatorFromFilter(filter: esFilters.Filter) {
-  return FILTER_OPERATORS.find(operator => {
+  return esFilters.FILTER_OPERATORS.find(operator => {
     return filter.meta.type === operator.type && filter.meta.negate === operator.negate;
   });
 }
@@ -47,12 +40,6 @@ export function getQueryDslFromFilter(filter: esFilters.Filter) {
 
 export function getFilterableFields(indexPattern: IndexPattern) {
   return indexPattern.fields.filter(isFilterable);
-}
-
-export function getOperatorOptions(field: Field) {
-  return FILTER_OPERATORS.filter(operator => {
-    return !operator.fieldTypes || operator.fieldTypes.includes(field.type);
-  });
 }
 
 export function getFilterParams(filter: esFilters.Filter) {
@@ -88,7 +75,7 @@ export function validateParams(params: any, type: string) {
 export function isFilterValid(
   indexPattern?: IndexPattern,
   field?: Field,
-  operator?: Operator,
+  operator?: esFilters.Operator,
   params?: any
 ) {
   if (!indexPattern || !field || !operator) {
@@ -112,56 +99,4 @@ export function isFilterValid(
     default:
       throw new Error(`Unknown operator type: ${operator.type}`);
   }
-}
-
-export function buildFilter(
-  indexPattern: IndexPattern,
-  field: Field,
-  operator: Operator,
-  disabled: boolean,
-  params: any,
-  alias: string | null,
-  store: esFilters.FilterStateStore
-): esFilters.Filter {
-  const filter = buildBaseFilter(indexPattern, field, operator, params);
-  filter.meta.alias = alias;
-  filter.meta.negate = operator.negate;
-  filter.meta.disabled = disabled;
-  filter.$state = { store };
-  return filter;
-}
-
-function buildBaseFilter(
-  indexPattern: IndexPattern,
-  field: Field,
-  operator: Operator,
-  params: any
-): esFilters.Filter {
-  switch (operator.type) {
-    case 'phrase':
-      return esFilters.buildPhraseFilter(field, params, indexPattern);
-    case 'phrases':
-      return esFilters.buildPhrasesFilter(field, params, indexPattern);
-    case 'range':
-      const newParams = { gte: params.from, lt: params.to };
-      return esFilters.buildRangeFilter(field, newParams, indexPattern);
-    case 'exists':
-      return esFilters.buildExistsFilter(field, indexPattern);
-    default:
-      throw new Error(`Unknown operator type: ${operator.type}`);
-  }
-}
-
-export function buildCustomFilter(
-  index: string,
-  queryDsl: any,
-  disabled: boolean,
-  negate: boolean,
-  alias: string | null,
-  store: esFilters.FilterStateStore
-): esFilters.Filter {
-  const meta: esFilters.FilterMeta = { index, type: 'custom', disabled, negate, alias };
-  const filter: esFilters.Filter = { ...queryDsl, meta };
-  filter.$state = { store };
-  return filter;
 }

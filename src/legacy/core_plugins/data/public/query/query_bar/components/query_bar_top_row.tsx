@@ -38,6 +38,7 @@ import { Toast } from 'src/core/public';
 import {
   TimeRange,
   TimeHistoryContract,
+  IDataPluginServices,
   Query,
   PersistedLog,
   getQueryLog,
@@ -46,7 +47,6 @@ import { useKibana, toMountPoint } from '../../../../../../../plugins/kibana_rea
 
 import { IndexPattern } from '../../../index_patterns';
 import { QueryBarInput } from './query_bar_input';
-import { IDataPluginServices } from '../../../types';
 
 interface Props {
   query?: Query;

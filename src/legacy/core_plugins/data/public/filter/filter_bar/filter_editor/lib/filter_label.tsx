@@ -20,7 +20,6 @@
 import React, { Fragment } from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { existsOperator, isOneOfOperator } from './filter_operators';
 import { esFilters } from '../../../../../../../../plugins/data/public';
 
 interface Props {
@@ -55,7 +54,7 @@ export function FilterLabel({ filter, valueLabel }: Props) {
       return (
         <Fragment>
           {prefix}
-          {filter.meta.key} {existsOperator.message}
+          {filter.meta.key} {esFilters.existsOperator.message}
         </Fragment>
       );
     case 'geo_bounding_box':
@@ -83,7 +82,7 @@ export function FilterLabel({ filter, valueLabel }: Props) {
       return (
         <Fragment>
           {prefix}
-          {filter.meta.key} {isOneOfOperator.message} {valueLabel}
+          {filter.meta.key} {esFilters.isOneOfOperator.message} {valueLabel}
         </Fragment>
       );
     case 'query_string':

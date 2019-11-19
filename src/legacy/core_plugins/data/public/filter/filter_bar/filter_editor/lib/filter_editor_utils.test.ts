@@ -18,14 +18,20 @@
  */
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-import { stubIndexPattern, stubFields } from '../../../../../../../../plugins/data/public/stubs';
+import {
+  stubIndexPattern,
+  stubFields,
+  phraseFilter,
+  phrasesFilter,
+  rangeFilter,
+  existsFilter,
+} from '../../../../../../../../plugins/data/public/stubs';
 import { IndexPattern, Field } from '../../../../index';
 import {
   buildFilter,
   getFieldFromFilter,
   getFilterableFields,
   getFilterParams,
-  getIndexPatternFromFilter,
   getOperatorFromFilter,
   getOperatorOptions,
   getQueryDslFromFilter,
@@ -38,10 +44,6 @@ import {
   isOneOfOperator,
   isOperator,
 } from './filter_operators';
-import { existsFilter } from './fixtures/exists_filter';
-import { phraseFilter } from './fixtures/phrase_filter';
-import { phrasesFilter } from './fixtures/phrases_filter';
-import { rangeFilter } from './fixtures/range_filter';
 import { esFilters } from '../../../../../../../../plugins/data/public';
 
 jest.mock('ui/new_platform');
@@ -55,13 +57,6 @@ describe('Filter editor utils', () => {
       const queryDsl = getQueryDslFromFilter(phraseFilter);
       expect(queryDsl).not.toHaveProperty('meta');
       expect(queryDsl).not.toHaveProperty('$state');
-    });
-  });
-
-  describe('getIndexPatternFromFilter', () => {
-    it('should return the index pattern from the filter', () => {
-      const indexPattern = getIndexPatternFromFilter(phraseFilter, [mockedIndexPattern]);
-      expect(indexPattern).toBe(mockedIndexPattern);
     });
   });
 

@@ -17,6 +17,11 @@
  * under the License.
  */
 
-export { stubIndexPattern } from './index_patterns/index_pattern.stub';
-export { stubFields } from './index_patterns/field.stub';
-export * from '../common/es_query/filters/stubs';
+import { esFilters, IIndexPattern } from '../../../..';
+
+export function getIndexPatternFromFilter(
+  filter: esFilters.Filter,
+  indexPatterns: IIndexPattern[]
+): IIndexPattern | undefined {
+  return indexPatterns.find(indexPattern => indexPattern.id === filter.meta.index);
+}

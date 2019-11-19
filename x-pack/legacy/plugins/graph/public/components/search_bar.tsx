@@ -10,8 +10,6 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { IDataPluginServices } from 'src/legacy/core_plugins/data/public/types';
-import { Query } from 'src/plugins/data/public';
 import { IndexPatternSavedObject, IndexPatternProvider } from '../types';
 import { QueryBarInput, IndexPattern } from '../../../../../../src/legacy/core_plugins/data/public';
 import { openSourceModal } from '../services/source_modal';
@@ -23,6 +21,7 @@ import {
   IndexpatternDatasource,
 } from '../state_management';
 
+import { Query, IDataPluginServices } from '../../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 export interface OuterSearchBarProps {

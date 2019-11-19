@@ -32,8 +32,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { IndexPattern } from '../../index_patterns';
 import { FilterLabel } from '../filter_bar/filter_editor/lib/filter_label';
-import { mapAndFlattenFilters, esFilters } from '../../../../../../plugins/data/public';
-import { getDisplayValueFromFilter } from '../filter_bar/filter_editor/lib/get_display_value';
+import {
+  mapAndFlattenFilters,
+  esFilters,
+  getDisplayValueFromFilter,
+} from '../../../../../../plugins/data/public';
 
 interface Props {
   filters: esFilters.Filter[];
