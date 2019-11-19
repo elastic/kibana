@@ -36,7 +36,6 @@ import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { timefilter } from 'ui/timefilter';
-import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 // @ts-ignore
 import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
 import { wrapInI18nContext } from 'ui/i18n';
@@ -59,6 +58,7 @@ const services = {
   uiSettings: npStart.core.uiSettings,
   uiActions: npStart.plugins.uiActions,
   embeddable: npStart.plugins.embeddable,
+  share: npStart.plugins.share,
   // legacy
   docTitle,
   docViewsRegistry,
@@ -69,7 +69,6 @@ const services = {
   SavedObjectRegistryProvider,
   SavedObjectProvider,
   SearchSource,
-  ShareContextMenuExtensionsRegistryProvider,
   StateProvider,
   timefilter,
   uiModules,
@@ -100,7 +99,6 @@ export { RequestAdapter } from 'ui/inspector/adapters';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 export { FieldList } from 'ui/index_patterns';
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-export { showShareContextMenu } from 'ui/share';
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
@@ -112,6 +110,7 @@ export { tabifyAggResponse } from 'ui/agg_response/tabify';
 // @ts-ignore
 export { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
+export { unhashUrl } from 'ui/state_management/state_hashing';
 
 // EXPORT types
 export { Vis } from 'ui/vis';

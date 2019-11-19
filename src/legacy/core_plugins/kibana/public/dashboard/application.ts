@@ -52,6 +52,7 @@ import { SavedQueryService } from '../../../data/public/search/search_bar/lib/sa
 import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
 import { NavigationStart } from '../../../navigation/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
+import { SharePluginStart } from '../../../../../plugins/share/public';
 
 export interface RenderDeps {
   core: LegacyCoreStart;
@@ -59,7 +60,6 @@ export interface RenderDeps {
   dataStart: DataStart;
   npDataStart: NpDataStart;
   navigation: NavigationStart;
-  shareContextMenuExtensions: any;
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectRegistry: any;
   dashboardConfig: any;
@@ -71,6 +71,7 @@ export interface RenderDeps {
   savedQueryService: SavedQueryService;
   embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
   localStorage: Storage;
+  share: SharePluginStart;
 }
 
 let angularModuleInstance: IModule | null = null;

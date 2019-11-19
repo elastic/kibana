@@ -38,9 +38,9 @@ import {
   FeatureCatalogueCategory,
   FeatureCatalogueSetup,
 } from '../../../../../plugins/feature_catalogue/public';
+import { SharePluginStart } from '../../../../../plugins/share/public';
 
 export interface LegacyAngularInjectedDependencies {
-  shareContextMenuExtensions: any;
   dashboardConfig: any;
   savedObjectRegistry: any;
   savedDashboards: any;
@@ -51,6 +51,7 @@ export interface DashboardPluginStartDependencies {
   npData: NpDataStart;
   embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
   navigation: NavigationStart;
+  share: SharePluginStart;
 }
 
 export interface DashboardPluginSetupDependencies {
@@ -68,6 +69,7 @@ export class DashboardPlugin implements Plugin {
     savedObjectsClient: SavedObjectsClientContract;
     embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
     navigation: NavigationStart;
+    share: SharePluginStart;
   } | null = null;
 
   public setup(
@@ -89,6 +91,7 @@ export class DashboardPlugin implements Plugin {
           savedObjectsClient,
           embeddables,
           navigation,
+          share,
           npDataStart,
         } = this.startDependencies;
         const angularDependencies = await getAngularDependencies();
@@ -98,6 +101,7 @@ export class DashboardPlugin implements Plugin {
           ...angularDependencies,
           navigation,
           dataStart,
+          share,
           npDataStart,
           indexPatterns: dataStart.indexPatterns.indexPatterns,
           savedObjectsClient,
@@ -133,7 +137,7 @@ export class DashboardPlugin implements Plugin {
 
   start(
     { savedObjects: { client: savedObjectsClient } }: CoreStart,
-    { data: dataStart, embeddables, navigation, npData }: DashboardPluginStartDependencies
+    { data: dataStart, embeddables, navigation, npData, share }: DashboardPluginStartDependencies
   ) {
     this.startDependencies = {
       dataStart,
@@ -141,6 +145,7 @@ export class DashboardPlugin implements Plugin {
       savedObjectsClient,
       embeddables,
       navigation,
+      share,
     };
   }
 }
