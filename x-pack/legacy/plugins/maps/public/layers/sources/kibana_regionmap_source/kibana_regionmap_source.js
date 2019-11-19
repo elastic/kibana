@@ -10,7 +10,7 @@ import { CreateSourceEditor } from './create_source_editor';
 import { getKibanaRegionList } from '../../../meta';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
-import { FEATURE_ID_PROPERTY_NAME } from '../../../../common/constants';
+import { FEATURE_ID_PROPERTY_NAME, FIELD_ORIGIN } from '../../../../common/constants';
 import { KibanaRegionField } from '../../fields/kibana_region_field';
 
 export class KibanaRegionmapSource extends AbstractVectorSource {
@@ -49,7 +49,8 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
   createField({ fieldName }) {
     return new KibanaRegionField({
       fieldName,
-      source: this
+      source: this,
+      origin: FIELD_ORIGIN.SOURCE
     });
   }
 
@@ -57,7 +58,8 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     return [
       {
         label: getDataSourceLabel(),
-        value: KibanaRegionmapSource.title },
+        value: KibanaRegionmapSource.title
+      },
       {
         label: i18n.translate('xpack.maps.source.kbnRegionMap.vectorLayerLabel', {
           defaultMessage: 'Vector layer'

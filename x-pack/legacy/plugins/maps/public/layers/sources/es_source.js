@@ -17,7 +17,7 @@ import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../reducers/util';
-import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
+import { ES_GEO_FIELD_TYPE, METRIC_TYPE } from '../../../common/constants';
 import { DataRequestAbortError } from '../util/data_request';
 
 export class AbstractESSource extends AbstractVectorSource {
@@ -245,6 +245,16 @@ export class AbstractESSource extends AbstractVectorSource {
 
 
   async getFieldFormatter(fieldName) {
+
+    const metricField = this.getMetricFields().find(({ propertyKey }) => {
+      return propertyKey === fieldName;
+    });
+
+    // Do not use field formatters for counting metrics
+    if (metricField && metricField.type === METRIC_TYPE.COUNT || metricField.type === METRIC_TYPE.UNIQUE_COUNT) {
+      return null;
+    }
+
     // fieldName could be an aggregation so it needs to be unpacked to expose raw field.
     const rawFieldName = this._getRawFieldName(fieldName);
     if (!rawFieldName) {

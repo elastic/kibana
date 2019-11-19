@@ -39,7 +39,7 @@ export class UpdateSourceEditor extends Component {
   };
 
   state = {
-    tooltipFields: null,
+    sourceFields: null,
     termFields: null,
     sortFields: null,
   };
@@ -77,7 +77,7 @@ export class UpdateSourceEditor extends Component {
 
     //todo move this all to the source
     const rawTooltipFields = getSourceFields(indexPattern.fields);
-    const tooltipFields = rawTooltipFields.map(field => {
+    const sourceFields = rawTooltipFields.map(field => {
       return new ESDocField({
         fieldName: field.name,
         source: this.props.source
@@ -85,7 +85,7 @@ export class UpdateSourceEditor extends Component {
     });
 
     this.setState({
-      tooltipFields: tooltipFields,
+      sourceFields: sourceFields,
       termFields: getTermsFields(indexPattern.fields), //todo change term fields to use fields
       sortFields: indexPattern.fields.filter(field => field.sortable), //todo change sort fields to use fields
     });
@@ -186,7 +186,7 @@ export class UpdateSourceEditor extends Component {
           <TooltipSelector
             tooltipFields={this.props.tooltipFields}
             onChange={this._onTooltipPropertiesChange}
-            fields={this.state.tooltipFields}
+            fields={this.state.sourceFields}
           />
         </EuiFormRow>
 

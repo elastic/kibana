@@ -53,16 +53,12 @@ export class ESTermSource extends AbstractESAggSource {
 
   constructor(descriptor, inspectorAdapters) {
     super(descriptor, inspectorAdapters);
-    this._termField = new ESDocField({ fieldName: descriptor.term, source: this });
+    this._termField = new ESDocField({ fieldName: descriptor.term, source: this, origin: this.getOriginForField() });
   }
 
   static renderEditor({}) {
     //no need to localize. this editor is never rendered.
     return `<div>editor details</div>`;
-  }
-
-  createField() {
-    throw new Error('Not implemented. Should retrieve corresponding field from the inner_join.metrics config.');
   }
 
   hasCompleteConfig() {

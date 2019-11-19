@@ -9,7 +9,6 @@ import { ESAggMetricField } from '../fields/es_agg_field';
 import { ESDocField } from '../fields/es_doc_field';
 import { METRIC_TYPE, COUNT_AGG_TYPE, COUNT_PROP_LABEL, COUNT_PROP_NAME, FIELD_ORIGIN } from '../../../common/constants';
 
-
 const AGG_DELIMITER = '_of_';
 
 export class AbstractESAggSource extends AbstractESSource {
@@ -52,7 +51,8 @@ export class AbstractESAggSource extends AbstractESSource {
       return new ESAggMetricField({
         aggType: COUNT_AGG_TYPE,
         label: label,
-        source: this
+        source: this,
+        origin: this.getOriginForField()
       });
     }
     //this only works because aggType is a fixed set and does not include the `_of_` string
@@ -82,7 +82,8 @@ export class AbstractESAggSource extends AbstractESSource {
     if (metrics.length === 0) {
       metrics.push(new ESAggMetricField({
         aggType: COUNT_AGG_TYPE,
-        source: this
+        source: this,
+        origin: this.getOriginForField()
       }));
     }
     return metrics;

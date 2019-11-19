@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { TooltipSelector } from '../../../components/tooltip_selector';
 import { getEMSClient } from '../../../meta';
 import { EMSFileField } from '../../fields/ems_file_field';
+import { FIELD_ORIGIN } from '../../../../common/constants';
 
 export class UpdateSourceEditor extends Component {
 
@@ -40,7 +41,8 @@ export class UpdateSourceEditor extends Component {
       const emsFields = emsFile.getFieldsInLanguage();
       fields = emsFields.map(field => new EMSFileField({
         fieldName: field.name,
-        source: this.props.source
+        source: this.props.source,
+        origin: FIELD_ORIGIN.SOURCE
       }));
     } catch(e) {
       //swallow this error. when a matching EMS-config cannot be found, the source already will have thrown errors during the data request. This will propagate to the vector-layer and be displayed in the UX

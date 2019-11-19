@@ -13,8 +13,8 @@ export class ESAggMetricField extends AbstractField {
 
   static type = 'ES_AGG';
 
-  constructor({ label, source, aggType, esDocField }) {
-    super({ source });
+  constructor({ label, source, aggType, esDocField, origin }) {
+    super({ source, origin });
     this._label = label;
     this._aggType = aggType;
     this._esDocField = esDocField;
