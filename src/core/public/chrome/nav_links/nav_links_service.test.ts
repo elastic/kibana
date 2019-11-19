@@ -224,6 +224,7 @@ describe('NavLinksService', () => {
         Object {
           "appUrl": "/app1",
           "baseUrl": "http://localhost/wow/app1",
+          "disabled": false,
           "hidden": true,
           "icon": "legacyApp1",
           "id": "legacyApp1",
