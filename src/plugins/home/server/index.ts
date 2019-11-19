@@ -17,8 +17,8 @@
  * under the License.
  */
 
-export { HomePluginSetup, HomePluginStart } from './plugin';
+export { HomeServerPluginSetup, HomeServerPluginStart } from './plugin';
 export { TutorialProvider } from './services';
-import { HomePlugin } from './plugin';
+import { HomeServerPlugin } from './plugin';
 
-export const plugin = () => new HomePlugin();
+export const plugin = () => new HomeServerPlugin();

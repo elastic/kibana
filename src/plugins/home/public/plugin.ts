@@ -24,21 +24,22 @@ import {
   FeatureCatalogueRegistryStart,
 } from './services';
 
-export class FeatureCataloguePlugin
-  implements Plugin<FeatureCatalogueSetup, FeatureCatalogueStart> {
+export class HomePublicPlugin implements Plugin<HomePublicPluginSetup, HomePublicPluginStart> {
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
 
   public async setup() {
     return {
-      ...this.featuresCatalogueRegistry.setup(),
+      featureCatalogue: { ...this.featuresCatalogueRegistry.setup() },
     };
   }
 
   public async start(core: CoreStart) {
     return {
-      ...this.featuresCatalogueRegistry.start({
-        capabilities: core.application.capabilities,
-      }),
+      featureCatalogue: {
+        ...this.featuresCatalogueRegistry.start({
+          capabilities: core.application.capabilities,
+        }),
+      },
     };
   }
 }
@@ -48,3 +49,13 @@ export type FeatureCatalogueSetup = FeatureCatalogueRegistrySetup;
 
 /** @public */
 export type FeatureCatalogueStart = FeatureCatalogueRegistryStart;
+
+/** @public */
+export interface HomePublicPluginSetup {
+  featureCatalogue: FeatureCatalogueSetup;
+}
+
+/** @public */
+export interface HomePublicPluginStart {
+  featureCatalogue: FeatureCatalogueStart;
+}
