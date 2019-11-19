@@ -25,7 +25,7 @@ describe('getNotifyUserAboutOptInDefault: get a flag that describes if the user 
       getNotifyUserAboutOptInDefault({
         allowChangingOptInStatus: true,
         telemetrySavedObject: { userHasSeenNotice: false },
-        telemetryOptedIn: true,
+        telemetryOptedIn: null,
         configTelemetryOptIn: true,
       })
     ).toBe(true);
@@ -40,15 +40,6 @@ describe('getNotifyUserAboutOptInDefault: get a flag that describes if the user 
         configTelemetryOptIn: false,
       })
     ).toBe(false);
-
-    expect(
-      getNotifyUserAboutOptInDefault({
-        allowChangingOptInStatus: false,
-        telemetrySavedObject: null,
-        telemetryOptedIn: true,
-        configTelemetryOptIn: true,
-      })
-    ).toBe(false);
   });
 
   it('should return false if user has seen notice', () => {
@@ -57,7 +48,7 @@ describe('getNotifyUserAboutOptInDefault: get a flag that describes if the user 
         allowChangingOptInStatus: true,
         telemetrySavedObject: { userHasSeenNotice: true },
         telemetryOptedIn: false,
-        configTelemetryOptIn: false,
+        configTelemetryOptIn: true,
       })
     ).toBe(false);
 
@@ -69,6 +60,28 @@ describe('getNotifyUserAboutOptInDefault: get a flag that describes if the user 
         configTelemetryOptIn: true,
       })
     ).toBe(false);
+  });
+
+  it('not show notice for users already opted in and has not seen notice yet', () => {
+    expect(
+      getNotifyUserAboutOptInDefault({
+        allowChangingOptInStatus: true,
+        telemetrySavedObject: { userHasSeenNotice: false },
+        telemetryOptedIn: true,
+        configTelemetryOptIn: true,
+      })
+    ).toBe(false);
+  });
+
+  it('should see notice if they are merely opted in by default and have not yet seen the notice', () => {
+    expect(
+      getNotifyUserAboutOptInDefault({
+        allowChangingOptInStatus: true,
+        telemetrySavedObject: { userHasSeenNotice: false },
+        telemetryOptedIn: null,
+        configTelemetryOptIn: true,
+      })
+    ).toBe(true);
   });
 
   it('should return false if user is opted out', () => {
