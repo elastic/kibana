@@ -9,9 +9,9 @@ import { ServerFacade } from './types';
 import { initServerWithKibana } from './kibana.index';
 
 export class Plugin {
-  name = 'siem';
-  private mode: EnvironmentMode;
-  private logger: Logger;
+  readonly name = 'siem';
+  private readonly mode: EnvironmentMode;
+  private readonly logger: Logger;
 
   constructor({ env, logger }: PluginInitializerContext) {
     this.logger = logger.get('plugins', this.name);
