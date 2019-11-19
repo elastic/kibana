@@ -17,8 +17,9 @@
  * under the License.
  */
 
-export { FeatureCatalogueSetup, FeatureCatalogueStart } from './plugin';
-export { FeatureCatalogueEntry, FeatureCatalogueCategory } from './services';
-import { FeatureCataloguePlugin } from './plugin';
+import { featureCatalogueRegistryMock } from './services/feature_catalogue/feature_catalogue_registry.mock';
 
-export const plugin = () => new FeatureCataloguePlugin();
+export const registryMock = featureCatalogueRegistryMock.create();
+jest.doMock('./services', () => ({
+  FeatureCatalogueRegistry: jest.fn(() => registryMock),
+}));
