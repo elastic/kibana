@@ -448,11 +448,11 @@ export class SavedObjectsRepository {
     }
 
     let kueryNode;
+
     try {
-      kueryNode =
-        filter && filter !== ''
-          ? validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings)
-          : null;
+      if (filter && filter) {
+        kueryNode = validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings);
+      }
     } catch (e) {
       if (e.name === 'KQLSyntaxError') {
         throw SavedObjectsErrorHelpers.createBadRequestError('KQLSyntaxError: ' + e.message);

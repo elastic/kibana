@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { npStart } from 'ui/new_platform';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { esKuery } from '../../../../../../../src/plugins/data/public';
 
 const getAutocompleteProvider = language => npStart.plugins.data.autocomplete.getProvider(language);
 
@@ -35,8 +35,8 @@ export async function getSuggestions(
 }
 
 function convertKueryToEsQuery(kuery, indexPattern) {
-  const ast = fromKueryExpression(kuery);
-  return toElasticsearchQuery(ast, indexPattern);
+  const ast = esKuery.fromKueryExpression(kuery);
+  return esKuery.toElasticsearchQuery(ast, indexPattern);
 }
 // Recommended by MDN for escaping user input to be treated as a literal string within a regular expression
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
@@ -53,7 +53,7 @@ export function escapeDoubleQuotes(string) {
 }
 
 export function getKqlQueryValues(inputValue, indexPattern) {
-  const ast = fromKueryExpression(inputValue);
+  const ast = esKuery.fromKueryExpression(inputValue);
   const isAndOperator = (ast.function === 'and');
   const query = convertKueryToEsQuery(inputValue, indexPattern);
   const filteredFields = [];

@@ -17,12 +17,8 @@
  * under the License.
  */
 
-module.exports = {
-  kuery: {
-    src: 'src/plugins/data/common/es_query/kuery/ast/kuery.peg',
-    dest: 'src/plugins/data/common/es_query/kuery/ast/_generated_/kuery.js',
-    options: {
-      allowedStartRules: ['start', 'Literal']
-    }
-  }
-};
+export { KQLSyntaxError } from './kuery_syntax_error';
+export { nodeTypes } from './node_types';
+export * from './ast';
+
+export * from './types';

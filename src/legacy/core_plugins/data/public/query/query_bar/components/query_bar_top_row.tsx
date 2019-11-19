@@ -18,11 +18,8 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
-
 import classNames from 'classnames';
 import React, { useState } from 'react';
-
 import {
   EuiButton,
   EuiFlexGroup,
@@ -44,7 +41,7 @@ import {
   getQueryLog,
 } from '../../../../../../../plugins/data/public';
 import { useKibana, toMountPoint } from '../../../../../../../plugins/kibana_react/public';
-
+import { esKuery } from '../../../../../../../plugins/data/public';
 import { IndexPattern } from '../../../index_patterns';
 import { QueryBarInput } from './query_bar_input';
 
@@ -300,7 +297,7 @@ function QueryBarTopRowUI(props: Props) {
       language === 'kuery' &&
       typeof query === 'string' &&
       (!storage || !storage.get('kibana.luceneSyntaxWarningOptOut')) &&
-      doesKueryExpressionHaveLuceneSyntaxError(query)
+      esKuery.doesKueryExpressionHaveLuceneSyntaxError(query)
     ) {
       const toast = notifications!.toasts.addWarning({
         title: intl.formatMessage({

@@ -18,6 +18,7 @@
  */
 import * as esQuery from './es_query';
 import * as esFilters from './filters';
-import * as utils from './utils';
+import * as esKuery from './kuery';
+import * as esUtils from './utils';
 
-export { esFilters, esQuery, utils };
+export { esFilters, esQuery, esUtils, esKuery };

@@ -8,7 +8,6 @@ import React, { useState } from 'react';
 import { uniqueId, startsWith } from 'lodash';
 import styled from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 // @ts-ignore
@@ -19,7 +18,8 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
 import {
   AutocompleteSuggestion,
-  AutocompleteProvider
+  AutocompleteProvider,
+  esKuery,
 } from '../../../../../../../../src/plugins/data/public';
 import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
 import { usePlugins } from '../../../new-platform/plugin';
@@ -37,8 +37,8 @@ function convertKueryToEsQuery(
   kuery: string,
   indexPattern: StaticIndexPattern
 ) {
-  const ast = fromKueryExpression(kuery);
-  return toElasticsearchQuery(ast, indexPattern);
+  const ast = esKuery.fromKueryExpression(kuery);
+  return esKuery.toElasticsearchQuery(ast, indexPattern);
 }
 
 function getSuggestions(

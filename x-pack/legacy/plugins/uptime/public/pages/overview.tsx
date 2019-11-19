@@ -6,10 +6,9 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { AutocompleteProviderRegister } from 'src/plugins/data/public';
+import { AutocompleteProviderRegister, esKuery } from 'src/plugins/data/public';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import {
   EmptyState,
@@ -109,8 +108,8 @@ export const OverviewPage = ({
       if (indexPattern) {
         const staticIndexPattern = toStaticIndexPattern(indexPattern);
         const combinedFilterString = combineFiltersAndUserSearch(filterQueryString, kueryString);
-        const ast = fromKueryExpression(combinedFilterString);
-        const elasticsearchQuery = toElasticsearchQuery(ast, staticIndexPattern);
+        const ast = esKuery.fromKueryExpression(combinedFilterString);
+        const elasticsearchQuery = esKuery.toElasticsearchQuery(ast, staticIndexPattern);
         filters = JSON.stringify(elasticsearchQuery);
       }
     }

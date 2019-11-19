@@ -17,12 +17,31 @@
  * under the License.
  */
 
-module.exports = {
-  kuery: {
-    src: 'src/plugins/data/common/es_query/kuery/ast/kuery.peg',
-    dest: 'src/plugins/data/common/es_query/kuery/ast/_generated_/kuery.js',
-    options: {
-      allowedStartRules: ['start', 'Literal']
-    }
-  }
-};
+import { NodeTypes } from './node_types';
+
+export interface KueryNode {
+  type: keyof NodeTypes;
+  [key: string]: any;
+}
+
+export type DslQuery = any;
+
+export interface KueryParseOptions {
+  helpers: {
+    [key: string]: any;
+  };
+  startRule: string;
+  allowLeadingWildcards: boolean;
+  errorOnLuceneSyntax: boolean;
+}
+
+export { nodeTypes } from './node_types';
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface JsonArray extends Array<JsonValue> {}
+
+export type JsonValue = null | boolean | number | string | JsonObject | JsonArray;
+
+export interface JsonObject {
+  [key: string]: JsonValue;
+}
