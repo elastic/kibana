@@ -9,6 +9,7 @@ import { isFunction } from 'lodash/fp';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import { deleteSignals } from '../alerts/delete_signals';
+import { ServerFacade } from '../../../types';
 import { querySignalSchema } from './schemas';
 import { QueryRequest } from '../alerts/types';
 import { getIdError, transformOrError } from './utils';
@@ -49,6 +50,6 @@ export const createDeleteSignalsRoute: Hapi.ServerRoute = {
   },
 };
 
-export const deleteSignalsRoute = (server: Hapi.Server): void => {
+export const deleteSignalsRoute = (server: ServerFacade): void => {
   server.route(createDeleteSignalsRoute);
 };
