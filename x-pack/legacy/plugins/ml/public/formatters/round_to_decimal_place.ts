@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function kbnTypeToMLJobType(field: any): any;
+export function roundToDecimalPlace(num: number, dp: number = 2) {
+  if (Math.abs(num) < Math.pow(10, -dp)) {
+    return Number.parseFloat(String(num)).toExponential(2);
+  }
+  const m = Math.pow(10, dp);
+  return Math.round(num * m) / m;
+}
