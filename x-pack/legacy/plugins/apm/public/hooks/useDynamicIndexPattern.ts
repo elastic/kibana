@@ -5,14 +5,15 @@
  */
 
 import { useFetcher } from './useFetcher';
+import { ProcessorEvent } from '../../common/processor_event';
 
-export function useKueryBarIndexPattern(
-  processorEvent: 'transaction' | 'metric' | 'error' | undefined
+export function useDynamicIndexPattern(
+  processorEvent: ProcessorEvent | undefined
 ) {
-  const { data: indexPattern, status } = useFetcher(
+  const { data, status } = useFetcher(
     callApmApi => {
       return callApmApi({
-        pathname: '/api/apm/kuery_bar_index_pattern',
+        pathname: '/api/apm/index_pattern/dynamic',
         forceCache: true,
         params: {
           query: {
@@ -25,7 +26,7 @@ export function useKueryBarIndexPattern(
   );
 
   return {
-    indexPattern,
+    indexPattern: data?.dynamicIndexPattern,
     status
   };
 }
