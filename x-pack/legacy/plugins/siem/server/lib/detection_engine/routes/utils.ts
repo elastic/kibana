@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { pickBy, identity } from 'lodash/fp';
+import { pickBy, isNil } from 'lodash/fp';
 import { SignalAlertType, isAlertType, OutputSignalAlertRest, isAlertTypes } from '../alerts/types';
 
 export const getIdError = ({
@@ -27,7 +27,7 @@ export const getIdError = ({
 // Transforms the data but will remove any null or undefined it encounters and not include
 // those on the export
 export const transformAlertToSignal = (signal: SignalAlertType): Partial<OutputSignalAlertRest> => {
-  return pickBy<OutputSignalAlertRest>(identity, {
+  return pickBy<OutputSignalAlertRest>((value: unknown) => value != null, {
     created_by: signal.createdBy,
     description: signal.alertTypeParams.description,
     enabled: signal.enabled,
