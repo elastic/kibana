@@ -9,8 +9,15 @@ import { i18n } from '@kbn/i18n';
 
 import { UseField, TextField, FieldConfig, FieldHook } from '../../../shared_imports';
 import { getFieldConfig } from '../../../lib';
-import { PARAMETERS_OPTIONS } from '../../../constants';
-import { AnalyzerParameterSelects, mapOptionsToSubOptions } from './analyzer_parameter_selects';
+import { PARAMETERS_OPTIONS, getSuperSelectOption } from '../../../constants';
+import {
+  IndexSettings,
+  IndexSettingsInterface,
+  SelectOption,
+  SuperSelectOption,
+} from '../../../types';
+import { useIndexSettings } from '../../../index_settings_context';
+import { AnalyzerParameterSelects } from './analyzer_parameter_selects';
 
 interface Props {
   path: string;
@@ -19,9 +26,72 @@ interface Props {
   config?: FieldConfig;
 }
 
-const fieldOptions = PARAMETERS_OPTIONS.analyzer!;
+const ANALYZER_OPTIONS = PARAMETERS_OPTIONS.analyzer!;
+
+const getCustomAnalyzers = (indexSettings: IndexSettings): SelectOption[] | undefined => {
+  const settings: IndexSettingsInterface = {}.hasOwnProperty.call(indexSettings, 'index')
+    ? (indexSettings as { index: IndexSettingsInterface }).index
+    : (indexSettings as IndexSettingsInterface);
+
+  if (
+    !{}.hasOwnProperty.call(settings, 'analysis') ||
+    !{}.hasOwnProperty.call(settings.analysis!, 'analyzer')
+  ) {
+    return undefined;
+  }
+
+  // We wrap inside a try catch as the index settings are written in JSON
+  // and who knows what the user has entered.
+  try {
+    return Object.keys(settings.analysis!.analyzer).map(value => ({ value, text: value }));
+  } catch {
+    return undefined;
+  }
+};
+
+export interface MapOptionsToSubOptions {
+  [key: string]: {
+    label: string;
+    options: SuperSelectOption[] | SelectOption[];
+  };
+}
 
 export const AnalyzerParameter = ({ path, defaultValue, label, config }: Props) => {
+  const indexSettings = useIndexSettings();
+  const customAnalyzers = getCustomAnalyzers(indexSettings);
+
+  const fieldOptions = [...ANALYZER_OPTIONS] as SuperSelectOption[];
+  const mapOptionsToSubOptions: MapOptionsToSubOptions = {
+    language: {
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.analyzers.languageAnalyzerLabel', {
+        defaultMessage: 'Language',
+      }),
+      options: PARAMETERS_OPTIONS.languageAnalyzer!,
+    },
+  };
+
+  if (customAnalyzers) {
+    const customOption: SuperSelectOption = {
+      value: 'custom',
+      ...getSuperSelectOption(
+        i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.analyzer.customTitle', {
+          defaultMessage: 'Custom analyzer',
+        }),
+        i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.analyzer.customDescription', {
+          defaultMessage: 'Choose one of your custom analyzers.',
+        })
+      ),
+    };
+    fieldOptions.push(customOption);
+
+    mapOptionsToSubOptions.custom = {
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.analyzers.customAnalyzerLabel', {
+        defaultMessage: 'Custom',
+      }),
+      options: customAnalyzers,
+    };
+  }
+
   const isDefaultValueInOptions =
     defaultValue === undefined || fieldOptions.some((option: any) => option.value === defaultValue);
 
@@ -92,6 +162,8 @@ export const AnalyzerParameter = ({ path, defaultValue, label, config }: Props) 
               mainDefaultValue={mainValue}
               subDefaultValue={subValue}
               config={fieldConfigWithLabel}
+              options={fieldOptions}
+              mapOptionsToSubOptions={mapOptionsToSubOptions}
             />
           )}
         </div>

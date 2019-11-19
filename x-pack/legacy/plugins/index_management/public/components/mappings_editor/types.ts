@@ -175,3 +175,24 @@ export interface AliasOption {
   id: string;
   label: string;
 }
+
+export interface IndexSettingsInterface {
+  analysis?: {
+    analyzer: {
+      [key: string]: {
+        type: string;
+        tokenizer: string;
+        char_filter?: string[];
+        filter?: string[];
+        position_increment_gap?: number;
+      };
+    };
+  };
+}
+
+/**
+ * When we define the index settings we can skip
+ * the "index" property and directly add the "analysis".
+ * ES always returns the settings wrapped under "index".
+ */
+export type IndexSettings = IndexSettingsInterface | { index: IndexSettingsInterface };

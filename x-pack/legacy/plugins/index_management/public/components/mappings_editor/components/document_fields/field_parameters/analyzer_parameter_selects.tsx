@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import {
@@ -17,9 +17,11 @@ import {
   FormDataProvider,
 } from '../../../shared_imports';
 import { SelectOption, SuperSelectOption } from '../../../types';
-import { PARAMETERS_OPTIONS } from '../../../constants';
+import { MapOptionsToSubOptions } from './analyzer_parameter';
 
-const areOptionsSuperSelect = (options: SuperSelectOption[] | SelectOption[]): boolean => {
+type Options = SuperSelectOption[] | SelectOption[];
+
+const areOptionsSuperSelect = (options: Options): boolean => {
   if (!options || !Boolean(options.length)) {
     return false;
   }
@@ -27,22 +29,13 @@ const areOptionsSuperSelect = (options: SuperSelectOption[] | SelectOption[]): b
   return {}.hasOwnProperty.call(options[0], 'text') === false;
 };
 
-const fieldOptions = PARAMETERS_OPTIONS.analyzer!;
-
-export const mapOptionsToSubOptions: {
-  [key: string]: { label: string; options: SuperSelectOption[] | SelectOption[] };
-} = {
-  language: {
-    label: 'Language',
-    options: PARAMETERS_OPTIONS.languageAnalyzer!,
-  },
-};
-
 interface Props {
   onChange(value: unknown): void;
   mainDefaultValue: string | undefined;
   subDefaultValue: string | undefined;
   config: FieldConfig;
+  options: Options;
+  mapOptionsToSubOptions: MapOptionsToSubOptions;
 }
 
 export const AnalyzerParameterSelects = ({
@@ -50,6 +43,8 @@ export const AnalyzerParameterSelects = ({
   mainDefaultValue,
   subDefaultValue,
   config,
+  options,
+  mapOptionsToSubOptions,
 }: Props) => {
   const { form } = useForm({ defaultValue: { main: mainDefaultValue, sub: subDefaultValue } });
 
@@ -63,15 +58,23 @@ export const AnalyzerParameterSelects = ({
     return subscription.unsubscribe;
   }, [form]);
 
-  const renderSelect = (field: FieldHook, options: SuperSelectOption[] | SelectOption[]) => {
-    const isSuperSelect = areOptionsSuperSelect(options);
+  const getSubOptionsMeta = (mainValue: string) =>
+    mapOptionsToSubOptions !== undefined ? mapOptionsToSubOptions[mainValue] : undefined;
+
+  const onMainValueChange = useCallback((mainValue: unknown) => {
+    const subOptionsMeta = getSubOptionsMeta(mainValue as string);
+    form.setFieldValue('sub', subOptionsMeta ? subOptionsMeta.options[0].value : undefined);
+  }, []);
+
+  const renderSelect = (field: FieldHook, opts: Options) => {
+    const isSuperSelect = areOptionsSuperSelect(opts);
 
     return isSuperSelect ? (
-      <SuperSelectField field={field} euiFieldProps={{ options }} />
+      <SuperSelectField field={field} euiFieldProps={{ options: opts }} />
     ) : (
       <SelectField
         field={field}
-        euiFieldProps={{ options: options as any, hasNoInitialSelection: false }}
+        euiFieldProps={{ options: opts as any, hasNoInitialSelection: false }}
       />
     );
   };
@@ -80,24 +83,23 @@ export const AnalyzerParameterSelects = ({
     <Form form={form}>
       <FormDataProvider pathsToWatch="main">
         {({ main }) => {
-          const subOptions =
-            mapOptionsToSubOptions !== undefined ? mapOptionsToSubOptions[main] : undefined;
+          const subOptions = getSubOptionsMeta(main);
 
           return (
             <EuiFlexGroup>
               <EuiFlexItem>
-                <UseField path="main" config={config}>
-                  {field => renderSelect(field, fieldOptions)}
+                <UseField path="main" config={config} onChange={onMainValueChange}>
+                  {field => renderSelect(field, options)}
                 </UseField>
               </EuiFlexItem>
               {subOptions && (
                 <EuiFlexItem>
                   <UseField
                     path="sub"
+                    defaultValue={subOptions.options[0].value}
                     config={{
                       ...config,
                       label: subOptions.label,
-                      defaultValue: subOptions.options[0].value,
                     }}
                   >
                     {field => renderSelect(field, subOptions.options)}

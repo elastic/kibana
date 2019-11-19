@@ -26,19 +26,28 @@ export const FIELD_TYPES_OPTIONS = Object.entries(MAIN_DATA_TYPE_DEFINITION).map
   })
 );
 
-const getOptionTexts = (
-  option: FieldOption
-): { inputDisplay: string; dropdownDisplay: JSX.Element } => ({
-  inputDisplay: FIELD_OPTIONS_TEXTS[option].title,
+interface SuperSelectOptionConfig {
+  inputDisplay: string;
+  dropdownDisplay: JSX.Element;
+}
+
+export const getSuperSelectOption = (
+  title: string,
+  description: string
+): SuperSelectOptionConfig => ({
+  inputDisplay: title,
   dropdownDisplay: (
     <>
-      <strong>{FIELD_OPTIONS_TEXTS[option].title}</strong>
+      <strong>{title}</strong>
       <EuiText size="s" color="subdued">
-        <p className="euiTextColor--subdued">{FIELD_OPTIONS_TEXTS[option].description}</p>
+        <p className="euiTextColor--subdued">{description}</p>
       </EuiText>
     </>
   ),
 });
+
+const getOptionTexts = (option: FieldOption): SuperSelectOptionConfig =>
+  getSuperSelectOption(FIELD_OPTIONS_TEXTS[option].title, FIELD_OPTIONS_TEXTS[option].description);
 
 type ParametersOptions = ParameterName | 'languageAnalyzer';
 
