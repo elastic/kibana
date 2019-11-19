@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-import React, { Fragment } from 'react';
-import { PropTypes } from 'prop-types';
+import React, { FC, Fragment } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -17,7 +14,7 @@ import {
   EuiPageContentHeader,
   EuiPageContent,
   EuiPageBody,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -25,10 +22,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useUiChromeContext } from '../contexts/ui/use_ui_chrome_context';
 import { NavigationMenu } from '../components/navigation_menu';
 
-export function Settings({
-  canGetFilters,
-  canGetCalendars
-}) {
+interface Props {
+  canGetFilters: boolean;
+  canGetCalendars: boolean;
+}
+
+export const Settings: FC<Props> = ({ canGetFilters, canGetCalendars }) => {
   const basePath = useUiChromeContext().getBasePath();
 
   return (
@@ -36,10 +35,7 @@ export function Settings({
       <NavigationMenu tabId="settings" />
       <EuiPage className="mlSettingsPage" data-test-subj="mlPageSettings">
         <EuiPageBody className="mlSettingsPage__body">
-          <EuiPageContent
-            className="mlSettingsPage__content"
-            horizontalPosition="center"
-          >
+          <EuiPageContent className="mlSettingsPage__content" horizontalPosition="center">
             <EuiPageContentHeader>
               <EuiTitle>
                 <h2>
@@ -82,15 +78,9 @@ export function Settings({
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
-
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
     </Fragment>
   );
-}
-
-Settings.propTypes = {
-  canGetFilters: PropTypes.bool.isRequired,
-  canGetCalendars: PropTypes.bool.isRequired,
 };
