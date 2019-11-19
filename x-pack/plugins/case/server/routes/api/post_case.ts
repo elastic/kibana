@@ -24,40 +24,13 @@ export function initPostCaseApi(deps: RouteDeps) {
       const requestClient = context.core.elasticsearch.dataClient;
       const service = new CaseService(requestClient.callAsCurrentUser, caseIndex, log);
       try {
-        log.debug(`Attempting to GET all cases`);
+        log.debug(`Attempting to POST a new case`);
         const newCase = await service.postCase(formattedCase);
-        console.log('newCase', newCase);
         return response.ok({ body: newCase });
       } catch (error) {
-        console.log(`Error on GET all cases: ${error}`, error);
-        log.debug(`Error on GET all cases: ${error}`);
+        log.debug(`Error on POST a new case: ${error}`);
         return response.customError(wrapError(error));
       }
     }
   );
 }
-
-//
-//
-// ,
-//     async (context, request, response) => {
-//       log.debug(`Inside POST /api/cases/case`);
-//
-//       const formattedCase = formatNewCase(request.body);
-//
-//       const tags = request.route.options.tags;
-//       const tagPrefix = 'access:';
-//       const actionTags = tags.filter(tag => tag.startsWith(tagPrefix));
-//       console.log('actionTagsactionTags', actionTags);
-//       console.log('formattedCase', formattedCase);
-//
-//       try {
-//         log.debug(`Attempting to create case`);
-//         return response.ok({ body: { id: request.params } });
-//       } catch (error) {
-//         log.debug(`Error creating case: ${error}`);
-//         return response.customError(error);
-//       }
-//     }
-//   );
-// }

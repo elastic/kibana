@@ -24,7 +24,7 @@ export const NewCaseSchema = schema.object({
   // comments: schema.arrayOf(Comment),
   // creation_date: schema.string(),
   description: schema.string(),
-  id: schema.string(),
+  // id: schema.string(),
   // last_edit_date: schema.string(),
   name: schema.string(),
   // reporter: User,

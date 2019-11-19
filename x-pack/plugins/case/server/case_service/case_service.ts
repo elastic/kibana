@@ -59,10 +59,9 @@ export class CaseService implements CaseServiceInterface {
 
   async postCase(newCase: Case) {
     this.log.debug(`CaseService - postCase:`, newCase);
-    console.log('BLARG', newCase);
-    return await this.callDataCluster<CaseAggregationResponse>('create', {
+    return await this.callDataCluster<CaseAggregationResponse>('index', {
       index: this.caseIndex,
-      ...newCase,
+      body: newCase,
     });
   }
 }
