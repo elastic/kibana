@@ -35,9 +35,23 @@ interface SubtitleItemProps {
 
 const SubtitleItem = React.memo<SubtitleItemProps>(({ children }) => {
   if (typeof children === 'string') {
-    return <p className="siemSubtitle__item siemSubtitle__item--text">{children}</p>;
+    return (
+      <p
+        className="siemSubtitle__item siemSubtitle__item--text"
+        data-test-subj="header-panel-subtitle"
+      >
+        {children}
+      </p>
+    );
   } else {
-    return <div className="siemSubtitle__item siemSubtitle__item--node">{children}</div>;
+    return (
+      <div
+        className="siemSubtitle__item siemSubtitle__item--node"
+        data-test-subj="header-panel-subtitle"
+      >
+        {children}
+      </div>
+    );
   }
 });
 SubtitleItem.displayName = 'SubtitleItem';
