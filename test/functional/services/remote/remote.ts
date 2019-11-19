@@ -38,6 +38,17 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const coveragePrefix = 'coveragejson:';
   const coverageDir = resolve(__dirname, '../../../../target/kibana-coverage/functional');
   let logSubscription: undefined | Rx.Subscription;
+  type BrowserStorage = 'sessionStorage' | 'localStorage';
+
+  const clearBrowserStorage = async (storageType: BrowserStorage) => {
+    try {
+      await driver.executeScript(`window.${storageType}.clear();`);
+    } catch (error) {
+      if (!error.message.includes(`Failed to read the ${storageType} property from 'Window'`)) {
+        throw error;
+      }
+    }
+  };
 
   const { driver, By, until, consoleLog$ } = await initWebDriver(
     log,
@@ -128,12 +139,8 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
       .manage()
       .window()
       .setRect({ width, height });
-    await driver.executeScript(
-      `try { window.sessionStorage.clear(); } catch (err) { console.log('WebDriverError: ' + err) };`
-    );
-    await driver.executeScript(
-      `try { window.localStorage.clear(); } catch (err) { console.log('WebDriverError: ' + err) };`
-    );
+    await clearBrowserStorage('sessionStorage');
+    await clearBrowserStorage('localStorage');
   });
 
   lifecycle.on('cleanup', async () => {

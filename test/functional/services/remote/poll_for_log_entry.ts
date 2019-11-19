@@ -78,15 +78,6 @@ export function pollForLogEntry$(
                 entry.level = logging.getLevel('INFO');
               }
 
-              // ignore Webdriver failure to clear browser storage
-              if (
-                entry.message.match(
-                  `WebDriverError: SecurityError: Failed to read the '(localStorage|sessionStorage)' property from 'Window'`
-                )
-              ) {
-                return false;
-              }
-
               return true;
             });
 
