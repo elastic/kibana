@@ -57,8 +57,9 @@ const makeSuccessMessage = options => {
  * @property {string} options.installDir     Optional installation dir from which to run Kibana
  * @property {boolean} options.bail          Whether to exit test run at the first failure
  * @property {string} options.esFrom         Optionally run from source instead of snapshot
+ * @param {asyncFunction} testRunner         Optional function to execute a different test runner once elasticsearch and kibana are setup
  */
-export async function runTests(options) {
+export async function runTests(options, testRunner) {
   for (const configPath of options.configs) {
     const log = options.createLogger();
     const opts = {
@@ -86,7 +87,11 @@ export async function runTests(options) {
       try {
         es = await runElasticsearch({ config, options: opts });
         await runKibanaServer({ procs, config, options: opts });
-        await runFtr({ configPath, options: opts });
+        if (testRunner) {
+          await testRunner({ configPath, config, es, procs, options: opts });
+        } else {
+          await runFtr({ configPath, options: opts });
+        }
       } finally {
         try {
           await procs.stop('kibana');
@@ -109,7 +114,7 @@ export async function runTests(options) {
  * @property {string} options.esFrom         Optionally run from source instead of snapshot
  */
 export async function startServers(options) {
-  const log = options.createLogger();
+  const log = options.log || options.createLogger();
   const opts = {
     ...options,
     log,
@@ -135,7 +140,6 @@ export async function startServers(options) {
     // success message so that it doesn't get buried
     await silence(log, 5000);
     log.success(makeSuccessMessage(options));
-
     await procs.waitForAllToStop();
     await es.cleanup();
   });

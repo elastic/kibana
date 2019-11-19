@@ -60,6 +60,14 @@ export class FunctionalTestRunner {
 
       await providers.loadAll();
 
+      const customTestRunner = config.get('testRunner');
+      if (customTestRunner) {
+        this.log.warning(
+          'custom test runner defined, ignoring all mocha/suite/filtering related options'
+        );
+        return (await providers.invokeProviderFn(customTestRunner)) || 0;
+      }
+
       const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
       await this.lifecycle.beforeTests.trigger();
       this.log.info('Starting tests');
@@ -70,6 +78,10 @@ export class FunctionalTestRunner {
 
   async getTestStats() {
     return await this._run(async (config, coreProviders) => {
+      if (config.get('testRunner')) {
+        throw new Error('Unable to get test stats for config that uses a custom test runner');
+      }
+
       // replace the function of custom service providers so that they return
       // promise-like objects which never resolve, essentially disabling them
       // allowing us to load the test files and populate the mocha suites
@@ -108,8 +120,11 @@ export class FunctionalTestRunner {
       const config = await readConfigFile(this.log, this.configFile, this.configOverrides);
       this.log.info('Config loaded');
 
-      if (config.get('testFiles').length === 0) {
-        throw new Error('No test files defined.');
+      if (
+        (!config.get('testFiles') || config.get('testFiles').length === 0) &&
+        !config.get('testRunner')
+      ) {
+        throw new Error('No tests defined.');
       }
 
       // base level services that functional_test_runner exposes
