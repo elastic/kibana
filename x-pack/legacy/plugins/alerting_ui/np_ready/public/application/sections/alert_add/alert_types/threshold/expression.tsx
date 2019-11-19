@@ -676,7 +676,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
               button={
                 <EuiExpression
                   description={i18n.translate(
-                    'xpack.watcher.sections.watchEdit.threshold.ofLabel',
+                    'xpack.alertingUI.sections.alertAdd.threshold.ofLabel',
                     {
                       defaultMessage: 'of',
                     }
@@ -697,7 +697,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
             >
               <div>
                 <EuiPopoverTitle>
-                  {i18n.translate('xpack.watcher.sections.watchEdit.threshold.ofButtonLabel', {
+                  {i18n.translate('xpack.alertingUI.sections.alertAdd.threshold.ofButtonLabel', {
                     defaultMessage: 'of',
                   })}
                 </EuiPopoverTitle>
@@ -747,12 +747,12 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                 description={`${
                   groupByTypes[groupBy || DEFAULT_VALUES.GROUP_BY].sizeRequired
                     ? i18n.translate(
-                        'xpack.watcher.sections.watchEdit.threshold.groupedOverLabel',
+                        'xpack.alertingUI.sections.alertAdd.threshold.groupedOverLabel',
                         {
                           defaultMessage: 'grouped over',
                         }
                       )
-                    : i18n.translate('xpack.watcher.sections.watchEdit.threshold.overLabel', {
+                    : i18n.translate('xpack.alertingUI.sections.alertAdd.threshold.overLabel', {
                         defaultMessage: 'over',
                       })
                 }`}
@@ -778,7 +778,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
           >
             <div>
               <EuiPopoverTitle>
-                {i18n.translate('xpack.watcher.sections.watchEdit.threshold.overButtonLabel', {
+                {i18n.translate('xpack.alertingUI.sections.alertAdd.threshold.overButtonLabel', {
                   defaultMessage: 'over',
                 })}
               </EuiPopoverTitle>
@@ -960,7 +960,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
             button={
               <EuiExpression
                 description={i18n.translate(
-                  'xpack.watcher.sections.watchEdit.threshold.forTheLastLabel',
+                  'xpack.alertingUI.sections.alertAdd.threshold.forTheLastLabel',
                   {
                     defaultMessage: 'for the last',
                   }
@@ -987,7 +987,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
             <div>
               <EuiPopoverTitle>
                 <FormattedMessage
-                  id="xpack.watcher.sections.watchEdit.threshold.forTheLastButtonLabel"
+                  id="xpack.alertingUI.sections.alertAdd.threshold.forTheLastButtonLabel"
                   defaultMessage="For the last"
                 />
               </EuiPopoverTitle>
