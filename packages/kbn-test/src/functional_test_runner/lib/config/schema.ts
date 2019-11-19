@@ -61,13 +61,8 @@ const defaultRelativeToConfigPath = (path: string) => {
 
 export const schema = Joi.object()
   .keys({
-    testFiles: Joi.array()
-      .items(Joi.string())
-      .when('$primary', {
-        is: true,
-        then: Joi.required(),
-        otherwise: Joi.any().default([]),
-      }),
+    testFiles: Joi.array().items(Joi.string()),
+    testRunner: Joi.func(),
 
     excludeTestFiles: Joi.array()
       .items(Joi.string())

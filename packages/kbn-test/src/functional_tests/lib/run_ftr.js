@@ -26,24 +26,32 @@ async function createFtr({
 }) {
   const config = await readConfigFile(log, configPath);
 
-  return new FunctionalTestRunner(log, configPath, {
-    mochaOpts: {
-      bail: !!bail,
-      grep,
-    },
-    kbnTestServer: {
-      installDir,
-    },
-    updateBaselines,
-    suiteTags: {
-      include: [...suiteTags.include, ...config.get('suiteTags.include')],
-      exclude: [...suiteTags.exclude, ...config.get('suiteTags.exclude')],
-    },
-  });
+  return {
+    config,
+    ftr: new FunctionalTestRunner(log, configPath, {
+      mochaOpts: {
+        bail: !!bail,
+        grep,
+      },
+      kbnTestServer: {
+        installDir,
+      },
+      updateBaselines,
+      suiteTags: {
+        include: [...suiteTags.include, ...config.get('suiteTags.include')],
+        exclude: [...suiteTags.exclude, ...config.get('suiteTags.exclude')],
+      },
+    }),
+  };
 }
 
 export async function assertNoneExcluded({ configPath, options }) {
-  const ftr = await createFtr({ configPath, options });
+  const { config, ftr } = await createFtr({ configPath, options });
+
+  if (config.get('testRunner')) {
+    // tests with custom test runners are not included in this check
+    return;
+  }
 
   const stats = await ftr.getTestStats();
   if (stats.excludedTests.length > 0) {
@@ -60,7 +68,7 @@ export async function assertNoneExcluded({ configPath, options }) {
 }
 
 export async function runFtr({ configPath, options }) {
-  const ftr = await createFtr({ configPath, options });
+  const { ftr } = await createFtr({ configPath, options });
 
   const failureCount = await ftr.run();
   if (failureCount > 0) {
@@ -71,7 +79,13 @@ export async function runFtr({ configPath, options }) {
 }
 
 export async function hasTests({ configPath, options }) {
-  const ftr = await createFtr({ configPath, options });
+  const { ftr, config } = await createFtr({ configPath, options });
+
+  if (config.get('testRunner')) {
+    // configs with custom test runners are assumed to always have tests
+    return true;
+  }
+
   const stats = await ftr.getTestStats();
   return stats.testCount > 0;
 }
