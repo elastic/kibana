@@ -32,7 +32,7 @@ interface ConstructorOptions {
   createAPIKey: () => Promise<CreateAPIKeyResult>;
 }
 
-interface FindOptions {
+export interface FindOptions {
   options?: {
     perPage?: number;
     page?: number;
@@ -40,6 +40,7 @@ interface FindOptions {
     defaultSearchOperator?: 'AND' | 'OR';
     searchFields?: string[];
     sortField?: string;
+    sortOrder?: string;
     hasReference?: {
       type: string;
       id: string;
