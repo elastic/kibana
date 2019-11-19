@@ -23,7 +23,12 @@ import { i18n } from '@kbn/i18n';
 import { existsOperator, isOneOfOperator } from './filter_operators';
 import { esFilters } from '../../../../../../../../plugins/data/public';
 
-export function getFilterDisplayText(filter: esFilters.Filter, filterDisplayName: string) {
+interface Props {
+  filter: esFilters.Filter;
+  valueLabel?: string;
+}
+
+export function FilterLabel({ filter, valueLabel }: Props) {
   const prefixText = filter.meta.negate
     ? ` ${i18n.translate('data.filter.filterBar.negatedFilterPrefix', {
         defaultMessage: 'NOT ',
@@ -37,7 +42,12 @@ export function getFilterDisplayText(filter: esFilters.Filter, filterDisplayName
     );
 
   if (filter.meta.alias !== null) {
-    return `${prefix}${filter.meta.alias}`;
+    return (
+      <Fragment>
+        {prefix}
+        {filter.meta.alias}
+      </Fragment>
+    );
   }
 
   switch (filter.meta.type) {
@@ -52,35 +62,35 @@ export function getFilterDisplayText(filter: esFilters.Filter, filterDisplayName
       return (
         <Fragment>
           {prefix}
-          {filter.meta.key}: {filterDisplayName}
+          {filter.meta.key}: {valueLabel}
         </Fragment>
       );
     case 'geo_polygon':
       return (
         <Fragment>
           {prefix}
-          {filter.meta.key}: {filterDisplayName}
+          {filter.meta.key}: {valueLabel}
         </Fragment>
       );
     case 'phrase':
       return (
         <Fragment>
           {prefix}
-          {filter.meta.key}: {filterDisplayName}
+          {filter.meta.key}: {valueLabel}
         </Fragment>
       );
     case 'phrases':
       return (
         <Fragment>
           {prefix}
-          {filter.meta.key} {isOneOfOperator.message} {filterDisplayName}
+          {filter.meta.key} {isOneOfOperator.message} {valueLabel}
         </Fragment>
       );
     case 'query_string':
       return (
         <Fragment>
           {prefix}
-          {filterDisplayName}
+          {valueLabel}
         </Fragment>
       );
     case 'range':
@@ -88,7 +98,7 @@ export function getFilterDisplayText(filter: esFilters.Filter, filterDisplayName
       return (
         <Fragment>
           {prefix}
-          {filter.meta.key}: {filterDisplayName}
+          {filter.meta.key}: {valueLabel}
         </Fragment>
       );
     default:
