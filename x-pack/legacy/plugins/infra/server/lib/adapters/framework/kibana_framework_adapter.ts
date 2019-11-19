@@ -66,6 +66,9 @@ export class KibanaFramework {
       validate: {
         body,
       },
+      options: {
+        tags: ['access:infra'],
+      },
     };
     async function handler(
       context: RequestHandlerContext,
