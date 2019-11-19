@@ -22,7 +22,7 @@ jest.mock('ui/kfetch', () => ({}));
 import React from 'react';
 
 import { npStart } from 'ui/new_platform';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
 jest.mock('brace/mode/groovy', () => ({}));
 jest.mock('ui/new_platform');
