@@ -38,10 +38,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import {
   Query,
-  esFilters,
-  FIELD_FORMAT_IDS,
   KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
+  esFilters,
   esQuery,
   IIndexPattern,
 } from '../../../../../../src/plugins/data/public';
@@ -282,9 +281,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
 
   let formatter: { convert: (data: unknown) => string };
   if (indexPattern.fieldFormatMap && indexPattern.fieldFormatMap[field.name]) {
-    const FormatType = fieldFormats.getType(
-      indexPattern.fieldFormatMap[field.name].id as FIELD_FORMAT_IDS
-    );
+    const FormatType = fieldFormats.getType(indexPattern.fieldFormatMap[field.name].id);
     if (FormatType) {
       formatter = new FormatType(
         indexPattern.fieldFormatMap[field.name].params,

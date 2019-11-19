@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { FIELD_FORMAT_IDS } from '../../common';
+import { IFieldFormatId } from '../../common';
 
 export interface FieldType {
-  id: FIELD_FORMAT_IDS;
+  id: IFieldFormatId;
   params: Record<string, any>;
   es?: boolean;
 }

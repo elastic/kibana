@@ -24,12 +24,13 @@ import {
   KBN_FIELD_TYPES,
   FIELD_FORMAT_IDS,
   IFieldFormatType,
+  IFieldFormatId,
   FieldFormat,
 } from '../../common';
 import { FieldType } from './types';
 
 export class FieldFormatRegisty {
-  private fieldFormats: Map<FIELD_FORMAT_IDS, IFieldFormatType>;
+  private fieldFormats: Map<IFieldFormatId, IFieldFormatType>;
   private uiSettings!: UiSettingsClientContract;
   private defaultMap: Record<string, FieldType>;
 
@@ -71,10 +72,10 @@ export class FieldFormatRegisty {
   /**
    * Get a derived FieldFormat class by its id.
    *
-   * @param  {FIELD_FORMAT_IDS} formatId - the format id
+   * @param  {IFieldFormatId} formatId - the format id
    * @return {FieldFormat}
    */
-  getType = (formatId: FIELD_FORMAT_IDS): IFieldFormatType | undefined => {
+  getType = (formatId: IFieldFormatId): IFieldFormatType | undefined => {
     return this.fieldFormats.get(formatId);
   };
 
@@ -131,11 +132,11 @@ export class FieldFormatRegisty {
   /**
    * Get the singleton instance of the FieldFormat type by its id.
    *
-   * @param  {FIELD_FORMATS_IDS} formatId
+   * @param  {IFieldFormatId} formatId
    * @return {FIELD_FORMATS_INSTANCES[number]}
    */
   getInstance = memoize(
-    (formatId: FIELD_FORMAT_IDS): FieldFormat => {
+    (formatId: IFieldFormatId): FieldFormat => {
       const DerivedFieldFormat = this.getType(formatId);
 
       if (!DerivedFieldFormat) {

@@ -23,7 +23,7 @@ import { AggConfig, Vis } from 'ui/vis';
 import { npStart } from 'ui/new_platform';
 import { SerializedFieldFormat } from 'src/plugins/expressions/public';
 
-import { FIELD_FORMAT_IDS, FieldFormat } from '../../../../../../plugins/data/public';
+import { IFieldFormatId, FieldFormat } from '../../../../../../plugins/data/public';
 
 import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
 import chrome from '../../../chrome';
@@ -48,15 +48,18 @@ const getConfig = (key: string, defaultOverride?: any): any =>
   npStart.core.uiSettings.get(key, defaultOverride);
 const DefaultFieldFormat = FieldFormat.from(identity);
 
-const getFieldFormat = (id?: FIELD_FORMAT_IDS | string, params: object = {}): FieldFormat => {
+const getFieldFormat = (id?: IFieldFormatId, params: object = {}): FieldFormat => {
   const fieldFormats = npStart.plugins.data.fieldFormats;
-  const Format = fieldFormats.getType(id as FIELD_FORMAT_IDS);
 
-  if (Format) {
-    return new Format(params, getConfig);
-  } else {
-    return new DefaultFieldFormat();
+  if (id) {
+    const Format = fieldFormats.getType(id);
+
+    if (Format) {
+      return new Format(params, getConfig);
+    }
   }
+
+  return new DefaultFieldFormat();
 };
 
 export const createFormat = (agg: AggConfig): SerializedFieldFormat => {
