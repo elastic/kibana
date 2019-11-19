@@ -35,8 +35,7 @@ uiRoutes.when('/settings', {
   },
 });
 
-// @ts-ignore
-import { Settings } from './settings.js';
+import { Settings } from './settings';
 
 module.directive('mlSettings', function() {
   const canGetFilters = checkPermission('canGetFilters');
