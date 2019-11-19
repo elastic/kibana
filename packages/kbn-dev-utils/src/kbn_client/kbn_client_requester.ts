@@ -106,7 +106,9 @@ export class KbnClientRequester {
     } catch (error) {
       if (error.message.includes('certificate') || error.stack.includes('certificate')) {
         this.log.error(error.message);
-        throw new Error(`Maybe try running the process with this envronment variable: NODE_TLS_REJECT_UNAUTHORIZED=0`);
+        throw new Error(
+          `Maybe try using this environment variable: NODE_TLS_REJECT_UNAUTHORIZED=0`
+        );
       }
       let retryErrorMsg: string | undefined;
       if (isAxiosRequestError(error)) {
