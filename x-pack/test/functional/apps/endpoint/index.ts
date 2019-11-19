@@ -11,6 +11,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('The Endpoint app', function() {
+    this.tags('ciGroup7');
+
     beforeEach(async function() {
       await pageObjects.common.navigateToApp('endpoint');
     });
