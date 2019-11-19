@@ -138,7 +138,7 @@ export const createProxyRoute = ({
 
           break;
         } catch (e) {
-          if (e && e.code !== 'ECONNREFUSED') {
+          if (e.code !== 'ECONNREFUSED') {
             throw Boom.boomify(e);
           }
           if (idx === hosts.length - 1) {
