@@ -42,10 +42,10 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                 'xpack-ciGroup9': kibanaPipeline.getXpackCiGroupWorker(9),
                 'xpack-ciGroup10': kibanaPipeline.getXpackCiGroupWorker(10),
                 'xpack-accessibility': kibanaPipeline.getPostBuildWorker('xpack-accessibility', { runbld('./test/scripts/jenkins_xpack_accessibility.sh', 'Execute xpack-accessibility') }),
-                // 'xpack-visualRegression': kibanaPipeline.getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') }),
-              ]),
-            ])
-          }
+                //'xpack-visualRegression': kibanaPipeline.getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') }),
+              'xpack-siemCypress': kibanaPipeline.getPostBuildWorker('xpack-siemCypress', { runbld('./test/scripts/jenkins_siem_cypress.sh', 'Execute siem-cypress') }),
+            ]),
+          ])}
         }
         kibanaPipeline.sendMail()
       }
