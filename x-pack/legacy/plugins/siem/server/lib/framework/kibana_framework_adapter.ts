@@ -7,10 +7,10 @@
 import { GenericParams } from 'elasticsearch';
 import * as GraphiQL from 'apollo-server-module-graphiql';
 import Boom from 'boom';
-import { ResponseToolkit } from 'hapi';
 import { GraphQLSchema } from 'graphql';
 import { runHttpQuery } from 'apollo-server-core';
-import { CoreSetup, IRouter } from 'src/core/server';
+import { schema as configSchema } from '@kbn/config-schema';
+import { CoreSetup, IRouter, KibanaResponseFactory } from 'src/core/server';
 import { ServerFacade, RequestFacade } from '../../types';
 
 import {
@@ -67,69 +67,85 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   }
 
   public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
-    this.__legacy.route({
-      options: {
-        tags: ['access:siem'],
+    this.router.get(
+      {
+        path: routePath,
+        validate: false,
+        options: {
+          tags: ['access:siem'],
+        },
       },
-      handler: async (request: RequestFacade, h: ResponseToolkit) => {
+      async (context, request, response) => {
         try {
-          const query =
-            request.method === 'post'
-              ? (request.payload as Record<string, any>) // eslint-disable-line @typescript-eslint/no-explicit-any
-              : (request.query as Record<string, any>); // eslint-disable-line @typescript-eslint/no-explicit-any
-
+          const { query } = request;
           const gqlResponse = await runHttpQuery([request], {
-            method: request.method.toUpperCase(),
+            method: 'GET',
             options: (req: RequestFacade) => ({
               context: { req: wrapRequest(req) },
               schema,
             }),
-
             query,
           });
 
-          return h.response(gqlResponse).type('application/json');
+          return response.ok({
+            body: gqlResponse,
+            headers: {
+              'content-type': 'application/json',
+            },
+          });
         } catch (error) {
-          if ('HttpQueryError' !== error.name) {
-            const queryError = Boom.boomify(error);
-
-            queryError.output.payload.message = error.message;
-
-            return queryError;
-          }
-
-          if (error.isGraphQLError === true) {
-            return h
-              .response(error.message)
-              .code(error.statusCode)
-              .type('application/json');
-          }
-
-          const genericError = new Boom(error.message, { statusCode: error.statusCode });
-
-          if (error.headers) {
-            Object.keys(error.headers).forEach(header => {
-              genericError.output.headers[header] = error.headers[header];
-            });
-          }
-
-          // Boom hides the error when status code is 500
-          genericError.output.payload.message = error.message;
-
-          throw genericError;
+          return this.handleError(error, response);
         }
-      },
-      method: ['GET', 'POST'],
-      path: routePath,
-      vhost: undefined,
-    });
+      }
+    );
 
-    if (!this.isProductionMode) {
-      this.__legacy.route({
+    this.router.post(
+      {
+        path: routePath,
+        validate: {
+          body: configSchema.object({
+            operationName: configSchema.string(),
+            query: configSchema.string(),
+            variables: configSchema.any(),
+          }),
+        },
         options: {
           tags: ['access:siem'],
         },
-        handler: async (request: RequestFacade, h: ResponseToolkit) => {
+      },
+      async (context, request, response) => {
+        try {
+          const gqlResponse = await runHttpQuery([request], {
+            method: 'POST',
+            options: (req: RequestFacade) => ({
+              context: { context, req: wrapRequest(req) },
+              schema,
+            }),
+            query: request.body,
+          });
+
+          return response.ok({
+            body: gqlResponse,
+            headers: {
+              'content-type': 'application/json',
+            },
+          });
+        } catch (error) {
+          return this.handleError(error, response);
+        }
+      }
+    );
+
+    if (!this.isProductionMode) {
+      this.router.get(
+        {
+          path: `${routePath}/graphiql`,
+          validate: false,
+          options: {
+            tags: ['access:siem'],
+          },
+        },
+        async (context, request, response) => {
           const graphiqlString = await GraphiQL.resolveGraphiQLString(
             request.query,
             {
@@ -139,12 +155,50 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
             request
           );
 
-          return h.response(graphiqlString).type('text/html');
+          return response.ok({
+            body: graphiqlString,
+            headers: {
+              'content-type': 'application/json',
+            },
+          });
+        }
+      );
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private handleError(error: any, response: KibanaResponseFactory) {
+    // TODO(rylnd): address this case
+    // if ('HttpQueryError' !== error.name) {
+    //   const queryError = Boom.boomify(error);
+
+    //   queryError.output.payload.message = error.message;
+
+    //   return queryError;
+    // }
+
+    if (error.isGraphQLError === true) {
+      return response.badRequest({
+        // TODO(rylnd): make this dynamic on error code
+        body: error.message,
+        headers: {
+          'content-type': 'application/json',
         },
-        method: 'GET',
-        path: `${routePath}/graphiql`,
       });
     }
+
+    const genericError = new Boom(error.message, { statusCode: error.statusCode });
+
+    if (error.headers) {
+      Object.keys(error.headers).forEach(header => {
+        genericError.output.headers[header] = error.headers[header];
+      });
+    }
+
+    // Boom hides the error when status code is 500
+    genericError.output.payload.message = error.message;
+
+    throw genericError;
   }
 
   public getIndexPatternsService(request: FrameworkRequest): FrameworkIndexPatternsService {
