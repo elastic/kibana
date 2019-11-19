@@ -6,13 +6,16 @@
 
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import { findSignals } from '../alerts/find_signals';
 import { FindSignalsRequest } from '../alerts/types';
 import { findSignalsSchema } from './schemas';
+import { ServerFacade } from '../../../types';
+import { transformFindAlertsOrError } from './utils';
 
 export const createFindSignalRoute: Hapi.ServerRoute = {
   method: 'GET',
-  path: '/api/siem/signals/_find',
+  path: `${DETECTION_ENGINE_RULES_URL}/_find`,
   options: {
     tags: ['access:signals-all'],
     validate: {
@@ -31,15 +34,16 @@ export const createFindSignalRoute: Hapi.ServerRoute = {
       return headers.response().code(404);
     }
 
-    return findSignals({
+    const signals = await findSignals({
       alertsClient,
       perPage: query.per_page,
       page: query.page,
       sortField: query.sort_field,
     });
+    return transformFindAlertsOrError(signals);
   },
 };
 
-export const findSignalsRoute = (server: Hapi.Server) => {
+export const findSignalsRoute = (server: ServerFacade) => {
   server.route(createFindSignalRoute);
 };

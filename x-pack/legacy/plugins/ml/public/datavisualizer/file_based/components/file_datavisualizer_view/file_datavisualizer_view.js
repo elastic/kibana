@@ -7,7 +7,7 @@
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, {
-  Component,
+  Component
 } from 'react';
 
 import {
