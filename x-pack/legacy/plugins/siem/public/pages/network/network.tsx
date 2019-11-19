@@ -5,7 +5,6 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import { getEsQueryConfig } from '@kbn/es-query';
 import React from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
@@ -31,6 +30,7 @@ import { navTabsNetwork, NetworkRoutes, NetworkRoutesLoading } from './navigatio
 import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
 import { NetworkComponentProps } from './types';
+import { esQuery } from '../../../../../../../src/plugins/data/public';
 
 const KpiNetworkComponentManage = manageQuery(KpiNetworkComponent);
 const sourceId = 'default';
@@ -55,7 +55,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
         <WithSource sourceId={sourceId}>
           {({ indicesExist, indexPattern }) => {
             const filterQuery = convertToBuildEsQuery({
-              config: getEsQueryConfig(core.uiSettings),
+              config: esQuery.getEsQueryConfig(core.uiSettings),
               indexPattern,
               queries: [query],
               filters,

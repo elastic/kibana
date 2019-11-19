@@ -32,7 +32,7 @@ export async function deleteIndex(options) {
     stats,
     index,
     log,
-    retryIfSnapshottingCount = 3
+    retryIfSnapshottingCount = 10
   } = options;
 
   const getIndicesToDelete = async () => {

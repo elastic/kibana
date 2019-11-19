@@ -28,11 +28,6 @@
 # Canvas
 /x-pack/legacy/plugins/canvas/  @elastic/kibana-canvas
 
-# Code
-/x-pack/legacy/plugins/code/  @teams/code
-/x-pack/test/functional/apps/code/  @teams/code
-/x-pack/test/api_integration/apis/code/  @teams/code
-
 # Logs & Metrics UI
 /x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
 /x-pack/legacy/plugins/integrations_manager/ @elastic/epm

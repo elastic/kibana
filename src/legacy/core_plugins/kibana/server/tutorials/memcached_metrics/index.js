@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function memcachedMetricsSpecProvider(server, context) {
+export function memcachedMetricsSpecProvider(context) {
   const moduleName = 'memcached';
   return {
     id: 'memcachedMetrics',
