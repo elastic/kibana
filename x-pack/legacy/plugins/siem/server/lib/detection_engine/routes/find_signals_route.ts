@@ -10,6 +10,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import { findSignals } from '../alerts/find_signals';
 import { FindSignalsRequest } from '../alerts/types';
 import { findSignalsSchema } from './schemas';
+import { ServerFacade } from '../../../types';
 import { transformFindAlertsOrError } from './utils';
 
 export const createFindSignalRoute: Hapi.ServerRoute = {
@@ -43,6 +44,6 @@ export const createFindSignalRoute: Hapi.ServerRoute = {
   },
 };
 
-export const findSignalsRoute = (server: Hapi.Server) => {
+export const findSignalsRoute = (server: ServerFacade) => {
   server.route(createFindSignalRoute);
 };

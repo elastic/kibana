@@ -325,7 +325,7 @@ Note that for VSCode, to enable "live" linting of TypeScript (and other) file ty
   "eslint.autoFixOnSave": true,
 ```
 
-It is **not** recommended to use `prettier` plugin on Kibana project. Because settings are in `eslintrc.js` file and it is applied to too many files that shouldn't be prettier-ized. 
+:warning: It is **not** recommended to use the [`Prettier` extension/IDE plugin](https://prettier.io/) while maintaining the Kibana project. Formatting and styling roles are set in the multiple `.eslintrc.js` files across the project and some of them use the [NPM version of Prettier](https://www.npmjs.com/package/prettier). Using the IDE extension might cause conflicts, applying the formatting to too many files that shouldn't be prettier-ized and/or highlighting errors that are actually OK.
 
 ### Internationalization
 

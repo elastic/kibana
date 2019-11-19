@@ -9,7 +9,6 @@ import { Direction } from '../../graphql/types';
 import { convertTimelineAsInput } from './epic';
 
 import { esFilters } from '../../../../../../../src/plugins/data/public';
-import { FilterStateStore } from '../../../../../../../src/plugins/data/common/es_query/filters';
 
 describe('Epic Timeline', () => {
   describe('#convertTimelineAsInput ', () => {
@@ -92,7 +91,7 @@ describe('Epic Timeline', () => {
         historyIds: [],
         filters: [
           {
-            $state: { store: FilterStateStore.APP_STATE },
+            $state: { store: esFilters.FilterStateStore.APP_STATE },
             meta: {
               alias: null,
               disabled: false,
@@ -104,7 +103,7 @@ describe('Epic Timeline', () => {
             query: { match_phrase: { 'event.category': 'file' } },
           },
           {
-            $state: { store: FilterStateStore.APP_STATE },
+            $state: { store: esFilters.FilterStateStore.APP_STATE },
             meta: {
               alias: null,
               disabled: false,

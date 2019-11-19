@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
-export function redisLogsSpecProvider(server, context) {
+export function redisLogsSpecProvider(context) {
   const moduleName = 'redis';
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
