@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ChangeEvent } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { SelectField, UseField, FieldHook } from '../../../../shared_imports';
+import { SelectField, UseField, useFormContext } from '../../../../shared_imports';
 import { MainType, SubType, Field } from '../../../../types';
 import { getFieldConfig, filterTypesForMultiField } from '../../../../lib';
 import { TYPE_DEFINITION, FIELD_TYPES_OPTIONS } from '../../../../constants';
@@ -23,6 +23,7 @@ interface Props {
 export const EditFieldHeaderForm = React.memo(({ type, defaultValue, isMultiField }: Props) => {
   const typeDefinition = TYPE_DEFINITION[type];
   const hasSubType = typeDefinition.subTypes !== undefined;
+  const form = useFormContext();
 
   const subTypeOptions = hasSubType
     ? typeDefinition
@@ -36,23 +37,17 @@ export const EditFieldHeaderForm = React.memo(({ type, defaultValue, isMultiFiel
       : typeDefinition.subTypes!.types[0] // we set the first item from the subType array
     : undefined;
 
-  const onTypeChange = (field: FieldHook) => (e: ChangeEvent<HTMLSelectElement>) => {
-    const { value } = e.currentTarget;
+  const onTypeChange = (value: unknown) => {
     const nextTypeDefinition = TYPE_DEFINITION[value as MainType];
-    const nextHasSubType = nextTypeDefinition.subTypes !== undefined;
-    const subTypeField = field.form.getFields().subType;
 
-    if (nextHasSubType && subTypeField) {
+    if (nextTypeDefinition.subTypes !== undefined) {
       /**
        * We need to manually set the subType field value because if we edit a field type that already has a subtype
-       * (e.g. "numeric" with subType "float"), and we change the type to another one that also has subTypes (e.g. "range").
-       * If we then immediately click the "update" button, _without_ changing the subType, the old value of subType
-       * is maintained.
+       * (e.g. "numeric" with subType "float"), and we change the type to another one that also has subTypes (e.g. "range"),
+       * the old value would be kept on the subType.
        */
-      subTypeField.setValue(nextTypeDefinition.subTypes!.types[0]);
+      form.setFieldValue('subType', nextTypeDefinition.subTypes!.types[0]);
     }
-
-    field.setValue(value);
   };
 
   return (
@@ -64,20 +59,20 @@ export const EditFieldHeaderForm = React.memo(({ type, defaultValue, isMultiFiel
 
       {/* Field type */}
       <EuiFlexItem>
-        <UseField path="type" config={getFieldConfig('type')}>
-          {field => (
-            <SelectField
-              field={field}
-              euiFieldProps={{
-                options: isMultiField
-                  ? filterTypesForMultiField(FIELD_TYPES_OPTIONS)
-                  : FIELD_TYPES_OPTIONS,
-                hasNoInitialSelection: true,
-                onChange: onTypeChange(field),
-              }}
-            />
-          )}
-        </UseField>
+        <UseField
+          path="type"
+          config={getFieldConfig('type')}
+          component={SelectField}
+          componentProps={{
+            euiFieldProps: {
+              options: isMultiField
+                ? filterTypesForMultiField(FIELD_TYPES_OPTIONS)
+                : FIELD_TYPES_OPTIONS,
+              hasNoInitialSelection: true,
+            },
+          }}
+          onChange={onTypeChange}
+        />
       </EuiFlexItem>
 
       {/* Field sub type (if any) */}

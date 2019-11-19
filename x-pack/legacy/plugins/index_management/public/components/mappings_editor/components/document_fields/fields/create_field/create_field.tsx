@@ -17,14 +17,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import {
-  useForm,
-  Form,
-  FormDataProvider,
-  SelectField,
-  UseField,
-  FieldHook,
-} from '../../../../shared_imports';
+import { useForm, Form, FormDataProvider, SelectField, UseField } from '../../../../shared_imports';
 
 import { TYPE_DEFINITION, FIELD_TYPES_OPTIONS, EUI_SIZE } from '../../../../constants';
 
@@ -43,6 +36,8 @@ interface Props {
   isCancelable?: boolean;
   maxNestedDepth?: number;
 }
+
+const typeFieldConfig = getFieldConfig('type');
 
 export const CreateField = React.memo(function CreateFieldComponent({
   allFields,
@@ -129,13 +124,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
     };
   };
 
-  const onTypeChanged = (typeField: FieldHook) => (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const nextType = e.target.value as MainType;
-    const { subTypeOptions } = getSubTypeMeta(nextType);
-
-    // We both set the type 6 the subType field values
+  const onTypeChange = (nextType: unknown) => {
+    const { subTypeOptions } = getSubTypeMeta(nextType as MainType);
     form.setFieldValue('subType', subTypeOptions ? subTypeOptions[0].value : undefined);
-    typeField.setValue(nextType);
   };
 
   const renderFormFields = (type: MainType) => {
@@ -150,29 +141,29 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
         {/* Field type */}
         <EuiFlexItem>
-          <UseField path="type" config={getFieldConfig('type')}>
-            {typeField => (
-              <SelectField
-                field={typeField}
-                euiFieldProps={{
-                  options: isMultiField
-                    ? filterTypesForMultiField(FIELD_TYPES_OPTIONS)
-                    : FIELD_TYPES_OPTIONS,
-                  onChange: onTypeChanged(typeField),
-                }}
-              />
-            )}
-          </UseField>
+          <UseField
+            path="type"
+            config={typeFieldConfig}
+            onChange={onTypeChange}
+            component={SelectField}
+            componentProps={{
+              euiFieldProps: {
+                options: isMultiField
+                  ? filterTypesForMultiField(FIELD_TYPES_OPTIONS)
+                  : FIELD_TYPES_OPTIONS,
+              },
+            }}
+          />
         </EuiFlexItem>
 
         {/* Field sub type (if any) */}
-        {subTypeOptions !== undefined && (
+        {subTypeOptions && (
           <EuiFlexItem grow={false}>
             <UseField
               path="subType"
               defaultValue={subTypeOptions[0].value}
               config={{
-                ...getFieldConfig('type'),
+                ...typeFieldConfig,
                 label: subTypeLabel,
               }}
               component={SelectField}

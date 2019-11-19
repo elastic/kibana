@@ -247,8 +247,13 @@ export function useForm<T extends FormData = FormData>(
     const { resetValues = true } = resetOptions;
     const currentFormData = { ...formData$.current.value } as FormData;
     Object.entries(fieldsRefs.current).forEach(([path, field]) => {
-      const fieldValue = field.reset({ resetValue: resetValues });
-      currentFormData[path] = fieldValue;
+      // By resetting the form, some field might be unmounted. In order
+      // to avoid a race condition, we check that the field still exists.
+      const isFieldMounted = fieldsRefs.current[path] !== undefined;
+      if (isFieldMounted) {
+        const fieldValue = field.reset({ resetValue: resetValues });
+        currentFormData[path] = fieldValue;
+      }
     });
     if (resetValues) {
       formData$.current.next(currentFormData as T);
