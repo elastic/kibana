@@ -252,16 +252,20 @@ export interface ESQueueWorker {
 }
 
 export type ESQueueCreateJobFn = (
-  jobParams: object,
+  jobParams: any,
   headers: Record<string, string>,
   request: RequestFacade
 ) => Promise<object>;
 
 export type ImmediateCreateJobFn = (
-  jobParams: any,
+  jobParams: { savedObjectType: string; savedObjectId: string; isImmediate: boolean },
   headers: Record<string, string>,
   req: RequestFacade
-) => Promise<any>; // some kind of job payload
+) => Promise<{
+  type: string | null;
+  title: string;
+  jobParams: { savedObjectType: string; savedObjectId: string; isImmediate: boolean };
+}>;
 
 export type ESQueueWorkerExecuteFn = (
   jobId: string,
