@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
@@ -32,7 +32,7 @@ import {
 import { toMountPoint } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { ToastNotificationText } from '../../../../components';
 import { useApi } from '../../../../hooks/use_api';
-import { isKibanaContextInitialized, KibanaContext } from '../../../../lib/kibana';
+import { useKibanaContext } from '../../../../lib/kibana';
 import { RedirectToTransformManagement } from '../../../../common/navigation';
 import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
 
@@ -73,7 +73,7 @@ export const StepCreateForm: FC<Props> = React.memo(
       undefined
     );
 
-    const kibanaContext = useContext(KibanaContext);
+    const kibanaContext = useKibanaContext();
 
     useEffect(() => {
       onChange({ created, started, indexPatternId });
@@ -82,10 +82,6 @@ export const StepCreateForm: FC<Props> = React.memo(
     }, [created, started, indexPatternId]);
 
     const api = useApi();
-
-    if (!isKibanaContextInitialized(kibanaContext)) {
-      return null;
-    }
 
     async function createTransform() {
       setCreated(true);
