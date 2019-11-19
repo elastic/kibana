@@ -7,7 +7,7 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 
 import { DataType, ParameterName, SelectOption, SuperSelectOption } from '../types';
-import { FIELD_OPTIONS_TEXTS, FieldOption } from './field_options_i18n';
+import { FIELD_OPTIONS_TEXTS, LANGUAGE_OPTIONS_TEXT, FieldOption } from './field_options_i18n';
 import { INDEX_DEFAULT } from './default_values';
 import { MAIN_DATA_TYPE_DEFINITION } from './data_types_definition';
 
@@ -40,8 +40,10 @@ const getOptionTexts = (
   ),
 });
 
+type ParametersOptions = ParameterName | 'languageAnalyzer';
+
 export const PARAMETERS_OPTIONS: {
-  [key in ParameterName]?: SelectOption[] | SuperSelectOption[];
+  [key in ParametersOptions]?: SelectOption[] | SuperSelectOption[];
 } = {
   index_options: [
     {
@@ -94,7 +96,15 @@ export const PARAMETERS_OPTIONS: {
       value: 'fingerprint',
       ...getOptionTexts('analyzer.fingerprint'),
     },
+    {
+      value: 'language',
+      ...getOptionTexts('analyzer.language'),
+    },
   ] as SuperSelectOption[],
+  languageAnalyzer: Object.entries(LANGUAGE_OPTIONS_TEXT).map(([value, text]) => ({
+    value,
+    text,
+  })),
   similarity: [
     {
       value: 'BM25',

@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
@@ -23,14 +22,15 @@ import {
   Field,
   FieldHook,
   FormDataProvider,
+  CheckBoxField,
 } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
 import { PARAMETERS_OPTIONS } from '../../../../constants';
-import { SelectWithCustom } from '../../../form';
 import {
   StoreParameter,
   IndexParameter,
   BoostParameter,
+  AnalyzerParameter,
   EagerGlobalOrdinalsParameter,
   NormsParameter,
   SimilarityParameter,
@@ -157,67 +157,52 @@ export const TextType = React.memo(({ field }: Props) => {
             defaultMessage: 'Analysers',
           })}
         >
-          <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.indexAnalyzersFieldTitle', {
-                  defaultMessage: 'Use different analyzers for index and searching',
-                })}
-              </h3>
+          <AnalyzerParameter
+            path="analyzer"
+            label={i18n.translate('xpack.idxMgmt.mappingsEditor.indexSearchAnalyzerFieldLabel', {
+              defaultMessage: 'Index + search analyzer',
+            })}
+            defaultValue={field.source.analyzer}
+          />
+
+          <EuiSpacer size="s" />
+
+          <UseField
+            path="useSameAnalyzerForSearch"
+            component={CheckBoxField}
+            config={{
+              label: i18n.translate(
+                'xpack.idxMgmt.mappingsEditor.analyzers.useSameAnalyzerIndexAnSearch',
+                {
+                  defaultMessage: 'Use the same analyzers for index and searching',
+                }
+              ),
+              defaultValue: true,
+            }}
+          />
+
+          <FormDataProvider pathsToWatch="useSameAnalyzerForSearch">
+            {({ useSameAnalyzerForSearch }) =>
+              useSameAnalyzerForSearch ? null : (
+                <>
+                  <EuiSpacer />
+                  <AnalyzerParameter
+                    path="search_analyzer"
+                    defaultValue={field.source.search_analyzer}
+                    config={getFieldConfig('search_analyzer')}
+                  />
+                </>
+              )
             }
-            sizeTitle={'xxs'}
-            toggleDefaultValue={getDefaultValueToggle('analyzers', field.source)}
-          >
-            {isOn => (
-              <>
-                <div>
-                  <SelectWithCustom
-                    path="analyzer"
-                    label={
-                      isOn
-                        ? i18n.translate('xpack.idxMgmt.mappingsEditor.indexAnalyzerFieldLabel', {
-                            defaultMessage: 'Index analyzer',
-                          })
-                        : i18n.translate(
-                            'xpack.idxMgmt.mappingsEditor.indexSearchAnalyzerFieldLabel',
-                            {
-                              defaultMessage: 'Index + search analyzer',
-                            }
-                          )
-                    }
-                    options={PARAMETERS_OPTIONS.analyzer!}
-                    config={getFieldConfig('analyzer')}
-                    defaultValue={field.source.analyzer}
-                    isSuperSelect
-                  />
-                </div>
-                {isOn && (
-                  <>
-                    <EuiSpacer />
-                    <div>
-                      <SelectWithCustom
-                        path="search_analyzer"
-                        options={PARAMETERS_OPTIONS.analyzer!}
-                        config={getFieldConfig('search_analyzer')}
-                        defaultValue={field.source.search_analyzer}
-                        isSuperSelect
-                      />
-                    </div>
-                  </>
-                )}
-                <EuiSpacer />
-                <div>
-                  <SelectWithCustom
-                    path="search_quote_analyzer"
-                    options={PARAMETERS_OPTIONS.analyzer!}
-                    config={getFieldConfig('search_quote_analyzer')}
-                    defaultValue={field.source.search_quote_analyzer}
-                    isSuperSelect
-                  />
-                </div>
-              </>
-            )}
-          </EditFieldFormRow>
+          </FormDataProvider>
+
+          <EuiSpacer />
+
+          <AnalyzerParameter
+            path="search_quote_analyzer"
+            defaultValue={field.source.search_quote_analyzer}
+            config={getFieldConfig('search_quote_analyzer')}
+          />
         </EditFieldSection>
 
         <EditFieldSection>

@@ -32,6 +32,7 @@ export {
   SuperSelectField,
   ToggleField,
   NumericField,
+  CheckBoxField,
 } from '../../../../../../../src/plugins/es_ui_shared/static/forms/components';
 
 export {

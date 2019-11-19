@@ -10,11 +10,13 @@ interface Optioni18n {
   description: string;
 }
 
-export type FieldOption =
+type IndexOptions =
   | 'indexOptions.docs'
   | 'indexOptions.freqs'
   | 'indexOptions.positions'
-  | 'indexOptions.offsets'
+  | 'indexOptions.offsets';
+
+type AnalyzerOptions =
   | 'analyzer.indexDefault'
   | 'analyzer.standard'
   | 'analyzer.simple'
@@ -23,8 +25,11 @@ export type FieldOption =
   | 'analyzer.keyword'
   | 'analyzer.pattern'
   | 'analyzer.fingerprint'
-  | 'similarity.bm25'
-  | 'similarity.boolean'
+  | 'analyzer.language';
+
+type SimilarityOptions = 'similarity.bm25' | 'similarity.boolean';
+
+type TermVectorOptions =
   | 'termVector.no'
   | 'termVector.yes'
   | 'termVector.withPositions'
@@ -32,6 +37,44 @@ export type FieldOption =
   | 'termVector.withPositionsOffsets'
   | 'termVector.withPositionsPayloads'
   | 'termVector.withPositionsOffsetsPayloads';
+
+type LanguageAnalyzerOption =
+  | 'arabic'
+  | 'armenian'
+  | 'basque'
+  | 'bengali'
+  | 'brazilian'
+  | 'bulgarian'
+  | 'catalan'
+  | 'cjk'
+  | 'czech'
+  | 'danish'
+  | 'dutch'
+  | 'english'
+  | 'finnish'
+  | 'french'
+  | 'galician'
+  | 'german'
+  | 'greek'
+  | 'hindi'
+  | 'hungarian'
+  | 'indonesian'
+  | 'irish'
+  | 'italian'
+  | 'latvian'
+  | 'lithuanian'
+  | 'norwegian'
+  | 'persian'
+  | 'portuguese'
+  | 'romanian'
+  | 'russian'
+  | 'sorani'
+  | 'spanish'
+  | 'swedish'
+  | 'turkish'
+  | 'thai';
+
+export type FieldOption = IndexOptions | AnalyzerOptions | SimilarityOptions | TermVectorOptions;
 
 export const FIELD_OPTIONS_TEXTS: { [key in FieldOption]: Optioni18n } = {
   'indexOptions.docs': {
@@ -179,6 +222,18 @@ export const FIELD_OPTIONS_TEXTS: { [key in FieldOption]: Optioni18n } = {
       }
     ),
   },
+  'analyzer.language': {
+    title: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.analyzer.languageTitle', {
+      defaultMessage: 'Language',
+    }),
+    description: i18n.translate(
+      'xpack.idxMgmt.mappingsEditor.formSelect.analyzer.languageDescription',
+      {
+        defaultMessage:
+          'Elasticsearch provides many language-specific analyzers like english or french.',
+      }
+    ),
+  },
   'similarity.bm25': {
     title: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.similarity.bm25Title', {
       defaultMessage: 'Okapi BM25',
@@ -289,4 +344,118 @@ export const FIELD_OPTIONS_TEXTS: { [key in FieldOption]: Optioni18n } = {
       }
     ),
   },
+};
+
+export const LANGUAGE_OPTIONS_TEXT: { [key in LanguageAnalyzerOption]: string } = {
+  arabic: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.arabic', {
+    defaultMessage: 'Arabic',
+  }),
+  armenian: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.armenian', {
+    defaultMessage: 'Armenian',
+  }),
+  basque: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.basque', {
+    defaultMessage: 'Basque',
+  }),
+  bengali: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.bengali', {
+    defaultMessage: 'Bengali',
+  }),
+  brazilian: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.brazilian', {
+    defaultMessage: 'Brazilian',
+  }),
+  bulgarian: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.bulgarian', {
+    defaultMessage: 'Bulgarian',
+  }),
+  catalan: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.catalan', {
+    defaultMessage: 'Catalan',
+  }),
+  cjk: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.cjk', {
+    defaultMessage: 'Cjk',
+  }),
+  czech: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.czech', {
+    defaultMessage: 'Czech',
+  }),
+  danish: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.danish', {
+    defaultMessage: 'Danish',
+  }),
+  dutch: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.dutch', {
+    defaultMessage: 'Dutch',
+  }),
+  english: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.english', {
+    defaultMessage: 'English',
+  }),
+  finnish: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.finnish', {
+    defaultMessage: 'Finnish',
+  }),
+  french: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.french', {
+    defaultMessage: 'French',
+  }),
+  galician: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.galician', {
+    defaultMessage: 'Galician',
+  }),
+  german: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.german', {
+    defaultMessage: 'German',
+  }),
+  greek: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.greek', {
+    defaultMessage: 'Greek',
+  }),
+  hindi: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.hindi', {
+    defaultMessage: 'Hindi',
+  }),
+  hungarian: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.hungarian', {
+    defaultMessage: 'Hungarian',
+  }),
+  indonesian: i18n.translate(
+    'xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.indonesian',
+    {
+      defaultMessage: 'Indonesian',
+    }
+  ),
+  irish: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.irish', {
+    defaultMessage: 'Irish',
+  }),
+  italian: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.italian', {
+    defaultMessage: 'Italian',
+  }),
+  latvian: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.latvian', {
+    defaultMessage: 'Latvian',
+  }),
+  lithuanian: i18n.translate(
+    'xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.lithuanian',
+    {
+      defaultMessage: 'Lithuanian',
+    }
+  ),
+  norwegian: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.norwegian', {
+    defaultMessage: 'Norwegian',
+  }),
+  persian: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.persian', {
+    defaultMessage: 'Persian',
+  }),
+  portuguese: i18n.translate(
+    'xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.portuguese',
+    {
+      defaultMessage: 'Portuguese',
+    }
+  ),
+  romanian: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.romanian', {
+    defaultMessage: 'Romanian',
+  }),
+  russian: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.russian', {
+    defaultMessage: 'Russian',
+  }),
+  sorani: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.sorani', {
+    defaultMessage: 'Sorani',
+  }),
+  spanish: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.spanish', {
+    defaultMessage: 'Spanish',
+  }),
+  swedish: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.swedish', {
+    defaultMessage: 'Swedish',
+  }),
+  thai: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.thai', {
+    defaultMessage: 'Thai',
+  }),
+  turkish: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.languageAnalyzer.turkish', {
+    defaultMessage: 'Turkish',
+  }),
 };

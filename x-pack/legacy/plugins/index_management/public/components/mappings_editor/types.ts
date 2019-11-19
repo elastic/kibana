@@ -123,6 +123,7 @@ interface FieldBasic {
 type FieldParams = {
   [K in ParameterName]: typeof PARAMETERS_DEFINITION[K]['fieldConfig']['defaultValue'];
 };
+
 export type Field = FieldBasic & FieldParams;
 
 export interface FieldMeta {

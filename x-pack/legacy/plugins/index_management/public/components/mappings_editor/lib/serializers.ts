@@ -27,6 +27,10 @@ export const fieldSerializer: SerializerFunc<Field> = (field: Field) => {
     field.type = field.subType as DataType;
     delete field.subType;
   }
+
+  // Delete temp fields
+  delete (field as any).useSameAnalyzerForSearch;
+
   return sanitizeField(field);
 };
 
@@ -42,6 +46,9 @@ export const fieldDeserializer: SerializerFunc<Field> = (field: Field): Field =>
     field.subType = field.type as SubType;
     field.type = type;
   }
+
+  (field as any).useSameAnalyzerForSearch =
+    {}.hasOwnProperty.call(field, 'search_analyzer') === false;
 
   return field;
 };
