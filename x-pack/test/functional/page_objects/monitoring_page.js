@@ -5,12 +5,28 @@
  */
 
 export function MonitoringPageProvider({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'header']);
+  const PageObjects = getPageObjects(['common', 'header', 'shield', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
+  const security = getService('security');
   const retry = getService('retry');
   const find = getService('find');
 
   return new class MonitoringPage {
+    async navigateTo(useSuperUser = false) {
+      // always create this because our tear down tries to delete it
+      await security.user.create('basic_monitoring_user', {
+        password: 'monitoring_user_password',
+        roles: ['monitoring_user', 'kibana_user'],
+        full_name: 'basic monitoring',
+      });
+
+      if (!useSuperUser) {
+        await PageObjects.common.navigateToApp('login');
+        await PageObjects.shield.login(
+          'basic_monitoring_user',
+          'monitoring_user_password'
+        );
+      }
     async getWelcome() {
       const el = await find.byCssSelector('.euiCallOut--primary', 10000 * 10);
       return await el.getVisibleText();

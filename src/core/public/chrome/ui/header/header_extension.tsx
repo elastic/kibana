@@ -18,9 +18,10 @@
  */
 
 import React from 'react';
+import { MountPoint } from '../../../types';
 
 interface Props {
-  extension?: (el: HTMLDivElement) => () => void;
+  extension?: MountPoint<HTMLDivElement>;
 }
 
 export class HeaderExtension extends React.Component<Props> {
