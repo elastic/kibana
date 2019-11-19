@@ -17,8 +17,4 @@
  * under the License.
  */
 
-export { OverlayRef } from './types';
-export { OverlayBannersStart } from './banners';
-export { OverlayFlyoutStart, OverlayFlyoutOpenOptions } from './flyout';
-export { OverlayModalStart, OverlayModalOpenOptions } from './modal';
-export { OverlayService, OverlayStart } from './overlay_service';
+export { FlyoutService, OverlayFlyoutStart, OverlayFlyoutOpenOptions } from './flyout_service';
