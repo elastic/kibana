@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function kbnTypeToMLJobType(field: any): any;
+import { PluginInitializerContext } from 'src/core/public';
+import { LicensingPlugin } from './plugin';
+
+export * from '../common/types';
+export const plugin = (context: PluginInitializerContext) => new LicensingPlugin(context);

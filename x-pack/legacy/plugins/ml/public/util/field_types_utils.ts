@@ -5,18 +5,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  ML_JOB_FIELD_TYPES,
-} from './../../common/constants/field_types';
+import { FieldType } from 'ui/index_patterns';
+import { ML_JOB_FIELD_TYPES } from './../../common/constants/field_types';
 
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 
 // convert kibana types to ML Job types
 // this is needed because kibana types only have string and not text and keyword.
 // and we can't use ES_FIELD_TYPES because it has no NUMBER type
-export function kbnTypeToMLJobType(field) {
+export function kbnTypeToMLJobType(field: FieldType) {
   // Return undefined if not one of the supported data visualizer field types.
-  let type = undefined;
+  let type;
   switch (field.type) {
     case KBN_FIELD_TYPES.STRING:
       type = field.aggregatable ? ML_JOB_FIELD_TYPES.KEYWORD : ML_JOB_FIELD_TYPES.TEXT;
@@ -53,8 +52,8 @@ export const mlJobTypeAriaLabels = {
   GEO_POINT: i18n.translate('xpack.ml.fieldTypeIcon.geoPointTypeAriaLabel', {
     defaultMessage: '{geoPointParam} type',
     values: {
-      geoPointParam: 'geo point'
-    }
+      geoPointParam: 'geo point',
+    },
   }),
   IP: i18n.translate('xpack.ml.fieldTypeIcon.ipTypeAriaLabel', {
     defaultMessage: 'ip type',
@@ -73,7 +72,12 @@ export const mlJobTypeAriaLabels = {
   }),
 };
 
-export const getMLJobTypeAriaLabel = (type) => {
-  const requestedFieldType = Object.keys(ML_JOB_FIELD_TYPES).find(k => (ML_JOB_FIELD_TYPES[k] === type));
-  return mlJobTypeAriaLabels[requestedFieldType] || null;
+export const getMLJobTypeAriaLabel = (type: string) => {
+  const requestedFieldType = Object.keys(ML_JOB_FIELD_TYPES).find(
+    k => ML_JOB_FIELD_TYPES[k as keyof typeof ML_JOB_FIELD_TYPES] === type
+  );
+  if (requestedFieldType === undefined) {
+    return null;
+  }
+  return mlJobTypeAriaLabels[requestedFieldType as keyof typeof mlJobTypeAriaLabels];
 };
