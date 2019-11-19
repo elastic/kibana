@@ -20,7 +20,6 @@ const introspectionQuery = gql`
 `;
 
 export default function({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestWithoutAuth');
   const security: SecurityService = getService('security');
   const spaces: SpacesService = getService('spaces');
   const clientFactory = getService('infraOpsGraphQLClientFactory');
@@ -36,18 +35,6 @@ export default function({ getService }: FtrProviderContext) {
     expect(result.error).to.be(undefined);
     expect(result.response).to.have.property('data');
     expect(result.response.data).to.be.an('object');
-  };
-
-  const expectGraphIQL404 = (result: any) => {
-    expect(result.error).to.be(undefined);
-    expect(result.response).not.to.be(undefined);
-    expect(result.response).to.have.property('statusCode', 404);
-  };
-
-  const expectGraphIQLResponse = (result: any) => {
-    expect(result.error).to.be(undefined);
-    expect(result.response).not.to.be(undefined);
-    expect(result.response).to.have.property('statusCode', 200);
   };
 
   const executeGraphQLQuery = async (username: string, password: string, spaceId?: string) => {
@@ -69,16 +56,6 @@ export default function({ getService }: FtrProviderContext) {
       error,
       response,
     };
-  };
-
-  const executeGraphIQLRequest = async (username: string, password: string, spaceId?: string) => {
-    const basePath = spaceId ? `/s/${spaceId}` : '';
-
-    return supertest
-      .get(`${basePath}/api/infra/graphql/graphiql`)
-      .auth(username, password)
-      .then((response: any) => ({ error: undefined, response }))
-      .catch((error: any) => ({ error, response: undefined }));
   };
 
   describe('feature controls', () => {
