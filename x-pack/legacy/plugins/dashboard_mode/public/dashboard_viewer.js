@@ -20,6 +20,7 @@ import 'uiExports/visResponseHandlers';
 import 'uiExports/visRequestHandlers';
 import 'uiExports/visEditorTypes';
 import 'uiExports/inspectorViews';
+import 'uiExports/interpreter';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/embeddableActions';
 import 'uiExports/embeddableFactories';

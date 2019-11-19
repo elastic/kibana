@@ -13,6 +13,8 @@ import { MlServerDefaults, MlServerLimits } from '../../services/ml_server_info'
 import { ES_AGGREGATION } from '../../../common/constants/aggregation_types';
 import { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { JobMessage } from '../../../common/types/audit_message';
+import { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common/analytics';
+import { DeepPartial } from '../../../common/types/common';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -70,6 +72,9 @@ declare interface Ml {
     getDataFrameAnalyticsStats(analyticsId?: string): Promise<GetDataFrameAnalyticsStatsResponse>;
     createDataFrameAnalytics(analyticsId: string, analyticsConfig: any): Promise<any>;
     evaluateDataFrameAnalytics(evaluateConfig: any): Promise<any>;
+    estimateDataFrameAnalyticsMemoryUsage(
+      jobConfig: DeepPartial<DataFrameAnalyticsConfig>
+    ): Promise<any>;
     deleteDataFrameAnalytics(analyticsId: string): Promise<any>;
     startDataFrameAnalytics(analyticsId: string): Promise<any>;
     stopDataFrameAnalytics(
