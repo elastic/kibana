@@ -25,7 +25,7 @@ import {
   onPremCloudInstructions,
 } from '../../../common/tutorials/heartbeat_instructions';
 
-export function uptimeMonitorsSpecProvider(server, context) {
+export function uptimeMonitorsSpecProvider(context) {
   return {
     id: 'uptimeMonitors',
     name: i18n.translate('kbn.server.tutorials.uptimeMonitors.nameTitle', {

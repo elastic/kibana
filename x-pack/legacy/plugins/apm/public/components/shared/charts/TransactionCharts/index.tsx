@@ -19,7 +19,6 @@ import { Location } from 'history';
 import React, { Component } from 'react';
 import { isEmpty, flatten } from 'lodash';
 import styled from 'styled-components';
-import { idx } from '@kbn/elastic-idx';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
@@ -27,13 +26,13 @@ import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import {
   asInteger,
   tpmUnit,
-  TimeFormatter
+  TimeFormatter,
+  getDurationFormatter
 } from '../../../../utils/formatters';
 import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { TransactionLineChart } from './TransactionLineChart';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { getTimeFormatter } from '../../../../utils/formatters';
 import { DurationByCountryMap } from './DurationByCountryMap';
 import {
   TRANSACTION_PAGE_LOAD,
@@ -74,12 +73,14 @@ export class TransactionCharts extends Component<TransactionChartProps> {
   };
 
   public getResponseTimeTickFormatter = (formatter: TimeFormatter) => {
-    return (t: number) => formatter(t);
+    return (t: number) => formatter(t).formatted;
   };
 
   public getResponseTimeTooltipFormatter = (formatter: TimeFormatter) => {
     return (p: Coordinate) => {
-      return isValidCoordinateValue(p.y) ? formatter(p.y) : NOT_AVAILABLE_LABEL;
+      return isValidCoordinateValue(p.y)
+        ? formatter(p.y).formatted
+        : NOT_AVAILABLE_LABEL;
     };
   };
 
@@ -154,7 +155,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
     const { responseTimeSeries, tpmSeries } = charts;
     const { transactionType } = urlParams;
     const maxY = this.getMaxY(responseTimeSeries);
-    const formatter = getTimeFormatter(maxY);
+    const formatter = getDurationFormatter(maxY);
 
     return (
       <>
@@ -170,9 +171,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
                   </EuiFlexItem>
                   <LicenseContext.Consumer>
                     {license =>
-                      this.renderMLHeader(
-                        idx(license, _ => _.features.ml.is_available)
-                      )
+                      this.renderMLHeader(license.features.ml?.is_available)
                     }
                   </LicenseContext.Consumer>
                 </EuiFlexGroup>

@@ -42,7 +42,7 @@ export function scheduleTasks(server: HapiServer) {
     // function block.
     (async () => {
       try {
-        await taskManager.schedule({
+        await taskManager.ensureScheduled({
           id: `${PLUGIN_ID}-${VIS_TELEMETRY_TASK}`,
           taskType: VIS_TELEMETRY_TASK,
           state: { stats: {}, runs: 0 },
