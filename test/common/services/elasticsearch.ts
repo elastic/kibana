@@ -17,18 +17,17 @@
  * under the License.
  */
 
-import { LegacyEsProvider } from './legacy_es';
-import { ElasticsearchProvider } from './elasticsearch';
-import { EsArchiverProvider } from './es_archiver';
-import { KibanaServerProvider } from './kibana_server';
-import { RetryProvider } from './retry';
-import { RandomnessProvider } from './randomness';
+import { format as formatUrl } from 'url';
 
-export const services = {
-  es: LegacyEsProvider,
-  '@elastic/elasticsearch': ElasticsearchProvider,
-  esArchiver: EsArchiverProvider,
-  kibanaServer: KibanaServerProvider,
-  retry: RetryProvider,
-  randomness: RandomnessProvider,
-};
+import { Client } from '@elastic/elasticsearch';
+
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export function ElasticsearchProvider({ getService }: FtrProviderContext) {
+  const config = getService('config');
+
+  return new Client({
+    nodes: [formatUrl(config.get('servers.elasticsearch'))],
+    requestTimeout: config.get('timeouts.esRequestTimeout'),
+  });
+}
