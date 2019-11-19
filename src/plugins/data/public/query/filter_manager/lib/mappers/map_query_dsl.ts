@@ -16,25 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { esFilters } from '../../../../../common';
 
-export * from './autocomplete_provider/types';
-
-import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
-import { ISearchSetup, ISearchStart } from './search';
-import { IGetSuggestions } from './suggestions_provider/types';
-import { QuerySetup, QueryStart } from './query';
-export interface DataPublicPluginSetup {
-  autocomplete: AutocompletePublicPluginSetup;
-  search: ISearchSetup;
-  query: QuerySetup;
-}
-
-export interface DataPublicPluginStart {
-  autocomplete: AutocompletePublicPluginStart;
-  getSuggestions: IGetSuggestions;
-  search: ISearchStart;
-  query: QueryStart;
-  filterTypes: any;
-}
-
-export { IGetSuggestions } from './suggestions_provider/types';
+// Use mapQueryDsl mapper to avoid bloating meta with value and params for query DSL filters.
+export const mapQueryDsl = (filter: esFilters.Filter) => {
+  const metaProperty = /(^\$|meta)/;
+  const key = Object.keys(filter).find(item => {
+    return !item.match(metaProperty);
+  });
+  if (key && filter.meta && filter.meta.alias && filter.meta.type === esFilters.FILTERS.QUERY_DSL) {
+    return {
+      key,
+      type: filter.meta.type,
+      value: '',
+    };
+  }
+  throw filter;
+};

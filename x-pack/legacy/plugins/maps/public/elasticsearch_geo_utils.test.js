@@ -6,6 +6,11 @@
 
 jest.mock('ui/new_platform');
 jest.mock('ui/index_patterns');
+jest.mock('./kibana_services', () => {
+  return {
+    QUERY_DSL_FILTER_TYPE: 'query_dsl'
+  };
+});
 
 import {
   hitsToGeoJson,

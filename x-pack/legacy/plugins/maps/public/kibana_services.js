@@ -8,6 +8,9 @@ import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/
 export { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { start as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
 
+console.log('data', data);
+
+export const QUERY_DSL_FILTER_TYPE = data.filterTypes.QUERY_DSL;
 export { SearchSource } from 'ui/courier';
 export const indexPatternService = data.indexPatterns.indexPatterns;
 
