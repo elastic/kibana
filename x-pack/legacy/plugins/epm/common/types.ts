@@ -40,12 +40,7 @@ export type ServiceName = 'kibana' | 'elasticsearch';
 export type RequirementVersion = string;
 
 export interface ServiceRequirements {
-  version: RequirementVersionRange;
-}
-
-export interface RequirementVersionRange {
-  min: RequirementVersion;
-  max: RequirementVersion;
+  versions: string;
 }
 
 // from /categories

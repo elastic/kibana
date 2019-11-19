@@ -5,9 +5,18 @@
  */
 
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
+import styled from 'styled-components';
 import { RequirementVersion } from '../../common/types';
 
-export function VersionBadge({ version }: { version: RequirementVersion }) {
-  return <EuiBadge color="hollow">v{version}</EuiBadge>;
+const CodeText = styled.span`
+  font-family: ${props => props.theme.eui.euiCodeFontFamily};
+`;
+export function Version({
+  className,
+  version,
+}: {
+  className?: string;
+  version: RequirementVersion;
+}) {
+  return <CodeText className={className}>{version}</CodeText>;
 }
