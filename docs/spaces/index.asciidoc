@@ -114,6 +114,7 @@ interface.
 === Configure a Space-level landing page
 
 You can create a custom experience for users by configuring the {kib} landing page on a per-space basis.
+The landing page can route users to a specific dashboard, application, or saved object as they enter each space.
 To configure the landing page, use the `defaultRoute` setting in <<kibana-general-settings, Management > Advanced settings>>.
 
 [float]
