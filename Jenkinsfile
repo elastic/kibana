@@ -42,6 +42,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               'xpack-firefoxSmoke': kibanaPipeline.getPostBuildWorker('xpack-firefoxSmoke', { runbld('./test/scripts/jenkins_xpack_firefox_smoke.sh', 'Execute xpack-firefoxSmoke') }),
               'xpack-accessibility': kibanaPipeline.getPostBuildWorker('xpack-accessibility', { runbld('./test/scripts/jenkins_xpack_accessibility.sh', 'Execute xpack-accessibility') }),
               'xpack-visualRegression': kibanaPipeline.getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') }),
+              'xpack-siemCypress': kibanaPipeline.getPostBuildWorker('xpack-siemCypress', { runbld('./test/scripts/jenkins_siem_cypress.sh', 'Execute siem-cypress') }),
             ]),
           ])
         }
