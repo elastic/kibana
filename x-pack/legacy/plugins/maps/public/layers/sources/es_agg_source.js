@@ -7,7 +7,7 @@
 import { AbstractESSource } from './es_source';
 import { ESAggMetricField } from '../fields/es_agg_field';
 import { ESDocField } from '../fields/es_doc_field';
-import { METRIC_TYPE, COUNT_AGG_TYPE, COUNT_PROP_LABEL, COUNT_PROP_NAME } from '../../../common/constants';
+import { METRIC_TYPE, COUNT_AGG_TYPE, COUNT_PROP_LABEL, COUNT_PROP_NAME, FIELD_ORIGIN } from '../../../common/constants';
 
 
 const AGG_DELIMITER = '_of_';
@@ -41,7 +41,8 @@ export class AbstractESAggSource extends AbstractESSource {
         label: metric.label,
         esDocField: esDocField,
         aggType: metric.type,
-        source: this
+        source: this,
+        origin: this.getOriginForField()
       });
     }) : [];
   }
@@ -61,7 +62,8 @@ export class AbstractESAggSource extends AbstractESSource {
         label: label,
         esDocField,
         aggType,
-        source: this
+        source: this,
+        origin: this.getOriginForField()
       });
     }
   }
@@ -70,6 +72,10 @@ export class AbstractESAggSource extends AbstractESSource {
     return this.getMetricFields().find(metricField => {
       return metricField.getName() === fieldName;
     });
+  }
+
+  getOriginForField() {
+    return FIELD_ORIGIN.SOURCE;
   }
 
   getMetricFields() {

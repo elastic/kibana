@@ -9,9 +9,10 @@ import { FIELD_ORIGIN } from '../../../common/constants';
 
 export class AbstractField {
 
-  constructor({ fieldName, source }) {
+  constructor({ fieldName, source, origin }) {
     this._fieldName = fieldName;
     this._source = source;
+    this._origin = origin || FIELD_ORIGIN.SOURCE;
   }
 
   getName() {
@@ -39,6 +40,6 @@ export class AbstractField {
   }
 
   getOrigin() {
-    return FIELD_ORIGIN.UNDEFINED;
+    return this._origin;
   }
 }

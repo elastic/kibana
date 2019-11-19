@@ -53,8 +53,7 @@ export const ES_PEW_PEW = 'ES_PEW_PEW';
 
 export const FIELD_ORIGIN = {
   SOURCE: 'source',
-  JOIN: 'join',
-  UNDEFINED: 'undefined'
+  JOIN: 'join'
 };
 
 export const SOURCE_DATA_ID_ORIGIN = 'source';

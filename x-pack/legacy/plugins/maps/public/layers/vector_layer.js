@@ -24,7 +24,6 @@ import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataRequestAbortError } from './util/data_request';
-import { FieldWithOrigin } from './fields/field_with_origin';
 
 const VISIBILITY_FILTER_CLAUSE = ['all',
   [
@@ -227,31 +226,16 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async getDateFields() {
-    const timeFields = await this._source.getDateFields();
-    return timeFields.map((field) => {
-      return new FieldWithOrigin({ field: field, origin: FIELD_ORIGIN.SOURCE });
-    });
+    return await this._source.getDateFields();
   }
 
   async getNumberFields() {
-    const numberFields = await this._source.getNumberFields();
-    const numberFieldOptions = numberFields.map(field => {
-      return new FieldWithOrigin({
-        field: field,
-        origin: FIELD_ORIGIN.SOURCE
-      });
-    });
+    const numberFieldOptions = await this._source.getNumberFields();
     const joinFields = [];
     this.getValidJoins().forEach(join => {
-      const fields = join.getJoinFields().map(joinField => {
-        return new FieldWithOrigin({
-          field: joinField,
-          origin: FIELD_ORIGIN.JOIN
-        });
-      });
+      const fields = join.getJoinFields();
       joinFields.push(...fields);
     });
-
     return [...numberFieldOptions, ...joinFields];
   }
 
@@ -518,7 +502,7 @@ export class VectorLayer extends AbstractLayer {
   _assignIdsToFeatures(featureCollection) {
 
     //wrt https://github.com/elastic/kibana/issues/39317
-    // In constrained resource environments, mapbox-gl may throw a stackoverflow error due to hitting the browser's recursion limit. This crashes Kibana.
+    //In constrained resource environments, mapbox-gl may throw a stackoverflow error due to hitting the browser's recursion limit. This crashes Kibana.
     //This error is thrown in mapbox-gl's quicksort implementation, when it is sorting all the features by id.
     //This is a work-around to avoid hitting such a worst-case
     //This was tested as a suitable work-around for mapbox-gl 0.54
