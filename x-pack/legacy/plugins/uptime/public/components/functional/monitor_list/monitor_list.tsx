@@ -64,8 +64,8 @@ export const MonitorListComponent = (props: Props) => {
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
 
   const items = data?.monitorStates?.summaries || [];
-  const nextPagePagination = data?.monitorStates?.nextPagePagination || '';
-  const prevPagePagination = data?.monitorStates?.prevPagePagination || '';
+  const nextPagePagination = data?.monitorStates?.nextPagePagination || undefined;
+  const prevPagePagination = data?.monitorStates?.prevPagePagination || undefined;
 
   const getExpandedRowMap = () => {
     return drawerIds.reduce((map: ExpandedRowMap, id: string) => {

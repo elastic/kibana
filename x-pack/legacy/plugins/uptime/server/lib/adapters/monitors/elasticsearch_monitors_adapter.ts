@@ -420,7 +420,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     return {
       id: pageTitle?.monitor?.id || monitorId,
       url: pageTitle?.url?.full || null,
-      name: pageTitle?.monitor?.name || null,
+      name: pageTitle?.monitor?.name || '',
     };
   }
 

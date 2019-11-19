@@ -12,7 +12,7 @@ import { useUrlParams } from '../../../hooks';
 interface OverviewPageLinkProps {
   dataTestSubj: string;
   direction: string;
-  pagination: string;
+  pagination: string | undefined;
 }
 
 export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
