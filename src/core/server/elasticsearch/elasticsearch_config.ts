@@ -46,12 +46,15 @@ export const config = {
         false,
         schema.string({
           validate: rawConfig => {
-            if (rawConfig === 'elastic') {
-              return (
-                'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
-                'privilege-related issues. You should use the "kibana" user instead.'
-              );
-            }
+            // FIXME_INGEST: Disabled because of https://github.com/elastic/kibana/pull/49037
+            // Temporary work around until we know how the stack wants to add the permissions we need.
+            // Either adding them to the kibana user or creating a new user.
+            // if (rawConfig === 'elastic') {
+            //   return (
+            //     'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
+            //     'privilege-related issues. You should use the "kibana" user instead.'
+            //   );
+            // }
           },
         }),
         schema.string()
