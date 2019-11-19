@@ -29,6 +29,7 @@ export interface Props {
   defaultValue?: unknown;
   component?: FunctionComponent<any> | 'input';
   componentProps?: Record<string, any>;
+  onChange?: (value: unknown) => void;
   children?: (field: FieldHook) => JSX.Element;
 }
 
@@ -38,6 +39,7 @@ export const UseField = ({
   defaultValue,
   component = 'input',
   componentProps = {},
+  onChange,
   children,
 }: Props) => {
   const form = useFormContext();
@@ -64,7 +66,7 @@ export const UseField = ({
     }
   }
 
-  const field = useField(form, path, configCopy);
+  const field = useField(form, path, configCopy, onChange);
 
   // Remove field from form when it is unmounted or if its path changes
   useEffect(() => {
