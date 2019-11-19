@@ -6,7 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { cryptoFactory, LevelLogger } from '../../../server/lib';
-import { JobDocOutputExecuted, ServerFacade, RequestFacade } from '../../../types';
+import {
+  ImmediateExecuteFn,
+  JobDocOutputExecuted,
+  ServerFacade,
+  RequestFacade,
+} from '../../../types';
 import {
   CONTENT_TYPE_CSV,
   CSV_FROM_SAVEDOBJECT_JOB_TYPE,
@@ -15,14 +20,7 @@ import {
 import { CsvResultFromSearch, JobDocPayloadPanelCsv, FakeRequest } from '../types';
 import { createGenerateCsv } from './lib';
 
-// TODO moveme
-type ExecuteJobFn = (
-  jobId: string | null,
-  job: JobDocPayloadPanelCsv,
-  realRequest?: RequestFacade
-) => Promise<JobDocOutputExecuted>;
-
-export function executeJobFactory(server: ServerFacade): ExecuteJobFn {
+export function executeJobFactory(server: ServerFacade): ImmediateExecuteFn {
   const crypto = cryptoFactory(server);
   const logger = LevelLogger.createForServer(server, [
     PLUGIN_ID,

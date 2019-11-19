@@ -8,7 +8,7 @@ import { notFound, notImplemented } from 'boom';
 import { get } from 'lodash';
 import { PLUGIN_ID, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
 import { cryptoFactory, LevelLogger } from '../../../../server/lib';
-import { ServerFacade, RequestFacade } from '../../../../types';
+import { ImmediateCreateJobFn, ServerFacade, RequestFacade } from '../../../../types';
 import {
   SavedObject,
   SavedObjectServiceError,
@@ -27,13 +27,7 @@ interface VisData {
   panel: SearchPanel;
 }
 
-type CreateJobFn = (
-  jobParams: JobParamsPanelCsv,
-  headers: any,
-  req: RequestFacade
-) => Promise<JobDocPayloadPanelCsv>;
-
-export function createJobFactory(server: ServerFacade): CreateJobFn {
+export function createJobFactory(server: ServerFacade): ImmediateCreateJobFn {
   const crypto = cryptoFactory(server);
   const logger = LevelLogger.createForServer(server, [
     PLUGIN_ID,

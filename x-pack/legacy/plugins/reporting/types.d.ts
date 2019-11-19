@@ -198,9 +198,10 @@ export interface JobParamPostPayload {
 
 export interface JobDocPayload {
   headers?: Record<string, string>;
-  jobParams: object;
+  jobParams: any;
   title: string;
   type: string | null;
+  objects: null;
 }
 
 export interface JobSource {
@@ -256,6 +257,12 @@ export type ESQueueCreateJobFn = (
   request: RequestFacade
 ) => Promise<object>;
 
+export type ImmediateCreateJobFn = (
+  jobParams: any,
+  headers: Record<string, string>,
+  req: RequestFacade
+) => Promise<object>;
+
 export type ESQueueWorkerExecuteFn = (
   jobId: string,
   job: JobDoc,
@@ -263,9 +270,10 @@ export type ESQueueWorkerExecuteFn = (
 ) => void;
 
 export type JobIDForImmediate = null;
+
 export type ImmediateExecuteFn = (
   jobId: JobIDForImmediate,
-  jobDocPayload: JobDocPayload,
+  job: JobDocPayload,
   request: RequestFacade
 ) => Promise<JobDocOutputExecuted>;
 
