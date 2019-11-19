@@ -7,14 +7,10 @@
 // This file redirects lens urls starting with app/lens#... to their counterpart on app/kibana#lens/... to
 // make sure it's compatible with the 7.5 release
 
-const newUrl =
-  // replace app/lens in the path with app/kibana
-  window.location.pathname.replace(/app\/lens$/, 'app/kibana') +
-  // prefix the path in the url with lens
-  window.location.hash.replace(/^#\//, '#/lens/');
+import { npSetup } from 'ui/new_platform';
 
-// redirect
-window.location.href = window.location.href.replace(
-  window.location.pathname + window.location.hash,
-  newUrl
-);
+// prefix the path in the hash with lens/
+const prefixedHashRoute = window.location.hash.replace(/^#\//, '#/lens/');
+
+// redirect to the new lens url `app/kibana#/lens/...`
+window.location.href = npSetup.core.http.basePath.prepend('/app/kibana' + prefixedHashRoute);

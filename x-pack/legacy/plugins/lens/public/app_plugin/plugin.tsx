@@ -41,6 +41,7 @@ import {
   trackUiEvent,
 } from '../lens_ui_telemetry';
 import { LocalApplicationService } from '../../../../../../src/legacy/core_plugins/kibana/public/local_application_service';
+import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../index';
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
@@ -123,7 +124,7 @@ export class AppPlugin {
 
     localApplicationService.register({
       id: 'lens',
-      title: 'Lens',
+      title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
       mount: async (context, params) => {
         render(
           <I18nProvider>

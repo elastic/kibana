@@ -12,7 +12,7 @@ import mappings from './mappings.json';
 import { PLUGIN_ID, getEditPath } from './common';
 import { lensServerPlugin } from './server';
 
-const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
+export const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 
 export const lens: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({

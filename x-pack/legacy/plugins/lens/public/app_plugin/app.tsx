@@ -65,16 +65,19 @@ export function App({
   const language =
     storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
 
-  const [state, setState] = useState<State>({
-    isLoading: !!docId,
-    isSaveModalVisible: false,
-    indexPatternsForTopNav: [],
-    query: { query: '', language },
-    dateRange: {
-      fromDate: data.query.timefilter.timefilter.getTime().from,
-      toDate: data.query.timefilter.timefilter.getTime().to,
-    },
-    filters: [],
+  const [state, setState] = useState<State>(() => {
+    const currentRange = data.query.timefilter.timefilter.getTime();
+    return {
+      isLoading: !!docId,
+      isSaveModalVisible: false,
+      indexPatternsForTopNav: [],
+      query: { query: '', language },
+      dateRange: {
+        fromDate: currentRange.from,
+        toDate: currentRange.to,
+      },
+      filters: [],
+    };
   });
 
   const { lastKnownDoc } = state;
@@ -198,12 +201,11 @@ export function App({
                   dateRange.from !== state.dateRange.fromDate ||
                   dateRange.to !== state.dateRange.toDate
                 ) {
+                  data.query.timefilter.timefilter.setTime(dateRange);
                   trackUiEvent('app_date_change');
                 } else {
                   trackUiEvent('app_query_change');
                 }
-
-                data.query.timefilter.timefilter.setTime(dateRange);
 
                 setState(s => ({
                   ...s,
