@@ -17,7 +17,13 @@ import {
   CSV_FROM_SAVEDOBJECT_JOB_TYPE,
   PLUGIN_ID,
 } from '../../../common/constants';
-import { CsvResultFromSearch, JobDocPayloadPanelCsv, FakeRequest } from '../types';
+import {
+  CsvResultFromSearch,
+  JobParamsPanelCsv,
+  SearchPanel,
+  JobDocPayloadPanelCsv,
+  FakeRequest,
+} from '../types';
 import { createGenerateCsv } from './lib';
 
 export function executeJobFactory(server: ServerFacade): ImmediateExecuteFn {
@@ -39,7 +45,14 @@ export function executeJobFactory(server: ServerFacade): ImmediateExecuteFn {
     const jobLogger = logger.clone([jobId === null ? 'immediate' : jobId]);
 
     const { jobParams } = job;
-    const { isImmediate, panel, visType } = jobParams;
+    const { isImmediate, panel, visType } = jobParams as JobParamsPanelCsv & { panel: SearchPanel };
+
+    if (!panel) {
+      i18n.translate(
+        'xpack.reporting.exportTypes.csv_from_savedobject.executeJob.failedToAccessPanel',
+        { defaultMessage: 'Failed to access panel metadata for job execution' }
+      );
+    }
 
     jobLogger.debug(`Execute job generating [${visType}] csv`);
 

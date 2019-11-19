@@ -20,7 +20,7 @@ export interface JobParamsPanelCsv {
   savedObjectType: string;
   savedObjectId: string;
   isImmediate: boolean;
-  panel: SearchPanel;
+  panel?: SearchPanel;
   post?: JobParamsPostPayloadPanelCsv;
   visType?: string;
 }
@@ -28,7 +28,7 @@ export interface JobParamsPanelCsv {
 export interface JobDocPayloadPanelCsv extends JobDocPayload {
   type: string | null;
   jobParams: JobParamsPanelCsv;
-  objects: null;
+  objects?: null;
 }
 
 export interface SavedObjectServiceError {

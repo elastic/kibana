@@ -201,7 +201,7 @@ export interface JobDocPayload {
   jobParams: any;
   title: string;
   type: string | null;
-  objects: null;
+  objects?: null | object[];
 }
 
 export interface JobSource {
