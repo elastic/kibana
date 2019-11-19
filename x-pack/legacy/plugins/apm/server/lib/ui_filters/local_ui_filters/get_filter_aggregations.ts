@@ -3,20 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { omit } from 'lodash';
-import { Server } from 'hapi';
 import { Projection } from '../../../../common/projections/typings';
 import { UIFilters } from '../../../../typings/ui-filters';
 import { getUiFiltersES } from '../../helpers/convert_ui_filters/get_ui_filters_es';
 import { localUIFilters, LocalUIFilterName } from './config';
+import { StaticIndexPattern } from '../../../../../../../../src/legacy/core_plugins/data/public';
 
 export const getFilterAggregations = async ({
-  server,
+  indexPattern,
   uiFilters,
   projection,
   localFilterNames
 }: {
-  server: Server;
+  indexPattern: StaticIndexPattern | undefined;
   uiFilters: UIFilters;
   projection: Projection;
   localFilterNames: LocalUIFilterName[];
@@ -25,7 +26,10 @@ export const getFilterAggregations = async ({
 
   const aggs = await Promise.all(
     mappedFilters.map(async field => {
-      const filter = await getUiFiltersES(server, omit(uiFilters, field.name));
+      const filter = await getUiFiltersES(
+        indexPattern,
+        omit(uiFilters, field.name)
+      );
 
       const bucketCountAggregation = projection.body.aggs
         ? {

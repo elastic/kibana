@@ -34,7 +34,8 @@ function getSetup() {
       'apm_oss.transactionIndices': 'myIndex',
       'apm_oss.metricsIndices': 'myIndex',
       'apm_oss.apmAgentConfigurationIndex': 'myIndex'
-    }
+    },
+    dynamicIndexPattern: null as any
   };
 }
 

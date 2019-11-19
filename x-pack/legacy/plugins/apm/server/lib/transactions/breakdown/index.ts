@@ -5,7 +5,6 @@
  */
 
 import { flatten, sortByOrder, last } from 'lodash';
-import { idx } from '@kbn/elastic-idx';
 import {
   SERVICE_NAME,
   SPAN_SUBTYPE,
@@ -149,7 +148,7 @@ export async function getTransactionBreakdown({
 
   const kpiNames = kpis.map(kpi => kpi.name);
 
-  const bucketsByDate = idx(resp.aggregations, _ => _.by_date.buckets) || [];
+  const bucketsByDate = resp.aggregations?.by_date.buckets || [];
 
   const timeseriesPerSubtype = bucketsByDate.reduce((prev, bucket) => {
     const formattedValues = formatBucket(bucket);
