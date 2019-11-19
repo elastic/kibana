@@ -17,5 +17,29 @@
  * under the License.
  */
 
-export { showShareContextMenu } from './show_share_context_menu';
-export { ShareContextMenuExtensionsRegistryProvider } from './share_action_registry';
+import { CoreStart, Plugin } from 'src/core/public';
+import { ShareMenuManager, ShareMenuManagerStart } from './services';
+import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
+
+export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
+  private readonly shareMenuRegistry = new ShareMenuRegistry();
+  private readonly shareContextMenu = new ShareMenuManager();
+
+  public async setup() {
+    return {
+      ...this.shareMenuRegistry.setup(),
+    };
+  }
+
+  public async start(core: CoreStart) {
+    return {
+      ...this.shareContextMenu.start(core, this.shareMenuRegistry.start()),
+    };
+  }
+}
+
+/** @public */
+export type SharePluginSetup = ShareMenuRegistrySetup;
+
+/** @public */
+export type SharePluginStart = ShareMenuManagerStart;

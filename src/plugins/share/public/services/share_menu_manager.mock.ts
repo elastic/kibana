@@ -17,11 +17,24 @@
  * under the License.
  */
 
-// @ts-ignore: implicit any for JS file
-import { uiRegistry } from 'ui/registry/_registry';
-import { ShareActionProvider } from './share_action';
+import { ShareMenuManager, ShareMenuManagerStart } from './share_menu_manager';
 
-export const ShareContextMenuExtensionsRegistryProvider = uiRegistry<ShareActionProvider>({
-  name: 'shareContextMenuExtensions',
-  index: ['id'],
-});
+const createStartMock = (): jest.Mocked<ShareMenuManagerStart> => {
+  const start = {
+    toggleShareContextMenu: jest.fn(),
+  };
+  return start;
+};
+
+const createMock = (): jest.Mocked<PublicMethodsOf<ShareMenuManager>> => {
+  const service = {
+    start: jest.fn(),
+  };
+  service.start.mockImplementation(createStartMock);
+  return service;
+};
+
+export const shareMenuManagerMock = {
+  createStart: createStartMock,
+  create: createMock,
+};
