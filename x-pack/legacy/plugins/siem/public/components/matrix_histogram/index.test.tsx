@@ -26,9 +26,9 @@ jest.mock('../../lib/settings/use_kibana_ui_setting', () => {
   return { useKibanaUiSetting: () => [false] };
 });
 
-jest.mock('../header_panel', () => {
+jest.mock('../header_section', () => {
   return {
-    HeaderPanel: () => <div className="headerPanel" />,
+    HeaderSection: () => <div className="headerSection" />,
   };
 });
 

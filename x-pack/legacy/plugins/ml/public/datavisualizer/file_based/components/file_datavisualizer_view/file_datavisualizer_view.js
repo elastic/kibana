@@ -7,7 +7,7 @@
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, {
-  Component,
+  Component
 } from 'react';
 
 import {
@@ -31,11 +31,7 @@ import {
   reduceData,
   hasImportPermission,
 } from '../utils';
-
-export const MODE = {
-  READ: 0,
-  IMPORT: 1,
-};
+import { MODE } from './constants';
 
 const UPLOAD_SIZE_MB = 5;
 
@@ -306,13 +302,12 @@ export class FileDataVisualizerView extends Component {
               fields={fields}
             />
 
-            <BottomBar
-              showBar={(bottomBarVisible && loaded)}
+            {(bottomBarVisible && loaded) && <BottomBar
               mode={MODE.READ}
-              changeMode={this.changeMode}
+              onChangeMode={this.changeMode}
               onCancel={this.onCancel}
               disableImport={(hasPermissionToImport === false)}
-            />
+            />}
 
             <BottomPadding />
           </React.Fragment>
@@ -329,12 +324,11 @@ export class FileDataVisualizerView extends Component {
               hideBottomBar={this.hideBottomBar}
             />
 
-            <BottomBar
-              showBar={bottomBarVisible}
+            {bottomBarVisible && <BottomBar
               mode={MODE.IMPORT}
-              changeMode={this.changeMode}
+              onChangeMode={this.changeMode}
               onCancel={this.onCancel}
-            />
+            />}
 
             <BottomPadding />
           </React.Fragment>

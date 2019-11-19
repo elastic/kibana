@@ -5,6 +5,6 @@
  */
 
 import { KibanaUrlConfig } from '../../../../common/types/custom_urls';
-import { Job } from '../../new_job_new/common/job_creator/configs';
+import { Job } from '../../new_job/common/job_creator/configs';
 
 export function getTestUrl(job: Job, customUrl: KibanaUrlConfig): Promise<string>;

@@ -80,10 +80,9 @@ function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOption
   const MetricOptional = t.partial({
     field: t.string,
     rate: t.boolean,
-    color: t.keyof(Object.fromEntries(values(MetricsExplorerColor).map(c => [c, null])) as Record<
-      string,
-      null
-    >),
+    color: t.keyof(
+      Object.fromEntries(values(MetricsExplorerColor).map(c => [c, null])) as Record<string, null>
+    ),
     label: t.string,
   });
 
@@ -114,12 +113,18 @@ function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOption
 
 function isMetricExplorerChartOptions(subject: any): subject is MetricsExplorerChartOptions {
   const ChartOptions = t.type({
-    yAxisMode: t.keyof(Object.fromEntries(
-      values(MetricsExplorerYAxisMode).map(v => [v, null])
-    ) as Record<string, null>),
-    type: t.keyof(Object.fromEntries(
-      values(MetricsExplorerChartType).map(v => [v, null])
-    ) as Record<string, null>),
+    yAxisMode: t.keyof(
+      Object.fromEntries(values(MetricsExplorerYAxisMode).map(v => [v, null])) as Record<
+        string,
+        null
+      >
+    ),
+    type: t.keyof(
+      Object.fromEntries(values(MetricsExplorerChartType).map(v => [v, null])) as Record<
+        string,
+        null
+      >
+    ),
     stack: t.boolean,
   });
   const result = ChartOptions.decode(subject);

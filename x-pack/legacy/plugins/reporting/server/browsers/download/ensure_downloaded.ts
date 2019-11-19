@@ -8,7 +8,7 @@ import { resolve as resolvePath } from 'path';
 import { existsSync } from 'fs';
 
 import { chromium } from '../index';
-import { BrowserType } from '../types';
+import { BrowserDownload, BrowserType } from '../types';
 
 import { md5 } from './checksum';
 import { asyncMap } from './util';
@@ -40,15 +40,7 @@ export async function ensureAllBrowsersDownloaded() {
  * @param  {BrowserSpec} browsers
  * @return {Promise<undefined>}
  */
-async function ensureDownloaded(
-  browsers: Array<{
-    paths: {
-      archivesPath: string;
-      baseUrl: string;
-      packages: Array<{ archiveFilename: string; archiveChecksum: string }>;
-    };
-  }>
-) {
+async function ensureDownloaded(browsers: BrowserDownload[]) {
   await asyncMap(browsers, async browser => {
     const { archivesPath } = browser.paths;
 

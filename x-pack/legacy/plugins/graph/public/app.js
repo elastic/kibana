@@ -11,6 +11,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { isColorDark, hexToRgb } from '@elastic/eui';
 
+import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { addAppRedirectMessageToUrl } from 'ui/notify';
 
@@ -347,11 +348,7 @@ export function initGraphApp(angularModule, deps) {
     };
 
     $scope.clickEdge = function (edge) {
-      if (edge.inferred) {
-        $scope.setDetail ({ 'inferredEdge': edge });
-      }else {
-        $scope.workspace.getAllIntersections($scope.handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
-      }
+      $scope.workspace.getAllIntersections($scope.handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
     };
 
     $scope.submit = function (searchTerm) {
@@ -555,9 +552,11 @@ export function initGraphApp(angularModule, deps) {
           canEditDrillDownUrls: canEditDrillDownUrls
         }), $scope.$digest.bind($scope));
         coreStart.overlays.openFlyout(
-          <Provider store={store}>
-            <Settings observable={settingsObservable} />
-          </Provider>, {
+          toMountPoint(
+            <Provider store={store}>
+              <Settings observable={settingsObservable} />
+            </Provider>
+          ), {
             size: 'm',
             closeButtonAriaLabel: i18n.translate('xpack.graph.settings.closeLabel', { defaultMessage: 'Close' }),
             'data-test-subj': 'graphSettingsFlyout',
