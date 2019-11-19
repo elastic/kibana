@@ -182,7 +182,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       }),
       actions: [
         {
-          render: ({ name, inProgress }: SlmPolicy) => {
+          render: ({ name, inProgress, isManagedPolicy }: SlmPolicy) => {
             return (
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem>
@@ -246,13 +246,19 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                 <EuiFlexItem>
                   <PolicyDeleteProvider>
                     {deletePolicyPrompt => {
-                      return (
-                        <EuiToolTip
-                          content={i18n.translate(
+                      const label = !isManagedPolicy
+                        ? i18n.translate(
                             'xpack.snapshotRestore.policyList.table.actionDeleteTooltip',
                             { defaultMessage: 'Delete' }
-                          )}
-                        >
+                          )
+                        : i18n.translate(
+                            'xpack.snapshotRestore.policyList.table.deleteManagedPolicyTableActionTooltip',
+                            {
+                              defaultMessage: 'You cannot delete a cloud-managed policy.',
+                            }
+                          );
+                      return (
+                        <EuiToolTip content={label}>
                           <EuiButtonIcon
                             aria-label={i18n.translate(
                               'xpack.snapshotRestore.policyList.table.actionDeleteAriaLabel',
@@ -265,6 +271,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                             color="danger"
                             data-test-subj="deletePolicyButton"
                             onClick={() => deletePolicyPrompt([name], onPolicyDeleted)}
+                            isDisabled={isManagedPolicy}
                           />
                         </EuiToolTip>
                       );
@@ -294,6 +301,17 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
 
   const selection = {
     onSelectionChange: (newSelectedItems: SlmPolicy[]) => setSelectedItems(newSelectedItems),
+    selectable: ({ isManagedPolicy }: SlmPolicy) => !isManagedPolicy,
+    selectableMessage: (selectable: boolean) => {
+      if (!selectable) {
+        return i18n.translate(
+          'xpack.snapshotRestore.policyList.table.deleteManagedPolicySelectTooltip',
+          {
+            defaultMessage: 'You cannot delete a cloud-managed policy.',
+          }
+        );
+      }
+    },
   };
 
   const search = {

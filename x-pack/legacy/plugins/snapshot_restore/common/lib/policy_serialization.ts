@@ -11,7 +11,11 @@ import {
   serializeSnapshotRetention,
 } from './';
 
-export const deserializePolicy = (name: string, esPolicy: SlmPolicyEs): SlmPolicy => {
+export const deserializePolicy = (
+  name: string,
+  esPolicy: SlmPolicyEs,
+  isManagedPolicy: boolean
+): SlmPolicy => {
   const {
     version,
     modified_date: modifiedDate,
@@ -35,6 +39,7 @@ export const deserializePolicy = (name: string, esPolicy: SlmPolicyEs): SlmPolic
     repository,
     nextExecution,
     nextExecutionMillis,
+    isManagedPolicy,
   };
 
   if (config) {

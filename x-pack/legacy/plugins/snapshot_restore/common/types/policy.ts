@@ -20,6 +20,7 @@ export interface SlmPolicyPayload {
 }
 
 export interface SlmPolicy extends SlmPolicyPayload {
+  isManagedPolicy: boolean;
   version: number;
   modifiedDate: string;
   modifiedDateMillis: number;

@@ -11,6 +11,7 @@ import {
 import { SlmPolicyEs, SlmPolicy, SlmPolicyPayload } from '../../../common/types';
 import { deserializePolicy, serializePolicy } from '../../../common/lib';
 import { Plugins } from '../../../shim';
+import { getManagedPolicyNames } from '../../lib';
 
 let callWithInternalUser: any;
 
@@ -34,6 +35,8 @@ export const getAllHandler: RouterRouteHandler = async (
 ): Promise<{
   policies: SlmPolicy[];
 }> => {
+  const managedPolicies = await getManagedPolicyNames(callWithInternalUser);
+
   // Get policies
   const policiesByName: {
     [key: string]: SlmPolicyEs;
@@ -43,9 +46,10 @@ export const getAllHandler: RouterRouteHandler = async (
 
   // Deserialize policies
   return {
-    policies: Object.entries(policiesByName).map(([name, policy]) =>
-      deserializePolicy(name, policy)
-    ),
+    policies: Object.entries(policiesByName).map(([name, policy]) => {
+      const isManagedPolicy = managedPolicies.includes(name);
+      return deserializePolicy(name, policy, isManagedPolicy);
+    }),
   };
 };
 
