@@ -303,10 +303,22 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       timeout: number = WAIT_FOR_EXISTS_TIME
     ): Promise<boolean> {
       log.debug(`Find.existsByDisplayedByCssSelector('${selector}') with timeout=${timeout}`);
-      return await this.exists(async drive => {
-        const elements = wrapAll(await drive.findElements(By.css(selector)));
-        return await this.filterElementIsDisplayed(elements);
-      }, timeout);
+      try {
+        await retry.tryForTime(timeout, async () => {
+          // make sure that the find timeout is not longer than the retry timeout
+          await this._withTimeout(Math.min(timeout, WAIT_FOR_EXISTS_TIME));
+          const elements = await driver.findElements(By.css(selector));
+          await this._withTimeout(defaultFindTimeout);
+          const displayed = await this.filterElementIsDisplayed(wrapAll(elements));
+          if (displayed.length === 0) {
+            throw new Error(`${selector} is not displayed`);
+          }
+        });
+      } catch (err) {
+        await this._withTimeout(defaultFindTimeout);
+        return false;
+      }
+      return true;
     }
 
     public async existsByCssSelector(

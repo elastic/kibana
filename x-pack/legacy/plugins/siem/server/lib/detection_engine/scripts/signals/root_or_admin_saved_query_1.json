@@ -1,5 +1,5 @@
 {
-  "id": "saved-query-1",
+  "rule_id": "saved-query-1",
   "description": "Detecting root and admin users",
   "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "5m",

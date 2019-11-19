@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ES_FIELD_TYPES } from '../../../data/common';
+import { ES_FIELD_TYPES } from '../../../data/public';
 
 /** @public */
 export interface FieldMappingSpec {
