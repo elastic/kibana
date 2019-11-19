@@ -148,8 +148,6 @@ export async function getTransactionBreakdown({
 
   const kpiNames = kpis.map(kpi => kpi.name);
 
-  // TODO(TS-3.7-ESLINT)
-  // eslint-disable-next-line @typescript-eslint/camelcase
   const bucketsByDate = resp.aggregations?.by_date.buckets || [];
 
   const timeseriesPerSubtype = bucketsByDate.reduce((prev, bucket) => {
