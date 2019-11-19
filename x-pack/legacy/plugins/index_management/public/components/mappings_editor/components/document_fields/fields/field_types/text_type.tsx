@@ -69,6 +69,12 @@ const getDefaultValueToggle = (param: string, field: FieldType) => {
   }
 };
 
+const i18nTexts = {
+  rangeFieldLabel: i18n.translate('xpack.idxMgmt.mappingsEditor.rangeFieldLabel', {
+    defaultMessage: 'Range (Min / Max %)',
+  }),
+};
+
 export const TextType = React.memo(({ field }: Props) => {
   const onFrequencyFilterChange = (minField: FieldHook, maxField: FieldHook) => ([
     min,
@@ -111,11 +117,7 @@ export const TextType = React.memo(({ field }: Props) => {
           formFieldPath="fielddata"
         >
           {/* fielddata_frequency_filter */}
-          <EuiFormRow
-            label={i18n.translate('xpack.idxMgmt.mappingsEditor.rangeFieldLabel', {
-              defaultMessage: 'Range (Min / Max %)',
-            })}
-          >
+          <EuiFormRow label={i18nTexts.rangeFieldLabel}>
             <UseMultiFields
               fields={{
                 min: {
@@ -249,11 +251,7 @@ export const TextType = React.memo(({ field }: Props) => {
             )}
             toggleDefaultValue={getDefaultValueToggle('indexPrefixes', field.source)}
           >
-            <EuiFormRow
-              label={i18n.translate('xpack.idxMgmt.mappingsEditor.rangeFieldLabel', {
-                defaultMessage: 'Range (Min / Max)',
-              })}
-            >
+            <EuiFormRow label={i18nTexts.rangeFieldLabel}>
               <UseMultiFields
                 fields={{
                   min: {
@@ -324,7 +322,7 @@ export const TextType = React.memo(({ field }: Props) => {
                           <EuiSpacer size="s" />
                           <EuiCallOut
                             title={i18n.translate(
-                              'xpack.idxMgmt.mappingsEditor.positionsErrorMessage',
+                              'xpack.idxMgmt.mappingsEditor.positionsErrorTitle',
                               {
                                 defaultMessage: 'Positions not enabled.',
                               }
