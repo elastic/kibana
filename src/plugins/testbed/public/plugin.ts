@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { take } from 'rxjs/operators';
 import { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/public';
 
 interface ConfigType {
@@ -28,10 +27,7 @@ export class TestbedPlugin implements Plugin<TestbedPluginSetup, TestbedPluginSt
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public async setup(core: CoreSetup, deps: {}) {
-    const config = await this.initializerContext.config
-      .create<ConfigType>()
-      .pipe(take(1))
-      .toPromise();
+    const config = this.initializerContext.config.get<ConfigType>();
 
     // eslint-disable-next-line no-console
     console.log(`Testbed plugin set up. uiProp: '${config.uiProp}'`);

@@ -1261,23 +1261,21 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   exposeToBrowser: ['uiProp'],
   schema: configSchema,
 };
-
-export type ClientConfigType = Pick<ConfigType, 'uiProp'>
 ```
 
-Configuration containing only the exposed properties will be then available on the client-side plugin using the same API as the server-side:
+Configuration containing only the exposed properties will be then available on the client-side using the plugin's `initializerContext`:
 ```typescript
 // my_plugin/public/index.ts
-import { ClientConfigType } from '../server';
+interface ClientConfigType {
+  uiProp: string;
+}
 
 export class Plugin implements Plugin<PluginSetup, PluginStart> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public async setup(core: CoreSetup, deps: {}) {
-    const config = await this.initializerContext.config
-      .create<ClientConfigType>()
-      .pipe(take(1))
-      .toPromise();
+    const config = this.initializerContext.config.get<ClientConfigType>();
+    // ...
   }
 ```
 

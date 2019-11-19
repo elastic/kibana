@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { of } from 'rxjs';
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
 import { CoreContext, CoreSetup, CoreStart, PluginInitializerContext, NotificationsSetup } from '.';
@@ -94,7 +93,7 @@ function pluginInitializerContextMock() {
       },
     },
     config: {
-      create: <T>() => of({} as T),
+      get: <T>() => ({} as T),
     },
   };
 

@@ -46,7 +46,6 @@ import { CoreSetup, CoreStart, PluginInitializerContext } from '..';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { savedObjectsMock } from '../saved_objects/saved_objects_service.mock';
 import { contextServiceMock } from '../context/context_service.mock';
-import { take } from 'rxjs/operators';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
@@ -229,10 +228,7 @@ describe('PluginsService', () => {
 
       const initializerContext = mockPluginInitializers.get('pluginA')!.mock
         .calls[0][0] as PluginInitializerContext;
-      const config = await initializerContext.config
-        .create()
-        .pipe(take(1))
-        .toPromise();
+      const config = initializerContext.config.get();
       expect(config).toMatchObject(pluginConfig);
     });
 

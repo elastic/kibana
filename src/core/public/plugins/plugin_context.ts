@@ -18,7 +18,6 @@
  */
 
 import { omit } from 'lodash';
-import { Observable, of } from 'rxjs';
 import { DiscoveredPlugin } from '../../server';
 import { PluginOpaqueId, PackageInfo, EnvironmentMode } from '../../server/types';
 import { CoreContext } from '../core_system';
@@ -41,7 +40,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
     packageInfo: Readonly<PackageInfo>;
   };
   readonly config: {
-    create: <T = ConfigSchema>() => Observable<T>;
+    get: <T = ConfigSchema>() => T;
   };
 }
 
@@ -67,8 +66,8 @@ export function createPluginInitializerContext(
     opaqueId,
     env: coreContext.env,
     config: {
-      create<T>() {
-        return of<T>((pluginConfig as unknown) as T);
+      get<T>() {
+        return (pluginConfig as unknown) as T;
       },
     },
   };
