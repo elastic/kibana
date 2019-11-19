@@ -121,7 +121,10 @@ export class SavedObjectsSerializer {
       ...(subType && { subType }),
       id: this.trimId(namespace, type, subType, _id),
       ...(namespace && !this.schema.isNamespaceAgnostic(type) && { namespace }),
-      attributes: _source[type],
+      attributes: {
+        ...Object.fromEntries(Object.entries(_source[type]).filter(([key]) => key !== subType)),
+        ...(subType && _source[type][subType]),
+      },
       references: _source.references || [],
       ...(_source.migrationVersion && { migrationVersion: _source.migrationVersion }),
       ...(_source.updated_at && { updated_at: _source.updated_at }),
@@ -147,7 +150,10 @@ export class SavedObjectsSerializer {
       references,
     } = savedObj;
     const source = {
-      [type]: attributes,
+      [type]: {
+        ...this.getCommonAttributes(type, attributes),
+        ...(subType && { [subType]: this.getSubTypeAttributes(type, subType, attributes) }),
+      },
       type,
       ...(subType && { subType }),
       references,
@@ -201,5 +207,29 @@ export class SavedObjectsSerializer {
     }
 
     return id.slice(prefix.length);
+  }
+
+  public getCommonAttributes(type: string, attributes: Record<string, any>): Record<string, any> {
+    if (!this.schema.isSuperType(type)) {
+      return attributes;
+    }
+
+    const keys = this.schema.getSuperTypeCommonAttributeKeys(type);
+    return Object.fromEntries(Object.entries(attributes).filter(([key]) => keys.includes(key)));
+  }
+
+  public getSubTypeAttributes(
+    type: string,
+    subType: string,
+    attributes: Record<string, any>
+  ): Record<string, any> {
+    if (!this.schema.isSuperType(type)) {
+      throw new Error(`${type} doesn't have subTypes, can't call "getSubbTypeAttributes"`);
+    }
+
+    const excludeKeys = this.schema.getSuperTypeCommonAttributeKeys(type);
+    return Object.fromEntries(
+      Object.entries(attributes).filter(([key]) => !excludeKeys.includes(key))
+    );
   }
 }

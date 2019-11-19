@@ -32,6 +32,17 @@ interface GetRequest extends Hapi.Request {
   };
 }
 
+interface GetSubTypeRequest extends Hapi.Request {
+  pre: {
+    savedObjectsClient: SavedObjectsClientContract;
+  };
+  params: {
+    type: string;
+    subType: string;
+    id: string;
+  };
+}
+
 export const createGetRoute = (prereqs: Prerequisites) => ({
   path: '/api/saved_objects/{type}/{id}',
   method: 'GET',
@@ -50,6 +61,29 @@ export const createGetRoute = (prereqs: Prerequisites) => ({
       const { type, id } = request.params;
 
       return savedObjectsClient.get(type, id);
+    },
+  },
+});
+
+export const createGetSubTypeRoute = (prereqs: Prerequisites) => ({
+  path: '/api/saved_objects/{type}/{subType}/{id}',
+  method: 'GET',
+  config: {
+    pre: [prereqs.getSavedObjectsClient],
+    validate: {
+      params: Joi.object()
+        .keys({
+          type: Joi.string().required(),
+          subType: Joi.string().required(),
+          id: Joi.string().required(),
+        })
+        .required(),
+    },
+    handler(request: GetSubTypeRequest) {
+      const { savedObjectsClient } = request.pre;
+      const { type, subType, id } = request.params;
+
+      return savedObjectsClient.get({ type, subType }, id);
     },
   },
 });

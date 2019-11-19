@@ -604,19 +604,26 @@ export class SavedObjectsRepository {
    * @returns {promise} - { id, type, version, attributes }
    */
   async get<T extends SavedObjectAttributes = any>(
-    type: string,
+    type: string | SavedObjectType,
     id: string,
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObject<T>> {
-    if (!this._allowedTypes.includes(type)) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    const savedObjectType = coerceToSavedObjectType(type);
+
+    if (!this._allowedTypes.includes(savedObjectType.type)) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(savedObjectType.type, id);
     }
 
     const { namespace } = options;
 
     const response = await this._callCluster('get', {
-      id: this._serializer.generateRawId(namespace, type, undefined, id),
-      index: this.getIndexForType(type),
+      id: this._serializer.generateRawId(
+        namespace,
+        savedObjectType.type,
+        savedObjectType.subType,
+        id
+      ),
+      index: this.getIndexForType(savedObjectType.type),
       ignore: [404],
     });
 
@@ -624,17 +631,26 @@ export class SavedObjectsRepository {
     const indexNotFound = response.status === 404;
     if (docNotFound || indexNotFound) {
       // see "404s from missing index" above
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(savedObjectType.type, id);
     }
 
     const { updated_at: updatedAt } = response._source;
 
     return {
       id,
-      type,
+      type: savedObjectType.type,
+      ...(savedObjectType.subType && { subType: savedObjectType.subType }),
       ...(updatedAt && { updated_at: updatedAt }),
       version: encodeHitVersion(response),
-      attributes: response._source[type],
+      attributes: {
+        ...Object.fromEntries(
+          Object.entries(response._source[savedObjectType.type]).filter(
+            ([key]) => key !== savedObjectType.subType
+          )
+        ),
+        ...(savedObjectType.subType &&
+          response._source[savedObjectType.type][savedObjectType.subType]),
+      },
       references: response._source.references || [],
       migrationVersion: response._source.migrationVersion,
     };

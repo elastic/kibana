@@ -1,5 +1,5 @@
 {
-  "subtype": {
+  "super_type": {
     "properties": {
       "name": {
         "type": "text",
@@ -10,7 +10,7 @@
           }
         }
       },
-      "foo": {
+      "sub_type_1": {
         "properties": {
           "description": {
             "type": "text",
@@ -23,7 +23,7 @@
           }
         }
       },
-      "bar": {
+      "sub_type_2": {
         "properties": {
           "title": {
             "type": "text",

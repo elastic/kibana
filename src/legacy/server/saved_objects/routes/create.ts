@@ -82,7 +82,7 @@ export const createCreateRoute = (prereqs: Prerequisites, schema: SavedObjectsSc
         const optionalParts = optional ? optional.split('/') : [];
         let subType: string | undefined;
         let id: string | undefined;
-        if (schema.hasSubTypes(type)) {
+        if (schema.isSuperType(type)) {
           [subType, id] = optionalParts;
           if (!subType) {
             throw Boom.badRequest(`subType is required for ${type}`);

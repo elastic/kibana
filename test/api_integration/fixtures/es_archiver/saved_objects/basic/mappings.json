@@ -250,7 +250,7 @@
             }
           }
         },
-        "subtype": {
+        "super_type": {
           "properties": {
             "name": {
               "type": "text",

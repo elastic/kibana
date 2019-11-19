@@ -22,7 +22,10 @@ import { Config } from '../../config';
 interface SavedObjectsSchemaTypeDefinition {
   isNamespaceAgnostic: boolean;
   hidden?: boolean;
-  subTypes?: string[];
+  superType?: {
+    commonAttributes: string[];
+    subTypes: string[];
+  };
   indexPattern?: ((config: Config) => string) | string;
   convertToAliasScript?: string;
 }
@@ -76,7 +79,7 @@ export class SavedObjectsSchema {
     return Boolean(typeSchema.isNamespaceAgnostic);
   }
 
-  public hasSubTypes(type: string) {
+  public isSuperType(type: string) {
     if (!this.definition) {
       return false;
     }
@@ -86,6 +89,15 @@ export class SavedObjectsSchema {
       return false;
     }
 
-    return Boolean(typeSchema.subTypes);
+    return Boolean(typeSchema.superType);
+  }
+
+  public getSuperTypeCommonAttributeKeys(type: string) {
+    if (!this.isSuperType(type)) {
+      throw new Error(`${type} isn't a superType, can't use "getSuperTypeRootProperties"`);
+    }
+
+    const typeSchema = this.definition![type];
+    return typeSchema.superType!.commonAttributes;
   }
 }

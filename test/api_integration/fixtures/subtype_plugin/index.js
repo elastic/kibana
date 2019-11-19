@@ -27,8 +27,11 @@ export default function (kibana) {
     uiExports: {
       savedObjectsManagement: {},
       savedObjectSchemas: {
-        subtype: {
-          subTypes: ['foo', 'bar']
+        super_type: {
+          superType: {
+            commonAttributes: ['name'],
+            subTypes: ['sub_type_1', 'sub_type_2']
+          }
         }
       },
       mappings,

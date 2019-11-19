@@ -38,6 +38,7 @@ import {
   createDeleteRoute,
   createFindRoute,
   createGetRoute,
+  createGetSubTypeRoute,
   createUpdateRoute,
   createBulkUpdateRoute,
   createExportRoute,
@@ -93,6 +94,7 @@ export async function savedObjectsMixin(kbnServer, server) {
   server.route(createDeleteRoute(prereqs));
   server.route(createFindRoute(prereqs));
   server.route(createGetRoute(prereqs));
+  server.route(createGetSubTypeRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
   server.route(createExportRoute(prereqs, server, importableAndExportableTypes));
   server.route(createImportRoute(prereqs, server, importableAndExportableTypes));

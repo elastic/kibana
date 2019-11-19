@@ -22,7 +22,7 @@ export { createBulkGetRoute } from './bulk_get';
 export { createCreateRoute } from './create';
 export { createDeleteRoute } from './delete';
 export { createFindRoute } from './find';
-export { createGetRoute } from './get';
+export { createGetRoute, createGetSubTypeRoute } from './get';
 export { createImportRoute } from './import';
 export { createLogLegacyImportRoute } from './log_legacy_import';
 export { createResolveImportErrorsRoute } from './resolve_import_errors';

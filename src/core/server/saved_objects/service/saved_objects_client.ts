@@ -263,7 +263,7 @@ export class SavedObjectsClient {
    * @param options
    */
   async get<T extends SavedObjectAttributes = any>(
-    type: string,
+    type: string | SavedObjectType,
     id: string,
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObject<T>> {
