@@ -69,6 +69,7 @@ export const AlertsList: React.FunctionComponent = () => {
     }
     const updatedData = alerts.map(alert => ({
       ...alert,
+      tagsText: alert.tags.join(', '),
       alertType: alertTypesIndex[alert.alertTypeId]
         ? alertTypesIndex[alert.alertTypeId].name
         : alert.alertTypeId,
@@ -125,6 +126,14 @@ export const AlertsList: React.FunctionComponent = () => {
       ),
       sortable: false,
       truncateText: true,
+    },
+    {
+      field: 'tagsText',
+      name: i18n.translate(
+        'xpack.alertingUI.sections.alertsList.alertsListTable.columns.tagsText',
+        { defaultMessage: 'Tags' }
+      ),
+      sortable: false,
     },
     {
       field: 'alertType',
