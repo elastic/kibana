@@ -31,7 +31,7 @@ import { ConfigType } from './config';
 import { toggleUICapabilities } from './lib/toggle_ui_capabilities';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { initExternalSpacesApi } from './routes/api/external';
-
+import { HomePluginSetup } from '../../../../src/plugins/home/server';
 /**
  * Describes a set of APIs that is available in the legacy platform only and required by this plugin
  * to function properly.
@@ -62,6 +62,7 @@ export interface PluginsSetup {
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
+  home?: HomePluginSetup;
 }
 
 export interface SpacesPluginSetup {
@@ -136,6 +137,12 @@ export class Plugin {
 
     if (plugins.security) {
       plugins.security.registerSpacesService(spacesService);
+    }
+
+    if (plugins.home) {
+      plugins.home.tutorials.addScopedTutorialContextFactory(
+        createSpacesTutorialContextFactory(spacesService)
+      );
     }
 
     return {
