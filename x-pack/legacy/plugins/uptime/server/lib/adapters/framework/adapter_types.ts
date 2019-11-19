@@ -8,8 +8,9 @@ import { GraphQLOptions } from 'apollo-server-core';
 import { GraphQLSchema } from 'graphql';
 import { Lifecycle, ResponseToolkit } from 'hapi';
 import { RouteOptions } from 'hapi';
-import { SavedObjectsLegacyService } from 'src/core/server';
+import { SavedObjectsLegacyService, RequestHandler, RouteMethod, IRouter } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { ObjectType } from '@kbn/config-schema';
 
 export interface UMFrameworkRequest {
   user: string;
@@ -22,17 +23,19 @@ export interface UMFrameworkRequest {
 export type UMFrameworkResponse = Lifecycle.ReturnValue;
 
 export interface UMFrameworkRouteOptions<
-  RouteRequest extends UMFrameworkRequest,
-  RouteResponse extends UMFrameworkResponse
+  P extends ObjectType,
+  Q extends ObjectType,
+  B extends ObjectType
 > {
   path: string;
   method: string;
-  handler: (req: Request, h: ResponseToolkit) => any;
+  handler: RequestHandler<P, Q, B>;
   config?: any;
+  validate: any;
 }
 
 export interface UptimeCoreSetup {
-  route: any;
+  route: IRouter;
 }
 
 export interface UptimeCorePlugins {
@@ -58,7 +61,7 @@ export interface UMHapiGraphQLPluginOptions {
 
 export interface UMBackendFrameworkAdapter {
   registerRoute<RouteRequest extends UMFrameworkRequest, RouteResponse extends UMFrameworkResponse>(
-    route: UMFrameworkRouteOptions<RouteRequest, RouteResponse>
+    route: UMFrameworkRouteOptions<ObjectType, ObjectType, ObjectType, RouteMethod>
   ): void;
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
   getSavedObjectsClient(): any;

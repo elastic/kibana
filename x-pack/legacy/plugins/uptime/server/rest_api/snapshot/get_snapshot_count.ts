@@ -7,29 +7,30 @@
 import Joi from 'joi';
 import { UMServerLibs } from '../../lib/lib';
 import { Snapshot } from '../../../common/runtime_types';
+import { UMRestApiRouteCreator } from '../types';
 
-export const createGetSnapshotCount = (libs: UMServerLibs) => ({
+export const createGetSnapshotCount: UMRestApiRouteCreator = (libs: UMServerLibs) => ({
   method: 'GET',
   path: '/api/uptime/snapshot/count',
-  options: {
-    validate: {
-      query: Joi.object({
-        dateRangeStart: Joi.string().required(),
-        dateRangeEnd: Joi.string().required(),
-        filters: Joi.string(),
-        statusFilter: Joi.string(),
-      }),
-    },
-    tags: ['access:uptime'],
+  validate: {
+    query: Joi.object({
+      dateRangeStart: Joi.string().required(),
+      dateRangeEnd: Joi.string().required(),
+      filters: Joi.string(),
+      statusFilter: Joi.string(),
+    }),
   },
-  handler: async (request: any): Promise<Snapshot> => {
+  tags: ['access:uptime'],
+  handler: async (_context: any, request: any, response: any): Promise<Snapshot> => {
     const { dateRangeStart, dateRangeEnd, filters, statusFilter } = request.query;
-    return await libs.monitorStates.getSnapshotCount(
-      request,
-      dateRangeStart,
-      dateRangeEnd,
-      filters,
-      statusFilter
-    );
+    return response.ok({
+      body: await libs.monitorStates.getSnapshotCount(
+        request,
+        dateRangeStart,
+        dateRangeEnd,
+        filters,
+        statusFilter
+      ),
+    });
   },
 });

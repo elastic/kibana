@@ -4,36 +4,55 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
-import { PingResults } from '../../../common/graphql/types';
+import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
+import { UMRestApiRouteCreator } from '../types';
 
-export const createGetAllRoute = (libs: UMServerLibs) => ({
-  method: 'GET',
-  path: '/api/uptime/pings',
-  options: {
+export const createGetAllRoute: UMRestApiRouteCreator = (libs: UMServerLibs) => {
+  return {
+    method: 'GET',
+    path: '/api/uptime/pings',
     validate: {
-      query: Joi.object({
-        dateRangeStart: Joi.number().required(),
-        dateRangeEnd: Joi.number().required(),
-        monitorId: Joi.string(),
-        size: Joi.number(),
-        sort: Joi.string(),
-        status: Joi.string(),
+      query: schema.object({
+        dateRangeStart: schema.string(),
+        dateRangeEnd: schema.string(),
+        location: schema.maybe(schema.string()),
+        monitorId: schema.maybe(schema.string()),
+        size: schema.maybe(schema.number()),
+        sort: schema.maybe(schema.string()),
+        status: schema.maybe(schema.string()),
       }),
     },
-    tags: ['access:uptime'],
-  },
-  handler: async (request: any): Promise<PingResults> => {
-    const { size, sort, dateRangeStart, dateRangeEnd, monitorId, status } = request.query;
-    return await libs.pings.getAll(
-      request,
-      dateRangeStart,
-      dateRangeEnd,
-      monitorId,
-      status,
-      sort,
-      size
-    );
-  },
-});
+    options: {
+      tags: ['access:uptime'],
+    },
+    handler: async (context, request, resp): Promise<any> => {
+      const {
+        size,
+        sort,
+        dateRangeStart,
+        dateRangeEnd,
+        location,
+        monitorId,
+        status,
+      } = request.query;
+
+      const result = await libs.pings.getAll(
+        request,
+        dateRangeStart,
+        dateRangeEnd,
+        monitorId,
+        status,
+        sort,
+        size,
+        location
+      );
+
+      return resp.ok({
+        body: {
+          ...result,
+        },
+      });
+    },
+  };
+};
