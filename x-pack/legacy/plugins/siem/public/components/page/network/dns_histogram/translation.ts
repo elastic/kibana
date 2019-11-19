@@ -7,5 +7,5 @@
 import { i18n } from '@kbn/i18n';
 
 export const NETWORK_DNS_HISTOGRAM = i18n.translate('xpack.siem.DNS.histogramTitle', {
-  defaultMessage: 'Top DNS domains bytes out',
+  defaultMessage: 'Top DNS domains bytes count',
 });

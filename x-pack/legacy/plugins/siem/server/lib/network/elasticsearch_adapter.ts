@@ -209,7 +209,12 @@ const getHistogramData = (
           {
             x: _id,
             y: dnsBytesOut,
-            g: 'dnsBytesOut',
+            g: 'DNS Bytes Out',
+          },
+          {
+            x: _id,
+            y: dnsBytesIn,
+            g: 'DNS Bytes In',
           },
         ];
       return acc;
