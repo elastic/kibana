@@ -25,8 +25,8 @@ export function renderApp(appMountContext: AppMountContext, { element }: AppMoun
 const AppRoot = React.memo(function Root() {
   return (
     <I18nProvider>
-      <h1 data-test-subj="welcomeMessage">
-        <FormattedMessage id="xpack.endpoint.welcomeMessage" defaultMessage="Hello World" />
+      <h1 data-test-subj="welcomeTitle">
+        <FormattedMessage id="xpack.endpoint.welcomeTitle" defaultMessage="Hello World" />
       </h1>
     </I18nProvider>
   );
