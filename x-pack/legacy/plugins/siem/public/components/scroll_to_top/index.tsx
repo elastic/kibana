@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 
 export const useScrollToTop = () => {
   useEffect(() => {
-    window.scroll(0, 0);
+    window.scrollTo(0, 0);
   });
 
   // renders nothing, since nothing is needed
