@@ -23,7 +23,7 @@ export function validateModelMemoryLimit(mml) {
     }
   };
 
-  let validationResults = validateModelMemoryLimitUnitsUtils(tempJob);
+  let validationResults = validateModelMemoryLimitUnitsUtils(mml);
   let { valid } = validationResults;
 
   if(valid) {
