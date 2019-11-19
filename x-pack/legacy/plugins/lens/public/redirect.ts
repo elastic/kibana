@@ -8,9 +8,12 @@
 // make sure it's compatible with the 7.5 release
 
 import { npSetup } from 'ui/new_platform';
+import chrome from 'ui/chrome';
 
-// prefix the path in the hash with lens/
-const prefixedHashRoute = window.location.hash.replace(/^#\//, '#/lens/');
+chrome.setRootController('lens', () => {
+  // prefix the path in the hash with lens/
+  const prefixedHashRoute = window.location.hash.replace(/^#\//, '#/lens/');
 
-// redirect to the new lens url `app/kibana#/lens/...`
-window.location.href = npSetup.core.http.basePath.prepend('/app/kibana' + prefixedHashRoute);
+  // redirect to the new lens url `app/kibana#/lens/...`
+  window.location.href = npSetup.core.http.basePath.prepend('/app/kibana' + prefixedHashRoute);
+});

@@ -26,7 +26,7 @@ export const lens: LegacyPluginInitializer = kibana => {
       app: {
         title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
         description: 'Explore and visualize data.',
-        main: `plugins/${PLUGIN_ID}/_redirect`,
+        main: `plugins/${PLUGIN_ID}/redirect`,
         listed: false,
       },
       visualize: [`plugins/${PLUGIN_ID}/legacy`],
