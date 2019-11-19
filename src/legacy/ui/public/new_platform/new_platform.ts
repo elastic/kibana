@@ -28,10 +28,12 @@ import {
   Start as InspectorStart,
 } from '../../../../plugins/inspector/public';
 import { EuiUtilsStart } from '../../../../plugins/eui_utils/public';
+import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/public';
 import {
   FeatureCatalogueSetup,
   FeatureCatalogueStart,
 } from '../../../../plugins/feature_catalogue/public';
+import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
 
 export interface PluginsSetup {
   data: ReturnType<DataPlugin['setup']>;
@@ -40,6 +42,8 @@ export interface PluginsSetup {
   feature_catalogue: FeatureCatalogueSetup;
   inspector: InspectorSetup;
   uiActions: IUiActionsSetup;
+  share: SharePluginSetup;
+  devTools: DevToolsSetup;
 }
 
 export interface PluginsStart {
@@ -50,6 +54,8 @@ export interface PluginsStart {
   feature_catalogue: FeatureCatalogueStart;
   inspector: InspectorStart;
   uiActions: IUiActionsStart;
+  share: SharePluginStart;
+  devTools: DevToolsStart;
 }
 
 export const npSetup = {

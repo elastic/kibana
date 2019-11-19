@@ -215,13 +215,6 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/siem/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-        'react-hooks/rules-of-hooks': 'off',
-      },
-    },
-    {
       files: ['x-pack/legacy/plugins/snapshot_restore/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
@@ -400,6 +393,7 @@ module.exports = {
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/legacy/plugins/apm/**/*.js',
         'test/*/config.ts',
+        'test/*/{tests,test_suites,apis,apps}/**/*',
         'test/visual_regression/tests/**/*',
         'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
         'x-pack/test/*/*config.*ts',
@@ -838,6 +832,8 @@ module.exports = {
         // might be introduced after the other warns are fixed
         // 'react/jsx-sort-props': 'error',
         'react/jsx-tag-spacing': 'error',
+        // might be introduced after the other warns are fixed
+        'react-hooks/exhaustive-deps': 'off',
         'require-atomic-updates': 'error',
         'rest-spread-spacing': ['error', 'never'],
         'symbol-description': 'error',

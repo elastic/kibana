@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { npSetup } from 'ui/new_platform';
 import { CoreSetup } from 'src/core/public';
 import { FormatFactory, getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { metricVisualization } from './metric_visualization';
-import { ExpressionsSetup } from '../../../../../../src/legacy/core_plugins/expressions/public';
-import { setup as expressionsSetup } from '../../../../../../src/legacy/core_plugins/expressions/public/legacy';
+import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
 import { metricChart, getMetricChartRenderer } from './metric_expression';
 
 export interface MetricVisualizationPluginSetupPlugins {
@@ -41,7 +41,7 @@ const plugin = new MetricVisualizationPlugin();
 
 export const metricVisualizationSetup = () =>
   plugin.setup(null, {
-    expressions: expressionsSetup,
+    expressions: npSetup.plugins.expressions,
     fieldFormat: {
       formatFactory: getFormat,
     },

@@ -24,80 +24,28 @@ import 'brace/mode/json';
 import 'brace/mode/text';
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-import { toastNotifications as notifications } from 'ui/notify';
 import { npSetup, npStart } from 'ui/new_platform';
-import uiRoutes from 'ui/routes';
-import { DOC_LINK_VERSION } from 'ui/documentation_links';
 import { I18nContext } from 'ui/i18n';
-import { ResizeChecker } from 'ui/resize_checker';
-import 'ui/capabilities/route_setup';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
-import template from '../../public/quarantined/index.html';
-import { App, AppUnmount, NotificationsSetup } from '../../../../../core/public';
-
 export interface XPluginSet {
+  devTools: DevToolsSetup;
+  feature_catalogue: FeatureCatalogueSetup;
   __LEGACY: {
     I18nContext: any;
-    ResizeChecker: any;
-    docLinkVersion: string;
   };
 }
 
 import { plugin } from '.';
+import { DevToolsSetup } from '../../../../../plugins/dev_tools/public';
+import { FeatureCatalogueSetup } from '../../../../../plugins/feature_catalogue/public';
 
 const pluginInstance = plugin({} as any);
 
-const anyObject = {} as any;
-
-uiRoutes.when('/dev_tools/console', {
-  requireUICapability: 'dev_tools.show',
-  controller: function RootController($scope) {
-    // Stub out this config for now...
-    $scope.topNavMenu = [];
-
-    $scope.initReactApp = () => {
-      const targetElement = document.querySelector<HTMLDivElement>('#consoleRoot');
-      if (!targetElement) {
-        const message = `Could not mount Console App!`;
-        npSetup.core.fatalErrors.add(message);
-        throw new Error(message);
-      }
-
-      let unmount: AppUnmount | Promise<AppUnmount>;
-
-      const mockedSetupCore = {
-        ...npSetup.core,
-        notifications: (notifications as unknown) as NotificationsSetup,
-        application: {
-          register(app: App): void {
-            try {
-              unmount = app.mount(anyObject, { element: targetElement, appBasePath: '' });
-            } catch (e) {
-              npSetup.core.fatalErrors.add(e);
-            }
-          },
-          registerMountContext() {},
-        },
-      };
-
-      pluginInstance.setup(mockedSetupCore, {
-        ...npSetup.plugins,
-        __LEGACY: {
-          I18nContext,
-          ResizeChecker,
-          docLinkVersion: DOC_LINK_VERSION,
-        },
-      });
-      pluginInstance.start(npStart.core);
-
-      $scope.$on('$destroy', async () => {
-        if (unmount) {
-          const fn = await unmount;
-          fn();
-        }
-      });
-    };
+pluginInstance.setup(npSetup.core, {
+  ...npSetup.plugins,
+  __LEGACY: {
+    I18nContext,
   },
-  template,
 });
+pluginInstance.start(npStart.core);

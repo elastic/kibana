@@ -40,6 +40,6 @@ function createJobFn(server: ServerFacade) {
   };
 }
 
-export const createJobFactory: CreateJobFactory = oncePerServer(createJobFn as (
-  server: ServerFacade
-) => ESQueueCreateJobFnPNG);
+export const createJobFactory: CreateJobFactory = oncePerServer(
+  createJobFn as (server: ServerFacade) => ESQueueCreateJobFnPNG
+);

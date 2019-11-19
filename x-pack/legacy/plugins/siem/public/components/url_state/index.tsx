@@ -38,10 +38,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
 });
 
 export const UrlStateRedux = compose<React.ComponentClass<UrlStateProps & RouteSpyState>>(
-  connect(
-    makeMapStateToProps,
-    mapDispatchToProps
-  )
+  connect(makeMapStateToProps, mapDispatchToProps)
 )(UrlStateContainer);
 
 export const UseUrlState = React.memo<UrlStateProps>(props => {

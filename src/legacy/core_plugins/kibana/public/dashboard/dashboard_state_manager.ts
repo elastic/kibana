@@ -20,7 +20,6 @@
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 
-import { Filter } from '@kbn/es-query';
 import { stateMonitorFactory, StateMonitor } from 'ui/state_management/state_monitor_factory';
 import { Timefilter } from 'ui/timefilter';
 import { AppStateClass as TAppStateClass } from 'ui/state_management/app_state';
@@ -29,7 +28,7 @@ import { Moment } from 'moment';
 
 import { DashboardContainer } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
-import { Query } from '../../../data/public';
+import { Query, esFilters } from '../../../../../../src/plugins/data/public';
 
 import { getAppStateDefaults, migrateAppState } from './lib';
 import { convertPanelStateToSavedDashboardPanel } from './lib/embeddable_saved_object_converters';
@@ -50,7 +49,7 @@ export class DashboardStateManager {
   public lastSavedDashboardFilters: {
     timeTo?: string | Moment;
     timeFrom?: string | Moment;
-    filterBars: Filter[];
+    filterBars: esFilters.Filter[];
     query: Query;
   };
   private stateDefaults: DashboardAppStateDefaults;
@@ -303,7 +302,7 @@ export class DashboardStateManager {
     return this.savedDashboard.timeRestore;
   }
 
-  public getLastSavedFilterBars(): Filter[] {
+  public getLastSavedFilterBars(): esFilters.Filter[] {
     return this.lastSavedDashboardFilters.filterBars;
   }
 
@@ -461,7 +460,7 @@ export class DashboardStateManager {
    * Applies the current filter state to the dashboard.
    * @param filter An array of filter bar filters.
    */
-  public applyFilters(query: Query, filters: Filter[]) {
+  public applyFilters(query: Query, filters: esFilters.Filter[]) {
     this.appState.query = query;
     this.savedDashboard.searchSource.setField('query', query);
     this.savedDashboard.searchSource.setField('filter', filters);

@@ -40,6 +40,10 @@ export const setNetworkPageQueriesActivePageToZero = (state: NetworkModel): Netw
     ...state.page.queries[NetworkTableType.tls],
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
   },
+  [NetworkTableType.http]: {
+    ...state.page.queries[NetworkTableType.http],
+    activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+  },
 });
 
 export const setNetworkDetailsQueriesActivePageToZero = (
@@ -68,6 +72,10 @@ export const setNetworkDetailsQueriesActivePageToZero = (
   },
   [IpDetailsTableType.users]: {
     ...state.details.queries[IpDetailsTableType.users],
+    activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+  },
+  [IpDetailsTableType.http]: {
+    ...state.details.queries[IpDetailsTableType.http],
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
   },
 });
