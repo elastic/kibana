@@ -10,7 +10,7 @@ export interface EndpointData {
     name: string;
     hostname: string;
     ip: string;
-    macAddress: string;
+    mac_address: string;
     os: {
       name: string;
       full: string;
@@ -19,7 +19,7 @@ export interface EndpointData {
   endpoint: {
     domain: string;
     is_base_image: boolean;
-    active_directory_distinguishedName: string;
+    active_directory_distinguished_name: string;
     active_directory_hostname: string;
     upgrade: {
       status?: string;

@@ -12,11 +12,11 @@ interface HitSource {
 }
 
 export class ResponseToEndpointMapper {
-  async mapHits(searchResponse: SearchResponse<EndpointData>): EndpointData[] {
+  mapHits(searchResponse: SearchResponse<EndpointData>): EndpointData[] {
     return searchResponse.hits.hits.map(response => response._source);
   }
 
-  async mapInnerHits(searchResponse: SearchResponse<EndpointData>): EndpointData[] {
+  mapInnerHits(searchResponse: SearchResponse<EndpointData>): EndpointData[] {
     return searchResponse.hits.hits
       .map(response => response.inner_hits.most_recent.hits.hits)
       .flatMap(data => data as HitSource)

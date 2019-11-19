@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup, Logger, PluginInitializerContext } from 'kibana/server';
+import { Plugin, CoreSetup, Logger, PluginInitializerContext, IClusterClient } from 'kibana/server';
 import { managementRoutes } from './routes/management';
 import { alertsRoutes } from './routes/alerts';
 import { registerEndpointsApi } from './routes/endpoints';
@@ -19,20 +19,19 @@ declare module 'kibana/server' {
 
 export class EndpointPlugin implements Plugin {
   private readonly logger: Logger;
-
+  private clusterClient?: IClusterClient;
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
   }
 
   public setup(core: CoreSetup, deps: {}) {
-    core.http.registerRouteHandlerContext(
-      'endpointPlugin',
-      context => new EndpointHandler(context)
-    );
+    this.clusterClient = core.elasticsearch.createClient('endpoint-plugin');
+    const endpointHandler: EndpointRequestContext = new EndpointHandler(this.clusterClient);
+    core.http.registerRouteHandlerContext('endpointPlugin', () => endpointHandler);
     const router = core.http.createRouter();
     managementRoutes(router);
     alertsRoutes(router);
-    registerEndpointsApi(router);
+    registerEndpointsApi(router, endpointHandler);
   }
 
   public start() {
@@ -41,5 +40,9 @@ export class EndpointPlugin implements Plugin {
 
   public stop() {
     this.logger.debug('Starting plugin');
+    if (this.clusterClient) {
+      this.clusterClient.close();
+      this.clusterClient = undefined;
+    }
   }
 }

@@ -35,6 +35,8 @@ describe('Test Endpoint Plugin', () => {
         'endpointPlugin',
         expect.any(Function)
       );
+      expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledTimes(1);
+      expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledWith('endpoint-plugin');
     });
   });
 });

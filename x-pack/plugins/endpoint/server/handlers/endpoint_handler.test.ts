@@ -5,7 +5,7 @@
  */
 import singleEndpointData from './../fixtures/mapper_test/single_endpoint_data.json';
 import allEndpointData from './../fixtures/mapper_test/all_endpoints_data.json';
-import { IClusterClient } from 'kibana/server';
+import { IClusterClient, IScopedClusterClient } from 'kibana/server';
 import { EndpointHandler } from './endpoint_handler';
 import { SearchResponse } from 'elasticsearch';
 import { EndpointData } from '../types';
@@ -13,28 +13,22 @@ import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 
 describe('Test Endpoint Handler', () => {
   let mockClusterClient: jest.Mocked<IClusterClient>;
-  let mockClient: jest.Mocked<IClusterClient>;
+  let mockScopedClient: jest.Moked<IScopedClusterClient>;
   beforeEach(() => {
     mockClusterClient = elasticsearchServiceMock.createClusterClient() as jest.Mocked<
       IClusterClient
     >;
-    mockClient = (mockClusterClient as unknown) as jest.Mocked<IClusterClient>;
+    mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
   });
   describe('findEndpoint()', () => {
     it('test find endpoint', async () => {
-      const mockContext = {
-        core: {
-          elasticsearch: {
-            adminClient: mockClient,
-          },
-        },
-      };
-      mockClient.callAsInternalUser = jest.fn(
+      mockScopedClient.callAsCurrentUser = jest.fn(
         () => singleEndpointData as SearchResponse<EndpointData>
       );
-      const testHandler = new EndpointHandler(mockContext);
+      const testHandler = new EndpointHandler(mockClusterClient);
       const result = await testHandler.findEndpoint('endpoint-id');
-      expect(mockClient.callAsInternalUser).toBeCalledWith('search', {
+      expect(mockScopedClient.callAsCurrentUser).toBeCalledWith('search', {
         body: {
           query: {
             match: {
@@ -59,19 +53,12 @@ describe('Test Endpoint Handler', () => {
 
   describe('findLatestOfAllEndpoints()', () => {
     it('test find the latest of all endpoints', async () => {
-      const mockContext = {
-        core: {
-          elasticsearch: {
-            adminClient: mockClient,
-          },
-        },
-      };
-      mockClient.callAsInternalUser = jest.fn(
+      mockScopedClient.callAsCurrentUser = jest.fn(
         () => allEndpointData as SearchResponse<EndpointData>
       );
-      const testHandler = new EndpointHandler(mockContext);
+      const testHandler = new EndpointHandler(mockClusterClient);
       const result = await testHandler.findLatestOfAllEndpoints();
-      expect(mockClient.callAsInternalUser).toBeCalledWith('search', {
+      expect(mockScopedClient.callAsCurrentUser).toBeCalledWith('search', {
         body: {
           query: {
             match_all: {},

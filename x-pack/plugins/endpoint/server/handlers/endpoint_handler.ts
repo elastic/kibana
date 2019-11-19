@@ -4,26 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
+import { IClusterClient, KibanaRequest } from 'kibana/server';
 import { SearchParams, SearchResponse } from 'elasticsearch';
 import { EndpointData } from '../types';
 import { ResponseToEndpointMapper } from './response_to_endpoint_mapper';
 
 export interface EndpointRequestContext {
-  findEndpoint: (endpointId: string) => Promise<EndpointData[]>;
-  findLatestOfAllEndpoints: () => Promise<EndpointData[]>;
+  findEndpoint: (endpointId: string, request: KibanaRequest) => Promise<EndpointData[]>;
+  findLatestOfAllEndpoints: (request: KibanaRequest) => Promise<EndpointData[]>;
 }
 
 export class EndpointHandler implements EndpointRequestContext {
-  private context: RequestHandlerContext;
   private responseToEndpointMapper: ResponseToEndpointMapper;
+  private elasticSearchClient: IClusterClient;
 
-  constructor(context: RequestHandlerContext) {
-    this.context = context;
+  constructor(elasticSearchClient: IClusterClient) {
+    this.elasticSearchClient = elasticSearchClient;
     this.responseToEndpointMapper = new ResponseToEndpointMapper();
   }
 
-  async findEndpoint(endpointId: string): Promise<EndpointData[]> {
+  async findEndpoint(endpointId: string, request: KibanaRequest): Promise<EndpointData[]> {
     const searchParams: SearchParams = {
       body: {
         query: {
@@ -42,11 +42,11 @@ export class EndpointHandler implements EndpointRequestContext {
       },
       index: 'endpoint*',
     };
-    const response = await this.search(searchParams);
+    const response = await this.search(searchParams, request);
     return this.responseToEndpointMapper.mapHits(response);
   }
 
-  async findLatestOfAllEndpoints(): Promise<EndpointData[]> {
+  async findLatestOfAllEndpoints(request: KibanaRequest): Promise<EndpointData[]> {
     const searchParams: SearchParams = {
       body: {
         query: {
@@ -63,17 +63,17 @@ export class EndpointHandler implements EndpointRequestContext {
       },
       index: 'endpoint*',
     };
-    const response = await this.search(searchParams);
+    const response = await this.search(searchParams, request);
     return this.responseToEndpointMapper.mapInnerHits(response);
   }
 
   private async search(
-    clientParams: Record<string, any> = {}
+    clientParams: Record<string, any> = {},
+    request: KibanaRequest
   ): Promise<SearchResponse<EndpointData>> {
-    const result = this.context.core!.elasticsearch.adminClient.callAsInternalUser(
-      'search',
-      clientParams
-    );
+    const result = this.elasticSearchClient
+      .asScoped(request)
+      .callAsCurrentUser('search', clientParams);
     return result as Promise<SearchResponse<EndpointData>>;
   }
 }
