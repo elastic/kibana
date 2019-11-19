@@ -29,7 +29,7 @@ export function get(workpadId) {
   });
 }
 
-export function update(id, workpad) {
+export function xxxxxupdate(id, workpad) {
   return fetch.put(`${apiPath}/${id}`, workpad);
 }
 
