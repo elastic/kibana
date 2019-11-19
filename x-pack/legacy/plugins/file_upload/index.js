@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
-import { fileUploadRoutes } from './server/routes/file_upload';
-import { makeUsageCollector } from './server/telemetry/';
-import mappings from './mappings';
+import { getImportRouteHandler } from './server/routes/file_upload';
+import { getTelemetry, initTelemetry } from './server/telemetry/telemetry';
+import { MAX_BYTES } from './common/constants/file_import';
+import { mappings } from './mappings';
 
 export const fileUpload = kibana => {
   return new kibana.Plugin({
@@ -23,11 +24,31 @@ export const fileUpload = kibana => {
     },
 
     init(server) {
-      const { xpack_main: xpackMainPlugin } = server.plugins;
+      const elasticsearchPlugin = server.plugins.elasticsearch;
+      const getSavedObjectsRepository = server.savedObjects.getSavedObjectsRepository;
+      const xpackMainPlugin = server.plugins.xpack_main;
+      const makeUsageCollector = server.usage.collectorSet.makeUsageCollector;
 
       mirrorPluginStatus(xpackMainPlugin, this);
-      fileUploadRoutes(server);
-      makeUsageCollector(server);
+
+      // Set up route
+      server.route({
+        method: 'POST',
+        path: '/api/fileupload/import',
+        handler: getImportRouteHandler(elasticsearchPlugin, getSavedObjectsRepository),
+        config: {
+          payload: { maxBytes: MAX_BYTES },
+        }
+      });
+
+      // Make usage collector
+      const TELEMETRY_TYPE = 'fileUploadTelemetry';
+      makeUsageCollector({
+        type: TELEMETRY_TYPE,
+        isReady: () => true,
+        fetch: async () =>
+          (await getTelemetry(elasticsearchPlugin, getSavedObjectsRepository)) || initTelemetry()
+      });
     }
   });
 };
