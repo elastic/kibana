@@ -224,10 +224,9 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
         <button
           type="button"
           onClick={this.toggleLegend}
-          className={classNames([
-            'kuiCollapseButton visLegend__toggle',
-            { 'visLegend__toggle--isOpen': open },
-          ])}
+          className={classNames('kuiCollapseButton visLegend__toggle', {
+            'visLegend__toggle--isOpen': open,
+          })}
           aria-label={i18n.translate('common.ui.vis.visTypes.legend.toggleLegendButtonAriaLabel', {
             defaultMessage: 'Toggle legend',
           })}

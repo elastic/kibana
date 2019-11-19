@@ -114,10 +114,10 @@ const VisLegendItemComponent = ({
             aria-selected={color === getColor(legendItem.label)}
             onClick={setColor(legendItem.label, color)}
             onKeyPress={setColor(legendItem.label, color)}
-            className={classNames([
+            className={classNames(
               'fa dot visLegend__valueColorPickerDot',
-              color === getColor(legendItem.label) ? 'fa-circle-o' : 'fa-circle',
-            ])}
+              color === getColor(legendItem.label) ? 'fa-circle-o' : 'fa-circle'
+            )}
             style={{ color }}
             data-test-subj={`legendSelectColor-${color}`}
           />
@@ -142,10 +142,10 @@ const VisLegendItemComponent = ({
         >
           <div
             data-label={item.label}
-            className={classNames([
+            className={classNames(
               'visLegend__valueTitle',
-              selected ? 'visLegend__valueTitle--full' : 'visLegend__valueTitle--truncate',
-            ])}
+              selected ? 'visLegend__valueTitle--full' : 'visLegend__valueTitle--truncate'
+            )}
             title={item.label}
             aria-label={i18n.translate(
               'common.ui.vis.visTypes.legend.toggleOptionsButtonAriaLabel',
