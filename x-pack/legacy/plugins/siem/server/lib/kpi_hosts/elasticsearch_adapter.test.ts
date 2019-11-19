@@ -55,7 +55,6 @@ describe('getKpiHosts', () => {
   const mockFramework: FrameworkAdapter = {
     version: 'mock',
     callWithRequest: mockCallWithRequest,
-    exposeStaticDir: jest.fn(),
     registerGraphQLEndpoint: jest.fn(),
     getIndexPatternsService: jest.fn(),
     getSavedObjectsService: jest.fn(),
@@ -171,7 +170,6 @@ describe('getKpiHostDetails', () => {
   const mockFramework: FrameworkAdapter = {
     version: 'mock',
     callWithRequest: mockCallWithRequest,
-    exposeStaticDir: jest.fn(),
     registerGraphQLEndpoint: jest.fn(),
     getIndexPatternsService: jest.fn(),
     getSavedObjectsService: jest.fn(),

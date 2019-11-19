@@ -66,18 +66,6 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     return fields;
   }
 
-  public exposeStaticDir(urlPath: string, dir: string): void {
-    this.__legacy.route({
-      handler: {
-        directory: {
-          path: dir,
-        },
-      },
-      method: 'GET',
-      path: urlPath,
-    });
-  }
-
   public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
     this.__legacy.route({
       options: {

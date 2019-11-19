@@ -37,7 +37,6 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
     const mockFramework: FrameworkAdapter = {
       version: 'mock',
       callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
       getIndexPatternsService: jest.fn(),
       getSavedObjectsService: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
@@ -65,7 +64,6 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
     const mockFramework: FrameworkAdapter = {
       version: 'mock',
       callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
       getSavedObjectsService: jest.fn(),
@@ -107,7 +105,6 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
     const mockFramework: FrameworkAdapter = {
       version: 'mock',
       callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
       getIndexPatternsService: jest.fn(),
       getSavedObjectsService: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
@@ -140,7 +137,6 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
     const mockFramework: FrameworkAdapter = {
       version: 'mock',
       callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
       getSavedObjectsService: jest.fn(),
@@ -165,7 +161,6 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
     const mockFramework: FrameworkAdapter = {
       version: 'mock',
       callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
       getIndexPatternsService: jest.fn(),
       getSavedObjectsService: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
