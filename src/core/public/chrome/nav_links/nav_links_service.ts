@@ -21,7 +21,7 @@ import { sortBy } from 'lodash';
 import { BehaviorSubject, ReplaySubject, Observable, combineLatest } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { NavLinkWrapper, ChromeNavLinkUpdateableFields, ChromeNavLink } from './nav_link';
-import { App, InternalApplicationStart, LegacyApp } from '../../application';
+import { App, AppStatus, InternalApplicationStart, LegacyApp } from '../../application';
 import { HttpStart } from '../../http';
 
 interface StartDeps {
@@ -112,6 +112,7 @@ export class NavLinksService {
                   appId,
                   new NavLinkWrapper({
                     ...app,
+                    disabled: app.status === AppStatus.inaccessibleWithDisabledNavLink,
                     legacy: isLegacyApp(app),
                     baseUrl: isLegacyApp(app)
                       ? relativeToAbsolute(http.basePath.prepend(app.appUrl))
