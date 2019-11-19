@@ -938,9 +938,12 @@ export class ToastsApi implements IToasts {
     addSuccess(toastOrTitle: ToastInput): Toast;
     addWarning(toastOrTitle: ToastInput): Toast;
     get$(): Rx.Observable<Toast[]>;
-    // @internal (undocumented)
-    registerOverlays(overlays: OverlayStart): void;
     remove(toastOrId: Toast | string): void;
+    // @internal (undocumented)
+    start({ overlays, i18n }: {
+        overlays: OverlayStart;
+        i18n: I18nStart;
+    }): void;
     }
 
 // @public (undocumented)
