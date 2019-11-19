@@ -5,15 +5,17 @@
  */
 
 import { IndexField } from '../../graphql/types';
-import { FrameworkRequest } from '../framework';
 
-import { FieldsAdapter } from './types';
+import { FieldsAdapter, FrameworkFieldsRequest } from './types';
 export { ElasticsearchIndexFieldAdapter } from './elasticsearch_adapter';
 
 export class IndexFields {
   constructor(private readonly adapter: FieldsAdapter) {}
 
-  public async getFields(request: FrameworkRequest, defaultIndex: string[]): Promise<IndexField[]> {
+  public async getFields(
+    request: FrameworkFieldsRequest,
+    defaultIndex: string[]
+  ): Promise<IndexField[]> {
     return this.adapter.getIndexFields(request, defaultIndex);
   }
 }

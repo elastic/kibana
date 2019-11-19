@@ -5,10 +5,8 @@
  */
 
 import { EuiLink, EuiText } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
 import React, { useEffect, useState } from 'react';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
-import { Query } from 'src/plugins/data/common';
 import styled, { css } from 'styled-components';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
@@ -30,6 +28,7 @@ import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
 import { MapEmbeddable, SetQuery } from './types';
+import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
 interface EmbeddableMapProps {
   maintainRatio?: boolean;
@@ -75,7 +74,7 @@ EmbeddableMap.displayName = 'EmbeddableMap';
 
 export interface EmbeddedMapProps {
   query: Query;
-  filters: Filter[];
+  filters: esFilters.Filter[];
   startDate: number;
   endDate: number;
   setQuery: SetQuery;

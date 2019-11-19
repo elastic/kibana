@@ -109,25 +109,38 @@ function getImageData(img) {
   return context.getImageData(0, 0, img.width, img.height);
 }
 
-export async function addSpritesheetToMap(json, imgUrl, mbMap) {
+export async function loadSpriteSheetImageData(imgUrl) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.crossOrigin = 'Anonymous';
+    image.onload = (el) => {
+      const imgData = getImageData(el.currentTarget);
+      resolve(imgData);
+    };
+    image.onerror = (e) =>{
+      reject(e);
+    };
+    image.src = imgUrl;
+  });
+}
 
-  const image = new Image();
-  image.crossOrigin = 'Anonymous';
-  image.onload = (el) => {
-    const imgData = getImageData(el.currentTarget);
-    for (const imageId in json) {
-      if (!(json.hasOwnProperty(imageId) && !mbMap.hasImage(imageId))) {
-        continue;
-      }
-      const { width, height, x, y, sdf, pixelRatio } = json[imageId];
-      if (typeof width !== 'number' || typeof height !== 'number') {
-        continue;
-      }
-
-      const data = new RGBAImage({ width, height });
-      RGBAImage.copy(imgData, data, { x, y }, { x: 0, y: 0 }, { width, height });
-      mbMap.addImage(imageId, data, { pixelRatio, sdf });
+export function addSpriteSheetToMapFromImageData(json, imgData, mbMap) {
+  for (const imageId in json) {
+    if (!(json.hasOwnProperty(imageId) && !mbMap.hasImage(imageId))) {
+      continue;
     }
-  };
-  image.src = imgUrl;
+    const { width, height, x, y, sdf, pixelRatio } = json[imageId];
+    if (typeof width !== 'number' || typeof height !== 'number') {
+      continue;
+    }
+
+    const data = new RGBAImage({ width, height });
+    RGBAImage.copy(imgData, data, { x, y }, { x: 0, y: 0 }, { width, height });
+    mbMap.addImage(imageId, data, { pixelRatio, sdf });
+  }
+}
+
+export async function addSpritesheetToMap(json, imgUrl, mbMap) {
+  const imgData = await loadSpriteSheetImageData(imgUrl);
+  addSpriteSheetToMapFromImageData(json, imgData, mbMap);
 }

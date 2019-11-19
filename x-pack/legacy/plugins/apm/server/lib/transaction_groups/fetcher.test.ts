@@ -13,6 +13,9 @@ function getSetup() {
     client: {
       search: jest.fn()
     } as any,
+    internalClient: {
+      search: jest.fn()
+    } as any,
     config: {
       get: jest.fn<any, string[]>((key: string) => {
         switch (key) {
@@ -31,7 +34,8 @@ function getSetup() {
       'apm_oss.transactionIndices': 'myIndex',
       'apm_oss.metricsIndices': 'myIndex',
       'apm_oss.apmAgentConfigurationIndex': 'myIndex'
-    }
+    },
+    dynamicIndexPattern: null as any
   };
 }
 

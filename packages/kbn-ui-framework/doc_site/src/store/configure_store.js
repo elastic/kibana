@@ -23,11 +23,8 @@ import {
   compose,
 } from 'redux';
 import thunk from 'redux-thunk';
-import { browserHistory } from 'react-router';
-import {
-  routerMiddleware,
-  routerReducer,
-} from 'react-router-redux';
+import { browserHistory } from 'react-router'; // eslint-disable-line
+import { routerMiddleware, routerReducer } from 'react-router-redux';
 
 import codeViewerReducer from './reducers/code_viewer_reducer';
 import sandboxReducer from './reducers/sandbox_reducer';

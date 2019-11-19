@@ -11,9 +11,8 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { isColorDark, hexToRgb } from '@elastic/eui';
 
-import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
+import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-import { formatAngularHttpError } from 'ui/notify/lib';
 import { addAppRedirectMessageToUrl } from 'ui/notify';
 
 import appTemplate from './angular/templates/index.html';
@@ -39,6 +38,7 @@ import {
   datasourceSelector,
   hasFieldsSelector
 } from './state_management';
+import { formatHttpError } from './helpers/format_http_error';
 
 export function initGraphApp(angularModule, deps) {
   const {
@@ -56,7 +56,6 @@ export function initGraphApp(angularModule, deps) {
     savedObjectRegistry,
     capabilities,
     coreStart,
-    $http,
     Storage,
     canEditDrillDownUrls,
     graphSavePolicy,
@@ -208,31 +207,35 @@ export function initGraphApp(angularModule, deps) {
 
     async function handleHttpError(error) {
       checkLicense(kbnBaseUrl);
-      toastNotifications.addDanger(formatAngularHttpError(error));
+      toastNotifications.addDanger(formatHttpError(error));
     }
 
     // Replacement function for graphClientWorkspace's comms so
     // that it works with Kibana.
     function callNodeProxy(indexName, query, responseHandler) {
       const request = {
-        index: indexName,
-        query: query
+        body: JSON.stringify({
+          index: indexName,
+          query: query
+        })
       };
       $scope.loading = true;
-      return $http.post('../api/graph/graphExplore', request)
-        .then(function (resp) {
-          if (resp.data.resp.timed_out) {
+      return coreStart.http.post('../api/graph/graphExplore', request)
+        .then(function (data) {
+          const response = data.resp;
+          if (response.timed_out) {
             toastNotifications.addWarning(
               i18n.translate('xpack.graph.exploreGraph.timedOutWarningText', {
                 defaultMessage: 'Exploration timed out',
               })
             );
           }
-          responseHandler(resp.data.resp);
+          responseHandler(response);
         })
         .catch(handleHttpError)
         .finally(() => {
           $scope.loading = false;
+          $scope.$digest();
         });
     }
 
@@ -240,17 +243,21 @@ export function initGraphApp(angularModule, deps) {
     //Helper function for the graphClientWorkspace to perform a query
     const callSearchNodeProxy = function (indexName, query, responseHandler) {
       const request = {
-        index: indexName,
-        body: query
+        body: JSON.stringify({
+          index: indexName,
+          body: query
+        })
       };
       $scope.loading = true;
-      $http.post('../api/graph/searchProxy', request)
-        .then(function (resp) {
-          responseHandler(resp.data.resp);
+      coreStart.http.post('../api/graph/searchProxy', request)
+        .then(function (data) {
+          const response = data.resp;
+          responseHandler(response);
         })
         .catch(handleHttpError)
         .finally(() => {
           $scope.loading = false;
+          $scope.$digest();
         });
     };
 
@@ -341,11 +348,7 @@ export function initGraphApp(angularModule, deps) {
     };
 
     $scope.clickEdge = function (edge) {
-      if (edge.inferred) {
-        $scope.setDetail ({ 'inferredEdge': edge });
-      }else {
-        $scope.workspace.getAllIntersections($scope.handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
-      }
+      $scope.workspace.getAllIntersections($scope.handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
     };
 
     $scope.submit = function (searchTerm) {
@@ -549,9 +552,11 @@ export function initGraphApp(angularModule, deps) {
           canEditDrillDownUrls: canEditDrillDownUrls
         }), $scope.$digest.bind($scope));
         coreStart.overlays.openFlyout(
-          <Provider store={store}>
-            <Settings observable={settingsObservable} />
-          </Provider>, {
+          toMountPoint(
+            <Provider store={store}>
+              <Settings observable={settingsObservable} />
+            </Provider>
+          ), {
             size: 'm',
             closeButtonAriaLabel: i18n.translate('xpack.graph.settings.closeLabel', { defaultMessage: 'Close' }),
             'data-test-subj': 'graphSettingsFlyout',

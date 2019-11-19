@@ -19,7 +19,6 @@ import {
   EuiText,
   EuiSpacer
 } from '@elastic/eui';
-import { idx } from '@kbn/elastic-idx';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isRight } from 'fp-ts/lib/Either';
@@ -90,17 +89,16 @@ export function AddEditFlyout({
   // config settings
   const [sampleRate, setSampleRate] = useState<string>(
     (
-      idx(selectedConfig, _ => _.settings.transaction_sample_rate) ||
+      selectedConfig?.settings.transaction_sample_rate ||
       defaultSettings.TRANSACTION_SAMPLE_RATE
     ).toString()
   );
   const [captureBody, setCaptureBody] = useState<string>(
-    idx(selectedConfig, _ => _.settings.capture_body) ||
-      defaultSettings.CAPTURE_BODY
+    selectedConfig?.settings.capture_body || defaultSettings.CAPTURE_BODY
   );
   const [transactionMaxSpans, setTransactionMaxSpans] = useState<string>(
     (
-      idx(selectedConfig, _ => _.settings.transaction_max_spans) ||
+      selectedConfig?.settings.transaction_max_spans ||
       defaultSettings.TRANSACTION_MAX_SPANS
     ).toString()
   );

@@ -3,6 +3,20 @@
     "properties": {
       "enabled": {
         "type": "boolean"
+      },
+      "sendUsageFrom": {
+        "ignore_above": 256,
+        "type": "keyword"
+      },
+      "lastReported": {
+        "type": "date"
+      },
+      "lastVersionChecked": {
+        "ignore_above": 256,
+        "type": "keyword"
+      },
+      "userHasSeenNotice": {
+        "type": "boolean"
       }
     }
   }
