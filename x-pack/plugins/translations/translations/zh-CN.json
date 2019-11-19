@@ -6164,7 +6164,6 @@
     "xpack.infra.analysisSetup.steps.setupProcess.viewResultsButton": "查看结果",
     "xpack.infra.logs.analysis.analyzeInMlButtonLabel": "在 ML 中分析",
     "xpack.infra.logs.analysis.anomaliesExpandedRowNumberOfLogEntriesDescription": "日志条目数",
-    "xpack.infra.logs.analysis.anomaliesExpandedRowTopAnomalyScoreDescription": "最大异常分数",
     "xpack.infra.logs.analysis.anomaliesSectionLineSeriesName": "每 15 分钟日志条目数（平均值）",
     "xpack.infra.logs.analysis.anomaliesSectionLoadingAriaLabel": "正在加载异常",
     "xpack.infra.logs.analysis.anomaliesSectionTitle": "异常",
