@@ -19,6 +19,7 @@ import {
   EuiFieldNumber,
   EuiComboBoxOptionProps,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
 import { AlertTypeModel, AlertType, Alert, ValidationResult } from '../../../../../types';
 import { Comparator, AggregationType, GroupByType } from '../types';
@@ -579,7 +580,14 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
 
   return (
     <Fragment>
-      <EuiFlexGroup wrap>
+      {hasExpressionErrors ? (
+        <Fragment>
+          <EuiSpacer />
+          <EuiCallOut color="danger" size="s" title={expressionErrorMessage} />
+          <EuiSpacer />
+        </Fragment>
+      ) : null}
+      <EuiFlexGroup gutterSize="s" wrap>
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="insidePopover"
@@ -1023,21 +1031,11 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {hasExpressionErrors ? (
-        <Fragment>
-          <EuiSpacer size="m" />
-          <EuiText color="danger" size="s">
-            {expressionErrorMessage}
-          </EuiText>
-          <EuiSpacer size="m" />
-        </Fragment>
-      ) : null}
       {hasErrors ? null : (
         <Fragment>
           <ThresholdVisualization />
         </Fragment>
       )}
-      <EuiSpacer />
     </Fragment>
   );
 };
