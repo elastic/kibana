@@ -28,7 +28,7 @@ export function registerEndpointsApi(router: IRouter) {
     {
       path: '/api/endpoint/endpoints/{id}',
       validate: {
-        params: schema.object({ id: schema.maybe(schema.string()) }),
+        params: schema.object({ id: schema.string() }),
       },
       options: { authRequired: false },
     },
@@ -38,9 +38,7 @@ export function registerEndpointsApi(router: IRouter) {
   router.get(
     {
       path: '/api/endpoint/endpoints',
-      validate: {
-        params: schema.object({ id: schema.maybe(schema.string()) }),
-      },
+      validate: {},
       options: { authRequired: false },
     },
     async (context, req, res) => endpointsHandler(context, req, res)
