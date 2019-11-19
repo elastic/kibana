@@ -8,6 +8,7 @@ import { Observable, Subject, Subscription, merge, timer } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 import moment from 'moment';
 import { createHash } from 'crypto';
+import stringify from 'json-stable-stringify';
 
 import {
   CoreSetup,
@@ -57,7 +58,7 @@ function sign({
 }) {
   return createHash('sha256')
     .update(
-      JSON.stringify({
+      stringify({
         license,
         features,
         error,
