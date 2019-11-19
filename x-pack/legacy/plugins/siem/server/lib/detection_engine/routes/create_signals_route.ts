@@ -12,6 +12,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import { createSignals } from '../alerts/create_signals';
 import { SignalsRequest } from '../alerts/types';
 import { createSignalsSchema } from './schemas';
+import { ServerFacade } from '../../../types';
 import { readSignals } from '../alerts/read_signals';
 import { transformOrError } from './utils';
 
@@ -98,6 +99,6 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
   },
 };
 
-export const createSignalsRoute = (server: Hapi.Server) => {
+export const createSignalsRoute = (server: ServerFacade) => {
   server.route(createCreateSignalsRoute);
 };
