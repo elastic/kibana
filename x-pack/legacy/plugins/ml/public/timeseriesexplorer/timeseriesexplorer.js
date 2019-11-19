@@ -1071,6 +1071,13 @@ export class TimeSeriesExplorer extends React.Component {
     // Listen for context chart updates.
     this.contextChart
       .pipe(
+        tap(selection => {
+          this.setState({
+            zoomFrom: selection.from,
+            zoomTo: selection.to,
+            loading: true,
+          });
+        }),
         skipWhile(() => {
           const {
             contextChartData,
@@ -1097,11 +1104,6 @@ export class TimeSeriesExplorer extends React.Component {
           } else {
             appStateHandler(APP_STATE_ACTION.UNSET_ZOOM);
           }
-
-          this.setState({
-            zoomFrom: selection.from,
-            zoomTo: selection.to,
-          });
 
           if (
             (this.contextChartSelectedInitCallDone === false && focusChartData === undefined) ||
