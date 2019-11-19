@@ -7,6 +7,7 @@
 import { unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import routes from 'ui/routes';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import {
   CoreSetup,
   CoreStart,
@@ -23,6 +24,7 @@ import { ActionTypeRegistry } from './application/action_type_registry';
 import { registerBuiltInActionTypes } from './application/sections/action_add/buildin_action_types';
 import { AlertTypeRegistry } from './application/alert_type_registry';
 import { registerAlertTypes } from './application/sections/alert_add/alert_types';
+import { setSavedObjectsClient } from './application/lib/api';
 
 export type Setup = void;
 export type Start = void;
@@ -98,8 +100,9 @@ export class Plugin implements CorePlugin<Setup, Start> {
     routes.when(`${BASE_PATH}/:section?/:subsection?/:view?/:id?`, {
       template,
       controller: (() => {
-        return ($route: any, $scope: any) => {
+        return ($route: any, $scope: any, Private: any) => {
           const appRoute = $route.current;
+          setSavedObjectsClient(Private(SavedObjectsClientProvider));
           const stopListeningForLocationChange = $scope.$on('$locationChangeSuccess', () => {
             const currentRoute = $route.current;
             const isNavigationInApp = currentRoute.$$route.template === appRoute.$$route.template;

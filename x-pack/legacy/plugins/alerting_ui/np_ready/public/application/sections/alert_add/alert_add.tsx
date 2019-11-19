@@ -27,7 +27,6 @@ import {
   EuiCard,
   EuiTabs,
   EuiTab,
-  EuiText,
   EuiLink,
   EuiPanel,
   EuiFieldNumber,
@@ -35,14 +34,20 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { useAppDependencies } from '../..';
-import { saveAlert } from '../../lib/api';
+import { saveAlert, loadActionTypes } from '../../lib/api';
 import { AlertsContext } from '../../context/alerts_context';
 import { alertReducer } from './alert_reducer';
 import { ErrableFormRow } from '../../components/page_error';
-import { AlertTypeModel, Alert, IErrorObject, ActionTypeModel, AlertAction } from '../../../types';
+import {
+  AlertTypeModel,
+  Alert,
+  IErrorObject,
+  ActionTypeModel,
+  AlertAction,
+  ActionTypeIndex,
+} from '../../../types';
 import { ACTION_GROUPS } from '../../constants/action_groups';
-import { getTimeUnitLabel } from '../../lib/get_time_unit_label';
-import { TIME_UNITS } from '../../constants';
+import { getTimeOptions } from '../../lib/get_time_options';
 
 interface Props {
   refreshList: () => Promise<void>;
@@ -64,14 +69,6 @@ function validateBaseProperties(alertObject: Alert) {
   return validationResult;
 }
 
-const getTimeOptions = (unitSize: string) =>
-  Object.entries(TIME_UNITS).map(([_key, value]) => {
-    return {
-      text: getTimeUnitLabel(value, unitSize),
-      value,
-    };
-  });
-
 export const AlertAdd = ({ refreshList }: Props) => {
   const {
     core: { http },
@@ -79,8 +76,6 @@ export const AlertAdd = ({ refreshList }: Props) => {
     alertTypeRegistry,
     actionTypeRegistry,
   } = useAppDependencies();
-  const [alertType, setAlertType] = useState<AlertTypeModel | undefined>(undefined);
-
   const initialAlert = {
     alertTypeParams: {},
     alertTypeId: null,
@@ -89,10 +84,36 @@ export const AlertAdd = ({ refreshList }: Props) => {
 
   const { alertFlyoutVisible, setAlertFlyoutVisibility } = useContext(AlertsContext);
   // hooks
+  const [alertType, setAlertType] = useState<AlertTypeModel | undefined>(undefined);
   const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [selectedTabId, setSelectedTabId] = useState<string>('alert');
   const [alertAction, setAlertAction] = useState<AlertAction | undefined>(undefined);
+  const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setIsLoadingActionTypes(true);
+        const actionTypes = await loadActionTypes({ http });
+        const index: ActionTypeIndex = {};
+        for (const actionTypeItem of actionTypes) {
+          index[actionTypeItem.id] = actionTypeItem;
+        }
+        setActionTypesIndex(index);
+      } catch (e) {
+        toastNotifications.addDanger({
+          title: i18n.translate(
+            'xpack.alertingUI.sections.alertAdd.unableToLoadActionTypesMessage',
+            { defaultMessage: 'Unable to load action types' }
+          ),
+        });
+      } finally {
+        setIsLoadingActionTypes(false);
+      }
+    })();
+  }, [toastNotifications, http]);
 
   useEffect(() => {
     dispatch({
@@ -137,6 +158,18 @@ export const AlertAdd = ({ refreshList }: Props) => {
     ...validateBaseProperties(alert).errors,
   } as IErrorObject;
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+
+  const actionErrors = alert.actions.reduce((acc: any, action: any) => {
+    const actionValidationErrors = action.validate();
+    acc[action.id] = actionValidationErrors;
+    return acc;
+  }, {});
+
+  const hasActionErrors = !!Object.keys(actionErrors).find(actionError => {
+    return !!Object.keys(actionErrors[actionError]).find((actionErrorKey: string) => {
+      return actionErrors[actionError][actionErrorKey].length >= 1;
+    });
+  });
 
   const tabs = [
     {
@@ -201,7 +234,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
       <EuiFlexItem key={index}>
         <EuiCard
           icon={<EuiIcon size="xl" type={item.iconClass} />}
-          title={item.name}
+          title={actionTypesIndex ? actionTypesIndex[item.id].name : item.name}
           description={''}
           onClick={() => addActionType(item.actionType)}
         />
@@ -520,7 +553,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
               data-test-subj="saveActionButton"
               type="submit"
               iconType="check"
-              isDisabled={hasErrors}
+              isDisabled={hasErrors || hasActionErrors}
               isLoading={isSaving}
               onClick={async () => {
                 setIsSaving(true);

@@ -14,7 +14,7 @@ export const ErrableFormRow = ({
   ...rest
 }: {
   errorKey: string;
-  isShowingErrors: boolean;
+  isShowingErrors?: boolean;
   errors: { [key: string]: string[] };
   children: ReactElement;
   [key: string]: any;

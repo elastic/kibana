@@ -25,7 +25,7 @@ import {
   onPremCloudInstructions,
 } from '../../../common/tutorials/filebeat_instructions';
 
-export function osqueryLogsSpecProvider(server, context) {
+export function osqueryLogsSpecProvider(context) {
   const moduleName = 'osquery';
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
