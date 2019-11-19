@@ -20,6 +20,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
+import { documentationService } from '../../../../../../services/documentation';
 import { Form, FormHook, FormDataProvider } from '../../../../shared_imports';
 import { TYPE_DEFINITION } from '../../../../constants';
 import {
@@ -30,7 +31,6 @@ import {
   MainType,
   SubType,
 } from '../../../../types';
-import { getTypeDocLink } from '../../../../lib';
 import { getParametersFormForType } from '../field_types';
 import { UpdateFieldProvider, UpdateFieldFunc } from './update_field_provider';
 import { EditFieldHeaderForm } from './edit_field_header_form';
@@ -85,7 +85,9 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
                 return null;
               }
 
-              const linkDocumentation = getTypeDocLink(subType) || getTypeDocLink(type);
+              const linkDocumentation =
+                documentationService.getTypeDocLink(subType) ||
+                documentationService.getTypeDocLink(type);
 
               return (
                 <EuiFlyout

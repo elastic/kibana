@@ -5,19 +5,17 @@
  */
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
-
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { UseField, Field } from '../../../../shared_imports';
 
 import {
   StoreParameter,
   IndexParameter,
   DocValuesParameter,
   BoostParameter,
+  NullValueParameter,
 } from '../../field_parameters';
-import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
+import { EditFieldSection, AdvancedSettingsWrapper } from '../edit_field';
 
 const getDefaultValueToggle = (param: string, field: FieldType) => {
   switch (param) {
@@ -51,25 +49,9 @@ export const IpType = ({ field }: Props) => {
           <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
 
           {/* null_value */}
-          <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.ipNullValueFieldTitle', {
-                  defaultMessage: 'Set null value',
-                })}
-              </h3>
-            }
-            description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.ipNullValueFieldDescription',
-              {
-                defaultMessage:
-                  'Accepts an IPv4 value which is substituted for any explicit null values.',
-              }
-            )}
-            formFieldPath="null_value"
-          >
-            <UseField path="null_value" config={getFieldConfig('null_value')} component={Field} />
-          </EditFieldFormRow>
+          <NullValueParameter
+            defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
+          />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

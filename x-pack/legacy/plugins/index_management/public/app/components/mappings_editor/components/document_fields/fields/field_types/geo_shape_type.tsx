@@ -5,10 +5,13 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCallOut, EuiSpacer, EuiLink } from '@elastic/eui';
 
+import { documentationService } from '../../../../../../services/documentation';
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { UseField, FormDataProvider, Field, SelectField } from '../../../../shared_imports';
+import { UseField, SelectField } from '../../../../shared_imports';
 import { CoerceParameter, IgnoreMalformedParameter } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 import { PARAMETERS_OPTIONS } from '../../../../constants';
@@ -36,6 +39,29 @@ export const GeoShapeType = ({ field }: Props) => {
   return (
     <>
       <AdvancedSettingsWrapper>
+        <EuiCallOut color="primary">
+          <p>
+            <FormattedMessage
+              id="xpack.idxMgmt.mappingsEditor.geoShape.infoMessage"
+              defaultMessage="GeoShape types are indexed by decomposing the shape into a triangular mesh and indexing each triangle as a 7 dimension point in a BKD tree. {docsLink}"
+              values={{
+                docsLink: (
+                  <EuiLink
+                    href={documentationService.getGeoShapeDocumentationLink()}
+                    target="_blank"
+                  >
+                    {i18n.translate('xpack.idxMgmt.mappingsEditor.geoShape.learnMoreLink', {
+                      defaultMessage: 'Learn more.',
+                    })}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        </EuiCallOut>
+
+        <EuiSpacer />
+
         <EditFieldSection>
           {/* orientation */}
           <EditFieldFormRow
@@ -47,7 +73,7 @@ export const GeoShapeType = ({ field }: Props) => {
               </h3>
             }
             description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.orientationFieldDescription',
+              'xpack.idxMgmt.mappingsEditor.geoShape.orientationFieldDescription',
               {
                 defaultMessage:
                   'Define how to interpret vertex order for polygons or multipolygons',
@@ -72,13 +98,13 @@ export const GeoShapeType = ({ field }: Props) => {
           <EditFieldFormRow
             title={
               <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.pointsOnlyFieldTitle', {
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.geoShape.pointsOnlyFieldTitle', {
                   defaultMessage: 'Points only',
                 })}
               </h3>
             }
             description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.ignoreZValueFieldDescription',
+              'xpack.idxMgmt.mappingsEditor.geoShape.ignoreZValueFieldDescription',
               {
                 defaultMessage: 'Configures the geo_shape field type for point shapes only.',
               }
@@ -90,13 +116,13 @@ export const GeoShapeType = ({ field }: Props) => {
           <EditFieldFormRow
             title={
               <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreZValueFieldTitle', {
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.geoShape.ignoreZValueFieldTitle', {
                   defaultMessage: 'Ignore Z value',
                 })}
               </h3>
             }
             description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.ignoreZValueFieldDescription',
+              'xpack.idxMgmt.mappingsEditor.geoShape.ignoreZValueFieldDescription',
               {
                 defaultMessage:
                   'If enabled, three dimension points will be accepted, but only latitude and longitude values will be indexed; the third dimension is ignored.',
@@ -109,7 +135,12 @@ export const GeoShapeType = ({ field }: Props) => {
 
           {/* ignore_malformed */}
           <IgnoreMalformedParameter
-            defaultToggleValue={getDefaultValueToggle('ignore_malformed', field.source)}
+            description={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.geoShape.ignoreMalformedFieldDescription',
+              {
+                defaultMessage: 'Whether to ignore malformed GeoJSON or WKT shapes.',
+              }
+            )}
           />
         </EditFieldSection>
       </AdvancedSettingsWrapper>

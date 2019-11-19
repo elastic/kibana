@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EditFieldFormRow } from '../fields/edit_field';
 
-export const IgnoreMalformedParameter = () => (
+export const IgnoreMalformedParameter = ({ description }: { description?: string }) => (
   <EditFieldFormRow
     title={
       <h3>
@@ -19,9 +19,13 @@ export const IgnoreMalformedParameter = () => (
         })}
       </h3>
     }
-    description={i18n.translate('xpack.idxMgmt.mappingsEditor.ignoredMalformedFieldDescription', {
-      defaultMessage: 'Whether to ignore malformed data.',
-    })}
+    description={
+      description
+        ? description
+        : i18n.translate('xpack.idxMgmt.mappingsEditor.ignoredMalformedFieldDescription', {
+            defaultMessage: 'Whether to ignore malformed data.',
+          })
+    }
     formFieldPath="ignore_malformed"
   />
 );

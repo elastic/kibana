@@ -17,7 +17,6 @@ import { INDEX_DEFAULT } from '../constants';
 import { AliasOption, DataType } from '../types';
 
 import { ComboBoxOption } from '../types';
-import { ALL_DATE_FORMAT_OPTIONS } from './field_options';
 
 const { toInt } = fieldFormatters;
 const { emptyField, containsCharsField } = fieldValidators;
@@ -173,6 +172,7 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: 50,
       type: FIELD_TYPES.NUMBER,
+      formatters: [toInt],
       validations: [
         {
           validator: emptyField(

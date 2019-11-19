@@ -5,6 +5,8 @@
  */
 
 import { DocLinksStart } from '../../../../../../../src/core/public';
+import { DataType } from '../components/mappings_editor/types';
+import { TYPE_DEFINITION } from '../components/mappings_editor/constants';
 
 class DocumentationService {
   private esDocsBase: string = '';
@@ -32,6 +34,18 @@ class DocumentationService {
 
   public getIdxMgmtDocumentationLink() {
     return `${this.kibanaDocsBase}/managing-indices.html`;
+  }
+
+  public getTypeDocLink = (type: DataType): string | undefined => {
+    const typeDefinition = TYPE_DEFINITION[type];
+    if (!typeDefinition || !typeDefinition.docUri) {
+      return undefined;
+    }
+    return `${this.esDocsBase}${typeDefinition.docUri}`;
+  };
+
+  public getGeoShapeDocumentationLink() {
+    return `${this.esDocsBase}/geo-shape.html#geoshape-indexing-approach`;
   }
 }
 

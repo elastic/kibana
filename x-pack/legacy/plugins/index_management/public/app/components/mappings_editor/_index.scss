@@ -92,6 +92,9 @@
     margin-top: $euiSizeL;
     padding-top: $euiSize;
     border-top: 1px solid $euiColorLightShade;
+    & .mappingsEditor__selectWithCustom {
+      max-width: 400px;
+    }
   }
 
   &__editField {

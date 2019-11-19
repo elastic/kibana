@@ -15,7 +15,7 @@ import { BooleanType } from './boolean_type';
 import { BinaryType } from './binary_type';
 import { RangeType } from './range_type';
 import { IpType } from './ip_type';
-import { TokenCountType } from './token_count';
+import { TokenCountType } from './token_count_type';
 import { CompletionType } from './completion_type';
 import { GeoPointType } from './geo_point_type';
 import { DateType } from './date_type';

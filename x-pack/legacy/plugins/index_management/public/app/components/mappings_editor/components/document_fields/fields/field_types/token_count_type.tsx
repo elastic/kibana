@@ -9,18 +9,21 @@ import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { UseField, Field } from '../../../../shared_imports';
+import { UseField, NumericField, fieldFormatters } from '../../../../shared_imports';
 
 import {
   StoreParameter,
   IndexParameter,
   DocValuesParameter,
   BoostParameter,
+  AnalyzerParameter,
+  NullValueParameter,
 } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 
 const getDefaultValueToggle = (param: string, field: FieldType) => {
   switch (param) {
+    case 'analyzer':
     case 'boost': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
@@ -39,6 +42,23 @@ interface Props {
 export const TokenCountType = ({ field }: Props) => {
   return (
     <>
+      <EditFieldSection
+        title={i18n.translate('xpack.idxMgmt.mappingsEditor.tokenCount.analyzer.sectionTitle', {
+          defaultMessage: 'Analyzer',
+        })}
+      >
+        <AnalyzerParameter
+          path="analyzer"
+          label={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.tokenCount.indexSearchAnalyzerFieldLabel',
+            {
+              defaultMessage: 'Index analyzer',
+            }
+          )}
+          defaultValue={field.source.analyzer}
+          useDefaultOptions={false}
+        />
+      </EditFieldSection>
       <EditFieldSection>
         <StoreParameter />
         <IndexParameter hasIndexOptions={false} />
@@ -51,36 +71,30 @@ export const TokenCountType = ({ field }: Props) => {
           <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
 
           {/* null_value */}
-          <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.tokenCountNullValueFieldTitle', {
-                  defaultMessage: 'Set null value',
-                })}
-              </h3>
-            }
-            description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.tokenCountNullValueFieldDescription',
-              {
-                defaultMessage: 'Accepts a numeric value of the same type as the field.',
-              }
-            )}
-            formFieldPath="null_value"
+          <NullValueParameter
+            defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
           >
-            <UseField path="null_value" config={getFieldConfig('null_value')} component={Field} />
-          </EditFieldFormRow>
+            <UseField
+              path="null_value"
+              component={NumericField}
+              config={{ formatters: [fieldFormatters.toInt] }}
+            />
+          </NullValueParameter>
 
           {/* enable_position_increments */}
           <EditFieldFormRow
             title={
               <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.enablePositionIncrementsFieldTitle', {
-                  defaultMessage: 'Enable position increments',
-                })}
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.tokenCount.enablePositionIncrementsFieldTitle',
+                  {
+                    defaultMessage: 'Enable position increments',
+                  }
+                )}
               </h3>
             }
             description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.enablePositionIncrementsFieldDescription',
+              'xpack.idxMgmt.mappingsEditor.tokenCount.enablePositionIncrementsFieldDescription',
               {
                 defaultMessage: 'Whether to count position increments.',
               }

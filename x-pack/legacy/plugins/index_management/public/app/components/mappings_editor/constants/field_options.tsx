@@ -8,7 +8,7 @@ import { EuiText } from '@elastic/eui';
 
 import { DataType, ParameterName, SelectOption, SuperSelectOption } from '../types';
 import { FIELD_OPTIONS_TEXTS, LANGUAGE_OPTIONS_TEXT, FieldOption } from './field_options_i18n';
-import { INDEX_DEFAULT } from './default_values';
+import { INDEX_DEFAULT, STANDARD } from './default_values';
 import { MAIN_DATA_TYPE_DEFINITION } from './data_types_definition';
 
 export const TYPE_NOT_ALLOWED_MULTIFIELD: DataType[] = ['object', 'nested', 'alias'];
@@ -78,7 +78,7 @@ export const PARAMETERS_OPTIONS: {
       ...getOptionTexts('analyzer.indexDefault'),
     },
     {
-      value: 'standard',
+      value: STANDARD,
       ...getOptionTexts('analyzer.standard'),
     },
     {

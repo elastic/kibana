@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { UseField, TextField, FieldConfig, FieldHook } from '../../../shared_imports';
 import { getFieldConfig } from '../../../lib';
-import { PARAMETERS_OPTIONS, getSuperSelectOption } from '../../../constants';
+import { PARAMETERS_OPTIONS, getSuperSelectOption, INDEX_DEFAULT } from '../../../constants';
 import {
   IndexSettings,
   IndexSettingsInterface,
@@ -24,9 +24,14 @@ interface Props {
   defaultValue: string | undefined;
   label?: string;
   config?: FieldConfig;
+  useDefaultOptions?: boolean;
 }
 
 const ANALYZER_OPTIONS = PARAMETERS_OPTIONS.analyzer!;
+
+const ANALYZER_OPTIONS_WITHOUT_DEFAULT = (PARAMETERS_OPTIONS.analyzer as SuperSelectOption[]).filter(
+  ({ value }) => value !== INDEX_DEFAULT
+);
 
 const getCustomAnalyzers = (indexSettings: IndexSettings): SelectOption[] | undefined => {
   const settings: IndexSettingsInterface = {}.hasOwnProperty.call(indexSettings, 'index')
@@ -56,11 +61,19 @@ export interface MapOptionsToSubOptions {
   };
 }
 
-export const AnalyzerParameter = ({ path, defaultValue, label, config }: Props) => {
+export const AnalyzerParameter = ({
+  path,
+  defaultValue,
+  label,
+  config,
+  useDefaultOptions = true,
+}: Props) => {
   const indexSettings = useIndexSettings();
   const customAnalyzers = getCustomAnalyzers(indexSettings);
 
-  const fieldOptions = [...ANALYZER_OPTIONS] as SuperSelectOption[];
+  const analyzerOptions = useDefaultOptions ? ANALYZER_OPTIONS : ANALYZER_OPTIONS_WITHOUT_DEFAULT;
+
+  const fieldOptions = [...analyzerOptions] as SuperSelectOption[];
   const mapOptionsToSubOptions: MapOptionsToSubOptions = {
     language: {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.analyzers.languageAnalyzerLabel', {

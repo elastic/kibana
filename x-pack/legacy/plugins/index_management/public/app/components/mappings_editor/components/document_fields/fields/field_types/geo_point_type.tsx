@@ -31,21 +31,31 @@ export const GeoPointType = ({ field }: Props) => {
     <AdvancedSettingsWrapper>
       <EditFieldSection>
         {/* ignore_malformed */}
-        <IgnoreMalformedParameter />
+        <IgnoreMalformedParameter
+          description={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.geoPoint.ignoreMalformedFieldDescription',
+            {
+              defaultMessage: 'Whether to ignore malformed geo-points.',
+            }
+          )}
+        />
 
         {/* ignore_z_value */}
         <EditFieldFormRow
           title={
             <h3>
-              {i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreZValueFieldTitle', {
+              {i18n.translate('xpack.idxMgmt.mappingsEditor.geoPoint.ignoreZValueFieldTitle', {
                 defaultMessage: 'Ignore Z value',
               })}
             </h3>
           }
-          description={i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreZValueFieldDescription', {
-            defaultMessage:
-              'If true, three dimension points will be accepted, but only latitude and longitude values will be indexed; the third dimension is ignored.',
-          })}
+          description={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.geoPoint.ignoreZValueFieldDescription',
+            {
+              defaultMessage:
+                'If true, three dimension points will be accepted, but only latitude and longitude values will be indexed; the third dimension is ignored.',
+            }
+          )}
           formFieldPath="ignore_z_value"
         />
 
@@ -53,7 +63,7 @@ export const GeoPointType = ({ field }: Props) => {
         <NullValueParameter
           defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
           description={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.geoPointNullValueFieldDescription',
+            'xpack.idxMgmt.mappingsEditor.geoPoint.nullValueFieldDescription',
             {
               defaultMessage:
                 'Accepts a geopoint value which is substituted for any explicit null values.',
