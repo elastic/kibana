@@ -9,4 +9,7 @@ import { npStart } from 'ui/new_platform';
 import { Plugin } from './plugin';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-new Plugin({ opaqueId: Symbol('siem'), env: {} as any }, chrome).start(npStart);
+new Plugin({ opaqueId: Symbol('siem'), env: {} as any }, chrome).start(
+  npStart.core,
+  npStart.plugins
+);

@@ -47,7 +47,7 @@ import {
 
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
-import { createFilterBarDirective, createFilterBarHelper, DataStart } from '../../../data/public';
+import { DataStart } from '../../../data/public';
 import { SavedQueryService } from '../../../data/public/search/search_bar/lib/saved_query_service';
 import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
 import { NavigationStart } from '../../../navigation/public';
@@ -122,7 +122,6 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
   createLocalPersistedStateModule();
   createLocalTopNavModule(navigation);
   createLocalConfirmModalModule();
-  createLocalFilterBarModule();
 
   const dashboardAngularModule = angular.module(moduleName, [
     ...thirdPartyAngularDependencies,
@@ -133,7 +132,6 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
     'app/dashboard/TopNav',
     'app/dashboard/State',
     'app/dashboard/ConfirmModal',
-    'app/dashboard/FilterBar',
   ]);
   return dashboardAngularModule;
 }
@@ -211,13 +209,6 @@ function createLocalTopNavModule(navigation: NavigationStart) {
     .module('app/dashboard/TopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)
     .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
-}
-
-function createLocalFilterBarModule() {
-  angular
-    .module('app/dashboard/FilterBar', ['react'])
-    .directive('filterBar', createFilterBarDirective)
-    .directive('filterBarHelper', createFilterBarHelper);
 }
 
 function createLocalI18nModule() {

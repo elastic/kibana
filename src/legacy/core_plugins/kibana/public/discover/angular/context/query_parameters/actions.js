@@ -18,7 +18,8 @@
  */
 
 import _ from 'lodash';
-import { getServices, getFilterGenerator } from '../../../kibana_services';
+import { getServices } from '../../../kibana_services';
+import { generateFilters } from '../../../../../../../../plugins/data/public';
 
 import {
   MAX_CONTEXT_SIZE,
@@ -28,7 +29,6 @@ import {
 
 
 export function QueryParameterActionsProvider(queryFilter) {
-  const filterGen = getFilterGenerator(queryFilter);
 
   const setPredecessorCount = (state) => (predecessorCount) => (
     state.queryParameters.predecessorCount = clamp(
@@ -59,7 +59,7 @@ export function QueryParameterActionsProvider(queryFilter) {
 
   const addFilter = (state) => async (field, values, operation) => {
     const indexPatternId = state.queryParameters.indexPatternId;
-    const newFilters = filterGen.generate(field, values, operation, indexPatternId);
+    const newFilters = generateFilters(queryFilter, field, values, operation, indexPatternId);
     queryFilter.addFilters(newFilters);
     const indexPattern = await getServices().indexPatterns.get(indexPatternId);
     indexPattern.popularizeField(field.name, 1);

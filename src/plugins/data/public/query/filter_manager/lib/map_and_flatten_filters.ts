@@ -19,7 +19,7 @@
 
 import { compact, flatten } from 'lodash';
 import { mapFilter } from './map_filter';
-import { esFilters } from '../../../../../data/public';
+import { esFilters } from '../../../../common';
 
 export const mapAndFlattenFilters = (filters: esFilters.Filter[]) => {
   return compact(flatten(filters)).map((item: esFilters.Filter) => mapFilter(item));

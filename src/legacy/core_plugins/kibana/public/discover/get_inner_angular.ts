@@ -67,11 +67,6 @@ import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_to
 import { configureAppAngularModule } from 'ui/legacy_compat';
 // @ts-ignore
 
-import {
-  createApplyFiltersPopoverDirective,
-  createFilterBarDirective,
-  createFilterBarHelper,
-} from '../../../data/public';
 // @ts-ignore
 import { IndexPatterns } from '../../../data/public/index_patterns/index_patterns';
 // @ts-ignore
@@ -194,9 +189,6 @@ export function initializeInnerAngularModule(
     .directive('collapsibleSidebar', CollapsibleSidebarProvider)
     .directive('cssTruncate', CssTruncateProvide)
     .directive('fixedScroll', FixedScrollProvider)
-    .directive('filterBar', createFilterBarDirective)
-    .directive('filterBarHelper', createFilterBarHelper)
-    .directive('applyFiltersPopover', createApplyFiltersPopoverDirective)
     .directive('renderComplete', createRenderCompleteDirective)
     .directive('discoverFieldSearch', createFieldSearchDirective)
     .directive('discoverIndexPatternSelect', createIndexPatternSelectDirective)

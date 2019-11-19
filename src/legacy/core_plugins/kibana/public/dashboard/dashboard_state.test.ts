@@ -23,7 +23,7 @@ import { DashboardStateManager } from './dashboard_state_manager';
 import { getAppStateMock, getSavedDashboardMock } from './__tests__';
 import { AppStateClass } from './legacy_imports';
 import { DashboardAppState } from './types';
-import { TimeRange, Timefilter, InputTimeRange } from 'src/plugins/data/public';
+import { TimeRange, TimefilterContract, InputTimeRange } from 'src/plugins/data/public';
 import { ViewMode } from 'src/plugins/embeddable/public';
 
 jest.mock('ui/registry/field_formats', () => ({
@@ -48,7 +48,7 @@ describe('DashboardState', function() {
     setTime: (time: InputTimeRange) => {
       mockTime = time as TimeRange;
     },
-  } as Timefilter;
+  } as TimefilterContract;
 
   function initDashboardState() {
     dashboardState = new DashboardStateManager({

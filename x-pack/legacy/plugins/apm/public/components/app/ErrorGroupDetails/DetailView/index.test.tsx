@@ -60,6 +60,7 @@ describe('DetailView', () => {
     const errorGroup = {
       occurrencesCount: 10,
       error: {
+        error: {},
         timestamp: {
           us: 0
         }
@@ -85,6 +86,7 @@ describe('DetailView', () => {
         timestamp: {
           us: 0
         },
+        error: {},
         service: {},
         user: {}
       } as any
@@ -109,6 +111,7 @@ describe('DetailView', () => {
         timestamp: {
           us: 0
         },
+        error: {},
         context: {}
       } as any
     };

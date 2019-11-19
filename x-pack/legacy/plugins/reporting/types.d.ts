@@ -8,7 +8,11 @@ import { ResponseObject } from 'hapi';
 import { EventEmitter } from 'events';
 import { Legacy } from 'kibana';
 import { XPackMainPlugin } from '../xpack_main/xpack_main';
-import { ElasticsearchPlugin } from '../../../../src/legacy/core_plugins/elasticsearch';
+import {
+  ElasticsearchPlugin,
+  CallCluster,
+} from '../../../../src/legacy/core_plugins/elasticsearch';
+import { CancellationToken } from './common/cancellation_token';
 import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
 import { BrowserType } from './server/browsers/types';
 
@@ -18,12 +22,31 @@ export interface ReportingPlugin {
   queue: {
     addJob: (type: string, payload: object, options: object) => Job;
   };
+  // TODO: convert exportTypesRegistry to TS
   exportTypesRegistry: {
     getById: (id: string) => ExportTypeDefinition;
     getAll: () => ExportTypeDefinition[];
+    get: (callback: (item: ExportTypeDefinition) => boolean) => ExportTypeDefinition;
   };
   browserDriverFactory: HeadlessChromiumDriverFactory;
 }
+
+export interface ReportingConfigOptions {
+  browser: BrowserConfig;
+  poll: {
+    jobCompletionNotifier: {
+      interval: number;
+      intervalErrorMultiplier: number;
+    };
+    jobsRefresh: {
+      interval: number;
+      intervalErrorMultiplier: number;
+    };
+  };
+  queue: QueueConfig;
+  capture: CaptureConfig;
+}
+
 export interface NetworkPolicyRule {
   allow: boolean;
   protocol: string;
@@ -34,16 +57,6 @@ export interface NetworkPolicy {
   enabled: boolean;
   rules: NetworkPolicyRule[];
 }
-
-// Tracks which parts of the legacy plugin system are being used
-export type ServerFacade = Legacy.Server & {
-  plugins: {
-    reporting?: ReportingPlugin;
-    xpack_main?: XPackMainPlugin & {
-      status?: any;
-    };
-  };
-};
 
 interface ListQuery {
   page: string;
@@ -60,7 +73,21 @@ interface DownloadParams {
   docId: string;
 }
 
-// Tracks which parts of the legacy plugin system are being used
+/*
+ * Legacy System
+ */
+
+export type ReportingPluginSpecOptions = Legacy.PluginSpecOptions;
+
+export type ServerFacade = Legacy.Server & {
+  plugins: {
+    reporting?: ReportingPlugin;
+    xpack_main?: XPackMainPlugin & {
+      status?: any;
+    };
+  };
+};
+
 interface ReportingRequest {
   query: ListQuery & GenerateQuery;
   params: DownloadParams;
@@ -80,6 +107,12 @@ export type ResponseFacade = ResponseObject & {
 };
 
 export type ReportingResponseToolkit = Legacy.ResponseToolkit;
+
+export type ESCallCluster = CallCluster;
+
+/*
+ * Reporting Config
+ */
 
 export interface CaptureConfig {
   browser: {
@@ -165,6 +198,11 @@ export interface JobDocPayload {
   type: string | null;
 }
 
+export interface JobSource {
+  _id: string;
+  _source: JobDoc;
+}
+
 export interface JobDocOutput {
   content: string; // encoded content
   contentType: string;
@@ -177,9 +215,11 @@ export interface JobDoc {
   status: string; // completed, failed, etc
 }
 
-export interface JobSource {
-  _id: string;
-  _source: JobDoc;
+export interface JobDocExecuted {
+  jobtype: string;
+  output: JobDocOutputExecuted;
+  payload: JobDocPayload;
+  status: string; // completed, failed, etc
 }
 
 /*
@@ -211,7 +251,11 @@ export type ESQueueCreateJobFn = (
   request: RequestFacade
 ) => Promise<object>;
 
-export type ESQueueWorkerExecuteFn = (jobId: string, job: JobDoc, cancellationToken: any) => void;
+export type ESQueueWorkerExecuteFn = (
+  jobId: string,
+  job: JobDoc,
+  cancellationToken?: CancellationToken
+) => void;
 
 export type JobIDForImmediate = null;
 export type ImmediateExecuteFn = (
@@ -243,6 +287,7 @@ export interface ExportTypeDefinition {
   id: string;
   name: string;
   jobType: string;
+  jobContentEncoding?: string;
   jobContentExtension: string;
   createJobFactory: CreateJobFactory;
   executeJobFactory: ExecuteJobFactory | ExecuteImmediateJobFactory;

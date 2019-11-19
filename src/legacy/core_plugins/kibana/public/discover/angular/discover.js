@@ -30,7 +30,6 @@ import './doc_table';
 import { getSort } from './doc_table/lib/get_sort';
 import { getSortForSearchSource } from './doc_table/lib/get_sort_for_search_source';
 import * as columnActions from './doc_table/actions/columns';
-import * as filterActions from './doc_table/actions/filter';
 
 import indexTemplate from './discover.html';
 import { showOpenSearchPanel } from '../components/top_nav/show_open_search_panel';
@@ -40,7 +39,6 @@ import { getPainlessError } from './get_painless_error';
 import {
   angular,
   buildVislibDimensions,
-  getFilterGenerator,
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
@@ -55,7 +53,7 @@ import {
   subscribeWithScope,
   tabifyAggResponse,
   vislibSeriesResponseHandlerProvider,
-  VisProvider,
+  Vis,
   SavedObjectSaveModal,
   getAngularModule,
   ensureDefaultIndexPattern,
@@ -74,8 +72,8 @@ const {
 } = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
-import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
 import { start as data } from '../../../../data/public/legacy';
+import { generateFilters } from '../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { registerTimefilterWithGlobalStateFactory } from '../../../../../ui/public/timefilter/setup_router';
 
@@ -192,9 +190,7 @@ function discoverController(
   uiCapabilities,
   queryFilter
 ) {
-  const Vis = Private(VisProvider);
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
-  const filterGen = getFilterGenerator(queryFilter);
 
   const inspectorAdapters = {
     requests: new RequestAdapter()
@@ -420,20 +416,6 @@ function discoverController(
     // The filters will automatically be set when the queryFilter emits an update event (see below)
     queryFilter.setFilters(filters);
   };
-
-  $scope.applyFilters = filters => {
-    const { timeRangeFilter, restOfFilters } = extractTimeFilter($scope.indexPattern.timeFieldName, filters);
-    queryFilter.addFilters(restOfFilters);
-    if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
-
-    $scope.state.$newFilters = [];
-  };
-
-  $scope.$watch('state.$newFilters', (filters = []) => {
-    if (filters.length === 1) {
-      $scope.applyFilters(filters);
-    }
-  });
 
   const getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
@@ -899,7 +881,8 @@ function discoverController(
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function (field, values, operation) {
     $scope.indexPattern.popularizeField(field, 1);
-    filterActions.addFilter(field, values, operation, $scope.indexPattern.id, $scope.state, filterGen);
+    const newFilters = generateFilters(queryFilter, field, values, operation, $scope.indexPattern.id);
+    return queryFilter.addFilters(newFilters);
   };
 
   $scope.addColumn = function addColumn(columnName) {
