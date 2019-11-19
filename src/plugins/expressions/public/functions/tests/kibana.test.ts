@@ -19,8 +19,8 @@
 
 import { functionWrapper } from './utils';
 import { kibana } from '../kibana';
-import { FunctionHandlers } from '../../types';
-import { KibanaContext } from '../../expression_types';
+import { FunctionHandlers } from '../../../common/types';
+import { KibanaContext } from '../../../common/expression_types/kibana_context';
 
 describe('interpreter/functions#kibana', () => {
   const fn = functionWrapper(kibana);
