@@ -47,7 +47,7 @@ export class DeprecationLoggingToggleUI extends React.Component<
         id="xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch"
         data-test-subj="upgradeAssistantDeprecationToggle"
         label={this.renderLoggingState()}
-        checked={loggingEnabled}
+        checked={loggingEnabled || false}
         onChange={this.toggleLogging}
         disabled={loadingState === LoadingState.Loading || loadingState === LoadingState.Error}
       />

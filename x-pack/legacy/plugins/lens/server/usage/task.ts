@@ -82,7 +82,7 @@ function scheduleTasks(server: Server) {
     // function block.
     (async () => {
       try {
-        await taskManager.schedule({
+        await taskManager.ensureScheduled({
           id: TASK_ID,
           taskType: TELEMETRY_TASK_TYPE,
           state: { byDate: {}, suggestionsByDate: {}, saved: {}, runs: 0 },

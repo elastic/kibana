@@ -25,7 +25,7 @@ import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy
 const tileMapPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
     id: 'tile_map',
-    require: ['kibana', 'elasticsearch', 'interpreter', 'expressions'],
+    require: ['kibana', 'elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),

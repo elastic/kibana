@@ -270,8 +270,8 @@ export function createTestServers({
         // Override provided configs, we know what the elastic user is now
         kbnSettings.elasticsearch = {
           hosts: [esTestConfig.getUrl()],
-          username: esTestConfig.getUrlParts().username,
-          password: esTestConfig.getUrlParts().password,
+          username: kibanaServerTestUser.username,
+          password: kibanaServerTestUser.password,
         };
       }
 
@@ -279,8 +279,8 @@ export function createTestServers({
         stop: async () => await es.cleanup(),
         es,
         hosts: [esTestConfig.getUrl()],
-        username: esTestConfig.getUrlParts().username,
-        password: esTestConfig.getUrlParts().password,
+        username: kibanaServerTestUser.username,
+        password: kibanaServerTestUser.password,
       };
     },
     startKibana: async () => {

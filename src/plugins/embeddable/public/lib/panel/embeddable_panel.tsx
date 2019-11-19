@@ -25,7 +25,8 @@ import {
   TGetActionsCompatibleWithTrigger,
   IAction,
 } from '../ui_actions';
-import { CoreStart } from '../../../../../core/public';
+import { CoreStart, OverlayStart } from '../../../../../core/public';
+import { toMountPoint } from '../../../../kibana_react/public';
 
 import { Start as InspectorStartContract } from '../inspector';
 import { CONTEXT_MENU_TRIGGER, PANEL_BADGE_TRIGGER } from '../triggers';
@@ -49,6 +50,7 @@ interface Props {
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
+  hideHeader?: boolean;
 }
 
 interface State {
@@ -164,16 +166,18 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         role="figure"
         aria-labelledby={headerId}
       >
-        <PanelHeader
-          getActionContextMenuPanel={this.getActionContextMenuPanel}
-          hidePanelTitles={this.state.hidePanelTitles}
-          isViewMode={viewOnlyMode}
-          closeContextMenu={this.state.closeContextMenu}
-          title={title}
-          badges={this.state.badges}
-          embeddable={this.props.embeddable}
-          headerId={headerId}
-        />
+        {!this.props.hideHeader && (
+          <PanelHeader
+            getActionContextMenuPanel={this.getActionContextMenuPanel}
+            hidePanelTitles={this.state.hidePanelTitles}
+            isViewMode={viewOnlyMode}
+            closeContextMenu={this.state.closeContextMenu}
+            title={title}
+            badges={this.state.badges}
+            embeddable={this.props.embeddable}
+            headerId={headerId}
+          />
+        )}
         <div className="embPanel__content" ref={this.embeddableRoot} />
       </EuiPanel>
     );
@@ -200,17 +204,19 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       embeddable: this.props.embeddable,
     });
 
-    const createGetUserData = (overlays: CoreStart['overlays']) =>
+    const createGetUserData = (overlays: OverlayStart) =>
       async function getUserData(context: { embeddable: IEmbeddable }) {
         return new Promise<{ title: string | undefined }>(resolve => {
           const session = overlays.openModal(
-            <CustomizePanelModal
-              embeddable={context.embeddable}
-              updateTitle={title => {
-                session.close();
-                resolve({ title });
-              }}
-            />,
+            toMountPoint(
+              <CustomizePanelModal
+                embeddable={context.embeddable}
+                updateTitle={title => {
+                  session.close();
+                  resolve({ title });
+                }}
+              />
+            ),
             {
               'data-test-subj': 'customizePanel',
             }

@@ -19,6 +19,12 @@ jest.mock('../settings/apm_indices/get_apm_indices', () => ({
   })
 }));
 
+jest.mock('../index_pattern/get_dynamic_index_pattern', () => ({
+  getDynamicIndexPattern: async () => {
+    return;
+  }
+}));
+
 function getMockRequest() {
   const callWithRequestSpy = jest.fn();
   const callWithInternalUserSpy = jest.fn();
@@ -34,6 +40,9 @@ function getMockRequest() {
             callWithInternalUser: callWithInternalUserSpy
           })
         }
+      },
+      savedObjects: {
+        getScopedSavedObjectsClient: () => ({ get: async () => false })
       }
     },
     getUiSettingsService: () => ({ get: async () => false })
