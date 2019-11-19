@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EnterButton should render properly 1`] = `
+<div
+  style={
+    Object {
+      "left": 10,
+      "position": "absolute",
+      "top": 10,
+      "zIndex": 1,
+    }
+  }
+>
+  <EuiButton
+    iconSide="right"
+    iconType="flag"
+    isLoading={false}
+    onClick={[Function]}
+  >
+    Enter Setup Mode
+  </EuiButton>
+</div>
+`;
