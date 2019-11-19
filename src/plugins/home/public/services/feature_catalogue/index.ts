@@ -17,4 +17,10 @@
  * under the License.
  */
 
-export * from './feature_catalogue';
+export {
+  FeatureCatalogueCategory,
+  FeatureCatalogueEntry,
+  FeatureCatalogueRegistry,
+  FeatureCatalogueRegistrySetup,
+  FeatureCatalogueRegistryStart,
+} from './feature_catalogue_registry';
