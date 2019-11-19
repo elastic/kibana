@@ -21,10 +21,17 @@ import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
-import { TimeRange, onlyDisabledFiltersChanged } from '../../../../../../plugins/data/public';
-import { setup as data } from '../../../../data/public/legacy';
-import { Query, getTime } from '../../../../data/public';
-import { esFilters } from '../../../../../../plugins/data/public';
+import { npStart } from 'ui/new_platform';
+import {
+  esFilters,
+  TimeRange,
+  FilterManager,
+  onlyDisabledFiltersChanged,
+  generateFilters,
+  getTime,
+  Query,
+  IFieldType,
+} from '../../../../../../plugins/data/public';
 import {
   APPLY_FILTER_TRIGGER,
   Container,
@@ -39,7 +46,6 @@ import { getSortForSearchSource } from '../angular/doc_table/lib/get_sort_for_se
 import {
   Adapters,
   angular,
-  getFilterGenerator,
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
@@ -48,6 +54,8 @@ import {
   SearchSource,
 } from '../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
+
+const { data } = npStart.plugins;
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
@@ -59,23 +67,11 @@ interface SearchScope extends ng.IScope {
   removeColumn?: (column: string) => void;
   addColumn?: (column: string) => void;
   moveColumn?: (column: string, index: number) => void;
-  filter?: (field: { name: string; scripted: boolean }, value: string[], operator: string) => void;
+  filter?: (field: IFieldType, value: string[], operator: string) => void;
   hits?: any[];
   indexPattern?: IndexPattern;
   totalHitCount?: number;
   isLoading?: boolean;
-}
-
-export interface FilterManager {
-  generate: (
-    field: {
-      name: string;
-      scripted: boolean;
-    },
-    values: string | string[],
-    operation: string,
-    index: number
-  ) => esFilters.Filter[];
 }
 
 interface SearchEmbeddableConfig {
@@ -101,7 +97,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   private autoRefreshFetchSubscription?: Subscription;
   private subscription?: Subscription;
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
-  private filterGen: FilterManager;
+  private filterManager: FilterManager;
   private abortController?: AbortController;
 
   private prevTimeRange?: TimeRange;
@@ -128,7 +124,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       parent
     );
 
-    this.filterGen = getFilterGenerator(queryFilter);
+    this.filterManager = queryFilter as FilterManager;
     this.savedSearch = savedSearch;
     this.$rootScope = $rootScope;
     this.$compile = $compile;
@@ -136,9 +132,9 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       requests: new RequestAdapter(),
     };
     this.initializeSearchScope();
-    this.autoRefreshFetchSubscription = data.timefilter.timefilter
-      .getAutoRefreshFetch$()
-      .subscribe(this.fetch);
+    const { timefilter } = data.query.timefilter;
+
+    this.autoRefreshFetchSubscription = timefilter.getAutoRefreshFetch$().subscribe(this.fetch);
 
     this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
       this.panelTitle = this.output.title || '';
@@ -245,7 +241,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     };
 
     searchScope.filter = async (field, value, operator) => {
-      let filters = this.filterGen.generate(field, value, operator, indexPattern.id);
+      let filters = generateFilters(this.filterManager, field, value, operator, indexPattern.id);
       filters = filters.map(filter => ({
         ...filter,
         $state: { store: esFilters.FilterStateStore.APP_STATE },

@@ -16,7 +16,7 @@ export default function ({ getService }) {
   const log = getService('log');
   const retry = getService('retry');
   const config = getService('config');
-  const testHistoryIndex = '.task_manager_test_result';
+  const testHistoryIndex = '.kibana_task_manager_test_result';
   const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
 
   describe('scheduling and running tasks', () => {
@@ -60,7 +60,15 @@ export default function ({ getService }) {
     function scheduleTask(task) {
       return supertest.post('/api/sample_tasks')
         .set('kbn-xsrf', 'xxx')
-        .send(task)
+        .send({ task })
+        .expect(200)
+        .then((response) => response.body);
+    }
+
+    function scheduleTaskIfNotExists(task) {
+      return supertest.post('/api/sample_tasks')
+        .set('kbn-xsrf', 'xxx')
+        .send({ task, ensureScheduled: true })
         .expect(200)
         .then((response) => response.body);
     }
@@ -114,6 +122,24 @@ export default function ({ getService }) {
       });
 
       expect(result.id).to.be('test-task-for-sample-task-plugin-to-test-task-manager');
+    });
+
+    it('should allow a task with a given ID to be scheduled multiple times', async () => {
+      const result = await scheduleTaskIfNotExists({
+        id: 'test-task-to-reschedule-in-task-manager',
+        taskType: 'sampleTask',
+        params: { },
+      });
+
+      expect(result.id).to.be('test-task-to-reschedule-in-task-manager');
+
+      const rescheduleResult = await scheduleTaskIfNotExists({
+        id: 'test-task-to-reschedule-in-task-manager',
+        taskType: 'sampleTask',
+        params: { },
+      });
+
+      expect(rescheduleResult.id).to.be('test-task-to-reschedule-in-task-manager');
     });
 
     it('should reschedule if task errors', async () => {

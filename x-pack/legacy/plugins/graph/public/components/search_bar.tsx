@@ -11,12 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { IDataPluginServices } from 'src/legacy/core_plugins/data/public/types';
+import { Query } from 'src/plugins/data/public';
 import { IndexPatternSavedObject, IndexPatternProvider } from '../types';
-import {
-  QueryBarInput,
-  Query,
-  IndexPattern,
-} from '../../../../../../src/legacy/core_plugins/data/public';
+import { QueryBarInput, IndexPattern } from '../../../../../../src/legacy/core_plugins/data/public';
 import { openSourceModal } from '../services/source_modal';
 
 import {
@@ -89,7 +86,8 @@ export function SearchBarComponent(props: SearchBarProps) {
   }, [currentDatasource]);
 
   const kibana = useKibana<IDataPluginServices>();
-  const { overlays, savedObjects, uiSettings } = kibana.services;
+  const { services, overlays } = kibana;
+  const { savedObjects, uiSettings } = services;
   if (!overlays) return null;
 
   return (

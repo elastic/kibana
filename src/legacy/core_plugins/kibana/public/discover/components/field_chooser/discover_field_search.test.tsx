@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { EventHandler, MouseEvent as ReactMouseEvent } from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DiscoverFieldSearch, Props } from './discover_field_search';
-import { EuiButtonGroupProps } from '@elastic/eui';
+import { EuiButtonGroupProps, EuiPopover } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 
 describe('DiscoverFieldSearch', () => {
@@ -121,7 +121,7 @@ describe('DiscoverFieldSearch', () => {
       // @ts-ignore
       (aggregtableButtonGroup.props() as EuiButtonGroupProps).onChange('aggregatable-true', null);
     });
-    missingSwitch.simulate('change', { target: { value: false } });
+    missingSwitch.simulate('click');
     expect(onChange).toBeCalledTimes(2);
   });
 
@@ -135,5 +135,45 @@ describe('DiscoverFieldSearch', () => {
     expect(onChange).toBeCalledWith('type', 'string');
     typeSelector.simulate('change', { target: { value: 'any' } });
     expect(onChange).toBeCalledWith('type', 'any');
+  });
+
+  test('click on filter button should open and close popover', () => {
+    const component = mountComponent();
+    const btn = findTestSubject(component, 'toggleFieldFilterButton');
+    btn.simulate('click');
+    let popover = component.find(EuiPopover);
+    expect(popover.prop('isOpen')).toBe(true);
+    btn.simulate('click');
+    popover = component.find(EuiPopover);
+    expect(popover.prop('isOpen')).toBe(false);
+  });
+
+  test('click outside popover should close popover', () => {
+    const triggerDocumentMouseDown: EventHandler<any> = (e: ReactMouseEvent<any>) => {
+      const event = new Event('mousedown');
+      // @ts-ignore
+      event.euiGeneratedBy = e.nativeEvent.euiGeneratedBy;
+      document.dispatchEvent(event);
+    };
+    const triggerDocumentMouseUp: EventHandler<any> = (e: ReactMouseEvent<any>) => {
+      const event = new Event('mouseup');
+      // @ts-ignore
+      event.euiGeneratedBy = e.nativeEvent.euiGeneratedBy;
+      document.dispatchEvent(event);
+    };
+    const component = mountWithIntl(
+      <div onMouseDown={triggerDocumentMouseDown} onMouseUp={triggerDocumentMouseUp} id="wrapperId">
+        <DiscoverFieldSearch {...defaultProps} />
+      </div>
+    );
+    const btn = findTestSubject(component, 'toggleFieldFilterButton');
+    btn.simulate('click');
+    let popover = component.find(EuiPopover);
+    expect(popover.length).toBe(1);
+    expect(popover.prop('isOpen')).toBe(true);
+    component.find('#wrapperId').simulate('mousedown');
+    component.find('#wrapperId').simulate('mouseup');
+    popover = component.find(EuiPopover);
+    expect(popover.prop('isOpen')).toBe(false);
   });
 });

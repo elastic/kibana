@@ -37,13 +37,13 @@ import 'uiExports/navbarExtensions';
 import 'uiExports/contextMenuActions';
 import 'uiExports/managementSections';
 import 'uiExports/indexManagement';
-import 'uiExports/devTools';
 import 'uiExports/docViews';
 import 'uiExports/embeddableFactories';
 import 'uiExports/embeddableActions';
 import 'uiExports/inspectorViews';
 import 'uiExports/search';
 import 'uiExports/shareContextMenuExtensions';
+import 'uiExports/interpreter';
 
 import 'ui/autoload/all';
 import 'ui/kbn_top_nav';

@@ -102,6 +102,7 @@ export class NavLinksService {
 
   public start({ application, http }: StartDeps): ChromeNavLinks {
     const appLinks$ = application.availableApps$.pipe(
+      // TODO: .filter(([, app]) => !app.chromeless)
       map(apps => {
         return new Map(
           [...apps].map(
@@ -137,10 +138,7 @@ export class NavLinksService {
 
     return {
       getNavLinks$: () => {
-        return navLinks$.pipe(
-          map(sortNavLinks),
-          takeUntil(this.stop$)
-        );
+        return navLinks$.pipe(map(sortNavLinks), takeUntil(this.stop$));
       },
 
       get(id: string) {
@@ -202,7 +200,10 @@ export class NavLinksService {
 }
 
 function sortNavLinks(navLinks: ReadonlyMap<string, NavLinkWrapper>) {
-  return sortBy([...navLinks.values()].map(link => link.properties), 'order');
+  return sortBy(
+    [...navLinks.values()].map(link => link.properties),
+    'order'
+  );
 }
 
 function relativeToAbsolute(url: string) {
