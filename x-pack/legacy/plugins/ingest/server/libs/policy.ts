@@ -18,6 +18,7 @@ import { FrameworkAuthenticatedUser, FrameworkUser } from './adapters/framework/
 import { DEFAULT_POLICY_ID } from '../../common/constants';
 import { OutputsLib } from './outputs';
 import { DatasourcesLib } from './datasources';
+import { ReturnTypeBulkDelete } from '../../../../../../data/.update_prs/x-pack/legacy/plugins/fleet/common/types/std_return_format';
 
 export class PolicyLib {
   constructor(
@@ -173,10 +174,10 @@ export class PolicyLib {
   public async update(
     user: FrameworkUser,
     id: string,
-    policy: Partial<StoredPolicy>
-  ): Promise<StoredPolicy> {
+    policy: Partial<Exclude<Policy, 'id' | 'datasources' | 'updated_by' | 'updated_on'>>
+  ): Promise<Policy> {
     const invalidKeys = Object.keys(policy).filter(key =>
-      ['updated_on', 'updated_by'].includes(key)
+      ['id', 'updated_on', 'updated_by', 'datasources'].includes(key)
     );
 
     if (invalidKeys.length !== 0) {
@@ -194,25 +195,66 @@ export class PolicyLib {
       throw new Error(`Policy ${id} can not be updated because it is ${oldPolicy.status}`);
     }
 
-    return await this._update(user, id, { ...oldPolicy, ...policy });
+    return await this._update(user, id, { ...oldPolicy, ...(policy as StoredPolicy) });
   }
 
-  // public async delete(sharedId: string): Promise<{ success: boolean }> {
-  //   if (sharedId === DEFAULT_POLICY_ID) {
-  //     throw new Error('Not allowed (impossible to delete default policy)');
-  //   }
-  //   // TODO Low priority - page through vs one large query as this will break if there are more then 10k past versions
-  //   const versions = await this.listVersions(sharedId, false, 1, 10000);
+  public async assignDatasource(
+    user: FrameworkUser,
+    policyID: string,
+    datasourceIds: string[]
+  ): Promise<Policy> {
+    const oldPolicy = await this.adapter.get(user, policyID);
+    if (!oldPolicy) {
+      throw new Error('Policy not found');
+    }
 
-  //   // TODO bulk delete
-  //   for (const version of versions) {
-  //     await this.adapter.deleteVersion(version.id);
-  //   }
+    // TODO ensure IDs of datasources are valid
+    return await this._update(user, policyID, {
+      ...oldPolicy,
+      ...{
+        datasources: (oldPolicy.datasources || []).concat(datasourceIds),
+      },
+    } as StoredPolicy);
+  }
 
-  //   return {
-  //     success: true,
-  //   };
-  // }
+  public async unassignDatasource(
+    user: FrameworkUser,
+    policyID: string,
+    datasourceIds: string[]
+  ): Promise<Policy> {
+    const oldPolicy = await this.adapter.get(user, policyID);
+    if (!oldPolicy) {
+      throw new Error('Policy not found');
+    }
+
+    return await this._update(user, policyID, {
+      ...oldPolicy,
+      ...{
+        datasources: (oldPolicy.datasources || []).filter(id => !datasourceIds.includes(id)),
+      },
+    } as StoredPolicy);
+  }
+
+  public async delete(user: FrameworkUser, ids: string[]): Promise<ReturnTypeBulkDelete> {
+    if (ids.includes(DEFAULT_POLICY_ID)) {
+      throw new Error('Not allowed (impossible to delete default policy)');
+    }
+
+    // TODO bulk delete
+    for (const id of ids) {
+      await this.update(user, id, {
+        status: Status.Inactive,
+      });
+    }
+
+    return {
+      results: ids.map(() => ({
+        success: true,
+        action: 'deleted',
+      })),
+      success: true,
+    };
+  }
 
   // public async changeAgentVersion(policyId: string, version: string) {
   //   const { id, agent_version: agentVersion, ...oldPolicy } = await this.adapter.get(policyId);
@@ -275,6 +317,6 @@ export class PolicyLib {
     // TODO create audit/history log
     // const newPolicy = await this.adapter.create(policyData);
 
-    return policy;
+    return policy as Policy;
   }
 }

@@ -19,6 +19,7 @@ export const RuntimeStoredPolicy = t.intersection([
     updated_by: t.string,
   }),
   t.partial({
+    id: t.string,
     datasources: t.array(t.string), // IDs
     description: t.string,
     label: t.string, // the key formerly known as "use case"
@@ -30,7 +31,7 @@ export interface Policy {
   datasources?: Datasource[];
   description?: string;
   id: string;
-  name?: string;
+  name: string;
   status: Status;
   label?: string; // the key formerly known as "use case"
   updated_on: string;

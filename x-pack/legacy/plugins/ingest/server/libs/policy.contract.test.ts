@@ -10,6 +10,7 @@ import { ServerLibs } from './types';
 import * as elasticsearch from 'elasticsearch';
 import { FrameworkAuthenticatedUser } from './adapters/framework/adapter_types';
 import { INDEX_NAMES } from '../../common/constants/index_names';
+import { AssetType, InputType } from './adapters/policy/adapter_types';
 
 jest.mock('uuid/v4', () => {
   let uuid = 1;
@@ -74,11 +75,9 @@ describe('Policies Lib', () => {
       const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
 
       expect(typeof newPolicy.id).toBe('string');
-      expect(typeof newPolicy.shared_id).toBe('string');
-      expect(typeof newPolicy.version).toBe('number');
 
-      const gottenPolicy = await libs.policy.get(newPolicy.id);
-      expect(gottenPolicy.name).toBe('test');
+      const gottenPolicy = await libs.policy.get(TestUser, newPolicy.id as string);
+      expect(gottenPolicy?.name).toBe('test');
     });
   });
 
@@ -86,7 +85,7 @@ describe('Policies Lib', () => {
     it('should create a new default policy if none exists', async () => {
       await libs.policy.ensureDefaultPolicy();
 
-      const { items: policies } = await libs.policy.list();
+      const { items: policies } = await libs.policy.list(TestUser);
       expect(policies).toHaveLength(1);
       expect(policies[0].id).toBe('default');
     });
@@ -95,7 +94,7 @@ describe('Policies Lib', () => {
       await libs.policy.ensureDefaultPolicy();
       await libs.policy.ensureDefaultPolicy();
 
-      const { items: policies } = await libs.policy.list();
+      const { items: policies } = await libs.policy.list(TestUser);
       expect(policies).toHaveLength(1);
       expect(policies[0].id).toBe('default');
     });
@@ -108,31 +107,10 @@ describe('Policies Lib', () => {
       const newPolicy3 = await libs.policy.create(TestUser, 'test3', 'test description');
 
       expect(typeof newPolicy.id).toBe('string');
-      expect(typeof newPolicy.shared_id).toBe('string');
-      expect(typeof newPolicy.version).toBe('number');
 
-      const { items: gottenPolicies } = await libs.policy.list();
+      const { items: gottenPolicies } = await libs.policy.list(TestUser);
       expect(gottenPolicies.length).toBe(3);
       expect(gottenPolicies.find(c => c.id === newPolicy.id) !== undefined).toBe(true);
-      expect(gottenPolicies.find(c => c.id === newPolicy2.id) !== undefined).toBe(true);
-      expect(gottenPolicies.find(c => c.id === newPolicy3.id) !== undefined).toBe(true);
-    });
-
-    it('should not list inactive policies', async () => {
-      const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
-      const updated = await libs.policy.update(newPolicy.id, {
-        name: 'foo',
-      });
-      const newPolicy2 = await libs.policy.create(TestUser, 'test2', 'test description');
-      const newPolicy3 = await libs.policy.create(TestUser, 'test3', 'test description');
-
-      expect(typeof newPolicy.id).toBe('string');
-      expect(typeof newPolicy.shared_id).toBe('string');
-      expect(typeof newPolicy.version).toBe('number');
-
-      const { items: gottenPolicies } = await libs.policy.list();
-      expect(gottenPolicies.length).toBe(3);
-      expect(gottenPolicies.find(c => c.id === updated.id) !== undefined).toBe(true);
       expect(gottenPolicies.find(c => c.id === newPolicy2.id) !== undefined).toBe(true);
       expect(gottenPolicies.find(c => c.id === newPolicy3.id) !== undefined).toBe(true);
     });
@@ -141,157 +119,91 @@ describe('Policies Lib', () => {
   describe('update', () => {
     it('should update a policy and invalidate the origional', async () => {
       const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
-      const updated = await libs.policy.update(newPolicy.id, {
+      const updated = await libs.policy.update(TestUser, newPolicy.id as string, {
         name: 'foo',
       });
       expect(updated.id).not.toBe(newPolicy.id);
-      expect(updated.version).toBe(newPolicy.version + 1);
-      expect(updated.shared_id).toBe(newPolicy.shared_id);
+      expect(updated.name).toBe('foo');
 
-      const gottenPolicy = await libs.policy.get(updated.id);
-      expect(gottenPolicy.name).toBe('foo');
-
-      const origPolicy = await libs.policy.get(newPolicy.id);
-      expect(origPolicy.status).toBe('locked');
+      const gottenPolicy = await libs.policy.get(TestUser, updated.id as string);
+      expect(gottenPolicy?.name).toBe('foo');
     });
-  });
 
-  describe.skip('finish update', () => {});
-
-  describe('list versions', () => {
-    it('Should list past locked versions of a policy', async () => {
-      const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
-      await libs.policy.update(newPolicy.id, {
-        name: 'foo',
-      });
-
-      const gottenPolicies = await libs.policy.listVersions(newPolicy.shared_id, false);
-      expect(gottenPolicies.length).toBe(2);
-      expect(gottenPolicies.filter(c => c.status === 'active').length).toBe(1);
-      expect(gottenPolicies.filter(c => c.status === 'locked').length).toBe(1);
-    });
+    describe.skip('finish update', () => {});
   });
 
   describe('delete', () => {
-    it('Should delete the version by the versions ID', async () => {
+    it('Should delete the by the ID', async () => {
       const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
 
-      await libs.policy.update(newPolicy.id, {
+      await libs.policy.update(TestUser, newPolicy.id as string, {
         name: 'foo',
       });
 
       try {
-        await libs.policy.deleteVersion(newPolicy.id);
-      } catch (e) {
-        expect(e).toBe(undefined);
-      }
-      const gottenPolicies = await libs.policy.listVersions(newPolicy.shared_id, false);
-      expect(gottenPolicies.length).toBe(1);
-    });
-
-    it('Should delete the all versions when deleting the shared ID', async () => {
-      const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
-
-      await libs.policy.update(newPolicy.id, {
-        name: 'foo',
-      });
-
-      try {
-        await libs.policy.delete(newPolicy.shared_id);
+        await libs.policy.delete(TestUser, [newPolicy?.id as string]);
       } catch (e) {
         expect(e).toBe(undefined);
       }
 
-      const { items: gottenPolicies } = await libs.policy.list();
+      const { items: gottenPolicies } = await libs.policy.list(TestUser);
       expect(gottenPolicies.length).toBe(0);
     });
 
     it('Should never delete the default policy', async () => {
-      expect(libs.policy.delete('default')).rejects.toThrowError(/Not allowed/);
+      expect(libs.policy.delete(TestUser, ['default'])).rejects.toThrowError(/Not allowed/);
     });
   });
 
-  describe('createNewPolicyFrom', () => {
-    it('Should duplicate policy but with a new shared_id', async () => {
+  describe('getWithAgentFormating', () => {
+    it('Should return a policy with all datasource, formatted for agent', async () => {
       const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
 
-      await libs.policy.createNewPolicyFrom(newPolicy.id, 'foo', 'description');
+      await libs.datasources.add(TestUser, {
+        name: 'prod_west',
+        package: {
+          name: 'coredns',
+          version: '1.0.1, 1.3.1',
+          description:
+            'CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n',
+          title: 'CoreDNS',
+          assets: [{ id: 'string', type: AssetType.IndexTemplate }],
+        },
+        streams: [
+          {
+            id: 'string',
+            input: {
+              type: InputType.Etc,
+              config: { paths: '/var/log/*.log' },
+              ingest_pipelines: ['string'],
+              id: 'string',
+              index_template: 'string',
+              ilm_policy: 'string',
+              fields: [{}],
+            },
+            config: { metricsets: ['container', 'cpu'] },
+            output_id: 'default',
+            processors: ['string'],
+          },
+        ],
+        id: 'foo-bar',
+        read_alias: 'string',
+      });
 
-      const { items: gottenPolicies } = await libs.policy.list();
-      expect(gottenPolicies.length).toBe(2);
-      expect(gottenPolicies.find(c => c.name === 'foo') !== undefined).toBe(true);
-      expect(gottenPolicies.find(c => c.name === 'foo')!.shared_id).not.toBe(
-        gottenPolicies.find(c => c.name === 'test')!.shared_id
+      const updatedPolicyInfo = await libs.policy.assignDatasource(
+        TestUser,
+        newPolicy.id as string,
+        ['foo-bar']
       );
-    });
-  });
-  describe.skip('rollForward', () => {});
 
-  describe('requestAddDataSource', () => {
-    it('Should add data sources and inputs to the policy', async () => {
-      const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
-
-      const updatedPolicyInfo = await libs.policy.requestAddDataSource(newPolicy.id, {
-        ref_source: undefined,
-        ref: undefined,
-        output: '43hi34hi5y3i53o4',
-        inputs: [{}, {}],
-        queue: undefined,
-      });
-      const fullPolicy = await libs.policy.get(updatedPolicyInfo.id);
-      expect(fullPolicy.name).toBe('test');
-      expect(fullPolicy.data_sources.length).toBe(1);
-      expect(fullPolicy.data_sources[0].uuid.length > 0).toBe(true);
-      expect(fullPolicy.data_sources[0].inputs.length).toBe(2);
-      expect(typeof fullPolicy.data_sources[0].inputs[0]).toBe('string');
-    });
-  });
-  describe('requestDeleteDataSource', () => {
-    it('Should delete data sources', async () => {
-      const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
-
-      const updatedPolicyInfo = await libs.policy.requestAddDataSource(newPolicy.id, {
-        ref_source: undefined,
-        ref: undefined,
-        output: '43hi34hi5y3i53o4',
-        inputs: [{}, {}],
-        queue: undefined,
-      });
-      const fullPolicy = await libs.policy.get(updatedPolicyInfo.id);
-      expect(fullPolicy.data_sources.length).toBe(1);
-      expect(fullPolicy.data_sources[0].uuid.length > 0).toBe(true);
-
-      const finalPolicyInfo = await libs.policy.requestDeleteDataSource(
-        updatedPolicyInfo.id,
-        fullPolicy.data_sources[0].uuid
+      const fullPolicy = await libs.policy.getWithAgentFormating(
+        TestUser,
+        updatedPolicyInfo.id as string
       );
-      expect(finalPolicyInfo.id).not.toBe(updatedPolicyInfo.id);
-      const fullPolicy2 = await libs.policy.get(finalPolicyInfo.id);
-      expect(fullPolicy2.version).toBe(fullPolicy.version + 1);
 
-      expect(fullPolicy2.data_sources.length).toBe(0);
-    });
-  });
-  describe('getFull', () => {
-    it('Should return a policy with all inputs, not just refs to the inputs', async () => {
-      const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
-
-      const updatedPolicyInfo = await libs.policy.requestAddDataSource(newPolicy.id, {
-        ref_source: undefined,
-        ref: undefined,
-        output: '43hi34hi5y3i53o4',
-        inputs: [{ foo: 'bar' }],
-        queue: undefined,
-      });
-      const fullPolicy = await libs.policy.getFull(updatedPolicyInfo.id);
-
-      expect(fullPolicy.name).toBe('test');
-      expect(fullPolicy.data_sources.length).toBe(1);
-      expect(fullPolicy.data_sources[0].uuid.length > 0).toBe(true);
-      expect(fullPolicy.data_sources[0].inputs.length).toBe(1);
-      expect(typeof fullPolicy.data_sources[0].inputs[0]).not.toBe('string');
-      expect((fullPolicy.data_sources[0].inputs[0] as any).other).toBe(undefined);
-      expect(fullPolicy.data_sources[0].inputs[0].foo).toBe('bar');
+      expect(fullPolicy?.streams.length).toBe(1);
+      expect(fullPolicy?.streams[0].id).toBe('string');
+      expect(fullPolicy).toMatchSnapshot();
     });
   });
 

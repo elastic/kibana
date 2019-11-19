@@ -7,9 +7,25 @@ import { FrameworkUser } from './adapters/framework/adapter_types';
 import { Datasource } from './adapters/policy/adapter_types';
 
 export class DatasourcesLib {
-  public async getByIDs(_user: FrameworkUser, _ids: string[]): Promise<Datasource[]> {
+  private datasources: Datasource[] = [];
+
+  public async getByIDs(_user: FrameworkUser, ids: string[]): Promise<Datasource[]> {
     return new Promise(resolve => {
-      resolve([]);
+      resolve(this.datasources.filter(ds => ids.includes(ds.id)));
+    });
+  }
+
+  public async add(_user: FrameworkUser, datasource: Datasource): Promise<Datasource> {
+    return new Promise(resolve => {
+      this.datasources.push(datasource);
+      resolve(datasource);
+    });
+  }
+
+  public async delete(_user: FrameworkUser, ids: string[]): Promise<boolean> {
+    return new Promise(resolve => {
+      this.datasources.filter(ds => !ids.includes(ds.id));
+      resolve(true);
     });
   }
 }
