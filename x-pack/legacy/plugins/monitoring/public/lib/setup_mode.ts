@@ -6,6 +6,7 @@
 
 import { get, contains } from 'lodash';
 import chrome from 'ui/chrome';
+import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 
@@ -90,7 +91,26 @@ export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid
   const oldData = setupModeState.data;
   const data = await fetchCollectionData(uuid, fetchWithoutClusterUuid);
   setupModeState.data = data;
-  if (chrome.getInjected('isOnCloud')) {
+
+  const isCloud = chrome.getInjected('isOnCloud');
+  const hasPermissions = get(data, '_meta.hasPermissions', false);
+  if (isCloud || !hasPermissions) {
+    const text = !hasPermissions
+      ? i18n.translate('xpack.monitoring.setupMode.notAvailablePermissions', {
+        defaultMessage: 'You do not have the necessary permissions to do this.'
+      })
+      : i18n.translate('xpack.monitoring.setupMode.notAvailableCloud', {
+        defaultMessage: 'This feature is not available on cloud.'
+      });
+
+    angularState.scope.$evalAsync(() => {
+      toastNotifications.addDanger({
+        title: i18n.translate('xpack.monitoring.setupMode.notAvailableTitle', {
+          defaultMessage: 'Setup mode is not available'
+        }),
+        text,
+      });
+    });
     return toggleSetupMode(false); // eslint-disable-line no-use-before-define
   }
   notifySetupModeDataChange(oldData);

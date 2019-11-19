@@ -40,7 +40,8 @@ const angularStateMock = {
     }
   },
   scope: {
-    $apply: fn => fn && fn()
+    $apply: fn => fn && fn(),
+    $evalAsync: fn => fn && fn()
   }
 };
 
@@ -123,11 +124,22 @@ describe('setup_mode', () => {
     });
 
     it('should not fetch data if on cloud', async (done) => {
+      const addDanger = jest.fn();
       jest.doMock('ui/chrome', () => ({
         getInjected: (key) => {
           if (key === 'isOnCloud') {
             return true;
           }
+        }
+      }));
+      data = {
+        _meta: {
+          hasPermissions: true
+        }
+      };
+      jest.doMock('ui/notify', () => ({
+        toastNotifications: {
+          addDanger,
         }
       }));
       setModules();
@@ -136,6 +148,36 @@ describe('setup_mode', () => {
       waitForSetupModeData(() => {
         const state = getSetupModeState();
         expect(state.enabled).toBe(false);
+        expect(addDanger).toHaveBeenCalledWith({
+          title: 'Setup mode is not available',
+          text: 'This feature is not available on cloud.'
+        });
+        done();
+      });
+    });
+
+    it('should not fetch data if the user does not have sufficient permissions', async (done) => {
+      const addDanger = jest.fn();
+      jest.doMock('ui/notify', () => ({
+        toastNotifications: {
+          addDanger,
+        }
+      }));
+      data = {
+        _meta: {
+          hasPermissions: false
+        }
+      };
+      setModules();
+      initSetupModeState(angularStateMock.scope, angularStateMock.injector);
+      await toggleSetupMode(true);
+      waitForSetupModeData(() => {
+        const state = getSetupModeState();
+        expect(state.enabled).toBe(false);
+        expect(addDanger).toHaveBeenCalledWith({
+          title: 'Setup mode is not available',
+          text: 'You do not have the necessary permissions to do this.'
+        });
         done();
       });
     });
@@ -144,7 +186,8 @@ describe('setup_mode', () => {
       const clusterUuid = '1ajy';
       data = {
         _meta: {
-          liveClusterUuid: clusterUuid
+          liveClusterUuid: clusterUuid,
+          hasPermissions: true
         },
         elasticsearch: {
           byUuid: {
@@ -166,7 +209,8 @@ describe('setup_mode', () => {
       const clusterUuid = '1ajy';
       data = {
         _meta: {
-          liveClusterUuid: clusterUuid
+          liveClusterUuid: clusterUuid,
+          hasPermissions: true
         },
         elasticsearch: {
           byUuid: {
