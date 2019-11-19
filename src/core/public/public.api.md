@@ -124,7 +124,7 @@ export type ChromeHelpExtension = (element: HTMLDivElement) => () => void;
 // @public (undocumented)
 export interface ChromeNavControl {
     // (undocumented)
-    mount(targetDomElement: HTMLElement): () => void;
+    mount: MountPoint;
     // (undocumented)
     order?: number;
 }
