@@ -44,7 +44,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     try {
       await driver.executeScript(`window.${storageType}.clear();`);
     } catch (error) {
-      if (!error.message.includes(`Failed to read the ${storageType} property from 'Window'`)) {
+      if (!error.message.includes(`Failed to read the '${storageType}' property from 'Window'`)) {
         throw error;
       }
     }
