@@ -5,32 +5,23 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { ILicense } from './types';
-import { setup } from './__fixtures__/setup';
+import { licenseMock } from '../common/license.mock';
+
 import { createRouteHandlerContext } from './licensing_route_handler_context';
 
-describe('licensingRouteHandlerContext', () => {
-  it('provides the initial license value', async () => {
-    const { license$, license } = await setup();
+describe('createRouteHandlerContext', () => {
+  it('returns a function providing the last license value', async () => {
+    const firstLicense = licenseMock.create();
+    const secondLicense = licenseMock.create();
+    const license$ = new BehaviorSubject(firstLicense);
 
-    const context = createRouteHandlerContext(license$);
+    const routeHandler = createRouteHandlerContext(license$);
 
-    const { license: contextResult } = await context({}, {} as any, {} as any);
+    const firstCtx = await routeHandler({}, {} as any, {} as any);
+    license$.next(secondLicense);
+    const secondCtx = await routeHandler({}, {} as any, {} as any);
 
-    expect(contextResult).toBe(license);
-  });
-
-  it('provides the latest license value', async () => {
-    const { license } = await setup();
-    const license$ = new BehaviorSubject<ILicense>(license);
-
-    const context = createRouteHandlerContext(license$);
-
-    const latestLicense = (Symbol() as unknown) as ILicense;
-    license$.next(latestLicense);
-
-    const { license: contextResult } = await context({}, {} as any, {} as any);
-
-    expect(contextResult).toBe(latestLicense);
+    expect(firstCtx.license).toBe(firstLicense);
+    expect(secondCtx.license).toBe(secondLicense);
   });
 });
