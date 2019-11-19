@@ -7,7 +7,6 @@
 import uiRoutes from 'ui/routes';
 
 import { checkMlNodesAvailable } from '../../../../ml_nodes_check';
-// @ts-ignore
 import { checkLicenseExpired } from '../../../../license/check_license';
 import { checkCreateJobsPrivilege } from '../../../../privilege/check_privilege';
 import { loadCurrentIndexPattern, loadCurrentSavedSearch } from '../../../../util/index_utils';

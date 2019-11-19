@@ -43,6 +43,7 @@ import 'uiExports/embeddableActions';
 import 'uiExports/inspectorViews';
 import 'uiExports/search';
 import 'uiExports/shareContextMenuExtensions';
+import 'uiExports/interpreter';
 
 import 'ui/autoload/all';
 import 'ui/kbn_top_nav';
