@@ -34,13 +34,14 @@ export interface ScreenshotItem {
   title?: string;
 }
 
+export type ServiceName = 'kibana' | 'elasticsearch';
+
 // from /package/{name}
 // https://github.com/elastic/package-registry/blob/master/docs/api/package.json
-export type ServiceName = 'kibana' | 'elasticsearch';
 export type RequirementVersion = string;
-
+export type RequirementVersionRange = string;
 export interface ServiceRequirements {
-  versions: string;
+  versions: RequirementVersionRange;
 }
 
 // from /categories
