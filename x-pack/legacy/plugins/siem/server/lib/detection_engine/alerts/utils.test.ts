@@ -293,6 +293,28 @@ describe('utils', () => {
       );
       expect(result).toEqual(true);
     });
+    test('if successful iteration of while loop with maxDocs and search after returns empty results with no sort ids', async () => {
+      const sampleParams = sampleSignalAlertParams(10);
+      mockService.callCluster
+        .mockReturnValueOnce({
+          took: 100,
+          errors: false,
+          items: [
+            {
+              fakeItemValue: 'fakeItemKey',
+            },
+          ],
+        })
+        .mockReturnValueOnce(sampleEmptyDocSearchResults);
+      const result = await searchAfterAndBulkIndex(
+        repeatedSearchResultsWithSortId(4),
+        sampleParams,
+        mockService,
+        mockLogger,
+        sampleSignalId
+      );
+      expect(result).toEqual(true);
+    });
     test('if logs error when iteration is unsuccessful when bulk index results in a failure', async () => {
       const sampleParams = sampleSignalAlertParams(5);
       mockService.callCluster

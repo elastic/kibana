@@ -42,7 +42,7 @@ function getExistingFilter(
     }
 
     if (esFilters.isScriptedPhraseFilter(filter)) {
-      return filter.meta.field === fieldName && filter.meta.script!.script.params.value === value;
+      return filter.meta.field === fieldName && filter.script!.script.params.value === value;
     }
   });
 }
