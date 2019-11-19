@@ -26,14 +26,11 @@ import { KBN_FIELD_TYPES, esQuery } from '../../../../../../../src/plugins/data/
 import { NavigationMenu } from '../../components/navigation_menu';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';
-// @ts-ignore
 import { isFullLicense } from '../../license/check_license';
 import { FullTimeRangeSelector } from '../../components/full_time_range_selector';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { useKibanaContext, SavedSearchQuery } from '../../contexts/kibana';
-// @ts-ignore
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
-// @ts-ignore
 import { timeBasedIndexCheck } from '../../util/index_utils';
 import { TimeBuckets } from '../../util/time_buckets';
 import { FieldRequestConfig, FieldVisConfig } from './common';
@@ -113,7 +110,7 @@ export const Page: FC = () => {
   const indexPatternFields: FieldType[] = currentIndexPattern.fields;
   indexPatternFields.forEach(field => {
     if (field.scripted !== true) {
-      const dataVisualizerType: ML_JOB_FIELD_TYPES = kbnTypeToMLJobType(field);
+      const dataVisualizerType: ML_JOB_FIELD_TYPES | undefined = kbnTypeToMLJobType(field);
       if (
         dataVisualizerType !== undefined &&
         !indexedFieldTypes.includes(dataVisualizerType) &&
