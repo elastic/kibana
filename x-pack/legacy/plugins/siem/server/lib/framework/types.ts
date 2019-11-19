@@ -9,6 +9,7 @@ import { GraphQLSchema } from 'graphql';
 import { RequestAuth } from 'hapi';
 import { Legacy } from 'kibana';
 
+import { RequestHandlerContext } from 'src/core/server';
 import { ESQuery } from '../../../common/typed_json';
 import {
   PaginationInput,
@@ -38,25 +39,16 @@ export interface FrameworkAdapter {
   ): Promise<DatabaseMultiResponse<Hit, Aggregation>>;
   callWithRequest(
     req: FrameworkRequest,
-    method: 'indices.existsAlias',
-    options?: object
-  ): Promise<boolean>;
-  callWithRequest(
-    req: FrameworkRequest,
     method: 'indices.getMapping',
     options?: IndicesGetMappingParams // eslint-disable-line
   ): Promise<MappingResponse>;
-  callWithRequest(
-    req: FrameworkRequest,
-    method: 'indices.getAlias' | 'indices.get', // eslint-disable-line
-    options?: object
-  ): Promise<DatabaseGetIndicesResponse>;
   getIndexPatternsService(req: FrameworkRequest): FrameworkIndexPatternsService;
   getSavedObjectsService(): Legacy.SavedObjectsService;
 }
 
 export interface FrameworkRequest<InternalRequest extends WrappableRequest = RequestFacade> {
   [internalFrameworkRequest]: InternalRequest;
+  context: RequestHandlerContext;
   payload: InternalRequest['payload'];
   params: InternalRequest['params'];
   query: InternalRequest['query'];
@@ -129,22 +121,6 @@ export interface FrameworkIndexPatternsService {
   getFieldsForWildcard(options: {
     pattern: string | string[];
   }): Promise<FrameworkIndexFieldDescriptor[]>;
-}
-
-interface Alias {
-  settings: {
-    index: {
-      uuid: string;
-    };
-  };
-}
-
-export interface DatabaseGetIndicesResponse {
-  [indexName: string]: {
-    aliases: {
-      [aliasName: string]: Alias;
-    };
-  };
 }
 
 export interface RequestBasicOptions {

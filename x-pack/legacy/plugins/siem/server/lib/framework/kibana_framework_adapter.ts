@@ -10,7 +10,7 @@ import Boom from 'boom';
 import { GraphQLSchema } from 'graphql';
 import { runHttpQuery } from 'apollo-server-core';
 import { schema as configSchema } from '@kbn/config-schema';
-import { CoreSetup, IRouter, KibanaResponseFactory } from 'src/core/server';
+import { CoreSetup, IRouter, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
 import { ServerFacade, RequestFacade } from '../../types';
 
 import {
@@ -43,16 +43,14 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...rest: any[]
   ) {
+    const { callAsCurrentUser } = req.context.core.elasticsearch.dataClient;
     const internalRequest = req[internalFrameworkRequest];
-    const { elasticsearch } = internalRequest.server.plugins;
-    const { callWithRequest } = elasticsearch.getCluster('data');
     const includeFrozen = await internalRequest.getUiSettingsService().get('search:includeFrozen');
     const maxConcurrentShardRequests =
       endpoint === 'msearch'
         ? await internalRequest.getUiSettingsService().get('courier:maxConcurrentShardRequests')
         : 0;
-    const fields = await callWithRequest(
-      internalRequest,
+    const fields = await callAsCurrentUser(
       endpoint,
       {
         ...params,
@@ -81,7 +79,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
           const gqlResponse = await runHttpQuery([request], {
             method: 'GET',
             options: (req: RequestFacade) => ({
-              context: { req: wrapRequest(req) },
+              context: { req: wrapRequest(req, context) },
               schema,
             }),
             query,
@@ -118,7 +116,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
           const gqlResponse = await runHttpQuery([request], {
             method: 'POST',
             options: (req: RequestFacade) => ({
-              context: { context, req: wrapRequest(req) },
+              context: { req: wrapRequest(req, context) },
               schema,
             }),
             query: request.body,
@@ -222,13 +220,15 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
 }
 
 export function wrapRequest<InternalRequest extends WrappableRequest>(
-  req: InternalRequest
+  req: InternalRequest,
+  context: RequestHandlerContext
 ): FrameworkRequest<InternalRequest> {
   const { auth, params, payload, query } = req;
 
   return {
     [internalFrameworkRequest]: req,
     auth,
+    context,
     params,
     payload,
     query,

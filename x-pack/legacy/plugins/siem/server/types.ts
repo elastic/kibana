@@ -29,7 +29,4 @@ export interface RequestFacade {
   params: Legacy.Request['params'];
   payload: unknown;
   query: Legacy.Request['query'];
-  server: {
-    plugins: { elasticsearch: Legacy.Request['server']['plugins']['elasticsearch'] };
-  };
 }
