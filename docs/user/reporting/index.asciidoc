@@ -30,14 +30,11 @@ for different operating systems.
 
 [float]
 [[reporting-required-privileges]]
-== Required privileges
+== Roles and privileges
 
-To generate a report, you need the following:
-
-* The `reporting_user` role.
-* The appropriate <<kibana-privileges, {kib} privileges>> to access the objects that you
-want to report on.
-* Access to the {es} indices with the underlying data.
+To generate a report, you mut have the `reporting_user` role. You also need
+the appropriate <<kibana-privileges, {kib} privileges>> to access the objects that you
+want to report on and the {es} indices.
 
 [float]
 [[manually-generate-reports]]
@@ -45,7 +42,7 @@ want to report on.
 
 . Open the dashboard, visualization, Canvas workpad, or saved search that you want to include in the report. 
 
-. In the toolbar, click *Share*.  If in Canvas, 
+. In the {kib} toolbar, click *Share*.  If you are working in Canvas, 
 click the share icon image:user/reporting/images/canvas-share-button.png["Canvas Share button"].
 
 . Select the appropriate option for generating the report:
@@ -74,8 +71,8 @@ image::user/reporting/images/preserve-layout-switch.png["Share"]
 [[manage-report-history]]
 == View and manage report history
 
-For a list of reports that you generated, go to *Management > Reporting*.  
-From this view, you can monitor generation of your reports and 
+For a list of your reports, go to *Management > Reporting*.  
+From this view, you can monitor generation of a report and 
 download reports that you previously generated.
 
 [float]
