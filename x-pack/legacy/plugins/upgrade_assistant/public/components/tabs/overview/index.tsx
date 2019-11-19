@@ -24,7 +24,7 @@ import { LoadingErrorBanner } from '../../error_banner';
 import { LoadingState, UpgradeAssistantTabProps } from '../../types';
 import { Steps } from './steps';
 
-export const OverviewTab: StatelessComponent<UpgradeAssistantTabProps> = props => (
+export const OverviewTab: FunctionComponent<UpgradeAssistantTabProps> = props => (
   <Fragment>
     <EuiSpacer />
 

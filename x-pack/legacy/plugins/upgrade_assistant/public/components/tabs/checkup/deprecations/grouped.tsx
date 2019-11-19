@@ -59,7 +59,7 @@ export const filterDeps = (level: LevelFilterOption, search: string = '') => {
 /**
  * A single accordion item for a grouped deprecation item.
  */
-export const DeprecationAccordion: StatelessComponent<{
+export const DeprecationAccordion: FunctionComponent<{
   id: string;
   deprecations: EnrichedDeprecationInfo[];
   title: string;

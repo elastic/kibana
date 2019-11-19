@@ -26,7 +26,7 @@ interface CheckupControlsProps extends ReactIntl.InjectedIntlProps {
   onGroupByChange: (groupBy: GroupByOption) => void;
 }
 
-export const CheckupControlsUI: StatelessComponent<CheckupControlsProps> = ({
+export const CheckupControlsUI: FunctionComponent<CheckupControlsProps> = ({
   allDeprecations,
   loadingState,
   loadData,

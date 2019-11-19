@@ -92,8 +92,11 @@ const START_UPGRADE_STEP = {
   ),
 };
 
-export const StepsUI: StatelessComponent<UpgradeAssistantTabProps &
-  ReactIntl.InjectedIntlProps> = ({ checkupData, setSelectedTabIndex, intl }) => {
+export const StepsUI: FunctionComponent<UpgradeAssistantTabProps & ReactIntl.InjectedIntlProps> = ({
+  checkupData,
+  setSelectedTabIndex,
+  intl,
+}) => {
   const checkupDataTyped = (checkupData! as unknown) as { [checkupType: string]: any[] };
   const countByType = Object.keys(checkupDataTyped).reduce((counts, checkupType) => {
     counts[checkupType] = checkupDataTyped[checkupType].length;

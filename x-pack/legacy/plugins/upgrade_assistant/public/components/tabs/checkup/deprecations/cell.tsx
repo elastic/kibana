@@ -30,7 +30,7 @@ interface DeprecationCellProps {
 /**
  * Used to display a deprecation with links to docs, a health indicator, and other descriptive information.
  */
-export const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
+export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
   headline,
   healthColor,
   reindexIndexName,

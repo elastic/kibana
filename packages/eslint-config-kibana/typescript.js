@@ -72,7 +72,24 @@ module.exports = {
           '@typescript-eslint/ban-types': [
             'error',
             {
-              types: { SFC: null, 'React.SFC': null },
+              types: {
+                SFC: {
+                  message: 'Use FC or FunctionComponent instead.',
+                  fixWith: 'FC',
+                },
+                'React.SFC': {
+                  message: 'Use FC or FunctionComponent instead.',
+                  fixWith: 'React.FC',
+                },
+                StatelessComponent: {
+                  message: 'Use FunctionComponent instead.',
+                  fixWith: 'FunctionComponent',
+                },
+                'React.StatelessComponent': {
+                  message: 'Use FunctionComponent instead.',
+                  fixWith: 'React.FunctionComponent',
+                },
+              },
             },
           ],
           camelcase: 'off',
