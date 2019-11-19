@@ -7,16 +7,16 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
-  const { common } = getPageObjects(['common']);
-  const { find } = getService('testSubjects');
+  const pageObjects = getPageObjects(['common']);
+  const testSubjects = getService('testSubjects');
 
   describe('The Endpoint app', function() {
     beforeEach(async function() {
-      await common.navigateToApp('endpoint');
+      await pageObjects.common.navigateToApp('endpoint');
     });
 
     it("welcomes the user with 'Hello World'", async function() {
-      await find('welcomeMessage');
+      await testSubjects.find('welcomeMessage');
     });
   });
 }
