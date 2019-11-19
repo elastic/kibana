@@ -14,7 +14,7 @@ export class CanvasPlugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(coreSetup: CoreSetup): void {
-    this.initializerContext.logger.get().debug('Get Workpad route');
+    this.initializerContext.logger.get().debug('Setting up Canvas plugin');
     const canvasRouter = coreSetup.http.createRouter();
 
     initRoutes({ router: canvasRouter });
