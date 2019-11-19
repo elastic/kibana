@@ -140,7 +140,7 @@ export class PolicyLib {
       perPage?: number;
     } = {
       page: 1,
-      perPage: 25,
+      perPage: 20,
     }
   ): Promise<{ items: Policy[]; total: number; page: number; perPage: number }> {
     const response = await this.adapter.list(user, options);
@@ -167,8 +167,8 @@ export class PolicyLib {
   //   page: number = 1,
   //   perPage: number = 25
   // ): Promise<PolicyFile[]> {
-  //   const policys = await this.adapter.listVersions(sharedID, activeOnly, page, perPage);
-  //   return policys;
+  //   const policies = await this.adapter.listVersions(sharedID, activeOnly, page, perPage);
+  //   return policies;
   // }
 
   public async update(

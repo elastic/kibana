@@ -69,14 +69,14 @@ export class PolicyAdapter {
       filters.push(kuery.replace(/policies\./g, 'policies.attributes.'));
     }
 
-    const policys = await this.so.find<any>(user, {
+    const policies = await this.so.find<any>(user, {
       type: 'policies',
       page,
       perPage,
       filter: _joinFilters(filters),
     });
 
-    const storedPolicies = policys.saved_objects.map<StoredPolicy>(policySO => {
+    const storedPolicies = policies.saved_objects.map<StoredPolicy>(policySO => {
       const policy = {
         id: policySO.id,
         ...policySO.attributes,
@@ -95,7 +95,7 @@ export class PolicyAdapter {
     });
     return {
       items: [...storedPolicies.values()],
-      total: policys.total,
+      total: policies.total,
       page,
       perPage,
     };
@@ -107,7 +107,7 @@ export class PolicyAdapter {
   //   page: number = 1,
   //   perPage: number = 25
   // ): Promise<PolicyFile[]> {
-  //   const policys = (await this.so.find<any>({
+  //   const policies = (await this.so.find<any>({
   //     type: 'policies',
   //     search: sharedID,
   //     searchFields: ['shared_id'],
@@ -121,10 +121,10 @@ export class PolicyAdapter {
   //       search: sharedID,
   //       searchFields: ['shared_id'],
   //     });
-  //     policys.concat(backupPolicies.saved_objects);
+  //     policies.concat(backupPolicies.saved_objects);
   //   }
 
-  //   return policys.map<PolicyFile>(policySO => {
+  //   return policies.map<PolicyFile>(policySO => {
   //     const policy = {
   //       id: policySO.id,
   //       ...policySO.attributes,

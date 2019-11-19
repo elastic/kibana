@@ -207,7 +207,7 @@ export const RuntimeAgentPolicy = t.interface({
 
 export type AgentPolicy = t.TypeOf<typeof RuntimeAgentPolicy>;
 
-export const exampleStorredPolicy: Policy = {
+export const exampleStoredPolicy: Policy = {
   id: 'policy_example',
   name: 'Example Policy',
   datasources: [
