@@ -22,7 +22,7 @@ import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { AggConfig } from '../../agg_types/agg_config';
-import { VisProvider } from '..';
+import { Vis } from '..';
 import { AggConfigs } from '../../agg_types/agg_configs';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { Schemas } from '../editors/default/schemas';
@@ -30,13 +30,11 @@ import { AggGroupNames } from '../editors/default/agg_groups';
 
 describe('AggConfigs', function () {
 
-  let Vis;
   let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     // load main deps
-    Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
