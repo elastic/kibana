@@ -9,23 +9,24 @@ import React from 'react';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import moment from 'moment';
 import { getEmptyTagValue } from '../../../../components/empty_value';
-import { Action, ColumnTypes } from './index';
 import {
   deleteRulesAction,
   duplicateRuleAction,
   editRuleAction,
-  exportRuleAction,
+  enableRulesAction,
+  exportRulesAction,
   runRuleAction,
 } from './actions';
-import { enableRules } from '../../../../containers/detection_engine/rules/api';
 import { RuleSwitch } from '../rule_switch';
+import { Action } from './reducer';
+import { TableData } from '../types';
 
 // Michael: Will need to change this to get the current datetime format from Kibana settings.
 const dateTimeFormat = (value: string) => {
   return moment(value).format('M/D/YYYY, h:mm A');
 };
 
-const getActions = (dispatch: React.Dispatch<Action>) => [
+const getActions = (dispatch: React.Dispatch<Action>, kbnVersion: string) => [
   {
     description: 'Edit rule settings',
     icon: 'visControls',
@@ -44,29 +45,29 @@ const getActions = (dispatch: React.Dispatch<Action>) => [
     description: 'Duplicate rule…',
     icon: 'copy',
     name: 'Duplicate rule…',
-    onClick: (rowItem: ColumnTypes) => duplicateRuleAction(rowItem, dispatch),
+    onClick: (rowItem: TableData) => duplicateRuleAction(rowItem.sourceRule, dispatch, kbnVersion),
   },
   {
     description: 'Export rule',
     icon: 'exportAction',
     name: 'Export rule',
-    onClick: exportRuleAction,
+    onClick: (rowItem: TableData) => exportRulesAction([rowItem.rule_id], dispatch),
     enabled: () => false,
   },
   {
     description: 'Delete rule…',
     icon: 'trash',
     name: 'Delete rule…',
-    onClick: (rowItem: ColumnTypes) => deleteRulesAction(rowItem, dispatch),
+    onClick: (rowItem: TableData) => deleteRulesAction([rowItem.rule_id], dispatch, kbnVersion),
   },
 ];
 
 // Michael: Are we able to do custom, in-table-header filters, as shown in my wireframes?
-export const getColumns = (dispatch: React.Dispatch<Action>) => [
+export const getColumns = (dispatch: React.Dispatch<Action>, kbnVersion: string) => [
   {
     field: 'rule',
     name: 'Rule',
-    render: (value: ColumnTypes['rule']) => (
+    render: (value: TableData['rule']) => (
       <div>
         <EuiLink href={value.href}>{value.name}</EuiLink>{' '}
         <EuiBadge color="hollow">{value.status}</EuiBadge>
@@ -84,7 +85,7 @@ export const getColumns = (dispatch: React.Dispatch<Action>) => [
   {
     field: 'severity',
     name: 'Severity',
-    render: (value: ColumnTypes['severity']) => (
+    render: (value: TableData['severity']) => (
       <EuiHealth
         color={
           value === 'low'
@@ -104,7 +105,7 @@ export const getColumns = (dispatch: React.Dispatch<Action>) => [
   {
     field: 'lastCompletedRun',
     name: 'Last completed run',
-    render: (value: ColumnTypes['lastCompletedRun']) => {
+    render: (value: TableData['lastCompletedRun']) => {
       return value === undefined ? (
         getEmptyTagValue()
       ) : (
@@ -118,7 +119,7 @@ export const getColumns = (dispatch: React.Dispatch<Action>) => [
   {
     field: 'lastResponse',
     name: 'Last response',
-    render: (value: ColumnTypes['lastResponse']) => {
+    render: (value: TableData['lastResponse']) => {
       return value === undefined ? (
         getEmptyTagValue()
       ) : (
@@ -138,7 +139,7 @@ export const getColumns = (dispatch: React.Dispatch<Action>) => [
   {
     field: 'tags',
     name: 'Tags',
-    render: (value: ColumnTypes['tags']) => (
+    render: (value: TableData['tags']) => (
       <div>
         <>
           {value.map((tag, i) => (
@@ -156,27 +157,13 @@ export const getColumns = (dispatch: React.Dispatch<Action>) => [
     align: 'center',
     field: 'activate',
     name: 'Activate',
-    render: (value: ColumnTypes['activate'], item: ColumnTypes) => (
+    render: (value: TableData['activate'], item: TableData) => (
       <RuleSwitch
         ruleId={item.rule_id}
         enabled={item.activate}
         isLoading={item.isLoading}
         onRuleStateChange={async (enabled, ruleId) => {
-          console.log('item.rule_id', item.rule_id);
-          console.log('isEnabled', enabled);
-          console.log('ruleId', ruleId);
-          try {
-            dispatch({ type: 'updateLoading', ruleIds: [ruleId], isLoading: true });
-            const updatedRules = await enableRules({
-              ruleIds: [ruleId],
-              enabled,
-              kbnVersion: '8.0.0',
-            });
-            console.log('updatedRules', updatedRules);
-            dispatch({ type: 'updateRules', rules: updatedRules });
-          } finally {
-            // dispatch({ type: 'updateLoading', ruleIds: [ruleId], isLoading: false });
-          }
+          await enableRulesAction([ruleId], enabled, dispatch, kbnVersion);
         }}
       />
     ),
@@ -184,7 +171,7 @@ export const getColumns = (dispatch: React.Dispatch<Action>) => [
     width: '65px',
   },
   {
-    actions: getActions(dispatch),
+    actions: getActions(dispatch, kbnVersion),
     width: '40px',
   },
 ];

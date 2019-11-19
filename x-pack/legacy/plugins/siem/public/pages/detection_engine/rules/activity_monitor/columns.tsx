@@ -6,14 +6,8 @@
 
 import { EuiIconTip, EuiLink, EuiTextColor } from '@elastic/eui';
 import React from 'react';
-import moment from 'moment';
 import { getEmptyTagValue } from '../../../../components/empty_value';
 import { ColumnTypes } from './index';
-
-// Michael: Will need to change this to get the current datetime format from Kibana settings.
-const dateTimeFormat = (value: string) => {
-  return moment(value).format('M/D/YYYY, h:mm A');
-};
 
 const actions = [
   {
@@ -48,15 +42,14 @@ export const columns = [
   {
     field: 'ran',
     name: 'Ran',
-    render: (value: ColumnTypes['ran']) => '--', // <time dateTime={value}>{dateTimeFormat(value)}</time>,
+    render: (value: ColumnTypes['ran']) => '--',
     sortable: true,
     truncateText: true,
   },
   {
     field: 'lookedBackTo',
     name: 'Looked back to',
-    render: (value: ColumnTypes['lookedBackTo']) =>
-      '--', // <time dateTime={value}>{dateTimeFormat(value)}</time>
+    render: (value: ColumnTypes['lookedBackTo']) => '--',
     sortable: true,
     truncateText: true,
   },

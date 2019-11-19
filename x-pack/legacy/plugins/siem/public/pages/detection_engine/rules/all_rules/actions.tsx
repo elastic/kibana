@@ -4,48 +4,53 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import {
   deleteRules,
   duplicateRule,
-  exportRules,
+  enableRules,
 } from '../../../../containers/detection_engine/rules/api';
-import { Action, ColumnTypes } from './index';
-import React from 'react';
+import { Action } from './reducer';
+import { Rule } from '../../../../containers/detection_engine/rules/types';
 
-export const editRuleAction = () => {
-  console.log('Editing Rule...');
-};
+export const editRuleAction = () => {};
 
-export const runRuleAction = () => {
-  console.log('Running Rule...');
-};
+export const runRuleAction = () => {};
 
 export const duplicateRuleAction = async (
-  rowItem: ColumnTypes,
-  dispatch: React.Dispatch<Action>
+  rule: Rule,
+  dispatch: React.Dispatch<Action>,
+  kbnVersion: string
 ) => {
-  console.log('Duplicating Rule...', rowItem);
-  const duplicatedRule = await duplicateRule({ rule: rowItem.sourceRule, kbnVersion: '8.0.0' });
+  dispatch({ type: 'updateLoading', ruleIds: [rule.rule_id], isLoading: true });
+  const duplicatedRule = await duplicateRule({ rule, kbnVersion });
+  dispatch({ type: 'updateLoading', ruleIds: [rule.rule_id], isLoading: false });
   dispatch({ type: 'updateRules', rules: [duplicatedRule] });
-  console.log('duplicatedRule', duplicatedRule);
 };
 
-export const exportRuleAction = async (rowItem: ColumnTypes) => {
-  console.log('Exporting Rule...', rowItem);
-  const exportResponse = await exportRules({ ruleIds: [rowItem.rule_id], kbnVersion: '8.0.0' });
-  console.log('exportResponse', exportResponse);
-};
+export const exportRulesAction = async (ruleIds: string[], dispatch: React.Dispatch<Action>) => {};
 
-export const deleteRulesAction = async (rowItem: ColumnTypes, dispatch: React.Dispatch<Action>) => {
-  console.log('Deleting following Rules:', rowItem);
-  const deletedRules = await deleteRules({
-    ruleIds: [rowItem.sourceRule.rule_id],
-    kbnVersion: '8.0.0',
-  });
+export const deleteRulesAction = async (
+  ruleIds: string[],
+  dispatch: React.Dispatch<Action>,
+  kbnVersion: string
+) => {
+  dispatch({ type: 'updateLoading', ruleIds, isLoading: true });
+  const deletedRules = await deleteRules({ ruleIds, kbnVersion });
   dispatch({ type: 'deleteRules', rules: deletedRules });
-  console.log('deletedRules:', deletedRules);
 };
 
-export const enableRuleAction = () => {
-  console.log('Enabling Rule...');
+export const enableRulesAction = async (
+  ruleIds: string[],
+  enabled: boolean,
+  dispatch: React.Dispatch<Action>,
+  kbnVersion: string
+) => {
+  try {
+    dispatch({ type: 'updateLoading', ruleIds, isLoading: true });
+    const updatedRules = await enableRules({ ruleIds, enabled, kbnVersion });
+    dispatch({ type: 'updateRules', rules: updatedRules });
+  } catch {
+    dispatch({ type: 'updateLoading', ruleIds, isLoading: false });
+  }
 };

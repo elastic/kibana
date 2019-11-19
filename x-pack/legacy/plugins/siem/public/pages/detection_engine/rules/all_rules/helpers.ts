@@ -5,9 +5,9 @@
  */
 
 import { Rule } from '../../../../containers/detection_engine/rules/types';
-import { ColumnTypes } from './index';
+import { TableData } from '../types';
 
-export const formatRules = (rules: Rule[], selectedRules?: string[]): ColumnTypes[] =>
+export const formatRules = (rules: Rule[], selectedRules?: string[]): TableData[] =>
   rules.map(rule => ({
     rule_id: rule.rule_id,
     rule: {

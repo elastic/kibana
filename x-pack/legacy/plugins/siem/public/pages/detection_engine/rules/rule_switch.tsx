@@ -5,7 +5,7 @@
  */
 
 import styled from 'styled-components';
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
 
 const StaticSwitch = styled(EuiSwitch)`

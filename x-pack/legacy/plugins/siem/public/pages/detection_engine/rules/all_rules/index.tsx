@@ -11,7 +11,7 @@ import {
   EuiLoadingContent,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 
 import { HeaderSection } from '../../../../components/header_section';
 import {
@@ -21,145 +21,23 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../../components/detection_engine/utility_bar';
-import { columns, getColumns } from './columns';
+import { getColumns } from './columns';
 import { useRules } from '../../../../containers/detection_engine/rules/use_rules';
-import {
-  FetchRulesResponse,
-  PaginationOptions,
-  Rule,
-} from '../../../../containers/detection_engine/rules/types';
 import { Loader } from '../../../../components/loader';
 import { Panel } from '../../../../components/panel';
 import { getBatchItems } from './batch_actions';
-import { formatRules } from './helpers';
-
-// TODO Move/Consolidate Types
-export interface RuleTypes {
-  href: string;
-  name: string;
-  status: string;
-}
-
-export interface LastResponseTypes {
-  type: string;
-  message?: string;
-}
-
-export interface ColumnTypes {
-  rule_id: string;
-  rule: RuleTypes;
-  method: string;
-  severity: string;
-  lastCompletedRun: string | undefined;
-  lastResponse: LastResponseTypes;
-  tags: string[];
-  activate: boolean;
-  sourceRule: Rule;
-  isLoading: boolean;
-}
-
-export interface SortTypes {
-  field: string;
-  direction: string;
-}
-
-// Reducer types
-interface State {
-  isLoading: boolean;
-  rules: Rule[];
-  pagination: PaginationOptions;
-  refreshToggle: boolean;
-  tableData: ColumnTypes[];
-}
-
-export type Action =
-  | { type: 'refresh' }
-  | { type: 'updateRules'; rules: Rule[]; pagination?: PaginationOptions }
-  | { type: 'loading' }
-  | { type: 'duplicate'; rule: Rule }
-  | { type: 'deleteRules'; rules: Rule[] }
-  | { type: 'updateLoading'; ruleIds: string[]; isLoading: boolean }
-  | { type: 'failure' };
-
-function allRulesReducer(state: State, action: Action): State {
-  switch (action.type) {
-    case 'refresh': {
-      console.log('allRulesReducer:refresh', state, action);
-      return {
-        ...state,
-        refreshToggle: !state.refreshToggle,
-      };
-    }
-    case 'updateRules': {
-      console.log('allRulesReducer:updateRules', state, action);
-      if (action.pagination) {
-        return {
-          ...state,
-          rules: action.rules,
-          pagination: action.pagination,
-          tableData: formatRules(action.rules),
-        };
-      }
-
-      const ruleIds = state.rules.map(r => r.rule_id);
-      const updatedRules = action.rules.reduce(
-        (rules, updatedRule) =>
-          ruleIds.includes(updatedRule.rule_id)
-            ? rules.map(r => (updatedRule.rule_id === r.rule_id ? updatedRule : r))
-            : [...rules, updatedRule],
-        [...state.rules]
-      );
-      return {
-        ...state,
-        rules: updatedRules,
-        tableData: formatRules(updatedRules),
-        pagination: state.pagination,
-      };
-    }
-    case 'deleteRules': {
-      console.log('allRulesReducer:deleteRules', state, action);
-      const deletedRuleIds = action.rules.map(r => r.rule_id);
-      const updatedRules = state.rules.reduce<Rule[]>(
-        (rules, rule) => (deletedRuleIds.includes(rule.rule_id) ? rules : [...rules, rule]),
-        []
-      );
-      return {
-        ...state,
-        rules: updatedRules,
-        tableData: formatRules(updatedRules),
-      };
-    }
-    case 'updateLoading': {
-      console.log('allRulesReducer:updateLoading', state, action);
-      return {
-        ...state,
-        rules: state.rules,
-        tableData: formatRules(state.rules, action.ruleIds),
-      };
-    }
-    case 'loading': {
-      return {
-        ...state,
-        isLoading: true,
-      };
-    }
-    case 'failure': {
-      return {
-        ...state,
-        isLoading: false,
-        rules: [],
-      };
-    }
-    default:
-      return state;
-  }
-}
+import { SortTypes, TableData } from '../types';
+import { allRulesReducer, State } from './reducer';
+import * as i18n from '../translations';
+import { useKibanaUiSetting } from '../../../../lib/settings/use_kibana_ui_setting';
+import { DEFAULT_KBN_VERSION } from '../../../../../common/constants';
 
 const initialState: State = {
-  isLoading: false,
+  isLoading: true,
   refreshToggle: true,
   tableData: [],
   rules: [],
+  selectedItems: [],
   pagination: {
     page: 1,
     perPage: 20,
@@ -168,20 +46,27 @@ const initialState: State = {
   },
 };
 
+/**
+ * Table Component for displaying all Rules for a given cluster. Provides the ability to filter
+ * by name, sort by enabled, and perform the following actions:
+ *   * Enable/Disable
+ *   * Duplicate
+ *   * Delete
+ *   * Export
+ */
 export const AllRules = React.memo(() => {
-  const [{ refreshToggle, tableData, pagination }, dispatch] = useReducer(
+  const [{ isLoading, refreshToggle, selectedItems, tableData, pagination }, dispatch] = useReducer(
     allRulesReducer,
     initialState
   );
 
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedState, setSelectedState] = useState<ColumnTypes[]>([]);
   const [sortState, setSortState] = useState<SortTypes>({ field: 'rule', direction: 'asc' });
   const [isLoadingRules, rulesData, updatePagination] = useRules(refreshToggle);
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
   useEffect(() => {
-    setIsLoading(isLoadingRules);
+    dispatch({ type: 'loading', isLoading: isLoadingRules });
 
     if (!isLoadingRules) {
       setIsInitialLoad(false);
@@ -201,7 +86,6 @@ export const AllRules = React.memo(() => {
     });
   }, [rulesData]);
 
-  console.log('Rendering All Rules');
   return (
     <>
       <EuiSpacer />
@@ -211,46 +95,46 @@ export const AllRules = React.memo(() => {
           <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
         ) : (
           <>
-            <HeaderSection split title="All rules">
-              <EuiFieldSearch aria-label="Search rules" fullWidth placeholder="e.g. rule name" />
+            <HeaderSection split title={i18n.ALL_RULES}>
+              <EuiFieldSearch
+                aria-label={i18n.SEARCH_RULES}
+                fullWidth
+                placeholder={i18n.SEARCH_PLACEHOLDER}
+              />
             </HeaderSection>
 
             <UtilityBar border>
               <UtilityBarSection>
                 <UtilityBarGroup>
-                  <UtilityBarText>{`Showing: ${pagination.total} rules`}</UtilityBarText>
+                  <UtilityBarText>{i18n.SHOWING_RULES(pagination.total ?? 0)}</UtilityBarText>
                 </UtilityBarGroup>
 
                 <UtilityBarGroup>
-                  <UtilityBarText>{`Selected: ${selectedState.length} rules`}</UtilityBarText>
+                  <UtilityBarText>{i18n.SELECTED_RULES(selectedItems.length)}</UtilityBarText>
                   <UtilityBarAction
                     iconSide="right"
                     iconType="arrowDown"
                     popoverContent={closePopover => (
                       <EuiContextMenuPanel
-                        items={getBatchItems(selectedState, dispatch, closePopover)}
+                        items={getBatchItems(selectedItems, dispatch, closePopover, kbnVersion)}
                       />
                     )}
                   >
-                    {'Batch actions'}
+                    {i18n.BATCH_ACTIONS}
                   </UtilityBarAction>
                   <UtilityBarAction
                     iconSide="right"
                     iconType="refresh"
                     onClick={() => dispatch({ type: 'refresh' })}
                   >
-                    {'Refresh'}
+                    {i18n.REFRESH}
                   </UtilityBarAction>
                 </UtilityBarGroup>
-
-                {/* <UtilityBarGroup>*/}
-                {/*  <UtilityBarAction iconType="cross">{'Clear 7 filters'}</UtilityBarAction>*/}
-                {/* </UtilityBarGroup>*/}
               </UtilityBarSection>
             </UtilityBar>
 
             <EuiBasicTable
-              columns={getColumns(dispatch)}
+              columns={getColumns(dispatch, kbnVersion)}
               isSelectable
               itemId="rule_id"
               items={tableData}
@@ -276,13 +160,9 @@ export const AllRules = React.memo(() => {
                 pageSizeOptions: [5, 10, 20],
               }}
               selection={{
-                selectable: (item: ColumnTypes) => !item.isLoading,
-                onSelectionChange: (selectedItems: ColumnTypes[]) => {
-                  console.log('setSelectionChange');
-                  console.log('selectecItems', selectedItems);
-                  //
-                  setSelectedState(selectedItems);
-                },
+                selectable: (item: TableData) => !item.isLoading,
+                onSelectionChange: (selected: TableData[]) =>
+                  dispatch({ type: 'setSelected', selectedItems: selected }),
               }}
               sorting={{
                 sort: sortState,
@@ -295,4 +175,5 @@ export const AllRules = React.memo(() => {
     </>
   );
 });
+
 AllRules.displayName = 'AllRules';
