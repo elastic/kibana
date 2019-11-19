@@ -42,12 +42,3 @@ export class AbstractField {
     return FIELD_ORIGIN.UNDEFINED;
   }
 }
-
-
-
-
-
-
-
-
-

@@ -14,7 +14,7 @@ export class ESDocField extends AbstractField {
 
   async _getField() {
     const indexPattern = await this._source.getIndexPattern();
-    return indexPattern.fields.find((field) => field.name === this._fieldName);
+    return indexPattern.fields.getByName(this._fieldName);
   }
 
   async createTooltipProperty(value) {

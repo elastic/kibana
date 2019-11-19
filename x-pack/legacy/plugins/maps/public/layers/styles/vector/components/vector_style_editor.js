@@ -77,7 +77,7 @@ export class VectorStyleEditor extends Component {
       return {
         label: await field.getLabel(),
         name: field.getName(),
-        origin: field.getOrigin()
+        origin: field.ggetOrigin()
       };
     });
 

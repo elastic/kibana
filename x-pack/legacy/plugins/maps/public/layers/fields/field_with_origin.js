@@ -10,8 +10,8 @@ import { AbstractField } from './field';
 export class FieldWithOrigin extends AbstractField {
 
   //todo: This annotated field was introduced due to legacy constraints in the code.
-  //Field-descriptors in styles use a combination of field-name and FIELD_ORIGIN-enumeration to uniquely identify a field
-  //across layer-source and joins.
+  //Field-descriptors in styles use a combination of field-name and FIELD_ORIGIN-enumeration
+  //to uniquely identify a field across layer-source and joins.
   constructor({ field, origin }) {
     super({});
     this._field = field;
@@ -37,14 +37,4 @@ export class FieldWithOrigin extends AbstractField {
   getOrigin() {
     return this._origin;
   }
-
 }
-
-
-
-
-
-
-
-
-
