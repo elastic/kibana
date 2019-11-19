@@ -16,7 +16,12 @@ import { CancellationToken } from './common/cancellation_token';
 import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
 import { BrowserType } from './server/browsers/types';
 
-type Job = EventEmitter & { id: string };
+export type Job = EventEmitter & {
+  id: string;
+  toJSON: () => {
+    id: string;
+  };
+};
 
 export interface ReportingPlugin {
   queue: {

@@ -8,6 +8,7 @@ import { get } from 'lodash';
 // @ts-ignore
 import { events as esqueueEvents } from './esqueue';
 import {
+  Job,
   ServerFacade,
   RequestFacade,
   Logger,
@@ -38,7 +39,7 @@ export function enqueueJobFactory(server: ServerFacade) {
     user: string,
     headers: ConditionalHeaders['headers'],
     request: RequestFacade
-  ) {
+  ): Promise<Job> {
     const logger = parentLogger.clone(['queue-job']);
     const exportType = exportTypesRegistry.getById(exportTypeId);
     const createJob = exportType.createJobFactory(server);
