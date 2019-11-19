@@ -299,6 +299,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
         // this has to be investigated
         return;
       }
+      this.searchScope.isLoading = false;
 
       // Log response to inspector
       inspectorRequest.stats(getResponseInspectorStats(searchSource, resp)).ok({ json: resp });
