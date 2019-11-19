@@ -13,7 +13,7 @@ import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
  */
 export function renderApp(appMountContext: AppMountContext, { element }: AppMountParameters) {
-  appMountContext.core.http.get('/endpoint/hello-world');
+  appMountContext.core.http.get('/api/endpoint/hello-world');
 
   ReactDOM.render(<AppRoot />, element);
 
@@ -25,8 +25,8 @@ export function renderApp(appMountContext: AppMountContext, { element }: AppMoun
 const AppRoot = React.memo(function Root() {
   return (
     <I18nProvider>
-      <h1>
-        <FormattedMessage id="xpack.endpoint.welcome" defaultMessage="Hello World" />
+      <h1 data-test-subj="welcomeMessage">
+        <FormattedMessage id="xpack.endpoint.welcomeMessage" defaultMessage="Hello World" />
       </h1>
     </I18nProvider>
   );
