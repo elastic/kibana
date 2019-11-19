@@ -23,7 +23,6 @@ import {
   SavedObjectRegistryProvider,
   legacyChrome,
   IPrivate,
-  ShareContextMenuExtensionsRegistryProvider,
 } from './legacy_imports';
 import { DashboardPlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { start as data } from '../../../data/public/legacy';
