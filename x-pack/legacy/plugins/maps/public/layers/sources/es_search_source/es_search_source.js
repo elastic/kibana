@@ -55,6 +55,7 @@ export class ESSearchSource extends AbstractESSource {
 
   constructor(descriptor, inspectorAdapters) {
     super({
+      ...descriptor,
       id: descriptor.id,
       type: ESSearchSource.type,
       indexPatternId: descriptor.indexPatternId,
@@ -81,6 +82,7 @@ export class ESSearchSource extends AbstractESSource {
         useTopHits={this._descriptor.useTopHits}
         topHitsSplitField={this._descriptor.topHitsSplitField}
         topHitsSize={this._descriptor.topHitsSize}
+        applyGlobalQuery={this._descriptor.applyGlobalQuery}
       />
     );
   }
