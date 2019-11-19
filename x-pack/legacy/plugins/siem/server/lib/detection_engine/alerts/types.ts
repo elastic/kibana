@@ -34,6 +34,7 @@ export interface SignalAlertParams {
   ruleId: string | undefined | null;
   language: string | undefined | null;
   maxSignals: number;
+  riskScore: number;
   name: string;
   query: string | undefined | null;
   references: string[];
@@ -47,12 +48,13 @@ export interface SignalAlertParams {
 
 export type SignalAlertParamsRest = Omit<
   SignalAlertParams,
-  'ruleId' | 'falsePositives' | 'maxSignals' | 'savedId'
+  'ruleId' | 'falsePositives' | 'maxSignals' | 'savedId' | 'riskScore'
 > & {
   rule_id: SignalAlertParams['ruleId'];
   false_positives: SignalAlertParams['falsePositives'];
   saved_id: SignalAlertParams['savedId'];
   max_signals: SignalAlertParams['maxSignals'];
+  risk_score: SignalAlertParams['riskScore'];
 };
 
 export type OutputSignalAlertRest = SignalAlertParamsRest & {

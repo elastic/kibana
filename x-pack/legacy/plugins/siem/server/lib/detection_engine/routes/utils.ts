@@ -42,6 +42,7 @@ export const transformAlertToSignal = (signal: SignalAlertType): Partial<OutputS
     rule_id: signal.alertTypeParams.ruleId,
     language: signal.alertTypeParams.language,
     max_signals: signal.alertTypeParams.maxSignals,
+    risk_score: signal.alertTypeParams.riskScore,
     name: signal.name,
     query: signal.alertTypeParams.query,
     references: signal.alertTypeParams.references,

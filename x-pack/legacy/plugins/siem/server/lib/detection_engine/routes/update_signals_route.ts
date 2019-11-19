@@ -45,6 +45,8 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
       interval,
       // eslint-disable-next-line @typescript-eslint/camelcase
       max_signals: maxSignals,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      risk_score: riskScore,
       name,
       severity,
       size,
@@ -79,6 +81,7 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
       index,
       interval,
       maxSignals,
+      riskScore,
       name,
       severity,
       size,

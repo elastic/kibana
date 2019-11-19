@@ -34,6 +34,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         query: schema.nullable(schema.string()),
         filters: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
         maxSignals: schema.number({ defaultValue: 10000 }),
+        riskScore: schema.number(),
         severity: schema.string(),
         tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
         to: schema.string(),
@@ -54,6 +55,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         savedId,
         query,
         maxSignals,
+        // riskScore, TODO: Add and copy this data and any other data over to the rule
         references,
         severity,
         to,

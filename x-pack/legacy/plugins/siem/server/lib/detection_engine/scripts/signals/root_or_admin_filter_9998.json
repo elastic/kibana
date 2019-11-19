@@ -1,5 +1,6 @@
 {
   "rule_id": "rule-9999",
+  "risk_score": 100,
   "description": "Detecting root and admin users",
   "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "5m",

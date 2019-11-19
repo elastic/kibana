@@ -1,5 +1,6 @@
 {
   "rule_id": "rule-1",
+  "risk_score": 78,
   "description": "Changed Description of only detecting root user",
   "index": ["auditbeat-*"],
   "interval": "50m",

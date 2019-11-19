@@ -6,7 +6,10 @@
 
 import { SignalSourceHit, SignalSearchResponse, SignalAlertParams } from '../types';
 
-export const sampleSignalAlertParams = (maxSignals: number | undefined): SignalAlertParams => ({
+export const sampleSignalAlertParams = (
+  maxSignals: number | undefined,
+  riskScore?: number | undefined
+): SignalAlertParams => ({
   ruleId: 'rule-1',
   description: 'Detecting root and admin users',
   falsePositives: [],
@@ -22,6 +25,7 @@ export const sampleSignalAlertParams = (maxSignals: number | undefined): SignalA
   query: 'user.name: root or user.name: admin',
   language: 'kuery',
   references: ['http://google.com'],
+  riskScore: riskScore ? riskScore : 50,
   maxSignals: maxSignals ? maxSignals : 10000,
   enabled: true,
   filter: undefined,
