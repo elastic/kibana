@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getActionType as getThresholdAlertType } from './threshold';
+import { getActionType as getThresholdAlertType } from './threshold/expression';
 import { AlertTypeRegistry } from '../../../alert_type_registry';
 
 export function registerAlertTypes({

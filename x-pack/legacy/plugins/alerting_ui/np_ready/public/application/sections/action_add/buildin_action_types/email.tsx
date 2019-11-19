@@ -97,7 +97,7 @@ const EmailActionFields: React.FunctionComponent<Props> = ({
         errorKey="from"
         fullWidth
         errors={errors}
-        isShowingErrors={hasErrors === true && from !== undefined}
+        isShowingErrors={hasErrors && from !== undefined}
         label={i18n.translate(
           'xpack.alertingUI.sections.actionAdd.emailAction.fromTextFieldLabel',
           {
@@ -127,7 +127,7 @@ const EmailActionFields: React.FunctionComponent<Props> = ({
             errorKey="host"
             fullWidth
             errors={errors}
-            isShowingErrors={hasErrors === true && host !== undefined}
+            isShowingErrors={hasErrors && host !== undefined}
             label={i18n.translate(
               'xpack.alertingUI.sections.actionAdd.emailAction.hostTextFieldLabel',
               {
@@ -157,7 +157,7 @@ const EmailActionFields: React.FunctionComponent<Props> = ({
             errorKey="port"
             fullWidth
             errors={errors}
-            isShowingErrors={hasErrors === true && port !== undefined}
+            isShowingErrors={hasErrors && port !== undefined}
             label={i18n.translate(
               'xpack.alertingUI.sections.actionAdd.emailAction.portTextFieldLabel',
               {
@@ -190,7 +190,7 @@ const EmailActionFields: React.FunctionComponent<Props> = ({
             errorKey="user"
             fullWidth
             errors={errors}
-            isShowingErrors={hasErrors === true && user !== undefined}
+            isShowingErrors={hasErrors && user !== undefined}
             label={i18n.translate(
               'xpack.alertingUI.sections.actionAdd.emailAction.userTextFieldLabel',
               {
@@ -220,7 +220,7 @@ const EmailActionFields: React.FunctionComponent<Props> = ({
             errorKey="password"
             fullWidth
             errors={errors}
-            isShowingErrors={hasErrors === true && password !== undefined}
+            isShowingErrors={hasErrors && password !== undefined}
             label={i18n.translate(
               'xpack.alertingUI.sections.actionAdd.emailAction.passwordFieldLabel',
               {
@@ -265,7 +265,7 @@ const EmailParamsFields: React.FunctionComponent<ParamsProps> = ({
         errorKey="to"
         fullWidth
         errors={errors}
-        isShowingErrors={hasErrors === true && to !== undefined}
+        isShowingErrors={hasErrors && to !== undefined}
         label={i18n.translate(
           'xpack.alertingUI.sections.actionAdd.emailAction.recipientTextFieldLabel',
           {

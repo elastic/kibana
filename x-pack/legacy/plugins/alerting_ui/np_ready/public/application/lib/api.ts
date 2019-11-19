@@ -175,9 +175,16 @@ export async function getMatchingIndicesForThresholdAlertType({
   pattern: string;
   http: HttpServiceBase;
 }): Promise<Record<string, any>> {
-  return await http.post(`${WATCHER_API_ROOT}/indices`, {
+  if (!pattern.startsWith('*')) {
+    pattern = `*${pattern}`;
+  }
+  if (!pattern.endsWith('*')) {
+    pattern = `${pattern}*`;
+  }
+  const { indices } = await http.post(`${WATCHER_API_ROOT}/indices`, {
     body: JSON.stringify(pattern),
   });
+  return indices;
 }
 
 export async function getThresholdAlertTypeFields({
@@ -187,7 +194,44 @@ export async function getThresholdAlertTypeFields({
   indices: string[];
   http: HttpServiceBase;
 }): Promise<Record<string, any>> {
-  return await http.post(`${WATCHER_API_ROOT}/fields`, {
+  const { fields } = await http.post(`${WATCHER_API_ROOT}/fields`, {
     body: JSON.stringify(indices),
+  });
+  return fields;
+}
+
+let savedObjectsClient: any;
+
+export const setSavedObjectsClient = (aSavedObjectsClient: any) => {
+  savedObjectsClient = aSavedObjectsClient;
+};
+
+export const getSavedObjectsClient = () => {
+  return savedObjectsClient;
+};
+
+export const loadIndexPatterns = async () => {
+  const { savedObjects } = await getSavedObjectsClient().find({
+    type: 'index-pattern',
+    fields: ['title'],
+    perPage: 10000,
+  });
+  return savedObjects;
+};
+
+export async function getThresholdAlertVisualizationData({
+  model,
+  visualizeOptions,
+  http,
+}: {
+  model: any;
+  visualizeOptions: any;
+  http: HttpServiceBase;
+}): Promise<Record<string, any>> {
+  return await http.post(`${WATCHER_API_ROOT}/watch/visualize`, {
+    body: JSON.stringify({
+      watch: model,
+      options: visualizeOptions,
+    }),
   });
 }
