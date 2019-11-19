@@ -6,10 +6,9 @@
 
 // @ts-ignore no @typed def; Elastic library
 import { evaluate } from 'tinymath';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore untyped local
 import { pivotObjectArray } from '../../../common/lib/pivot_object_array';
-import { Datatable, isDatatable } from '../../../types';
+import { Datatable, isDatatable, ExpressionFunction } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
@@ -44,7 +43,10 @@ export function math(): ExpressionFunction<'math', Context, Arguments, number> {
       }
 
       const mathContext = isDatatable(context)
-        ? pivotObjectArray(context.rows, context.columns.map(col => col.name))
+        ? pivotObjectArray(
+            context.rows,
+            context.columns.map(col => col.name)
+          )
         : { value: context };
 
       try {

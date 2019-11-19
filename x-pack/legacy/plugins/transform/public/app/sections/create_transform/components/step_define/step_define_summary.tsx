@@ -57,75 +57,80 @@ export const StepDefineSummary: FC<StepDefineExposedState> = ({
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
-        <EuiForm>
-          {kibanaContext.currentSavedSearch !== undefined &&
-            kibanaContext.currentSavedSearch.id === undefined &&
-            typeof searchString === 'string' && (
-              <Fragment>
+        <div data-test-subj="transformStepDefineSummary">
+          <EuiForm>
+            {kibanaContext.currentSavedSearch !== undefined &&
+              kibanaContext.currentSavedSearch.id === undefined &&
+              typeof searchString === 'string' && (
+                <Fragment>
+                  <EuiFormRow
+                    label={i18n.translate('xpack.transform.stepDefineSummary.indexPatternLabel', {
+                      defaultMessage: 'Index pattern',
+                    })}
+                  >
+                    <span>{kibanaContext.currentIndexPattern.title}</span>
+                  </EuiFormRow>
+                  {useCodeBlock === false && displaySearch !== emptySearch && (
+                    <EuiFormRow
+                      label={i18n.translate('xpack.transform.stepDefineSummary.queryLabel', {
+                        defaultMessage: 'Query',
+                      })}
+                    >
+                      <span>{displaySearch}</span>
+                    </EuiFormRow>
+                  )}
+                  {useCodeBlock === true && displaySearch !== emptySearch && (
+                    <EuiFormRow
+                      label={i18n.translate(
+                        'xpack.transform.stepDefineSummary.queryCodeBlockLabel',
+                        {
+                          defaultMessage: 'Query',
+                        }
+                      )}
+                    >
+                      <EuiCodeBlock
+                        language="js"
+                        fontSize="s"
+                        paddingSize="s"
+                        color="light"
+                        overflowHeight={300}
+                        isCopyable
+                      >
+                        {displaySearch}
+                      </EuiCodeBlock>
+                    </EuiFormRow>
+                  )}
+                </Fragment>
+              )}
+
+            {kibanaContext.currentSavedSearch !== undefined &&
+              kibanaContext.currentSavedSearch.id !== undefined && (
                 <EuiFormRow
-                  label={i18n.translate('xpack.transform.stepDefineSummary.indexPatternLabel', {
-                    defaultMessage: 'Index pattern',
+                  label={i18n.translate('xpack.transform.stepDefineSummary.savedSearchLabel', {
+                    defaultMessage: 'Saved search',
                   })}
                 >
-                  <span>{kibanaContext.currentIndexPattern.title}</span>
+                  <span>{kibanaContext.currentSavedSearch.title}</span>
                 </EuiFormRow>
-                {useCodeBlock === false && displaySearch !== emptySearch && (
-                  <EuiFormRow
-                    label={i18n.translate('xpack.transform.stepDefineSummary.queryLabel', {
-                      defaultMessage: 'Query',
-                    })}
-                  >
-                    <span>{displaySearch}</span>
-                  </EuiFormRow>
-                )}
-                {useCodeBlock === true && displaySearch !== emptySearch && (
-                  <EuiFormRow
-                    label={i18n.translate('xpack.transform.stepDefineSummary.queryCodeBlockLabel', {
-                      defaultMessage: 'Query',
-                    })}
-                  >
-                    <EuiCodeBlock
-                      language="js"
-                      fontSize="s"
-                      paddingSize="s"
-                      color="light"
-                      overflowHeight={300}
-                      isCopyable
-                    >
-                      {displaySearch}
-                    </EuiCodeBlock>
-                  </EuiFormRow>
-                )}
-              </Fragment>
-            )}
+              )}
 
-          {kibanaContext.currentSavedSearch !== undefined &&
-            kibanaContext.currentSavedSearch.id !== undefined && (
-              <EuiFormRow
-                label={i18n.translate('xpack.transform.stepDefineSummary.savedSearchLabel', {
-                  defaultMessage: 'Saved search',
-                })}
-              >
-                <span>{kibanaContext.currentSavedSearch.title}</span>
-              </EuiFormRow>
-            )}
+            <EuiFormRow
+              label={i18n.translate('xpack.transform.stepDefineSummary.groupByLabel', {
+                defaultMessage: 'Group by',
+              })}
+            >
+              <GroupByListSummary list={groupByList} />
+            </EuiFormRow>
 
-          <EuiFormRow
-            label={i18n.translate('xpack.transform.stepDefineSummary.groupByLabel', {
-              defaultMessage: 'Group by',
-            })}
-          >
-            <GroupByListSummary list={groupByList} />
-          </EuiFormRow>
-
-          <EuiFormRow
-            label={i18n.translate('xpack.transform.stepDefineSummary.aggregationsLabel', {
-              defaultMessage: 'Aggregations',
-            })}
-          >
-            <AggListSummary list={aggList} />
-          </EuiFormRow>
-        </EuiForm>
+            <EuiFormRow
+              label={i18n.translate('xpack.transform.stepDefineSummary.aggregationsLabel', {
+                defaultMessage: 'Aggregations',
+              })}
+            >
+              <AggListSummary list={aggList} />
+            </EuiFormRow>
+          </EuiForm>
+        </div>
       </EuiFlexItem>
 
       <EuiFlexItem>

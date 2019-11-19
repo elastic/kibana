@@ -51,14 +51,16 @@ export function withUptimeGraphQL<T, P = {}>(WrappedComponent: any, query: any) 
     const { client, implementsCustomErrorState, variables } = props;
     const fetch = () => {
       setLoading(true);
-      client.query<T>({ fetchPolicy: 'network-only', query, variables }).then(
-        (result: any) => {
-          updateState(result.loading, result.data, result.errors);
-        },
-        (result: any) => {
-          updateState(false, undefined, result.graphQLErrors);
-        }
-      );
+      client
+        .query<T>({ fetchPolicy: 'network-only', query, variables })
+        .then(
+          (result: any) => {
+            updateState(result.loading, result.data, result.errors);
+          },
+          (result: any) => {
+            updateState(false, undefined, result.graphQLErrors);
+          }
+        );
     };
     useEffect(() => {
       fetch();

@@ -73,6 +73,7 @@ interface UpdateOptions {
   id: string;
   data: {
     name: string;
+    tags: string[];
     interval: string;
     actions: AlertAction[];
     alertTypeParams: Record<string, any>;

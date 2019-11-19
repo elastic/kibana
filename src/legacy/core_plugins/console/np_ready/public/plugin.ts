@@ -18,26 +18,54 @@
  */
 
 import { render, unmountComponentAtNode } from 'react-dom';
+import { i18n } from '@kbn/i18n';
 
+import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { PluginInitializerContext, Plugin, CoreStart, CoreSetup } from '../../../../../core/public';
 import { XPluginSet } from './legacy';
-import { boot } from './application';
 
 export class ConsoleUIPlugin implements Plugin<any, any> {
   // @ts-ignore
   constructor(private readonly ctx: PluginInitializerContext) {}
 
-  async setup({ application, notifications }: CoreSetup, pluginSet: XPluginSet) {
+  async setup({ notifications }: CoreSetup, pluginSet: XPluginSet) {
     const {
-      __LEGACY: { docLinkVersion, I18nContext, ResizeChecker },
+      __LEGACY: { I18nContext },
+      devTools,
+      feature_catalogue,
     } = pluginSet;
 
-    application.register({
+    feature_catalogue.register({
+      id: 'console',
+      title: i18n.translate('console.devToolsTitle', {
+        defaultMessage: 'Console',
+      }),
+      description: i18n.translate('console.devToolsDescription', {
+        defaultMessage: 'Skip cURL and use this JSON interface to work with your data directly.',
+      }),
+      icon: 'consoleApp',
+      path: '/app/kibana#/dev_tools/console',
+      showOnHomePage: true,
+      category: FeatureCatalogueCategory.ADMIN,
+    });
+
+    devTools.register({
       id: 'console',
       order: 1,
-      title: 'Console',
-      mount(ctx, { element }) {
-        render(boot({ docLinkVersion, I18nContext, ResizeChecker, notifications }), element);
+      title: i18n.translate('console.consoleDisplayName', {
+        defaultMessage: 'Console',
+      }),
+      enableRouting: false,
+      async mount(ctx, { element }) {
+        const { boot } = await import('./application');
+        render(
+          boot({
+            docLinkVersion: ctx.core.docLinks.DOC_LINK_VERSION,
+            I18nContext,
+            notifications,
+          }),
+          element
+        );
         return () => {
           unmountComponentAtNode(element);
         };

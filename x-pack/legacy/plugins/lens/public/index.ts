@@ -12,6 +12,7 @@ import 'uiExports/fieldFormats';
 import 'uiExports/search';
 import 'uiExports/visRequestHandlers';
 import 'uiExports/visResponseHandlers';
+import 'uiExports/interpreter';
 // Used for kibana_context function
 import 'uiExports/savedObjectTypes';
 

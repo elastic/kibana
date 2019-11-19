@@ -25,7 +25,7 @@ import { METRIC_TYPES } from './metric_agg_types';
 
 // @ts-ignore
 import { fieldFormats } from '../../registry/field_formats';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 export type IMetricAggConfig = AggConfig;
 
@@ -58,8 +58,9 @@ export class MetricAggType<
       config.getValue ||
       ((agg, bucket) => {
         // Metric types where an empty set equals `zero`
-        const isSettableToZero = [METRIC_TYPES.CARDINALITY, METRIC_TYPES.SUM].includes(agg.type
-          .name as METRIC_TYPES);
+        const isSettableToZero = [METRIC_TYPES.CARDINALITY, METRIC_TYPES.SUM].includes(
+          agg.type.name as METRIC_TYPES
+        );
 
         // Return proper values when no buckets are present
         // `Count` handles empty sets properly

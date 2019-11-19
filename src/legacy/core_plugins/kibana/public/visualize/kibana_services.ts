@@ -36,13 +36,12 @@ import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
-import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { timefilter } from 'ui/timefilter';
 
 // Saved objects
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 // @ts-ignore
-import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
+import { SavedObject, SavedObjectProvider } from 'ui/saved_objects/saved_object';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 
 import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
@@ -62,6 +61,7 @@ const services = {
   toastNotifications: npStart.core.notifications.toasts,
   uiSettings: npStart.core.uiSettings,
 
+  share: npStart.plugins.share,
   data,
   embeddables,
   visualizations,
@@ -77,7 +77,6 @@ const services = {
   SavedObjectProvider,
   SavedObjectRegistryProvider,
   SavedObjectsClientProvider,
-  ShareContextMenuExtensionsRegistryProvider,
   timefilter,
   uiModules,
   uiRoutes,
@@ -99,14 +98,13 @@ export { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
 // @ts-ignore
 export { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-export { showShareContextMenu } from 'ui/share';
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-export { getVisualizeLoader } from 'ui/visualize/loader';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
+export { unhashUrl } from 'ui/state_management/state_hashing';
 export {
   Container,
   Embeddable,
@@ -121,12 +119,8 @@ export { METRIC_TYPE };
 export { StaticIndexPattern } from 'ui/index_patterns';
 export { AppState } from 'ui/state_management/app_state';
 export { VisType } from 'ui/vis';
-export { VisualizeLoader } from 'ui/visualize/loader';
-export {
-  VisSavedObject,
-  VisualizeLoaderParams,
-  VisualizeUpdateParams,
-} from 'ui/visualize/loader/types';
 
 // export const
 export { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+
+export { VisSavedObject } from './embeddable/visualize_embeddable';
