@@ -28,6 +28,7 @@ const name = Joi.string();
 const severity = Joi.string();
 const to = Joi.string();
 const type = Joi.string().valid('filter', 'query', 'saved_query');
+const queryFilter = Joi.string();
 const references = Joi.array()
   .items(Joi.string())
   .single();
@@ -117,4 +118,5 @@ export const findSignalsSchema = Joi.object({
   page,
   sort_field,
   fields,
+  filter: queryFilter,
 });

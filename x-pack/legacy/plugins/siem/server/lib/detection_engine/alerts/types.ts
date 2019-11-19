@@ -95,6 +95,7 @@ export interface FindSignalsRequest extends Omit<RequestFacade, 'query'> {
     page: number;
     search?: string;
     sort_field?: string;
+    filter?: string;
     fields?: string[];
   };
 }
@@ -104,6 +105,7 @@ export interface FindSignalParams {
   perPage?: number;
   page?: number;
   sortField?: string;
+  filter?: string;
   fields?: string[];
 }
 

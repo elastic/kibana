@@ -7,12 +7,27 @@
 import { SIGNALS_ID } from '../../../../common/constants';
 import { FindSignalParams } from './types';
 
-export const findSignals = async ({ alertsClient, perPage, page, fields }: FindSignalParams) =>
-  alertsClient.find({
+export const getFilter = (filter: string | null | undefined) => {
+  if (filter == null) {
+    return `alert.attributes.alertTypeId: ${SIGNALS_ID}`;
+  } else {
+    return `alert.attributes.alertTypeId: ${SIGNALS_ID} AND ${filter}`;
+  }
+};
+
+export const findSignals = async ({
+  alertsClient,
+  perPage,
+  page,
+  fields,
+  filter,
+}: FindSignalParams) => {
+  return alertsClient.find({
     options: {
       fields,
       page,
       perPage,
-      filter: `alert.attributes.alertTypeId: ${SIGNALS_ID}`,
+      filter: getFilter(filter),
     },
   });
+};

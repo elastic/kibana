@@ -128,7 +128,7 @@ export const validateFilterKueryNode = (
   }, []);
 };
 
-const getType = (key: string) => (key.includes('.') ? key.split('.')[0] : null);
+const getType = (key: string) => (key != null && key.includes('.') ? key.split('.')[0] : null);
 
 /**
  * Is this filter key referring to a a top-level SavedObject attribute such as
@@ -137,8 +137,8 @@ const getType = (key: string) => (key.includes('.') ? key.split('.')[0] : null);
  * @param key
  * @param indexMapping
  */
-export const isSavedObjectAttr = (key: string, indexMapping: IndexMapping) => {
-  const keySplit = key.split('.');
+export const isSavedObjectAttr = (key: string | null | undefined, indexMapping: IndexMapping) => {
+  const keySplit = key != null ? key.split('.') : [];
   if (keySplit.length === 1 && fieldDefined(indexMapping, keySplit[0])) {
     return true;
   } else if (keySplit.length === 2 && fieldDefined(indexMapping, keySplit[1])) {
@@ -149,10 +149,13 @@ export const isSavedObjectAttr = (key: string, indexMapping: IndexMapping) => {
 };
 
 export const hasFilterKeyError = (
-  key: string,
+  key: string | null | undefined,
   types: string[],
   indexMapping: IndexMapping
 ): string | null => {
+  if (key == null) {
+    return `The key is empty and needs to be wrapped by a saved object type like ${types.join()}`;
+  }
   if (!key.includes('.')) {
     return `This key '${key}' need to be wrapped by a saved object type like ${types.join()}`;
   } else if (key.includes('.')) {

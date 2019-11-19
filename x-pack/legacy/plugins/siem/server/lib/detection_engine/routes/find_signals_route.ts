@@ -39,6 +39,7 @@ export const createFindSignalRoute: Hapi.ServerRoute = {
       perPage: query.per_page,
       page: query.page,
       sortField: query.sort_field,
+      filter: query.filter,
     });
     return transformFindAlertsOrError(signals);
   },
