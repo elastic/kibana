@@ -128,7 +128,8 @@ export const validateFilterKueryNode = (
   }, []);
 };
 
-const getType = (key: string) => (key != null && key.includes('.') ? key.split('.')[0] : null);
+const getType = (key: string | undefined | null) =>
+  key != null && key.includes('.') ? key.split('.')[0] : null;
 
 /**
  * Is this filter key referring to a a top-level SavedObject attribute such as
