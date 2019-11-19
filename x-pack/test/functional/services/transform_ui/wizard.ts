@@ -75,6 +75,47 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail(selector);
     },
 
+    async parseTable(tableSubj: string) {
+      const table = await testSubjects.find(`~${tableSubj}`);
+      const $ = await table.parseDomContent();
+      const rows = [];
+
+      // For each row, get the content of each cell and
+      // add its values as an array to each row.
+      for (const tr of $.findTestSubjects(`~${tableSubj}Row`).toArray()) {
+        rows.push(
+          $(tr)
+            .find('.euiTableCellContent')
+            .toArray()
+            .map(cell =>
+              $(cell)
+                .text()
+                .trim()
+            )
+        );
+      }
+
+      return rows;
+    },
+
+    async assertTableResults(tableSubj: string, column: number, expectedColumnValues: string) {
+      await retry.tryForTime(2000, async () => {
+        // get a 2D array of rows and cell values
+        const rows = await this.parseTable(tableSubj);
+
+        // reduce the rows data to an array of unique values in the specified column
+        const uniqueColumnValues = rows
+          .map(row => row[column])
+          .flat()
+          .filter((v, i, a) => a.indexOf(v) === i);
+
+        uniqueColumnValues.sort();
+
+        // check if the returned unique value matches the supplied filter value
+        expect(uniqueColumnValues.join()).to.equal(expectedColumnValues);
+      });
+    },
+
     async assertPivotPreviewLoaded() {
       await this.assertPivotPreviewExists('loaded');
     },
@@ -87,6 +128,10 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail('tarnsformQueryInput');
     },
 
+    async assertQueryInputMissing() {
+      await testSubjects.missingOrFail('tarnsformQueryInput');
+    },
+
     async assertQueryValue(expectedQuery: string) {
       const actualQuery = await testSubjects.getVisibleText('tarnsformQueryInput');
       expect(actualQuery).to.eql(
@@ -97,6 +142,10 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
 
     async assertAdvancedQueryEditorSwitchExists() {
       await testSubjects.existOrFail(`transformAdvancedQueryEditorSwitch`, { allowHidden: true });
+    },
+
+    async assertAdvancedQueryEditorSwitchMissing() {
+      await testSubjects.missingOrFail(`transformAdvancedQueryEditorSwitch`);
     },
 
     async assertAdvancedQueryEditorSwitchCheckState(expectedCheckState: boolean) {

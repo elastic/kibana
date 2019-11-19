@@ -273,6 +273,9 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
             initialPageSize: 5,
             pageSizeOptions: [5, 10, 25],
           }}
+          rowProps={item => ({
+            'data-test-subj': `transformPivotPreviewRow row-${item.id}`,
+          })}
           sorting={sorting}
         />
       )}

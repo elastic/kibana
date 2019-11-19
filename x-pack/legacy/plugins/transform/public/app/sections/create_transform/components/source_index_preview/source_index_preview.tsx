@@ -410,6 +410,9 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ cellClick, quer
           itemId="_id"
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isExpandable={true}
+          rowProps={item => ({
+            'data-test-subj': `transformSourceIndexPreviewRow row-${item.id}`,
+          })}
           sorting={sorting}
         />
       )}

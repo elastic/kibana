@@ -17,41 +17,41 @@ export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('creation', function() {
+  describe('creation_saved_search', function() {
     this.tags(['smoke']);
     before(async () => {
-      await esArchiver.load('ml/ecommerce');
+      await esArchiver.load('ml/farequote');
     });
 
     after(async () => {
-      await esArchiver.unload('ml/ecommerce');
+      await esArchiver.unload('ml/farequote');
       await transform.api.cleanTransformIndices();
     });
 
     const testDataList = [
       {
-        suiteTitle: 'batch transform with terms+date_histogram groups and avg agg',
-        source: 'ecommerce',
+        suiteTitle: 'batch transform with terms groups and avg agg with saved search filter',
+        source: 'farequote_filter',
+        sourceIndex: 'farequote',
+        sourcePreviewColumn: 3,
+        sourcePreviewExpectedColumnValues: 'ASA',
+        pivotPreviewColumn: 0,
+        pivotPreviewExpectedColumnValues: 'ASA',
         groupByEntries: [
           {
-            identifier: 'terms(category.keyword)',
-            label: 'category.keyword',
-          } as GroupByEntry,
-          {
-            identifier: 'date_histogram(order_date)',
-            label: 'order_date',
-            intervalLabel: '1m',
+            identifier: 'terms(airline)',
+            label: 'airline',
           } as GroupByEntry,
         ],
         aggregationEntries: [
           {
-            identifier: 'avg(products.base_price)',
-            label: 'products.base_price.avg',
+            identifier: 'avg(responsetime)',
+            label: 'responsetime.avg',
           },
         ],
-        transformId: `ec_1_${Date.now()}`,
+        transformId: `fq_1_${Date.now()}`,
         transformDescription:
-          'ecommerce batch transform with groups terms(category.keyword) + date_histogram(order_date) 1m and aggregation avg(products.base_price)',
+          'farequote batch transform with groups terms(airline) and aggregation avg(products.base_price) with saved search filter',
         get destinationIndex(): string {
           return `dest_${this.transformId}`;
         },
@@ -96,18 +96,24 @@ export default function({ getService }: FtrProviderContext) {
           await transform.wizard.assertSourceIndexPreviewLoaded();
         });
 
+        it('shows the filtered source index preview', async () => {
+          await transform.wizard.assertTableResults(
+            'transformSourceIndexPreview',
+            testData.sourcePreviewColumn,
+            testData.sourcePreviewExpectedColumnValues
+          );
+        });
+
         it('displays an empty pivot preview', async () => {
           await transform.wizard.assertPivotPreviewEmpty();
         });
 
-        it('displays the query input', async () => {
-          await transform.wizard.assertQueryInputExists();
-          await transform.wizard.assertQueryValue('');
+        it('hides the query input', async () => {
+          await transform.wizard.assertQueryInputMissing();
         });
 
-        it('displays the advanced query editor switch', async () => {
-          await transform.wizard.assertAdvancedQueryEditorSwitchExists();
-          await transform.wizard.assertAdvancedQueryEditorSwitchCheckState(false);
+        it('hides the advanced query editor switch', async () => {
+          await transform.wizard.assertAdvancedQueryEditorSwitchMissing();
         });
 
         it('adds the group by entries', async () => {
@@ -138,6 +144,14 @@ export default function({ getService }: FtrProviderContext) {
 
         it('loads the pivot preview', async () => {
           await transform.wizard.assertPivotPreviewLoaded();
+        });
+
+        it('shows the pivot preview', async () => {
+          await transform.wizard.assertTableResults(
+            'transformPivotPreview',
+            testData.pivotPreviewColumn,
+            testData.pivotPreviewExpectedColumnValues
+          );
         });
 
         it('loads the details step', async () => {
@@ -216,7 +230,7 @@ export default function({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowFields(testData.transformId, {
             id: testData.transformId,
             description: testData.transformDescription,
-            sourceIndex: testData.source,
+            sourceIndex: testData.sourceIndex,
             destinationIndex: testData.destinationIndex,
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
