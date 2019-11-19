@@ -25,7 +25,7 @@ import { esFilters } from '../../../../../../../../plugins/data/public';
 
 interface Props {
   filter: esFilters.Filter;
-  valueLabel: string;
+  valueLabel?: string;
 }
 
 export function FilterLabel({ filter, valueLabel }: Props) {
