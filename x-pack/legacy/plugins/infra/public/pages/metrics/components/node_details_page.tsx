@@ -27,7 +27,6 @@ import euiStyled from '../../../../../../common/eui_styled_components';
 import { MetricsTimeInput } from '../containers/with_metrics_time';
 import { InfraMetadata } from '../../../../common/http_api/metadata_api';
 import { PageError } from './page_error';
-// import { MetricsTimeInput } from '../containers/with_metrics_time';
 
 interface Props {
   name: string;
@@ -73,7 +72,7 @@ export const NodeDetailsPage = (props: Props) => {
   }, [parsedTimeRange]);
 
   if (error) {
-    return <PageError error={error} name={name} />;
+    return <PageError error={error} name={props.name} />;
   }
 
   return (

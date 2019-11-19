@@ -7,9 +7,9 @@
 // import { GraphQLFormattedError } from 'graphql';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-// import { InvalidNodeError } from './invalid_node';
-// import { InfraMetricsErrorCodes } from '../../../../common/errors';
 import { KFetchError } from 'ui/kfetch/kfetch_error';
+import { InvalidNodeError } from './invalid_node';
+// import { InfraMetricsErrorCodes } from '../../../../common/errors';
 import { DocumentTitle } from '../../../components/document_title';
 import { ErrorPageBody } from '../../error';
 
@@ -19,10 +19,6 @@ interface Props {
 }
 // TODO: NEED TO FIGURE OUT HOW TO HANDLE ERROR CODES AND SUCH....
 export const PageError = ({ error, name }: Props) => {
-  // const invalidNodeError = error.graphQLErrors.some(
-  //   (err: GraphQLFormattedError) => err.code === InfraMetricsErrorCodes.invalid_node
-  // );
-
   return (
     <>
       <DocumentTitle
@@ -35,11 +31,13 @@ export const PageError = ({ error, name }: Props) => {
           })
         }
       />
-      {/* {invalidNodeError ? (
-        <InvalidNodeError nodeName={name} />
-      ) : ( */}
-      <ErrorPageBody message={error.message} />
-      {/* )} */}
+      {
+        (error.body.statusCode = 404 ? (
+          <InvalidNodeError nodeName={name} />
+        ) : (
+          <ErrorPageBody message={error.message} />
+        ))
+      }
     </>
   );
 };
