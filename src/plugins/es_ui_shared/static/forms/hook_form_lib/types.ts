@@ -22,9 +22,9 @@ import { Subject, Subscription } from './lib';
 
 // This type will convert all optional property to required ones
 // Comes from https://github.com/microsoft/TypeScript/issues/15012#issuecomment-365453623
-type Required<T> = T extends object ? { [P in keyof T]-?: NonNullable<T[P]> } : T;
+type Required<T> = T extends FormData ? { [P in keyof T]-?: NonNullable<T[P]> } : T;
 
-export interface FormHook<T extends object = FormData> {
+export interface FormHook<T extends FormData = FormData> {
   readonly isSubmitted: boolean;
   readonly isSubmitting: boolean;
   readonly isValid: boolean | undefined;
@@ -47,16 +47,16 @@ export interface FormHook<T extends object = FormData> {
   __readFieldConfigFromSchema: (fieldName: string) => FieldConfig;
 }
 
-export interface FormSchema<T extends object = FormData> {
+export interface FormSchema<T extends FormData = FormData> {
   [key: string]: FormSchemaEntry<T>;
 }
 
-type FormSchemaEntry<T extends object> =
+type FormSchemaEntry<T extends FormData> =
   | FieldConfig<T>
   | Array<FieldConfig<T>>
   | { [key: string]: FieldConfig<T> | Array<FieldConfig<T>> | FormSchemaEntry<T> };
 
-export interface FormConfig<T extends object = FormData> {
+export interface FormConfig<T extends FormData = FormData> {
   onSubmit?: (data: T, isFormValid: boolean) => void;
   schema?: FormSchema<T>;
   defaultValue?: Partial<T>;
@@ -65,7 +65,7 @@ export interface FormConfig<T extends object = FormData> {
   options?: FormOptions;
 }
 
-export interface OnFormUpdateArg<T extends object> {
+export interface OnFormUpdateArg<T extends FormData> {
   data: {
     raw: { [key: string]: any };
     format: () => T;
@@ -74,7 +74,7 @@ export interface OnFormUpdateArg<T extends object> {
   isValid?: boolean;
 }
 
-export type OnUpdateHandler<T extends object> = (arg: OnFormUpdateArg<T>) => void;
+export type OnUpdateHandler<T extends FormData> = (arg: OnFormUpdateArg<T>) => void;
 
 export interface FormOptions {
   errorDisplayDelay?: number;
@@ -113,7 +113,7 @@ export interface FieldHook {
   __serializeOutput: (rawValue?: unknown) => unknown;
 }
 
-export interface FieldConfig<T extends object = any, ValueType = unknown> {
+export interface FieldConfig<T extends FormData = any, ValueType = unknown> {
   readonly path?: string;
   readonly label?: string;
   readonly helpText?: string | ReactNode;
@@ -140,7 +140,7 @@ export interface ValidationError<T = string> {
   [key: string]: any;
 }
 
-export interface ValidationFuncArg<T extends object, V = unknown> {
+export interface ValidationFuncArg<T extends FormData, V = unknown> {
   path: string;
   value: V;
   form: FormHook<T>;
@@ -148,7 +148,7 @@ export interface ValidationFuncArg<T extends object, V = unknown> {
   errors: readonly ValidationError[];
 }
 
-export type ValidationFunc<T extends object = any, E = string> = (
+export type ValidationFunc<T extends FormData = any, E = string> = (
   data: ValidationFuncArg<T>
 ) => ValidationError<E> | void | undefined | Promise<ValidationError<E> | void | undefined>;
 
@@ -169,7 +169,7 @@ type FormatterFunc = (value: any, formData: FormData) => unknown;
 // string | number | boolean | string[] ...
 type FieldValue = unknown;
 
-export interface ValidationConfig<T extends object = any> {
+export interface ValidationConfig<T extends FormData = any> {
   validator: ValidationFunc<T>;
   type?: string;
   exitOnFail?: boolean;

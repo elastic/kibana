@@ -35,7 +35,6 @@ import { docTitle } from 'ui/doc_title/doc_title';
 
 import { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
 
-import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 
 import { timefilter } from 'ui/timefilter';
@@ -50,12 +49,14 @@ import {
 import { KbnUrl } from 'ui/url/kbn_url';
 import { IndexPattern } from 'ui/index_patterns';
 import { IPrivate } from 'ui/private';
-import { Query, SavedQuery } from 'src/legacy/core_plugins/data/public';
+import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
 import { capabilities } from 'ui/capabilities';
 import { Subscription } from 'rxjs';
 import { npStart } from 'ui/new_platform';
+import { unhashUrl } from 'ui/state_management/state_hashing';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
+import { Query } from '../../../../../plugins/data/public';
 import { start as data } from '../../../data/public/legacy';
 
 import {
@@ -130,7 +131,6 @@ export class DashboardAppController {
   }) {
     const queryFilter = Private(FilterBarQueryFilterProvider);
     const getUnhashableStates = Private(getUnhashableStatesProvider);
-    const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
 
     let lastReloadRequestTime = 0;
 
@@ -757,14 +757,13 @@ export class DashboardAppController {
       });
     };
     navActions[TopNavIds.SHARE] = anchorElement => {
-      showShareContextMenu({
+      npStart.plugins.share.toggleShareContextMenu({
         anchorElement,
         allowEmbed: true,
         allowShortUrl: !dashboardConfig.getHideWriteControls(),
-        getUnhashableStates,
+        shareableUrl: unhashUrl(window.location.href, getUnhashableStates()),
         objectId: dash.id,
         objectType: 'dashboard',
-        shareContextMenuExtensions: shareContextMenuExtensions.raw,
         sharingData: {
           title: dash.title,
         },

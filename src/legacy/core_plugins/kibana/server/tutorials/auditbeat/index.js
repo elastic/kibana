@@ -25,7 +25,7 @@ import {
   onPremCloudInstructions,
 } from '../../../common/tutorials/auditbeat_instructions';
 
-export function auditbeatSpecProvider(server, context) {
+export function auditbeatSpecProvider(context) {
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
     id: 'auditbeat',

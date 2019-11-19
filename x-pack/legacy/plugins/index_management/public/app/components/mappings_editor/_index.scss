@@ -1,0 +1,250 @@
+
+/*
+ [1] When the <CreateField /> component is embedded inside the tree, we need
+ to add some extra indent to make room for the child "L" bullet on the left.
+
+ [2] By default all content have a padding left to leave some room for the "L" bullet
+ unless "--toggle" is added. In that case we don't need padding as the toggle will add it.
+
+ [3] We need to compensate from the -4px margin added by the euiFlexGroup to make sure that the
+ border-bottom is always visible, even when mouseovering and changing the background color.
+ */
+
+.mappingsEditor {
+  &__fieldsListItem {
+    &--dottedLine {
+      > .mappingsEditor__fieldsListItem__field {
+        border-bottom-style: dashed;
+      }
+    }
+
+    &__field {
+      border-bottom: $euiBorderThin;
+      margin-top: $euiSizeXS; // [3]
+
+      &:hover {
+        background-color: $euiColorLightestShade;
+        .mappingsEditor__fieldsListItem__actions,
+        .mappingsEditor__fieldsListItem__multiFieldButton {
+          opacity: 1;
+        }
+      }
+
+      &--selected {
+        background-color: $euiColorLightestShade;
+        &:hover {
+          background-color: $euiColorLightestShade;
+        }
+      }
+
+      &--dim {
+        opacity: 0.3;
+
+        &:hover {
+          background-color: initial;
+        }
+      }
+    }
+
+    &__wrapper {
+      padding-left: $euiSizeXS;
+
+      &--indent {
+        padding-left: $euiSize;
+      }
+    }
+
+    &__content {
+      height: $euiSizeXL * 2;
+      position: relative;
+
+      &--indent {
+        padding-left: $euiSizeXL;
+      }
+    }
+
+    &__toggle {
+      padding-left: $euiSizeXS;
+      width: $euiSizeL;
+    }
+
+    &__actions,
+    &__multiFieldButton {
+      opacity: 0;
+      padding-right: $euiSizeS;
+      transition: opacity $euiAnimSpeedNormal $euiAnimSlightResistance;
+    }
+  }
+
+  &__createFieldWrapper {
+    background-color: $euiColorLightestShade;
+    border-right: $euiBorderThin;
+    border-bottom: $euiBorderThin;
+    border-left: $euiBorderThin;
+    padding: $euiSize;
+  }
+
+  &__createFieldContent {
+    position: relative;
+  }
+
+  &__createFieldRequiredProps {
+    margin-top: $euiSizeL;
+    padding-top: $euiSize;
+    border-top: 1px solid $euiColorLightShade;
+  }
+
+  &__editField {
+    min-width: 680px;
+
+    &__section {
+      border-bottom: $euiBorderThin;
+      margin-bottom: $euiSizeXL;
+      padding-bottom: $euiSizeXL;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      + .mappingsEditor__editField__advancedSettings {
+        margin-top: $euiSizeL * -1;
+      }
+    }
+
+    &__formRow {
+      margin-bottom: $euiSizeXL;
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      &__btnTitle {
+        display: inherit;
+        text-align: left;
+
+        &:focus {
+          animation: none !important;
+        }
+      }
+
+      &__title {
+        line-height: 1;
+        margin-bottom: $euiSizeS;
+      }
+    }
+  }
+
+  &__selectWithCustom {
+    position: relative;
+
+    &__button {
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+  }
+}
+
+.mappingsEditor__fieldsList {
+  .mappingsEditor__fieldsList .mappingsEditor__fieldsListItem__content,
+  .mappingsEditor__createFieldContent {
+      &::before {
+        border-bottom: 1px solid $euiColorMediumShade;
+        content: '';
+        left: $euiSize;
+        position: absolute;
+        top: 50%;
+        width: $euiSizeS;
+      }
+      &::after {
+        border-left: 1px solid $euiColorMediumShade;
+        content: '';
+        left: $euiSize;
+        position: absolute;
+        top: calc(50% - #{$euiSizeS});
+        height: $euiSizeS;
+      }
+    }
+
+    .mappingsEditor__createFieldContent {
+      padding-left: $euiSizeXXL - $euiSizeXS; // [1]
+    }
+
+    .mappingsEditor__createFieldWrapper {
+      &--multiField {
+        .mappingsEditor__createFieldContent {
+          padding-left: $euiSize;
+        }
+
+        .mappingsEditor__createFieldContent {
+          &::before, &::after {
+            content: none;
+          }
+        }
+      }
+
+      &--toggle {
+        .mappingsEditor__createFieldContent {
+          padding-left: $euiSizeXXL - $euiSizeXS; // [1]
+        }
+      }
+    }
+
+    .mappingsEditor__fieldsList .mappingsEditor__fieldsListItem__content {
+      padding-left: $euiSizeXL; // [2]
+
+      &--toggle, &--multiField {
+        &::before, &::after {
+          content: none;
+        }
+      }
+
+      &--toggle {
+        padding-left: 0;
+      }
+
+      &--multiField {
+        padding-left: $euiSizeS;
+      }
+    }
+}
+
+ul.esUiTree {
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+  position: relative;
+  padding-top: $euiSizeXS;
+
+  li.esUiTreeItem {
+    list-style-type: none;
+    border-left: $euiBorderThin;
+    margin-left: $euiSizeL;
+    padding-bottom: $euiSizeS;
+
+    &__label {
+      padding-left: $euiSizeL;
+      position: relative;
+
+      &::before {
+        content:'';
+        position: absolute;
+        top: 0;
+        left: -1px;
+        bottom: 50%;
+        width: $euiSize;
+        border: $euiBorderThin;
+        border-top: none;
+        border-right: none;
+      }
+    }
+  }
+
+  > li.esUiTreeItem:first-child {
+    padding-top: $euiSizeS;
+  }
+
+  > li.esUiTreeItem:last-child {
+    border-left-color: transparent;
+    padding-bottom: 0;
+  }
+}

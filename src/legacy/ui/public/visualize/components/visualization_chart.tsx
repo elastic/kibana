@@ -22,7 +22,7 @@ import * as Rx from 'rxjs';
 import { debounceTime, filter, share, switchMap } from 'rxjs/operators';
 
 import { PersistedState } from '../../persisted_state';
-import { ResizeChecker } from '../../resize_checker';
+import { ResizeChecker } from '../../../../../plugins/kibana_utils/public';
 import { Vis, VisualizationController } from '../../vis';
 import { getUpdateStatus } from '../../vis/update_status';
 

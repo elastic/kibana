@@ -29,11 +29,11 @@ const DEFAULT_OPTIONS = {
   stripEmptyFields: true,
 };
 
-interface UseFormReturn<T extends object> {
+interface UseFormReturn<T extends FormData> {
   form: FormHook<T>;
 }
 
-export function useForm<T extends object = FormData>(
+export function useForm<T extends FormData = FormData>(
   formConfig: FormConfig<T> | undefined = {}
 ): UseFormReturn<T> {
   const {
@@ -159,10 +159,11 @@ export function useForm<T extends object = FormData>(
   const addField: FormHook<T>['__addField'] = field => {
     fieldsRefs.current[field.path] = field;
 
-    // Only update the formData if the path does not exist (it is the _first_ time
-    // the field is added), to avoid entering an infinite loop when the form is re-rendered.
-    if (!{}.hasOwnProperty.call(formData$.current.value, field.path)) {
-      updateFormDataAt(field.path, field.__serializeOutput());
+    const currentValue = formData$.current.value[field.path];
+    const fieldValue = field.__serializeOutput();
+
+    if (currentValue !== fieldValue) {
+      updateFormDataAt(field.path, fieldValue);
     }
   };
 
@@ -179,10 +180,16 @@ export function useForm<T extends object = FormData>(
   };
 
   const setFieldValue: FormHook<T>['setFieldValue'] = (fieldName, value) => {
+    if (fieldsRefs.current[fieldName] === undefined) {
+      return;
+    }
     fieldsRefs.current[fieldName].setValue(value);
   };
 
   const setFieldErrors: FormHook<T>['setFieldErrors'] = (fieldName, errors) => {
+    if (fieldsRefs.current[fieldName] === undefined) {
+      return;
+    }
     fieldsRefs.current[fieldName].setErrors(errors);
   };
 
@@ -221,11 +228,10 @@ export function useForm<T extends object = FormData>(
 
   const subscribe: FormHook<T>['subscribe'] = handler => {
     const format = () => serializer(getFormData() as T);
-    const validate = async () => await validateAllFields();
 
     const subscription = formData$.current.subscribe(raw => {
       if (!isUnmounted.current) {
-        handler({ isValid, data: { raw, format }, validate });
+        handler({ isValid, data: { raw, format }, validate: validateAllFields });
       }
     });
 
@@ -241,8 +247,13 @@ export function useForm<T extends object = FormData>(
     const { resetValues = true } = resetOptions;
     const currentFormData = { ...formData$.current.value } as FormData;
     Object.entries(fieldsRefs.current).forEach(([path, field]) => {
-      const fieldValue = field.reset({ resetValue: resetValues });
-      currentFormData[path] = fieldValue;
+      // By resetting the form, some field might be unmounted. In order
+      // to avoid a race condition, we check that the field still exists.
+      const isFieldMounted = fieldsRefs.current[path] !== undefined;
+      if (isFieldMounted) {
+        const fieldValue = field.reset({ resetValue: resetValues });
+        currentFormData[path] = fieldValue;
+      }
     });
     if (resetValues) {
       formData$.current.next(currentFormData as T);

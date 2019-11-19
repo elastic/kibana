@@ -19,7 +19,6 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { SearchService, SearchStart, createSearchBar, StatetfulSearchBarProps } from './search';
-import { QueryService, QuerySetup } from './query';
 import { IndexPatternsService, IndexPatternsSetup, IndexPatternsStart } from './index_patterns';
 import { Storage, IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
@@ -42,7 +41,6 @@ export interface DataPluginStartDependencies {
  * @public
  */
 export interface DataSetup {
-  query: QuerySetup;
   indexPatterns: IndexPatternsSetup;
 }
 
@@ -52,7 +50,6 @@ export interface DataSetup {
  * @public
  */
 export interface DataStart {
-  query: QuerySetup;
   indexPatterns: IndexPatternsStart;
   search: SearchStart;
   ui: {
@@ -74,7 +71,6 @@ export interface DataStart {
 
 export class DataPlugin implements Plugin<DataSetup, DataStart, {}, DataPluginStartDependencies> {
   private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
-  private readonly query: QueryService = new QueryService();
   private readonly search: SearchService = new SearchService();
 
   private setupApi!: DataSetup;
@@ -85,7 +81,6 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, {}, DataPluginSt
 
     this.setupApi = {
       indexPatterns: this.indexPatterns.setup(),
-      query: this.query.setup(),
     };
 
     return this.setupApi;
@@ -132,7 +127,6 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, {}, DataPluginSt
 
   public stop() {
     this.indexPatterns.stop();
-    this.query.stop();
     this.search.stop();
   }
 }
