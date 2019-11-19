@@ -30,6 +30,13 @@ describe('Test Response To Endpoint Data Mapper', () => {
       const responseToEndpointMapper = new ResponseToEndpointMapper();
       const result = await responseToEndpointMapper.mapInnerHits(response);
       expect(result).toHaveLength(3);
+      const actualMachineIds = new Set(result.map(endpointData => endpointData.machine_id));
+      const expectedMachineIds = new Set([
+        '3f148a0b-a33e-44f2-8834-9ebc1c073507',
+        'c14a0771-7157-4f79-ac9e-013e6e9d1458',
+        'be3b5b7c-e270-418f-90dd-ec51887c16ff',
+      ]);
+      expect(actualMachineIds).toEqual(expectedMachineIds);
     });
   });
 });

@@ -54,7 +54,7 @@ describe('Endpoints Route Test', () => {
 
     const mockContext = {
       endpointPlugin: {
-        findLatestOfAllEndpoint: jest.fn(() => ({ id: 'all' })),
+        findLatestOfAllEndpoints: jest.fn(() => ({ id: 'all' })),
       },
     };
     await routeHandler(

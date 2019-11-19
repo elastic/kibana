@@ -16,7 +16,7 @@ export function registerEndpointsApi(router: IRouter) {
         const response = await context.endpointPlugin.findEndpoint(endpointId);
         return res.ok({ body: response });
       } else {
-        const response = await context.endpointPlugin.findLatestOfAllEndpoint();
+        const response = await context.endpointPlugin.findLatestOfAllEndpoints();
         return res.ok({ body: response });
       }
     } catch (err) {

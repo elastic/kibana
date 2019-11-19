@@ -11,7 +11,7 @@ import { ResponseToEndpointMapper } from './response_to_endpoint_mapper';
 
 export interface EndpointRequestContext {
   findEndpoint: (endpointId: string) => Promise<EndpointData[]>;
-  findLatestOfAllEndpoint: () => Promise<EndpointData[]>;
+  findLatestOfAllEndpoints: () => Promise<EndpointData[]>;
 }
 
 export class EndpointHandler implements EndpointRequestContext {
@@ -46,7 +46,7 @@ export class EndpointHandler implements EndpointRequestContext {
     return this.responseToEndpointMapper.mapHits(response);
   }
 
-  async findLatestOfAllEndpoint(): Promise<EndpointData[]> {
+  async findLatestOfAllEndpoints(): Promise<EndpointData[]> {
     const searchParams: SearchParams = {
       body: {
         query: {
