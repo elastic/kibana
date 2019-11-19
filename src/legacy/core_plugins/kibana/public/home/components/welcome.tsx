@@ -47,6 +47,7 @@ import { trackUiMetric, METRIC_TYPE } from '../kibana_services';
 interface Props {
   urlBasePath: string;
   onSkip: () => void;
+  onOptInSeen: () => any;
   showTelemetryDisclaimer: boolean;
 }
 
@@ -77,6 +78,7 @@ export class Welcome extends React.Component<Props> {
 
   componentDidMount() {
     trackUiMetric(METRIC_TYPE.LOADED, 'welcomeScreenMount');
+    this.props.onOptInSeen();
     document.addEventListener('keydown', this.hideOnEsc);
   }
 
@@ -134,17 +136,17 @@ export class Welcome extends React.Component<Props> {
                     >
                       <FormattedMessage
                         id="kbn.home.dataManagementDisclaimerPrivacyLink"
-                        defaultMessage="Privacy Policy."
+                        defaultMessage="Privacy Statement."
                       />
                     </EuiLink>
                     <FormattedMessage
                       id="kbn.home.dataManagementDisableCollection"
-                      defaultMessage=" To disable collection, "
+                      defaultMessage=" To stop collection, "
                     />
                     <EuiLink href="#/management/kibana/settings">
                       <FormattedMessage
                         id="kbn.home.dataManagementDisableCollectionLink"
-                        defaultMessage="click here."
+                        defaultMessage="disable usage data here."
                       />
                     </EuiLink>
                   </EuiTextColor>
