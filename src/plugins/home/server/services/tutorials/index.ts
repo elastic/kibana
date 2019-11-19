@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// provided to other plugins as APIs
-// should model the plugin lifecycle
-
-export { TutorialsRegistry, TutorialsRegistrySetup, TutorialsRegistryStart } from './tutorials';
+export {
+  TutorialsRegistry,
+  TutorialsRegistrySetup,
+  TutorialsRegistryStart,
+} from './tutorials_registry';
 export {
   TutorialsCategory,
   ParamTypes,
@@ -32,4 +33,4 @@ export {
   TutorialProvider,
   TutorialContextFactory,
   ScopedTutorialContextFactory,
-} from './tutorials';
+} from './lib/tutorials_registry_types';
