@@ -23,6 +23,7 @@ import classNames from 'classnames';
 import { EuiKeyboardAccessible } from '@elastic/eui';
 import { keyCodes } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { legendColors, LegendItem } from './models';
 
@@ -97,9 +98,11 @@ const VisLegendItemComponent = ({
 
       <div className="visLegend__valueColorPicker" role="listbox">
         <span id={`${legendId}ColorPickerDesc`} className="euiScreenReaderOnly">
-          {i18n.translate('common.ui.vis.visTypes.legend.setColorScreenReaderDescription', {
-            defaultMessage: `Set color for value ${legendItem.label}`,
-          })}
+          <FormattedMessage
+            id="common.ui.vis.visTypes.legend.setColorScreenReaderDescription"
+            defaultMessage="Set color for value {legendDataLabel}"
+            values={{ legendDataLabel: legendItem.label }}
+          />
         </span>
         {legendColors.map(color => (
           <i
@@ -168,10 +171,4 @@ const VisLegendItemComponent = ({
   );
 };
 
-export const VisLegendItem = memo(VisLegendItemComponent, (prev, next) => {
-  return (
-    prev.selected === next.selected &&
-    prev.canFilter === next.canFilter &&
-    prev.item.label === next.item.label
-  );
-});
+export const VisLegendItem = memo(VisLegendItemComponent);
