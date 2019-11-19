@@ -13,6 +13,8 @@ export const RuntimeAgentEventType = t.union([
   t.literal('ACTION_RESULT'),
 ]);
 
+export type AgentEventType = t.TypeOf<typeof RuntimeAgentEventType>;
+
 export const RuntimeAgentEventSubtype = t.union([
   t.literal('RUNNING'),
   t.literal('STARTING'),

@@ -4,6 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+const agentEvents = {
+  properties: {
+    type: { type: 'keyword' },
+    agent_id: { type: 'keyword' },
+    subtype: { type: 'keyword' },
+    timestamp: { type: 'date' },
+    message: { type: 'text' },
+    payload: { type: 'text' },
+    data: { type: 'text' },
+  },
+};
+
 export const mappings = {
   agents: {
     properties: {
@@ -42,6 +54,10 @@ export const mappings = {
       },
       updated_at: {
         type: 'date',
+      },
+      error_events: {
+        type: 'nested',
+        ...agentEvents,
       },
       actions: {
         type: 'nested',
@@ -104,14 +120,6 @@ export const mappings = {
     },
   },
   agent_events: {
-    properties: {
-      type: { type: 'keyword' },
-      agent_id: { type: 'keyword' },
-      subtype: { type: 'keyword' },
-      timestamp: { type: 'date' },
-      message: { type: 'text' },
-      payload: { type: 'text' },
-      data: { type: 'text' },
-    },
+    ...agentEvents,
   },
 };

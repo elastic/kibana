@@ -5,16 +5,21 @@
  */
 import React from 'react';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
-import { EuiHealth, EuiToolTip } from '@elastic/eui';
+import { EuiHealth, EuiToolTip, EuiText } from '@elastic/eui';
 import {
   AGENT_TYPE_PERMANENT,
   AGENT_TYPE_TEMPORARY,
   AGENT_POLLING_THRESHOLD_MS,
 } from '../../common/constants';
 import { Agent } from '../../common/types/domain_data';
+import { AgentEvent } from '../../server/repositories/agent_events/types';
 
 interface Props {
   agent: Agent;
+}
+
+function formatErrorEvent(event: AgentEvent) {
+  return event.message;
 }
 
 const Status = {
@@ -40,7 +45,7 @@ const Status = {
   ),
   Error: (
     <EuiHealth color="danger">
-      <FormattedMessage id="xpack.fleet.agentHealth.errorStatusText" defaultMessage="Offline" />
+      <FormattedMessage id="xpack.fleet.agentHealth.errorStatusText" defaultMessage="Error" />
     </EuiHealth>
   ),
 };
@@ -57,6 +62,8 @@ export const AgentHealth: React.SFC<Props> = ({ agent }) => {
 
   if (!agent.active) {
     status = Status.Inactive;
+  } else if (agent.error_events.length > 0) {
+    status = Status.Error;
   } else {
     switch (type) {
       case AGENT_TYPE_PERMANENT:
@@ -76,26 +83,30 @@ export const AgentHealth: React.SFC<Props> = ({ agent }) => {
     }
   }
 
+  const toolTipContent = msLastCheckIn ? (
+    <>
+      {agent.error_events.map(errorEvent => (
+        <EuiText size="s" key={errorEvent.timestamp}>
+          {formatErrorEvent(errorEvent)}
+        </EuiText>
+      ))}
+      <FormattedMessage
+        id="xpack.fleet.agentHealth.checkInTooltipText"
+        defaultMessage="Last checked in {lastCheckIn}"
+        values={{
+          lastCheckIn: <FormattedRelative value={msLastCheckIn} />,
+        }}
+      />
+    </>
+  ) : (
+    <FormattedMessage
+      id="xpack.fleet.agentHealth.noCheckInTooltipText"
+      defaultMessage="Never checked in"
+    />
+  );
+
   return (
-    <EuiToolTip
-      position="top"
-      content={
-        msLastCheckIn ? (
-          <FormattedMessage
-            id="xpack.fleet.agentHealth.checkInTooltipText"
-            defaultMessage="Last checked in {lastCheckIn}"
-            values={{
-              lastCheckIn: <FormattedRelative value={msLastCheckIn} />,
-            }}
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.fleet.agentHealth.noCheckInTooltipText"
-            defaultMessage="Never checked in"
-          />
-        )
-      }
-    >
+    <EuiToolTip position="top" content={toolTipContent}>
       {status}
     </EuiToolTip>
   );

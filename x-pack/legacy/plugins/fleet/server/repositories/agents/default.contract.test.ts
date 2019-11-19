@@ -210,6 +210,14 @@ describe('AgentsRepository', () => {
     it('should allow to update an agent', async () => {
       await adapter.update(getUser(), agentId, {
         active: true,
+        error_events: [
+          {
+            type: 'ERROR',
+            message: 'error',
+            subtype: 'CONFIG',
+            timestamp: '2019-08-05T19:35:14.861Z',
+          },
+        ],
       });
 
       const freshAgent = await adapter.getById(getUser(), agentId);
@@ -217,6 +225,14 @@ describe('AgentsRepository', () => {
       expect(freshAgent).toMatchObject({
         shared_id: 'agent1',
         active: true,
+        error_events: [
+          {
+            type: 'ERROR',
+            message: 'error',
+            subtype: 'CONFIG',
+            timestamp: '2019-08-05T19:35:14.861Z',
+          },
+        ],
       });
     });
   });

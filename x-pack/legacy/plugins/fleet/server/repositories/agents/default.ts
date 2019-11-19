@@ -42,6 +42,7 @@ export class AgentsRepository implements AgentsRepositoryType {
         local_metadata: JSON.stringify(agent.local_metadata || {}),
         user_provided_metadata: JSON.stringify(agent.user_provided_metadata || {}),
         actions: [],
+        error_events: [],
       },
       options
     );

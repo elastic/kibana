@@ -98,10 +98,8 @@ export class AgentLib {
       if (agents.length === 0) {
         hasMore = false;
       }
-      await this.unenroll(
-        user,
-        agents.map(a => a.id)
-      );
+      const agentIds = agents.map(a => a.id);
+      await this.unenroll(user, agentIds);
     }
   }
 
@@ -235,8 +233,13 @@ export class AgentLib {
     if (localMetadata) {
       updateData.local_metadata = localMetadata;
     }
+    const errorEvents = events.filter(e => e.type === 'ERROR');
+    if (errorEvents.length > 0) {
+      updateData.error_events = errorEvents;
+    }
 
     const policy = agent.policy_id ? await this.policies.getFullPolicy(agent.policy_id) : null;
+
     await this.agentsRepository.update(internalUser, agent.id, updateData);
     if (events.length > 0) {
       await this.agentEventsRepository.createEventsForAgent(internalUser, agent.id, events);
