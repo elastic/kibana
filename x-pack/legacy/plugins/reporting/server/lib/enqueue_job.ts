@@ -36,7 +36,7 @@ export function enqueueJobFactory(server: ServerFacade) {
     exportTypeId: string,
     jobParams: object,
     user: string,
-    headers: ConditionalHeaders,
+    headers: ConditionalHeaders['headers'],
     request: RequestFacade
   ) {
     const logger = parentLogger.clone(['queue-job']);

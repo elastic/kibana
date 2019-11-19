@@ -247,7 +247,7 @@ export interface ESQueueWorker {
 
 export type ESQueueCreateJobFn = (
   jobParams: object,
-  headers: ConditionalHeaders,
+  headers: Record<string, string>,
   request: RequestFacade
 ) => Promise<object>;
 

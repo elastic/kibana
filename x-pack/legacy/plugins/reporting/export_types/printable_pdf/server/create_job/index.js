@@ -10,7 +10,7 @@ import { LevelLogger } from '../../../../server/lib';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { compatibilityShimFactory } from './compatibility_shim';
 
-export function createJobFactoryFactory(server) {
+export function createJobFactory(server) {
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'create']);
   const compatibilityShim = compatibilityShimFactory(server, logger);
   const crypto = cryptoFactory(server);
