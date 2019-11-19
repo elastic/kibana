@@ -23,8 +23,8 @@ import {
   TutorialProvider,
   TutorialContextFactory,
   ScopedTutorialContextFactory,
-} from '../lib/tutorials_registry_types';
-import { tutorialSchema } from '../lib/tutorial_schema';
+} from './lib/tutorials_registry_types';
+import { tutorialSchema } from './lib/tutorial_schema';
 
 export class TutorialsRegistry {
   private readonly tutorialProviders: TutorialProvider[] = []; // pre-register all the tutorials we know we want in here
