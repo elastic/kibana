@@ -17,20 +17,33 @@
  * under the License.
  */
 
-import { CoreSetup } from 'src/core/server';
-import { registerTelemetryOptInRoutes } from './telemetry_opt_in';
-import { registerTelemetryUsageStatsRoutes } from './telemetry_usage_stats';
-import { registerTelemetryOptInStatsRoutes } from './telemetry_opt_in_stats';
-import { registerTelemetryUserHasSeenNotice } from './telemetry_user_has_seen_notice';
+import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
 
-interface RegisterRoutesParams {
-  core: CoreSetup;
-  currentKibanaVersion: string;
+interface NotifyOpts {
+  allowChangingOptInStatus: boolean;
+  telemetrySavedObject: TelemetrySavedObject;
+  telemetryOptedIn: boolean | null;
+  configTelemetryOptIn: boolean;
 }
 
-export function registerRoutes({ core, currentKibanaVersion }: RegisterRoutesParams) {
-  registerTelemetryOptInRoutes({ core, currentKibanaVersion });
-  registerTelemetryUsageStatsRoutes(core);
-  registerTelemetryOptInStatsRoutes(core);
-  registerTelemetryUserHasSeenNotice(core);
+export function getNotifyUserAboutOptInDefault({
+  allowChangingOptInStatus,
+  telemetrySavedObject,
+  telemetryOptedIn,
+  configTelemetryOptIn,
+}: NotifyOpts) {
+  if (allowChangingOptInStatus === false) {
+    return false;
+  }
+
+  // determine if notice has been seen before
+  if (telemetrySavedObject && telemetrySavedObject.userHasSeenNotice === true) {
+    return false;
+  }
+
+  if (telemetryOptedIn !== null) {
+    return false; // they were not defaulted in
+  }
+
+  return configTelemetryOptIn;
 }
