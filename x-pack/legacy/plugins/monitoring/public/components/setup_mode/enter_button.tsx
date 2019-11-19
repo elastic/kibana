@@ -25,6 +25,7 @@ export const SetupModeEnterButton: React.FC<SetupModeEnterButtonProps> = (
   async function enterSetupMode() {
     setIsLoading(true);
     props.toggleSetupMode(true);
+    setIsLoading(false);
   }
 
   return (
