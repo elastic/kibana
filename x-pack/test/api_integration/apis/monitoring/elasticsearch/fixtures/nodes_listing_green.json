@@ -10,15 +10,13 @@
     "totalShards": 108,
     "unassignedShards": 0,
     "upTime": 1787957,
-    "version": [
-      "7.0.0-alpha1"
-    ]
+    "version": ["7.0.0-alpha1"]
   },
   "nodes": [
     {
       "isOnline": true,
       "name": "node01",
-      "nodeTypeClass": "fa-star",
+      "nodeTypeClass": "starFilled",
       "nodeTypeLabel": "Master Node",
       "node_cpu_utilization": {
         "metric": {
@@ -106,7 +104,7 @@
     {
       "isOnline": true,
       "name": "node02",
-      "nodeTypeClass": "fa-server",
+      "nodeTypeClass": "storage",
       "nodeTypeLabel": "Node",
       "node_cpu_utilization": {
         "metric": {

@@ -6,9 +6,7 @@
     "dataSize": 1604573,
     "nodesCount": 2,
     "upTime": 1126458,
-    "version": [
-      "7.0.0-alpha1"
-    ],
+    "version": ["7.0.0-alpha1"],
     "memUsed": 259061752,
     "memMax": 835321856,
     "unassignedShards": 0,
@@ -21,7 +19,7 @@
       "type": "master",
       "isOnline": true,
       "nodeTypeLabel": "Master Node",
-      "nodeTypeClass": "fa-star",
+      "nodeTypeClass": "starFilled",
       "shardCount": 6,
       "node_cgroup_quota": {
         "metric": {
@@ -149,7 +147,7 @@
       "type": "node",
       "isOnline": true,
       "nodeTypeLabel": "Node",
-      "nodeTypeClass": "fa-server",
+      "nodeTypeClass": "storage",
       "shardCount": 6,
       "node_cgroup_throttled": {
         "metric": {

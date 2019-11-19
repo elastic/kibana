@@ -11,12 +11,12 @@ describe('Node Type and Label', () => {
   describe('when master node', () => {
     it('type is indicated by boolean flag', () => {
       const node = {
-        master: true
+        master: true,
       };
       const { nodeType, nodeTypeLabel, nodeTypeClass } = getNodeTypeClassLabel(node);
       expect(nodeType).to.be('master');
       expect(nodeTypeLabel).to.be('Master Node');
-      expect(nodeTypeClass).to.be('fa-star');
+      expect(nodeTypeClass).to.be('starFilled');
     });
     it('type is indicated by string', () => {
       const node = {};
@@ -24,7 +24,7 @@ describe('Node Type and Label', () => {
       const { nodeType, nodeTypeLabel, nodeTypeClass } = getNodeTypeClassLabel(node, type);
       expect(nodeType).to.be('master');
       expect(nodeTypeLabel).to.be('Master Node');
-      expect(nodeTypeClass).to.be('fa-star');
+      expect(nodeTypeClass).to.be('starFilled');
     });
   });
   it('when type is generic node', () => {
@@ -33,6 +33,6 @@ describe('Node Type and Label', () => {
     const { nodeType, nodeTypeLabel, nodeTypeClass } = getNodeTypeClassLabel(node, type);
     expect(nodeType).to.be('node');
     expect(nodeTypeLabel).to.be('Node');
-    expect(nodeTypeClass).to.be('fa-server');
+    expect(nodeTypeClass).to.be('storage');
   });
 });

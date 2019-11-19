@@ -38,7 +38,7 @@ export class Unassigned extends React.Component {
   render() {
     const shards = _.sortBy(this.props.shards, 'shard').map(this.createShard);
     return (
-      <td className="unassigned" data-test-subj="clusterView-Unassigned">
+      <td className="monUnassigned" data-test-subj="clusterView-Unassigned">
         <EuiFlexGroup wrap className="children">
           {shards}
         </EuiFlexGroup>
