@@ -24,6 +24,11 @@ import { getRenderersRegistry } from './services';
 import { first } from 'rxjs/operators';
 
 const element: HTMLElement = {} as HTMLElement;
+const mockNotificationService = {
+  toasts: {
+    addError: jest.fn(() => {}),
+  },
+};
 
 jest.mock('./services', () => {
   const renderers: Record<string, unknown> = {
@@ -39,11 +44,7 @@ jest.mock('./services', () => {
       get: jest.fn((id: string) => renderers[id]),
     })),
     getNotifications: jest.fn(() => {
-      return {
-        toasts: {
-          addError: jest.fn(() => {}),
-        },
-      };
+      return mockNotificationService;
     }),
   };
 });
@@ -83,6 +84,7 @@ describe('ExpressionRenderHandler', () => {
   describe('render()', () => {
     beforeEach(() => {
       mockMockErrorRenderFunction.mockReset();
+      mockNotificationService.toasts.addError.mockReset();
     });
 
     it('should emit render count in case of error', async () => {
@@ -174,6 +176,22 @@ describe('ExpressionRenderHandler', () => {
       const promise = expressionRenderHandler.render$.pipe(first()).toPromise();
       await expressionRenderHandler.render(false);
       await expect(promise).resolves.toEqual(1);
+    });
+
+    it('default renderer should use notification service', async () => {
+      const expressionRenderHandler = new ExpressionRenderHandler(element);
+      expressionRenderHandler.render(false);
+      const promise1 = expressionRenderHandler.render$.pipe(first()).toPromise();
+      await expect(promise1).resolves.toEqual(1);
+      expect(mockNotificationService.toasts.addError).toBeCalledWith(
+        {
+          message: 'invalid data provided to the expression renderer',
+        },
+        {
+          title: 'error',
+          toastMessage: 'request failed',
+        }
+      );
     });
   });
 });
