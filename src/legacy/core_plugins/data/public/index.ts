@@ -38,7 +38,7 @@ export {
   IndexPatterns,
   StaticIndexPattern,
 } from './index_patterns';
-export { Query, QueryBarInput } from './query';
+export { QueryBarInput } from './query';
 export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
 
 /** @public static code */
@@ -58,6 +58,4 @@ export {
   IndexPatternMissingIndices,
   NoDefaultIndexPattern,
   NoDefinedIndexPatterns,
-  mockFields,
-  mockIndexPattern,
 } from './index_patterns';

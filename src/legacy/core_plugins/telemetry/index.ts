@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import * as Rx from 'rxjs';
 import { resolve } from 'path';
 import JoiNamespace from 'joi';
 import { Server } from 'hapi';
@@ -26,12 +27,13 @@ import { i18n } from '@kbn/i18n';
 import mappings from './mappings.json';
 import { CONFIG_TELEMETRY, getConfigTelemetryDesc } from './common/constants';
 import { getXpackConfigWithDeprecated } from './common/get_xpack_config_with_deprecated';
-import { telemetryPlugin, getTelemetryOptIn } from './server';
+import { telemetryPlugin, replaceTelemetryInjectedVars, FetcherTask } from './server';
 
 import {
   createLocalizationUsageCollector,
   createTelemetryUsageCollector,
   createUiMetricUsageCollector,
+  createTelemetryPluginUsageCollector,
 } from './server/collectors';
 
 const ENDPOINT_VERSION = 'v2';
@@ -45,12 +47,15 @@ const telemetry = (kibana: any) => {
     config(Joi: typeof JoiNamespace) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
+        allowChangingOptInStatus: Joi.boolean().default(true),
+        optIn: Joi.when('allowChangingOptInStatus', {
+          is: false,
+          then: Joi.valid(true).default(true),
+          otherwise: Joi.boolean().default(true),
+        }),
         // `config` is used internally and not intended to be set
         config: Joi.string().default(Joi.ref('$defaultConfigPath')),
         banner: Joi.boolean().default(true),
-        lastVersionChecked: Joi.string()
-          .allow('')
-          .default(''),
         url: Joi.when('$dev', {
           is: true,
           then: Joi.string().default(
@@ -60,6 +65,18 @@ const telemetry = (kibana: any) => {
             `https://telemetry.elastic.co/xpack/${ENDPOINT_VERSION}/send`
           ),
         }),
+        optInStatusUrl: Joi.when('$dev', {
+          is: true,
+          then: Joi.string().default(
+            `https://telemetry-staging.elastic.co/opt_in_status/${ENDPOINT_VERSION}/send`
+          ),
+          otherwise: Joi.string().default(
+            `https://telemetry.elastic.co/opt_in_status/${ENDPOINT_VERSION}/send`
+          ),
+        }),
+        sendUsageFrom: Joi.string()
+          .allow(['server', 'browser'])
+          .default('browser'),
       }).default();
     },
     uiExports: {
@@ -80,31 +97,48 @@ const telemetry = (kibana: any) => {
         },
       },
       async replaceInjectedVars(originalInjectedVars: any, request: any) {
-        const currentKibanaVersion = getCurrentKibanaVersion(request.server);
-        const telemetryOptedIn = await getTelemetryOptIn({ request, currentKibanaVersion });
-
-        return {
-          ...originalInjectedVars,
-          telemetryOptedIn,
-        };
+        const telemetryInjectedVars = await replaceTelemetryInjectedVars(request);
+        return Object.assign({}, originalInjectedVars, telemetryInjectedVars);
       },
       injectDefaultVars(server: Server) {
         const config = server.config();
         return {
           telemetryEnabled: getXpackConfigWithDeprecated(config, 'telemetry.enabled'),
           telemetryUrl: getXpackConfigWithDeprecated(config, 'telemetry.url'),
-          telemetryBanner: getXpackConfigWithDeprecated(config, 'telemetry.banner'),
-          telemetryOptedIn: null,
+          telemetryBanner:
+            config.get('telemetry.allowChangingOptInStatus') !== false &&
+            getXpackConfigWithDeprecated(config, 'telemetry.banner'),
+          telemetryOptedIn: config.get('telemetry.optIn'),
+          telemetryOptInStatusUrl: config.get('telemetry.optInStatusUrl'),
+          allowChangingOptInStatus: config.get('telemetry.allowChangingOptInStatus'),
+          telemetrySendUsageFrom: config.get('telemetry.sendUsageFrom'),
         };
       },
       hacks: ['plugins/telemetry/hacks/telemetry_init', 'plugins/telemetry/hacks/telemetry_opt_in'],
       mappings,
     },
+    postInit(server: Server) {
+      const fetcherTask = new FetcherTask(server);
+      fetcherTask.start();
+    },
     init(server: Server) {
       const initializerContext = {
         env: {
           packageInfo: {
-            version: getCurrentKibanaVersion(server),
+            version: server.config().get('pkg.version'),
+          },
+        },
+        config: {
+          create() {
+            const config = server.config();
+            return Rx.of({
+              enabled: config.get('telemetry.enabled'),
+              optIn: config.get('telemetry.optIn'),
+              config: config.get('telemetry.config'),
+              banner: config.get('telemetry.banner'),
+              url: config.get('telemetry.url'),
+              allowChangingOptInStatus: config.get('telemetry.allowChangingOptInStatus'),
+            });
           },
         },
       } as PluginInitializerContext;
@@ -115,8 +149,8 @@ const telemetry = (kibana: any) => {
       } as any) as CoreSetup;
 
       telemetryPlugin(initializerContext).setup(coreSetup);
-
       // register collectors
+      server.usage.collectorSet.register(createTelemetryPluginUsageCollector(server));
       server.usage.collectorSet.register(createLocalizationUsageCollector(server));
       server.usage.collectorSet.register(createTelemetryUsageCollector(server));
       server.usage.collectorSet.register(createUiMetricUsageCollector(server));
@@ -126,7 +160,3 @@ const telemetry = (kibana: any) => {
 
 // eslint-disable-next-line import/no-default-export
 export default telemetry;
-
-function getCurrentKibanaVersion(server: Server): string {
-  return server.config().get('pkg.version');
-}

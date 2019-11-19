@@ -23,9 +23,11 @@ function getUser(apiKey?: string, apiKeyId?: string) {
   return ({
     kind: 'authenticated',
     [internalAuthData]: {
-      authorization: `ApiKey ${Buffer.from(`${apiKeyId || 'key_id'}:${apiKey}`).toString(
-        'base64'
-      )}`,
+      headers: {
+        authorization: `ApiKey ${Buffer.from(`${apiKeyId || 'key_id'}:${apiKey}`).toString(
+          'base64'
+        )}`,
+      },
     },
   } as unknown) as FrameworkUser;
 }
@@ -49,11 +51,13 @@ describe('Agent lib', () => {
     const agentIds: string[] = [];
     for (const agent of agents) {
       agentIds.push(
-        (await soAdapter.create(getUser(), 'agents', {
-          ...agent,
-          local_metadata: JSON.stringify(agent.local_metadata || {}),
-          user_provided_metadata: JSON.stringify(agent.user_provided_metadata || {}),
-        })).id
+        (
+          await soAdapter.create(getUser(), 'agents', {
+            ...agent,
+            local_metadata: JSON.stringify(agent.local_metadata || {}),
+            user_provided_metadata: JSON.stringify(agent.user_provided_metadata || {}),
+          })
+        ).id
       );
     }
     return agentIds;

@@ -23,7 +23,9 @@ describe('AgentsRepository', () => {
     return ({
       kind: 'authenticated',
       [internalAuthData]: {
-        authorization: `Basic ${Buffer.from(`elastic:changeme`).toString('base64')}`,
+        headers: {
+          authorization: `Basic ${Buffer.from(`elastic:changeme`).toString('base64')}`,
+        },
       },
     } as unknown) as FrameworkUser;
   }

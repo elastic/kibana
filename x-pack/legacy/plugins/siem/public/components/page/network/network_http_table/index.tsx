@@ -140,10 +140,7 @@ const makeMapStateToProps = () => {
 };
 
 export const NetworkHttpTable = compose<React.ComponentClass<OwnProps>>(
-  connect(
-    makeMapStateToProps,
-    {
-      updateNetworkTable: networkActions.updateNetworkTable,
-    }
-  )
+  connect(makeMapStateToProps, {
+    updateNetworkTable: networkActions.updateNetworkTable,
+  })
 )(NetworkHttpTableComponent);

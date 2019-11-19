@@ -51,7 +51,7 @@ export class ApiKeyLib implements Interface<ApiKeyLibType> {
     user: FrameworkUser
   ): Promise<EnrollmentApiKeyVerificationResponse> {
     if (user.kind === 'authenticated') {
-      const apiKeyHeader = user[internalAuthData].authorization.split(' ')[1];
+      const apiKeyHeader = user[internalAuthData].headers.authorization.split(' ')[1];
       const apiKey = Buffer.from(apiKeyHeader, 'base64')
         .toString('utf8')
         .split(':')[1];
@@ -76,7 +76,7 @@ export class ApiKeyLib implements Interface<ApiKeyLibType> {
     user: FrameworkUser<any>
   ): Promise<AccessApiKeyVerificationResponse> {
     if (user.kind === 'authenticated') {
-      const apiKeyHeader = user[internalAuthData].authorization.split(' ')[1];
+      const apiKeyHeader = user[internalAuthData].headers.authorization.split(' ')[1];
       const [apiKeyId, apiKey] = Buffer.from(apiKeyHeader, 'base64')
         .toString('utf8')
         .split(':');

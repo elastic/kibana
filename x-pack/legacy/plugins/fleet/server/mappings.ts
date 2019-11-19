@@ -60,6 +60,9 @@ export const mappings = {
       name: {
         type: 'keyword',
       },
+      type: {
+        type: 'keyword',
+      },
       api_key: {
         type: 'binary',
       },

@@ -5,9 +5,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SIGNALS_ID } from '../../../../common/constants';
+import { SIGNALS_ID, DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { Logger } from '../../../../../../../../src/core/server';
-
 // TODO: Remove this for the build_events_query call eventually
 import { buildEventsReIndex } from './build_events_reindex';
 
@@ -24,16 +23,19 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
     validate: {
       params: schema.object({
         description: schema.string(),
+        falsePositives: schema.arrayOf(schema.string(), { defaultValue: [] }),
         from: schema.string(),
         filter: schema.nullable(schema.object({}, { allowUnknowns: true })),
         id: schema.string(),
+        immutable: schema.boolean({ defaultValue: false }),
         index: schema.arrayOf(schema.string()),
         language: schema.nullable(schema.string()),
         savedId: schema.nullable(schema.string()),
         query: schema.nullable(schema.string()),
         filters: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
-        maxSignals: schema.number({ defaultValue: 100 }),
+        maxSignals: schema.number({ defaultValue: 10000 }),
         severity: schema.string(),
+        tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
         to: schema.string(),
         type: schema.string(),
         references: schema.arrayOf(schema.string(), { defaultValue: [] }),
@@ -79,6 +81,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         to,
         filter: esFilter,
         size: searchAfterSize,
+        searchAfterSortId: undefined,
       });
 
       try {
@@ -90,7 +93,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
             to,
             // TODO: Change this out once we have solved
             // https://github.com/elastic/kibana/issues/47002
-            signalsIndex: process.env.SIGNALS_INDEX || '.siem-signals-10-01-2019',
+            signalsIndex: process.env.SIGNALS_INDEX || DEFAULT_SIGNALS_INDEX,
             severity,
             description,
             name,
@@ -135,13 +138,6 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         // handling/conditions
         logger.error(`Error from signal rule "${id}", ${err.message}`);
       }
-
-      // TODO: Schedule and fire any and all actions configured for the signals rule
-      // such as email/slack/etc... Note you will not be able to save in-memory state
-      // without calling this at least once but we are not using in-memory state at the moment.
-      // Schedule the default action which is nothing if it's a plain signal.
-      // const instance = services.alertInstanceFactory('siem-signals');
-      // instance.scheduleActions('default');
     },
   };
 };

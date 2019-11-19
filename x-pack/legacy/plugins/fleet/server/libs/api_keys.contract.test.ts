@@ -20,7 +20,9 @@ function getUser(): FrameworkUser {
   return ({
     kind: 'authenticated',
     [internalAuthData]: {
-      authorization: `Basic ${Buffer.from(`elastic:changeme`).toString('base64')}`,
+      headers: {
+        authorization: `Basic ${Buffer.from(`elastic:changeme`).toString('base64')}`,
+      },
     },
   } as unknown) as FrameworkUser;
 }
@@ -33,7 +35,9 @@ function getUserForApiKey(apiKey: { id: string; api_key: string }) {
   return {
     kind: 'authenticated',
     [internalAuthData]: {
-      authorization: `ApiKey ${apiKeyToString(apiKey)}`,
+      headers: {
+        authorization: `ApiKey ${apiKeyToString(apiKey)}`,
+      },
     },
   } as FrameworkUser;
 }

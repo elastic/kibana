@@ -122,16 +122,18 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
       `,
     }));
 
-    adapterModule.run((
-      config: InfraKibanaUIConfig,
-      kbnVersion: string,
-      Private: <Provider>(provider: Provider) => Provider,
-      // @ts-ignore: inject kibanaAdapter to force eager instatiation
-      kibanaAdapter: any
-    ) => {
-      this.timezone = Private(this.timezoneProvider)();
-      this.kbnVersion = kbnVersion;
-    });
+    adapterModule.run(
+      (
+        config: InfraKibanaUIConfig,
+        kbnVersion: string,
+        Private: <Provider>(provider: Provider) => Provider,
+        // @ts-ignore: inject kibanaAdapter to force eager instatiation
+        kibanaAdapter: any
+      ) => {
+        this.timezone = Private(this.timezoneProvider)();
+        this.kbnVersion = kbnVersion;
+      }
+    );
 
     uiRoutes.enable();
 

@@ -1,0 +1,160 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Ingest",
+    "version": "0.2",
+    "description": "Strawman API for fka Ingest Plugin",
+    "license": {
+      "url": "https://raw.githubusercontent.com/elastic/elasticsearch/master/licenses/ELASTIC-LICENSE.txt",
+      "name": "Elastic"
+    },
+    "contact": {
+      "name": "Elastic Observability Team"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5601/api/epm",
+      "description": "EPM API Root"
+    }
+  ],
+  "paths": {
+    "/policies": {
+      "get": {
+        "summary": "Get policies",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "./models/policy.v1.json"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "datasource"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "use_case"
+          },
+          {
+            "$ref": "#/components/parameters/pageIndexParam"
+          },
+          {
+            "$ref": "#/components/parameters/pageSizeParam"
+          }
+        ],
+        "description": "Return one or many polices based on the given filter",
+        "operationId": "getPolicies"
+      },
+      "parameters": []
+    },
+    "/datasources": {
+      "get": {
+        "summary": "Get datasources",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "./models/datasource.v1.json"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "policy_id"
+          },
+          {
+            "$ref": "#/components/parameters/pageIndexParam"
+          },
+          {
+            "$ref": "#/components/parameters/pageSizeParam"
+          }
+        ],
+        "description": "Return datasources",
+        "operationId": "getDatasources"
+      }
+    },
+    "/policy/{policy_id}": {
+      "parameters": [
+        {
+          "name": "policy_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Get policy by id",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./models/policy.v1.json"
+                }
+              }
+            }
+          }
+        },
+        "description": "Get Policy by id",
+        "operationId": "getPolicyById"
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "pageSizeParam": {
+        "name": "per_page",
+        "in": "query",
+        "description": "The number of items to return",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "default": 50
+        }
+      },
+      "pageIndexParam": {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "default": 1
+        }
+      }
+    }
+  }
+}
