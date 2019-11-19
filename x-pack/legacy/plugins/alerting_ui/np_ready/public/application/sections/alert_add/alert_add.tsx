@@ -159,9 +159,13 @@ export const AlertAdd = ({ refreshList }: Props) => {
   } as IErrorObject;
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
-  const actionErrors = alert.actions.reduce((acc: any, action: any) => {
-    const actionValidationErrors = action.validate();
-    acc[action.id] = actionValidationErrors;
+  const actionErrors = alert.actions.reduce((acc: any, alertActionType: any) => {
+    const actionType = actionTypeRegistry.get(alertActionType.id);
+    if (!actionType) {
+      return [];
+    }
+    const actionValidationErrors = actionType.validateParams(alertActionType.params);
+    acc[alertActionType.id] = actionValidationErrors;
     return acc;
   }, {});
 
@@ -291,20 +295,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
 
   let alertDetails;
   if (!alertAction) {
-    alertDetails = (
-      <Fragment>
-        <EuiTitle size="xxs">
-          <h5 id="alertActionTypeTitle">
-            <FormattedMessage
-              defaultMessage={'Select an action'}
-              id="xpack.alertingUI.sections.alertAdd.selectAlertActionTypeTitle"
-            />
-          </h5>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiFlexGrid columns={4}>{actionTypeNodes}</EuiFlexGrid>
-      </Fragment>
-    );
+    alertDetails = null;
   } else {
     alert.actions.push(alertAction);
     const actionTypeRegisterd = actionTypeRegistry.get(alert.actions[0].id);
@@ -312,14 +303,17 @@ export const AlertAdd = ({ refreshList }: Props) => {
     const ParamsFieldsComponent = actionTypeRegisterd.actionParamsFields;
     alertDetails = (
       <Fragment>
-        {ParamsFieldsComponent !== null ? (
-          <ParamsFieldsComponent
-            action={alert.actions[0].params}
-            errors={{}}
-            editAction={setActionParams}
-            hasErrors={false}
-          />
-        ) : null}
+        <EuiSpacer size="m" />
+        <EuiPanel paddingSize="m">
+          {ParamsFieldsComponent !== null ? (
+            <ParamsFieldsComponent
+              action={alert.actions[0].params}
+              errors={{}}
+              editAction={setActionParams}
+              hasErrors={false}
+            />
+          ) : null}
+        </EuiPanel>
       </Fragment>
     );
   }
@@ -532,8 +526,20 @@ export const AlertAdd = ({ refreshList }: Props) => {
           <EuiTabs>{alertTabs}</EuiTabs>
           <EuiSpacer size="m" />
           <EuiPanel paddingSize="m">{alertTypeArea}</EuiPanel>
+          {selectedTabContent}
           <EuiSpacer size="m" />
-          <EuiPanel paddingSize="m">{selectedTabContent}</EuiPanel>
+          <EuiPanel paddingSize="m">
+            <EuiTitle size="xxs">
+              <h5 id="alertActionTypeTitle">
+                <FormattedMessage
+                  defaultMessage={'Select an action'}
+                  id="xpack.alertingUI.sections.alertAdd.selectAlertActionTypeTitle"
+                />
+              </h5>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiFlexGrid columns={4}>{actionTypeNodes}</EuiFlexGrid>
+          </EuiPanel>
           <EuiSpacer size="m" />
         </EuiForm>
       </EuiFlyoutBody>

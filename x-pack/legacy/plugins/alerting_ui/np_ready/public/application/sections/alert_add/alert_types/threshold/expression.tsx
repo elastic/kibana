@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, Fragment, useEffect } from 'react';
+import React, { useState, Fragment, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -332,7 +332,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
     }
   );
 
-  function setDefaultValues() {
+  const setDefaultValues = useCallback(() => {
     setAlertTypeParams('aggType', DEFAULT_VALUES.AGGREGATION_TYPE);
     setAlertTypeParams('termSize', DEFAULT_VALUES.TERM_SIZE);
     setAlertTypeParams('thresholdComparator', DEFAULT_VALUES.THRESHOLD_COMPARATOR);
@@ -345,27 +345,21 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
       setAlertTypeParams('groupBy', 'top');
     }
     setAlertTypeParams('threshold', DEFAULT_VALUES.THRESHOLD);
-  }
+  }, [setAlertTypeParams, termField]);
 
-  const loadData = async () => {
-    if (index && index.length > 0) {
-      const allEsFields = await getFields(index);
-      const timeFields = getTimeFieldOptions(allEsFields, firstFieldOption);
-      setEsFields(allEsFields);
-      setTimeFieldOptions(timeFields);
-      setAlertTypeParams('timeFields', timeFields);
-    }
-    getIndexPatterns();
-  };
+  const getFields = useCallback(
+    (indices: string[]) => {
+      const fields = async () => {
+        return await getThresholdAlertTypeFields({ indices, http });
+      };
+      return fields();
+    },
+    [http]
+  );
 
   useEffect(() => {
-    loadData();
-    setDefaultValues();
-  });
-
-  const getFields = async (indices: string[]) => {
-    return await getThresholdAlertTypeFields({ indices, http });
-  };
+    getIndexPatterns();
+  }, []);
 
   interface IOption {
     label: string;
