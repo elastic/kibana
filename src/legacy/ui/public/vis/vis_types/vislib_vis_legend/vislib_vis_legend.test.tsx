@@ -19,10 +19,10 @@
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-
-import { VisLegend, VisLegendComponentProps } from '../vislib_vis_legend/vislib_vis_legend';
-import { legendColors } from './models';
 import { act } from 'react-hooks-testing-library';
+
+import { VisLegend, VisLegendProps } from '../vislib_vis_legend/vislib_vis_legend';
+import { legendColors } from './models';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -45,19 +45,19 @@ const vis = {
       filter: jest.fn(),
     },
   },
-  vislibVis: {
-    handler: {
-      highlight: jest.fn(),
-      unHighlight: jest.fn(),
-    },
-    getLegendLabels: jest.fn(),
-    visConfigArgs: {
-      type: 'area',
-    },
-    visConfig: {
-      data: {
-        getColorFunc: jest.fn().mockReturnValue(() => 'red'),
-      },
+};
+const vislibVis = {
+  handler: {
+    highlight: jest.fn(),
+    unHighlight: jest.fn(),
+  },
+  getLegendLabels: jest.fn(),
+  visConfigArgs: {
+    type: 'area',
+  },
+  visConfig: {
+    data: {
+      getColorFunc: jest.fn().mockReturnValue(() => 'red'),
     },
   },
 };
@@ -93,8 +93,10 @@ const uiState = {
   setSilent: jest.fn(),
 };
 
-const getWrapper = (props?: Partial<VisLegendComponentProps>) =>
-  mount(<VisLegend vis={vis} visData={visData} uiState={uiState} refreshLegend={0} {...props} />);
+const getWrapper = (props?: Partial<VisLegendProps>) =>
+  mount(
+    <VisLegend vis={vis} vislibVis={vislibVis} visData={visData} uiState={uiState} {...props} />
+  );
 
 const getLegendItems = (wrapper: ReactWrapper) => wrapper.find('.visLegend__value--item');
 
@@ -137,14 +139,14 @@ describe('VisLegend Component', () => {
       const first = getLegendItems(wrapper).first();
       first.simulate('focus');
 
-      expect(vis.vislibVis.handler.highlight).toHaveBeenCalledTimes(1);
+      expect(vislibVis.handler.highlight).toHaveBeenCalledTimes(1);
     });
 
     it('should call highlight handler when legend item is hovered', () => {
       const first = getLegendItems(wrapper).first();
       first.simulate('mouseEnter');
 
-      expect(vis.vislibVis.handler.highlight).toHaveBeenCalledTimes(1);
+      expect(vislibVis.handler.highlight).toHaveBeenCalledTimes(1);
     });
 
     it('should call unHighlight handler when legend item is blurred', () => {
@@ -153,7 +155,7 @@ describe('VisLegend Component', () => {
       first = getLegendItems(wrapper).first();
       first.simulate('blur');
 
-      expect(vis.vislibVis.handler.unHighlight).toHaveBeenCalledTimes(1);
+      expect(vislibVis.handler.unHighlight).toHaveBeenCalledTimes(1);
     });
 
     it('should call unHighlight handler when legend item is unhovered', () => {
@@ -164,14 +166,14 @@ describe('VisLegend Component', () => {
         first.simulate('mouseLeave');
       });
 
-      expect(vis.vislibVis.handler.unHighlight).toHaveBeenCalledTimes(1);
+      expect(vislibVis.handler.unHighlight).toHaveBeenCalledTimes(1);
     });
 
     it('should work with no handlers set', () => {
       const newVis = {
         ...vis,
         vislibVis: {
-          ...vis.vislibVis,
+          ...vislibVis,
           handler: null,
         },
       };
