@@ -54,7 +54,7 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
         path: routePath,
         validate: {
           body: kbnSchema.object({
-            operationName: kbnSchema.nullable(kbnSchema.string()),
+            operationName: kbnSchema.string(),
             query: kbnSchema.string(),
             variables: kbnSchema.recordOf(kbnSchema.string(), kbnSchema.any()),
           }),

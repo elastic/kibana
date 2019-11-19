@@ -10,6 +10,8 @@ import { UMServerLibs } from '../lib/lib';
 
 export interface UMServerRoute {
   method: string;
+  path: string;
+  options?: any;
   handler: RequestHandler<ObjectType, ObjectType, ObjectType>;
 }
 
