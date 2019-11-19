@@ -20,6 +20,7 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { act } from 'react-hooks-testing-library';
+import { I18nProvider } from '@kbn/i18n/react';
 
 import { VisLegend, VisLegendProps } from '../vislib_vis_legend/vislib_vis_legend';
 import { legendColors } from './models';
@@ -95,7 +96,9 @@ const uiState = {
 
 const getWrapper = (props?: Partial<VisLegendProps>) =>
   mount(
-    <VisLegend vis={vis} vislibVis={vislibVis} visData={visData} uiState={uiState} {...props} />
+    <I18nProvider>
+      <VisLegend vis={vis} vislibVis={vislibVis} visData={visData} uiState={uiState} {...props} />
+    </I18nProvider>
   );
 
 const getLegendItems = (wrapper: ReactWrapper) => wrapper.find('.visLegend__value--item');
@@ -284,7 +287,7 @@ describe('VisLegend Component', () => {
       const toggleButton = wrapper.find('.visLegend__toggle').first();
       toggleButton.simulate('click');
 
-      expect(wrapper.exists('.visLegend__list')).toBe(true);
+      expect(uiState.get('vis.legendOpen')).toBe(true);
     });
 
     it('click should hide legend once toggled from shown', () => {
@@ -293,7 +296,7 @@ describe('VisLegend Component', () => {
       const toggleButton = wrapper.find('.visLegend__toggle').first();
       toggleButton.simulate('click');
 
-      expect(wrapper.exists('.visLegend__list')).toBe(false);
+      expect(uiState.get('vis.legendOpen')).toBe(false);
     });
   });
 });

@@ -40,7 +40,6 @@ export interface VisLegendProps {
 }
 
 export interface VisLegendState {
-  open: boolean;
   labels: any[];
   tableAggs: any[];
   selectedLabel: string | null;
@@ -58,10 +57,8 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
 
   constructor(props: VisLegendProps) {
     super(props);
-    const open = props.uiState.get('vis.legendOpen', true);
 
     this.state = {
-      open,
       labels: [],
       tableAggs: [],
       selectedLabel: null,
@@ -76,11 +73,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
     const bwcAddLegend = this.props.vis.params.addLegend;
     const bwcLegendStateDefault = bwcAddLegend == null ? true : bwcAddLegend;
     const newOpen = !this.props.uiState.get('vis.legendOpen', bwcLegendStateDefault);
-    this.setState({ open: newOpen });
-    // open should be applied on template before we update uiState
-    setTimeout(() => {
-      this.props.uiState.set('vis.legendOpen', newOpen);
-    });
+    this.props.uiState.set('vis.legendOpen', newOpen);
   };
 
   setColor = (label: string, color: string) => (event: BaseSyntheticEvent) => {
@@ -158,7 +151,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
       this.props.uiState.get('vis.legendOpen') == null &&
       this.props.vis.params.addLegend != null
     ) {
-      this.setState({ open: this.props.vis.params.addLegend });
+      this.props.uiState.set('vis.legendOpen', this.props.vis.params.addLegend);
     }
 
     if (CUSTOM_LEGEND_VIS_TYPES.includes(vislibVis.visConfigArgs.type)) {
@@ -224,7 +217,8 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
   );
 
   render() {
-    const { open } = this.state;
+    const open = this.props.uiState.get('vis.legendOpen', true);
+
     return (
       <div className="visLegend">
         <button
