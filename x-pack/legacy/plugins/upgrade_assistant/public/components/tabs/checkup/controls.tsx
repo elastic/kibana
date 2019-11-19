@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { StatelessComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 
 import { EuiButton, EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';

@@ -5,7 +5,7 @@
  */
 
 import { countBy } from 'lodash';
-import React, { StatelessComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

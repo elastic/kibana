@@ -5,7 +5,7 @@
  */
 
 import { groupBy } from 'lodash';
-import React, { Fragment, StatelessComponent } from 'react';
+import React, { Fragment, FunctionComponent } from 'react';
 
 import {
   EuiAccordion,

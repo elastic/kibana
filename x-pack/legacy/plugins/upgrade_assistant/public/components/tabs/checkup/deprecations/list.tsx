@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { StatelessComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 
 import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
 import { EnrichedDeprecationInfo } from '../../../../../server/lib/es_migration_apis';

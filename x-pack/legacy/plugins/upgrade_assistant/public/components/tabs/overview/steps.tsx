@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, StatelessComponent } from 'react';
+import React, { Fragment, FunctionComponent } from 'react';
 
 import {
   EuiFormRow,
