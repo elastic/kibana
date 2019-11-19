@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-// @ts-ignore
 import { hasLicenseExpired } from '../license/check_license';
 
 import { Privileges, getDefaultPrivileges } from '../../common/types/privileges';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { FC, Fragment } from 'react';
 
 import {
   EuiButton,
@@ -19,10 +19,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { isFullLicense } from '../license/check_license';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { timefilter } from 'ui/timefilter';
+import { isFullLicense } from '../license/check_license';
 
 import { NavigationMenu } from '../components/navigation_menu';
 
@@ -47,7 +48,7 @@ function startTrialDescription() {
   );
 }
 
-export const DatavisualizerSelector = injectI18n(function (props) {
+export const DatavisualizerSelector: FC = () => {
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
 
@@ -99,10 +100,12 @@ export const DatavisualizerSelector = injectI18n(function (props) {
                     defaultMessage="Import data from a log file. You can upload files up to 100 MB."
                   />
                 }
-                betaBadgeLabel={props.intl.formatMessage({
-                  id: 'xpack.ml.datavisualizer.selector.experimentalBadgeLabel',
-                  defaultMessage: 'Experimental',
-                })}
+                betaBadgeLabel={i18n.translate(
+                  'xpack.ml.datavisualizer.selector.experimentalBadgeLabel',
+                  {
+                    defaultMessage: 'Experimental',
+                  }
+                )}
                 betaBadgeTooltipContent={
                   <FormattedMessage
                     id="xpack.ml.datavisualizer.selector.experimentalBadgeTooltipLabel"
@@ -181,4 +184,4 @@ export const DatavisualizerSelector = injectI18n(function (props) {
       </EuiPage>
     </Fragment>
   );
-});
+};
