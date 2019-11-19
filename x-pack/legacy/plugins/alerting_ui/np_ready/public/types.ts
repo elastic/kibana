@@ -72,6 +72,7 @@ export interface AlertAction {
 export interface Alert {
   id: string;
   name: string;
+  tags: string[];
   enabled: boolean;
   alertTypeId: string;
   interval: string;
@@ -93,6 +94,7 @@ export interface Alert {
 
 export interface AlertTableItem extends Alert {
   alertType: AlertType['name'];
+  tagsText: string;
 }
 
 export interface AlertTypeModel {
