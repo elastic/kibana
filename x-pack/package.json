@@ -305,7 +305,7 @@
     "raw-loader": "3.1.0",
     "react": "^16.8.6",
     "react-apollo": "^2.1.4",
-    "react-beautiful-dnd": "^12.1.0",
+    "react-beautiful-dnd": "^12.1.1",
     "react-datetime": "^2.14.0",
     "react-dom": "^16.8.6",
     "react-dropzone": "^4.2.9",
