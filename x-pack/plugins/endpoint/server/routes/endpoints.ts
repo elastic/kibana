@@ -8,7 +8,7 @@ import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { EndpointRequestContext } from '../handlers/endpoint_handler';
 
-export function registerEndpointsApi(router: IRouter, endpointHandler: EndpointRequestContext) {
+export function registerEndpointRoutes(router: IRouter, endpointHandler: EndpointRequestContext) {
   router.get(
     {
       path: '/api/endpoint/endpoints/{id}',

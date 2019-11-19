@@ -6,7 +6,7 @@
 import { IRouter, KibanaResponseFactory, RequestHandlerContext } from 'kibana/server';
 import { httpServiceMock } from '../../../../../src/core/server/http/http_service.mock';
 import { httpServerMock } from '../../../../../src/core/server/http/http_server.mocks';
-import { registerEndpointsApi } from './endpoints';
+import { registerEndpointRoutes } from './endpoints';
 import { EndpointRequestContext } from '../handlers/endpoint_handler';
 
 describe('endpoints route test', () => {
@@ -26,7 +26,7 @@ describe('endpoints route test', () => {
     const endpointHandler: jest.Mocked<EndpointRequestContext> = {
       findEndpoint: jest.fn((endpointId: string) => ({ id: endpointId })),
     };
-    registerEndpointsApi(routerMock, endpointHandler);
+    registerEndpointRoutes(routerMock, endpointHandler);
     const [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/endpoints')
     );
@@ -45,7 +45,7 @@ describe('endpoints route test', () => {
     const endpointHandler: jest.Mocked<EndpointRequestContext> = {
       findLatestOfAllEndpoints: jest.fn(() => ({ id: 'all' })),
     };
-    registerEndpointsApi(routerMock, endpointHandler);
+    registerEndpointRoutes(routerMock, endpointHandler);
     const [routeConfig, routeHandler] = routerMock.get.mock.calls.find(
       ([{ path }]) => path === '/api/endpoint/endpoints'
     );

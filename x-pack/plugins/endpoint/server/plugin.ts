@@ -7,7 +7,7 @@
 import { Plugin, CoreSetup, Logger, PluginInitializerContext, IClusterClient } from 'kibana/server';
 import { managementRoutes } from './routes/management';
 import { alertsRoutes } from './routes/alerts';
-import { registerEndpointsApi } from './routes/endpoints';
+import { registerEndpointRoutes } from './routes/endpoints';
 import { EndpointHandler } from './handlers/endpoint_handler';
 import { EndpointRequestContext } from './handlers/endpoint_handler';
 
@@ -31,7 +31,7 @@ export class EndpointPlugin implements Plugin {
     const router = core.http.createRouter();
     managementRoutes(router);
     alertsRoutes(router);
-    registerEndpointsApi(router, endpointHandler);
+    registerEndpointRoutes(router, endpointHandler);
   }
 
   public start() {
