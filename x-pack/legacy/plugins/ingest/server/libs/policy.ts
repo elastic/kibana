@@ -114,20 +114,16 @@ export class PolicyLib {
     }
     const agentPolicy = {
       outputs: {
-        ...(await this.libs.outputs.getByIDs(
-          user,
-          this.outputIDsFromDatasources(policy.datasources)
-        )).reduce(
-          (outputs, { config, ...output }) => {
-            outputs[output.id] = {
-              ...output,
-              type: output.type as any,
-              ...config,
-            };
-            return outputs;
-          },
-          {} as AgentPolicy['outputs']
-        ),
+        ...(
+          await this.libs.outputs.getByIDs(user, this.outputIDsFromDatasources(policy.datasources))
+        ).reduce((outputs, { config, ...output }) => {
+          outputs[output.id] = {
+            ...output,
+            type: output.type as any,
+            ...config,
+          };
+          return outputs;
+        }, {} as AgentPolicy['outputs']),
       },
       streams: this.storedDatasourceToAgentStreams(policy.datasources),
     };
@@ -195,7 +191,7 @@ export class PolicyLib {
     }
 
     if (oldPolicy.status === Status.Inactive && policy.status !== Status.Active) {
-      throw new Error(`Policy ${id} can not be updated becuase it is ${oldPolicy.status}`);
+      throw new Error(`Policy ${id} can not be updated because it is ${oldPolicy.status}`);
     }
 
     return await this._update(user, id, { ...oldPolicy, ...policy });

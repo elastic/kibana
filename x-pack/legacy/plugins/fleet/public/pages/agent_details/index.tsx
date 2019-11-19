@@ -13,6 +13,7 @@ import { Loading } from '../../components/loading';
 import { AgentEventsTable } from './components/agent_events_table';
 import { AgentDetailSection } from './components/details_section';
 import { useGetAgent, AgentRefreshContext } from './hooks/use_agent';
+import { AGENT_POLLING_INTERVAL } from '../../../common/constants/agent';
 
 export const Layout: SFC = ({ children }) => (
   <EuiPageBody>
@@ -34,7 +35,7 @@ export const AgentDetailsPage: SFC<Props> = ({
 
   // Poll for agents on interval
   useInterval(() => {
-    if (new Date().getTime() - lastPolledAgentsMs >= 1000) {
+    if (new Date().getTime() - lastPolledAgentsMs >= AGENT_POLLING_INTERVAL) {
       setLastPolledAgentsMs(new Date().getTime());
       refreshAgent();
     }

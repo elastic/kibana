@@ -27,7 +27,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AGENT_POLLING_THRESHOLD_MS } from '../../../common/constants';
 import { Agent } from '../../../common/types/domain_data';
 import { AgentHealth } from '../../components/agent_health';
 import { AgentUnenrollProvider } from '../../components/agent_unenroll_provider';
@@ -37,13 +36,14 @@ import { SearchBar } from '../../components/search_bar';
 import { AgentEnrollmentFlyout } from './components/agent_enrollment';
 import { useLibs } from '../../hooks/use_libs';
 import { Policy } from '../../../scripts/mock_spec/types';
+import { AGENT_POLLING_INTERVAL } from '../../../common/constants/agent';
 
 export const AgentListPage: React.SFC<{}> = () => {
   const libs = useLibs();
   // Agent data states
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [agents, setAgents] = useState<Agent[]>([]);
-  const [isInitalLoad, setIsInitalLoad] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const [lastPolledAgentsMs, setLastPolledAgentsMs] = useState<number>(0);
   const [totalAgents, setTotalAgents] = useState<number>(0);
@@ -76,7 +76,9 @@ export const AgentListPage: React.SFC<{}> = () => {
 
   // Fetch agents method
   const fetchAgents = async () => {
-    if (isInitalLoad) setIsLoading(true);
+    if (isInitialLoad) {
+      setIsLoading(true);
+    }
     setLastPolledAgentsMs(new Date().getTime());
 
     // Build kuery from current search and policy filter states
@@ -100,7 +102,7 @@ export const AgentListPage: React.SFC<{}> = () => {
     setAgents(list);
     setTotalAgents(total);
     setIsLoading(false);
-    setIsInitalLoad(false);
+    setIsInitialLoad(false);
   };
 
   // Fetch policies method
@@ -125,7 +127,7 @@ export const AgentListPage: React.SFC<{}> = () => {
 
   // Poll for agents on interval
   useInterval(() => {
-    if (new Date().getTime() - lastPolledAgentsMs >= 1000) {
+    if (new Date().getTime() - lastPolledAgentsMs >= AGENT_POLLING_INTERVAL) {
       fetchAgents();
     }
   }, 1000);
@@ -186,7 +188,7 @@ export const AgentListPage: React.SFC<{}> = () => {
       }),
       truncateText: true,
       render: (policyId: string) =>
-        (policies.find(p => p.id === policyId) || ({} as Policy)).name || `Example Policy`,
+        (policies.find(p => p.id === policyId) || ({} as Policy)).name || `Policy: ${policyId}`,
     },
     {
       field: 'active',
