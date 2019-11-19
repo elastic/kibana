@@ -131,7 +131,7 @@ export const ActionsList: React.FunctionComponent = () => {
       name: i18n.translate(
         'xpack.alertingUI.sections.actionsList.actionsListTable.columns.descriptionTitle',
         {
-          defaultMessage: 'Title',
+          defaultMessage: 'Name',
         }
       ),
       sortable: false,
