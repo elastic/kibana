@@ -4,14 +4,66 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FullPolicyFile as BaseFullPolicyFile } from '../../../../ingest/server/libs/adapters/policy/adapter_types';
-
-export type FullPolicyFile = BaseFullPolicyFile;
-
+import * as t from 'io-ts';
+import { FrameworkUser } from '../../adapters/framework/adapter_types';
+import { Output, Policy } from '../../../../ingest/server/libs/adapters/policy/adapter_types';
 export interface IngestPlugin {
-  getFull(id: string): Promise<FullPolicyFile>;
+  getPolicyOutputByIDs(user: FrameworkUser, ids: string[]): Promise<Output[]>;
+  getPolicyById(user: FrameworkUser, id: string): Promise<Policy>;
 }
 
 export interface PoliciesRepository {
-  getFullPolicy(id: string): Promise<FullPolicyFile | null>;
+  getPolicyOutputByIDs(user: FrameworkUser, ids: string[]): Promise<Output[]>;
+  get(user: FrameworkUser, id: string): Promise<Policy | null>;
 }
+
+export const RuntimeAgentPolicy = t.interface({
+  outputs: t.record(
+    t.string,
+    t.intersection([
+      t.type({
+        id: t.string,
+        type: t.union([
+          t.literal('etc'),
+          t.literal('log'),
+          t.literal('metric/docker'),
+          t.literal('metric/system'),
+        ]),
+      }),
+      t.partial({
+        url: t.string,
+        api_token: t.string,
+        username: t.string,
+        pass: t.string,
+        index_name: t.string,
+        ingest_pipeline: t.string,
+      }),
+      t.UnknownRecord,
+    ])
+  ),
+  streams: t.array(
+    t.intersection([
+      t.type({
+        id: t.string,
+        type: t.union([t.literal('es'), t.literal('logstash')]),
+      }),
+      t.partial({
+        output: t.partial({
+          overide: t.partial({
+            url: t.string,
+            api_token: t.string,
+            username: t.string,
+            pass: t.string,
+            index_name: t.string,
+            ingest_pipeline: t.string,
+          }),
+          use_output: t.string,
+          index_name: t.string,
+        }),
+      }),
+      t.UnknownRecord,
+    ])
+  ),
+});
+
+export type AgentPolicy = t.TypeOf<typeof RuntimeAgentPolicy>;

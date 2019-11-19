@@ -10,7 +10,6 @@ import { ServerLibs } from './types';
 import * as elasticsearch from 'elasticsearch';
 import { FrameworkAuthenticatedUser } from './adapters/framework/adapter_types';
 import { INDEX_NAMES } from '../../common/constants/index_names';
-import { AssetType, InputType } from './adapters/policy/adapter_types';
 
 jest.mock('uuid/v4', () => {
   let uuid = 1;
@@ -155,57 +154,57 @@ describe('Policies Lib', () => {
     });
   });
 
-  describe('getWithAgentFormating', () => {
-    it('Should return a policy with all datasource, formatted for agent', async () => {
-      const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
+  // describe('getWithAgentFormating', () => {
+  //   it('Should return a policy with all datasource, formatted for agent', async () => {
+  //     const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
 
-      await libs.datasources.add(TestUser, {
-        name: 'prod_west',
-        package: {
-          name: 'coredns',
-          version: '1.0.1, 1.3.1',
-          description:
-            'CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n',
-          title: 'CoreDNS',
-          assets: [{ id: 'string', type: AssetType.IndexTemplate }],
-        },
-        streams: [
-          {
-            id: 'string',
-            input: {
-              type: InputType.Etc,
-              config: { paths: '/var/log/*.log' },
-              ingest_pipelines: ['string'],
-              id: 'string',
-              index_template: 'string',
-              ilm_policy: 'string',
-              fields: [{}],
-            },
-            config: { metricsets: ['container', 'cpu'] },
-            output_id: 'default',
-            processors: ['string'],
-          },
-        ],
-        id: 'foo-bar',
-        read_alias: 'string',
-      });
+  //     await libs.datasources.add(TestUser, {
+  //       name: 'prod_west',
+  //       package: {
+  //         name: 'coredns',
+  //         version: '1.0.1, 1.3.1',
+  //         description:
+  //           'CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n',
+  //         title: 'CoreDNS',
+  //         assets: [{ id: 'string', type: AssetType.IndexTemplate }],
+  //       },
+  //       streams: [
+  //         {
+  //           id: 'string',
+  //           input: {
+  //             type: InputType.Etc,
+  //             config: { paths: '/var/log/*.log' },
+  //             ingest_pipelines: ['string'],
+  //             id: 'string',
+  //             index_template: 'string',
+  //             ilm_policy: 'string',
+  //             fields: [{}],
+  //           },
+  //           config: { metricsets: ['container', 'cpu'] },
+  //           output_id: 'default',
+  //           processors: ['string'],
+  //         },
+  //       ],
+  //       id: 'foo-bar',
+  //       read_alias: 'string',
+  //     });
 
-      const updatedPolicyInfo = await libs.policy.assignDatasource(
-        TestUser,
-        newPolicy.id as string,
-        ['foo-bar']
-      );
+  //     const updatedPolicyInfo = await libs.policy.assignDatasource(
+  //       TestUser,
+  //       newPolicy.id as string,
+  //       ['foo-bar']
+  //     );
 
-      const fullPolicy = await libs.policy.getWithAgentFormating(
-        TestUser,
-        updatedPolicyInfo.id as string
-      );
+  //     const fullPolicy = await libs.policy.getWithAgentFormating(
+  //       TestUser,
+  //       updatedPolicyInfo.id as string
+  //     );
 
-      expect(fullPolicy?.streams.length).toBe(1);
-      expect(fullPolicy?.streams[0].id).toBe('string');
-      expect(fullPolicy).toMatchSnapshot();
-    });
-  });
+  //     expect(fullPolicy?.streams.length).toBe(1);
+  //     expect(fullPolicy?.streams[0].id).toBe('string');
+  //     expect(fullPolicy).toMatchSnapshot();
+  //   });
+  // });
 
   describe.skip('update / change hooks', () => {});
 });

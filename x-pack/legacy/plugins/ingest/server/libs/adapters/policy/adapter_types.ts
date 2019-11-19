@@ -156,57 +156,6 @@ export enum Status {
   Inactive = 'inactive',
 }
 
-export const RuntimeAgentPolicy = t.interface({
-  outputs: t.record(
-    t.string,
-    t.intersection([
-      t.type({
-        id: t.string,
-        type: t.union([
-          t.literal('etc'),
-          t.literal('log'),
-          t.literal('metric/docker'),
-          t.literal('metric/system'),
-        ]),
-      }),
-      t.partial({
-        url: t.string,
-        api_token: t.string,
-        username: t.string,
-        pass: t.string,
-        index_name: t.string,
-        ingest_pipeline: t.string,
-      }),
-      t.UnknownRecord,
-    ])
-  ),
-  streams: t.array(
-    t.intersection([
-      t.type({
-        id: t.string,
-        type: t.union([t.literal('es'), t.literal('logstash')]),
-      }),
-      t.partial({
-        output: t.partial({
-          overide: t.partial({
-            url: t.string,
-            api_token: t.string,
-            username: t.string,
-            pass: t.string,
-            index_name: t.string,
-            ingest_pipeline: t.string,
-          }),
-          use_output: t.string,
-          index_name: t.string,
-        }),
-      }),
-      t.UnknownRecord,
-    ])
-  ),
-});
-
-export type AgentPolicy = t.TypeOf<typeof RuntimeAgentPolicy>;
-
 export const exampleStoredPolicy: Policy = {
   id: 'policy_example',
   name: 'Example Policy',

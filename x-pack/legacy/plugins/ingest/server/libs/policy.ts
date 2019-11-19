@@ -5,15 +5,10 @@
  */
 
 import { unique, flatten } from 'lodash';
+import EventEmitter from 'events';
 import { PolicyAdapter } from './adapters/policy/default';
 import { BackendFrameworkLib } from './framework';
-import {
-  Policy,
-  AgentPolicy,
-  Datasource,
-  Status,
-  StoredPolicy,
-} from './adapters/policy/adapter_types';
+import { Policy, Datasource, Status, StoredPolicy } from './adapters/policy/adapter_types';
 import { FrameworkAuthenticatedUser, FrameworkUser } from './adapters/framework/adapter_types';
 import { DEFAULT_POLICY_ID } from '../../common/constants';
 import { OutputsLib } from './outputs';
@@ -21,6 +16,7 @@ import { DatasourcesLib } from './datasources';
 import { ReturnTypeBulkDelete } from '../../../../../../data/.update_prs/x-pack/legacy/plugins/fleet/common/types/std_return_format';
 
 export class PolicyLib {
+  public events: EventEmitter = new EventEmitter();
   constructor(
     private readonly adapter: PolicyAdapter,
     private readonly libs: {
@@ -29,30 +25,6 @@ export class PolicyLib {
       datasources: DatasourcesLib;
     }
   ) {}
-
-  private storedDatasourceToAgentStreams(datasources: Datasource[] = []): AgentPolicy['streams'] {
-    return flatten(
-      datasources.map((ds: Datasource) => {
-        return ds.streams.map(stream => ({
-          ...stream.config,
-          id: stream.id,
-          type: stream.input.type as any,
-          output: { use_output: stream.output_id },
-          ...(stream.config || {}),
-        }));
-      })
-    );
-  }
-
-  private outputIDsFromDatasources(datasources: Datasource[] = []): string[] {
-    return unique(
-      flatten(
-        datasources.map((ds: Datasource) => {
-          return ds.streams.map(stream => stream.output_id);
-        })
-      )
-    ) as string[];
-  }
 
   public async create(
     withUser: FrameworkAuthenticatedUser,
@@ -106,30 +78,6 @@ export class PolicyLib {
       ...policy,
       datasources: await this.libs.datasources.getByIDs(user, policy.datasources || []),
     } as Policy;
-  }
-
-  public async getWithAgentFormating(user: FrameworkUser, id: string): Promise<AgentPolicy | null> {
-    const policy = await this.get(user, id);
-    if (!policy) {
-      return null;
-    }
-    const agentPolicy = {
-      outputs: {
-        ...(
-          await this.libs.outputs.getByIDs(user, this.outputIDsFromDatasources(policy.datasources))
-        ).reduce((outputs, { config, ...output }) => {
-          outputs[output.id] = {
-            ...output,
-            type: output.type as any,
-            ...config,
-          };
-          return outputs;
-        }, {} as AgentPolicy['outputs']),
-      },
-      streams: this.storedDatasourceToAgentStreams(policy.datasources),
-    };
-
-    return agentPolicy;
   }
 
   public async list(
