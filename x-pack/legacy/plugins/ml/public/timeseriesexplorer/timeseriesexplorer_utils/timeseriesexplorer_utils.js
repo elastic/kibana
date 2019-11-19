@@ -16,30 +16,16 @@ import _ from 'lodash';
 import moment from 'moment-timezone';
 
 import {
-  ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-  ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
-} from '../../common/constants/search';
-import {
   isTimeSeriesViewJob,
-  mlFunctionToESAggregation,
-} from '../../common/util/job_utils';
-import { parseInterval } from '../../common/util/parse_interval';
+} from '../../../common/util/job_utils';
+import { parseInterval } from '../../../common/util/parse_interval';
 
-import { ml } from '../services/ml_api_service';
-import { mlForecastService } from '../services/forecast_service';
-import { mlResultsService } from '../services/results_service';
-import { TimeBuckets, getBoundsRoundedToInterval } from '../util/time_buckets';
-
-import { mlTimeSeriesSearchService } from './timeseries_search_service';
+import { TimeBuckets, getBoundsRoundedToInterval } from '../../util/time_buckets';
 
 import {
   CHARTS_POINT_TARGET,
-  MAX_SCHEDULED_EVENTS,
   TIME_FIELD_NAME,
-} from './timeseriesexplorer_constants';
-
-import chrome from 'ui/chrome';
-const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
+} from '../timeseriesexplorer_constants';
 
 // create new job objects based on standard job config objects
 // new job objects just contain job id, bucket span in seconds and a selected flag.
@@ -300,154 +286,6 @@ export function findChartPointForAnomalyTime(chartData, anomalyTime, aggregation
 
   return chartPoint;
 }
-
-export const getFocusData = function (
-  criteriaFields,
-  detectorIndex,
-  focusAggregationInterval,
-  forecastId,
-  modelPlotEnabled,
-  nonBlankEntities,
-  searchBounds,
-  selectedJob,
-) {
-  return new Promise((resolve, reject) => {
-    // Counter to keep track of the queries to populate the chart.
-    let awaitingCount = 4;
-
-    // This object is used to store the results of individual remote requests
-    // before we transform it into the final data and apply it to $scope. Otherwise
-    // we might trigger multiple $digest cycles and depending on how deep $watches
-    // listen for changes we could miss updates.
-    const refreshFocusData = {};
-
-    // finish() function, called after each data set has been loaded and processed.
-    // The last one to call it will trigger the page render.
-    function finish() {
-      awaitingCount--;
-      if (awaitingCount === 0) {
-        // Tell the results container directives to render the focus chart.
-        refreshFocusData.focusChartData = processDataForFocusAnomalies(
-          refreshFocusData.focusChartData,
-          refreshFocusData.anomalyRecords,
-          focusAggregationInterval,
-          modelPlotEnabled,
-        );
-
-        refreshFocusData.focusChartData = processScheduledEventsForChart(
-          refreshFocusData.focusChartData,
-          refreshFocusData.scheduledEvents);
-
-        resolve(refreshFocusData);
-      }
-    }
-
-    // Query 1 - load metric data across selected time range.
-    mlTimeSeriesSearchService.getMetricData(
-      selectedJob,
-      detectorIndex,
-      nonBlankEntities,
-      searchBounds.min.valueOf(),
-      searchBounds.max.valueOf(),
-      focusAggregationInterval.expression
-    ).then((resp) => {
-      refreshFocusData.focusChartData = processMetricPlotResults(resp.results, modelPlotEnabled);
-      finish();
-    }).catch((resp) => {
-      console.log('Time series explorer - error getting metric data from elasticsearch:', resp);
-      reject();
-    });
-
-    // Query 2 - load all the records across selected time range for the chart anomaly markers.
-    mlResultsService.getRecordsForCriteria(
-      [selectedJob.job_id],
-      criteriaFields,
-      0,
-      searchBounds.min.valueOf(),
-      searchBounds.max.valueOf(),
-      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
-    ).then((resp) => {
-      // Sort in descending time order before storing in scope.
-      refreshFocusData.anomalyRecords = _.chain(resp.records)
-        .sortBy(record => record[TIME_FIELD_NAME])
-        .reverse()
-        .value();
-      finish();
-    });
-
-    // Query 3 - load any scheduled events for the selected job.
-    mlResultsService.getScheduledEventsByBucket(
-      [selectedJob.job_id],
-      searchBounds.min.valueOf(),
-      searchBounds.max.valueOf(),
-      focusAggregationInterval.expression,
-      1,
-      MAX_SCHEDULED_EVENTS
-    ).then((resp) => {
-      refreshFocusData.scheduledEvents = resp.events[selectedJob.job_id];
-      finish();
-    }).catch((resp) => {
-      console.log('Time series explorer - error getting scheduled events from elasticsearch:', resp);
-      reject();
-    });
-
-    // Query 4 - load any annotations for the selected job.
-    if (mlAnnotationsEnabled) {
-      ml.annotations.getAnnotations({
-        jobIds: [selectedJob.job_id],
-        earliestMs: searchBounds.min.valueOf(),
-        latestMs: searchBounds.max.valueOf(),
-        maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
-      }).then((resp) => {
-        refreshFocusData.focusAnnotationData = resp.annotations[selectedJob.job_id]
-          .sort((a, b) => {
-            return a.timestamp - b.timestamp;
-          })
-          .map((d, i) => {
-            d.key = String.fromCharCode(65 + i);
-            return d;
-          });
-
-        finish();
-      }).catch(() => {
-        // silent fail
-        refreshFocusData.focusAnnotationData = [];
-        finish();
-      });
-    } else {
-      finish();
-    }
-
-    // Plus query for forecast data if there is a forecastId stored in the appState.
-    if (forecastId !== undefined) {
-      awaitingCount++;
-      let aggType = undefined;
-      const detector = selectedJob.analysis_config.detectors[detectorIndex];
-      const esAgg = mlFunctionToESAggregation(detector.function);
-      if (modelPlotEnabled === false && (esAgg === 'sum' || esAgg === 'count')) {
-        aggType = { avg: 'sum', max: 'sum', min: 'sum' };
-      }
-
-      mlForecastService.getForecastData(
-        selectedJob,
-        detectorIndex,
-        forecastId,
-        nonBlankEntities,
-        searchBounds.min.valueOf(),
-        searchBounds.max.valueOf(),
-        focusAggregationInterval.expression,
-        aggType)
-        .then((resp) => {
-          refreshFocusData.focusForecastData = processForecastResults(resp.results);
-          refreshFocusData.showForecastCheckbox = (refreshFocusData.focusForecastData.length > 0);
-          finish();
-        }).catch((resp) => {
-          console.log(`Time series explorer - error loading data for forecast ID ${forecastId}`, resp);
-          reject();
-        });
-    }
-  });
-};
 
 export function calculateAggregationInterval(
   bounds,

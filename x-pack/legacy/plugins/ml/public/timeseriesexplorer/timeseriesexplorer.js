@@ -82,9 +82,7 @@ import {
   processForecastResults,
   processMetricPlotResults,
   processRecordScoreResults,
-} from './timeseriesexplorer_utils';
-
-import { getFocusData } from './resolvers';
+  getFocusData } from './timeseriesexplorer_utils';
 
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 

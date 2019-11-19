@@ -5,27 +5,27 @@
  */
 
 import { forkJoin, Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import chrome from 'ui/chrome';
-import { ml } from '../services/ml_api_service';
+import { ml } from '../../services/ml_api_service';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
-} from '../../common/constants/search';
-import { mlTimeSeriesSearchService } from './timeseries_search_service';
-import { mlResultsServiceRx } from '../services/result_service_rx';
-import { Job } from '../jobs/new_job/common/job_creator/configs';
-import { MAX_SCHEDULED_EVENTS, TIME_FIELD_NAME } from './timeseriesexplorer_constants';
-// @ts-ignore
+} from '../../../common/constants/search';
+import { mlTimeSeriesSearchService } from '../timeseries_search_service';
+import { mlResultsServiceRx } from '../../services/result_service_rx';
+import { Job } from '../../jobs/new_job/common/job_creator/configs';
+import { MAX_SCHEDULED_EVENTS, TIME_FIELD_NAME } from '../timeseriesexplorer_constants';
 import {
   processMetricPlotResults,
   processDataForFocusAnomalies,
   processScheduledEventsForChart,
   processForecastResults,
 } from './timeseriesexplorer_utils';
-import { CriteriaField } from '../services/results_service';
-import { mlForecastService } from '../services/forecast_service';
-import { mlFunctionToESAggregation } from '../../common/util/job_utils';
+import { CriteriaField } from '../../services/results_service';
+import { mlForecastService } from '../../services/forecast_service';
+import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
+import { Annotation } from '../../../common/types/annotations';
 
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
@@ -83,12 +83,19 @@ export function getFocusData(
     ),
     // Query 4 - load any annotations for the selected job.
     mlAnnotationsEnabled
-      ? ml.annotations.getAnnotationsRx({
-          jobIds: [selectedJob.job_id],
-          earliestMs: searchBounds.min.valueOf(),
-          latestMs: searchBounds.max.valueOf(),
-          maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-        })
+      ? ml.annotations
+          .getAnnotationsRx({
+            jobIds: [selectedJob.job_id],
+            earliestMs: searchBounds.min.valueOf(),
+            latestMs: searchBounds.max.valueOf(),
+            maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+          })
+          .pipe(
+            catchError(() => {
+              // silent fail
+              return of({ annotations: {} as Record<string, Annotation[]> });
+            })
+          )
       : of(null),
     // Plus query for forecast data if there is a forecastId stored in the appState.
     forecastId !== undefined
@@ -96,7 +103,7 @@ export function getFocusData(
           let aggType;
           const detector = selectedJob.analysis_config.detectors[detectorIndex];
           const esAgg = mlFunctionToESAggregation(detector.function);
-          if (modelPlotEnabled === false && (esAgg === 'sum' || esAgg === 'count')) {
+          if (!modelPlotEnabled && (esAgg === 'sum' || esAgg === 'count')) {
             aggType = { avg: 'sum', max: 'sum', min: 'sum' };
           }
           return mlForecastService.getForecastData(
