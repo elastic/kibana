@@ -108,7 +108,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should have `drop partial buckets` option', async () => {
-      const fromTime = 'Sep 20. 2015 @ 06:31:44.000';
+      const fromTime = 'Sep 20, 2015 @ 06:31:44.000';
       const toTime = 'Sep 22, 2015 @ 18:31:44.000';
 
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);

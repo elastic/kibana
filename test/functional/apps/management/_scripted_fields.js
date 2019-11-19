@@ -327,7 +327,7 @@ export default function ({ getService, getPageObjects }) {
       it('should filter by scripted field value in Discover', async function () {
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await log.debug('filter by "Sep 17, 2015 @ 23:00" in the expanded scripted field list');
-        await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'Sep 17, 2015 @ 23:00');
+        await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, '2015-09-17 23:00');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {
