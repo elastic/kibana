@@ -25,6 +25,9 @@ const app = uiModules.get('apps/dashboard');
 
 app.directive('dashboardEmptyScreen', function(reactDirective: any) {
   return reactDirective(wrapInI18nContext(DashboardEmptyScreen), [
-    ['value', { watchDepth: 'value' }],
+    ['showLinkToVisualize', { watchDepth: 'value' }],
+    ['onLinkClick', { watchDepth: 'reference' }],
+    ['messageTokens', { watchDepth: 'value' }],
+    ['messageDefaults', { watchDepth: 'value' }],
   ]);
 });

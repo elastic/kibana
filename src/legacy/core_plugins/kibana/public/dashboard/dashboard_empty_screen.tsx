@@ -18,15 +18,62 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiIcon, EuiI18n, EuiLink } from '@elastic/eui';
 
-export function DashboardEmptyScreen({}) {
+export interface Props {
+  showIcon: boolean;
+  showLinkToVisualize: boolean;
+  onLinkClick: () => void;
+  messageTokens: string[];
+  messageDefaults: string[];
+}
+export function DashboardEmptyScreen({
+  showLinkToVisualize,
+  onLinkClick,
+  messageTokens,
+  messageDefaults,
+}: Props) {
+  const visualizeAppLinkTest = i18n.translate('kbn.dashboard.visitVisualizeAppLinkText', {
+    defaultMessage: 'visit the Visualize app',
+  });
+  const visualizeAppLink = "<a class='euiLink' href='#/visualize'>" + visualizeAppLinkTest + '</a>';
+  const addVisualizationDescription = i18n.translate('kbn.dashboard.addVisualizationDescription3', {
+    defaultMessage:
+      "If you haven't set up any visualizations yet, {visualizeAppLink} to create your first visualization",
+    values: { visualizeAppLink },
+  });
+  const linkToVisualizeParagraph = (
+    <p>
+      {/* eslint-disable-next-line react/no-danger */}
+      <span dangerouslySetInnerHTML={{ __html: addVisualizationDescription }} />
+    </p>
+  );
+  const fillDashboardTitle = i18n.translate('kbn.dashboard.fillDashboardTitle', {
+    defaultMessage: 'This dashboard is empty. Let\u2019s fill it up!',
+  });
+  const addVisualizationLinkTestSubject = 'emptyDashboardAddPanelButton';
   return (
     <React.Fragment>
-      <h2>
-        {i18n.translate('kbn.dashboard.fillDashboardTitle', {
-          defaultMessage: 'This dashboard is empty. Let\u2019s fill it up!',
-        })}
-      </h2>
+      <EuiIcon type="dashboardApp" size="xxl" color="subdued" />
+      <h2>{fillDashboardTitle}</h2>
+      <p>
+        <EuiI18n tokens={messageTokens} defaults={messageDefaults}>
+          {([description1, description2, label, ariaLabel]: string[]) => (
+            <span>
+              {description1}
+              <EuiLink
+                onClick={onLinkClick}
+                aria-label={ariaLabel}
+                data-test-subj={showLinkToVisualize ? addVisualizationLinkTestSubject : ''}
+              >
+                {label}
+              </EuiLink>
+              {description2}
+            </span>
+          )}
+        </EuiI18n>
+      </p>
+      {showLinkToVisualize ? linkToVisualizeParagraph : null}
     </React.Fragment>
   );
 }
