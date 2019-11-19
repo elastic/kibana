@@ -21,6 +21,8 @@ export const findSignals = async ({
   page,
   fields,
   filter,
+  sortField,
+  sortOrder,
 }: FindSignalParams) => {
   return alertsClient.find({
     options: {
@@ -28,6 +30,8 @@ export const findSignals = async ({
       page,
       perPage,
       filter: getFilter(filter),
+      sortOrder,
+      sortField,
     },
   });
 };

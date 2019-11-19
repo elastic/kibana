@@ -70,7 +70,9 @@ export interface FindParamsRest {
   per_page: number;
   page: number;
   sort_field: string;
+  sort_order: 'asc' | 'desc';
   fields: string[];
+  filter: string;
 }
 
 export interface Clients {
@@ -97,6 +99,7 @@ export interface FindSignalsRequest extends Omit<RequestFacade, 'query'> {
     sort_field?: string;
     filter?: string;
     fields?: string[];
+    sort_order?: 'asc' | 'desc';
   };
 }
 
@@ -107,6 +110,7 @@ export interface FindSignalParams {
   sortField?: string;
   filter?: string;
   fields?: string[];
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface ReadSignalParams {
