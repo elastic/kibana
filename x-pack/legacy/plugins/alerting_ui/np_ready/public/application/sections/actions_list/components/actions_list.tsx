@@ -227,27 +227,34 @@ export const ActionsList: React.FunctionComponent = () => {
                     .sort((a, b) => a.name.localeCompare(b.name)),
                 },
               ],
+              toolsLeft:
+                selectedItems.length === 0 || !canDelete
+                  ? []
+                  : [
+                      <EuiButton
+                        key="delete"
+                        iconType="trash"
+                        color="danger"
+                        onClick={deleteSelectedItems}
+                        title={
+                          canDelete
+                            ? undefined
+                            : i18n.translate(
+                                'xpack.alertingUI.sections.actionsList.buttons.deleteDisabledTitle',
+                                { defaultMessage: 'Unable to delete actions' }
+                              )
+                        }
+                      >
+                        <FormattedMessage
+                          id="xpack.alertingUI.sections.actionsList.buttons.deleteLabel"
+                          defaultMessage="Delete ({count})"
+                          values={{
+                            count: selectedItems.length,
+                          }}
+                        />
+                      </EuiButton>,
+                    ],
               toolsRight: [
-                <EuiButton
-                  key="delete"
-                  iconType="trash"
-                  color="danger"
-                  isDisabled={selectedItems.length === 0 || !canDelete}
-                  onClick={deleteSelectedItems}
-                  title={
-                    canDelete
-                      ? undefined
-                      : i18n.translate(
-                          'xpack.alertingUI.sections.actionsList.buttons.deleteDisabledTitle',
-                          { defaultMessage: 'Unable to delete actions' }
-                        )
-                  }
-                >
-                  <FormattedMessage
-                    id="xpack.alertingUI.sections.actionsList.buttons.deleteLabel"
-                    defaultMessage="Delete"
-                  />
-                </EuiButton>,
                 <EuiButton
                   data-test-subj="createActionButton"
                   key="create-action"
