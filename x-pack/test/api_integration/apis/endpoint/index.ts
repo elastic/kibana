@@ -8,7 +8,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function endpointAPIIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('Endpoint', function() {
-    this.tags('ciGroup7');
     loadTestFile(require.resolve('./resolver'));
   });
 }
