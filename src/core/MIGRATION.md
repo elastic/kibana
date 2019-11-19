@@ -323,7 +323,34 @@ Below you can find their new locations:
 
 | Service | Old place                                    | New place in the NP                                             |
 | --------------- | ----------------------------------------- | --------------------------------------------------- |
-| *field_formats*         | ui/registry/field_formats      | plugins/data/public |
+| *FieldFormats*         | ui/registry/field_formats      | plugins/data/public |
+
+The `FieldFormats` service has been moved to the `data` plugin in the New Platform. If your plugin has any imports from `ui/registry/field_formats`, you'll need to update your imports as follows:
+
+Use it in your New Platform plugin:
+
+```ts
+class MyPlugin {
+  setup (core, { data }) {
+    data.fieldFormats.register(myFieldFormat);
+    // ...
+  }
+  start (core, { data }) {
+    data.fieldFormats.getType(myFieldFormatId);
+    // ...
+  }
+}
+```
+
+Or, in your legacy platform plugin, consume it through the `ui/new_platform` module:
+
+```ts
+import { npSetup, npStart } from 'ui/new_platform';
+
+npSetup.plugins.data.fieldFormats.register(myFieldFormat);
+npStart.plugins.data.fieldFormats.getType(myFieldFormatId);
+// ...
+```
 
 ## Server-side plan of action
 
