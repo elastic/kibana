@@ -21,6 +21,7 @@ import 'uiExports/savedObjectTypes';
 import 'uiExports/spyModes';
 import 'uiExports/fieldFormats';
 import 'uiExports/embeddableFactories';
+import 'uiExports/interpreter';
 
 // load application code
 import './lib/load_expression_types';
