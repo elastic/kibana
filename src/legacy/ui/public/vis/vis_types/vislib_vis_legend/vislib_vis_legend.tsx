@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, useEffect, BaseSyntheticEvent, KeyboardEvent, memo } from 'react';
+import React, { BaseSyntheticEvent, KeyboardEvent, PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { compact, uniq, map } from 'lodash';
@@ -32,66 +32,84 @@ import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './vislib_vis_legend_item';
 import { getTableAggs } from '../../../visualize/loader/pipeline_helpers/utilities';
 
-export interface VisLegendComponentProps {
+export interface VisLegendProps {
   vis: any;
+  vislibVis: any;
   visData: any;
   uiState: any;
-  refreshLegend: number;
 }
 
-let getColor: (label: string) => string;
+export interface VisLegendState {
+  open: boolean;
+  labels: any[];
+  tableAggs: any[];
+  selectedLabel: string | null;
+}
 
-const VisLegendComponent = ({ vis, visData, uiState, refreshLegend }: VisLegendComponentProps) => {
-  const [open, setOpen] = useState(uiState.get('vis.legendOpen', true));
-  const [labels, setLabels] = useState<any[]>([]);
-  const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
-  const [tableAggs, setTableAggs] = useState<any[]>([]);
-  const legendId = htmlIdGenerator()('legend');
+export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
+  static propTypes = {
+    vis: PropTypes.object,
+    visData: PropTypes.object,
+    uiState: PropTypes.object,
+  };
 
-  useEffect(() => {
-    if (visData) {
-      refresh();
-    }
-  }, [refreshLegend]);
+  legendId = htmlIdGenerator()('legend');
+  getColor: (label: string) => string = () => '';
 
-  const toggleLegend = () => {
-    const bwcAddLegend = vis.params.addLegend;
+  constructor(props: VisLegendProps) {
+    super(props);
+    const open = props.uiState.get('vis.legendOpen', true);
+
+    this.state = {
+      open,
+      labels: [],
+      tableAggs: [],
+      selectedLabel: null,
+    };
+  }
+
+  componentDidMount() {
+    this.refresh();
+  }
+
+  toggleLegend = () => {
+    const bwcAddLegend = this.props.vis.params.addLegend;
     const bwcLegendStateDefault = bwcAddLegend == null ? true : bwcAddLegend;
-    const newOpen = !uiState.get('vis.legendOpen', bwcLegendStateDefault);
-    setOpen(newOpen);
+    const newOpen = !this.props.uiState.get('vis.legendOpen', bwcLegendStateDefault);
+    this.setState({ open: newOpen });
     // open should be applied on template before we update uiState
     setTimeout(() => {
-      uiState.set('vis.legendOpen', newOpen);
+      this.props.uiState.set('vis.legendOpen', newOpen);
     });
   };
 
-  const setColor = (label: string, color: string) => (event: BaseSyntheticEvent) => {
+  setColor = (label: string, color: string) => (event: BaseSyntheticEvent) => {
     if ((event as KeyboardEvent).keyCode && (event as KeyboardEvent).keyCode !== keyCodes.ENTER) {
       return;
     }
 
-    const colors = uiState.get('vis.colors') || {};
+    const colors = this.props.uiState.get('vis.colors') || {};
     if (colors[label] === color) delete colors[label];
     else colors[label] = color;
-    uiState.setSilent('vis.colors', null);
-    uiState.set('vis.colors', colors);
-    uiState.emit('colorChanged');
-    refresh();
+    this.props.uiState.setSilent('vis.colors', null);
+    this.props.uiState.set('vis.colors', colors);
+    this.props.uiState.emit('colorChanged');
+    this.refresh();
   };
 
-  const filter = ({ values: data }: LegendItem, negate: boolean) => () => {
-    vis.API.events.filter({ data, negate });
+  filter = ({ values: data }: LegendItem, negate: boolean) => () => {
+    this.props.vis.API.events.filter({ data, negate });
   };
 
-  const canFilter = (item: LegendItem): boolean => {
-    if (CUSTOM_LEGEND_VIS_TYPES.includes(vis.vislibVis.visConfigArgs.type)) {
+  canFilter = (item: LegendItem): boolean => {
+    if (CUSTOM_LEGEND_VIS_TYPES.includes(this.props.vislibVis.visConfigArgs.type)) {
       return false;
     }
-    const filters = createFiltersFromEvent({ aggConfigs: tableAggs, data: item.values });
+    const filters = createFiltersFromEvent({ aggConfigs: this.state.tableAggs, data: item.values });
     return Boolean(filters.length);
   };
 
-  const toggleDetails = (label: string | null) => (event?: BaseSyntheticEvent) => {
+  toggleDetails = (label: string | null) => (event?: BaseSyntheticEvent) => {
     if (
       event &&
       (event as KeyboardEvent).keyCode &&
@@ -99,68 +117,73 @@ const VisLegendComponent = ({ vis, visData, uiState, refreshLegend }: VisLegendC
     ) {
       return;
     }
-    setSelectedLabel(selectedLabel === label ? null : label);
+    this.setState({ selectedLabel: this.state.selectedLabel === label ? null : label });
   };
 
-  function getSeriesLabels(data: any[]) {
+  getSeriesLabels = (data: any[]) => {
     const values = data.map(chart => chart.series).reduce((a, b) => a.concat(b), []);
 
     return compact(uniq(values, 'label')).map((label: any) => ({
       ...label,
       values: [label.values[0].seriesRaw],
     }));
-  }
+  };
 
   // Most of these functions were moved directly from the old Legend class. Not a fan of this.
-  const getLabels = (data: any, type: string) => {
+  getLabels = (data: any, type: string) => {
     if (!data) return [];
     data = data.columns || data.rows || [data];
 
     if (type === 'pie') return Data.prototype.pieNames(data);
 
-    return getSeriesLabels(data);
+    return this.getSeriesLabels(data);
   };
 
-  const refresh = () => {
-    const vislibVis = vis.vislibVis;
+  refresh = () => {
+    const vislibVis = this.props.vislibVis;
     if (!vislibVis || !vislibVis.visConfig) {
-      setLabels([
-        {
-          label: i18n.translate('common.ui.vis.visTypes.legend.loadingLabel', {
-            defaultMessage: 'loading…',
-          }),
-        },
-      ]);
+      this.setState({
+        labels: [
+          {
+            label: i18n.translate('common.ui.vis.visTypes.legend.loadingLabel', {
+              defaultMessage: 'loading…',
+            }),
+          },
+        ],
+      });
       return;
     } // make sure vislib is defined at this point
 
-    if (uiState.get('vis.legendOpen') == null && vis.params.addLegend != null) {
-      setOpen(vis.params.addLegend);
+    if (
+      this.props.uiState.get('vis.legendOpen') == null &&
+      this.props.vis.params.addLegend != null
+    ) {
+      this.setState({ open: this.props.vis.params.addLegend });
     }
 
     if (CUSTOM_LEGEND_VIS_TYPES.includes(vislibVis.visConfigArgs.type)) {
-      const legendLabels = vislibVis.getLegendLabels();
+      const legendLabels = this.props.vislibVis.getLegendLabels();
       if (legendLabels) {
-        setLabels(
-          map(legendLabels, label => {
+        this.setState({
+          labels: map(legendLabels, label => {
             return { label };
-          })
-        );
+          }),
+        });
       }
     } else {
-      setLabels(getLabels(visData, vislibVis.visConfigArgs.type));
+      this.setState({ labels: this.getLabels(this.props.visData, vislibVis.visConfigArgs.type) });
     }
 
     if (vislibVis.visConfig) {
-      getColor = vislibVis.visConfig.data.getColorFunc();
+      this.getColor = this.props.vislibVis.visConfig.data.getColorFunc();
     }
 
-    setTableAggs(getTableAggs(vis));
+    this.setState({ tableAggs: getTableAggs(this.props.vis) });
   };
 
-  const highlight = (event: BaseSyntheticEvent) => {
+  highlight = (event: BaseSyntheticEvent) => {
     const el = event.currentTarget;
-    const handler = vis.vislibVis && vis.vislibVis.handler;
+    const handler = this.props.vislibVis && this.props.vislibVis.handler;
 
     // there is no guarantee that a Chart will set the highlight-function on its handler
     if (!handler || typeof handler.highlight !== 'function') {
@@ -169,9 +192,10 @@ const VisLegendComponent = ({ vis, visData, uiState, refreshLegend }: VisLegendC
     handler.highlight.call(el, handler.el);
   };
 
-  const unhighlight = (event: BaseSyntheticEvent) => {
+  unhighlight = (event: BaseSyntheticEvent) => {
     const el = event.currentTarget;
-    const handler = vis.vislibVis && vis.vislibVis.handler;
+    const handler = this.props.vislibVis && this.props.vislibVis.handler;
+
     // there is no guarantee that a Chart will set the unhighlight-function on its handler
     if (!handler || typeof handler.unHighlight !== 'function') {
       return;
@@ -179,61 +203,51 @@ const VisLegendComponent = ({ vis, visData, uiState, refreshLegend }: VisLegendC
     handler.unHighlight.call(el, handler.el);
   };
 
-  const renderLegend = () => (
-    <ul className="visLegend__list" id={legendId}>
-      {labels.map(item => (
+  renderLegend = () => (
+    <ul className="visLegend__list" id={this.legendId}>
+      {this.state.labels.map(item => (
         <VisLegendItem
           item={item}
           key={item.label}
-          selected={selectedLabel === item.label}
-          canFilter={canFilter(item)}
-          onFilter={filter}
-          onSelect={toggleDetails}
-          legendId={legendId}
-          setColor={setColor}
-          getColor={getColor}
-          onHighlight={highlight}
-          onUnhighlight={unhighlight}
+          selected={this.state.selectedLabel === item.label}
+          canFilter={this.canFilter(item)}
+          onFilter={this.filter}
+          onSelect={this.toggleDetails}
+          legendId={this.legendId}
+          setColor={this.setColor}
+          getColor={this.getColor}
+          onHighlight={this.highlight}
+          onUnhighlight={this.unhighlight}
         />
       ))}
     </ul>
   );
 
-  return (
-    <div className="visLegend">
-      <button
-        type="button"
-        onClick={toggleLegend}
-        className={classNames([
-          'kuiCollapseButton visLegend__toggle',
-          { 'visLegend__toggle--isOpen': open },
-        ])}
-        aria-label={i18n.translate('common.ui.vis.visTypes.legend.toggleLegendButtonAriaLabel', {
-          defaultMessage: 'Toggle legend',
-        })}
-        aria-expanded={Boolean(open)}
-        aria-controls={legendId}
-        data-test-subj="vislibToggleLegend"
-        title={i18n.translate('common.ui.vis.visTypes.legend.toggleLegendButtonTitle', {
-          defaultMessage: 'Toggle legend',
-        })}
-      >
-        <EuiIcon type="list" />
-      </button>
-      {open && renderLegend()}
-    </div>
-  );
-};
-
-VisLegendComponent.propTypes = {
-  vis: PropTypes.object,
-  visData: PropTypes.object,
-  visParams: PropTypes.object,
-  uiState: PropTypes.object,
-  refreshLegend: PropTypes.number,
-};
-
-export const VisLegend = memo(
-  VisLegendComponent,
-  (prev, next) => prev.refreshLegend === next.refreshLegend
-);
+  render() {
+    const { open } = this.state;
+    return (
+      <div className="visLegend">
+        <button
+          type="button"
+          onClick={this.toggleLegend}
+          className={classNames([
+            'kuiCollapseButton visLegend__toggle',
+            { 'visLegend__toggle--isOpen': open },
+          ])}
+          aria-label={i18n.translate('common.ui.vis.visTypes.legend.toggleLegendButtonAriaLabel', {
+            defaultMessage: 'Toggle legend',
+          })}
+          aria-expanded={Boolean(open)}
+          aria-controls={this.legendId}
+          data-test-subj="vislibToggleLegend"
+          title={i18n.translate('common.ui.vis.visTypes.legend.toggleLegendButtonTitle', {
+            defaultMessage: 'Toggle legend',
+          })}
+        >
+          <EuiIcon type="list" />
+        </button>
+        {open && this.renderLegend()}
+      </div>
+    );
+  }
+}

@@ -17,20 +17,5 @@
  * under the License.
  */
 
-import { wrapInI18nContext } from 'ui/i18n';
-
-// @ts-ignore
-import { uiModules } from '../../../modules';
-import { VisLegend } from './vislib_vis_legend';
-
+export { VisLegend } from './vislib_vis_legend';
 export { CUSTOM_LEGEND_VIS_TYPES } from './models';
-
-uiModules.get('kibana').directive('vislibLegend', function(reactDirective: any) {
-  return reactDirective(wrapInI18nContext(VisLegend), [
-    ['vis', { watchDepth: 'reference' }],
-    ['refreshLegend', { watchDepth: 'reference' }],
-    ['visData', { watchDepth: 'reference' }],
-    ['visParams', { watchDepth: 'reference' }],
-    ['uiState', { watchDepth: 'reference' }],
-  ]);
-});

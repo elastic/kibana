@@ -101,6 +101,7 @@ $visLegendLineHeight: $euiSize;
 .visLegend__valueTitle {
   @include euiTextTruncate; // ALWAYS truncate
   color: $visTextColor;
+  user-select: none;
 
   &:hover {
     text-decoration: underline;
