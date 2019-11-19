@@ -37,7 +37,8 @@ exports[`StringFormatEditor should render normally 1`] = `
       }
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
+    sampleType="text"
     samples={
       Array [
         Object {
