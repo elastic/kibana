@@ -22,6 +22,7 @@ import { Config } from '../../config';
 interface SavedObjectsSchemaTypeDefinition {
   isNamespaceAgnostic: boolean;
   hidden?: boolean;
+  subTypes?: string[];
   indexPattern?: ((config: Config) => string) | string;
   convertToAliasScript?: string;
 }
@@ -73,5 +74,18 @@ export class SavedObjectsSchema {
       return false;
     }
     return Boolean(typeSchema.isNamespaceAgnostic);
+  }
+
+  public hasSubTypes(type: string) {
+    if (!this.definition) {
+      return false;
+    }
+
+    const typeSchema = this.definition[type];
+    if (!typeSchema) {
+      return false;
+    }
+
+    return Boolean(typeSchema.subTypes);
   }
 }

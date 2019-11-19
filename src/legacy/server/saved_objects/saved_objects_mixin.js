@@ -89,7 +89,7 @@ export async function savedObjectsMixin(kbnServer, server) {
   server.route(createBulkCreateRoute(prereqs));
   server.route(createBulkGetRoute(prereqs));
   server.route(createBulkUpdateRoute(prereqs));
-  server.route(createCreateRoute(prereqs));
+  server.route(createCreateRoute(prereqs, schema));
   server.route(createDeleteRoute(prereqs));
   server.route(createFindRoute(prereqs));
   server.route(createGetRoute(prereqs));
