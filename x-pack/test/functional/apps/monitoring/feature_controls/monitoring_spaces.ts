@@ -19,6 +19,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.load('empty_kibana');
     });
 
+    after(async () => {
+      await esArchiver.unload('empty_kibana');
+      await PageObjects.common.navigateToApp('home');
+      await PageObjects.security.logout();
+    });
+
     describe('space with no features disabled', () => {
       before(async () => {
         await spacesService.create({

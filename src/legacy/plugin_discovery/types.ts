@@ -73,6 +73,7 @@ export interface LegacyPluginOptions {
     embeddableActions?: string[];
     embeddableFactories?: string[];
     uiSettingDefaults?: Record<string, any>;
+    interpreter: string | string[];
   }>;
   uiCapabilities?: Capabilities;
   publicDir: any;

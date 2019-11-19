@@ -6,7 +6,6 @@
 
 import { get } from 'lodash/fp';
 
-import Hapi from 'hapi';
 import { SIGNALS_ID } from '../../../../common/constants';
 import {
   Alert,
@@ -16,6 +15,7 @@ import {
 } from '../../../../../alerting/server/types';
 import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
+import { RequestFacade } from '../../../types';
 import { SearchResponse } from '../../types';
 import { esFilters } from '../../../../../../../../src/plugins/data/server';
 
@@ -89,7 +89,7 @@ export type DeleteSignalParams = Clients & {
   ruleId: string | undefined | null;
 };
 
-export interface FindSignalsRequest extends Omit<Hapi.Request, 'query'> {
+export interface FindSignalsRequest extends Omit<RequestFacade, 'query'> {
   query: {
     per_page: number;
     page: number;
@@ -125,11 +125,11 @@ export type SignalAlertType = Alert & {
   alertTypeParams: AlertTypeParams;
 };
 
-export interface SignalsRequest extends Hapi.Request {
+export interface SignalsRequest extends RequestFacade {
   payload: SignalAlertParamsRest;
 }
 
-export interface UpdateSignalsRequest extends Hapi.Request {
+export interface UpdateSignalsRequest extends RequestFacade {
   payload: UpdateSignalAlertParamsRest;
 }
 
@@ -164,7 +164,7 @@ export interface BulkResponse {
 export type SignalSearchResponse = SearchResponse<SignalSource>;
 export type SignalSourceHit = SignalSearchResponse['hits']['hits'][0];
 
-export type QueryRequest = Omit<Hapi.Request, 'query'> & {
+export type QueryRequest = Omit<RequestFacade, 'query'> & {
   query: { id: string | undefined; rule_id: string | undefined };
 };
 
