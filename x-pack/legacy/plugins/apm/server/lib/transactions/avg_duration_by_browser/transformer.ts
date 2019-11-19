@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx/target';
 import { ESResponse } from './fetcher';
 import { AvgDurationByBrowserAPIResponse } from '.';
 import { Coordinate } from '../../../../typings/timeseries';
@@ -15,21 +14,23 @@ export function transformer({
   response: ESResponse;
 }): AvgDurationByBrowserAPIResponse {
   const allUserAgentKeys = new Set<string>(
-    (
-      idx(response, _ => _.aggregations.user_agent_keys.buckets) || []
-    ).map(({ key }) => key.toString())
+    // TODO(TS-3.7-ESLINT)
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    (response.aggregations?.user_agent_keys?.buckets ?? []).map(({ key }) =>
+      key.toString()
+    )
   );
-  const buckets = idx(response, _ => _.aggregations.browsers.buckets) || [];
+  const buckets = response.aggregations?.browsers?.buckets ?? [];
 
   const series = buckets.reduce<{ [key: string]: Coordinate[] }>(
     (acc, next) => {
-      const userAgentBuckets = idx(next, _ => _.user_agent.buckets) || [];
+      const userAgentBuckets = next.user_agent?.buckets ?? [];
       const x = next.key;
       const seenUserAgentKeys = new Set<string>();
 
       userAgentBuckets.map(userAgentBucket => {
         const key = userAgentBucket.key;
-        const y = idx(userAgentBucket, _ => _.avg_duration.value);
+        const y = userAgentBucket.avg_duration?.value;
 
         seenUserAgentKeys.add(key.toString());
         acc[key] = (acc[key] || []).concat({ x, y });
