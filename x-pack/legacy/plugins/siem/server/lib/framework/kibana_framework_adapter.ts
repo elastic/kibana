@@ -8,7 +8,6 @@ import { GenericParams } from 'elasticsearch';
 import * as GraphiQL from 'apollo-server-module-graphiql';
 import Boom from 'boom';
 import { ResponseToolkit } from 'hapi';
-import { EnvironmentMode } from 'kibana/public';
 import { GraphQLSchema } from 'graphql';
 import { runHttpQuery } from 'apollo-server-core';
 import { ServerFacade, RequestFacade } from '../../types';
@@ -27,11 +26,11 @@ interface CallWithRequestParams extends GenericParams {
 
 export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   public version: string;
-  public envMode: EnvironmentMode;
+  private isProductionMode: boolean;
 
-  constructor(private server: ServerFacade, mode: EnvironmentMode) {
+  constructor(private server: ServerFacade) {
     this.version = server.config().get('pkg.version');
-    this.envMode = mode;
+    this.isProductionMode = process.env.NODE_ENV === 'production';
   }
 
   public async callWithRequest(
@@ -134,7 +133,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
       vhost: undefined,
     });
 
-    if (!this.envMode.prod) {
+    if (!this.isProductionMode) {
       this.server.route({
         options: {
           tags: ['access:siem'],
