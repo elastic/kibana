@@ -1,0 +1,392 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
+<DashboardEmptyScreen
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  messageDefaults={
+    Array [
+      "First part of the message ",
+      " second part of the message",
+      " link label ",
+      "link area label",
+    ]
+  }
+  messageTokens={
+    Array [
+      "message1",
+      "message2",
+      "message3",
+      "message4",
+    ]
+  }
+  onLinkClick={[MockFunction]}
+  showLinkToVisualize={true}
+>
+  <EuiIcon
+    color="subdued"
+    size="xxl"
+    type="dashboardApp"
+  >
+    <EuiIconEmpty
+      className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
+      focusable="false"
+      style={null}
+    >
+      <svg
+        className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
+        focusable="false"
+        height={16}
+        style={null}
+        viewBox="0 0 16 16"
+        width={16}
+        xmlns="http://www.w3.org/2000/svg"
+      />
+    </EuiIconEmpty>
+  </EuiIcon>
+  <h2>
+    This dashboard is empty. Let’s fill it up!
+  </h2>
+  <p>
+    <EuiI18n
+      defaults={
+        Array [
+          "First part of the message ",
+          " second part of the message",
+          " link label ",
+          "link area label",
+        ]
+      }
+      tokens={
+        Array [
+          "message1",
+          "message2",
+          "message3",
+          "message4",
+        ]
+      }
+    >
+      <span>
+        First part of the message 
+        <EuiLink
+          aria-label="link area label"
+          data-test-subj="emptyDashboardAddPanelButton"
+          onClick={[MockFunction]}
+        >
+          <button
+            aria-label="link area label"
+            className="euiLink euiLink--primary"
+            data-test-subj="emptyDashboardAddPanelButton"
+            onClick={[MockFunction]}
+            type="button"
+          >
+             link label 
+          </button>
+        </EuiLink>
+         second part of the message
+      </span>
+    </EuiI18n>
+  </p>
+  <p
+    className="linkToVisualizeParagraph"
+  >
+    <span
+      dangerouslySetInnerHTML={
+        Object {
+          "__html": "If you haven't set up any visualizations yet, <a class='euiLink' href='#/visualize'>visit the Visualize app</a> to create your first visualization",
+        }
+      }
+    />
+  </p>
+</DashboardEmptyScreen>
+`;
+
+exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] = `
+<DashboardEmptyScreen
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  messageDefaults={
+    Array [
+      "First part of the message ",
+      " second part of the message",
+      " link label ",
+      "link area label",
+    ]
+  }
+  messageTokens={
+    Array [
+      "message1",
+      "message2",
+      "message3",
+      "message4",
+    ]
+  }
+  onLinkClick={[MockFunction]}
+  showLinkToVisualize={false}
+>
+  <EuiIcon
+    color="subdued"
+    size="xxl"
+    type="dashboardApp"
+  >
+    <EuiIconEmpty
+      className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
+      focusable="false"
+      style={null}
+    >
+      <svg
+        className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
+        focusable="false"
+        height={16}
+        style={null}
+        viewBox="0 0 16 16"
+        width={16}
+        xmlns="http://www.w3.org/2000/svg"
+      />
+    </EuiIconEmpty>
+  </EuiIcon>
+  <h2>
+    This dashboard is empty. Let’s fill it up!
+  </h2>
+  <p>
+    <EuiI18n
+      defaults={
+        Array [
+          "First part of the message ",
+          " second part of the message",
+          " link label ",
+          "link area label",
+        ]
+      }
+      tokens={
+        Array [
+          "message1",
+          "message2",
+          "message3",
+          "message4",
+        ]
+      }
+    >
+      <span>
+        First part of the message 
+        <EuiLink
+          aria-label="link area label"
+          data-test-subj=""
+          onClick={[MockFunction]}
+        >
+          <button
+            aria-label="link area label"
+            className="euiLink euiLink--primary"
+            data-test-subj=""
+            onClick={[MockFunction]}
+            type="button"
+          >
+             link label 
+          </button>
+        </EuiLink>
+         second part of the message
+      </span>
+    </EuiI18n>
+  </p>
+</DashboardEmptyScreen>
+`;

@@ -24,8 +24,8 @@ export interface Props {
   showIcon: boolean;
   showLinkToVisualize: boolean;
   onLinkClick: () => void;
-  messageTokens: string[];
-  messageDefaults: string[];
+  messageTokens: readonly [string, string, string, string];
+  messageDefaults: readonly [string, string, string, string];
 }
 export function DashboardEmptyScreen({
   showLinkToVisualize,
@@ -43,7 +43,7 @@ export function DashboardEmptyScreen({
     values: { visualizeAppLink },
   });
   const linkToVisualizeParagraph = (
-    <p>
+    <p className="linkToVisualizeParagraph">
       {/* eslint-disable-next-line react/no-danger */}
       <span dangerouslySetInnerHTML={{ __html: addVisualizationDescription }} />
     </p>
