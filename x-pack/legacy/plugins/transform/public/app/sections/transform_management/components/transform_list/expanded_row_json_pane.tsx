@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC } from 'react';
+import React, { FC } from 'react';
 
 import {
   // @ts-ignore
@@ -18,7 +18,7 @@ interface Props {
   json: object;
 }
 
-export const ExpandedRowJsonPane: SFC<Props> = ({ json }) => {
+export const ExpandedRowJsonPane: FC<Props> = ({ json }) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
