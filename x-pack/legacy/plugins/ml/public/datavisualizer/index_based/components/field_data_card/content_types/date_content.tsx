@@ -12,7 +12,6 @@ import { formatDate } from '@elastic/eui/lib/services/format';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { FieldDataCardProps } from '../field_data_card';
-// @ts-ignore
 import { roundToDecimalPlace } from '../../../../../formatters/round_to_decimal_place';
 
 const TIME_FORMAT = 'MMM D YYYY, HH:mm:ss.SSS';
