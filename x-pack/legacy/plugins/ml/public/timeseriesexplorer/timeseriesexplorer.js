@@ -1075,7 +1075,6 @@ export class TimeSeriesExplorer extends React.Component {
           this.setState({
             zoomFrom: selection.from,
             zoomTo: selection.to,
-            loading: true,
           });
         }),
         skipWhile(() => {
