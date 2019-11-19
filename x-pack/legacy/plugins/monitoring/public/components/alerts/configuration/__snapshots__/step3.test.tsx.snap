@@ -1,0 +1,55 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Step3 should render normally 1`] = `
+<EuiButton
+  isDisabled={false}
+  isLoading={false}
+  onClick={[MockFunction]}
+>
+  Save
+</EuiButton>
+`;
+
+exports[`Step3 should show a disabled state 1`] = `
+<EuiButton
+  isDisabled={true}
+  isLoading={false}
+  onClick={
+    [MockFunction] {
+      "calls": Array [
+        Array [],
+      ],
+      "results": Array [
+        Object {
+          "type": "return",
+          "value": undefined,
+        },
+      ],
+    }
+  }
+>
+  Save
+</EuiButton>
+`;
+
+exports[`Step3 should show a saving state 1`] = `
+<EuiButton
+  isDisabled={false}
+  isLoading={true}
+  onClick={
+    [MockFunction] {
+      "calls": Array [
+        Array [],
+      ],
+      "results": Array [
+        Object {
+          "type": "return",
+          "value": undefined,
+        },
+      ],
+    }
+  }
+>
+  Save
+</EuiButton>
+`;

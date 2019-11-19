@@ -153,7 +153,7 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
           defaultMessage: 'Service',
         })}
         helpText={
-          <EuiLink target="_blank" href="https://nodemailer.com/smtp/well-known/">
+          <EuiLink external href="https://nodemailer.com/smtp/well-known/">
             {i18n.translate('xpack.monitoring.alerts.migrate.manageAction.serviceHelpText', {
               defaultMessage: 'Find out more',
             })}
@@ -225,6 +225,7 @@ export const ManageEmailAction: React.FC<ManageActionModalProps> = (
         })}
       >
         <EuiSwitch
+          label=""
           checked={data.secure}
           onChange={e => setData({ ...data, secure: e.target.checked })}
         />
