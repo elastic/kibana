@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiHealth, EuiIconTip, EuiLink, EuiSwitch, EuiTextColor } from '@elastic/eui';
+import { EuiBadge, EuiHealth, EuiIconTip, EuiLink, EuiTextColor } from '@elastic/eui';
 import React from 'react';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import moment from 'moment';
 import { getEmptyTagValue } from '../../../../components/empty_value';
-import { ColumnTypes } from './index';
+import { Action, ColumnTypes } from './index';
 import {
   deleteRulesAction,
   duplicateRuleAction,
   editRuleAction,
-  enableRulesAction,
   exportRuleAction,
   runRuleAction,
 } from './actions';
@@ -26,7 +25,7 @@ const dateTimeFormat = (value: string) => {
   return moment(value).format('M/D/YYYY, h:mm A');
 };
 
-const actions = [
+const getActions = (dispatch: React.Dispatch<Action>) => [
   {
     description: 'Edit rule settings',
     icon: 'visControls',
@@ -45,7 +44,7 @@ const actions = [
     description: 'Duplicate rule…',
     icon: 'copy',
     name: 'Duplicate rule…',
-    onClick: duplicateRuleAction,
+    onClick: (rowItem: ColumnTypes) => duplicateRuleAction(rowItem, dispatch),
   },
   {
     description: 'Export rule',
@@ -58,12 +57,12 @@ const actions = [
     description: 'Delete rule…',
     icon: 'trash',
     name: 'Delete rule…',
-    onClick: deleteRulesAction,
+    onClick: (rowItem: ColumnTypes) => deleteRulesAction(rowItem, dispatch),
   },
 ];
 
 // Michael: Are we able to do custom, in-table-header filters, as shown in my wireframes?
-export const getColumns = (updateRule: (isEnabled: boolean, ruleId: string) => void) => [
+export const getColumns = (dispatch: React.Dispatch<Action>) => [
   {
     field: 'rule',
     name: 'Rule',
@@ -159,22 +158,24 @@ export const getColumns = (updateRule: (isEnabled: boolean, ruleId: string) => v
     name: 'Activate',
     render: (value: ColumnTypes['activate'], item: ColumnTypes) => (
       <RuleSwitch
-        ruleId={item.id}
-        isEnabled={item.activate}
-        onRuleStateChange={async (isEnabled, ruleId, setIsLoading) => {
-          console.log('item.id', item.id);
-          console.log('isEnabled', isEnabled);
+        ruleId={item.rule_id}
+        enabled={item.activate}
+        isLoading={item.isLoading}
+        onRuleStateChange={async (enabled, ruleId) => {
+          console.log('item.rule_id', item.rule_id);
+          console.log('isEnabled', enabled);
           console.log('ruleId', ruleId);
           try {
-            const response = await enableRules({
+            dispatch({ type: 'updateLoading', ruleIds: [ruleId], isLoading: true });
+            const updatedRules = await enableRules({
               ruleIds: [ruleId],
-              enabled: isEnabled,
+              enabled,
               kbnVersion: '8.0.0',
             });
-            console.log('response', response);
+            console.log('updatedRules', updatedRules);
+            dispatch({ type: 'updateRules', rules: updatedRules });
           } finally {
-            updateRule(isEnabled, ruleId);
-            setIsLoading(false);
+            // dispatch({ type: 'updateLoading', ruleIds: [ruleId], isLoading: false });
           }
         }}
       />
@@ -183,7 +184,7 @@ export const getColumns = (updateRule: (isEnabled: boolean, ruleId: string) => v
     width: '65px',
   },
   {
-    actions,
+    actions: getActions(dispatch),
     width: '40px',
   },
 ];

@@ -48,16 +48,15 @@ export const columns = [
   {
     field: 'ran',
     name: 'Ran',
-    render: (value: ColumnTypes['ran']) => <time dateTime={value}>{dateTimeFormat(value)}</time>,
+    render: (value: ColumnTypes['ran']) => '--', // <time dateTime={value}>{dateTimeFormat(value)}</time>,
     sortable: true,
     truncateText: true,
   },
   {
     field: 'lookedBackTo',
     name: 'Looked back to',
-    render: (value: ColumnTypes['lookedBackTo']) => (
-      <time dateTime={value}>{dateTimeFormat(value)}</time>
-    ),
+    render: (value: ColumnTypes['lookedBackTo']) =>
+      '--', // <time dateTime={value}>{dateTimeFormat(value)}</time>
     sortable: true,
     truncateText: true,
   },

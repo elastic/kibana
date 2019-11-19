@@ -14,12 +14,7 @@ import { fetchRules } from './api';
 import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
 
-type Return = [
-  boolean,
-  FetchRulesResponse,
-  Dispatch<SetStateAction<FetchRulesResponse>>,
-  Dispatch<SetStateAction<PaginationOptions>>
-];
+type Return = [boolean, FetchRulesResponse, Dispatch<SetStateAction<PaginationOptions>>];
 
 /**
  * Hook for using the list of Rules from the Detection Engine API
@@ -71,6 +66,5 @@ export const useRules = (refetchToggle: boolean): Return => {
     };
   }, [refetchToggle, paginationOptions]);
 
-  console.log('Updated Rules:', rules);
-  return [loading, rules, setRules, setPaginationOptions];
+  return [loading, rules, setPaginationOptions];
 };

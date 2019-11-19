@@ -9,7 +9,7 @@ import {
   duplicateRule,
   exportRules,
 } from '../../../../containers/detection_engine/rules/api';
-import { ColumnTypes } from './index';
+import { Action, ColumnTypes } from './index';
 import React from 'react';
 
 export const editRuleAction = () => {
@@ -20,25 +20,30 @@ export const runRuleAction = () => {
   console.log('Running Rule...');
 };
 
-export const duplicateRuleAction = async (rowItem: ColumnTypes) => {
+export const duplicateRuleAction = async (
+  rowItem: ColumnTypes,
+  dispatch: React.Dispatch<Action>
+) => {
   console.log('Duplicating Rule...', rowItem);
-  const duplicateResponse = await duplicateRule({ rule: rowItem.sourceRule, kbnVersion: '8.0.0' });
-  console.log('duplicateResponse', duplicateResponse);
+  const duplicatedRule = await duplicateRule({ rule: rowItem.sourceRule, kbnVersion: '8.0.0' });
+  dispatch({ type: 'updateRules', rules: [duplicatedRule] });
+  console.log('duplicatedRule', duplicatedRule);
 };
 
 export const exportRuleAction = async (rowItem: ColumnTypes) => {
   console.log('Exporting Rule...', rowItem);
-  const exportResponse = await exportRules({ ruleIds: [rowItem.id], kbnVersion: '8.0.0' });
+  const exportResponse = await exportRules({ ruleIds: [rowItem.rule_id], kbnVersion: '8.0.0' });
   console.log('exportResponse', exportResponse);
 };
 
-export const deleteRulesAction = async (rowItem: ColumnTypes) => {
+export const deleteRulesAction = async (rowItem: ColumnTypes, dispatch: React.Dispatch<Action>) => {
   console.log('Deleting following Rules:', rowItem);
-  const deleteResponse = await deleteRules({
-    ruleIds: [rowItem.sourceRule.id],
+  const deletedRules = await deleteRules({
+    ruleIds: [rowItem.sourceRule.rule_id],
     kbnVersion: '8.0.0',
   });
-  console.log('Delete Response:', deleteResponse);
+  dispatch({ type: 'deleteRules', rules: deletedRules });
+  console.log('deletedRules:', deletedRules);
 };
 
 export const enableRuleAction = () => {

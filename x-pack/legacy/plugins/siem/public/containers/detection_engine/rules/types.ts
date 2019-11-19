@@ -8,6 +8,7 @@ export interface PaginationOptions {
   page: number;
   perPage: number;
   sortField: string;
+  total?: number;
 }
 
 // Fetch Rules Types
@@ -25,20 +26,25 @@ export interface FetchRulesResponse {
 }
 
 export interface Rule {
-  id: string;
-  name: string;
-  alertTypeId: string;
-  alertTypeParams: RuleAlertTypeParams;
-  interval: string;
+  created_by: string;
+  description: string;
   enabled: boolean;
-  actions: RuleAction[];
-  throttle: null;
-  createdBy: string;
-  updatedBy: string;
-  apiKeyOwner: string;
-  muteAll: false;
-  mutedInstanceIds: [];
-  scheduledTaskId: string;
+  false_positives: string[];
+  from: string;
+  id: string;
+  index: string[];
+  interval: string;
+  language: string;
+  max_signals: number;
+  name: string;
+  query: string;
+  references: string[];
+  rule_id: string;
+  severity: string;
+  tags: string[];
+  to: string;
+  type: string;
+  updated_by: string;
 }
 
 export interface RuleAlertTypeParams {

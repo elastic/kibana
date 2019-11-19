@@ -29,13 +29,14 @@ export const fetchRules = async ({
     perPage: 20,
     sortField: 'name',
   },
-  ruleId = '_find',
+  ruleId,
   kbnVersion,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
+  const rulesParam = ruleId != null ? `?rule_id="${ruleId}&"` : '/_find?';
   const response = await fetch(
-    `${chrome.getBasePath()}/api/siem/signals/${ruleId}?page=${paginationOptions.page}&per_page=${
-      paginationOptions.perPage
-    }&sort_field=${paginationOptions.sortField}`,
+    `${chrome.getBasePath()}/api/detection_engine/rules${rulesParam}page=${
+      paginationOptions.page
+    }&per_page=${paginationOptions.perPage}&sort_field=${paginationOptions.sortField}`,
     {
       method: 'GET',
       credentials: 'same-origin',
@@ -47,7 +48,7 @@ export const fetchRules = async ({
     }
   );
   await throwIfNotOk(response);
-  return ruleId !== '_find'
+  return ruleId != null
     ? {
         page: 0,
         perPage: 1,
@@ -70,7 +71,7 @@ export const enableRules = async ({
   kbnVersion,
 }: EnableRulesProps): Promise<Rule[]> => {
   const requests = ruleIds.map(ruleId =>
-    fetch(`${chrome.getBasePath()}/api/siem/signals`, {
+    fetch(`${chrome.getBasePath()}/api/detection_engine/rules`, {
       method: 'PUT',
       credentials: 'same-origin',
       headers: {
@@ -78,7 +79,7 @@ export const enableRules = async ({
         'kbn-version': kbnVersion,
         'kbn-xsrf': kbnVersion,
       },
-      body: JSON.stringify({ id: ruleId, enabled }),
+      body: JSON.stringify({ rule_id: ruleId, enabled }),
     })
   );
 
@@ -97,7 +98,7 @@ export const enableRules = async ({
  */
 export const deleteRules = async ({ ruleIds, kbnVersion }: DeleteRulesProps): Promise<Rule[]> => {
   const requests = ruleIds.map(ruleId =>
-    fetch(`${chrome.getBasePath()}/api/siem/signals/${encodeURIComponent(ruleId)}`, {
+    fetch(`${chrome.getBasePath()}/api/detection_engine/rules?rule_id=${ruleId}`, {
       method: 'DELETE',
       credentials: 'same-origin',
       headers: {
@@ -121,12 +122,7 @@ export const deleteRules = async ({ ruleIds, kbnVersion }: DeleteRulesProps): Pr
  * @param kbnVersion current Kibana Version to use for headers
  */
 export const duplicateRule = async ({ rule, kbnVersion }: DuplicateRuleProps): Promise<Rule> => {
-  const newRuleId = `${rule.alertTypeParams.id} (1)`;
-  // TODO: Check if exists before create
-  // const existingRule = await fetchRules({ ruleId: encodeURIComponent(newRuleId), kbnVersion });
-  // console.log('New Rule ID exists?', existingRule.data && existingRule.data.length !== 0);
-
-  const response = await fetch(`${chrome.getBasePath()}/api/siem/signals`, {
+  const response = await fetch(`${chrome.getBasePath()}/api/detection_engine/rules`, {
     method: 'POST',
     credentials: 'same-origin',
     headers: {
@@ -134,22 +130,15 @@ export const duplicateRule = async ({ rule, kbnVersion }: DuplicateRuleProps): P
       'kbn-version': kbnVersion,
       'kbn-xsrf': kbnVersion,
     },
-    body: JSON.stringify(
-      (({ description, index, severity, type, from, to, query, language, references }) => ({
-        id: newRuleId,
-        description,
-        index,
-        interval: rule.interval,
-        name: rule.name,
-        severity,
-        type,
-        from,
-        to,
-        query,
-        language,
-        references,
-      }))(rule.alertTypeParams)
-    ),
+    body: JSON.stringify({
+      ...rule,
+      name: `${rule.name} [Duplicate]`,
+      created_by: undefined,
+      id: undefined,
+      rule_id: undefined,
+      updated_by: undefined,
+      enabled: rule.enabled ?? false,
+    }),
   });
 
   // ["name", "filter", "filters", "savedId", "maxSignals"]}

@@ -19,18 +19,13 @@ StaticSwitch.displayName = 'StaticSwitch';
 
 export interface RuleSwitchProps {
   ruleId: string;
-  isEnabled: boolean;
-  onRuleStateChange: (
-    isEnabled: boolean,
-    ruleId: string,
-    setIsLoading: Dispatch<SetStateAction<boolean>>
-  ) => void;
+  enabled: boolean;
+  isLoading: boolean;
+  onRuleStateChange: (isEnabled: boolean, ruleId: string) => void;
 }
 
 export const RuleSwitch = React.memo<RuleSwitchProps>(
-  ({ ruleId, isEnabled, onRuleStateChange }) => {
-    const [isLoading, setIsLoading] = useState(false);
-
+  ({ ruleId, enabled, isLoading, onRuleStateChange }) => {
     return (
       <EuiFlexGroup alignItems="center" justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
@@ -42,10 +37,9 @@ export const RuleSwitch = React.memo<RuleSwitchProps>(
               label="rule-switch"
               showLabel={false}
               disabled={false}
-              checked={isEnabled}
+              checked={enabled ?? false}
               onChange={e => {
-                setIsLoading(true);
-                onRuleStateChange(e.target.checked, ruleId, setIsLoading);
+                onRuleStateChange(e.target.checked!, ruleId);
               }}
             />
           )}

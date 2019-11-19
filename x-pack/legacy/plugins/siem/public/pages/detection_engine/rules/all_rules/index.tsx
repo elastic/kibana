@@ -11,7 +11,7 @@ import {
   EuiLoadingContent,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 
 import { HeaderSection } from '../../../../components/header_section';
 import {
@@ -21,9 +21,13 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../../components/detection_engine/utility_bar';
-import { getColumns } from './columns';
+import { columns, getColumns } from './columns';
 import { useRules } from '../../../../containers/detection_engine/rules/use_rules';
-import { Rule } from '../../../../containers/detection_engine/rules/types';
+import {
+  FetchRulesResponse,
+  PaginationOptions,
+  Rule,
+} from '../../../../containers/detection_engine/rules/types';
 import { Loader } from '../../../../components/loader';
 import { Panel } from '../../../../components/panel';
 import { getBatchItems } from './batch_actions';
@@ -42,11 +46,11 @@ export interface LastResponseTypes {
 }
 
 export interface ColumnTypes {
-  id: string;
+  rule_id: string;
   rule: RuleTypes;
   method: string;
   severity: string;
-  lastCompletedRun: string;
+  lastCompletedRun: string | undefined;
   lastResponse: LastResponseTypes;
   tags: string[];
   activate: boolean;
@@ -63,42 +67,80 @@ export interface SortTypes {
 interface State {
   isLoading: boolean;
   rules: Rule[];
+  pagination: PaginationOptions;
   refreshToggle: boolean;
   tableData: ColumnTypes[];
 }
 
-type Action =
+export type Action =
   | { type: 'refresh' }
-  | { type: 'updateTableData'; rules?: Rule[]; selectedRules?: ColumnTypes[] }
+  | { type: 'updateRules'; rules: Rule[]; pagination?: PaginationOptions }
   | { type: 'loading' }
-  | { type: 'bulkDelete'; selectedRules: Rule[] }
+  | { type: 'duplicate'; rule: Rule }
+  | { type: 'deleteRules'; rules: Rule[] }
+  | { type: 'updateLoading'; ruleIds: string[]; isLoading: boolean }
   | { type: 'failure' };
 
 function allRulesReducer(state: State, action: Action): State {
   switch (action.type) {
     case 'refresh': {
+      console.log('allRulesReducer:refresh', state, action);
       return {
         ...state,
         refreshToggle: !state.refreshToggle,
       };
     }
-    case 'updateTableData': {
+    case 'updateRules': {
+      console.log('allRulesReducer:updateRules', state, action);
+      if (action.pagination) {
+        return {
+          ...state,
+          rules: action.rules,
+          pagination: action.pagination,
+          tableData: formatRules(action.rules),
+        };
+      }
+
+      const ruleIds = state.rules.map(r => r.rule_id);
+      const updatedRules = action.rules.reduce(
+        (rules, updatedRule) =>
+          ruleIds.includes(updatedRule.rule_id)
+            ? rules.map(r => (updatedRule.rule_id === r.rule_id ? updatedRule : r))
+            : [...rules, updatedRule],
+        [...state.rules]
+      );
       return {
         ...state,
-        tableData: formatRules(action.rules ?? []),
+        rules: updatedRules,
+        tableData: formatRules(updatedRules),
+        pagination: state.pagination,
+      };
+    }
+    case 'deleteRules': {
+      console.log('allRulesReducer:deleteRules', state, action);
+      const deletedRuleIds = action.rules.map(r => r.rule_id);
+      const updatedRules = state.rules.reduce<Rule[]>(
+        (rules, rule) => (deletedRuleIds.includes(rule.rule_id) ? rules : [...rules, rule]),
+        []
+      );
+      return {
+        ...state,
+        rules: updatedRules,
+        tableData: formatRules(updatedRules),
+      };
+    }
+    case 'updateLoading': {
+      console.log('allRulesReducer:updateLoading', state, action);
+      return {
+        ...state,
+        rules: state.rules,
+        tableData: formatRules(state.rules, action.ruleIds),
       };
     }
     case 'loading': {
       return {
         ...state,
         isLoading: true,
-      };
-    }
-    case 'bulkDelete': {
-      return {
-        ...state,
-        isLoading: false,
-        rules: action.selectedRules,
       };
     }
     case 'failure': {
@@ -118,26 +160,25 @@ const initialState: State = {
   refreshToggle: true,
   tableData: [],
   rules: [],
+  pagination: {
+    page: 1,
+    perPage: 20,
+    sortField: 'rule',
+    total: 0,
+  },
 };
 
 export const AllRules = React.memo(() => {
-  const [{ refreshToggle, tableData }, dispatch] = useReducer(allRulesReducer, initialState);
+  const [{ refreshToggle, tableData, pagination }, dispatch] = useReducer(
+    allRulesReducer,
+    initialState
+  );
 
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedState, setSelectedState] = useState<ColumnTypes[]>([]);
   const [sortState, setSortState] = useState<SortTypes>({ field: 'rule', direction: 'asc' });
-  const [isLoadingRules, rules, setRules, updatePagination] = useRules(refreshToggle);
-
-  const updateRule = useCallback(
-    (isEnabled: boolean, ruleId: string) => {
-      const data = rules.data.map<Rule>(r => {
-        return r.id === ruleId ? { ...r, enabled: isEnabled } : r;
-      });
-      setRules({ ...rules, data });
-    },
-    [rules]
-  );
+  const [isLoadingRules, rulesData, updatePagination] = useRules(refreshToggle);
 
   useEffect(() => {
     setIsLoading(isLoadingRules);
@@ -148,10 +189,19 @@ export const AllRules = React.memo(() => {
   }, [isLoadingRules]);
 
   useEffect(() => {
-    dispatch({ type: 'updateTableData', rules: rules.data });
-  }, [rules]);
+    dispatch({
+      type: 'updateRules',
+      rules: rulesData.data,
+      pagination: {
+        sortField: initialState.pagination.sortField,
+        page: rulesData.page,
+        perPage: rulesData.perPage,
+        total: rulesData.total,
+      },
+    });
+  }, [rulesData]);
 
-  console.log('Rending AllRules Table');
+  console.log('Rendering All Rules');
   return (
     <>
       <EuiSpacer />
@@ -168,7 +218,7 @@ export const AllRules = React.memo(() => {
             <UtilityBar border>
               <UtilityBarSection>
                 <UtilityBarGroup>
-                  <UtilityBarText>{`Showing: ${rules.total} rules`}</UtilityBarText>
+                  <UtilityBarText>{`Showing: ${pagination.total} rules`}</UtilityBarText>
                 </UtilityBarGroup>
 
                 <UtilityBarGroup>
@@ -176,7 +226,11 @@ export const AllRules = React.memo(() => {
                   <UtilityBarAction
                     iconSide="right"
                     iconType="arrowDown"
-                    popoverContent={<EuiContextMenuPanel items={getBatchItems(selectedState)} />}
+                    popoverContent={closePopover => (
+                      <EuiContextMenuPanel
+                        items={getBatchItems(selectedState, dispatch, closePopover)}
+                      />
+                    )}
                   >
                     {'Batch actions'}
                   </UtilityBarAction>
@@ -196,9 +250,9 @@ export const AllRules = React.memo(() => {
             </UtilityBar>
 
             <EuiBasicTable
-              columns={getColumns(updateRule)}
+              columns={getColumns(dispatch)}
               isSelectable
-              itemId="id"
+              itemId="rule_id"
               items={tableData}
               onChange={({
                 page,
@@ -210,20 +264,23 @@ export const AllRules = React.memo(() => {
                 };
                 sort: SortTypes;
               }) => {
-                console.log('Updating sort/pagination');
-                const sortField = sort.field === 'rule' ? 'name' : 'enabled';
+                const sortField =
+                  sort.field === 'rule' ? initialState.pagination.sortField : 'enabled';
                 updatePagination({ page: page.index + 1, perPage: page.size, sortField });
                 setSortState(sort);
               }}
               pagination={{
-                pageIndex: rules.page - 1,
-                pageSize: rules.perPage,
-                totalItemCount: rules.total,
+                pageIndex: pagination.page - 1,
+                pageSize: pagination.perPage,
+                totalItemCount: pagination.total,
                 pageSizeOptions: [5, 10, 20],
               }}
               selection={{
-                selectable: () => true,
+                selectable: (item: ColumnTypes) => !item.isLoading,
                 onSelectionChange: (selectedItems: ColumnTypes[]) => {
+                  console.log('setSelectionChange');
+                  console.log('selectecItems', selectedItems);
+                  //
                   setSelectedState(selectedItems);
                 },
               }}

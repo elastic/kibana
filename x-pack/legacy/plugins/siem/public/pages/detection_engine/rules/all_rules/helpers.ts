@@ -7,22 +7,22 @@
 import { Rule } from '../../../../containers/detection_engine/rules/types';
 import { ColumnTypes } from './index';
 
-export const formatRules = (rules: Rule[]): ColumnTypes[] =>
+export const formatRules = (rules: Rule[], selectedRules?: string[]): ColumnTypes[] =>
   rules.map(rule => ({
-    id: rule.id,
+    rule_id: rule.rule_id,
     rule: {
-      href: `#/detection-engine/rules/rule-details/${rule.id}`,
+      href: `#/detection-engine/rules/rule-details/${encodeURIComponent(rule.id)}`,
       name: rule.name,
       status: 'Status Placeholder',
     },
-    method: rule.alertTypeParams.type, // Map to i18n
-    severity: rule.alertTypeParams.severity,
-    lastCompletedRun: '--', // Frank Plumber
+    method: rule.type, // Map to i18n
+    severity: rule.severity,
+    lastCompletedRun: undefined, // Frank Plumber
     lastResponse: {
       type: '--', // Frank Plumber
     },
-    tags: rule.alertTypeParams.tags,
+    tags: rule.tags,
     activate: rule.enabled,
     sourceRule: rule,
-    isLoading: false,
+    isLoading: selectedRules?.includes(rule.rule_id) ?? false,
   }));
