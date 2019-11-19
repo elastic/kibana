@@ -45,18 +45,6 @@ export function intervalFromDate(date: Date, interval?: string): Date | undefine
   return minutesFromDate(date, parseInterval(interval));
 }
 
-export function precedingDateByInterval(date: Date, interval?: string): Date | undefined {
-  if (interval === undefined) {
-    return;
-  }
-
-  assertValidInterval(interval);
-
-  return isSeconds(interval)
-    ? secondsFromDate(date, negative(parseInterval(interval)))
-    : minutesFromDate(date, negative(parseInterval(interval)));
-}
-
 /**
  * Returns a date that is mins minutes from now.
  *
@@ -132,8 +120,4 @@ function isMinutes(interval: string) {
 
 function isSeconds(interval: string) {
   return /^[1-9][0-9]*s$/.test(interval);
-}
-
-function negative(n: number): number {
-  return -n;
 }
