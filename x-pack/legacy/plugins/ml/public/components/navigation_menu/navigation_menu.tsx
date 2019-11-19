@@ -7,7 +7,6 @@
 import React, { Fragment, FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 
-// @ts-ignore
 import { isFullLicense } from '../../license/check_license';
 
 import { TopNav } from './top_nav';

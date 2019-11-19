@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 
 function getViewString(lat, lon, zoom) {
   return `${lat},${lon},${zoom}`;
@@ -117,8 +118,8 @@ export class SetViewControl extends Component {
 
     const { isInvalid: isZoomInvalid, component: zoomFormRow } = this._renderNumberFormRow({
       value: this.state.zoom,
-      min: 0,
-      max: 24,
+      min: MIN_ZOOM,
+      max: MAX_ZOOM,
       onChange: this._onZoomChange,
       label: i18n.translate('xpack.maps.setViewControl.zoomLabel', {
         defaultMessage: 'Zoom',

@@ -97,9 +97,7 @@ export class OverlayBannersService {
         if (!banners$.value.has(id)) {
           return false;
         }
-
         banners$.next(banners$.value.remove(id));
-
         return true;
       },
 
@@ -107,10 +105,8 @@ export class OverlayBannersService {
         if (!id || !banners$.value.has(id)) {
           return this.add(mount, priority);
         }
-
         const nextId = genId();
         const nextBanner = { id: nextId, mount, priority };
-
         banners$.next(banners$.value.remove(id).add(nextId, nextBanner));
         return nextId;
       },
