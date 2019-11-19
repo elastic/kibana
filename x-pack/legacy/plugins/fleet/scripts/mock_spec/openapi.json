@@ -14,7 +14,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5601/api/integrations_manager"
+      "url": "http://localhost:5601/api/epm"
     }
   ],
   "paths": {

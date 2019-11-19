@@ -23,7 +23,7 @@ export async function installPackage(options: {
   });
 
   if (toSave.length) {
-    // Save those references in the integration manager's state saved object
+    // Save those references in the package manager's state saved object
     await saveInstallationReferences({
       savedObjectsClient,
       pkgkey,

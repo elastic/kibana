@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
-import { getTemplate } from '../../../legacy/plugins/integrations_manager/server/lib/template/template';
+import { getTemplate } from '../../../legacy/plugins/epm/server/lib/template/template';
 
 export default function({ getService }: FtrProviderContext) {
   // This test was inspired by https://github.com/elastic/kibana/blob/master/x-pack/test/api_integration/apis/monitoring/common/mappings_exist.js
