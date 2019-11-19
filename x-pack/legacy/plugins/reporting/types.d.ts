@@ -198,7 +198,7 @@ export interface JobParamPostPayload {
 
 export interface JobDocPayload {
   headers?: Record<string, string>;
-  jobParams: any;
+  jobParams: JobParamsSavedObject;
   title: string;
   type: string | null;
   objects?: null | object[];
@@ -251,20 +251,28 @@ export interface ESQueueWorker {
   on: (event: string, handler: any) => void;
 }
 
+export type JobParamsUrl = object;
+
+interface JobParamsSavedObject {
+  savedObjectType: string;
+  savedObjectId: string;
+  isImmediate: boolean;
+}
+
 export type ESQueueCreateJobFn = (
-  jobParams: any,
+  jobParams: JobParamsSavedObject | JobParamsUrl,
   headers: Record<string, string>,
   request: RequestFacade
-) => Promise<object>;
+) => Promise<JobParamsSavedObject>;
 
 export type ImmediateCreateJobFn = (
-  jobParams: { savedObjectType: string; savedObjectId: string; isImmediate: boolean },
+  jobParams: JobParamsSavedObject,
   headers: Record<string, string>,
   req: RequestFacade
 ) => Promise<{
   type: string | null;
   title: string;
-  jobParams: { savedObjectType: string; savedObjectId: string; isImmediate: boolean };
+  jobParams: JobParamsSavedObject;
 }>;
 
 export type ESQueueWorkerExecuteFn = (

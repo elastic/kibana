@@ -9,6 +9,7 @@ import { get } from 'lodash';
 import { events as esqueueEvents } from './esqueue';
 import {
   Job,
+  JobParamsUrl,
   ServerFacade,
   RequestFacade,
   Logger,
@@ -35,7 +36,7 @@ export function enqueueJobFactory(server: ServerFacade) {
   return async function enqueueJob(
     parentLogger: Logger,
     exportTypeId: string,
-    jobParams: object,
+    jobParams: JobParamsUrl,
     user: string,
     headers: ConditionalHeaders['headers'],
     request: RequestFacade
