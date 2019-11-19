@@ -10,6 +10,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import { updateSignal } from '../alerts/update_signals';
 import { UpdateSignalsRequest } from '../alerts/types';
 import { updateSignalSchema } from './schemas';
+import { ServerFacade } from '../../../types';
 import { getIdError, transformOrError } from './utils';
 
 export const createUpdateSignalsRoute: Hapi.ServerRoute = {
@@ -94,6 +95,6 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
   },
 };
 
-export const updateSignalsRoute = (server: Hapi.Server) => {
+export const updateSignalsRoute = (server: ServerFacade) => {
   server.route(createUpdateSignalsRoute);
 };
