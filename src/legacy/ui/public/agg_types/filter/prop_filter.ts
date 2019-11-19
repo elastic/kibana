@@ -59,24 +59,21 @@ function propFilter<P extends string>(prop: P) {
       return list;
     }
 
-    const options = filters.reduce(
-      (acc, filter) => {
-        let type = 'include';
-        let value = filter;
+    const options = filters.reduce((acc, filter) => {
+      let type = 'include';
+      let value = filter;
 
-        if (filter.charAt(0) === '!') {
-          type = 'exclude';
-          value = filter.substr(1);
-        }
+      if (filter.charAt(0) === '!') {
+        type = 'exclude';
+        value = filter.substr(1);
+      }
 
-        if (!acc[type]) {
-          acc[type] = [];
-        }
-        acc[type].push(value);
-        return acc;
-      },
-      {} as { [type: string]: string[] }
-    );
+      if (!acc[type]) {
+        acc[type] = [];
+      }
+      acc[type].push(value);
+      return acc;
+    }, {} as { [type: string]: string[] });
 
     return list.filter(item => {
       const value = item[prop];

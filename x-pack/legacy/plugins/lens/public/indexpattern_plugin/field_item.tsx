@@ -35,8 +35,12 @@ import {
   niceTimeFormatter,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { Filter, buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
-import { Query } from 'src/plugins/data/common';
+import {
+  Query,
+  esFilters,
+  esQuery,
+  IIndexPattern,
+} from '../../../../../../src/plugins/data/public';
 // @ts-ignore
 import { fieldFormats } from '../../../../../../src/legacy/ui/public/registry/field_formats';
 import { DraggedField } from './indexpattern';
@@ -55,7 +59,7 @@ export interface FieldItemProps {
   exists: boolean;
   query: Query;
   dateRange: DatasourceDataPanelProps['dateRange'];
-  filters: Filter[];
+  filters: esFilters.Filter[];
   hideDetails?: boolean;
 }
 
@@ -127,7 +131,12 @@ export function FieldItem(props: FieldItemProps) {
     core.http
       .post(`/api/lens/index_stats/${indexPattern.title}/field`, {
         body: JSON.stringify({
-          dslQuery: buildEsQuery(indexPattern, query, filters, getEsQueryConfig(core.uiSettings)),
+          dslQuery: esQuery.buildEsQuery(
+            indexPattern as IIndexPattern,
+            query,
+            filters,
+            esQuery.getEsQueryConfig(core.uiSettings)
+          ),
           fromDate: dateRange.fromDate,
           toDate: dateRange.toDate,
           timeFieldName: indexPattern.timeFieldName,

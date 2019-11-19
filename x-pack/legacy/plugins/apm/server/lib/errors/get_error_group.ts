@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
@@ -55,9 +54,9 @@ export async function getErrorGroup({
   };
 
   const resp = await client.search<APMError>(params);
-  const error = idx(resp, _ => _.hits.hits[0]._source);
-  const transactionId = idx(error, _ => _.transaction.id);
-  const traceId = idx(error, _ => _.trace.id);
+  const error = resp.hits.hits[0]?._source;
+  const transactionId = error?.transaction?.id;
+  const traceId = error?.trace?.id;
 
   let transaction;
   if (transactionId && traceId) {

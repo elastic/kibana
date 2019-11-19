@@ -75,9 +75,9 @@ export async function loadIndexPatterns({
 
   return resp.savedObjects.reduce(
     (acc, savedObject) => {
-      const indexPattern = fromSavedObject(savedObject as SimpleSavedObject<
-        SavedIndexPatternAttributes
-      >);
+      const indexPattern = fromSavedObject(
+        savedObject as SimpleSavedObject<SavedIndexPatternAttributes>
+      );
       acc[indexPattern.id] = indexPattern;
       return acc;
     },
@@ -263,13 +263,10 @@ export async function syncExistingFields({
 }
 
 function booleanMap(keys: string[]) {
-  return keys.reduce(
-    (acc, key) => {
-      acc[key] = true;
-      return acc;
-    },
-    {} as Record<string, boolean>
-  );
+  return keys.reduce((acc, key) => {
+    acc[key] = true;
+    return acc;
+  }, {} as Record<string, boolean>);
 }
 
 function isSingleEmptyLayer(layerMap: IndexPatternPrivateState['layers']) {

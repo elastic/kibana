@@ -71,13 +71,12 @@
 
 import _ from 'lodash';
 import angular from 'angular';
-import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 
 import { normalizeSortRequest } from './_normalize_sort_request';
 
 import { fetchSoon } from '../fetch';
 import { fieldWildcardFilter } from '../../field_wildcard';
-import { getHighlightRequest } from '../../../../../plugins/data/common/field_formats';
+import { getHighlightRequest, esQuery } from '../../../../../plugins/data/public';
 import { npSetup } from 'ui/new_platform';
 import chrome from '../../chrome';
 import { RequestFailure } from '../fetch/errors';
@@ -491,8 +490,8 @@ export class SearchSource {
           _.set(flatData.body, '_source.includes', remainingFields);
         }
 
-        const esQueryConfigs = getEsQueryConfig(config);
-        flatData.body.query = buildEsQuery(flatData.index, flatData.query, flatData.filters, esQueryConfigs);
+        const esQueryConfigs = esQuery.getEsQueryConfig(config);
+        flatData.body.query = esQuery.buildEsQuery(flatData.index, flatData.query, flatData.filters, esQueryConfigs);
 
         if (flatData.highlightAll != null) {
           if (flatData.highlightAll && flatData.body.query) {

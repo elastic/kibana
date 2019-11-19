@@ -18,7 +18,7 @@ import {
   getHumanReadableLogonType,
   getUserDomainField,
   getUserNameField,
-  useTargetUserAndTargetDomain,
+  getTargetUserAndTargetDomain,
 } from './helpers';
 
 import * as i18n from './translations';
@@ -65,10 +65,10 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
     userName,
     winlogEventId,
   }) => {
-    const domain = useTargetUserAndTargetDomain(eventAction) ? endgameTargetDomainName : userDomain;
+    const domain = getTargetUserAndTargetDomain(eventAction) ? endgameTargetDomainName : userDomain;
     const eventDetails = getEventDetails(eventAction);
     const hostNameSeparator = getHostNameSeparator(eventAction);
-    const user = useTargetUserAndTargetDomain(eventAction) ? endgameTargetUserName : userName;
+    const user = getTargetUserAndTargetDomain(eventAction) ? endgameTargetUserName : userName;
     const userDomainField = getUserDomainField(eventAction);
     const userNameField = getUserNameField(eventAction);
 

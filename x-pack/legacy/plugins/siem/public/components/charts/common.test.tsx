@@ -109,20 +109,70 @@ describe('getChartWidth', () => {
 
 describe('checkIfAllValuesAreZero', () => {
   const mockInvalidDataSets: Array<[ChartSeriesData[]]> = [
-    [[{ key: 'mockKey', color: 'mockColor', value: [{ x: 1, y: 0 }, { x: 1, y: 1 }] }]],
     [
       [
-        { key: 'mockKeyA', color: 'mockColor', value: [{ x: 1, y: 0 }, { x: 1, y: 1 }] },
-        { key: 'mockKeyB', color: 'mockColor', value: [{ x: 1, y: 0 }, { x: 1, y: 0 }] },
+        {
+          key: 'mockKey',
+          color: 'mockColor',
+          value: [
+            { x: 1, y: 0 },
+            { x: 1, y: 1 },
+          ],
+        },
+      ],
+    ],
+    [
+      [
+        {
+          key: 'mockKeyA',
+          color: 'mockColor',
+          value: [
+            { x: 1, y: 0 },
+            { x: 1, y: 1 },
+          ],
+        },
+        {
+          key: 'mockKeyB',
+          color: 'mockColor',
+          value: [
+            { x: 1, y: 0 },
+            { x: 1, y: 0 },
+          ],
+        },
       ],
     ],
   ];
   const mockValidDataSets: Array<[ChartSeriesData[]]> = [
-    [[{ key: 'mockKey', color: 'mockColor', value: [{ x: 0, y: 0 }, { x: 1, y: 0 }] }]],
     [
       [
-        { key: 'mockKeyA', color: 'mockColor', value: [{ x: 1, y: 0 }, { x: 3, y: 0 }] },
-        { key: 'mockKeyB', color: 'mockColor', value: [{ x: 2, y: 0 }, { x: 4, y: 0 }] },
+        {
+          key: 'mockKey',
+          color: 'mockColor',
+          value: [
+            { x: 0, y: 0 },
+            { x: 1, y: 0 },
+          ],
+        },
+      ],
+    ],
+    [
+      [
+        {
+          key: 'mockKeyA',
+          color: 'mockColor',
+          value: [
+            { x: 1, y: 0 },
+            { x: 3, y: 0 },
+          ],
+        },
+        {
+          key: 'mockKeyB',
+          color: 'mockColor',
+          value: [
+            { x: 2, y: 0 },
+            { x: 4, y: 0 },
+          ],
+        },
       ],
     ],
   ];

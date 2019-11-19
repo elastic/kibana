@@ -48,10 +48,10 @@ function renderTime(date, aggregationInterval) {
   }
 }
 
-function showLinksMenuForItem(item) {
-  const canConfigureRules = (isRuleSupported(item) && checkPermission('canUpdateJob'));
+function showLinksMenuForItem(item, showViewSeriesLink) {
+  const canConfigureRules = (isRuleSupported(item.source) && checkPermission('canUpdateJob'));
   return (canConfigureRules ||
-    item.isTimeSeriesViewRecord ||
+    (showViewSeriesLink && item.isTimeSeriesViewRecord) ||
     item.entityName === 'mlcategory' ||
     item.customUrls !== undefined);
 }
@@ -248,7 +248,7 @@ export function getColumns(
     });
   }
 
-  const showLinks = (showViewSeriesLink === true) || items.some(item => showLinksMenuForItem(item));
+  const showLinks = items.some(item => showLinksMenuForItem(item, showViewSeriesLink));
 
   if (showLinks === true) {
     columns.push({
