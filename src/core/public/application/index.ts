@@ -25,6 +25,9 @@ export {
   AppUnmount,
   AppMountContext,
   AppMountParameters,
+  AppStatus,
+  AppUpdatableFields,
+  AppStatusUpdater,
   ApplicationSetup,
   ApplicationStart,
   // Internal types

@@ -74,7 +74,16 @@ import {
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
 
-export { App, AppBase, AppUnmount, AppMountContext, AppMountParameters } from './application';
+export {
+  App,
+  AppBase,
+  AppUnmount,
+  AppMountContext,
+  AppMountParameters,
+  AppStatus,
+  AppUpdatableFields,
+  AppStatusUpdater,
+} from './application';
 
 export {
   SavedObjectsBatchResponse,
