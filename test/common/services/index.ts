@@ -25,8 +25,8 @@ import { RetryProvider } from './retry';
 import { RandomnessProvider } from './randomness';
 
 export const services = {
-  es: LegacyEsProvider,
-  '@elastic/elasticsearch': ElasticsearchProvider,
+  legacyEs: LegacyEsProvider,
+  es: ElasticsearchProvider,
   esArchiver: EsArchiverProvider,
   kibanaServer: KibanaServerProvider,
   retry: RetryProvider,

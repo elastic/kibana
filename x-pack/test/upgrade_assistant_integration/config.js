@@ -22,7 +22,7 @@ export default async function ({ readConfigFile }) {
     services: {
       ...kibanaCommonConfig.get('services'),
       supertest: kibanaAPITestsConfig.get('services.supertest'),
-      es: LegacyEsProvider,
+      legacyEs: LegacyEsProvider,
     },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {
