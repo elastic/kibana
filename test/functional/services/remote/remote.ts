@@ -128,8 +128,12 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
       .manage()
       .window()
       .setRect({ width, height });
-    await driver.executeScript('try { window.sessionStorage.clear(); } catch (err) {};');
-    await driver.executeScript('try { window.localStorage.clear(); } catch (err) {};');
+    await driver.executeScript(
+      `try { window.sessionStorage.clear(); } catch (err) { console.log('WebDriverError: ' + err) };`
+    );
+    await driver.executeScript(
+      `try { window.localStorage.clear(); } catch (err) { console.log('WebDriverError: ' + err) };`
+    );
   });
 
   lifecycle.on('cleanup', async () => {
