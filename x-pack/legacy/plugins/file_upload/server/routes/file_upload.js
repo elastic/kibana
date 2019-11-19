@@ -20,25 +20,33 @@ function importData({
 export function getImportRouteHandler(elasticsearchPlugin, getSavedObjectsRepository) {
   return async request => {
 
+    const requestObj = {
+      query: request.query,
+      payload: request.payload,
+      params: request.payload,
+      auth: request.auth,
+      headers: request.headers
+    };
+
     // `id` being `undefined` tells us that this is a new import due to create a new index.
     // follow-up import calls to just add additional data will include the `id` of the created
     // index, we'll ignore those and don't increment the counter.
-    const { id } = request.query;
+    const { id } = requestObj.query;
     if (id === undefined) {
       await updateTelemetry({ elasticsearchPlugin, getSavedObjectsRepository });
     }
 
-    const requestContent = {
+    const requestContentWithDefaults = {
       id,
-      callWithRequest: callWithRequestFactory(elasticsearchPlugin, request),
+      callWithRequest: callWithRequestFactory(elasticsearchPlugin, requestObj),
       index: undefined,
       settings: {},
       mappings: {},
       ingestPipeline: {},
       data: [],
-      ...request.payload
+      ...requestObj.payload
     };
-    return importData(requestContent)
+    return importData(requestContentWithDefaults)
       .catch(wrapError);
   };
 }
