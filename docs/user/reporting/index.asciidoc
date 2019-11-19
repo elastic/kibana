@@ -11,14 +11,14 @@ saved search, or Canvas workpad.  You can create the report on demand,
 schedule it for later, or trigger a report based on specified conditions. 
 You can keep the report for yourself, or automatically share it with others via email.
 
-Reporting is located in the *Share* menu 
+Reporting is available from the *Share* menu 
 in *Discover*, *Visualize*, *Dashboard*, and *Canvas*.
 
 [role="screenshot"]
 image::user/reporting/images/share-button.png["Share"]
 
 [float]
-== System setup
+== Chromium setup
 
 {reporting} is automatically enabled in {kib}. The first time {kib} runs, it extracts a custom build for the Chromium web browser, which
 runs on the server in headless mode to load {kib} and capture the rendered {kib} charts as images.
@@ -45,10 +45,11 @@ want to report on and the {es} indices.
 . In the {kib} toolbar, click *Share*.  If you are working in Canvas, 
 click the share icon image:user/reporting/images/canvas-share-button.png["Canvas Share button"].
 
-. Select the appropriate option for generating the report:
+. Select the appropriate option for generating the report. You can export:
 +
-You can export a dashboard or visualization as either a PNG or PDF document, 
-a Canvas workspad as a PDF document, and a saved search as a CSV document.
+** A dashboard or visualization as either a PNG or PDF document
+** A Canvas workpad as a PDF document
+** A saved search as a CSV document
 
 . Generate the report.
 +
@@ -60,7 +61,7 @@ A notification appears when the report is complete.
 
 By default, {kib} creates a PDF  
 using the existing layout and size of the dashboard. To create a 
-print-friendly PDF with multiple A4 portrait pages and two visualizations 
+printer-friendly PDF with multiple A4 portrait pages and two visualizations 
 per page, turn on *Optimize for printing*.
 
 [role="screenshot"]
@@ -72,7 +73,7 @@ image::user/reporting/images/preserve-layout-switch.png["Share"]
 == View and manage report history
 
 For a list of your reports, go to *Management > Reporting*.  
-From this view, you can monitor generation of a report and 
+From this view, you can monitor the generation of a report and 
 download reports that you previously generated.
 
 [float]
