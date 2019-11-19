@@ -4,74 +4,76 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import createContainer from 'constate';
-import { useMemo, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 
-import { useLogEntryRate } from './log_entry_rate';
-import { GetLogEntryRateSuccessResponsePayload } from '../../../../common/http_api/log_analysis';
+import {
+  GetLogEntryRateSuccessResponsePayload,
+  LogEntryRateHistogramBucket,
+  LogEntryRatePartition,
+} from '../../../../common/http_api/log_analysis';
+import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { callGetLogEntryRateAPI } from './service_calls/get_log_entry_rate';
 
-type PartitionBucket = {
+type PartitionBucket = LogEntryRatePartition & {
   startTime: number;
-} & GetLogEntryRateSuccessResponsePayload['data']['histogramBuckets'][0]['partitions'][0];
+};
 
 type PartitionRecord = Record<
   string,
   { buckets: PartitionBucket[]; topAnomalyScore: number; totalNumberOfLogEntries: number }
 >;
 
-export interface LogRateResults {
+export interface LogEntryRateResults {
   bucketDuration: number;
   totalNumberOfLogEntries: number;
-  histogramBuckets: GetLogEntryRateSuccessResponsePayload['data']['histogramBuckets'];
+  histogramBuckets: LogEntryRateHistogramBucket[];
   partitionBuckets: PartitionRecord;
 }
 
-export const useLogAnalysisResults = ({
+export const useLogEntryRateResults = ({
   sourceId,
   startTime,
   endTime,
   bucketDuration = 15 * 60 * 1000,
-  lastRequestTime,
 }: {
   sourceId: string;
   startTime: number;
   endTime: number;
-  bucketDuration?: number;
-  lastRequestTime: number;
+  bucketDuration: number;
 }) => {
-  const { isLoading: isLoadingLogEntryRate, logEntryRate, getLogEntryRate } = useLogEntryRate({
-    sourceId,
-    startTime,
-    endTime,
-    bucketDuration,
-  });
+  const [logEntryRate, setLogEntryRate] = useState<LogEntryRateResults | null>(null);
 
-  const isLoading = useMemo(() => isLoadingLogEntryRate, [isLoadingLogEntryRate]);
+  const [getLogEntryRateRequest, getLogEntryRate] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'resolution',
+      createPromise: async () => {
+        return await callGetLogEntryRateAPI(sourceId, startTime, endTime, bucketDuration);
+      },
+      onResolve: ({ data }) => {
+        setLogEntryRate({
+          bucketDuration: data.bucketDuration,
+          totalNumberOfLogEntries: data.totalNumberOfLogEntries,
+          histogramBuckets: data.histogramBuckets,
+          partitionBuckets: formatLogEntryRateResultsByPartition(data),
+        });
+      },
+      onReject: () => {
+        setLogEntryRate(null);
+      },
+    },
+    [sourceId, startTime, endTime, bucketDuration]
+  );
 
-  useEffect(() => {
-    getLogEntryRate();
-  }, [sourceId, startTime, endTime, bucketDuration, lastRequestTime]);
-
-  const logRateResults: LogRateResults | null = useMemo(() => {
-    if (logEntryRate) {
-      return {
-        bucketDuration: logEntryRate.bucketDuration,
-        totalNumberOfLogEntries: logEntryRate.totalNumberOfLogEntries,
-        histogramBuckets: logEntryRate.histogramBuckets,
-        partitionBuckets: formatLogEntryRateResultsByPartition(logEntryRate),
-      };
-    } else {
-      return null;
-    }
-  }, [logEntryRate]);
+  const isLoading = useMemo(() => getLogEntryRateRequest.state === 'pending', [
+    getLogEntryRateRequest.state,
+  ]);
 
   return {
+    getLogEntryRate,
     isLoading,
-    logRateResults,
+    logEntryRate,
   };
 };
-
-export const LogAnalysisResults = createContainer(useLogAnalysisResults);
 
 const formatLogEntryRateResultsByPartition = (
   results: GetLogEntryRateSuccessResponsePayload['data']

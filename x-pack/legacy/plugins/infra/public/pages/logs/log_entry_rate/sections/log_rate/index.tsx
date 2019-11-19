@@ -8,7 +8,7 @@ import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiTitle, EuiText } from 
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 
-import { LogRateResults as Results } from '../../../../../containers/logs/log_analysis/log_analysis_results';
+import { LogEntryRateResults as Results } from '../../use_log_entry_rate_results';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { LogEntryRateBarChart } from './bar_chart';
 import { getLogEntryRatePartitionedSeries } from '../helpers/data_formatters';

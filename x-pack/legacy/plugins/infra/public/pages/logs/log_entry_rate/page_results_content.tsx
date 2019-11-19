@@ -17,17 +17,12 @@ import {
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
 import { LoadingOverlayWrapper } from '../../../components/loading_overlay_wrapper';
-import {
-  StringTimeRange,
-  useLogAnalysisResults,
-  useLogAnalysisResultsUrlState,
-} from '../../../containers/logs/log_analysis';
 import { useInterval } from '../../../hooks/use_interval';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
@@ -35,6 +30,11 @@ import { FirstUseCallout } from './first_use';
 import { AnomaliesResults } from './sections/anomalies';
 import { LogRateResults } from './sections/log_rate';
 import { useLogEntryRateJobsContext } from './use_log_entry_rate_jobs';
+import { useLogEntryRateResults } from './use_log_entry_rate_results';
+import {
+  StringTimeRange,
+  useLogAnalysisResultsUrlState,
+} from './use_log_entry_rate_results_url_state';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
@@ -65,32 +65,20 @@ export const LogEntryRateResultsContent = ({
     lastChangedTime: Date.now(),
   }));
 
-  const bucketDuration = useMemo(() => {
-    // This function takes the current time range in ms,
-    // works out the bucket interval we'd need to always
-    // display 100 data points, and then takes that new
-    // value and works out the nearest multiple of
-    // 900000 (15 minutes) to it, so that we don't end up with
-    // jaggy bucket boundaries between the ML buckets and our
-    // aggregation buckets.
-    const msRange = moment(queryTimeRange.value.endTime).diff(
-      moment(queryTimeRange.value.startTime)
-    );
-    const bucketIntervalInMs = msRange / 100;
-    const result = bucketSpan * Math.round(bucketIntervalInMs / bucketSpan);
-    const roundedResult = parseInt(Number(result).toFixed(0), 10);
-    return roundedResult < bucketSpan ? bucketSpan : roundedResult;
-  }, [queryTimeRange.value.startTime, queryTimeRange.value.endTime]);
+  const bucketDuration = useMemo(
+    () => getBucketDuration(queryTimeRange.value.startTime, queryTimeRange.value.endTime),
+    [queryTimeRange.value.endTime, queryTimeRange.value.startTime]
+  );
 
-  const { isLoading, logRateResults } = useLogAnalysisResults({
+  const { getLogEntryRate, isLoading, logEntryRate } = useLogEntryRateResults({
     sourceId,
     startTime: queryTimeRange.value.startTime,
     endTime: queryTimeRange.value.endTime,
     bucketDuration,
-    lastRequestTime: queryTimeRange.lastChangedTime,
   });
-  const hasResults = useMemo(() => logRateResults && logRateResults.histogramBuckets.length > 0, [
-    logRateResults,
+
+  const hasResults = useMemo(() => (logEntryRate?.histogramBuckets?.length ?? 0) > 0, [
+    logEntryRate,
   ]);
 
   const handleQueryTimeRangeChange = useCallback(
@@ -147,6 +135,10 @@ export const LogEntryRateResultsContent = ({
     jobIds,
   } = useLogEntryRateJobsContext();
 
+  useEffect(() => {
+    getLogEntryRate();
+  }, [getLogEntryRate, queryTimeRange.lastChangedTime]);
+
   useInterval(() => {
     fetchJobStatus();
   }, JOB_STATUS_POLLING_INTERVAL);
@@ -168,7 +160,7 @@ export const LogEntryRateResultsContent = ({
           <EuiPanel paddingSize="l">
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
-                {logRateResults ? (
+                {logEntryRate ? (
                   <LoadingOverlayWrapper isLoading={isLoading}>
                     <EuiText size="s">
                       <FormattedMessage
@@ -178,7 +170,7 @@ export const LogEntryRateResultsContent = ({
                           numberOfLogs: (
                             <EuiBadge color="primary">
                               <EuiText size="s" color="ghost">
-                                {numeral(logRateResults.totalNumberOfLogEntries).format('0.00a')}
+                                {numeral(logEntryRate.totalNumberOfLogEntries).format('0.00a')}
                               </EuiText>
                             </EuiBadge>
                           ),
@@ -210,7 +202,7 @@ export const LogEntryRateResultsContent = ({
             {isFirstUse && !hasResults ? <FirstUseCallout /> : null}
             <LogRateResults
               isLoading={isLoading}
-              results={logRateResults}
+              results={logEntryRate}
               setTimeRange={handleChartTimeRangeChange}
               timeRange={queryTimeRange.value}
             />
@@ -223,7 +215,7 @@ export const LogEntryRateResultsContent = ({
               jobStatus={jobStatus['log-entry-rate']}
               viewSetupForReconfiguration={viewSetupForReconfiguration}
               viewSetupForUpdate={viewSetupForUpdate}
-              results={logRateResults}
+              results={logEntryRate}
               setTimeRange={handleChartTimeRangeChange}
               setupStatus={setupStatus}
               timeRange={queryTimeRange.value}
@@ -249,6 +241,23 @@ const stringToNumericTimeRange = (timeRange: StringTimeRange): TimeRange => ({
     })
   ).valueOf(),
 });
+
+/**
+ * This function takes the current time range in ms,
+ * works out the bucket interval we'd need to always
+ * display 100 data points, and then takes that new
+ * value and works out the nearest multiple of
+ * 900000 (15 minutes) to it, so that we don't end up with
+ * jaggy bucket boundaries between the ML buckets and our
+ * aggregation buckets.
+ */
+const getBucketDuration = (startTime: number, endTime: number) => {
+  const msRange = moment(endTime).diff(moment(startTime));
+  const bucketIntervalInMs = msRange / 100;
+  const result = bucketSpan * Math.round(bucketIntervalInMs / bucketSpan);
+  const roundedResult = parseInt(Number(result).toFixed(0), 10);
+  return roundedResult < bucketSpan ? bucketSpan : roundedResult;
+};
 
 // This is needed due to the flex-basis: 100% !important; rule that
 // kicks in on small screens via media queries breaking when using direction="column"

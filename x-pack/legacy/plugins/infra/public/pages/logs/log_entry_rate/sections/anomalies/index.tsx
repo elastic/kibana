@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 
 import euiStyled from '../../../../../../../../common/eui_styled_components';
-import { LogRateResults } from '../../../../../containers/logs/log_analysis/log_analysis_results';
+import { LogEntryRateResults } from '../../use_log_entry_rate_results';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { JobStatus, SetupStatus } from '../../../../../../common/log_analysis';
 import {
@@ -36,7 +36,7 @@ import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay
 export const AnomaliesResults: React.FunctionComponent<{
   isLoading: boolean;
   jobStatus: JobStatus;
-  results: LogRateResults | null;
+  results: LogEntryRateResults | null;
   setTimeRange: (timeRange: TimeRange) => void;
   setupStatus: SetupStatus;
   timeRange: TimeRange;
