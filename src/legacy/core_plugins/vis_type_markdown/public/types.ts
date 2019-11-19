@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Style } from '../../interpreter/public/types';
+import { Style } from 'src/plugins/expressions/public';
 
 export interface Arguments {
   markdown: string;

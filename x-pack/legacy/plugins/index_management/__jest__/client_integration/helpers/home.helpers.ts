@@ -13,9 +13,9 @@ import {
   findTestSubject,
   nextTick,
 } from '../../../../../../test_utils';
-import { IndexManagementHome } from '../../../public/sections/home';
+import { IndexManagementHome } from '../../../public/app/sections/home';
 import { BASE_PATH } from '../../../common/constants';
-import { indexManagementStore } from '../../../public/store';
+import { indexManagementStore } from '../../../public/app/store';
 import { Template } from '../../../common/types';
 
 const testBedConfig: TestBedConfig = {

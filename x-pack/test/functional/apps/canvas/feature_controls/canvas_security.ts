@@ -86,7 +86,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       it(`allows a workpad to be created`, async () => {
         await PageObjects.common.navigateToActualUrl('canvas', 'workpad/create', {
           ensureCurrentUrl: true,
-          showLoginIfPrompted: false,
+          shouldLoginIfPrompted: false,
         });
 
         await PageObjects.canvas.expectAddElementButton();
@@ -98,7 +98,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31',
           {
             ensureCurrentUrl: true,
-            showLoginIfPrompted: false,
+            shouldLoginIfPrompted: false,
           }
         );
 

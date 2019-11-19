@@ -21,7 +21,6 @@ export interface KibanaContextValue {
   currentIndexPattern: IndexPattern;
   currentSavedSearch: SavedSearch;
   indexPatterns: IndexPatterns;
-  kbnBaseUrl: string;
   kibanaConfig: KibanaConfigTypeFix;
 }
 

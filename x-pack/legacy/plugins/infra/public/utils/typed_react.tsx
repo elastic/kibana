@@ -11,18 +11,18 @@ import { InferableComponentEnhancerWithProps } from 'react-redux';
 export type RendererResult = React.ReactElement<any> | null;
 export type RendererFunction<RenderArgs, Result = RendererResult> = (args: RenderArgs) => Result;
 
-export type ChildFunctionRendererProps<RenderArgs> = {
+export type ChildFunctionRendererProps<RenderArgs extends {}> = {
   children: RendererFunction<RenderArgs>;
   initializeOnMount?: boolean;
   resetOnUnmount?: boolean;
 } & RenderArgs;
 
-interface ChildFunctionRendererOptions<RenderArgs> {
+interface ChildFunctionRendererOptions<RenderArgs extends {}> {
   onInitialize?: (props: RenderArgs) => void;
   onCleanup?: (props: RenderArgs) => void;
 }
 
-export const asChildFunctionRenderer = <InjectedProps, OwnProps>(
+export const asChildFunctionRenderer = <InjectedProps extends {}, OwnProps>(
   hoc: InferableComponentEnhancerWithProps<InjectedProps, OwnProps>,
   { onInitialize, onCleanup }: ChildFunctionRendererOptions<InjectedProps> = {}
 ) =>
@@ -43,7 +43,9 @@ export const asChildFunctionRenderer = <InjectedProps, OwnProps>(
       }
 
       public render() {
-        return this.props.children(this.getRendererArgs());
+        return (this.props.children as ChildFunctionRendererProps<InjectedProps>['children'])(
+          this.getRendererArgs()
+        );
       }
 
       private getRendererArgs = () =>
