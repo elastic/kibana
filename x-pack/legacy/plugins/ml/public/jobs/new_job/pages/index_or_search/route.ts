@@ -7,7 +7,6 @@
 import uiRoutes from 'ui/routes';
 import { checkMlNodesAvailable } from '../../../../ml_nodes_check';
 import { preConfiguredJobRedirect } from './preconfigured_job_redirect';
-// @ts-ignore
 import { checkLicenseExpired, checkBasicLicense } from '../../../../license/check_license';
 import { loadIndexPatterns } from '../../../../util/index_utils';
 import {

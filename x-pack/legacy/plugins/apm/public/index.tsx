@@ -9,8 +9,8 @@ import 'react-vis/dist/style.css';
 import 'ui/autoload/all';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
-
 import url from 'url';
+
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import { plugin } from './new-platform';

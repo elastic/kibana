@@ -49,8 +49,6 @@ export async function getMlBucketSize({
 
   try {
     const resp = await client.search<ESResponse, typeof params>(params);
-    // TODO(TS-3.7-ESLINT)
-    // eslint-disable-next-line @typescript-eslint/camelcase
     return resp.hits.hits[0]?._source.bucket_span || 0;
   } catch (err) {
     const isHttpError = 'statusCode' in err;
