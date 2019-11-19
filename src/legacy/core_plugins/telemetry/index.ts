@@ -112,6 +112,7 @@ const telemetry = (kibana: any) => {
           telemetryOptInStatusUrl: config.get('telemetry.optInStatusUrl'),
           allowChangingOptInStatus: config.get('telemetry.allowChangingOptInStatus'),
           telemetrySendUsageFrom: config.get('telemetry.sendUsageFrom'),
+          telemetryNotifyUserAboutOptInDefault: false,
         };
       },
       hacks: ['plugins/telemetry/hacks/telemetry_init', 'plugins/telemetry/hacks/telemetry_opt_in'],
