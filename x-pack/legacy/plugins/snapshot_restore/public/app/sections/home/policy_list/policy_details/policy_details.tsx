@@ -20,6 +20,7 @@ import {
   EuiContextMenu,
   EuiButtonIcon,
   EuiLink,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../common/types';
@@ -301,49 +302,40 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
       maxWidth={550}
     >
       <EuiFlyoutHeader>
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem>
-            <EuiTitle size="m">
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <h2 id="srPolicyDetailsFlyoutTitle" data-test-subj="title">
-                    {policyName}
-                  </h2>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="refresh"
-                    color="subdued"
-                    aria-label={i18n.translate(
-                      'xpack.snapshotRestore.policyDetails.reloadButtonAriaLabel',
-                      { defaultMessage: 'Reload' }
-                    )}
-                    onClick={() => reload()}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiTitle>
-          </EuiFlexItem>
-          {policyDetails && policyDetails.policy && policyDetails.policy.inProgress ? (
-            <EuiFlexItem>
-              <SectionLoading inline={true} size="s">
-                <EuiLink
-                  href={linkToSnapshot(
-                    policyDetails.policy.repository,
-                    policyDetails.policy.inProgress.snapshotName
-                  )}
-                  data-test-subj="inProgressSnapshotLink"
-                >
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.policyDetails.inProgressSnapshotLinkText"
-                    defaultMessage="'{snapshotName}' in progress"
-                    values={{ snapshotName: policyDetails.policy.inProgress.snapshotName }}
-                  />
-                </EuiLink>
-              </SectionLoading>
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
+        <EuiTitle size="m">
+          <h2 id="srPolicyDetailsFlyoutTitle" data-test-subj="title">
+            {policyName}{' '}
+            <EuiButtonIcon
+              iconType="refresh"
+              color="subdued"
+              aria-label={i18n.translate(
+                'xpack.snapshotRestore.policyDetails.reloadButtonAriaLabel',
+                { defaultMessage: 'Reload' }
+              )}
+              onClick={() => reload()}
+            />
+          </h2>
+        </EuiTitle>
+        {policyDetails && policyDetails.policy && policyDetails.policy.inProgress ? (
+          <>
+            <EuiSpacer size="s" />
+            <SectionLoading inline={true} size="s">
+              <EuiLink
+                href={linkToSnapshot(
+                  policyDetails.policy.repository,
+                  policyDetails.policy.inProgress.snapshotName
+                )}
+                data-test-subj="inProgressSnapshotLink"
+              >
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyDetails.inProgressSnapshotLinkText"
+                  defaultMessage="'{snapshotName}' in progress"
+                  values={{ snapshotName: policyDetails.policy.inProgress.snapshotName }}
+                />
+              </EuiLink>
+            </SectionLoading>
+          </>
+        ) : null}
         {renderTabs()}
       </EuiFlyoutHeader>
 
