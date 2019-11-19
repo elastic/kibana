@@ -10,6 +10,7 @@ import Boom from 'boom';
 import { ResponseToolkit } from 'hapi';
 import { GraphQLSchema } from 'graphql';
 import { runHttpQuery } from 'apollo-server-core';
+import { CoreSetup, IRouter } from 'src/core/server';
 import { ServerFacade, RequestFacade } from '../../types';
 
 import {
@@ -27,10 +28,12 @@ interface CallWithRequestParams extends GenericParams {
 export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   public version: string;
   private isProductionMode: boolean;
+  private router: IRouter;
 
-  constructor(private server: ServerFacade) {
-    this.version = server.config().get('pkg.version');
+  constructor(private readonly core: CoreSetup, private __legacy: ServerFacade) {
+    this.version = __legacy.config().get('pkg.version');
     this.isProductionMode = process.env.NODE_ENV === 'production';
+    this.router = core.http.createRouter();
   }
 
   public async callWithRequest(
@@ -64,7 +67,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   }
 
   public exposeStaticDir(urlPath: string, dir: string): void {
-    this.server.route({
+    this.__legacy.route({
       handler: {
         directory: {
           path: dir,
@@ -76,7 +79,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   }
 
   public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
-    this.server.route({
+    this.__legacy.route({
       options: {
         tags: ['access:siem'],
       },
@@ -134,7 +137,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     });
 
     if (!this.isProductionMode) {
-      this.server.route({
+      this.__legacy.route({
         options: {
           tags: ['access:siem'],
         },
@@ -157,7 +160,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   }
 
   public getIndexPatternsService(request: FrameworkRequest): FrameworkIndexPatternsService {
-    return this.server.indexPatternsServiceFactory({
+    return this.__legacy.indexPatternsServiceFactory({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       callCluster: async (method: string, args: [GenericParams], ...rest: any[]) => {
         const fieldCaps = await this.callWithRequest(
@@ -172,7 +175,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   }
 
   public getSavedObjectsService() {
-    return this.server.savedObjects;
+    return this.__legacy.savedObjects;
   }
 }
 

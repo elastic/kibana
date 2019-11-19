@@ -21,7 +21,7 @@ export class Plugin {
   public setup(core: CoreSetup, dependencies: {}, __legacy: ServerFacade) {
     this.logger.info('NP plugin setup');
 
-    initServerWithKibana(__legacy, this.logger);
+    initServerWithKibana(core, __legacy, this.logger);
 
     this.logger.info('NP plugin setup complete');
   }

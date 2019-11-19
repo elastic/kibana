@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CoreSetup } from 'src/core/server';
 import { ServerFacade } from '../../types';
 import { Anomalies } from '../anomalies';
 import { ElasticsearchAnomaliesAdapter } from '../anomalies/elasticsearch_adapter';
@@ -33,9 +34,9 @@ import { Note } from '../note/saved_object';
 import { PinnedEvent } from '../pinned_event/saved_object';
 import { Timeline } from '../timeline/saved_object';
 
-export function compose(server: ServerFacade): AppBackendLibs {
+export function compose(core: CoreSetup, server: ServerFacade): AppBackendLibs {
   const configuration = new KibanaConfigurationAdapter<Configuration>(server);
-  const framework = new KibanaBackendFrameworkAdapter(server);
+  const framework = new KibanaBackendFrameworkAdapter(core, server);
   const sources = new Sources(new ConfigurationSourcesAdapter(configuration));
   const sourceStatus = new SourceStatus(new ElasticsearchSourceStatusAdapter(framework));
 

@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Logger } from 'src/core/server';
+import { CoreSetup, Logger } from 'src/core/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
 import {
@@ -26,7 +26,7 @@ import { ServerFacade } from './types';
 
 const APP_ID = 'siem';
 
-export const initServerWithKibana = (kbnServer: ServerFacade, logger: Logger) => {
+export const initServerWithKibana = (core: CoreSetup, kbnServer: ServerFacade, logger: Logger) => {
   if (kbnServer.plugins.alerting != null) {
     const version = kbnServer.config().get<string>('pkg.version');
     const type = rulesAlertType({ logger, version });
@@ -36,7 +36,7 @@ export const initServerWithKibana = (kbnServer: ServerFacade, logger: Logger) =>
   }
   kbnServer.injectUiAppVars('siem', async () => kbnServer.getInjectedUiAppVars('kibana'));
 
-  const libs = compose(kbnServer);
+  const libs = compose(core, kbnServer);
   initServer(libs);
   if (
     kbnServer.config().has('xpack.actions.enabled') &&
