@@ -15,6 +15,7 @@ import {
   JobDocPayload,
   JobIDForImmediate,
   JobDocOutputExecuted,
+  ImmediateCreateJobFn,
 } from '../../types';
 import { getRouteOptionsCsv } from './lib/route_config_factories';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
@@ -46,7 +47,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
     handler: async (request: RequestFacade, h: ReportingResponseToolkit) => {
       const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(request, { isImmediate: true });
-      const createJobFn = createJobFactory(server);
+      const createJobFn: ImmediateCreateJobFn = createJobFactory(server);
       const executeJobFn = executeJobFactory(server);
       const jobDocPayload: JobDocPayload = await createJobFn(jobParams, request.headers, request);
       const {

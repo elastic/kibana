@@ -261,7 +261,7 @@ export type ImmediateCreateJobFn = (
   jobParams: any,
   headers: Record<string, string>,
   req: RequestFacade
-) => Promise<object>;
+) => Promise<any>; // some kind of job payload
 
 export type ESQueueWorkerExecuteFn = (
   jobId: string,
