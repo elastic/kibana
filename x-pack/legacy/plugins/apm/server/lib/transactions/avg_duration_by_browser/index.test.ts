@@ -22,7 +22,9 @@ describe('getAvgDurationByBrowser', () => {
     const options = ({
       setup: { client: { search }, indices: {}, uiFiltersES: [] }
     } as unknown) as Options;
-    jest.spyOn(fetcherModule, 'fetcher').mockResolvedValueOnce(response);
+    jest
+      .spyOn<{ fetcher: any }, 'fetcher'>(fetcherModule, 'fetcher')
+      .mockResolvedValueOnce(response);
 
     await getTransactionAvgDurationByBrowser(options);
 
