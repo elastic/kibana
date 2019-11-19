@@ -22,13 +22,13 @@ export class HeatmapLayer extends VectorLayer {
     return heatmapLayerDescriptor;
   }
 
-  constructor({ layerDescriptor, source, style }) {
-    super({ layerDescriptor, source, style });
-    if (!style) {
+  constructor({ layerDescriptor, source }) {
+    super({ layerDescriptor, source });
+    if (!layerDescriptor.style) {
       const defaultStyle = HeatmapStyle.createDescriptor();
       this._style = new HeatmapStyle(defaultStyle);
     } else {
-      this._style = style;
+      this._style = new HeatmapStyle(layerDescriptor.style);
     }
   }
 
