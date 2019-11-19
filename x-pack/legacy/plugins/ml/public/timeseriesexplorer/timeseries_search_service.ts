@@ -14,7 +14,7 @@ import { isModelPlotEnabled } from '../../common/util/job_utils';
 import { buildConfigFromDetector } from '../util/chart_config_builder';
 import { mlResultsService } from '../services/results_service';
 import { mlResultsServiceRx, ModelPlotOutput } from '../services/result_service_rx';
-import { Job } from '../jobs/new_job_new/common/job_creator/configs';
+import { Job } from '../jobs/new_job/common/job_creator/configs';
 
 function getMetricDataRx(
   job: Job,

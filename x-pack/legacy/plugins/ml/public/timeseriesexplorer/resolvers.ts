@@ -14,7 +14,7 @@ import {
 } from '../../common/constants/search';
 import { mlTimeSeriesSearchService } from './timeseries_search_service';
 import { mlResultsServiceRx } from '../services/result_service_rx';
-import { Job } from '../jobs/new_job_new/common/job_creator/configs';
+import { Job } from '../jobs/new_job/common/job_creator/configs';
 import { MAX_SCHEDULED_EVENTS, TIME_FIELD_NAME } from './timeseriesexplorer_constants';
 // @ts-ignore
 import {
