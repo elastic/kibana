@@ -45,3 +45,23 @@ export async function getTransaction(
   const resp = await client.search<Transaction>(params);
   return resp.hits.hits[0]?._source;
 }
+
+export async function getRootTransactionByTraceId(
+  traceId: string,
+  setup: Setup
+) {
+  const { client, indices } = setup;
+  const params = {
+    index: indices['apm_oss.transactionIndices'],
+    body: {
+      query: {
+        bool: {
+          must_not: { exists: { field: 'parent' } },
+          must: { match: { 'trace.id': traceId } }
+        }
+      }
+    }
+  };
+  const resp = await client.search<Transaction>(params);
+  return resp.hits.hits[0]?._source;
+}
