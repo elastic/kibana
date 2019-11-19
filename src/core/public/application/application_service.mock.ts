@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 import { ApplicationService } from './application_service';
@@ -52,7 +52,7 @@ const createStartContractMock = (legacyMode = false): jest.Mocked<ApplicationSta
 });
 
 const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart> => ({
-  availableApps$: new Subject<ReadonlyMap<string, App>>(),
+  availableApps$: new BehaviorSubject<ReadonlyMap<string, App>>(new Map()),
   capabilities: capabilitiesServiceMock.createStartContract().capabilities,
   navigateToApp: jest.fn(),
   getUrlForApp: jest.fn(),

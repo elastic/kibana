@@ -102,22 +102,23 @@ export class NavLinksService {
 
   public start({ application, http }: StartDeps): ChromeNavLinks {
     const appLinks$ = application.availableApps$.pipe(
-      // TODO: .filter(([, app]) => !app.chromeless)
       map(apps => {
         return new Map(
-          [...apps].map(
-            ([appId, app]) =>
-              [
-                appId,
-                new NavLinkWrapper({
-                  ...app,
-                  legacy: isLegacyApp(app),
-                  baseUrl: isLegacyApp(app)
-                    ? relativeToAbsolute(http.basePath.prepend(app.appUrl))
-                    : relativeToAbsolute(http.basePath.prepend(`/app/${appId}`)),
-                }),
-              ] as [string, NavLinkWrapper]
-          )
+          [...apps]
+            .filter(([, app]) => !app.chromeless)
+            .map(
+              ([appId, app]) =>
+                [
+                  appId,
+                  new NavLinkWrapper({
+                    ...app,
+                    legacy: isLegacyApp(app),
+                    baseUrl: isLegacyApp(app)
+                      ? relativeToAbsolute(http.basePath.prepend(app.appUrl))
+                      : relativeToAbsolute(http.basePath.prepend(`/app/${appId}`)),
+                  }),
+                ] as [string, NavLinkWrapper]
+            )
         );
       })
     );

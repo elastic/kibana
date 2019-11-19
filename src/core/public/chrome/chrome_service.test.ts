@@ -18,7 +18,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { toArray } from 'rxjs/operators';
+import { take, toArray } from 'rxjs/operators';
 import { shallow } from 'enzyme';
 import React from 'react';
 
@@ -54,7 +54,9 @@ function defaultStartDeps(availableApps?: App[]) {
   };
 
   if (availableApps) {
-    deps.application.availableApps = new Map(availableApps.map(app => [app.id, app]));
+    (deps.application.availableApps$ as Rx.BehaviorSubject<Map<string, App>>).next(
+      new Map(availableApps.map(app => [app.id, app]))
+    );
   }
 
   return deps;
@@ -211,13 +213,14 @@ describe('start', () => {
         new FakeApp('beta', true),
         new FakeApp('gamma', false),
       ]);
-      const { availableApps, currentAppId$ } = startDeps.application;
+      const { availableApps$, currentAppId$ } = startDeps.application;
       const { chrome, service } = await start({ startDeps });
       const promise = chrome
         .getIsVisible$()
         .pipe(toArray())
         .toPromise();
 
+      const availableApps = await availableApps$.pipe(take(1)).toPromise();
       [...availableApps.keys()].forEach(appId => currentAppId$.next(appId));
       service.stop();
 
