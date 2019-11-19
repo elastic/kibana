@@ -29,11 +29,11 @@ const DEFAULT_OPTIONS = {
   stripEmptyFields: true,
 };
 
-interface UseFormReturn<T extends object> {
+interface UseFormReturn<T extends FormData> {
   form: FormHook<T>;
 }
 
-export function useForm<T extends object = FormData>(
+export function useForm<T extends FormData = FormData>(
   formConfig: FormConfig<T> | undefined = {}
 ): UseFormReturn<T> {
   const {
@@ -159,10 +159,11 @@ export function useForm<T extends object = FormData>(
   const addField: FormHook<T>['__addField'] = field => {
     fieldsRefs.current[field.path] = field;
 
-    // Only update the formData if the path does not exist (it is the _first_ time
-    // the field is added), to avoid entering an infinite loop when the form is re-rendered.
-    if (!{}.hasOwnProperty.call(formData$.current.value, field.path)) {
-      updateFormDataAt(field.path, field.__serializeOutput());
+    const currentValue = formData$.current.value[field.path];
+    const fieldValue = field.__serializeOutput();
+
+    if (currentValue !== fieldValue) {
+      updateFormDataAt(field.path, fieldValue);
     }
   };
 
