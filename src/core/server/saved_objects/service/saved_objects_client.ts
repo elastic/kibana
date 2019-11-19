@@ -26,6 +26,7 @@ import {
   SavedObjectsBaseOptions,
   MutatingOperationRefreshSetting,
   SavedObjectsFindOptions,
+  SavedObjectType,
 } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
 
@@ -194,7 +195,7 @@ export class SavedObjectsClient {
    * @param options
    */
   async create<T extends SavedObjectAttributes = any>(
-    type: string,
+    type: string | SavedObjectType,
     attributes: T,
     options?: SavedObjectsCreateOptions
   ) {

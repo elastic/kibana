@@ -50,6 +50,7 @@ interface SavedObjectDoc {
   attributes: object;
   id?: string; // NOTE: SavedObjectDoc is used for uncreated objects where `id` is optional
   type: string;
+  subType?: string;
   namespace?: string;
   migrationVersion?: SavedObjectsMigrationVersion;
   version?: string;
@@ -90,12 +91,13 @@ export class SavedObjectsSerializer {
    * @param {RawDoc} rawDoc - The raw ES document to be tested
    */
   public isRawSavedObject(rawDoc: RawDoc) {
-    const { type, namespace } = rawDoc._source;
+    const { type, subType, namespace } = rawDoc._source;
     const namespacePrefix =
       namespace && !this.schema.isNamespaceAgnostic(type) ? `${namespace}:` : '';
+    const subTypePrefix = subType ? `${subType}:` : '';
     return (
       type &&
-      rawDoc._id.startsWith(`${namespacePrefix}${type}:`) &&
+      rawDoc._id.startsWith(`${namespacePrefix}${type}:${subTypePrefix}`) &&
       rawDoc._source.hasOwnProperty(type)
     );
   }
@@ -107,7 +109,7 @@ export class SavedObjectsSerializer {
    */
   public rawToSavedObject(doc: RawDoc): SanitizedSavedObjectDoc {
     const { _id, _source, _seq_no, _primary_term } = doc;
-    const { type, namespace } = _source;
+    const { type, subType, namespace } = _source;
 
     const version =
       _seq_no != null || _primary_term != null
@@ -116,7 +118,8 @@ export class SavedObjectsSerializer {
 
     return {
       type,
-      id: this.trimIdPrefix(namespace, type, _id),
+      ...(subType && { subType }),
+      id: this.trimId(namespace, type, subType, _id),
       ...(namespace && !this.schema.isNamespaceAgnostic(type) && { namespace }),
       attributes: _source[type],
       references: _source.references || [],
@@ -135,6 +138,7 @@ export class SavedObjectsSerializer {
     const {
       id,
       type,
+      subType,
       namespace,
       attributes,
       migrationVersion,
@@ -145,6 +149,7 @@ export class SavedObjectsSerializer {
     const source = {
       [type]: attributes,
       type,
+      ...(subType && { subType }),
       references,
       ...(namespace && !this.schema.isNamespaceAgnostic(type) && { namespace }),
       ...(migrationVersion && { migrationVersion }),
@@ -152,7 +157,7 @@ export class SavedObjectsSerializer {
     };
 
     return {
-      _id: this.generateRawId(namespace, type, id),
+      _id: this.generateRawId(namespace, type, subType, id),
       _source: source,
       ...(version != null && decodeVersion(version)),
     };
@@ -165,19 +170,31 @@ export class SavedObjectsSerializer {
    * @param {string} type - The saved object type
    * @param {string} id - The id of the saved object
    */
-  public generateRawId(namespace: string | undefined, type: string, id?: string) {
+  public generateRawId(
+    namespace: string | undefined,
+    type: string,
+    subType: string | undefined,
+    id?: string
+  ) {
     const namespacePrefix =
       namespace && !this.schema.isNamespaceAgnostic(type) ? `${namespace}:` : '';
-    return `${namespacePrefix}${type}:${id || uuid.v1()}`;
+    const subTypePrefix = subType ? `${subType}:` : '';
+    return `${namespacePrefix}${type}:${subTypePrefix}${id || uuid.v1()}`;
   }
 
-  private trimIdPrefix(namespace: string | undefined, type: string, id: string) {
+  private trimId(
+    namespace: string | undefined,
+    type: string,
+    subType: string | undefined,
+    id: string
+  ) {
     assertNonEmptyString(id, 'document id');
     assertNonEmptyString(type, 'saved object type');
 
     const namespacePrefix =
       namespace && !this.schema.isNamespaceAgnostic(type) ? `${namespace}:` : '';
-    const prefix = `${namespacePrefix}${type}:`;
+    const subTypePrefix = subType ? `${subType}:` : '';
+    const prefix = `${namespacePrefix}${type}:${subTypePrefix}`;
 
     if (!id.startsWith(prefix)) {
       return id;

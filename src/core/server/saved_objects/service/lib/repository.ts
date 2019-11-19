@@ -51,6 +51,7 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
   MutatingOperationRefreshSetting,
+  SavedObjectType,
 } from '../../types';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 
@@ -83,6 +84,16 @@ export interface SavedObjectsRepositoryOptions {
   migrator: KibanaMigrator;
   allowedTypes: string[];
   onBeforeWrite?: (...args: Parameters<CallCluster>) => Promise<void>;
+}
+
+function coerceToSavedObjectType(type: string | SavedObjectType): SavedObjectType {
+  if (typeof type === 'string') {
+    return {
+      type,
+    };
+  }
+
+  return type;
 }
 
 export interface IncrementCounterOptions extends SavedObjectsBaseOptions {
@@ -158,7 +169,7 @@ export class SavedObjectsRepository {
    * @returns {promise} - { id, type, version, attributes }
    */
   public async create<T extends SavedObjectAttributes>(
-    type: string,
+    type: string | SavedObjectType,
     attributes: T,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObject<T>> {
@@ -170,9 +181,10 @@ export class SavedObjectsRepository {
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
     } = options;
+    const savedObjectType = coerceToSavedObjectType(type);
 
-    if (!this._allowedTypes.includes(type)) {
-      throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
+    if (!this._allowedTypes.includes(savedObjectType.type)) {
+      throw SavedObjectsErrorHelpers.createUnsupportedTypeError(savedObjectType.type);
     }
 
     const method = id && !overwrite ? 'create' : 'index';
@@ -181,7 +193,8 @@ export class SavedObjectsRepository {
     try {
       const migrated = this._migrator.migrateDocument({
         id,
-        type,
+        type: savedObjectType.type,
+        subType: savedObjectType.subType,
         namespace,
         attributes,
         migrationVersion,
@@ -193,7 +206,7 @@ export class SavedObjectsRepository {
 
       const response = await this._writeToCluster(method, {
         id: raw._id,
-        index: this.getIndexForType(type),
+        index: this.getIndexForType(savedObjectType.type),
         refresh,
         body: raw._source,
       });
@@ -333,7 +346,7 @@ export class SavedObjectsRepository {
     const { namespace, refresh = DEFAULT_REFRESH_SETTING } = options;
 
     const response = await this._writeToCluster('delete', {
-      id: this._serializer.generateRawId(namespace, type, id),
+      id: this._serializer.generateRawId(namespace, type, undefined, id),
       index: this.getIndexForType(type),
       refresh,
       ignore: [404],
@@ -545,7 +558,7 @@ export class SavedObjectsRepository {
       body: {
         docs: supportedTypeObjects.map(({ type, id, fields }) => {
           return {
-            _id: this._serializer.generateRawId(namespace, type, id),
+            _id: this._serializer.generateRawId(namespace, type, undefined, id),
             _index: this.getIndexForType(type),
             _source: includedFields(type, fields),
           };
@@ -602,7 +615,7 @@ export class SavedObjectsRepository {
     const { namespace } = options;
 
     const response = await this._callCluster('get', {
-      id: this._serializer.generateRawId(namespace, type, id),
+      id: this._serializer.generateRawId(namespace, type, undefined, id),
       index: this.getIndexForType(type),
       ignore: [404],
     });
@@ -662,7 +675,7 @@ export class SavedObjectsRepository {
     }
 
     const response = await this._writeToCluster('update', {
-      id: this._serializer.generateRawId(namespace, type, id),
+      id: this._serializer.generateRawId(namespace, type, undefined, id),
       index: this.getIndexForType(type),
       ...(version && decodeRequestVersion(version)),
       refresh,
@@ -740,7 +753,7 @@ export class SavedObjectsRepository {
       bulkUpdateParams.push(
         {
           update: {
-            _id: this._serializer.generateRawId(namespace, type, id),
+            _id: this._serializer.generateRawId(namespace, type, undefined, id),
             _index: this.getIndexForType(type),
             ...(version && decodeRequestVersion(version)),
           },
@@ -832,7 +845,7 @@ export class SavedObjectsRepository {
     const raw = this._serializer.savedObjectToRaw(migrated as SanitizedSavedObjectDoc);
 
     const response = await this._writeToCluster('update', {
-      id: this._serializer.generateRawId(namespace, type, id),
+      id: this._serializer.generateRawId(namespace, type, undefined, id),
       index: this.getIndexForType(type),
       refresh,
       _source: true,

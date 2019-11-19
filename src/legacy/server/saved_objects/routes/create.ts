@@ -42,6 +42,7 @@ interface CreateRequest extends WithoutQueryAndParams<Hapi.Request> {
 
 export const createCreateRoute = (prereqs: Prerequisites) => {
   return {
+    // TODO: WHAT DO WE DO HERE????
     path: '/api/saved_objects/{type}/{id?}',
     method: 'POST',
     options: {
