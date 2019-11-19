@@ -20,13 +20,14 @@
 jest.mock('ui/kfetch', () => ({}));
 
 import React from 'react';
+
 import { npStart } from 'ui/new_platform';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers
 
 jest.mock('brace/mode/groovy', () => ({}));
 jest.mock('ui/new_platform');
 
-import { FieldEditorComponent } from './field_editor';
+import { FieldEditor } from './field_editor';
 
 jest.mock('@elastic/eui', () => ({
   EuiBasicTable: 'eui-basic-table',
@@ -129,8 +130,8 @@ describe('FieldEditor', () => {
   });
 
   it('should render create new scripted field correctly', async () => {
-    const component = shallowWithIntl(
-      <FieldEditorComponent
+    const component = shallowWithI18nProvider(
+      <FieldEditor
         indexPattern={indexPattern}
         field={field}
         helpers={helpers}
@@ -156,8 +157,8 @@ describe('FieldEditor', () => {
       return fields[name];
     };
 
-    const component = shallowWithIntl(
-      <FieldEditorComponent
+    const component = shallowWithI18nProvider(
+      <FieldEditor
         indexPattern={indexPattern}
         field={testField}
         helpers={helpers}
@@ -184,8 +185,8 @@ describe('FieldEditor', () => {
       return fields[name];
     };
 
-    const component = shallowWithIntl(
-      <FieldEditorComponent
+    const component = shallowWithI18nProvider(
+      <FieldEditor
         indexPattern={indexPattern}
         field={testField}
         helpers={helpers}
@@ -199,8 +200,8 @@ describe('FieldEditor', () => {
 
   it('should show conflict field warning', async () => {
     const testField = { ...field };
-    const component = shallowWithIntl(
-      <FieldEditorComponent
+    const component = shallowWithI18nProvider(
+      <FieldEditor
         indexPattern={indexPattern}
         field={testField}
         helpers={helpers}
@@ -222,8 +223,8 @@ describe('FieldEditor', () => {
         text: ['index_name_3']
       }
     };
-    const component = shallowWithIntl(
-      <FieldEditorComponent
+    const component = shallowWithI18nProvider(
+      <FieldEditor
         indexPattern={indexPattern}
         field={testField}
         helpers={helpers}
@@ -235,5 +236,4 @@ describe('FieldEditor', () => {
     component.update();
     expect(component).toMatchSnapshot();
   });
-
 });
