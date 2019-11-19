@@ -12,7 +12,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
 import { px, unit, units } from '../../../../../../style/variables';
-import { asTime } from '../../../../../../utils/formatters';
+import { asDuration } from '../../../../../../utils/formatters';
 import { ErrorCountBadge } from '../../ErrorCountBadge';
 import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 import { ErrorOverviewLink } from '../../../../../shared/Links/apm/ErrorOverviewLink';
@@ -133,7 +133,7 @@ const SpanActionToolTip: React.SFC<SpanActionToolTipProps> = ({
 function Duration({ item }: { item: IWaterfallItem }) {
   return (
     <EuiText color="subdued" size="xs">
-      {asTime(item.duration)}
+      {asDuration(item.duration)}
     </EuiText>
   );
 }
