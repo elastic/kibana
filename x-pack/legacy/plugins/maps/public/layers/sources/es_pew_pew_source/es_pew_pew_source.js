@@ -14,7 +14,7 @@ import { UpdateSourceEditor } from './update_source_editor';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { vectorStyles } from '../../styles/vector/vector_style_defaults';
 import { i18n } from '@kbn/i18n';
-import { SOURCE_DATA_ID_ORIGIN, ES_PEW_PEW } from '../../../../common/constants';
+import { SOURCE_DATA_ID_ORIGIN, ES_PEW_PEW, COUNT_PROP_NAME, COUNT_PROP_LABEL } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
 import { Schemas } from 'ui/vis/editors/default/schemas';
@@ -128,8 +128,8 @@ export class ESPewPewSource extends AbstractESAggSource {
         type: DynamicStyleProperty.type,
         options: {
           field: {
-            label: AbstractESAggSource.COUNT_PROP_LABEL,
-            name: AbstractESAggSource.COUNT_PROP_NANE,
+            label: COUNT_PROP_LABEL,
+            name: COUNT_PROP_NAME,
             origin: SOURCE_DATA_ID_ORIGIN
           },
           color: 'Blues'
@@ -139,8 +139,8 @@ export class ESPewPewSource extends AbstractESAggSource {
         type: DynamicStyleProperty.type,
         options: {
           field: {
-            label: AbstractESAggSource.COUNT_PROP_LABEL,
-            name: AbstractESAggSource.COUNT_PROP_NANE,
+            label: COUNT_PROP_LABEL,
+            name: COUNT_PROP_NAME,
             origin: SOURCE_DATA_ID_ORIGIN
           },
           minSize: 4,

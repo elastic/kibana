@@ -54,18 +54,17 @@ export class AbstractESAggSource extends AbstractESSource {
         label: label,
         source: this
       });
-    } else {
-      //this only works because aggType is a fixed set and does not include the `_of_` string
-      const [aggType, docField] = fieldName.split(AGG_DELIMITER);
-      const esDocField = new ESDocField({ fieldName: docField, source: this });
-      return new ESAggMetricField({
-        label: label,
-        esDocField,
-        aggType,
-        source: this,
-        origin: this.getOriginForField()
-      });
     }
+    //this only works because aggType is a fixed set and does not include the `_of_` string
+    const [aggType, docField] = fieldName.split(AGG_DELIMITER);
+    const esDocField = new ESDocField({ fieldName: docField, source: this });
+    return new ESAggMetricField({
+      label: label,
+      esDocField,
+      aggType,
+      source: this,
+      origin: this.getOriginForField()
+    });
   }
 
   getMetricFieldForName(fieldName) {
@@ -124,12 +123,7 @@ export class AbstractESAggSource extends AbstractESSource {
         }
       }
 
-      const tooltipPromise = new Promise(async (resolve) => {
-        const tooltipProperty = await metricField.createTooltipProperty(value);
-        resolve(tooltipProperty);
-      });
-
-
+      const tooltipPromise = metricField.createTooltipProperty(value);
       tooltipPropertiesPromises.push(tooltipPromise);
     });
 

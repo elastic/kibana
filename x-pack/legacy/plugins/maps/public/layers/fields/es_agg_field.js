@@ -33,7 +33,7 @@ export class ESAggMetricField extends AbstractField {
   }
 
   isValid() {
-    return (this.getAggType() === COUNT_AGG_TYPE)  ? true : !!this._esDocField;
+    return (this.getAggType() === COUNT_AGG_TYPE) ? true : !!this._esDocField;
   }
 
   getESDocFieldName() {
@@ -69,5 +69,4 @@ export class ESAggMetricField extends AbstractField {
     }
     return metricAggConfig;
   }
-
 }
