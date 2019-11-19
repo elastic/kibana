@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { pickBy, isNil } from 'lodash/fp';
+import { pickBy } from 'lodash/fp';
 import { SignalAlertType, isAlertType, OutputSignalAlertRest, isAlertTypes } from '../alerts/types';
 
 export const getIdError = ({
