@@ -22,7 +22,7 @@ import React, { Fragment } from 'react';
 import { EuiText, EuiButton } from '@elastic/eui';
 import { VisTypeAliasListEntry } from './type_selection';
 
-import { getServices } from '../../kibana_services';
+import { getHttp } from '../../np_ready/public/services';
 
 interface Props {
   promotedTypes: VisTypeAliasListEntry[];
@@ -33,7 +33,7 @@ export function NewVisHelp(props: Props) {
     <EuiText>
       <p>
         <FormattedMessage
-          id="kbn.visualize.newVisWizard.helpText"
+          id="visualizations.newVisWizard.helpText"
           defaultMessage="Start creating your visualization by selecting a type for that visualization."
         />
       </p>
@@ -43,7 +43,7 @@ export function NewVisHelp(props: Props) {
             <strong>{t.promotion!.description}</strong>
           </p>
           <EuiButton
-            href={getServices().addBasePath(t.aliasUrl)}
+            href={getHttp().basePath.prepend(t.aliasUrl)}
             fill
             size="s"
             iconType="popout"

@@ -22,9 +22,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
+import { SavedObjectFinder } from '../../../../..//ui/public/saved_objects/components/saved_object_finder';
 
-import { VisType } from '../../kibana_services';
+import { VisType } from '../..';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
@@ -40,13 +40,13 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <FormattedMessage
-              id="kbn.visualize.newVisWizard.newVisTypeTitle"
+              id="visualizations.newVisWizard.newVisTypeTitle"
               defaultMessage="New {visTypeName}"
               values={{ visTypeName: this.props.visType.title }}
             />{' '}
             /{' '}
             <FormattedMessage
-              id="kbn.visualize.newVisWizard.chooseSourceTitle"
+              id="visualizations.newVisWizard.chooseSourceTitle"
               defaultMessage="Choose a source"
             />
           </EuiModalHeaderTitle>
@@ -57,7 +57,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
             onChoose={this.props.onSearchSelected}
             showFilter
             noItemsMessage={i18n.translate(
-              'kbn.visualize.newVisWizard.searchSelection.notFoundLabel',
+              'visualizations.newVisWizard.searchSelection.notFoundLabel',
               {
                 defaultMessage: 'No matching indices or saved searches found.',
               }
@@ -67,7 +67,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                 type: 'search',
                 getIconForSavedObject: () => 'search',
                 name: i18n.translate(
-                  'kbn.visualize.newVisWizard.searchSelection.savedObjectType.search',
+                  'visualizations.newVisWizard.searchSelection.savedObjectType.search',
                   {
                     defaultMessage: 'Saved search',
                   }
@@ -77,7 +77,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                 type: 'index-pattern',
                 getIconForSavedObject: () => 'indexPatternApp',
                 name: i18n.translate(
-                  'kbn.visualize.newVisWizard.searchSelection.savedObjectType.indexPattern',
+                  'visualizations.newVisWizard.searchSelection.savedObjectType.indexPattern',
                   {
                     defaultMessage: 'Index pattern',
                   }

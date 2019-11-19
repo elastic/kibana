@@ -53,9 +53,6 @@ export const UI_EXPORT_DEFAULTS = {
     visEditorTypes: [
       'ui/vis/editors/default/default',
     ],
-    embeddableFactories: [
-      'plugins/kibana/visualize/embeddable/visualize_embeddable_factory',
-    ],
     search: [
       'ui/courier/search_strategy/default_search_strategy',
     ],

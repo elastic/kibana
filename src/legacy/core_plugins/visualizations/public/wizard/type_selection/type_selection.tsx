@@ -34,13 +34,12 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { memoizeLast } from '../../../../../visualizations/public/np_ready/public/legacy/memoize';
-import { VisType } from '../../kibana_services';
-import { VisTypeAlias } from '../../../../../visualizations/public';
+import { memoizeLast } from '../../np_ready/public/legacy/memoize';
+import { VisType, VisTypeAlias } from '../..';
 import { NewVisHelp } from './new_vis_help';
 import { VisHelpText } from './vis_help_text';
 import { VisTypeIcon } from './vis_type_icon';
-import { TypesStart } from '../../../../../visualizations/public/np_ready/public/types';
+import { TypesStart } from '../../np_ready/public/types';
 
 export interface VisTypeListEntry extends VisType {
   highlighted: boolean;
@@ -84,7 +83,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <FormattedMessage
-              id="kbn.visualize.newVisWizard.title"
+              id="visualizations.newVisWizard.title"
               defaultMessage="New Visualization"
             />
           </EuiModalHeaderTitle>
@@ -106,7 +105,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                     fullWidth
                     data-test-subj="filterVisType"
                     aria-label={i18n.translate(
-                      'kbn.visualize.newVisWizard.filterVisTypeAriaLabel',
+                      'visualizations.newVisWizard.filterVisTypeAriaLabel',
                       {
                         defaultMessage: 'Filter for a visualization type',
                       }
@@ -118,7 +117,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                     <span aria-live="polite">
                       {query && (
                         <FormattedMessage
-                          id="kbn.visualize.newVisWizard.resultsFound"
+                          id="visualizations.newVisWizard.resultsFound"
                           defaultMessage="{resultCount} {resultCount, plural,
                             one {type}
                             other {types}
@@ -145,7 +144,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                   <EuiTitle size="s">
                     <h2>
                       <FormattedMessage
-                        id="kbn.visualize.newVisWizard.selectVisType"
+                        id="visualizations.newVisWizard.selectVisType"
                         defaultMessage="Select a visualization type"
                       />
                     </h2>
@@ -205,26 +204,26 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     let highlightMsg;
     if (!('aliasUrl' in visType) && visType.stage === 'experimental') {
       stage = {
-        betaBadgeLabel: i18n.translate('kbn.visualize.newVisWizard.experimentalTitle', {
+        betaBadgeLabel: i18n.translate('visualizations.newVisWizard.experimentalTitle', {
           defaultMessage: 'Experimental',
         }),
-        betaBadgeTooltipContent: i18n.translate('kbn.visualize.newVisWizard.experimentalTooltip', {
+        betaBadgeTooltipContent: i18n.translate('visualizations.newVisWizard.experimentalTooltip', {
           defaultMessage:
             'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
         }),
       };
-      highlightMsg = i18n.translate('kbn.visualize.newVisWizard.experimentalDescription', {
+      highlightMsg = i18n.translate('visualizations.newVisWizard.experimentalDescription', {
         defaultMessage:
           'This visualization is experimental. The design and implementation are less mature than stable visualizations and might be subject to change.',
       });
     } else if ('aliasUrl' in visType) {
       if (visType.stage === 'beta') {
-        const aliasDescription = i18n.translate('kbn.visualize.newVisWizard.betaDescription', {
+        const aliasDescription = i18n.translate('visualizations.newVisWizard.betaDescription', {
           defaultMessage:
             'This visualization is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features',
         });
         stage = {
-          betaBadgeLabel: i18n.translate('kbn.visualize.newVisWizard.betaTitle', {
+          betaBadgeLabel: i18n.translate('visualizations.newVisWizard.betaTitle', {
             defaultMessage: 'Beta',
           }),
           betaBadgeTooltipContent: aliasDescription,
@@ -233,13 +232,13 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         highlightMsg = aliasDescription;
       } else {
         const aliasDescription = i18n.translate(
-          'kbn.visualize.newVisWizard.visTypeAliasDescription',
+          'visualizations.newVisWizard.visTypeAliasDescription',
           {
             defaultMessage: 'Opens a Kibana application that is outside of Visualize.',
           }
         );
         stage = {
-          betaBadgeLabel: i18n.translate('kbn.visualize.newVisWizard.visTypeAliasTitle', {
+          betaBadgeLabel: i18n.translate('visualizations.newVisWizard.visTypeAliasTitle', {
             defaultMessage: 'Kibana application',
           }),
           betaBadgeTooltipContent: aliasDescription,

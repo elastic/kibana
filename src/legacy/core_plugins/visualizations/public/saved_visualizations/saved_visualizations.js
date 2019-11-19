@@ -20,10 +20,10 @@
 import './_saved_vis';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
-import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
-import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
-import { createVisualizeEditUrl } from '../visualize_constants';
+import { savedObjectManagementRegistry } from '../../../kibana/public/management/saved_object_registry';
+import { createVisualizeEditUrl } from '../../../kibana/public/visualize/visualize_constants';
 import { findListItems } from './find_list_items';
+import { getTypes } from '../np_ready/public/services';
 
 const app = uiModules.get('app/visualize');
 
@@ -35,7 +35,7 @@ savedObjectManagementRegistry.register({
 });
 
 app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) {
-  const visTypes = visualizations.types;
+  const visTypes = getTypes();
   const savedObjectClient = Private(SavedObjectsClientProvider);
   const saveVisualizationLoader = new SavedObjectLoader(
     SavedVis,
@@ -84,7 +84,7 @@ app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) 
       size,
       mapSavedObjectApiHits: this.mapSavedObjectApiHits.bind(this),
       savedObjectsClient: this.savedObjectsClient,
-      visTypes: visualizations.types.getAliases(),
+      visTypes: getTypes().getAliases(),
     });
   };
 

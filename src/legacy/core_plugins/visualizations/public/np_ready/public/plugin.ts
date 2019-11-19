@@ -18,7 +18,33 @@
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { TypesService, TypesSetup, TypesStart } from './types';
-import { setUISettings, setTypes, setI18n } from './services';
+import {
+  setUISettings,
+  setCapabilities,
+  setTypes,
+  setHttp,
+  setSavedObjectsClient,
+  setI18n,
+} from './services';
+import { ExpressionsSetup } from '../../../../../../plugins/expressions/public';
+import { IEmbeddableSetup } from '../../../../../../plugins/embeddable/public';
+
+import { visualization as visualizationFunction } from '../../expressions/visualization_function';
+import { visualization as visualizationRenderer } from '../../expressions/visualization_renderer';
+import { VisualizeEmbeddableFactory } from '../../embeddable/visualize_embeddable_factory';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '../../embeddable';
+import { showNewVisModal } from '../../wizard';
+
+import { SavedObjectRegistryProvider } from '../../legacy_imports';
+import '../../saved_visualizations';
+
+export interface VisualizationsSetupDeps {
+  expressions: ExpressionsSetup;
+}
+
+export interface VisualizationsStartDeps {
+  embeddable: IEmbeddableSetup;
+}
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -32,6 +58,7 @@ export interface VisualizationsSetup {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisualizationsStart {
   types: TypesStart;
+  showNewVisModal: typeof showNewVisModal;
 }
 
 /**
@@ -42,24 +69,44 @@ export interface VisualizationsStart {
  *
  * @internal
  */
-export class VisualizationsPlugin implements Plugin<VisualizationsSetup, VisualizationsStart> {
+export class VisualizationsPlugin
+  implements Plugin<VisualizationsSetup, VisualizationsStart, VisualizationsSetupDeps> {
   private readonly types: TypesService = new TypesService();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, { expressions }: VisualizationsSetupDeps) {
     setUISettings(core.uiSettings);
+
+    expressions.registerFunction(visualizationFunction);
+    expressions.registerRenderer(visualizationRenderer);
+
     return {
       types: this.types.setup(),
     };
   }
 
-  public start(core: CoreStart) {
-    setI18n(core.i18n);
+  public start(core: CoreStart, { embeddable }: VisualizationsStartDeps) {
     const types = this.types.start();
+    setI18n(core.i18n);
     setTypes(types);
+    setCapabilities(core.application.capabilities);
+    setHttp(core.http);
+    setSavedObjectsClient(core.savedObjects.client);
+
+    // regostration of theese two items should happen in setup, but we depend on start contracts
+    embeddable.registerEmbeddableFactory(
+      VISUALIZE_EMBEDDABLE_TYPE,
+      new VisualizeEmbeddableFactory()
+    );
+
+    SavedObjectRegistryProvider.register((savedVisualizations: any) => {
+      return savedVisualizations;
+    });
+
     return {
       types,
+      showNewVisModal,
     };
   }
 

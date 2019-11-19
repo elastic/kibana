@@ -123,4 +123,4 @@ export { VisType } from 'ui/vis';
 // export const
 export { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-export { VisSavedObject } from './embeddable/visualize_embeddable';
+export { VisSavedObject } from '../../../visualizations/public/embeddable/visualize_embeddable';

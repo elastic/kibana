@@ -25,10 +25,9 @@
  * NOTE: It's a type of SavedObject, but specific to visualizations.
  */
 
-import { Vis } from 'ui/vis';
+import { Vis, updateOldState } from '..';
 import { uiModules } from 'ui/modules';
-import { updateOldState } from '../../../../visualizations/public';
-import { VisualizeConstants } from '../visualize_constants';
+import { VisualizeConstants } from '../../../kibana/public/visualize/visualize_constants';
 import { createLegacyClass } from 'ui/utils/legacy_class';
 import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 import {

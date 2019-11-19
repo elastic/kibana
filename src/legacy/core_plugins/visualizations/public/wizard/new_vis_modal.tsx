@@ -22,19 +22,17 @@ import React from 'react';
 import { EuiModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { VisualizeConstants } from '../visualize_constants';
+import { VisualizeConstants } from '../../../kibana/public/visualize/visualize_constants';
 import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
-import { TypesStart, VisTypeAlias } from '../../../../visualizations/public/np_ready/public/types';
+import { VisType, VisTypeAlias } from '../np_ready/public/types';
+import { getUISettings, getHttp, getTypes } from '../np_ready/public/services';
 
-import { getServices, METRIC_TYPE, VisType } from '../kibana_services';
-
-const { addBasePath, createUiStatsReporter, uiSettings } = getServices();
+import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
 
 interface TypeSelectionProps {
   isOpen: boolean;
   onClose: () => void;
-  visTypesRegistry: TypesStart;
   editorParams?: string[];
 }
 
@@ -55,7 +53,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
   constructor(props: TypeSelectionProps) {
     super(props);
-    this.isLabsEnabled = uiSettings.get('visualize:enableLabs');
+    this.isLabsEnabled = getUISettings().get('visualize:enableLabs');
 
     this.state = {
       showSearchVisModal: false,
@@ -70,7 +68,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     }
 
     const visNewVisDialogAriaLabel = i18n.translate(
-      'kbn.visualize.newVisWizard.helpTextAriaLabel',
+      'visualizations.newVisWizard.helpTextAriaLabel',
       {
         defaultMessage:
           'Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further.',
@@ -92,7 +90,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
           <TypeSelection
             showExperimental={this.isLabsEnabled}
             onVisTypeSelected={this.onVisTypeSelected}
-            visTypesRegistry={this.props.visTypesRegistry}
+            visTypesRegistry={getTypes()}
           />
         </EuiModal>
       );
@@ -124,7 +122,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     this.trackUiMetric(METRIC_TYPE.CLICK, visType.name);
 
     if ('aliasUrl' in visType) {
-      window.location.href = addBasePath(visType.aliasUrl);
+      window.location.href = getHttp().basePath.prepend(visType.aliasUrl);
 
       return;
     }

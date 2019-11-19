@@ -29,14 +29,14 @@ export function DisabledLabVisualization({ title }: { title: string }) {
       />
       <div className="kuiVerticalRhythm">
         <FormattedMessage
-          id="kbn.visualize.disabledLabVisualizationTitle"
+          id="visualizations.disabledLabVisualizationTitle"
           defaultMessage="{title} is a lab visualization."
           values={{ title: <em className="visDisabledLabVisualization__title">{title}</em> }}
         />
       </div>
       <div className="kuiVerticalRhythm">
         <FormattedMessage
-          id="kbn.visualize.disabledLabVisualizationMessage"
+          id="visualizations.disabledLabVisualizationMessage"
           defaultMessage="Please turn on lab-mode in the advanced settings to see lab visualizations."
         />
       </div>

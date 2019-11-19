@@ -29,6 +29,12 @@ import { VisualizationsSetup, VisualizationsStart } from './';
 import { VisualizationsPlugin } from './plugin';
 import { coreMock } from '../../../../../../core/public/mocks';
 
+/* eslint-disable */
+// @ts-ignore
+import { embeddablePluginMock } from '../../../../../../plugins/embeddable/public/mocks';
+import { expressionsPluginMock } from '../../../../../../plugins/expressions/public/mocks';
+/* eslint-enable */
+
 const createSetupContract = (): VisualizationsSetup => ({
   types: {
     createBaseVisualization: jest.fn(),
@@ -44,13 +50,19 @@ const createStartContract = (): VisualizationsStart => ({
     all: jest.fn(),
     getAliases: jest.fn(),
   },
+  showNewVisModal: jest.fn(),
 });
 
 const createInstance = async () => {
   const plugin = new VisualizationsPlugin({} as PluginInitializerContext);
 
-  const setup = plugin.setup(coreMock.createSetup());
-  const doStart = () => plugin.start(coreMock.createStart());
+  const setup = plugin.setup(coreMock.createSetup(), {
+    expressions: expressionsPluginMock.createSetupContract(),
+  });
+  const doStart = () =>
+    plugin.start(coreMock.createStart(), {
+      embeddable: embeddablePluginMock.createStartContract(),
+    });
 
   return {
     plugin,

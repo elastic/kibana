@@ -20,8 +20,6 @@
 import { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 import './editor/editor';
 import { i18n } from '@kbn/i18n';
-import './saved_visualizations/_saved_vis';
-import './saved_visualizations/saved_visualizations';
 import visualizeListingTemplate from './listing/visualize_listing.html';
 import { VisualizeListingController } from './listing/visualize_listing';
 import { VisualizeConstants } from './visualize_constants';

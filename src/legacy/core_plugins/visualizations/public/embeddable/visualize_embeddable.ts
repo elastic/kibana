@@ -18,18 +18,17 @@
  */
 
 import _, { forEach } from 'lodash';
-import { PersistedState } from 'ui/persisted_state';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
-import { buildPipeline } from 'ui/visualize/loader/pipeline_helpers';
-import { SavedObject } from 'ui/saved_objects/saved_object';
-import { Vis } from 'ui/vis';
-import { queryGeohashBounds } from 'ui/visualize/loader/utils';
-import { getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
-import { AppState } from 'ui/state_management/app_state';
-import { npStart } from 'ui/new_platform';
-import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
-import { SearchSourceContract } from '../../../../../ui/public/courier';
+import { StaticIndexPattern } from '../../../../ui/public/index_patterns';
+import { PersistedState } from '../../../../ui/public/persisted_state';
+import { SavedObject } from '../../../../ui/public/saved_objects/saved_object';
+import { queryGeohashBounds } from '../../../../ui/public/visualize/loader/utils';
+import { getTableAggs } from '../../../../ui/public/visualize/loader/pipeline_helpers/utilities';
+import { AppState } from '../../../../ui/public/state_management/app_state';
+import { npStart } from '../../../../ui/public/new_platform';
+import { IExpressionLoaderParams } from '../../../../../plugins/expressions/public';
+import { SearchSourceContract } from '../../../../ui/public/courier';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
@@ -38,15 +37,16 @@ import {
   onlyDisabledFiltersChanged,
   esFilters,
   mapAndFlattenFilters,
-} from '../../../../../../plugins/data/public';
+} from '../../../../../plugins/data/public';
 import {
   EmbeddableInput,
   EmbeddableOutput,
   Embeddable,
   Container,
   APPLY_FILTER_TRIGGER,
-} from '../../../../../../plugins/embeddable/public';
-import { dispatchRenderComplete } from '../../../../../../plugins/kibana_utils/public';
+} from '../../../../../plugins/embeddable/public';
+import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
+import { Vis, buildPipeline } from '..';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 

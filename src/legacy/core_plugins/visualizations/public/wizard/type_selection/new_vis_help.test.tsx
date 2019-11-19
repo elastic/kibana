@@ -21,10 +21,12 @@ import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { NewVisHelp } from './new_vis_help';
 
-jest.mock('../../kibana_services', () => {
+jest.mock('../../np_ready/public/services', () => {
   return {
-    getServices: () => ({
-      addBasePath: jest.fn((url: string) => `testbasepath${url}`),
+    getHttp: () => ({
+      basePath: {
+        prepend: jest.fn((url: string) => `testbasepath${url}`),
+      },
     }),
   };
 });
@@ -60,7 +62,7 @@ describe('NewVisHelp', () => {
         <p>
           <FormattedMessage
             defaultMessage="Start creating your visualization by selecting a type for that visualization."
-            id="kbn.visualize.newVisWizard.helpText"
+            id="visualizations.newVisWizard.helpText"
             values={Object {}}
           />
         </p>

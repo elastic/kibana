@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { getServices, getFromSavedObject, VisSavedObject } from '../kibana_services';
-
+import { VisSavedObject } from './visualize_embeddable';
+import { getFromSavedObject } from '../../../data/public';
 import { IIndexPattern } from '../../../../../../plugins/data/public';
 
-const { savedObjectsClient, uiSettings } = getServices();
+import { getUISettings, getSavedObjectsClient } from '../np_ready/public/services';
 
 export async function getIndexPattern(
   savedVis: VisSavedObject
@@ -30,10 +30,10 @@ export async function getIndexPattern(
     return savedVis.vis.indexPattern;
   }
 
-  const defaultIndex = uiSettings.get('defaultIndex');
+  const defaultIndex = getUISettings().get('defaultIndex');
 
   if (savedVis.vis.params.index_pattern) {
-    const indexPatternObjects = await savedObjectsClient.find({
+    const indexPatternObjects = await getSavedObjectsClient().find({
       type: 'index-pattern',
       fields: ['title', 'fields'],
       search: `"${savedVis.vis.params.index_pattern}"`,
@@ -43,6 +43,6 @@ export async function getIndexPattern(
     return indexPattern;
   }
 
-  const savedObject = await savedObjectsClient.get('index-pattern', defaultIndex);
+  const savedObject = await getSavedObjectsClient().get('index-pattern', defaultIndex);
   return getFromSavedObject(savedObject);
 }

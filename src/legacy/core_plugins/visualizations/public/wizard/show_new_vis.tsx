@@ -20,30 +20,25 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { Embeddable, EmbeddableOutput } from '../kibana_services';
-import { DisabledLabVisualization } from './disabled_lab_visualization';
-import { VisualizeInput } from './visualize_embeddable';
-import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+import { I18nContext } from 'ui/i18n';
+import { NewVisModal } from './new_vis_modal';
 
-export class DisabledLabEmbeddable extends Embeddable<VisualizeInput, EmbeddableOutput> {
-  private domNode?: HTMLElement;
-  public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
+interface ShowNewVisModalParams {
+  editorParams?: string[];
+}
 
-  constructor(private readonly title: string, initialInput: VisualizeInput) {
-    super(initialInput, { title });
-  }
+export function showNewVisModal({ editorParams = [] }: ShowNewVisModalParams = {}) {
+  const container = document.createElement('div');
+  const onClose = () => {
+    ReactDOM.unmountComponentAtNode(container);
+    document.body.removeChild(container);
+  };
 
-  public reload() {}
-  public render(domNode: HTMLElement) {
-    if (this.title) {
-      this.domNode = domNode;
-      ReactDOM.render(<DisabledLabVisualization title={this.title} />, domNode);
-    }
-  }
-
-  public destroy() {
-    if (this.domNode) {
-      ReactDOM.unmountComponentAtNode(this.domNode);
-    }
-  }
+  document.body.appendChild(container);
+  const element = (
+    <I18nContext>
+      <NewVisModal isOpen={true} onClose={onClose} editorParams={editorParams} />
+    </I18nContext>
+  );
+  ReactDOM.render(element, container);
 }
