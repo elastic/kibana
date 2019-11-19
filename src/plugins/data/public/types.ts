@@ -34,7 +34,6 @@ export interface DataPublicPluginStart {
   getSuggestions: IGetSuggestions;
   search: ISearchStart;
   query: QueryStart;
-  filterTypes: any;
 }
 
 export { IGetSuggestions } from './suggestions_provider/types';
