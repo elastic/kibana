@@ -35,6 +35,7 @@ export const createSignals = async ({
   return alertsClient.create({
     data: {
       name,
+      tags: [],
       alertTypeId: SIGNALS_ID,
       alertTypeParams: {
         description,

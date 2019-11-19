@@ -25,7 +25,7 @@ import {
   onPremCloudInstructions,
 } from '../../../common/tutorials/filebeat_instructions';
 
-export function suricataLogsSpecProvider(server, context) {
+export function suricataLogsSpecProvider(context) {
   const moduleName = 'suricata';
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {

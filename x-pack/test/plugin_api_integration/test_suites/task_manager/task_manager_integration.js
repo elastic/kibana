@@ -16,7 +16,7 @@ export default function ({ getService }) {
   const log = getService('log');
   const retry = getService('retry');
   const config = getService('config');
-  const testHistoryIndex = '.task_manager_test_result';
+  const testHistoryIndex = '.kibana_task_manager_test_result';
   const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
 
   describe('scheduling and running tasks', () => {
