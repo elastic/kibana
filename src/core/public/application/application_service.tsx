@@ -62,6 +62,13 @@ function isLegacyApp(app: AppBox | LegacyApp): app is LegacyApp {
   return (app as AppBox).mount === undefined;
 }
 
+const allApplicationsFilter = '__ALL__';
+
+interface AppStatusUpdaterWrapper {
+  application: string;
+  updater: AppStatusUpdater;
+}
+
 /**
  * Service that is responsible for registering new applications.
  * @internal
@@ -69,13 +76,27 @@ function isLegacyApp(app: AppBox | LegacyApp): app is LegacyApp {
 export class ApplicationService {
   private started = false;
   private readonly apps = new Map<string, AppBox | LegacyApp>();
-  private readonly statusUpdaters$ = new BehaviorSubject<Map<symbol, AppStatusUpdater>>(new Map());
+  private readonly statusUpdaters$ = new BehaviorSubject<Map<symbol, AppStatusUpdaterWrapper>>(
+    new Map()
+  );
 
   private readonly capabilities = new CapabilitiesService();
   private mountContext?: IContextContainer<App['mount']>;
 
   public setup({ context }: SetupDeps): InternalApplicationSetup {
     this.mountContext = context.createContextContainer();
+
+    const registerStatusUpdater = (application: string, updater$: Observable<AppStatusUpdater>) => {
+      const updaterId = Symbol();
+      updater$.subscribe(updater => {
+        const nextValue = new Map(this.statusUpdaters$.getValue());
+        nextValue.set(updaterId, {
+          application,
+          updater,
+        });
+        this.statusUpdaters$.next(nextValue);
+      });
+    };
 
     return {
       register: (plugin: symbol, app: App) => {
@@ -85,15 +106,19 @@ export class ApplicationService {
         if (this.started) {
           throw new Error(`Applications cannot be registered after "setup"`);
         }
+        const { status, statusUpdater$, ...appProps } = app;
         const appBox: AppBox = {
           app: {
-            ...app,
+            ...appProps,
             status: app.status !== undefined ? app.status : AppStatus.accessible,
             legacy: false,
           },
           mount: this.mountContext!.createHandler(plugin, app.mount),
         };
         this.apps.set(app.id, appBox);
+        if (statusUpdater$) {
+          registerStatusUpdater(app.id, statusUpdater$);
+        }
       },
       registerLegacyApp: (app: LegacyApp) => {
         if (this.apps.has(app.id)) {
@@ -102,20 +127,18 @@ export class ApplicationService {
         if (this.started) {
           throw new Error(`Applications cannot be registered after "setup"`);
         }
+        const { status, statusUpdater$, ...appProps } = app;
         this.apps.set(app.id, {
-          ...app,
+          ...appProps,
           status: app.status !== undefined ? app.status : AppStatus.accessible,
           legacy: true,
         });
+        if (statusUpdater$) {
+          registerStatusUpdater(app.id, statusUpdater$);
+        }
       },
-      registerAppStatusUpdater: (statusUpdater$: Observable<AppStatusUpdater>) => {
-        const updaterId = Symbol();
-        statusUpdater$.subscribe(statusUpdater => {
-          const nextValue = new Map(this.statusUpdaters$.getValue());
-          nextValue.set(updaterId, statusUpdater);
-          this.statusUpdaters$.next(nextValue);
-        });
-      },
+      registerAppStatusUpdater: (statusUpdater$: Observable<AppStatusUpdater>) =>
+        registerStatusUpdater(allApplicationsFilter, statusUpdater$),
       registerMountContext: this.mountContext!.registerContext,
     };
   }
@@ -226,10 +249,13 @@ export class ApplicationService {
   public stop() {}
 }
 
-const updateStatus = <T extends AppBase>(app: T, statusUpdaters: AppStatusUpdater[]): T => {
+const updateStatus = <T extends AppBase>(app: T, statusUpdaters: AppStatusUpdaterWrapper[]): T => {
   let changes: Partial<AppUpdatableFields> = {};
-  statusUpdaters.forEach(updater => {
-    const fields = updater(app);
+  statusUpdaters.forEach(wrapper => {
+    if (wrapper.application !== allApplicationsFilter && wrapper.application !== app.id) {
+      return;
+    }
+    const fields = wrapper.updater(app);
     if (fields) {
       changes = {
         ...changes,

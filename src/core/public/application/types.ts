@@ -33,6 +33,9 @@ import { RecursiveReadonly } from '../../utils';
 
 /** @public */
 export interface AppBase {
+  /**
+   * The unique identifier of the application
+   */
   id: string;
 
   /**
@@ -44,6 +47,12 @@ export interface AppBase {
    * The status of the application.
    */
   status?: AppStatus;
+
+  /**
+   * An {@link AppStatusUpdater} observable that can be used to update
+   * the application {@link AppUpdatableFields} at runtime.
+   */
+  statusUpdater$?: Observable<AppStatusUpdater>;
 
   /**
    * An ordinal used to sort nav links relative to one another for display.
@@ -88,6 +97,7 @@ export interface AppBase {
 }
 
 /**
+ * Accessibility status of an application.
  *
  * @public
  */
@@ -97,7 +107,7 @@ export enum AppStatus {
    */
   accessible = 0,
   /**
-   *
+   * Application is not accessible, but visible in an inactive state in navigation.
    */
   inaccessibleWithDisabledNavLink = 1,
   /**
@@ -107,13 +117,13 @@ export enum AppStatus {
 }
 
 /**
- *
+ * Defines the list of fields that can be updated via an {@link AppStatusUpdater}.
  * @public
  */
 export type AppUpdatableFields = Pick<AppBase, 'status' | 'tooltip'>;
 
 /**
- *
+ * Status updater for applications.
  * @public
  */
 export type AppStatusUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefined;
@@ -245,7 +255,9 @@ export interface ApplicationSetup {
   register(app: App): void;
 
   /**
-   * TODO
+   * Register an application status updater that can be used to change the {@link AppUpdatableFields} fields
+   * of all applications at runtime.
+   *
    * @param statusUpdater$
    */
   registerAppStatusUpdater(statusUpdater$: Observable<AppStatusUpdater>): void;

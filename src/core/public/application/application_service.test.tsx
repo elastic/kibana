@@ -65,6 +65,52 @@ describe('ApplicationService', () => {
           `"Applications cannot be registered after \\"setup\\""`
         );
       });
+
+      it('allows to register a statusUpdater for the application', async () => {
+        const setup = service.setup({ context });
+
+        const pluginId = Symbol('plugin');
+        const statusUpdater$ = new BehaviorSubject<AppStatusUpdater>(app => ({}));
+        setup.register(pluginId, { id: 'app1', statusUpdater$ } as any);
+        setup.register(pluginId, { id: 'app2' } as any);
+        const { availableApps$ } = await service.start({ http, injectedMetadata });
+
+        expect(await availableApps$.pipe(take(1)).toPromise()).toMatchInlineSnapshot(`
+          Map {
+            "app1" => Object {
+              "id": "app1",
+              "legacy": false,
+              "status": 0,
+            },
+            "app2" => Object {
+              "id": "app2",
+              "legacy": false,
+              "status": 0,
+            },
+          }
+        `);
+
+        statusUpdater$.next(app => ({
+          status: AppStatus.inaccessibleWithDisabledNavLink,
+          tooltip: 'App inaccessible due to reason',
+        }));
+
+        expect(await availableApps$.pipe(take(1)).toPromise()).toMatchInlineSnapshot(`
+          Map {
+            "app1" => Object {
+              "id": "app1",
+              "legacy": false,
+              "status": 1,
+              "tooltip": "App inaccessible due to reason",
+            },
+            "app2" => Object {
+              "id": "app2",
+              "legacy": false,
+              "status": 0,
+            },
+          }
+        `);
+      });
     });
 
     describe('registerLegacyApp', () => {
@@ -121,6 +167,43 @@ describe('ApplicationService', () => {
               "id": "app2",
               "legacy": false,
               "status": 0,
+            },
+          }
+        `);
+      });
+
+      it('properly combine with application statusUpdater$', async () => {
+        const setup = service.setup({ context });
+
+        const pluginId = Symbol('plugin');
+        const appStatusUpdater$ = new BehaviorSubject<AppStatusUpdater>(app => ({
+          status: AppStatus.inaccessibleWithDisabledNavLink,
+        }));
+        setup.register(pluginId, { id: 'app1', statusUpdater$: appStatusUpdater$ } as any);
+        setup.register(pluginId, { id: 'app2' } as any);
+
+        setup.registerAppStatusUpdater(
+          new BehaviorSubject<AppStatusUpdater>(app => {
+            if (app.id === 'app1') {
+              return {
+                tooltip: 'App inaccessible due to reason',
+              };
+            }
+            return {
+              status: AppStatus.inaccessible,
+            };
+          })
+        );
+
+        const { availableApps$ } = await service.start({ http, injectedMetadata });
+
+        expect(await availableApps$.pipe(take(1)).toPromise()).toMatchInlineSnapshot(`
+          Map {
+            "app1" => Object {
+              "id": "app1",
+              "legacy": false,
+              "status": 1,
+              "tooltip": "App inaccessible due to reason",
             },
           }
         `);
