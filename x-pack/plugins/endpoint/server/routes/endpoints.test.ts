@@ -9,7 +9,7 @@ import { httpServerMock } from '../../../../../src/core/server/http/http_server.
 import { registerEndpointsApi } from './endpoints';
 import { EndpointRequestContext } from '../handlers/endpoint_handler';
 
-describe('Endpoints Route Test', () => {
+describe('endpoints route test', () => {
   let routerMock: jest.Mocked<IRouter>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
 

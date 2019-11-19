@@ -7,7 +7,7 @@ import { CoreSetup, IClusterClient } from 'kibana/server';
 import { coreMock, elasticsearchServiceMock } from '../../../../src/core/server/mocks';
 import { EndpointPlugin } from './plugin';
 
-describe('Test Endpoint Plugin', () => {
+describe('test endpoint plugin', () => {
   let plugin: EndpointPlugin;
   let mockCoreSetup: MockedKeys<CoreSetup>;
   let mockClusterClient: jest.Mocked<IClusterClient>;

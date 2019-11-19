@@ -9,11 +9,11 @@ import { IClusterClient, IScopedClusterClient } from 'kibana/server';
 import { EndpointHandler } from './endpoint_handler';
 import { SearchResponse } from 'elasticsearch';
 import { EndpointData } from '../types';
-import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, httpServerMock } from '../../../../../src/core/server/mocks';
 
-describe('Test Endpoint Handler', () => {
+describe('test endpoint handler', () => {
   let mockClusterClient: jest.Mocked<IClusterClient>;
-  let mockScopedClient: jest.Moked<IScopedClusterClient>;
+  let mockScopedClient: jest.Mocked<IScopedClusterClient>;
   beforeEach(() => {
     mockClusterClient = elasticsearchServiceMock.createClusterClient() as jest.Mocked<
       IClusterClient
@@ -27,7 +27,10 @@ describe('Test Endpoint Handler', () => {
         () => singleEndpointData as SearchResponse<EndpointData>
       );
       const testHandler = new EndpointHandler(mockClusterClient);
-      const result = await testHandler.findEndpoint('endpoint-id');
+      const result = await testHandler.findEndpoint(
+        'endpoint-id',
+        httpServerMock.createKibanaRequest()
+      );
       expect(mockScopedClient.callAsCurrentUser).toBeCalledWith('search', {
         body: {
           query: {
@@ -57,7 +60,9 @@ describe('Test Endpoint Handler', () => {
         () => allEndpointData as SearchResponse<EndpointData>
       );
       const testHandler = new EndpointHandler(mockClusterClient);
-      const result = await testHandler.findLatestOfAllEndpoints();
+      const result = await testHandler.findLatestOfAllEndpoints(
+        httpServerMock.createKibanaRequest()
+      );
       expect(mockScopedClient.callAsCurrentUser).toBeCalledWith('search', {
         body: {
           query: {

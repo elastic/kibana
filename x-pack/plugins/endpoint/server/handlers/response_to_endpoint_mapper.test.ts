@@ -9,7 +9,7 @@ import { SearchResponse } from 'elasticsearch';
 import { EndpointData } from '../types';
 import { ResponseToEndpointMapper } from './response_to_endpoint_mapper';
 
-describe('Test Response To Endpoint Data Mapper', () => {
+describe('test response to endpoint data mapper', () => {
   describe('map hits()', () => {
     it('test map response hits', async () => {
       const response: SearchResponse<
