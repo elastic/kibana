@@ -193,6 +193,9 @@
         "type": {
           "type": "keyword"
         },
+        "subType": {
+          "type": "keyword"
+        },
         "updated_at": {
           "type": "date"
         },
@@ -244,6 +247,45 @@
             },
             "visState": {
               "type": "text"
+            }
+          }
+        },
+        "subtype": {
+          "properties": {
+            "name": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 2048
+                }
+              }
+            },
+            "foo": {
+              "properties": {
+                "description": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 2048
+                    }
+                  }
+                }
+              }
+            },
+            "bar": {
+              "properties": {
+                "title": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 2048
+                    }
+                  }
+                }
+              }
             }
           }
         }

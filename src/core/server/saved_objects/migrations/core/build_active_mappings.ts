@@ -147,6 +147,9 @@ function defaultMapping(): IndexMapping {
       type: {
         type: 'keyword',
       },
+      subType: {
+        type: 'keyword',
+      },
       namespace: {
         type: 'keyword',
       },
