@@ -62,6 +62,9 @@ export const npSetup = {
         }
       },
     },
+    share: {
+      register: () => {},
+    },
     devTools: {
       register: () => {},
     },
@@ -161,6 +164,9 @@ export const npStart = {
           history: sinon.fake(),
         },
       },
+    },
+    share: {
+      toggleShareContextMenu: () => {},
     },
     inspector: {
       isAvailable: () => false,
