@@ -16,6 +16,10 @@ import {
 import { rangeFilter } from '../../helpers/range_filter';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { Options } from '.';
+import {
+  TRANSACTION,
+  TRANSACTION_PAGE_LOAD
+} from '../../../../common/transaction_types';
 
 export type ESResponse = PromiseReturnType<typeof fetcher>;
 
@@ -25,9 +29,9 @@ export function fetcher(options: Options) {
   const { intervalString } = getBucketSize(start, end, 'auto');
 
   const filter: ESFilter[] = [
-    { term: { [PROCESSOR_EVENT]: 'transaction' } },
+    { term: { [PROCESSOR_EVENT]: TRANSACTION } },
     { term: { [SERVICE_NAME]: serviceName } },
-    { term: { [TRANSACTION_TYPE]: 'page-load' } },
+    { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
     { range: rangeFilter(start, end) },
     ...uiFiltersES
   ];
