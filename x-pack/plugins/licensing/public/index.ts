@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext } from 'src/core/public';
 import { LicensingPlugin } from './plugin';
 
-export const plugin = (context: PluginInitializerContext) => new LicensingPlugin(context);
-
 export * from '../common/types';
-export { config } from './licensing_config';
+export const plugin = (context: PluginInitializerContext) => new LicensingPlugin(context);
