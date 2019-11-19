@@ -5,11 +5,11 @@
  */
 
 import React from 'react';
+import styled from 'styled-components';
 import { RequirementVersion } from '../../common/types';
-import euiStyled from '../../../../common/eui_styled_components';
 
-const CodeText = euiStyled.span`
-font-family: ${props => props.theme.eui.euiCodeFontFamily}
+const CodeText = styled.span`
+  font-family: ${props => props.theme.eui.euiCodeFontFamily};
 `;
 export function Version({
   className,

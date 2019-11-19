@@ -5,29 +5,29 @@
  */
 import React, { useState, useRef, useLayoutEffect, Fragment, useCallback } from 'react';
 import { EuiButtonEmpty, EuiSpacer, EuiButton, EuiHorizontalRule } from '@elastic/eui';
-import euiStyled from '../../../../common/eui_styled_components';
+import styled from 'styled-components';
 
-const BottomFade = euiStyled.div`
-width: 100%;
-background: ${props =>
-  `linear-gradient(${props.theme.eui.euiColorEmptyShade}00 0%, ${props.theme.eui.euiColorEmptyShade} 100%)`};
-margin-top: -${props => parseInt(props.theme.eui.spacerSizes.xl, 10) * 2}px;
-height: ${props => parseInt(props.theme.eui.spacerSizes.xl, 10) * 2}px;
-position: absolute;
+const BottomFade = styled.div`
+  width: 100%;
+  background: ${props =>
+    `linear-gradient(${props.theme.eui.euiColorEmptyShade}00 0%, ${props.theme.eui.euiColorEmptyShade} 100%)`};
+  margin-top: -${props => parseInt(props.theme.eui.spacerSizes.xl, 10) * 2}px;
+  height: ${props => parseInt(props.theme.eui.spacerSizes.xl, 10) * 2}px;
+  position: absolute;
 `;
-const ContentCollapseContainer = euiStyled.div`
-position: relative;
+const ContentCollapseContainer = styled.div`
+  position: relative;
 `;
-const CollapseButtonContainer = euiStyled.div`
-display: inline-block;
-background-color: ${props => props.theme.eui.euiColorGhost};
-position: absolute;
-left: 50%;
-transform: translateX(-50%);
-top: ${props => parseInt(props.theme.eui.euiButtonHeight, 10) / 2}px;
+const CollapseButtonContainer = styled.div`
+  display: inline-block;
+  background-color: ${props => props.theme.eui.euiColorGhost};
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: ${props => parseInt(props.theme.eui.euiButtonHeight, 10) / 2}px;
 `;
-const CollapseButtonTop = euiStyled(EuiButtonEmpty)`
-float: right;
+const CollapseButtonTop = styled(EuiButtonEmpty)`
+  float: right;
 `;
 
 const CollapseButton = ({
