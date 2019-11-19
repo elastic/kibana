@@ -71,4 +71,12 @@ describe('Logs', () => {
     />);
     expect(component).toMatchSnapshot();
   });
+
+  it('should render with a bad indices reason', () => {
+    const component = shallow(<Reason reason={{
+      correctIndexName: false
+    }}
+    />);
+    expect(component).toMatchSnapshot();
+  });
 });

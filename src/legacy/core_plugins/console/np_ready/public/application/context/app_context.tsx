@@ -29,7 +29,6 @@ interface ContextValue {
     notifications: NotificationsSetup;
   };
   docLinkVersion: string;
-  ResizeChecker: any;
 }
 
 interface ContextProps {
