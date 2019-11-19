@@ -73,6 +73,7 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
     <EuiFlexGroup alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <svg
+          className="donutChart"
           aria-label={i18n.translate('xpack.uptime.donutChart.ariaLabel', {
             defaultMessage:
               'Pie chart showing the current status. {down} of {total} monitors are down.',
