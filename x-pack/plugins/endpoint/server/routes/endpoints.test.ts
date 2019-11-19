@@ -43,7 +43,7 @@ describe('Endpoints Route Test', () => {
       params: {},
     });
     const endpointHandler: jest.Mocked<EndpointRequestContext> = {
-      findEndpoint: jest.fn((endpointId: string) => ({ id: endpointId })),
+      findLatestOfAllEndpoints: jest.fn(() => ({ id: 'all' })),
     };
     registerEndpointsApi(routerMock, endpointHandler);
     const [routeConfig, routeHandler] = routerMock.get.mock.calls.find(

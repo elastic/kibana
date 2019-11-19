@@ -39,4 +39,12 @@ describe('Test Endpoint Plugin', () => {
       expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledWith('endpoint-plugin');
     });
   });
+
+  describe('test stop()', () => {
+    it('test properly stop plugin', async () => {
+      await plugin.setup(mockCoreSetup, {});
+      await plugin.stop();
+      expect(mockClusterClient.close).toBeCalledTimes(1);
+    });
+  });
 });
