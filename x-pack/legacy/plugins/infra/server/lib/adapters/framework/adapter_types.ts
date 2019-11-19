@@ -6,6 +6,8 @@
 
 import { SearchResponse, GenericParams } from 'elasticsearch';
 import { Lifecycle } from 'hapi';
+import { ObjectType } from '@kbn/config-schema';
+import { RouteMethod, RouteConfig } from '../../../../../../../../src/core/server';
 
 interface ApmIndices {
   'apm_oss.transactionIndices': string | undefined;
@@ -147,3 +149,11 @@ export interface InfraTSVBSeries {
 }
 
 export type InfraTSVBDataPoint = [number, number];
+
+export type InfraRouteConfig<
+  params extends ObjectType,
+  query extends ObjectType,
+  body extends ObjectType
+> = {
+  method: RouteMethod;
+} & RouteConfig<params, query, body>;

@@ -10,8 +10,9 @@ import { GenericParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 import { Legacy } from 'kibana';
 import { runHttpQuery } from 'apollo-server-core';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf, ObjectType } from '@kbn/config-schema';
 import {
+  InfraRouteConfig,
   InfraTSVBResponse,
   InfraServerPluginDeps,
   CallWithRequestParams,
@@ -28,6 +29,7 @@ import {
   RequestHandlerContext,
   KibanaResponseFactory,
 } from '../../../../../../../../src/core/server';
+import { RequestHandler } from '../../../../../../../../src/core/server';
 import { InfraConfig } from '../../../../../../../plugins/infra/server';
 
 // const anyObject = schema.object({}, { allowUnknowns: true });
@@ -54,6 +56,39 @@ export class KibanaFramework {
     this.router = core.http.createRouter();
     this.core = core;
     this.plugins = plugins;
+  }
+
+  public registerRoute<
+    params extends ObjectType = any,
+    query extends ObjectType = any,
+    body extends ObjectType = any
+  >(config: InfraRouteConfig<params, query, body>, handler: RequestHandler<params, query, body>) {
+    const defaultOptions = {
+      tags: ['access:infra'],
+    };
+    const routeOptions = {
+      ...defaultOptions,
+      ...(config.options ? config.options : {}),
+    };
+    const routeConfig = {
+      path: config.path,
+      validate: config.validate,
+      options: routeOptions,
+    };
+    switch (config.method) {
+      case 'get':
+        this.router.get(routeConfig, handler);
+        break;
+      case 'post':
+        this.router.post(routeConfig, handler);
+        break;
+      case 'delete':
+        this.router.delete(routeConfig, handler);
+        break;
+      case 'put':
+        this.router.put(routeConfig, handler);
+        break;
+    }
   }
 
   public registerGraphQLEndpoint(routePath: string, gqlSchema: GraphQLSchema) {

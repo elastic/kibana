@@ -25,9 +25,10 @@ const ipToHostSchema = schema.object({
 });
 
 export const initIpToHostName = ({ framework }: InfraBackendLibs) => {
-  const { callWithRequest, router } = framework;
-  router.post(
+  const { callWithRequest } = framework;
+  framework.registerRoute(
     {
+      method: 'post',
       path: '/api/infra/ip_to_host',
       validate: {
         body: ipToHostSchema,

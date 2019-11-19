@@ -26,8 +26,9 @@ export const initLogAnalysisGetLogEntryRateRoute = ({
   framework,
   logAnalysis,
 }: InfraBackendLibs) => {
-  framework.router.post(
+  framework.registerRoute(
     {
+      method: 'post',
       path: LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH,
       validate: {
         // short-circuit forced @kbn/config-schema validation so we can do io-ts validation

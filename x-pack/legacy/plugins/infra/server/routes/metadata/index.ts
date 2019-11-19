@@ -28,8 +28,9 @@ const escapeHatch = schema.object({}, { allowUnknowns: true });
 export const initMetadataRoute = (libs: InfraBackendLibs) => {
   const { framework } = libs;
 
-  framework.router.post(
+  framework.registerRoute(
     {
+      method: 'post',
       path: '/api/infra/metadata',
       validate: {
         body: escapeHatch,

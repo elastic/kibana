@@ -19,8 +19,9 @@ export const initMetricExplorerRoute = (libs: InfraBackendLibs) => {
   const { framework } = libs;
   const { callWithRequest } = framework;
 
-  framework.router.post(
+  framework.registerRoute(
     {
+      method: 'post',
       path: '/api/infra/metrics_explorer',
       validate: {
         body: escapeHatch,
