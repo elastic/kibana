@@ -36,7 +36,8 @@
       }
     },
     "description": {
-      "type": "string"
+      "type": "string",
+      "example": "Example policy description text"
     },
     "status": {
       "type": "string",
