@@ -1,10 +1,9 @@
-
 .tab-contents {
   margin: -$euiSizeS;
   padding: $euiSizeS;
   background-color: $euiColorEmptyShade;
 
-    // SASSTODO: Need to remove bootstrap grid
+  // SASSTODO: Need to remove bootstrap grid
   .col-md-6:nth-child(1) {
     // SASSTODO: Why is this 7?
     padding-right: 7px;
@@ -65,40 +64,24 @@
     }
   }
 
-    // SASSTODO: This needs a proper calc
+  // SASSTODO: This needs a proper calc
   .json-textarea {
     height: 500px;
   }
+}
 
-    // SASSTODO: This needs to be rewritten. A lot of this should be done with the JS props
-  .job-messages-table {
-    max-height: 500px;
-    overflow: auto;
+.job-messages-table {
+  max-height: 500px;
+  overflow: auto;
+  text-align: left;
 
-    .euiTable {
-      font-size: 12px;
-
-      th:nth-child(1) {
-        width: $euiSizeXL;
-      }
-      th:nth-child(2) {
-        width: 150px;
-      }
-      th:nth-child(3) {
-        width: 120px;
-      }
-      th:nth-child(4) {
-        width: auto;
-      }
-      tr:last-child {
-        td {
-          border-bottom: none;
-        }
-      }
-
-      .euiTableRowCell {
-        background-color: $euiColorEmptyShade;
-      }
+  tr:last-child {
+    td {
+      border-bottom: none;
     }
+  }
+
+  .euiTableRowCell {
+    background-color: $euiColorEmptyShade;
   }
 }

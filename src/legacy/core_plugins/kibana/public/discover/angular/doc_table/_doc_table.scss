@@ -62,6 +62,15 @@ doc-table {
   margin: $euiSizeXS $euiSizeXS 0;
 }
 
+.kbnDocTable__bar--footer {
+  position: relative;
+  margin: -($euiSize * 3) $euiSizeXS 0;
+}
+
+.kbnDocTable__padBottom {
+  padding-bottom: $euiSizeXL;
+}
+
 .kbnDocTable__error {
   display: flex;
   flex-direction: column;

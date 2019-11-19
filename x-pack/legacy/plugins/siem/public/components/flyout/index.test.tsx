@@ -20,6 +20,8 @@ import { FlyoutButton } from './button';
 const testFlyoutHeight = 980;
 const usersViewing = ['elastic'];
 
+jest.mock('../../lib/settings/use_kibana_ui_setting');
+
 describe('Flyout', () => {
   const state: State = mockGlobalState;
 

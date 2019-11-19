@@ -17,7 +17,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { kibanaFieldFormat } from '../../../../../formatters/kibana_field_format';
-// @ts-ignore
 import { roundToDecimalPlace } from '../../../../../formatters/round_to_decimal_place';
 
 interface Props {

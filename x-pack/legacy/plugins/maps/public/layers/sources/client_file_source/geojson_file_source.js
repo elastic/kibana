@@ -15,9 +15,6 @@ import { ClientFileCreateSourceEditor } from './create_client_file_source_editor
 import { ESSearchSource } from '../es_search_source';
 import uuid from 'uuid/v4';
 import _ from 'lodash';
-import {
-  DEFAULT_APPLY_GLOBAL_QUERY
-} from './constants';
 import { i18n } from '@kbn/i18n';
 
 export class GeojsonFileSource extends AbstractVectorSource {
@@ -31,9 +28,6 @@ export class GeojsonFileSource extends AbstractVectorSource {
   });
   static icon = 'importAction';
   static isIndexingSource = true;
-  static layerDefaults = {
-    applyGlobalQuery: DEFAULT_APPLY_GLOBAL_QUERY
-  }
 
   static createDescriptor(geoJson, name) {
     // Wrap feature as feature collection if needed
@@ -96,7 +90,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
           geoField,
           filterByMapBounds
         }, inspectorAdapters);
-        addAndViewSource(source, this.layerDefaults);
+        addAndViewSource(source);
         importSuccessHandler(indexResponses);
       }
     };
