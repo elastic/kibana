@@ -111,10 +111,10 @@ interface.
 
 [float]
 [[spaces-default-route]]
-=== Space-level landing page
+=== Configure a Space-level landing page
 
 You can create a custom experience for users by configuring the {kib} landing page on a per-space basis.
-To configure the landing page, use the `defaultRoute` in **Management > Advanced settings**.
+To configure the landing page, use the `defaultRoute` setting in <<kibana-general-settings, Management > Advanced settings>>.
 
 [float]
 [[spaces-delete-started]]
