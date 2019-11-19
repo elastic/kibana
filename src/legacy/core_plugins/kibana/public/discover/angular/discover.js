@@ -50,7 +50,7 @@ import {
   migrateLegacyQuery,
   RequestAdapter,
   showSaveModal,
-  showShareContextMenu,
+  unhashUrl,
   stateMonitorFactory,
   subscribeWithScope,
   tabifyAggResponse,
@@ -63,7 +63,7 @@ const {
   chrome,
   docTitle,
   FilterBarQueryFilterProvider,
-  ShareContextMenuExtensionsRegistryProvider,
+  share,
   StateProvider,
   timefilter,
   toastNotifications,
@@ -190,7 +190,6 @@ function discoverController(
 ) {
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
   const getUnhashableStates = Private(getUnhashableStatesProvider);
-  const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
 
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
@@ -323,14 +322,13 @@ function discoverController(
       testId: 'shareTopNavButton',
       run: async (anchorElement) => {
         const sharingData = await this.getSharingData();
-        showShareContextMenu({
+        share.toggleShareContextMenu({
           anchorElement,
           allowEmbed: false,
           allowShortUrl: uiCapabilities.discover.createShortUrl,
-          getUnhashableStates,
+          shareableUrl: unhashUrl(window.location.href, getUnhashableStates()),
           objectId: savedSearch.id,
           objectType: 'search',
-          shareContextMenuExtensions,
           sharingData: {
             ...sharingData,
             title: savedSearch.title,

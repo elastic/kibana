@@ -31,24 +31,25 @@ import {
   EuiLoadingSpinner,
   EuiRadioGroup,
   EuiSwitch,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 
 import { format as formatUrl, parse as parseUrl } from 'url';
 
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { unhashUrl } from '../../state_management/state_hashing';
-import { shortenUrl } from '../lib/url_shortener';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { HttpStart } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 
-// TODO: Remove once EuiIconTip supports "content" prop
-const FixedEuiIconTip = EuiIconTip as React.SFC<any>;
+import { shortenUrl } from '../lib/url_shortener';
 
 interface Props {
   allowShortUrl: boolean;
   isEmbedded?: boolean;
   objectId?: string;
   objectType: string;
-  getUnhashableStates: () => object[];
-  intl: InjectedIntl;
+  shareableUrl?: string;
+  basePath: string;
+  post: HttpStart['post'];
 }
 
 enum ExportUrlAsType {
@@ -64,7 +65,7 @@ interface State {
   shortUrlErrorMsg?: string;
 }
 
-class UrlPanelContentUI extends Component<Props, State> {
+export class UrlPanelContent extends Component<Props, State> {
   private mounted?: boolean;
   private shortUrlCache?: string;
 
@@ -96,41 +97,41 @@ class UrlPanelContentUI extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
-        {this.renderExportAsRadioGroup()}
+      <I18nProvider>
+        <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
+          {this.renderExportAsRadioGroup()}
 
-        {this.renderShortUrlSwitch()}
+          {this.renderShortUrlSwitch()}
 
-        <EuiSpacer size="m" />
+          <EuiSpacer size="m" />
 
-        <EuiCopy
-          textToCopy={this.state.url || ''}
-          anchorClassName="kbnShareContextMenu__copyAnchor"
-        >
-          {(copy: () => void) => (
-            <EuiButton
-              fill
-              onClick={copy}
-              disabled={this.state.isCreatingShortUrl || this.state.url === ''}
-              data-share-url={this.state.url}
-              data-test-subj="copyShareUrlButton"
-              size="s"
-            >
-              {this.props.isEmbedded ? (
-                <FormattedMessage
-                  id="common.ui.share.urlPanel.copyIframeCodeButtonLabel"
-                  defaultMessage="Copy iFrame code"
-                />
-              ) : (
-                <FormattedMessage
-                  id="common.ui.share.urlPanel.copyLinkButtonLabel"
-                  defaultMessage="Copy link"
-                />
-              )}
-            </EuiButton>
-          )}
-        </EuiCopy>
-      </EuiForm>
+          <EuiCopy textToCopy={this.state.url || ''} anchorClassName="eui-displayBlock">
+            {(copy: () => void) => (
+              <EuiButton
+                fill
+                fullWidth
+                onClick={copy}
+                disabled={this.state.isCreatingShortUrl || this.state.url === ''}
+                data-share-url={this.state.url}
+                data-test-subj="copyShareUrlButton"
+                size="s"
+              >
+                {this.props.isEmbedded ? (
+                  <FormattedMessage
+                    id="share.urlPanel.copyIframeCodeButtonLabel"
+                    defaultMessage="Copy iFrame code"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="share.urlPanel.copyLinkButtonLabel"
+                    defaultMessage="Copy link"
+                  />
+                )}
+              </EuiButton>
+            )}
+          </EuiCopy>
+        </EuiForm>
+      </I18nProvider>
     );
   }
 
@@ -155,11 +156,9 @@ class UrlPanelContentUI extends Component<Props, State> {
       return;
     }
 
-    const url = window.location.href;
-    // Replace hashes with original RISON values.
-    const unhashedUrl = unhashUrl(url, this.props.getUnhashableStates());
+    const url = this.getSnapshotUrl();
 
-    const parsedUrl = parseUrl(unhashedUrl);
+    const parsedUrl = parseUrl(url);
     if (!parsedUrl || !parsedUrl.hash) {
       return;
     }
@@ -184,9 +183,7 @@ class UrlPanelContentUI extends Component<Props, State> {
   };
 
   private getSnapshotUrl = () => {
-    const url = window.location.href;
-    // Replace hashes with original RISON values.
-    return unhashUrl(url, this.props.getUnhashableStates());
+    return this.props.shareableUrl || window.location.href;
   };
 
   private makeUrlEmbeddable = (url: string) => {
@@ -233,8 +230,7 @@ class UrlPanelContentUI extends Component<Props, State> {
     );
   };
 
-  // TODO: switch evt type to ChangeEvent<HTMLInputElement> once https://github.com/elastic/eui/issues/1134 is resolved
-  private handleShortUrlChange = async (evt: any) => {
+  private handleShortUrlChange = async (evt: EuiSwitchEvent) => {
     const isChecked = evt.target.checked;
 
     if (!isChecked || this.shortUrlCache !== undefined) {
@@ -249,7 +245,10 @@ class UrlPanelContentUI extends Component<Props, State> {
     });
 
     try {
-      const shortUrl = await shortenUrl(this.getSnapshotUrl());
+      const shortUrl = await shortenUrl(this.getSnapshotUrl(), {
+        basePath: this.props.basePath,
+        post: this.props.post,
+      });
       if (this.mounted) {
         this.shortUrlCache = shortUrl;
         this.setState(
@@ -267,15 +266,12 @@ class UrlPanelContentUI extends Component<Props, State> {
           {
             useShortUrl: false,
             isCreatingShortUrl: false,
-            shortUrlErrorMsg: this.props.intl.formatMessage(
-              {
-                id: 'common.ui.share.urlPanel.unableCreateShortUrlErrorMessage',
-                defaultMessage: 'Unable to create short URL. Error: {errorMessage}',
-              },
-              {
+            shortUrlErrorMsg: i18n.translate('share.urlPanel.unableCreateShortUrlErrorMessage', {
+              defaultMessage: 'Unable to create short URL. Error: {errorMessage}',
+              values: {
                 errorMessage: fetchError.message,
-              }
-            ),
+              },
+            }),
           },
           this.setUrl
         );
@@ -288,12 +284,9 @@ class UrlPanelContentUI extends Component<Props, State> {
       {
         id: ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
         label: this.renderWithIconTip(
+          <FormattedMessage id="share.urlPanel.snapshotLabel" defaultMessage="Snapshot" />,
           <FormattedMessage
-            id="common.ui.share.urlPanel.snapshotLabel"
-            defaultMessage="Snapshot"
-          />,
-          <FormattedMessage
-            id="common.ui.share.urlPanel.snapshotDescription"
+            id="share.urlPanel.snapshotDescription"
             defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself.
             Edits to the saved {objectType} won't be visible via this URL."
             values={{ objectType: this.props.objectType }}
@@ -305,12 +298,9 @@ class UrlPanelContentUI extends Component<Props, State> {
         id: ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT,
         disabled: this.isNotSaved(),
         label: this.renderWithIconTip(
+          <FormattedMessage id="share.urlPanel.savedObjectLabel" defaultMessage="Saved object" />,
           <FormattedMessage
-            id="common.ui.share.urlPanel.savedObjectLabel"
-            defaultMessage="Saved object"
-          />,
-          <FormattedMessage
-            id="common.ui.share.urlPanel.savedObjectDescription"
+            id="share.urlPanel.savedObjectDescription"
             defaultMessage="You can share this URL with people to let them load the most recent saved version of this {objectType}."
             values={{ objectType: this.props.objectType }}
           />
@@ -325,7 +315,7 @@ class UrlPanelContentUI extends Component<Props, State> {
       <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem>{child}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <FixedEuiIconTip content={tipContent} position="bottom" />
+          <EuiIconTip content={tipContent} position="bottom" />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -334,7 +324,7 @@ class UrlPanelContentUI extends Component<Props, State> {
   private renderExportAsRadioGroup = () => {
     const generateLinkAsHelp = this.isNotSaved() ? (
       <FormattedMessage
-        id="common.ui.share.urlPanel.canNotShareAsSavedObjectHelpText"
+        id="share.urlPanel.canNotShareAsSavedObjectHelpText"
         defaultMessage="Can't share as saved object until the {objectType} has been saved."
         values={{ objectType: this.props.objectType }}
       />
@@ -345,7 +335,7 @@ class UrlPanelContentUI extends Component<Props, State> {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="common.ui.share.urlPanel.generateLinkAsLabel"
+            id="share.urlPanel.generateLinkAsLabel"
             defaultMessage="Generate the link as"
           />
         }
@@ -368,7 +358,7 @@ class UrlPanelContentUI extends Component<Props, State> {
       return;
     }
     const shortUrlLabel = (
-      <FormattedMessage id="common.ui.share.urlPanel.shortUrlLabel" defaultMessage="Short URL" />
+      <FormattedMessage id="share.urlPanel.shortUrlLabel" defaultMessage="Short URL" />
     );
     const switchLabel = this.state.isCreatingShortUrl ? (
       <span>
@@ -387,7 +377,7 @@ class UrlPanelContentUI extends Component<Props, State> {
     );
     const tipContent = (
       <FormattedMessage
-        id="common.ui.share.urlPanel.shortUrlHelpText"
+        id="share.urlPanel.shortUrlHelpText"
         defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility.
         Internet Explorer has URL length restrictions,
         and some wiki and markup parsers don't do well with the full-length version of the snapshot URL,
@@ -402,5 +392,3 @@ class UrlPanelContentUI extends Component<Props, State> {
     );
   };
 }
-
-export const UrlPanelContent = injectI18n(UrlPanelContentUI);
