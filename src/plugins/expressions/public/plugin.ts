@@ -21,7 +21,13 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../..
 import { ExpressionInterpretWithHandlers, ExpressionExecutor } from './types';
 import { FunctionsRegistry, RenderFunctionsRegistry, TypesRegistry } from './registries';
 import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
-import { setCoreStart, setInspector, setInterpreter, setRenderersRegistry } from './services';
+import {
+  setCoreStart,
+  setInspector,
+  setInterpreter,
+  setRenderersRegistry,
+  setNotifications,
+} from './services';
 import { clog as clogFunction } from './functions/clog';
 import { font as fontFunction } from './functions/font';
 import { kibana as kibanaFunction } from './functions/kibana';
@@ -158,6 +164,7 @@ export class ExpressionsPublicPlugin
   public start(core: CoreStart, { inspector }: ExpressionsStartDeps): ExpressionsStart {
     setCoreStart(core);
     setInspector(inspector);
+    setNotifications(core.notifications);
 
     return {
       execute,

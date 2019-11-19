@@ -77,7 +77,7 @@ describe('ExpressionRenderer', () => {
     expect(instance.find(EuiProgress)).toHaveLength(0);
   });
 
-  it('should display an error message when the expression fails', () => {
+  it.skip('should display an error message when the expression fails', () => {
     const dataSubject = new Subject();
     const data$ = dataSubject.asObservable().pipe(share());
     const renderSubject = new Subject();
@@ -107,7 +107,7 @@ describe('ExpressionRenderer', () => {
     expect(instance.find('[data-test-subj="expression-renderer-error"]')).toHaveLength(1);
   });
 
-  it('should display a custom error message if the user provides one', () => {
+  it.skip('should display a custom error message if the user provides one', () => {
     const dataSubject = new Subject();
     const data$ = dataSubject.asObservable().pipe(share());
     const renderSubject = new Subject();

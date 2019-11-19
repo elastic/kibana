@@ -20,40 +20,44 @@
 import { Observable } from 'rxjs';
 import * as Rx from 'rxjs';
 import { filter, share } from 'rxjs/operators';
-import { event, RenderId, Data, IInterpreterRenderHandlers } from './types';
+import {
+  event,
+  RenderId,
+  Data,
+  IInterpreterRenderHandlers,
+  ExpressionRenderDefinition,
+} from './types';
 import { getRenderersRegistry } from './services';
-
-interface RenderError {
-  type: 'error';
-  error: { type?: string; message: string };
-}
+import { errorRenderer as defaultErrorRenderer } from './error_renderer';
 
 export type IExpressionRendererExtraHandlers = Record<string, any>;
 
 export class ExpressionRenderHandler {
-  render$: Observable<RenderId | RenderError>;
+  render$: Observable<RenderId>;
   update$: Observable<any>;
   events$: Observable<event>;
 
   private element: HTMLElement;
   private destroyFn?: any;
   private renderCount: number = 0;
-  private renderSubject: Rx.BehaviorSubject<RenderId | RenderError | null>;
+  private renderSubject: Rx.BehaviorSubject<RenderId | null>;
   private eventsSubject: Rx.Subject<unknown>;
   private updateSubject: Rx.Subject<unknown>;
   private handlers: IInterpreterRenderHandlers;
+  private errorRenderer: ExpressionRenderDefinition;
 
-  constructor(element: HTMLElement) {
+  constructor(element: HTMLElement, errorRenderer?: ExpressionRenderDefinition) {
     this.element = element;
 
     this.eventsSubject = new Rx.Subject();
     this.events$ = this.eventsSubject.asObservable().pipe(share());
+    this.errorRenderer = errorRenderer || defaultErrorRenderer;
 
-    this.renderSubject = new Rx.BehaviorSubject(null as RenderId | RenderError | null);
+    this.renderSubject = new Rx.BehaviorSubject(null as RenderId | null);
     this.render$ = this.renderSubject.asObservable().pipe(
       share(),
       filter(_ => _ !== null)
-    ) as Observable<RenderId | RenderError>;
+    ) as Observable<RenderId>;
 
     this.updateSubject = new Rx.Subject();
     this.update$ = this.updateSubject.asObservable().pipe(share());
@@ -80,33 +84,42 @@ export class ExpressionRenderHandler {
 
   render = async (data: Data, extraHandlers: IExpressionRendererExtraHandlers = {}) => {
     if (!data || typeof data !== 'object') {
-      this.renderSubject.next({
-        type: 'error',
-        error: {
-          message: 'invalid data provided to the expression renderer',
+      return this.errorRenderer.render(
+        this.element,
+        {
+          type: 'error',
+          error: {
+            message: 'invalid data provided to the expression renderer',
+          },
         },
-      });
-      return;
+        this.handlers
+      );
     }
 
     if (data.type !== 'render' || !data.as) {
       if (data.type === 'error') {
-        this.renderSubject.next(data);
+        return this.errorRenderer.render(this.element, data, this.handlers);
       } else {
-        this.renderSubject.next({
-          type: 'error',
-          error: { message: 'invalid data provided to the expression renderer' },
-        });
+        return this.errorRenderer.render(
+          this.element,
+          {
+            type: 'error',
+            error: { message: 'invalid data provided to the expression renderer' },
+          },
+          this.handlers
+        );
       }
-      return;
     }
 
     if (!getRenderersRegistry().get(data.as)) {
-      this.renderSubject.next({
-        type: 'error',
-        error: { message: `invalid renderer id '${data.as}'` },
-      });
-      return;
+      return this.errorRenderer.render(
+        this.element,
+        {
+          type: 'error',
+          error: { message: `invalid renderer id '${data.as}'` },
+        },
+        this.handlers
+      );
     }
 
     try {
@@ -115,10 +128,14 @@ export class ExpressionRenderHandler {
         .get(data.as)!
         .render(this.element, data.value, { ...this.handlers, ...extraHandlers });
     } catch (e) {
-      this.renderSubject.next({
-        type: 'error',
-        error: { type: e.type, message: e.message },
-      });
+      return await this.errorRenderer.render(
+        this.element,
+        {
+          type: 'error',
+          error: { type: e.type, message: e.message },
+        },
+        this.handlers
+      );
     }
   };
 
