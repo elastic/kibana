@@ -16,22 +16,21 @@ import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/type
 
 // @public
 export interface App extends AppBase {
-    chromeless?: boolean;
     mount: (context: AppMountContext, params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
 }
 
 // @public (undocumented)
 export interface AppBase {
     capabilities?: Partial<Capabilities>;
+    chromeless?: boolean;
     euiIconType?: string;
     icon?: string;
-    // (undocumented)
     id: string;
     // @internal
     legacy?: boolean;
     order?: number;
-    // Warning: (ae-forgotten-export) The symbol "AppStatus" needs to be exported by the entry point index.d.ts
     status?: AppStatus;
+    statusUpdater$?: Observable<AppStatusUpdater>;
     title: string;
     tooltip?: string;
 }
@@ -39,7 +38,6 @@ export interface AppBase {
 // @public (undocumented)
 export interface ApplicationSetup {
     register(app: App): void;
-    // Warning: (ae-forgotten-export) The symbol "AppStatusUpdater" needs to be exported by the entry point index.d.ts
     registerAppStatusUpdater(statusUpdater$: Observable<AppStatusUpdater>): void;
     registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<App['mount'], T>): void;
 }
@@ -81,7 +79,20 @@ export interface AppMountParameters {
 }
 
 // @public
+export enum AppStatus {
+    accessible = 0,
+    inaccessible = 2,
+    inaccessibleWithDisabledNavLink = 1
+}
+
+// @public
+export type AppStatusUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefined;
+
+// @public
 export type AppUnmount = () => void;
+
+// @public
+export type AppUpdatableFields = Pick<AppBase, 'status' | 'tooltip'>;
 
 // @public
 export interface Capabilities {

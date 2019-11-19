@@ -19,6 +19,12 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ToastsApi](./kibana-plugin-public.toastsapi.md) | Methods for adding and removing global toast messages. |
 |  [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |  |
 
+## Enumerations
+
+|  Enumeration | Description |
+|  --- | --- |
+|  [AppStatus](./kibana-plugin-public.appstatus.md) | Accessibility status of an application. |
+
 ## Interfaces
 
 |  Interface | Description |
@@ -96,7 +102,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [AppStatusUpdater](./kibana-plugin-public.appstatusupdater.md) | Status updater for applications. |
 |  [AppUnmount](./kibana-plugin-public.appunmount.md) | A function called when an application should be unmounted from the page. This function should be synchronous. |
+|  [AppUpdatableFields](./kibana-plugin-public.appupdatablefields.md) | Defines the list of fields that can be updated via an [AppStatusUpdater](./kibana-plugin-public.appstatusupdater.md)<!-- -->. |
 |  [ChromeBreadcrumb](./kibana-plugin-public.chromebreadcrumb.md) |  |
 |  [ChromeHelpExtension](./kibana-plugin-public.chromehelpextension.md) |  |
 |  [ChromeNavLinkUpdateableFields](./kibana-plugin-public.chromenavlinkupdateablefields.md) |  |

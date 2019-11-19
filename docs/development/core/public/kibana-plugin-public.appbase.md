@@ -16,11 +16,13 @@ export interface AppBase
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [capabilities](./kibana-plugin-public.appbase.capabilities.md) | <code>Partial&lt;Capabilities&gt;</code> | Custom capabilities defined by the app. |
+|  [chromeless](./kibana-plugin-public.appbase.chromeless.md) | <code>boolean</code> | Hide the UI chrome when the application is mounted. Defaults to <code>false</code>. Takes precedence over chrome service visibility settings. |
 |  [euiIconType](./kibana-plugin-public.appbase.euiicontype.md) | <code>string</code> | A EUI iconType that will be used for the app's icon. This icon takes precendence over the <code>icon</code> property. |
 |  [icon](./kibana-plugin-public.appbase.icon.md) | <code>string</code> | A URL to an image file used as an icon. Used as a fallback if <code>euiIconType</code> is not provided. |
-|  [id](./kibana-plugin-public.appbase.id.md) | <code>string</code> |  |
+|  [id](./kibana-plugin-public.appbase.id.md) | <code>string</code> | The unique identifier of the application |
 |  [order](./kibana-plugin-public.appbase.order.md) | <code>number</code> | An ordinal used to sort nav links relative to one another for display. |
 |  [status](./kibana-plugin-public.appbase.status.md) | <code>AppStatus</code> | The status of the application. |
+|  [statusUpdater$](./kibana-plugin-public.appbase.statusupdater_.md) | <code>Observable&lt;AppStatusUpdater&gt;</code> | An [AppStatusUpdater](./kibana-plugin-public.appstatusupdater.md) observable that can be used to update the application [AppUpdatableFields](./kibana-plugin-public.appupdatablefields.md) at runtime. |
 |  [title](./kibana-plugin-public.appbase.title.md) | <code>string</code> | The title of the application. |
 |  [tooltip](./kibana-plugin-public.appbase.tooltip.md) | <code>string</code> | A tooltip shown when hovering over app link. |
 

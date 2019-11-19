@@ -4,7 +4,7 @@
 
 ## ApplicationSetup.registerAppStatusUpdater() method
 
-TODO
+Register an application status updater that can be used to change the [AppUpdatableFields](./kibana-plugin-public.appupdatablefields.md) fields of all applications at runtime.
 
 <b>Signature:</b>
 
