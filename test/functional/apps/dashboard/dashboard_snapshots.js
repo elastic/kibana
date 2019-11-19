@@ -53,7 +53,6 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.closeToast();
 
       await PageObjects.dashboard.saveDashboard('tsvb');
-      await PageObjects.common.closeToast();
       await PageObjects.dashboard.clickFullScreenMode();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickExpandPanelToggle();
@@ -74,7 +73,6 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.closeToast();
 
       await PageObjects.dashboard.saveDashboard('area');
-      await PageObjects.common.closeToast();
       await PageObjects.dashboard.clickFullScreenMode();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickExpandPanelToggle();
