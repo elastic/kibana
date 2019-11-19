@@ -6,7 +6,9 @@
 
 import React, { FC, Fragment, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+// import { SearchResponse } from 'elasticsearch';
 import { ErrorCallout } from './error_callout';
 import {
   getValuesFromResponse,
@@ -16,15 +18,27 @@ import {
   Eval,
   DataFrameAnalyticsConfig,
 } from '../../../../common';
+import { ml } from '../../../../../services/ml_api_service';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 import { EvaluateStat } from './evaluate_stat';
-import { RegressionResultsSearchQuery } from '../../../../common/analytics';
+import { RegressionResultsSearchQuery, getEvalQueryBody } from '../../../../common/analytics';
+import { SearchQuery } from './use_explore_data';
 
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus: DATA_FRAME_TASK_STATE;
   searchQuery: RegressionResultsSearchQuery;
+}
+
+interface TrackTotalHitsSearchResponse {
+  hits: {
+    total: {
+      value: number;
+      relation: string;
+    };
+    hits: any;
+  };
 }
 
 const defaultEval: Eval = { meanSquaredError: '', rSquared: '', error: null };
@@ -34,12 +48,50 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   const [generalizationEval, setGeneralizationEval] = useState<Eval>(defaultEval);
   const [isLoadingTraining, setIsLoadingTraining] = useState<boolean>(false);
   const [isLoadingGeneralization, setIsLoadingGeneralization] = useState<boolean>(false);
+  const [trainingDocsCount, setTrainingDocsCount] = useState<null | number>(null);
+  const [generalizationDocsCount, setGeneralizationDocsCount] = useState<null | number>(null);
 
   const index = jobConfig.dest.index;
   const dependentVariable = getDependentVar(jobConfig.analysis);
   const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
   // default is 'ml'
   const resultsField = jobConfig.dest.results_field;
+
+  const loadDocsCount = async ({
+    ignoreDefaultQuery = true,
+    isTraining,
+  }: {
+    ignoreDefaultQuery?: boolean;
+    isTraining: boolean;
+  }): Promise<{
+    docsCount: number | null;
+    success: boolean;
+    error: null | string;
+  }> => {
+    const query = getEvalQueryBody({ resultsField, isTraining, ignoreDefaultQuery, searchQuery });
+
+    try {
+      const body: SearchQuery = {
+        track_total_hits: true,
+        query,
+      };
+
+      const resp: TrackTotalHitsSearchResponse = await ml.esSearch({
+        index: jobConfig.dest.index,
+        size: 0,
+        body,
+      });
+
+      const docsCount = resp.hits && resp.hits.total && resp.hits.total.value;
+      return { docsCount, success: true, error: null };
+    } catch (e) {
+      if (e.message !== undefined) {
+        return { docsCount: null, success: false, error: e.message };
+      } else {
+        return { docsCount: null, success: false, error: JSON.stringify(e) };
+      }
+    }
+  };
 
   const loadGeneralizationData = async (ignoreDefaultQuery: boolean = true) => {
     setIsLoadingGeneralization(true);
@@ -104,24 +156,63 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   };
 
   const loadData = async ({ isTraining }: { isTraining?: { query: string; operator: string } }) => {
+    // searchBar query is filtering for testing data
     if (isTraining !== undefined && isTraining.query === 'false') {
       loadGeneralizationData();
+      const { docsCount, success, error } = await loadDocsCount({ isTraining: false });
+      if (success === true) {
+        setGeneralizationDocsCount(docsCount);
+      } else {
+        setGeneralizationDocsCount(null);
+      }
+      setTrainingDocsCount(0);
       setTrainingEval({
         meanSquaredError: '--',
         rSquared: '--',
         error: null,
       });
     } else if (isTraining !== undefined && isTraining.query === 'true') {
+      // searchBar query is filtering for training data
       loadTrainingData();
+      const { docsCount, success, error } = await loadDocsCount({ isTraining: true });
+      if (success === true) {
+        setTrainingDocsCount(docsCount);
+      } else {
+        setTrainingDocsCount(null);
+      }
+      setGeneralizationDocsCount(0);
       setGeneralizationEval({
         meanSquaredError: '--',
         rSquared: '--',
         error: null,
       });
     } else {
-      // No is_training clause from search bar so load both
+      // No is_training clause/filter from search bar so load both
       loadGeneralizationData(false);
+      const { docsCount: genDocsCount, success: genSuccess, error: genErr } = await loadDocsCount({
+        ignoreDefaultQuery: false,
+        isTraining: false,
+      });
+      if (genSuccess === true) {
+        setGeneralizationDocsCount(genDocsCount);
+      } else {
+        setGeneralizationDocsCount(null);
+      }
+
       loadTrainingData(false);
+      const {
+        docsCount: trainDocsCount,
+        success: trainingSuccess,
+        error: trainErr,
+      } = await loadDocsCount({
+        ignoreDefaultQuery: false,
+        isTraining: true,
+      });
+      if (trainingSuccess === true) {
+        setTrainingDocsCount(trainDocsCount);
+      } else {
+        setTrainingDocsCount(null);
+      }
     }
   };
 
@@ -169,6 +260,15 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
               )}
             </span>
           </EuiTitle>
+          {generalizationDocsCount !== null && (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.ml.dataframe.analytics.regressionExploration.generalizationDocsCount"
+                defaultMessage="{docsCount} docs evaluated"
+                values={{ docsCount: generalizationDocsCount }}
+              />
+            </EuiText>
+          )}
           <EuiSpacer />
           <EuiFlexGroup>
             {generalizationEval.error !== null && <ErrorCallout error={generalizationEval.error} />}
@@ -203,6 +303,15 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
               )}
             </span>
           </EuiTitle>
+          {trainingDocsCount !== null && (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.ml.dataframe.analytics.regressionExploration.trainingDocsCount"
+                defaultMessage="{docsCount} docs evaluated"
+                values={{ docsCount: trainingDocsCount }}
+              />
+            </EuiText>
+          )}
           <EuiSpacer />
           <EuiFlexGroup>
             {trainingEval.error !== null && <ErrorCallout error={trainingEval.error} />}

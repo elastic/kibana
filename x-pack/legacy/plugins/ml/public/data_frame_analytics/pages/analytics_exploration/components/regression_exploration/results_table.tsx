@@ -62,7 +62,7 @@ const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus: DATA_FRAME_TASK_STATE;
-  setEvaluateSearchQuery: any; // update
+  setEvaluateSearchQuery: React.Dispatch<React.SetStateAction<object>>;
 }
 
 export const ResultsTable: FC<Props> = React.memo(
@@ -332,8 +332,8 @@ export const ResultsTable: FC<Props> = React.memo(
     if (jobConfig === undefined) {
       return null;
     }
-
-    if (status === INDEX_STATUS.ERROR) {
+    // if it's a searchBar syntax error leave the table visible so they can try again
+    if (status === INDEX_STATUS.ERROR && !errorMessage.includes('parsing_exception')) {
       return (
         <EuiPanel grow={false}>
           <EuiFlexGroup gutterSize="s">
@@ -356,6 +356,11 @@ export const ResultsTable: FC<Props> = React.memo(
         </EuiPanel>
       );
     }
+
+    const tableError =
+      status === INDEX_STATUS.ERROR && errorMessage.includes('parsing_exception')
+        ? errorMessage
+        : searchError;
 
     return (
       <EuiPanel grow={false}>
@@ -461,7 +466,7 @@ export const ResultsTable: FC<Props> = React.memo(
               pagination={pagination}
               responsive={false}
               search={search}
-              error={searchError}
+              error={tableError}
               sorting={sorting}
             />
           </Fragment>

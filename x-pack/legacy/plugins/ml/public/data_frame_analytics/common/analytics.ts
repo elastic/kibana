@@ -219,6 +219,32 @@ export interface RegressionResultsSearchQuery {
   term?: { [key: string]: any };
 }
 
+export function getEvalQueryBody({
+  resultsField,
+  isTraining,
+  searchQuery,
+  ignoreDefaultQuery,
+}: {
+  resultsField: string;
+  isTraining: boolean;
+  searchQuery: RegressionResultsSearchQuery | undefined;
+  ignoreDefaultQuery: boolean | undefined;
+}) {
+  let query: RegressionResultsSearchQuery = {
+    term: { [`${resultsField}.is_training`]: { value: isTraining } },
+  };
+
+  if (searchQuery !== undefined && ignoreDefaultQuery === true) {
+    query = searchQuery;
+  } else if (searchQuery !== undefined && searchQuery.bool !== undefined) {
+    const searchQueryClone = cloneDeep(searchQuery);
+    // Doing an explicit check for undefined above so non-null assertion operator should be safe
+    searchQueryClone.bool!.must.push(query);
+    query = searchQueryClone;
+  }
+  return query;
+}
+
 export const loadEvalData = async ({
   isTraining,
   index,
@@ -242,18 +268,7 @@ export const loadEvalData = async ({
     predictionFieldName ? predictionFieldName : defaultPredictionField
   }`;
 
-  let query: RegressionResultsSearchQuery = {
-    term: { [`${resultsField}.is_training`]: { value: isTraining } },
-  };
-
-  if (searchQuery !== undefined && ignoreDefaultQuery === true) {
-    query = searchQuery;
-  } else if (searchQuery !== undefined && searchQuery.bool !== undefined) {
-    const searchQueryClone = cloneDeep(searchQuery);
-    // Doing an explicit check for undefined above so non-null assertion operator should be safe
-    searchQueryClone.bool!.must.push(query);
-    query = searchQueryClone;
-  }
+  const query = getEvalQueryBody({ resultsField, isTraining, searchQuery, ignoreDefaultQuery });
 
   const config = {
     index,
