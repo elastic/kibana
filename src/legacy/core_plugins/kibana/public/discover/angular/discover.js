@@ -57,6 +57,7 @@ import {
   SavedObjectSaveModal,
   getAngularModule,
   ensureDefaultIndexPattern,
+  getUnhashableStatesProvider,
 } from '../kibana_services';
 
 const {
@@ -67,8 +68,7 @@ const {
   State,
   timefilter,
   toastNotifications,
-  uiSettings,
-  getUnhashableStates
+  uiSettings
 } = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
@@ -191,6 +191,7 @@ function discoverController(
   queryFilter
 ) {
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
+  const getUnhashableStates = Private(getUnhashableStatesProvider);
 
   const inspectorAdapters = {
     requests: new RequestAdapter()

@@ -79,6 +79,7 @@ export { tabifyAggResponse } from 'ui/agg_response/tabify';
 export { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 export { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
+export { getUnhashableStatesProvider } from 'ui/state_management/state_hashing/get_unhashable_states_provider';
 
 // EXPORT types
 export { Vis } from 'ui/vis';
