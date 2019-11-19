@@ -18,7 +18,6 @@ import { REACT_APP_ROOT_ID } from './new-platform/plugin';
 import './style/global_overrides.css';
 import template from './templates/index.html';
 import { KibanaCoreContextProvider } from '../../observability/public';
-
 const { core } = npStart;
 
 // render APM feedback link in global help menu

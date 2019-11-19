@@ -18,7 +18,7 @@
  */
 
 import { get, identity } from 'lodash';
-import { getType } from './interpreter';
+import { getType } from '../common/type';
 
 export function serializeProvider(types: any) {
   return {
