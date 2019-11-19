@@ -965,7 +965,7 @@ export class TimeSeriesExplorer extends React.Component {
     this.resizeHandler();
 
     // Listen for context chart updates.
-    this.contextChart
+    this.subscriptions.add(this.contextChart
       .pipe(
         tap(selection => {
           this.setState({
@@ -1048,14 +1048,14 @@ export class TimeSeriesExplorer extends React.Component {
         // All the data is ready now for a state update.
         this.setState({
           focusAggregationInterval: this.getFocusAggregationInterval({ from: selection.from, to: selection.to }),
-          ...refreshFocusData,
           loading: false,
           showModelBoundsCheckbox: modelPlotEnabled && (refreshFocusData.focusChartData.length > 0),
           zoomFromFocusLoaded: selection.from,
           zoomToFocusLoaded: selection.to,
+          ...refreshFocusData,
           ...tableData
         });
-      });
+      }));
   }
 
   componentWillUnmount() {
