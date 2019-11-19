@@ -206,7 +206,7 @@ export default function ({ getService }) {
       });
     });
 
-    it('should adjust the scheduled interval when rescheduling an idle task', async () => {
+    it('should rerun and adjust the scheduled interval when rescheduling an idle task', async () => {
       const interval = _.random(150, 200);
       const intervalMilliseconds = interval * 60000;
 
@@ -220,7 +220,6 @@ export default function ({ getService }) {
         expect((await historyDocs()).length).to.eql(1);
 
         const [automaticallyRescheduledTask] = (await currentTasks()).docs;
-        expect(automaticallyRescheduledTask.attempts).to.eql(0);
         expect(automaticallyRescheduledTask.state.count).to.eql(1);
 
         return expectReschedule(originalTask, automaticallyRescheduledTask, intervalMilliseconds);
@@ -235,12 +234,12 @@ export default function ({ getService }) {
       });
 
       return await retry.try(async () => {
-        expect((await historyDocs()).length).to.eql(1);
+        expect((await historyDocs()).length).to.eql(2);
 
         const [manuallyRescheduledTask] = (await currentTasks()).docs;
 
-        expect(manuallyRescheduledTask.attempts).to.eql(0);
-        expect(manuallyRescheduledTask.state.count).to.eql(1);
+        expect(manuallyRescheduledTask.interval).to.eql(`${updatedInterval}m`);
+        expect(manuallyRescheduledTask.state.count).to.eql(2);
 
         return expectReschedule(originalTask, manuallyRescheduledTask, updatedIntervalMilliseconds);
       });

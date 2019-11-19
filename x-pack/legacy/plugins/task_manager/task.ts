@@ -22,7 +22,7 @@ import Joi from 'joi';
  *    // This type is now defined as { id: string; name: string; }
  *    type TaskInstanceWithId = Require<TaskInstance, 'id'>;
  */
-export type Require<T extends object, P extends keyof T> = Omit<T, P> & Required<Pick<T, P>>;
+type Require<T extends object, P extends keyof T> = Omit<T, P> & Required<Pick<T, P>>;
 
 /**
  * A loosely typed definition of the elasticjs wrapper. It's beyond the scope
@@ -234,6 +234,11 @@ export interface TaskInstance {
  * A task instance that has an id.
  */
 export type TaskInstanceWithId = Require<TaskInstance, 'id'>;
+
+/**
+ * A task instance that has an id.
+ */
+export type TaskInstanceScheduling = Pick<Require<TaskInstance, 'id'>, 'id' | 'runAt' | 'interval'>;
 
 /**
  * A task instance that has an id and is ready for storage.

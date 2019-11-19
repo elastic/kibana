@@ -8,7 +8,7 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 
-import { omit, defaults, mapValues, isDate } from 'lodash';
+import { omit, defaults, mapValues, isDate, flow } from 'lodash';
 import {
   SavedObjectsClientContract,
   SavedObject,
@@ -22,9 +22,8 @@ import {
   TaskDefinition,
   TaskDictionary,
   TaskInstance,
-  Require,
+  TaskInstanceScheduling,
 } from './task';
-import { intervalFromDate, precedingDateByInterval } from './lib/intervals';
 
 export interface StoreOpts {
   callCluster: ElasticJs;
@@ -144,30 +143,14 @@ export class TaskStore {
    *
    * @param task - The task being rescheduled.
    */
-  public async reschedule(
-    taskInstance: Require<Partial<TaskInstance>, 'id'>
-  ): Promise<ConcreteTaskInstance> {
+  public async reschedule(taskInstance: TaskInstanceScheduling): Promise<ConcreteTaskInstance> {
     const taskInStore = await this.getTask(taskInstance.id);
-
-    if (taskInStore.status !== 'idle') {
-      throw new Error(
-        `Rescheduling Task ${taskInstance.id} failed, as only Idle tasks may be rescheduled`
-      );
-    }
-
-    const taskUpdate = applyConcreteTaskInstanceDefaults({
-      ...omit(taskInStore, 'runAt'),
-      ...taskInstance,
-    });
-
-    if (!taskInstance.runAt && taskInstance.interval) {
-      taskUpdate.runAt = intervalFromDate(
-        precedingDateByInterval(taskInStore.runAt, taskInStore.interval) || taskInStore.scheduledAt,
-        taskInstance.interval
-      )!;
-    }
-
-    return await this.update(taskUpdate);
+    return await this.update(
+      applyConcreteTaskInstanceDefaults({
+        ...(taskInStore.status === 'idle' ? omit(taskInStore, 'runAt') : taskInStore),
+        ...taskInstance,
+      })
+    );
   }
 
   /**
@@ -434,9 +417,10 @@ function paginatableSort(sort: any[] = []) {
   return [...sort, sortById];
 }
 
-function taskInstanceToAttributes(doc: TaskInstance): SavedObjectAttributes {
-  return serializeTaskInstanceFields(applyConcreteTaskInstanceDefaults(doc));
-}
+const taskInstanceToAttributes = flow(
+  applyConcreteTaskInstanceDefaults,
+  serializeTaskInstanceFields
+);
 
 function serializeTaskInstanceFields(doc: ConcreteTaskInstance): SavedObjectAttributes {
   const { params, state, scheduledAt, startedAt, retryAt, runAt } = doc;
