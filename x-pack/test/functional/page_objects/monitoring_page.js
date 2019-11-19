@@ -27,6 +27,8 @@ export function MonitoringPageProvider({ getPageObjects, getService }) {
           'monitoring_user_password'
         );
       }
+    }
+
     async getWelcome() {
       const el = await find.byCssSelector('.euiCallOut--primary', 10000 * 10);
       return await el.getVisibleText();

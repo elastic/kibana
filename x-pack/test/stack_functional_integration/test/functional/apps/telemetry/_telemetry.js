@@ -13,10 +13,9 @@ export default ({ getService, getPageObjects }) => {
     });
 
     it('should show banner Help us improve Kibana and Elasticsearch', async () => {
-      const expectedMessage = `Help us improve the Elastic Stack!
-Help us improve the Elastic Stack by providing usage statistics for basic features. We will not share this data outside of Elastic. Read more
-Yes
-No`;
+      const expectedMessage = `Help us improve the Elastic Stack
+To learn about how usage data helps us manage and improve our products and services, see our Privacy Statement. To stop collection, disable usage data here.
+Dismiss`;
       const actualMessage = await PageObjects.monitoring.getWelcome();
       log.debug(`X-Pack message = ${actualMessage}`);
       expect(actualMessage).to.be(expectedMessage);

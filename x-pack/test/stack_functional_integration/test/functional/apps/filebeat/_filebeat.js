@@ -13,10 +13,11 @@ export default function ({ getService, getPageObjects }) {
     it('filebeat- should have hit count GT 0', async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('filebeat-*');
-      // await PageObjects.common.tryForTime(40000, async () => {
+      // await retry.try(async () => {
       //   await PageObjects.header.setQuickSpan('Today');
       // });
-      await retry.try(async function () {
+      await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_This_week');
+      await retry.try(async () => {
         const hitCount = parseInt(await PageObjects.discover.getHitCount());
         expect(hitCount).to.be.greaterThan(0);
       });

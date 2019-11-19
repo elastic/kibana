@@ -5,12 +5,16 @@ const url = require('url');
 
 // KIBANAURL is the same env var used by setenv.sh
 // TODO: Change the user back to power/changeme.  https://github.com/elastic/x-pack-kibana/issues/2948
-const TEST_KIBANA_URL = url.parse(process.env.KIBANAURL ? process.env.KIBANAURL : 'http://elastic:changeit@localhost:5601');
+const TEST_KIBANA_URL = url.parse(
+  process.env.KIBANAURL ? process.env.KIBANAURL : 'http://elastic:changeit@localhost:5601'
+);
 const TEST_KIBANA_USERNAME = TEST_KIBANA_URL.auth.split(':')[0] || 'elastic';
 const TEST_KIBANA_PASSWORD = TEST_KIBANA_URL.auth.split(':')[1] || 'changeit';
 
 // ESURL is the same env var used by setenv.sh
-const TEST_ES_URL = url.parse(process.env.ESURL ? process.env.ESURL : 'http://elastic:changeit@localhost:9200');
+const TEST_ES_URL = url.parse(
+  process.env.ESURL ? process.env.ESURL : 'http://elastic:changeit@localhost:9200'
+);
 const TEST_ES_USERNAME = TEST_ES_URL.auth.split(':')[0] || 'elastic';
 const TEST_ES_PASSWORD = TEST_ES_URL.auth.split(':')[1] || 'changeit';
 
@@ -54,7 +58,7 @@ export default () => {
       // },
       settings: {
         pathname: kibanaURL,
-        hash: '/management'
+        hash: '/management',
       },
       // console: {
       //   pathname: kibanaURL,
@@ -82,4 +86,4 @@ export default () => {
     //   dataDir: resolve(__dirname, 'fixtures/dump_data'),
     // },
   };
-}
+};

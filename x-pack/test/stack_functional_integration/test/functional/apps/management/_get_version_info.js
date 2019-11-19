@@ -1,27 +1,27 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
-import {
-  bdd
-} from '../../../support';
+export default function ({ getService, getPageObjects }) {
+  describe('get version info', function describeIndexTests() {
+    const config = getService('config');
+    const log = getService('log');
+    const PageObjects = getPageObjects(['common', 'settings']);
 
-import PageObjects from '../../../support/page_objects';
-
-bdd.describe('get version info', function describeIndexTests() {
-  const kbnInternVars = global.__kibana__intern__;
-  const config = kbnInternVars.intern.config;
-
-  bdd.before(function () {
-    return PageObjects.common.navigateToApp('settings', 'power', 'changeme')
-    .then(function () {
-      PageObjects.common.debug('getVersionInfo');
-      return PageObjects.settings.getVersionInfo();
-    })
-    .then(function (versionInfo) {
+    before(async () => {
+      await PageObjects.common.navigateToApp('settings', 'power', 'changeme');
+      log.debug('getVersionInfo');
       // PageObjects.common.debug('version = ' + versionInfo.version);
       // PageObjects.common.debug('Build, Commit = ' + versionInfo.build);
-      config.servers.kibana.version = versionInfo;
-      PageObjects.common.debug(config.servers.kibana.version.version);
-      PageObjects.common.debug(config.servers.kibana.version.build);
+      config.servers.kibana.version = PageObjects.settings.getVersionInfo();
+      log.debug(
+        `\n### config.servers.kibana.version.version: ${config.servers.kibana.version.version}`
+      );
+      log.debug(
+        `\n### config.servers.kibana.version.build: ${config.servers.kibana.version.build}`
+      );
     });
   });
-
-});
+}

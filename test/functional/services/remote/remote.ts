@@ -32,6 +32,7 @@ import { pollForLogEntry$ } from './poll_for_log_entry';
 export async function RemoteProvider({ getService }: FtrProviderContext) {
   const lifecycle = getService('lifecycle');
   const log = getService('log');
+  const provisionedEnv = getService('provisionedEnv');
   const config = getService('config');
   const browserType: Browsers = config.get('browser.type');
   const collectCoverage: boolean = !!process.env.CODE_COVERAGE;
@@ -43,7 +44,8 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     log,
     browserType,
     lifecycle,
-    config.get('browser.logPollingMs')
+    config.get('browser.logPollingMs'),
+    provisionedEnv.REMOTE_SESSION_URL
   );
   const isW3CEnabled = (driver as any).executor_.w3c;
 

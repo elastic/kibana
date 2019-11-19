@@ -1,17 +1,24 @@
-import expect from '@kbn/expect';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 
 export default ({ getService, getPageObjects }) => {
   describe('monitoring app', () => {
     const provisionedEnv = getService('provisionedEnv');
     const browser = getService('browser');
-    const PageObjects = getPageObjects(['shield', 'monitoring', 'common']);
+    const PageObjects = getPageObjects(['security', 'shield', 'monitoring', 'common']);
     const monitoringNoData = getService('monitoringNoData');
+    const log = getService('log');
+    const isSaml = !!provisionedEnv.VM.includes('saml');
 
-    before(async function() {
+    before(async () => {
       await browser.setWindowSize(1200, 800);
       if (provisionedEnv.SECURITY === 'YES') {
-        await PageObjects.shield.logout();
-        PageObjects.common.debug('provisionedEnv.SECURITY === YES so log in as elastic superuser to enable monitoring');
+        await PageObjects.security.forceLogout(isSaml);
+        log.debug('### log in as elastic superuser to enable monitoring');
         // Tests may be running as a non-superuser like `power` but that user
         // doesn't have the cluster privs to enable monitoring.
         // On the SAML config, this will fail, but the test recovers on the next
@@ -26,10 +33,7 @@ export default ({ getService, getPageObjects }) => {
     });
 
     after(async () => {
-      if (provisionedEnv.SECURITY === 'YES') {
-        await PageObjects.shield.logout();
-      }
+      if (provisionedEnv.SECURITY === 'YES') await PageObjects.security.forceLogout(isSaml);
     });
-
   });
-}
+};

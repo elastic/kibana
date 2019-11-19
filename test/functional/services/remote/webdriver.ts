@@ -65,7 +65,8 @@ async function attemptToCreateCommand(
   log: ToolingLog,
   browserType: Browsers,
   lifecycle: Lifecycle,
-  logPollingMs: number
+  logPollingMs: number,
+  remoteSessionUrl: string
 ) {
   const attemptId = ++attemptCounter;
   log.debug('[webdriver] Creating session');
@@ -103,11 +104,20 @@ async function attemptToCreateCommand(
         });
         chromeCapabilities.set('goog:loggingPrefs', { browser: 'ALL' });
 
-        const session = await new Builder()
-          .forBrowser(browserType)
-          .withCapabilities(chromeCapabilities)
-          .setChromeService(new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging())
-          .build();
+        let session;
+        if (remoteSessionUrl) {
+          session = await new Builder()
+            .forBrowser(browserType)
+            .withCapabilities(chromeCapabilities)
+            .usingServer(remoteSessionUrl)
+            .build();
+        } else {
+          session = await new Builder()
+            .forBrowser(browserType)
+            .withCapabilities(chromeCapabilities)
+            .setChromeService(new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging())
+            .build();
+        }
 
         return {
           session,
@@ -228,7 +238,8 @@ export async function initWebDriver(
   log: ToolingLog,
   browserType: Browsers,
   lifecycle: Lifecycle,
-  logPollingMs: number
+  logPollingMs: number,
+  remoteSessionUrl: string
 ) {
   const logger = getLogger('webdriver.http.Executor');
   logger.setLevel(logging.Level.FINEST);
@@ -251,7 +262,7 @@ export async function initWebDriver(
       while (true) {
         const command = await Promise.race([
           delay(30 * SECOND),
-          attemptToCreateCommand(log, browserType, lifecycle, logPollingMs),
+          attemptToCreateCommand(log, browserType, lifecycle, logPollingMs, remoteSessionUrl),
         ]);
 
         if (!command) {

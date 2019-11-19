@@ -91,7 +91,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     private async loginIfPrompted(appUrl: string) {
       let currentUrl = await browser.getCurrentUrl();
       log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
-      await find.byCssSelector('[data-test-subj="kibanaChrome"]', 6 * defaultFindTimeout); // 60 sec waiting
+      // await find.byCssSelector('[data-test-subj="kibanaChrome"]', 6 * defaultFindTimeout); // 60 sec waiting
       const loginPage = currentUrl.includes('/login');
       const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
 
@@ -109,7 +109,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         );
         await browser.get(appUrl);
         currentUrl = await browser.getCurrentUrl();
-        log.debug(`Finished login process currentUrl = ${currentUrl}`);
+        log.debug(`### Finished login process currentUrl = ${currentUrl}`);
       }
       return currentUrl;
     }
@@ -189,39 +189,34 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
     async navigateToApp(
       appName: string,
-      { basePath = '', shouldLoginIfPrompted = true, shouldAcceptAlert = true, hash = '' } = {}
+      { basePath = '', shouldLoginIfPrompted = true, shouldAcceptAlert = true, hashArg = '' } = {}
     ) {
-      let appUrl: string;
-      if (config.has(['apps', appName])) {
-        // Legacy applications
-        const appConfig = config.get(['apps', appName]);
-        appUrl = getUrl.noAuth(config.get('servers.kibana'), {
-          pathname: `${basePath}${appConfig.pathname}`,
-          hash: hash || appConfig.hash,
-        });
-      } else {
-        appUrl = getUrl.noAuth(config.get('servers.kibana'), {
-          pathname: `${basePath}/app/${appName}`,
-          hash,
-        });
-      }
+      const kibServerConf = config.get('servers.kibana');
+      const getKibServerUrl = getUrl.noAuth.bind(null, kibServerConf);
+      const buildLegacyUrl = ({ pathname, hash }) =>
+        getKibServerUrl({ pathname: `${basePath}${pathname}`, hash });
+      const buildUrl = () =>
+        config.has(['apps', appName])
+          ? buildLegacyUrl(config.get(['apps', appName]))
+          : getKibServerUrl({ pathname: `${basePath}/app/${appName}`, hash: hashArg });
+      const appUrl: string = buildUrl();
 
-      log.debug('navigating to ' + appName + ' url: ' + appUrl);
-
-      await retry.tryForTime(defaultTryTimeout * 2, async () => {
+      const navToAppSuccess = async () => {
         let lastUrl = await retry.try(async () => {
           // since we're using hash URLs, always reload first to force re-render
           await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert);
           await this.sleep(700);
-          log.debug('returned from get, calling refresh');
-          await browser.refresh();
+          // TODO-TRE: Uncomment
+          // log.debug('returned from get, calling refresh');
+          // await browser.refresh();
           let currentUrl = shouldLoginIfPrompted
             ? await this.loginIfPrompted(appUrl)
             : await browser.getCurrentUrl();
 
-          if (currentUrl.includes('app/kibana')) {
-            await testSubjects.find('kibanaChrome');
-          }
+          // TODO-TRE: Uncomment
+          // if (currentUrl.includes('app/kibana')) {
+          //   await testSubjects.find('kibanaChrome');
+          // }
 
           currentUrl = (await browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
           const maxAdditionalLengthOnNavUrl = 230;
@@ -236,23 +231,22 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           // Navigating to Settings when there is a default index pattern has a URL length of 196
           // (from debug output). Some other tabs may also be long. But a rather simple configured
           // visualization is about 1000 chars long. So at least we catch that case.
-
+          const replace = (a: string, b: string, c: string) => a.replace(b, c);
           // Browsers don't show the ':port' if it's 80 or 443 so we have to
           // remove that part so we can get a match in the tests.
-          const navSuccessful = new RegExp(
-            appUrl.replace(':80/', '/').replace(':443/', '/') +
-              `.{0,${maxAdditionalLengthOnNavUrl}}$`
-          ).test(currentUrl);
+          const no80 = replace(appUrl, ':80/', '/');
+          const no443 = replace(no80, ':443/', '/');
+          const replaced = `${no443}.{0,${maxAdditionalLengthOnNavUrl}}$`;
+          const navSuccessful = new RegExp(replaced).test(currentUrl);
 
-          if (!navSuccessful) {
-            const msg = `App failed to load: ${appName} in ${defaultFindTimeout}ms appUrl=${appUrl} currentUrl=${currentUrl}`;
-            log.debug(msg);
-            throw new Error(msg);
-          }
+          if (!navSuccessful)
+            throw new Error(
+              `Failed to load: ${appName} app in ${defaultFindTimeout}ms appUrl=${appUrl} currentUrl=${currentUrl}`
+            );
           return currentUrl;
         });
 
-        await retry.try(async () => {
+        const waitUntilSettled = async () => {
           await this.sleep(501);
           const currentUrl = await browser.getCurrentUrl();
           log.debug('in navigateTo url = ' + currentUrl);
@@ -260,12 +254,16 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
             lastUrl = currentUrl;
             throw new Error('URL changed, waiting for it to settle');
           }
-        });
+        };
+        await retry.try(waitUntilSettled);
         if (appName === 'status_page') return;
-        if (await testSubjects.exists('statusPageContainer')) {
+        if (await testSubjects.exists('statusPageContainer'))
           throw new Error('Navigation ended up at the status page.');
-        }
-      });
+      };
+      const navToAppFail = async (x: any) => {
+        if (x) log.debug(`\n### x: \n\t${x}`);
+      };
+      await retry.tryForTime(defaultTryTimeout * 2, navToAppSuccess, navToAppFail);
     }
 
     async waitUntilUrlIncludes(path: string) {
