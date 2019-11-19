@@ -17,8 +17,8 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await setup('monitoring/multicluster', {
-        from: '2017-08-15 21:00:00.000',
-        to: '2017-08-16 00:00:00.000',
+        from: 'Aug 15, 2017 @ 21:00:00.000',
+        to: 'Aug 16, 2017 @ 00:00:00.000',
       });
       await clusterList.assertDefaults();
     });
