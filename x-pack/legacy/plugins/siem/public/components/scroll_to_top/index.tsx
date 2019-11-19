@@ -9,11 +9,11 @@ import { useEffect } from 'react';
 export const useScrollToTop = () => {
   useEffect(() => {
     // trying to use new API - https://developer.mozilla.org/en-US/docs/Web/API/Window/scrollTo
-    if (window.scroll) {	
+    if (window.scroll) {
       window.scroll(0, 0);
-    } else {	
-      // just a fallback for older browsers	
-      window.scrollTo(0, 0);	
+    } else {
+      // just a fallback for older browsers
+      window.scrollTo(0, 0);
     }
   });
 
