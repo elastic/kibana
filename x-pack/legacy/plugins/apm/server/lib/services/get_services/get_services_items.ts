@@ -58,13 +58,9 @@ export async function getServicesItems(setup: Setup) {
     const eventTypes = bucket.events.buckets;
 
     const transactions = eventTypes.find(e => e.key === 'transaction');
-    // TODO(TS-3.7-ESLINT)
-    // eslint-disable-next-line @typescript-eslint/camelcase
     const totalTransactions = transactions?.doc_count || 0;
 
     const errors = eventTypes.find(e => e.key === 'error');
-    // TODO(TS-3.7-ESLINT)
-    // eslint-disable-next-line @typescript-eslint/camelcase
     const totalErrors = errors?.doc_count || 0;
 
     const deltaAsMinutes = (end - start) / 1000 / 60;

@@ -31,7 +31,6 @@ uiRoutes.when('/datavisualizer', {
   },
 });
 
-// @ts-ignore
 import { DatavisualizerSelector } from './datavisualizer_selector';
 
 module.directive('datavisualizerSelector', function() {
