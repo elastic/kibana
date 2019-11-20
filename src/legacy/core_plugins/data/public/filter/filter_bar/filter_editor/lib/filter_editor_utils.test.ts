@@ -34,7 +34,9 @@ import {
   getOperatorOptions,
   isFilterValid,
 } from './filter_editor_utils';
+
 import { existsOperator, isBetweenOperator, isOneOfOperator, isOperator } from './filter_operators';
+
 import { esFilters } from '../../../../../../../../plugins/data/public';
 
 jest.mock('ui/new_platform');

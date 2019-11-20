@@ -23,6 +23,7 @@ import {
   withKibana,
   KibanaReactContextValue,
 } from '../../../../../../../plugins/kibana_react/public';
+
 import {
   IDataPluginServices,
   IIndexPattern,
