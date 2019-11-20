@@ -20,8 +20,9 @@
 import { Url } from 'url';
 import { Request } from 'hapi';
 
-import { ObjectType, TypeOf } from '@kbn/config-schema';
+import { ObjectType, Type, TypeOf } from '@kbn/config-schema';
 
+import { Stream } from 'stream';
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { Headers } from './headers';
 import { RouteMethod, RouteSchemas, RouteConfigOptions } from './route';
@@ -33,11 +34,11 @@ const requestSymbol = Symbol('request');
  * Request specific route information exposed to a handler.
  * @public
  * */
-export interface KibanaRequestRoute<Method extends RouteMethod | 'patch' | 'options'> {
+export interface KibanaRequestRoute<Method extends RouteMethod> {
   path: string;
   method: Method;
   options: Method extends 'get'
-    ? Required<Pick<RouteConfigOptions<Method>, 'authRequired' | 'tags'>> // GET requests cannot have payload options
+    ? Required<Omit<RouteConfigOptions<Method>, 'body'>> // GET requests cannot have payload options
     : Required<RouteConfigOptions>; // Using any because 'patch' and 'options' are not valid RouteMethods but shouldn't affect much to typings
 }
 
@@ -58,11 +59,11 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
    * instance of a KibanaRequest.
    * @internal
    */
-  public static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    req: Request,
-    routeSchemas?: RouteSchemas<P, Q, B>,
-    withoutSecretHeaders: boolean = true
-  ) {
+  public static from<
+    P extends ObjectType,
+    Q extends ObjectType,
+    B extends ObjectType | Type<Buffer> | Type<Stream>
+  >(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders: boolean = true) {
     const requestParts = KibanaRequest.validate(req, routeSchemas);
     return new KibanaRequest(
       req,
@@ -79,7 +80,11 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
    * received in the route handler.
    * @internal
    */
-  private static validate<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+  private static validate<
+    P extends ObjectType,
+    Q extends ObjectType,
+    B extends ObjectType | Type<Buffer> | Type<Stream>
+  >(
     req: Request,
     routeSchemas: RouteSchemas<P, Q, B> | undefined
   ): {

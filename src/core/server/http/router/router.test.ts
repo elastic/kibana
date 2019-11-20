@@ -71,6 +71,16 @@ describe('Router', () => {
       expect(route.options).toEqual({ body: { output: 'stream', parse: false } });
     });
 
+    it('should NOT default `output: "stream" and parse: false` when the user has specified body options (he cares about it)', () => {
+      const router = new Router('', logger, enhanceWithContext);
+      router.post(
+        { path: '/', options: { body: { maxBytes: 1 } }, validate: {} },
+        (context, req, res) => res.ok({})
+      );
+      const [route] = router.getRoutes();
+      expect(route.options).toEqual({ body: { maxBytes: 1 } });
+    });
+
     it('should NOT default `output: "stream" and parse: false` when no body validation is required and GET', () => {
       const router = new Router('', logger, enhanceWithContext);
       router.get({ path: '/', validate: {} }, (context, req, res) => res.ok({}));

@@ -17,12 +17,19 @@
  * under the License.
  */
 
-import { ObjectType } from '@kbn/config-schema';
+import { ObjectType, Type } from '@kbn/config-schema';
+import { Stream } from 'stream';
+
 /**
  * The set of common HTTP methods supported by Kibana routing.
  * @public
  */
-export type RouteMethod = 'get' | 'post' | 'put' | 'delete';
+export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
+
+/**
+ * The set of valid body.output
+ */
+export const validBodyOutput = ['data', 'stream'] as const;
 
 /**
  * The set of supported parseable Content-Types
@@ -73,7 +80,7 @@ export interface RouteConfigOptionsBody {
    *
    * Default value: 'data', unless no validation.body is provided in the route definition. In that case the default is 'stream' to alleviate memory pressure.
    */
-  output?: 'data' | 'stream';
+  output?: typeof validBodyOutput[number];
 
   /**
    * Determines if the incoming payload is processed or presented raw. Available values:
@@ -109,7 +116,7 @@ export interface RouteConfigOptions<Method extends RouteMethod = any> {
   /**
    * Additional body options {@link RouteConfigOptionsBody}.
    */
-  body?: Method extends 'get' ? never : RouteConfigOptionsBody;
+  body?: Method extends 'get' | 'options' ? never : RouteConfigOptionsBody;
 }
 
 /**
@@ -119,7 +126,7 @@ export interface RouteConfigOptions<Method extends RouteMethod = any> {
 export interface RouteConfig<
   P extends ObjectType,
   Q extends ObjectType,
-  B extends ObjectType,
+  B extends ObjectType | Type<Buffer> | Type<Stream>,
   Method extends RouteMethod
 > {
   /**
@@ -206,7 +213,11 @@ export interface RouteConfig<
  * request.
  * @public
  */
-export interface RouteSchemas<P extends ObjectType, Q extends ObjectType, B extends ObjectType> {
+export interface RouteSchemas<
+  P extends ObjectType,
+  Q extends ObjectType,
+  B extends ObjectType | Type<Buffer> | Type<Stream>
+> {
   params?: P;
   query?: Q;
   body?: B;

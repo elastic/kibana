@@ -21,10 +21,17 @@ import { ObjectType, TypeOf, Type } from '@kbn/config-schema';
 import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 import Boom from 'boom';
 
+import { Stream } from 'stream';
 import { Logger } from '../../logging';
 import { KibanaRequest } from './request';
 import { KibanaResponseFactory, kibanaResponseFactory, IKibanaResponse } from './response';
-import { RouteConfig, RouteConfigOptions, RouteMethod, RouteSchemas } from './route';
+import {
+  RouteConfig,
+  RouteConfigOptions,
+  RouteMethod,
+  RouteSchemas,
+  validBodyOutput,
+} from './route';
 import { HapiResponseAdapter } from './response_adapter';
 import { RequestHandlerContext } from '../../../server';
 
@@ -52,8 +59,18 @@ export interface IRouter {
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  get: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+  get: <P extends ObjectType, Q extends ObjectType, B extends never>(
     route: RouteConfig<P, Q, B, 'get'>,
+    handler: RequestHandler<P, Q, B>
+  ) => void;
+
+  /**
+   * Register a route handler for `OPTIONS` request.
+   * @param route {@link RouteConfig} - a route configuration.
+   * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
+   */
+  options: <P extends ObjectType, Q extends ObjectType, B extends never>(
+    route: RouteConfig<P, Q, B, 'options'>,
     handler: RequestHandler<P, Q, B>
   ) => void;
 
@@ -62,7 +79,11 @@ export interface IRouter {
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  post: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+  post: <
+    P extends ObjectType,
+    Q extends ObjectType,
+    B extends ObjectType | Type<Buffer> | Type<Stream>
+  >(
     route: RouteConfig<P, Q, B, 'post'>,
     handler: RequestHandler<P, Q, B>
   ) => void;
@@ -72,8 +93,26 @@ export interface IRouter {
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  put: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+  put: <
+    P extends ObjectType,
+    Q extends ObjectType,
+    B extends ObjectType | Type<Buffer> | Type<Stream>
+  >(
     route: RouteConfig<P, Q, B, 'put'>,
+    handler: RequestHandler<P, Q, B>
+  ) => void;
+
+  /**
+   * Register a route handler for `PATCH` request.
+   * @param route {@link RouteConfig} - a route configuration.
+   * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
+   */
+  patch: <
+    P extends ObjectType,
+    Q extends ObjectType,
+    B extends ObjectType | Type<Buffer> | Type<Stream>
+  >(
+    route: RouteConfig<P, Q, B, 'patch'>,
     handler: RequestHandler<P, Q, B>
   ) => void;
 
@@ -82,7 +121,11 @@ export interface IRouter {
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  delete: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+  delete: <
+    P extends ObjectType,
+    Q extends ObjectType,
+    B extends ObjectType | Type<Buffer> | Type<Stream>
+  >(
     route: RouteConfig<P, Q, B, 'delete'>,
     handler: RequestHandler<P, Q, B>
   ) => void;
@@ -115,7 +158,7 @@ function getRouteFullPath(routerPath: string, routePath: string) {
 function routeSchemasFromRouteConfig<
   P extends ObjectType,
   Q extends ObjectType,
-  B extends ObjectType,
+  B extends ObjectType | Type<Buffer> | Type<Stream>,
   Method extends RouteMethod
 >(route: RouteConfig<P, Q, B, Method>, routeMethod: Method) {
   // The type doesn't allow `validate` to be undefined, but it can still
@@ -147,26 +190,27 @@ function routeSchemasFromRouteConfig<
  */
 function validOptions<Method extends RouteMethod>(
   method: Method,
-  routeConfig: RouteConfig<ObjectType, ObjectType, ObjectType, Method>
+  routeConfig: RouteConfig<ObjectType, ObjectType, ObjectType | Type<Buffer> | Type<Stream>, Method>
 ) {
   const shouldNotHavePayload = ['head', 'get'].includes(method);
   const { options = {}, validate } = routeConfig;
-  const shouldValidateBody = validate && validate.body;
+  const shouldValidateBody = (validate && !!validate.body) || !!options.body;
 
   const { output } = options.body || {};
-  if (typeof output === 'string' && !['data', 'stream'].includes(output)) {
+  if (typeof output === 'string' && !validBodyOutput.includes(output)) {
     throw new Error(
       `[options.body.output: '${output}'] in route ${method.toUpperCase()} ${
         routeConfig.path
-      } is not valid. Only 'data' or 'stream' are valid.`
+      } is not valid. Only '${validBodyOutput.join("' or '")}' are valid.`
     );
   }
 
   const body = shouldNotHavePayload
     ? undefined
     : {
-        // If it's not a GET (requires payload) but no body validation is required, use the memory-cheapest approach (stream and no parsing)
-        output: !shouldValidateBody ? ('stream' as 'stream') : undefined,
+        // If it's not a GET (requires payload) but no body validation is required (or no body options are specified),
+        // We assume the route does not care about the body => use the memory-cheapest approach (stream and no parsing)
+        output: !shouldValidateBody ? ('stream' as const) : undefined,
         parse: !shouldValidateBody ? false : undefined,
 
         // User's settings should overwrite any of the "desired" values
@@ -185,6 +229,8 @@ export class Router implements IRouter {
   public post: IRouter['post'];
   public delete: IRouter['delete'];
   public put: IRouter['put'];
+  public patch: IRouter['patch'];
+  public options: IRouter['options'];
 
   constructor(
     public readonly routerPath: string,
@@ -194,7 +240,7 @@ export class Router implements IRouter {
     const buildMethod = <Method extends RouteMethod>(method: Method) => <
       P extends ObjectType,
       Q extends ObjectType,
-      B extends ObjectType
+      B extends ObjectType | Type<Buffer> | Type<Stream>
     >(
       route: RouteConfig<P, Q, B, Method>,
       handler: RequestHandler<P, Q, B>
@@ -219,13 +265,19 @@ export class Router implements IRouter {
     this.post = buildMethod('post');
     this.delete = buildMethod('delete');
     this.put = buildMethod('put');
+    this.patch = buildMethod('patch');
+    this.options = buildMethod('options');
   }
 
   public getRoutes() {
     return [...this.routes];
   }
 
-  private async handle<P extends ObjectType, Q extends ObjectType, B extends ObjectType>({
+  private async handle<
+    P extends ObjectType,
+    Q extends ObjectType,
+    B extends ObjectType | Type<Buffer> | Type<Stream>
+  >({
     routeSchemas,
     request,
     responseToolkit,
@@ -261,7 +313,7 @@ type WithoutHeadArgument<T> = T extends (first: any, ...rest: infer Params) => i
 type RequestHandlerEnhanced<
   P extends ObjectType,
   Q extends ObjectType,
-  B extends ObjectType
+  B extends ObjectType | Type<Buffer> | Type<Stream>
 > = WithoutHeadArgument<RequestHandler<P, Q, B>>;
 
 /**
@@ -297,7 +349,11 @@ type RequestHandlerEnhanced<
  * ```
  * @public
  */
-export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (
+export type RequestHandler<
+  P extends ObjectType,
+  Q extends ObjectType,
+  B extends ObjectType | Type<Buffer> | Type<Stream>
+> = (
   context: RequestHandlerContext,
   request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>,
   response: KibanaResponseFactory
