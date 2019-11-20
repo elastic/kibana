@@ -1,0 +1,65 @@
+{
+  "took": 15,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 2,
+      "relation": "eq"
+    },
+    "max_score": null,
+    "hits": [
+      {
+        "_index": "endpoint",
+        "_type": "_doc",
+        "_id": "3yA7d24BAt2dZTpHQnG1",
+        "_score": null,
+        "_source": {
+          "machine_id": "9b28b63f-68d8-44ee-b8c0-49ba057a53ec",
+          "created_at": "2019-11-17T02:40:01.478Z",
+          "host": {
+            "name": "alcott-7",
+            "hostname": "alcott-7.example.com",
+            "ip": "10.145.227.153",
+            "mac_address": "1e-72-79-cc-cc-b4",
+            "os": {
+              "name": "windows 10.0",
+              "full": "Windows Server 2016"
+            }
+          },
+          "endpoint": {
+            "domain": "example.com",
+            "is_base_image": false,
+            "active_directory_distinguished_name": "CN=alcott-7,DC=example,DC=com",
+            "active_directory_hostname": "alcott-7.example.com",
+            "upgrade": {
+              "status": null,
+              "updated_at": null
+            },
+            "isolation": {
+              "status": false,
+              "request_status": null,
+              "updated_at": null
+            },
+            "policy": {
+              "name": "With Eventing",
+              "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+            },
+            "sensor": {
+              "persistence": true,
+              "status": {}
+            }
+          }
+        },
+        "sort": [
+          1573958401478
+        ]
+      }
+    ]
+  }
+}
