@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export type FieldFormat = any;
+export { FieldFormatRegisty } from './field_formats'; // TODO: Try to remove
+export { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats_service';

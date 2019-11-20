@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { asPrettyString } from '../index';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert } from '../types';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 // @ts-ignore
 import { shortenDottedString } from '../../../../../legacy/core_plugins/kibana/common/utils/shorten_dotted_string';
 
@@ -72,7 +72,7 @@ const TRANSFORM_OPTIONS = [
 const DEFAULT_TRANSFORM_OPTION = false;
 
 export class StringFormat extends FieldFormat {
-  static id = 'string';
+  static id = FIELD_FORMAT_IDS.STRING;
   static title = 'String';
   static fieldType = [
     KBN_FIELD_TYPES.NUMBER,
