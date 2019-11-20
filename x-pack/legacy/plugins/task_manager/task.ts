@@ -238,7 +238,7 @@ export type TaskInstanceWithId = Require<TaskInstance, 'id'>;
 /**
  * A task instance that has an id.
  */
-export type TaskInstanceScheduling = Pick<Require<TaskInstance, 'id'>, 'id' | 'runAt' | 'interval'>;
+export type TaskInstanceScheduling = Pick<TaskInstanceWithId, 'id' | 'runAt' | 'interval'>;
 
 /**
  * A task instance that has an id and is ready for storage.
