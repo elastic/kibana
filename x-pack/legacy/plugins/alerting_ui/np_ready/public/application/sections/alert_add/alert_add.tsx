@@ -97,6 +97,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
     alertTypeId: null,
     interval: '1m',
     actions: [],
+    tags: ['sfdfsfsd'],
   };
 
   const { alertFlyoutVisible, setAlertFlyoutVisibility } = useContext(AlertsContext);
@@ -112,6 +113,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
   const [alertIntervalUnit, setAlertIntervalUnit] = useState<string>('m');
   const [alertThrottle, setAlertThrottle] = useState<number | null>(null);
   const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>('');
+  const tagsOptions = alert.tags ? alert.tags.map((label: string) => ({ label })) : [];
 
   useEffect(() => {
     (async () => {
@@ -146,6 +148,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
           alertTypeId: null,
           interval: '1m',
           actions: [],
+          tags: [],
         },
       },
     });
@@ -172,7 +175,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
   if (!alertFlyoutVisible) {
     return null;
   }
-  const tagsOptions = []; // TODO: move to alert instande when the server side will be done
+
   const AlertTypeParamsExpressionComponent = alertType ? alertType.alertTypeParamsExpression : null;
 
   const errors = {
@@ -500,21 +503,21 @@ export const AlertAdd = ({ refreshList }: Props) => {
                   )}
                 >
                   <EuiComboBox
+                    noSuggestions
                     fullWidth
-                    async
-                    noSuggestions={!tagsOptions.length}
-                    options={[]}
                     data-test-subj="tagsComboBox"
-                    selectedOptions={(alert.tags || []).map((anIndex: string) => {
-                      return {
-                        label: anIndex,
-                        value: anIndex,
-                      };
-                    })}
-                    onChange={async (selected: EuiComboBoxOptionProps[]) => {
+                    selectedOptions={tagsOptions}
+                    onCreateOption={(searchValue: string) => {
+                      const newOptions = [...tagsOptions, { label: searchValue }];
                       setAlertProperty(
                         'tags',
-                        selected.map(aSelected => aSelected.value)
+                        newOptions.map(newOption => newOption.label)
+                      );
+                    }}
+                    onChange={(selectedOptions: Array<{ label: string }>) => {
+                      setAlertProperty(
+                        'tags',
+                        selectedOptions.map(selectedOption => selectedOption.label)
                       );
                     }}
                     onBlur={() => {
