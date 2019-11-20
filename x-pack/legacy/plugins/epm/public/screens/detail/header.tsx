@@ -3,52 +3,76 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import React, { Fragment, useCallback, useState } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonEmptyProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPage,
-  EuiTitle,
-  IconType,
-} from '@elastic/eui';
+import React, { Fragment, useCallback, useState, useMemo } from 'react';
 import styled from 'styled-components';
+import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiTitle, IconType } from '@elastic/eui';
+import { PLUGIN } from '../../../common/constants';
+import { PackageInfo } from '../../../common/types';
+import { Version } from '../../components/version';
+import { IconPanel } from '../../components/icon_panel';
+import { useBreadcrumbs, useLinks } from '../../hooks';
+import { CenterColumn, LeftColumn, RightColumn } from './layout';
+import { InstallationButton } from '../../components/installation_button';
+import { ConfirmPackageInstall } from '../../components/confirm_package_install';
 // TODO: either
 // * import from a shared point
 // * duplicate inside our folder
 import { useTrackedPromise } from '../../../../infra/public/utils/use_tracked_promise';
 import { installPackage } from '../../data';
-import { PLUGIN } from '../../../common/constants';
-import { PackageInfo } from '../../../common/types';
-import { Version } from '../../components/version';
-import { IconPanel } from '../../components/icon_panel';
-import { useBreadcrumbs, useCore, useLinks } from '../../hooks';
-import { CenterColumn, LeftColumn, RightColumn } from './layout';
+import { NavButtonBack } from '../../components/nav_button_back';
+
+const FullWidthNavRow = styled(EuiPage)`
+  /* no left padding so link is against column left edge  */
+  padding-left: 0;
+`;
+
+const Text = styled.span`
+  margin-right: ${props => props.theme.eui.euiSizeM};
+`;
+
+const StyledVersion = styled(Version)`
+  font-size: ${props => props.theme.eui.euiFontSizeS};
+  color: ${props => props.theme.eui.euiColorDarkShade};
+`;
 
 type HeaderProps = PackageInfo & { iconType?: IconType };
 
 export function Header(props: HeaderProps) {
-  const { iconType, title, version } = props;
-  const { theme } = useCore();
+  const [isModalVisible, setModalVisible] = useState<boolean>(false);
+  const { iconType, title, version, assets } = props;
   const { toListView } = useLinks();
   useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }, { text: title }]);
+  const [isInstalled, setInstalled] = useState<boolean>(props.status === 'installed');
+  const [installationRequest, attemptInstallation] = useTrackedPromise(
+    {
+      createPromise: async () => {
+        const pkgkey = `${props.name}-${props.version}`;
+        return installPackage(pkgkey);
+      },
+      onResolve: (value: PackageInfo) => setInstalled(value.status === 'installed'),
+    },
+    [props.name, props.version, installPackage]
+  );
+  const isLoading = installationRequest.state === 'pending';
 
-  const FullWidthNavRow = styled(EuiPage)`
-    /* no left padding so link is against column left edge  */
-    padding-left: 0;
-  `;
+  const handleModal = useCallback(() => {
+    setModalVisible(!isModalVisible);
+  }, [isModalVisible]);
 
-  const Text = styled.span`
-    margin-right: ${theme.eui.euiSizeM};
-  `;
+  const handleClickInstall = useCallback(() => {
+    attemptInstallation();
+    handleModal();
+  }, [attemptInstallation, handleModal]);
 
-  const StyledVersion = styled(Version)`
-    font-size: ${theme.eui.euiFontSizeS};
-    color: ${theme.eui.euiColorDarkShade};
-  `;
+  const numOfAssets = useMemo(
+    () =>
+      Object.entries(assets).reduce(
+        (acc, [key, value]) =>
+          acc + Object.entries(value).reduce((acc2, [key2, value2]) => acc2 + value2.length, 0),
+        0
+      ),
+    [assets]
+  );
 
   return (
     <Fragment>
@@ -72,57 +96,23 @@ export function Header(props: HeaderProps) {
         <RightColumn>
           <EuiFlexGroup direction="column" alignItems="flexEnd">
             <EuiFlexItem grow={false}>
-              <InstallationButton {...props} />
+              <InstallationButton
+                isLoading={isLoading}
+                isInstalled={isInstalled}
+                onClick={handleModal}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </RightColumn>
       </EuiFlexGroup>
+      {isModalVisible && (
+        <ConfirmPackageInstall
+          numOfAssets={numOfAssets}
+          packageName={props.title}
+          handleModal={handleModal}
+          handleInstall={handleClickInstall}
+        />
+      )}
     </Fragment>
   );
-}
-
-function NavButtonBack() {
-  const { toListView } = useLinks();
-  const { theme } = useCore();
-  const ButtonEmpty = styled(EuiButtonEmpty).attrs<EuiButtonEmptyProps>({
-    href: toListView(),
-  })`
-    margin-right: ${theme.eui.spacerSizes.xl};
-  `;
-
-  return (
-    <ButtonEmpty iconType="arrowLeft" size="xs" flush="left">
-      Browse Packages
-    </ButtonEmpty>
-  );
-}
-
-const installedButton = (
-  <EuiButtonEmpty iconType="check" disabled>
-    This package is installed
-  </EuiButtonEmpty>
-);
-
-function InstallationButton(props: PackageInfo) {
-  const [isInstalled, setInstalled] = useState<boolean>(props.status === 'installed');
-  const [installationRequest, attemptInstallation] = useTrackedPromise(
-    {
-      createPromise: async () => {
-        const pkgkey = `${props.name}-${props.version}`;
-        return installPackage(pkgkey);
-      },
-      onResolve: (value: PackageInfo) => setInstalled(value.status === 'installed'),
-    },
-    [props.name, props.version, installPackage]
-  );
-  const isLoading = installationRequest.state === 'pending';
-  const handleClickInstall = useCallback(attemptInstallation, [attemptInstallation]);
-
-  const installButton = (
-    <EuiButton isLoading={isLoading} fill={true} onClick={handleClickInstall}>
-      {isLoading ? 'Installing' : 'Install package'}
-    </EuiButton>
-  );
-
-  return isInstalled ? installedButton : installButton;
 }
