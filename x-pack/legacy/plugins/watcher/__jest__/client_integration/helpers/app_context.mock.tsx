@@ -12,35 +12,36 @@ import { AppContextProvider } from '../../../public/np_ready/application/app_con
 export const withAppContext = (Component: ComponentType<any>) => (props: any) => {
   return (
     <AppContextProvider
-      value={{
-        docLinks: {
-          DOC_LINK_VERSION: 'test',
-          ELASTIC_WEBSITE_URL: 'test',
-          links: {} as any,
-        },
-        savedObjects: {
-          create: jest.fn(),
-        } as any,
-        uiSettings: {} as any,
-        chrome: {
-          setBreadCrumbs: () => {},
-        },
-        TimeBuckets: class MockTimeBuckets {
-          setBounds(_domain: any) {
-            return {};
-          }
-          getInterval() {
-            return {
-              expression: {},
-            };
-          }
-        },
-        uiSettings: {
-          get: () => {},
-          isDefault: () => true,
-        },
-        MANAGEMENT_BREADCRUMB: { text: 'test' },
-      }}
+      value={
+        {
+          docLinks: {
+            DOC_LINK_VERSION: 'test',
+            ELASTIC_WEBSITE_URL: 'test',
+            links: {} as any,
+          },
+          savedObjects: {
+            create: jest.fn(),
+          } as any,
+          chrome: {
+            setBreadcrumbs: () => {},
+          } as any,
+          TimeBuckets: class MockTimeBuckets {
+            setBounds(_domain: any) {
+              return {};
+            }
+            getInterval() {
+              return {
+                expression: {},
+              };
+            }
+          },
+          uiSettings: {
+            get: () => {},
+            isDefault: () => true,
+          } as any,
+          MANAGEMENT_BREADCRUMB: { text: 'test' },
+        } as any
+      }
     >
       <Component {...props} />
     </AppContextProvider>

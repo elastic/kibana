@@ -6,7 +6,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
-import { loadSettings } from '../../../../lib/api';
+import { useLoadSettings } from '../../../../lib/api';
 import { WatchActionsDropdown } from './threshold_watch_action_dropdown';
 import { WatchActionsAccordion } from './threshold_watch_action_accordion';
 import { WatchContext } from '../../watch_context';
@@ -22,7 +22,7 @@ interface Props {
 export const WatchActionsPanel: React.FunctionComponent<Props> = ({ actionErrors }) => {
   const { watch } = useContext(WatchContext);
 
-  const { data: settings, isLoading } = loadSettings();
+  const { data: settings, isLoading } = useLoadSettings();
 
   return (
     <div data-test-subj="watchActionsPanel">

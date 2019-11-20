@@ -28,7 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TIME_UNITS } from '../../../../../../../common/constants';
 import { serializeThresholdWatch } from '../../../../../../../common/lib/serialization';
-import { ErrableFormRow, SectionError } from '../../../../components';
+import { ErrableFormRow, SectionError, Error as ServerError } from '../../../../components';
 import { fetchFields, getMatchingIndices, loadIndexPatterns } from '../../../../lib/api';
 import { aggTypes } from '../../../../models/watch/agg_types';
 import { groupByTypes } from '../../../../models/watch/group_by_types';
@@ -167,34 +167,33 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   const [watchThresholdPopoverOpen, setWatchThresholdPopoverOpen] = useState(false);
   const [watchDurationPopoverOpen, setWatchDurationPopoverOpen] = useState(false);
   const [aggTypePopoverOpen, setAggTypePopoverOpen] = useState(false);
-  const [serverError, setServerError] = useState<{
-    data: { nessage: string; error: string };
-  } | null>(null);
+  const [serverError, setServerError] = useState<ServerError | null>(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
 
   const { watch, setWatchProperty } = useContext(WatchContext);
 
-  const getIndexPatterns = async () => {
-    const indexPatternObjects = await loadIndexPatterns();
-    const titles = indexPatternObjects.map((indexPattern: any) => indexPattern.attributes.title);
-    setIndexPatterns(titles);
-  };
-
-  const loadData = async () => {
-    if (watch.index && watch.index.length > 0) {
-      const allEsFields = await getFields(watch.index);
-      const timeFields = getTimeFieldOptions(allEsFields);
-      setEsFields(allEsFields);
-      setTimeFieldOptions(timeFields);
-      setWatchProperty('timeFields', timeFields);
-    }
-    getIndexPatterns();
-  };
-
   useEffect(() => {
+    const getIndexPatterns = async () => {
+      const indexPatternObjects = await loadIndexPatterns();
+      const titles = indexPatternObjects.map((indexPattern: any) => indexPattern.attributes.title);
+      setIndexPatterns(titles);
+    };
+
+    const loadData = async () => {
+      if (watch.index && watch.index.length > 0) {
+        const allEsFields = await getFields(watch.index);
+        const timeFields = getTimeFieldOptions(allEsFields);
+        setEsFields(allEsFields);
+        setTimeFieldOptions(timeFields);
+        setWatchProperty('timeFields', timeFields);
+      }
+      getIndexPatterns();
+    };
+
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { errors } = watch.validate();

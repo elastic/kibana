@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { serializeJsonWatch } from '../../../../../../../common/lib/serialization';
-import { ErrableFormRow, SectionError } from '../../../../components';
+import { ErrableFormRow, SectionError, Error as ServerError } from '../../../../components';
 import { onWatchSave } from '../../watch_edit_actions';
 import { WatchContext } from '../../watch_context';
 import { goToWatchList } from '../../../../lib/navigation';
@@ -42,9 +42,7 @@ export const JsonWatchEditForm = () => {
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
 
-  const [serverError, setServerError] = useState<{
-    data: { nessage: string; error: string };
-  } | null>(null);
+  const [serverError, setServerError] = useState<ServerError | null>(null);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
 

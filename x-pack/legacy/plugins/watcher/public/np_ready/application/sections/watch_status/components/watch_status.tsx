@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { WatchDetail } from './watch_detail';
 import { WatchHistory } from './watch_history';
 import { listBreadcrumb, statusBreadcrumb } from '../../../lib/breadcrumbs';
-import { loadWatchDetail, deactivateWatch, activateWatch } from '../../../lib/api';
+import { useLoadWatchDetail, deactivateWatch, activateWatch } from '../../../lib/api';
 import { WatchDetailsContext } from '../watch_details_context';
 import {
   getPageErrorCode,
@@ -72,7 +72,7 @@ export const WatchStatus = ({
     error: watchDetailError,
     data: watchDetail,
     isLoading: isWatchDetailLoading,
-  } = loadWatchDetail(id);
+  } = useLoadWatchDetail(id);
 
   const [selectedTab, setSelectedTab] = useState<string>(WATCH_EXECUTION_HISTORY_TAB);
   const [isActivated, setIsActivated] = useState<boolean | undefined>(undefined);
@@ -81,7 +81,7 @@ export const WatchStatus = ({
 
   useEffect(() => {
     chrome.setBreadcrumbs([MANAGEMENT_BREADCRUMB, listBreadcrumb, statusBreadcrumb]);
-  }, [id]);
+  }, [id, chrome, MANAGEMENT_BREADCRUMB]);
 
   const errorCode = getPageErrorCode(watchDetailError);
 

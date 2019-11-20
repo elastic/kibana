@@ -7,6 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import { npSetup } from 'ui/new_platform';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { FeatureCatalogueCategory } from 'src/plugins/feature_catalogue/public/services';
+
 npSetup.plugins.feature_catalogue.register({
   id: 'watcher',
   title: 'Watcher', // This is a product name so we don't translate it.
@@ -16,5 +19,5 @@ npSetup.plugins.feature_catalogue.register({
   icon: 'watchesApp',
   path: '/app/kibana#/management/elasticsearch/watcher/watches',
   showOnHomePage: true,
-  category: 'admin',
+  category: FeatureCatalogueCategory.ADMIN,
 });

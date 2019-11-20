@@ -25,7 +25,7 @@ import {
 
 import { PAGINATION } from '../../../../../../common/constants';
 import { WatchStatus, SectionError, Error } from '../../../components';
-import { loadWatchHistory, loadWatchHistoryDetail } from '../../../lib/api';
+import { useLoadWatchHistory, useLoadWatchHistoryDetail } from '../../../lib/api';
 import { WatchDetailsContext } from '../watch_details_context';
 
 const watchHistoryTimeSpanOptions = [
@@ -83,12 +83,12 @@ export const WatchHistory = () => {
     setIsActivated(isActive);
   }
 
-  const { error: historyError, data: history, isLoading } = loadWatchHistory(
+  const { error: historyError, data: history, isLoading } = useLoadWatchHistory(
     loadedWatch.id,
     watchHistoryTimeSpan
   );
 
-  const { error: watchHistoryDetailsError, data: watchHistoryDetails } = loadWatchHistoryDetail(
+  const { error: watchHistoryDetailsError, data: watchHistoryDetails } = useLoadWatchHistoryDetail(
     detailWatchId
   );
 

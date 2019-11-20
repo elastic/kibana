@@ -39,7 +39,7 @@ import {
   SectionLoading,
   Error,
 } from '../../../components';
-import { loadWatches } from '../../../lib/api';
+import { useLoadWatches } from '../../../lib/api';
 import { goToCreateThresholdAlert, goToCreateAdvancedWatch } from '../../../lib/navigation';
 import { useAppContext } from '../../../app_context';
 
@@ -57,9 +57,9 @@ export const WatchList = () => {
 
   useEffect(() => {
     chrome.setBreadcrumbs([MANAGEMENT_BREADCRUMB, listBreadcrumb]);
-  }, []);
+  }, [chrome, MANAGEMENT_BREADCRUMB]);
 
-  const { isLoading: isWatchesLoading, data: watches, error } = loadWatches(
+  const { isLoading: isWatchesLoading, data: watches, error } = useLoadWatches(
     REFRESH_INTERVALS.WATCH_LIST
   );
 

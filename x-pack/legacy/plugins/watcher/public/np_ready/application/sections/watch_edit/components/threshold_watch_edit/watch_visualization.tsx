@@ -26,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { VisualizeOptions } from 'plugins/watcher/np_ready/application/models/visualize_options';
 import { ThresholdWatch } from 'plugins/watcher/np_ready/application/models/watch/threshold_watch';
 
-import { getWatchVisualizationData } from '../../../../lib/api';
+import { useGetWatchVisualizationData } from '../../../../lib/api';
 import { WatchContext } from '../../watch_context';
 import { aggTypes } from '../../../../models/watch/agg_types';
 import { comparators } from '../../../../models/watch/comparators';
@@ -127,7 +127,7 @@ export const WatchVisualization = () => {
     data: watchVisualizationData,
     error,
     sendRequest: reload,
-  } = getWatchVisualizationData(watchWithoutActions, visualizeOptions);
+  } = useGetWatchVisualizationData(watchWithoutActions, visualizeOptions);
 
   useEffect(() => {
     // Prevent sending a second request on initial render.
@@ -150,6 +150,8 @@ export const WatchVisualization = () => {
     timeWindowUnit,
     groupBy,
     threshold,
+    isInitialRequest,
+    reload,
   ]);
 
   if (isInitialRequest && isLoading) {

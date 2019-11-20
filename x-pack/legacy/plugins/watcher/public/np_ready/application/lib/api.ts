@@ -34,7 +34,7 @@ export const getSavedObjectsClient = () => savedObjectsClient;
 
 const basePath = ROUTES.API_ROOT;
 
-export const loadWatches = (pollIntervalMs: number) => {
+export const useLoadWatches = (pollIntervalMs: number) => {
   return useRequest({
     path: `${basePath}/watches`,
     method: 'get',
@@ -45,7 +45,7 @@ export const loadWatches = (pollIntervalMs: number) => {
   });
 };
 
-export const loadWatchDetail = (id: string) => {
+export const useLoadWatchDetail = (id: string) => {
   return useRequest({
     path: `${basePath}/watch/${id}`,
     method: 'get',
@@ -53,7 +53,7 @@ export const loadWatchDetail = (id: string) => {
   });
 };
 
-export const loadWatchHistory = (id: string, startTime: string) => {
+export const useLoadWatchHistory = (id: string, startTime: string) => {
   return useRequest({
     query: startTime ? { startTime } : undefined,
     path: `${basePath}/watch/${id}/history`,
@@ -66,7 +66,7 @@ export const loadWatchHistory = (id: string, startTime: string) => {
   });
 };
 
-export const loadWatchHistoryDetail = (id: string | undefined) => {
+export const useLoadWatchHistoryDetail = (id: string | undefined) => {
   return useRequest({
     path: !id ? '' : `${basePath}/history/${id}`,
     method: 'get',
@@ -147,7 +147,7 @@ export const loadIndexPatterns = async () => {
   return savedObjects;
 };
 
-export const getWatchVisualizationData = (watchModel: BaseWatch, visualizeOptions: any) => {
+export const useGetWatchVisualizationData = (watchModel: BaseWatch, visualizeOptions: any) => {
   return useRequest({
     path: `${basePath}/watch/visualize`,
     method: 'post',
@@ -159,7 +159,7 @@ export const getWatchVisualizationData = (watchModel: BaseWatch, visualizeOption
   });
 };
 
-export const loadSettings = () => {
+export const useLoadSettings = () => {
   return useRequest({
     path: `${basePath}/settings`,
     method: 'get',
