@@ -36,8 +36,8 @@ import { NavigationStart } from '../../../navigation/public';
 import { DashboardConstants } from './dashboard_constants';
 import {
   FeatureCatalogueCategory,
-  FeatureCatalogueSetup,
-} from '../../../../../plugins/feature_catalogue/public';
+  HomePublicPluginSetup,
+} from '../../../../../plugins/home/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 
 export interface LegacyAngularInjectedDependencies {
@@ -59,7 +59,7 @@ export interface DashboardPluginSetupDependencies {
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
     localApplicationService: LocalApplicationService;
   };
-  feature_catalogue: FeatureCatalogueSetup;
+  home: HomePublicPluginSetup;
 }
 
 export class DashboardPlugin implements Plugin {
@@ -76,7 +76,7 @@ export class DashboardPlugin implements Plugin {
     core: CoreSetup,
     {
       __LEGACY: { localApplicationService, getAngularDependencies, ...legacyServices },
-      feature_catalogue,
+      home,
     }: DashboardPluginSetupDependencies
   ) {
     const app: App = {
@@ -120,7 +120,7 @@ export class DashboardPlugin implements Plugin {
     localApplicationService.register({ ...app, id: 'dashboard' });
     localApplicationService.register({ ...app, id: 'dashboards' });
 
-    feature_catalogue.register({
+    home.featureCatalogue.register({
       id: 'dashboard',
       title: i18n.translate('kbn.dashboard.featureCatalogue.dashboardTitle', {
         defaultMessage: 'Dashboard',
