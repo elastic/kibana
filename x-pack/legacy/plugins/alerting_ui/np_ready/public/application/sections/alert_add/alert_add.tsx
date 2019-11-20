@@ -28,10 +28,11 @@ import {
   EuiTabs,
   EuiTab,
   EuiLink,
-  EuiPanel,
   EuiFieldNumber,
   EuiSelect,
   EuiIconTip,
+  EuiBadge,
+  EuiPortal,
 } from '@elastic/eui';
 import { useAppDependencies } from '../..';
 import { saveAlert, loadActionTypes } from '../../lib/api';
@@ -159,9 +160,13 @@ export const AlertAdd = ({ refreshList }: Props) => {
   } as IErrorObject;
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
-  const actionErrors = alert.actions.reduce((acc: any, action: any) => {
-    const actionValidationErrors = action.validate();
-    acc[action.id] = actionValidationErrors;
+  const actionErrors = alert.actions.reduce((acc: any, alertActionType: any) => {
+    const actionType = actionTypeRegistry.get(alertActionType.id);
+    if (!actionType) {
+      return [];
+    }
+    const actionValidationErrors = actionType.validateParams(alertActionType.params);
+    acc[alertActionType.id] = actionValidationErrors;
     return acc;
   }, {});
 
@@ -236,7 +241,9 @@ export const AlertAdd = ({ refreshList }: Props) => {
           icon={<EuiIcon size="xl" type={item.iconClass} />}
           title={actionTypesIndex ? actionTypesIndex[item.id].name : item.name}
           description={''}
-          onClick={() => addActionType(item.actionType)}
+          selectable={{
+            onClick: () => addActionType(item.actionType),
+          }}
         />
       </EuiFlexItem>
     );
@@ -257,12 +264,12 @@ export const AlertAdd = ({ refreshList }: Props) => {
 
   const alertTypeDetails = (
     <Fragment>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem>
+          <EuiTitle size="s">
             <h5 id="selectedAlertTypeTitle">
               <FormattedMessage
-                defaultMessage={'{alertType} alert condition'}
+                defaultMessage={'Trigger: {alertType}'}
                 id="xpack.alertingUI.sections.alertAdd.selectedAlertTypeTitle"
                 values={{ alertType: alertType ? alertType.name : '' }}
               />
@@ -283,6 +290,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
           alert={alert}
           errors={errors}
           setAlertTypeParams={setAlertTypeParams}
+          setAlertProperty={setAlertProperty}
           hasErrors={hasErrors}
         />
       ) : null}
@@ -293,7 +301,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
   if (!alertAction) {
     alertDetails = (
       <Fragment>
-        <EuiTitle size="xxs">
+        <EuiTitle size="s">
           <h5 id="alertActionTypeTitle">
             <FormattedMessage
               defaultMessage={'Select an action'}
@@ -302,7 +310,9 @@ export const AlertAdd = ({ refreshList }: Props) => {
           </h5>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiFlexGrid columns={4}>{actionTypeNodes}</EuiFlexGrid>
+        <EuiFlexGrid gutterSize="m" columns={3}>
+          {actionTypeNodes}
+        </EuiFlexGrid>
       </Fragment>
     );
   } else {
@@ -312,6 +322,15 @@ export const AlertAdd = ({ refreshList }: Props) => {
     const ParamsFieldsComponent = actionTypeRegisterd.actionParamsFields;
     alertDetails = (
       <Fragment>
+        <EuiTitle size="s">
+          <h5 id="alertActionTypeEditTitle">
+            <FormattedMessage
+              defaultMessage={'Action: Name of action'}
+              id="xpack.alertingUI.sections.alertAdd.selectAlertActionTypeEditTitle"
+            />
+          </h5>
+        </EuiTitle>
+        <EuiSpacer size="m" />
         {ParamsFieldsComponent !== null ? (
           <ParamsFieldsComponent
             action={alert.actions[0].params}
@@ -349,7 +368,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
   } else {
     alertTypeArea = (
       <Fragment>
-        <EuiTitle size="xxs">
+        <EuiTitle size="s">
           <h5 id="alertTypeTitle">
             <FormattedMessage
               defaultMessage={'Select a trigger'}
@@ -358,7 +377,9 @@ export const AlertAdd = ({ refreshList }: Props) => {
           </h5>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiFlexGrid columns={4}>{alertTypeNodes}</EuiFlexGrid>
+        <EuiFlexGrid gutterSize="m" columns={3}>
+          {alertTypeNodes}
+        </EuiFlexGrid>
       </Fragment>
     );
   }
@@ -396,181 +417,182 @@ export const AlertAdd = ({ refreshList }: Props) => {
   );
 
   return (
-    <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutAlertAddTitle" size="m">
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
-          <h3 id="flyoutTitle">
-            <FormattedMessage
-              defaultMessage={'Create Alert'}
-              id="xpack.alertingUI.sections.alertAdd.flyoutTitle"
-            />
-          </h3>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiForm>
-          <EuiFlexGrid columns={2}>
-            <EuiFlexItem>
-              <ErrableFormRow
-                id="alertName"
-                label={
-                  <FormattedMessage
-                    id="xpack.alertingUI.sections.alertAdd.alertNameLabel"
-                    defaultMessage="Name"
-                  />
-                }
-                errorKey="name"
-                isShowingErrors={hasErrors && alert.name !== undefined}
-                errors={errors}
-              >
-                <EuiFieldText
-                  name="name"
-                  data-test-subj="alertNameInput"
-                  value={alert.name || ''}
-                  onChange={e => {
-                    setAlertProperty('name', e.target.value);
-                  }}
-                  onBlur={() => {
-                    if (!alert.name) {
-                      setAlertProperty('name', '');
-                    }
-                  }}
-                />
-              </ErrableFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormRow
-                fullWidth
-                label={i18n.translate(
-                  'xpack.alertingUI.sections.actionAdd.indexAction.indexTextFieldLabel',
-                  {
-                    defaultMessage: 'Tags (optional)',
-                  }
-                )}
-              >
-                <EuiComboBox
-                  fullWidth
-                  async
-                  noSuggestions={!tagsOptions.length}
-                  options={[]}
-                  data-test-subj="tagsComboBox"
-                  selectedOptions={(alert.tags || []).map((anIndex: string) => {
-                    return {
-                      label: anIndex,
-                      value: anIndex,
-                    };
-                  })}
-                  onChange={async (selected: EuiComboBoxOptionProps[]) => {
-                    setAlertProperty(
-                      'tags',
-                      selected.map(aSelected => aSelected.value)
-                    );
-                  }}
-                  onBlur={() => {
-                    if (!alert.tags) {
-                      setAlertProperty('tags', []);
-                    }
-                  }}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGrid>
-          <EuiSpacer size="m" />
-          <EuiFlexGrid columns={2}>
-            <EuiFlexItem grow={false}>
-              <EuiFormRow fullWidth compressed label={labelForAlertChecked}>
-                <EuiFlexGroup gutterSize="none">
-                  <EuiFlexItem grow={false}>
-                    <EuiFieldNumber
-                      value={alert.checkIntervalSize || ''}
-                      name="throttle"
-                      data-test-subj="throttleInput"
-                      onChange={e => {
-                        setAlertProperty('checkIntervalSize', e.target.value);
-                      }}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiSelect
-                      value={alert.checkIntervalUnit}
-                      options={getTimeOptions(alert.checkIntervalSize)}
-                      onChange={(e: any) => setAlertProperty('checkIntervalUnit', e.target.value)}
-                      fullWidth={true}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFormRow fullWidth label={labelForAlertRenotify}>
-                <EuiFlexGroup gutterSize="none">
-                  <EuiFlexItem grow={false}>
-                    <EuiFieldNumber
-                      value={alert.throttle || ''}
-                      name="throttle"
-                      data-test-subj="throttleInput"
-                      onChange={e => {
-                        setAlertProperty('renotifyIntervalSize', e.target.value);
-                      }}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiSelect
-                      value={alert.renotifyIntervalUnit}
-                      options={getTimeOptions(alert.renotifyIntervalSize)}
-                      onChange={(e: any) =>
-                        setAlertProperty('renotifyIntervalUnit', e.target.value)
-                      }
-                      fullWidth={true}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGrid>
-          <EuiSpacer size="m" />
-          <EuiTabs>{alertTabs}</EuiTabs>
-          <EuiSpacer size="m" />
-          <EuiPanel paddingSize="m">{alertTypeArea}</EuiPanel>
-          <EuiSpacer size="m" />
-          <EuiPanel paddingSize="m">{selectedTabContent}</EuiPanel>
-          <EuiSpacer size="m" />
-        </EuiForm>
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeFlyout}>
-              {i18n.translate('xpack.alertingUI.sections.alertAdd.cancelButtonLabel', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              color="secondary"
-              data-test-subj="saveActionButton"
-              type="submit"
-              iconType="check"
-              isDisabled={hasErrors || hasActionErrors}
-              isLoading={isSaving}
-              onClick={async () => {
-                setIsSaving(true);
-                const savedAlert = await onSaveAlert();
-                setIsSaving(false);
-                setAlertFlyoutVisibility(false);
-                refreshList();
-              }}
-            >
+    <EuiPortal>
+      <EuiFlyout ownFocus onClose={closeFlyout} aria-labelledby="flyoutAlertAddTitle" size="m">
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="s">
+            <h3 id="flyoutTitle">
               <FormattedMessage
-                id="xpack.alertingUI.sections.alertAdd.saveButtonLabel"
-                defaultMessage="Save"
+                defaultMessage={'Create Alert'}
+                id="xpack.alertingUI.sections.alertAdd.flyoutTitle"
               />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+            </h3>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <EuiForm>
+            <EuiFlexGrid columns={2}>
+              <EuiFlexItem>
+                <ErrableFormRow
+                  id="alertName"
+                  label={
+                    <FormattedMessage
+                      id="xpack.alertingUI.sections.alertAdd.alertNameLabel"
+                      defaultMessage="Name"
+                    />
+                  }
+                  errorKey="name"
+                  isShowingErrors={hasErrors && alert.name !== undefined}
+                  errors={errors}
+                >
+                  <EuiFieldText
+                    name="name"
+                    data-test-subj="alertNameInput"
+                    value={alert.name || ''}
+                    onChange={e => {
+                      setAlertProperty('name', e.target.value);
+                    }}
+                    onBlur={() => {
+                      if (!alert.name) {
+                        setAlertProperty('name', '');
+                      }
+                    }}
+                  />
+                </ErrableFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow
+                  fullWidth
+                  label={i18n.translate(
+                    'xpack.alertingUI.sections.actionAdd.indexAction.indexTextFieldLabel',
+                    {
+                      defaultMessage: 'Tags (optional)',
+                    }
+                  )}
+                >
+                  <EuiComboBox
+                    fullWidth
+                    async
+                    noSuggestions={!tagsOptions.length}
+                    options={[]}
+                    data-test-subj="tagsComboBox"
+                    selectedOptions={(alert.tags || []).map((anIndex: string) => {
+                      return {
+                        label: anIndex,
+                        value: anIndex,
+                      };
+                    })}
+                    onChange={async (selected: EuiComboBoxOptionProps[]) => {
+                      setAlertProperty(
+                        'tags',
+                        selected.map(aSelected => aSelected.value)
+                      );
+                    }}
+                    onBlur={() => {
+                      if (!alert.tags) {
+                        setAlertProperty('tags', []);
+                      }
+                    }}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGrid>
+            <EuiSpacer size="m" />
+            <EuiFlexGrid columns={2}>
+              <EuiFlexItem grow={false}>
+                <EuiFormRow fullWidth compressed label={labelForAlertChecked}>
+                  <EuiFlexGroup gutterSize="none">
+                    <EuiFlexItem grow={false}>
+                      <EuiFieldNumber
+                        value={alert.checkIntervalSize || ''}
+                        name="throttle"
+                        data-test-subj="throttleInput"
+                        onChange={e => {
+                          setAlertProperty('checkIntervalSize', e.target.value);
+                        }}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiSelect
+                        value={alert.checkIntervalUnit}
+                        options={getTimeOptions(alert.checkIntervalSize)}
+                        onChange={(e: any) => setAlertProperty('checkIntervalUnit', e.target.value)}
+                        fullWidth={true}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormRow fullWidth label={labelForAlertRenotify}>
+                  <EuiFlexGroup gutterSize="none">
+                    <EuiFlexItem grow={false}>
+                      <EuiFieldNumber
+                        value={alert.throttle || ''}
+                        name="throttle"
+                        data-test-subj="throttleInput"
+                        onChange={e => {
+                          setAlertProperty('renotifyIntervalSize', e.target.value);
+                        }}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiSelect
+                        value={alert.renotifyIntervalUnit}
+                        options={getTimeOptions(alert.renotifyIntervalSize)}
+                        onChange={(e: any) =>
+                          setAlertProperty('renotifyIntervalUnit', e.target.value)
+                        }
+                        fullWidth={true}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGrid>
+            <EuiSpacer size="m" />
+            <EuiTabs>{alertTabs}</EuiTabs>
+            <EuiSpacer size="m" />
+            {alertTypeArea}
+            <EuiSpacer size="xl" />
+            {selectedTabContent}
+          </EuiForm>
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={closeFlyout}>
+                {i18n.translate('xpack.alertingUI.sections.alertAdd.cancelButtonLabel', {
+                  defaultMessage: 'Cancel',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                color="secondary"
+                data-test-subj="saveActionButton"
+                type="submit"
+                iconType="check"
+                isDisabled={hasErrors || hasActionErrors}
+                isLoading={isSaving}
+                onClick={async () => {
+                  setIsSaving(true);
+                  const savedAlert = await onSaveAlert();
+                  setIsSaving(false);
+                  setAlertFlyoutVisibility(false);
+                  refreshList();
+                }}
+              >
+                <FormattedMessage
+                  id="xpack.alertingUI.sections.alertAdd.saveButtonLabel"
+                  defaultMessage="Save"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    </EuiPortal>
   );
 };

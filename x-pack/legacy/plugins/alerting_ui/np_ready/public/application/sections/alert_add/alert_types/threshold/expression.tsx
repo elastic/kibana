@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, Fragment, useEffect } from 'react';
+import React, { useState, Fragment, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -19,6 +19,7 @@ import {
   EuiFieldNumber,
   EuiComboBoxOptionProps,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
 import { AlertTypeModel, AlertType, Alert, ValidationResult } from '../../../../../types';
 import { Comparator, AggregationType, GroupByType } from '../types';
@@ -148,14 +149,49 @@ export const comparators: { [key: string]: Comparator } = {
   },
 };
 
+export const groupByTypes: { [key: string]: GroupByType } = {
+  all: {
+    text: i18n.translate(
+      'xpack.alertingUI.sections.alertAdd.threshold.groupByLabel.allDocumentsLabel',
+      {
+        defaultMessage: 'all documents',
+      }
+    ),
+    sizeRequired: false,
+    value: 'all',
+    validNormalizedTypes: [],
+  },
+  top: {
+    text: i18n.translate('xpack.alertingUI.sections.alertAdd.threshold.groupByLabel.topLabel', {
+      defaultMessage: 'top',
+    }),
+    sizeRequired: true,
+    value: 'top',
+    validNormalizedTypes: ['number', 'date', 'keyword'],
+  },
+};
+
 interface Props {
   alert: Alert;
   setAlertTypeParams: (property: string, value: any) => void;
+  setAlertProperty: (key: string, value: any) => void;
   errors: { [key: string]: string[] };
   hasErrors?: boolean;
 }
 
 function validateAlertType(alert: Alert): ValidationResult {
+  const {
+    index,
+    timeField,
+    triggerIntervalSize,
+    aggType,
+    aggField,
+    groupBy,
+    termSize,
+    termField,
+    threshold,
+    timeWindowSize,
+  } = alert.alertTypeParams;
   const validationResult = { errors: {} };
   const errors = {
     aggField: new Array<string>(),
@@ -169,71 +205,63 @@ function validateAlertType(alert: Alert): ValidationResult {
     triggerIntervalSize: new Array<string>(),
   };
   validationResult.errors = errors;
-  if (!alert.alertTypeParams.index) {
+  if (!index) {
     errors.index.push(
       i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredIndexText', {
         defaultMessage: 'Index is required.',
       })
     );
   }
-  if (!alert.alertTypeParams.timeField) {
+  if (!timeField) {
     errors.timeField.push(
       i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredTimeFieldText', {
         defaultMessage: 'Time field is required.',
       })
     );
   }
-  if (!alert.alertTypeParams.triggerIntervalSize) {
+  if (!triggerIntervalSize) {
     errors.triggerIntervalSize.push(
       i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredTriggerIntervalSizeText', {
         defaultMessage: 'Trigger interval size is required.',
       })
     );
   }
-  if (!alert.alertTypeParams.aggField) {
+  if (aggType && aggregationTypes[aggType].fieldRequired && !aggField) {
     errors.aggField.push(
       i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredAggFieldText', {
         defaultMessage: 'Aggregation field is required.',
       })
     );
   }
-  if (!alert.alertTypeParams.termSize) {
+  if (!termSize) {
     errors.termSize.push(
       i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredTermSizedText', {
         defaultMessage: 'Term size is required.',
       })
     );
   }
-  if (!alert.alertTypeParams.termField) {
+  if (groupBy && groupByTypes[groupBy].sizeRequired && !termField) {
     errors.termField.push(
       i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredtTermFieldText', {
         defaultMessage: 'Term field is required.',
       })
     );
   }
-  if (!alert.alertTypeParams.timeWindowSize) {
+  if (!timeWindowSize) {
     errors.timeWindowSize.push(
       i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredTimeWindowSizeText', {
         defaultMessage: 'Time window size is required.',
       })
     );
   }
-  if (
-    alert.alertTypeParams.threshold &&
-    alert.alertTypeParams.threshold.length > 0 &&
-    !alert.alertTypeParams.threshold[0]
-  ) {
+  if (threshold && threshold.length > 0 && !threshold[0]) {
     errors.threshold0.push(
       i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredThreshold0Text', {
         defaultMessage: 'Threshold0, is required.',
       })
     );
   }
-  if (
-    alert.alertTypeParams.threshold &&
-    alert.alertTypeParams.threshold.length > 1 &&
-    !alert.alertTypeParams.threshold[1]
-  ) {
+  if (threshold && threshold.length > 1 && !threshold[1]) {
     errors.threshold1.push(
       i18n.translate('xpack.alertingUI.sections.addAlert.error.requiredThreshold1Text', {
         defaultMessage: 'Threshold1 is required.',
@@ -246,6 +274,7 @@ function validateAlertType(alert: Alert): ValidationResult {
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> = ({
   alert,
   setAlertTypeParams,
+  setAlertProperty,
   errors,
   hasErrors,
 }) => {
@@ -285,7 +314,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
   const [alertThresholdPopoverOpen, setAlertThresholdPopoverOpen] = useState(false);
   const [alertDurationPopoverOpen, setAlertDurationPopoverOpen] = useState(false);
-
   const [aggFieldPopoverOpen, setAggFieldPopoverOpen] = useState(false);
   const [groupByPopoverOpen, setGroupByPopoverOpen] = useState(false);
 
@@ -303,28 +331,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
     setIndexPatterns(titles);
   };
 
-  const groupByTypes: { [key: string]: GroupByType } = {
-    all: {
-      text: i18n.translate(
-        'xpack.alertingUI.sections.alertAdd.threshold.groupByLabel.allDocumentsLabel',
-        {
-          defaultMessage: 'all documents',
-        }
-      ),
-      sizeRequired: false,
-      value: 'all',
-      validNormalizedTypes: [],
-    },
-    top: {
-      text: i18n.translate('xpack.alertingUI.sections.alertAdd.threshold.groupByLabel.topLabel', {
-        defaultMessage: 'top',
-      }),
-      sizeRequired: true,
-      value: 'top',
-      validNormalizedTypes: ['number', 'date', 'keyword'],
-    },
-  };
-
   const expressionErrorMessage = i18n.translate(
     'xpack.alertingUI.sections.alertAdd.threshold.fixErrorInExpressionBelowValidationMessage',
     {
@@ -332,40 +338,32 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
     }
   );
 
-  function setDefaultValues() {
-    setAlertTypeParams('aggType', DEFAULT_VALUES.AGGREGATION_TYPE);
-    setAlertTypeParams('termSize', DEFAULT_VALUES.TERM_SIZE);
-    setAlertTypeParams('thresholdComparator', DEFAULT_VALUES.THRESHOLD_COMPARATOR);
-    setAlertTypeParams('timeWindowSize', DEFAULT_VALUES.TIME_WINDOW_SIZE);
-    setAlertTypeParams('timeWindowUnit', DEFAULT_VALUES.TIME_WINDOW_UNIT);
-    setAlertTypeParams('triggerIntervalSize', DEFAULT_VALUES.TRIGGER_INTERVAL_SIZE);
-    setAlertTypeParams('triggerIntervalUnit', DEFAULT_VALUES.TRIGGER_INTERVAL_UNIT);
-    setAlertTypeParams('groupBy', DEFAULT_VALUES.GROUP_BY);
-    if (termField !== null) {
-      setAlertTypeParams('groupBy', 'top');
-    }
-    setAlertTypeParams('threshold', DEFAULT_VALUES.THRESHOLD);
-  }
-
-  const loadData = async () => {
-    if (index && index.length > 0) {
-      const allEsFields = await getFields(index);
-      const timeFields = getTimeFieldOptions(allEsFields, firstFieldOption);
-      setEsFields(allEsFields);
-      setTimeFieldOptions(timeFields);
-      setAlertTypeParams('timeFields', timeFields);
-    }
-    getIndexPatterns();
+  const setDefaultExpressionValues = () => {
+    setAlertProperty('alertTypeParams', {
+      aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
+      termSize: DEFAULT_VALUES.TERM_SIZE,
+      thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+      timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
+      timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
+      triggerIntervalSize: DEFAULT_VALUES.TRIGGER_INTERVAL_SIZE,
+      triggerIntervalUnit: DEFAULT_VALUES.TRIGGER_INTERVAL_UNIT,
+      groupBy: DEFAULT_VALUES.GROUP_BY,
+      threshold: DEFAULT_VALUES.THRESHOLD,
+    });
   };
-
-  useEffect(() => {
-    loadData();
-    setDefaultValues();
-  });
 
   const getFields = async (indices: string[]) => {
     return await getThresholdAlertTypeFields({ indices, http });
   };
+
+  useEffect(() => {
+    getIndexPatterns();
+  }, []);
+
+  useEffect(() => {
+    setDefaultExpressionValues();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   interface IOption {
     label: string;
@@ -470,9 +468,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                   setTimeFieldOptions(getTimeFieldOptions([], firstFieldOption));
                   setAlertTypeParams('timeFields', []);
 
-                  expressionFields.forEach(expressionField => {
-                    setAlertTypeParams(expressionField, null);
-                  });
+                  setDefaultExpressionValues();
                   return;
                 }
                 const currentEsFields = await getFields(indices);
@@ -545,7 +541,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                 <EuiFieldNumber
                   fullWidth
                   min={1}
-                  value={triggerIntervalSize}
+                  value={triggerIntervalSize || 1}
                   data-test-subj="triggerIntervalSizeInput"
                   onChange={e => {
                     const { value } = e.target;
@@ -585,7 +581,14 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
 
   return (
     <Fragment>
-      <EuiFlexGroup wrap>
+      {hasExpressionErrors ? (
+        <Fragment>
+          <EuiSpacer />
+          <EuiCallOut color="danger" size="s" title={expressionErrorMessage} />
+          <EuiSpacer />
+        </Fragment>
+      ) : null}
+      <EuiFlexGroup gutterSize="s" wrap>
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="insidePopover"
@@ -660,7 +663,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                 })}
               </EuiPopoverTitle>
               <EuiSelect
-                value={aggType}
+                value={aggType || ''}
                 onChange={e => {
                   setAlertTypeParams('aggType', e.target.value);
                   setAggTypePopoverOpen(false);
@@ -682,7 +685,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
               button={
                 <EuiExpression
                   description={i18n.translate(
-                    'xpack.watcher.sections.watchEdit.threshold.ofLabel',
+                    'xpack.alertingUI.sections.alertAdd.threshold.ofLabel',
                     {
                       defaultMessage: 'of',
                     }
@@ -703,7 +706,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
             >
               <div>
                 <EuiPopoverTitle>
-                  {i18n.translate('xpack.watcher.sections.watchEdit.threshold.ofButtonLabel', {
+                  {i18n.translate('xpack.alertingUI.sections.alertAdd.threshold.ofButtonLabel', {
                     defaultMessage: 'of',
                   })}
                 </EuiPopoverTitle>
@@ -753,12 +756,12 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                 description={`${
                   groupByTypes[groupBy || DEFAULT_VALUES.GROUP_BY].sizeRequired
                     ? i18n.translate(
-                        'xpack.watcher.sections.watchEdit.threshold.groupedOverLabel',
+                        'xpack.alertingUI.sections.alertAdd.threshold.groupedOverLabel',
                         {
                           defaultMessage: 'grouped over',
                         }
                       )
-                    : i18n.translate('xpack.watcher.sections.watchEdit.threshold.overLabel', {
+                    : i18n.translate('xpack.alertingUI.sections.alertAdd.threshold.overLabel', {
                         defaultMessage: 'over',
                       })
                 }`}
@@ -784,7 +787,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
           >
             <div>
               <EuiPopoverTitle>
-                {i18n.translate('xpack.watcher.sections.watchEdit.threshold.overButtonLabel', {
+                {i18n.translate('xpack.alertingUI.sections.alertAdd.threshold.overButtonLabel', {
                   defaultMessage: 'over',
                 })}
               </EuiPopoverTitle>
@@ -940,7 +943,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                         >
                           <EuiFieldNumber
                             data-test-subj="alertThresholdInput"
-                            value={!threshold || threshold[i] === null ? '' : threshold[i]}
+                            value={!threshold || threshold[i] === null ? 0 : threshold[i]}
                             min={0}
                             step={0.1}
                             onChange={e => {
@@ -966,7 +969,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
             button={
               <EuiExpression
                 description={i18n.translate(
-                  'xpack.watcher.sections.watchEdit.threshold.forTheLastLabel',
+                  'xpack.alertingUI.sections.alertAdd.threshold.forTheLastLabel',
                   {
                     defaultMessage: 'for the last',
                   }
@@ -993,7 +996,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
             <div>
               <EuiPopoverTitle>
                 <FormattedMessage
-                  id="xpack.watcher.sections.watchEdit.threshold.forTheLastButtonLabel"
+                  id="xpack.alertingUI.sections.alertAdd.threshold.forTheLastButtonLabel"
                   defaultMessage="For the last"
                 />
               </EuiPopoverTitle>
@@ -1006,7 +1009,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                   >
                     <EuiFieldNumber
                       min={1}
-                      value={timeWindowSize || ''}
+                      value={timeWindowSize ? parseInt(timeWindowSize, 10) : 1}
                       onChange={e => {
                         const { value } = e.target;
                         const timeWindowSizeVal = value !== '' ? parseInt(value, 10) : value;
@@ -1029,21 +1032,11 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {hasExpressionErrors ? (
-        <Fragment>
-          <EuiSpacer size="m" />
-          <EuiText color="danger" size="s">
-            {expressionErrorMessage}
-          </EuiText>
-          <EuiSpacer size="m" />
-        </Fragment>
-      ) : null}
       {hasErrors ? null : (
         <Fragment>
-          <ThresholdVisualization />
+          <ThresholdVisualization alert={alert} />
         </Fragment>
       )}
-      <EuiSpacer />
     </Fragment>
   );
 };

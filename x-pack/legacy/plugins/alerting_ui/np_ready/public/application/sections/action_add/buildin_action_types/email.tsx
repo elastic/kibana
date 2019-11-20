@@ -75,6 +75,10 @@ export function getActionType(): ActionTypeModel {
       }
       return validationResult;
     },
+    validateParams: (action: Action): ValidationResult => {
+      const validationResult = { errors: {} };
+      return validationResult;
+    },
     actionFields: EmailActionFields,
     actionParamsFields: EmailParamsFields,
   };
@@ -255,8 +259,9 @@ const EmailParamsFields: React.FunctionComponent<ParamsProps> = ({
   errors,
   hasErrors,
 }) => {
-  const { to, subject, body } = action;
+  const { to, cc, subject, body } = action;
   const toOptions = to ? to.map((label: any) => ({ label })) : [];
+  const ccOptions = cc ? cc.map((label: any) => ({ label })) : [];
 
   return (
     <Fragment>
@@ -298,6 +303,44 @@ const EmailParamsFields: React.FunctionComponent<ParamsProps> = ({
           }}
         />
       </ErrableFormRow>
+      <ErrableFormRow
+        id="emailCopyRecipient"
+        errorKey="cc"
+        fullWidth
+        errors={errors}
+        isShowingErrors={hasErrors && cc !== undefined}
+        label={i18n.translate(
+          'xpack.alertingUI.sections.actionAdd.emailAction.recipientCopyTextFieldLabel',
+          {
+            defaultMessage: 'CC email address',
+          }
+        )}
+      >
+        <EuiComboBox
+          noSuggestions
+          fullWidth
+          data-test-subj="ccEmailAddressInput"
+          selectedOptions={ccOptions}
+          onCreateOption={(searchValue: string) => {
+            const newOptions = [...ccOptions, { label: searchValue }];
+            editAction(
+              'cc',
+              newOptions.map(newOption => newOption.label)
+            );
+          }}
+          onChange={(selectedOptions: Array<{ label: string }>) => {
+            editAction(
+              'cc',
+              selectedOptions.map(selectedOption => selectedOption.label)
+            );
+          }}
+          onBlur={() => {
+            if (!cc) {
+              editAction('cc', []);
+            }
+          }}
+        />
+      </ErrableFormRow>
 
       <EuiFormRow
         fullWidth
@@ -322,19 +365,19 @@ const EmailParamsFields: React.FunctionComponent<ParamsProps> = ({
       <EuiFormRow
         fullWidth
         label={i18n.translate(
-          'xpack.alertingUI.sections.actionAdd.emailAction.bodyTextAreaFieldLabel',
+          'xpack.alertingUI.sections.actionAdd.emailAction.messageTextAreaFieldLabel',
           {
-            defaultMessage: 'Body',
+            defaultMessage: 'Message',
           }
         )}
       >
         <EuiTextArea
           fullWidth
           value={body || ''}
-          name="body"
-          data-test-subj="emailBodyInput"
+          name="message"
+          data-test-subj="emailMessageInput"
           onChange={e => {
-            editAction('body', e.target.value);
+            editAction('message', e.target.value);
           }}
         />
       </EuiFormRow>

@@ -32,6 +32,7 @@ export interface ActionTypeModel {
   iconClass: string;
   selectMessage: string;
   validate: (action: Action) => ValidationResult;
+  validateParams: (actionParams: any) => ValidationResult;
   actionFields: React.FunctionComponent<Props> | null;
   actionParamsFields: React.FunctionComponent<ParamsProps> | null;
 }
