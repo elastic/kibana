@@ -28,7 +28,7 @@ export interface EndpointData {
     isolation: {
       status: false;
       request_status?: string | boolean;
-      updated_at?: date;
+      updated_at?: Date;
     };
     policy: {
       name: string;
