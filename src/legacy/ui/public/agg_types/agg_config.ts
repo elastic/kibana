@@ -26,16 +26,14 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { npStart } from 'ui/new_platform';
 import { AggType } from './agg_type';
 import { FieldParamType } from './param_types/field';
 import { AggGroupNames } from '../vis/editors/default/agg_groups';
 import { writeParams } from './agg_params';
 import { AggConfigs } from './agg_configs';
 import { Schema } from '../vis/editors/default/schemas';
-import { ContentType } from '../../../../plugins/data/public';
-
-// @ts-ignore
-import { fieldFormats } from '../registry/field_formats';
+import { ContentType, KBN_FIELD_TYPES } from '../../../../plugins/data/public';
 
 export interface AggConfigOptions {
   enabled: boolean;
@@ -379,14 +377,16 @@ export class AggConfig {
     if (format) {
       return format.getConverterFor(contentType);
     }
+
     return this.fieldOwnFormatter(contentType, defaultFormat);
   }
 
   fieldOwnFormatter(contentType?: ContentType, defaultFormat?: any) {
+    const fieldFormats = npStart.plugins.data.fieldFormats;
     const field = this.getField();
     let format = field && field.format;
     if (!format) format = defaultFormat;
-    if (!format) format = fieldFormats.getDefaultInstance('string');
+    if (!format) format = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING);
     return format.getConverterFor(contentType);
   }
 

@@ -62,33 +62,35 @@ export function App({
   docStorage: SavedObjectStore;
   redirectTo: (id?: string) => void;
 }) {
-  const timeDefaults = core.uiSettings.get('timepicker:timeDefaults');
   const language =
     storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
 
-  const [state, setState] = useState<State>({
-    isLoading: !!docId,
-    isSaveModalVisible: false,
-    indexPatternsForTopNav: [],
-    query: { query: '', language },
-    dateRange: {
-      fromDate: timeDefaults.from,
-      toDate: timeDefaults.to,
-    },
-    filters: [],
+  const [state, setState] = useState<State>(() => {
+    const currentRange = data.query.timefilter.timefilter.getTime();
+    return {
+      isLoading: !!docId,
+      isSaveModalVisible: false,
+      indexPatternsForTopNav: [],
+      query: { query: '', language },
+      dateRange: {
+        fromDate: currentRange.from,
+        toDate: currentRange.to,
+      },
+      filters: [],
+    };
   });
 
   const { lastKnownDoc } = state;
 
   useEffect(() => {
-    const subscription = data.query.filterManager.getUpdates$().subscribe({
+    const filterSubscription = data.query.filterManager.getUpdates$().subscribe({
       next: () => {
         setState(s => ({ ...s, filters: data.query.filterManager.getFilters() }));
         trackUiEvent('app_filters_updated');
       },
     });
     return () => {
-      subscription.unsubscribe();
+      filterSubscription.unsubscribe();
     };
   }, []);
 
@@ -199,6 +201,7 @@ export function App({
                   dateRange.from !== state.dateRange.fromDate ||
                   dateRange.to !== state.dateRange.toDate
                 ) {
+                  data.query.timefilter.timefilter.setTime(dateRange);
                   trackUiEvent('app_date_change');
                 } else {
                   trackUiEvent('app_query_change');

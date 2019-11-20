@@ -58,6 +58,7 @@ const services = {
   savedObjectsClient: npStart.core.savedObjects.client,
   toastNotifications: npStart.core.notifications.toasts,
   uiSettings: npStart.core.uiSettings,
+  core: npStart.core,
 
   share: npStart.plugins.share,
   data,

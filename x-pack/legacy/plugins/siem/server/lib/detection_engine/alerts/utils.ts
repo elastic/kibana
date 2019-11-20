@@ -157,7 +157,9 @@ export const searchAfterAndBulkIndex = async (
         service,
         logger
       );
-      sortIds = searchAfterResult.hits.hits[0].sort;
+      if (searchAfterResult.hits.hits.length === 0) {
+        return true;
+      }
       hitsSize += searchAfterResult.hits.hits.length;
       logger.debug(`size adjusted: ${hitsSize}`);
       sortIds = searchAfterResult.hits.hits[0].sort;
