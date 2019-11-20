@@ -23,7 +23,6 @@ export interface RequestFacade {
   auth: Legacy.Request['auth'];
   getAlertsClient?: Legacy.Request['getAlertsClient'];
   getActionsClient?: Legacy.Request['getActionsClient'];
-  getUiSettingsService: Legacy.Request['getUiSettingsService'];
   headers: Legacy.Request['headers'];
   method: Legacy.Request['method'];
   params: Legacy.Request['params'];

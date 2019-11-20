@@ -30,7 +30,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   private isProductionMode: boolean;
   private router: IRouter;
 
-  constructor(private readonly core: CoreSetup, private __legacy: ServerFacade) {
+  constructor(core: CoreSetup, private __legacy: ServerFacade) {
     this.version = __legacy.config().get('pkg.version');
     this.isProductionMode = process.env.NODE_ENV === 'production';
     this.router = core.http.createRouter();
@@ -43,14 +43,13 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...rest: any[]
   ) {
-    const { callAsCurrentUser } = req.context.core.elasticsearch.dataClient;
-    const internalRequest = req[internalFrameworkRequest];
-    const includeFrozen = await internalRequest.getUiSettingsService().get('search:includeFrozen');
+    const { elasticsearch, uiSettings } = req.context.core;
+    const includeFrozen = await uiSettings.client.get('search:includeFrozen');
     const maxConcurrentShardRequests =
       endpoint === 'msearch'
-        ? await internalRequest.getUiSettingsService().get('courier:maxConcurrentShardRequests')
+        ? await uiSettings.client.get('courier:maxConcurrentShardRequests')
         : 0;
-    const fields = await callAsCurrentUser(
+    const fields = await elasticsearch.dataClient.callAsCurrentUser(
       endpoint,
       {
         ...params,
