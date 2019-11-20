@@ -79,6 +79,9 @@ export const npSetup = {
       },
       fieldFormats: getFieldFormatsRegistry(mockUiSettings),
     },
+    share: {
+      register: () => {},
+    },
     devTools: {
       register: () => {},
     },
@@ -182,6 +185,9 @@ export const npStart = {
         },
       },
       fieldFormats: getFieldFormatsRegistry(mockUiSettings),
+    },
+    share: {
+      toggleShareContextMenu: () => {},
     },
     inspector: {
       isAvailable: () => false,

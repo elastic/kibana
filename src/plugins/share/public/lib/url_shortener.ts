@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { kfetch } from 'ui/kfetch';
 import url from 'url';
-import chrome from '../../chrome';
+import { HttpStart } from 'kibana/public';
 
-export async function shortenUrl(absoluteUrl: string) {
-  const basePath = chrome.getBasePath();
-
+export async function shortenUrl(
+  absoluteUrl: string,
+  { basePath, post }: { basePath: string; post: HttpStart['post'] }
+) {
   const parsedUrl = url.parse(absoluteUrl);
   if (!parsedUrl || !parsedUrl.path) {
     return;
@@ -34,7 +34,7 @@ export async function shortenUrl(absoluteUrl: string) {
 
   const body = JSON.stringify({ url: relativeUrl });
 
-  const resp = await kfetch({ method: 'POST', pathname: '/api/shorten_url', body });
+  const resp = await post('/api/shorten_url', { body });
   return url.format({
     protocol: parsedUrl.protocol,
     host: parsedUrl.host,

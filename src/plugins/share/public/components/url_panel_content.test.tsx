@@ -20,37 +20,30 @@
 jest.mock('../lib/url_shortener', () => ({}));
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
 
-import {
-  UrlPanelContent,
-} from './url_panel_content';
+import { UrlPanelContent } from './url_panel_content';
+
+const defaultProps = {
+  allowShortUrl: true,
+  objectType: 'dashboard',
+  basePath: '',
+  post: () => Promise.resolve(),
+};
 
 test('render', () => {
-  const component = shallowWithIntl(<UrlPanelContent.WrappedComponent
-    allowShortUrl={true}
-    objectType="dashboard"
-    getUnhashableStates={() => {}}
-  />);
+  const component = shallow(<UrlPanelContent {...defaultProps} />);
   expect(component).toMatchSnapshot();
 });
 
 test('should enable saved object export option when objectId is provided', () => {
-  const component = shallowWithIntl(<UrlPanelContent.WrappedComponent
-    allowShortUrl={true}
-    objectId="id1"
-    objectType="dashboard"
-    getUnhashableStates={() => {}}
-  />);
+  const component = shallow(<UrlPanelContent {...defaultProps} objectId="id1" />);
   expect(component).toMatchSnapshot();
 });
 
 test('should hide short url section when allowShortUrl is false', () => {
-  const component = shallowWithIntl(<UrlPanelContent.WrappedComponent
-    allowShortUrl={false}
-    objectId="id1"
-    objectType="dashboard"
-    getUnhashableStates={() => {}}
-  />);
+  const component = shallow(
+    <UrlPanelContent {...defaultProps} allowShortUrl={false} objectId="id1" />
+  );
   expect(component).toMatchSnapshot();
 });
