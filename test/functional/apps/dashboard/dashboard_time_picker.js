@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardVisualizations = getService('dashboardVisualizations');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'timePicker']);
   const browser = getService('browser');
+  const kibanaServer = getService('kibanaServer');
 
   describe('dashboard time picker', function describeIndexTests() {
     before(async function () {
@@ -71,6 +72,17 @@ export default function ({ getService, getPageObjects }) {
       expect(time.start).to.be('Nov 17, 2012 @ 00:00:00.000');
       expect(time.end).to.be('Nov 17, 2015 @ 18:01:36.621');
       expect(refresh.interval).to.be('2');
+    });
+
+    it('Timepicker respects dateFormat from UI settings', async () => {
+      await kibanaServer.uiSettings.replace({ 'dateFormat': 'YYYY-MM-DD HH:mm:ss.SSS', });
+      await browser.refresh();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
+      // Same date range as `setTimepickerInHistoricalDataRange`
+      await PageObjects.timePicker.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
+      await pieChart.expectPieSliceCount(10);
     });
   });
 }
