@@ -5,11 +5,11 @@
  */
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { isEqual, uniqWith } from 'lodash/fp';
+import { isEmpty, isEqual, uniqWith } from 'lodash/fp';
 import * as React from 'react';
 
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
-import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port';
+import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME, Port } from '../port';
 import * as i18n from '../timeline/body/renderers/translations';
 
 import { GeoFields } from './geo_fields';
@@ -22,81 +22,118 @@ export interface IpPortPair {
   port: string | null;
 }
 
-interface IsIpFieldPopulatedProps {
-  destinationIp?: string[] | null;
-  sourceIp?: string[] | null;
-  type: SourceDestinationType;
-}
-
 /**
  * Returns `true` if the ip field (i.e. `sourceIp`, `destinationIp`) that
  * corresponds with the specified `type` (i.e. `source`, `destination`) is
- * populated
+ * populated. This function will return `false` when the array only contains
+ * empty values.
  */
 export const isIpFieldPopulated = ({
   destinationIp,
   sourceIp,
   type,
-}: IsIpFieldPopulatedProps): boolean =>
-  (type === 'source' && sourceIp != null) || (type === 'destination' && destinationIp != null);
+}: {
+  destinationIp?: string[] | null;
+  sourceIp?: string[] | null;
+  type: SourceDestinationType;
+}): boolean =>
+  (type === 'source' && sourceIp != null && sourceIp.some(ip => !isEmpty(ip))) ||
+  (type === 'destination' && destinationIp != null && destinationIp.some(ip => !isEmpty(ip)));
 
-interface IpAdressesWithPortsProps {
+/**
+ * Returns an array of ports, filtered such that `null` entries are removed. If
+ * the provided `destinationPort` and `sourcePort` do not contain valid ports,
+ * an empty array will be returned.
+ */
+export const getPorts = ({
+  destinationPort,
+  sourcePort,
+  type,
+}: {
+  destinationPort?: Array<number | string | null> | null;
+  sourcePort?: Array<number | string | null> | null;
+  type: SourceDestinationType;
+}): string[] => {
+  const ports =
+    type === 'source' && sourcePort != null
+      ? sourcePort
+      : type === 'destination' && destinationPort != null
+      ? destinationPort
+      : [];
+
+  return ports
+    .filter(p => p != null)
+    .map(p => `${p}`)
+    .filter(p => !isEmpty(p));
+};
+
+/**
+ * Returns `true` if the array of ports, filtered to remove invalid entries,
+ * has at least one port.
+ */
+export const hasPorts = ({
+  destinationPort,
+  sourcePort,
+  type,
+}: {
+  destinationPort?: Array<number | string | null> | null;
+  sourcePort?: Array<number | string | null> | null;
+  type: SourceDestinationType;
+}): boolean => getPorts({ destinationPort, sourcePort, type }).length > 0;
+
+const IpAdressesWithPorts = React.memo<{
   contextId: string;
   destinationIp?: string[] | null;
-  destinationPort?: string[] | null;
+  destinationPort?: Array<number | string | null> | null;
   eventId: string;
   sourceIp?: string[] | null;
-  sourcePort?: string[] | null;
+  sourcePort?: Array<number | string | null> | null;
   type: SourceDestinationType;
-}
+}>(({ contextId, destinationIp, destinationPort, eventId, sourceIp, sourcePort, type }) => {
+  const ip = type === 'source' ? sourceIp : destinationIp;
+  const ipFieldName = type === 'source' ? SOURCE_IP_FIELD_NAME : DESTINATION_IP_FIELD_NAME;
+  const port = type === 'source' ? sourcePort : destinationPort;
+  const portFieldName = type === 'source' ? SOURCE_PORT_FIELD_NAME : DESTINATION_PORT_FIELD_NAME;
 
-const IpAdressesWithPorts = React.memo<IpAdressesWithPortsProps>(
-  ({ contextId, destinationIp, destinationPort, eventId, sourceIp, sourcePort, type }) => {
-    const ip = type === 'source' ? sourceIp : destinationIp;
-    const ipFieldName = type === 'source' ? SOURCE_IP_FIELD_NAME : DESTINATION_IP_FIELD_NAME;
-    const port = type === 'source' ? sourcePort : destinationPort;
-    const portFieldName = type === 'source' ? SOURCE_PORT_FIELD_NAME : DESTINATION_PORT_FIELD_NAME;
-
-    if (ip == null) {
-      return null; // if ip is not populated as an array, ports will be ignored
-    }
-
-    // IMPORTANT: The ip and port arrays are parallel arrays; the port at
-    // index `i` corresponds with the ip address at index `i`. We must
-    // preserve the relationships between the parallel arrays:
-    const ipPortPairs: IpPortPair[] =
-      port != null && ip.length === port.length
-        ? ip.map((address, i) => ({
-            ip: address,
-            port: port[i], // use the corresponding port in the parallel array
-          }))
-        : ip.map(address => ({
-            ip: address,
-            port: null, // drop the port, because the length of the ip and port arrays is different
-          }));
-
-    return ip != null ? (
-      <EuiFlexGroup gutterSize="none">
-        {uniqWith(isEqual, ipPortPairs).map(
-          ipPortPair =>
-            ipPortPair.ip != null && (
-              <EuiFlexItem grow={false} key={ipPortPair.ip}>
-                <IpWithPort
-                  contextId={contextId}
-                  data-test-subj={`${type}-ip-and-port`}
-                  eventId={eventId}
-                  ip={ipPortPair.ip}
-                  ipFieldName={ipFieldName}
-                  port={ipPortPair.port}
-                  portFieldName={portFieldName}
-                />
-              </EuiFlexItem>
-            )
-        )}
-      </EuiFlexGroup>
-    ) : null;
+  if (ip == null) {
+    return null; // if ip is not populated as an array, ports will be ignored
   }
-);
+
+  // IMPORTANT: The ip and port arrays are parallel arrays; the port at
+  // index `i` corresponds with the ip address at index `i`. We must
+  // preserve the relationships between the parallel arrays:
+  const ipPortPairs: IpPortPair[] =
+    port != null && ip.length === port.length
+      ? ip.map((address, i) => ({
+          ip: address,
+          port: port[i] != null ? `${port[i]}` : null, // use the corresponding port in the parallel array
+        }))
+      : ip.map(address => ({
+          ip: address,
+          port: null, // drop the port, because the length of the parallel ip and port arrays is different
+        }));
+
+  return (
+    <EuiFlexGroup gutterSize="none">
+      {uniqWith(isEqual, ipPortPairs).map(
+        ipPortPair =>
+          ipPortPair.ip != null && (
+            <EuiFlexItem grow={false} key={ipPortPair.ip}>
+              <IpWithPort
+                contextId={contextId}
+                data-test-subj={`${type}-ip-and-port`}
+                eventId={eventId}
+                ip={ipPortPair.ip}
+                ipFieldName={ipFieldName}
+                port={ipPortPair.port}
+                portFieldName={portFieldName}
+              />
+            </EuiFlexItem>
+          )
+      )}
+    </EuiFlexGroup>
+  );
+});
 
 IpAdressesWithPorts.displayName = 'IpAdressesWithPorts';
 
@@ -130,7 +167,9 @@ export const SourceDestinationIp = React.memo<SourceDestinationIpProps>(
     type,
   }) => {
     const label = type === 'source' ? i18n.SOURCE : i18n.DESTINATION;
-    return isIpFieldPopulated({ destinationIp, sourceIp, type }) ? (
+
+    return isIpFieldPopulated({ destinationIp, sourceIp, type }) ||
+      hasPorts({ destinationPort, sourcePort, type }) ? (
       <EuiBadge data-test-subj={`${type}-ip-badge`} color="hollow">
         <EuiFlexGroup
           alignItems="center"
@@ -142,15 +181,31 @@ export const SourceDestinationIp = React.memo<SourceDestinationIpProps>(
             <Label data-test-subj={`${type}-label`}>{label}</Label>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <IpAdressesWithPorts
-              contextId={contextId}
-              destinationIp={destinationIp}
-              destinationPort={destinationPort}
-              eventId={eventId}
-              sourceIp={sourceIp}
-              sourcePort={sourcePort}
-              type={type}
-            />
+            {isIpFieldPopulated({ destinationIp, sourceIp, type }) ? (
+              <IpAdressesWithPorts
+                contextId={contextId}
+                destinationIp={destinationIp}
+                destinationPort={destinationPort}
+                eventId={eventId}
+                sourceIp={sourceIp}
+                sourcePort={sourcePort}
+                type={type}
+              />
+            ) : (
+              <EuiFlexGroup gutterSize="none">
+                {getPorts({ destinationPort, sourcePort, type }).map((port, i) => (
+                  <EuiFlexItem key={`port-${port}-${i}`} grow={false}>
+                    <Port
+                      contextId={contextId}
+                      data-test-subj="port"
+                      eventId={eventId}
+                      fieldName={`${type}.port`}
+                      value={port}
+                    />
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            )}
           </EuiFlexItem>
           <EuiFlexItem>
             <GeoFields
