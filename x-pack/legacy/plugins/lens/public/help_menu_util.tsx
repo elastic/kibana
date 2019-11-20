@@ -5,17 +5,15 @@
  */
 
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
-import { Chrome } from 'ui/chrome';
+import { ChromeStart } from 'kibana/public';
 
-const docsPage = 'lens';
-
-export function addHelpMenuToAppChrome(chrome: Chrome) {
-  chrome.helpExtension.set({
+export function addHelpMenuToAppChrome(chrome: ChromeStart) {
+  chrome.setHelpExtension({
     appName: 'Lens',
     links: [
       {
         linkType: 'documentation',
-        href: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/${docsPage}.html`,
+        href: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/lens.html`,
       },
       {
         linkType: 'github',

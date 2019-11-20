@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
 export function addHelpMenuToAppChrome(chrome) {
-  chrome.helpExtension.set({
+  chrome.setHelpExtension({
     appName: i18n.translate('kbn.dashboard.helpMenu.appName', {
       defaultMessage: 'Dashboards',
     }),
