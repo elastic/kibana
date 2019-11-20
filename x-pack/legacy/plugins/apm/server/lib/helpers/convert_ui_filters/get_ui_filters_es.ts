@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import { ESFilter } from '../../../../typings/elasticsearch';
 import { UIFilters } from '../../../../typings/ui-filters';
 import { getEnvironmentUiFilterES } from './get_environment_ui_filter_es';
@@ -13,6 +12,7 @@ import {
   localUIFilterNames
 } from '../../ui_filters/local_ui_filters/config';
 import { StaticIndexPattern } from '../../../../../../../../src/legacy/core_plugins/data/public';
+import { esKuery } from '../../../../../../../../src/plugins/data/public';
 
 export function getUiFiltersES(
   indexPattern: StaticIndexPattern | undefined,
@@ -50,6 +50,6 @@ function getKueryUiFilterES(
     return;
   }
 
-  const ast = fromKueryExpression(kuery);
-  return toElasticsearchQuery(ast, indexPattern) as ESFilter;
+  const ast = esKuery.fromKueryExpression(kuery);
+  return esKuery.estoElasticsearchQuery(ast, indexPattern) as ESFilter;
 }

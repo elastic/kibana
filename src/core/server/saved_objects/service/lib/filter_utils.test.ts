@@ -408,7 +408,7 @@ describe('Filter Utils', () => {
 
     test('Return Error if filter is using an non-existing key null key', () => {
       const validationObject = validateFilterKueryNode(
-        fromKueryExpression('foo.attributes.description: hello AND bye'),
+        esKuery.fromKueryExpression('foo.attributes.description: hello AND bye'),
         ['foo'],
         mockMappings
       );
