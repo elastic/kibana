@@ -5,10 +5,8 @@
  */
 
 import uiRoutes from 'ui/routes';
-// @ts-ignore
-import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
-// @ts-ignore
-import { checkLicenseExpired } from 'plugins/ml/license/check_license';
+import { checkMlNodesAvailable } from '../../..//ml_nodes_check/check_ml_nodes';
+import { checkLicenseExpired } from '../../..//license/check_license';
 import { getCreateRecognizerJobBreadcrumbs } from '../../breadcrumbs';
 import { checkCreateJobsPrivilege } from '../../../privilege/check_privilege';
 import { loadCurrentIndexPattern, loadCurrentSavedSearch } from '../../../util/index_utils';

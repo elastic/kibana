@@ -206,8 +206,6 @@ export default function({ getService }: FtrProviderContext) {
       },
     },
     {
-      // TODO: fix and re-enable the categorization test as soon as Kibana and ES are in sync again
-      skipTest: true,
       suiteTitle: 'with categorization detector and default datafeed settings',
       jobSource: 'ecommerce',
       jobId: `ec_advanced_2_${Date.now()}`,
@@ -230,7 +228,7 @@ export default function({ getService }: FtrProviderContext) {
           } as Detector,
         ],
         influencers: ['mlcategory'],
-        bucketSpan: '12h',
+        bucketSpan: '4h',
         memoryLimit: '100mb',
       } as PickFieldsConfig,
       datafeedConfig: {} as DatafeedConfig,
@@ -247,30 +245,30 @@ export default function({ getService }: FtrProviderContext) {
         },
         counts: {
           processed_record_count: '4,675',
-          processed_field_count: '4,588',
-          input_bytes: '4.4 MB',
-          input_field_count: '6,154',
+          processed_field_count: '4,675',
+          input_bytes: '354.2 KB',
+          input_field_count: '4,675',
           invalid_date_count: '0',
-          missing_field_count: '87',
+          missing_field_count: '0',
           out_of_order_timestamp_count: '0',
           empty_bucket_count: '0',
           sparse_bucket_count: '0',
-          bucket_count: '61',
+          bucket_count: '185',
           earliest_record_timestamp: '2019-06-12 00:04:19',
           latest_record_timestamp: '2019-07-12 23:45:36',
           input_record_count: '4,675',
-          latest_bucket_timestamp: '2019-07-12 12:00:00',
+          latest_bucket_timestamp: '2019-07-12 20:00:00',
         },
         modelSizeStats: {
           result_type: 'model_size_stats',
           model_bytes_exceeded: '0',
           model_bytes_memory_limit: '104857600',
-          total_by_field_count: '3,787',
+          total_by_field_count: '994',
           total_over_field_count: '0',
           total_partition_field_count: '2',
           bucket_allocation_failures_count: '0',
           memory_status: 'ok',
-          timestamp: '2019-07-12 00:00:00',
+          timestamp: '2019-07-12 16:00:00',
         },
       },
     },
@@ -287,9 +285,7 @@ export default function({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
     });
 
-    for (const testData of testDataList.filter(td => {
-      return td.skipTest !== true;
-    })) {
+    for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function() {
         it('job creation loads the job management page', async () => {
           await ml.navigation.navigateToMl();
