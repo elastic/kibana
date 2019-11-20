@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Setup } from '../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../helpers/setup_request';
 import { fetcher } from './fetcher';
 
 describe('fetcher', () => {
@@ -14,7 +18,7 @@ describe('fetcher', () => {
       client: { search },
       indices: {},
       uiFiltersES: []
-    } as unknown) as Setup;
+    } as unknown) as Setup & SetupTimeRange & SetupUIFilters;
 
     await fetcher({ serviceName: 'testServiceName', setup });
 

@@ -160,9 +160,9 @@ export const transactionGroupsAvgDurationByBrowser = createRoute(() => ({
       rangeRt
     ])
   },
-  handler: async (req, { path }) => {
-    const setup = await setupRequest(req);
-    const { serviceName } = path;
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
 
     return getTransactionAvgDurationByBrowser({
       serviceName,
