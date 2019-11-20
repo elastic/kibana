@@ -8,8 +8,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { TooltipSelector } from '../../../components/tooltip_selector';
 import { getEMSClient } from '../../../meta';
-import { EMSFileField } from '../../fields/ems_file_field';
-import { FIELD_ORIGIN } from '../../../../common/constants';
 
 export class UpdateSourceEditor extends Component {
 
@@ -39,11 +37,7 @@ export class UpdateSourceEditor extends Component {
       const emsFiles = await emsClient.getFileLayers();
       const emsFile = emsFiles.find((emsFile => emsFile.getId() === this.props.layerId));
       const emsFields = emsFile.getFieldsInLanguage();
-      fields = emsFields.map(field => new EMSFileField({
-        fieldName: field.name,
-        source: this.props.source,
-        origin: FIELD_ORIGIN.SOURCE
-      }));
+      fields = emsFields.map(field => this.props.source.createField({ fieldName: field.name }));
     } catch(e) {
       //swallow this error. when a matching EMS-config cannot be found, the source already will have thrown errors during the data request. This will propagate to the vector-layer and be displayed in the UX
       fields = [];
