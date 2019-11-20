@@ -66,7 +66,6 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   }): Promise<{
     docsCount: number | null;
     success: boolean;
-    error: null | string;
   }> => {
     const query = getEvalQueryBody({ resultsField, isTraining, ignoreDefaultQuery, searchQuery });
 
@@ -82,14 +81,13 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
         body,
       });
 
-      const docsCount = resp.hits && resp.hits.total && resp.hits.total.value;
-      return { docsCount, success: true, error: null };
+      const docsCount = resp.hits.total && resp.hits.total.value;
+      return { docsCount, success: true };
     } catch (e) {
-      if (e.message !== undefined) {
-        return { docsCount: null, success: false, error: e.message };
-      } else {
-        return { docsCount: null, success: false, error: JSON.stringify(e) };
-      }
+      return {
+        docsCount: null,
+        success: false,
+      };
     }
   };
 
@@ -159,12 +157,14 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     // searchBar query is filtering for testing data
     if (isTraining !== undefined && isTraining.query === 'false') {
       loadGeneralizationData();
-      const { docsCount, success, error } = await loadDocsCount({ isTraining: false });
-      if (success === true) {
-        setGeneralizationDocsCount(docsCount);
+
+      const docsCountResp = await loadDocsCount({ isTraining: false });
+      if (docsCountResp.success === true) {
+        setGeneralizationDocsCount(docsCountResp.docsCount);
       } else {
         setGeneralizationDocsCount(null);
       }
+
       setTrainingDocsCount(0);
       setTrainingEval({
         meanSquaredError: '--',
@@ -174,12 +174,14 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     } else if (isTraining !== undefined && isTraining.query === 'true') {
       // searchBar query is filtering for training data
       loadTrainingData();
-      const { docsCount, success, error } = await loadDocsCount({ isTraining: true });
-      if (success === true) {
-        setTrainingDocsCount(docsCount);
+
+      const docsCountResp = await loadDocsCount({ isTraining: true });
+      if (docsCountResp.success === true) {
+        setTrainingDocsCount(docsCountResp.docsCount);
       } else {
         setTrainingDocsCount(null);
       }
+
       setGeneralizationDocsCount(0);
       setGeneralizationEval({
         meanSquaredError: '--',
@@ -189,27 +191,23 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     } else {
       // No is_training clause/filter from search bar so load both
       loadGeneralizationData(false);
-      const { docsCount: genDocsCount, success: genSuccess, error: genErr } = await loadDocsCount({
+      const genDocsCountResp = await loadDocsCount({
         ignoreDefaultQuery: false,
         isTraining: false,
       });
-      if (genSuccess === true) {
-        setGeneralizationDocsCount(genDocsCount);
+      if (genDocsCountResp.success === true) {
+        setGeneralizationDocsCount(genDocsCountResp.docsCount);
       } else {
         setGeneralizationDocsCount(null);
       }
 
       loadTrainingData(false);
-      const {
-        docsCount: trainDocsCount,
-        success: trainingSuccess,
-        error: trainErr,
-      } = await loadDocsCount({
+      const trainDocsCountResp = await loadDocsCount({
         ignoreDefaultQuery: false,
         isTraining: true,
       });
-      if (trainingSuccess === true) {
-        setTrainingDocsCount(trainDocsCount);
+      if (trainDocsCountResp.success === true) {
+        setTrainingDocsCount(trainDocsCountResp.docsCount);
       } else {
         setTrainingDocsCount(null);
       }
