@@ -64,7 +64,7 @@ interface Props {
 }
 
 interface State {
-  selectedIIndexPattern?: IIndexPattern;
+  selectedIndexPattern?: IIndexPattern;
   selectedField?: IFieldType;
   selectedOperator?: Operator;
   params: any;
@@ -78,7 +78,7 @@ class FilterEditorUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      selectedIIndexPattern: this.getIIndexPatternFromFilter(),
+      selectedIndexPattern: this.getIndexPatternFromFilter(),
       selectedField: this.getFieldFromFilter(),
       selectedOperator: this.getSelectedOperator(),
       params: esFilters.getFilterParams(props.filter),
@@ -120,7 +120,7 @@ class FilterEditorUI extends Component<Props, State> {
 
         <div className="globalFilterItem__editorForm">
           <EuiForm>
-            {this.renderIIndexPatternInput()}
+            {this.renderIndexPatternInput()}
 
             {this.state.isCustomEditorOpen ? this.renderCustomEditor() : this.renderRegularEditor()}
 
@@ -189,16 +189,16 @@ class FilterEditorUI extends Component<Props, State> {
     );
   }
 
-  private renderIIndexPatternInput() {
+  private renderIndexPatternInput() {
     if (
       this.props.indexPatterns.length <= 1 &&
       this.props.indexPatterns.find(
-        indexPattern => indexPattern === this.state.selectedIIndexPattern
+        indexPattern => indexPattern === this.state.selectedIndexPattern
       )
     ) {
       return '';
     }
-    const { selectedIIndexPattern } = this.state;
+    const { selectedIndexPattern } = this.state;
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -208,18 +208,18 @@ class FilterEditorUI extends Component<Props, State> {
               defaultMessage: 'Index Pattern',
             })}
           >
-            <IIndexPatternComboBox
+            <IndexPatternComboBox
               placeholder={this.props.intl.formatMessage({
                 id: 'data.filter.filterBar.indexPatternSelectPlaceholder',
                 defaultMessage: 'Select an index pattern',
               })}
               options={this.props.indexPatterns}
-              selectedOptions={selectedIIndexPattern ? [selectedIIndexPattern] : []}
+              selectedOptions={selectedIndexPattern ? [selectedIndexPattern] : []}
               getLabel={indexPattern => indexPattern.title}
-              onChange={this.onIIndexPatternChange}
+              onChange={this.onIndexPatternChange}
               singleSelection={{ asPlainText: true }}
               isClearable={false}
-              data-test-subj="filterIIndexPatternsSelect"
+              data-test-subj="filterIndexPatternsSelect"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -243,8 +243,8 @@ class FilterEditorUI extends Component<Props, State> {
   }
 
   private renderFieldInput() {
-    const { selectedIIndexPattern, selectedField } = this.state;
-    const fields = selectedIIndexPattern ? getFilterableFields(selectedIIndexPattern) : [];
+    const { selectedIndexPattern, selectedField } = this.state;
+    const fields = selectedIndexPattern ? getFilterableFields(selectedIndexPattern) : [];
 
     return (
       <EuiFormRow
@@ -255,7 +255,7 @@ class FilterEditorUI extends Component<Props, State> {
       >
         <FieldComboBox
           id="fieldInput"
-          isDisabled={!selectedIIndexPattern}
+          isDisabled={!selectedIndexPattern}
           placeholder={this.props.intl.formatMessage({
             id: 'data.filter.filterEditor.fieldSelectPlaceholder',
             defaultMessage: 'Select a field first',
@@ -327,7 +327,7 @@ class FilterEditorUI extends Component<Props, State> {
   }
 
   private renderParamsEditor() {
-    const indexPattern = this.state.selectedIIndexPattern;
+    const indexPattern = this.state.selectedIndexPattern;
     if (!indexPattern || !this.state.selectedOperator) {
       return '';
     }
@@ -375,12 +375,12 @@ class FilterEditorUI extends Component<Props, State> {
     return !!type && !['phrase', 'phrases', 'range', 'exists'].includes(type);
   }
 
-  private getIIndexPatternFromFilter() {
+  private getIndexPatternFromFilter() {
     return utils.getIndexPatternFromFilter(this.props.filter, this.props.indexPatterns);
   }
 
   private getFieldFromFilter() {
-    const indexPattern = this.getIIndexPatternFromFilter();
+    const indexPattern = this.getIndexPatternFromFilter();
     return (
       indexPattern && getFieldFromFilter(this.props.filter as esFilters.FieldFilter, indexPattern)
     );
@@ -394,7 +394,7 @@ class FilterEditorUI extends Component<Props, State> {
     const {
       isCustomEditorOpen,
       queryDsl,
-      selectedIIndexPattern: indexPattern,
+      selectedIndexPattern: indexPattern,
       selectedField: field,
       selectedOperator: operator,
       params,
@@ -411,11 +411,11 @@ class FilterEditorUI extends Component<Props, State> {
     return isFilterValid(indexPattern, field, operator, params);
   }
 
-  private onIIndexPatternChange = ([selectedIIndexPattern]: IIndexPattern[]) => {
+  private onIndexPatternChange = ([selectedIndexPattern]: IIndexPattern[]) => {
     const selectedField = undefined;
     const selectedOperator = undefined;
     const params = undefined;
-    this.setState({ selectedIIndexPattern, selectedField, selectedOperator, params });
+    this.setState({ selectedIndexPattern, selectedField, selectedOperator, params });
   };
 
   private onFieldChange = ([selectedField]: IFieldType[]) => {
@@ -454,7 +454,7 @@ class FilterEditorUI extends Component<Props, State> {
 
   private onSubmit = () => {
     const {
-      selectedIIndexPattern: indexPattern,
+      selectedIndexPattern: indexPattern,
       selectedField: field,
       selectedOperator: operator,
       params,
@@ -499,7 +499,7 @@ class FilterEditorUI extends Component<Props, State> {
   };
 }
 
-function IIndexPatternComboBox(props: GenericComboBoxProps<IIndexPattern>) {
+function IndexPatternComboBox(props: GenericComboBoxProps<IIndexPattern>) {
   return GenericComboBox(props);
 }
 
