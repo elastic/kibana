@@ -31,6 +31,14 @@ interface RegressionAnalysis {
   };
 }
 
+interface ClassificationAnalysis {
+  regression: {
+    dependent_variable: string;
+    training_percent?: number;
+    num_top_classes?: string;
+  };
+}
+
 export const SEARCH_SIZE = 1000;
 
 export const defaultSearchQuery = {
@@ -77,11 +85,16 @@ interface LoadEvaluateResult {
   error: string | null;
 }
 
-type AnalysisConfig = OutlierAnalysis | RegressionAnalysis | GenericAnalysis;
+type AnalysisConfig =
+  | OutlierAnalysis
+  | RegressionAnalysis
+  | ClassificationAnalysis
+  | GenericAnalysis;
 
 export enum ANALYSIS_CONFIG_TYPE {
   OUTLIER_DETECTION = 'outlier_detection',
   REGRESSION = 'regression',
+  CLASSIFICATION = 'classification',
   UNKNOWN = 'unknown',
 }
 

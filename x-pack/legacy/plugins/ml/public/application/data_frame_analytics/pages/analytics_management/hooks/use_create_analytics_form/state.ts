@@ -14,6 +14,7 @@ export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',
   // eslint-disable-next-line @typescript-eslint/camelcase
   outlier_detection = '50mb',
+  classification = '50mb',
 }
 
 export type EsIndexName = string;
@@ -34,6 +35,7 @@ export interface FormMessage {
 export enum JOB_TYPES {
   OUTLIER_DETECTION = 'outlier_detection',
   REGRESSION = 'regression',
+  CLASSIFICATION = 'classification',
 }
 
 export interface State {
@@ -148,8 +150,11 @@ export const getJobConfigFromFormState = (
     },
     model_memory_limit: formState.modelMemoryLimit,
   };
-
-  if (formState.jobType === JOB_TYPES.REGRESSION) {
+  // for classification num_top_classes defaults to 2
+  if (
+    formState.jobType === JOB_TYPES.REGRESSION ||
+    formState.jobType === JOB_TYPES.CLASSIFICATION
+  ) {
     jobConfig.analysis = {
       regression: {
         dependent_variable: formState.dependentVariable,

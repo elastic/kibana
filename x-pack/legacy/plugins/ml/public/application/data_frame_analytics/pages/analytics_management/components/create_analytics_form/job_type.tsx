@@ -13,7 +13,7 @@ import { AnalyticsJobType, JOB_TYPES } from '../../hooks/use_create_analytics_fo
 
 interface Props {
   type: AnalyticsJobType;
-  setFormState: any; // TODO update type
+  setFormState: React.Dispatch<React.SetStateAction<any>>;
 }
 
 export const JobType: FC<Props> = ({ type, setFormState }) => {
@@ -33,9 +33,18 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
     }
   );
 
+  const classificationHelpText = i18n.translate(
+    'xpack.ml.dataframe.analytics.create.classificationHelpText',
+    {
+      defaultMessage:
+        'Classification supports fields that are numeric, boolean, text, keyword and ip. It is also tolerant of missing values. Please use the advanced editor to apply custom options such as num top classes.',
+    }
+  );
+
   const helpText = {
     outlier_detection: outlierHelpText,
     regression: regressionHelpText,
+    classification: classificationHelpText,
   };
 
   return (

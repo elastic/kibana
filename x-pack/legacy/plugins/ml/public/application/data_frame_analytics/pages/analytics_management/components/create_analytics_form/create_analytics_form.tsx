@@ -401,84 +401,88 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               isInvalid={!destinationIndexNameEmpty && !destinationIndexNameValid}
             />
           </EuiFormRow>
-          {jobType === JOB_TYPES.REGRESSION && (
-            <Fragment>
-              <EuiFormRow
-                label={i18n.translate(
-                  'xpack.ml.dataframe.analytics.create.dependentVariableLabel',
-                  {
-                    defaultMessage: 'Dependent variable',
-                  }
-                )}
-                helpText={
-                  dependentVariableOptions.length === 0 &&
-                  dependentVariableFetchFail === false &&
-                  !sourceIndexNameEmpty &&
-                  i18n.translate(
-                    'xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields',
+          {jobType === JOB_TYPES.REGRESSION ||
+            (jobType === JOB_TYPES.CLASSIFICATION && (
+              <Fragment>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.ml.dataframe.analytics.create.dependentVariableLabel',
                     {
-                      defaultMessage: 'No numeric type fields were found for this index pattern.',
-                    }
-                  )
-                }
-                error={
-                  dependentVariableFetchFail === true && [
-                    <Fragment>
-                      {i18n.translate(
-                        'xpack.ml.dataframe.analytics.create.dependentVariableOptionsFetchError',
-                        {
-                          defaultMessage:
-                            'There was a problem fetching fields. Please refresh the page and try again.',
-                        }
-                      )}
-                    </Fragment>,
-                  ]
-                }
-              >
-                <EuiComboBox
-                  aria-label={i18n.translate(
-                    'xpack.ml.dataframe.analytics.create.dependentVariableInputAriaLabel',
-                    {
-                      defaultMessage: 'Enter field to be used as dependent variable.',
+                      defaultMessage: 'Dependent variable',
                     }
                   )}
-                  placeholder={i18n.translate(
-                    'xpack.ml.dataframe.analytics.create.dependentVariablePlaceholder',
+                  helpText={
+                    dependentVariableOptions.length === 0 &&
+                    dependentVariableFetchFail === false &&
+                    !sourceIndexNameEmpty &&
+                    i18n.translate(
+                      'xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields',
+                      {
+                        defaultMessage: 'No numeric type fields were found for this index pattern.',
+                      }
+                    )
+                  }
+                  error={
+                    dependentVariableFetchFail === true && [
+                      <Fragment>
+                        {i18n.translate(
+                          'xpack.ml.dataframe.analytics.create.dependentVariableOptionsFetchError',
+                          {
+                            defaultMessage:
+                              'There was a problem fetching fields. Please refresh the page and try again.',
+                          }
+                        )}
+                      </Fragment>,
+                    ]
+                  }
+                >
+                  <EuiComboBox
+                    aria-label={i18n.translate(
+                      'xpack.ml.dataframe.analytics.create.dependentVariableInputAriaLabel',
+                      {
+                        defaultMessage: 'Enter field to be used as dependent variable.',
+                      }
+                    )}
+                    placeholder={i18n.translate(
+                      'xpack.ml.dataframe.analytics.create.dependentVariablePlaceholder',
+                      {
+                        defaultMessage: 'dependent variable',
+                      }
+                    )}
+                    isDisabled={isJobCreated}
+                    isLoading={loadingDepFieldOptions}
+                    singleSelection={true}
+                    options={dependentVariableOptions}
+                    selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
+                    onChange={selectedOptions =>
+                      setFormState({ dependentVariable: selectedOptions[0].label || '' })
+                    }
+                    isClearable={false}
+                    isInvalid={dependentVariable === ''}
+                  />
+                </EuiFormRow>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.ml.dataframe.analytics.create.trainingPercentLabel',
                     {
-                      defaultMessage: 'dependent variable',
+                      defaultMessage: 'Training percent',
                     }
                   )}
-                  isDisabled={isJobCreated}
-                  isLoading={loadingDepFieldOptions}
-                  singleSelection={true}
-                  options={dependentVariableOptions}
-                  selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
-                  onChange={selectedOptions =>
-                    setFormState({ dependentVariable: selectedOptions[0].label || '' })
-                  }
-                  isClearable={false}
-                  isInvalid={dependentVariable === ''}
-                />
-              </EuiFormRow>
-              <EuiFormRow
-                label={i18n.translate('xpack.ml.dataframe.analytics.create.trainingPercentLabel', {
-                  defaultMessage: 'Training percent',
-                })}
-              >
-                <EuiRange
-                  min={0}
-                  max={100}
-                  step={1}
-                  showLabels
-                  showRange
-                  showValue
-                  value={trainingPercent}
-                  // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
-                  onChange={e => setFormState({ trainingPercent: e.target.value })}
-                />
-              </EuiFormRow>
-            </Fragment>
-          )}
+                >
+                  <EuiRange
+                    min={0}
+                    max={100}
+                    step={1}
+                    showLabels
+                    showRange
+                    showValue
+                    value={trainingPercent}
+                    // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
+                    onChange={e => setFormState({ trainingPercent: e.target.value })}
+                  />
+                </EuiFormRow>
+              </Fragment>
+            ))}
           <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.modelMemoryLimitLabel', {
               defaultMessage: 'Model memory limit',
