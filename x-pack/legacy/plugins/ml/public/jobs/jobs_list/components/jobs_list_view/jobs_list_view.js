@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
+import React, { Component } from 'react';
 import { timefilter } from 'ui/timefilter';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { loadFullJob, filterJobs, checkForAutoStartDatafeed } from '../utils';
+import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
 import { JobsList } from '../jobs_list';
 import { JobDetails } from '../job_details';
 import { JobFilterBar } from '../job_filter_bar';
@@ -19,29 +21,18 @@ import { CreateWatchFlyout } from '../create_watch_flyout';
 import { MultiJobActions } from '../multi_job_actions';
 import { NewJobButton } from '../new_job_button';
 import { JobStatsBar } from '../jobs_stats_bar';
-import { NodeAvailableWarning } from '../node_available_warning';
+import { NodeAvailableWarning } from '../../../../components/node_available_warning';
 import { UpgradeWarning } from '../../../../components/upgrade';
 import { RefreshJobsListButton } from '../refresh_jobs_list_button';
 import { isEqual } from 'lodash';
 
 import {
   DEFAULT_REFRESH_INTERVAL_MS,
-  MINIMUM_REFRESH_INTERVAL_MS,
   DELETING_JOBS_REFRESH_INTERVAL_MS,
+  MINIMUM_REFRESH_INTERVAL_MS,
 } from '../../../../../common/constants/jobs_list';
 
-import React, {
-  Component
-} from 'react';
-
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
-
-
-let jobsRefreshInterval =  null;
+let jobsRefreshInterval = null;
 let deletingJobsRefreshTimeout = null;
 
 // 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
@@ -76,8 +67,8 @@ export class JobsListView extends Component {
     if (this.props.isManagementTable === true) {
       this.refreshJobSummaryList(true);
     } else {
-    // The advanced job wizard is still angularjs based and triggers
-    // broadcast events which it expects the jobs list to be subscribed to.
+      // The advanced job wizard is still angularjs based and triggers
+      // broadcast events which it expects the jobs list to be subscribed to.
       this.props.angularWrapperScope.$on('jobsUpdated', () => {
         this.refreshJobSummaryList(true);
       });
@@ -114,7 +105,7 @@ export class JobsListView extends Component {
       // so switch it on and set the interval to 30s
       timefilter.setRefreshInterval({
         pause: false,
-        value: DEFAULT_REFRESH_INTERVAL_MS
+        value: DEFAULT_REFRESH_INTERVAL_MS,
       });
     }
 
@@ -124,7 +115,7 @@ export class JobsListView extends Component {
   initAutoRefreshUpdate() {
     // update the interval if it changes
     this.refreshIntervalSubscription = timefilter.getRefreshIntervalUpdate$().subscribe({
-      next: () => this.setAutoRefresh()
+      next: () => this.setAutoRefresh(),
     });
   }
 
@@ -143,7 +134,7 @@ export class JobsListView extends Component {
     this.clearRefreshInterval();
     if (interval >= MINIMUM_REFRESH_INTERVAL_MS) {
       this.blockRefresh = false;
-      jobsRefreshInterval = setInterval(() => (this.refreshJobSummaryList()), interval);
+      jobsRefreshInterval = setInterval(() => this.refreshJobSummaryList(), interval);
     }
   }
 
@@ -159,13 +150,12 @@ export class JobsListView extends Component {
     }
   }
 
-  toggleRow = (jobId) => {
+  toggleRow = jobId => {
     if (this.state.itemIdToExpandedRowMap[jobId]) {
       const itemIdToExpandedRowMap = { ...this.state.itemIdToExpandedRowMap };
       delete itemIdToExpandedRowMap[jobId];
       this.setState({ itemIdToExpandedRowMap });
     } else {
-
       let itemIdToExpandedRowMap = { ...this.state.itemIdToExpandedRowMap };
 
       if (this.state.fullJobsList[jobId] !== undefined) {
@@ -191,7 +181,7 @@ export class JobsListView extends Component {
 
       this.setState({ itemIdToExpandedRowMap }, () => {
         loadFullJob(jobId)
-          .then((job) => {
+          .then(job => {
             const fullJobsList = { ...this.state.fullJobsList };
             fullJobsList[jobId] = job;
             this.setState({ fullJobsList }, () => {
@@ -213,54 +203,54 @@ export class JobsListView extends Component {
               this.setState({ itemIdToExpandedRowMap });
             });
           })
-          .catch((error) => {
+          .catch(error => {
             console.error(error);
           });
       });
     }
-  }
+  };
 
   addUpdateFunction = (id, f) => {
     this.updateFunctions[id] = f;
-  }
-  removeUpdateFunction = (id) => {
+  };
+  removeUpdateFunction = id => {
     delete this.updateFunctions[id];
-  }
+  };
 
-  setShowEditJobFlyoutFunction = (func) => {
+  setShowEditJobFlyoutFunction = func => {
     this.showEditJobFlyout = func;
-  }
+  };
   unsetShowEditJobFlyoutFunction = () => {
     this.showEditJobFlyout = () => {};
-  }
+  };
 
-  setShowDeleteJobModalFunction = (func) => {
+  setShowDeleteJobModalFunction = func => {
     this.showDeleteJobModal = func;
-  }
+  };
   unsetShowDeleteJobModalFunction = () => {
     this.showDeleteJobModal = () => {};
-  }
+  };
 
-  setShowStartDatafeedModalFunction = (func) => {
+  setShowStartDatafeedModalFunction = func => {
     this.showStartDatafeedModal = func;
-  }
+  };
   unsetShowStartDatafeedModalFunction = () => {
     this.showStartDatafeedModal = () => {};
-  }
+  };
 
-  setShowCreateWatchFlyoutFunction = (func) => {
+  setShowCreateWatchFlyoutFunction = func => {
     this.showCreateWatchFlyout = func;
-  }
+  };
   unsetShowCreateWatchFlyoutFunction = () => {
     this.showCreateWatchFlyout = () => {};
-  }
+  };
   getShowCreateWatchFlyoutFunction = () => {
     return this.showCreateWatchFlyout;
-  }
+  };
 
-  selectJobChange = (selectedJobs) => {
+  selectJobChange = selectedJobs => {
     this.setState({ selectedJobs });
-  }
+  };
 
   refreshSelectedJobs() {
     const selectedJobsIds = this.state.selectedJobs.map(j => j.id);
@@ -275,24 +265,23 @@ export class JobsListView extends Component {
     this.setState({ selectedJobs });
   }
 
-  setFilters = (filterClauses) => {
+  setFilters = filterClauses => {
     const filteredJobsSummaryList = filterJobs(this.state.jobsSummaryList, filterClauses);
     this.setState({ filteredJobsSummaryList, filterClauses }, () => {
       this.refreshSelectedJobs();
     });
-  }
+  };
 
   onRefreshClick = () => {
     this.setState({ isRefreshing: true });
     this.refreshJobSummaryList(true);
-  }
+  };
   isDoneRefreshing = () => {
     this.setState({ isRefreshing: false });
-  }
+  };
 
   async refreshJobSummaryList(forceRefresh = false) {
     if (forceRefresh === true || this.blockRefresh === false) {
-
       // Set loading to true for jobs_list table for initial job loading
       if (this.state.loading === null) {
         this.setState({ loading: true });
@@ -302,24 +291,27 @@ export class JobsListView extends Component {
       try {
         const jobs = await ml.jobs.jobsSummary(expandedJobsIds);
         const fullJobsList = {};
-        const jobsSummaryList = jobs.map((job) => {
+        const jobsSummaryList = jobs.map(job => {
           if (job.fullJob !== undefined) {
             fullJobsList[job.id] = job.fullJob;
             delete job.fullJob;
           }
-          job.latestTimestampSortValue = (job.latestTimestampMs || 0);
+          job.latestTimestampSortValue = job.latestTimestampMs || 0;
           return job;
         });
         const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
-        this.setState({ jobsSummaryList, filteredJobsSummaryList, fullJobsList, loading: false }, () => {
-          this.refreshSelectedJobs();
-        });
+        this.setState(
+          { jobsSummaryList, filteredJobsSummaryList, fullJobsList, loading: false },
+          () => {
+            this.refreshSelectedJobs();
+          }
+        );
 
-        Object.keys(this.updateFunctions).forEach((j) => {
+        Object.keys(this.updateFunctions).forEach(j => {
           this.updateFunctions[j].setState({ job: fullJobsList[j] });
         });
 
-        jobs.forEach((job) => {
+        jobs.forEach(job => {
           if (job.deleting && this.state.itemIdToExpandedRowMap[job.id]) {
             this.toggleRow(job.id);
           }
@@ -342,7 +334,8 @@ export class JobsListView extends Component {
   async checkDeletingJobTasks(forceRefresh = false) {
     const { jobIds: taskJobIds } = await ml.jobs.deletingJobTasks();
 
-    const taskListHasChanged = (isEqual(taskJobIds.sort(), this.state.deletingJobIds.sort()) === false);
+    const taskListHasChanged =
+      isEqual(taskJobIds.sort(), this.state.deletingJobIds.sort()) === false;
 
     this.setState({
       deletingJobIds: taskJobIds,
@@ -363,7 +356,13 @@ export class JobsListView extends Component {
   }
 
   renderManagementJobsListComponents() {
-    const { loading, itemIdToExpandedRowMap, filteredJobsSummaryList, fullJobsList, selectedJobs } = this.state;
+    const {
+      loading,
+      itemIdToExpandedRowMap,
+      filteredJobsSummaryList,
+      fullJobsList,
+      selectedJobs,
+    } = this.state;
     return (
       <div className="managementJobsList">
         <div>
@@ -442,38 +441,51 @@ export class JobsListView extends Component {
     const { isManagementTable } = this.props;
 
     return (
-      <React.Fragment>
-        <JobStatsBar
-          jobsSummaryList={jobsSummaryList}
-        />
-        <div className="job-management" data-test-subj="ml-jobs-list">
-          <NodeAvailableWarning />
-          <UpgradeWarning />
-          <header>
-            <div className="job-buttons-container">
-              <EuiFlexGroup alignItems="center">
+      <div className="job-management" data-test-subj="ml-jobs-list">
+        {!isManagementTable && (
+          <>
+            <EuiTitle>
+              <h1>
+                <FormattedMessage
+                  id="xpack.ml.jobsList.title"
+                  defaultMessage="Anomaly detection jobs"
+                />
+              </h1>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+          </>
+        )}
+
+        <NodeAvailableWarning />
+
+        <UpgradeWarning />
+
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <JobStatsBar jobsSummaryList={jobsSummaryList} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <RefreshJobsListButton
+                  onRefreshClick={this.onRefreshClick}
+                  isRefreshing={isRefreshing}
+                />
+              </EuiFlexItem>
+              {!isManagementTable && (
                 <EuiFlexItem grow={false}>
-                  <RefreshJobsListButton
-                    onRefreshClick={this.onRefreshClick}
-                    isRefreshing={isRefreshing}
-                  />
+                  <NewJobButton />
                 </EuiFlexItem>
-                {isManagementTable === undefined &&
-                  <EuiFlexItem grow={false}>
-                    <NewJobButton />
-                  </EuiFlexItem>}
-              </EuiFlexGroup>
-            </div>
-          </header>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-          <div className="clear" />
+        <EuiSpacer size="s" />
 
-          <EuiSpacer size="s" />
-
-          { !isManagementTable && this.renderJobsListComponents() }
-          { isManagementTable && this.renderManagementJobsListComponents() }
-        </ div>
-      </React.Fragment>
+        {!isManagementTable && this.renderJobsListComponents()}
+        {isManagementTable && this.renderManagementJobsListComponents()}
+      </div>
     );
   }
 }

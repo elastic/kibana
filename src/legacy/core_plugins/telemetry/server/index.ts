@@ -21,7 +21,8 @@ import { PluginInitializerContext } from 'src/core/server';
 import { TelemetryPlugin } from './plugin';
 import * as constants from '../common/constants';
 
-export { getTelemetryOptIn } from './get_telemetry_opt_in';
+export { FetcherTask } from './fetcher';
+export { replaceTelemetryInjectedVars } from './telemetry_config';
 export { telemetryCollectionManager } from './collection_manager';
 
 export const telemetryPlugin = (initializerContext: PluginInitializerContext) =>

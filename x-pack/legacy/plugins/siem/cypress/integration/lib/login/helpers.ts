@@ -81,7 +81,6 @@ const loginViaEnvironmentCredentials = () => {
       username: Cypress.env(ELASTICSEARCH_USERNAME),
       password: Cypress.env(ELASTICSEARCH_PASSWORD),
     },
-    // followRedirect: false, // breaks in Cypress 3.6.1 https://github.com/cypress-io/cypress/issues/5654
     headers: { 'kbn-xsrf': 'cypress-creds-via-env' },
     method: 'POST',
     url: `${Cypress.config().baseUrl}${LOGIN_API_ENDPOINT}`,
@@ -108,7 +107,6 @@ const loginViaConfig = () => {
         username: config.elasticsearch.username,
         password: config.elasticsearch.password,
       },
-      // followRedirect: false, // breaks in Cypress 3.6.1 https://github.com/cypress-io/cypress/issues/5654
       headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
       method: 'POST',
       url: `${Cypress.config().baseUrl}${LOGIN_API_ENDPOINT}`,

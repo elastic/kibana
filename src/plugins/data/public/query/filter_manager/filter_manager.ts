@@ -27,7 +27,7 @@ import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { uniqFilters } from './lib/uniq_filters';
 import { onlyDisabledFiltersChanged } from './lib/only_disabled';
 import { PartitionedFilters } from './types';
-import { esFilters } from '../../../common/es_query';
+import { esFilters } from '../../../common';
 
 export class FilterManager {
   private filters: esFilters.Filter[] = [];
@@ -77,11 +77,16 @@ export class FilterManager {
 
   private handleStateUpdate(newFilters: esFilters.Filter[]) {
     // global filters should always be first
+
     newFilters.sort(({ $state: a }: esFilters.Filter, { $state: b }: esFilters.Filter): number => {
-      return a!.store === esFilters.FilterStateStore.GLOBAL_STATE &&
-        b!.store !== esFilters.FilterStateStore.GLOBAL_STATE
-        ? -1
-        : 1;
+      if (a!.store === b!.store) {
+        return 0;
+      } else {
+        return a!.store === esFilters.FilterStateStore.GLOBAL_STATE &&
+          b!.store !== esFilters.FilterStateStore.GLOBAL_STATE
+          ? -1
+          : 1;
+      }
     });
 
     const filtersUpdated = !_.isEqual(this.filters, newFilters);

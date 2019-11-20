@@ -5,13 +5,16 @@
  */
 
 import { findSignals } from './find_signals';
-import { SignalAlertType, isAlertTypeArray, ReadSignalParams } from './types';
+import { SignalAlertType, isAlertTypeArray, ReadSignalParams, ReadSignalByRuleId } from './types';
 
-export const findSignalInArrayById = (objects: object[], id: string): SignalAlertType | null => {
+export const findSignalInArrayByRuleId = (
+  objects: object[],
+  ruleId: string
+): SignalAlertType | null => {
   if (isAlertTypeArray(objects)) {
     const signals: SignalAlertType[] = objects;
     const signal: SignalAlertType[] = signals.filter(datum => {
-      return datum.alertTypeParams.id === id;
+      return datum.alertTypeParams.ruleId === ruleId;
     });
     if (signal.length !== 0) {
       return signal[0];
@@ -28,12 +31,12 @@ export const findSignalInArrayById = (objects: object[], id: string): SignalAler
 // not indexed and I cannot push in my own _id when I create an alert at the moment.
 // TODO: Once we can directly push in the _id, then we should no longer need this way.
 // TODO: This is meant to be _very_ temporary.
-export const readSignalById = async ({
+export const readSignalByRuleId = async ({
   alertsClient,
-  id,
-}: ReadSignalParams): Promise<SignalAlertType | null> => {
+  ruleId,
+}: ReadSignalByRuleId): Promise<SignalAlertType | null> => {
   const firstSignals = await findSignals({ alertsClient, page: 1 });
-  const firstSignal = findSignalInArrayById(firstSignals.data, id);
+  const firstSignal = findSignalInArrayByRuleId(firstSignals.data, ruleId);
   if (firstSignal != null) {
     return firstSignal;
   } else {
@@ -46,7 +49,7 @@ export const readSignalById = async ({
       })
       .reduce<Promise<SignalAlertType | null>>(async (accum, findSignal) => {
         const signals = await findSignal;
-        const signal = findSignalInArrayById(signals.data, id);
+        const signal = findSignalInArrayByRuleId(signals.data, ruleId);
         if (signal != null) {
           return signal;
         } else {
@@ -56,11 +59,23 @@ export const readSignalById = async ({
   }
 };
 
-export const readSignals = async ({ alertsClient, id }: ReadSignalParams) => {
-  const signalById = await readSignalById({ alertsClient, id });
-  if (signalById != null) {
-    return signalById;
+export const readSignals = async ({ alertsClient, id, ruleId }: ReadSignalParams) => {
+  if (id != null) {
+    try {
+      const output = await alertsClient.get({ id });
+      return output;
+    } catch (err) {
+      if (err.output.statusCode === 404) {
+        return null;
+      } else {
+        // throw non-404 as they would be 500 or other internal errors
+        throw err;
+      }
+    }
+  } else if (ruleId != null) {
+    return readSignalByRuleId({ alertsClient, ruleId });
   } else {
-    return alertsClient.get({ id });
+    // should never get here, and yet here we are.
+    return null;
   }
 };

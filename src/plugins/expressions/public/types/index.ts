@@ -18,42 +18,8 @@
  */
 
 import { ExpressionInterpret } from '../interpreter_provider';
-import { TimeRange } from '../../../data/public';
+import { TimeRange, Query, esFilters } from '../../../data/public';
 import { Adapters } from '../../../inspector/public';
-import { Query } from '../../../data/public';
-import { ExpressionAST } from '../../../expressions/public';
-import { ExpressionArgAST } from '../../../../plugins/expressions/public';
-import { esFilters } from '../../../../plugins/data/public';
-
-export { ArgumentType } from './arguments';
-export {
-  TypeToString,
-  KnownTypeToString,
-  TypeString,
-  UnmappedTypeStrings,
-  UnwrapPromise,
-  SerializedFieldFormat,
-} from './common';
-
-export { ExpressionFunction, AnyExpressionFunction, FunctionHandlers } from './functions';
-export { ExpressionType, AnyExpressionType } from './types';
-
-export * from './style';
-
-export type ExpressionArgAST = string | boolean | number | ExpressionAST;
-
-export interface ExpressionFunctionAST {
-  type: 'function';
-  function: string;
-  arguments: {
-    [key: string]: ExpressionArgAST[];
-  };
-}
-
-export interface ExpressionAST {
-  type: 'expression';
-  chain: ExpressionFunctionAST[];
-}
 
 export type ExpressionInterpretWithHandlers = (
   ast: Parameters<ExpressionInterpret>[0],
@@ -91,6 +57,7 @@ export interface IExpressionLoaderParams {
   customFunctions?: [];
   customRenderers?: [];
   extraHandlers?: Record<string, any>;
+  inspectorAdapters?: Adapters;
 }
 
 export interface IInterpreterHandlers {
@@ -132,11 +99,3 @@ export interface IInterpreterSuccessResult {
 }
 
 export type IInterpreterResult = IInterpreterSuccessResult & IInterpreterErrorResult;
-
-export interface IInterpreter {
-  interpretAst(
-    ast: ExpressionAST,
-    context: Context,
-    handlers: IInterpreterHandlers
-  ): Promise<IInterpreterResult>;
-}

@@ -6,7 +6,6 @@
 
 import { isEmpty } from 'lodash/fp';
 import { Location } from 'history';
-import { Query } from 'src/plugins/data/common';
 
 import { UrlInputsModel } from '../../store/inputs/model';
 import { CONSTANTS } from '../url_state/constants';
@@ -16,7 +15,7 @@ import {
   replaceStateKeyInQueryString,
   getQueryStringFromLocation,
 } from '../url_state/helpers';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
 import { TabNavigationProps } from './tab_navigation/types';
 import { SearchNavTab } from './types';
@@ -51,9 +50,10 @@ export const getSearch = (tab: SearchNavTab, urlState: TabNavigationProps): stri
         }
         return replaceQueryStringInLocation(
           myLocation,
-          replaceStateKeyInQueryString(urlKey, urlStateToReplace)(
-            getQueryStringFromLocation(myLocation)
-          )
+          replaceStateKeyInQueryString(
+            urlKey,
+            urlStateToReplace
+          )(getQueryStringFromLocation(myLocation))
         );
       },
       {
