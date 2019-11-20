@@ -5,21 +5,12 @@
  */
 
 import * as rt from 'io-ts';
+import { SnapshotMetricTypeRT } from '../inventory_models/types';
 
 export const SnapshotNodePath = rt.type({
   value: rt.string,
   label: rt.string,
   ip: rt.string,
-});
-
-const SnapshotMetricType = rt.keyof({
-  count: 'count',
-  cpu: 'cpu',
-  load: 'load',
-  memory: 'memory',
-  tx: 'tx',
-  rx: 'rx',
-  logRate: 'logRate',
 });
 
 const SnapshotNodeMetricOptional = rt.partial({
@@ -29,7 +20,7 @@ const SnapshotNodeMetricOptional = rt.partial({
 });
 
 const SnapshotNodeMetricRequired = rt.type({
-  name: SnapshotMetricType,
+  name: SnapshotMetricTypeRT,
 });
 
 export const SnapshotNodeRT = rt.type({
