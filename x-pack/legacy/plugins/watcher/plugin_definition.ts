@@ -6,7 +6,6 @@
 
 import { resolve } from 'path';
 import { plugin } from './server/np_ready';
-import { ServerShim } from './server/np_ready/plugin';
 import { PLUGIN } from './common/constants';
 
 export const pluginDefinition = {
@@ -20,13 +19,12 @@ export const pluginDefinition = {
     home: ['plugins/watcher/register_feature'],
   },
   init(server: any) {
-    const serverShim: ServerShim = server as any;
     plugin({} as any).setup(server.newPlatform.setup.core, {
       __LEGACY: {
         route: server.route.bind(server),
         plugins: {
           elasticsearch: server.plugins.elasticsearch,
-          [PLUGIN.ID]: server.plugins[PLUGIN.ID],
+          watcher: server.plugins[PLUGIN.ID],
           xpack_main: server.plugins.xpack_main,
         },
       },
