@@ -12,7 +12,7 @@ import { getRandomString } from './lib';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const {
     createIndexWithMappings,
