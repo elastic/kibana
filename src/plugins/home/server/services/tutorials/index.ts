@@ -16,18 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { uiRegistry } from './_registry';
-import { capabilities } from '../capabilities';
-export { FeatureCatalogueCategory } from '../../../../plugins/home/public';
-
-export const FeatureCatalogueRegistryProvider = uiRegistry({
-  name: 'featureCatalogue',
-  index: ['id'],
-  group: ['category'],
-  order: ['title'],
-  filter: featureCatalogItem => {
-    const isDisabledViaCapabilities = capabilities.get().catalogue[featureCatalogItem.id] === false;
-    return !isDisabledViaCapabilities && Object.keys(featureCatalogItem).length > 0;
-  }
-});
+export {
+  TutorialsRegistry,
+  TutorialsRegistrySetup,
+  TutorialsRegistryStart,
+} from './tutorials_registry';
+export {
+  TutorialsCategory,
+  ParamTypes,
+  InstructionSetSchema,
+  ParamsSchema,
+  InstructionsSchema,
+  DashboardSchema,
+  ArtifactsSchema,
+  TutorialSchema,
+  TutorialProvider,
+  TutorialContextFactory,
+  ScopedTutorialContextFactory,
+} from './lib/tutorials_registry_types';

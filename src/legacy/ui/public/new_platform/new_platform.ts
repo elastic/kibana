@@ -29,16 +29,13 @@ import {
 } from '../../../../plugins/inspector/public';
 import { EuiUtilsStart } from '../../../../plugins/eui_utils/public';
 import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/public';
-import {
-  FeatureCatalogueSetup,
-  FeatureCatalogueStart,
-} from '../../../../plugins/feature_catalogue/public';
+import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
 
 export interface PluginsSetup {
   data: ReturnType<DataPlugin['setup']>;
   embeddable: EmbeddableSetup;
   expressions: ReturnType<ExpressionsPlugin['setup']>;
-  feature_catalogue: FeatureCatalogueSetup;
+  home: HomePublicPluginSetup;
   inspector: InspectorSetup;
   uiActions: IUiActionsSetup;
   devTools: DevToolsSetup;
@@ -49,7 +46,7 @@ export interface PluginsStart {
   embeddable: EmbeddableStart;
   eui_utils: EuiUtilsStart;
   expressions: ReturnType<ExpressionsPlugin['start']>;
-  feature_catalogue: FeatureCatalogueStart;
+  home: HomePublicPluginStart;
   inspector: InspectorStart;
   uiActions: IUiActionsStart;
   devTools: DevToolsStart;
