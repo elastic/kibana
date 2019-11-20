@@ -100,13 +100,11 @@ export function buildMapsTelemetry(mapSavedObjects, indexPatternSavedObjects, se
 }
 
 async function getMapSavedObjects(savedObjectsClient) {
-  console.log('test', savedObjectsClient);
   const mapsSavedObjects = await savedObjectsClient.find({ type: MAP_SAVED_OBJECT_TYPE });
   return _.get(mapsSavedObjects, 'saved_objects');
 }
 
 async function getIndexPatternSavedObjects(savedObjectsClient) {
-  console.log('saved objects', savedObjectsClient);
   const indexPatternSavedObjects = await savedObjectsClient.find({ type: 'index-pattern' });
   return _.get(indexPatternSavedObjects, 'saved_objects');
 }
@@ -116,9 +114,7 @@ export async function getMapsTelemetry(server, callCluster) {
   const mapSavedObjects = await getMapSavedObjects(savedObjectsClient);
   const indexPatternSavedObjects = await getIndexPatternSavedObjects(savedObjectsClient);
   const settings = {
-    showMapVisualizationTypes: server.config().get('xpack.maps.showMapVisualizationTypes'),
-    includeElasticMapsService: server.config().get('xpack.map.includeElasticMapsService'),
-    proxyElasticMapsServiceInMaps: server.config().get('xpack.map.includeElasticMapsService'),
+    showMapVisualizationTypes: server.config().get('xpack.maps.showMapVisualizationTypes')
   };
   const mapsTelemetry = buildMapsTelemetry(mapSavedObjects, indexPatternSavedObjects, settings);
   return await savedObjectsClient.create('maps-telemetry', mapsTelemetry, { id: 'maps-telemetry', overwrite: true });
