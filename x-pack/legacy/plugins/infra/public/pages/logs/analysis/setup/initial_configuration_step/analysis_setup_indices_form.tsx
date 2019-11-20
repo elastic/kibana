@@ -50,9 +50,11 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
         return validIndex ? (
           checkbox
         ) : (
-          <EuiToolTip key={index.index} content={errorToI18n(index.validation!)}>
-            {checkbox}
-          </EuiToolTip>
+          <div>
+            <EuiToolTip key={index.index} content={errorToI18n(index.validation!)}>
+              {checkbox}
+            </EuiToolTip>
+          </div>
         );
       }),
     [indices]
