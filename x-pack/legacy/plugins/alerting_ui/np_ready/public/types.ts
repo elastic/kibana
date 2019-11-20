@@ -86,11 +86,6 @@ export interface Alert {
   throttle: string | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
-  // TODO: replace this temporary fields with the proper server relevant
-  checkIntervalSize?: number;
-  checkIntervalUnit?: string;
-  renotifyIntervalSize?: number;
-  renotifyIntervalUnit?: string;
 }
 
 export interface AlertTableItem extends Alert {

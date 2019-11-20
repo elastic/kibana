@@ -31,7 +31,6 @@ import {
   EuiFieldNumber,
   EuiSelect,
   EuiIconTip,
-  EuiBadge,
   EuiPortal,
 } from '@elastic/eui';
 import { useAppDependencies } from '../..';
@@ -58,12 +57,28 @@ function validateBaseProperties(alertObject: Alert) {
   const validationResult = { errors: {} };
   const errors = {
     name: new Array<string>(),
+    interval: new Array<string>(),
+    alertTypeId: new Array<string>(),
   };
   validationResult.errors = errors;
   if (!alertObject.name) {
     errors.name.push(
       i18n.translate('xpack.alertingUI.sections.alertAdd.error.requiredNameText', {
         defaultMessage: 'Name is required.',
+      })
+    );
+  }
+  if (!alertObject.interval) {
+    errors.interval.push(
+      i18n.translate('xpack.alertingUI.sections.alertAdd.error.requiredIntervalText', {
+        defaultMessage: 'Check interval is required.',
+      })
+    );
+  }
+  if (!alertObject.alertTypeId) {
+    errors.alertTypeId.push(
+      i18n.translate('xpack.alertingUI.sections.alertAdd.error.requiredAlertTypeIdText', {
+        defaultMessage: 'Alert trigger is required.',
       })
     );
   }
@@ -80,6 +95,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
   const initialAlert = {
     alertTypeParams: {},
     alertTypeId: null,
+    interval: '1m',
     actions: [],
   };
 
@@ -92,6 +108,10 @@ export const AlertAdd = ({ refreshList }: Props) => {
   const [selectedTabId, setSelectedTabId] = useState<string>('alert');
   const [alertAction, setAlertAction] = useState<AlertAction | undefined>(undefined);
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
+  const [alertInterval, setAlertInterval] = useState<number | null>(null);
+  const [alertIntervalUnit, setAlertIntervalUnit] = useState<string>('m');
+  const [alertThrottle, setAlertThrottle] = useState<number | null>(null);
+  const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>('');
 
   useEffect(() => {
     (async () => {
@@ -124,6 +144,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
         value: {
           alertTypeParams: {},
           alertTypeId: null,
+          interval: '1m',
           actions: [],
         },
       },
@@ -228,7 +249,10 @@ export const AlertAdd = ({ refreshList }: Props) => {
           icon={<EuiIcon size="xl" type={item.iconClass} />}
           title={item.name}
           description={''}
-          onClick={() => setAlertType(item.alertType)}
+          onClick={() => {
+            setAlertProperty('alertTypeId', item.id);
+            setAlertType(item.alertType);
+          }}
         />
       </EuiFlexItem>
     );
@@ -277,7 +301,12 @@ export const AlertAdd = ({ refreshList }: Props) => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiLink onClick={() => setAlertType(undefined)}>
+          <EuiLink
+            onClick={() => {
+              setAlertProperty('alertTypeId', null);
+              setAlertType(undefined);
+            }}
+          >
             <FormattedMessage
               defaultMessage={'Change'}
               id="xpack.alertingUI.sections.alertAdd.changeAlertTypeLink"
@@ -504,19 +533,25 @@ export const AlertAdd = ({ refreshList }: Props) => {
                   <EuiFlexGroup gutterSize="none">
                     <EuiFlexItem grow={false}>
                       <EuiFieldNumber
-                        value={alert.checkIntervalSize || ''}
-                        name="throttle"
-                        data-test-subj="throttleInput"
+                        value={alertInterval || 1}
+                        name="interval"
+                        data-test-subj="intervalInput"
                         onChange={e => {
-                          setAlertProperty('checkIntervalSize', e.target.value);
+                          const interval =
+                            e.target.value !== '' ? parseInt(e.target.value, 10) : null;
+                          setAlertInterval(interval);
+                          setAlertProperty('interval', `${e.target.value}${alertIntervalUnit}`);
                         }}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiSelect
-                        value={alert.checkIntervalUnit}
-                        options={getTimeOptions(alert.checkIntervalSize)}
-                        onChange={(e: any) => setAlertProperty('checkIntervalUnit', e.target.value)}
+                        value={alertIntervalUnit}
+                        options={getTimeOptions((alertInterval ? alertInterval : 1).toString())}
+                        onChange={(e: any) => {
+                          setAlertIntervalUnit(e.target.value);
+                          setAlertProperty('interval', `${alertInterval}${e.target.value}`);
+                        }}
                         fullWidth={true}
                       />
                     </EuiFlexItem>
@@ -528,11 +563,14 @@ export const AlertAdd = ({ refreshList }: Props) => {
                   <EuiFlexGroup gutterSize="none">
                     <EuiFlexItem grow={false}>
                       <EuiFieldNumber
-                        value={alert.throttle || ''}
+                        value={alertThrottle || ''}
                         name="throttle"
                         data-test-subj="throttleInput"
                         onChange={e => {
-                          setAlertProperty('renotifyIntervalSize', e.target.value);
+                          const throttle =
+                            e.target.value !== '' ? parseInt(e.target.value, 10) : null;
+                          setAlertThrottle(throttle);
+                          setAlertProperty('throttle', `${e.target.value}${alertThrottleUnit}`);
                         }}
                       />
                     </EuiFlexItem>
@@ -540,9 +578,10 @@ export const AlertAdd = ({ refreshList }: Props) => {
                       <EuiSelect
                         value={alert.renotifyIntervalUnit}
                         options={getTimeOptions(alert.renotifyIntervalSize)}
-                        onChange={(e: any) =>
-                          setAlertProperty('renotifyIntervalUnit', e.target.value)
-                        }
+                        onChange={(e: any) => {
+                          setAlertThrottleUnit(e.target.value);
+                          setAlertProperty('throttle', `${alertThrottle}${e.target.value}`);
+                        }}
                         fullWidth={true}
                       />
                     </EuiFlexItem>
