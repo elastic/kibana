@@ -33,7 +33,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
   private licenseFetchSubscription?: Subscription;
   private storageSubscription?: Subscription;
 
-  private infoEndpoint = '/api/licensing/info';
+  private readonly infoEndpoint = '/api/licensing/info';
   private prevSignature?: string;
 
   constructor(
