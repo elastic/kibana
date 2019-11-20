@@ -198,7 +198,7 @@ export interface JobParamPostPayload {
 
 export interface JobDocPayload {
   headers?: Record<string, string>;
-  jobParams: JobParamsSavedObject | JobParamsUrl;
+  jobParams: any;
   title: string;
   type: string | null;
   objects?: null | object[];
