@@ -287,6 +287,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
           alert={alert}
           errors={errors}
           setAlertTypeParams={setAlertTypeParams}
+          setAlertProperty={setAlertProperty}
           hasErrors={hasErrors}
         />
       ) : null}
