@@ -61,7 +61,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     const opaqueIds = new Map<PluginName, PluginOpaqueId>(plugins.map(p => [p.id, Symbol(p.id)]));
 
     // Setup dependency map and plugin wrappers
-    plugins.forEach(({ id, plugin, config }) => {
+    plugins.forEach(({ id, plugin, config = {} }) => {
       // Setup map of dependencies
       this.pluginDependencies.set(id, [
         ...plugin.requiredPlugins,
@@ -74,7 +74,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         new PluginWrapper(
           plugin,
           opaqueIds.get(id)!,
-          createPluginInitializerContext(this.coreContext, opaqueIds.get(id)!, plugin, config || {})
+          createPluginInitializerContext(this.coreContext, opaqueIds.get(id)!, plugin, config)
         )
       );
     });

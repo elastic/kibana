@@ -124,21 +124,28 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   ): Map<PluginName, Observable<unknown>> {
     return new Map(
       [...uiPlugins]
-        .filter(([pluginId, plugin]) => {
+        .filter(([pluginId, _]) => {
           const configDescriptor = this.pluginConfigDescriptors.get(pluginId);
           return (
             configDescriptor &&
             configDescriptor.exposeToBrowser &&
-            configDescriptor.exposeToBrowser.length > 0
+            Object.values(configDescriptor?.exposeToBrowser).some(exposed => exposed)
           );
         })
         .map(([pluginId, plugin]) => {
           const configDescriptor = this.pluginConfigDescriptors.get(pluginId)!;
           return [
             pluginId,
-            this.configService
-              .atPath(plugin.configPath)
-              .pipe(map((config: any) => pick(config || {}, configDescriptor.exposeToBrowser!))),
+            this.configService.atPath(plugin.configPath).pipe(
+              map((config: any) =>
+                pick(
+                  config || {},
+                  Object.entries(configDescriptor.exposeToBrowser!)
+                    .filter(([_, exposed]) => exposed)
+                    .map(([key, _]) => key)
+                )
+              )
+            ),
           ];
         })
     );

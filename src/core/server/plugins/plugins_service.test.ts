@@ -406,7 +406,9 @@ describe('PluginsService', () => {
         join('plugin-with-expose', 'server'),
         () => ({
           config: {
-            exposeToBrowser: ['sharedProp'],
+            exposeToBrowser: {
+              sharedProp: true,
+            },
             schema: schema.object({
               serverProp: schema.string({ defaultValue: 'serverProp default value' }),
               sharedProp: schema.string({ defaultValue: 'sharedProp default value' }),

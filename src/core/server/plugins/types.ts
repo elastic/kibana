@@ -59,7 +59,7 @@ export interface PluginConfigDescriptor<T = any> {
   /**
    * List of configuration properties that will be available on the client-side plugin.
    */
-  exposeToBrowser?: Array<keyof T>;
+  exposeToBrowser?: { [P in keyof T]?: boolean };
   /**
    * Schema to use to validate the plugin configuration.
    *
