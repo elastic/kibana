@@ -56,19 +56,12 @@
       <div ng-show="getShouldShowEditHelp()" class="euiText">
         <dashboard-empty-screen on-link-click="showAddPanel"
                                 show-link-to-visualize="true"
-                                message-tokens="['kbn.dashboard.addVisualizationDescription1', 'kbn.dashboard.addVisualizationDescription2', 'kbn.dashboard.addVisualizationLinkText',
-                                 'kbn.dashboard.addVisualizationLinkAriaLabel']"
-                                message-defaults="[ 'Click the ', ' button in the menu bar above to add a visualization to the dashboard.', 'Add', 'Add visualization']"
         />
       </div>
 
       <div ng-show="getShouldShowViewHelp()" class="euiText">
         <dashboard-empty-screen show-link-to-visualize="false"
                                 on-link-click="enterEditMode"
-                                message-tokens="['kbn.dashboard.howToStartWorkingOnNewDashboardDescription1', 'kbn.dashboard.howToStartWorkingOnNewDashboardDescription2', 'kbn.dashboard.howToStartWorkingOnNewDashboardEditLinkText',
-                                 'kbn.dashboard.howToStartWorkingOnNewDashboardEditLinkAriaLabel']"
-                                message-defaults="['Click the ', ' button in the menu bar above to start working on your new dashboard.', 'Edit', 'Edit dashboard']"
-
         />
       </div>
 

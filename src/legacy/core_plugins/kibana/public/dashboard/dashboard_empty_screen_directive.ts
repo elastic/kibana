@@ -17,17 +17,14 @@
  * under the License.
  */
 // @ts-ignore
-import { getServices } from './kibana_services';
+import angular from 'angular';
 import { DashboardEmptyScreen } from './dashboard_empty_screen';
-const { wrapInI18nContext, uiModules } = getServices();
 
-const app = uiModules.get('apps/dashboard');
-
-app.directive('dashboardEmptyScreen', function(reactDirective: any) {
-  return reactDirective(wrapInI18nContext(DashboardEmptyScreen), [
-    ['showLinkToVisualize', { watchDepth: 'value' }],
-    ['onLinkClick', { watchDepth: 'reference' }],
-    ['messageTokens', { watchDepth: 'value' }],
-    ['messageDefaults', { watchDepth: 'value' }],
-  ]);
-});
+angular
+  .module('app/dashboard/emptyScreen', ['react'])
+  .directive('dashboardEmptyScreen', function(reactDirective: any) {
+    return reactDirective(DashboardEmptyScreen, [
+      ['showLinkToVisualize', { watchDepth: 'value' }],
+      ['onLinkClick', { watchDepth: 'reference' }],
+    ]);
+  });

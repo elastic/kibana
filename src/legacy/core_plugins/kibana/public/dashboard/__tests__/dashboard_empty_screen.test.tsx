@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { EventHandler, MouseEvent as ReactMouseEvent } from 'react';
+import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DashboardEmptyScreen, Props } from '../dashboard_empty_screen';
 
@@ -24,13 +24,6 @@ describe('DashboardEmptyScreen', () => {
   const defaultProps = {
     showLinkToVisualize: true,
     onLinkClick: jest.fn(),
-    messageTokens: ['message1', 'message2', 'message3', 'message4'],
-    messageDefaults: [
-      'First part of the message ',
-      ' second part of the message',
-      ' link label ',
-      'link area label',
-    ],
   };
 
   function mountComponent(props?: Props) {
