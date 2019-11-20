@@ -34,12 +34,14 @@ def withDefaultPrComments(closure) {
           ## :green_heart: Build Succeeded
           * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
           * Commit: ${getCommitHash()}
+          * This message from pipeline
         """
       } else {
         message = """
           ## :broken_heart: Build Failed
           * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
           * Commit: ${getCommitHash()}
+          * This message from pipeline
         """
       }
 
