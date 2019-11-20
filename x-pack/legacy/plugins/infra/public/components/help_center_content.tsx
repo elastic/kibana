@@ -4,33 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink } from '@elastic/eui';
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React, { useEffect } from 'react';
 import chrome from 'ui/chrome';
 
 interface HelpCenterContentProps {
   feedbackLink: string;
-  feedbackLinkText: string;
+  appName: string;
 }
 
-const Content: React.FC<HelpCenterContentProps> = ({ feedbackLink, feedbackLinkText }) => (
-  <EuiLink href={feedbackLink} target="_blank" rel="noopener">
-    {feedbackLinkText}
-  </EuiLink>
-);
-
-export class HelpCenterContent extends React.Component<HelpCenterContentProps> {
-  public componentDidMount = () => {
-    chrome.helpExtension.set(domElement => {
-      ReactDOM.render(<Content {...this.props} />, domElement);
-      return () => {
-        ReactDOM.unmountComponentAtNode(domElement);
-      };
+export const HelpCenterContent: React.FC<HelpCenterContentProps> = ({ feedbackLink, appName }) => {
+  useEffect(() => {
+    chrome.helpExtension.set({
+      appName,
+      links: [
+        {
+          linkType: 'discuss',
+          href: feedbackLink,
+        },
+      ],
     });
-  };
+  }, [feedbackLink, appName]);
 
-  public render = () => {
-    return null;
-  };
-}
+  return null;
+};

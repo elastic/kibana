@@ -1,533 +1,545 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`after fetch hideWriteControls 1`] = `
-<TableListView
-  createItem={null}
-  deleteItems={null}
-  editItem={null}
-  entityName="dashboard"
-  entityNamePlural="dashboards"
-  findItems={[Function]}
-  initialFilter=""
-  listingLimit={1}
-  noItemsFragment={
-    <div>
-      <EuiEmptyPrompt
-        iconType="visualizeApp"
-        title={
-          <h2>
-            <FormattedMessage
-              defaultMessage="Looks like you don't have any dashboards."
-              id="kbn.dashboard.listing.noItemsMessage"
-              values={Object {}}
-            />
-          </h2>
-        }
-      />
-    </div>
-  }
-  tableColumns={
-    Array [
-      Object {
-        "field": "title",
-        "name": "Title",
-        "render": [Function],
-        "sortable": true,
-      },
-      Object {
-        "dataType": "string",
-        "field": "description",
-        "name": "Description",
-        "sortable": true,
-      },
-    ]
-  }
-  tableListTitle="Dashboards"
-  toastNotifications={Object {}}
-  uiSettings={
-    Object {
-      "get": [MockFunction],
+<I18nProvider>
+  <TableListView
+    createItem={null}
+    deleteItems={null}
+    editItem={null}
+    entityName="dashboard"
+    entityNamePlural="dashboards"
+    findItems={[Function]}
+    initialFilter=""
+    listingLimit={1}
+    noItemsFragment={
+      <div>
+        <EuiEmptyPrompt
+          iconType="visualizeApp"
+          title={
+            <h2>
+              <FormattedMessage
+                defaultMessage="Looks like you don't have any dashboards."
+                id="kbn.dashboard.listing.noItemsMessage"
+                values={Object {}}
+              />
+            </h2>
+          }
+        />
+      </div>
     }
-  }
-/>
+    tableColumns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "Title",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "dataType": "string",
+          "field": "description",
+          "name": "Description",
+          "sortable": true,
+        },
+      ]
+    }
+    tableListTitle="Dashboards"
+    toastNotifications={Object {}}
+    uiSettings={
+      Object {
+        "get": [MockFunction],
+      }
+    }
+  />
+</I18nProvider>
 `;
 
 exports[`after fetch initialFilter 1`] = `
-<TableListView
-  createItem={[Function]}
-  deleteItems={[Function]}
-  editItem={[Function]}
-  entityName="dashboard"
-  entityNamePlural="dashboards"
-  findItems={[Function]}
-  initialFilter="my dashboard"
-  listingLimit={1000}
-  noItemsFragment={
-    <div>
-      <EuiEmptyPrompt
-        actions={
-          <EuiButton
-            data-test-subj="createDashboardPromptButton"
-            fill={true}
-            iconType="plusInCircle"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Create new dashboard"
-              id="kbn.dashboard.listing.createNewDashboard.createButtonLabel"
-              values={Object {}}
-            />
-          </EuiButton>
-        }
-        body={
-          <React.Fragment>
-            <p>
+<I18nProvider>
+  <TableListView
+    createItem={[Function]}
+    deleteItems={[Function]}
+    editItem={[Function]}
+    entityName="dashboard"
+    entityNamePlural="dashboards"
+    findItems={[Function]}
+    initialFilter="my dashboard"
+    listingLimit={1000}
+    noItemsFragment={
+      <div>
+        <EuiEmptyPrompt
+          actions={
+            <EuiButton
+              data-test-subj="createDashboardPromptButton"
+              fill={true}
+              iconType="plusInCircle"
+              onClick={[Function]}
+            >
               <FormattedMessage
-                defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+                defaultMessage="Create new dashboard"
+                id="kbn.dashboard.listing.createNewDashboard.createButtonLabel"
                 values={Object {}}
               />
-            </p>
-            <p>
-              <FormattedMessage
-                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
-                values={
-                  Object {
-                    "sampleDataInstallLink": <ForwardRef
-                      href="#/home/tutorial_directory/sampleData"
-                    >
-                      <FormattedMessage
-                        defaultMessage="Install some sample data"
-                        id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
-                        values={Object {}}
-                      />
-                    </ForwardRef>,
+            </EuiButton>
+          }
+          body={
+            <React.Fragment>
+              <p>
+                <FormattedMessage
+                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
+                  id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+                  values={Object {}}
+                />
+              </p>
+              <p>
+                <FormattedMessage
+                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                  id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
+                  values={
+                    Object {
+                      "sampleDataInstallLink": <ForwardRef
+                        href="#/home/tutorial_directory/sampleData"
+                      >
+                        <FormattedMessage
+                          defaultMessage="Install some sample data"
+                          id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
+                          values={Object {}}
+                        />
+                      </ForwardRef>,
+                    }
                   }
-                }
+                />
+              </p>
+            </React.Fragment>
+          }
+          iconType="dashboardApp"
+          title={
+            <h2>
+              <FormattedMessage
+                defaultMessage="Create your first dashboard"
+                id="kbn.dashboard.listing.createNewDashboard.title"
+                values={Object {}}
               />
-            </p>
-          </React.Fragment>
-        }
-        iconType="dashboardApp"
-        title={
-          <h2>
-            <FormattedMessage
-              defaultMessage="Create your first dashboard"
-              id="kbn.dashboard.listing.createNewDashboard.title"
-              values={Object {}}
-            />
-          </h2>
-        }
-      />
-    </div>
-  }
-  tableColumns={
-    Array [
-      Object {
-        "field": "title",
-        "name": "Title",
-        "render": [Function],
-        "sortable": true,
-      },
-      Object {
-        "dataType": "string",
-        "field": "description",
-        "name": "Description",
-        "sortable": true,
-      },
-    ]
-  }
-  tableListTitle="Dashboards"
-  toastNotifications={Object {}}
-  uiSettings={
-    Object {
-      "get": [MockFunction],
+            </h2>
+          }
+        />
+      </div>
     }
-  }
-/>
+    tableColumns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "Title",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "dataType": "string",
+          "field": "description",
+          "name": "Description",
+          "sortable": true,
+        },
+      ]
+    }
+    tableListTitle="Dashboards"
+    toastNotifications={Object {}}
+    uiSettings={
+      Object {
+        "get": [MockFunction],
+      }
+    }
+  />
+</I18nProvider>
 `;
 
 exports[`after fetch renders call to action when no dashboards exist 1`] = `
-<TableListView
-  createItem={[Function]}
-  deleteItems={[Function]}
-  editItem={[Function]}
-  entityName="dashboard"
-  entityNamePlural="dashboards"
-  findItems={[Function]}
-  initialFilter=""
-  listingLimit={1}
-  noItemsFragment={
-    <div>
-      <EuiEmptyPrompt
-        actions={
-          <EuiButton
-            data-test-subj="createDashboardPromptButton"
-            fill={true}
-            iconType="plusInCircle"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Create new dashboard"
-              id="kbn.dashboard.listing.createNewDashboard.createButtonLabel"
-              values={Object {}}
-            />
-          </EuiButton>
-        }
-        body={
-          <React.Fragment>
-            <p>
+<I18nProvider>
+  <TableListView
+    createItem={[Function]}
+    deleteItems={[Function]}
+    editItem={[Function]}
+    entityName="dashboard"
+    entityNamePlural="dashboards"
+    findItems={[Function]}
+    initialFilter=""
+    listingLimit={1}
+    noItemsFragment={
+      <div>
+        <EuiEmptyPrompt
+          actions={
+            <EuiButton
+              data-test-subj="createDashboardPromptButton"
+              fill={true}
+              iconType="plusInCircle"
+              onClick={[Function]}
+            >
               <FormattedMessage
-                defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+                defaultMessage="Create new dashboard"
+                id="kbn.dashboard.listing.createNewDashboard.createButtonLabel"
                 values={Object {}}
               />
-            </p>
-            <p>
-              <FormattedMessage
-                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
-                values={
-                  Object {
-                    "sampleDataInstallLink": <ForwardRef
-                      href="#/home/tutorial_directory/sampleData"
-                    >
-                      <FormattedMessage
-                        defaultMessage="Install some sample data"
-                        id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
-                        values={Object {}}
-                      />
-                    </ForwardRef>,
+            </EuiButton>
+          }
+          body={
+            <React.Fragment>
+              <p>
+                <FormattedMessage
+                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
+                  id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+                  values={Object {}}
+                />
+              </p>
+              <p>
+                <FormattedMessage
+                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                  id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
+                  values={
+                    Object {
+                      "sampleDataInstallLink": <ForwardRef
+                        href="#/home/tutorial_directory/sampleData"
+                      >
+                        <FormattedMessage
+                          defaultMessage="Install some sample data"
+                          id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
+                          values={Object {}}
+                        />
+                      </ForwardRef>,
+                    }
                   }
-                }
+                />
+              </p>
+            </React.Fragment>
+          }
+          iconType="dashboardApp"
+          title={
+            <h2>
+              <FormattedMessage
+                defaultMessage="Create your first dashboard"
+                id="kbn.dashboard.listing.createNewDashboard.title"
+                values={Object {}}
               />
-            </p>
-          </React.Fragment>
-        }
-        iconType="dashboardApp"
-        title={
-          <h2>
-            <FormattedMessage
-              defaultMessage="Create your first dashboard"
-              id="kbn.dashboard.listing.createNewDashboard.title"
-              values={Object {}}
-            />
-          </h2>
-        }
-      />
-    </div>
-  }
-  tableColumns={
-    Array [
-      Object {
-        "field": "title",
-        "name": "Title",
-        "render": [Function],
-        "sortable": true,
-      },
-      Object {
-        "dataType": "string",
-        "field": "description",
-        "name": "Description",
-        "sortable": true,
-      },
-    ]
-  }
-  tableListTitle="Dashboards"
-  toastNotifications={Object {}}
-  uiSettings={
-    Object {
-      "get": [MockFunction],
+            </h2>
+          }
+        />
+      </div>
     }
-  }
-/>
+    tableColumns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "Title",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "dataType": "string",
+          "field": "description",
+          "name": "Description",
+          "sortable": true,
+        },
+      ]
+    }
+    tableListTitle="Dashboards"
+    toastNotifications={Object {}}
+    uiSettings={
+      Object {
+        "get": [MockFunction],
+      }
+    }
+  />
+</I18nProvider>
 `;
 
 exports[`after fetch renders table rows 1`] = `
-<TableListView
-  createItem={[Function]}
-  deleteItems={[Function]}
-  editItem={[Function]}
-  entityName="dashboard"
-  entityNamePlural="dashboards"
-  findItems={[Function]}
-  initialFilter=""
-  listingLimit={1000}
-  noItemsFragment={
-    <div>
-      <EuiEmptyPrompt
-        actions={
-          <EuiButton
-            data-test-subj="createDashboardPromptButton"
-            fill={true}
-            iconType="plusInCircle"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Create new dashboard"
-              id="kbn.dashboard.listing.createNewDashboard.createButtonLabel"
-              values={Object {}}
-            />
-          </EuiButton>
-        }
-        body={
-          <React.Fragment>
-            <p>
+<I18nProvider>
+  <TableListView
+    createItem={[Function]}
+    deleteItems={[Function]}
+    editItem={[Function]}
+    entityName="dashboard"
+    entityNamePlural="dashboards"
+    findItems={[Function]}
+    initialFilter=""
+    listingLimit={1000}
+    noItemsFragment={
+      <div>
+        <EuiEmptyPrompt
+          actions={
+            <EuiButton
+              data-test-subj="createDashboardPromptButton"
+              fill={true}
+              iconType="plusInCircle"
+              onClick={[Function]}
+            >
               <FormattedMessage
-                defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+                defaultMessage="Create new dashboard"
+                id="kbn.dashboard.listing.createNewDashboard.createButtonLabel"
                 values={Object {}}
               />
-            </p>
-            <p>
-              <FormattedMessage
-                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
-                values={
-                  Object {
-                    "sampleDataInstallLink": <ForwardRef
-                      href="#/home/tutorial_directory/sampleData"
-                    >
-                      <FormattedMessage
-                        defaultMessage="Install some sample data"
-                        id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
-                        values={Object {}}
-                      />
-                    </ForwardRef>,
+            </EuiButton>
+          }
+          body={
+            <React.Fragment>
+              <p>
+                <FormattedMessage
+                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
+                  id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+                  values={Object {}}
+                />
+              </p>
+              <p>
+                <FormattedMessage
+                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                  id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
+                  values={
+                    Object {
+                      "sampleDataInstallLink": <ForwardRef
+                        href="#/home/tutorial_directory/sampleData"
+                      >
+                        <FormattedMessage
+                          defaultMessage="Install some sample data"
+                          id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
+                          values={Object {}}
+                        />
+                      </ForwardRef>,
+                    }
                   }
-                }
+                />
+              </p>
+            </React.Fragment>
+          }
+          iconType="dashboardApp"
+          title={
+            <h2>
+              <FormattedMessage
+                defaultMessage="Create your first dashboard"
+                id="kbn.dashboard.listing.createNewDashboard.title"
+                values={Object {}}
               />
-            </p>
-          </React.Fragment>
-        }
-        iconType="dashboardApp"
-        title={
-          <h2>
-            <FormattedMessage
-              defaultMessage="Create your first dashboard"
-              id="kbn.dashboard.listing.createNewDashboard.title"
-              values={Object {}}
-            />
-          </h2>
-        }
-      />
-    </div>
-  }
-  tableColumns={
-    Array [
-      Object {
-        "field": "title",
-        "name": "Title",
-        "render": [Function],
-        "sortable": true,
-      },
-      Object {
-        "dataType": "string",
-        "field": "description",
-        "name": "Description",
-        "sortable": true,
-      },
-    ]
-  }
-  tableListTitle="Dashboards"
-  toastNotifications={Object {}}
-  uiSettings={
-    Object {
-      "get": [MockFunction],
+            </h2>
+          }
+        />
+      </div>
     }
-  }
-/>
+    tableColumns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "Title",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "dataType": "string",
+          "field": "description",
+          "name": "Description",
+          "sortable": true,
+        },
+      ]
+    }
+    tableListTitle="Dashboards"
+    toastNotifications={Object {}}
+    uiSettings={
+      Object {
+        "get": [MockFunction],
+      }
+    }
+  />
+</I18nProvider>
 `;
 
 exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
-<TableListView
-  createItem={[Function]}
-  deleteItems={[Function]}
-  editItem={[Function]}
-  entityName="dashboard"
-  entityNamePlural="dashboards"
-  findItems={[Function]}
-  initialFilter=""
-  listingLimit={1}
-  noItemsFragment={
-    <div>
-      <EuiEmptyPrompt
-        actions={
-          <EuiButton
-            data-test-subj="createDashboardPromptButton"
-            fill={true}
-            iconType="plusInCircle"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Create new dashboard"
-              id="kbn.dashboard.listing.createNewDashboard.createButtonLabel"
-              values={Object {}}
-            />
-          </EuiButton>
-        }
-        body={
-          <React.Fragment>
-            <p>
+<I18nProvider>
+  <TableListView
+    createItem={[Function]}
+    deleteItems={[Function]}
+    editItem={[Function]}
+    entityName="dashboard"
+    entityNamePlural="dashboards"
+    findItems={[Function]}
+    initialFilter=""
+    listingLimit={1}
+    noItemsFragment={
+      <div>
+        <EuiEmptyPrompt
+          actions={
+            <EuiButton
+              data-test-subj="createDashboardPromptButton"
+              fill={true}
+              iconType="plusInCircle"
+              onClick={[Function]}
+            >
               <FormattedMessage
-                defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+                defaultMessage="Create new dashboard"
+                id="kbn.dashboard.listing.createNewDashboard.createButtonLabel"
                 values={Object {}}
               />
-            </p>
-            <p>
-              <FormattedMessage
-                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
-                values={
-                  Object {
-                    "sampleDataInstallLink": <ForwardRef
-                      href="#/home/tutorial_directory/sampleData"
-                    >
-                      <FormattedMessage
-                        defaultMessage="Install some sample data"
-                        id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
-                        values={Object {}}
-                      />
-                    </ForwardRef>,
+            </EuiButton>
+          }
+          body={
+            <React.Fragment>
+              <p>
+                <FormattedMessage
+                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
+                  id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+                  values={Object {}}
+                />
+              </p>
+              <p>
+                <FormattedMessage
+                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                  id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
+                  values={
+                    Object {
+                      "sampleDataInstallLink": <ForwardRef
+                        href="#/home/tutorial_directory/sampleData"
+                      >
+                        <FormattedMessage
+                          defaultMessage="Install some sample data"
+                          id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
+                          values={Object {}}
+                        />
+                      </ForwardRef>,
+                    }
                   }
-                }
+                />
+              </p>
+            </React.Fragment>
+          }
+          iconType="dashboardApp"
+          title={
+            <h2>
+              <FormattedMessage
+                defaultMessage="Create your first dashboard"
+                id="kbn.dashboard.listing.createNewDashboard.title"
+                values={Object {}}
               />
-            </p>
-          </React.Fragment>
-        }
-        iconType="dashboardApp"
-        title={
-          <h2>
-            <FormattedMessage
-              defaultMessage="Create your first dashboard"
-              id="kbn.dashboard.listing.createNewDashboard.title"
-              values={Object {}}
-            />
-          </h2>
-        }
-      />
-    </div>
-  }
-  tableColumns={
-    Array [
-      Object {
-        "field": "title",
-        "name": "Title",
-        "render": [Function],
-        "sortable": true,
-      },
-      Object {
-        "dataType": "string",
-        "field": "description",
-        "name": "Description",
-        "sortable": true,
-      },
-    ]
-  }
-  tableListTitle="Dashboards"
-  toastNotifications={Object {}}
-  uiSettings={
-    Object {
-      "get": [MockFunction],
+            </h2>
+          }
+        />
+      </div>
     }
-  }
-/>
+    tableColumns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "Title",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "dataType": "string",
+          "field": "description",
+          "name": "Description",
+          "sortable": true,
+        },
+      ]
+    }
+    tableListTitle="Dashboards"
+    toastNotifications={Object {}}
+    uiSettings={
+      Object {
+        "get": [MockFunction],
+      }
+    }
+  />
+</I18nProvider>
 `;
 
 exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
-<TableListView
-  createItem={[Function]}
-  deleteItems={[Function]}
-  editItem={[Function]}
-  entityName="dashboard"
-  entityNamePlural="dashboards"
-  findItems={[Function]}
-  initialFilter=""
-  listingLimit={1000}
-  noItemsFragment={
-    <div>
-      <EuiEmptyPrompt
-        actions={
-          <EuiButton
-            data-test-subj="createDashboardPromptButton"
-            fill={true}
-            iconType="plusInCircle"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Create new dashboard"
-              id="kbn.dashboard.listing.createNewDashboard.createButtonLabel"
-              values={Object {}}
-            />
-          </EuiButton>
-        }
-        body={
-          <React.Fragment>
-            <p>
+<I18nProvider>
+  <TableListView
+    createItem={[Function]}
+    deleteItems={[Function]}
+    editItem={[Function]}
+    entityName="dashboard"
+    entityNamePlural="dashboards"
+    findItems={[Function]}
+    initialFilter=""
+    listingLimit={1000}
+    noItemsFragment={
+      <div>
+        <EuiEmptyPrompt
+          actions={
+            <EuiButton
+              data-test-subj="createDashboardPromptButton"
+              fill={true}
+              iconType="plusInCircle"
+              onClick={[Function]}
+            >
               <FormattedMessage
-                defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+                defaultMessage="Create new dashboard"
+                id="kbn.dashboard.listing.createNewDashboard.createButtonLabel"
                 values={Object {}}
               />
-            </p>
-            <p>
-              <FormattedMessage
-                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
-                values={
-                  Object {
-                    "sampleDataInstallLink": <ForwardRef
-                      href="#/home/tutorial_directory/sampleData"
-                    >
-                      <FormattedMessage
-                        defaultMessage="Install some sample data"
-                        id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
-                        values={Object {}}
-                      />
-                    </ForwardRef>,
+            </EuiButton>
+          }
+          body={
+            <React.Fragment>
+              <p>
+                <FormattedMessage
+                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
+                  id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+                  values={Object {}}
+                />
+              </p>
+              <p>
+                <FormattedMessage
+                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                  id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
+                  values={
+                    Object {
+                      "sampleDataInstallLink": <ForwardRef
+                        href="#/home/tutorial_directory/sampleData"
+                      >
+                        <FormattedMessage
+                          defaultMessage="Install some sample data"
+                          id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
+                          values={Object {}}
+                        />
+                      </ForwardRef>,
+                    }
                   }
-                }
+                />
+              </p>
+            </React.Fragment>
+          }
+          iconType="dashboardApp"
+          title={
+            <h2>
+              <FormattedMessage
+                defaultMessage="Create your first dashboard"
+                id="kbn.dashboard.listing.createNewDashboard.title"
+                values={Object {}}
               />
-            </p>
-          </React.Fragment>
-        }
-        iconType="dashboardApp"
-        title={
-          <h2>
-            <FormattedMessage
-              defaultMessage="Create your first dashboard"
-              id="kbn.dashboard.listing.createNewDashboard.title"
-              values={Object {}}
-            />
-          </h2>
-        }
-      />
-    </div>
-  }
-  tableColumns={
-    Array [
-      Object {
-        "field": "title",
-        "name": "Title",
-        "render": [Function],
-        "sortable": true,
-      },
-      Object {
-        "dataType": "string",
-        "field": "description",
-        "name": "Description",
-        "sortable": true,
-      },
-    ]
-  }
-  tableListTitle="Dashboards"
-  toastNotifications={Object {}}
-  uiSettings={
-    Object {
-      "get": [MockFunction],
+            </h2>
+          }
+        />
+      </div>
     }
-  }
-/>
+    tableColumns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "Title",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "dataType": "string",
+          "field": "description",
+          "name": "Description",
+          "sortable": true,
+        },
+      ]
+    }
+    tableListTitle="Dashboards"
+    toastNotifications={Object {}}
+    uiSettings={
+      Object {
+        "get": [MockFunction],
+      }
+    }
+  />
+</I18nProvider>
 `;
