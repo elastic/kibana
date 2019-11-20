@@ -13,8 +13,6 @@ import {
   InfraTimerangeInput,
   InfraSnapshotGroupbyInput,
 } from '../../../../legacy/plugins/infra/server/graphql/types';
-import { waffleNodesQuery } from '../../../../legacy/plugins/infra/public/containers/waffle/waffle_nodes.gql_query';
-import { WaffleNodesQuery } from '../../../../legacy/plugins/infra/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { SnapshotNodeResponse } from '../../../../legacy/plugins/infra/common/http_api/snapshot_api';
 import { DATES } from './constants';
@@ -30,7 +28,6 @@ interface SnapshotRequest {
 
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const client = getService('infraOpsGraphQLClient');
   const supertest = getService('supertest');
   const fetchSnapshot = async (
     body: SnapshotRequest
