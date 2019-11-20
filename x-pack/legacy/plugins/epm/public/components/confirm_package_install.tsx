@@ -24,7 +24,7 @@ export const ConfirmPackageInstall = (props: ConfirmPackageInstallProps) => {
         confirmButtonText="Install package"
         defaultFocusedButton="confirm"
       >
-        <EuiCallOut>This package will install {numOfAssets} assets.</EuiCallOut>
+        <EuiCallOut title={`This package will install ${numOfAssets} assets.`} />
         <EuiSpacer size="l" />
         <p>
           and will only be accessible to users who have permission to view this Space. Elasticsearch
