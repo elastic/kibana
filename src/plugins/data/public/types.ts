@@ -19,10 +19,13 @@
 
 export * from './autocomplete_provider/types';
 
+import { CoreStart } from 'src/core/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
 import { ISearchSetup, ISearchStart } from './search';
 import { IGetSuggestions } from './suggestions_provider/types';
 import { QuerySetup, QueryStart } from './query';
+
 export interface DataPublicPluginSetup {
   autocomplete: AutocompletePublicPluginSetup;
   search: ISearchSetup;
@@ -37,3 +40,13 @@ export interface DataPublicPluginStart {
 }
 
 export { IGetSuggestions } from './suggestions_provider/types';
+
+export interface IDataPluginServices extends Partial<CoreStart> {
+  appName: string;
+  uiSettings: CoreStart['uiSettings'];
+  savedObjects: CoreStart['savedObjects'];
+  notifications: CoreStart['notifications'];
+  http: CoreStart['http'];
+  storage: IStorageWrapper;
+  data: DataPublicPluginStart;
+}

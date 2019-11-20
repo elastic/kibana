@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { connect } from 'react-redux';
-import { IDataPluginServices } from 'src/legacy/core_plugins/data/public/types';
 import {
   GraphState,
   hasDatasourceSelector,
@@ -29,6 +28,7 @@ import {
 import { IndexPatternSavedObject } from '../../types';
 import { openSourceModal } from '../../services/source_modal';
 
+import { IDataPluginServices } from '../../../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export interface GuidancePanelProps {
