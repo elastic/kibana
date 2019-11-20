@@ -79,25 +79,6 @@ $visLegendLineHeight: $euiSize;
   }
 }
 
-.visLegend__value {
-  display: flex;
-  flex-shrink: 0;
-  position: relative; /* 1 */
-
-  > * {
-    width: 100%;
-  }
-
-  &.disabled {
-    opacity: 0.5;
-  }
-
-  &--item {
-    cursor: pointer;
-    padding: $euiSizeXS;
-  }
-}
-
 .visLegend__valueTitle {
   @include euiTextTruncate; // ALWAYS truncate
   color: $visTextColor;
@@ -138,17 +119,10 @@ $visLegendLineHeight: $euiSize;
 }
 
 .visLegend__valueColorPicker {
-  width: $visColorPickerWidth;
-  margin: auto;
+  width: 192px;
+  cursor: pointer;
 
-  .visLegend__valueColorPickerDot {
-    $colorPickerDotsPerRow: 8;
-    $colorPickerDotMargin: $euiSizeXS / 2;
-    $colorPickerDotWidth: $visColorPickerWidth / $colorPickerDotsPerRow - 2 * $colorPickerDotMargin;
-
-    margin: $colorPickerDotMargin;
-    width: $colorPickerDotWidth;
-
+  &--dot {
     &:hover {
       transform: scale(1.4);
     }

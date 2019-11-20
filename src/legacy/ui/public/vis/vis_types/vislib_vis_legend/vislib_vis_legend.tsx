@@ -17,7 +17,6 @@
  * under the License.
  */
 import React, { BaseSyntheticEvent, KeyboardEvent, PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { compact, uniq, map } from 'lodash';
 
@@ -46,12 +45,6 @@ export interface VisLegendState {
 }
 
 export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
-  static propTypes = {
-    vis: PropTypes.object,
-    visData: PropTypes.object,
-    uiState: PropTypes.object,
-  };
-
   legendId = htmlIdGenerator()('legend');
   getColor: (label: string) => string = () => '';
 
@@ -90,7 +83,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
     this.refresh();
   };
 
-  filter = ({ values: data }: LegendItem, negate: boolean) => () => {
+  filter = ({ values: data }: LegendItem, negate: boolean) => {
     this.props.vis.API.events.filter({ data, negate });
   };
 

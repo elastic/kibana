@@ -20,11 +20,17 @@
 import React, { memo, BaseSyntheticEvent, KeyboardEvent } from 'react';
 import classNames from 'classnames';
 
-import { EuiKeyboardAccessible } from '@elastic/eui';
 import { keyCodes } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { EuiPopover } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
+import { EuiButtonGroup } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { EuiButtonGroupOption } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { legendColors, LegendItem } from './models';
 
 interface Props {
@@ -32,7 +38,7 @@ interface Props {
   legendId: string;
   selected: boolean;
   canFilter: boolean;
-  onFilter: (item: LegendItem, negate: boolean) => () => void;
+  onFilter: (item: LegendItem, negate: boolean) => void;
   onSelect: (label: string | null) => (event?: BaseSyntheticEvent) => void;
   onHighlight: (event: BaseSyntheticEvent) => void;
   onUnhighlight: (event: BaseSyntheticEvent) => void;
@@ -64,109 +70,120 @@ const VisLegendItemComponent = ({
     }
   };
 
-  const renderFilterBar = (legendItem: LegendItem) => (
-    <div className="kuiButtonGroup kuiButtonGroup--united kuiButtonGroup--fullWidth">
-      <button
-        className="visLegend__filterIn kuiButton kuiButton--basic kuiButton--small"
-        onClick={onFilter(legendItem, false)}
-        aria-label={i18n.translate('common.ui.vis.visTypes.legend.filterForValueButtonAriaLabel', {
-          defaultMessage: 'Filter for value {legendDataLabel}',
-          values: { legendDataLabel: legendItem.label },
-        })}
-        data-test-subj={`legend-${legendItem.label}-filterIn`}
-      >
-        <span className="kuiIcon fa-search-plus" />
-      </button>
+  const filterOptions: EuiButtonGroupOption[] = [
+    {
+      id: 'filterIn',
+      label: i18n.translate('common.ui.vis.visTypes.legend.filterForValueButtonAriaLabel', {
+        defaultMessage: 'Filter for value {legendDataLabel}',
+        values: { legendDataLabel: item.label },
+      }),
+      iconType: 'magnifyWithPlus',
+      'data-test-subj': `legend-${item.label}-filterIn`,
+    },
+    {
+      id: 'filterOut',
+      label: i18n.translate('common.ui.vis.visTypes.legend.filterOutValueButtonAriaLabel', {
+        defaultMessage: 'Filter out value {legendDataLabel}',
+        values: { legendDataLabel: item.label },
+      }),
+      iconType: 'magnifyWithMinus',
+      'data-test-subj': `legend-${item.label}-filterOut`,
+    },
+  ];
 
-      <button
-        className="visLegend__filterOut kuiButton kuiButton--basic kuiButton--small"
-        onClick={onFilter(legendItem, true)}
-        aria-label={i18n.translate('common.ui.vis.visTypes.legend.filterOutValueButtonAriaLabel', {
-          defaultMessage: 'Filter out value {legendDataLabel}',
-          values: { legendDataLabel: legendItem.label },
-        })}
-        data-test-subj={`legend-${legendItem.label}-filterOut`}
-      >
-        <span className="kuiIcon fa-search-minus" />
-      </button>
-    </div>
+  const handleFilterChange = (id: string) => {
+    onFilter(item, id !== 'filterIn');
+  };
+
+  const renderFilterBar = () => (
+    <>
+      <EuiButtonGroup
+        isIconOnly
+        isFullWidth
+        legend="add legend"
+        options={filterOptions}
+        onChange={handleFilterChange}
+        idSelected="null"
+      />
+      <EuiSpacer size="m" />
+    </>
   );
 
-  const renderDetails = (legendItem: LegendItem) => (
-    <div className="visLegend__valueDetails">
-      {canFilter && renderFilterBar(legendItem)}
+  const button = (
+    <EuiButtonEmpty
+      size="xs"
+      color="text"
+      tabIndex={0}
+      className={classNames('visLegend__value', {
+        'eui-textTruncate': !selected,
+        'eui-textBreakWord': selected,
+      })}
+      onKeyDown={onLegendEntryKeydown}
+      onMouseEnter={onHighlight}
+      onFocus={onHighlight}
+      onClick={onSelect(item.label)}
+      onMouseLeave={onUnhighlight}
+      onBlur={onUnhighlight}
+      data-label={item.label}
+      title={item.label}
+      aria-label={i18n.translate('common.ui.vis.visTypes.legend.toggleOptionsButtonAriaLabel', {
+        defaultMessage: '{legendDataLabel}, toggle options',
+        values: { legendDataLabel: item.label },
+      })}
+      data-test-subj={`legend-${item.label}`}
+    >
+      <EuiIcon
+        type="dot"
+        size="l"
+        color={getColor(item.label)}
+        data-test-subj={`legendSelectedColor-${getColor(item.label)}`}
+      />
+      <span className="visLegend__valueLabel">&nbsp;{item.label}</span>
+    </EuiButtonEmpty>
+  );
 
-      <div className="visLegend__valueColorPicker" role="listbox">
-        <span id={`${legendId}ColorPickerDesc`} className="euiScreenReaderOnly">
-          <FormattedMessage
-            id="common.ui.vis.visTypes.legend.setColorScreenReaderDescription"
-            defaultMessage="Set color for value {legendDataLabel}"
-            values={{ legendDataLabel: legendItem.label }}
-          />
-        </span>
-        {legendColors.map(color => (
-          <i
-            role="option"
-            tabIndex={0}
-            key={color}
-            aria-label={color}
-            aria-describedby={`${legendId}ColorPickerDesc`}
-            aria-selected={color === getColor(legendItem.label)}
-            onClick={setColor(legendItem.label, color)}
-            onKeyPress={setColor(legendItem.label, color)}
-            className={classNames(
-              'fa dot visLegend__valueColorPickerDot',
-              color === getColor(legendItem.label) ? 'fa-circle-o' : 'fa-circle'
-            )}
-            style={{ color }}
-            data-test-subj={`legendSelectColor-${color}`}
-          />
-        ))}
+  const renderDetails = () => (
+    <EuiPopover tabIndex={0} button={button} isOpen={selected} closePopover={onSelect(null)}>
+      <div className="visLegend__valueDetails">
+        {canFilter && renderFilterBar()}
+
+        <div className="visLegend__valueColorPicker" role="listbox">
+          <span id={`${legendId}ColorPickerDesc`} className="euiScreenReaderOnly">
+            <FormattedMessage
+              id="common.ui.vis.visTypes.legend.setColorScreenReaderDescription"
+              defaultMessage="Set color for value {legendDataLabel}"
+              values={{ legendDataLabel: item.label }}
+            />
+          </span>
+          {legendColors.map(color => (
+            <EuiIcon
+              role="option"
+              tabIndex={0}
+              type="dot"
+              size="l"
+              color={getColor(item.label)}
+              key={color}
+              aria-label={color}
+              aria-describedby={`${legendId}ColorPickerDesc`}
+              aria-selected={color === getColor(item.label)}
+              onClick={setColor(item.label, color)}
+              onKeyPress={setColor(item.label, color)}
+              className={classNames(
+                'visLegend__valueColorPicker--dot',
+                color === getColor(item.label) ? 'fa-circle-o' : 'fa-circle'
+              )}
+              style={{ color }}
+              data-test-subj={`legendSelectColor-${color}`}
+            />
+          ))}
+        </div>
       </div>
-    </div>
+    </EuiPopover>
   );
 
   return (
     <li key={item.label} className="visLegend__value color">
-      <EuiKeyboardAccessible>
-        <div
-          tabIndex={0}
-          className="visLegend__value--item"
-          onKeyDown={onLegendEntryKeydown}
-          onMouseEnter={onHighlight}
-          onFocus={onHighlight}
-          onClick={onSelect(item.label)}
-          onMouseLeave={onUnhighlight}
-          onBlur={onUnhighlight}
-          data-label={item.label}
-        >
-          <div
-            data-label={item.label}
-            className={classNames(
-              'visLegend__valueTitle',
-              selected ? 'visLegend__valueTitle--full' : 'visLegend__valueTitle--truncate'
-            )}
-            title={item.label}
-            aria-label={i18n.translate(
-              'common.ui.vis.visTypes.legend.toggleOptionsButtonAriaLabel',
-              {
-                defaultMessage: '{legendDataLabel}, toggle options',
-                values: { legendDataLabel: item.label },
-              }
-            )}
-            data-test-subj={`legend-${item.label}`}
-          >
-            <i
-              className="fa fa-circle"
-              style={{ color: getColor(item.label) }}
-              data-test-subj={`legendSelectedColor-${getColor(item.label)}`}
-            />
-            &nbsp;{item.label}
-          </div>
-
-          {selected && renderDetails(item)}
-        </div>
-      </EuiKeyboardAccessible>
+      {renderDetails()}
     </li>
   );
 };
