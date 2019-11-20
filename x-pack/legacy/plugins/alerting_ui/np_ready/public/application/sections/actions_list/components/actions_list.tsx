@@ -213,11 +213,13 @@ export const ActionsList: React.FunctionComponent = () => {
             })}
             data-test-subj="actionsTable"
             pagination={true}
-            selection={{
-              onSelectionChange(updatedSelectedItemsList: ActionTableItem[]) {
-                setSelectedItems(updatedSelectedItemsList);
-              },
-            }}
+            selection={
+              canDelete && {
+                onSelectionChange(updatedSelectedItemsList: ActionTableItem[]) {
+                  setSelectedItems(updatedSelectedItemsList);
+                },
+              }
+            }
             search={{
               filters: [
                 {
