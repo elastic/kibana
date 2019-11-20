@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SetupWithAllFilters } from '../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../helpers/setup_request';
 import {
   HOST_NAME,
   CONTAINER_ID
@@ -20,7 +24,7 @@ export async function getServiceNodeMetadata({
 }: {
   serviceName: string;
   serviceNodeName: string;
-  setup: SetupWithAllFilters;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
   const { client } = setup;
 

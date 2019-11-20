@@ -14,11 +14,11 @@ import {
 import { Span } from '../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 import { rangeFilter } from '../helpers/range_filter';
-import { SetupWithTimeRange } from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export async function getTraceItems(
   traceId: string,
-  setup: SetupWithTimeRange
+  setup: Setup & SetupTimeRange
 ) {
   const { start, end, client, config, indices } = setup;
   const maxTraceItems = config['xpack.apm.ui.maxTraceItems'];

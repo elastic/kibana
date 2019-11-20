@@ -9,7 +9,11 @@ import {
   TRANSACTION_SAMPLED
 } from '../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../typings/common';
-import { SetupWithAllFilters } from '../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../helpers/setup_request';
 import { getTransactionGroupsProjection } from '../../../common/projections/transaction_groups';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import { SortOptions } from '../../../typings/elasticsearch/aggregations';
@@ -32,7 +36,7 @@ export type Options = TopTransactionOptions | TopTraceOptions;
 export type ESResponse = PromiseReturnType<typeof transactionGroupsFetcher>;
 export function transactionGroupsFetcher(
   options: Options,
-  setup: SetupWithAllFilters
+  setup: Setup & SetupTimeRange & SetupUIFilters
 ) {
   const { client, config } = setup;
 

@@ -4,14 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SetupWithAllFilters } from '../../server/lib/helpers/setup_request';
+import {
+  Setup,
+  SetupUIFilters,
+  SetupTimeRange
+} from '../../server/lib/helpers/setup_request';
 import { SERVICE_NAME, PROCESSOR_EVENT } from '../elasticsearch_fieldnames';
 import { rangeFilter } from '../../server/lib/helpers/range_filter';
 
 export function getServicesProjection({
   setup
 }: {
-  setup: SetupWithAllFilters;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
   const { start, end, uiFiltersES, indices } = setup;
 

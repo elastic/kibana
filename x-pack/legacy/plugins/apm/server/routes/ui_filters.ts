@@ -8,7 +8,9 @@ import * as t from 'io-ts';
 import { omit } from 'lodash';
 import {
   setupRequest,
-  SetupWithAllFilters
+  Setup,
+  SetupUIFilters,
+  SetupTimeRange
 } from '../lib/helpers/setup_request';
 import { getEnvironments } from '../lib/ui_filters/get_environments';
 import { Projection } from '../../common/projections/typings';
@@ -225,5 +227,5 @@ type GetProjection<
   setup
 }: {
   query: t.TypeOf<TQueryRT>;
-  setup: SetupWithAllFilters;
+  setup: Setup & SetupUIFilters & SetupTimeRange;
 }) => TProjection;

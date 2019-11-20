@@ -9,11 +9,11 @@ import {
   TRANSACTION_TYPE
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../helpers/range_filter';
-import { SetupWithTimeRange } from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export async function getServiceTransactionTypes(
   serviceName: string,
-  setup: SetupWithTimeRange
+  setup: Setup & SetupTimeRange
 ) {
   const { start, end, client, indices } = setup;
 

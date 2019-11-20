@@ -68,10 +68,6 @@ export const apm: LegacyPluginInitializer = kibana => {
         // enable plugin
         enabled: Joi.boolean().default(true),
 
-        // buckets
-        minimumBucketSize: Joi.number().default(15),
-        bucketTargetCount: Joi.number().default(15),
-
         // index patterns
         autocreateApmIndexPattern: Joi.boolean().default(true),
 

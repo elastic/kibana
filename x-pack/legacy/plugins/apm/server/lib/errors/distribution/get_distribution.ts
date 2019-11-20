@@ -6,14 +6,15 @@
 
 import { PromiseReturnType } from '../../../../typings/common';
 import {
-  SetupWithTimeRange,
-  SetupWithAllFilters
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
 } from '../../helpers/setup_request';
 import { getBuckets } from './get_buckets';
+import { BUCKET_TARGET_COUNT } from '../../transactions/constants';
 
-function getBucketSize({ start, end, config }: SetupWithTimeRange) {
-  const bucketTargetCount = config['xpack.apm.bucketTargetCount'];
-  return Math.floor((end - start) / bucketTargetCount);
+function getBucketSize({ start, end }: SetupTimeRange) {
+  return Math.floor((end - start) / BUCKET_TARGET_COUNT);
 }
 
 export type ErrorDistributionAPIResponse = PromiseReturnType<
@@ -27,9 +28,9 @@ export async function getErrorDistribution({
 }: {
   serviceName: string;
   groupId?: string;
-  setup: SetupWithAllFilters;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const bucketSize = getBucketSize(setup);
+  const bucketSize = getBucketSize({ start: setup.start, end: setup.end });
   const { buckets, noHits } = await getBuckets({
     serviceName,
     groupId,

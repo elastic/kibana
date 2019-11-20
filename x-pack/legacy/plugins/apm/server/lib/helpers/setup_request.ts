@@ -35,9 +35,6 @@ function decodeUiFilters(
 // https://github.com/microsoft/TypeScript/issues/34933
 
 export interface Setup {
-  start: number;
-  end: number;
-  uiFiltersES: ESFilter[];
   client: ESClient;
   internalClient: ESClient;
   config: APMConfig;
@@ -45,16 +42,13 @@ export interface Setup {
   dynamicIndexPattern?: IIndexPattern;
 }
 
-export type SetupWithTimeRange = Setup & {
+export interface SetupTimeRange {
   start: number;
   end: number;
-};
-
-export type SetupWithUIFilters = Setup & {
+}
+export interface SetupUIFilters {
   uiFiltersES: ESFilter[];
-};
-
-export type SetupWithAllFilters = SetupWithTimeRange & SetupWithUIFilters;
+}
 
 interface SetupRequestParams {
   query?: {

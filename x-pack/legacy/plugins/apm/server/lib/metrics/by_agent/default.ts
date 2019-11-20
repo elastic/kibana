@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SetupWithAllFilters } from '../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../helpers/setup_request';
 import { getCPUChartData } from './shared/cpu';
 import { getMemoryChartData } from './shared/memory';
 
 export async function getDefaultMetricsCharts(
-  setup: SetupWithAllFilters,
+  setup: Setup & SetupTimeRange & SetupUIFilters,
   serviceName: string
 ) {
   const charts = await Promise.all([

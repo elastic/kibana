@@ -10,7 +10,11 @@ import {
   METRIC_JAVA_THREAD_COUNT,
   SERVICE_AGENT_NAME
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { SetupWithAllFilters } from '../../../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../../../helpers/setup_request';
 import { ChartBase } from '../../../types';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 
@@ -40,7 +44,7 @@ const chartBase: ChartBase = {
 };
 
 export async function getThreadCountChart(
-  setup: SetupWithAllFilters,
+  setup: Setup & SetupTimeRange & SetupUIFilters,
   serviceName: string,
   serviceNodeName?: string
 ) {

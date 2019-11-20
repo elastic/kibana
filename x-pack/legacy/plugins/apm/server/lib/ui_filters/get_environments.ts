@@ -10,12 +10,12 @@ import {
   SERVICE_NAME
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../helpers/range_filter';
-import { SetupWithTimeRange } from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { ESFilter } from '../../../typings/elasticsearch';
 
 export async function getEnvironments(
-  setup: SetupWithTimeRange,
+  setup: Setup & SetupTimeRange,
   serviceName?: string
 ) {
   const { start, end, client, indices } = setup;

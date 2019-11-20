@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SetupWithAllFilters } from '../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../helpers/setup_request';
 import { transactionGroupsFetcher, Options } from './fetcher';
 import { transactionGroupsTransformer } from './transform';
 import { PromiseReturnType } from '../../../typings/common';
@@ -14,7 +18,7 @@ export type TransactionGroupListAPIResponse = PromiseReturnType<
 >;
 export async function getTransactionGroupList(
   options: Options,
-  setup: SetupWithAllFilters
+  setup: Setup & SetupTimeRange & SetupUIFilters
 ) {
   const { start, end } = setup;
   const response = await transactionGroupsFetcher(options, setup);
