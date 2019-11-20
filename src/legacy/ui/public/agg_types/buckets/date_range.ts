@@ -23,14 +23,15 @@ import { npStart } from 'ui/new_platform';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
-import { FieldFormat } from '../../../../../plugins/data/common/field_formats';
 import { DateRangesParamEditor } from '../../vis/editors/default/controls/date_ranges';
 
 // @ts-ignore
-import { fieldFormats } from '../../registry/field_formats';
-// @ts-ignore
 import { dateRange } from '../../utils/date_range';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import {
+  KBN_FIELD_TYPES,
+  TEXT_CONTEXT_TYPE,
+  FieldFormat,
+} from '../../../../../plugins/data/public';
 
 const dateRangeTitle = i18n.translate('common.ui.aggTypes.buckets.dateRangeTitle', {
   defaultMessage: 'Date Range',
@@ -49,7 +50,12 @@ export const dateRangeBucketAgg = new BucketAggType({
     return { from, to };
   },
   getFormat(agg) {
-    const formatter = agg.fieldOwnFormatter('text', fieldFormats.getDefaultInstance('date'));
+    const fieldFormats = npStart.plugins.data.fieldFormats;
+
+    const formatter = agg.fieldOwnFormatter(
+      TEXT_CONTEXT_TYPE,
+      fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE)
+    );
     const DateRangeFormat = FieldFormat.from(function(range: DateRangeKey) {
       return dateRange.toString(range, formatter);
     });

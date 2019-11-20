@@ -11,7 +11,7 @@ import { resolveImportErrorsTestSuiteFactory } from '../../common/suites/resolve
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const {
     resolveImportErrorsTest,

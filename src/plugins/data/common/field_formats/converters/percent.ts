@@ -18,17 +18,17 @@
  */
 
 import { NumeralFormat } from './numeral';
-import { TextContextTypeConvert } from '../types';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 export class PercentFormat extends NumeralFormat {
-  static id = 'percent';
+  static id = FIELD_FORMAT_IDS.PERCENT;
   static title = 'Percentage';
 
   id = PercentFormat.id;
   title = PercentFormat.title;
 
   getParamDefaults = () => ({
-    pattern: this.getConfig('format:percent:defaultPattern'),
+    pattern: this.getConfig!('format:percent:defaultPattern'),
     fractional: true,
   });
 

@@ -13,7 +13,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const PageObjects = getPageObjects(['common', 'security']);
 
-  describe('securty', () => {
+  describe('security', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
 
