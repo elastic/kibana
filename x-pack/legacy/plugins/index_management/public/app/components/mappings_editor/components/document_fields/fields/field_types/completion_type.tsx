@@ -37,15 +37,18 @@ export const CompletionType = ({ field }: Props) => {
       <EditFieldSection>
         {/* analyzers */}
         <EditFieldSection
-          title={i18n.translate('xpack.idxMgmt.mappingsEditor.analyzersSectionTitle', {
+          title={i18n.translate('xpack.idxMgmt.mappingsEditor.completion.analyzersSectionTitle', {
             defaultMessage: 'Analyzers',
           })}
         >
           <AnalyzerParameter
             path="analyzer"
-            label={i18n.translate('xpack.idxMgmt.mappingsEditor.indexSearchAnalyzerFieldLabel', {
-              defaultMessage: 'Index analyzer',
-            })}
+            label={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.completion.indexSearchAnalyzerFieldLabel',
+              {
+                defaultMessage: 'Index analyzer',
+              }
+            )}
             defaultValue={field.source.analyzer}
           />
 
@@ -56,7 +59,7 @@ export const CompletionType = ({ field }: Props) => {
             component={CheckBoxField}
             config={{
               label: i18n.translate(
-                'xpack.idxMgmt.mappingsEditor.analyzers.useSameAnalyzerIndexAnSearch',
+                'xpack.idxMgmt.mappingsEditor.completion.analyzers.useSameAnalyzerIndexAnSearch',
                 {
                   defaultMessage: 'Use the same analyzers for index and searching',
                 }
@@ -85,13 +88,13 @@ export const CompletionType = ({ field }: Props) => {
         <EditFieldFormRow
           title={
             <h3>
-              {i18n.translate('xpack.idxMgmt.mappingsEditor.maxInputLengthFieldTitle', {
+              {i18n.translate('xpack.idxMgmt.mappingsEditor.completion.maxInputLengthFieldTitle', {
                 defaultMessage: 'Set max input length',
               })}
             </h3>
           }
           description={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.maxInputLengthFieldDescription',
+            'xpack.idxMgmt.mappingsEditor.completion.maxInputLengthFieldDescription',
             {
               defaultMessage: 'Limits the length of a single input.',
             }
@@ -109,13 +112,16 @@ export const CompletionType = ({ field }: Props) => {
         <EditFieldFormRow
           title={
             <h3>
-              {i18n.translate('xpack.idxMgmt.mappingsEditor.preserveSeparatorsFieldTitle', {
-                defaultMessage: 'Preserve separators',
-              })}
+              {i18n.translate(
+                'xpack.idxMgmt.mappingsEditor.completion.preserveSeparatorsFieldTitle',
+                {
+                  defaultMessage: 'Preserve separators',
+                }
+              )}
             </h3>
           }
           description={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.preserveSeparatorsFieldDescription',
+            'xpack.idxMgmt.mappingsEditor.completion.preserveSeparatorsFieldDescription',
             {
               defaultMessage: 'Preserves the separators.',
             }
@@ -127,13 +133,16 @@ export const CompletionType = ({ field }: Props) => {
         <EditFieldFormRow
           title={
             <h3>
-              {i18n.translate('xpack.idxMgmt.mappingsEditor.preservePositionIncrementsFieldTitle', {
-                defaultMessage: 'Preserve position increments',
-              })}
+              {i18n.translate(
+                'xpack.idxMgmt.mappingsEditor.completion.preservePositionIncrementsFieldTitle',
+                {
+                  defaultMessage: 'Preserve position increments',
+                }
+              )}
             </h3>
           }
           description={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.preservePositionIncrementsFieldDescription',
+            'xpack.idxMgmt.mappingsEditor.completion.preservePositionIncrementsFieldDescription',
             {
               defaultMessage: 'Enables position increments.',
             }

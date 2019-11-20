@@ -43,18 +43,15 @@ export const TokenCountType = ({ field }: Props) => {
   return (
     <>
       <EditFieldSection
-        title={i18n.translate('xpack.idxMgmt.mappingsEditor.tokenCount.analyzer.sectionTitle', {
+        title={i18n.translate('xpack.idxMgmt.mappingsEditor.tokenCount.analyzerSectionTitle', {
           defaultMessage: 'Analyzer',
         })}
       >
         <AnalyzerParameter
           path="analyzer"
-          label={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.tokenCount.indexSearchAnalyzerFieldLabel',
-            {
-              defaultMessage: 'Index analyzer',
-            }
-          )}
+          label={i18n.translate('xpack.idxMgmt.mappingsEditor.tokenCount.analyzerFieldLabel', {
+            defaultMessage: 'Index analyzer',
+          })}
           defaultValue={field.source.analyzer}
           useDefaultOptions={false}
         />

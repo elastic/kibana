@@ -15,15 +15,21 @@ import { EditFieldSection } from '../../edit_field';
 export const TokenCountTypeRequiredParameters = () => {
   return (
     <EditFieldSection
-      title={i18n.translate('xpack.idxMgmt.mappingsEditor.analyzer.sectionTitle', {
-        defaultMessage: 'Analyzer',
-      })}
+      title={i18n.translate(
+        'xpack.idxMgmt.mappingsEditor.tokenCountRequired.analyzer.sectionTitle',
+        {
+          defaultMessage: 'Analyzer',
+        }
+      )}
     >
       <AnalyzerParameter
         path="analyzer"
-        label={i18n.translate('xpack.idxMgmt.mappingsEditor.tokenCount.analyzerFieldLabel', {
-          defaultMessage: 'Index analyzer',
-        })}
+        label={i18n.translate(
+          'xpack.idxMgmt.mappingsEditor.tokenCountRequired.analyzerFieldLabel',
+          {
+            defaultMessage: 'Index analyzer',
+          }
+        )}
         defaultValue={STANDARD}
         useDefaultOptions={false}
       />

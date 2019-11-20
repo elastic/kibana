@@ -176,9 +176,12 @@ export const PARAMETERS_DEFINITION = {
       validations: [
         {
           validator: emptyField(
-            i18n.translate('xpack.idxMgmt.mappingsEditor.maxInputLengthFieldRequiredErrorMessage', {
-              defaultMessage: 'Specify a max input length.',
-            })
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.maxInputLengthFieldRequiredErrorMessage',
+              {
+                defaultMessage: 'Specify a max input length.',
+              }
+            )
           ),
         },
       ],
@@ -191,9 +194,12 @@ export const PARAMETERS_DEFINITION = {
       validations: [
         {
           validator: emptyField(
-            i18n.translate('xpack.idxMgmt.mappingsEditor.localeFieldRequiredErrorMessage', {
-              defaultMessage: 'Specify a locale.',
-            })
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.localeFieldRequiredErrorMessage',
+              {
+                defaultMessage: 'Specify a locale.',
+              }
+            )
           ),
         },
       ],
@@ -206,9 +212,12 @@ export const PARAMETERS_DEFINITION = {
       validations: [
         {
           validator: emptyField(
-            i18n.translate('xpack.idxMgmt.mappingsEditor.orientationFieldRequiredErrorMessage', {
-              defaultMessage: 'Specify an orientation.',
-            })
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.orientationFieldRequiredErrorMessage',
+              {
+                defaultMessage: 'Specify an orientation.',
+              }
+            )
           ),
         },
       ],

@@ -36,12 +36,12 @@ export const FormatParameter = ({ defaultValue, defaultToggleValue }: Props) => 
     <EditFieldFormRow
       title={
         <h3>
-          {i18n.translate('xpack.idxMgmt.mappingsEditor.formatFieldTitle', {
+          {i18n.translate('xpack.idxMgmt.mappingsEditor.formatParameter.fieldTitle', {
             defaultMessage: 'Set format',
           })}
         </h3>
       }
-      description={i18n.translate('xpack.idxMgmt.mappingsEditor.formatFieldDescription', {
+      description={i18n.translate('xpack.idxMgmt.mappingsEditor.formatParameter.fieldDescription', {
         defaultMessage: 'The date format(s) that can be parsed.',
       })}
       toggleDefaultValue={defaultToggleValue}
@@ -61,7 +61,7 @@ export const FormatParameter = ({ defaultValue, defaultToggleValue }: Props) => 
               onChange={value => {
                 formatField.setValue(value);
               }}
-              onCreateOption={(searchValue: string, flattenedOptions: ComboBoxOption[]) => {
+              onCreateOption={(searchValue: string) => {
                 const newOption = {
                   label: searchValue,
                 };

@@ -59,7 +59,7 @@ export const DateType = ({ field }: Props) => {
           <NullValueParameter
             defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
             description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.dateNullValueFieldDescription',
+              'xpack.idxMgmt.mappingsEditor.date.nullValueFieldDescription',
               {
                 defaultMessage: `Accepts a date value in one of the configured format's as the field which is substituted for any explicit null values.`,
               }
@@ -73,7 +73,7 @@ export const DateType = ({ field }: Props) => {
           <EditFieldFormRow
             title={
               <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.localeFieldTitle', {
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.date.localeFieldTitle', {
                   defaultMessage: 'Set locale',
                 })}
               </h3>
