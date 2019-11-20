@@ -6,6 +6,10 @@
 import { performance } from 'perf_hooks';
 import { pickBy } from 'lodash/fp';
 import { SignalHit, Signal } from '../../types';
+import { createHash } from 'crypto';
+import {
+  DEFAULT_SEARCH_AFTER_PAGE_SIZE,
+} from '../../../../common/constants';
 import { Logger } from '../../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../alerting/server/types';
 import {
@@ -156,7 +160,9 @@ export const singleBulkIndex = async ({
     {
       index: {
         _index: signalsIndex,
-        _id: doc._id,
+        _id: createHash('sha256')
+          .update(id.concat(doc._id))
+          .digest('hex'),
       },
     },
     buildBulkBody({ doc, signalParams, id, name, createdBy, updatedBy, interval, enabled }),
@@ -200,7 +206,7 @@ export const singleSearchAfter = async ({
       from: signalParams.from,
       to: signalParams.to,
       filter: signalParams.filter,
-      size: signalParams.size ? signalParams.size : 1000,
+      size: signalParams.size ? signalParams.size : DEFAULT_SEARCH_AFTER_PAGE_SIZE,
       searchAfterSortId,
     });
     const nextSearchAfterResult: SignalSearchResponse = await services.callCluster(
@@ -330,6 +336,6 @@ export const searchAfterAndBulkIndex = async ({
       return false;
     }
   }
-  logger.debug(`[+] completed bulk index of ${totalHits}`);
+  logger.debug(`[+] completed bulk index of ${maxTotalHitsSize}`);
   return true;
 };

@@ -6,7 +6,12 @@
 
 import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
-import { SIGNALS_ID } from '../../../../common/constants';
+import {
+  SIGNALS_ID,
+  DEFAULT_SIGNALS_INDEX,
+  DEFAULT_MAX_SIGNALS,
+  DEFAULT_SEARCH_AFTER_PAGE_SIZE,
+} from '../../../../common/constants';
 
 import { buildEventsSearchQuery } from './build_events_query';
 import { searchAfterAndBulkIndex } from './utils';
@@ -40,7 +45,7 @@ export const signalsAlertType = ({
         meta: schema.nullable(schema.object({}, { allowUnknowns: true })),
         query: schema.nullable(schema.string()),
         filters: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
-        maxSignals: schema.number({ defaultValue: 10000 }),
+        maxSignals: schema.number({ defaultValue: DEFAULT_MAX_SIGNALS }),
         riskScore: schema.number(),
         severity: schema.string(),
         tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
@@ -75,7 +80,7 @@ export const signalsAlertType = ({
       const interval: string = savedObject.attributes.interval;
       const enabled: boolean = savedObject.attributes.enabled;
 
-      const searchAfterSize = size ? size : 1000;
+      const searchAfterSize = size ? size : DEFAULT_SEARCH_AFTER_PAGE_SIZE;
 
       const { inputIndex, outputIndex: signalsIndex } = await getInputOutputIndex(
         services,
