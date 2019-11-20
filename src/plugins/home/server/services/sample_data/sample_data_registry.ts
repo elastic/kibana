@@ -33,11 +33,12 @@
     createListRoute
     createInstallRoute
     createUninstallRoute
-  I feel they should go into the start phase
+  They go into the setup phase before the return methods.
 
   Another question:
   sample data is registered at the end of the file in src/legacy/server/sample_data/sample_data_mixin.js
-  Does this service need to do the registration itself? I don't think so but I need to confirm where the registration is going to happen
+  Does this service need to do the registration itself? Yes, initialize the array with them!
+
 */
 import Joi from 'joi';
 import { CoreSetup } from 'src/core/server';
@@ -49,15 +50,22 @@ import {
   EmbeddableTypes,
 } from './lib/data_set_registry_types';
 import { sampleDataSchema } from './lib/data_set_schema';
+import { flightsSpecProvider, logsSpecProvider, ecommerceSpecProvider } from './data_sets';
 
+const flightsSampleDataset = flightsSpecProvider();
+const logsSampleDataset = logsSpecProvider();
+const ecommerceSampleDataset = ecommerceSpecProvider();
 export class SampleDataRegistry {
-  private readonly sampleDatasets: SampleDatasetSchema[] = [];
+  private readonly sampleDatasets: SampleDatasetSchema[] = [
+    flightsSampleDataset,
+    logsSampleDataset,
+    ecommerceSampleDataset,
+  ];
 
   public setup(core: CoreSetup) {
     return {
       registerSampleDataset: (specProvider: SampleDatasetProvider) => {
-        const emptyContext = {};
-        const { error, value } = Joi.validate(specProvider(emptyContext), sampleDataSchema);
+        const { error, value } = Joi.validate(specProvider(), sampleDataSchema);
 
         if (error) {
           throw new Error(`Unable to register sample dataset spec because it's invalid. ${error}`);
@@ -108,7 +116,7 @@ export class SampleDataRegistry {
           throw new Error(`Unable to find sample dataset with id: ${id}`);
         }
 
-        sampleDataset.appLinks = sampleDataset.appLinks.concat(appLinks);
+        sampleDataset.appLinks = sampleDataset.appLinks!.concat(appLinks);
       },
 
       replacePanelInSampleDatasetDashboard: (
@@ -133,7 +141,7 @@ export class SampleDataRegistry {
           throw new Error(`Unable to find dashboard with id: ${dashboardId}`);
         }
         try {
-          const reference = dashboard.references.find(referenceItem => {
+          const reference = dashboard.references.find((referenceItem: any) => {
             return referenceItem.id === oldEmbeddableId;
           });
           if (!reference) {

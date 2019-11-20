@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObject } from 'src/core/public';
+import { SavedObject } from 'src/core/server';
+
 export enum EmbeddableTypes {
   MAP_SAVED_OBJECT_TYPE = 'map',
   SEARCH_EMBEDDABLE_TYPE = 'search',
@@ -62,20 +63,15 @@ export interface SampleDatasetSchema {
 
   // saved object id of main dashboard for sample data set
   overviewDashboard: string;
-  appLinks: AppLinkSchema[];
+  appLinks?: AppLinkSchema[];
 
   // saved object id of default index-pattern for sample data set
   defaultIndex: string;
 
   // Kibana saved objects (index patter, visualizations, dashboard, ...)
   // Should provide a nice demo of Kibana's functionality with the sample data set
-  savedObjects: SavedObject[];
+  savedObjects: SavedObject[] | any[];
   dataIndices: DataIndexSchema[];
 }
 
-export type SampleDatasetProvider = (context: { [key: string]: unknown }) => SampleDatasetSchema;
-
-// export interface SavedObject {
-//   id: string;
-//   type: string;
-// }
+export type SampleDatasetProvider = () => SampleDatasetSchema;
