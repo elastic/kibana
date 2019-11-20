@@ -1318,7 +1318,7 @@ describe('SAMLAuthenticationProvider', () => {
       );
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/logged_out');
+      expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
     });
 
     it('uses `realm` name instead of `acs` if it is specified for SAML invalidate request.', async () => {
