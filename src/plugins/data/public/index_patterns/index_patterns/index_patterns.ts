@@ -48,11 +48,13 @@ export class IndexPatterns {
   }
 
   private async refreshSavedObjectsCache() {
-    this.savedObjectsCache = (await this.savedObjectsClient.find({
-      type: 'index-pattern',
-      fields: [],
-      perPage: 10000,
-    })).savedObjects;
+    this.savedObjectsCache = (
+      await this.savedObjectsClient.find({
+        type: 'index-pattern',
+        fields: [],
+        perPage: 10000,
+      })
+    ).savedObjects;
   }
 
   getIds = async (refresh: boolean = false) => {

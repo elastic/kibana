@@ -19,12 +19,12 @@
 
 import { NotificationsStart } from 'src/core/public';
 import { createGetterSetter } from '../../../kibana_utils/public';
-import { FieldFormatRegisty } from '../field_formats_provider';
+import { FieldFormatsStart } from '../field_formats_provider';
 
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
   'Notifications'
 );
 
-export const [getFieldFormats, setFieldFormats] = createGetterSetter<FieldFormatRegisty>(
+export const [getFieldFormats, setFieldFormats] = createGetterSetter<FieldFormatsStart>(
   'FieldFormats'
 );

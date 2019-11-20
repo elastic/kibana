@@ -23,7 +23,7 @@ import {
   HttpServiceBase,
   NotificationsStart,
 } from 'src/core/public';
-import { FieldFormatRegisty } from '../field_formats_provider';
+import { FieldFormatsStart } from '../field_formats_provider';
 import { Field, FieldList, FieldListInterface, FieldType } from './fields';
 import { createIndexPatternSelect } from './components';
 import { setNotifications, setFieldFormats } from './services';
@@ -41,7 +41,7 @@ export interface IndexPatternDependencies {
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpServiceBase;
   notifications: NotificationsStart;
-  fieldFormats: FieldFormatRegisty;
+  fieldFormats: FieldFormatsStart;
 }
 
 /**

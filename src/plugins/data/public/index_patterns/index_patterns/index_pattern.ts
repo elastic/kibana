@@ -28,6 +28,8 @@ import {
   MappingObject,
 } from '../../../../kibana_utils/public';
 
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern } from '../../../common';
+
 import { findIndexPatternByTitle, getRoutes } from '../utils';
 import { IndexPatternMissingIndices } from '../errors';
 import { Field, FieldList, FieldListInterface, FieldType } from '../fields';
@@ -35,21 +37,17 @@ import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from './index_patterns_api_client';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../common';
 import { getNotifications, getFieldFormats } from '../services';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
 
-export interface StaticIndexPattern {
-  fields: FieldType[];
-  title: string;
-  id?: string;
-  type?: string;
-  timeFieldName?: string;
-}
+/** @deprecated
+ *  Please use IIndexPattern instead
+ * */
+export type StaticIndexPattern = IIndexPattern;
 
-export class IndexPattern implements StaticIndexPattern {
+export class IndexPattern implements IIndexPattern {
   [key: string]: any;
 
   public id?: string;
