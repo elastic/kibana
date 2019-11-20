@@ -9,7 +9,6 @@ import { RunContext } from '../../../task_manager';
 import { createExecutionHandler } from './create_execution_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
 import { AlertInstance } from './alert_instance';
-import { getNextRunAt } from './get_next_run_at';
 import { validateAlertTypeParams } from './validate_alert_type_params';
 import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../../plugins/encrypted_saved_objects/server';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions';
@@ -94,7 +93,7 @@ export class TaskRunnerFactory {
         const services = getServices(fakeRequest);
         // Ensure API key is still valid and user has access
         const {
-          attributes: { alertTypeParams, actions, interval, throttle, muteAll, mutedInstanceIds },
+          attributes: { alertTypeParams, actions, throttle, muteAll, mutedInstanceIds },
           references,
         } = await services.savedObjectsClient.get<RawAlert>('alert', alertId);
 
@@ -167,15 +166,12 @@ export class TaskRunnerFactory {
           })
         );
 
-        const nextRunAt = getNextRunAt(new Date(taskInstance.startedAt!), interval);
-
         return {
           state: {
             alertTypeState,
             alertInstances,
             previousStartedAt: taskInstance.startedAt!,
           },
-          runAt: nextRunAt,
         };
       },
     };

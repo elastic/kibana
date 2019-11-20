@@ -100,6 +100,33 @@ export default function alertTests({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should set the Alert interval on the scheduled Task', async () => {
+      const reference = alertUtils.generateReference();
+      await alertUtils.createAlwaysFiringAction({ reference });
+
+      const scheduledActionTask = await retry.try(async () => {
+        const searchResult = await es.search({
+          index: '.kibana_task_manager',
+          body: {
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'task.taskType': 'alerting:test.always-firing',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+        expect(searchResult.hits.total.value).to.eql(1);
+        return searchResult.hits.hits[0];
+      });
+      expect(scheduledActionTask._source.task.interval).to.eql('1m');
+    });
+
     it('should handle custom retry logic', async () => {
       // We'll use this start time to query tasks created after this point
       const testStart = new Date();

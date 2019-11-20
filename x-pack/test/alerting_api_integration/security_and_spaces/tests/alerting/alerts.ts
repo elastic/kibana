@@ -247,6 +247,57 @@ export default function alertTests({ getService }: FtrProviderContext) {
           }
         });
 
+        it('should set the Alert interval on the scheduled Task when appropriate', async () => {
+          const reference = alertUtils.generateReference();
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            overwrites: { interval: '1m' },
+          });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(200);
+
+              // Wait for the task to be attempted once and idle
+              const scheduledActionTask = await retry.try(async () => {
+                const searchResult = await es.search({
+                  index: '.kibana_task_manager',
+                  body: {
+                    query: {
+                      bool: {
+                        must: [
+                          {
+                            term: {
+                              'task.taskType': 'alerting:test.always-firing',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                });
+                expect(searchResult.hits.total.value).to.eql(1);
+                return searchResult.hits.hits[0];
+              });
+
+              expect(scheduledActionTask._source.task.interval).to.eql('1m');
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
         it('should have proper callCluster and savedObjectsClient authorization for alert type executor when appropriate', async () => {
           let searchResult: any;
           const testStart = new Date();

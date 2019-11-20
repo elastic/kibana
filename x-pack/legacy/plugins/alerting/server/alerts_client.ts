@@ -139,7 +139,7 @@ export class AlertsClient {
         scheduledTask = await this.scheduleAlert(
           createdAlert.id,
           rawAlert.alertTypeId,
-          rawAlert.interval
+          data.interval
         );
       } catch (e) {
         // Cleanup data, something went wrong scheduling the task
@@ -223,6 +223,10 @@ export class AlertsClient {
         references,
       }
     );
+    if (data.interval !== attributes.interval) {
+      // if interval has changed, we should reschedule the task
+      await this.rescheduleAlert(attributes.scheduledTaskId, data.interval);
+    }
     return this.getAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
   }
 
@@ -358,6 +362,7 @@ export class AlertsClient {
   private async scheduleAlert(id: string, alertTypeId: string, interval: string) {
     return await this.taskManager.schedule({
       taskType: `alerting:${alertTypeId}`,
+      interval,
       params: {
         alertId: id,
         spaceId: this.spaceId,
@@ -368,6 +373,13 @@ export class AlertsClient {
         alertInstances: {},
       },
       scope: ['alerting'],
+    });
+  }
+
+  private async rescheduleAlert(scheduledTaskId: string, interval: string) {
+    return await this.taskManager.reschedule({
+      id: scheduledTaskId,
+      interval,
     });
   }
 

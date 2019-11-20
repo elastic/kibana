@@ -134,7 +134,6 @@ test('successfully executes the task', async () => {
   const runnerResult = await taskRunner.run();
   expect(runnerResult).toMatchInlineSnapshot(`
                                 Object {
-                                  "runAt": 1970-01-01T00:00:10.000Z,
                                   "state": Object {
                                     "alertInstances": Object {},
                                     "alertTypeState": undefined,

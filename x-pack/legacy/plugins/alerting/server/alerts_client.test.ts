@@ -195,24 +195,25 @@ describe('create()', () => {
                                                                             `);
     expect(taskManager.schedule).toHaveBeenCalledTimes(1);
     expect(taskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
-                                                                        Array [
-                                                                          Object {
-                                                                            "params": Object {
-                                                                              "alertId": "1",
-                                                                              "spaceId": "default",
-                                                                            },
-                                                                            "scope": Array [
-                                                                              "alerting",
-                                                                            ],
-                                                                            "state": Object {
-                                                                              "alertInstances": Object {},
-                                                                              "alertTypeState": Object {},
-                                                                              "previousStartedAt": null,
-                                                                            },
-                                                                            "taskType": "alerting:123",
-                                                                          },
-                                                                        ]
-                                                `);
+      Array [
+        Object {
+          "interval": "10s",
+          "params": Object {
+            "alertId": "1",
+            "spaceId": "default",
+          },
+          "scope": Array [
+            "alerting",
+          ],
+          "state": Object {
+            "alertInstances": Object {},
+            "alertTypeState": Object {},
+            "previousStartedAt": null,
+          },
+          "taskType": "alerting:123",
+        },
+      ]
+    `);
     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.update.mock.calls[0]).toHaveLength(3);
     expect(savedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
@@ -583,6 +584,7 @@ describe('enable()', () => {
     );
     expect(taskManager.schedule).toHaveBeenCalledWith({
       taskType: `alerting:2`,
+      interval: '10s',
       params: {
         alertId: '1',
         spaceId: 'default',
@@ -664,6 +666,7 @@ describe('enable()', () => {
     );
     expect(taskManager.schedule).toHaveBeenCalledWith({
       taskType: `alerting:2`,
+      interval: '10s',
       params: {
         alertId: '1',
         spaceId: 'default',
@@ -1260,6 +1263,154 @@ describe('update()', () => {
                                                                                                                     "version": "123",
                                                                                                                   }
                                                                             `);
+  });
+
+  test('reschedules the Alert Task if the interval is changed', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    alertTypeRegistry.get.mockReturnValueOnce({
+      id: '123',
+      name: 'Test',
+      actionGroups: ['default'],
+      async executor() {},
+    });
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        alertTypeId: '123',
+        scheduledTaskId: 'task-123',
+      },
+      references: [],
+      version: '123',
+    });
+    savedObjectsClient.update.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        interval: '10s',
+        alertTypeParams: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        scheduledTaskId: 'task-123',
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    await alertsClient.update({
+      id: '1',
+      data: {
+        interval: '100s',
+        name: 'abc',
+        tags: ['foo'],
+        alertTypeParams: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+    });
+
+    expect(taskManager.reschedule.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "id": "task-123",
+        "interval": "100s",
+      }
+    `);
+  });
+
+  test('does not reschedule the Alert Task if the interval is unchanged', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    alertTypeRegistry.get.mockReturnValueOnce({
+      id: '123',
+      name: 'Test',
+      actionGroups: ['default'],
+      async executor() {},
+    });
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        interval: '10s',
+        alertTypeId: '123',
+        scheduledTaskId: 'task-123',
+      },
+      references: [],
+      version: '123',
+    });
+    savedObjectsClient.update.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        interval: '10s',
+        alertTypeParams: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        scheduledTaskId: 'task-123',
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    await alertsClient.update({
+      id: '1',
+      data: {
+        interval: '10s',
+        name: 'abc',
+        tags: ['foo'],
+        alertTypeParams: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+    });
+
+    expect(taskManager.reschedule).not.toHaveBeenCalled();
   });
 
   it('calls the createApiKey function', async () => {
