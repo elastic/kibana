@@ -34,10 +34,10 @@ function getUniqueLayerCounts(layerCountsList, mapsCount) {
 
 function getIndexPatternsWithGeoFieldCount(indexPatterns) {
   const fieldLists = indexPatterns.map(indexPattern => JSON.parse(indexPattern.attributes.fields));
-  const fieldsListsWithGeoField = fieldLists.filter(fields => {
+  const fieldListsWithGeoFields = fieldLists.filter(fields => {
     return fields.some(field => (field.type === ES_GEO_FIELD_TYPE.GEO_POINT || field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE));
   });
-  return fieldsListsWithGeoField.length;
+  return fieldListsWithGeoFields.length;
 }
 
 export function buildMapsTelemetry(mapSavedObjects, indexPatternSavedObjects, settings) {
