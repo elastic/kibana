@@ -14,9 +14,7 @@ export let basePath;
 export let apiBasePath;
 export let kbnVersion;
 
-export const initServicesAndConstants = ({
-  savedObjects, http, injectedMetadata
-}) => {
+export const initServicesAndConstants = ({ savedObjects, http, injectedMetadata }) => {
   savedObjectsClient = savedObjects.client;
   basePath = http.basePath.basePath;
   apiBasePath = http.basePath.prepend('/api');

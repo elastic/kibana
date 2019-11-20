@@ -20,10 +20,7 @@ export type FileUploadPluginStart = ReturnType<FileUploadPlugin['start']>;
 
 /** @internal */
 export class FileUploadPlugin implements Plugin<FileUploadPluginSetup, FileUploadPluginStart> {
-  public setup() {
-    // kick off your plugin here...
-    // const { routing, http, savedObjects, chrome, notification, documentation, docTitle } = core;
-  }
+  public setup() {}
 
   public start(core: CoreStart) {
     const { savedObjects, http, injectedMetadata } = core;
