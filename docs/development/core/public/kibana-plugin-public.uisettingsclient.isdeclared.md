@@ -4,8 +4,6 @@
 
 ## UiSettingsClient.isDeclared() method
 
-Returns true if the key is a "known" uiSetting, meaning it is either defined in the uiSettingDefaults or was previously added as a custom setting via the `set()` method.
-
 <b>Signature:</b>
 
 ```typescript

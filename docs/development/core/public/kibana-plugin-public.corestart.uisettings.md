@@ -9,5 +9,5 @@
 <b>Signature:</b>
 
 ```typescript
-uiSettings: UiSettingsClientContract;
+uiSettings: IUiSettingsClient;
 ```

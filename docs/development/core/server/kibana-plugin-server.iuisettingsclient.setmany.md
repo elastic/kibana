@@ -9,5 +9,5 @@ Writes multiple uiSettings values and marks them as set by the user.
 <b>Signature:</b>
 
 ```typescript
-setMany: <T extends SavedObjectAttribute = any>(changes: Record<string, T>) => Promise<void>;
+setMany: (changes: Record<string, any>) => Promise<void>;
 ```

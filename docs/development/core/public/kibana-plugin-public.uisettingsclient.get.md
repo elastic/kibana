@@ -4,12 +4,10 @@
 
 ## UiSettingsClient.get() method
 
-Gets the value for a specific uiSetting. If this setting has no user-defined value then the `defaultOverride` parameter is returned (and parsed if setting is of type "json" or "number). If the parameter is not defined and the key is not defined by a uiSettingDefaults then an error is thrown, otherwise the default is read from the uiSettingDefaults.
-
 <b>Signature:</b>
 
 ```typescript
-get(key: string, defaultOverride?: any): any;
+get<T = any>(key: string, defaultOverride?: T): any;
 ```
 
 ## Parameters
@@ -17,7 +15,7 @@ get(key: string, defaultOverride?: any): any;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  key | <code>string</code> |  |
-|  defaultOverride | <code>any</code> |  |
+|  defaultOverride | <code>T</code> |  |
 
 <b>Returns:</b>
 

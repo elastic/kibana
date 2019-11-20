@@ -4,8 +4,6 @@
 
 ## UiSettingsClient.getAll() method
 
-Gets the metadata about all uiSettings, including the type, default value, and user value for each key.
-
 <b>Signature:</b>
 
 ```typescript

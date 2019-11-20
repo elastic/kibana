@@ -4,14 +4,12 @@
 
 ## UiSettingsClient.getUpdateErrors$() method
 
-Returns an Observable that notifies subscribers of each error while trying to update the settings, containing the actual Error class.
-
 <b>Signature:</b>
 
 ```typescript
-getUpdateErrors$(): Rx.Observable<Error>;
+getUpdateErrors$(): Observable<Error>;
 ```
 <b>Returns:</b>
 
-`Rx.Observable<Error>`
+`Observable<Error>`
 

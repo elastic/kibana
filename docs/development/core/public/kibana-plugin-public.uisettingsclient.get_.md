@@ -4,12 +4,10 @@
 
 ## UiSettingsClient.get$() method
 
-Gets an observable of the current value for a config key, and all updates to that config key in the future. Providing a `defaultOverride` argument behaves the same as it does in \#get()
-
 <b>Signature:</b>
 
 ```typescript
-get$(key: string, defaultOverride?: any): Rx.Observable<any>;
+get$<T = any>(key: string, defaultOverride?: T): Observable<any>;
 ```
 
 ## Parameters
@@ -17,9 +15,9 @@ get$(key: string, defaultOverride?: any): Rx.Observable<any>;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  key | <code>string</code> |  |
-|  defaultOverride | <code>any</code> |  |
+|  defaultOverride | <code>T</code> |  |
 
 <b>Returns:</b>
 
-`Rx.Observable<any>`
+`Observable<any>`
 

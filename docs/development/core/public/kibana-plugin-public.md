@@ -64,6 +64,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IHttpFetchError](./kibana-plugin-public.ihttpfetcherror.md) |  |
 |  [IHttpInterceptController](./kibana-plugin-public.ihttpinterceptcontroller.md) | Used to halt a request Promise chain in a [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md)<!-- -->. |
 |  [InterceptedHttpResponse](./kibana-plugin-public.interceptedhttpresponse.md) |  |
+|  [IUiSettingsClient](./kibana-plugin-public.iuisettingsclient.md) | Client-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |
 |  [LegacyCoreSetup](./kibana-plugin-public.legacycoresetup.md) | Setup interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
 |  [LegacyCoreStart](./kibana-plugin-public.legacycorestart.md) | Start interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
 |  [LegacyNavLink](./kibana-plugin-public.legacynavlink.md) |  |
@@ -121,6 +122,5 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ToastInputFields](./kibana-plugin-public.toastinputfields.md) | Allowed fields for [ToastInput](./kibana-plugin-public.toastinput.md)<!-- -->. |
 |  [ToastsSetup](./kibana-plugin-public.toastssetup.md) | [IToasts](./kibana-plugin-public.itoasts.md) |
 |  [ToastsStart](./kibana-plugin-public.toastsstart.md) | [IToasts](./kibana-plugin-public.itoasts.md) |
-|  [UiSettingsClientContract](./kibana-plugin-public.uisettingsclientcontract.md) | Client-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |
 |  [UnmountCallback](./kibana-plugin-public.unmountcallback.md) | A function that will unmount the element previously mounted by the associated [MountPoint](./kibana-plugin-public.mountpoint.md) |
 

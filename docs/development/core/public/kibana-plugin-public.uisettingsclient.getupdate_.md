@@ -4,12 +4,10 @@
 
 ## UiSettingsClient.getUpdate$() method
 
-Returns an Observable that notifies subscribers of each update to the uiSettings, including the key, newValue, and oldValue of the setting that changed.
-
 <b>Signature:</b>
 
 ```typescript
-getUpdate$(): Rx.Observable<{
+getUpdate$(): Observable<{
         key: string;
         newValue: any;
         oldValue: any;
@@ -17,7 +15,7 @@ getUpdate$(): Rx.Observable<{
 ```
 <b>Returns:</b>
 
-`Rx.Observable<{
+`Observable<{
         key: string;
         newValue: any;
         oldValue: any;

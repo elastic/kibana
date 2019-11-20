@@ -733,15 +733,15 @@ export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser'
 
 // @public
 export interface IUiSettingsClient {
-    get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
-    getAll: <T extends SavedObjectAttribute = any>() => Promise<Record<string, T>>;
+    get: <T = any>(key: string) => Promise<T>;
+    getAll: <T = any>() => Promise<Record<string, T>>;
     getRegistered: () => Readonly<Record<string, UiSettingsParams>>;
-    getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<Record<string, UserProvidedValues<T>>>;
+    getUserProvided: <T = any>() => Promise<Record<string, UserProvidedValues<T>>>;
     isOverridden: (key: string) => boolean;
     remove: (key: string) => Promise<void>;
     removeMany: (keys: string[]) => Promise<void>;
-    set: <T extends SavedObjectAttribute = any>(key: string, value: T) => Promise<void>;
-    setMany: <T extends SavedObjectAttribute = any>(changes: Record<string, T>) => Promise<void>;
+    set: (key: string, value: any) => Promise<void>;
+    setMany: (changes: Record<string, any>) => Promise<void>;
 }
 
 // @public
@@ -1604,7 +1604,7 @@ export interface UiSettingsServiceSetup {
 export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
 
 // @public
-export interface UserProvidedValues<T extends SavedObjectAttribute = any> {
+export interface UserProvidedValues<T = any> {
     // (undocumented)
     isOverridden?: boolean;
     // (undocumented)

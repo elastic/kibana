@@ -4,8 +4,6 @@
 
 ## UiSettingsClient.overrideLocalDefault() method
 
-Overrides the default value for a setting in this specific browser tab. If the page is reloaded the default override is lost.
-
 <b>Signature:</b>
 
 ```typescript

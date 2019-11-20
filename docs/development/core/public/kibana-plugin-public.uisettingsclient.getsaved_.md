@@ -4,12 +4,10 @@
 
 ## UiSettingsClient.getSaved$() method
 
-Returns an Observable that notifies subscribers of each update to the uiSettings, including the key, newValue, and oldValue of the setting that changed.
-
 <b>Signature:</b>
 
 ```typescript
-getSaved$(): Rx.Observable<{
+getSaved$(): Observable<{
         key: string;
         newValue: any;
         oldValue: any;
@@ -17,7 +15,7 @@ getSaved$(): Rx.Observable<{
 ```
 <b>Returns:</b>
 
-`Rx.Observable<{
+`Observable<{
         key: string;
         newValue: any;
         oldValue: any;
