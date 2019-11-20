@@ -66,6 +66,13 @@ export function createPluginInitializerContext(
      */
     config: {
       /**
+       * Global configuration
+       * Note: naming not final here, it will be renamed in a near future (https://github.com/elastic/kibana/issues/46240)
+       * @deprecated
+       */
+      globalConfig__deprecated$: coreContext.configService.getConfig$(),
+
+      /**
        * Reads the subset of the config at the `configPath` defined in the plugin
        * manifest and validates it against the schema in the static `schema` on
        * the given `ConfigClass`.

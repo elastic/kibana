@@ -20,7 +20,7 @@
 import { Observable } from 'rxjs';
 import { Type } from '@kbn/config-schema';
 
-import { ConfigPath, EnvironmentMode, PackageInfo } from '../config';
+import { ConfigPath, EnvironmentMode, PackageInfo, Config } from '../config';
 import { LoggerFactory } from '../logging';
 import { CoreSetup, CoreStart } from '..';
 
@@ -209,6 +209,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
   };
   logger: LoggerFactory;
   config: {
+    globalConfig__deprecated$: Observable<Config>;
     create: <T = ConfigSchema>() => Observable<T>;
     createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
   };

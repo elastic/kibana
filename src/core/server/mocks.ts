@@ -16,13 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { of } from 'rxjs';
+import { of, BehaviorSubject } from 'rxjs';
 import { PluginInitializerContext, CoreSetup, CoreStart } from '.';
 import { loggingServiceMock } from './logging/logging_service.mock';
 import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
 import { contextServiceMock } from './context/context_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+import { ObjectToConfigAdapter } from './config';
 
 export { httpServerMock } from './http/http_server.mocks';
 export { sessionStorageMock } from './http/cookie_session_storage.mocks';
@@ -33,8 +34,9 @@ export { loggingServiceMock } from './logging/logging_service.mock';
 export { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 
-export function pluginInitializerContextConfigMock<T>(config: T) {
+export function pluginInitializerContextConfigMock<T>(config: T, globalConfig = {}) {
   const mock: jest.Mocked<PluginInitializerContext<T>['config']> = {
+    globalConfig__deprecated$: new BehaviorSubject(new ObjectToConfigAdapter(globalConfig)),
     create: jest.fn().mockReturnValue(of(config)),
     createIfExists: jest.fn().mockReturnValue(of(config)),
   };

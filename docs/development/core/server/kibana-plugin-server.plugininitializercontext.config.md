@@ -8,6 +8,7 @@
 
 ```typescript
 config: {
+        globalConfig__deprecated$: Observable<Config>;
         create: <T = ConfigSchema>() => Observable<T>;
         createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
     };
