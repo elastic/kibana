@@ -5,7 +5,7 @@
  */
 
 export default function ({ getService, loadTestFile }) {
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   describe('uptime', () => {
     before(() =>

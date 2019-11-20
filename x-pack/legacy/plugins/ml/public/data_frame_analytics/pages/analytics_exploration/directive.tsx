@@ -15,7 +15,7 @@ import { IndexPatterns } from 'ui/index_patterns';
 import { I18nContext } from 'ui/i18n';
 
 import { InjectorService } from '../../../../common/types/angular';
-import { createSearchItems } from '../../../jobs/new_job_new/utils/new_job_utils';
+import { createSearchItems } from '../../../jobs/new_job/utils/new_job_utils';
 
 import { KibanaConfigTypeFix, KibanaContext } from '../../../contexts/kibana';
 

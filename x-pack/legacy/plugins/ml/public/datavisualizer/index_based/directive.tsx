@@ -16,7 +16,7 @@ import { IndexPatterns } from 'ui/index_patterns';
 import { InjectorService } from '../../../common/types/angular';
 
 import { KibanaConfigTypeFix, KibanaContext } from '../../contexts/kibana/kibana_context';
-import { createSearchItems } from '../../jobs/new_job_new/utils/new_job_utils';
+import { createSearchItems } from '../../jobs/new_job/utils/new_job_utils';
 
 import { Page } from './page';
 
