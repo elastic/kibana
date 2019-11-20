@@ -27,6 +27,7 @@ import { KibanaResponseFactory, kibanaResponseFactory, IKibanaResponse } from '.
 import { RouteConfig, RouteConfigOptions, RouteMethod, RouteSchemas } from './route';
 import { HapiResponseAdapter } from './response_adapter';
 import { RequestHandlerContext } from '../../../server';
+import { wrapErrors } from './error_wrapper';
 
 interface RouterRoute {
   method: RouteMethod;
@@ -86,6 +87,14 @@ export interface IRouter {
     route: RouteConfig<P, Q, B>,
     handler: RequestHandler<P, Q, B>
   ) => void;
+
+  /**
+   * Wrap a router handler to catch and converts legacy boom errors to proper custom errors.
+   * @param handler {@link RequestHandler} - a route handler to wrap
+   */
+  wrapErrors: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+    handler: RequestHandler<P, Q, B>
+  ) => RequestHandler<P, Q, B>;
 
   /**
    * Returns all routes registered with the this router.
@@ -186,6 +195,12 @@ export class Router implements IRouter {
 
   public getRoutes() {
     return [...this.routes];
+  }
+
+  public wrapErrors<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+    handler: RequestHandler<P, Q, B>
+  ): RequestHandler<P, Q, B> {
+    return wrapErrors(handler);
   }
 
   private async handle<P extends ObjectType, Q extends ObjectType, B extends ObjectType>({
