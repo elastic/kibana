@@ -7,19 +7,19 @@ import React from 'react';
 import { EuiConfirmModal, EuiOverlayMask, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 interface ConfirmPackageInstallProps {
-  handleModal: () => void;
-  handleInstall: () => void;
+  onCancel: () => void;
+  onConfirm: () => void;
   packageName: string;
   numOfAssets: number;
 }
 export const ConfirmPackageInstall = (props: ConfirmPackageInstallProps) => {
-  const { handleModal, handleInstall, packageName, numOfAssets } = props;
+  const { onCancel, onConfirm, packageName, numOfAssets } = props;
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
         title={`Install ${packageName}?`}
-        onCancel={handleModal}
-        onConfirm={handleInstall}
+        onCancel={onCancel}
+        onConfirm={onConfirm}
         cancelButtonText="Cancel"
         confirmButtonText="Install package"
         defaultFocusedButton="confirm"

@@ -55,14 +55,14 @@ export function Header(props: HeaderProps) {
   );
   const isLoading = installationRequest.state === 'pending';
 
-  const handleModal = useCallback(() => {
+  const toggleModal = useCallback(() => {
     setModalVisible(!isModalVisible);
   }, [isModalVisible]);
 
   const handleClickInstall = useCallback(() => {
     attemptInstallation();
-    handleModal();
-  }, [attemptInstallation, handleModal]);
+    toggleModal();
+  }, [attemptInstallation, toggleModal]);
 
   const numOfAssets = useMemo(
     () =>
@@ -99,7 +99,7 @@ export function Header(props: HeaderProps) {
               <InstallationButton
                 isLoading={isLoading}
                 isInstalled={isInstalled}
-                onClick={handleModal}
+                onClick={toggleModal}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -109,8 +109,8 @@ export function Header(props: HeaderProps) {
         <ConfirmPackageInstall
           numOfAssets={numOfAssets}
           packageName={props.title}
-          handleModal={handleModal}
-          handleInstall={handleClickInstall}
+          onCancel={toggleModal}
+          onConfirm={handleClickInstall}
         />
       )}
     </Fragment>
