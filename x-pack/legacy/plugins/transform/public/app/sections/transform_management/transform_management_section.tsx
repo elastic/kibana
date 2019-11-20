@@ -138,7 +138,11 @@ export const TransformManagement: FC = () => {
       </EuiPageBody>
       {isSearchSelectionVisible && (
         <EuiOverlayMask>
-          <EuiModal onClose={onCloseModal} className="transformCreateTransformSearchDialog">
+          <EuiModal
+            onClose={onCloseModal}
+            className="transformCreateTransformSearchDialog"
+            data-test-subj="transformSelectSourceModal"
+          >
             <SearchSelection onSearchSelected={onSearchSelected} />
           </EuiModal>
         </EuiOverlayMask>

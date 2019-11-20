@@ -13,3 +13,5 @@ export function replaceStringTokens(
 ): string;
 
 export function detectorToString(dtr: any): string;
+
+export function toLocaleString(x: number): string;
