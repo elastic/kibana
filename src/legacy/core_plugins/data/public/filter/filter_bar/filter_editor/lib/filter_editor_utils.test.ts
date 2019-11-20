@@ -18,7 +18,14 @@
  */
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-import { stubIndexPattern, stubFields } from '../../../../../../../../plugins/data/public/stubs';
+import {
+  existsFilter,
+  phraseFilter,
+  phrasesFilter,
+  rangeFilter,
+  stubIndexPattern,
+  stubFields,
+} from '../../../../../../../../plugins/data/public/stubs';
 import { IndexPattern, Field } from '../../../../index';
 import {
   buildFilter,
@@ -38,10 +45,6 @@ import {
   isOneOfOperator,
   isOperator,
 } from './filter_operators';
-import { existsFilter } from './fixtures/exists_filter';
-import { phraseFilter } from './fixtures/phrase_filter';
-import { phrasesFilter } from './fixtures/phrases_filter';
-import { rangeFilter } from './fixtures/range_filter';
 import { esFilters } from '../../../../../../../../plugins/data/public';
 
 jest.mock('ui/new_platform');
