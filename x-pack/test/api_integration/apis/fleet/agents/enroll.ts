@@ -22,17 +22,15 @@ export default function(providerContext: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
 
-      const options = {
-        method: 'POST',
-        path: '/_security/api_key',
+      const { body: apiKeyBody } = await esClient.security.createApiKey({
         body: {
-          name: `test enrollment api key: ${uuid.v4()}`,
+          name: `test access api key: ${uuid.v4()}`,
         },
-      };
-
-      // @ts-ignore
-      apiKey = await esClient.transport.request(options);
-      const { _source: enrollmentApiKeyDoc } = await esClient.get({
+      });
+      apiKey = apiKeyBody;
+      const {
+        body: { _source: enrollmentApiKeyDoc },
+      } = await esClient.get({
         index: '.kibana',
         id: 'enrollment_api_keys:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0',
       });
@@ -41,10 +39,10 @@ export default function(providerContext: FtrProviderContext) {
       await esClient.update({
         index: '.kibana',
         id: 'enrollment_api_keys:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0',
+        refresh: 'true',
         body: {
           doc: enrollmentApiKeyDoc,
         },
-        refresh: true,
       });
     });
     after(async () => {

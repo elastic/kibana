@@ -17,13 +17,13 @@ export default function({ getService }: FtrProviderContext) {
 
     const body = getTemplate(indexPattern);
 
-    const response = await es.indices.putTemplate({
+    const { body: response } = await es.indices.putTemplate({
       name: templateName,
       body,
     });
     expect(response).to.eql({ acknowledged: true });
 
-    const indexTemplate = await es.indices.getTemplate({ name: templateName });
+    const { body: indexTemplate } = await es.indices.getTemplate({ name: templateName });
     expect(indexTemplate[templateName].index_patterns).to.eql([indexPattern]);
   });
 }
