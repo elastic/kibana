@@ -18,6 +18,7 @@
  */
 
 import expect from '@kbn/expect';
+import moment from 'moment';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
@@ -85,10 +86,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.home.launchSampleDataSet('flights');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
-        const today = new Date();
-        const todayYearMonthDay = today.toISOString().substring(0, 10);
-        const fromTime = `${todayYearMonthDay} 00:00:00.000`;
-        const toTime = `${todayYearMonthDay} 23:59:59.999`;
+        const todayYearMonthDay = moment().format('MMM D, YYYY');
+        const fromTime = `${todayYearMonthDay} @ 00:00:00.000`;
+        const toTime = `${todayYearMonthDay} @ 23:59:59.999`;
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.be(18);
@@ -119,10 +119,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.home.launchSampleDataSet('logs');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
-        const today = new Date();
-        const todayYearMonthDay = today.toISOString().substring(0, 10);
-        const fromTime = `${todayYearMonthDay} 00:00:00.000`;
-        const toTime = `${todayYearMonthDay} 23:59:59.999`;
+        const todayYearMonthDay = moment().format('MMM D, YYYY');
+        const fromTime = `${todayYearMonthDay} @ 00:00:00.000`;
+        const toTime = `${todayYearMonthDay} @ 23:59:59.999`;
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.be(11);
@@ -132,10 +131,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.home.launchSampleDataSet('ecommerce');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
-        const today = new Date();
-        const todayYearMonthDay = today.toISOString().substring(0, 10);
-        const fromTime = `${todayYearMonthDay} 00:00:00.000`;
-        const toTime = `${todayYearMonthDay} 23:59:59.999`;
+        const todayYearMonthDay = moment().format('MMM D, YYYY');
+        const fromTime = `${todayYearMonthDay} @ 00:00:00.000`;
+        const toTime = `${todayYearMonthDay} @ 23:59:59.999`;
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.be(12);

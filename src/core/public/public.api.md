@@ -5,7 +5,9 @@
 ```ts
 
 import { Breadcrumb } from '@elastic/eui';
+import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
+import { ExclusiveUnion } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import React from 'react';
@@ -119,7 +121,39 @@ export interface ChromeDocTitle {
 }
 
 // @public (undocumented)
-export type ChromeHelpExtension = (element: HTMLDivElement) => () => void;
+export interface ChromeHelpExtension {
+    appName: string;
+    content?: (element: HTMLDivElement) => () => void;
+    links?: ChromeHelpExtensionMenuLink[];
+}
+
+// @public (undocumented)
+export type ChromeHelpExtensionMenuCustomLink = EuiButtonEmptyProps & {
+    linkType: 'custom';
+    content: React.ReactNode;
+};
+
+// @public (undocumented)
+export type ChromeHelpExtensionMenuDiscussLink = EuiButtonEmptyProps & {
+    linkType: 'discuss';
+    href: string;
+};
+
+// @public (undocumented)
+export type ChromeHelpExtensionMenuDocumentationLink = EuiButtonEmptyProps & {
+    linkType: 'documentation';
+    href: string;
+};
+
+// @public (undocumented)
+export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
+    linkType: 'github';
+    labels: string[];
+    title?: string;
+};
+
+// @public (undocumented)
+export type ChromeHelpExtensionMenuLink = ExclusiveUnion<ChromeHelpExtensionMenuGitHubLink, ExclusiveUnion<ChromeHelpExtensionMenuDiscussLink, ExclusiveUnion<ChromeHelpExtensionMenuDocumentationLink, ChromeHelpExtensionMenuCustomLink>>>;
 
 // @public (undocumented)
 export interface ChromeNavControl {

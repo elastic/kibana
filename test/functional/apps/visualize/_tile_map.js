@@ -37,15 +37,12 @@ export default function ({ getService, getPageObjects }) {
       before(async function () {
         await browser.setWindowSize(1280, 1000);
 
-        const fromTime = '2015-09-19 06:31:44.000';
-        const toTime = '2015-09-23 18:31:44.000';
-
         log.debug('navigateToApp visualize');
         await PageObjects.visualize.navigateToNewVisualization();
         log.debug('clickTileMap');
         await PageObjects.visualize.clickTileMap();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         //do not configure aggs
       });
 
@@ -62,15 +59,12 @@ export default function ({ getService, getPageObjects }) {
       before(async function () {
         await browser.setWindowSize(1280, 1000);
 
-        const fromTime = '2015-09-19 06:31:44.000';
-        const toTime = '2015-09-23 18:31:44.000';
-
         log.debug('navigateToApp visualize');
         await PageObjects.visualize.navigateToNewVisualization();
         log.debug('clickTileMap');
         await PageObjects.visualize.clickTileMap();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         log.debug('select bucket Geo Coordinates');
         await PageObjects.visualize.clickBucket('Geo coordinates');
         log.debug('Click aggregation Geohash');

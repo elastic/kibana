@@ -17,18 +17,7 @@
  * under the License.
  */
 
-import { esFilters } from '../../../../../../../../../plugins/data/public';
-
-export const existsFilter: esFilters.ExistsFilter = {
-  meta: {
-    index: 'logstash-*',
-    negate: false,
-    disabled: false,
-    type: 'exists',
-    key: 'machine.os',
-    alias: null,
-  },
-  $state: {
-    store: esFilters.FilterStateStore.APP_STATE,
-  },
-};
+export * from './exists_filter';
+export * from './phrase_filter';
+export * from './phrases_filter';
+export * from './range_filter';
