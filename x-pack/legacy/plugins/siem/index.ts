@@ -28,18 +28,36 @@ import {
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
 
+// This is VERY TEMPORARY as we need a way to turn on alerting and actions
+// for the server without having to manually edit this file. Once alerting
+// and actions has their enabled true by default this can be removed.
+// 'alerting', 'actions' are hidden behind feature flags at the moment so if you turn
+// these on without the feature flags turned on then Kibana will crash since we are a legacy plugin
+// and legacy plugins cannot have optional requirements.
+// This returns ['alerting', 'actions', 'kibana', 'elasticsearch'] iff alertingFeatureEnabled is true
+// or if the developer signalsIndex is setup. Otherwise this returns ['kibana', 'elasticsearch']
+export const getRequiredPlugins = (
+  alertingFeatureEnabled: string | null | undefined,
+  signalsIndex: string | null | undefined
+) => {
+  const baseRequire = ['kibana', 'elasticsearch'];
+  if (
+    signalsIndex != null ||
+    (alertingFeatureEnabled && alertingFeatureEnabled.toLowerCase() === 'true')
+  ) {
+    return [...baseRequire, 'alerting', 'actions'];
+  } else {
+    return baseRequire;
+  }
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const siem = (kibana: any) => {
   return new kibana.Plugin({
     id: APP_ID,
     configPrefix: 'xpack.siem',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch'],
-    // Uncomment these lines to turn on alerting and action for detection engine and comment the other
-    // require statement out. These are hidden behind feature flags at the moment so if you turn
-    // these on without the feature flags turned on then Kibana will crash since we are a legacy plugin
-    // and legacy plugins cannot have optional requirements.
-    // require: ['kibana', 'elasticsearch', 'alerting', 'actions'],
+    require: getRequiredPlugins(process.env.ALERTING_FEATURE_ENABLED, process.env.SIGNALS_INDEX),
     uiExports: {
       app: {
         description: i18n.translate('xpack.siem.securityDescription', {

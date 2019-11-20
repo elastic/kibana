@@ -4,27 +4,70 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { siem } from '.';
+import { getRequiredPlugins } from '.';
 
+// This test is a temporary test which is so we do not accidentally check-in
+// feature flags turned on from "alerting" and "actions". If those get
+// turned on during a check-in it will cause everyone's Kibana to not start.
+// Once alerting and actions are part of the plugins by default this test
+// should be removed.
 describe('siem plugin tests', () => {
-  // This test is a temporary test which is so we do not accidentally check-in
-  // feature flags turned on from "alerting" and "actions". If those get
-  // turned on during a check-in it will cause everyone's Kibana to not start.
-  // Once alerting and actions are part of the plugins by default this test
-  // should be removed.
-  test(`
-    You have accidentally tried to check-in a feature flag with alerting located
-    here: x-pack/legacy/plugins/siem/index.ts, please change the plugin require to
-    NOT have these two inside of the require array."
-  `, () => {
-    class MockPlugin {
-      require: string[];
-      constructor({ require }: { require: string[] }) {
-        this.require = require;
-      }
-    }
-    const plugin = siem({ Plugin: MockPlugin });
-    expect(plugin.require.includes('alerting')).toBe(false);
-    expect(plugin.require.includes('actions')).toBe(false);
+  describe('getRequiredPlugins', () => {
+    test('null settings returns regular kibana and elasticsearch plugins', () => {
+      expect(getRequiredPlugins(null, null)).toEqual(['kibana', 'elasticsearch']);
+    });
+
+    test('undefined settings returns regular kibana and elasticsearch plugins', () => {
+      expect(getRequiredPlugins(undefined, undefined)).toEqual(['kibana', 'elasticsearch']);
+    });
+
+    test('alertingFeatureEnabled being false returns regular kibana and elasticsearch plugins', () => {
+      expect(getRequiredPlugins('false', undefined)).toEqual(['kibana', 'elasticsearch']);
+    });
+
+    test('alertingFeatureEnabled being true returns action and alerts', () => {
+      expect(getRequiredPlugins('true', undefined)).toEqual([
+        'kibana',
+        'elasticsearch',
+        'alerting',
+        'actions',
+      ]);
+    });
+
+    test('alertingFeatureEnabled being false but a string for siemIndex returns alerting and actions', () => {
+      expect(getRequiredPlugins('false', '.siem-signals-frank')).toEqual([
+        'kibana',
+        'elasticsearch',
+        'alerting',
+        'actions',
+      ]);
+    });
+
+    test('alertingFeatureEnabled being true and a string for siemIndex returns alerting and actions', () => {
+      expect(getRequiredPlugins('true', '.siem-signals-frank')).toEqual([
+        'kibana',
+        'elasticsearch',
+        'alerting',
+        'actions',
+      ]);
+    });
+
+    test('alertingFeatureEnabled being null and a string for siemIndex returns alerting and actions', () => {
+      expect(getRequiredPlugins(null, '.siem-signals-frank')).toEqual([
+        'kibana',
+        'elasticsearch',
+        'alerting',
+        'actions',
+      ]);
+    });
+
+    test('alertingFeatureEnabled being undefined and a string for siemIndex returns alerting and actions', () => {
+      expect(getRequiredPlugins(undefined, '.siem-signals-frank')).toEqual([
+        'kibana',
+        'elasticsearch',
+        'alerting',
+        'actions',
+      ]);
+    });
   });
 });
