@@ -31,13 +31,8 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
   async setup({ notifications }: CoreSetup, pluginSet: XPluginSet) {
     const {
       __LEGACY: { I18nContext },
-<<<<<<< HEAD
       dev_tools,
-      feature_catalogue,
-=======
-      devTools,
       home,
->>>>>>> upstream/master
     } = pluginSet;
 
     home.featureCatalogue.register({
