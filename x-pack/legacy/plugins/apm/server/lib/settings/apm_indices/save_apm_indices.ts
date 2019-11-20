@@ -4,19 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
-import { getSavedObjectsClient } from '../../helpers/saved_objects_client';
+import { ApmIndicesConfig, ScopedSavedObjectsClient } from './get_apm_indices';
 import {
-  ApmIndicesConfig,
   APM_INDICES_SAVED_OBJECT_TYPE,
   APM_INDICES_SAVED_OBJECT_ID
-} from './get_apm_indices';
+} from '../../../../common/apm_saved_object_constants';
 
 export async function saveApmIndices(
-  server: Server,
+  savedObjectsClient: ScopedSavedObjectsClient,
   apmIndicesSavedObject: Partial<ApmIndicesConfig>
 ) {
-  const savedObjectsClient = getSavedObjectsClient(server, 'data');
   return await savedObjectsClient.create(
     APM_INDICES_SAVED_OBJECT_TYPE,
     apmIndicesSavedObject,

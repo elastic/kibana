@@ -1072,7 +1072,6 @@ describe('Get Doc Path from ES Response', () => {
   it('returns a formatted string after response of an update', function () {
     const responseMock = {
       _index: 'foo',
-      _type: '_doc',
       _id: 'booId',
     };
     expect(getUpdatedDocPath(responseMock)).equal('/foo/_doc/booId');

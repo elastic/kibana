@@ -76,6 +76,12 @@ module.exports = {
             directory: Path.resolve(REPO_ROOT, 'x-pack'),
           },
         },
+        {
+          rename: {
+            from: 'react-router',
+            to: 'react-router-dom',
+          }
+        },
       ],
     ],
   }

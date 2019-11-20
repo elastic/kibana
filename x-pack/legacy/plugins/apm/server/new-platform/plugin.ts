@@ -4,16 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InternalCoreSetup } from 'src/core/server';
+import { Server } from 'hapi';
+import { CoreSetup } from 'src/core/server';
 import { makeApmUsageCollector } from '../lib/apm_telemetry';
-import { CoreSetupWithUsageCollector } from '../lib/apm_telemetry/make_apm_usage_collector';
 import { createApmAgentConfigurationIndex } from '../lib/settings/agent_configuration/create_agent_config_index';
 import { createApmApi } from '../routes/create_apm_api';
 
+export interface LegacySetup {
+  server: Server;
+}
+
 export class Plugin {
-  public setup(core: InternalCoreSetup) {
-    createApmApi().init(core);
-    createApmAgentConfigurationIndex(core);
-    makeApmUsageCollector(core as CoreSetupWithUsageCollector);
+  public setup(core: CoreSetup, __LEGACY: LegacySetup) {
+    createApmApi().init(core, __LEGACY);
+    createApmAgentConfigurationIndex(core, __LEGACY);
+    makeApmUsageCollector(core, __LEGACY);
   }
 }

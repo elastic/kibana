@@ -19,9 +19,8 @@
 
 // TODO: remove when index patterns are moved here.
 jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
 
-import { mockFields, mockIndexPattern } from 'ui/index_patterns';
+import { stubIndexPattern, stubFields } from '../stubs';
 import { getSuggestionsProvider } from './value_suggestions';
 import { UiSettingsClientContract } from 'kibana/public';
 
@@ -37,8 +36,8 @@ describe('getSuggestions', () => {
     });
 
     it('should return an empty array', async () => {
-      const index = mockIndexPattern.id;
-      const [field] = mockFields;
+      const index = stubIndexPattern.id;
+      const [field] = stubFields;
       const query = '';
       const suggestions = await getSuggestions(index, field, query);
       expect(suggestions).toEqual([]);
@@ -54,8 +53,8 @@ describe('getSuggestions', () => {
     });
 
     it('should return true/false for boolean fields', async () => {
-      const index = mockIndexPattern.id;
-      const [field] = mockFields.filter(({ type }) => type === 'boolean');
+      const index = stubIndexPattern.id;
+      const [field] = stubFields.filter(({ type }) => type === 'boolean');
       const query = '';
       const suggestions = await getSuggestions(index, field, query);
       expect(suggestions).toEqual([true, false]);
@@ -63,8 +62,8 @@ describe('getSuggestions', () => {
     });
 
     it('should return an empty array if the field type is not a string or boolean', async () => {
-      const index = mockIndexPattern.id;
-      const [field] = mockFields.filter(({ type }) => type !== 'string' && type !== 'boolean');
+      const index = stubIndexPattern.id;
+      const [field] = stubFields.filter(({ type }) => type !== 'string' && type !== 'boolean');
       const query = '';
       const suggestions = await getSuggestions(index, field, query);
       expect(suggestions).toEqual([]);
@@ -72,8 +71,8 @@ describe('getSuggestions', () => {
     });
 
     it('should return an empty array if the field is not aggregatable', async () => {
-      const index = mockIndexPattern.id;
-      const [field] = mockFields.filter(({ aggregatable }) => !aggregatable);
+      const index = stubIndexPattern.id;
+      const [field] = stubFields.filter(({ aggregatable }) => !aggregatable);
       const query = '';
       const suggestions = await getSuggestions(index, field, query);
       expect(suggestions).toEqual([]);
@@ -81,8 +80,8 @@ describe('getSuggestions', () => {
     });
 
     it('should otherwise request suggestions', async () => {
-      const index = mockIndexPattern.id;
-      const [field] = mockFields.filter(
+      const index = stubIndexPattern.id;
+      const [field] = stubFields.filter(
         ({ type, aggregatable }) => type === 'string' && aggregatable
       );
       const query = '';
@@ -91,8 +90,8 @@ describe('getSuggestions', () => {
     });
 
     it('should cache results if using the same index/field/query/filter', async () => {
-      const index = mockIndexPattern.id;
-      const [field] = mockFields.filter(
+      const index = stubIndexPattern.id;
+      const [field] = stubFields.filter(
         ({ type, aggregatable }) => type === 'string' && aggregatable
       );
       const query = '';
@@ -102,8 +101,8 @@ describe('getSuggestions', () => {
     });
 
     it('should cache results for only one minute', async () => {
-      const index = mockIndexPattern.id;
-      const [field] = mockFields.filter(
+      const index = stubIndexPattern.id;
+      const [field] = stubFields.filter(
         ({ type, aggregatable }) => type === 'string' && aggregatable
       );
       const query = '';
@@ -119,7 +118,7 @@ describe('getSuggestions', () => {
     });
 
     it('should not cache results if using a different index/field/query', async () => {
-      const fields = mockFields.filter(
+      const fields = stubFields.filter(
         ({ type, aggregatable }) => type === 'string' && aggregatable
       );
       await getSuggestions('index', fields[0], '');

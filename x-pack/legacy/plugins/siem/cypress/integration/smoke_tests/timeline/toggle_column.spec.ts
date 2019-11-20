@@ -23,7 +23,7 @@ describe('toggle column in timeline', () => {
   const timestampField = '@timestamp';
   const idField = '_id';
 
-  it('displays a checked Toggle field checkbox for `@timestamp`, a default timeline column', () => {
+  it.skip('displays a checked Toggle field checkbox for `@timestamp`, a default timeline column', () => {
     populateTimeline();
 
     toggleFirstTimelineEventDetails();
@@ -39,7 +39,7 @@ describe('toggle column in timeline', () => {
     );
   });
 
-  it('removes the @timestamp field from the timeline when the user un-checks the toggle', () => {
+  it.skip('removes the @timestamp field from the timeline when the user un-checks the toggle', () => {
     populateTimeline();
 
     toggleFirstTimelineEventDetails();
@@ -57,7 +57,7 @@ describe('toggle column in timeline', () => {
     );
   });
 
-  it('adds the _id field to the timeline when the user checks the field', () => {
+  it.skip('adds the _id field to the timeline when the user checks the field', () => {
     populateTimeline();
 
     toggleFirstTimelineEventDetails();
@@ -71,7 +71,7 @@ describe('toggle column in timeline', () => {
     cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${idField}"]`).should('exist');
   });
 
-  it('adds the _id field to the timeline via drag and drop', () => {
+  it.skip('adds the _id field to the timeline via drag and drop', () => {
     populateTimeline();
 
     toggleFirstTimelineEventDetails();
