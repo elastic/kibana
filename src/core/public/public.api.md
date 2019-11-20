@@ -977,48 +977,6 @@ export type ToastsSetup = IToasts;
 // @public (undocumented)
 export type ToastsStart = IToasts;
 
-// Warning: (ae-missing-release-tag) "UiSettingsClient" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
-export class UiSettingsClient implements IUiSettingsClient {
-    // Warning: (ae-forgotten-export) The symbol "UiSettingsClientParams" needs to be exported by the entry point index.d.ts
-    constructor(params: UiSettingsClientParams);
-    // (undocumented)
-    get$<T = any>(key: string, defaultOverride?: T): Observable<any>;
-    // (undocumented)
-    get<T = any>(key: string, defaultOverride?: T): any;
-    // (undocumented)
-    getAll(): Record<string, UiSettingsParams_2 & UserProvidedValues_2<any>>;
-    // (undocumented)
-    getSaved$(): Observable<{
-        key: string;
-        newValue: any;
-        oldValue: any;
-    }>;
-    // (undocumented)
-    getUpdate$(): Observable<{
-        key: string;
-        newValue: any;
-        oldValue: any;
-    }>;
-    // (undocumented)
-    getUpdateErrors$(): Observable<Error>;
-    // (undocumented)
-    isCustom(key: string): boolean;
-    // (undocumented)
-    isDeclared(key: string): boolean;
-    // (undocumented)
-    isDefault(key: string): boolean;
-    // (undocumented)
-    isOverridden(key: string): boolean;
-    // (undocumented)
-    overrideLocalDefault(key: string, newDefault: any): void;
-    // (undocumented)
-    remove(key: string): Promise<boolean>;
-    // (undocumented)
-    set(key: string, value: any): Promise<boolean>;
-    }
-
 // @public (undocumented)
 export interface UiSettingsState {
     // (undocumented)

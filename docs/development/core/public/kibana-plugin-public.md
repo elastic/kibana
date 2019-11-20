@@ -17,7 +17,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsClient](./kibana-plugin-public.savedobjectsclient.md) | Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing plugin state. The client-side SavedObjectsClient is a thin convenience library around the SavedObjects HTTP API for interacting with Saved Objects. |
 |  [SimpleSavedObject](./kibana-plugin-public.simplesavedobject.md) | This class is a very simple wrapper for SavedObjects loaded from the server with the [SavedObjectsClient](./kibana-plugin-public.savedobjectsclient.md)<!-- -->.<!-- -->It provides basic functionality for creating/saving/deleting saved objects, but doesn't include any type-specific implementations. |
 |  [ToastsApi](./kibana-plugin-public.toastsapi.md) | Methods for adding and removing global toast messages. |
-|  [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |  |
 
 ## Interfaces
 
@@ -64,7 +63,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IHttpFetchError](./kibana-plugin-public.ihttpfetcherror.md) |  |
 |  [IHttpInterceptController](./kibana-plugin-public.ihttpinterceptcontroller.md) | Used to halt a request Promise chain in a [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md)<!-- -->. |
 |  [InterceptedHttpResponse](./kibana-plugin-public.interceptedhttpresponse.md) |  |
-|  [IUiSettingsClient](./kibana-plugin-public.iuisettingsclient.md) | Client-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |
+|  [IUiSettingsClient](./kibana-plugin-public.iuisettingsclient.md) | Client-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. [IUiSettingsClient](./kibana-plugin-public.iuisettingsclient.md) |
 |  [LegacyCoreSetup](./kibana-plugin-public.legacycoresetup.md) | Setup interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
 |  [LegacyCoreStart](./kibana-plugin-public.legacycorestart.md) | Start interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
 |  [LegacyNavLink](./kibana-plugin-public.legacynavlink.md) |  |
