@@ -50,7 +50,7 @@ def withDefaultPrComments(closure) {
         """
       }
 
-      postComment(message.trim().stripIndent())
+      postComment(message.stripIndent().trim())
     }
   }
 }
