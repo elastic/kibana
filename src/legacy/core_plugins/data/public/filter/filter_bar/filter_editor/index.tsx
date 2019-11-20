@@ -39,8 +39,6 @@ import React, { Component } from 'react';
 import { Field, IndexPattern } from '../../../index_patterns';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {
-  buildCustomFilter,
-  buildFilter,
   getFieldFromFilter,
   getFilterableFields,
   getFilterParams,
@@ -475,13 +473,21 @@ class FilterEditorUI extends Component<Props, State> {
       const { index, disabled, negate } = this.props.filter.meta;
       const newIndex = index || this.props.indexPatterns[0].id!;
       const body = JSON.parse(queryDsl);
-      const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
+      const filter = esFilters.buildCustomFilter(
+        newIndex,
+        body,
+        disabled,
+        negate,
+        alias,
+        $state.store
+      );
       this.props.onSubmit(filter);
     } else if (indexPattern && field && operator) {
-      const filter = buildFilter(
+      const filter = esFilters.buildFilter(
         indexPattern,
         field,
-        operator,
+        operator.type,
+        operator.negate,
         this.props.filter.meta.disabled,
         params,
         alias,
