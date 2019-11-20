@@ -44,13 +44,11 @@ describe('getVisualizationsCollector#fetch', () => {
     // In real life, the CollectorSet calls fetch and handles errors
     test('defers the errors', async () => {
       const mockTaskFetch = jest.fn(() => {
-        return Promise.reject(Error('BOOM'));
+        throw new Error('BOOM');
       });
 
       const { fetch } = getUsageCollector(getMockTaskManager(mockTaskFetch));
-      await expect(async () => {
-        await fetch();
-      }).rejects.toEqual({ message: 'BOOM' });
+      await expect(fetch()).rejects.toThrowErrorMatchingInlineSnapshot(`"BOOM"`);
     });
   });
 });

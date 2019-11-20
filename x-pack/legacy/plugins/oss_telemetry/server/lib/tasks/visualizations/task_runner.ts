@@ -10,6 +10,7 @@ import { getNextMidnight } from '../../get_next_midnight';
 import { VisState } from '../../../../../../../../src/legacy/core_plugins/visualizations/public';
 import { TaskInstance } from '../../../../../task_manager';
 import { ESSearchHit } from '../../../../../apm/typings/elasticsearch';
+import { LegacyConfig } from '../../../plugin';
 
 interface VisSummary {
   type: string;
@@ -72,7 +73,7 @@ async function getStats(callCluster: APICaller, index: string) {
 
 export function visualizationsTaskRunner(
   taskInstance: TaskInstance,
-  config: any,
+  config: LegacyConfig,
   es: CoreSetup['elasticsearch']
 ) {
   const { callAsInternalUser: callCluster } = es.createClient('data');

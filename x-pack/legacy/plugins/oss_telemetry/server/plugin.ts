@@ -17,6 +17,10 @@ interface UsageCollectorDefinition {
   fetch(): Promise<any>;
 }
 
+export interface LegacyConfig {
+  get: (key: string) => string | number | boolean;
+}
+
 export interface OssTelemetrySetupDependencies {
   __LEGACY: {
     telemetry: {
@@ -25,7 +29,7 @@ export interface OssTelemetrySetupDependencies {
         register(collector: UsageCollector): void;
       };
     };
-    config: any;
+    config: LegacyConfig;
     xpackMainStatus: { kbnServer: KbnServer };
   };
   taskManager?: TaskManagerPluginSetupContract;

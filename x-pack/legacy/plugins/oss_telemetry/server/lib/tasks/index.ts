@@ -9,6 +9,8 @@ import { PluginSetupContract as TaskManagerPluginSetupContract } from '../../../
 import { PLUGIN_ID, VIS_TELEMETRY_TASK } from '../../../constants';
 import { visualizationsTaskRunner } from './visualizations/task_runner';
 import KbnServer from '../../../../../../../src/legacy/server/kbn_server';
+import { LegacyConfig } from '../../plugin';
+import { TaskInstance } from '../../../../task_manager';
 
 export function registerTasks({
   taskManager,
@@ -19,7 +21,7 @@ export function registerTasks({
   taskManager?: TaskManagerPluginSetupContract;
   logger: Logger;
   elasticsearch: CoreSetup['elasticsearch'];
-  config: any;
+  config: LegacyConfig;
 }) {
   if (!taskManager) {
     logger.debug('Task manager is not available');
@@ -30,7 +32,7 @@ export function registerTasks({
     [VIS_TELEMETRY_TASK]: {
       title: 'X-Pack telemetry calculator for Visualizations',
       type: VIS_TELEMETRY_TASK,
-      createTaskRunner({ taskInstance }: { taskInstance: any }) {
+      createTaskRunner({ taskInstance }: { taskInstance: TaskInstance }) {
         return {
           run: visualizationsTaskRunner(taskInstance, config, elasticsearch),
         };

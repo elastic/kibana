@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup } from 'kibana/server';
+import { APICaller, CoreSetup } from 'kibana/server';
 
 import { TaskInstance } from '../../task_manager';
 import { PluginSetupContract as TaskManagerPluginSetupContract } from '../../task_manager/plugin';
@@ -27,15 +27,15 @@ const defaultMockSavedObjects = [
 
 const defaultMockTaskDocs = [getMockTaskInstance()];
 
-export const getMockEs = (mockCallWithInternal: any = getMockCallWithInternal()) =>
+export const getMockEs = (mockCallWithInternal: APICaller = getMockCallWithInternal()) =>
   (({
     createClient: () => ({ callAsInternalUser: mockCallWithInternal }),
   } as unknown) as CoreSetup['elasticsearch']);
 
-export const getMockCallWithInternal = (hits: any[] = defaultMockSavedObjects) => {
-  return (): Promise<any> => {
+export const getMockCallWithInternal = (hits: unknown[] = defaultMockSavedObjects): APICaller => {
+  return ((() => {
     return Promise.resolve({ hits: { hits } });
-  };
+  }) as unknown) as APICaller;
 };
 
 export const getMockTaskFetch = (docs: TaskInstance[] = defaultMockTaskDocs) => {
@@ -50,8 +50,8 @@ export const getMockConfig = () => {
 
 export const getMockTaskManager = (fetch: any = getMockTaskFetch()) =>
   (({
-    registerTaskDefinitions: (opts: any) => undefined,
-    ensureScheduled: (opts: any) => Promise.resolve(),
+    registerTaskDefinitions: () => undefined,
+    ensureScheduled: () => Promise.resolve(),
     fetch,
   } as unknown) as TaskManagerPluginSetupContract);
 
