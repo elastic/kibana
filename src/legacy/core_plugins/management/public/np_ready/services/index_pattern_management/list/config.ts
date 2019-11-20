@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { StaticIndexPattern, Field } from '../../../../../../data/public';
 
 export interface IndexPatternTag {
   key: string;
@@ -27,7 +28,10 @@ export interface IndexPatternTag {
 export class IndexPatternListConfig {
   public readonly key = 'default';
 
-  public getIndexPatternTags(indexPattern: any, isDefault: boolean): IndexPatternTag[] {
+  public getIndexPatternTags(
+    indexPattern: StaticIndexPattern,
+    isDefault: boolean
+  ): IndexPatternTag[] {
     return isDefault
       ? [
           {
@@ -40,11 +44,11 @@ export class IndexPatternListConfig {
       : [];
   }
 
-  public getFieldInfo(indexPattern: any, field: any): string[] {
+  public getFieldInfo(indexPattern: StaticIndexPattern, field: Field): string[] {
     return [];
   }
 
-  public areScriptedFieldsEnabled(indexPattern: any): boolean {
+  public areScriptedFieldsEnabled(indexPattern: StaticIndexPattern): boolean {
     return true;
   }
 }

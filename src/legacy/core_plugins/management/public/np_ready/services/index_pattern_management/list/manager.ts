@@ -18,6 +18,7 @@
  */
 
 import { IndexPatternListConfig, IndexPatternTag } from './config';
+import { StaticIndexPattern, Field } from '../../../../../../data/public';
 
 export class IndexPatternListManager {
   private configs: IndexPatternListConfig[];
@@ -34,7 +35,7 @@ export class IndexPatternListManager {
     this.configs.push(config);
   }
 
-  public getIndexPatternTags(indexPattern: any, isDefault: boolean) {
+  public getIndexPatternTags(indexPattern: StaticIndexPattern, isDefault: boolean) {
     return this.configs.reduce((tags: IndexPatternTag[], config) => {
       return config.getIndexPatternTags
         ? tags.concat(config.getIndexPatternTags(indexPattern, isDefault))
@@ -42,13 +43,13 @@ export class IndexPatternListManager {
     }, []);
   }
 
-  public getFieldInfo(indexPattern: any, field: any): string[] {
+  public getFieldInfo(indexPattern: StaticIndexPattern, field: Field): string[] {
     return this.configs.reduce((info: string[], config) => {
       return config.getFieldInfo ? info.concat(config.getFieldInfo(indexPattern, field)) : info;
     }, []);
   }
 
-  public areScriptedFieldsEnabled(indexPattern: any): boolean {
+  public areScriptedFieldsEnabled(indexPattern: StaticIndexPattern): boolean {
     return this.configs.every(config => {
       return config.areScriptedFieldsEnabled ? config.areScriptedFieldsEnabled(indexPattern) : true;
     });

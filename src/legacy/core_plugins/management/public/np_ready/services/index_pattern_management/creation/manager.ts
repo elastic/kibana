@@ -18,7 +18,7 @@
  */
 
 import { HttpServiceBase } from '../../../../../../../../core/public';
-import { IndexPatternCreationConfig } from './config';
+import { IndexPatternCreationConfig, UrlHandler, IndexPatternCreationOption } from './config';
 
 export class IndexPatternCreationManager {
   private configs: IndexPatternCreationConfig[];
@@ -37,15 +37,15 @@ export class IndexPatternCreationManager {
 
   public getType(key: string | undefined): IndexPatternCreationConfig | null {
     if (key) {
-      const index = key ? this.configs.findIndex(config => config.key === key) : -1;
-      return index > -1 && this.configs[index] ? this.configs[index] : null;
+      const index = this.configs.findIndex(config => config.key === key);
+      return this.configs[index] || null;
     } else {
       return this.getType('default');
     }
   }
 
-  public async getIndexPatternCreationOptions(urlHandler: any) {
-    const options: any[] = [];
+  public async getIndexPatternCreationOptions(urlHandler: UrlHandler) {
+    const options: IndexPatternCreationOption[] = [];
     await Promise.all(
       this.configs.map(async config => {
         const option = config.getIndexPatternCreationOption

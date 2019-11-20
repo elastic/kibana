@@ -34,6 +34,16 @@ const indexPatternButtonDescription = i18n.translate(
   { defaultMessage: 'Perform full aggregations against any data' }
 );
 
+export type UrlHandler = (url: string) => void;
+
+export interface IndexPatternCreationOption {
+  text: string;
+  description: string;
+  testSubj: string;
+  onClick: () => void;
+  isBeta?: boolean;
+}
+
 export class IndexPatternCreationConfig {
   public readonly key = 'default';
 
@@ -63,7 +73,9 @@ export class IndexPatternCreationConfig {
     this.isBeta = isBeta;
   }
 
-  public async getIndexPatternCreationOption(urlHandler: any) {
+  public async getIndexPatternCreationOption(
+    urlHandler: UrlHandler
+  ): Promise<IndexPatternCreationOption> {
     return {
       text: indexPatternButtonText,
       description: indexPatternButtonDescription,
