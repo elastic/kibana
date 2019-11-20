@@ -12,7 +12,7 @@ import { kfetch } from 'ui/kfetch';
 
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { getJobIdPrefix } from '../../../../../common/log_analysis';
-import { jobCustomSettingsRT } from './ml_api_types';
+// import { jobCustomSettingsRT } from './ml_api_types';
 
 export const callSetupMlModuleAPI = async (
   moduleId: string,
@@ -21,8 +21,8 @@ export const callSetupMlModuleAPI = async (
   spaceId: string,
   sourceId: string,
   indexPattern: string,
-  timeField: string,
-  bucketSpan: number
+  jobOverrides: SetupMlModuleJobOverrides[] = [],
+  datafeedOverrides: SetupMlModuleDatafeedOverrides[] = []
 ) => {
   const response = await kfetch({
     method: 'POST',
@@ -34,25 +34,27 @@ export const callSetupMlModuleAPI = async (
         indexPatternName: indexPattern,
         prefix: getJobIdPrefix(spaceId, sourceId),
         startDatafeed: true,
-        jobOverrides: [
-          {
-            job_id: 'log-entry-rate' as const,
-            analysis_config: {
-              bucket_span: `${bucketSpan}ms`,
-            },
-            data_description: {
-              time_field: timeField,
-            },
-            custom_settings: {
-              logs_source_config: {
-                indexPattern,
-                timestampField: timeField,
-                bucketSpan,
-              },
-            },
-          },
-        ],
-        datafeedOverrides: [],
+        jobOverrides,
+        datafeedOverrides,
+        // jobOverrides: [
+        //   {
+        //     job_id: 'log-entry-rate' as const,
+        //     analysis_config: {
+        //       bucket_span: `${bucketSpan}ms`,
+        //     },
+        //     data_description: {
+        //       time_field: timeField,
+        //     },
+        //     custom_settings: {
+        //       logs_source_config: {
+        //         indexPattern,
+        //         timestampField: timeField,
+        //         bucketSpan,
+        //       },
+        //     },
+        //   },
+        // ],
+        // datafeedOverrides: [],
       })
     ),
   });
@@ -68,23 +70,30 @@ const setupMlModuleTimeParamsRT = rt.partial({
   end: rt.number,
 });
 
-const setupMlModuleLogEntryRateJobOverridesRT = rt.type({
-  job_id: rt.literal('log-entry-rate'),
-  analysis_config: rt.type({
-    bucket_span: rt.string,
-  }),
-  data_description: rt.type({
-    time_field: rt.string,
-  }),
-  custom_settings: jobCustomSettingsRT,
-});
+const setupMlModuleJobOverridesRT = rt.object;
+
+type SetupMlModuleJobOverrides = rt.TypeOf<typeof setupMlModuleJobOverridesRT>;
+
+const setupMlModuleDatafeedOverridesRT = rt.object;
+
+type SetupMlModuleDatafeedOverrides = rt.TypeOf<typeof setupMlModuleDatafeedOverridesRT>;
+// const setupMlModuleLogEntryRateJobOverridesRT = rt.type({
+//   job_id: rt.literal('log-entry-rate'),
+//   analysis_config: rt.type({
+//     bucket_span: rt.string,
+//   }),
+//   data_description: rt.type({
+//     time_field: rt.string,
+//   }),
+//   custom_settings: jobCustomSettingsRT,
+// });
 
 const setupMlModuleRequestParamsRT = rt.type({
   indexPatternName: rt.string,
   prefix: rt.string,
   startDatafeed: rt.boolean,
-  jobOverrides: rt.array(setupMlModuleLogEntryRateJobOverridesRT),
-  datafeedOverrides: rt.array(rt.object),
+  jobOverrides: rt.array(setupMlModuleJobOverridesRT),
+  datafeedOverrides: rt.array(setupMlModuleDatafeedOverridesRT),
 });
 
 const setupMlModuleRequestPayloadRT = rt.intersection([

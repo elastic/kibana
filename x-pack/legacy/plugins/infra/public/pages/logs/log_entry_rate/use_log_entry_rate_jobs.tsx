@@ -27,7 +27,9 @@ export const useLogEntryRateJobs = ({
     moduleId: 'logs_ui_analysis',
     sourceId,
     spaceId,
-    timeField,
+    jobParameters: {
+      timestampField: timeField,
+    },
   });
 };
 

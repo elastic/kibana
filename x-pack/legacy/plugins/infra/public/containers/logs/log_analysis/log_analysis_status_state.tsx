@@ -11,8 +11,8 @@ import {
   getJobId,
   isJobStatusWithResults,
   JobStatus,
-  JobType,
-  jobTypeRT,
+  // JobType,
+  // jobTypeRT,
   SetupStatus,
 } from '../../../../common/log_analysis';
 import { FetchJobStatusResponsePayload, JobSummary } from './api/ml_get_jobs_summary_api';
@@ -20,7 +20,7 @@ import { GetMlModuleResponsePayload, JobDefinition } from './api/ml_get_module';
 import { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
 import { MandatoryProperty } from '../../../../common/utility_types';
 
-interface StatusReducerState {
+interface StatusReducerState<JobType extends string> {
   jobDefinitions: JobDefinition[];
   jobStatus: Record<JobType, JobStatus>;
   jobSummaries: JobSummary[];
@@ -65,42 +65,60 @@ type StatusReducerAction =
   | { type: 'requestedJobDefinitionUpdate' }
   | { type: 'viewedResults' };
 
-const createInitialState = (sourceConfiguration: JobSourceConfiguration): StatusReducerState => ({
+const createInitialState = <JobType extends string>({
+  jobTypes,
+  sourceConfiguration,
+}: {
+  jobTypes: JobType[];
+  sourceConfiguration: JobSourceConfiguration;
+}): StatusReducerState<JobType> => ({
   jobDefinitions: [],
-  jobStatus: {
-    'log-entry-rate': 'unknown',
-  },
+  jobStatus: jobTypes.reduce(
+    (accumulatedJobStatus, jobType) => ({
+      ...accumulatedJobStatus,
+      [jobType]: 'unknown',
+    }),
+    {} as Record<JobType, JobStatus>
+  ),
   jobSummaries: [],
   lastSetupErrorMessages: [],
   setupStatus: 'initializing',
   sourceConfiguration,
 });
 
-function statusReducer(state: StatusReducerState, action: StatusReducerAction): StatusReducerState {
+const createStatusReducer = <JobType extends string>(jobTypes: JobType[]) => (
+  state: StatusReducerState<JobType>,
+  action: StatusReducerAction
+): StatusReducerState<JobType> => {
   switch (action.type) {
     case 'startedSetup': {
       return {
         ...state,
-        jobStatus: {
-          'log-entry-rate': 'initializing',
-        },
+        jobStatus: jobTypes.reduce(
+          (accumulatedJobStatus, jobType) => ({
+            ...accumulatedJobStatus,
+            [jobType]: 'initializing',
+          }),
+          {} as Record<JobType, JobStatus>
+        ),
         setupStatus: 'pending',
       };
     }
     case 'finishedSetup': {
       const { jobs, datafeeds, spaceId, sourceId } = action;
-      const nextJobStatus = {
-        ...state.jobStatus,
-        'log-entry-rate':
-          hasSuccessfullyCreatedJob(getJobId(spaceId, sourceId, 'log-entry-rate'))(jobs) &&
-          hasSuccessfullyStartedDatafeed(getDatafeedId(spaceId, sourceId, 'log-entry-rate'))(
-            datafeeds
-          )
-            ? ('started' as JobStatus)
-            : ('failed' as JobStatus),
-      };
-      const nextSetupStatus = Object.values(nextJobStatus).every(jobState =>
-        ['started'].includes(jobState)
+      const nextJobStatus = jobTypes.reduce(
+        (accumulatedJobStatus, jobType) => ({
+          ...accumulatedJobStatus,
+          [jobType]:
+            hasSuccessfullyCreatedJob(getJobId(spaceId, sourceId, jobType))(jobs) &&
+            hasSuccessfullyStartedDatafeed(getDatafeedId(spaceId, sourceId, jobType))(datafeeds)
+              ? 'started'
+              : 'failed',
+        }),
+        {} as Record<JobType, JobStatus>
+      );
+      const nextSetupStatus = Object.values<JobStatus>(nextJobStatus).every(
+        jobState => jobState === 'started'
       )
         ? 'succeeded'
         : 'failed';
@@ -122,10 +140,13 @@ function statusReducer(state: StatusReducerState, action: StatusReducerAction): 
     case 'failedSetup': {
       return {
         ...state,
-        jobStatus: {
-          ...state.jobStatus,
-          'log-entry-rate': 'failed',
-        },
+        jobStatus: jobTypes.reduce(
+          (accumulatedJobStatus, jobType) => ({
+            ...accumulatedJobStatus,
+            [jobType]: 'failed',
+          }),
+          {} as Record<JobType, JobStatus>
+        ),
         setupStatus: 'failed',
       };
     }
@@ -140,10 +161,13 @@ function statusReducer(state: StatusReducerState, action: StatusReducerAction): 
       const { payload: jobSummaries, spaceId, sourceId } = action;
       const { jobDefinitions, setupStatus, sourceConfiguration } = state;
 
-      const nextJobStatus = {
-        ...state.jobStatus,
-        'log-entry-rate': getJobStatus(getJobId(spaceId, sourceId, 'log-entry-rate'))(jobSummaries),
-      };
+      const nextJobStatus = jobTypes.reduce(
+        (accumulatedJobStatus, jobType) => ({
+          ...accumulatedJobStatus,
+          [jobType]: getJobStatus(getJobId(spaceId, sourceId, jobType))(jobSummaries),
+        }),
+        {} as Record<JobType, JobStatus>
+      );
       const nextSetupStatus = getSetupStatus(
         spaceId,
         sourceId,
@@ -164,10 +188,13 @@ function statusReducer(state: StatusReducerState, action: StatusReducerAction): 
       return {
         ...state,
         setupStatus: 'unknown',
-        jobStatus: {
-          ...state.jobStatus,
-          'log-entry-rate': 'unknown',
-        },
+        jobStatus: jobTypes.reduce(
+          (accumulatedJobStatus, jobType) => ({
+            ...accumulatedJobStatus,
+            [jobType]: 'unknown',
+          }),
+          {} as Record<JobType, JobStatus>
+        ),
       };
     }
     case 'fetchedModuleDefinition': {
@@ -230,7 +257,7 @@ function statusReducer(state: StatusReducerState, action: StatusReducerAction): 
       return state;
     }
   }
-}
+};
 
 const hasSuccessfullyCreatedJob = (jobId: string) => (
   jobSetupResponses: SetupMlModuleResponsePayload['jobs']
@@ -281,7 +308,7 @@ const getJobStatus = (jobId: string) => (jobSummaries: FetchJobStatusResponsePay
       }
     )[0] || 'missing';
 
-const getSetupStatus = (
+const getSetupStatus = <JobType extends string>(
   spaceId: string,
   sourceId: string,
   sourceConfiguration: JobSourceConfiguration,
@@ -289,44 +316,47 @@ const getSetupStatus = (
   jobDefinitions: JobDefinition[],
   jobSummaries: JobSummary[]
 ) => (previousSetupStatus: SetupStatus) =>
-  Object.entries(everyJobStatus).reduce<SetupStatus>((setupStatus, [jobType, jobStatus]) => {
-    if (!jobTypeRT.is(jobType)) {
-      return setupStatus;
-    }
+  Object.entries<JobStatus>(everyJobStatus).reduce<SetupStatus>(
+    (setupStatus, [jobType, jobStatus]) => {
+      // if (!jobTypeRT.is(jobType)) {
+      //   return setupStatus;
+      // }
 
-    const jobId = getJobId(spaceId, sourceId, jobType);
-    const jobDefinition = jobDefinitions.find(({ id }) => id === jobType);
+      const jobId = getJobId(spaceId, sourceId, jobType);
+      const jobDefinition = jobDefinitions.find(({ id }) => id === jobType);
 
-    if (jobStatus === 'missing') {
-      return 'required';
-    } else if (
-      setupStatus === 'required' ||
-      setupStatus === 'requiredForUpdate' ||
-      setupStatus === 'requiredForReconfiguration'
-    ) {
-      return setupStatus;
-    } else if (
-      setupStatus === 'skippedButUpdatable' ||
-      (jobDefinition &&
-        !isJobRevisionCurrent(
-          jobId,
-          jobDefinition.config.custom_settings.job_revision || 0
-        )(jobSummaries))
-    ) {
-      return 'skippedButUpdatable';
-    } else if (
-      setupStatus === 'skippedButReconfigurable' ||
-      !isJobConfigurationConsistent(jobId, sourceConfiguration)(jobSummaries)
-    ) {
-      return 'skippedButReconfigurable';
-    } else if (setupStatus === 'hiddenAfterSuccess') {
-      return setupStatus;
-    } else if (setupStatus === 'skipped' || isJobStatusWithResults(jobStatus)) {
-      return 'skipped';
-    }
+      if (jobStatus === 'missing') {
+        return 'required';
+      } else if (
+        setupStatus === 'required' ||
+        setupStatus === 'requiredForUpdate' ||
+        setupStatus === 'requiredForReconfiguration'
+      ) {
+        return setupStatus;
+      } else if (
+        setupStatus === 'skippedButUpdatable' ||
+        (jobDefinition &&
+          !isJobRevisionCurrent(
+            jobId,
+            jobDefinition.config.custom_settings.job_revision || 0
+          )(jobSummaries))
+      ) {
+        return 'skippedButUpdatable';
+      } else if (
+        setupStatus === 'skippedButReconfigurable' ||
+        !isJobConfigurationConsistent(jobId, sourceConfiguration)(jobSummaries)
+      ) {
+        return 'skippedButReconfigurable';
+      } else if (setupStatus === 'hiddenAfterSuccess') {
+        return setupStatus;
+      } else if (setupStatus === 'skipped' || isJobStatusWithResults(jobStatus)) {
+        return 'skipped';
+      }
 
-    return setupStatus;
-  }, previousSetupStatus);
+      return setupStatus;
+    },
+    previousSetupStatus
+  );
 
 const isJobRevisionCurrent = (jobId: string, currentRevision: number) => (
   jobSummaries: FetchJobStatusResponsePayload
@@ -377,8 +407,15 @@ const isIndexPatternSubset = (indexPatternSubset: string, indexPatternSuperset: 
 const hasError = <Value extends any>(value: Value): value is MandatoryProperty<Value, 'error'> =>
   value.error != null;
 
-export const useStatusState = (sourceConfiguration: JobSourceConfiguration) => {
-  return useReducer(statusReducer, sourceConfiguration, createInitialState);
+export const useStatusState = <JobType extends string>(
+  jobTypes: JobType[],
+  sourceConfiguration: JobSourceConfiguration
+) => {
+  return useReducer(
+    createStatusReducer(jobTypes),
+    { jobTypes, sourceConfiguration },
+    createInitialState
+  );
 };
 
 interface JobSourceConfiguration {

@@ -20,20 +20,20 @@ export const useLogAnalysisJobs = <JobType extends string>({
   moduleId,
   sourceId,
   spaceId,
-  timeField,
+  jobParameters,
 }: {
   indexPattern: string;
   jobTypes: JobType[];
   moduleId: string;
   sourceId: string;
   spaceId: string;
-  timeField: string;
+  jobParameters: { timestampField: string };
 }) => {
   const { cleanupMLResources } = useLogAnalysisCleanup({ sourceId, spaceId });
-  const [statusState, dispatch] = useStatusState({
+  const [statusState, dispatch] = useStatusState(jobTypes, {
     bucketSpan,
     indexPattern,
-    timestampField: timeField,
+    timestampField: jobParameters.timestampField,
   });
 
   const [fetchModuleDefinitionRequest, fetchModuleDefinition] = useTrackedPromise(
@@ -74,8 +74,25 @@ export const useLogAnalysisJobs = <JobType extends string>({
           spaceId,
           sourceId,
           indices.join(','),
-          timeField,
-          bucketSpan
+          [
+            {
+              job_id: 'log-entry-rate' as const,
+              analysis_config: {
+                bucket_span: `${bucketSpan}ms`,
+              },
+              data_description: {
+                time_field: jobParameters.timestampField,
+              },
+              custom_settings: {
+                logs_source_config: {
+                  indexPattern,
+                  timestampField: jobParameters.timestampField,
+                  bucketSpan,
+                },
+              },
+            },
+          ],
+          []
         );
       },
       onResolve: ({ datafeeds, jobs }: SetupMlModuleResponsePayload) => {
@@ -85,7 +102,7 @@ export const useLogAnalysisJobs = <JobType extends string>({
         dispatch({ type: 'failedSetup' });
       },
     },
-    [spaceId, sourceId, timeField, bucketSpan]
+    [spaceId, sourceId, jobParameters.timestampField, bucketSpan]
   );
 
   const [fetchJobStatusRequest, fetchJobStatus] = useTrackedPromise(
