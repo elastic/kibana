@@ -298,6 +298,35 @@ class Plugin {
   }
 }
 ```
+If your plugin still relies on throwing Boom errors from routes, you can use the `router.wrapErrors` 
+as a temporary solution until error migration is complete:
+```ts
+// legacy/plugins/demoplugin/server/plugin.ts
+import { schema } from '@kbn/config-schema';
+import { CoreSetup } from 'src/core/server';
+
+export interface DemoPluginsSetup {};
+
+class Plugin {
+  public setup(core: CoreSetup, pluginSetup: DemoPluginSetup) {
+    const router = core.http.createRouter();
+    router.post(
+      {
+        path: '/api/demoplugin/search',
+        validate: {
+          body: schema.object({
+            field1: schema.string(),
+          }),
+        }
+      },
+      router.wrapErrors((context, req, res) => {
+        throw Boom.notFound('not there'); // will be converted into proper New Platform error
+      })
+    )
+  }
+}
+```
+
 
 #### 4. New Platform plugin
 As the final step we delete the shim and move all our code into a New Platform
