@@ -29,12 +29,6 @@ jest.mock('../errors', () => ({
   IndexPatternMissingIndices: jest.fn(),
 }));
 
-jest.mock('ui/registry/field_formats', () => ({
-  fieldFormats: {
-    getDefaultInstance: jest.fn(),
-  },
-}));
-
 jest.mock('./index_pattern', () => {
   class IndexPattern {
     init = async () => {
