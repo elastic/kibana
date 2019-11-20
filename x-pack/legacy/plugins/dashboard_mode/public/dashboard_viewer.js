@@ -26,7 +26,6 @@ import 'uiExports/embeddableActions';
 import 'uiExports/embeddableFactories';
 import 'uiExports/navbarExtensions';
 import 'uiExports/docViews';
-import 'uiExports/fieldFormats';
 import 'uiExports/search';
 import 'uiExports/shareContextMenuExtensions';
 import _ from 'lodash';
