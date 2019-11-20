@@ -263,16 +263,16 @@ export type ESQueueCreateJobFn = (
   jobParams: JobParamsSavedObject | JobParamsUrl,
   headers: Record<string, string>,
   request: RequestFacade
-) => Promise<JobParamsSavedObject>;
+) => Promise<JobParamsSavedObject | JobParamsUrl>;
 
 export type ImmediateCreateJobFn = (
-  jobParams: JobParamsSavedObject,
+  jobParams: any, // JobParamsSavedObject | JobParamsUrl,
   headers: Record<string, string>,
   req: RequestFacade
 ) => Promise<{
   type: string | null;
   title: string;
-  jobParams: JobParamsSavedObject;
+  jobParams: any; // JobParamsSavedObject | JobParamsUrl;
 }>;
 
 export type ESQueueWorkerExecuteFn = (
@@ -304,7 +304,7 @@ export interface ESQueueInstance {
   ) => ESQueueWorker;
 }
 
-export type CreateJobFactory = (server: ServerFacade) => ESQueueCreateJobFn;
+export type CreateJobFactory = (server: ServerFacade) => ESQueueCreateJobFn | ImmediateCreateJobFn;
 export type ExecuteJobFactory = (server: ServerFacade) => ESQueueWorkerExecuteFn;
 export type ExecuteImmediateJobFactory = (server: ServerFacade) => ImmediateExecuteFn;
 
