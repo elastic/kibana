@@ -74,11 +74,13 @@ The typical rate values are shown in grey, while the anomalous regions are color
 image::logs/images/log-rate-anomalies.png[Log rate entries chart]
 
 When a time range is flagged as anomalous,
-the machine learning algorithms have detected unusual log rate activity because:
+the machine learning algorithms have detected unusual log rate activity.
+This might be because:
 
-* The log rate is significantly higher than usual
-* The log rate is significantly lower than usual
-* Other anomalous behavior has been detected
+* The log rate is significantly higher than usual.
+* The log rate is significantly lower than usual.
+* Other anomalous behavior has been detected.
+For example, the log rate is within bounds, but not fluctuating when it is expected to.
 
 The level of anomaly detected in a time period is color-coded, from red, orange, yellow, to blue.
 Red indicates a critical anomaly level, while blue is a warning level.
