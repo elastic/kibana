@@ -443,17 +443,19 @@ export const ResultsTable: FC<Props> = React.memo(
         )}
         {(columns.length > 0 || searchQuery !== defaultSearchQuery) && (
           <Fragment>
-            <EuiFormRow
-              helpText={i18n.translate(
-                'xpack.ml.dataframe.analytics.regressionExploration.documentsShownHelpText',
-                {
-                  defaultMessage: 'Showing first {searchSize} documents',
-                  values: { searchSize: SEARCH_SIZE },
-                }
-              )}
-            >
-              <Fragment />
-            </EuiFormRow>
+            {tableItems.length === SEARCH_SIZE && (
+              <EuiFormRow
+                helpText={i18n.translate(
+                  'xpack.ml.dataframe.analytics.regressionExploration.documentsShownHelpText',
+                  {
+                    defaultMessage: 'Showing first {searchSize} documents',
+                    values: { searchSize: SEARCH_SIZE },
+                  }
+                )}
+              >
+                <Fragment />
+              </EuiFormRow>
+            )}
             <EuiSpacer />
             <MlInMemoryTableBasic
               allowNeutralSort={false}

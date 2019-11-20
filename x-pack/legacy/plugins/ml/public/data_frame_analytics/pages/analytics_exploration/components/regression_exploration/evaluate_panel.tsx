@@ -8,7 +8,6 @@ import React, { FC, Fragment, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-// import { SearchResponse } from 'elasticsearch';
 import { ErrorCallout } from './error_callout';
 import {
   getValuesFromResponse,
@@ -37,7 +36,7 @@ interface TrackTotalHitsSearchResponse {
       value: number;
       relation: string;
     };
-    hits: any;
+    hits: any[];
   };
 }
 
@@ -262,7 +261,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
             <EuiText size="xs" color="subdued">
               <FormattedMessage
                 id="xpack.ml.dataframe.analytics.regressionExploration.generalizationDocsCount"
-                defaultMessage="{docsCount} docs evaluated"
+                defaultMessage="{docsCount, plural, one {# doc} other {# docs}} evaluated"
                 values={{ docsCount: generalizationDocsCount }}
               />
             </EuiText>
@@ -305,7 +304,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
             <EuiText size="xs" color="subdued">
               <FormattedMessage
                 id="xpack.ml.dataframe.analytics.regressionExploration.trainingDocsCount"
-                defaultMessage="{docsCount} docs evaluated"
+                defaultMessage="{docsCount, plural, one {# doc} other {# docs}} evaluated"
                 values={{ docsCount: trainingDocsCount }}
               />
             </EuiText>
