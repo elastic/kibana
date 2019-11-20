@@ -19,16 +19,11 @@
 
 import { render, ExpressionRenderHandler } from './render';
 import { Observable } from 'rxjs';
-import { Data, ExpressionRenderDefinition, IInterpreterRenderHandlers } from './types';
+import { IInterpreterRenderHandlers } from './types';
 import { getRenderersRegistry } from './services';
 import { first } from 'rxjs/operators';
 
 const element: HTMLElement = {} as HTMLElement;
-const mockNotificationService = {
-  toasts: {
-    addError: jest.fn(() => {}),
-  },
-};
 
 jest.mock('./services', () => {
   const renderers: Record<string, unknown> = {
@@ -43,23 +38,8 @@ jest.mock('./services', () => {
     getRenderersRegistry: jest.fn(() => ({
       get: jest.fn((id: string) => renderers[id]),
     })),
-    getNotifications: jest.fn(() => {
-      return mockNotificationService;
-    }),
   };
 });
-
-const mockMockErrorRenderFunction = jest.fn(
-  async (el: HTMLElement, data: Data, handlers: IInterpreterRenderHandlers) => handlers.done()
-);
-export const createMockErrorRenderer: () => ExpressionRenderDefinition = () => ({
-  name: 'error_renderer',
-  displayName: 'error rederer',
-  reuseDomNode: true,
-  render: mockMockErrorRenderFunction,
-});
-// extracts data from mockMockErrorRenderFunction call to assert in tests
-const expectRenderedError = () => expect(mockMockErrorRenderFunction.mock.calls[0][1]);
 
 describe('render helper function', () => {
   it('returns ExpressionRenderHandler instance', () => {
@@ -82,29 +62,20 @@ describe('ExpressionRenderHandler', () => {
   });
 
   describe('render()', () => {
-    beforeEach(() => {
-      mockMockErrorRenderFunction.mockReset();
-      mockNotificationService.toasts.addError.mockReset();
-    });
-
-    it('should emit render count in case of error', async () => {
+    it('sends an observable error and keeps it open if invalid data is provided', async () => {
       const expressionRenderHandler = new ExpressionRenderHandler(element);
-      expressionRenderHandler.render(false);
       const promise1 = expressionRenderHandler.render$.pipe(first()).toPromise();
-      await expect(promise1).resolves.toEqual(1);
-
       expressionRenderHandler.render(false);
-      const promise2 = expressionRenderHandler.render$.pipe(first()).toPromise();
-      await expect(promise2).resolves.toEqual(2);
-    });
+      await expect(promise1).resolves.toEqual({
+        type: 'error',
+        error: {
+          message: 'invalid data provided to the expression renderer',
+        },
+      });
 
-    it('should render error if invalid data is provided', async () => {
-      const expressionRenderHandler = new ExpressionRenderHandler(
-        element,
-        createMockErrorRenderer()
-      );
-      await expressionRenderHandler.render(false);
-      expectRenderedError().toEqual({
+      const promise2 = expressionRenderHandler.render$.pipe(first()).toPromise();
+      expressionRenderHandler.render(false);
+      await expect(promise2).resolves.toEqual({
         type: 'error',
         error: {
           message: 'invalid data provided to the expression renderer',
@@ -112,13 +83,11 @@ describe('ExpressionRenderHandler', () => {
       });
     });
 
-    it('should render error if renderer does not exist', async () => {
-      const expressionRenderHandler = new ExpressionRenderHandler(
-        element,
-        createMockErrorRenderer()
-      );
-      await expressionRenderHandler.render({ type: 'render', as: 'something' });
-      expectRenderedError().toEqual({
+    it('sends an observable error if renderer does not exist', async () => {
+      const expressionRenderHandler = new ExpressionRenderHandler(element);
+      const promise = expressionRenderHandler.render$.pipe(first()).toPromise();
+      expressionRenderHandler.render({ type: 'render', as: 'something' });
+      await expect(promise).resolves.toEqual({
         type: 'error',
         error: {
           message: `invalid renderer id 'something'`,
@@ -126,7 +95,7 @@ describe('ExpressionRenderHandler', () => {
       });
     });
 
-    it('should render error if the rendering function throws', async () => {
+    it('sends an observable error if the rendering function throws', async () => {
       (getRenderersRegistry as jest.Mock).mockReturnValueOnce({ get: () => true });
       (getRenderersRegistry as jest.Mock).mockReturnValueOnce({
         get: () => ({
@@ -136,12 +105,10 @@ describe('ExpressionRenderHandler', () => {
         }),
       });
 
-      const expressionRenderHandler = new ExpressionRenderHandler(
-        element,
-        createMockErrorRenderer()
-      );
-      await expressionRenderHandler.render({ type: 'render', as: 'something' });
-      expectRenderedError().toEqual({
+      const expressionRenderHandler = new ExpressionRenderHandler(element);
+      const promise = expressionRenderHandler.render$.pipe(first()).toPromise();
+      expressionRenderHandler.render({ type: 'render', as: 'something' });
+      await expect(promise).resolves.toEqual({
         type: 'error',
         error: {
           message: 'renderer error',
@@ -166,32 +133,14 @@ describe('ExpressionRenderHandler', () => {
     // we still want to be notified about sync render$ updates
     it("doesn't swallow sync render errors", async () => {
       const expressionRenderHandler = new ExpressionRenderHandler(element);
-      await expressionRenderHandler.render(false);
-      const promise = expressionRenderHandler.render$.pipe(first()).toPromise();
-      await expect(promise).resolves.toEqual(1);
-    });
-
-    it('notifies about last render', async () => {
-      const expressionRenderHandler = new ExpressionRenderHandler(element);
-      const promise = expressionRenderHandler.render$.pipe(first()).toPromise();
-      await expressionRenderHandler.render(false);
-      await expect(promise).resolves.toEqual(1);
-    });
-
-    it('default renderer should use notification service', async () => {
-      const expressionRenderHandler = new ExpressionRenderHandler(element);
       expressionRenderHandler.render(false);
-      const promise1 = expressionRenderHandler.render$.pipe(first()).toPromise();
-      await expect(promise1).resolves.toEqual(1);
-      expect(mockNotificationService.toasts.addError).toBeCalledWith(
-        {
+      const promise = expressionRenderHandler.render$.pipe(first()).toPromise();
+      await expect(promise).resolves.toEqual({
+        type: 'error',
+        error: {
           message: 'invalid data provided to the expression renderer',
         },
-        {
-          title: 'error',
-          toastMessage: 'request failed',
-        }
-      );
+      });
     });
   });
 });

@@ -20,44 +20,40 @@
 import { Observable } from 'rxjs';
 import * as Rx from 'rxjs';
 import { filter, share } from 'rxjs/operators';
-import {
-  event,
-  RenderId,
-  Data,
-  IInterpreterRenderHandlers,
-  ExpressionRenderDefinition,
-} from './types';
+import { event, RenderId, Data, IInterpreterRenderHandlers } from './types';
 import { getRenderersRegistry } from './services';
-import { errorRenderer as defaultErrorRenderer } from './error_renderer';
+
+interface RenderError {
+  type: 'error';
+  error: { type?: string; message: string };
+}
 
 export type IExpressionRendererExtraHandlers = Record<string, any>;
 
 export class ExpressionRenderHandler {
-  render$: Observable<RenderId>;
+  render$: Observable<RenderId | RenderError>;
   update$: Observable<any>;
   events$: Observable<event>;
 
   private element: HTMLElement;
   private destroyFn?: any;
   private renderCount: number = 0;
-  private renderSubject: Rx.BehaviorSubject<RenderId | null>;
+  private renderSubject: Rx.BehaviorSubject<RenderId | RenderError | null>;
   private eventsSubject: Rx.Subject<unknown>;
   private updateSubject: Rx.Subject<unknown>;
   private handlers: IInterpreterRenderHandlers;
-  private errorRenderer: ExpressionRenderDefinition;
 
-  constructor(element: HTMLElement, errorRenderer?: ExpressionRenderDefinition) {
+  constructor(element: HTMLElement) {
     this.element = element;
 
     this.eventsSubject = new Rx.Subject();
     this.events$ = this.eventsSubject.asObservable().pipe(share());
-    this.errorRenderer = errorRenderer || defaultErrorRenderer;
 
-    this.renderSubject = new Rx.BehaviorSubject(null as RenderId | null);
+    this.renderSubject = new Rx.BehaviorSubject(null as RenderId | RenderError | null);
     this.render$ = this.renderSubject.asObservable().pipe(
       share(),
       filter(_ => _ !== null)
-    ) as Observable<RenderId>;
+    ) as Observable<RenderId | RenderError>;
 
     this.updateSubject = new Rx.Subject();
     this.update$ = this.updateSubject.asObservable().pipe(share());
@@ -84,42 +80,33 @@ export class ExpressionRenderHandler {
 
   render = async (data: Data, extraHandlers: IExpressionRendererExtraHandlers = {}) => {
     if (!data || typeof data !== 'object') {
-      return this.errorRenderer.render(
-        this.element,
-        {
-          type: 'error',
-          error: {
-            message: 'invalid data provided to the expression renderer',
-          },
+      this.renderSubject.next({
+        type: 'error',
+        error: {
+          message: 'invalid data provided to the expression renderer',
         },
-        this.handlers
-      );
+      });
+      return;
     }
 
     if (data.type !== 'render' || !data.as) {
       if (data.type === 'error') {
-        return this.errorRenderer.render(this.element, data, this.handlers);
+        this.renderSubject.next(data);
       } else {
-        return this.errorRenderer.render(
-          this.element,
-          {
-            type: 'error',
-            error: { message: 'invalid data provided to the expression renderer' },
-          },
-          this.handlers
-        );
+        this.renderSubject.next({
+          type: 'error',
+          error: { message: 'invalid data provided to the expression renderer' },
+        });
       }
+      return;
     }
 
     if (!getRenderersRegistry().get(data.as)) {
-      return this.errorRenderer.render(
-        this.element,
-        {
-          type: 'error',
-          error: { message: `invalid renderer id '${data.as}'` },
-        },
-        this.handlers
-      );
+      this.renderSubject.next({
+        type: 'error',
+        error: { message: `invalid renderer id '${data.as}'` },
+      });
+      return;
     }
 
     try {
@@ -128,14 +115,10 @@ export class ExpressionRenderHandler {
         .get(data.as)!
         .render(this.element, data.value, { ...this.handlers, ...extraHandlers });
     } catch (e) {
-      return await this.errorRenderer.render(
-        this.element,
-        {
-          type: 'error',
-          error: { type: e.type, message: e.message },
-        },
-        this.handlers
-      );
+      this.renderSubject.next({
+        type: 'error',
+        error: { type: e.type, message: e.message },
+      });
     }
   };
 

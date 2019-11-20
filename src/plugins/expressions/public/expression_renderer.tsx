@@ -32,12 +32,14 @@ export interface ExpressionRendererProps extends IExpressionLoaderParams {
   className?: string;
   dataAttrs?: string[];
   expression: string | ExpressionAST;
+  renderError?: (error?: string | null) => React.ReactElement | React.ReactElement[];
   padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
 }
 
 interface State {
   isEmpty: boolean;
   isLoading: boolean;
+  error: null | { message: string };
 }
 
 export type ExpressionRenderer = React.FC<ExpressionRendererProps>;
@@ -45,12 +47,14 @@ export type ExpressionRenderer = React.FC<ExpressionRendererProps>;
 const defaultState: State = {
   isEmpty: true,
   isLoading: false,
+  error: null,
 };
 
 export const ExpressionRendererImplementation = ({
   className,
   dataAttrs,
   expression,
+  renderError,
   padding,
   ...options
 }: ExpressionRendererProps) => {
@@ -70,7 +74,6 @@ export const ExpressionRendererImplementation = ({
     options.context,
     options.variables,
     options.disableCaching,
-    options.errorRenderer,
   ]);
   /* eslint-enable react-hooks/exhaustive-deps */
 
@@ -89,14 +92,22 @@ export const ExpressionRendererImplementation = ({
         if (!handlerRef.current) {
           return;
         }
-        setState(() => ({
-          ...defaultState,
-          isEmpty: false,
-        }));
+        if (typeof item !== 'number') {
+          setState(() => ({
+            ...defaultState,
+            isEmpty: false,
+            error: item.error,
+          }));
+        } else {
+          setState(() => ({
+            ...defaultState,
+            isEmpty: false,
+          }));
+        }
       });
     }
-    /* eslint-disable */
-    // TODO: Replace mountpoint.current by something else.
+  /* eslint-disable */
+  // TODO: Replace mountpoint.current by something else.
   }, [mountpoint.current]);
   /* eslint-enable */
 
@@ -112,6 +123,7 @@ export const ExpressionRendererImplementation = ({
 
   const classes = classNames('expExpressionRenderer', {
     'expExpressionRenderer-isEmpty': state.isEmpty,
+    'expExpressionRenderer-hasError': !!state.error,
     className,
   });
 
@@ -125,6 +137,13 @@ export const ExpressionRendererImplementation = ({
     <div {...dataAttrs} className={classes}>
       {state.isEmpty ? <EuiLoadingChart mono size="l" /> : null}
       {state.isLoading ? <EuiProgress size="xs" color="accent" position="absolute" /> : null}
+      {!state.isLoading && state.error ? (
+        renderError ? (
+          renderError(state.error.message)
+        ) : (
+          <div data-test-subj="expression-renderer-error">{state.error.message}</div>
+        )
+      ) : null}
       <div
         className="expExpressionRenderer__expression"
         style={expressionStyles}
