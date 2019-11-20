@@ -69,6 +69,7 @@ export const SET_SCROLL_ZOOM = 'SET_SCROLL_ZOOM';
 export const SET_MAP_INIT_ERROR = 'SET_MAP_INIT_ERROR';
 export const SET_INTERACTIVE = 'SET_INTERACTIVE';
 export const DISABLE_TOOLTIP_CONTROL = 'DISABLE_TOOLTIP_CONTROL';
+export const HIDE_TOOLBAR_OVERLAY = 'HIDE_TOOLBAR_OVERLAY';
 
 function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
@@ -825,4 +826,8 @@ export function disableInteractive() {
 
 export function disableTooltipControl() {
   return { type: DISABLE_TOOLTIP_CONTROL, disableTooltipControl: true };
+}
+
+export function hideToolbarOverlay() {
+  return { type: HIDE_TOOLBAR_OVERLAY, hideToolbarOverlay: true };
 }
