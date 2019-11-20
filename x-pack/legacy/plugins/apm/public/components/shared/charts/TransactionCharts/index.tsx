@@ -33,6 +33,7 @@ import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { TransactionLineChart } from './TransactionLineChart';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
+import { BrowserLineChart } from './BrowserLineChart';
 import { DurationByCountryMap } from './DurationByCountryMap';
 import {
   TRANSACTION_PAGE_LOAD,
@@ -59,31 +60,29 @@ const ShiftedEuiText = styled(EuiText)`
   top: 5px;
 `;
 
+export function getResponseTimeTickFormatter(formatter: TimeFormatter) {
+  return (t: number) => formatter(t).formatted;
+}
+
+export function getResponseTimeTooltipFormatter(formatter: TimeFormatter) {
+  return (p: Coordinate) => {
+    return isValidCoordinateValue(p.y)
+      ? formatter(p.y).formatted
+      : NOT_AVAILABLE_LABEL;
+  };
+}
+
+export function getMaxY(responseTimeSeries: TimeSeries[]) {
+  const coordinates = flatten(
+    responseTimeSeries.map((serie: TimeSeries) => serie.data as Coordinate[])
+  );
+
+  const numbers: number[] = coordinates.map((c: Coordinate) => (c.y ? c.y : 0));
+
+  return Math.max(...numbers, 0);
+}
+
 export class TransactionCharts extends Component<TransactionChartProps> {
-  public getMaxY = (responseTimeSeries: TimeSeries[]) => {
-    const coordinates = flatten(
-      responseTimeSeries.map((serie: TimeSeries) => serie.data as Coordinate[])
-    );
-
-    const numbers: number[] = coordinates.map((c: Coordinate) =>
-      c.y ? c.y : 0
-    );
-
-    return Math.max(...numbers, 0);
-  };
-
-  public getResponseTimeTickFormatter = (formatter: TimeFormatter) => {
-    return (t: number) => formatter(t).formatted;
-  };
-
-  public getResponseTimeTooltipFormatter = (formatter: TimeFormatter) => {
-    return (p: Coordinate) => {
-      return isValidCoordinateValue(p.y)
-        ? formatter(p.y).formatted
-        : NOT_AVAILABLE_LABEL;
-    };
-  };
-
   public getTPMFormatter = (t: number) => {
     const { urlParams } = this.props;
     const unit = tpmUnit(urlParams.transactionType);
@@ -154,7 +153,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
     const { charts, urlParams } = this.props;
     const { responseTimeSeries, tpmSeries } = charts;
     const { transactionType } = urlParams;
-    const maxY = this.getMaxY(responseTimeSeries);
+    const maxY = getMaxY(responseTimeSeries);
     const formatter = getDurationFormatter(maxY);
 
     return (
@@ -171,16 +170,14 @@ export class TransactionCharts extends Component<TransactionChartProps> {
                   </EuiFlexItem>
                   <LicenseContext.Consumer>
                     {license =>
-                      // TODO(TS-3.7-ESLINT)
-                      // eslint-disable-next-line @typescript-eslint/camelcase
                       this.renderMLHeader(license.features.ml?.is_available)
                     }
                   </LicenseContext.Consumer>
                 </EuiFlexGroup>
                 <TransactionLineChart
                   series={responseTimeSeries}
-                  tickFormatY={this.getResponseTimeTickFormatter(formatter)}
-                  formatTooltipValue={this.getResponseTimeTooltipFormatter(
+                  tickFormatY={getResponseTimeTickFormatter(formatter)}
+                  formatTooltipValue={getResponseTimeTooltipFormatter(
                     formatter
                   )}
                 />
@@ -207,7 +204,18 @@ export class TransactionCharts extends Component<TransactionChartProps> {
         {transactionType === TRANSACTION_PAGE_LOAD && (
           <>
             <EuiSpacer size="s" />
-            <DurationByCountryMap />
+            <EuiFlexGrid columns={2} gutterSize="s">
+              <EuiFlexItem>
+                <EuiPanel>
+                  <DurationByCountryMap />
+                </EuiPanel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiPanel>
+                  <BrowserLineChart />
+                </EuiPanel>
+              </EuiFlexItem>
+            </EuiFlexGrid>
           </>
         )}
       </>

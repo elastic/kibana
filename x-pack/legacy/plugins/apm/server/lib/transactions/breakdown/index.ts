@@ -18,7 +18,8 @@ import {
 import { Setup } from '../../helpers/setup_request';
 import { rangeFilter } from '../../helpers/range_filter';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
-import { MAX_KPIS, COLORS } from './constants';
+import { MAX_KPIS } from './constants';
+import { getVizColorForIndex } from '../../../../common/viz_colors';
 
 export async function getTransactionBreakdown({
   setup,
@@ -142,14 +143,12 @@ export async function getTransactionBreakdown({
   const kpis = sortByOrder(visibleKpis, 'name').map((kpi, index) => {
     return {
       ...kpi,
-      color: COLORS[index % COLORS.length]
+      color: getVizColorForIndex(index)
     };
   });
 
   const kpiNames = kpis.map(kpi => kpi.name);
 
-  // TODO(TS-3.7-ESLINT)
-  // eslint-disable-next-line @typescript-eslint/camelcase
   const bucketsByDate = resp.aggregations?.by_date.buckets || [];
 
   const timeseriesPerSubtype = bucketsByDate.reduce((prev, bucket) => {

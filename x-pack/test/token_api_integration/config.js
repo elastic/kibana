@@ -11,7 +11,7 @@ export default async function ({ readConfigFile }) {
     testFiles: [require.resolve('./auth')],
     servers: xPackAPITestsConfig.get('servers'),
     services: {
-      es: xPackAPITestsConfig.get('services.es'),
+      legacyEs: xPackAPITestsConfig.get('services.legacyEs'),
       supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
     },
     junit: {
