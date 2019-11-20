@@ -17,13 +17,6 @@ export const IMPORT_RULE = i18n.translate('xpack.siem.detectionEngine.rules.impo
   defaultMessage: 'Import rule…',
 });
 
-export const SUCCESSFULLY_IMPORTED_RULES = (totalRules: number) =>
-  i18n.translate('xpack.siem.detectionEngine.rules.allRules.successfullyImportedRulesTitle', {
-    values: { totalRules },
-    defaultMessage:
-      'Successfully imported {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
-  });
-
 export const ADD_NEW_RULE = i18n.translate('xpack.siem.detectionEngine.rules.addNewRuleTitle', {
   defaultMessage: 'Add new rule',
 });

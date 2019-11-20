@@ -25,17 +25,19 @@ import { failure } from 'io-ts/lib/PathReporter';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
+import uuid from 'uuid';
 import * as i18n from './translations';
 import { duplicateRules } from '../../../../../containers/detection_engine/rules/api';
 import { useKibanaUiSetting } from '../../../../../lib/settings/use_kibana_ui_setting';
 import { DEFAULT_KBN_VERSION } from '../../../../../../common/constants';
 import { ndjsonToJSON } from '../json_downloader';
-import { Rule, RulesSchema } from '../../../../../containers/detection_engine/rules/types';
+import { RulesSchema } from '../../../../../containers/detection_engine/rules/types';
+import { useStateToaster } from '../../../../../components/toasters';
 
 interface ImportRuleModalProps {
   showModal: boolean;
   closeModal: () => void;
-  importComplete: (rules: Rule[]) => void;
+  importComplete: () => void;
 }
 
 /**
@@ -50,28 +52,53 @@ export const ImportRuleModal = React.memo<ImportRuleModalProps>(
     const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
     const [isImporting, setIsImporting] = useState(false);
     const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+    const [, dispatchToaster] = useStateToaster();
+
+    const cleanupAndCloseModal = () => {
+      setIsImporting(false);
+      setSelectedFiles(null);
+      closeModal();
+    };
 
     const importRules = useCallback(async () => {
       if (selectedFiles != null) {
         setIsImporting(true);
         const reader = new FileReader();
         reader.onload = async event => {
-          // TODO: Validation via io-ts
           // @ts-ignore type is string, not ArrayBuffer as FileReader.readAsText is called
           const importedRules = ndjsonToJSON(event?.target?.result ?? '');
 
           const decodedRules = pipe(
             RulesSchema.decode(importedRules),
             fold(errors => {
+              cleanupAndCloseModal();
+              dispatchToaster({
+                type: 'addToaster',
+                toast: {
+                  id: uuid.v4(),
+                  title: i18n.IMPORT_FAILED,
+                  color: 'danger',
+                  iconType: 'alert',
+                  errors: failure(errors),
+                },
+              });
               throw new Error(failure(errors).join('\n'));
             }, identity)
           );
 
           const duplicatedRules = await duplicateRules({ rules: decodedRules, kbnVersion });
-          setIsImporting(false);
-          setSelectedFiles(null);
-          importComplete(duplicatedRules);
-          closeModal();
+          importComplete();
+          cleanupAndCloseModal();
+
+          dispatchToaster({
+            type: 'addToaster',
+            toast: {
+              id: uuid.v4(),
+              title: i18n.SUCCESSFULLY_IMPORTED_RULES(duplicatedRules.length),
+              color: 'success',
+              iconType: 'check',
+            },
+          });
         };
         Object.values(selectedFiles).map(f => reader.readAsText(f));
       }

@@ -63,12 +63,7 @@ export const getColumns = (dispatch: React.Dispatch<Action>, kbnVersion: string)
   {
     field: 'rule',
     name: i18n.COLUMN_RULE,
-    render: (value: TableData['rule']) => (
-      <div>
-        <EuiLink href={value.href}>{value.name}</EuiLink>{' '}
-        <EuiBadge color="hollow">{value.status}</EuiBadge>
-      </div>
-    ),
+    render: (value: TableData['rule']) => <EuiLink href={value.href}>{value.name}</EuiLink>,
     truncateText: true,
     width: '24%',
   },

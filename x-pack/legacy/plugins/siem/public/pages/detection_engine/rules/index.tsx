@@ -8,7 +8,6 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTabbedContent } from '@elastic
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import uuid from 'uuid';
 import { HeaderPage } from '../../../components/header_page';
 
 import { WrapperPage } from '../../../components/wrapper_page';
@@ -19,11 +18,10 @@ import { ActivityMonitor } from './activity_monitor';
 import { FormattedRelativePreferenceDate } from '../../../components/formatted_date';
 import { getEmptyTagValue } from '../../../components/empty_value';
 import { ImportRuleModal } from './components/import_rule_modal';
-import { useStateToaster } from '../../../components/toasters';
 
 export const RulesComponent = React.memo(() => {
   const [showImportModal, setShowImportModal] = useState(false);
-  const [, dispatchToaster] = useStateToaster();
+  const [importCompleteToggle, setImportCompleteToggle] = useState(false);
 
   const lastCompletedRun = undefined;
   return (
@@ -31,17 +29,7 @@ export const RulesComponent = React.memo(() => {
       <ImportRuleModal
         showModal={showImportModal}
         closeModal={() => setShowImportModal(false)}
-        importComplete={importedRules => {
-          dispatchToaster({
-            type: 'addToaster',
-            toast: {
-              id: uuid.v4(),
-              title: i18n.SUCCESSFULLY_IMPORTED_RULES(importedRules.length),
-              color: 'success',
-              iconType: 'check',
-            },
-          });
-        }}
+        importComplete={() => setImportCompleteToggle(!importCompleteToggle)}
       />
       <WrapperPage>
         <HeaderPage
@@ -86,7 +74,7 @@ export const RulesComponent = React.memo(() => {
             {
               id: 'tabAllRules',
               name: i18n.ALL_RULES,
-              content: <AllRules />,
+              content: <AllRules importCompleteToggle={importCompleteToggle} />,
             },
             {
               id: 'tabActivityMonitor',

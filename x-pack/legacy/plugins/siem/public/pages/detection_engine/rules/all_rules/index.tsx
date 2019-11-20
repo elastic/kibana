@@ -59,9 +59,9 @@ const initialState: State = {
  *   * Enable/Disable
  *   * Duplicate
  *   * Delete
- *   * Export
+ *   * Import/Export
  */
-export const AllRules = React.memo(() => {
+export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importCompleteToggle => {
   const [
     {
       exportPayload,
@@ -87,6 +87,12 @@ export const AllRules = React.memo(() => {
       setIsInitialLoad(false);
     }
   }, [isLoadingRules]);
+
+  useEffect(() => {
+    if (!isInitialLoad) {
+      dispatch({ type: 'refresh' });
+    }
+  }, [importCompleteToggle]);
 
   useEffect(() => {
     dispatch({

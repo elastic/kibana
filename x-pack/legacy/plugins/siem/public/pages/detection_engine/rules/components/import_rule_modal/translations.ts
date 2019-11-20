@@ -40,3 +40,20 @@ export const CANCEL_BUTTON = i18n.translate(
     defaultMessage: 'Cancel',
   }
 );
+
+export const SUCCESSFULLY_IMPORTED_RULES = (totalRules: number) =>
+  i18n.translate(
+    'xpack.siem.detectionEngine.components.importRuleModal.successfullyImportedRulesTitle',
+    {
+      values: { totalRules },
+      defaultMessage:
+        'Successfully imported {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
+    }
+  );
+
+export const IMPORT_FAILED = i18n.translate(
+  'xpack.siem.detectionEngine.components.importRuleModal.importFailedTitle',
+  {
+    defaultMessage: 'Failed to import rules',
+  }
+);
