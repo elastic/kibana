@@ -5,7 +5,9 @@
  */
 
 import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import {
+  EuiButton,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -18,24 +20,43 @@ import {
   EuiTitle,
   EuiSideNav,
 } from '@elastic/eui';
-export const Home = () => (
-  <EuiPageBody>
-    <EuiPageHeader>
-      <EuiPageHeaderSection>
-        <EuiTitle size="l">
-          <h1>Welcome to Endpoint!</h1>
-        </EuiTitle>
-      </EuiPageHeaderSection>
-    </EuiPageHeader>
-    <EuiPageContent>
-      <EuiPageContentHeader>
-        <EuiPageContentHeaderSection>
-          <EuiTitle>
-            <h2>Home Page</h2>
+import { actions as homeActions } from '../actions/home';
+
+export const Home = () => {
+  const dispatch = useDispatch();
+  const renderBootstrapButton = () => {
+    async function onBootstrap() {
+      dispatch(homeActions.userClickedArchiveItems());
+      // TODO: how to unselect once pressed? See https://github.com/elastic/eui/issues/1077
+    }
+
+    return (
+      <EuiButton color="danger" iconType="trash" onClick={onBootstrap}>
+        Bootstrap
+      </EuiButton>
+    );
+  };
+
+  const bootstrapButton = renderBootstrapButton();
+  return (
+    <EuiPageBody>
+      <EuiPageHeader>
+        <EuiPageHeaderSection>
+          <EuiTitle size="l">
+            <h1>Welcome to Endpoint!</h1>
           </EuiTitle>
-        </EuiPageContentHeaderSection>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>Body Content</EuiPageContentBody>
-    </EuiPageContent>
-  </EuiPageBody>
-);
+        </EuiPageHeaderSection>
+      </EuiPageHeader>
+      <EuiPageContent>
+        <EuiPageContentHeader>
+          <EuiPageContentHeaderSection>
+            <EuiTitle>
+              <h2>Home Page</h2>
+            </EuiTitle>
+          </EuiPageContentHeaderSection>
+        </EuiPageContentHeader>
+        <EuiPageContentBody>Body Content ${bootstrapButton}</EuiPageContentBody>
+      </EuiPageContent>
+    </EuiPageBody>
+  );
+};
