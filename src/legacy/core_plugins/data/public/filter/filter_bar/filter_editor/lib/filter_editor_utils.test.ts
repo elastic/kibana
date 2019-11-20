@@ -30,11 +30,9 @@ import { IndexPattern, Field } from '../../../../index';
 import {
   getFieldFromFilter,
   getFilterableFields,
-  getFilterParams,
   getIndexPatternFromFilter,
   getOperatorFromFilter,
   getOperatorOptions,
-  getQueryDslFromFilter,
   isFilterValid,
 } from './filter_editor_utils';
 import { existsOperator, isBetweenOperator, isOneOfOperator, isOperator } from './filter_operators';
@@ -46,14 +44,6 @@ const mockedFields = stubFields as Field[];
 const mockedIndexPattern = stubIndexPattern as IndexPattern;
 
 describe('Filter editor utils', () => {
-  describe('getQueryDslFromFilter', () => {
-    it('should return query DSL without meta and $state', () => {
-      const queryDsl = getQueryDslFromFilter(phraseFilter);
-      expect(queryDsl).not.toHaveProperty('meta');
-      expect(queryDsl).not.toHaveProperty('$state');
-    });
-  });
-
   describe('getIndexPatternFromFilter', () => {
     it('should return the index pattern from the filter', () => {
       const indexPattern = getIndexPatternFromFilter(phraseFilter, [mockedIndexPattern]);
@@ -128,28 +118,6 @@ describe('Filter editor utils', () => {
       expect(operator).not.toBeUndefined();
       expect(operator && operator.type).toBe('exists');
       expect(operator && operator.negate).toBe(true);
-    });
-  });
-
-  describe('getFilterParams', () => {
-    it('should retrieve params from phrase filter', () => {
-      const params = getFilterParams(phraseFilter);
-      expect(params).toBe('ios');
-    });
-
-    it('should retrieve params from phrases filter', () => {
-      const params = getFilterParams(phrasesFilter);
-      expect(params).toEqual(['win xp', 'osx']);
-    });
-
-    it('should retrieve params from range filter', () => {
-      const params = getFilterParams(rangeFilter);
-      expect(params).toEqual({ from: 0, to: 10 });
-    });
-
-    it('should return undefined for exists filter', () => {
-      const params = getFilterParams(existsFilter);
-      expect(params).toBeUndefined();
     });
   });
 

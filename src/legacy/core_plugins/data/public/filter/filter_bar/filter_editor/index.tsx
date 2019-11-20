@@ -41,11 +41,9 @@ import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {
   getFieldFromFilter,
   getFilterableFields,
-  getFilterParams,
   getIndexPatternFromFilter,
   getOperatorFromFilter,
   getOperatorOptions,
-  getQueryDslFromFilter,
   isFilterValid,
 } from './lib/filter_editor_utils';
 import { Operator } from './lib/filter_operators';
@@ -80,10 +78,10 @@ class FilterEditorUI extends Component<Props, State> {
       selectedIndexPattern: this.getIndexPatternFromFilter(),
       selectedField: this.getFieldFromFilter(),
       selectedOperator: this.getSelectedOperator(),
-      params: getFilterParams(props.filter),
+      params: esFilters.getFilterParams(props.filter),
       useCustomLabel: props.filter.meta.alias !== null,
       customLabel: props.filter.meta.alias,
-      queryDsl: JSON.stringify(getQueryDslFromFilter(props.filter), null, 2),
+      queryDsl: JSON.stringify(esFilters.cleanFilter(props.filter), null, 2),
       isCustomEditorOpen: this.isUnknownFilterType(),
     };
   }

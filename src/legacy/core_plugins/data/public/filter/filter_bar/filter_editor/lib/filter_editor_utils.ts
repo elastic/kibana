@@ -18,7 +18,6 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { omit } from 'lodash';
 import { Ipv4Address } from '../../../../../../../../plugins/kibana_utils/public';
 import { Field, IndexPattern, isFilterable } from '../../../../index_patterns';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
@@ -41,10 +40,6 @@ export function getOperatorFromFilter(filter: esFilters.Filter) {
   });
 }
 
-export function getQueryDslFromFilter(filter: esFilters.Filter) {
-  return omit(filter, ['$state', 'meta']);
-}
-
 export function getFilterableFields(indexPattern: IndexPattern) {
   return indexPattern.fields.filter(isFilterable);
 }
@@ -53,20 +48,6 @@ export function getOperatorOptions(field: Field) {
   return FILTER_OPERATORS.filter(operator => {
     return !operator.fieldTypes || operator.fieldTypes.includes(field.type);
   });
-}
-
-export function getFilterParams(filter: esFilters.Filter) {
-  switch (filter.meta.type) {
-    case 'phrase':
-      return (filter as esFilters.PhraseFilter).meta.params.query;
-    case 'phrases':
-      return (filter as esFilters.PhrasesFilter).meta.params;
-    case 'range':
-      return {
-        from: (filter as esFilters.RangeFilter).meta.params.gte,
-        to: (filter as esFilters.RangeFilter).meta.params.lt,
-      };
-  }
 }
 
 export function validateParams(params: any, type: string) {
