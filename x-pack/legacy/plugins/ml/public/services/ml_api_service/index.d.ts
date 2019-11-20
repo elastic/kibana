@@ -66,7 +66,7 @@ declare interface Ml {
   annotations: {
     deleteAnnotation(id: string | undefined): Promise<any>;
     indexAnnotation(annotation: Annotation): Promise<object>;
-    getAnnotationsRx(obj: {
+    getAnnotations(obj: {
       jobIds: string[];
       earliestMs: number;
       latestMs: number;

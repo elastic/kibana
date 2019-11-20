@@ -12,13 +12,6 @@ const basePath = chrome.addBasePath('/api/ml');
 
 export const annotations = {
   getAnnotations(obj: any) {
-    return http({
-      url: `${basePath}/annotations`,
-      method: 'POST',
-      data: obj,
-    });
-  },
-  getAnnotationsRx(obj: any) {
     return httpCall(`${basePath}/annotations`, {
       method: 'POST',
       body: obj,

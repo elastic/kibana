@@ -417,7 +417,7 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
       earliestMs: timeRange.earliestMs,
       latestMs: timeRange.latestMs,
       maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
-    }).then((resp) => {
+    }).toPromise().then((resp) => {
       if (resp.error !== undefined || resp.annotations === undefined) {
         return resolve([]);
       }
