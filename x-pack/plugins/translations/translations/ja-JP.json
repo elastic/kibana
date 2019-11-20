@@ -9933,7 +9933,6 @@
     "xpack.security.account.passwordsDoNotMatch": "パスワードが一致していません。",
     "xpack.security.account.usernameGroupDescription": "この情報は変更できません。",
     "xpack.security.account.usernameGroupTitle": "ユーザー名とメールアドレス",
-    "xpack.security.components.sessionIdleTimeoutWarning.message": "操作がないため間もなくログアウトします。再開するには [OK] をクリックしてくださ。",
     "xpack.security.components.sessionIdleTimeoutWarning.okButtonText": "OK",
     "xpack.security.components.sessionIdleTimeoutWarning.title": "警告",
     "xpack.security.loggedOut.login": "ログイン",
