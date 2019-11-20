@@ -1,5 +1,5 @@
 def isPr() {
-  return env.ghprbPullId && env.ghprbPullLink && env.ghprbPullLink ==~ /\/elastic\/kibana\//
+  return !!(env.ghprbPullId && env.ghprbPullLink && env.ghprbPullLink =~ /\/elastic\/kibana\//)
 }
 
 def getCommitHash() {
