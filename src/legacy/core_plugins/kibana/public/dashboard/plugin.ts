@@ -37,7 +37,7 @@ import { DashboardConstants } from './dashboard_constants';
 import {
   FeatureCatalogueCategory,
   FeatureCatalogueSetup,
-} from '../../../../../plugins/feature_catalogue/public';
+} from '../../../../../plugins/home/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 
 export interface LegacyAngularInjectedDependencies {
