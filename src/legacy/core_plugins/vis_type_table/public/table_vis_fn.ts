@@ -20,7 +20,11 @@
 import { i18n } from '@kbn/i18n';
 import { tableVisResponseHandler } from './table_vis_request_handler';
 
-import { ExpressionFunction, KibanaDatatable, Render } from '../../interpreter/types';
+import {
+  ExpressionFunction,
+  KibanaDatatable,
+  Render,
+} from '../../../../plugins/expressions/public';
 
 const name = 'kibana_table';
 

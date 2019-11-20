@@ -34,6 +34,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.body).to.eql({
         id: createdAlert.id,
         name: 'abc',
+        tags: ['foo'],
         alertTypeId: 'test.noop',
         interval: '1m',
         enabled: true,
