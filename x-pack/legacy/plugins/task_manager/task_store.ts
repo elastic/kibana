@@ -8,7 +8,7 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 
-import { omit, defaults, mapValues, isDate, flow } from 'lodash';
+import { omit, pick, defaults, mapValues, isPlainObject, isDate, flow } from 'lodash';
 import {
   SavedObjectsClientContract,
   SavedObject,
@@ -143,13 +143,22 @@ export class TaskStore {
    *
    * @param task - The task being rescheduled.
    */
-  public async reschedule(taskInstance: TaskInstanceScheduling): Promise<ConcreteTaskInstance> {
-    const taskInStore = await this.getTask(taskInstance.id);
+  public async reschedule(
+    taskInstanceScheduling: TaskInstanceScheduling
+  ): Promise<ConcreteTaskInstance> {
+    const taskInstance = await this.getTask(taskInstanceScheduling.id);
     return await this.update(
-      applyConcreteTaskInstanceDefaults({
-        ...(taskInStore.status === 'idle' ? omit(taskInStore, 'runAt') : taskInStore),
-        ...taskInstance,
-      })
+      applyConcreteTaskInstanceDefaults(
+        taskInstance.status === 'idle'
+          ? {
+              ...omit(taskInstance, 'runAt'),
+              ...taskInstanceScheduling,
+            }
+          : {
+              ...taskInstance,
+              ...omit(taskInstanceScheduling, 'runAt'),
+            }
+      )
     );
   }
 
@@ -423,13 +432,10 @@ const taskInstanceToAttributes = flow(
 );
 
 function serializeTaskInstanceFields(doc: ConcreteTaskInstance): SavedObjectAttributes {
-  const { params, state, scheduledAt, startedAt, retryAt, runAt } = doc;
   return {
     ...omit(doc, 'id', 'version'),
-    ...mapValues({ params, state }, objectProp => JSON.stringify(objectProp)),
-    ...mapValues({ scheduledAt, startedAt, retryAt, runAt }, dateProp =>
-      isDate(dateProp) ? dateProp.toISOString() : null
-    ),
+    ...mapValues(pick(doc, isPlainObject), objectProp => JSON.stringify(objectProp)),
+    ...mapValues(pick(doc, isDate), (dateProp: Date) => dateProp.toISOString()),
   };
 }
 

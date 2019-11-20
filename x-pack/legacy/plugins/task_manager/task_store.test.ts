@@ -336,6 +336,7 @@ describe('TaskStore', () => {
         {
           id: 'myTask',
           interval: '15m',
+          runAt: anHourInTheFuture,
         },
         // Current Task in Store
         {
