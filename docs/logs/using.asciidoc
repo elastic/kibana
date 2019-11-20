@@ -82,7 +82,8 @@ This automatically adds a search filter to the logs stream to filter the entries
 [[view-log-anomalies]]
 === View log anomalies
 
-If the {ml} {anomaly-detect} features are enabled, you can click *Log rate* to <<xpack-logs-analysis, use machine learning to detect and inspect anomalies>> in your log data.
+When the machine learning anomaly detection features are enabled, click *Log rate*, which allows you to
+<<xpack-logs-analysis,use machine learning to detect and inspect anomalies>> in your log data.
 
 [float]
 [[logs-integrations]]
