@@ -7,7 +7,7 @@ beta::[]
 With the {ml} {anomaly-detect} features enabled,
 you can use the *Log rate* page in the Logs app to automatically detect and inspect log anomalies and
 the log partitions in which they occurred.
-This helps you to spot suspicious behavior without significant human intervention --
+This helps you to spot anomalous behavior without significant human intervention --
 no more manually sampling log data, calculating rates, and determining if rates are normal.
 
 *Log rate* automatically highlights periods of time where the log rate is outside expected bounds and therefore may be anomalous.
@@ -22,22 +22,23 @@ TIP: You can also view log anomalies directly in the <<xpack-ml-anomalies,Machin
 
 [float]
 [[logs-analysis-create-ml-job]]
-=== Create a machine learning job for logs analysis
+=== Create a machine learning job for log rate analysis
 
-To enable log analysis and anomaly detection, you must first create your own {kibana-ref}/xpack-spaces.html[space].
-Within a space, you can create a machine learning job which will carry out the logs analysis.
+To enable log rate analysis and anomaly detection,
+you must first create your own {kibana-ref}/xpack-spaces.html[space].
+Within a space, you can create a machine learning job which will carry out the log rate analysis.
 
 [role="screenshot"]
 image::logs/images/analysis-tab-create-ml-job.png[Create machine learning job]
 
-1. Select the time range for the analysis.
+1. Select the time range for the machine learning analysis.
 By default, the analysis uses logs no older than four weeks, and continues indefinitely.
 You cannot change the time range for the analysis after the machine learning job has been created.
 2. Add the indices containing the logs you want to analyze.
 3. Click *Create ML job*.
 
-Even though the analyze time range is fixed,
-you can still use the time filter to adjust the results that are shown.
+Even though the machine learning job's time range is fixed,
+you can still use the time filter to adjust the results that are shown in your analysis.
 
 [float]
 [[logs-analysis-view-log-entries]]
@@ -55,8 +56,8 @@ image::logs/images/analysis-tab.png[Analysis tab in Logs app in Kibana]
 [[logs-analysis-entries-chart]]
 ==== Log entries chart
 
-The log entries chart shows an overall visualization of the log entry rate,
-partitioned and color-coded according to the value of the Elastic Common Schema (ECS)
+The log entries chart shows an overall, color-coded visualization of the log entry rate,
+partitioned according to the value of the Elastic Common Schema (ECS)
 {ecs-ref}/ecs-event.html[`event.dataset`] field.
 
 

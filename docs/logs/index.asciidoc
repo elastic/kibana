@@ -28,4 +28,4 @@ include::using.asciidoc[]
 
 include::configuring.asciidoc[]
 
-include::analysis-tab.asciidoc[]
+include::log-rate.asciidoc[]
