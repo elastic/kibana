@@ -83,15 +83,7 @@ export class vislibVisController {
           return cls.replace(/visLib--legend-\S+/g, '');
         }).addClass(legendClassName[visParams.legendPosition]);
 
-        this.unmount = mountReactNode(
-          <VisLegend
-            ref={this.legendRef}
-            vis={this.vis}
-            vislibVis={this.vislibVis}
-            visData={esResponse}
-            uiState={this.vis.getUiState()}
-          />
-        )(this.legendEl);
+        this.mountLegend(esResponse);
       }
 
       this.vislibVis.render(esResponse, this.vis.getUiState());
@@ -100,22 +92,29 @@ export class vislibVisController {
       // this is necessary because some visualizations
       // provide data necessary for the legend only after a render cycle.
       if (visParams.addLegend && CUSTOM_LEGEND_VIS_TYPES.includes(this.vislibVis.visConfigArgs.type)) {
-        if (this.unmount) {
-          this.unmount();
-        }
-
-        this.unmount = mountReactNode(
-          <VisLegend
-            ref={this.legendRef}
-            vis={this.vis}
-            vislibVis={this.vislibVis}
-            visData={esResponse}
-            uiState={this.vis.getUiState()}
-          />
-        )(this.legendEl);
+        this.unmountLegend();
+        this.mountLegend(esResponse);
         this.vislibVis.render(esResponse, this.vis.getUiState());
       }
     });
+  }
+
+  mountLegend(visData) {
+    this.unmount = mountReactNode(
+      <VisLegend
+        ref={this.legendRef}
+        vis={this.vis}
+        vislibVis={this.vislibVis}
+        visData={visData}
+        uiState={this.vis.getUiState()}
+      />
+    )(this.legendEl);
+  }
+
+  unmountLegend() {
+    if (this.unmount) {
+      this.unmount();
+    }
   }
 
   destroy() {
