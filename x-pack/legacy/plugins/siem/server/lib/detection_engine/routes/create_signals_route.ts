@@ -43,6 +43,7 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       output_index: outputIndex,
       // eslint-disable-next-line @typescript-eslint/camelcase
       saved_id: savedId,
+      meta,
       filters,
       // eslint-disable-next-line @typescript-eslint/camelcase
       rule_id: ruleId,
@@ -87,6 +88,7 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       language,
       outputIndex,
       savedId,
+      meta,
       filters,
       ruleId: ruleId != null ? ruleId : uuid.v4(),
       index,

@@ -40,6 +40,7 @@ export interface SignalAlertParams {
   query: string | undefined | null;
   references: string[];
   savedId: string | undefined | null;
+  meta: Record<string, {}> | undefined | null;
   severity: string;
   size: number | undefined | null;
   tags: string[];

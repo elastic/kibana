@@ -910,6 +910,58 @@ describe('schemas', () => {
         }).error
       ).toBeFalsy();
     });
+
+    test('You can set meta to any object you want', () => {
+      expect(
+        createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: true,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          meta: {
+            somethingMadeUp: { somethingElse: true },
+          },
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You cannot create meta as a string', () => {
+      expect(
+        createSignalsSchema.validate<
+          Partial<Omit<SignalAlertParamsRest, 'meta'> & { meta: string }>
+        >({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: true,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          meta: 'should not work',
+        }).error
+      ).toBeTruthy();
+    });
   });
 
   describe('update signals schema', () => {
@@ -1646,6 +1698,26 @@ describe('schemas', () => {
           max_signals: 1,
         }).error
       ).toBeFalsy();
+    });
+
+    test('meta can be updated', () => {
+      expect(
+        updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
+          id: 'rule-1',
+          meta: { whateverYouWant: 'anything_at_all' },
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You update meta as a string', () => {
+      expect(
+        updateSignalSchema.validate<
+          Partial<Omit<UpdateSignalAlertParamsRest, 'meta'> & { meta: string }>
+        >({
+          id: 'rule-1',
+          meta: 'should not work',
+        }).error
+      ).toBeTruthy();
     });
   });
 

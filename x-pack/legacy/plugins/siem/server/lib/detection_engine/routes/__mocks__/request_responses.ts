@@ -130,6 +130,7 @@ export const getResult = (): SignalAlertType => ({
     language: 'kuery',
     outputIndex: '.siem-signals',
     savedId: null,
+    meta: null,
     filters: null,
     riskScore: 50,
     maxSignals: 100,

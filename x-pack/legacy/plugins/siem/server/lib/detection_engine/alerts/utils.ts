@@ -42,6 +42,7 @@ export const buildRule = ({
     rule_id: signalParams.ruleId,
     false_positives: signalParams.falsePositives,
     saved_id: signalParams.savedId,
+    meta: signalParams.meta,
     max_signals: signalParams.maxSignals,
     risk_score: signalParams.riskScore,
     output_index: signalParams.outputIndex,

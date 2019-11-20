@@ -48,6 +48,7 @@ export const transformAlertToSignal = (signal: SignalAlertType): Partial<OutputS
     query: signal.alertTypeParams.query,
     references: signal.alertTypeParams.references,
     saved_id: signal.alertTypeParams.savedId,
+    meta: signal.alertTypeParams.meta,
     severity: signal.alertTypeParams.severity,
     size: signal.alertTypeParams.size,
     updated_by: signal.updatedBy,

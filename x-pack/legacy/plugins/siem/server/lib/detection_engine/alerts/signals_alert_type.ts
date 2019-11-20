@@ -30,6 +30,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         language: schema.nullable(schema.string()),
         outputIndex: schema.string(),
         savedId: schema.nullable(schema.string()),
+        meta: schema.nullable(schema.object({}, { allowUnknowns: true })),
         query: schema.nullable(schema.string()),
         filters: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
         maxSignals: schema.number({ defaultValue: 10000 }),

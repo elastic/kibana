@@ -29,6 +29,7 @@ export const sampleSignalAlertParams = (
   filter: undefined,
   filters: undefined,
   savedId: undefined,
+  meta: undefined,
   size: 1000,
 });
 

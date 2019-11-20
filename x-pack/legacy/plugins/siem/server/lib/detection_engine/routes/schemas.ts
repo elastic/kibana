@@ -24,6 +24,7 @@ const query = Joi.string();
 const language = Joi.string().valid('kuery', 'lucene');
 const output_index = Joi.string();
 const saved_id = Joi.string();
+const meta = Joi.object();
 const max_signals = Joi.number().greater(0);
 const name = Joi.string();
 const risk_score = Joi.number()
@@ -73,6 +74,7 @@ export const createSignalsSchema = Joi.object({
     then: Joi.required(),
     otherwise: Joi.forbidden(),
   }),
+  meta,
   risk_score: risk_score.required(),
   max_signals: max_signals.default(100),
   name: name.required(),
@@ -107,6 +109,7 @@ export const updateSignalSchema = Joi.object({
     then: Joi.optional(),
     otherwise: Joi.forbidden(),
   }),
+  meta,
   risk_score,
   max_signals,
   name,
