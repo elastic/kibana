@@ -266,13 +266,13 @@ export type ESQueueCreateJobFn = (
 ) => Promise<JobParamsSavedObject | JobParamsUrl>;
 
 export type ImmediateCreateJobFn = (
-  jobParams: any, // JobParamsSavedObject | JobParamsUrl,
+  jobParams: any,
   headers: Record<string, string>,
   req: RequestFacade
 ) => Promise<{
   type: string | null;
   title: string;
-  jobParams: any; // JobParamsSavedObject | JobParamsUrl;
+  jobParams: any;
 }>;
 
 export type ESQueueWorkerExecuteFn = (
@@ -305,8 +305,7 @@ export interface ESQueueInstance {
 }
 
 export type CreateJobFactory = (server: ServerFacade) => ESQueueCreateJobFn | ImmediateCreateJobFn;
-export type ExecuteJobFactory = (server: ServerFacade) => ESQueueWorkerExecuteFn;
-export type ExecuteImmediateJobFactory = (server: ServerFacade) => ImmediateExecuteFn;
+export type ExecuteJobFactory = (server: ServerFacade) => ESQueueWorkerExecuteFn | ImmediateExecuteFn; // prettier-ignore
 
 export interface ExportTypeDefinition {
   id: string;
@@ -315,7 +314,7 @@ export interface ExportTypeDefinition {
   jobContentEncoding?: string;
   jobContentExtension: string;
   createJobFactory: CreateJobFactory;
-  executeJobFactory: ExecuteJobFactory | ExecuteImmediateJobFactory;
+  executeJobFactory: ExecuteJobFactory;
   validLicenses: string[];
 }
 
