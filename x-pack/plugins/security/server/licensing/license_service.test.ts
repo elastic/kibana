@@ -48,7 +48,7 @@ describe('license features', function() {
     mockRawLicense.isOneOf.mockImplementation(licenses =>
       Array.isArray(licenses) ? licenses.includes('basic') : licenses === 'basic'
     );
-    mockRawLicense.getFeature.mockReturnValue({ isEnabled: true, isAvailable: true } as any);
+    mockRawLicense.getFeature.mockReturnValue({ isEnabled: true, isAvailable: true });
 
     const serviceSetup = new SecurityLicenseService().setup();
     serviceSetup.update(mockRawLicense);
@@ -67,7 +67,7 @@ describe('license features', function() {
   it('should not show login page or other security elements if security is disabled in Elasticsearch.', () => {
     const mockRawLicense = getMockRawLicense({ isAvailable: true });
     mockRawLicense.isOneOf.mockReturnValue(false);
-    mockRawLicense.getFeature.mockReturnValue({ isEnabled: false, isAvailable: true } as any);
+    mockRawLicense.getFeature.mockReturnValue({ isEnabled: false, isAvailable: true });
 
     const serviceSetup = new SecurityLicenseService().setup();
     serviceSetup.update(mockRawLicense);
@@ -88,7 +88,7 @@ describe('license features', function() {
       const licenseArray = [licenses].flat();
       return licenseArray.includes('trial') || licenseArray.includes('platinum');
     });
-    mockRawLicense.getFeature.mockReturnValue({ isEnabled: true, isAvailable: true } as any);
+    mockRawLicense.getFeature.mockReturnValue({ isEnabled: true, isAvailable: true });
 
     const serviceSetup = new SecurityLicenseService().setup();
     serviceSetup.update(mockRawLicense);

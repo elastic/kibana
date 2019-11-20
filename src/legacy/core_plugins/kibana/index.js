@@ -64,7 +64,6 @@ export default function (kibana) {
       hacks: [
         'plugins/kibana/dev_tools',
       ],
-      fieldFormats: ['plugins/kibana/field_formats/register'],
       savedObjectTypes: [
         'plugins/kibana/visualize/saved_visualizations/saved_visualization_register',
         'plugins/kibana/discover/saved_searches/saved_search_register',

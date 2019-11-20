@@ -10,16 +10,18 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup, CoreStart } from 'src/core/public';
 import chrome, { Chrome } from 'ui/chrome';
 import { npSetup, npStart } from 'ui/new_platform';
-import { Plugin as EmbeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { start as embeddablePlugin } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import {
+  ExpressionsSetup,
+  ExpressionsStart,
+} from '../../../../../../src/plugins/expressions/public';
+import {
+  Setup as EmbeddableSetup,
+  Start as EmbeddableStart,
+} from '../../../../../../src/plugins/embeddable/public';
 import {
   setup as dataSetup,
   start as dataStart,
 } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
-import {
-  setup as expressionsSetup,
-  start as expressionsStart,
-} from '../../../../../../src/legacy/core_plugins/expressions/public/legacy';
 import {
   Datasource,
   Visualization,
@@ -34,13 +36,14 @@ import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 
 export interface EditorFrameSetupPlugins {
   data: typeof dataSetup;
-  expressions: typeof expressionsSetup;
+  embeddable: EmbeddableSetup;
+  expressions: ExpressionsSetup;
 }
 
 export interface EditorFrameStartPlugins {
   data: typeof dataStart;
-  expressions: typeof expressionsStart;
-  embeddables: ReturnType<EmbeddablePlugin['start']>;
+  embeddable: EmbeddableStart;
+  expressions: ExpressionsStart;
   chrome: Chrome;
 }
 
@@ -64,7 +67,7 @@ export class EditorFramePlugin {
   }
 
   public start(core: CoreStart, plugins: EditorFrameStartPlugins): EditorFrameStart {
-    plugins.embeddables.registerEmbeddableFactory(
+    plugins.embeddable.registerEmbeddableFactory(
       'lens',
       new EmbeddableFactory(
         plugins.chrome,
@@ -128,15 +131,16 @@ const editorFrame = new EditorFramePlugin();
 export const editorFrameSetup = () =>
   editorFrame.setup(npSetup.core, {
     data: dataSetup,
-    expressions: expressionsSetup,
+    embeddable: npSetup.plugins.embeddable,
+    expressions: npSetup.plugins.expressions,
   });
 
 export const editorFrameStart = () =>
   editorFrame.start(npStart.core, {
     data: dataStart,
-    expressions: expressionsStart,
+    embeddable: npStart.plugins.embeddable,
+    expressions: npStart.plugins.expressions,
     chrome,
-    embeddables: embeddablePlugin,
   });
 
 export const editorFrameStop = () => editorFrame.stop();
