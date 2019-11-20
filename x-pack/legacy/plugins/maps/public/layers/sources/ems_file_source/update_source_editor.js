@@ -54,10 +54,6 @@ export class UpdateSourceEditor extends Component {
 
   render() {
 
-    if (!this.state.fields) {
-      return null;
-    }
-
     return (
       <TooltipSelector
         tooltipFields={this.props.tooltipFields}

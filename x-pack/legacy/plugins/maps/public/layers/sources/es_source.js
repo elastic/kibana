@@ -241,8 +241,6 @@ export class AbstractESSource extends AbstractVectorSource {
     return this._descriptor.id;
   }
 
-
-
   async getFieldFormatter(fieldName) {
 
     const metricField = this.getMetricFields().find(({ propertyKey }) => {
