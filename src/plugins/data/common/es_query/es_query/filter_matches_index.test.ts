@@ -49,4 +49,11 @@ describe('filterMatchesIndex', () => {
 
     expect(filterMatchesIndex(filter, indexPattern)).toBe(false);
   });
+
+  it('should return true if the filter has meta without a key', () => {
+    const filter = { meta: { index: 'foo' } } as Filter;
+    const indexPattern = { id: 'foo', fields: [{ name: 'bar' }] } as IIndexPattern;
+
+    expect(filterMatchesIndex(filter, indexPattern)).toBe(true);
+  });
 });
