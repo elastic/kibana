@@ -19,7 +19,7 @@
     "focus-trap-react": "^3.1.1",
     "lodash": "npm:@elastic/lodash@3.10.1-kibana3",
     "prop-types": "15.6.0",
-    "react": "^16.2.0",
+    "react": "^16.12.0",
     "react-ace": "^5.9.0",
     "react-color": "^2.13.8",
     "tabbable": "1.1.3",
