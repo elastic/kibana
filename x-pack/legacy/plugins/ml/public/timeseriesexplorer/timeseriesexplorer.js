@@ -182,7 +182,7 @@ export class TimeSeriesExplorer extends React.Component {
   /**
    * Subject for listening brush time range selection.
    */
-  contextChart = new Subject();
+  contextChart$ = new Subject();
 
   detectorIndexChangeHandler = (e) => {
     const id = e.target.value;
@@ -335,7 +335,7 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   contextChartSelected = (selection) => {
-    this.contextChart.next(selection);
+    this.contextChart$.next(selection);
   }
 
   entityFieldValueChanged = (entity, fieldValue) => {
@@ -964,7 +964,7 @@ export class TimeSeriesExplorer extends React.Component {
     this.resizeHandler();
 
     // Listen for context chart updates.
-    this.subscriptions.add(this.contextChart
+    this.subscriptions.add(this.contextChart$
       .pipe(
         tap(selection => {
           this.setState({
@@ -1037,7 +1037,7 @@ export class TimeSeriesExplorer extends React.Component {
             this.loadAnomaliesTableData(searchBounds.min.valueOf(), searchBounds.max.valueOf())
           ]);
         }),
-        withLatestFrom(this.contextChart)
+        withLatestFrom(this.contextChart$)
       )
       .subscribe(([[refreshFocusData, tableData], selection]) => {
         const {
