@@ -12,10 +12,17 @@ export default function({ getService }: FtrProviderContext) {
   const indexPattern = 'foo';
   const templateName = 'bar';
   const es = getService('es');
+  const mappings = {
+    properties: {
+      foo: {
+        type: 'keyword',
+      },
+    },
+  };
   // This test was inspired by https://github.com/elastic/kibana/blob/master/x-pack/test/api_integration/apis/monitoring/common/mappings_exist.js
   describe('template', async () => {
     it('can be loaded', async () => {
-      const template = getTemplate(indexPattern);
+      const template = getTemplate(indexPattern, mappings);
 
       // This test is not an API integration test with Kibana
       // We want to test here if the template is valid and for this we need a running ES instance.

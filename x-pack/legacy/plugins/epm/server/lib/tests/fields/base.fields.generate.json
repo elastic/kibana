@@ -1,0 +1,38 @@
+[
+  {
+    "name": "user",
+    "type": "group",
+    "fields": [
+      {
+        "name": "auid"
+      },
+      {
+        "name": "euid"
+      }
+    ]
+  },
+  {
+    "name": "long",
+    "type": "group",
+    "fields": [
+      {
+        "name": "nested",
+        "type": "group",
+        "fields": [
+          {
+            "name": "foo"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "nested",
+    "type": "group",
+    "fields": [
+      {
+        "name": "bar"
+      }
+    ]
+  }
+]
