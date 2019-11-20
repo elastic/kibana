@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { esQuery, esFilters, IIndexPattern, Query } from 'src/plugins/data/server';
 // @ts-ignore no module definition
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import { CancellationToken } from '../../../../common/cancellation_token';
@@ -18,12 +19,6 @@ import {
 import { getDataSource } from './get_data_source';
 import { getFilters } from './get_filters';
 import { JobParamsDiscoverCsv } from '../../../csv/types';
-import {
-  esQuery,
-  esFilters,
-  IIndexPattern,
-  Query,
-} from '../../../../../../../../src/plugins/data/server';
 
 const getEsQueryConfig = async (config: any) => {
   const configs = await Promise.all([
