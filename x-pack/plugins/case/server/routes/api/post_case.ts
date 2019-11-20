@@ -9,9 +9,7 @@ import { dateNewCase, wrapError } from './utils';
 import { NewCaseSchema } from './schema';
 import { RouteDeps } from '.';
 
-export function initPostCaseApi(deps: RouteDeps) {
-  const { log, router, caseIndex } = deps;
-
+export function initPostCaseApi({ caseIndex, log, router }: RouteDeps) {
   router.post(
     {
       path: '/api/cases',

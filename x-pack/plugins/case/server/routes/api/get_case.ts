@@ -9,9 +9,7 @@ import { CaseService } from '../../case_service';
 import { RouteDeps } from '.';
 import { wrapError } from './utils';
 
-export function initGetCaseApi(deps: RouteDeps) {
-  const { caseIndex, log, router } = deps;
-
+export function initGetCaseApi({ caseIndex, log, router }: RouteDeps) {
   router.get(
     {
       path: '/api/cases/{id}',

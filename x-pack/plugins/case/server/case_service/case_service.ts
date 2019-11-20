@@ -5,24 +5,18 @@
  */
 
 import { APICaller, Logger } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
+import { CreateDocumentResponse, GetResponse, SearchResponse } from 'elasticsearch';
 import { NewCaseWithDate, UpdatedCaseWithDate } from '../routes/api/types';
 
-interface CaseAggregationResponse {
-  hits: {
-    total: { value: number };
-  };
-  aggregations: {
-    [aggName: string]: {
-      buckets: Array<{ key: string; doc_count: number }>;
-    };
-  };
-}
+type CaseGetResponse = GetResponse<NewCaseWithDate>;
+
+type CaseSearchResponse = SearchResponse<NewCaseWithDate>;
 
 export interface CaseServiceInterface {
-  getAllCases(): Promise<SearchResponse<CaseAggregationResponse>>;
-  getCase(id: string): Promise<CaseAggregationResponse>;
-  postCase(newCase: NewCaseWithDate): Promise<CaseAggregationResponse>;
+  getAllCases(): Promise<SearchResponse<CaseSearchResponse>>;
+  getCase(id: string): Promise<CaseGetResponse>;
+  postCase(newCase: NewCaseWithDate): Promise<CreateDocumentResponse>;
+  updateCase(updatedCase: UpdatedCaseWithDate, id: string): Promise<CreateDocumentResponse>;
 }
 
 export class CaseService implements CaseServiceInterface {
@@ -34,7 +28,7 @@ export class CaseService implements CaseServiceInterface {
 
   async getAllCases() {
     this.log.debug(`CaseService - getAllCases`);
-    return await this.callDataCluster<CaseAggregationResponse>('search', {
+    return await this.callDataCluster<CaseSearchResponse>('search', {
       index: this.caseIndex,
       body: {
         track_total_hits: true,
@@ -51,7 +45,7 @@ export class CaseService implements CaseServiceInterface {
 
   async getCase(id: string) {
     this.log.debug(`CaseService - getCase/${id}`);
-    return await this.callDataCluster<CaseAggregationResponse>('get', {
+    return await this.callDataCluster<CaseGetResponse>('get', {
       index: this.caseIndex,
       id,
     });
@@ -59,15 +53,15 @@ export class CaseService implements CaseServiceInterface {
 
   async postCase(newCase: NewCaseWithDate) {
     this.log.debug(`CaseService - postCase:`, newCase);
-    return await this.callDataCluster<CaseAggregationResponse>('index', {
+    return await this.callDataCluster<CreateDocumentResponse>('index', {
       index: this.caseIndex,
       body: newCase,
     });
   }
 
   async updateCase(updatedCase: UpdatedCaseWithDate, id: string) {
-    this.log.debug(`CaseService - updateCase:`, updatedCase);
-    return await this.callDataCluster<CaseAggregationResponse>('update', {
+    this.log.debug(`CaseService - updateCase/${id}:`, updatedCase);
+    return await this.callDataCluster<CreateDocumentResponse>('update', {
       index: this.caseIndex,
       id,
       body: { doc: updatedCase },

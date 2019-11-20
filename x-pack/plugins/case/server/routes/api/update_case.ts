@@ -10,9 +10,7 @@ import { dateUpdatedCase, wrapError } from './utils';
 import { RouteDeps } from '.';
 import { UpdatedCaseSchema } from './schema';
 
-export function initUpdateCaseApi(deps: RouteDeps) {
-  const { log, router, caseIndex } = deps;
-
+export function initUpdateCaseApi({ log, router, caseIndex }: RouteDeps) {
   router.post(
     {
       path: '/api/cases/{id}',
