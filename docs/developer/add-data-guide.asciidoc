@@ -14,7 +14,7 @@ Each tutorial contains three sets of instructions:
 // TODO: update path to where the directory must be created on the new platform
 1. Create a new directory in the link:https://github.com/elastic/kibana/tree/master/src/legacy/core_plugins/kibana/server/tutorials[tutorials directory].
 2. In the new directory, create a file called `index.js` that exports a function.
-The function must return a JavaScript object that conforms to the link:https://github.com/elastic/kibana/blob/master/src/plugins/home/server/lib/tutorial_schema.ts[tutorial schema].
+The function must return a JavaScript object that conforms to the link:https://github.com/elastic/kibana/blob/master/src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts[tutorial schema].
 // TODO: update path to where the tutorial must be registered on the new platform
 3. Register the tutorial in link:https://github.com/elastic/kibana/blob/master/src/legacy/core_plugins/kibana/server/tutorials/register.js[register.js] by calling `server.newPlatform.setup.plugins.home.tutorials.registerTutorial(myFuncImportedFromIndexJs)`.
 // TODO: update path to where the image assets must be added on the new platform
