@@ -46,6 +46,7 @@ import { SearchSource } from '../../../../ui/public/courier';
 
 const services = {
   // new plattform
+  core: npStart.core,
   addBasePath: npStart.core.http.basePath.prepend,
   capabilities: npStart.core.application.capabilities,
   chrome: npStart.core.chrome,
@@ -109,6 +110,7 @@ export { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 export { tabifyAggResponse } from 'ui/agg_response/tabify';
 // @ts-ignore
 export { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
+export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 export { unhashUrl } from 'ui/state_management/state_hashing';
 
 // EXPORT types
