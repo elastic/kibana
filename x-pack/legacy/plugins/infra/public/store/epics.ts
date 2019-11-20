@@ -9,5 +9,4 @@ import { combineEpics } from 'redux-observable';
 import { createLocalEpic } from './local';
 import { createRemoteEpic } from './remote';
 
-export const createRootEpic = <State>() =>
-  combineEpics(createLocalEpic<State>(), createRemoteEpic<State>());
+export const createRootEpic = <State>() => combineEpics(createLocalEpic<State>());
