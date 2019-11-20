@@ -360,8 +360,8 @@
     "nohoist": [
       "**/mochawesome",
       "**/mochawesome/**",
-      "**/mocha-multi-reporters",
-      "**/mocha-multi-reporters/**"
+      "**/cypress-multi-reporters",
+      "**/cypress-multi-reporters/**"
     ]
   }
 }
