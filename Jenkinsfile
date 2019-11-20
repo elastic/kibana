@@ -1,6 +1,6 @@
 #!/bin/groovy
 
-library 'kibana-pipeline-library'
+library 'kibana-pipeline-library@github-api'
 kibanaLibrary.load()
 
 stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a little bit
@@ -48,7 +48,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
             // ])
           }
         }
-        kibanaPipeline.sendMail()
+        // kibanaPipeline.sendMail()
       }
     }
   }
