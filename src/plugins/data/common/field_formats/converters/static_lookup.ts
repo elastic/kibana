@@ -19,7 +19,7 @@
 
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert } from '../types';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 function convertLookupEntriesToMap(lookupEntries: any[]) {
   return lookupEntries.reduce(
@@ -32,7 +32,7 @@ function convertLookupEntriesToMap(lookupEntries: any[]) {
 }
 
 export class StaticLookupFormat extends FieldFormat {
-  static id = 'static_lookup';
+  static id = FIELD_FORMAT_IDS.STATIC_LOOKUP;
   static title = 'Static Lookup';
   static fieldType = [
     KBN_FIELD_TYPES.STRING,
