@@ -17,13 +17,17 @@
  * under the License.
  */
 
-import { once } from 'lodash';
+import { format as formatUrl } from 'url';
 
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-import { IndexPatterns } from '../index_patterns/index_patterns';
+import { Client } from '@elastic/elasticsearch';
 
-/** @internal */
-export const initLegacyModule = once((indexPatterns: IndexPatterns): void => {
-  uiModules.get('kibana/index_patterns').value('indexPatterns', indexPatterns);
-});
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export function ElasticsearchProvider({ getService }: FtrProviderContext) {
+  const config = getService('config');
+
+  return new Client({
+    nodes: [formatUrl(config.get('servers.elasticsearch'))],
+    requestTimeout: config.get('timeouts.esRequestTimeout'),
+  });
+}
