@@ -437,10 +437,13 @@ const taskInstanceToAttributes = flow(
 );
 
 function serializeTaskInstanceFields(doc: ConcreteTaskInstance): SavedObjectAttributes {
+  const { scheduledAt, runAt, startedAt, retryAt, params, state } = doc;
   return {
     ...omit(doc, 'id', 'version'),
-    ...mapValues(pick(doc, isPlainObject), objectProp => JSON.stringify(objectProp)),
-    ...mapValues(pick(doc, isDate), (dateProp: Date) => dateProp.toISOString()),
+    ...mapValues(pick({ params, state }, isPlainObject), objectProp => JSON.stringify(objectProp)),
+    ...mapValues(pick({ scheduledAt, runAt, startedAt, retryAt }, isDate), (dateProp: Date) =>
+      dateProp.toISOString()
+    ),
   };
 }
 
