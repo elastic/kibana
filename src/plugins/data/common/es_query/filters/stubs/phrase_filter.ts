@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { esFilters } from '../../../../../../../../../plugins/data/public';
+import { esFilters } from '../../..';
 
 export const phraseFilter: esFilters.PhraseFilter = {
   meta: {
