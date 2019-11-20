@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CallAPIOptions } from 'src/core/server/elasticsearch';
+import { APICaller } from 'src/core/server/elasticsearch';
 import { Config } from 'src/core/server/config';
 import { retryCallCluster } from '../../../elasticsearch/retry_call_cluster';
 import { KibanaMigrator } from '../../migrations';
@@ -31,11 +31,7 @@ export const createRepository = (
   schema: SavedObjectsSchema,
   config: Config,
   indexName: string,
-  callCluster: (
-    endpoint: string,
-    clientParams: Record<string, any>,
-    options?: CallAPIOptions
-  ) => Promise<any>,
+  callCluster: APICaller,
   extraTypes: string[] = []
 ) => {
   const mappings = migrator.getActiveMappings();

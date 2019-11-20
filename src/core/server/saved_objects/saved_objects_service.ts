@@ -29,7 +29,7 @@ import {
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
 import { LegacyServiceDiscoverPlugins } from '../legacy/legacy_service';
-import { ElasticsearchServiceSetup, CallAPIOptions } from '../elasticsearch';
+import { ElasticsearchServiceSetup, APICaller } from '../elasticsearch';
 import { KibanaConfigType } from '../kibana_config';
 import { retryCallCluster } from '../elasticsearch/retry_call_cluster';
 import { SavedObjectsConfigType } from './saved_objects_config';
@@ -229,14 +229,7 @@ export class SavedObjectsService
       callCluster: retryCallCluster(adminClient.callAsInternalUser),
     }));
 
-    const createSORepository = (
-      callCluster: (
-        endpoint: string,
-        clientParams: Record<string, any>,
-        options?: CallAPIOptions
-      ) => Promise<any>,
-      extraTypes: string[] = []
-    ) => {
+    const createSORepository = (callCluster: APICaller, extraTypes: string[] = []) => {
       return createRepository(
         migrator,
         savedObjectSchemas,
