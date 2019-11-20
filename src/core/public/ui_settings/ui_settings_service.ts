@@ -16,12 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Subject } from 'rxjs';
 
 import { HttpSetup } from '../http';
 import { InjectedMetadataSetup } from '../injected_metadata';
 
 import { UiSettingsApi } from './ui_settings_api';
-import { UiSettingsClient, UiSettingsClientContract } from './ui_settings_client';
+import { UiSettingsClient } from './ui_settings_client';
+import { IUiSettingsClient } from './types';
 
 interface UiSettingsServiceDeps {
   http: HttpSetup;
@@ -32,8 +34,9 @@ interface UiSettingsServiceDeps {
 export class UiSettingsService {
   private uiSettingsApi?: UiSettingsApi;
   private uiSettingsClient?: UiSettingsClient;
+  private done$ = new Subject();
 
-  public setup({ http, injectedMetadata }: UiSettingsServiceDeps): UiSettingsClientContract {
+  public setup({ http, injectedMetadata }: UiSettingsServiceDeps): IUiSettingsClient {
     this.uiSettingsApi = new UiSettingsApi(http);
     http.addLoadingCount(this.uiSettingsApi.getLoadingCount$());
 
@@ -44,19 +47,18 @@ export class UiSettingsService {
       api: this.uiSettingsApi,
       defaults: legacyMetadata.uiSettings.defaults,
       initialSettings: legacyMetadata.uiSettings.user,
+      done$: this.done$,
     });
 
     return this.uiSettingsClient;
   }
 
-  public start(): UiSettingsClientContract {
+  public start(): IUiSettingsClient {
     return this.uiSettingsClient!;
   }
 
   public stop() {
-    if (this.uiSettingsClient) {
-      this.uiSettingsClient.stop();
-    }
+    this.done$.complete();
 
     if (this.uiSettingsApi) {
       this.uiSettingsApi.stop();
