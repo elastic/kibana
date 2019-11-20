@@ -30,7 +30,6 @@ import { IndexPattern, Field } from '../../../../index';
 import {
   getFieldFromFilter,
   getFilterableFields,
-  getIndexPatternFromFilter,
   getOperatorFromFilter,
   getOperatorOptions,
   isFilterValid,
@@ -44,13 +43,6 @@ const mockedFields = stubFields as Field[];
 const mockedIndexPattern = stubIndexPattern as IndexPattern;
 
 describe('Filter editor utils', () => {
-  describe('getIndexPatternFromFilter', () => {
-    it('should return the index pattern from the filter', () => {
-      const indexPattern = getIndexPatternFromFilter(phraseFilter, [mockedIndexPattern]);
-      expect(indexPattern).toBe(mockedIndexPattern);
-    });
-  });
-
   describe('getFieldFromFilter', () => {
     it('should return the field from the filter', () => {
       const field = getFieldFromFilter(phraseFilter, mockedIndexPattern);

@@ -41,7 +41,6 @@ import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {
   getFieldFromFilter,
   getFilterableFields,
-  getIndexPatternFromFilter,
   getOperatorFromFilter,
   getOperatorOptions,
   isFilterValid,
@@ -50,7 +49,7 @@ import { Operator } from './lib/filter_operators';
 import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
-import { esFilters } from '../../../../../../../plugins/data/public';
+import { esFilters, utils } from '../../../../../../../plugins/data/public';
 
 interface Props {
   filter: esFilters.Filter;
@@ -75,7 +74,7 @@ class FilterEditorUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      selectedIndexPattern: this.getIndexPatternFromFilter(),
+      selectedIndexPattern: this.getIndexPatternFromFilter() as IndexPattern,
       selectedField: this.getFieldFromFilter(),
       selectedOperator: this.getSelectedOperator(),
       params: esFilters.getFilterParams(props.filter),
@@ -373,13 +372,14 @@ class FilterEditorUI extends Component<Props, State> {
   }
 
   private getIndexPatternFromFilter() {
-    return getIndexPatternFromFilter(this.props.filter, this.props.indexPatterns);
+    return utils.getIndexPatternFromFilter(this.props.filter, this.props.indexPatterns);
   }
 
   private getFieldFromFilter() {
     const indexPattern = this.getIndexPatternFromFilter();
     return (
-      indexPattern && getFieldFromFilter(this.props.filter as esFilters.FieldFilter, indexPattern)
+      indexPattern &&
+      getFieldFromFilter(this.props.filter as esFilters.FieldFilter, indexPattern as IndexPattern)
     );
   }
 

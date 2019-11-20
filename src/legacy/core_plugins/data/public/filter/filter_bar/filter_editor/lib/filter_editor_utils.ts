@@ -23,13 +23,6 @@ import { Field, IndexPattern, isFilterable } from '../../../../index_patterns';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
 import { esFilters } from '../../../../../../../../plugins/data/public';
 
-export function getIndexPatternFromFilter(
-  filter: esFilters.Filter,
-  indexPatterns: IndexPattern[]
-): IndexPattern | undefined {
-  return indexPatterns.find(indexPattern => indexPattern.id === filter.meta.index);
-}
-
 export function getFieldFromFilter(filter: esFilters.FieldFilter, indexPattern: IndexPattern) {
   return indexPattern.fields.find(field => field.name === filter.meta.key);
 }

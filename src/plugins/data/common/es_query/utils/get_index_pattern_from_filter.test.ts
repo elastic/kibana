@@ -17,6 +17,12 @@
  * under the License.
  */
 
-export * from './get_time_zone_from_settings';
-export * from './get_index_pattern_from_filter';
-export * from './get_display_value';
+import { stubIndexPattern, phraseFilter } from 'src/plugins/data/public/stubs';
+import { getIndexPatternFromFilter } from './get_index_pattern_from_filter';
+
+describe('getIndexPatternFromFilter', () => {
+  it('should return the index pattern from the filter', () => {
+    const indexPattern = getIndexPatternFromFilter(phraseFilter, [stubIndexPattern]);
+    expect(indexPattern).toBe(stubIndexPattern);
+  });
+});

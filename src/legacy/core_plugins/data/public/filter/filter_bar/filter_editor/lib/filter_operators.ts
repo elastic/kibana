@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { esFilters } from 'src/plugins/data/public';
+import { esFilters } from '../../../../../../../../plugins/data/public';
 
 export interface Operator {
   message: string;

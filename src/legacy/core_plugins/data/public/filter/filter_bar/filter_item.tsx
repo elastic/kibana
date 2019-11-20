@@ -25,8 +25,7 @@ import { UiSettingsClientContract } from 'src/core/public';
 import { IndexPattern } from '../../index_patterns';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
-import { getDisplayValueFromFilter } from './filter_editor/lib/get_display_value';
-import { esFilters } from '../../../../../../plugins/data/public';
+import { esFilters, utils } from '../../../../../../plugins/data/public';
 
 interface Props {
   id: string;
@@ -62,7 +61,7 @@ class FilterItemUI extends Component<Props, State> {
       this.props.className
     );
 
-    const valueLabel = getDisplayValueFromFilter(filter, this.props.indexPatterns);
+    const valueLabel = utils.getDisplayValueFromFilter(filter, this.props.indexPatterns);
     const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
     const dataTestSubjValue = filter.meta.value ? `filter-value-${valueLabel}` : '';
     const dataTestSubjDisabled = `filter-${

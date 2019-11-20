@@ -17,6 +17,12 @@
  * under the License.
  */
 
-export * from './get_time_zone_from_settings';
-export * from './get_index_pattern_from_filter';
-export * from './get_display_value';
+import { Filter } from '../filters';
+import { IIndexPattern } from '../..';
+
+export function getIndexPatternFromFilter(
+  filter: Filter,
+  indexPatterns: IIndexPattern[]
+): IIndexPattern | undefined {
+  return indexPatterns.find(indexPattern => indexPattern.id === filter.meta.index);
+}
