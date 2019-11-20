@@ -17,15 +17,13 @@
  * under the License.
  */
 
-// @ts-ignore
-import { fieldFormats } from 'ui/registry/field_formats';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { ObjDefine } from './obj_define';
 // @ts-ignore
 import { shortenDottedString } from '../../../../../core_plugins/kibana/common/utils/shorten_dotted_string';
 import { IndexPattern } from '../index_patterns';
-import { getNotifications } from '../services';
+import { getNotifications, getFieldFormats } from '../services';
 
 import {
   FieldFormat,
@@ -104,6 +102,8 @@ export class Field implements FieldType {
 
     let format = spec.format;
     if (!format || !(format instanceof FieldFormat)) {
+      const fieldFormats = getFieldFormats();
+
       format =
         indexPattern.fieldFormatMap[spec.name] ||
         fieldFormats.getDefaultInstance(spec.type, spec.esTypes);
