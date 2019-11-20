@@ -67,8 +67,12 @@ export function Header(props: HeaderProps) {
   const numOfAssets = useMemo(
     () =>
       Object.entries(assets).reduce(
-        (acc, [key, value]) =>
-          acc + Object.entries(value).reduce((acc2, [key2, value2]) => acc2 + value2.length, 0),
+        (acc, [serviceName, serviceNameValue]) =>
+          acc +
+          Object.entries(serviceNameValue).reduce(
+            (acc2, [assetName, assetNameValue]) => acc2 + assetNameValue.length,
+            0
+          ),
         0
       ),
     [assets]
