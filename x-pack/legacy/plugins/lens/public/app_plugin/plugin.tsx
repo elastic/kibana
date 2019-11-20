@@ -16,7 +16,7 @@ import 'uiExports/savedObjectTypes';
 import React from 'react';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
-import { render } from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { CoreSetup, CoreStart, SavedObjectsClientContract } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { DataStart } from '../../../../../../src/legacy/core_plugins/data/public';
@@ -40,6 +40,7 @@ import {
 } from '../lens_ui_telemetry';
 import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../index';
 import { KibanaLegacySetup } from '../../../../../../src/plugins/kibana_legacy/public';
+import { EditorFrameStart } from '../types';
 
 export interface LensPluginSetupDependencies {
   kibana_legacy: KibanaLegacySetup;
@@ -54,6 +55,7 @@ export class AppPlugin {
     data: DataPublicPluginStart;
     dataShim: DataStart;
     savedObjectsClient: SavedObjectsClientContract;
+    editorFrame: EditorFrameStart;
   } | null = null;
 
   constructor() {}
@@ -79,12 +81,10 @@ export class AppPlugin {
         if (this.startDependencies === null) {
           throw new Error('mounted before start phase');
         }
-        const { data, dataShim, savedObjectsClient } = this.startDependencies;
+        const { data, dataShim, savedObjectsClient, editorFrame } = this.startDependencies;
         addHelpMenuToAppChrome(context.core.chrome);
 
-        const editorFrameStartInterface = editorFrameStart();
-
-        const instance = editorFrameStartInterface.createInstance({});
+        const instance = editorFrame.createInstance({});
 
         setReportManager(
           new LensReportManager({
@@ -133,6 +133,7 @@ export class AppPlugin {
         );
         return () => {
           instance.unmount();
+          unmountComponentAtNode(params.element);
         };
       },
     });
@@ -143,6 +144,7 @@ export class AppPlugin {
       data,
       dataShim,
       savedObjectsClient: savedObjects.client,
+      editorFrame: editorFrameStart(),
     };
   }
 
