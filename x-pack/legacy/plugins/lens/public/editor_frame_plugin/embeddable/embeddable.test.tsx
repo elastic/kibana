@@ -5,8 +5,8 @@
  */
 
 import { Embeddable } from './embeddable';
+import { ExpressionRendererProps } from 'src/plugins/expressions/public';
 import { Query, TimeRange, esFilters } from 'src/plugins/data/public';
-import { ExpressionRendererProps } from 'src/legacy/core_plugins/expressions/public';
 import { Document } from '../../persistence';
 
 jest.mock('../../../../../../../src/legacy/ui/public/inspector', () => ({

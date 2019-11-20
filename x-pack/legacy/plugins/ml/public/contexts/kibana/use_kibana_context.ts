@@ -16,7 +16,6 @@ export const useKibanaContext = () => {
     context.currentIndexPattern === undefined ||
     context.currentSavedSearch === undefined ||
     context.indexPatterns === undefined ||
-    context.kbnBaseUrl === undefined ||
     context.kibanaConfig === undefined
   ) {
     throw new Error('required attribute is undefined');

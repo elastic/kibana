@@ -10,12 +10,12 @@ import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Chrome } from 'ui/chrome';
+import { ChromeStart } from 'kibana/public';
 
 const docsPage = 'lens';
 
-export function addHelpMenuToAppChrome(chrome: Chrome) {
-  chrome.helpExtension.set(domElement => {
+export function addHelpMenuToAppChrome(chrome: ChromeStart) {
+  chrome.setHelpExtension(domElement => {
     render(<HelpMenu />, domElement);
     return () => {
       unmountComponentAtNode(domElement);
