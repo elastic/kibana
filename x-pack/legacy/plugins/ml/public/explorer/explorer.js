@@ -203,7 +203,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     resizeRef = createRef();
     resizeChecker = undefined;
     resizeHandler = () => {
-      explorerAction$.next({ action: EXPLORER_ACTION.REDRAW });
+      explorerAction$.next({ type: EXPLORER_ACTION.REDRAW });
     }
 
     subscriptions = new Subscription();
@@ -250,8 +250,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
         this.subscriptions.add(this.props.jobSelectService$.subscribe(({ selection }) => {
           if (selection !== undefined) {
-            const actionName = initialized ? EXPLORER_ACTION.JOB_SELECTION_CHANGE : EXPLORER_ACTION.INITIALIZE;
-            explorerAction$.next(jobSelectionActionCreator(actionName, selection, this.props.explorerState.appState));
+            const actionType = initialized ? EXPLORER_ACTION.JOB_SELECTION_CHANGE : EXPLORER_ACTION.INITIALIZE;
+            explorerAction$.next(jobSelectionActionCreator(actionType, selection, this.props.explorerState.appState));
 
             initialized = true;
           }
@@ -260,7 +260,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       } else {
         explorerAction$.next({
-          action: EXPLORER_ACTION.RELOAD,
+          type: EXPLORER_ACTION.RELOAD,
           payload: {
             loading: false,
             noJobsFound: true,
@@ -292,10 +292,10 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     previousTableInterval = interval$.getValue().val;
     previousTableSeverity = severity$.getValue().val;
     async componentDidUpdate() {
-      if (this.props.explorer !== null && this.props.explorer.action !== EXPLORER_ACTION.IDLE) {
-        const { action, payload } = this.props.explorer;
+      if (this.props.explorer !== null && this.props.explorer.type !== EXPLORER_ACTION.IDLE) {
+        const { type, payload } = this.props.explorer;
 
-        if (action === EXPLORER_ACTION.INITIALIZE) {
+        if (type === EXPLORER_ACTION.INITIALIZE) {
           const { noJobsFound, selectedCells, selectedJobs, swimlaneViewByFieldName, filterData } = payload;
           let currentSelectedCells = this.state.selectedCells;
           let currentSwimlaneViewByFieldName = this.state.swimlaneViewByFieldName;
@@ -324,23 +324,23 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           stateUpdate.indexPattern = indexPattern;
 
           this.updateExplorer(stateUpdate, true);
-          explorerAction$.next({ action: EXPLORER_ACTION.IDLE });
+          explorerAction$.next({ type: EXPLORER_ACTION.IDLE });
           return;
         }
 
         // Listen for changes to job selection.
-        if (action === EXPLORER_ACTION.JOB_SELECTION_CHANGE) {
+        if (type === EXPLORER_ACTION.JOB_SELECTION_CHANGE) {
           const { selectedJobs } = payload;
           const stateUpdate = {
             noInfluencersConfigured: (getInfluencers(selectedJobs).length === 0),
             selectedJobs,
           };
 
-          explorerAction$.next({ action: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
+          explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
           Object.assign(stateUpdate, getClearedSelectedAnomaliesState());
           // clear filter if selected jobs have no influencers
           if (stateUpdate.noInfluencersConfigured === true) {
-            explorerAction$.next({ action: EXPLORER_ACTION.APP_STATE_CLEAR_INFLUENCER_FILTER_SETTINGS });
+            explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_CLEAR_INFLUENCER_FILTER_SETTINGS });
             const noFilterState = {
               filterActive: false,
               filteredFields: [],
@@ -360,7 +360,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
           if (selectedJobs.length > 1) {
             explorerAction$.next({
-              action: EXPLORER_ACTION.APP_STATE_SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
+              type: EXPLORER_ACTION.APP_STATE_SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
               payload: { swimlaneViewByFieldName: VIEW_BY_JOB_LABEL }
             });
             stateUpdate.swimlaneViewByFieldName = VIEW_BY_JOB_LABEL;
@@ -371,28 +371,28 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             return;
           }
           this.updateExplorer(stateUpdate, true);
-          explorerAction$.next({ action: EXPLORER_ACTION.IDLE });
+          explorerAction$.next({ type: EXPLORER_ACTION.IDLE });
 
           return;
         }
 
         // RELOAD reloads full Anomaly Explorer and clears the selection.
-        if (action === EXPLORER_ACTION.RELOAD) {
-          explorerAction$.next({ action: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
+        if (type === EXPLORER_ACTION.RELOAD) {
+          explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
           this.updateExplorer({ ...payload, ...getClearedSelectedAnomaliesState() }, true);
-          explorerAction$.next({ action: EXPLORER_ACTION.IDLE });
+          explorerAction$.next({ type: EXPLORER_ACTION.IDLE });
           return;
         }
 
         // REDRAW reloads Anomaly Explorer and tries to retain the selection.
-        if (action === EXPLORER_ACTION.REDRAW) {
+        if (type === EXPLORER_ACTION.REDRAW) {
           this.updateExplorer({}, false);
-          explorerAction$.next({ action: EXPLORER_ACTION.IDLE });
+          explorerAction$.next({ type: EXPLORER_ACTION.IDLE });
           return;
         }
       } else if (this.previousSwimlaneLimit !== this.props.swimlaneLimit) {
         this.previousSwimlaneLimit = this.props.swimlaneLimit;
-        explorerAction$.next({ action: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
+        explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
         this.updateExplorer(getClearedSelectedAnomaliesState(), false);
       } else if (this.previousTableInterval !== this.props.tableInterval) {
         this.previousTableInterval = this.props.tableInterval;
@@ -742,7 +742,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       }
 
       if (clearSelection === true) {
-        explorerAction$.next({ action: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
+        explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
         Object.assign(stateUpdate, getClearedSelectedAnomaliesState());
       }
 
@@ -846,9 +846,9 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           this.state.filteredFields.includes(swimlaneViewByFieldName) === false);
       }
 
-      explorerAction$.next({ action: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
+      explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
       explorerAction$.next({
-        action: EXPLORER_ACTION.APP_STATE_SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
+        type: EXPLORER_ACTION.APP_STATE_SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
         payload: { swimlaneViewByFieldName }
       });
       this.setState({ swimlaneViewByFieldName, maskAll }, () => {
@@ -895,7 +895,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       // If selectedCells is an empty object we clear any existing selection,
       // otherwise we save the new selection in AppState and update the Explorer.
       if (Object.keys(swimlaneSelectedCells).length === 0) {
-        explorerAction$.next({ action: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
+        explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
 
         const stateUpdate = getClearedSelectedAnomaliesState();
         this.updateExplorer(stateUpdate, false);
@@ -914,7 +914,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           swimlaneSelectedCells.showTopFieldValues = true;
         }
 
-        explorerAction$.next({ action: EXPLORER_ACTION.APP_STATE_SAVE_SELECTION, payload: { swimlaneSelectedCells } });
+        explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_SAVE_SELECTION, payload: { swimlaneSelectedCells } });
         this.updateExplorer({ selectedCells: swimlaneSelectedCells }, false);
       }
     }
@@ -965,8 +965,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       let selectedViewByFieldName = swimlaneViewByFieldName;
 
       if (influencersFilterQuery.match_all && Object.keys(influencersFilterQuery.match_all).length === 0) {
-        explorerAction$.next({ action: EXPLORER_ACTION.APP_STATE_CLEAR_INFLUENCER_FILTER_SETTINGS });
-        explorerAction$.next({ action: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
+        explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_CLEAR_INFLUENCER_FILTER_SETTINGS });
+        explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
         const stateUpdate = {
           filterActive: false,
           filteredFields: [],
@@ -984,7 +984,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         if (isAndOperator && selectedCells === null) {
           selectedViewByFieldName = VIEW_BY_JOB_LABEL;
           explorerAction$.next({
-            action: EXPLORER_ACTION.APP_STATE_SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
+            type: EXPLORER_ACTION.APP_STATE_SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
             payload: { swimlaneViewByFieldName: selectedViewByFieldName },
           });
         } else {
@@ -995,7 +995,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                 ((selectedCells === null || (selectedCells && selectedCells.type === 'overall')))) {
               selectedViewByFieldName = filteredFields[i];
               explorerAction$.next({
-                action: EXPLORER_ACTION.APP_STATE_SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
+                type: EXPLORER_ACTION.APP_STATE_SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
                 payload: { swimlaneViewByFieldName: selectedViewByFieldName },
               });
               break;
@@ -1004,7 +1004,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         }
 
         explorerAction$.next({
-          action: EXPLORER_ACTION.APP_STATE_SAVE_INFLUENCER_FILTER_SETTINGS,
+          type: EXPLORER_ACTION.APP_STATE_SAVE_INFLUENCER_FILTER_SETTINGS,
           payload: { influencersFilterQuery, filterActive: true, filteredFields, queryString, tableQueryString, isAndOperator },
         });
 

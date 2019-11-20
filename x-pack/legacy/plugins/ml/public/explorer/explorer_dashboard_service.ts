@@ -120,7 +120,7 @@ export function getExplorerDefaultState(): ExplorerState {
 type ActionPayload = any;
 
 interface Action {
-  action: string;
+  type: string;
   payload?: ActionPayload;
 }
 
@@ -151,11 +151,11 @@ const initialize = (state: ExplorerState, payload: ActionPayload) => {
 };
 
 const appStateReducer = (state: ExplorerAppState, nextAction: Action) => {
-  const { action, payload } = nextAction;
+  const { type, payload } = nextAction;
 
   const appState = cloneDeep(state);
 
-  switch (action) {
+  switch (type) {
     case EXPLORER_ACTION.APP_STATE_SET:
       return { ...appState, ...payload };
 
@@ -203,9 +203,9 @@ const explorerReducer = (state: ExplorerState, nextAction: Action) => {
     return state;
   }
 
-  const { action, payload } = nextAction;
+  const { type, payload } = nextAction;
 
-  switch (action) {
+  switch (type) {
     case EXPLORER_ACTION.INITIALIZE:
       return initialize(state, payload);
 
@@ -226,7 +226,7 @@ const explorerReducer = (state: ExplorerState, nextAction: Action) => {
 
 const triggerSideEffect = (nextAction: Action) => {
   if (nextAction !== null && isObservable(nextAction.payload)) {
-    explorerAction$.next({ action: nextAction.action });
+    explorerAction$.next({ type: nextAction.type });
     explorerAction$.next(nextAction.payload);
   }
 };
@@ -240,9 +240,7 @@ export const explorerFilteredAction$ = explorerAction$.pipe(
   ),
   tap(triggerSideEffect),
   filter(filterSideEffect),
-  distinctUntilChanged(
-    (prev, curr) => prev !== null && curr !== null && prev.action === curr.action
-  )
+  distinctUntilChanged((prev, curr) => prev !== null && curr !== null && prev.type === curr.type)
 );
 
 // filter events which should not be propagated to the Explorer react component.
@@ -252,7 +250,7 @@ export const explorer$ = explorerFilteredAction$.pipe(
       return true;
     }
 
-    switch (action.action) {
+    switch (action.type) {
       case EXPLORER_ACTION.IDLE:
       case EXPLORER_ACTION.INITIALIZE:
       case EXPLORER_ACTION.JOB_SELECTION_CHANGE:

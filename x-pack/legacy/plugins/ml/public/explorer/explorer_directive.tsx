@@ -75,7 +75,7 @@ module.directive('mlExplorerDirective', function(
     // After this hand-off, the appState stored in explorerState$ is the single
     // source of truth.
     explorerAction$.next({
-      action: EXPLORER_ACTION.APP_STATE_SET,
+      type: EXPLORER_ACTION.APP_STATE_SET,
       payload: { mlExplorerSwimlane, mlExplorerFilter },
     });
 

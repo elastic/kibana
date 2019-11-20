@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqual } from 'lodash';
 import { from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 
 import { mlFieldFormatService } from '../services/field_format_service';
 import { mlJobService } from '../services/job_service';
@@ -45,7 +46,7 @@ export function jobSelectionActionCreator(
       const noJobsFound = jobs.length === 0;
 
       return {
-        action: actionName,
+        type: actionName,
         payload: {
           loading: false,
           noJobsFound,
@@ -69,12 +70,13 @@ export function loadOverallDataActionCreator(
 ) {
   if (showOverallLoadingIndicator) {
     explorerAction$.next({
-      action: EXPLORER_ACTION.SET_STATE,
+      type: EXPLORER_ACTION.SET_STATE,
       payload: { hasResults: false, loading: true },
     });
   }
 
   return from(loadOverallData(selectedJobs, swimlaneBucketInterval, bounds)).pipe(
-    map(payload => ({ action: EXPLORER_ACTION.SET_STATE, payload }))
+    distinctUntilChanged(isEqual),
+    map(payload => ({ type: EXPLORER_ACTION.SET_STATE, payload }))
   );
 }
