@@ -39,7 +39,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
 
   useEffect(() => {
     editAction({ key: 'contentType', value: 'application/json' }); // set content-type for threshold watch to json by default
-  }, []);
+  }, [editAction]);
 
   return (
     <Fragment>

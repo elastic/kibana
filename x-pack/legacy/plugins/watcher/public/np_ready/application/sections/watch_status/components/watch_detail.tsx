@@ -61,7 +61,7 @@ export const WatchDetail = () => {
         };
       });
     setActionStatuses(actionStatusesWithErrors);
-  }, [watchDetail]);
+  }, [watchDetail, actionErrors, currentActionStatuses]);
 
   const baseColumns = [
     {

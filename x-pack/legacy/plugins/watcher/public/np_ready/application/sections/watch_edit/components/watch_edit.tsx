@@ -107,25 +107,25 @@ export const WatchEdit = ({
     dispatch({ command: 'addAction', payload: action });
   };
 
-  const getWatch = async () => {
-    if (id) {
-      try {
-        const loadedWatch = await loadWatch(id);
-        dispatch({ command: 'setWatch', payload: loadedWatch });
-      } catch (error) {
-        dispatch({ command: 'setError', payload: error });
-      }
-    } else if (type) {
-      const WatchType = Watch.getWatchTypes()[type];
-      if (WatchType) {
-        dispatch({ command: 'setWatch', payload: new WatchType() });
-      }
-    }
-  };
-
   useEffect(() => {
+    const getWatch = async () => {
+      if (id) {
+        try {
+          const loadedWatch = await loadWatch(id);
+          dispatch({ command: 'setWatch', payload: loadedWatch });
+        } catch (error) {
+          dispatch({ command: 'setError', payload: error });
+        }
+      } else if (type) {
+        const WatchType = Watch.getWatchTypes()[type];
+        if (WatchType) {
+          dispatch({ command: 'setWatch', payload: new WatchType() });
+        }
+      }
+    };
+
     getWatch();
-  }, []);
+  }, [id, type]);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -133,7 +133,7 @@ export const WatchEdit = ({
       listBreadcrumb,
       id ? editBreadcrumb : createBreadcrumb,
     ]);
-  }, [id]);
+  }, [id, chrome, MANAGEMENT_BREADCRUMB]);
 
   const errorCode = getPageErrorCode(loadError);
   if (errorCode) {
