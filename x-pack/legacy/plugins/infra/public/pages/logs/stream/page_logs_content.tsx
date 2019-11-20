@@ -48,7 +48,6 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
   } = useContext(LogFlyoutState.Context);
   const { logSummaryHighlights } = useContext(LogHighlightsState.Context);
   const derivedIndexPattern = createDerivedIndexPattern('logs');
-  console.log('sourceId', sourceId);
   return (
     <>
       <ReduxSourceIdBridge sourceId={sourceId} />

@@ -31,6 +31,7 @@ export const StoreProvider = ({ children }) => {
     logPosition: logPositionState,
     logFilter: logFilterState,
   };
+
   useEffect(() => updateLogEntriesState(logEntriesDependenciesSelector(store)), [
     logPositionState,
     logFilterState,

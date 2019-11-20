@@ -6,35 +6,56 @@
 import { useEffect, useState, useReducer } from 'react';
 import { createStructuredSelector } from 'reselect';
 import { useGraphQLQueries } from './gql_queries';
+import { TimeKey, timeKeyIsBetween } from '../../../../common/time';
+
+const useFetchEntriesEffect = (dispatch, { entriesStart, entriesEnd }, params) => {
+  const { sourceId, timeKey, filterQuery } = params;
+  const { getLogEntriesAround } = useGraphQLQueries();
+
+  const runFetchNewEntriesRequest = async () => {
+    dispatch({ type: 'FETCHING_NEW_ENTRIES' });
+    try {
+      const payload = await getLogEntriesAround({ sourceId, timeKey, filterQuery });
+      dispatch({ type: 'RECEIVE_NEW_ENTRIES', payload });
+    } catch (e) {
+      dispatch({ type: 'ERROR_ON_NEW_ENTRIES' });
+    }
+  };
+
+  const shouldFetchNewEntries = () => {
+    if (!timeKey) return false;
+    if (entriesStart && entriesEnd && timeKeyIsBetween(entriesStart, entriesEnd, timeKey)) {
+      return false;
+    }
+    return true;
+  };
+
+  const fetchNewEntriesEffectDependencies = Object.values(params);
+
+  const fetchNewEntriesEffect = () => {
+    if (shouldFetchNewEntries()) {
+      runFetchNewEntriesRequest();
+    }
+  };
+  return useEffect(fetchNewEntriesEffect, fetchNewEntriesEffectDependencies);
+};
 
 export const useLogEntriesStore = () => {
   const [state, dispatch] = useReducer(logEntriesStateReducer, logEntriesInitialState);
-  const { entries, hasMoreAfter, hasMoreBefore, isReloading } = state;
-
-  const { getLogEntriesAround } = useGraphQLQueries();
+  const {
+    entries,
+    entriesStart,
+    entriesEnd,
+    hasMoreAfterEnd,
+    hasMoreBeforeStart,
+    isReloading,
+  } = state;
 
   const [dependencies, subscriber] = useState(logEntriesInitialDependencies);
-  const { timeKey, filterQuery } = dependencies;
 
-  const fetchNewEntriesDependencies = [filterQuery, timeKey];
-  const fetchNewEntries = () => {
-    if (!timeKey) return;
-    dispatch({ type: 'FETCHING_NEW_ENTRIES' });
-    getLogEntriesAround({ sourceId: 'default', timeKey, filterQuery })
-      .then(payload => dispatch({ type: 'RECEIVE_NEW_ENTRIES', payload }))
-      .catch(() => dispatch({ type: 'ERROR_ON_NEW_ENTRIES' }));
-  };
-  useEffect(fetchNewEntries, fetchNewEntriesDependencies);
+  useFetchEntriesEffect(dispatch, state, { ...dependencies, sourceId: 'default' });
 
-  return [
-    {
-      entries,
-      hasMoreBeforeStart: hasMoreBefore,
-      hasMoreAfterEnd: hasMoreAfter,
-      isReloading,
-    },
-    subscriber,
-  ];
+  return [state, subscriber];
 };
 
 const logEntriesStateReducer = (prevState, action) => {

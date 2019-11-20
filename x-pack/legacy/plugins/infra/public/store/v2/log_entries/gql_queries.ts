@@ -11,12 +11,11 @@ const LOAD_CHUNK_SIZE = 200;
 const getLogEntriesAround = client => async ({ sourceId, timeKey, filterQuery }) => {
   if (!timeKey) return false;
   try {
-    console.log('making gql query');
     const result = await client.query({
       query: logEntriesQuery,
       variables: {
         sourceId,
-        timeKey,
+        timeKey: { time: timeKey.time, tiebreaker: timeKey.tiebreaker },
         countBefore: LOAD_CHUNK_SIZE,
         countAfter: LOAD_CHUNK_SIZE,
         filterQuery,
@@ -24,7 +23,13 @@ const getLogEntriesAround = client => async ({ sourceId, timeKey, filterQuery })
       fetchPolicy: 'no-cache',
     });
     const { logEntriesAround } = result.data.source;
-    return logEntriesAround;
+    return {
+      entries: logEntriesAround.entries,
+      entriesStart: logEntriesAround.start,
+      entriesEnd: logEntriesAround.end,
+      hasMoreAfterEnd: logEntriesAround.hasMoreAfter,
+      hasMoreBeforeStart: logEntriesAround.hasMoreBefore,
+    };
   } catch (e) {
     console.error('GQL Error', e);
     throw e;
