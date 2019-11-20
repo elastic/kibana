@@ -25,6 +25,7 @@ describe('utils', () => {
         false_positives: [],
         from: 'now-6m',
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        immutable: false,
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         interval: '5m',
         rule_id: 'rule-1',
@@ -51,6 +52,7 @@ describe('utils', () => {
         enabled: true,
         false_positives: [],
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        immutable: false,
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         interval: '5m',
         rule_id: 'rule-1',
@@ -78,6 +80,7 @@ describe('utils', () => {
         false_positives: [],
         from: 'now-6m',
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        immutable: false,
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         interval: '5m',
         rule_id: 'rule-1',
@@ -105,6 +108,7 @@ describe('utils', () => {
         false_positives: [],
         from: 'now-6m',
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        immutable: false,
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         interval: '5m',
         rule_id: 'rule-1',
@@ -131,11 +135,70 @@ describe('utils', () => {
         description: 'Detecting root and admin users',
         false_positives: [],
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        immutable: false,
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         interval: '5m',
         rule_id: 'rule-1',
         max_signals: 100,
         name: 'Detect Root/Admin Users',
+        references: ['http://www.example.com', 'https://ww.example.com'],
+        severity: 'high',
+        size: 1,
+        updated_by: 'elastic',
+        tags: [],
+        to: 'now',
+        type: 'query',
+      });
+    });
+
+    test('should return enabled is equal to false', () => {
+      const fullSignal = getResult();
+      fullSignal.enabled = false;
+      const signalWithEnabledFalse = transformAlertToSignal(fullSignal);
+      expect(signalWithEnabledFalse).toEqual({
+        created_by: 'elastic',
+        description: 'Detecting root and admin users',
+        enabled: false,
+        from: 'now-6m',
+        false_positives: [],
+        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        immutable: false,
+        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+        interval: '5m',
+        language: 'kuery',
+        rule_id: 'rule-1',
+        max_signals: 100,
+        name: 'Detect Root/Admin Users',
+        query: 'user.name: root or user.name: admin',
+        references: ['http://www.example.com', 'https://ww.example.com'],
+        severity: 'high',
+        size: 1,
+        updated_by: 'elastic',
+        tags: [],
+        to: 'now',
+        type: 'query',
+      });
+    });
+
+    test('should return immutable is equal to false', () => {
+      const fullSignal = getResult();
+      fullSignal.alertTypeParams.immutable = false;
+      const signalWithEnabledFalse = transformAlertToSignal(fullSignal);
+      expect(signalWithEnabledFalse).toEqual({
+        created_by: 'elastic',
+        description: 'Detecting root and admin users',
+        enabled: true,
+        from: 'now-6m',
+        false_positives: [],
+        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        immutable: false,
+        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+        interval: '5m',
+        language: 'kuery',
+        rule_id: 'rule-1',
+        max_signals: 100,
+        name: 'Detect Root/Admin Users',
+        query: 'user.name: root or user.name: admin',
         references: ['http://www.example.com', 'https://ww.example.com'],
         severity: 'high',
         size: 1,
@@ -208,6 +271,7 @@ describe('utils', () => {
             false_positives: [],
             from: 'now-6m',
             id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            immutable: false,
             index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             interval: '5m',
             rule_id: 'rule-1',
@@ -243,6 +307,7 @@ describe('utils', () => {
         false_positives: [],
         from: 'now-6m',
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        immutable: false,
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         interval: '5m',
         rule_id: 'rule-1',
