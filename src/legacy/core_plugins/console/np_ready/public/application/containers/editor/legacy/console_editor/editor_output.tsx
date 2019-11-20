@@ -31,7 +31,6 @@ function _EditorOuput() {
   const editorInstanceRef = useRef<null | any>(null);
   const {
     services: { settings },
-    ResizeChecker,
   } = useAppContext();
 
   const dispatch = useEditorActionContext();
@@ -42,11 +41,7 @@ function _EditorOuput() {
     const editor$ = $(editorRef.current!);
     editorInstanceRef.current = initializeOutput(editor$, settings);
     editorInstanceRef.current.update('');
-    const unsubscribe = subscribeResizeChecker(
-      ResizeChecker,
-      editorRef.current!,
-      editorInstanceRef.current
-    );
+    const unsubscribe = subscribeResizeChecker(editorRef.current!, editorInstanceRef.current);
 
     dispatch({ type: 'setOutputEditor', value: editorInstanceRef.current });
 

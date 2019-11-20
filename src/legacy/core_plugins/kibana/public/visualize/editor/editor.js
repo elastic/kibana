@@ -23,42 +23,46 @@ import { i18n } from '@kbn/i18n';
 import '../saved_visualizations/saved_visualizations';
 import './visualization_editor';
 import './visualization';
-import 'ui/vis/editors/default/sidebar';
-import 'ui/visualize';
-import 'ui/collapsible_sidebar';
-import 'ui/directives/storage';
 
-import { capabilities } from 'ui/capabilities';
-import chrome from 'ui/chrome';
 import React from 'react';
-import angular from 'angular';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { toastNotifications } from 'ui/notify';
-import { docTitle } from 'ui/doc_title';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
-import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { migrateAppState } from './lib';
-import uiRoutes from 'ui/routes';
-import { uiModules } from 'ui/modules';
 import editorTemplate from './editor.html';
 import { DashboardConstants } from '../../dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
-import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
-import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
-import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-import { timefilter } from 'ui/timefilter';
-import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
-import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
-import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
-import { npStart } from 'ui/new_platform';
-import { extractTimeFilter, changeTimeFilter } from '../../../../data/public';
-import { start as data } from '../../../../data/public/legacy';
-import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
+
+import {
+  getServices,
+  angular,
+  absoluteToParsedUrl,
+  getUnhashableStatesProvider,
+  KibanaParsedUrl,
+  migrateLegacyQuery,
+  SavedObjectSaveModal,
+  showSaveModal,
+  stateMonitorFactory,
+  subscribeWithScope,
+  unhashUrl,
+} from '../kibana_services';
+
+const {
+  capabilities,
+  chrome,
+  chromeLegacy,
+  data,
+  docTitle,
+  FilterBarQueryFilterProvider,
+  getBasePath,
+  toastNotifications,
+  timefilter,
+  uiModules,
+  uiRoutes,
+  visualizations,
+  share,
+} = getServices();
 
 const { savedQueryService } = data.search.services;
 
@@ -101,7 +105,7 @@ uiRoutes
       savedVis: function (savedVisualizations, redirectWhenMissing, $route) {
         return savedVisualizations.get($route.current.params.id)
           .then((savedVis) => {
-            npStart.core.chrome.recentlyAccessed.add(
+            chrome.recentlyAccessed.add(
               savedVis.getFullPath(),
               savedVis.title,
               savedVis.id);
@@ -155,7 +159,6 @@ function VisEditor(
 ) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const getUnhashableStates = Private(getUnhashableStatesProvider);
-  const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
 
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
@@ -169,7 +172,7 @@ function VisEditor(
     dirty: !savedVis.id
   };
 
-  $scope.topNavMenu = [...(capabilities.get().visualize.save ? [{
+  $scope.topNavMenu = [...(capabilities.visualize.save ? [{
     id: 'save',
     label: i18n.translate('kbn.topNavMenu.saveVisualizationButtonLabel', { defaultMessage: 'save' }),
     description: i18n.translate('kbn.visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
@@ -235,14 +238,13 @@ function VisEditor(
     run: (anchorElement) => {
       const hasUnappliedChanges = vis.dirty;
       const hasUnsavedChanges = $appStatus.dirty;
-      showShareContextMenu({
+      share.toggleShareContextMenu({
         anchorElement,
         allowEmbed: true,
-        allowShortUrl: capabilities.get().visualize.createShortUrl,
-        getUnhashableStates,
+        allowShortUrl: capabilities.visualize.createShortUrl,
+        shareableUrl: unhashUrl(window.location.href, getUnhashableStates()),
         objectId: savedVis.id,
         objectType: 'visualization',
-        shareContextMenuExtensions,
         sharingData: {
           title: savedVis.title,
         },
@@ -338,26 +340,9 @@ function VisEditor(
     queryFilter.setFilters(filters);
   };
 
-  $scope.onCancelApplyFilters = () => {
-    $scope.state.$newFilters = [];
-  };
+  $scope.showSaveQuery = capabilities.visualize.saveQuery;
 
-  $scope.onApplyFilters = filters => {
-    const { timeRangeFilter, restOfFilters } = extractTimeFilter($scope.indexPattern.timeFieldName, filters);
-    queryFilter.addFilters(restOfFilters);
-    if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
-    $scope.state.$newFilters = [];
-  };
-
-  $scope.$watch('state.$newFilters', (filters = []) => {
-    if (filters.length === 1) {
-      $scope.onApplyFilters(filters);
-    }
-  });
-
-  $scope.showSaveQuery = capabilities.get().visualize.saveQuery;
-
-  $scope.$watch(() => capabilities.get().visualize.saveQuery, (newCapability) => {
+  $scope.$watch(() => capabilities.visualize.saveQuery, (newCapability) => {
     $scope.showSaveQuery = newCapability;
   });
 
@@ -451,6 +436,12 @@ function VisEditor(
     }));
     subscriptions.add(subscribeWithScope($scope, queryFilter.getFetches$(), {
       next: $scope.fetch
+    }));
+
+    subscriptions.add(subscribeWithScope($scope, timefilter.getAutoRefreshFetch$(), {
+      next: () => {
+        $scope.vis.forceReload();
+      }
     }));
 
     $scope.$on('$destroy', function () {
@@ -578,7 +569,7 @@ function VisEditor(
 
             if ($scope.isAddToDashMode()) {
               const savedVisualizationParsedUrl = new KibanaParsedUrl({
-                basePath: chrome.getBasePath(),
+                basePath: getBasePath(),
                 appId: kbnBaseUrl.slice('/app/'.length),
                 appPath: kbnUrl.eval(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id }),
               });
@@ -587,15 +578,15 @@ function VisEditor(
               // Since we aren't reloading the page, only inserting a new browser history item, we need to manually update
               // the last url for this app, so directly clicking on the Visualize tab will also bring the user to the saved
               // url, not the unsaved one.
-              chrome.trackSubUrlForApp('kibana:visualize', savedVisualizationParsedUrl);
+              chromeLegacy.trackSubUrlForApp('kibana:visualize', savedVisualizationParsedUrl);
 
-              const lastDashboardAbsoluteUrl = npStart.core.chrome.navLinks.get('kibana:dashboard').url;
-              const dashboardParsedUrl = absoluteToParsedUrl(lastDashboardAbsoluteUrl, chrome.getBasePath());
+              const lastDashboardAbsoluteUrl = chrome.navLinks.get('kibana:dashboard').url;
+              const dashboardParsedUrl = absoluteToParsedUrl(lastDashboardAbsoluteUrl, getBasePath());
               dashboardParsedUrl.addQueryParameter(DashboardConstants.NEW_VISUALIZATION_ID_PARAM, savedVis.id);
               kbnUrl.change(dashboardParsedUrl.appPath);
             } else if (savedVis.id === $route.current.params.id) {
               docTitle.change(savedVis.lastSavedTitle);
-              chrome.breadcrumbs.set($injector.invoke(getEditBreadcrumbs));
+              chrome.setBreadcrumbs($injector.invoke(getEditBreadcrumbs));
               savedVis.vis.title = savedVis.title;
               savedVis.vis.description = savedVis.description;
               // it's needed to save the state to update url string

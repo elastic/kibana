@@ -10,8 +10,10 @@ import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
 import {
+  MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
-  SOURCE_DATA_ID_ORIGIN
+  MIN_ZOOM,
+  SOURCE_DATA_ID_ORIGIN,
 } from '../../common/constants';
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../reducers/util';
@@ -44,11 +46,10 @@ export class AbstractLayer {
     layerDescriptor.__dataRequests = _.get(options, '__dataRequests', []);
     layerDescriptor.id = _.get(options, 'id', uuid());
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
-    layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
-    layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
+    layerDescriptor.minZoom = _.get(options, 'minZoom', MIN_ZOOM);
+    layerDescriptor.maxZoom = _.get(options, 'maxZoom', MAX_ZOOM);
     layerDescriptor.alpha = _.get(options, 'alpha', 0.75);
     layerDescriptor.visible = _.get(options, 'visible', true);
-    layerDescriptor.applyGlobalQuery = _.get(options, 'applyGlobalQuery', true);
     layerDescriptor.style = _.get(options, 'style',  {});
 
     return layerDescriptor;
@@ -231,10 +232,6 @@ export class AbstractLayer {
     return this._descriptor.query;
   }
 
-  getApplyGlobalQuery() {
-    return this._descriptor.applyGlobalQuery;
-  }
-
   getZoomConfig() {
     return {
       minZoom: this._descriptor.minZoom,
@@ -383,14 +380,10 @@ export class AbstractLayer {
   }
 
   getIndexPatternIds() {
-    return  [];
+    return [];
   }
 
   getQueryableIndexPatternIds() {
-    if (this.getApplyGlobalQuery()) {
-      return this.getIndexPatternIds();
-    }
-
     return [];
   }
 
@@ -404,6 +397,10 @@ export class AbstractLayer {
 
   syncVisibilityWithMb(mbMap, mbLayerId) {
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+  }
+
+  getType() {
+    return this._descriptor.type;
   }
 
 }

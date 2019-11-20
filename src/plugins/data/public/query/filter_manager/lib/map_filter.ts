@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { reduceRight } from 'lodash';
 
 import { mapMatchAll } from './mappers/map_match_all';
@@ -31,8 +30,9 @@ import { mapGeoBoundingBox } from './mappers/map_geo_bounding_box';
 import { mapGeoPolygon } from './mappers/map_geo_polygon';
 import { mapDefault } from './mappers/map_default';
 import { generateMappingChain } from './generate_mapping_chain';
+import { esFilters } from '../../../../common';
 
-export function mapFilter(filter: Filter) {
+export function mapFilter(filter: esFilters.Filter) {
   /** Mappers **/
 
   // Each mapper is a simple promise function that test if the mapper can

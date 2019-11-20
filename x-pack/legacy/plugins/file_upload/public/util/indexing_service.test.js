@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// Not all index pattern dependencies are avab. in jest context,
+// prevent unrelated import errors by mocking kibana services
+jest.mock('../kibana_services', () => {});
 import { checkIndexPatternValid } from './indexing_service';
 
 describe('indexing_service', () => {

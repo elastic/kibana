@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { isEmpty } from 'lodash/fp';
 import { Location } from 'history';
-import { Query } from 'src/plugins/data/common';
 
 import { UrlInputsModel } from '../../store/inputs/model';
 import { CONSTANTS } from '../url_state/constants';
@@ -17,6 +15,7 @@ import {
   replaceStateKeyInQueryString,
   getQueryStringFromLocation,
 } from '../url_state/helpers';
+import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
 import { TabNavigationProps } from './tab_navigation/types';
 import { SearchNavTab } from './types';
@@ -25,7 +24,7 @@ export const getSearch = (tab: SearchNavTab, urlState: TabNavigationProps): stri
   if (tab && tab.urlKey != null && URL_STATE_KEYS[tab.urlKey] != null) {
     return URL_STATE_KEYS[tab.urlKey].reduce<Location>(
       (myLocation: Location, urlKey: KeyUrlState) => {
-        let urlStateToReplace: UrlInputsModel | Query | Filter[] | Timeline | string = '';
+        let urlStateToReplace: UrlInputsModel | Query | esFilters.Filter[] | Timeline | string = '';
 
         if (urlKey === CONSTANTS.appQuery && urlState.query != null) {
           if (urlState.query.query === '') {
@@ -51,9 +50,10 @@ export const getSearch = (tab: SearchNavTab, urlState: TabNavigationProps): stri
         }
         return replaceQueryStringInLocation(
           myLocation,
-          replaceStateKeyInQueryString(urlKey, urlStateToReplace)(
-            getQueryStringFromLocation(myLocation)
-          )
+          replaceStateKeyInQueryString(
+            urlKey,
+            urlStateToReplace
+          )(getQueryStringFromLocation(myLocation))
         );
       },
       {

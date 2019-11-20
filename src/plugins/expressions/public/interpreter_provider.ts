@@ -17,20 +17,24 @@
  * under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-var-requires */
-import { clone, each, keys, last, mapValues, reduce, zipObject } from 'lodash';
-
 // @ts-ignore
 import { fromExpression, getByAlias } from '@kbn/interpreter/common';
 
+import { clone, each, keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { createError } from './create_error';
-import { ExpressionAST, ExpressionFunctionAST, AnyExpressionFunction, ArgumentType } from './types';
-import { getType } from './interpreter';
+import {
+  ExpressionAST,
+  ExpressionFunctionAST,
+  AnyExpressionFunction,
+  ArgumentType,
+} from '../common/types';
+import { getType } from '../common/type';
+import { FunctionsRegistry } from './registries';
 
 export { createError };
 
 export interface InterpreterConfig {
-  functions: any;
+  functions: FunctionsRegistry;
   types: any;
   handlers: any;
 }
@@ -78,7 +82,7 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
     const link = chain.shift(); // Every thing in the chain will always be a function right?
     if (!link) throw Error('Function chain is empty.');
     const { function: fnName, arguments: fnArgs } = link;
-    const fnDef = getByAlias(functions, fnName);
+    const fnDef = getByAlias(functions.toJS(), fnName);
 
     if (!fnDef) {
       return createError({ message: `Function ${fnName} could not be found.` });
@@ -163,9 +167,9 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
 
     // Check for missing required arguments
     each(argDefs, argDef => {
-      const { aliases, default: argDefault, name: argName, required } = argDef as (ArgumentType<
+      const { aliases, default: argDefault, name: argName, required } = argDef as ArgumentType<
         any
-      > & { name: string });
+      > & { name: string };
       if (
         typeof argDefault === 'undefined' &&
         required &&

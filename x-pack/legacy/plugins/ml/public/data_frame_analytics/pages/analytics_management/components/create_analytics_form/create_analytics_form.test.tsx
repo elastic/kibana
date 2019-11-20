@@ -45,7 +45,7 @@ describe('Data Frame Analytics: <CreateAnalyticsForm />', () => {
     );
 
     const euiFormRows = wrapper.find('EuiFormRow');
-    expect(euiFormRows.length).toBe(6);
+    expect(euiFormRows.length).toBe(7);
 
     const row1 = euiFormRows.at(0);
     expect(row1.find('label').text()).toBe('Job type');
@@ -56,6 +56,6 @@ describe('Data Frame Analytics: <CreateAnalyticsForm />', () => {
     expect(options.at(2).props().value).toBe('regression');
 
     const row2 = euiFormRows.at(1);
-    expect(row2.find('label').text()).toBe('Enable advanced editor');
+    expect(row2.find('p').text()).toBe('Enable advanced editor');
   });
 });

@@ -7,13 +7,12 @@
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { buildExistsFilter } from '@kbn/es-query';
 import { App } from './app';
 import { EditorFrameInstance } from '../types';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
-
+import { esFilters, IFieldType, IIndexPattern } from '../../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 const dataStartMock = dataPluginMock.createStartContract();
 
@@ -312,9 +311,9 @@ describe('Lens App', () => {
 
         instance.update();
 
-        const handler = instance.findWhere(el => el.prop('onSave')).prop('onSave') as ((
+        const handler = instance.findWhere(el => el.prop('onSave')).prop('onSave') as (
           p: unknown
-        ) => void);
+        ) => void;
         handler(saveProps);
       }
 
@@ -593,17 +592,17 @@ describe('Lens App', () => {
       args.editorFrame = frame;
 
       const instance = mount(<App {...args} />);
+      const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+      const field = ({ name: 'myfield' } as unknown) as IFieldType;
 
-      args.data.query.filterManager.setFilters([
-        buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
-      ]);
+      args.data.query.filterManager.setFilters([esFilters.buildExistsFilter(field, indexPattern)]);
 
       instance.update();
 
       expect(frame.mount).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({
-          filters: [buildExistsFilter({ name: 'myfield' }, { id: 'index1' })],
+          filters: [esFilters.buildExistsFilter(field, indexPattern)],
         })
       );
     });
@@ -725,9 +724,10 @@ describe('Lens App', () => {
         query: { query: 'new', language: 'lucene' },
       });
 
-      args.data.query.filterManager.setFilters([
-        buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
-      ]);
+      const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+      const field = ({ name: 'myfield' } as unknown) as IFieldType;
+
+      args.data.query.filterManager.setFilters([esFilters.buildExistsFilter(field, indexPattern)]);
       instance.update();
 
       instance.find(TopNavMenu).prop('onClearSavedQuery')!();

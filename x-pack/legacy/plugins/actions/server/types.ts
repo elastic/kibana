@@ -45,6 +45,10 @@ export interface ActionResult {
   config: Record<string, any>;
 }
 
+export interface FindActionResult extends ActionResult {
+  referencedByCount: number;
+}
+
 // the result returned from an action type executor function
 export interface ActionTypeExecutorResult {
   status: 'ok' | 'error';

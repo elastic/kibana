@@ -14,8 +14,8 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggConfigs } from 'ui/agg_types';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from './convert_to_geojson';
-import { VectorStyle } from '../../styles/vector_style';
-import { vectorStyles } from '../../styles/vector_style_defaults';
+import { VectorStyle } from '../../styles/vector/vector_style';
+import { vectorStyles } from '../../styles/vector/vector_style_defaults';
 import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -85,6 +85,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
         metrics={this._descriptor.metrics}
         renderAs={this._descriptor.requestType}
         resolution={this._descriptor.resolution}
+        applyGlobalQuery={this._descriptor.applyGlobalQuery}
       />
     );
   }
