@@ -32,6 +32,18 @@ interface QueryTabBodyProps {
   filterQuery?: string | ESTermQuery;
 }
 
+export type SetQuery = ({
+  id,
+  inspect,
+  loading,
+  refetch,
+}: {
+  id: string;
+  inspect: InspectQuery | null;
+  loading: boolean;
+  refetch: Refetch;
+}) => void;
+
 export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
   skip: boolean;
   narrowDateRange: NarrowDateRange;
@@ -42,17 +54,7 @@ export type HostsComponentsQueryProps = QueryTabBodyProps & {
   deleteQuery?: ({ id }: { id: string }) => void;
   indexPattern: StaticIndexPattern;
   skip: boolean;
-  setQuery: ({
-    id,
-    inspect,
-    loading,
-    refetch,
-  }: {
-    id: string;
-    inspect: InspectQuery | null;
-    loading: boolean;
-    refetch: Refetch;
-  }) => void;
+  setQuery: SetQuery;
   updateDateRange?: UpdateDateRange;
   narrowDateRange?: NarrowDateRange;
 };

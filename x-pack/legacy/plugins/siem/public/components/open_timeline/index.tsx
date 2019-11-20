@@ -66,7 +66,7 @@ export const getSelectedTimelineIds = (selectedItems: OpenTimelineResult[]): str
   );
 
 /** Manages the state (e.g table selection) of the (pure) `OpenTimeline` component */
-export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
+export const StatefulOpenTimelineComponent: React.FC<OpenTimelineOwnProps> = React.memo(
   ({
     defaultPageSize,
     isModal = false,

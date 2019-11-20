@@ -47,14 +47,14 @@ interface OwnProps {
 
 type GlobalTimeProps = OwnProps & GlobalTimeReduxState & GlobalTimeDispatch;
 
-export const GlobalTimeComponent = ({
+export const GlobalTimeComponent: React.FC<GlobalTimeProps> = ({
   children,
   deleteAllQuery,
   deleteOneQuery,
   from,
   to,
   setGlobalQuery,
-}: GlobalTimeProps) => {
+}) => {
   const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {

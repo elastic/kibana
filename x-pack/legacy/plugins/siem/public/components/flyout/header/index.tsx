@@ -70,53 +70,51 @@ interface DispatchProps {
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
 
-const StatefulFlyoutHeader = React.memo<Props>(
-  ({
-    associateNote,
-    createTimeline,
-    description,
-    isFavorite,
-    isDataInTimeline,
-    isDatepickerLocked,
-    title,
-    width = DEFAULT_TIMELINE_WIDTH,
-    noteIds,
-    notesById,
-    timelineId,
-    toggleLock,
-    updateDescription,
-    updateIsFavorite,
-    updateNote,
-    updateTitle,
-    usersViewing,
-  }) => {
-    const getNotesByIds = useCallback(
-      (noteIdsVar: string[]): Note[] => appSelectors.getNotes(notesById, noteIdsVar),
-      [notesById]
-    );
-    return (
-      <Properties
-        associateNote={associateNote}
-        createTimeline={createTimeline}
-        description={description}
-        getNotesByIds={getNotesByIds}
-        isDataInTimeline={isDataInTimeline}
-        isDatepickerLocked={isDatepickerLocked}
-        isFavorite={isFavorite}
-        title={title}
-        noteIds={noteIds}
-        timelineId={timelineId}
-        toggleLock={toggleLock}
-        updateDescription={updateDescription}
-        updateIsFavorite={updateIsFavorite}
-        updateTitle={updateTitle}
-        updateNote={updateNote}
-        usersViewing={usersViewing}
-        width={width}
-      />
-    );
-  }
-);
+const StatefulFlyoutHeader = ({
+  associateNote,
+  createTimeline,
+  description,
+  isFavorite,
+  isDataInTimeline,
+  isDatepickerLocked,
+  title,
+  width = DEFAULT_TIMELINE_WIDTH,
+  noteIds,
+  notesById,
+  timelineId,
+  toggleLock,
+  updateDescription,
+  updateIsFavorite,
+  updateNote,
+  updateTitle,
+  usersViewing,
+}: Props) => {
+  const getNotesByIds = useCallback(
+    (noteIdsVar: string[]): Note[] => appSelectors.getNotes(notesById, noteIdsVar),
+    [notesById]
+  );
+  return (
+    <Properties
+      associateNote={associateNote}
+      createTimeline={createTimeline}
+      description={description}
+      getNotesByIds={getNotesByIds}
+      isDataInTimeline={isDataInTimeline}
+      isDatepickerLocked={isDatepickerLocked}
+      isFavorite={isFavorite}
+      title={title}
+      noteIds={noteIds}
+      timelineId={timelineId}
+      toggleLock={toggleLock}
+      updateDescription={updateDescription}
+      updateIsFavorite={updateIsFavorite}
+      updateTitle={updateTitle}
+      updateNote={updateNote}
+      usersViewing={usersViewing}
+      width={width}
+    />
+  );
+};
 
 StatefulFlyoutHeader.displayName = 'StatefulFlyoutHeader';
 

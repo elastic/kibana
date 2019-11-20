@@ -112,7 +112,21 @@ const mapStateToProps = (state: State) => {
 
 export const DragDropContextWrapper = connect(mapStateToProps)(DragDropContextWrapperComponent);
 
-const onBeforeCapture = before => {
+// There are two modes that a drag can be in
+// FLUID: everything is done in response to highly granular input (eg mouse)
+// SNAP: items snap between positions (eg keyboard);
+type MovementMode = 'FLUID' | 'SNAP';
+type Id = string;
+type DraggableId = Id;
+
+interface BeforeCapture {
+  draggableId: DraggableId;
+  mode: MovementMode;
+}
+
+type OnBeforeCaptureResponder = (before: BeforeCapture) => void;
+
+const onBeforeCapture: OnBeforeCaptureResponder = before => {
   const x =
     window.pageXOffset !== undefined
       ? window.pageXOffset

@@ -134,7 +134,7 @@ interface DispatchProps {
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
 
-const StatefulTimelineComponent = React.memo<Props>(
+const StatefulTimelineComponent: React.FC<Props> = React.memo(
   ({
     columns,
     createTimeline,

@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export type RendererResult = React.ReactElement<any> | null;
+export type RendererFunction<RenderArgs, Result = RendererResult> = (args: RenderArgs) => Result;
+
 export type StateUpdater<State, Props = {}> = (
   prevState: Readonly<State>,
   prevProps: Readonly<Props>

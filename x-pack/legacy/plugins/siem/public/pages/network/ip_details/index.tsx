@@ -45,7 +45,7 @@ export { getBreadcrumbs } from './utils';
 
 const IpOverviewManage = manageQuery(IpOverview);
 
-export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
+export const IPDetailsComponent: React.FC<IPDetailsComponentProps> = React.memo(
   ({
     detailName,
     filters,

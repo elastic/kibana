@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memo, useEffect } from 'react';
+import { FC, memo, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
@@ -37,7 +37,7 @@ export interface TimelineKqlFetchProps {
 
 type OwnProps = TimelineKqlFetchProps & TimelineKqlFetchRedux & TimelineKqlFetchDispatch;
 
-const TimelineKqlFetchComponent = memo<OwnProps>(
+const TimelineKqlFetchComponent: FC<OwnProps> = memo(
   ({ id, indexPattern, inputId, kueryFilterQuery, kueryFilterQueryDraft, setTimelineQuery }) => {
     useEffect(() => {
       setTimelineQuery({
@@ -72,4 +72,4 @@ const makeMapStateToProps = () => {
 
 export const TimelineKqlFetch = connect(makeMapStateToProps, {
   setTimelineQuery: inputsActions.setQuery,
-})(TimelineKqlFetchComponent);
+})(TimelineKqlFetchComponent as FC);

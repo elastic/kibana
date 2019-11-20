@@ -87,7 +87,7 @@ export type SuperDatePickerProps = OwnProps &
   SuperDatePickerDispatchProps &
   SuperDatePickerStateRedux;
 
-export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
+export const SuperDatePickerComponent: React.FC<SuperDatePickerProps> = React.memo(
   ({
     duration,
     end,
