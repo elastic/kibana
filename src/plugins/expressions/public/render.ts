@@ -28,7 +28,10 @@ interface RenderError {
   error: { type?: string; message: string };
 }
 
-export type IExpressionRendererExtraHandlers = Record<string, any>;
+export interface IExpressionRendererParams {
+  extraHandlers?: Record<string, any>;
+  variables?: Record<string, any>;
+}
 
 export class ExpressionRenderHandler {
   render$: Observable<RenderId | RenderError>;
@@ -72,10 +75,11 @@ export class ExpressionRenderHandler {
       event: data => {
         this.eventsSubject.next(data);
       },
+      getVariables: () => ({}),
     };
   }
 
-  render = (data: Data, extraHandlers: IExpressionRendererExtraHandlers = {}) => {
+  render = (data: Data, { variables, extraHandlers }: IExpressionRendererParams = {}) => {
     if (!data || typeof data !== 'object') {
       this.renderSubject.next({
         type: 'error',
@@ -105,6 +109,8 @@ export class ExpressionRenderHandler {
       });
       return;
     }
+
+    this.handlers.getVariables = () => ({ ...variables });
 
     try {
       // Rendering is asynchronous, completed by handlers.done()

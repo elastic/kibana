@@ -57,12 +57,15 @@ export class ExpressionDataHandler {
       ...params.searchContext,
     });
 
+    const getVariables = () => ({ ...params.variables });
+
     const defaultContext = { type: 'null' };
 
     const interpreter = getInterpreter();
     this.promise = interpreter
       .interpretAst(this.ast, params.context || defaultContext, {
         getInitialContext,
+        getVariables,
         inspectorAdapters: this.inspectorAdapters,
         abortSignal: this.abortController.signal,
       })

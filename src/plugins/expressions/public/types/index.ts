@@ -48,6 +48,7 @@ export interface SearchContext {
 }
 
 export type IGetInitialContext = () => SearchContext | Context;
+export type IGetVariables = () => Record<string, any>;
 
 export interface IExpressionLoaderParams {
   searchContext?: SearchContext;
@@ -62,6 +63,7 @@ export interface IExpressionLoaderParams {
 
 export interface IInterpreterHandlers {
   getInitialContext: IGetInitialContext;
+  getVariables: IGetVariables;
   inspectorAdapters?: Adapters;
   abortSignal?: AbortSignal;
 }
@@ -75,6 +77,7 @@ export interface IInterpreterRenderHandlers {
   reload: () => void;
   update: (params: any) => void;
   event: (event: event) => void;
+  getVariables: () => Record<string, any>;
 }
 
 export interface IInterpreterRenderFunction<T = unknown> {
