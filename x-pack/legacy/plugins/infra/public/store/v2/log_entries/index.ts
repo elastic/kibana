@@ -12,6 +12,8 @@ const useFetchEntriesEffect = (dispatch, { entriesStart, entriesEnd }, params) =
   const { sourceId, timeKey, filterQuery } = params;
   const { getLogEntriesAround } = useGraphQLQueries();
 
+  const [prevParams, cachePrevParams] = useState(params);
+
   const runFetchNewEntriesRequest = async () => {
     dispatch({ type: 'FETCHING_NEW_ENTRIES' });
     try {
@@ -24,10 +26,10 @@ const useFetchEntriesEffect = (dispatch, { entriesStart, entriesEnd }, params) =
 
   const shouldFetchNewEntries = () => {
     if (!timeKey) return false;
-    if (entriesStart && entriesEnd && timeKeyIsBetween(entriesStart, entriesEnd, timeKey)) {
-      return false;
-    }
-    return true;
+    const shouldLoadWithNewFilter = filterQuery !== prevParams.filterQuery;
+    const shouldLoadAroundNewPosition =
+      !entriesStart || !entriesEnd || !timeKeyIsBetween(entriesStart, entriesEnd, timeKey);
+    return shouldLoadWithNewFilter || shouldLoadAroundNewPosition;
   };
 
   const fetchNewEntriesEffectDependencies = Object.values(params);
@@ -36,7 +38,9 @@ const useFetchEntriesEffect = (dispatch, { entriesStart, entriesEnd }, params) =
     if (shouldFetchNewEntries()) {
       runFetchNewEntriesRequest();
     }
+    cachePrevParams(params);
   };
+
   return useEffect(fetchNewEntriesEffect, fetchNewEntriesEffectDependencies);
 };
 
