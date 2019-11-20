@@ -33,6 +33,15 @@ interface RegressionAnalysis {
 
 export const SEARCH_SIZE = 1000;
 
+export const defaultSearchQuery = {
+  match_all: {},
+};
+
+export interface SearchQuery {
+  query: SavedSearchQuery;
+  sort?: any;
+}
+
 export enum INDEX_STATUS {
   UNUSED,
   LOADING,
