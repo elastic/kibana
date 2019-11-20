@@ -17,16 +17,24 @@
  * under the License.
  */
 
-import { UiSettingsClientContract, CoreStart } from 'src/core/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { esFilters } from '../../..';
 
-export interface IDataPluginServices extends Partial<CoreStart> {
-  appName: string;
-  uiSettings: UiSettingsClientContract;
-  savedObjects: CoreStart['savedObjects'];
-  notifications: CoreStart['notifications'];
-  http: CoreStart['http'];
-  storage: IStorageWrapper;
-  data: DataPublicPluginStart;
-}
+export const rangeFilter: esFilters.RangeFilter = {
+  meta: {
+    index: 'logstash-*',
+    negate: false,
+    disabled: false,
+    alias: null,
+    type: 'range',
+    key: 'bytes',
+    value: '0 to 10',
+    params: {
+      gte: 0,
+      lt: 10,
+    },
+  },
+  $state: {
+    store: esFilters.FilterStateStore.APP_STATE,
+  },
+  range: {},
+};

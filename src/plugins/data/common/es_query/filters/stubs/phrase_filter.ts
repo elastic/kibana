@@ -17,24 +17,22 @@
  * under the License.
  */
 
-import { esFilters } from '../../../../../../../../../plugins/data/public';
+import { esFilters } from '../../..';
 
-export const rangeFilter: esFilters.RangeFilter = {
+export const phraseFilter: esFilters.PhraseFilter = {
   meta: {
-    index: 'logstash-*',
     negate: false,
+    index: 'logstash-*',
+    type: 'phrase',
+    key: 'machine.os',
+    value: 'ios',
     disabled: false,
     alias: null,
-    type: 'range',
-    key: 'bytes',
-    value: '0 to 10',
     params: {
-      gte: 0,
-      lt: 10,
+      query: 'ios',
     },
   },
   $state: {
     store: esFilters.FilterStateStore.APP_STATE,
   },
-  range: {},
 };
