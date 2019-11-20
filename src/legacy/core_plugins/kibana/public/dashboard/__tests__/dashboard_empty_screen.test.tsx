@@ -17,12 +17,8 @@
  * under the License.
  */
 import React, { EventHandler, MouseEvent as ReactMouseEvent } from 'react';
-import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-// @ts-ignore
-import { findTestSubject } from '@elastic/eui/lib/test';
 import { DashboardEmptyScreen, Props } from '../dashboard_empty_screen';
-import { ReactWrapper } from 'enzyme';
 
 describe('DashboardEmptyScreen', () => {
   const defaultProps = {
