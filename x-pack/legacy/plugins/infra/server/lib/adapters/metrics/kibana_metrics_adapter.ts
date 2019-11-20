@@ -12,7 +12,6 @@ import { InfraMetric, InfraMetricData, InfraNodeType } from '../../../graphql/ty
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../framework';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
 import { checkValidNode } from './lib/check_valid_node';
-import { InvalidNodeError } from './lib/errors';
 import { metrics } from '../../../../common/inventory_models';
 import { TSVBMetricModelCreator } from '../../../../common/inventory_models/types';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';

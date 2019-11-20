@@ -8,7 +8,6 @@ import React from 'react';
 import { InfraWaffleMapOptions, InfraWaffleMapBounds } from '../../lib/lib';
 import {
   InfraNodeType,
-  InfraSnapshotNode,
   InfraTimerangeInput,
   InfraSnapshotMetricInput,
   InfraSnapshotGroupbyInput,

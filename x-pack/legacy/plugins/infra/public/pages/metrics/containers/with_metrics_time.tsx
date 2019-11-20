@@ -5,7 +5,7 @@
  */
 
 import createContainer from 'constate';
-import React, { useContext, useState, useMemo, useCallback } from 'react';
+import React, { useContext, useState, useCallback } from 'react';
 import { isNumber } from 'lodash';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
