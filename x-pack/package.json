@@ -176,7 +176,6 @@
     "@babel/core": "^7.5.5",
     "@babel/register": "^7.5.5",
     "@babel/runtime": "^7.5.5",
-    "@elastic/ctags-langserver": "^0.1.11",
     "@elastic/datemath": "5.0.2",
     "@elastic/ems-client": "1.0.5",
     "@elastic/eui": "16.0.0",
