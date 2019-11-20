@@ -10,6 +10,7 @@ import { routingSaga } from './common';
 import { alertListSaga } from './alert_list';
 import { alertDetailsSaga } from './alert_details';
 import { endpointsListSaga } from './endpoints_list';
+import { homeSaga } from './home';
 
 // TODO: Type this properly
 // eslint-disable-next-line import/no-default-export
@@ -20,6 +21,7 @@ export default function(context: AppMountContext, history: History) {
       alertListSaga(...[...args, context, history]),
       alertDetailsSaga(...[...args, context, history]),
       endpointsListSaga(...[...args, context, history]),
+      homeSaga(...[...args, context, history]),
     ]);
   };
 }

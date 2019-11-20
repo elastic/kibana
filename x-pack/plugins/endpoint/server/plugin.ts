@@ -4,17 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
+import { Plugin, CoreSetup, PluginInitializerContext, LoggerFactory } from 'kibana/server';
 import { managementRoutes } from './routes/management';
 import { alertsRoutes } from './routes/alerts';
 import { endpointsApi } from './routes/endpoints';
+import { addRoutes } from './routes/bootstrap';
 
 export class EndpointPlugin implements Plugin {
+  private readonly factory: LoggerFactory;
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.factory = this.initializerContext.logger;
+  }
+
   public setup(core: CoreSetup, deps: {}) {
     const router = core.http.createRouter();
     managementRoutes(router);
     alertsRoutes(router);
     endpointsApi(router);
+    addRoutes(router, this.factory);
   }
 
   public start() {}
