@@ -122,11 +122,8 @@ export interface ChromeDocTitle {
 
 // @public (undocumented)
 export interface ChromeHelpExtension {
-    // (undocumented)
     appName: string;
-    // (undocumented)
     content?: (element: HTMLDivElement) => () => void;
-    // (undocumented)
     links?: ChromeHelpExtensionMenuExtraLink[];
 }
 

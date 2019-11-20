@@ -4,6 +4,8 @@
 
 ## ChromeHelpExtension.appName property
 
+Provide your plugin's name to create a header for separation
+
 <b>Signature:</b>
 
 ```typescript

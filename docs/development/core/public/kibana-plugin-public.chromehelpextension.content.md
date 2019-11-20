@@ -4,6 +4,8 @@
 
 ## ChromeHelpExtension.content property
 
+Custom content to occur below the list of links
+
 <b>Signature:</b>
 
 ```typescript

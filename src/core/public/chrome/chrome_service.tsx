@@ -60,8 +60,17 @@ export type ChromeBreadcrumb = EuiBreadcrumb;
 
 /** @public */
 export interface ChromeHelpExtension {
+  /**
+   * Provide your plugin's name to create a header for separation
+   */
   appName: string;
+  /**
+   * Creates unified links for sending users to documentation, GitHub, Discuss, or a custom link/button
+   */
   links?: ChromeHelpExtensionMenuExtraLink[];
+  /**
+   * Custom content to occur below the list of links
+   */
   content?: (element: HTMLDivElement) => () => void;
 }
 
