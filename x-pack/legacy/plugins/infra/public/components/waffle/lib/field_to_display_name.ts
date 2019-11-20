@@ -51,6 +51,9 @@ export const fieldToName = (field: string) => {
     'aws.ec2.instance.state.name': i18n.translate('xpack.infra.groupByDisplayNames.state.name', {
       defaultMessage: 'State',
     }),
+    'cloud.region': i18n.translate('xpack.infra.groupByDisplayNames.cloud.region', {
+      defaultMessage: 'Region',
+    }),
   };
   return LOOKUP[field] || field;
 };

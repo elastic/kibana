@@ -13,6 +13,7 @@ import { ContainerToolbarItems } from './container/toolbar_items';
 import { PodToolbarItems } from './pod/toolbar_items';
 import { ToolbarProps } from '../../public/components/inventory/toolbars/toolbar';
 import { AwsEC2ToolbarItems } from './aws_ec2/toolbar_items';
+import { AwsS3ToolbarItems } from './aws_s3/toolbar_items';
 
 interface Toolbars {
   [type: string]: ReactNode;
@@ -23,6 +24,7 @@ const toolbars: Toolbars = {
   container: ContainerToolbarItems,
   pod: PodToolbarItems,
   awsEC2: AwsEC2ToolbarItems,
+  awsS3: AwsS3ToolbarItems,
 };
 
 export const findToolbar = (type: InventoryItemType) => {

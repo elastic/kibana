@@ -117,7 +117,7 @@ const requestGroupedNodes = async (
               top_hits: {
                 sort: [{ [options.sourceConfiguration.fields.timestamp]: { order: 'desc' } }],
                 _source: {
-                  includes: [inventoryModel.fields.ip],
+                  includes: inventoryModel.fields.ip ? [inventoryModel.fields.ip] : [],
                 },
                 size: 1,
               },

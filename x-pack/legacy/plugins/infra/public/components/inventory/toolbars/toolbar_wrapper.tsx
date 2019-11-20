@@ -87,6 +87,21 @@ const ToolbarTranslations = {
   DiskIOWriteBytes: i18n.translate('xpack.infra.waffle.metricOptions.diskIOWriteBytes', {
     defaultMessage: 'Disk Writes',
   }),
+  s3BucketSize: i18n.translate('xpack.infra.waffle.metricOptions.s3BucketSize', {
+    defaultMessage: 'Bucket Size',
+  }),
+  s3TotalRequests: i18n.translate('xpack.infra.waffle.metricOptions.s3TotalRequests', {
+    defaultMessage: 'Total Requests',
+  }),
+  s3NumberOfObjects: i18n.translate('xpack.infra.waffle.metricOptions.s3NumberOfObjects', {
+    defaultMessage: 'Number of Objects',
+  }),
+  s3DownloadBytes: i18n.translate('xpack.infra.waffle.metricOptions.s3DownloadBytes', {
+    defaultMessage: 'Downloads (Bytes)',
+  }),
+  s3UploadBytes: i18n.translate('xpack.infra.waffle.metricOptions.s3UploadBytes', {
+    defaultMessage: 'Uploads (Bytes)',
+  }),
 };
 
 export const toGroupByOpt = (field: string) => ({
@@ -141,6 +156,31 @@ export const toMetricOpt = (metric: InfraSnapshotMetricType) => {
       return {
         text: ToolbarTranslations.DiskIOWriteBytes,
         value: InfraSnapshotMetricType.diskIOWriteBytes,
+      };
+    case InfraSnapshotMetricType.s3BucketSize:
+      return {
+        text: ToolbarTranslations.s3BucketSize,
+        value: InfraSnapshotMetricType.s3BucketSize,
+      };
+    case InfraSnapshotMetricType.s3TotalRequests:
+      return {
+        text: ToolbarTranslations.s3TotalRequests,
+        value: InfraSnapshotMetricType.s3TotalRequests,
+      };
+    case InfraSnapshotMetricType.s3NumberOfObjects:
+      return {
+        text: ToolbarTranslations.s3NumberOfObjects,
+        value: InfraSnapshotMetricType.s3NumberOfObjects,
+      };
+    case InfraSnapshotMetricType.s3DownloadBytes:
+      return {
+        text: ToolbarTranslations.s3DownloadBytes,
+        value: InfraSnapshotMetricType.s3DownloadBytes,
+      };
+    case InfraSnapshotMetricType.s3UploadBytes:
+      return {
+        text: ToolbarTranslations.s3UploadBytes,
+        value: InfraSnapshotMetricType.s3UploadBytes,
       };
   }
 };

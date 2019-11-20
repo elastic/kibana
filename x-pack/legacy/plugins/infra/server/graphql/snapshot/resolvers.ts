@@ -5,7 +5,7 @@
  */
 
 import { InfraSnapshotResponseResolvers, InfraSourceResolvers } from '../../graphql/types';
-import { InfraSnapshotRequestOptions } from '../../lib/snapshot';
+import { InfraSnapshotRequestOptions } from '../../lib/snapshot/types';
 import { InfraSnapshot } from '../../lib/snapshot';
 import { UsageCollector } from '../../usage/usage_collector';
 import { parseFilterQuery } from '../../utils/serialized_query';

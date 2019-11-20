@@ -17,6 +17,7 @@ import { replaceSourceIdInQueryString } from '../../containers/source_id';
 import { InfraNodeType, SourceConfigurationFields } from '../../graphql/types';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 import { useSource } from '../../containers/source/source';
+import { findInventoryFields } from '../../../common/inventory_models';
 
 type RedirectToNodeLogsType = RouteComponentProps<{
   nodeId: string;
@@ -25,12 +26,8 @@ type RedirectToNodeLogsType = RouteComponentProps<{
 }>;
 
 const getFieldByNodeType = (nodeType: InfraNodeType, fields: SourceConfigurationFields.Fields) => {
-  switch (nodeType) {
-    case InfraNodeType.awsEC2:
-      return 'cloud.instance.id';
-    default:
-      return fields[nodeType];
-  }
+  const inventoryFields = findInventoryFields(nodeType, fields);
+  return inventoryFields.id;
 };
 
 export const RedirectToNodeLogs = ({

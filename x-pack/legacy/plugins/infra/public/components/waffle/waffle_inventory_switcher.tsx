@@ -50,6 +50,7 @@ export const WaffleInventorySwitcher = (props: Props) => {
   const goToK8 = useCallback(() => goToNodeType('pod' as InfraNodeType), [goToNodeType]);
   const goToDocker = useCallback(() => goToNodeType('container' as InfraNodeType), [goToNodeType]);
   const goToAwsEC2 = useCallback(() => goToNodeType('awsEC2' as InfraNodeType), [goToNodeType]);
+  const goToAwsS3 = useCallback(() => goToNodeType('awsS3' as InfraNodeType), [goToNodeType]);
   const panels = useMemo(
     () =>
       [
@@ -88,6 +89,10 @@ export const WaffleInventorySwitcher = (props: Props) => {
               name: 'EC2',
               onClick: goToAwsEC2,
             },
+            {
+              name: 'S3',
+              onClick: goToAwsS3,
+            },
           ],
         },
       ] as EuiContextMenuPanelDescriptor[],
@@ -105,6 +110,8 @@ export const WaffleInventorySwitcher = (props: Props) => {
         return 'Docker';
       case InfraNodeType.awsEC2:
         return 'AWS EC2';
+      case InfraNodeType.awsS3:
+        return 'AWS S3';
     }
   }, [props.nodeType]);
 

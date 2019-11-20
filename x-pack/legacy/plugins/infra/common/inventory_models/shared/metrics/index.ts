@@ -35,4 +35,5 @@ export const metrics: InventoryMetrics = {
     count,
   },
   defaultSnapshot: 'count',
+  defaultTimeRangeInSeconds: 3600,
 };

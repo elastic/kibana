@@ -54,6 +54,7 @@ export const NodeContextMenu = injectUICapabilities(
       [InfraNodeType.container]: 'container.id',
       [InfraNodeType.pod]: 'kubernetes.pod.uid',
       [InfraNodeType.awsEC2]: 'cloud.instance.id',
+      [InfraNodeType.awsS3]: 'aws.s3.bucket.name',
     };
 
     const inventoryModel = findInventoryModel(nodeType);

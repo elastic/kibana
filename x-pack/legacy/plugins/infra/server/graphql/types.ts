@@ -581,6 +581,7 @@ export enum InfraNodeType {
   container = 'container',
   host = 'host',
   awsEC2 = 'awsEC2',
+  awsS3 = 'awsS3',
 }
 
 export enum InfraSnapshotMetricType {
@@ -593,6 +594,11 @@ export enum InfraSnapshotMetricType {
   logRate = 'logRate',
   diskIOReadBytes = 'diskIOReadBytes',
   diskIOWriteBytes = 'diskIOWriteBytes',
+  s3TotalRequests = 's3TotalRequests',
+  s3NumberOfObjects = 's3NumberOfObjects',
+  s3BucketSize = 's3BucketSize',
+  s3DownloadBytes = 's3DownloadBytes',
+  s3UploadBytes = 's3UploadBytes',
 }
 
 export enum InfraMetric {
@@ -636,6 +642,11 @@ export enum InfraMetric {
   awsEC2CpuUtilization = 'awsEC2CpuUtilization',
   awsEC2DiskIOBytes = 'awsEC2DiskIOBytes',
   awsEC2NetworkTraffic = 'awsEC2NetworkTraffic',
+  awsS3TotalRequests = 'awsS3TotalRequests',
+  awsS3NumberOfObjects = 'awsS3NumberOfObjects',
+  awsS3BucketSize = 'awsS3BucketSize',
+  awsS3DownloadBytes = 'awsS3DownloadBytes',
+  awsS3UploadBytes = 'awsS3UploadBytes',
   custom = 'custom',
 }
 

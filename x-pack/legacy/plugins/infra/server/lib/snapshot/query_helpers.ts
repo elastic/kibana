@@ -7,10 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import { idx } from '@kbn/elastic-idx';
 import { findInventoryModel, findInventoryFields } from '../../../common/inventory_models/index';
-import { InfraSnapshotRequestOptions } from './snapshot';
+import { InfraSnapshotRequestOptions } from './types';
 import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
 import { SnapshotModelRT, SnapshotModel } from '../../../common/inventory_models/types';
-import { InfraNodeType } from '../../graphql/types';
 
 interface GroupBySource {
   [id: string]: {
@@ -22,10 +21,8 @@ interface GroupBySource {
 }
 
 export const getFieldByNodeType = (options: InfraSnapshotRequestOptions) => {
-  if (options.nodeType === InfraNodeType.awsEC2) {
-    return 'cloud.instance.id';
-  }
-  return options.sourceConfiguration.fields[options.nodeType];
+  const inventoryFields = findInventoryFields(options.nodeType, options.sourceConfiguration.fields);
+  return inventoryFields.id;
 };
 
 export const getGroupedNodesSources = (options: InfraSnapshotRequestOptions) => {

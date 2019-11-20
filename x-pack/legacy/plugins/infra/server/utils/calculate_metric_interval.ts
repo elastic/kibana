@@ -5,6 +5,8 @@
  */
 
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../lib/adapters/framework';
+import { InfraNodeType } from '../graphql/types';
+import { findInventoryModel } from '../../common/inventory_models';
 
 interface Options {
   indexPattern: string;
@@ -23,8 +25,14 @@ export const calculateMetricInterval = async (
   framework: InfraBackendFrameworkAdapter,
   request: InfraFrameworkRequest,
   options: Options,
-  modules: string[]
+  modules: string[],
+  nodeType?: InfraNodeType
 ) => {
+  let from = options.timerange.from;
+  if (nodeType) {
+    const inventoryModel = findInventoryModel(nodeType);
+    from = options.timerange.to - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
+  }
   const query = {
     allowNoIndices: true,
     index: options.indexPattern,
@@ -36,7 +44,7 @@ export const calculateMetricInterval = async (
             {
               range: {
                 [options.timestampField]: {
-                  gte: options.timerange.from,
+                  gte: from,
                   lte: options.timerange.to,
                   format: 'epoch_millis',
                 },

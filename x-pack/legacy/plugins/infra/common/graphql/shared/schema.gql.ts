@@ -31,5 +31,6 @@ export const sharedSchema = gql`
     container
     host
     awsEC2
+    awsS3
   }
 `;

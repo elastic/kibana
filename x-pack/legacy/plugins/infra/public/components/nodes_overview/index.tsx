@@ -61,6 +61,34 @@ const METRIC_FORMATTERS: MetricFormatters = {
     formatter: InfraFormatterType.abbreviatedNumber,
     template: '{{value}}/s',
   },
+  [InfraSnapshotMetricType.diskIOReadBytes]: {
+    formatter: InfraFormatterType.bytes,
+    template: '{{value}}/s',
+  },
+  [InfraSnapshotMetricType.diskIOWriteBytes]: {
+    formatter: InfraFormatterType.bytes,
+    template: '{{value}}/s',
+  },
+  [InfraSnapshotMetricType.s3BucketSize]: {
+    formatter: InfraFormatterType.bytes,
+    template: '{{value}}',
+  },
+  [InfraSnapshotMetricType.s3TotalRequests]: {
+    formatter: InfraFormatterType.abbreviatedNumber,
+    template: '{{value}}',
+  },
+  [InfraSnapshotMetricType.s3NumberOfObjects]: {
+    formatter: InfraFormatterType.abbreviatedNumber,
+    template: '{{value}}',
+  },
+  [InfraSnapshotMetricType.s3UploadBytes]: {
+    formatter: InfraFormatterType.bytes,
+    template: '{{value}}',
+  },
+  [InfraSnapshotMetricType.s3DownloadBytes]: {
+    formatter: InfraFormatterType.bytes,
+    template: '{{value}}',
+  },
 };
 
 const calculateBoundsFromNodes = (nodes: InfraSnapshotNode[]): InfraWaffleMapBounds => {

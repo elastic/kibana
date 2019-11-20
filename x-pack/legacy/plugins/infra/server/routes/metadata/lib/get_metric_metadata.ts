@@ -48,7 +48,7 @@ export const getMetricMetadata = async (
       aggs: {
         nodeName: {
           terms: {
-            field: fields.ip,
+            field: fields.id,
             size: 1,
           },
         },

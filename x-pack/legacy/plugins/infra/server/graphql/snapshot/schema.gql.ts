@@ -44,6 +44,11 @@ export const snapshotSchema: any = gql`
     logRate
     diskIOReadBytes
     diskIOWriteBytes
+    s3BucketSize
+    s3TotalRequests
+    s3NumberOfObjects
+    s3UploadBytes
+    s3DownloadBytes
   }
 
   input InfraSnapshotMetricInput {

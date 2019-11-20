@@ -75,6 +75,11 @@ export const InventoryMetricRT = rt.keyof({
   awsEC2CpuUtilization: null,
   awsEC2NetworkTraffic: null,
   awsEC2DiskIOBytes: null,
+  awsS3TotalRequests: null,
+  awsS3NumberOfObjects: null,
+  awsS3BucketSize: null,
+  awsS3DownloadBytes: null,
+  awsS3UploadBytes: null,
   custom: null,
 });
 export type InventoryMetric = rt.TypeOf<typeof InventoryMetricRT>;
@@ -272,6 +277,11 @@ export const SnapshotMetricTypeRT = rt.keyof({
   logRate: null,
   diskIOReadBytes: null,
   diskIOWriteBytes: null,
+  s3TotalRequests: null,
+  s3NumberOfObjects: null,
+  s3BucketSize: null,
+  s3DownloadBytes: null,
+  s3UploadBytes: null,
 });
 
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
@@ -291,7 +301,7 @@ export interface InventoryModel {
   fields: {
     id: string;
     name: string;
-    ip: string;
+    ip?: string;
   };
   metrics: InventoryMetrics;
   requiredMetrics: InventoryMetric[];

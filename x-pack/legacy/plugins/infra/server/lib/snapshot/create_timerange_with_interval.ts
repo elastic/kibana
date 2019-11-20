@@ -29,7 +29,8 @@ export const createTimeRangeWithInterval = async (
       timestampField: options.sourceConfiguration.fields.timestamp,
       timerange: { from: options.timerange.from, to: options.timerange.to },
     },
-    modules
+    modules,
+    options.nodeType
   );
   if (!interval) {
     throw new Error(

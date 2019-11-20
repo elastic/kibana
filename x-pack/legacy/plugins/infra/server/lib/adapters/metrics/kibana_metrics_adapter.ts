@@ -28,14 +28,8 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     options: InfraMetricsRequestOptions
   ): Promise<InfraMetricData[]> {
     const indexPattern = `${options.sourceConfiguration.metricAlias},${options.sourceConfiguration.logAlias}`;
-    const timeField = options.sourceConfiguration.fields.timestamp;
-    const interval = options.timerange.interval;
     const fields = findInventoryFields(options.nodeType, options.sourceConfiguration.fields);
     const nodeField = fields.id;
-    const timerange = {
-      min: options.timerange.from,
-      max: options.timerange.to,
-    };
 
     const search = <Aggregation>(searchOptions: object) =>
       this.framework.callWithRequest<{}, Aggregation>(req, 'search', searchOptions);

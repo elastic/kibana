@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom, { boomify } from 'boom';
+import Boom from 'boom';
 import { get } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
@@ -77,7 +77,7 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
         if (error.isBoom) {
           throw error;
         }
-        throw boomify(error);
+        throw Boom.boomify(error);
       }
     },
   });

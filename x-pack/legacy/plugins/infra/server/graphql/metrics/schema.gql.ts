@@ -48,6 +48,11 @@ export const metricsSchema: any = gql`
     awsEC2CpuUtilization
     awsEC2NetworkTraffic
     awsEC2DiskIOBytes
+    awsS3TotalRequests
+    awsS3NumberOfObjects
+    awsS3BucketSize
+    awsS3DownloadBytes
+    awsS3UploadBytes
     custom
   }
 
