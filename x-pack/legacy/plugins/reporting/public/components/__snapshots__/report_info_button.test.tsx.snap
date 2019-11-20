@@ -47,93 +47,152 @@ Array [
     ownFocus={true}
     size="s"
   >
-    <span>
-      <EuiWindowEvent
-        event="keydown"
-        handler={[Function]}
+    <EuiWindowEvent
+      event="keydown"
+      handler={[Function]}
+    />
+    <EuiOverlayMask
+      onClick={[Function]}
+    >
+      <Portal
+        containerInfo={
+          <div
+            class="euiOverlayMask"
+          />
+        }
       />
-      <EuiOverlayMask
-        onClick={[Function]}
+    </EuiOverlayMask>
+    <EuiFocusTrap
+      clickOutsideDisables={true}
+    >
+      <EuiOutsideClickDetector
+        isDisabled={false}
+        onOutsideClick={[Function]}
       >
-        <Portal
-          containerInfo={
-            <div
-              class="euiOverlayMask"
-            />
-          }
-        />
-      </EuiOverlayMask>
-      <EuiFocusTrap
-        clickOutsideDisables={true}
-      >
-        <EuiOutsideClickDetector
-          isDisabled={false}
-          onOutsideClick={[Function]}
+        <OutsideEventDetector
+          handleEvent={[Function]}
+          onMouseDown={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchStart={[Function]}
         >
-          <OutsideEventDetector
-            handleEvent={[Function]}
+          <div
             onMouseDown={[Function]}
             onMouseUp={[Function]}
             onTouchEnd={[Function]}
             onTouchStart={[Function]}
           >
-            <div
-              onMouseDown={[Function]}
-              onMouseUp={[Function]}
-              onTouchEnd={[Function]}
-              onTouchStart={[Function]}
+            <FocusLock
+              as="div"
+              autoFocus={true}
+              disabled={false}
+              lockProps={
+                Object {
+                  "style": undefined,
+                }
+              }
+              noFocusGuards={false}
+              persistentFocus={false}
+              returnFocus={true}
             >
-              <FocusLock
-                as="div"
-                autoFocus={true}
-                disabled={false}
-                lockProps={
+              <div
+                data-focus-guard={true}
+                key="guard-first"
+                style={
                   Object {
-                    "style": undefined,
+                    "height": "0px",
+                    "left": "1px",
+                    "overflow": "hidden",
+                    "padding": 0,
+                    "position": "fixed",
+                    "top": "1px",
+                    "width": "1px",
                   }
                 }
-                noFocusGuards={false}
-                persistentFocus={false}
-                returnFocus={true}
+                tabIndex={0}
+              />
+              <div
+                data-focus-guard={true}
+                key="guard-nearest"
+                style={
+                  Object {
+                    "height": "0px",
+                    "left": "1px",
+                    "overflow": "hidden",
+                    "padding": 0,
+                    "position": "fixed",
+                    "top": "1px",
+                    "width": "1px",
+                  }
+                }
+                tabIndex={1}
+              />
+              <div
+                data-focus-lock-disabled={false}
+                onBlur={[Function]}
+                onFocus={[Function]}
               >
-                <div
-                  data-focus-guard={true}
-                  key="guard-first"
-                  style={
-                    Object {
-                      "height": "0px",
-                      "left": "1px",
-                      "overflow": "hidden",
-                      "padding": 0,
-                      "position": "fixed",
-                      "top": "1px",
-                      "width": "1px",
-                    }
+                <SideEffect(FocusWatcher)
+                  autoFocus={true}
+                  disabled={false}
+                  observed={
+                    <div
+                      data-focus-lock-disabled="false"
+                    >
+                      <div
+                        aria-labelledby="flyoutTitle"
+                        class="euiFlyout euiFlyout--small"
+                        data-test-subj="reportInfoFlyout"
+                        role="dialog"
+                        tabindex="0"
+                      >
+                        <button
+                          aria-label="Closes this dialog"
+                          class="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+                          data-test-subj="euiFlyoutCloseButton"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </button>
+                        <div
+                          class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+                        >
+                          <h2
+                            class="euiTitle euiTitle--medium"
+                            id="flyoutTitle"
+                          >
+                            Unable to fetch report info
+                          </h2>
+                        </div>
+                        <div
+                          class="euiFlyoutBody"
+                        >
+                          <div
+                            class="euiFlyoutBody__overflow"
+                          >
+                            <div
+                              class="euiText euiText--medium"
+                            >
+                              Could not fetch the job info
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   }
-                  tabIndex={0}
-                />
-                <div
-                  data-focus-guard={true}
-                  key="guard-nearest"
-                  style={
-                    Object {
-                      "height": "0px",
-                      "left": "1px",
-                      "overflow": "hidden",
-                      "padding": 0,
-                      "position": "fixed",
-                      "top": "1px",
-                      "width": "1px",
-                    }
-                  }
-                  tabIndex={1}
-                />
-                <div
-                  data-focus-lock-disabled={false}
-                  onBlur={[Function]}
-                  onFocus={[Function]}
+                  onActivation={[Function]}
+                  onDeactivation={[Function]}
+                  persistentFocus={false}
                 >
-                  <SideEffect(FocusWatcher)
+                  <FocusWatcher
                     autoFocus={true}
                     disabled={false}
                     observed={
@@ -192,174 +251,113 @@ Array [
                     onActivation={[Function]}
                     onDeactivation={[Function]}
                     persistentFocus={false}
+                  />
+                </SideEffect(FocusWatcher)>
+                <div
+                  aria-labelledby="flyoutTitle"
+                  className="euiFlyout euiFlyout--small"
+                  data-test-subj="reportInfoFlyout"
+                  role="dialog"
+                  tabIndex={0}
+                >
+                  <EuiButtonIcon
+                    aria-label="Closes this dialog"
+                    className="euiFlyout__closeButton"
+                    color="text"
+                    data-test-subj="euiFlyoutCloseButton"
+                    iconType="cross"
+                    onClick={[Function]}
                   >
-                    <FocusWatcher
-                      autoFocus={true}
-                      disabled={false}
-                      observed={
-                        <div
-                          data-focus-lock-disabled="false"
-                        >
-                          <div
-                            aria-labelledby="flyoutTitle"
-                            class="euiFlyout euiFlyout--small"
-                            data-test-subj="reportInfoFlyout"
-                            role="dialog"
-                            tabindex="0"
-                          >
-                            <button
-                              aria-label="Closes this dialog"
-                              class="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
-                              data-test-subj="euiFlyoutCloseButton"
-                              type="button"
-                            >
-                              <svg
-                                aria-hidden="true"
-                                class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                                focusable="false"
-                                height="16"
-                                viewBox="0 0 16 16"
-                                width="16"
-                                xmlns="http://www.w3.org/2000/svg"
-                              />
-                            </button>
-                            <div
-                              class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
-                            >
-                              <h2
-                                class="euiTitle euiTitle--medium"
-                                id="flyoutTitle"
-                              >
-                                Unable to fetch report info
-                              </h2>
-                            </div>
-                            <div
-                              class="euiFlyoutBody"
-                            >
-                              <div
-                                class="euiFlyoutBody__overflow"
-                              >
-                                <div
-                                  class="euiText euiText--medium"
-                                >
-                                  Could not fetch the job info
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      }
-                      onActivation={[Function]}
-                      onDeactivation={[Function]}
-                      persistentFocus={false}
-                    />
-                  </SideEffect(FocusWatcher)>
-                  <div
-                    aria-labelledby="flyoutTitle"
-                    className="euiFlyout euiFlyout--small"
-                    data-test-subj="reportInfoFlyout"
-                    role="dialog"
-                    tabIndex={0}
-                  >
-                    <EuiButtonIcon
+                    <button
                       aria-label="Closes this dialog"
-                      className="euiFlyout__closeButton"
-                      color="text"
+                      className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
                       data-test-subj="euiFlyoutCloseButton"
-                      iconType="cross"
                       onClick={[Function]}
+                      type="button"
                     >
-                      <button
-                        aria-label="Closes this dialog"
-                        className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
-                        data-test-subj="euiFlyoutCloseButton"
-                        onClick={[Function]}
-                        type="button"
+                      <EuiIcon
+                        aria-hidden="true"
+                        className="euiButtonIcon__icon"
+                        size="m"
+                        type="cross"
                       >
-                        <EuiIcon
+                        <EuiIconEmpty
                           aria-hidden="true"
-                          className="euiButtonIcon__icon"
-                          size="m"
-                          type="cross"
+                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                          focusable="false"
+                          style={null}
                         >
-                          <EuiIconEmpty
+                          <svg
                             aria-hidden="true"
                             className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                             focusable="false"
+                            height={16}
                             style={null}
-                          >
-                            <svg
-                              aria-hidden="true"
-                              className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                              focusable="false"
-                              height={16}
-                              style={null}
-                              viewBox="0 0 16 16"
-                              width={16}
-                              xmlns="http://www.w3.org/2000/svg"
-                            />
-                          </EuiIconEmpty>
-                        </EuiIcon>
-                      </button>
-                    </EuiButtonIcon>
-                    <EuiFlyoutHeader
-                      hasBorder={true}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </EuiIconEmpty>
+                      </EuiIcon>
+                    </button>
+                  </EuiButtonIcon>
+                  <EuiFlyoutHeader
+                    hasBorder={true}
+                  >
+                    <div
+                      className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+                    >
+                      <EuiTitle
+                        size="m"
+                      >
+                        <h2
+                          className="euiTitle euiTitle--medium"
+                          id="flyoutTitle"
+                        >
+                          Unable to fetch report info
+                        </h2>
+                      </EuiTitle>
+                    </div>
+                  </EuiFlyoutHeader>
+                  <EuiFlyoutBody>
+                    <div
+                      className="euiFlyoutBody"
                     >
                       <div
-                        className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+                        className="euiFlyoutBody__overflow"
                       >
-                        <EuiTitle
-                          size="m"
-                        >
-                          <h2
-                            className="euiTitle euiTitle--medium"
-                            id="flyoutTitle"
+                        <EuiText>
+                          <div
+                            className="euiText euiText--medium"
                           >
-                            Unable to fetch report info
-                          </h2>
-                        </EuiTitle>
+                            Could not fetch the job info
+                          </div>
+                        </EuiText>
                       </div>
-                    </EuiFlyoutHeader>
-                    <EuiFlyoutBody>
-                      <div
-                        className="euiFlyoutBody"
-                      >
-                        <div
-                          className="euiFlyoutBody__overflow"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            >
-                              Could not fetch the job info
-                            </div>
-                          </EuiText>
-                        </div>
-                      </div>
-                    </EuiFlyoutBody>
-                  </div>
+                    </div>
+                  </EuiFlyoutBody>
                 </div>
-                <div
-                  data-focus-guard={true}
-                  style={
-                    Object {
-                      "height": "0px",
-                      "left": "1px",
-                      "overflow": "hidden",
-                      "padding": 0,
-                      "position": "fixed",
-                      "top": "1px",
-                      "width": "1px",
-                    }
+              </div>
+              <div
+                data-focus-guard={true}
+                style={
+                  Object {
+                    "height": "0px",
+                    "left": "1px",
+                    "overflow": "hidden",
+                    "padding": 0,
+                    "position": "fixed",
+                    "top": "1px",
+                    "width": "1px",
                   }
-                  tabIndex={0}
-                />
-              </FocusLock>
-            </div>
-          </OutsideEventDetector>
-        </EuiOutsideClickDetector>
-      </EuiFocusTrap>
-    </span>
+                }
+                tabIndex={0}
+              />
+            </FocusLock>
+          </div>
+        </OutsideEventDetector>
+      </EuiOutsideClickDetector>
+    </EuiFocusTrap>
   </EuiFlyout>,
   <div
     aria-labelledby="flyoutTitle"
@@ -460,93 +458,150 @@ Array [
     ownFocus={true}
     size="s"
   >
-    <span>
-      <EuiWindowEvent
-        event="keydown"
-        handler={[Function]}
+    <EuiWindowEvent
+      event="keydown"
+      handler={[Function]}
+    />
+    <EuiOverlayMask
+      onClick={[Function]}
+    >
+      <Portal
+        containerInfo={
+          <div
+            class="euiOverlayMask"
+          />
+        }
       />
-      <EuiOverlayMask
-        onClick={[Function]}
+    </EuiOverlayMask>
+    <EuiFocusTrap
+      clickOutsideDisables={true}
+    >
+      <EuiOutsideClickDetector
+        isDisabled={false}
+        onOutsideClick={[Function]}
       >
-        <Portal
-          containerInfo={
-            <div
-              class="euiOverlayMask"
-            />
-          }
-        />
-      </EuiOverlayMask>
-      <EuiFocusTrap
-        clickOutsideDisables={true}
-      >
-        <EuiOutsideClickDetector
-          isDisabled={false}
-          onOutsideClick={[Function]}
+        <OutsideEventDetector
+          handleEvent={[Function]}
+          onMouseDown={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchStart={[Function]}
         >
-          <OutsideEventDetector
-            handleEvent={[Function]}
+          <div
             onMouseDown={[Function]}
             onMouseUp={[Function]}
             onTouchEnd={[Function]}
             onTouchStart={[Function]}
           >
-            <div
-              onMouseDown={[Function]}
-              onMouseUp={[Function]}
-              onTouchEnd={[Function]}
-              onTouchStart={[Function]}
+            <FocusLock
+              as="div"
+              autoFocus={true}
+              disabled={false}
+              lockProps={
+                Object {
+                  "style": undefined,
+                }
+              }
+              noFocusGuards={false}
+              persistentFocus={false}
+              returnFocus={true}
             >
-              <FocusLock
-                as="div"
-                autoFocus={true}
-                disabled={false}
-                lockProps={
+              <div
+                data-focus-guard={true}
+                key="guard-first"
+                style={
                   Object {
-                    "style": undefined,
+                    "height": "0px",
+                    "left": "1px",
+                    "overflow": "hidden",
+                    "padding": 0,
+                    "position": "fixed",
+                    "top": "1px",
+                    "width": "1px",
                   }
                 }
-                noFocusGuards={false}
-                persistentFocus={false}
-                returnFocus={true}
+                tabIndex={0}
+              />
+              <div
+                data-focus-guard={true}
+                key="guard-nearest"
+                style={
+                  Object {
+                    "height": "0px",
+                    "left": "1px",
+                    "overflow": "hidden",
+                    "padding": 0,
+                    "position": "fixed",
+                    "top": "1px",
+                    "width": "1px",
+                  }
+                }
+                tabIndex={1}
+              />
+              <div
+                data-focus-lock-disabled={false}
+                onBlur={[Function]}
+                onFocus={[Function]}
               >
-                <div
-                  data-focus-guard={true}
-                  key="guard-first"
-                  style={
-                    Object {
-                      "height": "0px",
-                      "left": "1px",
-                      "overflow": "hidden",
-                      "padding": 0,
-                      "position": "fixed",
-                      "top": "1px",
-                      "width": "1px",
-                    }
+                <SideEffect(FocusWatcher)
+                  autoFocus={true}
+                  disabled={false}
+                  observed={
+                    <div
+                      data-focus-lock-disabled="false"
+                    >
+                      <div
+                        aria-labelledby="flyoutTitle"
+                        class="euiFlyout euiFlyout--small"
+                        data-test-subj="reportInfoFlyout"
+                        role="dialog"
+                        tabindex="0"
+                      >
+                        <button
+                          aria-label="Closes this dialog"
+                          class="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+                          data-test-subj="euiFlyoutCloseButton"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </button>
+                        <div
+                          class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+                        >
+                          <h2
+                            class="euiTitle euiTitle--medium"
+                            id="flyoutTitle"
+                          >
+                            Job Info
+                          </h2>
+                        </div>
+                        <div
+                          class="euiFlyoutBody"
+                        >
+                          <div
+                            class="euiFlyoutBody__overflow"
+                          >
+                            <div
+                              class="euiText euiText--medium"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   }
-                  tabIndex={0}
-                />
-                <div
-                  data-focus-guard={true}
-                  key="guard-nearest"
-                  style={
-                    Object {
-                      "height": "0px",
-                      "left": "1px",
-                      "overflow": "hidden",
-                      "padding": 0,
-                      "position": "fixed",
-                      "top": "1px",
-                      "width": "1px",
-                    }
-                  }
-                  tabIndex={1}
-                />
-                <div
-                  data-focus-lock-disabled={false}
-                  onBlur={[Function]}
-                  onFocus={[Function]}
+                  onActivation={[Function]}
+                  onDeactivation={[Function]}
+                  persistentFocus={false}
                 >
-                  <SideEffect(FocusWatcher)
+                  <FocusWatcher
                     autoFocus={true}
                     disabled={false}
                     observed={
@@ -603,170 +658,111 @@ Array [
                     onActivation={[Function]}
                     onDeactivation={[Function]}
                     persistentFocus={false}
+                  />
+                </SideEffect(FocusWatcher)>
+                <div
+                  aria-labelledby="flyoutTitle"
+                  className="euiFlyout euiFlyout--small"
+                  data-test-subj="reportInfoFlyout"
+                  role="dialog"
+                  tabIndex={0}
+                >
+                  <EuiButtonIcon
+                    aria-label="Closes this dialog"
+                    className="euiFlyout__closeButton"
+                    color="text"
+                    data-test-subj="euiFlyoutCloseButton"
+                    iconType="cross"
+                    onClick={[Function]}
                   >
-                    <FocusWatcher
-                      autoFocus={true}
-                      disabled={false}
-                      observed={
-                        <div
-                          data-focus-lock-disabled="false"
-                        >
-                          <div
-                            aria-labelledby="flyoutTitle"
-                            class="euiFlyout euiFlyout--small"
-                            data-test-subj="reportInfoFlyout"
-                            role="dialog"
-                            tabindex="0"
-                          >
-                            <button
-                              aria-label="Closes this dialog"
-                              class="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
-                              data-test-subj="euiFlyoutCloseButton"
-                              type="button"
-                            >
-                              <svg
-                                aria-hidden="true"
-                                class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                                focusable="false"
-                                height="16"
-                                viewBox="0 0 16 16"
-                                width="16"
-                                xmlns="http://www.w3.org/2000/svg"
-                              />
-                            </button>
-                            <div
-                              class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
-                            >
-                              <h2
-                                class="euiTitle euiTitle--medium"
-                                id="flyoutTitle"
-                              >
-                                Job Info
-                              </h2>
-                            </div>
-                            <div
-                              class="euiFlyoutBody"
-                            >
-                              <div
-                                class="euiFlyoutBody__overflow"
-                              >
-                                <div
-                                  class="euiText euiText--medium"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      }
-                      onActivation={[Function]}
-                      onDeactivation={[Function]}
-                      persistentFocus={false}
-                    />
-                  </SideEffect(FocusWatcher)>
-                  <div
-                    aria-labelledby="flyoutTitle"
-                    className="euiFlyout euiFlyout--small"
-                    data-test-subj="reportInfoFlyout"
-                    role="dialog"
-                    tabIndex={0}
-                  >
-                    <EuiButtonIcon
+                    <button
                       aria-label="Closes this dialog"
-                      className="euiFlyout__closeButton"
-                      color="text"
+                      className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
                       data-test-subj="euiFlyoutCloseButton"
-                      iconType="cross"
                       onClick={[Function]}
+                      type="button"
                     >
-                      <button
-                        aria-label="Closes this dialog"
-                        className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
-                        data-test-subj="euiFlyoutCloseButton"
-                        onClick={[Function]}
-                        type="button"
+                      <EuiIcon
+                        aria-hidden="true"
+                        className="euiButtonIcon__icon"
+                        size="m"
+                        type="cross"
                       >
-                        <EuiIcon
+                        <EuiIconEmpty
                           aria-hidden="true"
-                          className="euiButtonIcon__icon"
-                          size="m"
-                          type="cross"
+                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                          focusable="false"
+                          style={null}
                         >
-                          <EuiIconEmpty
+                          <svg
                             aria-hidden="true"
                             className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                             focusable="false"
+                            height={16}
                             style={null}
-                          >
-                            <svg
-                              aria-hidden="true"
-                              className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                              focusable="false"
-                              height={16}
-                              style={null}
-                              viewBox="0 0 16 16"
-                              width={16}
-                              xmlns="http://www.w3.org/2000/svg"
-                            />
-                          </EuiIconEmpty>
-                        </EuiIcon>
-                      </button>
-                    </EuiButtonIcon>
-                    <EuiFlyoutHeader
-                      hasBorder={true}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </EuiIconEmpty>
+                      </EuiIcon>
+                    </button>
+                  </EuiButtonIcon>
+                  <EuiFlyoutHeader
+                    hasBorder={true}
+                  >
+                    <div
+                      className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+                    >
+                      <EuiTitle
+                        size="m"
+                      >
+                        <h2
+                          className="euiTitle euiTitle--medium"
+                          id="flyoutTitle"
+                        >
+                          Job Info
+                        </h2>
+                      </EuiTitle>
+                    </div>
+                  </EuiFlyoutHeader>
+                  <EuiFlyoutBody>
+                    <div
+                      className="euiFlyoutBody"
                     >
                       <div
-                        className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+                        className="euiFlyoutBody__overflow"
                       >
-                        <EuiTitle
-                          size="m"
-                        >
-                          <h2
-                            className="euiTitle euiTitle--medium"
-                            id="flyoutTitle"
-                          >
-                            Job Info
-                          </h2>
-                        </EuiTitle>
+                        <EuiText>
+                          <div
+                            className="euiText euiText--medium"
+                          />
+                        </EuiText>
                       </div>
-                    </EuiFlyoutHeader>
-                    <EuiFlyoutBody>
-                      <div
-                        className="euiFlyoutBody"
-                      >
-                        <div
-                          className="euiFlyoutBody__overflow"
-                        >
-                          <EuiText>
-                            <div
-                              className="euiText euiText--medium"
-                            />
-                          </EuiText>
-                        </div>
-                      </div>
-                    </EuiFlyoutBody>
-                  </div>
+                    </div>
+                  </EuiFlyoutBody>
                 </div>
-                <div
-                  data-focus-guard={true}
-                  style={
-                    Object {
-                      "height": "0px",
-                      "left": "1px",
-                      "overflow": "hidden",
-                      "padding": 0,
-                      "position": "fixed",
-                      "top": "1px",
-                      "width": "1px",
-                    }
+              </div>
+              <div
+                data-focus-guard={true}
+                style={
+                  Object {
+                    "height": "0px",
+                    "left": "1px",
+                    "overflow": "hidden",
+                    "padding": 0,
+                    "position": "fixed",
+                    "top": "1px",
+                    "width": "1px",
                   }
-                  tabIndex={0}
-                />
-              </FocusLock>
-            </div>
-          </OutsideEventDetector>
-        </EuiOutsideClickDetector>
-      </EuiFocusTrap>
-    </span>
+                }
+                tabIndex={0}
+              />
+            </FocusLock>
+          </div>
+        </OutsideEventDetector>
+      </EuiOutsideClickDetector>
+    </EuiFocusTrap>
   </EuiFlyout>,
   <div
     aria-labelledby="flyoutTitle"

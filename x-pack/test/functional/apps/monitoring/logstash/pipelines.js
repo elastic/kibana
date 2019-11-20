@@ -19,8 +19,8 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await setup('monitoring/logstash-pipelines', {
-        from: '2018-01-22 09:10:00.000',
-        to: '2018-01-22 09:41:00.000',
+        from: 'Jan 22, 2018 @ 09:10:00.000',
+        to: 'Jan 22, 2018 @ 09:41:00.000',
       });
 
       // go to pipelines listing
