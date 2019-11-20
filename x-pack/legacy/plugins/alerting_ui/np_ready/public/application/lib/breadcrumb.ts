@@ -29,7 +29,7 @@ class BreadcrumbService {
       ...this.breadcrumbs.management,
       {
         text: i18n.translate('xpack.alertingUI.home.breadcrumbTitle', {
-          defaultMessage: 'Alerting UI',
+          defaultMessage: 'Alerting',
         }),
         href: `#${routeToHome}`,
       },

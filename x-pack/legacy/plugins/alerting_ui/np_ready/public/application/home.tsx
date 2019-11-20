@@ -7,7 +7,17 @@
 import React, { useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageBody,
+  EuiPageContent,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
+} from '@elastic/eui';
+
 import { BASE_PATH, Section, routeToConnectors, routeToAlerts } from './constants';
 import { breadcrumbService } from './lib/breadcrumb';
 import { docTitleService } from './lib/doc_title';
@@ -69,6 +79,15 @@ export const AlertsUIHome: React.FunctionComponent<RouteComponentProps<MatchPara
   return (
     <EuiPageBody>
       <EuiPageContent>
+        <EuiTitle size="l">
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={true}>
+              <h1 data-test-subj="appTitle">
+                <FormattedMessage id="xpack.alertingUI.home.appTitle" defaultMessage="Alerting" />
+              </h1>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiTitle>
         <EuiTabs>
           {tabs.map(tab => (
             <EuiTab

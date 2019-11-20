@@ -28,7 +28,7 @@ class DocTitleService {
         break;
       default:
         updatedTitle = i18n.translate('xpack.alertingUI.home.breadcrumbTitle', {
-          defaultMessage: 'Alerting UI',
+          defaultMessage: 'Alerting',
         });
     }
 
