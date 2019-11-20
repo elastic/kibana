@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`includes namespace in failure 1`] = `"[foo-namespace]: expected value of type [Buffer] but got [undefined]"`;
+
+exports[`is required by default 1`] = `"expected value of type [Buffer] but got [undefined]"`;
+
+exports[`returns error when not a buffer 1`] = `"expected value of type [Buffer] but got [number]"`;
+
+exports[`returns error when not a buffer 2`] = `"expected value of type [Buffer] but got [Array]"`;
+
+exports[`returns error when not a buffer 3`] = `"expected value of type [Buffer] but got [string]"`;

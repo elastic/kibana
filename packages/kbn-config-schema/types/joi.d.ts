@@ -38,6 +38,7 @@ declare module 'joi' {
     duration: () => AnySchema;
     map: () => MapSchema;
     record: () => RecordSchema;
+    stream: () => AnySchema;
   };
 
   interface AnySchema {
