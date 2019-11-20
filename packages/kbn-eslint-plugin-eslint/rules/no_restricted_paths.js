@@ -98,7 +98,7 @@ module.exports = {
     }
 
     function checkForRestrictedImportPath(importPath, node) {
-      const absoluteImportPath = resolve(importPath, context);
+      const absoluteImportPath = importPath[0] === '.' ? resolve(importPath, context) : undefined;
 
       const currentFilename = context.getFilename();
       for (const { target, from, allowSameFolder, errorMessage = '' } of zones) {

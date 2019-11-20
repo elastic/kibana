@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Server } from 'hapi';
-import { getInternalSavedObjectsClient } from '../helpers/saved_objects_client';
-import apmIndexPattern from '../../../../../../../src/legacy/core_plugins/kibana/server/tutorials/apm/index_pattern.json';
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../../common/index_pattern_constants';
+import apmIndexPattern from 'src/legacy/core_plugins/kibana/server/tutorials/apm/index_pattern.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server/saved_objects';
+import { SavedObjectsErrorHelpers } from 'src/core/server/saved_objects';
+import { getInternalSavedObjectsClient } from '../helpers/saved_objects_client';
+import { APM_STATIC_INDEX_PATTERN_ID } from '../../../common/index_pattern_constants';
 import { hasHistoricalAgentData } from '../services/get_services/has_historical_agent_data';
 import { Setup } from '../helpers/setup_request';
 
