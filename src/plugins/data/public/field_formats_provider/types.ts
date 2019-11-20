@@ -17,26 +17,10 @@
  * under the License.
  */
 
-import moment from 'moment';
-import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
-import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import { IFieldFormatId } from '../../common';
 
-export class RelativeDateFormat extends FieldFormat {
-  static id = FIELD_FORMAT_IDS.RELATIVE_DATE;
-  static title = 'Relative Date';
-  static fieldType = KBN_FIELD_TYPES.DATE;
-
-  textConvert: TextContextTypeConvert = val => {
-    if (val === null || val === undefined) {
-      return '-';
-    }
-
-    const date = moment(val);
-    if (date.isValid()) {
-      return date.fromNow();
-    } else {
-      return val;
-    }
-  };
+export interface FieldType {
+  id: IFieldFormatId;
+  params: Record<string, any>;
+  es?: boolean;
 }
