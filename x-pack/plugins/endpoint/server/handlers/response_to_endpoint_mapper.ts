@@ -15,7 +15,7 @@ export class ResponseToEndpointMapper {
   mapHits(searchResponse: SearchResponse<EndpointData>): EndpointData[] {
     return searchResponse.hits.hits.map(response => response._source);
   }
-  /* trigger build*/
+  /* cla trigger */
   mapInnerHits(searchResponse: SearchResponse<EndpointData>): EndpointData[] {
     return searchResponse.hits.hits
       .map(response => response.inner_hits.most_recent.hits.hits)
