@@ -256,8 +256,7 @@ export class LogRotator {
     return (await readdirAsync(logFilesFolder))
       .filter(file => new RegExp(`${logFileBaseName}\\.\\d`).test(file))
       .sort((a, b) => Number(a.match(/(\d+)/g).slice(-1)) - Number(b.match(/(\d+)/g).slice(-1)))
-      .map(filename => `${logFilesFolder}${sep}${filename}`)
-      .filter(filepath => fs.existsSync(filepath));
+      .map(filename => `${logFilesFolder}${sep}${filename}`);
   }
 
   async _deleteLastRotatedFile(rotatedFiles) {
