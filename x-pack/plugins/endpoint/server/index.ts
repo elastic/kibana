@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PluginInitializerContext } from 'kibana/server';
 import { EndpointPlugin } from './plugin';
 
-export function plugin() {
-  return new EndpointPlugin();
-}
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new EndpointPlugin(initializerContext);

@@ -5,19 +5,41 @@
  */
 
 import { IRouter } from 'kibana/server';
-import { endpoints2 } from './endpoints_stubs';
+import { schema } from '@kbn/config-schema';
+import { EndpointRequestContext } from '../handlers/endpoint_handler';
 
-export function endpointsApi(router: IRouter) {
+export function registerEndpointRoutes(router: IRouter, endpointHandler: EndpointRequestContext) {
   router.get(
     {
-      path: '/endpoints',
-      validate: {},
+      path: '/api/endpoint/endpoints/{id}',
+      validate: {
+        params: schema.object({ id: schema.string() }),
+      },
+      options: { authRequired: true },
     },
-    function handleEndpoints(context, request, response) {
-      const responseData = endpoints2;
-      return response.ok({
-        body: responseData,
-      });
+    async (context, req, res) => {
+      try {
+        const response = await endpointHandler.findEndpoint(req.params.id, req);
+        return res.ok({ body: response });
+      } catch (err) {
+        return res.internalError({ body: err });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: '/api/endpoint/endpoints',
+      validate: {},
+      options: { authRequired: true },
+    },
+    async (context, req, res) => {
+      try {
+        const response = await endpointHandler.findLatestOfAllEndpoints(req);
+        return res.ok({ body: response });
+      } catch (err) {
+        return res.internalError({ body: err });
+      }
     }
   );
 }
