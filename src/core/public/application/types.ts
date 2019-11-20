@@ -118,7 +118,7 @@ export interface AppMountContext {
     notifications: NotificationsStart;
     /** {@link OverlayStart} */
     overlays: OverlayStart;
-    /** {@link UiSettingsClient} */
+    /** {@link IUiSettingsClient} */
     uiSettings: IUiSettingsClient;
     /**
      * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done

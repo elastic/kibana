@@ -57,7 +57,7 @@ import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './i
 import { NotificationsSetup, NotificationsStart } from './notifications';
 import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
-import { UiSettingsClient, UiSettingsState, IUiSettingsClient } from './ui_settings';
+import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
@@ -152,7 +152,7 @@ export interface CoreSetup {
   http: HttpSetup;
   /** {@link NotificationsSetup} */
   notifications: NotificationsSetup;
-  /** {@link UiSettingsClient} */
+  /** {@link IUiSettingsClient} */
   uiSettings: IUiSettingsClient;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
@@ -191,7 +191,7 @@ export interface CoreStart {
   notifications: NotificationsStart;
   /** {@link OverlayStart} */
   overlays: OverlayStart;
-  /** {@link UiSettingsClient} */
+  /** {@link IUiSettingsClient} */
   uiSettings: IUiSettingsClient;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
@@ -271,7 +271,6 @@ export {
   PluginInitializerContext,
   SavedObjectsStart,
   PluginOpaqueId,
-  UiSettingsClient,
   IUiSettingsClient,
   UiSettingsState,
 };

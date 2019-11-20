@@ -30,7 +30,7 @@ export interface UiSettingsState {
  * The settings provide control over the behavior of the Kibana application.
  * For example, a user can specify how to display numeric or date fields.
  * Users can adjust the settings via Management UI.
- * {@link UiSettingsClient}
+ * {@link IUiSettingsClient}
  *
  * @public
  */
