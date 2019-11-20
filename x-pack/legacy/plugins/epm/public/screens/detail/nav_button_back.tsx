@@ -6,7 +6,7 @@
 import { EuiButtonEmptyProps, EuiButtonEmpty } from '@elastic/eui';
 import styled from 'styled-components';
 import React from 'react';
-import { useLinks, useCore } from '../hooks';
+import { useLinks, useCore } from '../../hooks';
 
 export function NavButtonBack() {
   const { toListView } = useLinks();

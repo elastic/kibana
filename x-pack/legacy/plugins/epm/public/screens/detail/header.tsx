@@ -12,14 +12,14 @@ import { Version } from '../../components/version';
 import { IconPanel } from '../../components/icon_panel';
 import { useBreadcrumbs, useLinks } from '../../hooks';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
-import { InstallationButton } from '../../components/installation_button';
-import { ConfirmPackageInstall } from '../../components/confirm_package_install';
+import { InstallationButton } from './installation_button';
+import { ConfirmPackageInstall } from './confirm_package_install';
 // TODO: either
 // * import from a shared point
 // * duplicate inside our folder
 import { useTrackedPromise } from '../../../../infra/public/utils/use_tracked_promise';
 import { installPackage } from '../../data';
-import { NavButtonBack } from '../../components/nav_button_back';
+import { NavButtonBack } from './nav_button_back';
 
 const FullWidthNavRow = styled(EuiPage)`
   /* no left padding so link is against column left edge  */
