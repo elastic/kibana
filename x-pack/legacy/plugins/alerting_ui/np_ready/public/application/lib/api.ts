@@ -228,10 +228,11 @@ export async function getThresholdAlertVisualizationData({
   visualizeOptions: any;
   http: HttpServiceBase;
 }): Promise<Record<string, any>> {
-  return await http.post(`${WATCHER_API_ROOT}/watch/visualize`, {
+  const { visualizeData } = await http.post(`${WATCHER_API_ROOT}/watch/visualize`, {
     body: JSON.stringify({
       watch: model,
       options: visualizeOptions,
     }),
   });
+  return visualizeData;
 }

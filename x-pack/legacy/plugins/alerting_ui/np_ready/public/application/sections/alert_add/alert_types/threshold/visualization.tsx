@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { UiSettingsClient } from 'kibana/public';
 import {
   AnnotationDomainTypes,
   Axis,
@@ -20,18 +21,15 @@ import {
 } from '@elastic/charts';
 import { TimeBuckets } from 'ui/time_buckets';
 import dateMath from '@elastic/datemath';
-import chrome from 'ui/chrome';
 import moment from 'moment-timezone';
 import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { VisualizeOptions } from 'plugins/watcher/models/visualize_options';
-import { ThresholdWatch } from 'plugins/watcher/models/watch/threshold_watch';
 import { npStart } from 'ui/new_platform';
 import { getThresholdAlertVisualizationData } from '../../../../lib/api';
-import { AlertsContext } from '../../../../context/alerts_context';
 import { comparators, aggregationTypes } from './expression';
 import { useAppDependencies } from '../../../..';
 import { SectionError } from '../../../../components/page_error/section_error';
+import { Alert } from '../../../../../types';
 
 const customTheme = () => {
   return {
@@ -46,8 +44,26 @@ const customTheme = () => {
   };
 };
 
-const getTimezone = () => {
-  const config = chrome.getUiSettingsClient();
+const getTimezone = (
+  uiSettings: Pick<
+    UiSettingsClient,
+    | 'getAll'
+    | 'get'
+    | 'get$'
+    | 'set'
+    | 'remove'
+    | 'isDeclared'
+    | 'isDefault'
+    | 'isCustom'
+    | 'isOverridden'
+    | 'overrideLocalDefault'
+    | 'getUpdate$'
+    | 'getSaved$'
+    | 'getUpdateErrors$'
+    | 'stop'
+  >
+) => {
+  const config = uiSettings;
   const DATE_FORMAT_CONFIG_KEY = 'dateFormat:tz';
   const isCustomTimezone = !config.isDefault(DATE_FORMAT_CONFIG_KEY);
   if (isCustomTimezone) {
@@ -63,10 +79,10 @@ const getTimezone = () => {
   return tzOffset;
 };
 
-const getDomain = (watch: any) => {
+const getDomain = (alertTypeParams: any) => {
   const VISUALIZE_TIME_WINDOW_MULTIPLIER = 5;
-  const fromExpression = `now-${watch.timeWindowSize * VISUALIZE_TIME_WINDOW_MULTIPLIER}${
-    watch.timeWindowUnit
+  const fromExpression = `now-${alertTypeParams.timeWindowSize * VISUALIZE_TIME_WINDOW_MULTIPLIER}${
+    alertTypeParams.timeWindowUnit
   }`;
   const toExpression = 'now';
   const fromMoment = dateMath.parse(fromExpression);
@@ -79,27 +95,33 @@ const getDomain = (watch: any) => {
   };
 };
 
-const getThreshold = (watch: any) => {
-  return watch.threshold.slice(0, comparators[watch.thresholdComparator].requiredValues);
+const getThreshold = (alertTypeParams: any) => {
+  return alertTypeParams.threshold.slice(
+    0,
+    comparators[alertTypeParams.thresholdComparator].requiredValues
+  );
 };
 
-const getTimeBuckets = (watch: any) => {
-  const domain = getDomain(watch);
+const getTimeBuckets = (alertTypeParams: any) => {
+  const domain = getDomain(alertTypeParams);
   const timeBuckets = new TimeBuckets();
   timeBuckets.setBounds(domain);
   return timeBuckets;
 };
 
-export const ThresholdVisualization = () => {
+interface Props {
+  alert: Alert;
+}
+
+export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }) => {
   const {
-    core: { http },
+    core: { http, uiSettings },
   } = useAppDependencies();
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialRequest, setIsInitialRequest] = useState(false);
   const [error, setError] = useState<undefined | any>(undefined);
   const [visualizationData, setVisualizationData] = useState<Record<string, any>>([]);
 
-  const { alert } = useContext(AlertsContext);
   const chartsTheme = npStart.plugins.eui_utils.useChartsTheme();
   const {
     index,
@@ -117,19 +139,19 @@ export const ThresholdVisualization = () => {
     threshold,
   } = alert.alertTypeParams;
 
-  const domain = getDomain(alert);
+  const domain = getDomain(alert.alertTypeParams);
   const timeBuckets = new TimeBuckets();
   timeBuckets.setBounds(domain);
   const interval = timeBuckets.getInterval().expression;
-  const visualizeOptions = new VisualizeOptions({
+  const visualizeOptions = {
     rangeFrom: domain.min,
     rangeTo: domain.max,
     interval,
-    timezone: getTimezone(),
-  });
+    timezone: getTimezone(uiSettings),
+  };
 
   // Fetching visualization data is independent of alert actions
-  const watchWithoutActions = new ThresholdWatch({ ...alert, actions: [] });
+  const alertWithoutActions = { ...alert.alertTypeParams, actions: [], type: 'threshold' };
 
   useEffect(() => {
     // Prevent sending a second request on initial render.
@@ -141,13 +163,14 @@ export const ThresholdVisualization = () => {
       setIsLoading(true);
       setVisualizationData(
         await getThresholdAlertVisualizationData({
-          model: watchWithoutActions,
+          model: alertWithoutActions,
           visualizeOptions,
           http,
         })
       );
     }
     loadVisualizationData();
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, [
     index,
     timeField,
@@ -162,11 +185,8 @@ export const ThresholdVisualization = () => {
     timeWindowUnit,
     groupBy,
     threshold,
-    isInitialRequest,
-    watchWithoutActions,
-    visualizeOptions,
-    http,
   ]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   if (isInitialRequest && isLoading) {
     return (
@@ -175,8 +195,8 @@ export const ThresholdVisualization = () => {
         body={
           <EuiText color="subdued">
             <FormattedMessage
-              id="xpack.watcher.sections.watchEdit.loadingWatchVisualizationDescription"
-              defaultMessage="Loading watch visualization…"
+              id="xpack.alertingUI.sections.alertAdd.loadingAlertVisualizationDescription"
+              defaultMessage="Loading alert visualization…"
             />
           </EuiText>
         }
@@ -191,8 +211,8 @@ export const ThresholdVisualization = () => {
         <SectionError
           title={
             <FormattedMessage
-              id="xpack.watcher.sections.watchEdit.errorLoadingWatchVisualizationTitle"
-              defaultMessage="Cannot load watch visualization"
+              id="xpack.alertingUI.sections.alertAdd.errorLoadingAlertVisualizationTitle"
+              defaultMessage="Cannot load alert visualization"
             />
           }
           error={error}
@@ -203,9 +223,9 @@ export const ThresholdVisualization = () => {
   }
 
   if (visualizationData) {
-    const watchVisualizationDataKeys = Object.keys(visualizationData);
-    const timezone = getTimezone();
-    const actualThreshold = getThreshold(alert);
+    const alertVisualizationDataKeys = Object.keys(visualizationData);
+    const timezone = getTimezone(uiSettings);
+    const actualThreshold = getThreshold(alert.alertTypeParams);
     let maxY = actualThreshold[actualThreshold.length - 1];
 
     (Object.values(visualizationData) as number[][][]).forEach(data => {
@@ -218,13 +238,13 @@ export const ThresholdVisualization = () => {
     const dateFormatter = (d: number) => {
       return moment(d)
         .tz(timezone)
-        .format(getTimeBuckets(alert).getScaledDateFormat());
+        .format(getTimeBuckets(alert.alertTypeParams).getScaledDateFormat());
     };
     const aggLabel = aggregationTypes[alert.alertTypeParams.aggType].text;
     return (
-      <div data-test-subj="watchVisualizationChart">
+      <div data-test-subj="alertVisualizationChart">
         <EuiSpacer size="l" />
-        {watchVisualizationDataKeys.length ? (
+        {alertVisualizationDataKeys.length ? (
           <Chart size={['100%', 300]} renderer="canvas">
             <Settings
               theme={[customTheme(), chartsTheme]}
@@ -244,7 +264,7 @@ export const ThresholdVisualization = () => {
               title={aggLabel}
               position={Position.Left}
             />
-            {watchVisualizationDataKeys.map((key: string) => {
+            {alertVisualizationDataKeys.map((key: string) => {
               return (
                 <LineSeries
                   key={key}
@@ -274,14 +294,14 @@ export const ThresholdVisualization = () => {
           <EuiCallOut
             title={
               <FormattedMessage
-                id="xpack.watcher.thresholdPreviewChart.noDataTitle"
+                id="xpack.alertingUI.sections.alertAdd.thresholdPreviewChart.noDataTitle"
                 defaultMessage="No data"
               />
             }
             color="warning"
           >
             <FormattedMessage
-              id="xpack.watcher.thresholdPreviewChart.dataDoesNotExistTextMessage"
+              id="xpack.alertingUI.sections.alertAdd.thresholdPreviewChart.dataDoesNotExistTextMessage"
               defaultMessage="Your index and condition did not return any data."
             />
           </EuiCallOut>

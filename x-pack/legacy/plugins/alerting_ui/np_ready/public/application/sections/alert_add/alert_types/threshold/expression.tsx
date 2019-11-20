@@ -338,15 +338,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
     }
   );
 
-  const getFields = async (indices: string[]) => {
-    return await getThresholdAlertTypeFields({ indices, http });
-  };
-
-  useEffect(() => {
-    getIndexPatterns();
-  }, []);
-
-  useEffect(() => {
+  const setDefaultExpressionValues = () => {
     setAlertProperty('alertTypeParams', {
       aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
       termSize: DEFAULT_VALUES.TERM_SIZE,
@@ -358,6 +350,18 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
       groupBy: DEFAULT_VALUES.GROUP_BY,
       threshold: DEFAULT_VALUES.THRESHOLD,
     });
+  };
+
+  const getFields = async (indices: string[]) => {
+    return await getThresholdAlertTypeFields({ indices, http });
+  };
+
+  useEffect(() => {
+    getIndexPatterns();
+  }, []);
+
+  useEffect(() => {
+    setDefaultExpressionValues();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -464,9 +468,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                   setTimeFieldOptions(getTimeFieldOptions([], firstFieldOption));
                   setAlertTypeParams('timeFields', []);
 
-                  expressionFields.forEach(expressionField => {
-                    setAlertTypeParams(expressionField, null);
-                  });
+                  setDefaultExpressionValues();
                   return;
                 }
                 const currentEsFields = await getFields(indices);
@@ -539,7 +541,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                 <EuiFieldNumber
                   fullWidth
                   min={1}
-                  value={triggerIntervalSize || 0}
+                  value={triggerIntervalSize || 1}
                   data-test-subj="triggerIntervalSizeInput"
                   onChange={e => {
                     const { value } = e.target;
@@ -1032,7 +1034,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
       </EuiFlexGroup>
       {hasErrors ? null : (
         <Fragment>
-          <ThresholdVisualization />
+          <ThresholdVisualization alert={alert} />
         </Fragment>
       )}
     </Fragment>
