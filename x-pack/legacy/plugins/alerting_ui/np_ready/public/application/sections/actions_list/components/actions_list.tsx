@@ -29,6 +29,9 @@ export const ActionsList: React.FunctionComponent = () => {
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(false);
   const [isDeletingActions, setIsDeletingActions] = useState<boolean>(false);
   const [flyoutVisible, setFlyoutVisibility] = useState<boolean>(false);
+  const [actionTypesList, setActionTypesList] = useState<Array<{ value: string; name: string }>>(
+    []
+  );
 
   useEffect(() => {
     loadActions();
@@ -62,6 +65,7 @@ export const ActionsList: React.FunctionComponent = () => {
     if (typeof actionTypesIndex === 'undefined') {
       return;
     }
+    // Update the data for the table
     const updatedData = actions.map(action => {
       return {
         ...action,
@@ -71,6 +75,14 @@ export const ActionsList: React.FunctionComponent = () => {
       };
     });
     setData(updatedData);
+    // Update the action types list for the filter
+    const actionTypes = Object.values(actionTypesIndex)
+      .map(actionType => ({
+        value: actionType.id,
+        name: `${actionType.name} (${getActionsCountByActionType(actions, actionType.id)})`,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+    setActionTypesList(actionTypes);
   }, [actions, actionTypesIndex]);
 
   async function loadActions() {
@@ -216,12 +228,7 @@ export const ActionsList: React.FunctionComponent = () => {
                     { defaultMessage: 'Type' }
                   ),
                   multiSelect: 'or',
-                  options: Object.values(actionTypesIndex || {})
-                    .map(actionTypesIndexItem => ({
-                      value: actionTypesIndexItem.id,
-                      name: actionTypesIndexItem.name,
-                    }))
-                    .sort((a, b) => a.name.localeCompare(b.name)),
+                  options: actionTypesList,
                 },
               ],
               toolsLeft:
@@ -274,3 +281,7 @@ export const ActionsList: React.FunctionComponent = () => {
     </section>
   );
 };
+
+function getActionsCountByActionType(actions: Action[], actionTypeId: string) {
+  return actions.filter(action => action.actionTypeId === actionTypeId).length;
+}
