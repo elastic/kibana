@@ -470,10 +470,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       );
     }
 
-    public async executeAsync<A extends any[], R>(
-      fn: string | ((...args: A) => R),
-      ...args: A
-    ): Promise<R> {
+    public async executeAsync<R>(fn: string | ((...args: any[]) => R), ...args: any[]): Promise<R> {
       return await driver.executeAsyncScript(
         fn,
         ...cloneDeep<any>(args, arg => {
