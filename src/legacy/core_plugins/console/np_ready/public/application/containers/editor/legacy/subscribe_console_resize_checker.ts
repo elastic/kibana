@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { ResizeChecker } from '../../../../../../../../../plugins/kibana_utils/public';
 
-export function subscribeResizeChecker(ResizeChecker: any, $el: any, ...editors: any[]) {
-  const checker = new ResizeChecker($el);
+export function subscribeResizeChecker(el: HTMLElement, ...editors: any[]) {
+  const checker = new ResizeChecker(el);
   checker.on('resize', () =>
     editors.forEach(e => {
       e.resize();

@@ -32,7 +32,7 @@ import { AggGroupNames } from '../vis/editors/default/agg_groups';
 import { writeParams } from './agg_params';
 import { AggConfigs } from './agg_configs';
 import { Schema } from '../vis/editors/default/schemas';
-import { ContentType } from '../../../../plugins/data/common';
+import { ContentType } from '../../../../plugins/data/public';
 
 // @ts-ignore
 import { fieldFormats } from '../registry/field_formats';

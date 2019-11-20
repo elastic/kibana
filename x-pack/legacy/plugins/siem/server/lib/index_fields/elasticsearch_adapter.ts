@@ -14,16 +14,18 @@ import {
   hasDocumentation,
   IndexAlias,
 } from '../../utils/beat_schema';
-import { FrameworkAdapter, FrameworkRequest } from '../framework';
-
-import { FieldsAdapter, IndexFieldDescriptor } from './types';
+import { FrameworkAdapter } from '../framework';
+import { FieldsAdapter, IndexFieldDescriptor, FrameworkFieldsRequest } from './types';
 
 type IndexesAliasIndices = Record<string, string[]>;
 
 export class ElasticsearchIndexFieldAdapter implements FieldsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
 
-  public async getIndexFields(request: FrameworkRequest, indices: string[]): Promise<IndexField[]> {
+  public async getIndexFields(
+    request: FrameworkFieldsRequest,
+    indices: string[]
+  ): Promise<IndexField[]> {
     const indexPatternsService = this.framework.getIndexPatternsService(request);
     const indexesAliasIndices: IndexesAliasIndices = indices.reduce(
       (accumulator: IndexesAliasIndices, indice: string) => {
@@ -44,9 +46,10 @@ export class ElasticsearchIndexFieldAdapter implements FieldsAdapter {
         })
       )
     );
-    return formatIndexFields(responsesIndexFields, Object.keys(
-      indexesAliasIndices
-    ) as IndexAlias[]);
+    return formatIndexFields(
+      responsesIndexFields,
+      Object.keys(indexesAliasIndices) as IndexAlias[]
+    );
   }
 }
 

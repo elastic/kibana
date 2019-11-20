@@ -165,52 +165,25 @@ export const createGraphqlQueryEpic = <Data, Variables, Error = ApolloError>(
 export const createGraphqlStateSelectors = <State>(
   selectState: (parentState: any) => GraphqlState<State> = parentState => parentState
 ) => {
-  const selectData = createSelector(
-    selectState,
-    state => state.data
-  );
+  const selectData = createSelector(selectState, state => state.data);
 
-  const selectLoadingProgress = createSelector(
-    selectState,
-    state => state.current
+  const selectLoadingProgress = createSelector(selectState, state => state.current);
+  const selectLoadingProgressOperationInfo = createSelector(selectLoadingProgress, progress =>
+    isRunningLoadingProgress(progress) ? progress.parameters : null
   );
-  const selectLoadingProgressOperationInfo = createSelector(
-    selectLoadingProgress,
-    progress => (isRunningLoadingProgress(progress) ? progress.parameters : null)
-  );
-  const selectIsLoading = createSelector(
-    selectLoadingProgress,
-    isRunningLoadingProgress
-  );
-  const selectIsIdle = createSelector(
-    selectLoadingProgress,
-    isIdleLoadingProgress
-  );
+  const selectIsLoading = createSelector(selectLoadingProgress, isRunningLoadingProgress);
+  const selectIsIdle = createSelector(selectLoadingProgress, isIdleLoadingProgress);
 
-  const selectLoadingResult = createSelector(
-    selectState,
-    state => state.last
+  const selectLoadingResult = createSelector(selectState, state => state.last);
+  const selectLoadingResultOperationInfo = createSelector(selectLoadingResult, result =>
+    !isUninitializedLoadingResult(result) ? result.parameters : null
   );
-  const selectLoadingResultOperationInfo = createSelector(
-    selectLoadingResult,
-    result => (!isUninitializedLoadingResult(result) ? result.parameters : null)
+  const selectLoadingResultTime = createSelector(selectLoadingResult, result =>
+    !isUninitializedLoadingResult(result) ? result.time : null
   );
-  const selectLoadingResultTime = createSelector(
-    selectLoadingResult,
-    result => (!isUninitializedLoadingResult(result) ? result.time : null)
-  );
-  const selectIsUninitialized = createSelector(
-    selectLoadingResult,
-    isUninitializedLoadingResult
-  );
-  const selectIsSuccess = createSelector(
-    selectLoadingResult,
-    isSuccessLoadingResult
-  );
-  const selectIsFailure = createSelector(
-    selectLoadingResult,
-    isFailureLoadingResult
-  );
+  const selectIsUninitialized = createSelector(selectLoadingResult, isUninitializedLoadingResult);
+  const selectIsSuccess = createSelector(selectLoadingResult, isSuccessLoadingResult);
+  const selectIsFailure = createSelector(selectLoadingResult, isFailureLoadingResult);
 
   const selectLoadingState = createSelector(
     selectLoadingProgress,

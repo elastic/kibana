@@ -32,10 +32,9 @@ import { ScaleMetricsParamEditor } from '../../vis/editors/default/controls/scal
 import { dateHistogramInterval } from '../../../../core_plugins/data/public';
 import { writeParams } from '../agg_params';
 import { AggConfigs } from '../agg_configs';
-import { AggConfig } from '../agg_config';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 // @ts-ignore
 import { TimeBuckets } from '../../time_buckets';
@@ -189,7 +188,7 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
         const scaleMetrics = scaleMetricValues && interval.scaled && interval.scale < 1;
         if (scaleMetrics && aggs) {
           const metrics = aggs.aggs.filter(a => isMetricAggType(a.type));
-          const all = _.every(metrics, (a: AggConfig) => {
+          const all = _.every(metrics, (a: IBucketAggConfig) => {
             const { type } = a;
 
             if (isMetricAggType(type)) {

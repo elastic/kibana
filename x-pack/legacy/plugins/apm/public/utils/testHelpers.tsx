@@ -94,9 +94,11 @@ export function expectTextsInDocument(output: any, texts: string[]) {
 }
 
 interface MockSetup {
+  dynamicIndexPattern: any;
   start: number;
   end: number;
   client: any;
+  internalClient: any;
   config: {
     get: any;
     has: any;
@@ -122,11 +124,20 @@ export async function inspectSearchParams(
     }
   });
 
+  const internalClientSpy = jest.fn().mockReturnValueOnce({
+    hits: {
+      total: 0
+    }
+  });
+
   const mockSetup = {
     start: 1528113600000,
     end: 1528977600000,
     client: {
       search: clientSpy
+    } as any,
+    internalClient: {
+      search: internalClientSpy
     } as any,
     config: {
       get: () => 'myIndex' as any,
@@ -145,7 +156,8 @@ export async function inspectSearchParams(
       'apm_oss.transactionIndices': 'myIndex',
       'apm_oss.metricsIndices': 'myIndex',
       'apm_oss.apmAgentConfigurationIndex': 'myIndex'
-    }
+    },
+    dynamicIndexPattern: null as any
   };
   try {
     await fn(mockSetup);
@@ -153,8 +165,15 @@ export async function inspectSearchParams(
     // we're only extracting the search params
   }
 
+  let params;
+  if (clientSpy.mock.calls.length) {
+    params = clientSpy.mock.calls[0][0];
+  } else {
+    params = internalClientSpy.mock.calls[0][0];
+  }
+
   return {
-    params: clientSpy.mock.calls[0][0],
+    params,
     teardown: () => clientSpy.mockClear()
   };
 }

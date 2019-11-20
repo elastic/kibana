@@ -329,10 +329,10 @@ describe('IndexPattern Data Panel', () => {
         act(() => {
           ((inst.setProps as unknown) as (props: unknown) => {})({
             ...props,
-            ...(propChanges || {}),
+            ...((propChanges as object) || {}),
             state: {
               ...props.state,
-              ...(stateChanges || {}),
+              ...((stateChanges as object) || {}),
             },
           });
           inst.update();
