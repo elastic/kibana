@@ -6,9 +6,10 @@
 
 import t from 'io-ts';
 import { Request, ResponseToolkit } from 'hapi';
-import { InternalCoreSetup } from 'src/core/server';
+import { CoreSetup } from 'src/core/server';
 import { PickByValue, Optional } from 'utility-types';
 import { FetchOptions } from '../../public/services/rest/callApi';
+import { LegacySetup } from '../new-platform/plugin';
 
 export interface Params {
   query?: t.HasProps;
@@ -33,6 +34,9 @@ export interface Route<
   path: TPath;
   method?: TMethod;
   params?: TParams;
+  options?: {
+    tags: Array<'access:apm' | 'access:apm_write'>;
+  };
   handler: (
     req: Request,
     params: DecodeParams<TParams>,
@@ -45,7 +49,10 @@ export type RouteFactoryFn<
   TMethod extends HttpMethod | undefined,
   TParams extends Params,
   TReturn
-> = (core: InternalCoreSetup) => Route<TPath, TMethod, TParams, TReturn>;
+> = (
+  core: CoreSetup,
+  __LEGACY: LegacySetup
+) => Route<TPath, TMethod, TParams, TReturn>;
 
 export interface RouteState {
   [key: string]: {
@@ -76,7 +83,7 @@ export interface ServerAPI<TRouteState extends RouteState> {
         };
       }
   >;
-  init: (core: InternalCoreSetup) => void;
+  init: (core: CoreSetup, __LEGACY: LegacySetup) => void;
 }
 
 // without this, TS does not recognize possible existence of `params` in `options` below
@@ -88,7 +95,9 @@ type GetOptionalParamKeys<TParams extends Params> = keyof PickByValue<
   {
     [key in keyof TParams]: TParams[key] extends t.PartialType<any>
       ? false
-      : (TParams[key] extends t.Any ? true : false);
+      : TParams[key] extends t.Any
+      ? true
+      : false;
   },
   false
 >;

@@ -32,7 +32,6 @@ const createLoginState = (options?: Partial<LoginState>) => {
   return {
     allowLogin: true,
     layout: 'form',
-    loginMessage: '',
     ...options,
   } as LoginState;
 };

@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 
 import { FieldFormatsService } from '../../../../../../../../../src/legacy/ui/field_formats/mixin/field_formats_service';
-import { BytesFormat, NumberFormat } from '../../../../../../../../../src/plugins/data/common';
+import { BytesFormat, NumberFormat } from '../../../../../../../../../src/plugins/data/server';
 
 import { fieldFormatMapFactory } from '../field_format_map';
 

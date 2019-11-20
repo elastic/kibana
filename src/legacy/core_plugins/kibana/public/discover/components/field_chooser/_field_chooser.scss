@@ -27,3 +27,11 @@
   padding-left: $euiSizeXS;
   margin-left: $euiSizeXS;
 }
+
+.dscFieldSearch__filterWrapper {
+  flex-grow: 0;
+}
+
+.dscFieldSearch__formWrapper {
+  padding: $euiSizeM;
+}

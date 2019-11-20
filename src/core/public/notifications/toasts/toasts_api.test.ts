@@ -51,8 +51,11 @@ function uiSettingsMock() {
 function toastDeps() {
   return {
     uiSettings: uiSettingsMock(),
-    i18n: i18nServiceMock.createStartContract(),
   };
+}
+
+function startDeps() {
+  return { overlays: {} as any, i18n: i18nServiceMock.createStartContract() };
 }
 
 describe('#get$()', () => {
@@ -91,7 +94,7 @@ describe('#get$()', () => {
     toasts.add('foo');
     onToasts.mockClear();
 
-    toasts.remove({ id: 'bar' });
+    toasts.remove('bar');
     expect(onToasts).not.toHaveBeenCalled();
   });
 });
@@ -136,7 +139,7 @@ describe('#remove()', () => {
   it('ignores unknown toast', async () => {
     const toasts = new ToastsApi(toastDeps());
     toasts.add('Test');
-    toasts.remove({ id: 'foo' });
+    toasts.remove('foo');
 
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts).toHaveLength(1);
@@ -188,6 +191,7 @@ describe('#addDanger()', () => {
 describe('#addError', () => {
   it('adds an error toast', async () => {
     const toasts = new ToastsApi(toastDeps());
+    toasts.start(startDeps());
     const toast = toasts.addError(new Error('unexpected error'), { title: 'Something went wrong' });
     expect(toast).toHaveProperty('color', 'danger');
     expect(toast).toHaveProperty('title', 'Something went wrong');
@@ -195,6 +199,7 @@ describe('#addError', () => {
 
   it('returns the created toast', async () => {
     const toasts = new ToastsApi(toastDeps());
+    toasts.start(startDeps());
     const toast = toasts.addError(new Error('unexpected error'), { title: 'Something went wrong' });
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts[0]).toBe(toast);

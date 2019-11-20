@@ -18,5 +18,3 @@
  */
 
 export * from './kuery';
-export * from './filters';
-export * from './es_query';

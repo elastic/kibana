@@ -305,7 +305,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     /**
      * Save the current dashboard with the specified name and options and
-     * verify that the save was successful
+     * verify that the save was successful, close the toast and return the
+     * toast message
      *
      * @param dashName {String}
      * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false,  waitDialogIsClosed: boolean }}
@@ -319,8 +320,11 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       // Confirm that the Dashboard has actually been saved
       await testSubjects.existOrFail('saveDashboardSuccess');
+      const message =  await PageObjects.common.closeToast();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await this.waitForSaveModalToClose();
+
+      return message;
     }
 
     async waitForSaveModalToClose() {
@@ -347,7 +351,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickSave() {
       log.debug('DashboardPage.clickSave');
-      await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
+      await testSubjects.click('confirmSaveSavedObjectButton');
     }
 
     async pressEnterKey() {
@@ -543,9 +547,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async setSaveAsNewCheckBox(checked) {
       log.debug('saveAsNewCheckbox: ' + checked);
       const saveAsNewCheckbox = await testSubjects.find('saveAsNewCheckbox');
-      const isAlreadyChecked = (await saveAsNewCheckbox.getAttribute('checked') === 'true');
+      const isAlreadyChecked = (await saveAsNewCheckbox.getAttribute('aria-checked') === 'true');
       if (isAlreadyChecked !== checked) {
         log.debug('Flipping save as new checkbox');
+        const saveAsNewCheckbox = await testSubjects.find('saveAsNewCheckbox');
         await retry.try(() => saveAsNewCheckbox.click());
       }
     }
@@ -553,9 +558,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async setStoreTimeWithDashboard(checked) {
       log.debug('Storing time with dashboard: ' + checked);
       const storeTimeCheckbox = await testSubjects.find('storeTimeWithDashboard');
-      const isAlreadyChecked = (await storeTimeCheckbox.getAttribute('checked') === 'true');
+      const isAlreadyChecked = (await storeTimeCheckbox.getAttribute('aria-checked') === 'true');
       if (isAlreadyChecked !== checked) {
         log.debug('Flipping store time checkbox');
+        const storeTimeCheckbox = await testSubjects.find('storeTimeWithDashboard');
         await retry.try(() => storeTimeCheckbox.click());
       }
     }

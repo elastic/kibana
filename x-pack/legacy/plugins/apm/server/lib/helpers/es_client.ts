@@ -14,7 +14,6 @@ import {
 import { Legacy } from 'kibana';
 import { cloneDeep, has, isString, set, pick } from 'lodash';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
-import { StringMap, Omit } from '../../../typings/common';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import {
   ESSearchResponse,
@@ -67,8 +66,12 @@ async function getParamsForSearchRequest(
   apmOptions?: APMOptions
 ) {
   const uiSettings = req.getUiSettingsService();
+  const { server } = req;
   const [indices, includeFrozen] = await Promise.all([
-    getApmIndices(req.server),
+    getApmIndices({
+      config: server.config(),
+      savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(req)
+    }),
     uiSettings.get('search:includeFrozen')
   ]);
 
@@ -93,9 +96,22 @@ interface APMOptions {
   includeLegacyData: boolean;
 }
 
-export function getESClient(req: Legacy.Request) {
+interface ClientCreateOptions {
+  clientAsInternalUser?: boolean;
+}
+
+export type ESClient = ReturnType<typeof getESClient>;
+
+export function getESClient(
+  req: Legacy.Request,
+  { clientAsInternalUser = false }: ClientCreateOptions = {}
+) {
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
-  const query = req.query as StringMap;
+  const query = req.query as Record<string, unknown>;
+
+  const callMethod = clientAsInternalUser
+    ? cluster.callWithInternalUser.bind(cluster)
+    : cluster.callWithRequest.bind(cluster, req);
 
   return {
     search: async <
@@ -122,20 +138,18 @@ export function getESClient(req: Legacy.Request) {
         console.log(JSON.stringify(nextParams.body, null, 4));
       }
 
-      return (cluster.callWithRequest(
-        req,
-        'search',
-        nextParams
-      ) as unknown) as Promise<ESSearchResponse<TDocument, TSearchRequest>>;
+      return (callMethod('search', nextParams) as unknown) as Promise<
+        ESSearchResponse<TDocument, TSearchRequest>
+      >;
     },
     index: <Body>(params: APMIndexDocumentParams<Body>) => {
-      return cluster.callWithRequest(req, 'index', params);
+      return callMethod('index', params);
     },
     delete: (params: IndicesDeleteParams) => {
-      return cluster.callWithRequest(req, 'delete', params);
+      return callMethod('delete', params);
     },
     indicesCreate: (params: IndicesCreateParams) => {
-      return cluster.callWithRequest(req, 'indices.create', params);
+      return callMethod('indices.create', params);
     }
   };
 }

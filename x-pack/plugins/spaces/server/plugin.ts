@@ -14,10 +14,9 @@ import {
   Logger,
   PluginInitializerContext,
 } from '../../../../src/core/server';
-import { SecurityPlugin } from '../../../legacy/plugins/security';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import { PluginSetupContract as SecurityPluginSetup } from '../../security/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { OptionalPlugin } from '../../../legacy/server/lib/optional_plugin';
 import { XPackMainPlugin } from '../../../legacy/plugins/xpack_main/xpack_main';
 import { createDefaultSpace } from './lib/create_default_space';
 // @ts-ignore
@@ -33,6 +32,7 @@ import { toggleUICapabilities } from './lib/toggle_ui_capabilities';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { initExternalSpacesApi } from './routes/api/external';
 import { initInternalSpacesApi } from './routes/api/internal';
+import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 
 /**
  * Describes a set of APIs that is available in the legacy platform only and required by this plugin
@@ -58,14 +58,13 @@ export interface LegacyAPI {
     kibanaIndex: string;
   };
   xpackMain: XPackMainPlugin;
-  // TODO: Spaces has a circular dependency with Security right now.
-  // Security is not yet available when init runs, so this is wrapped in an optional plugin for the time being.
-  security: OptionalPlugin<SecurityPlugin>;
 }
 
 export interface PluginsSetup {
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
+  security?: SecurityPluginSetup;
+  home?: HomeServerPluginSetup;
 }
 
 export interface SpacesPluginSetup {
@@ -117,7 +116,7 @@ export class Plugin {
     const spacesService = await service.setup({
       http: core.http,
       elasticsearch: core.elasticsearch,
-      getSecurity: () => this.getLegacyAPI().security,
+      authorization: plugins.security ? plugins.security.authz : null,
       getSpacesAuditLogger: this.getSpacesAuditLogger,
       config$: this.config$,
     });
@@ -143,6 +142,16 @@ export class Plugin {
       spacesService,
       features: plugins.features,
     });
+
+    if (plugins.security) {
+      plugins.security.registerSpacesService(spacesService);
+    }
+
+    if (plugins.home) {
+      plugins.home.tutorials.addScopedTutorialContextFactory(
+        createSpacesTutorialContextFactory(spacesService)
+      );
+    }
 
     return {
       spacesService,

@@ -64,7 +64,6 @@ class Main extends React.Component {
           this.setState({ expression: 'Renderer was not found in registry!\n\n' + JSON.stringify(context) });
           return resolve();
         }
-        props.visualizationLoader.destroy(this.chartDiv);
         const renderCompleteHandler = () => {
           resolve('render complete');
           this.chartDiv.removeEventListener('renderComplete', renderCompleteHandler);

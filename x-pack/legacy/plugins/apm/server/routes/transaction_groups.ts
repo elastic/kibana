@@ -150,14 +150,20 @@ export const transactionGroupsAvgDurationByCountry = createRoute(() => ({
     path: t.type({
       serviceName: t.string
     }),
-    query: t.intersection([uiFiltersRt, rangeRt])
+    query: t.intersection([
+      uiFiltersRt,
+      rangeRt,
+      t.partial({ transactionName: t.string })
+    ])
   },
   handler: async (req, { path, query }) => {
     const setup = await setupRequest(req);
     const { serviceName } = path;
+    const { transactionName } = query;
 
     return getTransactionAvgDurationByCountry({
       serviceName,
+      transactionName,
       setup
     });
   }

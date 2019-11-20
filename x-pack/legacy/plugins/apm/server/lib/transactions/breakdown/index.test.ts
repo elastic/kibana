@@ -19,24 +19,29 @@ const mockIndices = {
   'apm_oss.apmAgentConfigurationIndex': 'myIndex'
 };
 
+function getMockSetup(esResponse: any) {
+  const clientSpy = jest.fn().mockReturnValueOnce(esResponse);
+  return {
+    start: 0,
+    end: 500000,
+    client: { search: clientSpy } as any,
+    internalClient: { search: clientSpy } as any,
+    config: {
+      get: () => 'myIndex' as any,
+      has: () => true
+    },
+    uiFiltersES: [],
+    indices: mockIndices,
+    dynamicIndexPattern: null as any
+  };
+}
+
 describe('getTransactionBreakdown', () => {
   it('returns an empty array if no data is available', async () => {
-    const clientSpy = jest.fn().mockReturnValueOnce(noDataResponse);
-
     const response = await getTransactionBreakdown({
       serviceName: 'myServiceName',
       transactionType: 'request',
-      setup: {
-        start: 0,
-        end: 500000,
-        client: { search: clientSpy } as any,
-        config: {
-          get: () => 'myIndex' as any,
-          has: () => true
-        },
-        uiFiltersES: [],
-        indices: mockIndices
-      }
+      setup: getMockSetup(noDataResponse)
     });
 
     expect(response.kpis.length).toBe(0);
@@ -45,22 +50,10 @@ describe('getTransactionBreakdown', () => {
   });
 
   it('returns transaction breakdowns grouped by type and subtype', async () => {
-    const clientSpy = jest.fn().mockReturnValueOnce(dataResponse);
-
     const response = await getTransactionBreakdown({
       serviceName: 'myServiceName',
       transactionType: 'request',
-      setup: {
-        start: 0,
-        end: 500000,
-        client: { search: clientSpy } as any,
-        config: {
-          get: () => 'myIndex' as any,
-          has: () => true
-        },
-        uiFiltersES: [],
-        indices: mockIndices
-      }
+      setup: getMockSetup(dataResponse)
     });
 
     expect(response.kpis.length).toBe(4);
@@ -86,22 +79,10 @@ describe('getTransactionBreakdown', () => {
   });
 
   it('returns a timeseries grouped by type and subtype', async () => {
-    const clientSpy = jest.fn().mockReturnValueOnce(dataResponse);
-
     const response = await getTransactionBreakdown({
       serviceName: 'myServiceName',
       transactionType: 'request',
-      setup: {
-        start: 0,
-        end: 500000,
-        client: { search: clientSpy } as any,
-        config: {
-          get: () => 'myIndex' as any,
-          has: () => true
-        },
-        uiFiltersES: [],
-        indices: mockIndices
-      }
+      setup: getMockSetup(dataResponse)
     });
 
     const { timeseries } = response;
@@ -126,22 +107,10 @@ describe('getTransactionBreakdown', () => {
     // @ts-ignore
     constants.MAX_KPIS = 2;
 
-    const clientSpy = jest.fn().mockReturnValueOnce(dataResponse);
-
     const response = await getTransactionBreakdown({
       serviceName: 'myServiceName',
       transactionType: 'request',
-      setup: {
-        start: 0,
-        end: 500000,
-        client: { search: clientSpy } as any,
-        config: {
-          get: () => 'myIndex' as any,
-          has: () => true
-        },
-        uiFiltersES: [],
-        indices: mockIndices
-      }
+      setup: getMockSetup(dataResponse)
     });
 
     const { timeseries } = response;
@@ -150,22 +119,10 @@ describe('getTransactionBreakdown', () => {
   });
 
   it('fills in gaps for a given timestamp', async () => {
-    const clientSpy = jest.fn().mockReturnValueOnce(dataResponse);
-
     const response = await getTransactionBreakdown({
       serviceName: 'myServiceName',
       transactionType: 'request',
-      setup: {
-        start: 0,
-        end: 500000,
-        client: { search: clientSpy } as any,
-        config: {
-          get: () => 'myIndex' as any,
-          has: () => true
-        },
-        uiFiltersES: [],
-        indices: mockIndices
-      }
+      setup: getMockSetup(dataResponse)
     });
 
     const { timeseries } = response;
