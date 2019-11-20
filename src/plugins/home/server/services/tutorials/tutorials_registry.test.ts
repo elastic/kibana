@@ -18,16 +18,16 @@
  */
 
 import { TutorialsRegistry } from './tutorials_registry';
-import { coreMock } from '../../../../core/server/mocks';
-import { CoreSetup } from '../../../../core/server';
-import { httpServerMock } from '../../../../../src/core/server/mocks';
+import { coreMock } from '../../../../../core/server/mocks';
+import { CoreSetup } from '../../../../../core/server';
+import { httpServerMock } from '../../../../../core/server/mocks';
 
 import {
   TutorialProvider,
   TutorialSchema,
   TutorialsCategory,
   ScopedTutorialContextFactory,
-} from '../lib/tutorials_registry_types';
+} from './lib/tutorials_registry_types';
 
 const INVALID_TUTORIAL: TutorialSchema = {
   id: 'test',
