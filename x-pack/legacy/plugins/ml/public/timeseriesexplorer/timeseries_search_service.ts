@@ -13,10 +13,10 @@ import { isModelPlotEnabled } from '../../common/util/job_utils';
 // @ts-ignore
 import { buildConfigFromDetector } from '../util/chart_config_builder';
 import { mlResultsService } from '../services/results_service';
-import { mlResultsServiceRx, ModelPlotOutput } from '../services/result_service_rx';
+import { ModelPlotOutput } from '../services/results_service/result_service_rx';
 import { Job } from '../jobs/new_job/common/job_creator/configs';
 
-function getMetricDataRx(
+function getMetricData(
   job: Job,
   detectorIndex: number,
   entityFields: object[],
@@ -60,7 +60,7 @@ function getMetricDataRx(
       }
     }
 
-    return mlResultsServiceRx.getModelPlotOutput(
+    return mlResultsService.getModelPlotOutput(
       job.job_id,
       detectorIndex,
       criteriaFields,
@@ -76,7 +76,7 @@ function getMetricDataRx(
 
     const chartConfig = buildConfigFromDetector(job, detectorIndex);
 
-    return mlResultsServiceRx
+    return mlResultsService
       .getMetricData(
         chartConfig.datafeedConfig.indices,
         entityFields,
@@ -99,94 +99,6 @@ function getMetricDataRx(
           return obj;
         })
       );
-  }
-}
-
-function getMetricData(
-  job: Job,
-  detectorIndex: number,
-  entityFields: any[],
-  earliestMs: number,
-  latestMs: number,
-  interval: string
-) {
-  if (isModelPlotEnabled(job, detectorIndex, entityFields)) {
-    // Extract the partition, by, over fields on which to filter.
-    const criteriaFields = [];
-    const detector = job.analysis_config.detectors[detectorIndex];
-    if (_.has(detector, 'partition_field_name')) {
-      const partitionEntity = _.find(entityFields, { fieldName: detector.partition_field_name });
-      if (partitionEntity !== undefined) {
-        criteriaFields.push(
-          { fieldName: 'partition_field_name', fieldValue: partitionEntity.fieldName },
-          { fieldName: 'partition_field_value', fieldValue: partitionEntity.fieldValue }
-        );
-      }
-    }
-
-    if (_.has(detector, 'over_field_name')) {
-      const overEntity = _.find(entityFields, { fieldName: detector.over_field_name });
-      if (overEntity !== undefined) {
-        criteriaFields.push(
-          { fieldName: 'over_field_name', fieldValue: overEntity.fieldName },
-          { fieldName: 'over_field_value', fieldValue: overEntity.fieldValue }
-        );
-      }
-    }
-
-    if (_.has(detector, 'by_field_name')) {
-      const byEntity = _.find(entityFields, { fieldName: detector.by_field_name });
-      if (byEntity !== undefined) {
-        criteriaFields.push(
-          { fieldName: 'by_field_name', fieldValue: byEntity.fieldName },
-          { fieldName: 'by_field_value', fieldValue: byEntity.fieldValue }
-        );
-      }
-    }
-
-    return mlResultsService.getModelPlotOutput(
-      job.job_id,
-      detectorIndex,
-      criteriaFields,
-      earliestMs,
-      latestMs,
-      interval
-    );
-  } else {
-    return new Promise((resolve, reject) => {
-      const obj = {
-        success: true,
-        results: {},
-      };
-
-      const chartConfig = buildConfigFromDetector(job, detectorIndex);
-
-      mlResultsService
-        .getMetricData(
-          chartConfig.datafeedConfig.indices,
-          entityFields,
-          chartConfig.datafeedConfig.query,
-          chartConfig.metricFunction,
-          chartConfig.metricFieldName,
-          chartConfig.timeField,
-          earliestMs,
-          latestMs,
-          interval
-        )
-        .then(resp => {
-          _.each(resp.results, (value, time) => {
-            // @ts-ignore
-            obj.results[time] = {
-              actual: value,
-            };
-          });
-
-          resolve(obj);
-        })
-        .catch(resp => {
-          reject(resp);
-        });
-    });
   }
 }
 
@@ -256,6 +168,5 @@ function getChartDetails(
 
 export const mlTimeSeriesSearchService = {
   getMetricData,
-  getMetricDataRx,
   getChartDetails,
 };

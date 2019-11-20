@@ -169,7 +169,7 @@ export function explorerChartsContainerServiceFactory(callback) {
             range.min,
             range.max,
             interval
-          )
+          ).toPromise()
             .then((resp) => {
               // Return data in format required by the explorer charts.
               const results = resp.results;
@@ -201,7 +201,7 @@ export function explorerChartsContainerServiceFactory(callback) {
         range.min,
         range.max,
         ANOMALIES_MAX_RESULTS
-      );
+      ).toPromise();
     }
 
     // Query 3 - load any scheduled events for the job.
@@ -213,7 +213,7 @@ export function explorerChartsContainerServiceFactory(callback) {
         config.interval,
         1,
         MAX_SCHEDULED_EVENTS
-      );
+      ).toPromise();
     }
 
     // Query 4 - load context data distribution

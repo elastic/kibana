@@ -426,6 +426,7 @@ export class TimeSeriesExplorer extends React.Component {
       bounds.min.valueOf(),
       bounds.max.valueOf(),
       ANOMALIES_TABLE_DEFAULT_QUERY_SIZE)
+      .toPromise()
       .then((resp) => {
         if (resp.records && resp.records.length > 0) {
           const firstRec = resp.records[0];
@@ -627,7 +628,7 @@ export class TimeSeriesExplorer extends React.Component {
         searchBounds.min.valueOf(),
         searchBounds.max.valueOf(),
         stateUpdate.contextAggregationInterval.expression
-      ).then((resp) => {
+      ).toPromise().then((resp) => {
         const fullRangeChartData = processMetricPlotResults(resp.results, modelPlotEnabled);
         stateUpdate.contextChartData = fullRangeChartData;
         finish(counter);

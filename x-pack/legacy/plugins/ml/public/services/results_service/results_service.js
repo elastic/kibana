@@ -11,17 +11,17 @@
 import _ from 'lodash';
 // import d3 from 'd3';
 
-import { ML_MEDIAN_PERCENTS } from '../../common/util/job_utils';
-import { escapeForElasticsearchQuery } from '../util/string_utils';
-import { ML_RESULTS_INDEX_PATTERN } from '../../common/constants/index_patterns';
+import { ML_MEDIAN_PERCENTS } from '../../../common/util/job_utils';
+import { escapeForElasticsearchQuery } from '../../util/string_utils';
+import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 
-import { ml } from '../services/ml_api_service';
+import { ml } from '../ml_api_service';
 
 // Obtains the maximum bucket anomaly scores by job ID and time.
 // Pass an empty array or ['*'] to search over all job IDs.
 // Returned response contains a results property, with a key for job
 // which has results for the specified time range.
-function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxResults) {
+export function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxResults) {
   return new Promise((resolve, reject) => {
     const obj = {
       success: true,
@@ -141,129 +141,13 @@ function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxResults) {
   });
 }
 
-// Obtains a list of scheduled events by job ID and time.
-// Pass an empty array or ['*'] to search over all job IDs.
-// Returned response contains a events property, which will only
-// contains keys for jobs which have scheduled events for the specified time range.
-function getScheduledEventsByBucket(
-  jobIds,
-  earliestMs,
-  latestMs,
-  interval,
-  maxJobs,
-  maxEvents) {
-  return new Promise((resolve, reject) => {
-    const obj = {
-      success: true,
-      events: {}
-    };
-
-    // Build the criteria to use in the bool filter part of the request.
-    // Adds criteria for the time range plus any specified job IDs.
-    const boolCriteria = [
-      {
-        range: {
-          timestamp: {
-            gte: earliestMs,
-            lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
-      },
-      {
-        exists: { field: 'scheduled_events' }
-      }
-    ];
-
-    if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
-      let jobIdFilterStr = '';
-      _.each(jobIds, (jobId, i) => {
-        jobIdFilterStr += `${i > 0 ? ' OR ' : ''}job_id:${jobId}`;
-      });
-      boolCriteria.push({
-        query_string: {
-          analyze_wildcard: false,
-          query: jobIdFilterStr
-        }
-      });
-    }
-
-    ml.esSearch({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: [{
-              query_string: {
-                query: 'result_type:bucket',
-                analyze_wildcard: false
-              }
-            }, {
-              bool: {
-                must: boolCriteria
-              }
-            }]
-          }
-        },
-        aggs: {
-          jobs: {
-            terms: {
-              field: 'job_id',
-              min_doc_count: 1,
-              size: maxJobs
-            },
-            aggs: {
-              times: {
-                date_histogram: {
-                  field: 'timestamp',
-                  interval: interval,
-                  min_doc_count: 1
-                },
-                aggs: {
-                  events: {
-                    terms: {
-                      field: 'scheduled_events',
-                      size: maxEvents
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    })
-      .then((resp) => {
-        const dataByJobId = _.get(resp, ['aggregations', 'jobs', 'buckets'], []);
-        _.each(dataByJobId, (dataForJob) => {
-          const jobId = dataForJob.key;
-          const resultsForTime = {};
-          const dataByTime = _.get(dataForJob, ['times', 'buckets'], []);
-          _.each(dataByTime, (dataForTime) => {
-            const time = dataForTime.key;
-            const events = _.get(dataForTime, ['events', 'buckets']);
-            resultsForTime[time] = _.map(events, 'key');
-          });
-          obj.events[jobId] = resultsForTime;
-        });
-
-        resolve(obj);
-      })
-      .catch((resp) => {
-        reject(resp);
-      });
-  });
-}
-
-
 // Obtains the top influencers, by maximum influencer score, for the specified index, time range and job ID(s).
 // Pass an empty array or ['*'] to search over all job IDs.
 // An optional array of influencers may be supplied, with each object in the array having 'fieldName'
 // and 'fieldValue' properties, to limit data to the supplied list of influencers.
 // Returned response contains an influencers property, with a key for each of the influencer field names,
 // whose value is an array of objects containing influencerFieldValue, maxAnomalyScore and sumAnomalyScore keys.
-function getTopInfluencers(
+export function getTopInfluencers(
   jobIds,
   earliestMs,
   latestMs,
@@ -428,7 +312,7 @@ function getTopInfluencers(
 // Pass an empty array or ['*'] to search over all job IDs.
 // Returned response contains a results property, which is an array of objects
 // containing influencerFieldValue, maxAnomalyScore and sumAnomalyScore keys.
-function getTopInfluencerValues(jobIds, influencerFieldName, earliestMs, latestMs, maxResults) {
+export function getTopInfluencerValues(jobIds, influencerFieldName, earliestMs, latestMs, maxResults) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, results: [] };
 
@@ -528,7 +412,7 @@ function getTopInfluencerValues(jobIds, influencerFieldName, earliestMs, latestM
 // Obtains the overall bucket scores for the specified job ID(s).
 // Pass ['*'] to search over all job IDs.
 // Returned response contains a results property as an object of max score by time.
-function getOverallBucketScores(jobIds, topN, earliestMs, latestMs, interval) {
+export function getOverallBucketScores(jobIds, topN, earliestMs, latestMs, interval) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, results: {} };
 
@@ -561,7 +445,7 @@ function getOverallBucketScores(jobIds, topN, earliestMs, latestMs, interval) {
 // values (pass an empty array to search over all field values).
 // Returned response contains a results property with influencer field values keyed
 // against max score by time.
-function getInfluencerValueMaxScoreByTime(
+export function getInfluencerValueMaxScoreByTime(
   jobIds,
   influencerFieldName,
   influencerFieldValues,
@@ -720,7 +604,7 @@ function getInfluencerValueMaxScoreByTime(
 // Pass an empty array or ['*'] to search over all job IDs.
 // Returned response contains a records property, with each record containing
 // only the fields job_id, detector_index, record_score and influencers.
-function getRecordInfluencers(jobIds, threshold, earliestMs, latestMs, maxResults) {
+export function getRecordInfluencers(jobIds, threshold, earliestMs, latestMs, maxResults) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, records: [] };
 
@@ -826,7 +710,7 @@ function getRecordInfluencers(jobIds, threshold, earliestMs, latestMs, maxResult
 // 'fieldValue' properties. The influencer array uses 'should' for the nested bool query,
 // so this returns record level results which have at least one of the influencers.
 // Pass an empty array or ['*'] to search over all job IDs.
-function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, latestMs, maxResults, influencersFilterQuery) {
+export function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, latestMs, maxResults, influencersFilterQuery) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, records: [] };
 
@@ -949,7 +833,7 @@ function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, lat
 // Queries Elasticsearch to obtain the record level results for the specified job and detector,
 // time range, record score threshold, and whether to only return results containing influencers.
 // An additional, optional influencer field name and value may also be provided.
-function getRecordsForDetector(
+export function getRecordsForDetector(
   jobId,
   detectorIndex,
   checkForInfluencers,
@@ -1076,261 +960,8 @@ function getRecordsForDetector(
 // and record score threshold.
 // Pass an empty array or ['*'] to search over all job IDs.
 // Returned response contains a records property, which is an array of the matching results.
-function getRecords(jobIds, threshold, earliestMs, latestMs, maxResults) {
+export function getRecords(jobIds, threshold, earliestMs, latestMs, maxResults) {
   return this.getRecordsForInfluencer(jobIds, [], threshold, earliestMs, latestMs, maxResults);
-}
-
-// Queries Elasticsearch to obtain the record level results matching the given criteria,
-// for the specified job(s), time range, and record score threshold.
-// criteriaFields parameter must be an array, with each object in the array having 'fieldName'
-// 'fieldValue' properties.
-// Pass an empty array or ['*'] to search over all job IDs.
-function getRecordsForCriteria(jobIds, criteriaFields, threshold, earliestMs, latestMs, maxResults) {
-  return new Promise((resolve, reject) => {
-    const obj = { success: true, records: [] };
-
-    // Build the criteria to use in the bool filter part of the request.
-    // Add criteria for the time range, record score, plus any specified job IDs.
-    const boolCriteria = [
-      {
-        range: {
-          timestamp: {
-            gte: earliestMs,
-            lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
-      },
-      {
-        range: {
-          record_score: {
-            gte: threshold,
-          }
-        }
-      }
-    ];
-
-    if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
-      let jobIdFilterStr = '';
-      _.each(jobIds, (jobId, i) => {
-        if (i > 0) {
-          jobIdFilterStr += ' OR ';
-        }
-        jobIdFilterStr += 'job_id:';
-        jobIdFilterStr += jobId;
-      });
-      boolCriteria.push({
-        query_string: {
-          analyze_wildcard: false,
-          query: jobIdFilterStr
-        }
-      });
-    }
-
-    // Add in term queries for each of the specified criteria.
-    _.each(criteriaFields, (criteria) => {
-      boolCriteria.push({
-        term: {
-          [criteria.fieldName]: criteria.fieldValue
-        }
-      });
-    });
-
-    ml.esSearch({
-      index: ML_RESULTS_INDEX_PATTERN,
-      rest_total_hits_as_int: true,
-      size: maxResults !== undefined ? maxResults : 100,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                query_string: {
-                  query: 'result_type:record',
-                  analyze_wildcard: false
-                }
-              },
-              {
-                bool: {
-                  must: boolCriteria
-                }
-              }
-            ]
-          }
-        },
-        sort: [
-          { record_score: { order: 'desc' } }
-        ],
-      }
-    })
-      .then((resp) => {
-        if (resp.hits.total !== 0) {
-          _.each(resp.hits.hits, (hit) => {
-            obj.records.push(hit._source);
-          });
-        }
-        resolve(obj);
-      })
-      .catch((resp) => {
-        reject(resp);
-      });
-  });
-}
-
-
-// Queries Elasticsearch to obtain metric aggregation results.
-// index can be a String, or String[], of index names to search.
-// entityFields parameter must be an array, with each object in the array having 'fieldName'
-//  and 'fieldValue' properties.
-// Extra query object can be supplied, or pass null if no additional query
-// to that built from the supplied entity fields.
-// Returned response contains a results property containing the requested aggregation.
-function getMetricData(
-  index,
-  entityFields,
-  query,
-  metricFunction, // ES aggregation name
-  metricFieldName,
-  timeFieldName,
-  earliestMs,
-  latestMs,
-  interval) {
-  return new Promise((resolve, reject) => {
-    const obj = { success: true, results: {} };
-
-    // Build the criteria to use in the bool filter part of the request.
-    // Add criteria for the time range, entity fields,
-    // plus any additional supplied query.
-    const mustCriteria = [];
-    const shouldCriteria = [];
-
-    mustCriteria.push({
-      range: {
-        [timeFieldName]: {
-          gte: earliestMs,
-          lte: latestMs,
-          format: 'epoch_millis'
-        }
-      }
-    });
-
-    if (query) {
-      mustCriteria.push(query);
-    }
-
-    _.each(entityFields, (entity) => {
-      if (entity.fieldValue.length !== 0) {
-        mustCriteria.push({
-          term: {
-            [entity.fieldName]: entity.fieldValue
-          }
-        });
-
-      } else {
-        // Add special handling for blank entity field values, checking for either
-        // an empty string or the field not existing.
-        shouldCriteria.push({
-          bool: {
-            must: [
-              {
-                term: {
-                  [entity.fieldName]: ''
-                }
-              }
-            ]
-          }
-        });
-        shouldCriteria.push({
-          bool: {
-            must_not: [
-              {
-                exists: { field: entity.fieldName }
-              }
-            ]
-          }
-        });
-      }
-
-    });
-
-    const body = {
-      query: {
-        bool: {
-          must: mustCriteria
-        }
-      },
-      size: 0,
-      _source: {
-        excludes: []
-      },
-      aggs: {
-        byTime: {
-          date_histogram: {
-            field: timeFieldName,
-            interval: interval,
-            min_doc_count: 0
-          }
-
-        }
-      }
-    };
-
-    if (shouldCriteria.length > 0) {
-      body.query.bool.should = shouldCriteria;
-      body.query.bool.minimum_should_match = shouldCriteria.length / 2;
-    }
-
-    if (metricFieldName !== undefined && metricFieldName !== '') {
-      body.aggs.byTime.aggs = {};
-
-      const metricAgg = {
-        [metricFunction]: {
-          field: metricFieldName
-        }
-      };
-
-      if (metricFunction === 'percentiles') {
-        metricAgg[metricFunction].percents = [ML_MEDIAN_PERCENTS];
-      }
-      body.aggs.byTime.aggs.metric = metricAgg;
-    }
-
-    ml.esSearch({
-      index,
-      body
-    })
-      .then((resp) => {
-        const dataByTime = _.get(resp, ['aggregations', 'byTime', 'buckets'], []);
-        _.each(dataByTime, (dataForTime) => {
-          if (metricFunction === 'count') {
-            obj.results[dataForTime.key] = dataForTime.doc_count;
-          } else {
-            const value = _.get(dataForTime, ['metric', 'value']);
-            const values = _.get(dataForTime, ['metric', 'values']);
-            if (dataForTime.doc_count === 0) {
-              obj.results[dataForTime.key] = null;
-            } else if (value !== undefined) {
-              obj.results[dataForTime.key] = value;
-            } else if (values !== undefined) {
-              // Percentiles agg currently returns NaN rather than null when none of the docs in the
-              // bucket contain the field used in the aggregation
-              // (see elasticsearch issue https://github.com/elastic/elasticsearch/issues/29066).
-              // Store as null, so values can be handled in the same manner downstream as other aggs
-              // (min, mean, max) which return null.
-              const medianValues = values[ML_MEDIAN_PERCENTS];
-              obj.results[dataForTime.key] = !isNaN(medianValues) ? medianValues : null;
-            } else {
-              obj.results[dataForTime.key] = null;
-            }
-          }
-        });
-
-        resolve(obj);
-      })
-      .catch((resp) => {
-        reject(resp);
-      });
-  });
 }
 
 // Queries Elasticsearch to obtain event rate data i.e. the count
@@ -1339,7 +970,7 @@ function getMetricData(
 // Extra query object can be supplied, or pass null if no additional query.
 // Returned response contains a results property, which is an object
 // of document counts against time (epoch millis).
-function getEventRateData(
+export function getEventRateData(
   index,
   query,
   timeFieldName,
@@ -1420,7 +1051,7 @@ const SAMPLER_TOP_TERMS_SHARD_SIZE = 20000;
 const ENTITY_AGGREGATION_SIZE = 10;
 const AGGREGATION_MIN_DOC_COUNT = 1;
 const CARDINALITY_PRECISION_THRESHOLD = 100;
-function getEventDistributionData(
+export function getEventDistributionData(
   index,
   splitField,
   filterField = null,
@@ -1583,155 +1214,11 @@ function getEventDistributionData(
   });
 }
 
-function getModelPlotOutput(
-  jobId,
-  detectorIndex,
-  criteriaFields,
-  earliestMs,
-  latestMs,
-  interval,
-  aggType) {
-  return new Promise((resolve, reject) => {
-    const obj = {
-      success: true,
-      results: {}
-    };
-
-    // if an aggType object has been passed in, use it.
-    // otherwise default to min and max aggs for the upper and lower bounds
-    const modelAggs = (aggType === undefined) ?
-      { max: 'max', min: 'min' } :
-      {
-        max: aggType.max,
-        min: aggType.min
-      };
-
-    // Build the criteria to use in the bool filter part of the request.
-    // Add criteria for the job ID and time range.
-    const mustCriteria = [
-      {
-        term: { job_id: jobId }
-      },
-      {
-        range: {
-          timestamp: {
-            gte: earliestMs,
-            lte: latestMs,
-            format: 'epoch_millis'
-          }
-        }
-      }
-    ];
-
-    // Add in term queries for each of the specified criteria.
-    _.each(criteriaFields, (criteria) => {
-      mustCriteria.push({
-        term: {
-          [criteria.fieldName]: criteria.fieldValue
-        }
-      });
-    });
-
-    // Add criteria for the detector index. Results from jobs created before 6.1 will not
-    // contain a detector_index field, so use a should criteria with a 'not exists' check.
-    const shouldCriteria = [
-      {
-        term: { detector_index: detectorIndex }
-      },
-      {
-        bool: {
-          must_not: [
-            {
-              exists: { field: 'detector_index' }
-            }
-          ]
-        }
-      }
-    ];
-
-    ml.esSearch({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: [{
-              query_string: {
-                query: 'result_type:model_plot',
-                analyze_wildcard: true
-              }
-            }, {
-              bool: {
-                must: mustCriteria,
-                should: shouldCriteria,
-                minimum_should_match: 1
-              }
-            }]
-          }
-        },
-        aggs: {
-          times: {
-            date_histogram: {
-              field: 'timestamp',
-              interval: interval,
-              min_doc_count: 0
-            },
-            aggs: {
-              actual: {
-                avg: {
-                  field: 'actual'
-                }
-              },
-              modelUpper: {
-                [modelAggs.max]: {
-                  field: 'model_upper'
-                }
-              },
-              modelLower: {
-                [modelAggs.min]: {
-                  field: 'model_lower'
-                }
-              }
-            }
-          }
-        }
-      }
-    })
-      .then((resp) => {
-        const aggregationsByTime = _.get(resp, ['aggregations', 'times', 'buckets'], []);
-        _.each(aggregationsByTime, (dataForTime) => {
-          const time = dataForTime.key;
-          let modelUpper = _.get(dataForTime, ['modelUpper', 'value']);
-          let modelLower = _.get(dataForTime, ['modelLower', 'value']);
-          const actual = _.get(dataForTime, ['actual', 'value']);
-
-          if (modelUpper === undefined || isFinite(modelUpper) === false) {
-            modelUpper = null;
-          }
-          if (modelLower === undefined || isFinite(modelLower) === false) {
-            modelLower = null;
-          }
-
-          obj.results[time] = {
-            actual,
-            modelUpper,
-            modelLower
-          };
-        });
-
-        resolve(obj);
-      })
-      .catch((resp) => {
-        reject(resp);
-      });
-  });
-}
-
 // Queries Elasticsearch to obtain the max record score over time for the specified job,
 // criteria, time range, and aggregation interval.
 // criteriaFields parameter must be an array, with each object in the array having 'fieldName'
 // 'fieldValue' properties.
-function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, latestMs, interval) {
+export function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, latestMs, interval) {
   return new Promise((resolve, reject) => {
     const obj = {
       success: true,
@@ -1840,22 +1327,3 @@ function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, latestMs, in
       });
   });
 }
-
-export const mlResultsService = {
-  getScoresByBucket,
-  getScheduledEventsByBucket,
-  getTopInfluencers,
-  getTopInfluencerValues,
-  getOverallBucketScores,
-  getInfluencerValueMaxScoreByTime,
-  getRecordInfluencers,
-  getRecordsForInfluencer,
-  getRecordsForDetector,
-  getRecords,
-  getRecordsForCriteria,
-  getMetricData,
-  getEventRateData,
-  getEventDistributionData,
-  getModelPlotOutput,
-  getRecordMaxScoreByTime
-};

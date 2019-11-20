@@ -14,10 +14,10 @@
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import _ from 'lodash';
-import { ML_MEDIAN_PERCENTS } from '../../common/util/job_utils';
-import { ml } from './ml_api_service';
-import { ML_RESULTS_INDEX_PATTERN } from '../../common/constants/index_patterns';
-import { CriteriaField } from './results_service';
+import { ML_MEDIAN_PERCENTS } from '../../../common/util/job_utils';
+import { ml } from '../ml_api_service';
+import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import { CriteriaField } from './index';
 
 interface ResultResponse {
   success: boolean;
@@ -27,7 +27,7 @@ export interface MetricData extends ResultResponse {
   results: Record<string, any>;
 }
 
-function getMetricData(
+export function getMetricData(
   index: string,
   entityFields: any[],
   query: object | undefined,
@@ -166,7 +166,7 @@ export interface ModelPlotOutput extends ResultResponse {
   results: Record<string, any>;
 }
 
-function getModelPlotOutput(
+export function getModelPlotOutput(
   jobId: string,
   detectorIndex: number,
   criteriaFields: any[],
@@ -317,7 +317,7 @@ export interface RecordsForCriteria extends ResultResponse {
 // criteriaFields parameter must be an array, with each object in the array having 'fieldName'
 // 'fieldValue' properties.
 // Pass an empty array or ['*'] to search over all job IDs.
-function getRecordsForCriteria(
+export function getRecordsForCriteria(
   jobIds: string[] | undefined,
   criteriaFields: CriteriaField[],
   threshold: any,
@@ -420,7 +420,7 @@ export interface ScheduledEventsByBucket extends ResultResponse {
 // Pass an empty array or ['*'] to search over all job IDs.
 // Returned response contains a events property, which will only
 // contains keys for jobs which have scheduled events for the specified time range.
-function getScheduledEventsByBucket(
+export function getScheduledEventsByBucket(
   jobIds: string[] | undefined,
   earliestMs: number,
   latestMs: number,
@@ -532,10 +532,3 @@ function getScheduledEventsByBucket(
       })
     );
 }
-
-export const mlResultsServiceRx = {
-  getMetricData,
-  getModelPlotOutput,
-  getRecordsForCriteria,
-  getScheduledEventsByBucket,
-};

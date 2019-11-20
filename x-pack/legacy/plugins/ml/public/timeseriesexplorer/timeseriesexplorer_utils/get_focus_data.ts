@@ -13,16 +13,15 @@ import {
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../common/constants/search';
 import { mlTimeSeriesSearchService } from '../timeseries_search_service';
-import { mlResultsServiceRx } from '../../services/result_service_rx';
+import { mlResultsService, CriteriaField } from '../../services/results_service';
 import { Job } from '../../jobs/new_job/common/job_creator/configs';
 import { MAX_SCHEDULED_EVENTS, TIME_FIELD_NAME } from '../timeseriesexplorer_constants';
 import {
-  processMetricPlotResults,
   processDataForFocusAnomalies,
-  processScheduledEventsForChart,
   processForecastResults,
+  processMetricPlotResults,
+  processScheduledEventsForChart,
 } from './timeseriesexplorer_utils';
-import { CriteriaField } from '../../services/results_service';
 import { mlForecastService } from '../../services/forecast_service';
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 import { Annotation } from '../../../common/types/annotations';
@@ -55,7 +54,7 @@ export function getFocusData(
 ): Observable<FocusData> {
   return forkJoin([
     // Query 1 - load metric data across selected time range.
-    mlTimeSeriesSearchService.getMetricDataRx(
+    mlTimeSeriesSearchService.getMetricData(
       selectedJob,
       detectorIndex,
       nonBlankEntities,
@@ -64,7 +63,7 @@ export function getFocusData(
       focusAggregationInterval.expression
     ),
     // Query 2 - load all the records across selected time range for the chart anomaly markers.
-    mlResultsServiceRx.getRecordsForCriteria(
+    mlResultsService.getRecordsForCriteria(
       [selectedJob.job_id],
       criteriaFields,
       0,
@@ -73,7 +72,7 @@ export function getFocusData(
       ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
     ),
     // Query 3 - load any scheduled events for the selected job.
-    mlResultsServiceRx.getScheduledEventsByBucket(
+    mlResultsService.getScheduledEventsByBucket(
       [selectedJob.job_id],
       searchBounds.min.valueOf(),
       searchBounds.max.valueOf(),
