@@ -5,7 +5,8 @@
  */
 
 import { registerRefreshRoute } from './register_refresh_route';
+import { ServerShimWithRouter } from '../../../types';
 
-export function registerLicenseRoutes(server) {
+export function registerLicenseRoutes(server: ServerShimWithRouter) {
   registerRefreshRoute(server);
 }

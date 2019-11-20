@@ -1,0 +1,96 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { schema } from '@kbn/config-schema';
+import { RequestHandler } from 'kibana/server';
+import { i18n } from '@kbn/i18n';
+import { WATCH_TYPES } from '../../../../../common/constants';
+import {
+  serializeJsonWatch,
+  serializeThresholdWatch,
+} from '../../../../../common/lib/serialization';
+import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
+import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
+import { ServerShimWithRouter } from '../../../types';
+
+function fetchWatch(callWithRequest: any, watchId: string) {
+  return callWithRequest('watcher.getWatch', {
+    id: watchId,
+  });
+}
+
+function saveWatch(callWithRequest: any, id: string, body: any) {
+  return callWithRequest('watcher.putWatch', {
+    id,
+    body,
+  });
+}
+
+export function registerSaveRoute(server: ServerShimWithRouter) {
+  const isEsError = isEsErrorFactory(server);
+  const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
+    const callWithRequest = callWithRequestFactory(server, request);
+    const { id, type, isNew, ...watchConfig } = request.body;
+
+    // For new watches, verify watch with the same ID doesn't already exist
+    if (isNew) {
+      const existingWatch = await fetchWatch(callWithRequest, id);
+
+      if (existingWatch.found) {
+        return response.conflict({
+          body: {
+            message: i18n.translate('xpack.watcher.saveRoute.duplicateWatchIdErrorMessage', {
+              defaultMessage: "There is already a watch with ID '{watchId}'.",
+              values: {
+                watchId: id,
+              },
+            }),
+          },
+        });
+      }
+    }
+
+    let serializedWatch;
+
+    switch (type) {
+      case WATCH_TYPES.JSON:
+        const { name, watch } = watchConfig;
+        serializedWatch = serializeJsonWatch(name, watch);
+        break;
+
+      case WATCH_TYPES.THRESHOLD:
+        serializedWatch = serializeThresholdWatch(watchConfig);
+        break;
+    }
+
+    try {
+      // Create new watch
+      await saveWatch(callWithRequest, id, serializedWatch);
+      return response.noContent();
+    } catch (e) {
+      // Case: Error from Elasticsearch JS client
+      if (isEsError(e)) {
+        return response.customError({ statusCode: e.statusCode, body: e });
+      }
+
+      // Case: default
+      return response.internalError({ body: e });
+    }
+  };
+
+  server.router.put(
+    {
+      path: '/api/watcher/watch/{id}',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    licensePreRoutingFactory(server, handler)
+  );
+}

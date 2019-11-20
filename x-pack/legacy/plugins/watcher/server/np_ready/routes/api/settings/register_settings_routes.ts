@@ -5,7 +5,8 @@
  */
 
 import { registerLoadRoute } from './register_load_route';
+import { ServerShimWithRouter } from '../../../types';
 
-export function registerSettingsRoutes(server) {
+export function registerSettingsRoutes(server: ServerShimWithRouter) {
   registerLoadRoute(server);
 }

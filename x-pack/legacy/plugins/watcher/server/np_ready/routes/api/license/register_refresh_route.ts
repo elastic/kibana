@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RequestHandler } from 'src/core/server';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
+import { ServerShimWithRouter } from '../../../types';
 
 /*
 In order for the client to have the most up-to-date snapshot of the current license,
@@ -12,17 +14,16 @@ it needs to make a round-trip to the kibana server. This refresh endpoint is pro
 for when the client needs to check the license, but doesn't need to pull data from the
 server for any reason, i.e., when adding a new watch.
 */
-export function registerRefreshRoute(server) {
-  const licensePreRouting = licensePreRoutingFactory(server);
+export function registerRefreshRoute(server: ServerShimWithRouter) {
+  const handler: RequestHandler<any, any, any> = (ctx, request, response) => {
+    return response.ok({ body: { success: true } });
+  };
 
-  server.route({
-    path: '/api/watcher/license/refresh',
-    method: 'GET',
-    handler: () => {
-      return { success: true };
+  server.router.get(
+    {
+      path: '/api/watcher/license/refresh',
+      validate: false,
     },
-    config: {
-      pre: [ licensePreRouting ]
-    }
-  });
+    licensePreRoutingFactory(server, handler)
+  );
 }

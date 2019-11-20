@@ -5,7 +5,8 @@
  */
 
 import { registerAcknowledgeRoute } from './register_acknowledge_route';
+import { ServerShimWithRouter } from '../../../../types';
 
-export function registerActionRoutes(server) {
+export function registerActionRoutes(server: ServerShimWithRouter) {
   registerAcknowledgeRoute(server);
 }
