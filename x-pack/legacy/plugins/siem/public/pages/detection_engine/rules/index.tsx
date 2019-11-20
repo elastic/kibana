@@ -49,7 +49,7 @@ export const RulesComponent = React.memo(() => {
           subtitle={
             lastCompletedRun ? (
               <FormattedMessage
-                id="xpack.siem.headerPage.pageSubtitle"
+                id="xpack.siem.headerPage.rules.pageSubtitle"
                 defaultMessage="Last completed run: {lastCompletedRun}"
                 values={{
                   lastCompletedRun: <FormattedRelativePreferenceDate value={lastCompletedRun} />,
