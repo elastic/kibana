@@ -36,7 +36,7 @@ export class HeatmapLegend extends React.Component {
 
   async _loadLabel() {
     const label = await this.props.field.getLabel();
-    if (this.state.label !== label) {
+    if (this._isMounted && this.state.label !== label) {
       this.setState({ label });
     }
   }

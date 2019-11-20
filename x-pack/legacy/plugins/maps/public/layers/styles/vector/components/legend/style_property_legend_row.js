@@ -5,67 +5,12 @@
  */
 
 import _ from 'lodash';
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 import { rangeShape } from '../style_option_shapes';
-import { CircleIcon } from './circle_icon';
 import { getVectorStyleLabel } from '../get_vector_style_label';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { StyleLegendRow } from '../../../components/style_legend_row';
-import { vectorStyles } from '../../vector_style_defaults';
-
-function getLineWidthIcons() {
-  const defaultStyle = {
-    stroke: 'grey',
-    fill: 'none',
-    width: '12px',
-  };
-  return [
-    <CircleIcon style={{ ...defaultStyle, strokeWidth: '1px' }}/>,
-    <CircleIcon style={{ ...defaultStyle, strokeWidth: '2px' }}/>,
-    <CircleIcon style={{ ...defaultStyle, strokeWidth: '3px' }}/>,
-  ];
-}
-
-function getSymbolSizeIcons() {
-  const defaultStyle = {
-    stroke: 'grey',
-    fill: 'grey',
-  };
-  return [
-    <CircleIcon style={{ ...defaultStyle, width: '4px' }}/>,
-    <CircleIcon style={{ ...defaultStyle, width: '8px' }}/>,
-    <CircleIcon style={{ ...defaultStyle, width: '12px' }}/>,
-  ];
-}
-
-function renderHeaderWithIcons(icons) {
-  return (
-    <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
-      {
-        icons.map((icon, index) => {
-          const isLast = index === icons.length - 1;
-          let spacer;
-          if (!isLast) {
-            spacer = (
-              <EuiFlexItem>
-                <EuiHorizontalRule margin="xs" />
-              </EuiFlexItem>
-            );
-          }
-          return (
-            <Fragment key={index}>
-              <EuiFlexItem grow={false}>
-                {icon}
-              </EuiFlexItem>
-              {spacer}
-            </Fragment>
-          );
-        })
-      }
-    </EuiFlexGroup>
-  );
-}
 
 const EMPTY_VALUE = '';
 
@@ -142,15 +87,7 @@ export class StylePropertyLegendRow extends Component {
       return null;
     }
 
-    let header;
-    if (style.getOptions().color) {
-      header = style.renderHeader();
-    } else if (style.getStyleName() === vectorStyles.LINE_WIDTH) {
-      header = renderHeaderWithIcons(getLineWidthIcons());
-    } else if (style.getStyleName() === vectorStyles.ICON_SIZE) {
-      header = renderHeaderWithIcons(getSymbolSizeIcons());
-    }
-
+    const header = style.renderHeader();
     return (
       <StyleLegendRow
         header={header}
@@ -164,5 +101,6 @@ export class StylePropertyLegendRow extends Component {
 }
 
 StylePropertyLegendRow.propTypes = {
-  range: rangeShape
+  range: rangeShape,
+  style: PropTypes.object
 };

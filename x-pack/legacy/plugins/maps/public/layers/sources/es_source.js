@@ -69,10 +69,9 @@ export class AbstractESSource extends AbstractVectorSource {
     return clonedDescriptor;
   }
 
-  _getRawFieldName(fieldName) {
-    return fieldName;
+  getMetricFields() {
+    return [];
   }
-
 
   async _runEsQuery(requestName, searchSource, registerCancelCallback, requestDescription) {
     const abortController = new AbortController();
@@ -256,8 +255,8 @@ export class AbstractESSource extends AbstractVectorSource {
     }
 
     // fieldName could be an aggregation so it needs to be unpacked to expose raw field.
-    const rawFieldName = this._getRawFieldName(fieldName);
-    if (!rawFieldName) {
+    const realFieldName = metricField ? metricField.getESDocFieldName() : fieldName;
+    if (!realFieldName) {
       return null;
     }
 
@@ -268,7 +267,7 @@ export class AbstractESSource extends AbstractVectorSource {
       return null;
     }
 
-    const fieldFromIndexPattern = indexPattern.fields.getByName(rawFieldName);
+    const fieldFromIndexPattern = indexPattern.fields.getByName(realFieldName);
     if (!fieldFromIndexPattern) {
       return null;
     }
