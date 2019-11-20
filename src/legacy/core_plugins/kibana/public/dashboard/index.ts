@@ -23,7 +23,6 @@ import {
   SavedObjectRegistryProvider,
   legacyChrome,
   IPrivate,
-  ShareContextMenuExtensionsRegistryProvider,
 } from './legacy_imports';
 import { DashboardPlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { start as data } from '../../../data/public/legacy';
@@ -42,11 +41,9 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
 
   const Private = injector.get<IPrivate>('Private');
 
-  const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
   const savedObjectRegistry = Private(SavedObjectRegistryProvider);
 
   return {
-    shareContextMenuExtensions,
     dashboardConfig: injector.get('dashboardConfig'),
     savedObjectRegistry,
     savedDashboards: injector.get('savedDashboards'),
@@ -63,6 +60,7 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
     },
   });
   instance.start(npStart.core, {
+    ...npStart.plugins,
     data,
     npData: npStart.plugins.data,
     embeddables,

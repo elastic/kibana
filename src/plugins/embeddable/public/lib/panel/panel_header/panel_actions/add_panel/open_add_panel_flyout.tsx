@@ -17,8 +17,8 @@
  * under the License.
  */
 import React from 'react';
-import { NotificationsStart } from 'src/core/public';
-import { KibanaReactOverlays } from 'src/plugins/kibana_react/public';
+import { NotificationsStart, OverlayStart } from 'src/core/public';
+import { toMountPoint } from '../../../../../../../kibana_react/public';
 import { IContainer } from '../../../../containers';
 import { AddPanelFlyout } from './add_panel_flyout';
 import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
@@ -27,7 +27,7 @@ export async function openAddPanelFlyout(options: {
   embeddable: IContainer;
   getFactory: GetEmbeddableFactory;
   getAllFactories: GetEmbeddableFactories;
-  overlays: KibanaReactOverlays;
+  overlays: OverlayStart;
   notifications: NotificationsStart;
   SavedObjectFinder: React.ComponentType<any>;
 }) {
@@ -40,18 +40,20 @@ export async function openAddPanelFlyout(options: {
     SavedObjectFinder,
   } = options;
   const flyoutSession = overlays.openFlyout(
-    <AddPanelFlyout
-      container={embeddable}
-      onClose={() => {
-        if (flyoutSession) {
-          flyoutSession.close();
-        }
-      }}
-      getFactory={getFactory}
-      getAllFactories={getAllFactories}
-      notifications={notifications}
-      SavedObjectFinder={SavedObjectFinder}
-    />,
+    toMountPoint(
+      <AddPanelFlyout
+        container={embeddable}
+        onClose={() => {
+          if (flyoutSession) {
+            flyoutSession.close();
+          }
+        }}
+        getFactory={getFactory}
+        getAllFactories={getAllFactories}
+        notifications={notifications}
+        SavedObjectFinder={SavedObjectFinder}
+      />
+    ),
     {
       'data-test-subj': 'addPanelFlyout',
     }

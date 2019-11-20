@@ -29,7 +29,6 @@ import chromeLegacy from 'ui/chrome';
 import { IPrivate } from 'ui/private';
 import { TimefilterContract } from 'src/plugins/data/public';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing/get_unhashable_states_provider';
-import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 // @ts-ignore
 import { StateProvider } from 'ui/state_management/state';
 // @ts-ignore
@@ -54,13 +53,13 @@ export interface DiscoverServices {
   indexPatterns: IndexPatterns;
   inspector: unknown;
   metadata: { branch: string };
+  share: unknown;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
   // legacy
   getSavedSearchById: (id: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
   getUnhashableStates: unknown;
-  shareContextMenuExtensions: unknown;
   State: unknown;
   uiSettings: UiSettingsClientContract;
 }
@@ -70,7 +69,6 @@ export async function buildGlobalAngularServices() {
   const Private = injector.get<IPrivate>('Private');
   const kbnUrl = injector.get<IPrivate>('kbnUrl');
   const getUnhashableStates = Private(getUnhashableStatesProvider);
-  const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
   const State = Private(StateProvider);
   const SavedSearchFactory = createSavedSearchFactory(Private);
   const service = createSavedSearchesService(Private, SavedSearchFactory, kbnUrl, chromeLegacy);
@@ -78,7 +76,6 @@ export async function buildGlobalAngularServices() {
     getSavedSearchById: async (id: string) => service.get(id),
     getSavedSearchUrlById: async (id: string) => service.urlFor(id),
     getUnhashableStates,
-    shareContextMenuExtensions,
     State,
   };
 }
@@ -90,7 +87,6 @@ export async function buildServices(core: CoreStart, plugins: DiscoverStartPlugi
         getSavedSearchById: async (id: string) => void id,
         getSavedSearchUrlById: async (id: string) => void id,
         getUnhashableStates: () => void 0,
-        shareContextMenuExtensions: [],
         State: null,
       };
 
@@ -108,6 +104,7 @@ export async function buildServices(core: CoreStart, plugins: DiscoverStartPlugi
     inspector: plugins.inspector,
     // @ts-ignore
     metadata: core.injectedMetadata.getLegacyMetadata(),
+    share: plugins.share,
     timefilter: plugins.data.query.timefilter.timefilter,
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,

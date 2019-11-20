@@ -42,13 +42,14 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
+  getUnhashableStatesProvider,
   hasSearchStategyForIndexPattern,
   intervalOptions,
   isDefaultTypeIndexPattern,
   migrateLegacyQuery,
   RequestAdapter,
   showSaveModal,
-  showShareContextMenu,
+  unhashUrl,
   stateMonitorFactory,
   subscribeWithScope,
   tabifyAggResponse,
@@ -57,15 +58,14 @@ import {
   SavedObjectSaveModal,
   getAngularModule,
   ensureDefaultIndexPattern,
-  getUnhashableStatesProvider,
 } from '../kibana_services';
 
 const {
   core,
   chrome,
   docTitle,
-  shareContextMenuExtensions,
   State,
+  share,
   timefilter,
   toastNotifications,
   uiSettings
@@ -322,14 +322,13 @@ function discoverController(
       testId: 'shareTopNavButton',
       run: async (anchorElement) => {
         const sharingData = await this.getSharingData();
-        showShareContextMenu({
+        share.toggleShareContextMenu({
           anchorElement,
           allowEmbed: false,
           allowShortUrl: uiCapabilities.discover.createShortUrl,
-          getUnhashableStates,
+          shareableUrl: unhashUrl(window.location.href, getUnhashableStates()),
           objectId: savedSearch.id,
           objectType: 'search',
-          shareContextMenuExtensions,
           sharingData: {
             ...sharingData,
             title: savedSearch.title,

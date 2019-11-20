@@ -32,6 +32,7 @@ import { setAngularModule, setServices } from './kibana_services';
 import { NavigationStart } from '../../../navigation/public';
 import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
 import { buildServices } from './helpers/build_services';
+import { SharePluginStart } from '../../../../../plugins/share/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -51,6 +52,7 @@ export interface DiscoverStartPlugins {
   navigation: NavigationStart;
   eui_utils: EuiUtilsStart;
   data: DataPublicPluginStart;
+  share: SharePluginStart;
   inspector: any;
 }
 const innerAngularName = 'app/discover';

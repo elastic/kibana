@@ -68,18 +68,18 @@ export { RequestAdapter } from 'ui/inspector/adapters';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 export { FieldList } from 'ui/index_patterns';
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-export { showShareContextMenu } from 'ui/share';
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
 export { timezoneProvider } from 'ui/vis/lib/timezone';
 // @ts-ignore
+export { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
+// @ts-ignore
 export { tabifyAggResponse } from 'ui/agg_response/tabify';
 // @ts-ignore
 export { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
-export { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
-export { getUnhashableStatesProvider } from 'ui/state_management/state_hashing/get_unhashable_states_provider';
+export { unhashUrl } from 'ui/state_management/state_hashing';
 
 // EXPORT types
 export { Vis } from 'ui/vis';

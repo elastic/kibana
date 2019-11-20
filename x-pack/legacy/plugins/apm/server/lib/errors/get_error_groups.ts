@@ -105,8 +105,6 @@ export async function getErrorGroups({
 
   // aggregations can be undefined when no matching indices are found.
   // this is an exception rather than the rule so the ES type does not account for this.
-  // TODO(TS-3.7-ESLINT)
-  // eslint-disable-next-line @typescript-eslint/camelcase
   const hits = (resp.aggregations?.error_groups.buckets || []).map(bucket => {
     const source = bucket.sample.hits.hits[0]._source;
     const message =

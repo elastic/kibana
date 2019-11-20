@@ -43,10 +43,10 @@ import {
   KibanaParsedUrl,
   migrateLegacyQuery,
   SavedObjectSaveModal,
-  showShareContextMenu,
   showSaveModal,
   stateMonitorFactory,
   subscribeWithScope,
+  unhashUrl,
 } from '../kibana_services';
 
 const {
@@ -58,12 +58,12 @@ const {
   docTitle,
   FilterBarQueryFilterProvider,
   getBasePath,
-  ShareContextMenuExtensionsRegistryProvider,
   toastNotifications,
   timefilter,
   uiModules,
   uiRoutes,
   visualizations,
+  share,
 } = getServices();
 
 const { savedQueryService } = data.search.services;
@@ -166,7 +166,6 @@ function VisEditor(
 ) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const getUnhashableStates = Private(getUnhashableStatesProvider);
-  const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
 
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
@@ -246,14 +245,13 @@ function VisEditor(
     run: (anchorElement) => {
       const hasUnappliedChanges = vis.dirty;
       const hasUnsavedChanges = $appStatus.dirty;
-      showShareContextMenu({
+      share.toggleShareContextMenu({
         anchorElement,
         allowEmbed: true,
         allowShortUrl: capabilities.visualize.createShortUrl,
-        getUnhashableStates,
+        shareableUrl: unhashUrl(window.location.href, getUnhashableStates()),
         objectId: savedVis.id,
         objectType: 'visualization',
-        shareContextMenuExtensions,
         sharingData: {
           title: savedVis.title,
         },
