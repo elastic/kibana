@@ -25,11 +25,6 @@ def withDefaultPrComments(closure) {
     }
 
     if (!isPr()) {
-      print "Not PR"
-      print env.ghprbPullId
-      print env.ghprbPullLink
-      print env
-
       return
     }
 
