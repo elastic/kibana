@@ -19,8 +19,6 @@ import {
   getScrubber as scrubber,
   getScrubberSlideContainer as scrubberContainer,
   getPageControlsCenter as center,
-  getSettingsTrigger as trigger,
-  getContextMenuItems as menuItems,
   // getAutoplayTextField as autoplayText,
   // getAutoplayCheckbox as autoplayCheck,
   // getAutoplaySubmit as autoplaySubmit,
@@ -30,6 +28,7 @@ import {
   getPageControlsPrevious as previous,
   getPageControlsNext as next,
 } from '../../test/selectors';
+import { openSettings, selectMenuItem } from '../../test/interactions';
 
 // Mock the renderers
 jest.mock('../../supported_renderers');
@@ -100,18 +99,14 @@ describe('<App />', () => {
     expect(center(wrapper).text()).toEqual('Page 6 of 28');
   });
 
-  test('autohide footer functions on mouseEnter + Leave', async () => {
+  test.skip('autohide footer functions on mouseEnter + Leave', async () => {
     const wrapper = getWrapper();
-    trigger(wrapper).simulate('click');
-    await tick(20);
-    menuItems(wrapper)
-      .at(1)
-      .simulate('click');
-    await tick(20);
-    wrapper.update();
+    await openSettings(wrapper);
+    await selectMenuItem(wrapper, 1);
+
     expect(footer(wrapper).prop('isHidden')).toEqual(false);
     expect(footer(wrapper).prop('isAutohide')).toEqual(false);
-    toolbarCheck(wrapper).simulate('change');
+    toolbarCheck(wrapper).simulate('click');
     expect(footer(wrapper).prop('isAutohide')).toEqual(true);
     canvas(wrapper).simulate('mouseEnter');
     expect(footer(wrapper).prop('isHidden')).toEqual(false);
@@ -125,14 +120,10 @@ describe('<App />', () => {
     expect(scrubber(wrapper).prop('isScrubberVisible')).toEqual(true);
 
     // Open the menu and activate toolbar hiding.
-    trigger(wrapper).simulate('click');
-    await tick(20);
-    menuItems(wrapper)
-      .at(1)
-      .simulate('click');
-    await tick(20);
-    wrapper.update();
-    toolbarCheck(wrapper).simulate('change');
+    await openSettings(wrapper);
+    await selectMenuItem(wrapper, 1);
+
+    toolbarCheck(wrapper).simulate('click');
     await tick(20);
 
     // Simulate the mouse leaving the container

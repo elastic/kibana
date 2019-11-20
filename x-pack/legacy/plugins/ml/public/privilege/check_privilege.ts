@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-// @ts-ignore
 import { hasLicenseExpired } from '../license/check_license';
 
 import { Privileges, getDefaultPrivileges } from '../../common/types/privileges';
@@ -15,18 +14,18 @@ import { ACCESS_DENIED_PATH } from '../management/management_urls';
 
 let privileges: Privileges = getDefaultPrivileges();
 // manage_ml requires all monitor and admin cluster privileges: https://github.com/elastic/elasticsearch/blob/664a29c8905d8ce9ba8c18aa1ed5c5de93a0eabc/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/security/authz/privilege/ClusterPrivilege.java#L53
-export function canGetManagementMlJobs(kbnUrl: any) {
+export function canGetManagementMlJobs() {
   return new Promise((resolve, reject) => {
     getManageMlPrivileges().then(
       ({ capabilities, isPlatinumOrTrialLicense, mlFeatureEnabledInSpace }) => {
         privileges = capabilities;
-        // Loop through all privilages to ensure they are all set to true.
+        // Loop through all privileges to ensure they are all set to true.
         const isManageML = Object.values(privileges).every(p => p === true);
 
         if (isManageML === true && isPlatinumOrTrialLicense === true) {
           return resolve({ mlFeatureEnabledInSpace });
         } else {
-          kbnUrl.redirect(ACCESS_DENIED_PATH);
+          window.location.href = ACCESS_DENIED_PATH;
           return reject();
         }
       }
@@ -34,7 +33,7 @@ export function canGetManagementMlJobs(kbnUrl: any) {
   });
 }
 
-export function checkGetJobsPrivilege(kbnUrl: any): Promise<Privileges> {
+export function checkGetJobsPrivilege(): Promise<Privileges> {
   return new Promise((resolve, reject) => {
     getPrivileges().then(({ capabilities, isPlatinumOrTrialLicense }) => {
       privileges = capabilities;
@@ -46,14 +45,14 @@ export function checkGetJobsPrivilege(kbnUrl: any): Promise<Privileges> {
       if (privileges.canGetJobs || isPlatinumOrTrialLicense === false) {
         return resolve(privileges);
       } else {
-        kbnUrl.redirect('/access-denied');
+        window.location.href = '#/access-denied';
         return reject();
       }
     });
   });
 }
 
-export function checkCreateJobsPrivilege(kbnUrl: any): Promise<Privileges> {
+export function checkCreateJobsPrivilege(): Promise<Privileges> {
   return new Promise((resolve, reject) => {
     getPrivileges().then(({ capabilities, isPlatinumOrTrialLicense }) => {
       privileges = capabilities;
@@ -65,14 +64,14 @@ export function checkCreateJobsPrivilege(kbnUrl: any): Promise<Privileges> {
       } else {
         // if the user has no permission to create a job,
         // redirect them back to the Transforms Management page
-        kbnUrl.redirect('/jobs');
+        window.location.href = '#/jobs';
         return reject();
       }
     });
   });
 }
 
-export function checkFindFileStructurePrivilege(kbnUrl: any): Promise<Privileges> {
+export function checkFindFileStructurePrivilege(): Promise<Privileges> {
   return new Promise((resolve, reject) => {
     getPrivileges().then(({ capabilities }) => {
       privileges = capabilities;
@@ -81,7 +80,7 @@ export function checkFindFileStructurePrivilege(kbnUrl: any): Promise<Privileges
       if (privileges.canFindFileStructure) {
         return resolve(privileges);
       } else {
-        kbnUrl.redirect('/access-denied');
+        window.location.href = '#/access-denied';
         return reject();
       }
     });

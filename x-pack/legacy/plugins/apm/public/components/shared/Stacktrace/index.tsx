@@ -10,7 +10,7 @@ import { isEmpty, last } from 'lodash';
 import React, { Fragment } from 'react';
 import { IStackframe } from '../../../../typings/es_schemas/raw/fields/Stackframe';
 import { EmptyMessage } from '../../shared/EmptyMessage';
-import { LibraryStackFrames } from './LibraryStackFrames';
+import { LibraryStacktrace } from './LibraryStacktrace';
 import { Stackframe } from './Stackframe';
 
 interface Props {
@@ -25,7 +25,7 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
         heading={i18n.translate(
           'xpack.apm.stacktraceTab.noStacktraceAvailableLabel',
           {
-            defaultMessage: 'No stacktrace available.'
+            defaultMessage: 'No stack trace available.'
           }
         )}
         hideSubheading
@@ -34,24 +34,21 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
   }
 
   const groups = getGroupedStackframes(stackframes);
+
   return (
     <Fragment>
       {groups.map((group, i) => {
         // library frame
-        if (group.isLibraryFrame) {
-          const hasMultipleStackframes = group.stackframes.length > 1;
-          const hasLeadingSpacer = hasMultipleStackframes && i !== 0;
-          const hasTrailingSpacer =
-            hasMultipleStackframes && i !== groups.length - 1;
+        if (group.isLibraryFrame && groups.length > 1) {
           return (
             <Fragment key={i}>
-              {hasLeadingSpacer && <EuiSpacer size="m" />}
-              <LibraryStackFrames
-                initialVisiblity={!hasMultipleStackframes}
+              <EuiSpacer size="m" />
+              <LibraryStacktrace
+                id={i.toString()}
                 stackframes={group.stackframes}
                 codeLanguage={codeLanguage}
               />
-              {hasTrailingSpacer && <EuiSpacer size="m" />}
+              <EuiSpacer size="m" />
             </Fragment>
           );
         }
@@ -60,7 +57,12 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
         return group.stackframes.map((stackframe, idx) => (
           <Fragment key={`${i}-${idx}`}>
             {idx > 0 && <EuiSpacer size="m" />}
-            <Stackframe codeLanguage={codeLanguage} stackframe={stackframe} />
+            <Stackframe
+              codeLanguage={codeLanguage}
+              id={`${i}-${idx}`}
+              initialIsOpen={i === 0 && groups.length > 1}
+              stackframe={stackframe}
+            />
           </Fragment>
         ));
       })}

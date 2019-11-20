@@ -50,10 +50,8 @@ const telemetry = (kibana: any) => {
         allowChangingOptInStatus: Joi.boolean().default(true),
         optIn: Joi.when('allowChangingOptInStatus', {
           is: false,
-          then: Joi.valid(true).required(),
-          otherwise: Joi.boolean()
-            .allow(null)
-            .default(null),
+          then: Joi.valid(true).default(true),
+          otherwise: Joi.boolean().default(true),
         }),
         // `config` is used internally and not intended to be set
         config: Joi.string().default(Joi.ref('$defaultConfigPath')),
@@ -114,6 +112,7 @@ const telemetry = (kibana: any) => {
           telemetryOptInStatusUrl: config.get('telemetry.optInStatusUrl'),
           allowChangingOptInStatus: config.get('telemetry.allowChangingOptInStatus'),
           telemetrySendUsageFrom: config.get('telemetry.sendUsageFrom'),
+          telemetryNotifyUserAboutOptInDefault: false,
         };
       },
       hacks: ['plugins/telemetry/hacks/telemetry_init', 'plugins/telemetry/hacks/telemetry_opt_in'],
