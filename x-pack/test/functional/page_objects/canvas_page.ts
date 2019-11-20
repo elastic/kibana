@@ -13,6 +13,11 @@ export function CanvasPageProvider({ getService }: FtrProviderContext) {
   const find = getService('find');
 
   return {
+    async enterFullscreen() {
+      const elem = await find.byCssSelector('[aria-label="View fullscreen"]', 20000);
+      await elem.click();
+    },
+
     async expectCreateWorkpadButtonEnabled() {
       const button = await testSubjects.find('create-workpad-button', 20000);
       const disabledAttr = await button.getAttribute('disabled');
