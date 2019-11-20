@@ -27,7 +27,7 @@ const jsonArray = [
 ];
 
 const ndjson = `{"description":"Detecting root and admin users1","created_by":"elastic","false_positives":[],"index":["auditbeat-*","filebeat-*","packetbeat-*","winlogbeat-*"],"max_signals":100}
-    {"description":"Detecting root and admin users2","created_by":"elastic","false_positives":[],"index":["auditbeat-*","packetbeat-*","winlogbeat-*"],"max_signals":101}`;
+{"description":"Detecting root and admin users2","created_by":"elastic","false_positives":[],"index":["auditbeat-*","packetbeat-*","winlogbeat-*"],"max_signals":101}`;
 
 const ndjsonSorted = `{"created_by":"elastic","description":"Detecting root and admin users1","false_positives":[],"index":["auditbeat-*","filebeat-*","packetbeat-*","winlogbeat-*"],"max_signals":100}
 {"created_by":"elastic","description":"Detecting root and admin users2","false_positives":[],"index":["auditbeat-*","packetbeat-*","winlogbeat-*"],"max_signals":101}`;
