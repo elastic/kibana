@@ -128,13 +128,6 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   renameFromRoot('optimize.lazyHost', 'optimize.watchHost'),
   renameFromRoot('optimize.lazyPrebuild', 'optimize.watchPrebuild'),
   renameFromRoot('optimize.lazyProxyTimeout', 'optimize.watchProxyTimeout'),
-  renameFromRoot('xpack.xpack_main.telemetry.config', 'telemetry.config'),
-  renameFromRoot('xpack.xpack_main.telemetry.url', 'telemetry.url'),
-  renameFromRoot('xpack.xpack_main.telemetry.enabled', 'telemetry.enabled'),
-  renameFromRoot('xpack.telemetry.enabled', 'telemetry.enabled'),
-  renameFromRoot('xpack.telemetry.config', 'telemetry.config'),
-  renameFromRoot('xpack.telemetry.banner', 'telemetry.banner'),
-  renameFromRoot('xpack.telemetry.url', 'telemetry.url'),
   // Monitoring renames
   // TODO: Remove these from here once the monitoring plugin is migrated to NP
   renameFromRoot('xpack.monitoring.enabled', 'monitoring.enabled'),
