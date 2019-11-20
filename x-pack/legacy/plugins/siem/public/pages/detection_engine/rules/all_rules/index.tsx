@@ -27,7 +27,7 @@ import { useRules } from '../../../../containers/detection_engine/rules/use_rule
 import { Loader } from '../../../../components/loader';
 import { Panel } from '../../../../components/panel';
 import { getBatchItems } from './batch_actions';
-import { SortTypes, TableData } from '../types';
+import { EuiBasicTableOnChange, TableData } from '../types';
 import { allRulesReducer, State } from './reducer';
 import * as i18n from '../translations';
 import { useKibanaUiSetting } from '../../../../lib/settings/use_kibana_ui_setting';
@@ -37,15 +37,19 @@ import { useStateToaster } from '../../../../components/toasters';
 
 const initialState: State = {
   isLoading: true,
-  refreshToggle: true,
-  tableData: [],
   rules: [],
+  tableData: [],
   selectedItems: [],
+  refreshToggle: true,
   pagination: {
     page: 1,
     perPage: 20,
-    sortField: 'rule',
     total: 0,
+  },
+  filterOptions: {
+    filter: '',
+    sortField: 'enabled',
+    sortOrder: 'desc',
   },
 };
 
@@ -59,15 +63,22 @@ const initialState: State = {
  */
 export const AllRules = React.memo(() => {
   const [
-    { exportPayload, isLoading, refreshToggle, selectedItems, tableData, pagination },
+    {
+      exportPayload,
+      filterOptions,
+      isLoading,
+      refreshToggle,
+      selectedItems,
+      tableData,
+      pagination,
+    },
     dispatch,
   ] = useReducer(allRulesReducer, initialState);
 
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [sortState, setSortState] = useState<SortTypes>({ field: 'rule', direction: 'asc' });
-  const [isLoadingRules, rulesData, updatePagination] = useRules(refreshToggle);
-  const [, dispatchToaster] = useStateToaster();
+  const [isLoadingRules, rulesData] = useRules(pagination, filterOptions, refreshToggle);
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
     dispatch({ type: 'loading', isLoading: isLoadingRules });
@@ -82,7 +93,6 @@ export const AllRules = React.memo(() => {
       type: 'updateRules',
       rules: rulesData.data,
       pagination: {
-        sortField: initialState.pagination.sortField,
         page: rulesData.page,
         perPage: rulesData.perPage,
         total: rulesData.total,
@@ -118,7 +128,17 @@ export const AllRules = React.memo(() => {
               <EuiFieldSearch
                 aria-label={i18n.SEARCH_RULES}
                 fullWidth
+                incremental={false}
                 placeholder={i18n.SEARCH_PLACEHOLDER}
+                onSearch={filterString => {
+                  dispatch({
+                    type: 'updateFilterOptions',
+                    filterOptions: {
+                      ...filterOptions,
+                      filter: filterString,
+                    },
+                  });
+                }}
               />
             </HeaderSection>
 
@@ -157,20 +177,19 @@ export const AllRules = React.memo(() => {
               isSelectable
               itemId="rule_id"
               items={tableData}
-              onChange={({
-                page,
-                sort,
-              }: {
-                page: {
-                  index: number;
-                  size: number;
-                };
-                sort: SortTypes;
-              }) => {
-                const sortField =
-                  sort.field === 'rule' ? initialState.pagination.sortField : 'enabled';
-                updatePagination({ page: page.index + 1, perPage: page.size, sortField });
-                setSortState(sort);
+              onChange={({ page, sort }: EuiBasicTableOnChange) => {
+                dispatch({
+                  type: 'updatePagination',
+                  pagination: { ...pagination, page: page.index + 1, perPage: page.size },
+                });
+                dispatch({
+                  type: 'updateFilterOptions',
+                  filterOptions: {
+                    ...filterOptions,
+                    sortField: 'enabled', // Only enabled is supported for sorting currently
+                    sortOrder: sort.direction,
+                  },
+                });
               }}
               pagination={{
                 pageIndex: pagination.page - 1,
@@ -183,9 +202,7 @@ export const AllRules = React.memo(() => {
                 onSelectionChange: (selected: TableData[]) =>
                   dispatch({ type: 'setSelected', selectedItems: selected }),
               }}
-              sorting={{
-                sort: sortState,
-              }}
+              sorting={{ sort: { field: 'activate', direction: filterOptions.sortOrder } }}
             />
             {isLoading && <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />}
           </>

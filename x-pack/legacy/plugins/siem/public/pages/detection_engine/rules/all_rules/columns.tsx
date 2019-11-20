@@ -54,7 +54,7 @@ const getActions = (dispatch: React.Dispatch<Action>, kbnVersion: string) => [
     description: i18n.DELETE_RULE,
     icon: 'trash',
     name: i18n.DELETE_RULE,
-    onClick: (rowItem: TableData) => deleteRulesAction([rowItem.rule_id], dispatch, kbnVersion),
+    onClick: (rowItem: TableData) => deleteRulesAction([rowItem.id], dispatch, kbnVersion),
   },
 ];
 
@@ -69,7 +69,6 @@ export const getColumns = (dispatch: React.Dispatch<Action>, kbnVersion: string)
         <EuiBadge color="hollow">{value.status}</EuiBadge>
       </div>
     ),
-    sortable: true,
     truncateText: true,
     width: '24%',
   },
@@ -155,16 +154,16 @@ export const getColumns = (dispatch: React.Dispatch<Action>, kbnVersion: string)
     name: i18n.COLUMN_ACTIVATE,
     render: (value: TableData['activate'], item: TableData) => (
       <RuleSwitch
-        ruleId={item.rule_id}
+        id={item.id}
         enabled={item.activate}
         isLoading={item.isLoading}
-        onRuleStateChange={async (enabled, ruleId) => {
-          await enableRulesAction([ruleId], enabled, dispatch, kbnVersion);
+        onRuleStateChange={async (enabled, id) => {
+          await enableRulesAction([id], enabled, dispatch, kbnVersion);
         }}
       />
     ),
     sortable: true,
-    width: '65px',
+    width: '85px',
   },
   {
     actions: getActions(dispatch, kbnVersion),

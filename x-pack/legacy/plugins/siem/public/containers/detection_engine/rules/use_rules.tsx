@@ -4,24 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
 import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
-import { FetchRulesResponse, PaginationOptions } from './types';
+import { FetchRulesResponse, FilterOptions, PaginationOptions } from './types';
 import { useStateToaster } from '../../../components/toasters';
 import { fetchRules } from './api';
 import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
 
-type Return = [boolean, FetchRulesResponse, Dispatch<SetStateAction<PaginationOptions>>];
+type Return = [boolean, FetchRulesResponse];
 
 /**
  * Hook for using the list of Rules from the Detection Engine API
  *
+ * @param pagination desired pagination options (e.g. page/perPage)
+ * @param filterOptions desired filters (e.g. filter/sortField/sortOrder)
  * @param refetchToggle toggle for refetching data
  */
-export const useRules = (refetchToggle: boolean): Return => {
+export const useRules = (
+  pagination: PaginationOptions,
+  filterOptions: FilterOptions,
+  refetchToggle: boolean
+): Return => {
   const [rules, setRules] = useState<FetchRulesResponse>({
     page: 1,
     perPage: 20,
@@ -29,11 +35,6 @@ export const useRules = (refetchToggle: boolean): Return => {
     data: [],
   });
   const [loading, setLoading] = useState(true);
-  const [paginationOptions, setPaginationOptions] = useState<PaginationOptions>({
-    page: 1,
-    perPage: 20,
-    sortField: 'name',
-  });
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const [, dispatchToaster] = useStateToaster();
 
@@ -44,7 +45,7 @@ export const useRules = (refetchToggle: boolean): Return => {
 
     async function fetchData() {
       try {
-        const fetchRulesResult = await fetchRules({ paginationOptions, kbnVersion });
+        const fetchRulesResult = await fetchRules({ filterOptions, pagination, kbnVersion });
 
         if (isSubscribed) {
           setRules(fetchRulesResult);
@@ -64,7 +65,14 @@ export const useRules = (refetchToggle: boolean): Return => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [refetchToggle, paginationOptions]);
+  }, [
+    refetchToggle,
+    pagination.page,
+    pagination.perPage,
+    filterOptions.filter,
+    filterOptions.sortField,
+    filterOptions.sortOrder,
+  ]);
 
-  return [loading, rules, setPaginationOptions];
+  return [loading, rules];
 };

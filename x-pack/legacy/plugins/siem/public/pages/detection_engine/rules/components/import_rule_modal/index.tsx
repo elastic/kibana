@@ -21,12 +21,16 @@ import {
 } from '@elastic/eui';
 
 import React, { useCallback, useState } from 'react';
+import { failure } from 'io-ts/lib/PathReporter';
+import { identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
 import * as i18n from './translations';
 import { duplicateRules } from '../../../../../containers/detection_engine/rules/api';
 import { useKibanaUiSetting } from '../../../../../lib/settings/use_kibana_ui_setting';
 import { DEFAULT_KBN_VERSION } from '../../../../../../common/constants';
 import { ndjsonToJSON } from '../json_downloader';
-import { Rule } from '../../../../../containers/detection_engine/rules/types';
+import { Rule, RulesSchema } from '../../../../../containers/detection_engine/rules/types';
 
 interface ImportRuleModalProps {
   showModal: boolean;
@@ -54,9 +58,16 @@ export const ImportRuleModal = React.memo<ImportRuleModalProps>(
         reader.onload = async event => {
           // TODO: Validation via io-ts
           // @ts-ignore type is string, not ArrayBuffer as FileReader.readAsText is called
-          const importedRules = ndjsonToJSON(event?.target?.result ?? '') as Rule[];
-          const duplicatedRules = await duplicateRules({ rules: importedRules, kbnVersion });
+          const importedRules = ndjsonToJSON(event?.target?.result ?? '');
 
+          const decodedRules = pipe(
+            RulesSchema.decode(importedRules),
+            fold(errors => {
+              throw new Error(failure(errors).join('\n'));
+            }, identity)
+          );
+
+          const duplicatedRules = await duplicateRules({ rules: decodedRules, kbnVersion });
           setIsImporting(false);
           setSelectedFiles(null);
           importComplete(duplicatedRules);

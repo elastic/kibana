@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PaginationOptions, Rule } from '../../../../containers/detection_engine/rules/types';
+import {
+  FilterOptions,
+  PaginationOptions,
+  Rule,
+} from '../../../../containers/detection_engine/rules/types';
 import { TableData } from '../types';
 import { formatRules } from './helpers';
 
@@ -13,6 +17,7 @@ export interface State {
   rules: Rule[];
   selectedItems: TableData[];
   pagination: PaginationOptions;
+  filterOptions: FilterOptions;
   refreshToggle: boolean;
   tableData: TableData[];
   exportPayload?: object[];
@@ -20,13 +25,15 @@ export interface State {
 
 export type Action =
   | { type: 'refresh' }
-  | { type: 'updateRules'; rules: Rule[]; pagination?: PaginationOptions }
   | { type: 'loading'; isLoading: boolean }
-  | { type: 'duplicate'; rule: Rule }
   | { type: 'deleteRules'; rules: Rule[] }
-  | { type: 'setSelected'; selectedItems: TableData[] }
-  | { type: 'updateLoading'; ruleIds: string[]; isLoading: boolean }
+  | { type: 'duplicate'; rule: Rule }
   | { type: 'setExportPayload'; exportPayload?: object[] }
+  | { type: 'setSelected'; selectedItems: TableData[] }
+  | { type: 'updateLoading'; ids: string[]; isLoading: boolean }
+  | { type: 'updateRules'; rules: Rule[]; pagination?: PaginationOptions }
+  | { type: 'updatePagination'; pagination: PaginationOptions }
+  | { type: 'updateFilterOptions'; filterOptions: FilterOptions }
   | { type: 'failure' };
 
 export const allRulesReducer = (state: State, action: Action): State => {
@@ -59,7 +66,18 @@ export const allRulesReducer = (state: State, action: Action): State => {
         ...state,
         rules: updatedRules,
         tableData: formatRules(updatedRules),
-        pagination: state.pagination,
+      };
+    }
+    case 'updatePagination': {
+      return {
+        ...state,
+        pagination: action.pagination,
+      };
+    }
+    case 'updateFilterOptions': {
+      return {
+        ...state,
+        filterOptions: action.filterOptions,
       };
     }
     case 'deleteRules': {
@@ -84,7 +102,7 @@ export const allRulesReducer = (state: State, action: Action): State => {
       return {
         ...state,
         rules: state.rules,
-        tableData: formatRules(state.rules, action.ruleIds),
+        tableData: formatRules(state.rules, action.ids),
       };
     }
     case 'loading': {

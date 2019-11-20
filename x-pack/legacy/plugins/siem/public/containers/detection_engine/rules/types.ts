@@ -4,17 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as t from 'io-ts';
+
+export const RuleSchema = t.type({
+  created_by: t.string,
+  description: t.string,
+  enabled: t.boolean,
+  false_positives: t.array(t.string),
+  from: t.string,
+  id: t.string,
+  index: t.array(t.string),
+  interval: t.string,
+  language: t.string,
+  max_signals: t.number,
+  name: t.string,
+  query: t.string,
+  references: t.array(t.string),
+  rule_id: t.string,
+  severity: t.string,
+  tags: t.array(t.string),
+  to: t.string,
+  type: t.string,
+  updated_by: t.string,
+});
+
+export const RulesSchema = t.array(RuleSchema);
+
+export type Rule = t.TypeOf<typeof RuleSchema>;
+export type Rules = t.TypeOf<typeof RulesSchema>;
+
 export interface PaginationOptions {
   page: number;
   perPage: number;
-  sortField: string;
-  total?: number;
+  total: number;
 }
 
 export interface FetchRulesProps {
-  paginationOptions?: PaginationOptions;
-  ruleId?: string;
+  pagination?: PaginationOptions;
+  filterOptions?: FilterOptions;
+  id?: string;
   kbnVersion: string;
+}
+
+export interface FilterOptions {
+  filter: string;
+  sortField: string;
+  sortOrder: 'asc' | 'desc';
 }
 
 export interface FetchRulesResponse {
@@ -24,40 +59,18 @@ export interface FetchRulesResponse {
   data: Rule[];
 }
 
-export interface Rule {
-  created_by: string;
-  description: string;
-  enabled: boolean;
-  false_positives: string[];
-  from: string;
-  id: string;
-  index: string[];
-  interval: string;
-  language: string;
-  max_signals: number;
-  name: string;
-  query: string;
-  references: string[];
-  rule_id: string;
-  severity: string;
-  tags: string[];
-  to: string;
-  type: string;
-  updated_by: string;
-}
-
 export interface EnableRulesProps {
-  ruleIds: string[];
+  ids: string[];
   enabled: boolean;
   kbnVersion: string;
 }
 
 export interface DeleteRulesProps {
-  ruleIds: string[];
+  ids: string[];
   kbnVersion: string;
 }
 
 export interface DuplicateRulesProps {
-  rules: Rule[];
+  rules: Rules;
   kbnVersion: string;
 }

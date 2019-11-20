@@ -22,9 +22,9 @@ export const duplicateRuleAction = async (
   dispatch: React.Dispatch<Action>,
   kbnVersion: string
 ) => {
-  dispatch({ type: 'updateLoading', ruleIds: [rule.rule_id], isLoading: true });
+  dispatch({ type: 'updateLoading', ids: [rule.id], isLoading: true });
   const duplicatedRule = await duplicateRules({ rules: [rule], kbnVersion });
-  dispatch({ type: 'updateLoading', ruleIds: [rule.rule_id], isLoading: false });
+  dispatch({ type: 'updateLoading', ids: [rule.id], isLoading: false });
   dispatch({ type: 'updateRules', rules: duplicatedRule });
 };
 
@@ -33,26 +33,26 @@ export const exportRulesAction = async (rules: Rule[], dispatch: React.Dispatch<
 };
 
 export const deleteRulesAction = async (
-  ruleIds: string[],
+  ids: string[],
   dispatch: React.Dispatch<Action>,
   kbnVersion: string
 ) => {
-  dispatch({ type: 'updateLoading', ruleIds, isLoading: true });
-  const deletedRules = await deleteRules({ ruleIds, kbnVersion });
+  dispatch({ type: 'updateLoading', ids, isLoading: true });
+  const deletedRules = await deleteRules({ ids, kbnVersion });
   dispatch({ type: 'deleteRules', rules: deletedRules });
 };
 
 export const enableRulesAction = async (
-  ruleIds: string[],
+  ids: string[],
   enabled: boolean,
   dispatch: React.Dispatch<Action>,
   kbnVersion: string
 ) => {
   try {
-    dispatch({ type: 'updateLoading', ruleIds, isLoading: true });
-    const updatedRules = await enableRules({ ruleIds, enabled, kbnVersion });
+    dispatch({ type: 'updateLoading', ids, isLoading: true });
+    const updatedRules = await enableRules({ ids, enabled, kbnVersion });
     dispatch({ type: 'updateRules', rules: updatedRules });
   } catch {
-    dispatch({ type: 'updateLoading', ruleIds, isLoading: false });
+    dispatch({ type: 'updateLoading', ids, isLoading: false });
   }
 };

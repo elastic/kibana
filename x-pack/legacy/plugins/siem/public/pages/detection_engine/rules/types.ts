@@ -6,12 +6,21 @@
 
 import { Rule } from '../../../containers/detection_engine/rules/types';
 
-export interface SortTypes {
+export interface EuiBasicTableSortTypes {
   field: string;
-  direction: string;
+  direction: 'asc' | 'desc';
+}
+
+export interface EuiBasicTableOnChange {
+  page: {
+    index: number;
+    size: number;
+  };
+  sort: EuiBasicTableSortTypes;
 }
 
 export interface TableData {
+  id: string;
   rule_id: string;
   rule: {
     href: string;

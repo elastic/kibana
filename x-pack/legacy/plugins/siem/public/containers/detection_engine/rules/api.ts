@@ -18,36 +18,51 @@ import { throwIfNotOk } from '../../../hooks/api/api';
 /**
  * Fetches all rules or single specified rule from the Detection Engine API
  *
- * @param paginationOptions
- * @param ruleId specified, will return specific rule if exists
+ * @param filterOptions desired filters (e.g. filter/sortField/sortOrder)
+ * @param pagination desired pagination options (e.g. page/perPage)
+ * @param id if specified, will return specific rule if exists
  * @param kbnVersion current Kibana Version to use for headers
  */
 export const fetchRules = async ({
-  paginationOptions = {
+  filterOptions = {
+    filter: '',
+    sortField: 'enabled',
+    sortOrder: 'desc',
+  },
+  pagination = {
     page: 1,
     perPage: 20,
-    sortField: 'name',
+    total: 0,
   },
-  ruleId,
+  id,
   kbnVersion,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
-  const rulesParam = ruleId != null ? `?rule_id="${ruleId}&"` : '/_find?';
-  const response = await fetch(
-    `${chrome.getBasePath()}/api/detection_engine/rules${rulesParam}page=${
-      paginationOptions.page
-    }&per_page=${paginationOptions.perPage}&sort_field=${paginationOptions.sortField}`,
-    {
-      method: 'GET',
-      credentials: 'same-origin',
-      headers: {
-        'content-type': 'application/json',
-        'kbn-version': kbnVersion,
-        'kbn-xsrf': kbnVersion,
-      },
-    }
-  );
+  const queryParams = [
+    `page=${pagination.page}`,
+    `per_page=${pagination.perPage}`,
+    `sort_field=${filterOptions.sortField}`,
+    `sort_order=${filterOptions.sortOrder}`,
+    ...(filterOptions.filter.length !== 0
+      ? [`filter=alert.attributes.name:%20${encodeURIComponent(filterOptions.filter)}`]
+      : []),
+  ];
+
+  const endpoint =
+    id != null
+      ? `${chrome.getBasePath()}/api/detection_engine/rules?id="${id}"`
+      : `${chrome.getBasePath()}/api/detection_engine/rules/_find?${queryParams.join('&')}`;
+
+  const response = await fetch(endpoint, {
+    method: 'GET',
+    credentials: 'same-origin',
+    headers: {
+      'content-type': 'application/json',
+      'kbn-version': kbnVersion,
+      'kbn-xsrf': kbnVersion,
+    },
+  });
   await throwIfNotOk(response);
-  return ruleId != null
+  return id != null
     ? {
         page: 0,
         perPage: 1,
@@ -60,16 +75,16 @@ export const fetchRules = async ({
 /**
  * Enables/Disables provided Rule ID's
  *
- * @param ruleIds array of rule ID's to enable/disable
+ * @param ids array of Rule ID's (not rule_id) to enable/disable
  * @param enabled to enable or disable
  * @param kbnVersion current Kibana Version to use for headers
  */
 export const enableRules = async ({
-  ruleIds,
+  ids,
   enabled,
   kbnVersion,
 }: EnableRulesProps): Promise<Rule[]> => {
-  const requests = ruleIds.map(ruleId =>
+  const requests = ids.map(id =>
     fetch(`${chrome.getBasePath()}/api/detection_engine/rules`, {
       method: 'PUT',
       credentials: 'same-origin',
@@ -78,12 +93,12 @@ export const enableRules = async ({
         'kbn-version': kbnVersion,
         'kbn-xsrf': kbnVersion,
       },
-      body: JSON.stringify({ rule_id: ruleId, enabled }),
+      body: JSON.stringify({ id, enabled }),
     })
   );
 
   const responses = await Promise.all(requests);
-  // await throwIfNotOk(responses);
+  await responses.map(response => throwIfNotOk(response));
   return Promise.all(
     responses.map<Promise<Rule>>(response => response.json())
   );
@@ -92,13 +107,13 @@ export const enableRules = async ({
 /**
  * Deletes provided Rule ID's
  *
- * @param ruleIds array of rule ID's to delete
+ * @param ids array of Rule ID's (not rule_id) to delete
  * @param kbnVersion current Kibana Version to use for headers
  */
-export const deleteRules = async ({ ruleIds, kbnVersion }: DeleteRulesProps): Promise<Rule[]> => {
-  // TODO: Don't delete immutable!
-  const requests = ruleIds.map(ruleId =>
-    fetch(`${chrome.getBasePath()}/api/detection_engine/rules?rule_id=${ruleId}`, {
+export const deleteRules = async ({ ids, kbnVersion }: DeleteRulesProps): Promise<Rule[]> => {
+  // TODO: Don't delete if immutable!
+  const requests = ids.map(id =>
+    fetch(`${chrome.getBasePath()}/api/detection_engine/rules?id=${id}`, {
       method: 'DELETE',
       credentials: 'same-origin',
       headers: {
@@ -108,8 +123,9 @@ export const deleteRules = async ({ ruleIds, kbnVersion }: DeleteRulesProps): Pr
       },
     })
   );
-  // await throwIfNotOk(response);
+
   const responses = await Promise.all(requests);
+  await responses.map(response => throwIfNotOk(response));
   return Promise.all(
     responses.map<Promise<Rule>>(response => response.json())
   );
@@ -147,7 +163,7 @@ export const duplicateRules = async ({
   );
 
   const responses = await Promise.all(requests);
-  // await throwIfNotOk(responses);
+  await responses.map(response => throwIfNotOk(response));
   return Promise.all(
     responses.map<Promise<Rule>>(response => response.json())
   );

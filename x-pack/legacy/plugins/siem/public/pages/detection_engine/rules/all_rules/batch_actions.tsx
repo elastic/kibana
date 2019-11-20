@@ -28,8 +28,8 @@ export const getBatchItems = (
       disabled={containsLoading || !containsDisabled}
       onClick={async () => {
         closePopover();
-        const deactivatedRuleIds = selectedState.filter(s => !s.activate).map(s => s.rule_id);
-        await enableRulesAction(deactivatedRuleIds, true, dispatch, kbnVersion);
+        const deactivatedIds = selectedState.filter(s => !s.activate).map(s => s.id);
+        await enableRulesAction(deactivatedIds, true, dispatch, kbnVersion);
       }}
     >
       {i18n.BATCH_ACTION_ACTIVATE_SELECTED}
@@ -40,8 +40,8 @@ export const getBatchItems = (
       disabled={containsLoading || !containsEnabled}
       onClick={async () => {
         closePopover();
-        const activatedRuleIds = selectedState.filter(s => s.activate).map(s => s.rule_id);
-        await enableRulesAction(activatedRuleIds, false, dispatch, kbnVersion);
+        const activatedIds = selectedState.filter(s => s.activate).map(s => s.id);
+        await enableRulesAction(activatedIds, false, dispatch, kbnVersion);
       }}
     >
       {i18n.BATCH_ACTION_DEACTIVATE_SELECTED}
@@ -49,7 +49,7 @@ export const getBatchItems = (
     <EuiContextMenuItem
       key={i18n.BATCH_ACTION_EXPORT_SELECTED}
       icon="exportAction"
-      disabled={containsLoading}
+      disabled={containsLoading || selectedState.length === 0}
       onClick={async () => {
         closePopover();
         await exportRulesAction(
@@ -77,7 +77,7 @@ export const getBatchItems = (
       onClick={async () => {
         closePopover();
         await deleteRulesAction(
-          selectedState.map(r => r.sourceRule.rule_id),
+          selectedState.map(r => r.sourceRule.id),
           dispatch,
           kbnVersion
         );
