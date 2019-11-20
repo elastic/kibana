@@ -5,14 +5,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { flatten } from 'lodash';
+import { flatten, get } from 'lodash';
 
 import { InfraMetric, InfraMetricData, InfraNodeType } from '../../../graphql/types';
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../framework';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
 import { checkValidNode } from './lib/check_valid_node';
 import { InvalidNodeError } from './lib/errors';
-import { metricModels } from './models';
+import { metrics } from '../../../../common/inventory_models';
+import { TSVBMetricModelCreator } from '../../../../common/inventory_models/types';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   private framework: InfraBackendFrameworkAdapter;
@@ -55,7 +56,21 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     }
 
     const requests = options.metrics.map(metricId => {
-      const model = metricModels[metricId](timeField, indexPattern, interval);
+      const createTSVBModel = get(metrics, ['tsvb', metricId]) as
+        | TSVBMetricModelCreator
+        | undefined;
+      if (!createTSVBModel) {
+        throw new Error(
+          i18n.translate('xpack.infra.metrics.missingTSVBModelError', {
+            defaultMessage: 'The TSVB model for {metricId} does not exist for {nodeType}',
+            values: {
+              metricId,
+              nodeType: options.nodeType,
+            },
+          })
+        );
+      }
+      const model = createTSVBModel(timeField, indexPattern, interval);
       if (model.id_type === 'cloud' && !options.nodeIds.cloudId) {
         throw new InvalidNodeError(
           i18n.translate('xpack.infra.kibanaMetrics.cloudIdMissingErrorMessage', {

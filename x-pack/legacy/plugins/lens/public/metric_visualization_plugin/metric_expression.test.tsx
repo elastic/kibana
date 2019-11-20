@@ -17,7 +17,11 @@ function sampleArgs() {
     tables: {
       l1: {
         type: 'kibana_datatable',
-        columns: [{ id: 'a', name: 'a' }, { id: 'b', name: 'b' }, { id: 'c', name: 'c' }],
+        columns: [
+          { id: 'a', name: 'a' },
+          { id: 'b', name: 'b' },
+          { id: 'c', name: 'c' },
+        ],
         rows: [{ a: 10110, b: 2, c: 3 }],
       },
     },

@@ -33,6 +33,7 @@ export const ArgAddPopover = ({ options }: Props) => {
       iconType="plusInCircle"
       aria-label={strings.getAddAriaLabel()}
       onClick={handleClick}
+      className="canvasArg__addArg"
     />
   );
 

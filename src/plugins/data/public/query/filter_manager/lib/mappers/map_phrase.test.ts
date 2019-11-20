@@ -17,7 +17,7 @@
  * under the License.
  */
 import { mapPhrase } from './map_phrase';
-import { PhraseFilter, Filter } from '@kbn/es-query';
+import { esFilters } from '../../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapPhrase()', () => {
@@ -25,11 +25,13 @@ describe('filter manager utilities', () => {
       const filter = {
         meta: { index: 'logstash-*' },
         query: { match: { _type: { query: 'apache', type: 'phrase' } } },
-      } as PhraseFilter;
+      } as esFilters.PhraseFilter;
+
       const result = mapPhrase(filter);
 
       expect(result).toHaveProperty('value');
       expect(result).toHaveProperty('key', '_type');
+
       if (result.value) {
         const displayName = result.value();
         expect(displayName).toBe('apache');
@@ -40,7 +42,7 @@ describe('filter manager utilities', () => {
       const filter = {
         meta: { index: 'logstash-*' },
         query: { query_string: { query: 'foo:bar' } },
-      } as Filter;
+      } as esFilters.Filter;
 
       try {
         mapPhrase(filter);

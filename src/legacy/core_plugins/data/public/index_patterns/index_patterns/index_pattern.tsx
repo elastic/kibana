@@ -33,6 +33,7 @@ import {
   FieldMappingSpec,
   MappingObject,
 } from '../../../../../../plugins/kibana_utils/public';
+import { toMountPoint } from '../../../../../../plugins/kibana_react/public';
 
 import { findIndexPatternByTitle, getRoutes } from '../utils';
 import { IndexPatternMissingIndices } from '../errors';
@@ -41,22 +42,18 @@ import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from './index_patterns_api_client';
-import { ES_FIELD_TYPES } from '../../../../../../plugins/data/common';
+import { ES_FIELD_TYPES, IIndexPattern } from '../../../../../../plugins/data/public';
 import { getNotifications } from '../services';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
 
-export interface StaticIndexPattern {
-  fields: FieldType[];
-  title: string;
-  id?: string;
-  type?: string;
-  timeFieldName?: string;
-  intervalName?: string | null;
-}
+/** @deprecated
+ *  Please use IIndexPattern instead
+ * */
+export type StaticIndexPattern = IIndexPattern;
 
-export class IndexPattern implements StaticIndexPattern {
+export class IndexPattern implements IIndexPattern {
   [key: string]: any;
 
   public id?: string;
@@ -215,7 +212,7 @@ export class IndexPattern implements StaticIndexPattern {
 
       toasts.addWarning({
         title: warningTitle,
-        text: (
+        text: toMountPoint(
           <div>
             <p>{warningText}</p>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">

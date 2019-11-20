@@ -60,19 +60,16 @@ export const generateDefaultFields = (
   mapping: MappingProperties,
   fieldTypes: ReadonlySet<string>
 ): string[] =>
-  Object.getOwnPropertyNames(mapping).reduce(
-    (defaultFields, fieldName) => {
-      const { type, properties } = mapping[fieldName];
+  Object.getOwnPropertyNames(mapping).reduce((defaultFields, fieldName) => {
+    const { type, properties } = mapping[fieldName];
 
-      if (type && fieldTypes.has(type)) {
-        defaultFields.push(fieldName);
-      } else if (properties) {
-        generateDefaultFields(properties, fieldTypes).forEach(subField =>
-          defaultFields.push(`${fieldName}.${subField}`)
-        );
-      }
+    if (type && fieldTypes.has(type)) {
+      defaultFields.push(fieldName);
+    } else if (properties) {
+      generateDefaultFields(properties, fieldTypes).forEach(subField =>
+        defaultFields.push(`${fieldName}.${subField}`)
+      );
+    }
 
-      return defaultFields;
-    },
-    [] as string[]
-  );
+    return defaultFields;
+  }, [] as string[]);

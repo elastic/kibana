@@ -21,7 +21,7 @@ interface Processor {
   event: 'error';
 }
 
-interface Exception {
+export interface Exception {
   message?: string; // either message or type are given
   type?: string;
   module?: string;

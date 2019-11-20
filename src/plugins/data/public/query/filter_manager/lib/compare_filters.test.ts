@@ -16,42 +16,48 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { buildQueryFilter, buildEmptyFilter, FilterStateStore } from '@kbn/es-query';
+
 import { compareFilters } from './compare_filters';
+import { esFilters } from '../../../../common';
 
 describe('filter manager utilities', () => {
   describe('compare filters', () => {
     test('should compare filters', () => {
-      const f1 = buildQueryFilter(
+      const f1 = esFilters.buildQueryFilter(
         { _type: { match: { query: 'apache', type: 'phrase' } } },
-        'index'
+        'index',
+        ''
       );
-      const f2 = buildEmptyFilter(true);
+      const f2 = esFilters.buildEmptyFilter(true);
 
       expect(compareFilters(f1, f2)).toBeFalsy();
     });
 
     test('should compare duplicates', () => {
-      const f1 = buildQueryFilter(
+      const f1 = esFilters.buildQueryFilter(
         { _type: { match: { query: 'apache', type: 'phrase' } } },
-        'index'
+        'index',
+        ''
       );
-      const f2 = buildQueryFilter(
+      const f2 = esFilters.buildQueryFilter(
         { _type: { match: { query: 'apache', type: 'phrase' } } },
-        'index'
+        'index',
+        ''
       );
 
       expect(compareFilters(f1, f2)).toBeTruthy();
     });
 
     test('should compare duplicates, ignoring meta attributes', () => {
-      const f1 = buildQueryFilter(
+      const f1 = esFilters.buildQueryFilter(
         { _type: { match: { query: 'apache', type: 'phrase' } } },
-        'index1'
+        'index1',
+        ''
       );
-      const f2 = buildQueryFilter(
+      const f2 = esFilters.buildQueryFilter(
         { _type: { match: { query: 'apache', type: 'phrase' } } },
-        'index2'
+        'index2',
+        ''
       );
 
       expect(compareFilters(f1, f2)).toBeTruthy();
@@ -59,12 +65,20 @@ describe('filter manager utilities', () => {
 
     test('should compare duplicates, ignoring $state attributes', () => {
       const f1 = {
-        $state: { store: FilterStateStore.APP_STATE },
-        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index'),
+        $state: { store: esFilters.FilterStateStore.APP_STATE },
+        ...esFilters.buildQueryFilter(
+          { _type: { match: { query: 'apache', type: 'phrase' } } },
+          'index',
+          ''
+        ),
       };
       const f2 = {
-        $state: { store: FilterStateStore.GLOBAL_STATE },
-        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index'),
+        $state: { store: esFilters.FilterStateStore.GLOBAL_STATE },
+        ...esFilters.buildQueryFilter(
+          { _type: { match: { query: 'apache', type: 'phrase' } } },
+          'index',
+          ''
+        ),
       };
 
       expect(compareFilters(f1, f2)).toBeTruthy();

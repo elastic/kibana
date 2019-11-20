@@ -58,7 +58,8 @@ export function JoinEditor({ joins, layer, onChange }) {
       ...joins,
       {
         right: {
-          id: uuid()
+          id: uuid(),
+          applyGlobalQuery: true,
         }
       }
     ]);

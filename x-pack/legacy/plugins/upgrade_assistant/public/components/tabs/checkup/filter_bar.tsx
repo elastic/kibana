@@ -37,13 +37,10 @@ export const FilterBar: React.StatelessComponent<FilterBarProps> = ({
   onFilterChange,
 }) => {
   const levelGroups = groupBy(allDeprecations, 'level');
-  const levelCounts = Object.keys(levelGroups).reduce(
-    (counts, level) => {
-      counts[level] = levelGroups[level].length;
-      return counts;
-    },
-    {} as { [level: string]: number }
-  );
+  const levelCounts = Object.keys(levelGroups).reduce((counts, level) => {
+    counts[level] = levelGroups[level].length;
+    return counts;
+  }, {} as { [level: string]: number });
 
   const allCount = allDeprecations.length;
 

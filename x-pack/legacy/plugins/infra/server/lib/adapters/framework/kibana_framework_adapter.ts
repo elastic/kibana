@@ -10,7 +10,6 @@ import { Legacy } from 'kibana';
 
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { get } from 'lodash';
-import { InfraMetricModel } from '../metrics/adapter_types';
 import {
   InfraBackendFrameworkAdapter,
   InfraFrameworkRequest,
@@ -26,6 +25,7 @@ import {
   HapiGraphiQLPluginOptions,
   HapiGraphQLPluginOptions,
 } from './apollo_server_hapi';
+import { TSVBMetricModel } from '../../../../common/inventory_models/types';
 
 interface CallWithRequestParams extends GenericParams {
   max_concurrent_shard_requests?: number;
@@ -169,7 +169,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
 
   public async makeTSVBRequest(
     req: InfraFrameworkRequest<Legacy.Request>,
-    model: InfraMetricModel,
+    model: TSVBMetricModel,
     timerange: { min: number; max: number },
     filters: any[]
   ) {

@@ -18,9 +18,9 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject, combineLatest, of, merge } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import * as Url from 'url';
+import { parse } from 'url';
 
 import { i18n } from '@kbn/i18n';
 import { IconType, Breadcrumb as EuiBreadcrumb } from '@elastic/eui';
@@ -40,11 +40,6 @@ import { DocLinksStart } from '../doc_links';
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
 const IS_COLLAPSED_KEY = 'core.chrome.isCollapsed';
-
-function isEmbedParamInHash() {
-  const { query } = Url.parse(String(window.location.hash).slice(1), true);
-  return Boolean(query.embed);
-}
 
 /** @public */
 export interface ChromeBadge {
@@ -79,6 +74,9 @@ interface StartDeps {
 
 /** @internal */
 export class ChromeService {
+  private isVisible$!: Observable<boolean>;
+  private appHidden$!: Observable<boolean>;
+  private toggleHidden$!: BehaviorSubject<boolean>;
   private readonly stop$ = new ReplaySubject(1);
   private readonly navControls = new NavControlsService();
   private readonly navLinks = new NavLinksService();
@@ -87,6 +85,38 @@ export class ChromeService {
 
   constructor(private readonly params: ConstructorParams) {}
 
+  /**
+   * These observables allow consumers to toggle the chrome visibility via either:
+   *   1. Using setIsVisible() to trigger the next chromeHidden$
+   *   2. Setting `chromeless` when registering an application, which will
+   *      reset the visibility whenever the next application is mounted
+   *   3. Having "embed" in the query string
+   */
+  private initVisibility(application: StartDeps['application']) {
+    // Start off the chrome service hidden if "embed" is in the hash query string.
+    const isEmbedded = 'embed' in parse(location.hash.slice(1), true).query;
+
+    this.toggleHidden$ = new BehaviorSubject(isEmbedded);
+    this.appHidden$ = merge(
+      // Default the app being hidden to the same value initial value as the chrome visibility
+      // in case the application service has not emitted an app ID yet, since we want to trigger
+      // combineLatest below regardless of having an application value yet.
+      of(isEmbedded),
+      application.currentAppId$.pipe(
+        map(
+          appId =>
+            !!appId &&
+            application.availableApps.has(appId) &&
+            !!application.availableApps.get(appId)!.chromeless
+        )
+      )
+    );
+    this.isVisible$ = combineLatest(this.appHidden$, this.toggleHidden$).pipe(
+      map(([appHidden, chromeHidden]) => !(appHidden || chromeHidden)),
+      takeUntil(this.stop$)
+    );
+  }
+
   public async start({
     application,
     docLinks,
@@ -94,11 +124,10 @@ export class ChromeService {
     injectedMetadata,
     notifications,
   }: StartDeps): Promise<InternalChromeStart> {
-    const FORCE_HIDDEN = isEmbedParamInHash();
+    this.initVisibility(application);
 
     const appTitle$ = new BehaviorSubject<string>('Kibana');
     const brand$ = new BehaviorSubject<ChromeBrand>({});
-    const isVisible$ = new BehaviorSubject(true);
     const isCollapsed$ = new BehaviorSubject(!!localStorage.getItem(IS_COLLAPSED_KEY));
     const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
@@ -129,6 +158,7 @@ export class ChromeService {
           <LoadingIndicator loadingCount$={http.getLoadingCount$()} />
 
           <Header
+            isCloudEnabled={injectedMetadata.getInjectedVar('isCloudEnabled') as boolean}
             application={application}
             appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
             badge$={badge$.pipe(takeUntil(this.stop$))}
@@ -138,10 +168,7 @@ export class ChromeService {
             forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
             helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
             homeHref={http.basePath.prepend('/app/kibana#/home')}
-            isVisible$={isVisible$.pipe(
-              map(visibility => (FORCE_HIDDEN ? false : visibility)),
-              takeUntil(this.stop$)
-            )}
+            isVisible$={this.isVisible$}
             kibanaVersion={injectedMetadata.getKibanaVersion()}
             legacyMode={injectedMetadata.getLegacyMode()}
             navLinks$={navLinks.getNavLinks$()}
@@ -165,15 +192,9 @@ export class ChromeService {
         );
       },
 
-      getIsVisible$: () =>
-        isVisible$.pipe(
-          map(visibility => (FORCE_HIDDEN ? false : visibility)),
-          takeUntil(this.stop$)
-        ),
+      getIsVisible$: () => this.isVisible$,
 
-      setIsVisible: (visibility: boolean) => {
-        isVisible$.next(visibility);
-      },
+      setIsVisible: (isVisible: boolean) => this.toggleHidden$.next(!isVisible),
 
       getIsCollapsed$: () => isCollapsed$.pipe(takeUntil(this.stop$)),
 

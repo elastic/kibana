@@ -4,31 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useState } from 'react';
+import React, { FC, Fragment, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import {
   EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiPage,
   EuiPageBody,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
-  EuiPanel,
-  EuiSpacer,
   EuiTitle,
+  EuiPageHeader,
+  EuiPageHeaderSection,
 } from '@elastic/eui';
 
 import { NavigationMenu } from '../../../components/navigation_menu';
-import { CreateAnalyticsButton } from './components/create_analytics_button';
 import { DataFrameAnalyticsList } from './components/analytics_list';
-import { RefreshAnalyticsListButton } from './components/refresh_analytics_list_button';
 import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
 import { useCreateAnalyticsForm } from './hooks/use_create_analytics_form';
+import { NodeAvailableWarning } from '../../../components/node_available_warning';
+import { UpgradeWarning } from '../../../components/upgrade';
 
 export const Page: FC = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
@@ -42,8 +37,8 @@ export const Page: FC = () => {
       <NavigationMenu tabId="data_frame_analytics" />
       <EuiPage data-test-subj="mlPageDataFrameAnalytics">
         <EuiPageBody>
-          <EuiPageContentHeader>
-            <EuiPageContentHeaderSection>
+          <EuiPageHeader>
+            <EuiPageHeaderSection>
               <EuiTitle>
                 <h1>
                   <FormattedMessage
@@ -67,29 +62,16 @@ export const Page: FC = () => {
                   />
                 </h1>
               </EuiTitle>
-            </EuiPageContentHeaderSection>
-            <EuiPageContentHeaderSection>
-              <EuiFlexGroup alignItems="center">
-                {/* grow={false} fixes IE11 issue with nested flex */}
-                <EuiFlexItem grow={false}>
-                  <RefreshAnalyticsListButton />
-                </EuiFlexItem>
-                {/* grow={false} fixes IE11 issue with nested flex */}
-                <EuiFlexItem grow={false}>
-                  <CreateAnalyticsButton {...createAnalyticsForm} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPageContentHeaderSection>
-          </EuiPageContentHeader>
-          <EuiPageContentBody>
-            <EuiSpacer size="l" />
-            <EuiPanel>
-              <DataFrameAnalyticsList
-                blockRefresh={blockRefresh}
-                openCreateJobModal={createAnalyticsForm.actions.openModal}
-              />
-            </EuiPanel>
-          </EuiPageContentBody>
+            </EuiPageHeaderSection>
+          </EuiPageHeader>
+
+          <NodeAvailableWarning />
+          <UpgradeWarning />
+
+          <DataFrameAnalyticsList
+            blockRefresh={blockRefresh}
+            createAnalyticsForm={createAnalyticsForm}
+          />
         </EuiPageBody>
       </EuiPage>
     </Fragment>

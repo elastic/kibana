@@ -25,14 +25,12 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { DataPublicPlugin as Plugin };
-export { DataPublicPluginSetup, DataPublicPluginStart } from './types';
 
 export * from '../common';
-export * from './autocomplete_provider';
 
+export * from './autocomplete_provider';
 export * from './types';
 
 export { IRequestTypesMap, IResponseTypesMap } from './search';
 export * from './search';
-
 export * from './query';

@@ -40,7 +40,7 @@ export function ClusterStatus({ stats }) {
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.clusterStatus.memoryLabel', {
-        defaultMessage: 'Memory'
+        defaultMessage: 'JVM Heap'
       }),
       value: formatMetric(memUsed, 'byte') + ' / ' + formatMetric(memMax, 'byte'),
       'data-test-subj': 'memory'

@@ -11,8 +11,10 @@ import { ComponentStrings } from '../../../i18n';
 const { GroupSettings: strings } = ComponentStrings;
 
 export const GroupSettings: FunctionComponent = () => (
-  <EuiText size="s">
-    <p>{strings.getUngroupDescription()}</p>
-    <p>{strings.getSaveGroupDescription()}</p>
-  </EuiText>
+  <div className="canvasSidebar__panel canvasSidebar__panel--isEmpty">
+    <EuiText size="s">
+      <p>{strings.getUngroupDescription()}</p>
+      <p>{strings.getSaveGroupDescription()}</p>
+    </EuiText>
+  </div>
 );

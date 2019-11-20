@@ -18,30 +18,20 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
-import {
-  buildEmptyFilter,
-  disableFilter,
-  enableFilter,
-  Filter,
-  pinFilter,
-  toggleFilterDisabled,
-  toggleFilterNegated,
-  unpinFilter,
-} from '@kbn/es-query';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { useState } from 'react';
 import { CoreStart } from 'src/core/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { IndexPattern } from '../../index_patterns';
 import { FilterEditor } from './filter_editor';
 import { FilterItem } from './filter_item';
 import { FilterOptions } from './filter_options';
 import { useKibana, KibanaContextProvider } from '../../../../../../plugins/kibana_react/public';
+import { DataPublicPluginStart, esFilters } from '../../../../../../plugins/data/public';
 
 interface Props {
-  filters: Filter[];
-  onFiltersUpdated?: (filters: Filter[]) => void;
+  filters: esFilters.Filter[];
+  onFiltersUpdated?: (filters: esFilters.Filter[]) => void;
   className: string;
   indexPatterns: IndexPattern[];
   intl: InjectedIntl;
@@ -87,7 +77,7 @@ function FilterBarUI(props: Props) {
     return content;
   }
 
-  function onFiltersUpdated(filters: Filter[]) {
+  function onFiltersUpdated(filters: esFilters.Filter[]) {
     if (props.onFiltersUpdated) {
       props.onFiltersUpdated(filters);
     }
@@ -112,7 +102,7 @@ function FilterBarUI(props: Props) {
     const isPinned = uiSettings!.get('filters:pinnedByDefault');
     const [indexPattern] = props.indexPatterns;
     const index = indexPattern && indexPattern.id;
-    const newFilter = buildEmptyFilter(isPinned, index);
+    const newFilter = esFilters.buildEmptyFilter(isPinned, index);
 
     const button = (
       <EuiButtonEmpty
@@ -157,7 +147,7 @@ function FilterBarUI(props: Props) {
     );
   }
 
-  function onAdd(filter: Filter) {
+  function onAdd(filter: esFilters.Filter) {
     setIsAddFilterPopoverOpen(false);
     const filters = [...props.filters, filter];
     onFiltersUpdated(filters);
@@ -169,39 +159,39 @@ function FilterBarUI(props: Props) {
     onFiltersUpdated(filters);
   }
 
-  function onUpdate(i: number, filter: Filter) {
+  function onUpdate(i: number, filter: esFilters.Filter) {
     const filters = [...props.filters];
     filters[i] = filter;
     onFiltersUpdated(filters);
   }
 
   function onEnableAll() {
-    const filters = props.filters.map(enableFilter);
+    const filters = props.filters.map(esFilters.enableFilter);
     onFiltersUpdated(filters);
   }
 
   function onDisableAll() {
-    const filters = props.filters.map(disableFilter);
+    const filters = props.filters.map(esFilters.disableFilter);
     onFiltersUpdated(filters);
   }
 
   function onPinAll() {
-    const filters = props.filters.map(pinFilter);
+    const filters = props.filters.map(esFilters.pinFilter);
     onFiltersUpdated(filters);
   }
 
   function onUnpinAll() {
-    const filters = props.filters.map(unpinFilter);
+    const filters = props.filters.map(esFilters.unpinFilter);
     onFiltersUpdated(filters);
   }
 
   function onToggleAllNegated() {
-    const filters = props.filters.map(toggleFilterNegated);
+    const filters = props.filters.map(esFilters.toggleFilterNegated);
     onFiltersUpdated(filters);
   }
 
   function onToggleAllDisabled() {
-    const filters = props.filters.map(toggleFilterDisabled);
+    const filters = props.filters.map(esFilters.toggleFilterDisabled);
     onFiltersUpdated(filters);
   }
 
