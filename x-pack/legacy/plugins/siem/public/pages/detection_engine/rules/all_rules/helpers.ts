@@ -6,6 +6,7 @@
 
 import { Rule } from '../../../../containers/detection_engine/rules/types';
 import { TableData } from '../types';
+import { getEmptyValue } from '../../../../components/empty_value';
 
 export const formatRules = (rules: Rule[], selectedRules?: string[]): TableData[] =>
   rules.map(rule => ({
@@ -19,7 +20,7 @@ export const formatRules = (rules: Rule[], selectedRules?: string[]): TableData[
     severity: rule.severity,
     lastCompletedRun: undefined, // Frank Plumber
     lastResponse: {
-      type: '--', // Frank Plumber
+      type: getEmptyValue(), // Frank Plumber
     },
     tags: rule.tags,
     activate: rule.enabled,

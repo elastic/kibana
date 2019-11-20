@@ -49,11 +49,11 @@ export const getBatchItems = (
     <EuiContextMenuItem
       key={i18n.BATCH_ACTION_EXPORT_SELECTED}
       icon="exportAction"
-      disabled={true}
+      disabled={containsLoading}
       onClick={async () => {
         closePopover();
         await exportRulesAction(
-          selectedState.map(s => s.rule_id),
+          selectedState.map(s => s.sourceRule),
           dispatch
         );
       }}

@@ -7,9 +7,8 @@
 import chrome from 'ui/chrome';
 import {
   DeleteRulesProps,
-  DuplicateRuleProps,
+  DuplicateRulesProps,
   EnableRulesProps,
-  ExportRulesProps,
   FetchRulesProps,
   FetchRulesResponse,
   Rule,
@@ -97,6 +96,7 @@ export const enableRules = async ({
  * @param kbnVersion current Kibana Version to use for headers
  */
 export const deleteRules = async ({ ruleIds, kbnVersion }: DeleteRulesProps): Promise<Rule[]> => {
+  // TODO: Don't delete immutable!
   const requests = ruleIds.map(ruleId =>
     fetch(`${chrome.getBasePath()}/api/detection_engine/rules?rule_id=${ruleId}`, {
       method: 'DELETE',
@@ -116,45 +116,17 @@ export const deleteRules = async ({ ruleIds, kbnVersion }: DeleteRulesProps): Pr
 };
 
 /**
- * Duplicates provided Rule
+ * Duplicates provided Rules
  *
  * @param rule to duplicate
  * @param kbnVersion current Kibana Version to use for headers
  */
-export const duplicateRule = async ({ rule, kbnVersion }: DuplicateRuleProps): Promise<Rule> => {
-  const response = await fetch(`${chrome.getBasePath()}/api/detection_engine/rules`, {
-    method: 'POST',
-    credentials: 'same-origin',
-    headers: {
-      'content-type': 'application/json',
-      'kbn-version': kbnVersion,
-      'kbn-xsrf': kbnVersion,
-    },
-    body: JSON.stringify({
-      ...rule,
-      name: `${rule.name} [Duplicate]`,
-      created_by: undefined,
-      id: undefined,
-      rule_id: undefined,
-      updated_by: undefined,
-      enabled: rule.enabled ?? false,
-    }),
-  });
-
-  // ["name", "filter", "filters", "savedId", "maxSignals"]}
-  await throwIfNotOk(response);
-  return response.json();
-};
-
-/**
- * Export Rule Saved Object(s)
- *
- * @param ruleIds array of rule ID's to enable/disable
- * @param kbnVersion current Kibana Version to use for headers
- */
-export const exportRules = async ({ ruleIds, kbnVersion }: ExportRulesProps): Promise<Rule[]> => {
-  const requests = ruleIds.map(ruleId =>
-    fetch(`${chrome.getBasePath()}/api/saved_objects/_export`, {
+export const duplicateRules = async ({
+  rules,
+  kbnVersion,
+}: DuplicateRulesProps): Promise<Rule[]> => {
+  const requests = rules.map(rule =>
+    fetch(`${chrome.getBasePath()}/api/detection_engine/rules`, {
       method: 'POST',
       credentials: 'same-origin',
       headers: {
@@ -163,8 +135,13 @@ export const exportRules = async ({ ruleIds, kbnVersion }: ExportRulesProps): Pr
         'kbn-xsrf': kbnVersion,
       },
       body: JSON.stringify({
-        objects: [{ id: ruleId, type: 'alert' }],
-        includeReferencesDeep: false,
+        ...rule,
+        name: `${rule.name} [Duplicate]`,
+        created_by: undefined,
+        id: undefined,
+        rule_id: undefined,
+        updated_by: undefined,
+        enabled: rule.enabled,
       }),
     })
   );

@@ -7,7 +7,6 @@
 import { EuiBadge, EuiHealth, EuiIconTip, EuiLink, EuiTextColor } from '@elastic/eui';
 import React from 'react';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import moment from 'moment';
 import { getEmptyTagValue } from '../../../../components/empty_value';
 import {
   deleteRulesAction,
@@ -17,47 +16,44 @@ import {
   exportRulesAction,
   runRuleAction,
 } from './actions';
-import { RuleSwitch } from '../rule_switch';
+
 import { Action } from './reducer';
 import { TableData } from '../types';
-
-// Michael: Will need to change this to get the current datetime format from Kibana settings.
-const dateTimeFormat = (value: string) => {
-  return moment(value).format('M/D/YYYY, h:mm A');
-};
+import * as i18n from '../translations';
+import { PreferenceFormattedDate } from '../../../../components/formatted_date';
+import { RuleSwitch } from '../components/rule_switch';
 
 const getActions = (dispatch: React.Dispatch<Action>, kbnVersion: string) => [
   {
-    description: 'Edit rule settings',
+    description: i18n.EDIT_RULE_SETTINGS,
     icon: 'visControls',
-    name: 'Edit rule settings',
+    name: i18n.EDIT_RULE_SETTINGS,
     onClick: editRuleAction,
     enabled: () => false,
   },
   {
-    description: 'Run rule manually…',
+    description: i18n.RUN_RULE_MANUALLY,
     icon: 'play',
-    name: 'Run rule manually…',
+    name: i18n.RUN_RULE_MANUALLY,
     onClick: runRuleAction,
     enabled: () => false,
   },
   {
-    description: 'Duplicate rule…',
+    description: i18n.DUPLICATE_RULE,
     icon: 'copy',
-    name: 'Duplicate rule…',
+    name: i18n.DUPLICATE_RULE,
     onClick: (rowItem: TableData) => duplicateRuleAction(rowItem.sourceRule, dispatch, kbnVersion),
   },
   {
-    description: 'Export rule',
+    description: i18n.EXPORT_RULE,
     icon: 'exportAction',
-    name: 'Export rule',
-    onClick: (rowItem: TableData) => exportRulesAction([rowItem.rule_id], dispatch),
-    enabled: () => false,
+    name: i18n.EXPORT_RULE,
+    onClick: (rowItem: TableData) => exportRulesAction([rowItem.sourceRule], dispatch),
   },
   {
-    description: 'Delete rule…',
+    description: i18n.DELETE_RULE,
     icon: 'trash',
-    name: 'Delete rule…',
+    name: i18n.DELETE_RULE,
     onClick: (rowItem: TableData) => deleteRulesAction([rowItem.rule_id], dispatch, kbnVersion),
   },
 ];
@@ -66,7 +62,7 @@ const getActions = (dispatch: React.Dispatch<Action>, kbnVersion: string) => [
 export const getColumns = (dispatch: React.Dispatch<Action>, kbnVersion: string) => [
   {
     field: 'rule',
-    name: 'Rule',
+    name: i18n.COLUMN_RULE,
     render: (value: TableData['rule']) => (
       <div>
         <EuiLink href={value.href}>{value.name}</EuiLink>{' '}
@@ -79,12 +75,12 @@ export const getColumns = (dispatch: React.Dispatch<Action>, kbnVersion: string)
   },
   {
     field: 'method',
-    name: 'Method',
+    name: i18n.COLUMN_METHOD,
     truncateText: true,
   },
   {
     field: 'severity',
-    name: 'Severity',
+    name: i18n.COLUMN_SEVERITY,
     render: (value: TableData['severity']) => (
       <EuiHealth
         color={
@@ -104,12 +100,12 @@ export const getColumns = (dispatch: React.Dispatch<Action>, kbnVersion: string)
   },
   {
     field: 'lastCompletedRun',
-    name: 'Last completed run',
+    name: i18n.COLUMN_LAST_COMPLETE_RUN,
     render: (value: TableData['lastCompletedRun']) => {
       return value === undefined ? (
         getEmptyTagValue()
       ) : (
-        <time dateTime={value}>{dateTimeFormat(value)}</time>
+        <PreferenceFormattedDate value={new Date(value)} />
       );
     },
     sortable: true,
@@ -118,7 +114,7 @@ export const getColumns = (dispatch: React.Dispatch<Action>, kbnVersion: string)
   },
   {
     field: 'lastResponse',
-    name: 'Last response',
+    name: i18n.COLUMN_LAST_RESPONSE,
     render: (value: TableData['lastResponse']) => {
       return value === undefined ? (
         getEmptyTagValue()
@@ -138,7 +134,7 @@ export const getColumns = (dispatch: React.Dispatch<Action>, kbnVersion: string)
   },
   {
     field: 'tags',
-    name: 'Tags',
+    name: i18n.COLUMN_TAGS,
     render: (value: TableData['tags']) => (
       <div>
         <>
@@ -156,7 +152,7 @@ export const getColumns = (dispatch: React.Dispatch<Action>, kbnVersion: string)
   {
     align: 'center',
     field: 'activate',
-    name: 'Activate',
+    name: i18n.COLUMN_ACTIVATE,
     render: (value: TableData['activate'], item: TableData) => (
       <RuleSwitch
         ruleId={item.rule_id}

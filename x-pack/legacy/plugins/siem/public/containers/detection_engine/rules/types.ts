@@ -11,7 +11,6 @@ export interface PaginationOptions {
   total?: number;
 }
 
-// Fetch Rules Types
 export interface FetchRulesProps {
   paginationOptions?: PaginationOptions;
   ruleId?: string;
@@ -47,54 +46,18 @@ export interface Rule {
   updated_by: string;
 }
 
-export interface RuleAlertTypeParams {
-  description: string;
-  id: string;
-  index: string[];
-  from: string;
-  filter: string | null;
-  query: string;
-  language: string;
-  savedId: string | null;
-  filters: string | null;
-  maxSignals: number;
-  severity: string;
-  to: string;
-  type: string;
-  references: string[];
-  tags: string[];
-}
-
-export interface RuleAction {
-  group: string;
-  params: {
-    message: string;
-    level: string;
-  };
-  id: string;
-}
-
-// Enable Rules Types
 export interface EnableRulesProps {
   ruleIds: string[];
   enabled: boolean;
   kbnVersion: string;
 }
 
-// Delete Rules Types
 export interface DeleteRulesProps {
   ruleIds: string[];
   kbnVersion: string;
 }
 
-// Duplicate Rule Types
-export interface DuplicateRuleProps {
-  rule: Rule;
-  kbnVersion: string;
-}
-
-// Export Rules Types
-export interface ExportRulesProps {
-  ruleIds: string[];
+export interface DuplicateRulesProps {
+  rules: Rule[];
   kbnVersion: string;
 }

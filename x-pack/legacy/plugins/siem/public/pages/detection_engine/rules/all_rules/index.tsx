@@ -13,6 +13,7 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useReducer, useState } from 'react';
 
+import uuid from 'uuid';
 import { HeaderSection } from '../../../../components/header_section';
 import {
   UtilityBar,
@@ -31,6 +32,8 @@ import { allRulesReducer, State } from './reducer';
 import * as i18n from '../translations';
 import { useKibanaUiSetting } from '../../../../lib/settings/use_kibana_ui_setting';
 import { DEFAULT_KBN_VERSION } from '../../../../../common/constants';
+import { JSONDownloader } from '../components/json_downloader';
+import { useStateToaster } from '../../../../components/toasters';
 
 const initialState: State = {
   isLoading: true,
@@ -55,14 +58,15 @@ const initialState: State = {
  *   * Export
  */
 export const AllRules = React.memo(() => {
-  const [{ isLoading, refreshToggle, selectedItems, tableData, pagination }, dispatch] = useReducer(
-    allRulesReducer,
-    initialState
-  );
+  const [
+    { exportPayload, isLoading, refreshToggle, selectedItems, tableData, pagination },
+    dispatch,
+  ] = useReducer(allRulesReducer, initialState);
 
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [sortState, setSortState] = useState<SortTypes>({ field: 'rule', direction: 'asc' });
   const [isLoadingRules, rulesData, updatePagination] = useRules(refreshToggle);
+  const [, dispatchToaster] = useStateToaster();
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
   useEffect(() => {
@@ -88,6 +92,21 @@ export const AllRules = React.memo(() => {
 
   return (
     <>
+      <JSONDownloader
+        filename={`${i18n.EXPORT_FILENAME}.ndjson`}
+        payload={exportPayload}
+        onExportComplete={exportCount => {
+          dispatchToaster({
+            type: 'addToaster',
+            toast: {
+              id: uuid.v4(),
+              title: i18n.SUCCESSFULLY_EXPORTED_RULES(exportCount),
+              color: 'success',
+              iconType: 'check',
+            },
+          });
+        }}
+      />
       <EuiSpacer />
 
       <Panel loading={isLoading}>

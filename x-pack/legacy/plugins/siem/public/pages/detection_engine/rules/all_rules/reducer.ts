@@ -15,6 +15,7 @@ export interface State {
   pagination: PaginationOptions;
   refreshToggle: boolean;
   tableData: TableData[];
+  exportPayload?: object[];
 }
 
 export type Action =
@@ -25,6 +26,7 @@ export type Action =
   | { type: 'deleteRules'; rules: Rule[] }
   | { type: 'setSelected'; selectedItems: TableData[] }
   | { type: 'updateLoading'; ruleIds: string[]; isLoading: boolean }
+  | { type: 'setExportPayload'; exportPayload?: object[] }
   | { type: 'failure' };
 
 export const allRulesReducer = (state: State, action: Action): State => {
@@ -96,6 +98,12 @@ export const allRulesReducer = (state: State, action: Action): State => {
         ...state,
         isLoading: false,
         rules: [],
+      };
+    }
+    case 'setExportPayload': {
+      return {
+        ...state,
+        exportPayload: action.exportPayload,
       };
     }
     default:

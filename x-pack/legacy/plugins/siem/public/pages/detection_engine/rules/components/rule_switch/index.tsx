@@ -24,6 +24,9 @@ export interface RuleSwitchProps {
   onRuleStateChange: (isEnabled: boolean, ruleId: string) => void;
 }
 
+/**
+ * Basic switch component for displaying loader when enabled/disabled
+ */
 export const RuleSwitch = React.memo<RuleSwitchProps>(
   ({ ruleId, enabled, isLoading, onRuleStateChange }) => {
     return (

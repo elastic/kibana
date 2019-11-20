@@ -7,7 +7,7 @@
 import React from 'react';
 import {
   deleteRules,
-  duplicateRule,
+  duplicateRules,
   enableRules,
 } from '../../../../containers/detection_engine/rules/api';
 import { Action } from './reducer';
@@ -23,12 +23,14 @@ export const duplicateRuleAction = async (
   kbnVersion: string
 ) => {
   dispatch({ type: 'updateLoading', ruleIds: [rule.rule_id], isLoading: true });
-  const duplicatedRule = await duplicateRule({ rule, kbnVersion });
+  const duplicatedRule = await duplicateRules({ rules: [rule], kbnVersion });
   dispatch({ type: 'updateLoading', ruleIds: [rule.rule_id], isLoading: false });
-  dispatch({ type: 'updateRules', rules: [duplicatedRule] });
+  dispatch({ type: 'updateRules', rules: duplicatedRule });
 };
 
-export const exportRulesAction = async (ruleIds: string[], dispatch: React.Dispatch<Action>) => {};
+export const exportRulesAction = async (rules: Rule[], dispatch: React.Dispatch<Action>) => {
+  dispatch({ type: 'setExportPayload', exportPayload: rules });
+};
 
 export const deleteRulesAction = async (
   ruleIds: string[],
