@@ -171,8 +171,6 @@ export class TransactionCharts extends Component<TransactionChartProps> {
                   </EuiFlexItem>
                   <LicenseContext.Consumer>
                     {license =>
-                      // TODO(TS-3.7-ESLINT)
-                      // eslint-disable-next-line @typescript-eslint/camelcase
                       this.renderMLHeader(license.features.ml?.is_available)
                     }
                   </LicenseContext.Consumer>
