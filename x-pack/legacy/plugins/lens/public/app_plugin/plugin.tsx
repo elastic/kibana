@@ -16,9 +16,8 @@ import 'uiExports/savedObjectTypes';
 import React from 'react';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
-import { render, unmountComponentAtNode } from 'react-dom';
-import chrome from 'ui/chrome';
-import { CoreSetup, CoreStart } from 'src/core/public';
+import { render } from 'react-dom';
+import { CoreSetup, CoreStart, SavedObjectsClientContract } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { DataStart } from '../../../../../../src/legacy/core_plugins/data/public';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
@@ -33,30 +32,33 @@ import {
   datatableVisualizationStop,
 } from '../datatable_visualization_plugin';
 import { App } from './app';
-import { EditorFrameInstance } from '../types';
 import {
   LensReportManager,
   setReportManager,
   stopReportManager,
   trackUiEvent,
 } from '../lens_ui_telemetry';
-import { LocalApplicationService } from '../../../../../../src/legacy/core_plugins/kibana/public/local_application_service';
 import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../index';
+import { KibanaLegacySetup } from '../../../../../../src/plugins/kibana_legacy/public';
+
+export interface LensPluginSetupDependencies {
+  kibana_legacy: KibanaLegacySetup;
+}
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
   dataShim: DataStart;
-  __LEGACY: {
-    localApplicationService: LocalApplicationService;
-  };
 }
 export class AppPlugin {
-  private instance: EditorFrameInstance | null = null;
-  private store: SavedObjectIndexStore | null = null;
+  private startDependencies: {
+    data: DataPublicPluginStart;
+    dataShim: DataStart;
+    savedObjectsClient: SavedObjectsClientContract;
+  } | null = null;
 
   constructor() {}
 
-  setup(core: CoreSetup, plugins: {}) {
+  setup(core: CoreSetup, { kibana_legacy }: LensPluginSetupDependencies) {
     // TODO: These plugins should not be called from the top level, but since this is the
     // entry point to the app we have no choice until the new platform is ready
     const indexPattern = indexPatternDatasourceSetup();
@@ -64,68 +66,59 @@ export class AppPlugin {
     const xyVisualization = xyVisualizationSetup();
     const metricVisualization = metricVisualizationSetup();
     const editorFrameSetupInterface = editorFrameSetup();
-    this.store = new SavedObjectIndexStore(chrome!.getSavedObjectsClient());
 
     editorFrameSetupInterface.registerVisualization(xyVisualization);
     editorFrameSetupInterface.registerVisualization(datatableVisualization);
     editorFrameSetupInterface.registerVisualization(metricVisualization);
     editorFrameSetupInterface.registerDatasource('indexpattern', indexPattern);
-  }
 
-  start(
-    core: CoreStart,
-    { data, dataShim, __LEGACY: { localApplicationService } }: LensPluginStartDependencies
-  ) {
-    if (this.store === null) {
-      throw new Error('Start lifecycle called before setup lifecycle');
-    }
-
-    addHelpMenuToAppChrome(core.chrome);
-
-    const store = this.store;
-
-    const editorFrameStartInterface = editorFrameStart();
-
-    this.instance = editorFrameStartInterface.createInstance({});
-
-    setReportManager(
-      new LensReportManager({
-        storage: new Storage(localStorage),
-        http: core.http,
-      })
-    );
-
-    const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
-      trackUiEvent('loaded');
-      return (
-        <App
-          core={core}
-          data={data}
-          dataShim={dataShim}
-          editorFrame={this.instance!}
-          storage={new Storage(localStorage)}
-          docId={routeProps.match.params.id}
-          docStorage={store}
-          redirectTo={id => {
-            if (!id) {
-              routeProps.history.push('/lens');
-            } else {
-              routeProps.history.push(`/lens/edit/${id}`);
-            }
-          }}
-        />
-      );
-    };
-
-    function NotFound() {
-      trackUiEvent('loaded_404');
-      return <FormattedMessage id="xpack.lens.app404" defaultMessage="404 Not Found" />;
-    }
-
-    localApplicationService.register({
+    kibana_legacy.registerLegacyApp({
       id: 'lens',
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
       mount: async (context, params) => {
+        if (this.startDependencies === null) {
+          throw new Error('mounted before start phase');
+        }
+        const { data, dataShim, savedObjectsClient } = this.startDependencies;
+        addHelpMenuToAppChrome(context.core.chrome);
+
+        const editorFrameStartInterface = editorFrameStart();
+
+        const instance = editorFrameStartInterface.createInstance({});
+
+        setReportManager(
+          new LensReportManager({
+            storage: new Storage(localStorage),
+            http: core.http,
+          })
+        );
+
+        const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
+          trackUiEvent('loaded');
+          return (
+            <App
+              core={context.core}
+              data={data}
+              dataShim={dataShim}
+              editorFrame={instance}
+              storage={new Storage(localStorage)}
+              docId={routeProps.match.params.id}
+              docStorage={new SavedObjectIndexStore(savedObjectsClient)}
+              redirectTo={id => {
+                if (!id) {
+                  routeProps.history.push('/lens');
+                } else {
+                  routeProps.history.push(`/lens/edit/${id}`);
+                }
+              }}
+            />
+          );
+        };
+
+        function NotFound() {
+          trackUiEvent('loaded_404');
+          return <FormattedMessage id="xpack.lens.app404" defaultMessage="404 Not Found" />;
+        }
         render(
           <I18nProvider>
             <HashRouter>
@@ -139,17 +132,21 @@ export class AppPlugin {
           params.element
         );
         return () => {
-          unmountComponentAtNode(params.element);
+          instance.unmount();
         };
       },
     });
   }
 
-  stop() {
-    if (this.instance) {
-      this.instance.unmount();
-    }
+  start({ savedObjects }: CoreStart, { data, dataShim }: LensPluginStartDependencies) {
+    this.startDependencies = {
+      data,
+      dataShim,
+      savedObjectsClient: savedObjects.client,
+    };
+  }
 
+  stop() {
     stopReportManager();
 
     // TODO this will be handled by the plugin platform itself
