@@ -4,28 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { once } from 'lodash';
-import { wrapCustomError } from '../error_wrappers';
+import {
+  KibanaRequest,
+  KibanaResponseFactory,
+  RequestHandler,
+  RequestHandlerContext,
+} from 'src/core/server';
 import { PLUGIN } from '../../../../common/constants';
 import { LICENSE_STATUS_VALID } from '../../../../../../common/constants/license_status';
+import { ServerShimWithRouter } from '../../types';
 
-export const licensePreRoutingFactory = once((server) => {
+export const licensePreRoutingFactory = (
+  server: ServerShimWithRouter,
+  handler: RequestHandler
+): RequestHandler => {
   const xpackMainPlugin = server.plugins.xpack_main;
 
   // License checking and enable/disable logic
-  function licensePreRouting() {
+  return function licensePreRouting(
+    ctx: RequestHandlerContext,
+    request: KibanaRequest,
+    response: KibanaResponseFactory
+  ) {
     const licenseCheckResults = xpackMainPlugin.info.feature(PLUGIN.ID).getLicenseCheckResults();
     const { status } = licenseCheckResults;
 
     if (status !== LICENSE_STATUS_VALID) {
-      const error = new Error(licenseCheckResults.message);
-      const statusCode = 403;
-      throw wrapCustomError(error, statusCode);
+      return response.customError({
+        body: {
+          message: licenseCheckResults.messsage,
+        },
+        statusCode: 403,
+      });
     }
 
-    return null;
-  }
-
-  return licensePreRouting;
-});
-
+    return handler(ctx, request, response);
+  };
+};

@@ -4,16 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup, ElasticsearchServiceSetup } from 'src/core/server';
+import { Plugin, CoreSetup } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
-import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 import { PLUGIN } from '../../common/constants';
-// @ts-ignore
-import { registerFieldsRoutes } from './routes/api/fields';
+import { ServerShim, ServerShimWithRouter } from './types';
 // @ts-ignore
 import { registerSettingsRoutes } from './routes/api/settings';
-// @ts-ignore
-import { registerHistoryRoutes } from './routes/api/history';
 // @ts-ignore
 import { registerIndicesRoutes } from './routes/api/indices';
 // @ts-ignore
@@ -22,29 +18,27 @@ import { registerLicenseRoutes } from './routes/api/license';
 import { registerWatchesRoutes } from './routes/api/watches';
 // @ts-ignore
 import { registerWatchRoutes } from './routes/api/watch';
+import { registerListFieldsRoute } from './routes/api/register_list_fields_route';
+import { registerLoadHistoryRoute } from './routes/api/register_load_history_route';
 import { registerLicenseChecker } from '../../../../server/lib/register_license_checker';
 
-export interface ServerShim {
-  route: any;
-  plugins: {
-    xpack_main: XPackMainPlugin;
-    watcher: any;
-    elasticsearch: ElasticsearchServiceSetup;
-  };
-}
-
 export class WatcherServerPlugin implements Plugin<void, void, any, any> {
-  async setup(core: CoreSetup, { __LEGACY: serverShim }: { __LEGACY: ServerShim }) {
+  async setup({ http }: CoreSetup, { __LEGACY: serverShim }: { __LEGACY: ServerShim }) {
+    const router = http.createRouter();
+    const serverShimWithRouter: ServerShimWithRouter = {
+      ...serverShim,
+      router,
+    };
     // Register license checker
     registerLicenseChecker(
-      serverShim as any,
+      serverShimWithRouter as any,
       PLUGIN.ID,
       PLUGIN.getI18nName(i18n),
       PLUGIN.MINIMUM_LICENSE_REQUIRED
     );
 
-    registerFieldsRoutes(serverShim);
-    registerHistoryRoutes(serverShim);
+    registerListFieldsRoute(serverShimWithRouter);
+    registerLoadHistoryRoute(serverShimWithRouter);
     registerIndicesRoutes(serverShim);
     registerLicenseRoutes(serverShim);
     registerSettingsRoutes(serverShim);

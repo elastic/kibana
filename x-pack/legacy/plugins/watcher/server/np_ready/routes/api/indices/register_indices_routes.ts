@@ -5,7 +5,8 @@
  */
 
 import { registerGetRoute } from './register_get_route';
+import { ServerShimWithRouter } from '../../../types';
 
-export function registerIndicesRoutes(server) {
+export function registerIndicesRoutes(server: ServerShimWithRouter) {
   registerGetRoute(server);
 }

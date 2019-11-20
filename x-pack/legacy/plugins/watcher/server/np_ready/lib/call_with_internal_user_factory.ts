@@ -6,13 +6,13 @@
 
 import { once } from 'lodash';
 
-const _callWithInternalUser = once((server) => {
+const _callWithInternalUser = once((server: any) => {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   return callWithInternalUser;
 });
 
-export const callWithInternalUserFactory = (server) => {
-  return (...args) => {
+export const callWithInternalUserFactory = (server: any) => {
+  return (...args: any[]) => {
     return _callWithInternalUser(server)(...args);
   };
 };

@@ -7,12 +7,11 @@
 import Boom from 'boom';
 
 /**
- * Wraps a custom error into a Boom error response and returns it
+ * Wraps an unknown error into a Boom error response and returns it
  *
- * @param err Object error
- * @param statusCode Error status code
+ * @param err Object Unknown error
  * @return Object Boom error response
  */
-export function wrapCustomError(err, statusCode) {
-  return Boom.boomify(err, { statusCode });
+export function wrapUnknownError(err: Error) {
+  return Boom.boomify(err);
 }

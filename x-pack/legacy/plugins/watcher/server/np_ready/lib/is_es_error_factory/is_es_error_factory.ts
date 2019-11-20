@@ -5,14 +5,15 @@
  */
 
 import { memoize } from 'lodash';
+import { ServerShimWithRouter } from '../../types';
 
-const esErrorsFactory = memoize((server) => {
-  return server.plugins.elasticsearch.getCluster('admin').errors;
+const esErrorsFactory = memoize((server: ServerShimWithRouter) => {
+  return (server.plugins.elasticsearch.getCluster('admin') as any).errors;
 });
 
-export function isEsErrorFactory(server) {
+export function isEsErrorFactory(server: ServerShimWithRouter) {
   const esErrors = esErrorsFactory(server);
-  return function isEsError(err) {
+  return function isEsError(err: Error) {
     return err instanceof esErrors._Abstract;
   };
 }
