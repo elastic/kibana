@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
+import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { applyLogFilterQuery, setLogFilterQueryDraft } from './actions';
 

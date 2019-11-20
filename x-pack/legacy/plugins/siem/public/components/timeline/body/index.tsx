@@ -5,6 +5,7 @@
  */
 
 import * as React from 'react';
+import { injectGlobal } from 'styled-components';
 
 import { BrowserFields } from '../../../containers/source';
 import { TimelineItem } from '../../../graphql/types';
@@ -27,6 +28,13 @@ import { getActionsColumnWidth } from './helpers';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
+
+// eslint-disable-next-line no-unused-expressions
+injectGlobal`
+  body.is-timeline-field-dragging .siemTimeline__body {
+    overflow: hidden;
+  }
+`;
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;

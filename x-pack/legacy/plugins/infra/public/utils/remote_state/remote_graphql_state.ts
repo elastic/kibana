@@ -11,7 +11,7 @@ import { Epic } from 'redux-observable';
 import { from, Observable } from 'rxjs';
 import { catchError, filter, map, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 import { Action, ActionCreator, actionCreatorFactory, Failure, Success } from 'typescript-fsa';
-import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
+import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { createSelector } from 'reselect';
 import { InfraApolloClient } from '../../lib/lib';

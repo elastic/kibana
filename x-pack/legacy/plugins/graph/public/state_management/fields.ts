@@ -5,7 +5,7 @@
  */
 
 import actionCreatorFactory, { Action } from 'typescript-fsa';
-import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
+import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { createSelector } from 'reselect';
 import { select, takeLatest, takeEvery } from 'redux-saga/effects';
 import { WorkspaceField } from '../types';

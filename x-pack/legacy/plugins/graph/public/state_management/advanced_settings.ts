@@ -5,7 +5,7 @@
  */
 
 import actionCreatorFactory, { Action } from 'typescript-fsa';
-import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
+import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { takeLatest } from 'redux-saga/effects';
 import { GraphState, GraphStoreDependencies } from './store';
 import { AdvancedSettings } from '../types';

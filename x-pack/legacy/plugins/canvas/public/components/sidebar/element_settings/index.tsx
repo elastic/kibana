@@ -34,6 +34,6 @@ export const ElementSettings = connect<StateProps, {}, Props, State>(mapStateToP
   renderIfElement
 );
 
-ElementSettings.propTypes = {
-  selectedElementId: PropTypes.string.isRequired,
-};
+// ElementSettings.propTypes = {
+//   selectedElementId: PropTypes.string.isRequired,
+// };

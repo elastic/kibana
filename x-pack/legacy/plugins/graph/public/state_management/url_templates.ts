@@ -5,7 +5,7 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
+import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { i18n } from '@kbn/i18n';
 import rison from 'rison-node';

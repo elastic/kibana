@@ -5,7 +5,7 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
+import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { createSelector } from 'reselect';
 import { GraphState } from './store';
 import { reset } from './global';

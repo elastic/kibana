@@ -5,7 +5,7 @@
  */
 
 import { combineReducers } from 'redux';
-import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
+import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { TimeKey } from '../../../../common/time';
 import {
