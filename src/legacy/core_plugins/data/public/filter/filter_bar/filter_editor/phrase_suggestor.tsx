@@ -24,7 +24,7 @@ import {
   withKibana,
   KibanaReactContextValue,
 } from '../../../../../../../plugins/kibana_react/public';
-import { IDataPluginServices } from '../../../types';
+import { IDataPluginServices } from '../../../../../../../plugins/data/public';
 
 export interface PhraseSuggestorProps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
