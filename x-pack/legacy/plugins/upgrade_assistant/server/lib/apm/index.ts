@@ -10,8 +10,8 @@ import minimatch from 'minimatch';
 import { SemVer } from 'semver';
 import { CallClusterWithRequest } from 'src/legacy/core_plugins/elasticsearch';
 
-import { EnrichedDeprecationInfo } from '../es_migration_apis';
-import { FlatSettings } from '../reindexing/types';
+import { EnrichedDeprecationInfo } from '../../np_ready/lib/es_migration_apis';
+import { FlatSettings } from '../../np_ready/lib/reindexing/types';
 
 export async function getDeprecatedApmIndices(
   callWithRequest: CallClusterWithRequest,

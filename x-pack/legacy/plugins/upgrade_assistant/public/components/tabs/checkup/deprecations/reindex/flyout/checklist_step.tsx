@@ -22,9 +22,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 
 import { ReindexStatus, ReindexWarning } from '../../../../../../../common/types';
-import { LoadingState } from '../../../../../types';
-import { ReindexState } from '../polling_service';
-import { ReindexProgress } from './progress';
+import { LoadingState } from '../../../../../../np_ready/application/components/types';
+import { ReindexState } from '../../../../../../np_ready/application/components/tabs/checkup/deprecations/reindex/polling_service';
+import { ReindexProgress } from '../../../../../../np_ready/application/components/tabs/checkup/deprecations/reindex/flyout/progress';
 
 const buttonLabel = (status?: ReindexStatus) => {
   switch (status) {

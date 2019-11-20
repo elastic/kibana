@@ -9,7 +9,7 @@ import { Request } from 'hapi';
 import { get } from 'lodash';
 
 import { CallClusterWithRequest } from 'src/legacy/core_plugins/elasticsearch';
-import { MappingProperties } from './reindexing/types';
+import { MappingProperties } from '../np_ready/lib/reindexing/types';
 
 /**
  * Adds the index.query.default_field setting, generated from the index's mapping.

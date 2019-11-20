@@ -9,7 +9,7 @@ import React, { ReactNode } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { kfetch } from 'ui/kfetch';
-import { LoadingState } from '../../../../types';
+import { LoadingState } from '../../../../../np_ready/application/components/types';
 
 /**
  * Field types used by Metricbeat to generate the default_field setting.

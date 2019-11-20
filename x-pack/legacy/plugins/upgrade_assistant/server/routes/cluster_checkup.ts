@@ -8,7 +8,7 @@ import Boom from 'boom';
 import { Legacy } from 'kibana';
 import _ from 'lodash';
 
-import { getUpgradeAssistantStatus } from '../lib/es_migration_apis';
+import { getUpgradeAssistantStatus } from '../np_ready/lib/es_migration_apis';
 import { EsVersionPrecheck } from '../lib/es_version_precheck';
 
 export function registerClusterCheckupRoutes(server: Legacy.Server) {
@@ -26,7 +26,7 @@ export function registerClusterCheckupRoutes(server: Legacy.Server) {
       try {
         return await getUpgradeAssistantStatus(
           callWithRequest,
-          request,
+          request as any,
           isCloudEnabled,
           apmIndexPatterns
         );

@@ -9,8 +9,8 @@ import { cloneDeep } from 'lodash';
 import React from 'react';
 
 import { ReindexStatus, ReindexWarning } from '../../../../../../../common/types';
-import { LoadingState } from '../../../../../types';
-import { ReindexState } from '../polling_service';
+import { LoadingState } from '../../../../../../np_ready/application/components/types';
+import { ReindexState } from '../../../../../../np_ready/application/components/tabs/checkup/deprecations/reindex/polling_service';
 import { ChecklistFlyoutStep } from './checklist_step';
 
 describe('ChecklistFlyout', () => {
