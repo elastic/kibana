@@ -1,5 +1,5 @@
 [role="xpack"]
-[[xpack-reporting]]
+[[reporting-getting-started]]
 = Reporting from Kibana
 
 [partintro]
@@ -7,9 +7,8 @@
 --
 
 You can generate a report that contains a {kib} dashboard, visualization, 
-saved search, or Canvas workpad.  You can create the report on demand, 
-schedule it for later, or trigger a report based on specified conditions. 
-You can keep the report for yourself, or automatically share it with others via email.
+saved search, or Canvas workpad. Depending on the object type, you can export the data as 
+a PDF, PNG, or CSV document, which you can keep for yourself, or share with others.
 
 Reporting is available from the *Share* menu 
 in *Discover*, *Visualize*, *Dashboard*, and *Canvas*.
@@ -18,7 +17,7 @@ in *Discover*, *Visualize*, *Dashboard*, and *Canvas*.
 image::user/reporting/images/share-button.png["Share"]
 
 [float]
-== Chromium setup
+== Setup
 
 {reporting} is automatically enabled in {kib}. The first time {kib} runs, it extracts a custom build for the Chromium web browser, which
 runs on the server in headless mode to load {kib} and capture the rendered {kib} charts as images.
@@ -32,9 +31,10 @@ for different operating systems.
 [[reporting-required-privileges]]
 == Roles and privileges
 
-To generate a report, you mut have the `reporting_user` role. You also need
-the appropriate <<kibana-privileges, {kib} privileges>> to access the objects that you
-want to report on and the {es} indices.
+To generate a report, you must have the `reporting_user` role. You also need
+the appropriate {kib} privileges to access the objects that you
+want to report on and the {es} indices.  See <<secure-reporting, Reporting and security>>
+for an example.
 
 [float]
 [[manually-generate-reports]]
@@ -45,7 +45,7 @@ want to report on and the {es} indices.
 . In the {kib} toolbar, click *Share*.  If you are working in Canvas, 
 click the share icon image:user/reporting/images/canvas-share-button.png["Canvas Share button"].
 
-. Select the appropriate option for generating the report. You can export:
+. Select the option appropriate for your object. You can export:
 +
 ** A dashboard or visualization as either a PNG or PDF document
 ** A Canvas workpad as a PDF document

@@ -49,5 +49,11 @@ Use <<kibana-feature-privileges,feature privileges>> instead.
 [role="exclude",id="pdf-layout-modes"]
 == PDF layout modes
 
-This page has moved. Please see <<xpack-reporting>>.
+This page has moved. Please see <<reporting-getting-started>>.
+
+[role="exclude",id="xpack-reporting"]
+== Reporting from Kibana
+
+This page has moved. Please see <<reporting-getting-started>>.
+
 
