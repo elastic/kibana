@@ -57,7 +57,7 @@ describe('Events Viewer', () => {
       .should('eq', 'Customize Columns');
   });
 
-  it('closes the fields browser when the user clicks outside of it', () => {
+  it.skip('closes the fields browser when the user clicks outside of it', () => {
     openEventsViewerFieldsBrowser();
 
     clickOutsideFieldsBrowser();
@@ -81,7 +81,7 @@ describe('Events Viewer', () => {
     );
   });
 
-  it('removes the message field from the timeline when the user un-checks the field', () => {
+  it.skip('removes the message field from the timeline when the user un-checks the field', () => {
     const toggleField = 'message';
 
     cy.get(`${EVENTS_VIEWER_PANEL} [data-test-subj="header-text-${toggleField}"]`).should('exist');
@@ -99,7 +99,7 @@ describe('Events Viewer', () => {
     );
   });
 
-  it('filters the events by applying filter criteria from the search bar at the top of the page', () => {
+  it.skip('filters the events by applying filter criteria from the search bar at the top of the page', () => {
     const filterInput = '4bf34c1c-eaa9-46de-8921-67a4ccc49829'; // this will never match real data
 
     cy.get(HEADER_SUBTITLE)
@@ -119,7 +119,7 @@ describe('Events Viewer', () => {
       });
   });
 
-  it('adds a field to the events viewer when the user clicks the checkbox', () => {
+  it.skip('adds a field to the events viewer when the user clicks the checkbox', () => {
     const filterInput = 'host.geo.c';
     const toggleField = 'host.geo.city_name';
 
@@ -158,7 +158,7 @@ describe('Events Viewer', () => {
       });
   });
 
-  it('launches the inspect query modal when the inspect button is clicked', () => {
+  it.skip('launches the inspect query modal when the inspect button is clicked', () => {
     // wait for data to load
     cy.get(HEADER_SUBTITLE)
       .invoke('text')
@@ -171,7 +171,7 @@ describe('Events Viewer', () => {
     cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('exist');
   });
 
-  it('resets all fields in the events viewer when `Reset Fields` is clicked', () => {
+  it.skip('resets all fields in the events viewer when `Reset Fields` is clicked', () => {
     const filterInput = 'host.geo.c';
     const toggleField = 'host.geo.city_name';
 

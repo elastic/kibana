@@ -54,7 +54,7 @@ export class ConfigService {
   public async setSchema(path: ConfigPath, schema: Type<unknown>) {
     const namespace = pathToString(path);
     if (this.schemas.has(namespace)) {
-      throw new Error(`Validation schema for ${path} was already registered.`);
+      throw new Error(`Validation schema for [${path}] was already registered.`);
     }
 
     this.schemas.set(namespace, schema);
@@ -98,14 +98,28 @@ export class ConfigService {
   }
 
   public async isEnabledAtPath(path: ConfigPath) {
-    const enabledPath = createPluginEnabledPath(path);
+    const namespace = pathToString(path);
 
+    const validatedConfig = this.schemas.has(namespace)
+      ? await this.atPath<{ enabled?: boolean }>(path)
+          .pipe(first())
+          .toPromise()
+      : undefined;
+
+    const enabledPath = createPluginEnabledPath(path);
     const config = await this.config$.pipe(first()).toPromise();
-    if (!config.has(enabledPath)) {
+
+    // if plugin hasn't got a config schema, we try to read "enabled" directly
+    const isEnabled =
+      validatedConfig && validatedConfig.enabled !== undefined
+        ? validatedConfig.enabled
+        : config.get(enabledPath);
+
+    // not declared. consider that plugin is enabled by default
+    if (isEnabled === undefined) {
       return true;
     }
 
-    const isEnabled = config.get(enabledPath);
     if (isEnabled === false) {
       // If the plugin is _not_ enabled, we mark the entire plugin path as
       // handled, as it's expected that it won't be used.
@@ -138,7 +152,7 @@ export class ConfigService {
     const namespace = pathToString(path);
     const schema = this.schemas.get(namespace);
     if (!schema) {
-      throw new Error(`No validation schema has been defined for ${namespace}`);
+      throw new Error(`No validation schema has been defined for [${namespace}]`);
     }
     return schema.validate(
       config,
@@ -147,7 +161,7 @@ export class ConfigService {
         prod: this.env.mode.prod,
         ...this.env.packageInfo,
       },
-      namespace
+      `config validation of [${namespace}]`
     );
   }
 

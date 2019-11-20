@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { ResizeChecker } from 'ui/resize_checker';
+import { ResizeChecker } from '../../../../../../../../src/plugins/kibana_utils/public';
 import {
   syncLayerOrderForSingleLayer,
   removeOrphanedSourcesAndLayers,

@@ -55,7 +55,7 @@ image::images/canvas-create-URL.gif[Create POST URL]
 [[add-workpad-website]]
 === Share the workpad on a website
 
-beta[] Download the workpad and share it on any website, then customize the workpad behavior to autoplay the pages or hide the toolbar.
+beta[] Canvas allows you to create _shareables_, which are workpads that you download and securely share on any website. To customize the behavior of the workpad on your website, you can choose to autoplay the pages or hide the workpad toolbar.
 
 . If you are using a Gold or Platinum license, enable reporting in your `config/kibana.yml` file.
 
@@ -74,7 +74,7 @@ NOTE: Shareable workpads encode the current state of the workpad in a JSON file.
 
 [float]
 [[change-the-workpad-settings]]
-=== Change the shareable workpad settings
+=== Change the settings
 
 After you've added the workpad to your website, you can change the autoplay and toolbar settings.
 
