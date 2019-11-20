@@ -22,6 +22,7 @@ import {
   repeatedSearchResultsWithSortId,
   sampleSignalId,
 } from './__mocks__/es_results';
+import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 
 const mockLogger: Logger = {
   log: jest.fn(),
@@ -90,7 +91,8 @@ describe('utils', () => {
         sampleParams,
         mockService,
         mockLogger,
-        sampleSignalId
+        sampleSignalId,
+        DEFAULT_SIGNALS_INDEX
       );
       expect(successfulSingleBulkIndex).toEqual(true);
     });
@@ -103,7 +105,8 @@ describe('utils', () => {
         sampleParams,
         mockService,
         mockLogger,
-        sampleSignalId
+        sampleSignalId,
+        DEFAULT_SIGNALS_INDEX
       );
       expect(successfulSingleBulkIndex).toEqual(true);
     });
@@ -120,7 +123,8 @@ describe('utils', () => {
         sampleParams,
         mockService,
         mockLogger,
-        sampleSignalId
+        sampleSignalId,
+        DEFAULT_SIGNALS_INDEX
       );
       expect(mockLogger.error).toHaveBeenCalled();
       expect(successfulSingleBulkIndex).toEqual(false);
@@ -166,7 +170,8 @@ describe('utils', () => {
         sampleParams,
         mockService,
         mockLogger,
-        sampleSignalId
+        sampleSignalId,
+        DEFAULT_SIGNALS_INDEX
       );
       expect(mockService.callCluster).toHaveBeenCalledTimes(0);
       expect(result).toEqual(true);
@@ -208,7 +213,8 @@ describe('utils', () => {
         sampleParams,
         mockService,
         mockLogger,
-        sampleSignalId
+        sampleSignalId,
+        DEFAULT_SIGNALS_INDEX
       );
       expect(mockService.callCluster).toHaveBeenCalledTimes(5);
       expect(result).toEqual(true);
@@ -224,7 +230,8 @@ describe('utils', () => {
         sampleParams,
         mockService,
         mockLogger,
-        sampleSignalId
+        sampleSignalId,
+        DEFAULT_SIGNALS_INDEX
       );
       expect(mockLogger.error).toHaveBeenCalled();
       expect(result).toEqual(false);
@@ -246,7 +253,8 @@ describe('utils', () => {
         sampleParams,
         mockService,
         mockLogger,
-        sampleSignalId
+        sampleSignalId,
+        DEFAULT_SIGNALS_INDEX
       );
       expect(mockLogger.error).toHaveBeenCalled();
       expect(result).toEqual(false);
@@ -267,7 +275,8 @@ describe('utils', () => {
         sampleParams,
         mockService,
         mockLogger,
-        sampleSignalId
+        sampleSignalId,
+        DEFAULT_SIGNALS_INDEX
       );
       expect(result).toEqual(true);
     });
@@ -289,7 +298,8 @@ describe('utils', () => {
         sampleParams,
         mockService,
         mockLogger,
-        sampleSignalId
+        sampleSignalId,
+        DEFAULT_SIGNALS_INDEX
       );
       expect(result).toEqual(true);
     });
@@ -311,7 +321,8 @@ describe('utils', () => {
         sampleParams,
         mockService,
         mockLogger,
-        sampleSignalId
+        sampleSignalId,
+        DEFAULT_SIGNALS_INDEX
       );
       expect(result).toEqual(true);
     });
@@ -334,7 +345,8 @@ describe('utils', () => {
         sampleParams,
         mockService,
         mockLogger,
-        sampleSignalId
+        sampleSignalId,
+        DEFAULT_SIGNALS_INDEX
       );
       expect(mockLogger.error).toHaveBeenCalled();
       expect(result).toEqual(true);
@@ -357,7 +369,8 @@ describe('utils', () => {
         sampleParams,
         mockService,
         mockLogger,
-        sampleSignalId
+        sampleSignalId,
+        DEFAULT_SIGNALS_INDEX
       );
       expect(result).toEqual(false);
     });

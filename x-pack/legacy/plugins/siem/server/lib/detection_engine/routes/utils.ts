@@ -41,6 +41,7 @@ export const transformAlertToSignal = (signal: SignalAlertType): Partial<OutputS
     interval: signal.interval,
     rule_id: signal.alertTypeParams.ruleId,
     language: signal.alertTypeParams.language,
+    output_index: signal.alertTypeParams.outputIndex,
     max_signals: signal.alertTypeParams.maxSignals,
     risk_score: signal.alertTypeParams.riskScore,
     name: signal.name,

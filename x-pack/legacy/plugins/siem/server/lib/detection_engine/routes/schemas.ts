@@ -22,6 +22,7 @@ const index = Joi.array()
 const interval = Joi.string();
 const query = Joi.string();
 const language = Joi.string().valid('kuery', 'lucene');
+const output_index = Joi.string();
 const saved_id = Joi.string();
 const max_signals = Joi.number().greater(0);
 const name = Joi.string();
@@ -66,6 +67,7 @@ export const createSignalsSchema = Joi.object({
     then: Joi.required(),
     otherwise: Joi.forbidden(),
   }),
+  output_index: output_index.required(),
   saved_id: saved_id.when('type', {
     is: 'saved_query',
     then: Joi.required(),
@@ -99,6 +101,7 @@ export const updateSignalSchema = Joi.object({
     then: Joi.optional(),
     otherwise: Joi.forbidden(),
   }),
+  output_index,
   saved_id: saved_id.when('type', {
     is: 'saved_query',
     then: Joi.optional(),

@@ -24,6 +24,7 @@ export const sampleSignalAlertParams = (
   severity: 'high',
   query: 'user.name: root or user.name: admin',
   language: 'kuery',
+  outputIndex: '.siem-signals',
   references: ['http://google.com'],
   riskScore: riskScore ? riskScore : 50,
   maxSignals: maxSignals ? maxSignals : 10000,

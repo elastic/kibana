@@ -7,6 +7,7 @@
   "name": "Detect Root/Admin Users",
   "severity": "high",
   "type": "filter",
+  "output_index": ".siem-signals",
   "from": "now-6m",
   "to": "now",
   "filter": {

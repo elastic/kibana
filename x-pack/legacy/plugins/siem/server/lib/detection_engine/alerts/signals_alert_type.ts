@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
-import { SIGNALS_ID, DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
+import { SIGNALS_ID } from '../../../../common/constants';
 // TODO: Remove this for the build_events_query call eventually
 import { buildEventsReIndex } from './build_events_reindex';
 
@@ -30,6 +30,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         immutable: schema.boolean({ defaultValue: false }),
         index: schema.arrayOf(schema.string()),
         language: schema.nullable(schema.string()),
+        outputIndex: schema.string(),
         savedId: schema.nullable(schema.string()),
         query: schema.nullable(schema.string()),
         filters: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
@@ -52,6 +53,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
         index,
         filters,
         language,
+        outputIndex,
         savedId,
         query,
         maxSignals,
@@ -95,9 +97,7 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
             index,
             from,
             to,
-            // TODO: Change this out once we have solved
-            // https://github.com/elastic/kibana/issues/47002
-            signalsIndex: process.env.SIGNALS_INDEX || DEFAULT_SIGNALS_INDEX,
+            signalsIndex: outputIndex,
             severity,
             description,
             name,
@@ -132,7 +132,8 @@ export const signalsAlertType = ({ logger }: { logger: Logger }): SignalAlertTyp
             params,
             services,
             logger,
-            alertId
+            alertId,
+            outputIndex
           );
 
           if (bulkIndexResult) {

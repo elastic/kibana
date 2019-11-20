@@ -36,6 +36,8 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
       query,
       language,
       // eslint-disable-next-line @typescript-eslint/camelcase
+      output_index: outputIndex,
+      // eslint-disable-next-line @typescript-eslint/camelcase
       saved_id: savedId,
       filters,
       // eslint-disable-next-line @typescript-eslint/camelcase
@@ -74,6 +76,7 @@ export const createUpdateSignalsRoute: Hapi.ServerRoute = {
       immutable,
       query,
       language,
+      outputIndex,
       savedId,
       filters,
       id,

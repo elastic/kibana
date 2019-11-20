@@ -156,7 +156,25 @@ describe('schemas', () => {
       ).toBeTruthy();
     });
 
-    test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score] does validate', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, query, language] does not validate', () => {
+      expect(
+        createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          query: 'some query',
+          language: 'kuery',
+        }).error
+      ).toBeTruthy();
+    });
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score] does not validate', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -172,13 +190,52 @@ describe('schemas', () => {
           query: 'some query',
           language: 'kuery',
         }).error
-      ).toBeFalsy();
+      ).toBeTruthy();
     });
 
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score] does validate', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score, output_index] does validate', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          query: 'some query',
+          language: 'kuery',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score] does not validate', () => {
+      expect(
+        createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'filter',
+          filter: {},
+          risk_score: 50,
+        }).error
+      ).toBeTruthy();
+    });
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index] does validate', () => {
+      expect(
+        createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -197,6 +254,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -214,6 +272,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -233,6 +292,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -252,6 +312,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -271,6 +332,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -291,6 +353,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -312,6 +375,7 @@ describe('schemas', () => {
           Partial<Omit<SignalAlertParamsRest, 'references'>> & { references: number[] }
         >({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -334,6 +398,7 @@ describe('schemas', () => {
           Partial<Omit<SignalAlertParamsRest, 'index'>> & { index: number[] }
         >({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -353,6 +418,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -369,6 +435,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -386,6 +453,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -405,6 +473,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -423,6 +492,7 @@ describe('schemas', () => {
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
           risk_score: 50,
+          output_index: '.siem-signals',
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -440,6 +510,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -460,6 +531,7 @@ describe('schemas', () => {
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
           risk_score: 50,
+          output_index: '.siem-signals',
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -478,6 +550,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -499,6 +572,7 @@ describe('schemas', () => {
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
           risk_score: 50,
+          output_index: '.siem-signals',
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -518,6 +592,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -538,6 +613,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -559,6 +635,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -580,6 +657,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -601,6 +679,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -625,6 +704,7 @@ describe('schemas', () => {
           Partial<Omit<SignalAlertParamsRest, 'tags'>> & { tags: number[] }
         >({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -647,6 +727,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           false_positives: ['false_1', 'false_2'],
@@ -671,6 +752,7 @@ describe('schemas', () => {
           Partial<Omit<SignalAlertParamsRest, 'false_positives'>> & { false_positives: number[] }
         >({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           false_positives: [5, 4],
@@ -693,6 +775,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -717,6 +800,7 @@ describe('schemas', () => {
           Partial<Omit<SignalAlertParamsRest, 'immutable'>> & { immutable: number }
         >({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 50,
           description: 'some description',
           from: 'now-5m',
@@ -739,6 +823,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 101,
           description: 'some description',
           from: 'now-5m',
@@ -761,6 +846,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: -1,
           description: 'some description',
           from: 'now-5m',
@@ -783,6 +869,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 0,
           description: 'some description',
           from: 'now-5m',
@@ -805,6 +892,7 @@ describe('schemas', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
+          output_index: '.siem-signals',
           risk_score: 100,
           description: 'some description',
           from: 'now-5m',
@@ -1655,15 +1743,6 @@ describe('schemas', () => {
       expect(
         findSignalsSchema.validate<Partial<FindParamsRest>>({
           sort_order: 'asc',
-        }).error
-      ).toBeTruthy();
-    });
-
-    // TODO: Delete this if not used
-    test.skip('sort_field requires sort_order to work', () => {
-      expect(
-        findSignalsSchema.validate<Partial<FindParamsRest>>({
-          sort_field: 'some field',
         }).error
       ).toBeTruthy();
     });

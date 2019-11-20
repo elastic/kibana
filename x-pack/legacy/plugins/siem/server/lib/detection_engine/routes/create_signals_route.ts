@@ -40,6 +40,8 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       query,
       language,
       // eslint-disable-next-line @typescript-eslint/camelcase
+      output_index: outputIndex,
+      // eslint-disable-next-line @typescript-eslint/camelcase
       saved_id: savedId,
       filters,
       // eslint-disable-next-line @typescript-eslint/camelcase
@@ -71,6 +73,7 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
         return new Boom(`Signal rule_id ${ruleId} already exists`, { statusCode: 409 });
       }
     }
+
     const createdSignal = await createSignals({
       alertsClient,
       actionsClient,
@@ -82,6 +85,7 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
       immutable,
       query,
       language,
+      outputIndex,
       savedId,
       filters,
       ruleId: ruleId != null ? ruleId : uuid.v4(),

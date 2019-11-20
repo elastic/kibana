@@ -6,6 +6,7 @@
   "interval": "5m",
   "name": "Detect Root/Admin Users",
   "severity": "high",
+  "output_index": ".siem-signals",
   "type": "saved_query",
   "from": "now-6m",
   "to": "now",

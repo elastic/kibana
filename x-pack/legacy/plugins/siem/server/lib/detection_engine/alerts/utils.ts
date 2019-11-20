@@ -5,7 +5,6 @@
  */
 import { performance } from 'perf_hooks';
 import { SignalHit } from '../../types';
-import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { Logger } from '../../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../alerting/server/types';
 import { SignalSourceHit, SignalSearchResponse, SignalAlertParams, BulkResponse } from './types';
@@ -47,7 +46,8 @@ export const singleBulkIndex = async (
   params: SignalAlertParams,
   service: AlertServices,
   logger: Logger,
-  id: string
+  id: string,
+  signalsIndex: string
 ): Promise<boolean> => {
   if (sr.hits.hits.length === 0) {
     return true;
@@ -55,7 +55,7 @@ export const singleBulkIndex = async (
   const bulkBody = sr.hits.hits.flatMap(doc => [
     {
       index: {
-        _index: process.env.SIGNALS_INDEX || DEFAULT_SIGNALS_INDEX,
+        _index: signalsIndex,
         _id: doc._id,
       },
     },
@@ -63,7 +63,7 @@ export const singleBulkIndex = async (
   ]);
   const time1 = performance.now();
   const firstResult: BulkResponse = await service.callCluster('bulk', {
-    index: process.env.SIGNALS_INDEX || DEFAULT_SIGNALS_INDEX,
+    index: signalsIndex,
     refresh: false,
     body: bulkBody,
   });
@@ -113,14 +113,22 @@ export const searchAfterAndBulkIndex = async (
   params: SignalAlertParams,
   service: AlertServices,
   logger: Logger,
-  id: string
+  id: string,
+  signalsIndex: string
 ): Promise<boolean> => {
   if (someResult.hits.hits.length === 0) {
     return true;
   }
 
   logger.debug('[+] starting bulk insertion');
-  const firstBulkIndexSuccess = await singleBulkIndex(someResult, params, service, logger, id);
+  const firstBulkIndexSuccess = await singleBulkIndex(
+    someResult,
+    params,
+    service,
+    logger,
+    id,
+    signalsIndex
+  );
   if (!firstBulkIndexSuccess) {
     logger.error('First bulk index was unsuccessful');
     return false;
@@ -169,7 +177,14 @@ export const searchAfterAndBulkIndex = async (
       }
       sortId = sortIds[0];
       logger.debug('next bulk index');
-      const bulkSuccess = await singleBulkIndex(searchAfterResult, params, service, logger, id);
+      const bulkSuccess = await singleBulkIndex(
+        searchAfterResult,
+        params,
+        service,
+        logger,
+        id,
+        signalsIndex
+      );
       logger.debug('finished next bulk index');
       if (!bulkSuccess) {
         logger.error('[-] bulk index failed but continuing');
