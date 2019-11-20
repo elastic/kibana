@@ -106,7 +106,7 @@ export default function({ getService }: FtrProviderContext) {
         before(async () => {
           const index = 'heartbeat-8.0.0';
 
-          const es = getService('es');
+          const es = getService('legacyEs');
           dateRangeStart = new Date().toISOString();
           checks = await makeChecks(es, index, testMonitorId, 1, numIps, {}, d => {
             if (d.summary) {
