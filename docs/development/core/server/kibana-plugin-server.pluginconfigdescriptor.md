@@ -16,7 +16,7 @@ export interface PluginConfigDescriptor<T = any>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [exposeToBrowser](./kibana-plugin-server.pluginconfigdescriptor.exposetobrowser.md) | <code>Array&lt;keyof T&gt;</code> | List of configuration properties that will be available on the client-side plugin. |
+|  [exposeToBrowser](./kibana-plugin-server.pluginconfigdescriptor.exposetobrowser.md) | <code>{</code><br/><code>        [P in keyof T]?: boolean;</code><br/><code>    }</code> | List of configuration properties that will be available on the client-side plugin. |
 |  [schema](./kibana-plugin-server.pluginconfigdescriptor.schema.md) | <code>PluginConfigSchema&lt;T&gt;</code> | Schema to use to validate the plugin configuration.[PluginConfigSchema](./kibana-plugin-server.pluginconfigschema.md) |
 
 ## Example

@@ -698,7 +698,7 @@ export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = obj
 export interface PluginInitializerContext<ConfigSchema = unknown> {
     // (undocumented)
     readonly config: {
-        create: <T = ConfigSchema>() => Observable<T>;
+        get: <T = ConfigSchema>() => T;
     };
     // (undocumented)
     readonly env: {

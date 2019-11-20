@@ -8,6 +8,6 @@
 
 ```typescript
 readonly config: {
-        create: <T = ConfigSchema>() => Observable<T>;
+        get: <T = ConfigSchema>() => T;
     };
 ```

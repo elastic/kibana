@@ -16,7 +16,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [config](./kibana-plugin-public.plugininitializercontext.config.md) | <code>{</code><br/><code>        create: &lt;T = ConfigSchema&gt;() =&gt; Observable&lt;T&gt;;</code><br/><code>    }</code> |  |
+|  [config](./kibana-plugin-public.plugininitializercontext.config.md) | <code>{</code><br/><code>        get: &lt;T = ConfigSchema&gt;() =&gt; T;</code><br/><code>    }</code> |  |
 |  [env](./kibana-plugin-public.plugininitializercontext.env.md) | <code>{</code><br/><code>        mode: Readonly&lt;EnvironmentMode&gt;;</code><br/><code>        packageInfo: Readonly&lt;PackageInfo&gt;;</code><br/><code>    }</code> |  |
 |  [opaqueId](./kibana-plugin-public.plugininitializercontext.opaqueid.md) | <code>PluginOpaqueId</code> | A symbol used to identify this plugin in the system. Needed when registering handlers or context providers. |
 

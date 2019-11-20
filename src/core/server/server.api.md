@@ -961,7 +961,9 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends obje
 
 // @public
 export interface PluginConfigDescriptor<T = any> {
-    exposeToBrowser?: Array<keyof T>;
+    exposeToBrowser?: {
+        [P in keyof T]?: boolean;
+    };
     schema: PluginConfigSchema<T>;
 }
 
