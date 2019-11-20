@@ -18,7 +18,7 @@
  */
 
 import { I18nStart } from '../i18n';
-import { UiSettingsClientContract } from '../ui_settings';
+import { IUiSettingsClient } from '../ui_settings';
 import { OverlayBannersStart, OverlayBannersService } from './banners';
 import { FlyoutService, OverlayFlyoutStart } from './flyout';
 import { ModalService, OverlayModalStart } from './modal';
@@ -26,7 +26,7 @@ import { ModalService, OverlayModalStart } from './modal';
 interface StartDeps {
   i18n: I18nStart;
   targetDomElement: HTMLElement;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 /** @internal */

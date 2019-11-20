@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { UiSettingsClientContract, CoreStart } from 'src/core/public';
+import { IUiSettingsClient, CoreStart } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 
 export interface IDataPluginServices extends Partial<CoreStart> {
   appName: string;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
   savedObjects: CoreStart['savedObjects'];
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];

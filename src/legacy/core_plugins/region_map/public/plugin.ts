@@ -21,7 +21,7 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext,
-  UiSettingsClientContract,
+  IUiSettingsClient,
 } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
@@ -35,7 +35,7 @@ import { createRegionMapTypeDefinition } from './region_map_type';
 
 /** @private */
 interface RegionMapVisualizationDependencies extends LegacyDependenciesPluginSetup {
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 /** @internal */

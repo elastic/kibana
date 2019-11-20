@@ -21,7 +21,7 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext,
-  UiSettingsClientContract,
+  IUiSettingsClient,
   HttpSetup,
 } from 'kibana/public';
 import { Plugin as ExpressionsPlugin } from 'src/plugins/expressions/public';
@@ -35,7 +35,7 @@ import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim'
 
 /** @internal */
 export interface TimelionVisualizationDependencies extends LegacyDependenciesPluginSetup {
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
   http: HttpSetup;
   timelionPanels: Map<string, Panel>;
   timefilter: TimefilterContract;

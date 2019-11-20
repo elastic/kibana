@@ -27,7 +27,7 @@ import {
   ChromeStart,
   SavedObjectsClientContract,
   ToastsStart,
-  UiSettingsClientContract,
+  IUiSettingsClient,
 } from 'kibana/public';
 // @ts-ignore
 import { initGraphApp } from './app';
@@ -45,7 +45,7 @@ export interface GraphDependencies extends LegacyAngularInjectedDependencies {
   capabilities: Record<string, boolean | Record<string, boolean>>;
   coreStart: AppMountContext['core'];
   chrome: ChromeStart;
-  config: UiSettingsClientContract;
+  config: IUiSettingsClient;
   toastNotifications: ToastsStart;
   indexPatterns: DataStart['indexPatterns']['indexPatterns'];
   npData: ReturnType<DataPlugin['start']>;

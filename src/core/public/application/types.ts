@@ -28,7 +28,7 @@ import { I18nStart } from '../i18n';
 import { NotificationsStart } from '../notifications';
 import { OverlayStart } from '../overlays';
 import { PluginOpaqueId } from '../plugins';
-import { UiSettingsClientContract } from '../ui_settings';
+import { IUiSettingsClient } from '../ui_settings';
 import { RecursiveReadonly } from '../../utils';
 
 /** @public */
@@ -119,7 +119,7 @@ export interface AppMountContext {
     /** {@link OverlayStart} */
     overlays: OverlayStart;
     /** {@link UiSettingsClient} */
-    uiSettings: UiSettingsClientContract;
+    uiSettings: IUiSettingsClient;
     /**
      * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
      * use *only* to retrieve config values. There is no way to set injected values

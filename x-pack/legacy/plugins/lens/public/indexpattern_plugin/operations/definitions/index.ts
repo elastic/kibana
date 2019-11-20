@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  UiSettingsClientContract,
-  SavedObjectsClientContract,
-  HttpServiceBase,
-} from 'src/core/public';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpServiceBase } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { termsOperation } from './terms';
 import { cardinalityOperation } from './cardinality';
@@ -48,7 +44,7 @@ export interface ParamEditorProps<C extends BaseIndexPatternColumn> {
   setState: StateSetter<IndexPatternPrivateState>;
   columnId: string;
   layerId: string;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpServiceBase;

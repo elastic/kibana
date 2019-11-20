@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UiSettingsClientContract } from 'src/core/public';
+import { IUiSettingsClient } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { FilterManager } from './filter_manager';
 import { TimefilterService, TimefilterSetup } from './timefilter';
@@ -29,7 +29,7 @@ import { TimefilterService, TimefilterSetup } from './timefilter';
 
 export interface QueryServiceDependencies {
   storage: IStorageWrapper;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 export class QueryService {

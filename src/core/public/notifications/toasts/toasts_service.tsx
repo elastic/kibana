@@ -21,13 +21,13 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { I18nStart } from '../../i18n';
-import { UiSettingsClientContract } from '../../ui_settings';
+import { IUiSettingsClient } from '../../ui_settings';
 import { GlobalToastList } from './global_toast_list';
 import { ToastsApi, IToasts } from './toasts_api';
 import { OverlayStart } from '../../overlays';
 
 interface SetupDeps {
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 interface StartDeps {

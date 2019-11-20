@@ -25,7 +25,7 @@ import {
   NotificationsSetup,
   OverlayStart,
   SavedObjectsClientContract,
-  UiSettingsClientContract,
+  IUiSettingsClient,
   UiSettingsState,
 } from 'kibana/public';
 import { UiStatsMetricType } from '@kbn/analytics';
@@ -50,7 +50,7 @@ export interface HomeKibanaServices {
   getInjected: (name: string, defaultValue?: any) => unknown;
   chrome: ChromeStart;
   telemetryOptInProvider: any;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
   http: HttpStart;
   savedObjectsClient: SavedObjectsClientContract;
   toastNotifications: NotificationsSetup['toasts'];

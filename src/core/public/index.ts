@@ -57,7 +57,7 @@ import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './i
 import { NotificationsSetup, NotificationsStart } from './notifications';
 import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
-import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
+import { UiSettingsClient, UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
@@ -153,7 +153,7 @@ export interface CoreSetup {
   /** {@link NotificationsSetup} */
   notifications: NotificationsSetup;
   /** {@link UiSettingsClient} */
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
@@ -192,7 +192,7 @@ export interface CoreStart {
   /** {@link OverlayStart} */
   overlays: OverlayStart;
   /** {@link UiSettingsClient} */
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
@@ -272,6 +272,6 @@ export {
   SavedObjectsStart,
   PluginOpaqueId,
   UiSettingsClient,
-  UiSettingsClientContract,
+  IUiSettingsClient,
   UiSettingsState,
 };

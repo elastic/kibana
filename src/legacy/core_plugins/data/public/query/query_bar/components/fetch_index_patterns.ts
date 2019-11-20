@@ -17,13 +17,13 @@
  * under the License.
  */
 import { isEmpty } from 'lodash';
-import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
+import { IUiSettingsClient, SavedObjectsClientContract } from 'src/core/public';
 import { getFromSavedObject } from '../../../index_patterns';
 
 export async function fetchIndexPatterns(
   savedObjectsClient: SavedObjectsClientContract,
   indexPatternStrings: string[],
-  uiSettings: UiSettingsClientContract
+  uiSettings: IUiSettingsClient
 ) {
   if (!indexPatternStrings || isEmpty(indexPatternStrings)) {
     return [];

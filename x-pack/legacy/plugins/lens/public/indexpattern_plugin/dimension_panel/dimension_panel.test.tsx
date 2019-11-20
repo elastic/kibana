@@ -13,11 +13,7 @@ import { IndexPatternDimensionPanel, IndexPatternDimensionPanelProps } from './d
 import { DropHandler, DragContextState } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
-import {
-  UiSettingsClientContract,
-  SavedObjectsClientContract,
-  HttpServiceBase,
-} from 'src/core/public';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpServiceBase } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IndexPatternPrivateState } from '../types';
 import { documentField } from '../document_field';
@@ -136,7 +132,7 @@ describe('IndexPatternDimensionPanel', () => {
       uniqueLabel: 'stuff',
       filterOperations: () => true,
       storage: {} as IStorageWrapper,
-      uiSettings: {} as UiSettingsClientContract,
+      uiSettings: {} as IUiSettingsClient,
       savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpServiceBase,
     };

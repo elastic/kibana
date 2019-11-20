@@ -24,7 +24,7 @@ import * as Rx from 'rxjs';
 import { ErrorToast } from './error_toast';
 import { MountPoint } from '../../types';
 import { mountReactNode } from '../../utils';
-import { UiSettingsClientContract } from '../../ui_settings';
+import { IUiSettingsClient } from '../../ui_settings';
 import { OverlayStart } from '../../overlays';
 import { I18nStart } from '../../i18n';
 
@@ -94,12 +94,12 @@ export type IToasts = Pick<
 export class ToastsApi implements IToasts {
   private toasts$ = new Rx.BehaviorSubject<Toast[]>([]);
   private idCounter = 0;
-  private uiSettings: UiSettingsClientContract;
+  private uiSettings: IUiSettingsClient;
 
   private overlays?: OverlayStart;
   private i18n?: I18nStart;
 
-  constructor(deps: { uiSettings: UiSettingsClientContract }) {
+  constructor(deps: { uiSettings: IUiSettingsClient }) {
     this.uiSettings = deps.uiSettings;
   }
 
