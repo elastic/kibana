@@ -21,6 +21,7 @@ import Hapi from 'hapi';
 import Joi from 'joi';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { Prerequisites } from './types';
+import { parseSavedObjectType } from './parse_saved_object_type';
 
 interface GetRequest extends Hapi.Request {
   pre: {
@@ -28,17 +29,6 @@ interface GetRequest extends Hapi.Request {
   };
   params: {
     type: string;
-    id: string;
-  };
-}
-
-interface GetSubTypeRequest extends Hapi.Request {
-  pre: {
-    savedObjectsClient: SavedObjectsClientContract;
-  };
-  params: {
-    type: string;
-    subType: string;
     id: string;
   };
 }
@@ -60,30 +50,8 @@ export const createGetRoute = (prereqs: Prerequisites) => ({
       const { savedObjectsClient } = request.pre;
       const { type, id } = request.params;
 
-      return savedObjectsClient.get(type, id);
-    },
-  },
-});
-
-export const createGetSubTypeRoute = (prereqs: Prerequisites) => ({
-  path: '/api/saved_objects/{type}/{subType}/{id}',
-  method: 'GET',
-  config: {
-    pre: [prereqs.getSavedObjectsClient],
-    validate: {
-      params: Joi.object()
-        .keys({
-          type: Joi.string().required(),
-          subType: Joi.string().required(),
-          id: Joi.string().required(),
-        })
-        .required(),
-    },
-    handler(request: GetSubTypeRequest) {
-      const { savedObjectsClient } = request.pre;
-      const { type, subType, id } = request.params;
-
-      return savedObjectsClient.get({ type, subType }, id);
+      const savedObjectType = parseSavedObjectType(type);
+      return savedObjectsClient.get(savedObjectType, id);
     },
   },
 });

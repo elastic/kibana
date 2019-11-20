@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import Boom from 'boom';
 import Hapi from 'hapi';
 import Joi from 'joi';
 import { SavedObjectAttributes, SavedObjectsClient, SavedObjectsSchema } from 'src/core/server';
 import { Prerequisites, SavedObjectReference, WithoutQueryAndParams } from './types';
+import { parseSavedObjectType } from './parse_saved_object_type';
 
 interface CreateRequest extends WithoutQueryAndParams<Hapi.Request> {
   pre: {
@@ -32,7 +32,7 @@ interface CreateRequest extends WithoutQueryAndParams<Hapi.Request> {
   };
   params: {
     type: string;
-    optional?: string;
+    id?: string;
   };
   payload: {
     attributes: SavedObjectAttributes;
@@ -43,7 +43,7 @@ interface CreateRequest extends WithoutQueryAndParams<Hapi.Request> {
 
 export const createCreateRoute = (prereqs: Prerequisites, schema: SavedObjectsSchema) => {
   return {
-    path: '/api/saved_objects/{type}/{optional*}',
+    path: '/api/saved_objects/{type}/{id?}',
     method: 'POST',
     options: {
       pre: [prereqs.getSavedObjectsClient],
@@ -56,7 +56,7 @@ export const createCreateRoute = (prereqs: Prerequisites, schema: SavedObjectsSc
         params: Joi.object()
           .keys({
             type: Joi.string().required(),
-            optional: Joi.string(),
+            id: Joi.string(),
           })
           .required(),
         payload: Joi.object({
@@ -75,28 +75,13 @@ export const createCreateRoute = (prereqs: Prerequisites, schema: SavedObjectsSc
       },
       handler(request: CreateRequest) {
         const { savedObjectsClient } = request.pre;
-        const { type, optional } = request.params;
+        const { type, id } = request.params;
         const { overwrite } = request.query;
         const { migrationVersion, references } = request.payload;
-
-        const optionalParts = optional ? optional.split('/') : [];
-        let subType: string | undefined;
-        let id: string | undefined;
-        if (schema.isSuperType(type)) {
-          [subType, id] = optionalParts;
-          if (!subType) {
-            throw Boom.badRequest(`subType is required for ${type}`);
-          }
-        } else {
-          if (optionalParts.length > 1) {
-            throw Boom.badRequest(`too many parameters for ${type}`);
-          }
-          [id] = optionalParts;
-        }
+        const savedObjectType = parseSavedObjectType(type);
 
         const options = { id, overwrite, migrationVersion, references };
-
-        return savedObjectsClient.create({ type, subType }, request.payload.attributes, options);
+        return savedObjectsClient.create(savedObjectType, request.payload.attributes, options);
       },
     },
   };
