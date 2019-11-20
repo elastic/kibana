@@ -81,7 +81,7 @@ export const useAnalysisSetupState = ({
 
   useEffect(() => {
     validateIndices();
-  }, [availableIndices]);
+  }, [validateIndices]);
 
   const selectedIndexNames = useMemo(
     () => validatedIndices.filter(i => i.checked).map(i => i.index),
