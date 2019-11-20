@@ -198,7 +198,7 @@ export interface JobParamPostPayload {
 
 export interface JobDocPayload {
   headers?: Record<string, string>;
-  jobParams: JobParamsSavedObject;
+  jobParams: JobParamsSavedObject | JobParamsUrl;
   title: string;
   type: string | null;
   objects?: null | object[];
@@ -251,7 +251,7 @@ export interface ESQueueWorker {
   on: (event: string, handler: any) => void;
 }
 
-export type JobParamsUrl = object;
+type JobParamsUrl = object;
 
 interface JobParamsSavedObject {
   savedObjectType: string;
