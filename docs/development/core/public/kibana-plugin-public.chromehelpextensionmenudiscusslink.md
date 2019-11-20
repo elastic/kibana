@@ -4,6 +4,7 @@
 
 ## ChromeHelpExtensionMenuDiscussLink type
 
+
 <b>Signature:</b>
 
 ```typescript

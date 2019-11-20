@@ -4,6 +4,7 @@
 
 ## ChromeHelpExtensionMenuGitHubLink type
 
+
 <b>Signature:</b>
 
 ```typescript

@@ -45,6 +45,7 @@ import {
   KIBANA_FEEDBACK_LINK,
 } from '../../constants';
 
+/** @public */
 export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
   /**
    * Creates a link to a new github issue in the Kibana repo
@@ -60,6 +61,7 @@ export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
   title?: string;
 };
 
+/** @public */
 export type ChromeHelpExtensionMenuDiscussLink = EuiButtonEmptyProps & {
   /**
    * Creates a generic give feedback link with comment icon
@@ -72,6 +74,7 @@ export type ChromeHelpExtensionMenuDiscussLink = EuiButtonEmptyProps & {
   href: string;
 };
 
+/** @public */
 export type ChromeHelpExtensionMenuDocumentationLink = EuiButtonEmptyProps & {
   /**
    * Creates a deep-link to app-specific documentation
@@ -84,6 +87,7 @@ export type ChromeHelpExtensionMenuDocumentationLink = EuiButtonEmptyProps & {
   href: string;
 };
 
+/** @public */
 export type ChromeHelpExtensionMenuCustomLink = EuiButtonEmptyProps & {
   /**
    * Extend EuiButtonEmpty to provide extra functionality
@@ -95,6 +99,7 @@ export type ChromeHelpExtensionMenuCustomLink = EuiButtonEmptyProps & {
   content: React.ReactNode;
 };
 
+/** @public */
 export type ChromeHelpExtensionMenuLink = ExclusiveUnion<
   ChromeHelpExtensionMenuGitHubLink,
   ExclusiveUnion<

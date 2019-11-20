@@ -4,6 +4,7 @@
 
 ## ChromeHelpExtensionMenuCustomLink type
 
+
 <b>Signature:</b>
 
 ```typescript

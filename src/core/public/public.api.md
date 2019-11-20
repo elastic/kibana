@@ -127,32 +127,24 @@ export interface ChromeHelpExtension {
     links?: ChromeHelpExtensionMenuLink[];
 }
 
-// Warning: (ae-missing-release-tag) "ChromeHelpExtensionMenuCustomLink" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public (undocumented)
 export type ChromeHelpExtensionMenuCustomLink = EuiButtonEmptyProps & {
     linkType: 'custom';
     content: React.ReactNode;
 };
 
-// Warning: (ae-missing-release-tag) "ChromeHelpExtensionMenuDiscussLink" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public (undocumented)
 export type ChromeHelpExtensionMenuDiscussLink = EuiButtonEmptyProps & {
     linkType: 'discuss';
     href: string;
 };
 
-// Warning: (ae-missing-release-tag) "ChromeHelpExtensionMenuDocumentationLink" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public (undocumented)
 export type ChromeHelpExtensionMenuDocumentationLink = EuiButtonEmptyProps & {
     linkType: 'documentation';
     href: string;
 };
 
-// Warning: (ae-missing-release-tag) "ChromeHelpExtensionMenuGitHubLink" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public (undocumented)
 export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
     linkType: 'github';
@@ -160,8 +152,6 @@ export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
     title?: string;
 };
 
-// Warning: (ae-missing-release-tag) "ChromeHelpExtensionMenuLink" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public (undocumented)
 export type ChromeHelpExtensionMenuLink = ExclusiveUnion<ChromeHelpExtensionMenuGitHubLink, ExclusiveUnion<ChromeHelpExtensionMenuDiscussLink, ExclusiveUnion<ChromeHelpExtensionMenuDocumentationLink, ChromeHelpExtensionMenuCustomLink>>>;
 
