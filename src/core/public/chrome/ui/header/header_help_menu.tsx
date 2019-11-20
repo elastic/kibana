@@ -45,7 +45,7 @@ import {
   KIBANA_FEEDBACK_LINK,
 } from '../../constants';
 
-type GitHubLink = EuiButtonEmptyProps & {
+export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
   /**
    * Creates a link to a new github issue in the Kibana repo
    */
@@ -60,33 +60,47 @@ type GitHubLink = EuiButtonEmptyProps & {
   title?: string;
 };
 
-type DiscussLink = EuiButtonEmptyProps & {
+export type ChromeHelpExtensionMenuDiscussLink = EuiButtonEmptyProps & {
   /**
    * Creates a generic give feedback link with comment icon
    */
   linkType: 'discuss';
+  /**
+   * URL to discuss page.
+   * i.e. `https://discuss.elastic.co/c/${appName}`
+   */
   href: string;
 };
 
-type DocumentationLink = EuiButtonEmptyProps & {
+export type ChromeHelpExtensionMenuDocumentationLink = EuiButtonEmptyProps & {
   /**
    * Creates a deep-link to app-specific documentation
    */
   linkType: 'documentation';
+  /**
+   * URL to documentation page.
+   * i.e. `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/${appName}.html`,
+   */
   href: string;
 };
 
-type CustomLink = EuiButtonEmptyProps & {
+export type ChromeHelpExtensionMenuCustomLink = EuiButtonEmptyProps & {
   /**
    * Extend EuiButtonEmpty to provide extra functionality
    */
   linkType: 'custom';
-  text: React.ReactNode;
+  /**
+   * Content of the button (in lieu of `children`)
+   */
+  content: React.ReactNode;
 };
 
-export type ChromeHelpExtensionMenuExtraLink = ExclusiveUnion<
-  GitHubLink,
-  ExclusiveUnion<DiscussLink, ExclusiveUnion<DocumentationLink, CustomLink>>
+export type ChromeHelpExtensionMenuLink = ExclusiveUnion<
+  ChromeHelpExtensionMenuGitHubLink,
+  ExclusiveUnion<
+    ChromeHelpExtensionMenuDiscussLink,
+    ExclusiveUnion<ChromeHelpExtensionMenuDocumentationLink, ChromeHelpExtensionMenuCustomLink>
+  >
 >;
 
 interface Props {
@@ -228,7 +242,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
       const customLinks =
         links &&
         links.map((link, index) => {
-          const { linkType, title, labels = [], text, ...rest } = link;
+          const { linkType, title, labels = [], content: text, ...rest } = link;
           switch (linkType) {
             case 'documentation':
               return this.createCustomLink(

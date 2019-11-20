@@ -36,7 +36,7 @@ core.chrome.setHelpExtension({
         pathname: core.http.basePath.prepend('/app/kibana'),
         hash: '/management/elasticsearch/upgrade_assistant'
       }),
-      text: i18n.translate('xpack.apm.helpMenu.upgradeAssistantLink', {
+      content: i18n.translate('xpack.apm.helpMenu.upgradeAssistantLink', {
         defaultMessage: 'Upgrade assistant'
       })
     }

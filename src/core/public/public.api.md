@@ -124,17 +124,46 @@ export interface ChromeDocTitle {
 export interface ChromeHelpExtension {
     appName: string;
     content?: (element: HTMLDivElement) => () => void;
-    links?: ChromeHelpExtensionMenuExtraLink[];
+    links?: ChromeHelpExtensionMenuLink[];
 }
 
-// Warning: (ae-forgotten-export) The symbol "GitHubLink" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "DiscussLink" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "DocumentationLink" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "CustomLink" needs to be exported by the entry point index.d.ts
-// Warning: (ae-missing-release-tag) "ChromeHelpExtensionMenuExtraLink" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "ChromeHelpExtensionMenuCustomLink" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 // 
 // @public (undocumented)
-export type ChromeHelpExtensionMenuExtraLink = ExclusiveUnion<GitHubLink, ExclusiveUnion<DiscussLink, ExclusiveUnion<DocumentationLink, CustomLink>>>;
+export type ChromeHelpExtensionMenuCustomLink = EuiButtonEmptyProps & {
+    linkType: 'custom';
+    content: React.ReactNode;
+};
+
+// Warning: (ae-missing-release-tag) "ChromeHelpExtensionMenuDiscussLink" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export type ChromeHelpExtensionMenuDiscussLink = EuiButtonEmptyProps & {
+    linkType: 'discuss';
+    href: string;
+};
+
+// Warning: (ae-missing-release-tag) "ChromeHelpExtensionMenuDocumentationLink" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export type ChromeHelpExtensionMenuDocumentationLink = EuiButtonEmptyProps & {
+    linkType: 'documentation';
+    href: string;
+};
+
+// Warning: (ae-missing-release-tag) "ChromeHelpExtensionMenuGitHubLink" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
+    linkType: 'github';
+    labels: string[];
+    title?: string;
+};
+
+// Warning: (ae-missing-release-tag) "ChromeHelpExtensionMenuLink" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export type ChromeHelpExtensionMenuLink = ExclusiveUnion<ChromeHelpExtensionMenuGitHubLink, ExclusiveUnion<ChromeHelpExtensionMenuDiscussLink, ExclusiveUnion<ChromeHelpExtensionMenuDocumentationLink, ChromeHelpExtensionMenuCustomLink>>>;
 
 // @public (undocumented)
 export interface ChromeNavControl {

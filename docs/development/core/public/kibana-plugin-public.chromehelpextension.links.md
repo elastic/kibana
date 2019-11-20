@@ -9,5 +9,5 @@ Creates unified links for sending users to documentation, GitHub, Discuss, or a 
 <b>Signature:</b>
 
 ```typescript
-links?: ChromeHelpExtensionMenuExtraLink[];
+links?: ChromeHelpExtensionMenuLink[];
 ```

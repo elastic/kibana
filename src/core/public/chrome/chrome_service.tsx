@@ -36,7 +36,7 @@ import { NavControlsService, ChromeNavControls } from './nav_controls';
 import { DocTitleService, ChromeDocTitle } from './doc_title';
 import { LoadingIndicator, HeaderWrapper as Header } from './ui';
 import { DocLinksStart } from '../doc_links';
-import { ChromeHelpExtensionMenuExtraLink } from './ui/header/header_help_menu';
+import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
 
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
@@ -67,7 +67,7 @@ export interface ChromeHelpExtension {
   /**
    * Creates unified links for sending users to documentation, GitHub, Discuss, or a custom link/button
    */
-  links?: ChromeHelpExtensionMenuExtraLink[];
+  links?: ChromeHelpExtensionMenuLink[];
   /**
    * Custom content to occur below the list of links
    */
