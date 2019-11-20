@@ -12,6 +12,7 @@ import { getTransactionBreakdown } from '../lib/transactions/breakdown';
 import { getTransactionGroupList } from '../lib/transaction_groups';
 import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
+import { getTransactionAvgDurationByBrowser } from '../lib/transactions/avg_duration_by_browser';
 import { getTransactionAvgDurationByCountry } from '../lib/transactions/avg_duration_by_country';
 
 export const transactionGroupsRoute = createRoute(() => ({
@@ -139,6 +140,32 @@ export const transactionGroupsBreakdownRoute = createRoute(() => ({
       serviceName,
       transactionName,
       transactionType,
+      setup
+    });
+  }
+}));
+
+export const transactionGroupsAvgDurationByBrowser = createRoute(() => ({
+  path: `/api/apm/services/{serviceName}/transaction_groups/avg_duration_by_browser`,
+  params: {
+    path: t.type({
+      serviceName: t.string
+    }),
+    query: t.intersection([
+      t.partial({
+        transactionType: t.string,
+        transactionName: t.string
+      }),
+      uiFiltersRt,
+      rangeRt
+    ])
+  },
+  handler: async (req, { path }) => {
+    const setup = await setupRequest(req);
+    const { serviceName } = path;
+
+    return getTransactionAvgDurationByBrowser({
+      serviceName,
       setup
     });
   }
