@@ -23,7 +23,7 @@ export default function ({ getPageObjects, getService }) {
 
     after(() => esArchiver.unload('infra/metrics_and_logs'));
 
-    describe('Inverntory Test save functionality', () => {
+    describe('Inventory Test save functionality', () => {
       it('should have save and load controls', async () => {
         await PageObjects.infraHome.getSaveViewButton();
         await PageObjects.infraHome.getLoadViewsButton();

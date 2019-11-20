@@ -31,7 +31,7 @@ else
   KIBANA_CI_REPORTER_KEY=$(retry 5 vault read -field=value secret/kibana-issues/dev/kibanamachine-reporter)
   export KIBANA_CI_REPORTER_KEY
 
-  PERCY_TOKEN=$(retry 5 vault read -field=value secret/kibana-issues/dev/percy)
+  PERCY_TOKEN=$(retry 5 vault read -field=value secret/kibana-issues/dev/percy-dev)
   export PERCY_TOKEN
 
   # remove vault related secrets
