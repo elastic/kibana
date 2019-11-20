@@ -116,15 +116,12 @@ export const useAnalysisSetupState = ({
       return [{ error: 'TOO_FEW_SELECTED_INDICES' }];
     }
 
-    const indicesWithErrors = validatedIndices.filter(
-      index => selectedIndexNames.includes(index.index) && index.validation !== undefined
-    );
-
-    if (indicesWithErrors.length > 0) {
-      return indicesWithErrors.map(index => index.validation!);
-    }
-
-    return [];
+    return validatedIndices.reduce<ValidationIndicesUIError[]>((errors, index) => {
+      if (selectedIndexNames.includes(index.index) && index.validation !== undefined) {
+        errors.push(index.validation);
+      }
+      return errors;
+    }, []);
   }, [selectedIndexNames, validatedIndices, validateIndicesRequest.state]);
 
   return {
