@@ -36,6 +36,7 @@ export const variable: ExpressionFunctionVar = {
   help: i18n.translate('expressions.functions.var.help', {
     defaultMessage: 'Updates the Kibana global context.',
   }),
+  disableCache: true,
   args: {
     name: {
       types: ['string'],

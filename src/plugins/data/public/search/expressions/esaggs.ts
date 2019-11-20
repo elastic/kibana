@@ -213,6 +213,7 @@ const handleCourierRequest = async ({
 
 export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
   name,
+  noCache: true,
   type: 'kibana_datatable',
   inputTypes: ['kibana_context', 'null'],
   help: i18n.translate('data.functions.esaggs.help', {

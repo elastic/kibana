@@ -39,6 +39,8 @@ import { ArgumentType, ExpressionFunction } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
 
+const maxCacheSize = 1000;
+
 const createAbortErrorValue = () =>
   createError({
     message: 'The expression was aborted.',
@@ -52,7 +54,7 @@ export interface ExecutionParams<
   ast?: ExpressionAstExpression;
   expression?: string;
   context?: ExtraContext;
-
+  functionCache: Map<string, any>;
   /**
    * Whether to execute expression in *debug mode*. In *debug mode* inputs and
    * outputs as well as all resolved arguments and time it took to execute each
@@ -119,6 +121,8 @@ export class Execution<
    * Future that tracks result or error of this execution.
    */
   private readonly firstResultFuture = new Defer<Output | ExpressionValueError>();
+
+  private functionCache: Map<string, any> = new Map();
 
   /**
    * Contract is a public representation of `Execution` instances. Contract we
@@ -269,13 +273,34 @@ export class Execution<
     return input;
   }
 
+  async getCachedResults(
+    fn: ExpressionFunction,
+    normalizedInput: unknown,
+    args: Record<string, unknown>
+  ) {
+    let fnOutput;
+    const hash = calculateObjectHash([fn.name, normalizedInput, args, this.context.search]);
+    if (!this.context.disableCache && !fn.disableCache && this.functionCache.has(hash)) {
+      fnOutput = this.functionCache.get(hash);
+    } else {
+      fnOutput = await this.race(fn.fn(normalizedInput, args, this.context));
+      if (!fn.disableCache) {
+        while (this.functionCache.size >= maxCacheSize) {
+          this.functionCache.delete(this.functionCache.keys().next().value);
+        }
+        this.functionCache.set(hash, fnOutput);
+      }
+    }
+    return fnOutput;
+  }
+
   async invokeFunction(
     fn: ExpressionFunction,
     input: unknown,
     args: Record<string, unknown>
   ): Promise<any> {
     const normalizedInput = this.cast(input, fn.inputTypes);
-    const output = await this.race(fn.fn(normalizedInput, args, this.context));
+    const output = await this.getCachedResults(fn, normalizedInput, args);
 
     // Validate that the function returned the type it said it would.
     // This isn't required, but it keeps function developers honest.

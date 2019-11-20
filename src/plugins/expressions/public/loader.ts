@@ -181,6 +181,9 @@ export class ExpressionLoader {
     if (params.variables && this.params) {
       this.params.variables = params.variables;
     }
+    if (params.disableCache !== undefined) {
+      this.params.disableCache = params.disableCache;
+    }
 
     this.params.inspectorAdapters = (params.inspectorAdapters ||
       this.execution?.inspect()) as Adapters;

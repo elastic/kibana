@@ -152,7 +152,7 @@ export class VisualizeEmbeddable
 
     this.autoRefreshFetchSubscription = timefilter
       .getAutoRefreshFetch$()
-      .subscribe(this.updateHandler.bind(this));
+      .subscribe(this.updateHandler.bind(this, true));
 
     this.subscriptions.push(
       Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
@@ -364,10 +364,10 @@ export class VisualizeEmbeddable
   }
 
   public reload = () => {
-    this.handleVisUpdate();
+    this.handleVisUpdate(true);
   };
 
-  private async updateHandler() {
+  private async updateHandler(disableCache: boolean = false) {
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
         timeRange: this.timeRange,
@@ -376,6 +376,7 @@ export class VisualizeEmbeddable
       },
       uiState: this.vis.uiState,
       inspectorAdapters: this.inspectorAdapters,
+      disableCache,
     };
     if (this.abortController) {
       this.abortController.abort();
@@ -393,8 +394,8 @@ export class VisualizeEmbeddable
     }
   }
 
-  private handleVisUpdate = async () => {
-    this.updateHandler();
+  private handleVisUpdate = async (disableCache: boolean = false) => {
+    this.updateHandler(disableCache);
   };
 
   private uiStateChangeHandler = () => {

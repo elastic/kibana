@@ -51,6 +51,7 @@ export interface IExpressionLoaderParams {
   uiState?: unknown;
   inspectorAdapters?: Adapters;
   onRenderError?: RenderErrorHandlerFnType;
+  disableCache?: boolean;
 }
 
 export interface ExpressionRenderError extends Error {

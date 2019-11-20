@@ -31,6 +31,7 @@ const createExecution = (
     executor,
     ast: parseExpression(expression),
     context,
+    functionCache: new Map(),
   });
   return execution;
 };

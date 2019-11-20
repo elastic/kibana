@@ -41,6 +41,11 @@ export class ExpressionFunction {
   type: string;
 
   /**
+   * Opt-out of caching this function. By default function outputs are cached and given the same inputs cached result is returned.
+   */
+  disableCache: boolean;
+
+  /**
    * Function to run function (context, args)
    */
   fn: (input: ExpressionValue, params: Record<string, any>, handlers: object) => ExpressionValue;
@@ -61,7 +66,17 @@ export class ExpressionFunction {
   inputTypes: string[] | undefined;
 
   constructor(functionDefinition: AnyExpressionFunctionDefinition) {
-    const { name, type, aliases, fn, help, args, inputTypes, context } = functionDefinition;
+    const {
+      name,
+      type,
+      aliases,
+      fn,
+      help,
+      args,
+      inputTypes,
+      context,
+      disableCache,
+    } = functionDefinition;
 
     this.name = name;
     this.type = type;
@@ -70,6 +85,7 @@ export class ExpressionFunction {
       Promise.resolve(fn(input, params, handlers as ExecutionContext));
     this.help = help || '';
     this.inputTypes = inputTypes || context?.types;
+    this.disableCache = !!disableCache;
 
     for (const [key, arg] of Object.entries(args || {})) {
       this.args[key] = new ExpressionFunctionParameter(key, arg);

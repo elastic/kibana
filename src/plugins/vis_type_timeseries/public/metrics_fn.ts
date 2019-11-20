@@ -49,6 +49,7 @@ export const createMetricsFn = (): ExpressionFunctionDefinition<
   Output
 > => ({
   name: 'tsvb',
+  noCache: true,
   type: 'render',
   inputTypes: ['kibana_context', 'null'],
   help: i18n.translate('visTypeTimeseries.function.help', {

@@ -43,6 +43,11 @@ export interface ExecutionContext<Input = unknown, InspectorAdapters extends Ada
   types: Record<string, ExpressionType>;
 
   /**
+   * Prevents caching in the current execution.
+   */
+  disableCache?: boolean;
+
+  /**
    * Adds ability to abort current execution.
    */
   abortSignal: AbortSignal;
