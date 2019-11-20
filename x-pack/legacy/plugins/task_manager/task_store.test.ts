@@ -95,7 +95,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
       });
-      const result = await store.schedule(task);
+      const result = await store.scheduleTask(task);
 
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
 
@@ -215,7 +215,7 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
       });
 
-      const result = await store.reschedule(taskBeingRescheduled);
+      const result = await store.rescheduleTask(taskBeingRescheduled);
 
       expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
@@ -414,7 +414,7 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
       });
 
-      const result = await store.fetch(opts);
+      const result = await store.fetchTasks(opts);
 
       sinon.assert.calledOnce(callCluster);
       sinon.assert.calledWith(callCluster, 'search');
@@ -925,7 +925,7 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
       });
 
-      const result = await store.update(task);
+      const result = await store.updateTask(task);
 
       expect(savedObjectsClient.update).toHaveBeenCalledWith(
         'task',
@@ -973,7 +973,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
       });
-      const result = await store.remove(id);
+      const result = await store.removeTask(id);
       expect(result).toBeUndefined();
       expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', id);
     });

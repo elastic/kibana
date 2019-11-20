@@ -125,7 +125,7 @@ export class TaskStore {
    *
    * @param task - The task being scheduled.
    */
-  public async schedule(taskInstance: TaskInstance): Promise<ConcreteTaskInstance> {
+  public async scheduleTask(taskInstance: TaskInstance): Promise<ConcreteTaskInstance> {
     if (!this.definitions[taskInstance.taskType]) {
       throw new Error(
         `Unsupported task type "${taskInstance.taskType}". Supported types are ${Object.keys(
@@ -148,11 +148,11 @@ export class TaskStore {
    *
    * @param task - The task being rescheduled.
    */
-  public async reschedule(
+  public async rescheduleTask(
     taskInstanceScheduling: TaskReschedulingOpts
   ): Promise<ConcreteTaskInstance> {
     const taskInstance = await this.getTask(taskInstanceScheduling.id);
-    return await this.update(
+    return await this.updateTask(
       applyConcreteTaskInstanceDefaults(
         taskInstance.status === 'idle'
           ? {
@@ -181,7 +181,7 @@ export class TaskStore {
    *
    * @param opts - The query options used to filter tasks
    */
-  public async fetch(opts: FetchOpts = {}): Promise<FetchResult> {
+  public async fetchTasks(opts: FetchOpts = {}): Promise<FetchResult> {
     const sort = paginatableSort(opts.sort);
     return this.search({
       sort,
@@ -344,7 +344,7 @@ export class TaskStore {
    * @param {TaskDoc} doc
    * @returns {Promise<TaskDoc>}
    */
-  public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
+  public async updateTask(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
     const updatedSavedObject = await this.savedObjectsRepository.update(
       'task',
       doc.id,
@@ -364,7 +364,7 @@ export class TaskStore {
    * @param {string} id
    * @returns {Promise<void>}
    */
-  public async remove(id: string): Promise<void> {
+  public async removeTask(id: string): Promise<void> {
     await this.savedObjectsRepository.delete('task', id);
   }
 

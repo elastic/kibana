@@ -218,7 +218,7 @@ export class TaskManager {
       ...options,
       taskInstance,
     });
-    const result = await this.store.schedule(modifiedTask);
+    const result = await this.store.scheduleTask(modifiedTask);
     this.poller.attemptWork();
     return result;
   }
@@ -231,7 +231,7 @@ export class TaskManager {
    */
   public async reschedule(taskInstance: TaskReschedulingOpts): Promise<ConcreteTaskInstance> {
     await this.waitUntilStarted();
-    const result = await this.store.reschedule(taskInstance);
+    const result = await this.store.rescheduleTask(taskInstance);
     this.poller.attemptWork();
     return result;
   }
@@ -264,7 +264,7 @@ export class TaskManager {
    */
   public async fetch(opts: FetchOpts): Promise<FetchResult> {
     await this.waitUntilStarted();
-    return this.store.fetch(opts);
+    return this.store.fetchTasks(opts);
   }
 
   /**
@@ -275,7 +275,7 @@ export class TaskManager {
    */
   public async remove(id: string): Promise<void> {
     await this.waitUntilStarted();
-    return this.store.remove(id);
+    return this.store.removeTask(id);
   }
 
   /**
