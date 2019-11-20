@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CaseService } from '../../case_service';
 import { RouteDeps } from '.';
 import { wrapError } from './utils';
 
@@ -15,11 +14,9 @@ export function initGetAllApi({ caseIndex, log, router }: RouteDeps) {
       validate: false,
     },
     async (context, request, response) => {
-      const requestClient = context.core.elasticsearch.dataClient;
-      const service = new CaseService(requestClient.callAsCurrentUser, caseIndex, log);
       try {
         log.debug(`Attempting to GET all cases`);
-        const cases = await service.getAllCases();
+        const cases = await context.core.savedObjects.client.find({ type: 'case-workflow' });
         return response.ok({ body: cases });
       } catch (error) {
         log.debug(`Error on GET all cases: ${error}`);

@@ -5,7 +5,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CaseService } from '../../case_service';
 import { RouteDeps } from '.';
 import { wrapError } from './utils';
 
@@ -20,11 +19,12 @@ export function initGetCaseApi({ caseIndex, log, router }: RouteDeps) {
       },
     },
     async (context, request, response) => {
-      const requestClient = context.core.elasticsearch.dataClient;
-      const service = new CaseService(requestClient.callAsCurrentUser, caseIndex, log);
       try {
         log.debug(`Attempting to GET case ${request.params.id}`);
-        const theCase = await service.getCase(request.params.id);
+        const theCase = await context.core.savedObjects.client.get(
+          'case-workflow',
+          request.params.id
+        );
         return response.ok({ body: theCase });
       } catch (error) {
         log.debug(`Error on GET case  ${request.params.id}: ${error}`);

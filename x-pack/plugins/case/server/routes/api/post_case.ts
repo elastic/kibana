@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CaseService } from '../../case_service';
 import { dateNewCase, wrapError } from './utils';
 import { NewCaseSchema } from './schema';
 import { RouteDeps } from '.';
@@ -19,11 +18,11 @@ export function initPostCaseApi({ caseIndex, log, router }: RouteDeps) {
     },
     async (context, request, response) => {
       const datedCase = dateNewCase(request.body);
-      const requestClient = context.core.elasticsearch.dataClient;
-      const service = new CaseService(requestClient.callAsCurrentUser, caseIndex, log);
       try {
         log.debug(`Attempting to POST a new case`);
-        const newCase = await service.postCase(datedCase);
+        const newCase = await context.core.savedObjects.client.create('case-workflow', {
+          ...datedCase,
+        });
         return response.ok({ body: newCase });
       } catch (error) {
         log.debug(`Error on POST a new case: ${error}`);

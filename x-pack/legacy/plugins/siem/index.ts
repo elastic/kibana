@@ -123,6 +123,11 @@ export const siem = (kibana: any) => {
         },
       },
       mappings: savedObjectMappings,
+      savedObjectSchemas: {
+        'case-workflow': {
+          indexPattern: '.case-testing-ground', // TODO: Change this name and use kibana.yml settings to override it.
+        },
+      },
     },
     init(server: Server) {
       const newPlatform = ((server as unknown) as KbnServer).newPlatform;

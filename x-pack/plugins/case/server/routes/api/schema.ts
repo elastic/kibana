@@ -6,50 +6,35 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const User = schema.object({
+export const UserSchema = schema.object({
   id: schema.string(),
   name: schema.string(),
 });
 
-export const Comment = schema.object({
-  id: schema.string(),
-  comment: schema.number(),
+export const CommentSchema = schema.object({
+  comment: schema.string(),
   creation_date: schema.number(),
-  last_edit_date: schema.string(),
-  user: User,
+  last_edit_date: schema.number(),
+  user: UserSchema,
 });
 
 export const NewCaseSchema = schema.object({
-  assignees: schema.arrayOf(User, { defaultValue: [] }),
-  comments: schema.arrayOf(Comment, { defaultValue: [] }),
+  assignees: schema.arrayOf(UserSchema, { defaultValue: [] }),
+  comments: schema.arrayOf(CommentSchema, { defaultValue: [] }),
   description: schema.string(),
   name: schema.string(),
-  // reporter: User,
+  reporter: UserSchema,
   state: schema.oneOf([schema.literal('open'), schema.literal('closed')], { defaultValue: 'open' }),
   tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  type: schema.string(),
+  case_type: schema.string(),
 });
 
 export const UpdatedCaseSchema = schema.object({
-  assignees: schema.maybe(schema.arrayOf(User)),
-  comments: schema.nullable(schema.arrayOf(Comment)),
-  description: schema.nullable(schema.string()),
-  name: schema.nullable(schema.string()),
-  state: schema.nullable(schema.oneOf([schema.literal('open'), schema.literal('closed')])),
-  tags: schema.nullable(schema.arrayOf(schema.string())),
-  type: schema.nullable(schema.string()),
+  assignees: schema.maybe(schema.arrayOf(UserSchema)),
+  comments: schema.maybe(schema.arrayOf(CommentSchema)),
+  description: schema.maybe(schema.string()),
+  name: schema.maybe(schema.string()),
+  state: schema.maybe(schema.oneOf([schema.literal('open'), schema.literal('closed')])),
+  tags: schema.maybe(schema.arrayOf(schema.string())),
+  case_type: schema.maybe(schema.string()),
 });
-
-// export const CaseSchema = schema.object({
-//   assignees: schema.arrayOf(User),
-//   comments: schema.arrayOf(Comment),
-//   creation_date: schema.string(),
-//   description: schema.string(),
-//   id: schema.string(),
-//   last_edit_date: schema.string(),
-//   name: schema.string(),
-//   reporter: User,
-//   state: schema.oneOf([schema.literal('open'), schema.literal('closed')], { defaultValue: 'open' }),
-//   tags: schema.arrayOf(schema.string()),
-//   type: schema.string(),
-// });

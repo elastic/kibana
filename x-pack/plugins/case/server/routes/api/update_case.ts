@@ -5,7 +5,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CaseService } from '../../case_service';
 import { dateUpdatedCase, wrapError } from './utils';
 import { RouteDeps } from '.';
 import { UpdatedCaseSchema } from './schema';
@@ -23,11 +22,15 @@ export function initUpdateCaseApi({ log, router, caseIndex }: RouteDeps) {
     },
     async (context, request, response) => {
       const datedUpdatedCase = dateUpdatedCase(request.body);
-      const requestClient = context.core.elasticsearch.dataClient;
-      const service = new CaseService(requestClient.callAsCurrentUser, caseIndex, log);
       try {
         log.debug(`Attempting to POST to update case ${request.params.id}`);
-        const newCase = await service.updateCase(datedUpdatedCase, request.params.id);
+        const newCase = await context.core.savedObjects.client.update(
+          'case-workflow',
+          request.params.id,
+          {
+            ...datedUpdatedCase,
+          }
+        );
         return response.ok({ body: newCase });
       } catch (error) {
         log.debug(`Error on POST to update case ${request.params.id}: ${error}`);
