@@ -19,8 +19,7 @@
 
 import { find, get } from 'lodash';
 
-import { Field } from './fields';
-import { getFilterableKbnTypeNames } from '../../../../../plugins/data/public';
+import { getFilterableKbnTypeNames, IFieldType } from '../../../../../plugins/data/public';
 
 import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
 
@@ -109,7 +108,7 @@ export function validateIndexPattern(indexPattern: string) {
 
 const filterableTypes = getFilterableKbnTypeNames();
 
-export function isFilterable(field: Field): boolean {
+export function isFilterable(field: IFieldType): boolean {
   return (
     field.name === '_id' ||
     field.scripted ||

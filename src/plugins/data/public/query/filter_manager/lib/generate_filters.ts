@@ -98,8 +98,8 @@ export function generateFilters(
       const filterType =
         fieldName === '_exists_' ? esFilters.FILTERS.EXISTS : esFilters.FILTERS.PHRASE;
       filter = esFilters.buildFilter(
-        fieldObj,
         tmpIndexPattern,
+        fieldObj,
         filterType,
         negate,
         false,

@@ -22,18 +22,21 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { useState } from 'react';
 import { CoreStart } from 'src/core/public';
-import { IndexPattern } from '../../index_patterns';
 import { FilterEditor } from './filter_editor';
 import { FilterItem } from './filter_item';
 import { FilterOptions } from './filter_options';
 import { useKibana, KibanaContextProvider } from '../../../../../../plugins/kibana_react/public';
-import { DataPublicPluginStart, esFilters } from '../../../../../../plugins/data/public';
+import {
+  DataPublicPluginStart,
+  IIndexPattern,
+  esFilters,
+} from '../../../../../../plugins/data/public';
 
 interface Props {
   filters: esFilters.Filter[];
   onFiltersUpdated?: (filters: esFilters.Filter[]) => void;
   className: string;
-  indexPatterns: IndexPattern[];
+  indexPatterns: IIndexPattern[];
   intl: InjectedIntl;
 
   // TODO: Only for filter-bar directive!

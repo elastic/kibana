@@ -19,17 +19,20 @@
 
 import { Component } from 'react';
 import { debounce } from 'lodash';
-import { Field, IndexPattern } from '../../../index_patterns';
 import {
   withKibana,
   KibanaReactContextValue,
 } from '../../../../../../../plugins/kibana_react/public';
-import { IDataPluginServices } from '../../../../../../../plugins/data/public';
+import {
+  IDataPluginServices,
+  IIndexPattern,
+  IFieldType,
+} from '../../../../../../../plugins/data/public';
 
 export interface PhraseSuggestorProps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
-  indexPattern: IndexPattern;
-  field?: Field;
+  indexPattern: IIndexPattern;
+  field?: IFieldType;
 }
 
 export interface PhraseSuggestorState {

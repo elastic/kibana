@@ -19,11 +19,11 @@
 
 import dateMath from '@elastic/datemath';
 import { Ipv4Address } from '../../../../../../../../plugins/kibana_utils/public';
-import { Field, IndexPattern, isFilterable } from '../../../../index_patterns';
+import { isFilterable } from '../../../../index_patterns';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
-import { esFilters } from '../../../../../../../../plugins/data/public';
+import { esFilters, IIndexPattern, IFieldType } from '../../../../../../../../plugins/data/public';
 
-export function getFieldFromFilter(filter: esFilters.FieldFilter, indexPattern: IndexPattern) {
+export function getFieldFromFilter(filter: esFilters.FieldFilter, indexPattern: IIndexPattern) {
   return indexPattern.fields.find(field => field.name === filter.meta.key);
 }
 
@@ -33,11 +33,11 @@ export function getOperatorFromFilter(filter: esFilters.Filter) {
   });
 }
 
-export function getFilterableFields(indexPattern: IndexPattern) {
+export function getFilterableFields(indexPattern: IIndexPattern) {
   return indexPattern.fields.filter(isFilterable);
 }
 
-export function getOperatorOptions(field: Field) {
+export function getOperatorOptions(field: IFieldType) {
   return FILTER_OPERATORS.filter(operator => {
     return !operator.fieldTypes || operator.fieldTypes.includes(field.type);
   });
@@ -60,8 +60,8 @@ export function validateParams(params: any, type: string) {
 }
 
 export function isFilterValid(
-  indexPattern?: IndexPattern,
-  field?: Field,
+  indexPattern?: IIndexPattern,
+  field?: IFieldType,
   operator?: Operator,
   params?: any
 ) {
