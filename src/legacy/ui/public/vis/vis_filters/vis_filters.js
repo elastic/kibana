@@ -115,7 +115,6 @@ const VisFiltersProvider = (getAppState, $timeout) => {
     }
   };
 
-
   return {
     pushFilters,
   };

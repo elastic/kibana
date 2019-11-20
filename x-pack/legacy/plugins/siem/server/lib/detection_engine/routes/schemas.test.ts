@@ -1446,6 +1446,8 @@ describe('schemas', () => {
           page: 1,
           sort_field: 'some field',
           fields: ['field 1', 'field 2'],
+          filter: 'some filter',
+          sort_order: 'asc',
         }).error
       ).toBeFalsy();
     });
@@ -1504,6 +1506,68 @@ describe('schemas', () => {
 
     test('page has a default of 1', () => {
       expect(findSignalsSchema.validate<Partial<FindParamsRest>>({}).value.page).toEqual(1);
+    });
+
+    test('filter works with a string', () => {
+      expect(
+        findSignalsSchema.validate<Partial<FindParamsRest>>({
+          filter: 'some value 1',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('filter does not work with a number', () => {
+      expect(
+        findSignalsSchema.validate<Partial<Omit<FindParamsRest, 'filter'>> & { filter: number }>({
+          filter: 5,
+        }).error
+      ).toBeTruthy();
+    });
+
+    test('sort_order requires sort_field to work', () => {
+      expect(
+        findSignalsSchema.validate<Partial<FindParamsRest>>({
+          sort_order: 'asc',
+        }).error
+      ).toBeTruthy();
+    });
+
+    // TODO: Delete this if not used
+    test.skip('sort_field requires sort_order to work', () => {
+      expect(
+        findSignalsSchema.validate<Partial<FindParamsRest>>({
+          sort_field: 'some field',
+        }).error
+      ).toBeTruthy();
+    });
+
+    test('sort_order and sort_field validate together', () => {
+      expect(
+        findSignalsSchema.validate<Partial<FindParamsRest>>({
+          sort_order: 'asc',
+          sort_field: 'some field',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('sort_order validates with desc and sort_field', () => {
+      expect(
+        findSignalsSchema.validate<Partial<FindParamsRest>>({
+          sort_order: 'desc',
+          sort_field: 'some field',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('sort_order does not validate with a string other than asc and desc', () => {
+      expect(
+        findSignalsSchema.validate<
+          Partial<Omit<FindParamsRest, 'sort_order'>> & { sort_order: string }
+        >({
+          sort_order: 'some other string',
+          sort_field: 'some field',
+        }).error
+      ).toBeTruthy();
     });
   });
 
