@@ -17,6 +17,22 @@
  * under the License.
  */
 
-export { stubIndexPattern } from './index_patterns/index_pattern.stub';
-export { stubFields } from './index_patterns/field.stub';
-export * from '../common/es_query/filters/stubs';
+import { esFilters } from '../../..';
+
+export const phraseFilter: esFilters.PhraseFilter = {
+  meta: {
+    negate: false,
+    index: 'logstash-*',
+    type: 'phrase',
+    key: 'machine.os',
+    value: 'ios',
+    disabled: false,
+    alias: null,
+    params: {
+      query: 'ios',
+    },
+  },
+  $state: {
+    store: esFilters.FilterStateStore.APP_STATE,
+  },
+};
