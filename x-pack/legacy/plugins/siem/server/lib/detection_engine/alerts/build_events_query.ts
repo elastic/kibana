@@ -10,7 +10,7 @@ interface BuildEventsSearchQuery {
   to: string;
   filter: unknown;
   size: number;
-  searchAfterSortId?: string;
+  searchAfterSortId: string | number | undefined;
 }
 
 export const buildEventsSearchQuery = ({
@@ -74,7 +74,6 @@ export const buildEventsSearchQuery = ({
           ],
         },
       },
-      track_total_hits: true,
       sort: [
         {
           '@timestamp': {

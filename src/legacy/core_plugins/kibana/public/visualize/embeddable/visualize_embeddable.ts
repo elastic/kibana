@@ -30,14 +30,14 @@ import { queryGeohashBounds } from 'ui/visualize/loader/utils';
 import { getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { AppState } from 'ui/state_management/app_state';
 import { npStart } from 'ui/new_platform';
-import { IExpressionLoaderParams } from '../../../../expressions/public/np_ready/public/types';
-import { start as expressions } from '../../../../expressions/public/legacy';
+import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-import { Query } from '../../../../data/public';
 import {
   TimeRange,
+  Query,
   onlyDisabledFiltersChanged,
   esFilters,
+  mapAndFlattenFilters,
 } from '../../../../../../plugins/data/public';
 import {
   EmbeddableInput,
@@ -47,7 +47,6 @@ import {
   APPLY_FILTER_TRIGGER,
 } from '../../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../../plugins/kibana_utils/public';
-import { mapAndFlattenFilters } from '../../../../../../plugins/data/public';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -87,7 +86,7 @@ export interface VisualizeOutput extends EmbeddableOutput {
   visTypeName: string;
 }
 
-type ExpressionLoader = InstanceType<typeof expressions.ExpressionLoader>;
+type ExpressionLoader = InstanceType<typeof npStart.plugins.expressions.ExpressionLoader>;
 
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private handler?: ExpressionLoader;
@@ -289,7 +288,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     domNode.appendChild(div);
     this.domNode = div;
 
-    this.handler = new expressions.ExpressionLoader(this.domNode);
+    this.handler = new npStart.plugins.expressions.ExpressionLoader(this.domNode);
 
     this.subscriptions.push(
       this.handler.events$.subscribe(async event => {

@@ -5,8 +5,6 @@
  */
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-import axios from 'axios';
 
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { TemplateFormTestBed } from './helpers/template_form.helpers';
@@ -15,27 +13,7 @@ import { TEMPLATE_NAME, INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS } from './helpe
 
 const { setup } = pageHelpers.templateClone;
 
-const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
-
-jest.mock('ui/index_patterns', () => ({
-  ILLEGAL_CHARACTERS: 'ILLEGAL_CHARACTERS',
-  CONTAINS_SPACES: 'CONTAINS_SPACES',
-  validateIndexPattern: () => {
-    return {
-      errors: {},
-    };
-  },
-}));
-
-jest.mock('ui/chrome', () => ({
-  breadcrumbs: { set: () => {} },
-  addBasePath: (path: string) => path || '/api/index_management',
-}));
-
-jest.mock('../../public/services/api', () => ({
-  ...jest.requireActual('../../public/services/api'),
-  getHttpClient: () => mockHttpClient,
-}));
+jest.mock('ui/new_platform');
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -135,16 +113,13 @@ describe.skip('<TemplateClone />', () => {
 
       const latestRequest = server.requests[server.requests.length - 1];
 
-      const body = JSON.parse(latestRequest.requestBody);
-      const expected = {
+      const expected = JSON.stringify({
         ...templateToClone,
         name: `${templateToClone.name}-copy`,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
-        aliases: {},
-        mappings: {},
-        settings: {},
-      };
-      expect(body).toEqual(expected);
+      });
+
+      expect(JSON.parse(latestRequest.requestBody).body).toEqual(expected);
     });
   });
 });

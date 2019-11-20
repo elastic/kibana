@@ -36,7 +36,6 @@ import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { timefilter } from 'ui/timefilter';
-import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 // @ts-ignore
 import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
 import { wrapInI18nContext } from 'ui/i18n';
@@ -47,6 +46,7 @@ import * as docViewsRegistry from 'ui/registry/doc_views';
 
 const services = {
   // new plattform
+  core: npStart.core,
   addBasePath: npStart.core.http.basePath.prepend,
   capabilities: npStart.core.application.capabilities,
   chrome: npStart.core.chrome,
@@ -58,6 +58,7 @@ const services = {
   uiSettings: npStart.core.uiSettings,
   uiActions: npStart.plugins.uiActions,
   embeddable: npStart.plugins.embeddable,
+  share: npStart.plugins.share,
   // legacy
   docTitle,
   docViewsRegistry,
@@ -68,7 +69,6 @@ const services = {
   SavedObjectRegistryProvider,
   SavedObjectProvider,
   SearchSource,
-  ShareContextMenuExtensionsRegistryProvider,
   StateProvider,
   timefilter,
   uiModules,
@@ -84,8 +84,6 @@ export { angular };
 export { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 // @ts-ignore
 export { callAfterBindingsWorkaround } from 'ui/compat';
-// @ts-ignore
-export { getFilterGenerator } from 'ui/filter_manager';
 export {
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -101,7 +99,6 @@ export { RequestAdapter } from 'ui/inspector/adapters';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 export { FieldList } from 'ui/index_patterns';
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-export { showShareContextMenu } from 'ui/share';
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
@@ -112,9 +109,11 @@ export { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 export { tabifyAggResponse } from 'ui/agg_response/tabify';
 // @ts-ignore
 export { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
+export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
+export { unhashUrl } from 'ui/state_management/state_hashing';
 
 // EXPORT types
-export { VisProvider } from 'ui/vis';
+export { Vis } from 'ui/vis';
 export { StaticIndexPattern, IndexPatterns, IndexPattern, FieldType } from 'ui/index_patterns';
 export { SearchSource } from 'ui/courier';
 export { ElasticSearchHit } from 'ui/registry/doc_views_types';

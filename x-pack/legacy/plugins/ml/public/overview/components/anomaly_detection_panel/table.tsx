@@ -31,7 +31,6 @@ import { MlSummaryJobs } from '../../../../common/types/jobs';
 import { StatsBar, JobStatsBarStats } from '../../../components/stats_bar';
 // @ts-ignore
 import { JobSelectorBadge } from '../../../components/job_selector/job_selector_badge';
-// @ts-ignore
 import { toLocaleString } from '../../../util/string_utils';
 import { getSeverityColor } from '../../../../common/util/anomaly_utils';
 
@@ -144,6 +143,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
       dataType: 'date',
       render: (time: number) => formatHumanReadableDateTimeSeconds(time),
       textOnly: true,
+      truncateText: true,
       sortable: true,
       width: '20%',
     },
