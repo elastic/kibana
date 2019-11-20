@@ -56,7 +56,7 @@ export interface DataStart {
   ui: {
     SearchBar: React.ComponentType<StatetfulSearchBarProps>;
   };
-  filterTypes: esFilters.FILTERS;
+  filterTypes: any;
 }
 
 /**
