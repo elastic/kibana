@@ -111,7 +111,7 @@ export function getQueryParams({
   const types = getTypes(mappings, type);
   const bool: any = {
     filter: [
-      ...(kueryNode != null ? [esKuery.toElasticsearchQuery(kueryNode, null)] : []),
+      ...(kueryNode != null ? [esKuery.toElasticsearchQuery(kueryNode)] : []),
       {
         bool: {
           must: hasReference

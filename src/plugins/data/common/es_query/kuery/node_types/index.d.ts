@@ -22,7 +22,7 @@
  */
 
 import { IIndexPattern } from '../../../index_patterns';
-import { JsonObject, KueryNode, JsonValue } from '..';
+import { KueryNode, JsonValue } from '..';
 
 type FunctionName =
   | 'is'
@@ -38,7 +38,12 @@ type FunctionName =
 interface FunctionType {
   buildNode: (functionName: FunctionName, ...args: any[]) => KueryNode;
   buildNodeWithArgumentNodes: (functionName: FunctionName, ...args: any[]) => KueryNode;
-  toElasticsearchQuery: (node: any, indexPattern: IIndexPattern, config: JsonObject) => JsonValue;
+  toElasticsearchQuery: (
+    node: any,
+    indexPattern?: IIndexPattern,
+    config?: Record<string, any>,
+    context?: Record<string, any>
+  ) => JsonValue;
 }
 
 interface LiteralType {

@@ -90,7 +90,7 @@ export const doesKueryExpressionHaveLuceneSyntaxError = (
  */
 export const toElasticsearchQuery = (
   node: KueryNode,
-  indexPattern: IIndexPattern | null,
+  indexPattern?: IIndexPattern,
   config?: Record<string, any>,
   context?: Record<string, any>
 ): JsonObject => {

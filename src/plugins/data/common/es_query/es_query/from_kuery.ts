@@ -22,7 +22,7 @@ import { IIndexPattern } from '../../index_patterns';
 import { Query } from '../../query/types';
 
 export function buildQueryFromKuery(
-  indexPattern: IIndexPattern | null,
+  indexPattern: IIndexPattern | undefined,
   queries: Query[] = [],
   allowLeadingWildcards: boolean = false,
   dateFormatTZ?: string
@@ -35,7 +35,7 @@ export function buildQueryFromKuery(
 }
 
 function buildQuery(
-  indexPattern: IIndexPattern | null,
+  indexPattern: IIndexPattern | undefined,
   queryASTs: KueryNode[],
   config: Record<string, any> = {}
 ) {

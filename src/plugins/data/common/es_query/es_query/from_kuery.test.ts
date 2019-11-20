@@ -30,7 +30,7 @@ describe('build query', () => {
 
   describe('buildQueryFromKuery', () => {
     test('should return the parameters of an Elasticsearch bool query', () => {
-      const result = buildQueryFromKuery(null, [], true);
+      const result = buildQueryFromKuery(undefined, [], true);
       const expected = {
         must: [],
         filter: [],
