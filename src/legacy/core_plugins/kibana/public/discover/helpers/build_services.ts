@@ -27,8 +27,7 @@ import {
 import * as docViewsRegistry from 'ui/registry/doc_views';
 import chromeLegacy from 'ui/chrome';
 import { IPrivate } from 'ui/private';
-import { TimefilterContract } from 'src/plugins/data/public';
-import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing/get_unhashable_states_provider';
+import { FilterManager, TimefilterContract } from 'src/plugins/data/public';
 // @ts-ignore
 import { StateProvider } from 'ui/state_management/state';
 // @ts-ignore
@@ -40,6 +39,7 @@ import { start as legacyData } from '../../../../data/public/legacy';
 import { IndexPatterns } from '../../../../data/public/index_patterns/index_patterns';
 import { EuiUtilsStart } from '../../../../../../plugins/eui_utils/public';
 import { SavedSearch } from '../types';
+import { SharePluginStart } from '../../../../../../plugins/share/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -49,17 +49,16 @@ export interface DiscoverServices {
   docLinks: DocLinksStart;
   docViewsRegistry: docViewsRegistry.DocViewsRegistry;
   eui_utils: EuiUtilsStart;
-  filterManager: unknown;
+  filterManager: FilterManager;
   indexPatterns: IndexPatterns;
   inspector: unknown;
   metadata: { branch: string };
-  share: unknown;
+  share: SharePluginStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
   // legacy
   getSavedSearchById: (id: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
-  getUnhashableStates: unknown;
   State: unknown;
   uiSettings: UiSettingsClientContract;
 }
@@ -68,14 +67,12 @@ export async function buildGlobalAngularServices() {
   const injector = await chromeLegacy.dangerouslyGetActiveInjector();
   const Private = injector.get<IPrivate>('Private');
   const kbnUrl = injector.get<IPrivate>('kbnUrl');
-  const getUnhashableStates = Private(getUnhashableStatesProvider);
   const State = Private(StateProvider);
   const SavedSearchFactory = createSavedSearchFactory(Private);
   const service = createSavedSearchesService(Private, SavedSearchFactory, kbnUrl, chromeLegacy);
   return {
     getSavedSearchById: async (id: string) => service.get(id),
     getSavedSearchUrlById: async (id: string) => service.urlFor(id),
-    getUnhashableStates,
     State,
   };
 }
@@ -86,7 +83,6 @@ export async function buildServices(core: CoreStart, plugins: DiscoverStartPlugi
     : {
         getSavedSearchById: async (id: string) => void id,
         getSavedSearchUrlById: async (id: string) => void id,
-        getUnhashableStates: () => void 0,
         State: null,
       };
 
