@@ -65,7 +65,6 @@ export default function (kibana) {
         'plugins/kibana/discover',
         'plugins/kibana/dev_tools',
       ],
-      fieldFormats: ['plugins/kibana/field_formats/register'],
       savedObjectTypes: [
         'plugins/kibana/visualize/saved_visualizations/saved_visualization_register',
         'plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register',

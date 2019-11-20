@@ -92,10 +92,6 @@ import { createFieldChooserDirective } from './components/field_chooser/field_ch
 // @ts-ignore
 import { createDiscoverFieldDirective } from './components/field_chooser/discover_field';
 import { DiscoverStartPlugins } from './plugin';
-import {
-  createFilterBarDirective,
-  createFilterBarHelperDirective,
-} from '../../../data/public/shim/legacy_module';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
@@ -199,8 +195,6 @@ export function initializeInnerAngularModule(
     .directive('stringFieldProgressBar', createStringFieldProgressBarDirective)
     .directive('discoverField', createDiscoverFieldDirective)
     .directive('discFieldChooser', createFieldChooserDirective)
-    .directive('filterBar', createFilterBarDirective)
-    .directive('filterBarHelper', createFilterBarHelperDirective)
     .service('debounce', ['$timeout', DebounceProviderTimeout])
     .service('queryFilter', function(Private: any) {
       return Private(FilterBarQueryFilterProvider);
