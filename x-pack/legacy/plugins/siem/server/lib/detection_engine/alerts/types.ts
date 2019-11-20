@@ -6,7 +6,6 @@
 
 import { get } from 'lodash/fp';
 
-import Hapi from 'hapi';
 import { SIGNALS_ID } from '../../../../common/constants';
 import {
   Alert,
@@ -16,6 +15,7 @@ import {
 } from '../../../../../alerting/server/types';
 import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
+import { RequestFacade } from '../../../types';
 import { SearchResponse } from '../../types';
 import { esFilters } from '../../../../../../../../src/plugins/data/server';
 
@@ -70,7 +70,9 @@ export interface FindParamsRest {
   per_page: number;
   page: number;
   sort_field: string;
+  sort_order: 'asc' | 'desc';
   fields: string[];
+  filter: string;
 }
 
 export interface Clients {
@@ -89,13 +91,15 @@ export type DeleteSignalParams = Clients & {
   ruleId: string | undefined | null;
 };
 
-export interface FindSignalsRequest extends Omit<Hapi.Request, 'query'> {
+export interface FindSignalsRequest extends Omit<RequestFacade, 'query'> {
   query: {
     per_page: number;
     page: number;
     search?: string;
     sort_field?: string;
+    filter?: string;
     fields?: string[];
+    sort_order?: 'asc' | 'desc';
   };
 }
 
@@ -104,7 +108,9 @@ export interface FindSignalParams {
   perPage?: number;
   page?: number;
   sortField?: string;
+  filter?: string;
   fields?: string[];
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface ReadSignalParams {
@@ -125,11 +131,11 @@ export type SignalAlertType = Alert & {
   alertTypeParams: AlertTypeParams;
 };
 
-export interface SignalsRequest extends Hapi.Request {
+export interface SignalsRequest extends RequestFacade {
   payload: SignalAlertParamsRest;
 }
 
-export interface UpdateSignalsRequest extends Hapi.Request {
+export interface UpdateSignalsRequest extends RequestFacade {
   payload: UpdateSignalAlertParamsRest;
 }
 
@@ -164,7 +170,7 @@ export interface BulkResponse {
 export type SignalSearchResponse = SearchResponse<SignalSource>;
 export type SignalSourceHit = SignalSearchResponse['hits']['hits'][0];
 
-export type QueryRequest = Omit<Hapi.Request, 'query'> & {
+export type QueryRequest = Omit<RequestFacade, 'query'> & {
   query: { id: string | undefined; rule_id: string | undefined };
 };
 

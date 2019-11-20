@@ -117,9 +117,22 @@ function createCoreContext(): CoreContext {
   };
 }
 
+function createStorageMock() {
+  const storageMock: jest.Mocked<Storage> = {
+    getItem: jest.fn(),
+    setItem: jest.fn(),
+    removeItem: jest.fn(),
+    clear: jest.fn(),
+    key: jest.fn(),
+    length: 10,
+  };
+  return storageMock;
+}
+
 export const coreMock = {
   createCoreContext,
   createSetup: createCoreSetupMock,
   createStart: createCoreStartMock,
   createPluginInitializerContext: pluginInitializerContextMock,
+  createStorage: createStorageMock,
 };
