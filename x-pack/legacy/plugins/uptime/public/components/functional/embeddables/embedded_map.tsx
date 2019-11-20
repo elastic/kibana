@@ -48,7 +48,6 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(({ filters, query }) => 
     disableInteractive: true,
     disableTooltipControl: true,
     hideToolbarOverlay: true,
-    hideWidgetOverlay: true,
   };
 
   useEffect(() => {
@@ -66,7 +65,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(({ filters, query }) => 
   return embeddable != null ? (
     <EmbeddablePanel
       data-test-subj="embeddable-panel"
-      hideHeader={false}
+      hideHeader={true}
       embeddable={embeddable}
       // @ts-ignore
       getActions={getActions}
