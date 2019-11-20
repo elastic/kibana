@@ -22,6 +22,7 @@ Kibana supports spaces in several ways.  You can:
 * <<spaces-control-feature-visibility, Control feature access based on user needs>>
 * <<spaces-control-user-access, Control feature access based on user privileges>>
 * <<spaces-moving-objects, Move objects between spaces>>
+* <<spaces-default-route, Configure a Space-level landing page>>
 * <<spaces-delete-started, Disable the Spaces feature>>
 
 [float]
@@ -108,6 +109,13 @@ interface.
 {kib} also has beta <<saved-objects-api-import, import>> and 
 <<saved-objects-api-export, export>> APIs if you want to automate this process.
 
+[float]
+[[spaces-default-route]]
+=== Configure a Space-level landing page
+
+You can create a custom experience for users by configuring the {kib} landing page on a per-space basis.
+The landing page can route users to a specific dashboard, application, or saved object as they enter each space.
+To configure the landing page, use the `defaultRoute` setting in <<kibana-general-settings, Management > Advanced settings>>.
 
 [float]
 [[spaces-delete-started]]

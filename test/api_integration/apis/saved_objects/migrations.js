@@ -31,7 +31,7 @@ import { SavedObjectsSerializer } from '../../../../src/core/server/saved_object
 import { SavedObjectsSchema } from '../../../../src/core/server/saved_objects/schema';
 
 export default ({ getService }) => {
-  const es = getService('es');
+  const es = getService('legacyEs');
   const callCluster = (path, ...args) => _.get(es, path).call(es, ...args);
 
   describe('Kibana index migration', () => {
