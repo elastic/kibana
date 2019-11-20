@@ -45,6 +45,7 @@ export const allRulesReducer = (state: State, action: Action): State => {
       };
     }
     case 'updateRules': {
+      // If pagination included, this was a hard refresh
       if (action.pagination) {
         return {
           ...state,
@@ -62,10 +63,23 @@ export const allRulesReducer = (state: State, action: Action): State => {
             : [...rules, updatedRule],
         [...state.rules]
       );
+
+      // Update enabled on selectedItems so that batch actions show correct available actions
+      const updatedRuleIdToState = action.rules.reduce<Record<string, boolean>>(
+        (acc, r) => ({ ...acc, [r.id]: r.enabled }),
+        {}
+      );
+      const updatedSelectedItems = state.selectedItems.map(selectedItem =>
+        Object.keys(updatedRuleIdToState).includes(selectedItem.id)
+          ? { ...selectedItem, activate: updatedRuleIdToState[selectedItem.id] }
+          : selectedItem
+      );
+
       return {
         ...state,
         rules: updatedRules,
         tableData: formatRules(updatedRules),
+        selectedItems: updatedSelectedItems,
       };
     }
     case 'updatePagination': {
