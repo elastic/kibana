@@ -19,7 +19,7 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
@@ -41,27 +41,29 @@ export class DashboardListing extends React.Component {
 
   render() {
     return (
-      <TableListView
-        createItem={this.props.hideWriteControls ? null : this.props.createItem}
-        findItems={this.props.findItems}
-        deleteItems={this.props.hideWriteControls ? null : this.props.deleteItems}
-        editItem={this.props.hideWriteControls ? null : this.props.editItem}
-        tableColumns={this.getTableColumns()}
-        listingLimit={this.props.listingLimit}
-        initialFilter={this.props.initialFilter}
-        noItemsFragment={this.getNoItemsMessage()}
-        entityName={i18n.translate('kbn.dashboard.listing.table.entityName', {
-          defaultMessage: 'dashboard',
-        })}
-        entityNamePlural={i18n.translate('kbn.dashboard.listing.table.entityNamePlural', {
-          defaultMessage: 'dashboards',
-        })}
-        tableListTitle={i18n.translate('kbn.dashboard.listing.dashboardsTitle', {
-          defaultMessage: 'Dashboards',
-        })}
-        toastNotifications={npStart.core.notifications.toasts}
-        uiSettings={npStart.core.uiSettings}
-      />
+      <I18nProvider>
+        <TableListView
+          createItem={this.props.hideWriteControls ? null : this.props.createItem}
+          findItems={this.props.findItems}
+          deleteItems={this.props.hideWriteControls ? null : this.props.deleteItems}
+          editItem={this.props.hideWriteControls ? null : this.props.editItem}
+          tableColumns={this.getTableColumns()}
+          listingLimit={this.props.listingLimit}
+          initialFilter={this.props.initialFilter}
+          noItemsFragment={this.getNoItemsMessage()}
+          entityName={i18n.translate('kbn.dashboard.listing.table.entityName', {
+            defaultMessage: 'dashboard',
+          })}
+          entityNamePlural={i18n.translate('kbn.dashboard.listing.table.entityNamePlural', {
+            defaultMessage: 'dashboards',
+          })}
+          tableListTitle={i18n.translate('kbn.dashboard.listing.dashboardsTitle', {
+            defaultMessage: 'Dashboards',
+          })}
+          toastNotifications={npStart.core.notifications.toasts}
+          uiSettings={npStart.core.uiSettings}
+        />
+      </I18nProvider>
     );
   }
 
