@@ -132,7 +132,7 @@
     "@types/recompose": "^0.30.5",
     "JSONStream": "1.3.5",
     "abortcontroller-polyfill": "^1.3.0",
-    "angular": "^1.7.8",
+    "angular": "^1.7.9",
     "angular-aria": "^1.7.8",
     "angular-elastic": "^2.5.1",
     "angular-recursion": "^1.0.5",
