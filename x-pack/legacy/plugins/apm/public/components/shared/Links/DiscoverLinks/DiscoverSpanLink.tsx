@@ -15,7 +15,7 @@ function getDiscoverQuery(span: Span) {
     _a: {
       interval: 'auto',
       query: {
-        language: 'lucene',
+        language: 'kuery',
         query
       }
     }

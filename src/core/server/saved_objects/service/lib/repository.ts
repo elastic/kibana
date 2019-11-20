@@ -34,10 +34,15 @@ import {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
+  SavedObjectsBulkUpdateResponse,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponse,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
+  SavedObjectsDeleteOptions,
+  SavedObjectsDeleteByNamespaceOptions,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -45,18 +50,19 @@ import {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
+  MutatingOperationRefreshSetting,
 } from '../../types';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
-// eslint-disable-next-line @typescript-eslint/prefer-interface
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type Left<T> = {
   tag: 'Left';
   error: T;
 };
-// eslint-disable-next-line @typescript-eslint/prefer-interface
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type Right<T> = {
   tag: 'Right';
   value: T;
@@ -81,7 +87,11 @@ export interface SavedObjectsRepositoryOptions {
 
 export interface IncrementCounterOptions extends SavedObjectsBaseOptions {
   migrationVersion?: SavedObjectsMigrationVersion;
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
 }
+
+const DEFAULT_REFRESH_SETTING = 'wait_for';
 
 export class SavedObjectsRepository {
   private _migrator: KibanaMigrator;
@@ -144,15 +154,22 @@ export class SavedObjectsRepository {
    * @property {boolean} [options.overwrite=false]
    * @property {object} [options.migrationVersion=undefined]
    * @property {string} [options.namespace]
-   * @property {array} [options.references] - [{ name, type, id }]
+   * @property {array} [options.references=[]] - [{ name, type, id }]
    * @returns {promise} - { id, type, version, attributes }
    */
   public async create<T extends SavedObjectAttributes>(
     type: string,
     attributes: T,
-    options: SavedObjectsCreateOptions = { overwrite: false, references: [] }
+    options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObject<T>> {
-    const { id, migrationVersion, overwrite, namespace, references } = options;
+    const {
+      id,
+      migrationVersion,
+      overwrite = false,
+      namespace,
+      references = [],
+      refresh = DEFAULT_REFRESH_SETTING,
+    } = options;
 
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
@@ -177,7 +194,7 @@ export class SavedObjectsRepository {
       const response = await this._writeToCluster(method, {
         id: raw._id,
         index: this.getIndexForType(type),
-        refresh: 'wait_for',
+        refresh,
         body: raw._source,
       });
 
@@ -208,7 +225,7 @@ export class SavedObjectsRepository {
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
-    const { namespace, overwrite = false } = options;
+    const { namespace, overwrite = false, refresh = DEFAULT_REFRESH_SETTING } = options;
     const time = this._getCurrentTime();
     const bulkCreateParams: object[] = [];
 
@@ -229,15 +246,17 @@ export class SavedObjectsRepository {
       const expectedResult = {
         esRequestIndex: requestIndexCounter++,
         requestedId: object.id,
-        rawMigratedDoc: this._serializer.savedObjectToRaw(this._migrator.migrateDocument({
-          id: object.id,
-          type: object.type,
-          attributes: object.attributes,
-          migrationVersion: object.migrationVersion,
-          namespace,
-          updated_at: time,
-          references: object.references || [],
-        }) as SanitizedSavedObjectDoc),
+        rawMigratedDoc: this._serializer.savedObjectToRaw(
+          this._migrator.migrateDocument({
+            id: object.id,
+            type: object.type,
+            attributes: object.attributes,
+            migrationVersion: object.migrationVersion,
+            namespace,
+            updated_at: time,
+            references: object.references || [],
+          }) as SanitizedSavedObjectDoc
+        ),
       };
 
       bulkCreateParams.push(
@@ -254,7 +273,7 @@ export class SavedObjectsRepository {
     });
 
     const esResponse = await this._writeToCluster('bulk', {
-      refresh: 'wait_for',
+      refresh,
       body: bulkCreateParams,
     });
 
@@ -279,22 +298,12 @@ export class SavedObjectsRepository {
 
         const id = requestedId || responseId;
         if (error) {
-          if (error.type === 'version_conflict_engine_exception') {
-            return {
-              id,
-              type,
-              error: { statusCode: 409, message: 'version conflict, document already exists' },
-            };
-          }
           return {
             id,
             type,
-            error: {
-              message: error.reason || JSON.stringify(error),
-            },
+            error: getBulkOperationError(error, type, id),
           };
         }
-
         return {
           id,
           type,
@@ -316,17 +325,17 @@ export class SavedObjectsRepository {
    * @property {string} [options.namespace]
    * @returns {promise}
    */
-  async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}): Promise<{}> {
+  async delete(type: string, id: string, options: SavedObjectsDeleteOptions = {}): Promise<{}> {
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError();
     }
 
-    const { namespace } = options;
+    const { namespace, refresh = DEFAULT_REFRESH_SETTING } = options;
 
     const response = await this._writeToCluster('delete', {
       id: this._serializer.generateRawId(namespace, type, id),
       index: this.getIndexForType(type),
-      refresh: 'wait_for',
+      refresh,
       ignore: [404],
     });
 
@@ -353,10 +362,15 @@ export class SavedObjectsRepository {
    * @param {string} namespace
    * @returns {promise} - { took, timed_out, total, deleted, batches, version_conflicts, noops, retries, failures }
    */
-  async deleteByNamespace(namespace: string): Promise<any> {
+  async deleteByNamespace(
+    namespace: string,
+    options: SavedObjectsDeleteByNamespaceOptions = {}
+  ): Promise<any> {
     if (!namespace || typeof namespace !== 'string') {
       throw new TypeError(`namespace is required, and must be a string`);
     }
+
+    const { refresh = DEFAULT_REFRESH_SETTING } = options;
 
     const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
 
@@ -365,7 +379,7 @@ export class SavedObjectsRepository {
     const esOptions = {
       index: this.getIndicesForTypes(typesToDelete),
       ignore: [404],
-      refresh: 'wait_for',
+      refresh,
       body: {
         conflicts: 'proceed',
         ...getSearchDsl(this._mappings, this._schema, {
@@ -634,7 +648,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { version, namespace, references } = options;
+    const { version, namespace, references, refresh = DEFAULT_REFRESH_SETTING } = options;
 
     const time = this._getCurrentTime();
 
@@ -651,7 +665,7 @@ export class SavedObjectsRepository {
       id: this._serializer.generateRawId(namespace, type, id),
       index: this.getIndexForType(type),
       ...(version && decodeRequestVersion(version)),
-      refresh: 'wait_for',
+      refresh,
       ignore: [404],
       body: {
         doc,
@@ -670,6 +684,110 @@ export class SavedObjectsRepository {
       version: encodeHitVersion(response),
       references,
       attributes,
+    };
+  }
+
+  /**
+   * Updates multiple objects in bulk
+   *
+   * @param {array} objects - [{ type, id, attributes, options: { version, namespace } references }]
+   * @property {string} options.version - ensures version matches that of persisted object
+   * @property {string} [options.namespace]
+   * @returns {promise} -  {saved_objects: [[{ id, type, version, references, attributes, error: { message } }]}
+   */
+  async bulkUpdate<T extends SavedObjectAttributes = any>(
+    objects: Array<SavedObjectsBulkUpdateObject<T>>,
+    options: SavedObjectsBulkUpdateOptions = {}
+  ): Promise<SavedObjectsBulkUpdateResponse<T>> {
+    const time = this._getCurrentTime();
+    const bulkUpdateParams: object[] = [];
+
+    let requestIndexCounter = 0;
+    const expectedResults: Array<Either<any, any>> = objects.map(object => {
+      const { type, id } = object;
+
+      if (!this._allowedTypes.includes(type)) {
+        return {
+          tag: 'Left' as 'Left',
+          error: {
+            id,
+            type,
+            error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload,
+          },
+        };
+      }
+
+      const { attributes, references, version } = object;
+      const { namespace } = options;
+
+      const documentToSave = {
+        [type]: attributes,
+        updated_at: time,
+        references,
+      };
+
+      if (!Array.isArray(documentToSave.references)) {
+        delete documentToSave.references;
+      }
+
+      const expectedResult = {
+        type,
+        id,
+        esRequestIndex: requestIndexCounter++,
+        documentToSave,
+      };
+
+      bulkUpdateParams.push(
+        {
+          update: {
+            _id: this._serializer.generateRawId(namespace, type, id),
+            _index: this.getIndexForType(type),
+            ...(version && decodeRequestVersion(version)),
+          },
+        },
+        { doc: documentToSave }
+      );
+
+      return { tag: 'Right' as 'Right', value: expectedResult };
+    });
+
+    const { refresh = DEFAULT_REFRESH_SETTING } = options;
+    const esResponse = bulkUpdateParams.length
+      ? await this._writeToCluster('bulk', {
+          refresh,
+          body: bulkUpdateParams,
+        })
+      : {};
+
+    return {
+      saved_objects: expectedResults.map(expectedResult => {
+        if (isLeft(expectedResult)) {
+          return expectedResult.error;
+        }
+
+        const { type, id, documentToSave, esRequestIndex } = expectedResult.value;
+        const response = esResponse.items[esRequestIndex];
+        const { error, _seq_no: seqNo, _primary_term: primaryTerm } = Object.values(
+          response
+        )[0] as any;
+
+        const { [type]: attributes, references, updated_at } = documentToSave;
+        if (error) {
+          return {
+            id,
+            type,
+            error: getBulkOperationError(error, type, id),
+          };
+        }
+        return {
+          id,
+          type,
+          updated_at,
+          version: encodeVersion(seqNo, primaryTerm),
+          attributes,
+          references,
+        };
+      }),
     };
   }
 
@@ -699,7 +817,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
-    const { migrationVersion, namespace } = options;
+    const { migrationVersion, namespace, refresh = DEFAULT_REFRESH_SETTING } = options;
 
     const time = this._getCurrentTime();
 
@@ -716,7 +834,7 @@ export class SavedObjectsRepository {
     const response = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
       index: this.getIndexForType(type),
-      refresh: 'wait_for',
+      refresh,
       _source: true,
       body: {
         script: {
@@ -800,5 +918,18 @@ export class SavedObjectsRepository {
   private _rawToSavedObject(raw: RawDoc): SavedObject {
     const savedObject = this._serializer.rawToSavedObject(raw);
     return omit(savedObject, 'namespace');
+  }
+}
+
+function getBulkOperationError(error: { type: string; reason?: string }, type: string, id: string) {
+  switch (error.type) {
+    case 'version_conflict_engine_exception':
+      return { statusCode: 409, message: 'version conflict, document already exists' };
+    case 'document_missing_exception':
+      return SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload;
+    default:
+      return {
+        message: error.reason || JSON.stringify(error),
+      };
   }
 }

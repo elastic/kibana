@@ -50,7 +50,7 @@ export interface UsersComponentReduxProps {
   activePage: number;
   isInspected: boolean;
   limit: number;
-  usersSortField: UsersSortField;
+  sort: UsersSortField;
 }
 
 type UsersProps = OwnProps & UsersComponentReduxProps;
@@ -74,7 +74,7 @@ class UsersComponentQuery extends QueryTemplatePaginated<
       skip,
       sourceId,
       startDate,
-      usersSortField,
+      sort,
     } = this.props;
     const variables: GetUsersQuery.Variables = {
       defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
@@ -83,7 +83,7 @@ class UsersComponentQuery extends QueryTemplatePaginated<
       inspect: isInspected,
       ip,
       pagination: generateTablePaginationOptions(activePage, limit),
-      sort: usersSortField,
+      sort,
       sourceId,
       timerange: {
         interval: '12h',

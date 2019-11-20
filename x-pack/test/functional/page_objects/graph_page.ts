@@ -239,10 +239,10 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
     }
 
     async deleteGraph(name: string) {
-      await this.searchForWorkspaceWithName(name);
       await testSubjects.click('checkboxSelectAll');
       await this.clickDeleteSelectedWorkspaces();
       await PageObjects.common.clickConfirmOnModal();
+      await testSubjects.find('graphCreateGraphPromptButton');
     }
 
     async getWorkspaceCount() {

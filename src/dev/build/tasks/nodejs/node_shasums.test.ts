@@ -60,7 +60,9 @@ c4edece2c0aa68e816c4e067f397eb12e9d0c81bb37b3d349dbaf47cf246b0b7  win-x86/node.l
 
 jest.mock('axios', () => ({
   async get(url: string) {
-    expect(url).toBe('https://nodejs.org/dist/v8.9.4/SHASUMS256.txt');
+    expect(url).toBe(
+      'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v8.9.4/SHASUMS256.txt'
+    );
     return {
       status: 200,
       data: mockResponse,

@@ -6,13 +6,14 @@
 
 import React, { useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { FlowTargetSourceDest } from '../../../graphql/types';
 import { scoreIntervalToDateTime } from '../../../components/ml/score/score_interval_to_datetime';
 
 import { IPsQueryTabBody } from './ips_query_tab_body';
 import { CountriesQueryTabBody } from './countries_query_tab_body';
+import { HttpQueryTabBody } from './http_query_tab_body';
 import { AnomaliesQueryTabBody } from './anomalies_query_tab_body';
 import { DnsQueryTabBody } from './dns_query_tab_body';
 import { ConditionalFlexGroup } from './conditional_flex_group';
@@ -68,36 +69,41 @@ export const NetworkRoutes = ({
         render={() => <DnsQueryTabBody {...tabProps} />}
       />
       <Route
-        path={`${networkPagePath}/:tabName(${NetworkRouteType.ips})`}
+        path={`${networkPagePath}/:tabName(${NetworkRouteType.flows})`}
         render={() => (
-          <ConditionalFlexGroup direction="column">
-            <EuiFlexItem>
-              <IPsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />
-            </EuiFlexItem>
+          <>
+            <ConditionalFlexGroup direction="column">
+              <EuiFlexItem>
+                <IPsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />
+              </EuiFlexItem>
 
-            <EuiFlexItem>
-              <IPsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.destination} />
-            </EuiFlexItem>
-          </ConditionalFlexGroup>
+              <EuiFlexItem>
+                <IPsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.destination} />
+              </EuiFlexItem>
+            </ConditionalFlexGroup>
+            <EuiSpacer />
+            <ConditionalFlexGroup direction="column">
+              <EuiFlexItem>
+                <CountriesQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />
+              </EuiFlexItem>
+
+              <EuiFlexItem>
+                <CountriesQueryTabBody
+                  {...tabProps}
+                  flowTarget={FlowTargetSourceDest.destination}
+                />
+              </EuiFlexItem>
+            </ConditionalFlexGroup>
+          </>
         )}
+      />
+      <Route
+        path={`${networkPagePath}/:tabName(${NetworkRouteType.http})`}
+        render={() => <HttpQueryTabBody {...tabProps} />}
       />
       <Route
         path={`${networkPagePath}/:tabName(${NetworkRouteType.tls})`}
         render={() => <TlsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />}
-      />
-      <Route
-        path={`${networkPagePath}/:tabName(${NetworkRouteType.countries})`}
-        render={() => (
-          <ConditionalFlexGroup direction="column">
-            <EuiFlexItem>
-              <CountriesQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />
-            </EuiFlexItem>
-
-            <EuiFlexItem>
-              <CountriesQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.destination} />
-            </EuiFlexItem>
-          </ConditionalFlexGroup>
-        )}
       />
       <Route
         path={`${networkPagePath}/:tabName(${NetworkRouteType.anomalies})`}

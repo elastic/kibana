@@ -18,24 +18,27 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { npStart } from 'ui/new_platform';
 import { PercentileRanksEditor } from '../../vis/editors/default/controls/percentile_ranks';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
-import { getResponseAggConfigClass, IResponseAggConfig } from './get_response_agg_config_class';
+import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
 
 import { getPercentileValue } from './percentiles_get_value';
 import { METRIC_TYPES } from './metric_agg_types';
-// @ts-ignore
-import { fieldFormats } from '../../registry/field_formats';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import { FIELD_FORMAT_IDS, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 // required by the values editor
 
-type IPercentileRanksAggConfig = IResponseAggConfig;
+export type IPercentileRanksAggConfig = IResponseAggConfig;
+
+const getFieldFormats = () => npStart.plugins.data.fieldFormats;
 
 const valueProps = {
   makeLabel(this: IPercentileRanksAggConfig) {
+    const fieldFormats = getFieldFormats();
     const field = this.getField();
-    const format = (field && field.format) || fieldFormats.getDefaultInstance('number');
+    const format =
+      (field && field.format) || fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
     const customLabel = this.getParam('customLabel');
     const label = customLabel || this.getFieldDisplayName();
 
@@ -81,7 +84,11 @@ export const percentileRanksMetricAgg = new MetricAggType<IPercentileRanksAggCon
     return values.map((value: any) => new ValueAggConfig(value));
   },
   getFormat() {
-    return fieldFormats.getInstance('percent') || fieldFormats.getDefaultInstance('number');
+    const fieldFormats = getFieldFormats();
+    return (
+      fieldFormats.getInstance(FIELD_FORMAT_IDS.PERCENT) ||
+      fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER)
+    );
   },
   getValue(agg, bucket) {
     return getPercentileValue(agg, bucket) / 100;

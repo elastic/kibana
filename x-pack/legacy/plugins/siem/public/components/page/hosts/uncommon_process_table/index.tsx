@@ -139,13 +139,10 @@ const makeMapStateToProps = () => {
   return (state: State, { type }: OwnProps) => getUncommonProcessesSelector(state, type);
 };
 
-export const UncommonProcessTable = connect(
-  makeMapStateToProps,
-  {
-    updateTableActivePage: hostsActions.updateTableActivePage,
-    updateTableLimit: hostsActions.updateTableLimit,
-  }
-)(UncommonProcessTableComponent);
+export const UncommonProcessTable = connect(makeMapStateToProps, {
+  updateTableActivePage: hostsActions.updateTableActivePage,
+  updateTableLimit: hostsActions.updateTableLimit,
+})(UncommonProcessTableComponent);
 
 const getUncommonColumns = (): UncommonProcessTableColumns => [
   {
@@ -161,16 +158,20 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
     width: '20%',
   },
   {
+    align: 'right',
     name: i18n.NUMBER_OF_HOSTS,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => <>{node.hosts != null ? node.hosts.length : getEmptyValue()}</>,
+    width: '8%',
   },
   {
+    align: 'right',
     name: i18n.NUMBER_OF_INSTANCES,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => defaultToEmptyTag(node.instances),
+    width: '8%',
   },
   {
     name: i18n.HOSTS,
@@ -225,7 +226,10 @@ export const getUncommonColumnsCurated = (pageType: HostsType): UncommonProcessT
   const columns: UncommonProcessTableColumns = getUncommonColumns();
   if (pageType === HostsType.details) {
     return [i18n.HOSTS, i18n.NUMBER_OF_HOSTS].reduce((acc, name) => {
-      acc.splice(acc.findIndex(column => column.name === name), 1);
+      acc.splice(
+        acc.findIndex(column => column.name === name),
+        1
+      );
       return acc;
     }, columns);
   } else {

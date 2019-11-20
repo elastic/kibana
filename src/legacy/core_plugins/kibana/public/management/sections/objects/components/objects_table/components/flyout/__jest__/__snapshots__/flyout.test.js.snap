@@ -31,6 +31,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
       />
       <EuiCallOut
         color="warning"
+        data-test-subj="importSavedObjectsConflictsWarning"
         iconType="help"
         title={
           <FormattedMessage
@@ -238,6 +239,7 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
 exports[`Flyout conflicts should handle errors 1`] = `
 <EuiCallOut
   color="warning"
+  data-test-subj="importSavedObjectsFailedWarning"
   iconType="help"
   title={
     <FormattedMessage
@@ -266,6 +268,7 @@ exports[`Flyout conflicts should handle errors 1`] = `
 exports[`Flyout errors should display unsupported type errors properly 1`] = `
 <EuiCallOut
   color="warning"
+  data-test-subj="importSavedObjectsFailedWarning"
   iconType="help"
   title={
     <FormattedMessage
@@ -324,6 +327,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
       />
       <EuiCallOut
         color="warning"
+        data-test-subj="importSavedObjectsLegacyWarning"
         iconType="help"
         title={
           <FormattedMessage
@@ -348,6 +352,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
       />
       <EuiCallOut
         color="warning"
+        data-test-subj="importSavedObjectsConflictsWarning"
         iconType="help"
         title={
           <FormattedMessage
@@ -490,6 +495,7 @@ exports[`Flyout legacy conflicts should handle errors 1`] = `
 Array [
   <EuiCallOut
     color="warning"
+    data-test-subj="importSavedObjectsLegacyWarning"
     iconType="help"
     title={
       <FormattedMessage
@@ -509,6 +515,7 @@ Array [
   </EuiCallOut>,
   <EuiCallOut
     color="warning"
+    data-test-subj="importSavedObjectsConflictsWarning"
     iconType="help"
     title={
       <FormattedMessage

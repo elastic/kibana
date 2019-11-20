@@ -1,41 +1,22 @@
 .visEditor--vega {
   .visEditorSidebar__config {
     padding: 0;
-    // Makes sure the vega options dropdown menu is visible
-    overflow: inherit;
+    position: relative;
   }
 
-  // The following is necessary for the Vega editor to expand to full height of the editor panel
-  .visEditorSidebar__config,
   .visEditorSidebar__options {
-    @include flex-parent(1, 1, auto);
-
-    > * {
-      @include flex-parent(1, 1, auto);
-    }
-  }
-
-  @include euiBreakpoint('xs', 's', 'm') {
-    .visEditor__collapsibleSidebar {
-      flex-grow: 1;
-    }
+    @include euiScrollBar;
+    flex-shrink: 1;
+    overflow-y: auto;
   }
 }
-
 
 .vgaEditor {
-  @include flex-parent(1, 1, auto);
-  position: relative;
-
   @include euiBreakpoint('xs', 's', 'm') {
-    min-height: $euiSize * 15;
+    @include euiScrollBar;
+    max-height: $euiSize * 15;
+    overflow-y: auto;
   }
-
-  position: relative;
-}
-
-.vgaEditor__aceEditor {
-  flex: 1 1 auto;
 }
 
 .vgaEditor__aceEditorActions {

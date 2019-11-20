@@ -10,8 +10,7 @@
         "mlModelPlotAgg": {
           "max": "max",
           "min": "min"
-        },
-        "fieldIds": []
+        }
       },
       {
         "id": "high_count",
@@ -22,8 +21,7 @@
         "mlModelPlotAgg": {
           "max": "max",
           "min": "min"
-        },
-        "fieldIds": []
+        }
       },
       {
         "id": "low_count",
@@ -34,8 +32,7 @@
         "mlModelPlotAgg": {
           "max": "max",
           "min": "min"
-        },
-        "fieldIds": []
+        }
       },
       {
         "id": "mean",
@@ -215,8 +212,7 @@
         "mlModelPlotAgg": {
           "max": "max",
           "min": "min"
-        },
-        "fieldIds": []
+        }
       },
       {
         "id": "high_non_zero_count",
@@ -227,8 +223,7 @@
         "mlModelPlotAgg": {
           "max": "max",
           "min": "min"
-        },
-        "fieldIds": []
+        }
       },
       {
         "id": "low_non_zero_count",
@@ -239,8 +234,7 @@
         "mlModelPlotAgg": {
           "max": "max",
           "min": "min"
-        },
-        "fieldIds": []
+        }
       },
       {
         "id": "high_distinct_count",
@@ -253,6 +247,7 @@
           "min": "min"
         },
         "fieldIds": [
+          "airline",
           "responsetime"
         ]
       },
@@ -267,6 +262,7 @@
           "min": "min"
         },
         "fieldIds": [
+          "airline",
           "responsetime"
         ]
       },
@@ -377,8 +373,7 @@
         "mlModelPlotAgg": {
           "max": "max",
           "min": "min"
-        },
-        "fieldIds": []
+        }
       },
       {
         "id": "freq_rare",
@@ -389,8 +384,7 @@
         "mlModelPlotAgg": {
           "max": "max",
           "min": "min"
-        },
-        "fieldIds": []
+        }
       },
       {
         "id": "info_content",
@@ -443,8 +437,7 @@
         "mlModelPlotAgg": {
           "max": "max",
           "min": "min"
-        },
-        "fieldIds": []
+        }
       },
       {
         "id": "time_of_week",
@@ -455,8 +448,7 @@
         "mlModelPlotAgg": {
           "max": "max",
           "min": "min"
-        },
-        "fieldIds": []
+        }
       },
       {
         "id": "lat_long",
@@ -468,9 +460,7 @@
           "max": "max",
           "min": "min"
         },
-        "fieldIds": [
-          "responsetime"
-        ]
+        "fieldIds": []
       }
     ],
     "fields": [
@@ -487,7 +477,9 @@
         "type": "keyword",
         "aggregatable": true,
         "aggIds": [
-          "distinct_count"
+          "distinct_count",
+          "high_distinct_count",
+          "low_distinct_count"
         ]
       },
       {
@@ -519,8 +511,7 @@
           "low_non_null_sum",
           "info_content",
           "high_info_content",
-          "low_info_content",
-          "lat_long"
+          "low_info_content"
         ]
       }
     ]

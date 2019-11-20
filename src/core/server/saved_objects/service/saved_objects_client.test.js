@@ -127,3 +127,21 @@ test(`#update`, async () => {
   expect(mockRepository.update).toHaveBeenCalledWith(type, id, attributes, options);
   expect(result).toBe(returnValue);
 });
+
+test(`#bulkUpdate`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    bulkUpdate: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const type = Symbol();
+  const id = Symbol();
+  const attributes = Symbol();
+  const version = Symbol();
+  const namespace = Symbol();
+  const result = await client.bulkUpdate([{ type, id, attributes, version }], { namespace });
+
+  expect(mockRepository.bulkUpdate).toHaveBeenCalledWith([{ type, id, attributes, version }], { namespace });
+  expect(result).toBe(returnValue);
+});

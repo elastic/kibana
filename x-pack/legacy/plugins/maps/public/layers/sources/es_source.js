@@ -15,16 +15,21 @@ import { timefilter } from 'ui/timefilter';
 import _ from 'lodash';
 import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
-import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
-
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../reducers/util';
-import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
+import { ES_GEO_FIELD_TYPE, METRIC_TYPE } from '../../../common/constants';
 import { DataRequestAbortError } from '../util/data_request';
 
 export class AbstractESSource extends AbstractVectorSource {
 
   static icon = 'logoElasticsearch';
+
+  constructor(descriptor, inspectorAdapters) {
+    super({
+      ...descriptor,
+      applyGlobalQuery: _.get(descriptor, 'applyGlobalQuery', true),
+    }, inspectorAdapters);
+  }
 
   isFieldAware() {
     return true;
@@ -42,6 +47,13 @@ export class AbstractESSource extends AbstractVectorSource {
     return  [this._descriptor.indexPatternId];
   }
 
+  getQueryableIndexPatternIds() {
+    if (this.getApplyGlobalQuery()) {
+      return  [this._descriptor.indexPatternId];
+    }
+    return [];
+  }
+
   supportsElasticsearchFilters() {
     return true;
   }
@@ -57,86 +69,9 @@ export class AbstractESSource extends AbstractVectorSource {
     return clonedDescriptor;
   }
 
-  _getValidMetrics() {
-    const metrics = _.get(this._descriptor, 'metrics', []).filter(({ type, field }) => {
-      if (type === 'count') {
-        return true;
-      }
-
-      if (field) {
-        return true;
-      }
-      return false;
-    });
-    if (metrics.length === 0) {
-      metrics.push({ type: 'count' });
-    }
-    return metrics;
-  }
-
-  _formatMetricKey() {
-    throw new Error('should implement');
-  }
-
-  _formatMetricLabel() {
-    throw new Error('should implement');
-  }
-
-  getMetricFields() {
-    return this._getValidMetrics().map(metric => {
-      const metricKey = this._formatMetricKey(metric);
-      const metricLabel = metric.label ? metric.label : this._formatMetricLabel(metric);
-      const metricCopy = { ...metric };
-      delete metricCopy.label;
-      return {
-        ...metricCopy,
-        propertyKey: metricKey,
-        propertyLabel: metricLabel
-      };
-    });
-  }
-
-  async filterAndFormatPropertiesToHtmlForMetricFields(properties) {
-    let indexPattern;
-    try {
-      indexPattern = await this._getIndexPattern();
-    } catch(error) {
-      console.warn(`Unable to find Index pattern ${this._descriptor.indexPatternId}, values are not formatted`);
-      return properties;
-    }
-
-
-    const metricFields = this.getMetricFields();
-    const tooltipProperties = [];
-    metricFields.forEach((metricField) => {
-      let value;
-      for (const key in properties) {
-        if (properties.hasOwnProperty(key) && metricField.propertyKey === key) {
-          value = properties[key];
-          break;
-        }
-      }
-
-      const tooltipProperty  = new ESAggMetricTooltipProperty(
-        metricField.propertyKey,
-        metricField.propertyLabel,
-        value,
-        indexPattern,
-        metricField
-      );
-      tooltipProperties.push(tooltipProperty);
-    });
-
-    return tooltipProperties;
-
-  }
-
-
   async _runEsQuery(requestName, searchSource, registerCancelCallback, requestDescription) {
-    const cancel = () => {
-      searchSource.cancelQueued();
-    };
-    registerCancelCallback(cancel);
+    const abortController = new AbortController();
+    registerCancelCallback(() => abortController.abort());
 
     try {
       return await fetchSearchSourceAndRecordWithInspector({
@@ -144,7 +79,8 @@ export class AbstractESSource extends AbstractVectorSource {
         searchSource,
         requestName,
         requestId: this.getId(),
-        requestDesc: requestDescription
+        requestDesc: requestDescription,
+        abortSignal: abortController.signal,
       });
     } catch(error) {
       if (error.name === 'AbortError') {
@@ -301,18 +237,13 @@ export class AbstractESSource extends AbstractVectorSource {
     return this._descriptor.id;
   }
 
-  _getRawFieldName(fieldName) {
+  async getFieldFormatter(fieldName) {
     const metricField = this.getMetricFields().find(({ propertyKey }) => {
       return propertyKey === fieldName;
     });
 
-    return metricField ? metricField.field : null;
-  }
-
-  async getFieldFormatter(fieldName) {
-    // fieldName could be an aggregation so it needs to be unpacked to expose raw field.
-    const rawFieldName = this._getRawFieldName(fieldName);
-    if (!rawFieldName) {
+    // Do not use field formatters for counting metrics
+    if (metricField && metricField.type === METRIC_TYPE.COUNT || metricField.type === METRIC_TYPE.UNIQUE_COUNT) {
       return null;
     }
 
@@ -323,7 +254,10 @@ export class AbstractESSource extends AbstractVectorSource {
       return null;
     }
 
-    const fieldFromIndexPattern = indexPattern.fields.getByName(rawFieldName);
+    const realFieldName = metricField
+      ? metricField.field
+      : fieldName;
+    const fieldFromIndexPattern = indexPattern.fields.getByName(realFieldName);
     if (!fieldFromIndexPattern) {
       return null;
     }

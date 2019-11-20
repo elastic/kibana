@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useContext, useRef, useState } from 'react';
+import React, { Fragment, SFC, useContext, useEffect, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -23,6 +23,11 @@ import {
 import { getDefaultStepCreateState, StepCreateForm, StepCreateSummary } from '../step_create';
 import { getDefaultStepDetailsState, StepDetailsForm, StepDetailsSummary } from '../step_details';
 import { WizardNav } from '../wizard_nav';
+
+enum KBN_MANAGEMENT_PAGE_CLASSNAME {
+  DEFAULT_BODY = 'mgtPage__body',
+  TRANSFORM_BODY_MODIFIER = 'mgtPage__body--transformWizard',
+}
 
 enum WIZARD_STEPS {
   DEFINE,
@@ -83,6 +88,25 @@ export const Wizard: SFC = React.memo(() => {
 
   // The CREATE state
   const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
+
+  useEffect(() => {
+    // The transform plugin doesn't control the wrapping management page via React
+    // so we use plain JS to add and remove a custom CSS class to set the full
+    // page width to 100% for the transform wizard. It's done to replicate the layout
+    // as it was when transforms were part of the ML plugin. This will be revisited
+    // to come up with an approach that's more in line with the overall layout
+    // of the Kibana management section.
+    const managementBody = document.getElementsByClassName(
+      KBN_MANAGEMENT_PAGE_CLASSNAME.DEFAULT_BODY
+    );
+
+    if (managementBody.length > 0) {
+      managementBody[0].classList.add(KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER);
+      return () => {
+        managementBody[0].classList.remove(KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER);
+      };
+    }
+  }, []);
 
   if (!isKibanaContextInitialized(kibanaContext)) {
     // TODO proper loading indicator
@@ -173,5 +197,5 @@ export const Wizard: SFC = React.memo(() => {
     },
   ];
 
-  return <EuiSteps steps={stepsConfig} />;
+  return <EuiSteps className="transform__steps" steps={stepsConfig} />;
 });

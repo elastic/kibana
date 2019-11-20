@@ -4,7 +4,7 @@
 <titleabbrev>Get all spaces</titleabbrev>
 ++++
 
-Retrieves all {kib} spaces.
+Retrieve all {kib} spaces.
 
 experimental["The underlying Spaces concepts are stable, but the APIs for managing Spaces are experimental."]
 

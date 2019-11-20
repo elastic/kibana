@@ -33,7 +33,6 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(setSelectedLayer(null));
     },
     removeLayer: () => {
-      dispatch(updateFlyout(FLYOUT_STATE.NONE));
       dispatch(removeSelectedLayer());
     }
   };

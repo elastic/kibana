@@ -77,18 +77,15 @@ export class PluginsSystem {
 
       this.log.debug(`Setting up plugin "${pluginName}"...`);
       const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
-      const pluginDepContracts = Array.from(pluginDeps).reduce(
-        (depContracts, dependencyName) => {
-          // Only set if present. Could be absent if plugin does not have server-side code or is a
-          // missing optional dependency.
-          if (contracts.has(dependencyName)) {
-            depContracts[dependencyName] = contracts.get(dependencyName);
-          }
+      const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
+        // Only set if present. Could be absent if plugin does not have server-side code or is a
+        // missing optional dependency.
+        if (contracts.has(dependencyName)) {
+          depContracts[dependencyName] = contracts.get(dependencyName);
+        }
 
-          return depContracts;
-        },
-        {} as Record<PluginName, unknown>
-      );
+        return depContracts;
+      }, {} as Record<PluginName, unknown>);
 
       contracts.set(
         pluginName,
@@ -116,18 +113,15 @@ export class PluginsSystem {
       this.log.debug(`Starting plugin "${pluginName}"...`);
       const plugin = this.plugins.get(pluginName)!;
       const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
-      const pluginDepContracts = Array.from(pluginDeps).reduce(
-        (depContracts, dependencyName) => {
-          // Only set if present. Could be absent if plugin does not have server-side code or is a
-          // missing optional dependency.
-          if (contracts.has(dependencyName)) {
-            depContracts[dependencyName] = contracts.get(dependencyName);
-          }
+      const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
+        // Only set if present. Could be absent if plugin does not have server-side code or is a
+        // missing optional dependency.
+        if (contracts.has(dependencyName)) {
+          depContracts[dependencyName] = contracts.get(dependencyName);
+        }
 
-          return depContracts;
-        },
-        {} as Record<PluginName, unknown>
-      );
+        return depContracts;
+      }, {} as Record<PluginName, unknown>);
 
       contracts.set(
         pluginName,
@@ -161,22 +155,23 @@ export class PluginsSystem {
    * Get a Map of all discovered UI plugins in topological order.
    */
   public uiPlugins() {
+    const uiPluginNames = [...this.getTopologicallySortedPluginNames().keys()].filter(
+      pluginName => this.plugins.get(pluginName)!.includesUiPlugin
+    );
     const internal = new Map<PluginName, DiscoveredPluginInternal>(
-      [...this.getTopologicallySortedPluginNames().keys()]
-        .filter(pluginName => this.plugins.get(pluginName)!.includesUiPlugin)
-        .map(pluginName => {
-          const plugin = this.plugins.get(pluginName)!;
-          return [
-            pluginName,
-            {
-              id: pluginName,
-              path: plugin.path,
-              configPath: plugin.manifest.configPath,
-              requiredPlugins: plugin.manifest.requiredPlugins,
-              optionalPlugins: plugin.manifest.optionalPlugins,
-            },
-          ] as [PluginName, DiscoveredPluginInternal];
-        })
+      uiPluginNames.map(pluginName => {
+        const plugin = this.plugins.get(pluginName)!;
+        return [
+          pluginName,
+          {
+            id: pluginName,
+            path: plugin.path,
+            configPath: plugin.manifest.configPath,
+            requiredPlugins: plugin.manifest.requiredPlugins.filter(p => uiPluginNames.includes(p)),
+            optionalPlugins: plugin.manifest.optionalPlugins.filter(p => uiPluginNames.includes(p)),
+          },
+        ] as [PluginName, DiscoveredPluginInternal];
+      })
     );
 
     const publicPlugins = new Map<PluginName, DiscoveredPlugin>(
@@ -244,9 +239,9 @@ export class PluginsSystem {
     }
 
     if (pluginsDependenciesGraph.size > 0) {
-      const edgesLeft = JSON.stringify([...pluginsDependenciesGraph.entries()]);
+      const edgesLeft = JSON.stringify([...pluginsDependenciesGraph.keys()]);
       throw new Error(
-        `Topological ordering of plugins did not complete, these edges could not be ordered: ${edgesLeft}`
+        `Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ${edgesLeft}`
       );
     }
 

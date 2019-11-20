@@ -18,7 +18,7 @@
  */
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
-import { CoreContext, CoreSetup, CoreStart, PluginInitializerContext } from '.';
+import { CoreContext, CoreSetup, CoreStart, PluginInitializerContext, NotificationsSetup } from '.';
 import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
@@ -41,12 +41,12 @@ export { notificationServiceMock } from './notifications/notifications_service.m
 export { overlayServiceMock } from './overlays/overlay_service.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 
-function createCoreSetupMock() {
-  const mock: MockedKeys<CoreSetup> = {
+function createCoreSetupMock({ basePath = '' } = {}) {
+  const mock: MockedKeys<CoreSetup> & { notifications: MockedKeys<NotificationsSetup> } = {
     application: applicationServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-    http: httpServiceMock.createSetupContract(),
+    http: httpServiceMock.createSetupContract({ basePath }),
     notifications: notificationServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
     injectedMetadata: {
@@ -57,12 +57,12 @@ function createCoreSetupMock() {
   return mock;
 }
 
-function createCoreStartMock() {
-  const mock: MockedKeys<CoreStart> = {
+function createCoreStartMock({ basePath = '' } = {}) {
+  const mock: MockedKeys<CoreStart> & { notifications: MockedKeys<NotificationsSetup> } = {
     application: applicationServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
-    http: httpServiceMock.createStartContract(),
+    http: httpServiceMock.createStartContract({ basePath }),
     i18n: i18nServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
@@ -117,9 +117,22 @@ function createCoreContext(): CoreContext {
   };
 }
 
+function createStorageMock() {
+  const storageMock: jest.Mocked<Storage> = {
+    getItem: jest.fn(),
+    setItem: jest.fn(),
+    removeItem: jest.fn(),
+    clear: jest.fn(),
+    key: jest.fn(),
+    length: 10,
+  };
+  return storageMock;
+}
+
 export const coreMock = {
   createCoreContext,
   createSetup: createCoreSetupMock,
   createStart: createCoreStartMock,
   createPluginInitializerContext: pluginInitializerContextMock,
+  createStorage: createStorageMock,
 };

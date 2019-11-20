@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { ESSearchHit } from 'elasticsearch';
+import { ESSearchHit } from '../../../../typings/elasticsearch';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT
@@ -21,7 +20,7 @@ export async function searchConfigurations({
   environment?: string;
   setup: Setup;
 }) {
-  const { client, config } = setup;
+  const { internalClient, indices } = setup;
 
   // sorting order
   // 1. exact match: service.name AND service.environment (eg. opbeans-node / production)
@@ -34,7 +33,7 @@ export async function searchConfigurations({
     : [];
 
   const params = {
-    index: config.get<string>('apm_oss.apmAgentConfigurationIndex'),
+    index: indices['apm_oss.apmAgentConfigurationIndex'],
     body: {
       query: {
         bool: {
@@ -50,7 +49,9 @@ export async function searchConfigurations({
     }
   };
 
-  const resp = await client.search<AgentConfiguration>(params);
+  const resp = await internalClient.search<AgentConfiguration, typeof params>(
+    params
+  );
   const { hits } = resp.hits;
 
   const exactMatch = hits.find(

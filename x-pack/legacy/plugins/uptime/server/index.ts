@@ -5,3 +5,4 @@
  */
 
 export { initServerWithKibana, KibanaServer } from './kibana.index';
+export { plugin } from './plugin';

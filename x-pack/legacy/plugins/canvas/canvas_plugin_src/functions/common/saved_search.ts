@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunction } from 'src/plugins/expressions/common/types';
 import { SearchInput } from 'src/legacy/core_plugins/kibana/public/discover/embeddable';
 import {
   EmbeddableTypes,
@@ -23,7 +23,6 @@ interface Arguments {
 type Return = EmbeddableExpression<Partial<SearchInput> & { id: SearchInput['id'] }>;
 
 export function savedSearch(): ExpressionFunction<'savedSearch', Filter | null, Arguments, Return> {
-  // @ts-ignore elastic/kibana#44822 Disabling pending filters work
   const { help, args: argHelp } = getFunctionHelp().savedSearch;
   return {
     name: 'savedSearch',

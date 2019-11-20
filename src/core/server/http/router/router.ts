@@ -149,7 +149,7 @@ export class Router implements IRouter {
   public put: IRouter['put'];
 
   constructor(
-    readonly routerPath: string,
+    public readonly routerPath: string,
     private readonly log: Logger,
     private readonly enhanceWithContext: ContextEnhancer<any, any, any>
   ) {

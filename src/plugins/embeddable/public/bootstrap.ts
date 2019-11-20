@@ -56,5 +56,5 @@ export const bootstrap = (uiActions: IUiActionsSetup) => {
   uiActions.registerTrigger(triggerFilter);
   uiActions.registerAction(actionApplyFilter);
   uiActions.registerTrigger(triggerBadge);
-  uiActions.attachAction(triggerFilter.id, actionApplyFilter.id);
+  // uiActions.attachAction(triggerFilter.id, actionApplyFilter.id);
 };

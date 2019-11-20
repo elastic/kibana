@@ -65,6 +65,7 @@ export const useUiSetting$ = <T>(key: string, defaultValue?: T): [T, Setter<T>] 
   const observable$ = useMemo(() => services.uiSettings!.get$(key, defaultValue), [
     key,
     defaultValue,
+    services.uiSettings,
   ]);
   const value = useObservable<T>(observable$, services.uiSettings!.get(key, defaultValue));
   const set = useCallback((newValue: T) => services.uiSettings!.set(key, newValue), [key]);

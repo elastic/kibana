@@ -9,7 +9,6 @@ import styled from 'styled-components';
 
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { idx } from '@kbn/elastic-idx';
 import {
   borderRadius,
   fontFamilyCode,
@@ -34,7 +33,7 @@ interface Props {
 }
 
 export function HttpContext({ httpContext }: Props) {
-  const url = idx(httpContext, _ => _.url.original);
+  const url = httpContext?.url?.original;
 
   if (!url) {
     return null;

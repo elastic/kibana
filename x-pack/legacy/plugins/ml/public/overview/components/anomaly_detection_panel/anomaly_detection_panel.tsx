@@ -31,7 +31,7 @@ export interface Group {
   docs_processed: number;
   earliest_timestamp: number;
   latest_timestamp: number;
-  max_anomaly_score: number | null;
+  max_anomaly_score: number | undefined | null;
 }
 
 type MaxScoresByGroup = Dictionary<{
@@ -50,7 +50,11 @@ function getDefaultAnomalyScores(groups: Group[]): MaxScoresByGroup {
   return anomalyScores;
 }
 
-export const AnomalyDetectionPanel: FC = () => {
+interface Props {
+  jobCreationDisabled: boolean;
+}
+
+export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [groups, setGroups] = useState<GroupsDictionary>({});
   const [groupsCount, setGroupsCount] = useState<number>(0);
@@ -103,8 +107,9 @@ export const AnomalyDetectionPanel: FC = () => {
       // Check results for each group's promise index and update state
       Object.keys(scores).forEach(groupId => {
         const resultsIndex = scores[groupId] && scores[groupId].index;
+        // maxScore will be null if it was not loaded correctly
         const { maxScore } = resultsIndex !== undefined && results[resultsIndex];
-        tempGroups[groupId].max_anomaly_score = maxScore || undefined;
+        tempGroups[groupId].max_anomaly_score = maxScore;
       });
 
       setGroups(tempGroups);
@@ -155,7 +160,7 @@ export const AnomalyDetectionPanel: FC = () => {
           title={
             <h2>
               {i18n.translate('xpack.ml.overview.anomalyDetection.createFirstJobMessage', {
-                defaultMessage: 'Create your first anomaly detection job.',
+                defaultMessage: 'Create your first anomaly detection job',
               })}
             </h2>
           }
@@ -169,9 +174,15 @@ export const AnomalyDetectionPanel: FC = () => {
             </Fragment>
           }
           actions={
-            <EuiButton color="primary" href={createJobLink} fill>
+            <EuiButton
+              color="primary"
+              href={createJobLink}
+              fill
+              iconType="plusInCircle"
+              isDisabled={jobCreationDisabled}
+            >
               {i18n.translate('xpack.ml.overview.anomalyDetection.createJobButtonText', {
-                defaultMessage: 'Create job.',
+                defaultMessage: 'Create job',
               })}
             </EuiButton>
           }

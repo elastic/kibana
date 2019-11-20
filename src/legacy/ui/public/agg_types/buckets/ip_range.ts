@@ -17,31 +17,51 @@
  * under the License.
  */
 
-import { get, noop, map, omit, isNull } from 'lodash';
+import { noop, map, omit, isNull } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { npStart } from 'ui/new_platform';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { IpRangeTypeParamEditor } from '../../vis/editors/default/controls/ip_range_type';
 import { IpRangesParamEditor } from '../../vis/editors/default/controls/ip_ranges';
+import { ipRange } from '../../utils/ip_range';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 // @ts-ignore
 import { createFilterIpRange } from './create_filter/ip_range';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import {
+  KBN_FIELD_TYPES,
+  TEXT_CONTEXT_TYPE,
+  FieldFormat,
+} from '../../../../../plugins/data/public';
 
 const ipRangeTitle = i18n.translate('common.ui.aggTypes.buckets.ipRangeTitle', {
   defaultMessage: 'IPv4 Range',
 });
 
+export type IpRangeKey =
+  | { type: 'mask'; mask: string }
+  | { type: 'range'; from: string; to: string };
+
 export const ipRangeBucketAgg = new BucketAggType({
   name: BUCKET_TYPES.IP_RANGE,
   title: ipRangeTitle,
   createFilter: createFilterIpRange,
-  getKey(bucket, key) {
-    if (key) return key;
-    const from = get(bucket, 'from', '-Infinity');
-    const to = get(bucket, 'to', 'Infinity');
-
-    return `${from} to ${to}`;
+  getKey(bucket, key, agg): IpRangeKey {
+    if (agg.params.ipRangeType === 'mask') {
+      return { type: 'mask', mask: key };
+    }
+    return { type: 'range', from: bucket.from, to: bucket.to };
+  },
+  getFormat(agg) {
+    const fieldFormats = npStart.plugins.data.fieldFormats;
+    const formatter = agg.fieldOwnFormatter(
+      TEXT_CONTEXT_TYPE,
+      fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.IP)
+    );
+    const IpRangeFormat = FieldFormat.from(function(range: IpRangeKey) {
+      return ipRange.toString(range, formatter);
+    });
+    return new IpRangeFormat();
   },
   makeLabel(aggConfig) {
     return i18n.translate('common.ui.aggTypes.buckets.ipRangeLabel', {

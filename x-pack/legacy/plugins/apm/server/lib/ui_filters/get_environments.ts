@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from 'elasticsearch';
-import { idx } from '@kbn/elastic-idx';
 import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
@@ -14,9 +12,10 @@ import {
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
+import { ESFilter } from '../../../typings/elasticsearch';
 
 export async function getEnvironments(setup: Setup, serviceName?: string) {
-  const { start, end, client, config } = setup;
+  const { start, end, client, indices } = setup;
 
   const filter: ESFilter[] = [
     { terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] } },
@@ -31,9 +30,9 @@ export async function getEnvironments(setup: Setup, serviceName?: string) {
 
   const params = {
     index: [
-      config.get<string>('apm_oss.metricsIndices'),
-      config.get<string>('apm_oss.errorIndices'),
-      config.get<string>('apm_oss.transactionIndices')
+      indices['apm_oss.metricsIndices'],
+      indices['apm_oss.errorIndices'],
+      indices['apm_oss.transactionIndices']
     ],
     body: {
       size: 0,
@@ -55,10 +54,10 @@ export async function getEnvironments(setup: Setup, serviceName?: string) {
 
   const resp = await client.search(params);
   const aggs = resp.aggregations;
-  const environmentsBuckets = idx(aggs, _ => _.environments.buckets) || [];
+  const environmentsBuckets = aggs?.environments.buckets || [];
 
   const environments = environmentsBuckets.map(
-    environmentBucket => environmentBucket.key
+    environmentBucket => environmentBucket.key as string
   );
 
   return environments;

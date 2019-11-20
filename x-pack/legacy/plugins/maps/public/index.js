@@ -10,7 +10,6 @@ import { wrapInI18nContext } from 'ui/i18n';
 import { i18n } from '@kbn/i18n';
 
 // import the uiExports that we want to "use"
-import 'uiExports/fieldFormats';
 import 'uiExports/inspectorViews';
 import 'uiExports/search';
 import 'uiExports/embeddableFactories';
@@ -23,7 +22,6 @@ import routes from 'ui/routes';
 import 'ui/kbn_top_nav';
 import { uiModules } from 'ui/modules';
 import { docTitle } from 'ui/doc_title';
-import 'ui/autoload/styles';
 import 'ui/autoload/all';
 import 'react-vis/dist/style.css';
 

@@ -36,12 +36,14 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
       expect(response.body).to.eql({
         id: response.body.id,
+        name: 'abc',
+        tags: ['foo'],
         actions: [],
         enabled: true,
         alertTypeId: 'test.noop',
         alertTypeParams: {},
         createdBy: null,
-        interval: '10s',
+        interval: '1m',
         scheduledTaskId: response.body.scheduledTaskId,
         updatedBy: null,
         throttle: '1m',

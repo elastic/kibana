@@ -430,6 +430,15 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
+     * Clears session storage for the focused window/frame.
+     *
+     * @return {Promise<void>}
+     */
+    public async clearSessionStorage(): Promise<void> {
+      await driver.executeScript('return window.sessionStorage.clear();');
+    }
+
+    /**
      * Closes the currently focused window. In most environments, after the window has been
      * closed, it is necessary to explicitly switch to whatever window is now focused.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#close
@@ -461,10 +470,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       );
     }
 
-    public async executeAsync<A extends any[], R>(
-      fn: string | ((...args: A) => R),
-      ...args: A
-    ): Promise<R> {
+    public async executeAsync<R>(fn: string | ((...args: any[]) => R), ...args: any[]): Promise<R> {
       return await driver.executeAsyncScript(
         fn,
         ...cloneDeep<any>(args, arg => {

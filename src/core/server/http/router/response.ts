@@ -57,9 +57,9 @@ export function isKibanaResponse(response: Record<string, any>): response is IKi
 export class KibanaResponse<T extends HttpResponsePayload | ResponseError = any>
   implements IKibanaResponse<T> {
   constructor(
-    readonly status: number,
-    readonly payload?: T,
-    readonly options: HttpResponseOptions = {}
+    public readonly status: number,
+    public readonly payload?: T,
+    public readonly options: HttpResponseOptions = {}
   ) {}
 }
 

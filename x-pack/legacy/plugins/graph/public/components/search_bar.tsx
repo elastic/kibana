@@ -11,12 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { IDataPluginServices } from 'src/legacy/core_plugins/data/public/types';
+import { Query } from 'src/plugins/data/public';
 import { IndexPatternSavedObject, IndexPatternProvider } from '../types';
-import {
-  QueryBarInput,
-  Query,
-  IndexPattern,
-} from '../../../../../../src/legacy/core_plugins/data/public';
+import { QueryBarInput, IndexPattern } from '../../../../../../src/legacy/core_plugins/data/public';
 import { openSourceModal } from '../services/source_modal';
 
 import {
@@ -33,7 +30,11 @@ export interface OuterSearchBarProps {
   initialQuery?: string;
   onQuerySubmit: (query: string) => void;
 
-  confirmWipeWorkspace: (onConfirm: () => void) => void;
+  confirmWipeWorkspace: (
+    onConfirm: () => void,
+    text?: string,
+    options?: { confirmButtonText: string; title: string }
+  ) => void;
   indexPatternProvider: IndexPatternProvider;
 }
 
@@ -85,7 +86,8 @@ export function SearchBarComponent(props: SearchBarProps) {
   }, [currentDatasource]);
 
   const kibana = useKibana<IDataPluginServices>();
-  const { overlays, savedObjects, uiSettings } = kibana.services;
+  const { services, overlays } = kibana;
+  const { savedObjects, uiSettings } = services;
   if (!overlays) return null;
 
   return (
@@ -118,11 +120,27 @@ export function SearchBarComponent(props: SearchBarProps) {
                   className="gphSearchBar__datasourceButton"
                   data-test-subj="graphDatasourceButton"
                   onClick={() => {
-                    confirmWipeWorkspace(() =>
-                      openSourceModal(
-                        { overlays, savedObjects, uiSettings },
-                        onIndexPatternSelected
-                      )
+                    confirmWipeWorkspace(
+                      () =>
+                        openSourceModal(
+                          { overlays, savedObjects, uiSettings },
+                          onIndexPatternSelected
+                        ),
+                      i18n.translate('xpack.graph.clearWorkspace.confirmText', {
+                        defaultMessage:
+                          'If you change data sources, your current fields and vertices will be reset.',
+                      }),
+                      {
+                        confirmButtonText: i18n.translate(
+                          'xpack.graph.clearWorkspace.confirmButtonLabel',
+                          {
+                            defaultMessage: 'Change data source',
+                          }
+                        ),
+                        title: i18n.translate('xpack.graph.clearWorkspace.modalTitle', {
+                          defaultMessage: 'Unsaved changes',
+                        }),
+                      }
                     );
                   }}
                 >

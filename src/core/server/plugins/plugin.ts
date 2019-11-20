@@ -61,7 +61,7 @@ export class PluginWrapper<
   private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   constructor(
-    readonly params: {
+    public readonly params: {
       readonly path: string;
       readonly manifest: PluginManifest;
       readonly opaqueId: PluginOpaqueId;

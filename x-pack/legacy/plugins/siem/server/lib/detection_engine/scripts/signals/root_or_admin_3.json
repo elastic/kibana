@@ -1,13 +1,13 @@
 {
-  "id": "3",
-  "description": "Detecting root and admin users",
+  "rule_id": "rule-3",
+  "description": "Detecting root and admin users as an empty set",
   "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "5m",
   "name": "Detect Root/Admin Users",
-  "severity": 1,
-  "type": "kql",
+  "severity": "high",
+  "type": "query",
   "from": "now-16y",
   "to": "now-15y",
-  "kql": "user.name: root or user.name: admin"
+  "query": "user.name: root or user.name: admin",
+  "language": "kuery"
 }
-

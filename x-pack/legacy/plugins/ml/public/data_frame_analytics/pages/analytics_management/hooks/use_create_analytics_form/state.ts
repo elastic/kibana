@@ -6,16 +6,25 @@
 
 import { DeepPartial } from '../../../../../../common/types/common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
+import { mlNodesAvailable } from '../../../../../ml_nodes_check/check_ml_nodes';
 
 import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
 
-const OUTLIER_DETECTION_DEFAULT_MODEL_MEMORY_LIMIT = '50mb';
-const REGRESSION_DEFAULT_MODEL_MEMORY_LIMIT = '100mb';
+export enum DEFAULT_MODEL_MEMORY_LIMIT {
+  regression = '100mb',
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  outlier_detection = '50mb',
+}
 
 export type EsIndexName = string;
 export type DependentVariable = string;
 export type IndexPatternTitle = string;
 export type AnalyticsJobType = JOB_TYPES | undefined;
+type IndexPatternId = string;
+export type SourceIndexMap = Record<
+  IndexPatternTitle,
+  { label: IndexPatternTitle; value: IndexPatternId }
+>;
 
 export interface FormMessage {
   error?: string;
@@ -47,16 +56,18 @@ export interface State {
     jobIdValid: boolean;
     jobType: AnalyticsJobType;
     loadingDepFieldOptions: boolean;
+    modelMemoryLimit: string | undefined;
+    modelMemoryLimitUnitValid: boolean;
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
+    sourceIndexContainsNumericalFields: boolean;
+    sourceIndexFieldsCheckFailed: boolean;
     trainingPercent: number;
   };
   disabled: boolean;
   indexNames: EsIndexName[];
-  indexPatternsMap: any; // TODO: update type
-  indexPatternTitles: IndexPatternTitle[];
-  indexPatternsWithNumericFields: IndexPatternTitle[];
+  indexPatternsMap: SourceIndexMap;
   isAdvancedEditorEnabled: boolean;
   isJobCreated: boolean;
   isJobStarted: boolean;
@@ -88,19 +99,22 @@ export const getInitialState = (): State => ({
     jobIdValid: false,
     jobType: undefined,
     loadingDepFieldOptions: false,
+    modelMemoryLimit: undefined,
+    modelMemoryLimitUnitValid: true,
     sourceIndex: '',
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
+    sourceIndexContainsNumericalFields: true,
+    sourceIndexFieldsCheckFailed: false,
     trainingPercent: 80,
   },
   jobConfig: {},
   disabled:
+    !mlNodesAvailable() ||
     !checkPermission('canCreateDataFrameAnalytics') ||
     !checkPermission('canStartStopDataFrameAnalytics'),
   indexNames: [],
   indexPatternsMap: {},
-  indexPatternTitles: [],
-  indexPatternsWithNumericFields: [],
   isAdvancedEditorEnabled: false,
   isJobCreated: false,
   isJobStarted: false,
@@ -114,11 +128,6 @@ export const getInitialState = (): State => ({
 export const getJobConfigFromFormState = (
   formState: State['form']
 ): DeepPartial<DataFrameAnalyticsConfig> => {
-  const modelMemoryLimit =
-    formState.jobType === JOB_TYPES.REGRESSION
-      ? REGRESSION_DEFAULT_MODEL_MEMORY_LIMIT
-      : OUTLIER_DETECTION_DEFAULT_MODEL_MEMORY_LIMIT;
-
   const jobConfig: DeepPartial<DataFrameAnalyticsConfig> = {
     source: {
       // If a Kibana index patterns includes commas, we need to split
@@ -137,7 +146,7 @@ export const getJobConfigFromFormState = (
     analysis: {
       outlier_detection: {},
     },
-    model_memory_limit: modelMemoryLimit,
+    model_memory_limit: formState.modelMemoryLimit,
   };
 
   if (formState.jobType === JOB_TYPES.REGRESSION) {

@@ -185,7 +185,7 @@ export function uiRenderMixin(kbnServer, server, config) {
   async function getUiSettings({ request, includeUserProvidedConfig }) {
     const uiSettings = request.getUiSettingsService();
     return props({
-      defaults: uiSettings.getDefaults(),
+      defaults: uiSettings.getRegistered(),
       user: includeUserProvidedConfig && uiSettings.getUserProvided()
     });
   }

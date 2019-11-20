@@ -6,7 +6,7 @@
 
 import { Server } from 'hapi';
 
-export function getSavedObjectsClient(server: Server) {
+export function getInternalSavedObjectsClient(server: Server) {
   const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster(
     'admin'

@@ -17,10 +17,6 @@ export const testServerTask = async () => {
 
   const testGlobs = ['common/**/__tests__/**/*.js', 'server/**/__tests__/**/*.js'];
 
-  if (pluginIds.includes('code')) {
-    testGlobs.push(`legacy/plugins/**/server/**/__tests__/**/*.ts`);
-  }
-
   for (const pluginId of pluginIds) {
     testGlobs.push(
       `legacy/plugins/${pluginId}/__tests__/**/*.js`,

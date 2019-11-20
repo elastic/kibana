@@ -16,7 +16,7 @@ import { constants } from '../constants';
 const anchor = '2016-04-02T01:02:03.456'; // saturday
 const defaults = {
   timeout: 10000,
-  size: 10,
+  size: 1,
   unknownMime: false,
   contentBody: null,
 };
@@ -107,7 +107,6 @@ describe('Worker class', function () {
       expect(worker).to.have.property('queue', mockQueue);
       expect(worker).to.have.property('jobtype', jobtype);
       expect(worker).to.have.property('workerFn', workerFn);
-      expect(worker).to.have.property('checkSize');
     });
 
     it('should have a unique ID', function () {
@@ -379,12 +378,6 @@ describe('Worker class', function () {
       it('should use default size', function () {
         const { body } = getSearchParams(jobtype);
         expect(body).to.have.property('size', defaults.size);
-      });
-
-      it('should observe the size option', function () {
-        const size = 25;
-        const { body } = getSearchParams(jobtype, { size });
-        expect(body).to.have.property('size', size);
       });
     });
   });
@@ -1079,7 +1072,6 @@ describe('Get Doc Path from ES Response', () => {
   it('returns a formatted string after response of an update', function () {
     const responseMock = {
       _index: 'foo',
-      _type: '_doc',
       _id: 'booId',
     };
     expect(getUpdatedDocPath(responseMock)).equal('/foo/_doc/booId');

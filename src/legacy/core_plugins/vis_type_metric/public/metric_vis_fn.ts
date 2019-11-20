@@ -20,7 +20,13 @@
 import { i18n } from '@kbn/i18n';
 
 import { vislibColorMaps, ColorSchemas } from 'ui/vislib/components/color/colormaps';
-import { ExpressionFunction, KibanaDatatable, Range, Render, Style } from '../../interpreter/types';
+import {
+  ExpressionFunction,
+  KibanaDatatable,
+  Range,
+  Render,
+  Style,
+} from '../../../../plugins/expressions/public';
 import { ColorModes } from '../../kbn_vislib_vis_types/public/utils/collections';
 import { visType, DimensionsVisParam, VisParams } from './types';
 
@@ -171,7 +177,7 @@ export const createMetricVisFn = (): ExpressionFunction<
       throw new Error('colorRange must be provided when using percentage');
     }
 
-    const fontSize = Number.parseInt(args.font.spec.fontSize, 10);
+    const fontSize = Number.parseInt(args.font.spec.fontSize || '', 10);
 
     return {
       type: 'render',

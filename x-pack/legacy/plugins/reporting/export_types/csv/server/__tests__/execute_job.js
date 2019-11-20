@@ -11,7 +11,7 @@ import nodeCrypto from '@elastic/node-crypto';
 
 import { CancellationToken } from '../../../../common/cancellation_token';
 import { FieldFormatsService } from  '../../../../../../../../src/legacy/ui/field_formats/mixin/field_formats_service';
-import { createStringFormat } from  '../../../../../../../../src/legacy/core_plugins/kibana/common/field_formats/types/string';
+import { StringFormat } from '../../../../../../../../src/plugins/data/server';
 
 import { executeJobFactory } from '../execute_job';
 
@@ -81,7 +81,7 @@ describe('CSV Execute Job', function () {
           '_default_': { 'id': 'string', 'params': {} }
         };
         const getConfig = (key) => uiConfigMock[key];
-        return new FieldFormatsService([createStringFormat()], getConfig);
+        return new FieldFormatsService([StringFormat], getConfig);
       },
       plugins: {
         elasticsearch: {

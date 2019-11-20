@@ -18,10 +18,16 @@ import { DataFrameAnalyticsListRow } from './common';
 import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ProgressBar } from './progress_bar';
-import { getDependentVar, getValuesFromResponse, loadEvalData, Eval } from '../../../../common';
+import {
+  getDependentVar,
+  getPredictionFieldName,
+  getValuesFromResponse,
+  loadEvalData,
+  Eval,
+} from '../../../../common';
 import { isCompletedAnalyticsJob } from './common';
 import { isRegressionAnalysis } from '../../../../common/analytics';
-// import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
+import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 
 function getItemDescription(value: any) {
   if (typeof value === 'object') {
@@ -60,6 +66,9 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
   const [isLoadingGeneralization, setIsLoadingGeneralization] = useState<boolean>(false);
   const index = idx(item, _ => _.config.dest.index) as string;
   const dependentVariable = getDependentVar(item.config.analysis);
+  const predictionFieldName = getPredictionFieldName(item.config.analysis);
+  // default is 'ml'
+  const resultsField = item.config.dest.results_field;
   const jobIsCompleted = isCompletedAnalyticsJob(item.stats);
   const isRegressionJob = isRegressionAnalysis(item.config.analysis);
 
@@ -71,6 +80,8 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       isTraining: false,
       index,
       dependentVariable,
+      resultsField,
+      predictionFieldName,
     });
 
     if (genErrorEval.success === true && genErrorEval.eval) {
@@ -94,6 +105,8 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       isTraining: true,
       index,
       dependentVariable,
+      resultsField,
+      predictionFieldName,
     });
 
     if (trainingErrorEval.success === true && trainingErrorEval.eval) {
@@ -222,19 +235,16 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       name: 'JSON',
       content: <ExpandedRowJsonPane json={item.config} />,
     },
-    // Audit messages are not yet supported by the analytics API.
-    /*
     {
       id: 'ml-analytics-job-messages',
       name: i18n.translate(
         'xpack.ml.dataframe.analyticsList.analyticsDetails.tabs.analyticsMessagesLabel',
         {
-          defaultMessage: 'Messages',
+          defaultMessage: 'Job messages',
         }
       ),
       content: <ExpandedRowMessagesPane analyticsId={item.id} />,
     },
-    */
   ];
 
   // Using `expand=false` here so the tabs themselves don't spread

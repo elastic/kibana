@@ -16,7 +16,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
   transform.getTransforms = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/<%=transformId%>',
+        fmt: '/_transform/<%=transformId%>',
         req: {
           transformId: {
             type: 'string',
@@ -24,7 +24,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
         },
       },
       {
-        fmt: '/_data_frame/transforms/_all?size=1000',
+        fmt: '/_transform/_all?size=1000',
       },
     ],
     method: 'GET',
@@ -33,7 +33,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
   transform.getTransformsStats = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/<%=transformId%>/_stats',
+        fmt: '/_transform/<%=transformId%>/_stats',
         req: {
           transformId: {
             type: 'string',
@@ -44,7 +44,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
         // Currently the endpoint uses a default size of 100 unless a size is supplied.
         // So until paging is supported in the UI, explicitly supply a size of 1000
         // to match the max number of docs that the endpoint can return.
-        fmt: '/_data_frame/transforms/_all/_stats?size=1000',
+        fmt: '/_transform/_all/_stats?size=1000',
       },
     ],
     method: 'GET',
@@ -53,7 +53,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
   transform.createTransform = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/<%=transformId%>',
+        fmt: '/_transform/<%=transformId%>',
         req: {
           transformId: {
             type: 'string',
@@ -68,7 +68,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
   transform.deleteTransform = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/<%=transformId%>',
+        fmt: '/_transform/<%=transformId%>',
         req: {
           transformId: {
             type: 'string',
@@ -82,7 +82,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
   transform.getTransformsPreview = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/_preview',
+        fmt: '/_transform/_preview',
       },
     ],
     needBody: true,
@@ -92,7 +92,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
   transform.startTransform = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/<%=transformId%>/_start',
+        fmt: '/_transform/<%=transformId%>/_start',
         req: {
           transformId: {
             type: 'string',
@@ -107,7 +107,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     urls: [
       {
         fmt:
-          '/_data_frame/transforms/<%=transformId%>/_stop?&force=<%=force%>&wait_for_completion=<%waitForCompletion%>',
+          '/_transform/<%=transformId%>/_stop?&force=<%=force%>&wait_for_completion=<%waitForCompletion%>',
         req: {
           transformId: {
             type: 'string',

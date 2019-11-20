@@ -99,9 +99,7 @@ export const useAnomaliesTableData = ({
               maxRecords: 500,
               maxExamples: 10,
             },
-            {
-              'kbn-version': kbnVersion,
-            },
+            kbnVersion,
             abortCtrl.signal
           );
           if (isSubscribed) {

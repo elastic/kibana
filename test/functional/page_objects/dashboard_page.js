@@ -22,6 +22,7 @@ import { DashboardConstants } from '../../../src/legacy/core_plugins/kibana/publ
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
+export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
 
 export function DashboardPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -41,15 +42,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
   class DashboardPage {
     async initTests({
       kibanaIndex = 'dashboard/legacy',
-      dataIndex = 'logstash_functional',
       defaultIndex = 'logstash-*',
     } = {}) {
       log.debug('load kibana index with visualizations and log data');
-      await Promise.all([
-        esArchiver.load(kibanaIndex),
-        esArchiver.loadIfNeeded(dataIndex)
-      ]);
-
+      await esArchiver.load(kibanaIndex);
       await kibanaServer.uiSettings.replace({
         'defaultIndex': defaultIndex,
       });
@@ -309,7 +305,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     /**
      * Save the current dashboard with the specified name and options and
-     * verify that the save was successful
+     * verify that the save was successful, close the toast and return the
+     * toast message
      *
      * @param dashName {String}
      * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false,  waitDialogIsClosed: boolean }}
@@ -323,8 +320,11 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       // Confirm that the Dashboard has actually been saved
       await testSubjects.existOrFail('saveDashboardSuccess');
+      const message =  await PageObjects.common.closeToast();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await this.waitForSaveModalToClose();
+
+      return message;
     }
 
     async waitForSaveModalToClose() {
@@ -351,7 +351,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickSave() {
       log.debug('DashboardPage.clickSave');
-      await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
+      await testSubjects.click('confirmSaveSavedObjectButton');
     }
 
     async pressEnterKey() {
@@ -504,7 +504,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         { name: 'Visualization☺ VerticalBarChart', description: 'VerticalBarChart' },
         { name: AREA_CHART_VIS_NAME, description: 'AreaChart' },
         { name: 'Visualization☺漢字 DataTable', description: 'DataTable' },
-        { name: 'Visualization漢字 LineChart', description: 'LineChart' },
+        { name: LINE_CHART_VIS_NAME, description: 'LineChart' },
         { name: 'Visualization TileMap', description: 'TileMap' },
         { name: 'Visualization MetricChart', description: 'MetricChart' }
       ];
@@ -547,9 +547,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async setSaveAsNewCheckBox(checked) {
       log.debug('saveAsNewCheckbox: ' + checked);
       const saveAsNewCheckbox = await testSubjects.find('saveAsNewCheckbox');
-      const isAlreadyChecked = (await saveAsNewCheckbox.getAttribute('checked') === 'true');
+      const isAlreadyChecked = (await saveAsNewCheckbox.getAttribute('aria-checked') === 'true');
       if (isAlreadyChecked !== checked) {
         log.debug('Flipping save as new checkbox');
+        const saveAsNewCheckbox = await testSubjects.find('saveAsNewCheckbox');
         await retry.try(() => saveAsNewCheckbox.click());
       }
     }
@@ -557,9 +558,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async setStoreTimeWithDashboard(checked) {
       log.debug('Storing time with dashboard: ' + checked);
       const storeTimeCheckbox = await testSubjects.find('storeTimeWithDashboard');
-      const isAlreadyChecked = (await storeTimeCheckbox.getAttribute('checked') === 'true');
+      const isAlreadyChecked = (await storeTimeCheckbox.getAttribute('aria-checked') === 'true');
       if (isAlreadyChecked !== checked) {
         log.debug('Flipping store time checkbox');
+        const storeTimeCheckbox = await testSubjects.find('storeTimeWithDashboard');
         await retry.try(() => storeTimeCheckbox.click());
       }
     }

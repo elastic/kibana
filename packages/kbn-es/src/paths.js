@@ -20,7 +20,7 @@
 const os = require('os');
 const path = require('path');
 
-function useBat(bin) {
+function maybeUseBat(bin) {
   return os.platform().startsWith('win') ? `${bin}.bat` : bin;
 }
 
@@ -28,8 +28,8 @@ const tempDir = os.tmpdir();
 
 exports.BASE_PATH = path.resolve(tempDir, 'kbn-es');
 
-exports.GRADLE_BIN = useBat('./gradlew');
-exports.ES_BIN = useBat('bin/elasticsearch');
+exports.GRADLE_BIN = maybeUseBat('./gradlew');
+exports.ES_BIN = maybeUseBat('bin/elasticsearch');
 exports.ES_CONFIG = 'config/elasticsearch.yml';
 
-exports.ES_KEYSTORE_BIN = useBat('./bin/elasticsearch-keystore');
+exports.ES_KEYSTORE_BIN = maybeUseBat('./bin/elasticsearch-keystore');

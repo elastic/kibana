@@ -23,14 +23,14 @@
     'release_note:skip',
     'renovate',
     'v8.0.0',
-    'v7.5.0',
+    'v7.6.0',
   ],
   major: {
     labels: [
       'release_note:skip',
       'renovate',
       'v8.0.0',
-      'v7.5.0',
+      'v7.6.0',
       'renovate:major',
     ],
   },
@@ -230,7 +230,7 @@
           'release_note:skip',
           'renovate',
           'v8.0.0',
-          'v7.5.0',
+          'v7.6.0',
           ':ml',
         ],
       },
@@ -354,14 +354,6 @@
         ],
       },
       {
-        groupSlug: 'execa',
-        groupName: 'execa related packages',
-        packageNames: [
-          'execa',
-          '@types/execa',
-        ],
-      },
-      {
         groupSlug: 'fetch-mock',
         groupName: 'fetch-mock related packages',
         packageNames: [
@@ -407,14 +399,6 @@
         packageNames: [
           'history',
           '@types/history',
-        ],
-      },
-      {
-        groupSlug: 'humps',
-        groupName: 'humps related packages',
-        packageNames: [
-          'humps',
-          '@types/humps',
         ],
       },
       {
@@ -530,19 +514,19 @@
         ],
       },
       {
+        groupSlug: '@reach/router',
+        groupName: '@reach/router related packages',
+        packageNames: [
+          '@reach/router',
+          '@types/reach__router',
+        ],
+      },
+      {
         groupSlug: 'request',
         groupName: 'request related packages',
         packageNames: [
           'request',
           '@types/request',
-        ],
-      },
-      {
-        groupSlug: 'rimraf',
-        groupName: 'rimraf related packages',
-        packageNames: [
-          'rimraf',
-          '@types/rimraf',
         ],
       },
       {
@@ -591,6 +575,14 @@
         packageNames: [
           'supertest',
           '@types/supertest',
+        ],
+      },
+      {
+        groupSlug: 'supertest-as-promised',
+        groupName: 'supertest-as-promised related packages',
+        packageNames: [
+          'supertest-as-promised',
+          '@types/supertest-as-promised',
         ],
       },
       {
@@ -818,19 +810,19 @@
         ],
       },
       {
-        groupSlug: 'xml2js',
-        groupName: 'xml2js related packages',
-        packageNames: [
-          'xml2js',
-          '@types/xml2js',
-        ],
-      },
-      {
         groupSlug: 'xml-crypto',
         groupName: 'xml-crypto related packages',
         packageNames: [
           'xml-crypto',
           '@types/xml-crypto',
+        ],
+      },
+      {
+        groupSlug: 'xml2js',
+        groupName: 'xml2js related packages',
+        packageNames: [
+          'xml2js',
+          '@types/xml2js',
         ],
       },
       {

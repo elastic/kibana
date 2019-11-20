@@ -12,10 +12,29 @@ import { validateIndexPattern } from 'ui/index_patterns';
 import { isValidIndexName } from '../../../../../../common/util/es_utils';
 
 import { Action, ACTION } from './actions';
-import { getInitialState, getJobConfigFromFormState, State } from './state';
-import { isJobIdValid } from '../../../../../../common/util/job_utils';
+import { getInitialState, getJobConfigFromFormState, State, JOB_TYPES } from './state';
+import {
+  isJobIdValid,
+  validateModelMemoryLimitUnits,
+} from '../../../../../../common/util/job_utils';
 import { maxLengthValidator } from '../../../../../../common/util/validators';
-import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
+import {
+  JOB_ID_MAX_LENGTH,
+  ALLOWED_DATA_UNITS,
+} from '../../../../../../common/constants/validation';
+import { getDependentVar, isRegressionAnalysis } from '../../../../common/analytics';
+
+const mmlAllowedUnitsStr = `${ALLOWED_DATA_UNITS.slice(0, ALLOWED_DATA_UNITS.length - 1).join(
+  ', '
+)} or ${[...ALLOWED_DATA_UNITS].pop()}`;
+
+export const mmlUnitInvalidErrorMessage = i18n.translate(
+  'xpack.ml.dataframe.analytics.create.modelMemoryUnitsInvalidError',
+  {
+    defaultMessage: 'Model memory limit data unit unrecognized. It must be {str}',
+    values: { str: mmlAllowedUnitsStr },
+  }
+);
 
 const getSourceIndexString = (state: State) => {
   const { jobConfig } = state;
@@ -34,7 +53,7 @@ const getSourceIndexString = (state: State) => {
 };
 
 export const validateAdvancedEditor = (state: State): State => {
-  const { jobIdEmpty, jobIdValid, jobIdExists, createIndexPattern } = state.form;
+  const { jobIdEmpty, jobIdValid, jobIdExists, jobType, createIndexPattern } = state.form;
   const { jobConfig } = state;
 
   state.advancedEditorMessages = [];
@@ -60,9 +79,20 @@ export const validateAdvancedEditor = (state: State): State => {
   const destinationIndexName = idx(jobConfig, _ => _.dest.index) || '';
   const destinationIndexNameEmpty = destinationIndexName === '';
   const destinationIndexNameValid = isValidIndexName(destinationIndexName);
-  const destinationIndexPatternTitleExists = state.indexPatternTitles.some(
-    name => destinationIndexName === name
-  );
+  const destinationIndexPatternTitleExists =
+    state.indexPatternsMap[destinationIndexName] !== undefined;
+  const mml = jobConfig.model_memory_limit;
+  const modelMemoryLimitEmpty = mml === '';
+  if (!modelMemoryLimitEmpty && mml !== undefined) {
+    const { valid } = validateModelMemoryLimitUnits(mml);
+    state.form.modelMemoryLimitUnitValid = valid;
+  }
+
+  let dependentVariableEmpty = false;
+  if (isRegressionAnalysis(jobConfig.analysis)) {
+    const dependentVariableName = getDependentVar(jobConfig.analysis) || '';
+    dependentVariableEmpty = jobType === JOB_TYPES.REGRESSION && dependentVariableName === '';
+  }
 
   if (sourceIndexNameEmpty) {
     state.advancedEditorMessages.push({
@@ -108,7 +138,39 @@ export const validateAdvancedEditor = (state: State): State => {
     });
   }
 
+  if (dependentVariableEmpty) {
+    state.advancedEditorMessages.push({
+      error: i18n.translate(
+        'xpack.ml.dataframe.analytics.create.advancedEditorMessage.dependentVariableEmpty',
+        {
+          defaultMessage: 'The dependent variable field must not be empty.',
+        }
+      ),
+      message: '',
+    });
+  }
+
+  if (modelMemoryLimitEmpty) {
+    state.advancedEditorMessages.push({
+      error: i18n.translate(
+        'xpack.ml.dataframe.analytics.create.advancedEditorMessage.modelMemoryLimitEmpty',
+        {
+          defaultMessage: 'The model memory limit field must not be empty.',
+        }
+      ),
+      message: '',
+    });
+  }
+
+  if (!state.form.modelMemoryLimitUnitValid) {
+    state.advancedEditorMessages.push({
+      error: mmlUnitInvalidErrorMessage,
+      message: '',
+    });
+  }
+
   state.isValid =
+    state.form.modelMemoryLimitUnitValid &&
     !jobIdEmpty &&
     jobIdValid &&
     !jobIdExists &&
@@ -116,6 +178,8 @@ export const validateAdvancedEditor = (state: State): State => {
     sourceIndexNameValid &&
     !destinationIndexNameEmpty &&
     destinationIndexNameValid &&
+    !dependentVariableEmpty &&
+    !modelMemoryLimitEmpty &&
     (!destinationIndexPatternTitleExists || !createIndexPattern);
 
   return state;
@@ -126,15 +190,27 @@ const validateForm = (state: State): State => {
     jobIdEmpty,
     jobIdValid,
     jobIdExists,
+    jobType,
     sourceIndexNameEmpty,
     sourceIndexNameValid,
     destinationIndexNameEmpty,
     destinationIndexNameValid,
     destinationIndexPatternTitleExists,
     createIndexPattern,
+    dependentVariable,
+    modelMemoryLimit,
   } = state.form;
 
+  const dependentVariableEmpty = jobType === JOB_TYPES.REGRESSION && dependentVariable === '';
+  const modelMemoryLimitEmpty = modelMemoryLimit === '';
+
+  if (!modelMemoryLimitEmpty && modelMemoryLimit !== undefined) {
+    const { valid } = validateModelMemoryLimitUnits(modelMemoryLimit);
+    state.form.modelMemoryLimitUnitValid = valid;
+  }
+
   state.isValid =
+    state.form.modelMemoryLimitUnitValid &&
     !jobIdEmpty &&
     jobIdValid &&
     !jobIdExists &&
@@ -142,6 +218,8 @@ const validateForm = (state: State): State => {
     sourceIndexNameValid &&
     !destinationIndexNameEmpty &&
     destinationIndexNameValid &&
+    !dependentVariableEmpty &&
+    !modelMemoryLimitEmpty &&
     (!destinationIndexPatternTitleExists || !createIndexPattern);
 
   return state;
@@ -182,9 +260,8 @@ export function reducer(state: State, action: Action): State {
         );
         newFormState.destinationIndexNameEmpty = newFormState.destinationIndex === '';
         newFormState.destinationIndexNameValid = isValidIndexName(newFormState.destinationIndex);
-        newFormState.destinationIndexPatternTitleExists = state.indexPatternTitles.some(
-          name => newFormState.destinationIndex === name
-        );
+        newFormState.destinationIndexPatternTitleExists =
+          state.indexPatternsMap[newFormState.destinationIndex] !== undefined;
       }
 
       if (action.payload.jobId !== undefined) {
@@ -219,9 +296,8 @@ export function reducer(state: State, action: Action): State {
         ...state,
         ...action.payload,
       };
-      newState.form.destinationIndexPatternTitleExists = newState.indexPatternTitles.some(
-        name => newState.form.destinationIndex === name
-      );
+      newState.form.destinationIndexPatternTitleExists =
+        newState.indexPatternsMap[newState.form.destinationIndex] !== undefined;
       return newState;
     }
 

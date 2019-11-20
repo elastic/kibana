@@ -98,7 +98,7 @@ export const RestoreList: React.FunctionComponent = () => {
             <h1>
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreList.emptyPromptTitle"
-                defaultMessage="You don't have any restored snapshots"
+                defaultMessage="No restored snapshots"
               />
             </h1>
           }

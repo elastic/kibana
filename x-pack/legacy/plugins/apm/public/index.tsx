@@ -9,7 +9,6 @@ import ReactDOM from 'react-dom';
 import { npStart } from 'ui/new_platform';
 import 'react-vis/dist/style.css';
 import 'ui/autoload/all';
-import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
@@ -19,7 +18,6 @@ import { REACT_APP_ROOT_ID } from './new-platform/plugin';
 import './style/global_overrides.css';
 import template from './templates/index.html';
 import { KibanaCoreContextProvider } from '../../observability/public';
-
 const { core } = npStart;
 
 // render APM feedback link in global help menu

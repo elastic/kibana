@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { IndexPattern } from './';
+import { IndexPattern } from './index_pattern';
 
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a flattened version

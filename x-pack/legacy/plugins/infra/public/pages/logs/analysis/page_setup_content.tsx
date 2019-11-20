@@ -20,21 +20,27 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { SetupStatus } from '../../../../common/log_analysis';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
-import { AnalysisSetupSteps } from './setup/steps';
+import { AnalysisSetupSteps } from './setup';
 
-type SetupHandler = (startTime?: number | undefined, endTime?: number | undefined) => void;
+type SetupHandler = (
+  indices: string[],
+  startTime: number | undefined,
+  endTime: number | undefined
+) => void;
 
 interface AnalysisSetupContentProps {
+  availableIndices: string[];
   cleanupAndSetup: SetupHandler;
-  indexPattern: string;
+  errorMessages: string[];
   setup: SetupHandler;
   setupStatus: SetupStatus;
   viewResults: () => void;
 }
 
 export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentProps> = ({
+  availableIndices,
   cleanupAndSetup,
-  indexPattern,
+  errorMessages,
   setup,
   setupStatus,
   viewResults,
@@ -71,11 +77,12 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
             </EuiText>
             <EuiSpacer />
             <AnalysisSetupSteps
-              setup={setup}
+              availableIndices={availableIndices}
               cleanupAndSetup={cleanupAndSetup}
-              viewResults={viewResults}
-              indexPattern={indexPattern}
+              errorMessages={errorMessages}
+              setup={setup}
               setupStatus={setupStatus}
+              viewResults={viewResults}
             />
           </EuiPageContentBody>
         </AnalysisPageContent>
@@ -86,7 +93,7 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
 
 // !important due to https://github.com/elastic/eui/issues/2232
 const AnalysisPageContent = euiStyled(EuiPageContent)`
-  max-width: 518px !important;
+  max-width: 768px !important;
 `;
 
 const AnalysisSetupPage = euiStyled(EuiPage)`
