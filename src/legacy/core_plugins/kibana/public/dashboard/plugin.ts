@@ -34,11 +34,11 @@ import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationStart } from '../../../navigation/public';
 import { DashboardConstants } from './dashboard_constants';
-import {
-  FeatureCatalogueCategory,
-  FeatureCatalogueSetup,
-} from '../../../../../plugins/feature_catalogue/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
+import {
+  HomePublicPluginSetup,
+  FeatureCatalogueCategory,
+} from '../../../../../plugins/home/public';
 
 export interface LegacyAngularInjectedDependencies {
   dashboardConfig: any;
@@ -59,7 +59,7 @@ export interface DashboardPluginSetupDependencies {
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
     localApplicationService: LocalApplicationService;
   };
-  feature_catalogue: FeatureCatalogueSetup;
+  home: HomePublicPluginSetup;
 }
 
 export class DashboardPlugin implements Plugin {
@@ -76,7 +76,7 @@ export class DashboardPlugin implements Plugin {
     core: CoreSetup,
     {
       __LEGACY: { localApplicationService, getAngularDependencies, ...legacyServices },
-      feature_catalogue,
+      home,
     }: DashboardPluginSetupDependencies
   ) {
     const app: App = {
@@ -120,7 +120,7 @@ export class DashboardPlugin implements Plugin {
     localApplicationService.register({ ...app, id: 'dashboard' });
     localApplicationService.register({ ...app, id: 'dashboards' });
 
-    feature_catalogue.register({
+    home.featureCatalogue.register({
       id: 'dashboard',
       title: i18n.translate('kbn.dashboard.featureCatalogue.dashboardTitle', {
         defaultMessage: 'Dashboard',
