@@ -65,6 +65,10 @@ export type OutputSignalAlertRest = SignalAlertParamsRest & {
   updated_by: string | undefined | null;
 };
 
+export type OutputSignalES = OutputSignalAlertRest & {
+  status: 'open' | 'closed';
+};
+
 export type UpdateSignalAlertParamsRest = Partial<SignalAlertParamsRest> & {
   id: string | undefined;
   rule_id: SignalAlertParams['ruleId'] | undefined;
