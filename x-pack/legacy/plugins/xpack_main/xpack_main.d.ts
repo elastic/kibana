@@ -9,11 +9,8 @@ import { Feature, FeatureWithAllOrReadPrivileges } from '../../../plugins/featur
 import { XPackInfo, XPackInfoOptions } from './server/lib/xpack_info';
 export { XPackFeature } from './server/lib/xpack_info';
 
-export type XPackStatus = any;
-
 export interface XPackMainPlugin {
   info: XPackInfo;
-  status: XPackStatus;
   createXPackInfo(options: XPackInfoOptions): XPackInfo;
   getFeatures(): Feature[];
   registerFeature(feature: FeatureWithAllOrReadPrivileges): void;

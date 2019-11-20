@@ -9,12 +9,9 @@ import { getUsageCollector } from './get_usage_collector';
 import { OssTelemetrySetupDependencies } from '../../../plugin';
 
 export function registerVisualizationsCollector(
-  {
-    makeUsageCollector,
-    register,
-  }: OssTelemetrySetupDependencies['__LEGACY']['telemetry']['collectorSet'],
+  collectorSet: OssTelemetrySetupDependencies['__LEGACY']['telemetry']['collectorSet'],
   taskManager: TaskManagerPluginSetupContract | undefined
 ): void {
-  const collector = makeUsageCollector(getUsageCollector(taskManager));
-  register(collector);
+  const collector = collectorSet.makeUsageCollector(getUsageCollector(taskManager));
+  collectorSet.register(collector);
 }
