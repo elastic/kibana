@@ -42,7 +42,8 @@ import {
   SET_MAP_INIT_ERROR,
   UPDATE_DRAW_STATE,
   SET_INTERACTIVE,
-  DISABLE_TOOLTIP_CONTROL
+  DISABLE_TOOLTIP_CONTROL,
+  HIDE_TOOLBAR_OVERLAY,
 } from '../actions/map_actions';
 
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
@@ -60,12 +61,13 @@ const updateLayerInList = (state, layerId, attribute, newValue) => {
     ...layerList[layerIdx],
     // Update layer w/ new value. If no value provided, toggle boolean value
     // allow empty strings, 0-value
-    [attribute]: (newValue || newValue === '' || newValue === 0) ? newValue : !layerList[layerIdx][attribute]
+    [attribute]:
+      newValue || newValue === '' || newValue === 0 ? newValue : !layerList[layerIdx][attribute],
   };
   const updatedList = [
     ...layerList.slice(0, layerIdx),
     updatedLayer,
-    ...layerList.slice(layerIdx + 1)
+    ...layerList.slice(layerIdx + 1),
   ];
   return { ...state, layerList: updatedList };
 };
@@ -78,12 +80,12 @@ const updateLayerSourceDescriptorProp = (state, layerId, propName, value) => {
     sourceDescriptor: {
       ...layerList[layerIdx].sourceDescriptor,
       [propName]: value,
-    }
+    },
   };
   const updatedList = [
     ...layerList.slice(0, layerIdx),
     updatedLayer,
-    ...layerList.slice(layerIdx + 1)
+    ...layerList.slice(layerIdx + 1),
   ];
   return { ...state, layerList: updatedList };
 };
@@ -110,13 +112,13 @@ const INITIAL_STATE = {
     drawState: null,
     disableInteractive: false,
     disableTooltipControl: false,
+    hideToolbarOverlay: false
   },
   selectedLayerId: null,
   __transientLayerId: null,
   layerList: [],
   waitingForMapReadyLayerList: [],
 };
-
 
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
@@ -346,13 +348,20 @@ export function map(state = INITIAL_STATE, action) {
           disableTooltipControl: action.disableTooltipControl,
         },
       };
+    case HIDE_TOOLBAR_OVERLAY:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          hideToolbarOverlay: action.hideToolbarOverlay,
+        },
+      };
     default:
       return state;
   }
 }
 
 function findDataRequest(layerDescriptor, dataRequestAction) {
-
   if (!layerDescriptor.__dataRequests) {
     return;
   }
@@ -362,18 +371,18 @@ function findDataRequest(layerDescriptor, dataRequestAction) {
   });
 }
 
-
 function updateWithDataRequest(state, action) {
   let dataRequest = getValidDataRequest(state, action, false);
   const layerRequestingData = findLayerById(state, action.layerId);
 
   if (!dataRequest) {
     dataRequest = {
-      dataId: action.dataId
+      dataId: action.dataId,
     };
     layerRequestingData.__dataRequests = [
-      ...(layerRequestingData.__dataRequests
-        ? layerRequestingData.__dataRequests : []), dataRequest ];
+      ...(layerRequestingData.__dataRequests ? layerRequestingData.__dataRequests : []),
+      dataRequest,
+    ];
   }
   dataRequest.dataMetaAtStart = action.meta;
   dataRequest.dataRequestToken = action.requestToken;
@@ -381,13 +390,12 @@ function updateWithDataRequest(state, action) {
   return { ...state, layerList };
 }
 
-
 function updateSourceDataRequest(state, action) {
   const layerDescriptor = findLayerById(state, action.layerId);
   if (!layerDescriptor) {
     return state;
   }
-  const dataRequest =   layerDescriptor.__dataRequests.find(dataRequest => {
+  const dataRequest = layerDescriptor.__dataRequests.find(dataRequest => {
     return dataRequest.dataId === SOURCE_DATA_ID_ORIGIN;
   });
   if (!dataRequest) {
@@ -398,10 +406,11 @@ function updateSourceDataRequest(state, action) {
   return resetDataRequest(state, action, dataRequest);
 }
 
-
 function updateWithDataResponse(state, action) {
   const dataRequest = getValidDataRequest(state, action);
-  if (!dataRequest) { return state; }
+  if (!dataRequest) {
+    return state;
+  }
 
   dataRequest.data = action.data;
   dataRequest.dataMeta = { ...dataRequest.dataMetaAtStart, ...action.meta };
@@ -411,7 +420,9 @@ function updateWithDataResponse(state, action) {
 
 function resetDataRequest(state, action, request) {
   const dataRequest = request || getValidDataRequest(state, action);
-  if (!dataRequest) { return state; }
+  if (!dataRequest) {
+    return state;
+  }
 
   dataRequest.dataRequestToken = null;
   dataRequest.dataId = action.dataId;
@@ -452,7 +463,7 @@ function trackCurrentLayerState(state, layerId) {
 }
 
 function removeTrackedLayerState(state, layerId) {
-  const layer = findLayerById(state,  layerId);
+  const layer = findLayerById(state, layerId);
   if (!layer) {
     return state;
   }
@@ -462,7 +473,7 @@ function removeTrackedLayerState(state, layerId) {
 
   return {
     ...state,
-    layerList: replaceInLayerList(state.layerList, layerId, copyLayer)
+    layerList: replaceInLayerList(state.layerList, layerId, copyLayer),
   };
 }
 
@@ -482,7 +493,7 @@ function rollbackTrackedLayerState(state, layerId) {
 
   return {
     ...state,
-    layerList: replaceInLayerList(state.layerList, layerId, rolledbackLayer)
+    layerList: replaceInLayerList(state.layerList, layerId, rolledbackLayer),
   };
 }
 

@@ -204,7 +204,7 @@ export class GisMap extends Component {
           {!this.props.hideToolbarOverlay && (
             <ToolbarOverlay addFilters={addFilters} geoFields={this.state.geoFields} />
           )}
-          {!this.props.hideWidgetOverlay && <WidgetOverlay />}
+          <WidgetOverlay/>
         </EuiFlexItem>
 
         <EuiFlexItem className={`mapMapLayerPanel ${currentPanelClassName}`} grow={false}>

@@ -29,6 +29,7 @@ import {
   disableScrollZoom,
   disableInteractive,
   disableTooltipControl,
+  hideToolbarOverlay,
 } from '../actions/map_actions';
 import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
@@ -119,12 +120,16 @@ export class MapEmbeddable extends Embeddable {
       this._store.dispatch(setOpenTOCDetails(this.input.openTOCDetails));
     }
 
-    if (_.has(this.input, 'disableInteractive')) {
+    if (_.has(this.input, 'disableInteractive') && this.input.disableInteractive) {
       this._store.dispatch(disableInteractive(this.input.disableInteractive));
     }
 
-    if (_.has(this.input, 'disableTooltipControl')) {
+    if (_.has(this.input, 'disableTooltipControl') && this.input.disableTooltipControl) {
       this._store.dispatch(disableTooltipControl(this.input.disableTooltipControl));
+    }
+
+    if (_.has(this.input, 'hideToolbarOverlay') && this.input.hideToolbarOverlay) {
+      this._store.dispatch(hideToolbarOverlay(this.input.hideToolbarOverlay));
     }
 
     if (this.input.mapCenter) {
@@ -149,8 +154,6 @@ export class MapEmbeddable extends Embeddable {
           <GisMap
             addFilters={this.input.hideFilterActions ? null : this.addFilters}
             renderTooltipContent={this._renderTooltipContent}
-            hideToolbarOverlay={this.input.hideToolbarOverlay}
-            hideWidgetOverlay={this.input.hideWidgetOverlay}
           />
         </I18nContext>
       </Provider>,

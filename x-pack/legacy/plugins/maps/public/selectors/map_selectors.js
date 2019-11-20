@@ -91,6 +91,8 @@ export const isInteractiveDisabled = ({ map }) => map.mapState.disableInteractiv
 
 export const isTooltipControlDisabled = ({ map }) => map.mapState.disableTooltipControl;
 
+export const isToolbarOverlayHidden = ({ map }) => map.mapState.hideToolbarOverlay;
+
 export const getMapExtent = ({ map }) => map.mapState.extent ?
   map.mapState.extent : {};
 
