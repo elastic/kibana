@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Job } from '../../public/jobs/new_job_new/common/job_creator/configs';
+import { Job } from '../../public/jobs/new_job/common/job_creator/configs';
 
 export interface ValidationMessage {
   id: string;
@@ -43,5 +43,3 @@ export function processCreatedBy(customSettings: { created_by?: string }): void;
 export function mlFunctionToESAggregation(functionName: string): string | null;
 
 export function isModelPlotEnabled(job: Job, detectorIndex: number, entityFields: any[]): boolean;
-
-export function mlFunctionToESAggregation(functionName: string): string | null;

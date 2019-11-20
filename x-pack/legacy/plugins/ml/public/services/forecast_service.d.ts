@@ -5,7 +5,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { Job } from '../jobs/new_job_new/common/job_creator/configs';
+import { Job } from '../jobs/new_job/common/job_creator/configs';
 
 export interface ForecastData {
   success: boolean;
