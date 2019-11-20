@@ -132,22 +132,8 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
     ? euiThemeDark
     : euiThemeLight;
 
-  const [clearTable, setClearTable] = useState(false);
-
   const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
   const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
-
-  // EuiInMemoryTable has an issue with dynamic sortable columns
-  // and will trigger a full page Kibana error in such a case.
-  // The following is a workaround until this is solved upstream:
-  // - If the sortable/columns config changes,
-  //   the table will be unmounted/not rendered.
-  //   This is what setClearTable(true) in toggleColumn() does.
-  // - After that on next render it gets re-enabled. To make sure React
-  //   doesn't consolidate the state updates, setTimeout is used.
-  if (clearTable) {
-    setTimeout(() => setClearTable(false), 0);
-  }
 
   function toggleColumnsPopover() {
     setColumnsPopoverVisible(!isColumnsPopoverVisible);
@@ -159,7 +145,6 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
 
   function toggleColumn(column: EsFieldName) {
     if (tableItems.length > 0 && jobConfig !== undefined) {
-      setClearTable(true);
       // spread to a new array otherwise the component wouldn't re-render
       setSelectedFields([...toggleSelectedField(selectedFields, column)]);
     }
@@ -368,7 +353,6 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
       setPageSize(size);
 
       if (sort.field !== sortField || sort.direction !== sortDirection) {
-        setClearTable(true);
         loadExploreData({ ...sort, searchQuery });
       }
     };
@@ -411,8 +395,8 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
   if (jobConfig === undefined) {
     return null;
   }
-
-  if (status === INDEX_STATUS.ERROR) {
+  // if it's a searchBar syntax error leave the table visible so they can try again
+  if (status === INDEX_STATUS.ERROR && !errorMessage.includes('parsing_exception')) {
     return (
       <EuiPanel grow={false}>
         <ExplorationTitle jobId={jobConfig.id} />
@@ -429,32 +413,16 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
     );
   }
 
-  if (status === INDEX_STATUS.LOADED && tableItems.length === 0) {
-    return (
-      <EuiPanel grow={false}>
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <ExplorationTitle jobId={jobConfig.id} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <span>{getTaskStateBadge(jobStatus)}</span>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiCallOut
-          title={i18n.translate('xpack.ml.dataframe.analytics.exploration.noDataCalloutTitle', {
-            defaultMessage: 'Empty index query result.',
-          })}
-          color="primary"
-        >
-          <p>
-            {i18n.translate('xpack.ml.dataframe.analytics.exploration.noDataCalloutBody', {
-              defaultMessage:
-                'The query for the index returned no results. Please make sure the index contains documents and your query is not too restrictive.',
-            })}
-          </p>
-        </EuiCallOut>
-      </EuiPanel>
-    );
+  let tableError =
+    status === INDEX_STATUS.ERROR && errorMessage.includes('parsing_exception')
+      ? errorMessage
+      : searchError;
+
+  if (status === INDEX_STATUS.LOADED && tableItems.length === 0 && tableError === undefined) {
+    tableError = i18n.translate('xpack.ml.dataframe.analytics.exploration.noDataCalloutBody', {
+      defaultMessage:
+        'The query for the index returned no results. Please make sure the index contains documents and your query is not too restrictive.',
+    });
   }
 
   return (
@@ -533,19 +501,21 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
       {status !== INDEX_STATUS.LOADING && (
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
-      {clearTable === false && columns.length > 0 && sortField !== '' && (
+      {(columns.length > 0 || searchQuery !== defaultSearchQuery) && sortField !== '' && (
         <Fragment>
-          <EuiFormRow
-            helpText={i18n.translate(
-              'xpack.ml.dataframe.analytics.exploration.documentsShownHelpText',
-              {
-                defaultMessage: 'Showing first {searchSize} documents',
-                values: { searchSize: SEARCH_SIZE },
-              }
-            )}
-          >
-            <Fragment />
-          </EuiFormRow>
+          {tableItems.length === SEARCH_SIZE && (
+            <EuiFormRow
+              helpText={i18n.translate(
+                'xpack.ml.dataframe.analytics.exploration.documentsShownHelpText',
+                {
+                  defaultMessage: 'Showing first {searchSize} documents',
+                  values: { searchSize: SEARCH_SIZE },
+                }
+              )}
+            >
+              <Fragment />
+            </EuiFormRow>
+          )}
           <EuiSpacer />
           <MlInMemoryTableBasic
             allowNeutralSort={false}
@@ -560,7 +530,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
             responsive={false}
             sorting={sorting}
             search={search}
-            error={searchError}
+            error={tableError}
           />
         </Fragment>
       )}
