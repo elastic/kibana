@@ -28,6 +28,7 @@ const name = Joi.string();
 const severity = Joi.string();
 const to = Joi.string();
 const type = Joi.string().valid('filter', 'query', 'saved_query');
+const queryFilter = Joi.string();
 const references = Joi.array()
   .items(Joi.string())
   .single();
@@ -38,6 +39,7 @@ const page = Joi.number()
   .min(1)
   .default(1);
 const sort_field = Joi.string();
+const sort_order = Joi.string().valid('asc', 'desc');
 const tags = Joi.array().items(Joi.string());
 const fields = Joi.array()
   .items(Joi.string())
@@ -113,8 +115,14 @@ export const querySignalSchema = Joi.object({
 }).xor('id', 'rule_id');
 
 export const findSignalsSchema = Joi.object({
+  fields,
+  filter: queryFilter,
   per_page,
   page,
-  sort_field,
-  fields,
+  sort_field: Joi.when(Joi.ref('sort_order'), {
+    is: Joi.exist(),
+    then: sort_field.required(),
+    otherwise: sort_field.optional(),
+  }),
+  sort_order,
 });
