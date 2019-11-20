@@ -115,7 +115,6 @@ function DefaultEditorDataTab({
   return (
     <>
       <DefaultEditorAggGroup
-        data-test-subj="metricsAggGroup"
         groupName={AggGroupNames.Metrics}
         schemas={schemas.metrics}
         {...commonProps}
@@ -124,7 +123,6 @@ function DefaultEditorDataTab({
       <EuiSpacer size="s" />
 
       <DefaultEditorAggGroup
-        data-test-subj="bucketsAggGroup"
         groupName={AggGroupNames.Buckets}
         schemas={schemas.buckets}
         {...commonProps}

@@ -660,7 +660,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async sizeUpEditor() {
-      await testSubjects.click('visualizeEditorResizer');
+      await testSubjects.click('splitPanelResizer');
       await browser.pressKeys(browser.keys.ARROW_RIGHT);
     }
 

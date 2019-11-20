@@ -147,7 +147,7 @@ function DefaultEditorAggGroup({
 
   return (
     <EuiDragDropContext onDragEnd={onDragEnd}>
-      <EuiPanel paddingSize="s">
+      <EuiPanel data-test-subj={`${groupName}AggGroup`} paddingSize="s">
         <EuiTitle size="xs">
           <h3>{groupNameLabel}</h3>
         </EuiTitle>
