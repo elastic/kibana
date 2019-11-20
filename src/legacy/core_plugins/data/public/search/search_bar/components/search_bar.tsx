@@ -35,8 +35,8 @@ import {
   withKibana,
   KibanaReactContextValue,
 } from '../../../../../../../plugins/kibana_react/public';
-import { IDataPluginServices } from '../../../types';
 import {
+  IDataPluginServices,
   TimeRange,
   Query,
   esFilters,
@@ -64,7 +64,7 @@ export interface SearchBarOwnProps {
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
   screenTitle?: string;
-
+  dataTestSubj?: string;
   // Togglers
   showQueryBar?: boolean;
   showQueryInput?: boolean;
@@ -415,6 +415,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           customSubmitButton={
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
+          dataTestSubj={this.props.dataTestSubj}
         />
       );
     }

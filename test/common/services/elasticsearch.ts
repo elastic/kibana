@@ -17,24 +17,17 @@
  * under the License.
  */
 
-import { esFilters } from '../../../../../../../../../plugins/data/public';
+import { format as formatUrl } from 'url';
 
-export const rangeFilter: esFilters.RangeFilter = {
-  meta: {
-    index: 'logstash-*',
-    negate: false,
-    disabled: false,
-    alias: null,
-    type: 'range',
-    key: 'bytes',
-    value: '0 to 10',
-    params: {
-      gte: 0,
-      lt: 10,
-    },
-  },
-  $state: {
-    store: esFilters.FilterStateStore.APP_STATE,
-  },
-  range: {},
-};
+import { Client } from '@elastic/elasticsearch';
+
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export function ElasticsearchProvider({ getService }: FtrProviderContext) {
+  const config = getService('config');
+
+  return new Client({
+    nodes: [formatUrl(config.get('servers.elasticsearch'))],
+    requestTimeout: config.get('timeouts.esRequestTimeout'),
+  });
+}

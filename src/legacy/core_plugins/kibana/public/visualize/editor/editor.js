@@ -425,6 +425,12 @@ function VisEditor(
       next: updateTimeRange
     }));
 
+    subscriptions.add(chrome.getIsVisible$().subscribe(isVisible => {
+      $scope.$evalAsync(() => {
+        $scope.isVisible = isVisible;
+      });
+    }));
+
     // update the searchSource when query updates
     $scope.fetch = function () {
       $state.save();
