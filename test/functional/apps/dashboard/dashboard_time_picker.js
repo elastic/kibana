@@ -34,6 +34,11 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.preserveCrossAppState();
     });
 
+    after(async () => {
+      await kibanaServer.uiSettings.replace({});
+      await browser.refresh();
+    });
+
     it('Visualization updated when time picker changes', async () => {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
