@@ -93,6 +93,7 @@ export function expectTextsInDocument(output: any, texts: string[]) {
 }
 
 interface MockSetup {
+  dynamicIndexPattern: any;
   start: number;
   end: number;
   client: any;
@@ -154,7 +155,8 @@ export async function inspectSearchParams(
       'apm_oss.transactionIndices': 'myIndex',
       'apm_oss.metricsIndices': 'myIndex',
       'apm_oss.apmAgentConfigurationIndex': 'myIndex'
-    }
+    },
+    dynamicIndexPattern: null as any
   };
   try {
     await fn(mockSetup);
