@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RouteDeps } from '.';
 import { CaseService } from '../../case_service';
+import { RouteDeps } from '.';
 import { wrapError } from './utils';
 
 export function initGetAllApi(deps: RouteDeps) {

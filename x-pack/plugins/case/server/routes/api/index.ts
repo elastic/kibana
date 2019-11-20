@@ -8,6 +8,7 @@ import { Logger, IRouter } from 'src/core/server';
 import { initGetAllApi } from './get_all';
 import { initGetCaseApi } from './get_case';
 import { initPostCaseApi } from './post_case';
+import { initUpdateCaseApi } from './update_case';
 
 export interface RouteDeps {
   caseIndex: string;
@@ -19,4 +20,5 @@ export function initCaseApi(deps: RouteDeps) {
   initGetAllApi(deps);
   initGetCaseApi(deps);
   initPostCaseApi(deps);
+  initUpdateCaseApi(deps);
 }

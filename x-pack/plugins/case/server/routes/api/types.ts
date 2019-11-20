@@ -4,42 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export enum CaseState {
-  open = 'open',
-  closed = 'closed',
-}
+import { TypeOf } from '@kbn/config-schema';
+import { NewCaseSchema, UpdatedCaseSchema } from './schema';
 
 export interface User {
   id: string;
   name: string;
 }
 
-export interface Comment {
-  id: string;
-  comment: string;
-  creation_date: number;
+// export interface Comment {
+//   id: string;
+//   comment: string;
+//   creation_date: number;
+//   last_edit_date: number;
+//   user: User;
+// }
+
+export type UpdatedCaseType = TypeOf<typeof UpdatedCaseSchema>;
+
+export interface UpdatedCaseWithDate extends UpdatedCaseType {
   last_edit_date: number;
-  user: User;
 }
 
-export interface Case {
-  assignees: User[] | [];
-  comments: Comment[] | [];
-  creation_date: number;
-  description: string;
-  last_edit_date: number;
-  name: string;
-  reporter: User;
-  state: keyof typeof CaseState;
-  tags: string[];
-  type: string;
-}
+export type NewCaseType = TypeOf<typeof NewCaseSchema>;
 
-export interface NewCase {
-  assignees?: User[];
-  description: string;
-  name: string;
-  state: keyof typeof CaseState;
-  tags?: string[];
-  type: string;
+export interface NewCaseWithDate extends NewCaseType {
+  creation_date: number;
+  last_edit_date: number;
+  reporter: User; // needs to be programmed still
 }

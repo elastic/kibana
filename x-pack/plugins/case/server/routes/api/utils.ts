@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CustomHttpResponseOptions, ResponseError } from 'kibana/server';
 import { boomify, isBoom } from 'boom';
-import { Case, NewCase } from './types';
+import { CustomHttpResponseOptions, ResponseError } from 'kibana/server';
+import { NewCaseWithDate, NewCaseType, UpdatedCaseWithDate, UpdatedCaseType } from './types';
 
 // we have to use any here because the SavedObjectAttributes interface is like below
 // export interface SavedObjectAttributes {
@@ -14,10 +14,7 @@ import { Case, NewCase } from './types';
 // }
 // then this interface does not allow types without index signature
 // this is limiting us with our type for now so the easy way was to use any
-export const formatNewCase = (newCase: NewCase): Case => ({
-  assignees: [],
-  tags: [],
-  comments: [],
+export const dateNewCase = (newCase: NewCaseType): NewCaseWithDate => ({
   creation_date: new Date().valueOf(),
   last_edit_date: new Date().valueOf(),
   reporter: {
@@ -25,6 +22,11 @@ export const formatNewCase = (newCase: NewCase): Case => ({
     name: 'Gayle Gergich',
   },
   ...newCase,
+});
+
+export const dateUpdatedCase = (updateCase: UpdatedCaseType): UpdatedCaseWithDate => ({
+  last_edit_date: new Date().valueOf(),
+  ...updateCase,
 });
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {

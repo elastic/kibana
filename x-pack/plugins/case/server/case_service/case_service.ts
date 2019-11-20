@@ -6,7 +6,7 @@
 
 import { APICaller, Logger } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
-import { Case } from '../routes/api/types';
+import { NewCaseWithDate, UpdatedCaseWithDate } from '../routes/api/types';
 
 interface CaseAggregationResponse {
   hits: {
@@ -22,7 +22,7 @@ interface CaseAggregationResponse {
 export interface CaseServiceInterface {
   getAllCases(): Promise<SearchResponse<CaseAggregationResponse>>;
   getCase(id: string): Promise<CaseAggregationResponse>;
-  postCase(newCase: Case): Promise<CaseAggregationResponse>;
+  postCase(newCase: NewCaseWithDate): Promise<CaseAggregationResponse>;
 }
 
 export class CaseService implements CaseServiceInterface {
@@ -57,11 +57,20 @@ export class CaseService implements CaseServiceInterface {
     });
   }
 
-  async postCase(newCase: Case) {
+  async postCase(newCase: NewCaseWithDate) {
     this.log.debug(`CaseService - postCase:`, newCase);
     return await this.callDataCluster<CaseAggregationResponse>('index', {
       index: this.caseIndex,
       body: newCase,
+    });
+  }
+
+  async updateCase(updatedCase: UpdatedCaseWithDate, id: string) {
+    this.log.debug(`CaseService - updateCase:`, updatedCase);
+    return await this.callDataCluster<CaseAggregationResponse>('update', {
+      index: this.caseIndex,
+      id,
+      body: { doc: updatedCase },
     });
   }
 }
