@@ -15,8 +15,7 @@ import {
   SOURCE_DATA_ID_ORIGIN,
   FEATURE_VISIBLE_PROPERTY_NAME,
   EMPTY_FEATURE_COLLECTION,
-  LAYER_TYPE,
-  FIELD_ORIGIN,
+  LAYER_TYPE
 } from '../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
@@ -241,8 +240,8 @@ export class VectorLayer extends AbstractLayer {
 
   async getOrdinalFields() {
     return [
-      ... await this.getDateFields(),
-      ... await this.getNumberFields()
+      ...await this.getDateFields(),
+      ...await this.getNumberFields()
     ];
   }
 
@@ -353,7 +352,7 @@ export class VectorLayer extends AbstractLayer {
 
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceId();
-    const requestToken = Symbol(`layer-join-refresh:${ this.getId()} - ${sourceDataId}`);
+    const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
 
     const searchFilters = {
       ...dataFilters,
@@ -465,7 +464,7 @@ export class VectorLayer extends AbstractLayer {
     startLoading, stopLoading, onLoadError, registerCancelCallback, dataFilters
   }) {
 
-    const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
+    const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
     const searchFilters = this._getSearchFilters(dataFilters);
     const canSkip = await this._canSkipSourceUpdate(this._source, SOURCE_DATA_ID_ORIGIN, searchFilters);
     if (canSkip) {
@@ -765,32 +764,4 @@ export class VectorLayer extends AbstractLayer {
       return feature.properties[FEATURE_ID_PROPERTY_NAME] === id;
     });
   }
-
-  _getFieldSource(field) {
-    if (!field) {
-      return null;
-    }
-
-    if (field.origin === FIELD_ORIGIN.SOURCE) {
-      return this._source;
-    } else if (field.origin === FIELD_ORIGIN.JOIN) {
-      const join = this.getValidJoins().find(join => {
-        const matchingField = join.getJoinFields().find(joinField => {
-          return joinField.getName() === field.name;
-        });
-        return !!matchingField;
-      });
-
-      if (!join) {
-        return null;
-      }
-
-      return join.getRightJoinSource();
-    } else {
-      return null;
-    }
-
-
-  }
-
 }

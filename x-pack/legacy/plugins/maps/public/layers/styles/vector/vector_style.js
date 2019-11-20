@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { VectorStyleEditor } from './components/vector_style_editor';
 import { getDefaultProperties, vectorStyles } from './vector_style_defaults';
 import { AbstractStyle } from '../abstract_style';
-import { SOURCE_DATA_ID_ORIGIN, GEO_JSON_TYPE, FIELD_ORIGIN, STYLE_TYPE } from '../../../../common/constants';
+import { GEO_JSON_TYPE, FIELD_ORIGIN, STYLE_TYPE } from '../../../../common/constants';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
@@ -52,7 +52,6 @@ export class VectorStyle extends AbstractStyle {
   }
 
   static description = '';
-
 
   constructor(descriptor = {}, source, layer) {
     super();
@@ -236,7 +235,7 @@ export class VectorStyle extends AbstractStyle {
   getSourceFieldNames() {
     const fieldNames = [];
     this.getDynamicPropertiesArray().forEach(styleProperty => {
-      if (styleProperty.getFieldOrigin() === SOURCE_DATA_ID_ORIGIN) {
+      if (styleProperty.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
         fieldNames.push(styleProperty.getField().getName());
       }
     });

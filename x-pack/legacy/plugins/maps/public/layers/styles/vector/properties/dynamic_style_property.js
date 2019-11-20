@@ -25,7 +25,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
 
     getFieldOrigin() {
-      return this._options.field.origin;
+      return this._field.getOrigin();
     }
 
     supportsFeatureState() {

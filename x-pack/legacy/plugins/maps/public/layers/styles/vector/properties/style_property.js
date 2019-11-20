@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
-
 export class AbstractStyleProperty {
 
   constructor(options, styleName) {
@@ -22,6 +18,7 @@ export class AbstractStyleProperty {
   getStyleName() {
     return this._styleName;
   }
+
   getOptions() {
     return this._options || {};
   }
