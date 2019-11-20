@@ -265,6 +265,19 @@ The danger is that in such a situation, a Task with that same `id` might already
 
 To achieve this you should use the `ensureScheduling` api which has the exact same behavior as `schedule`, except it allows the scheduling of a Task with an `id` that's already in assigned to another Task and it will assume that the existing Task is the one you wished to `schedule`, treating this as a successful operation.
 
+### reschedule
+The `reschedule` api allows a developer to reconfigure an existing Task's `runAt` and `interval` fields.
+Given the `id` of an existing Task, you may specify either, or both, of these fields and the Task's fields will be updated accordingly, returning the updated Task.
+
+One thing to note is that this api behaves mildly differently depending on the state of the Task.
+
+If a request is made to `reschedule` the `interval` field of an `idle` task, the task's field will be updated and the task will run immediately and the new `interval` will be applied to scheduling the _next_ run.
+If a request is made to `reschedule` the `runAt` field of an `idle` task, irrespective of whether the `interval` field is also specified, the task's field(s) will be updated and the task will only run when the newly specified `runAt` expires (after which, any new `interval` that may also have been specified, will be applied to the _next_ scheduled run).
+These behaviors mirrors how `schedule` treats these two fields.
+
+Where this behavior diverges is if a request is made to `reschedule` a non `idle` task, such as a `running` task or a `failed` task.
+In such a case, `reschedule` will avoid changing the `runAt` field, as it is used internally to manage Task Manager lifecycles and changing that field in such a case could be considered dangerous. `interval` on the other hand, will be updated in such a case, and we recommend using the Task returned by the `reschedule` api to assess whether the fields have been updated as expected.
+
 ### more options
 
 More custom access to the tasks can be done directly via Elasticsearch, though that won't be officially supported, as we can change the document structure at any time.
