@@ -8,7 +8,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { AutocompleteProviderRegister, esKuery } from 'src/plugins/data/public';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import {
   EmptyState,
@@ -25,6 +24,7 @@ import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
 import { getIndexPattern } from '../lib/adapters/index_pattern';
 import { combineFiltersAndUserSearch, stringifyKueries, toStaticIndexPattern } from '../lib/helper';
+import { AutocompleteProviderRegister, esKuery } from '../../../../../../src/plugins/data/public';
 
 interface OverviewPageProps {
   basePath: string;

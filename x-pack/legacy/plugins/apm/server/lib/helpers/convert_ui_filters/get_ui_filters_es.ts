@@ -51,5 +51,5 @@ function getKueryUiFilterES(
   }
 
   const ast = esKuery.fromKueryExpression(kuery);
-  return esKuery.estoElasticsearchQuery(ast, indexPattern) as ESFilter;
+  return esKuery.toElasticsearchQuery(ast, indexPattern) as ESFilter;
 }

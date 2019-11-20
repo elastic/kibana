@@ -9,17 +9,17 @@ import { uniqueId, startsWith } from 'lodash';
 import { EuiCallOut } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  AutocompleteProviderRegister,
-  AutocompleteSuggestion,
-  esKuery,
-} from 'src/plugins/data/public';
 import { Typeahead } from './typeahead';
 import { getIndexPattern } from '../../../lib/adapters/index_pattern';
 import { UptimeSettingsContext } from '../../../contexts';
 import { useUrlParams } from '../../../hooks';
 import { toStaticIndexPattern } from '../../../lib/helper';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import {
+  AutocompleteProviderRegister,
+  AutocompleteSuggestion,
+  esKuery,
+  IIndexPattern,
+} from '../../../../../../../../src/plugins/data/public';
 
 const Container = styled.div`
   margin-bottom: 10px;
