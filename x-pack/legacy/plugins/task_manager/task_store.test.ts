@@ -11,12 +11,17 @@ import {
   TaskDictionary,
   TaskDefinition,
   TaskInstance,
-  TaskInstanceScheduling,
   TaskStatus,
   ConcreteTaskInstance,
 } from './task';
 
-import { FetchOpts, StoreOpts, OwnershipClaimingOpts, TaskStore } from './task_store';
+import {
+  FetchOpts,
+  StoreOpts,
+  OwnershipClaimingOpts,
+  TaskReschedulingOpts,
+  TaskStore,
+} from './task_store';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import {
   SavedObjectsSerializer,
@@ -184,7 +189,7 @@ describe('TaskStore', () => {
 
   describe('reschedule', () => {
     async function testReschedule(
-      taskBeingRescheduled: TaskInstanceScheduling,
+      taskBeingRescheduled: TaskReschedulingOpts,
       taskCurrentlyInStore: ConcreteTaskInstance,
       taskInStoreAfterUpdate: ConcreteTaskInstance = taskCurrentlyInStore
     ) {

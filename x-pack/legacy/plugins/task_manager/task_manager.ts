@@ -17,7 +17,6 @@ import {
   RunContext,
   TaskInstanceWithId,
   TaskInstance,
-  TaskInstanceScheduling,
 } from './task';
 import { TaskPoller } from './task_poller';
 import { TaskPool } from './task_pool';
@@ -27,6 +26,7 @@ import {
   FetchResult,
   TaskStore,
   OwnershipClaimingOpts,
+  TaskReschedulingOpts,
   ClaimOwnershipResult,
 } from './task_store';
 import { identifyEsError } from './lib/identify_es_error';
@@ -229,7 +229,7 @@ export class TaskManager {
    * @param taskInstanceUpdate - The task  being rescheduled with its id and any fields you wish to update.
    * @returns {Promise<ConcreteTaskInstance>}
    */
-  public async reschedule(taskInstance: TaskInstanceScheduling): Promise<ConcreteTaskInstance> {
+  public async reschedule(taskInstance: TaskReschedulingOpts): Promise<ConcreteTaskInstance> {
     await this.waitUntilStarted();
     const result = await this.store.reschedule(taskInstance);
     this.poller.attemptWork();

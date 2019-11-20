@@ -22,7 +22,7 @@ import {
   TaskDefinition,
   TaskDictionary,
   TaskInstance,
-  TaskInstanceScheduling,
+  TaskInstanceWithId,
 } from './task';
 
 export interface StoreOpts {
@@ -81,6 +81,11 @@ export interface UpdateByQueryResult {
   version_conflicts: number;
   total: number;
 }
+
+/**
+ * The Scheduling fields of a task instance that has an id.
+ */
+export type TaskReschedulingOpts = Pick<TaskInstanceWithId, 'id' | 'runAt' | 'interval'>;
 
 /**
  * Wraps an elasticsearch connection and provides a task manager-specific
@@ -144,7 +149,7 @@ export class TaskStore {
    * @param task - The task being rescheduled.
    */
   public async reschedule(
-    taskInstanceScheduling: TaskInstanceScheduling
+    taskInstanceScheduling: TaskReschedulingOpts
   ): Promise<ConcreteTaskInstance> {
     const taskInstance = await this.getTask(taskInstanceScheduling.id);
     return await this.update(
