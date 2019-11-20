@@ -5,11 +5,12 @@
  */
 
 import { searchSourceMock } from '../../../../../../../../src/legacy/ui/public/courier/search_source/mocks';
+import { SearchSourceContract } from '../../../../../../../../src/legacy/ui/public/courier';
 
 export const savedSearchMock = {
   id: 'the-saved-search-id',
   title: 'the-saved-search-title',
-  searchSource: searchSourceMock,
+  searchSource: searchSourceMock as SearchSourceContract,
   columns: [],
   sort: [],
   destroy: () => {},

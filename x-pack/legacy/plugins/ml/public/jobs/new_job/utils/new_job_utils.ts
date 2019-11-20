@@ -7,7 +7,7 @@
 import { IndexPattern } from 'ui/index_patterns';
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { KibanaConfigTypeFix } from '../../../contexts/kibana';
-import { esQuery, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { esQuery, Query, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 export interface SearchItems {
   indexPattern: IIndexPattern;
@@ -28,7 +28,7 @@ export function createSearchItems(
   // a lucene query_string.
   // Using a blank query will cause match_all:{} to be used
   // when passed through luceneStringToDsl
-  let query = {
+  let query: Query = {
     query: '',
     language: 'lucene',
   };
@@ -45,12 +45,12 @@ export function createSearchItems(
 
   if (indexPattern.id === undefined && savedSearch.id !== undefined) {
     const searchSource = savedSearch.searchSource;
-    indexPattern = searchSource.getField('index');
+    indexPattern = searchSource.getField('index')!;
 
-    query = searchSource.getField('query');
+    query = searchSource.getField('query')!;
     const fs = searchSource.getField('filter');
 
-    const filters = fs.length ? fs : [];
+    const filters = Array.isArray(fs) ? fs : [];
 
     const esQueryConfigs = esQuery.getEsQueryConfig(kibanaConfig);
     combinedQuery = esQuery.buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
