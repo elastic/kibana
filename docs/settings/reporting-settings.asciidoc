@@ -27,13 +27,21 @@ setting to preserve the same key across multiple restarts and multiple instances
 ==== Kibana server settings
 
 Reporting uses the Kibana interface to generate reports. In most cases, you don't need
-to configure Reporting to communicate with Kibana. 
-
-If you use a reverse-proxy to access Kibana, you can set the proxy port, protocol, 
+to configure Reporting to communicate with Kibana. If you use a reverse-proxy to access Kibana, you can set the proxy port, protocol, 
 and hostname to have Reporting use the proxy to load Kibana URLs. In most cases, 
 this is only required if the proxy is responsible for modifying requests to 
-make them work with Kibana. For example, a reverse proxy can remove a 
-base from requests so Kibana will properly serve the requests.
+make them work with Kibana. 
+
+For example, a reverse proxy can be responsible for translating the public hostname 
+for the Kibana server to a different name in a private network. 
+It can also be responsible for maintaining encrypted communications between 
+the outside world and hosts in the internal network. 
+
+Encrypted communications 
+will fail if the hostname from the request doesn't match the destination 
+server's hostname because it is rejected by the proxy. In such cases, 
+Reporting should not assume a direct connection to the Kibana server. An administrator 
+must configure Reporting to send the hostname the proxy expects, by using the `xpack.reporting.kibanaServer.*` settings.
 
 `xpack.reporting.kibanaServer.port`::
 The port for accessing Kibana, if different from the `server.port` value.
