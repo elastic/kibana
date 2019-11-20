@@ -37,7 +37,7 @@ export const ActionAddFlyout = () => {
         <EuiTitle size="s">
           <h3 id="flyoutTitle">
             <FormattedMessage
-              defaultMessage={'Create action'}
+              defaultMessage={'Create connector'}
               id="xpack.alertingUI.sections.actionAdd.flyoutTitle"
             />
           </h3>
