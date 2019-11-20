@@ -5,7 +5,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { FeatureCatalogueSetup } from 'src/plugins/feature_catalogue/public';
+import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { SpacesManager } from './lib';
 import { initSpacesNavControl } from './views/nav_control';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
@@ -15,7 +15,7 @@ export interface SpacesPluginStart {
 }
 
 export interface PluginsSetup {
-  feature_catalogue?: FeatureCatalogueSetup;
+  home?: HomePublicPluginSetup;
 }
 
 export class SpacesPlugin implements Plugin<void, SpacesPluginStart, PluginsSetup> {
@@ -33,8 +33,8 @@ export class SpacesPlugin implements Plugin<void, SpacesPluginStart, PluginsSetu
   }
 
   public async setup(core: CoreSetup, plugins: PluginsSetup) {
-    if (plugins.feature_catalogue) {
-      plugins.feature_catalogue.register(createSpacesFeatureCatalogueEntry());
+    if (plugins.home) {
+      plugins.home.featureCatalogue.register(createSpacesFeatureCatalogueEntry());
     }
   }
 }

@@ -11,7 +11,7 @@ import { SpacesPlugin, PluginsSetup } from './plugin';
 const spacesPlugin: SpacesPlugin = plugin();
 
 const plugins: PluginsSetup = {
-  feature_catalogue: npSetup.plugins.feature_catalogue,
+  home: npSetup.plugins.home,
 };
 
 export const setup = spacesPlugin.setup(npSetup.core, plugins);

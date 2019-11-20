@@ -19,7 +19,9 @@ export class SpacesManager {
   public readonly onActiveSpaceChange$: Observable<Space>;
 
   constructor(private readonly serverBasePath: string, private readonly http: HttpSetup) {
-    this.onActiveSpaceChange$ = this.activeSpace$.asObservable().pipe(skipWhile(v => !v));
+    this.onActiveSpaceChange$ = this.activeSpace$
+      .asObservable()
+      .pipe(skipWhile((v: Space | null) => v == null)) as Observable<Space>;
 
     this.refreshActiveSpace();
   }
