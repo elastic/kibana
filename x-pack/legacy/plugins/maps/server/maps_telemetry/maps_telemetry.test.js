@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import mapSavedObjects from './test_resources/sample_saved_objects.json';
+import mapSavedObjects from './test_resources/sample_map_saved_objects.json';
 import indexPatternSavedObjects from './test_resources/sample_index_pattern_saved_objects';
 import { buildMapsTelemetry } from './maps_telemetry';
 
