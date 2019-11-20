@@ -5,36 +5,19 @@
  */
 
 import Boom from 'boom';
-import { get } from 'lodash';
-import { UMAuthAdapter } from '../adapters/auth/adapter_types';
+import { RequestHandlerContext } from 'kibana/server';
 
-const supportedLicenses = ['basic', 'standard', 'gold', 'platinum', 'trial'];
+export type UMLicenseCheck = (context: RequestHandlerContext) => boolean;
 
-export class UMAuthDomain {
-  constructor(private readonly adapter: UMAuthAdapter, libs: {}) {
-    this.adapter = adapter;
+export const authDomain: UMLicenseCheck = ({ licensing: { license } }) => {
+  if (license === null) {
+    throw Boom.badRequest('Missing license information');
   }
-
-  public requestIsValid(request: any): boolean {
-    const license = this.adapter.getLicenseType();
-    if (license === null) {
-      throw Boom.badRequest('Missing license information');
-    }
-    if (!supportedLicenses.some(licenseType => licenseType === license)) {
-      throw Boom.forbidden('License not supported');
-    }
-    if (this.adapter.licenseIsActive() === false) {
-      throw Boom.forbidden('License not active');
-    }
-
-    return this.checkRequest(request);
+  if (!license.isOneOf(['basic', 'standard', 'gold', 'platinum', 'trial'])) {
+    throw Boom.forbidden('License not supported');
   }
-
-  private checkRequest(request: any): boolean {
-    const authenticated = get(request, 'auth.isAuthenticated', null);
-    if (authenticated === null) {
-      throw Boom.forbidden('Missing authentication');
-    }
-    return authenticated;
+  if (license.isActive === false) {
+    throw Boom.forbidden('License not active');
   }
-}
+  return true;
+};

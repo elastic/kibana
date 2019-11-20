@@ -44,6 +44,15 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
           handler
         );
         break;
+      case 'POST':
+        this.server.route.post(
+          {
+            path,
+            validate,
+          },
+          handler
+        );
+        break;
       default:
         throw new Error(`Handler for method ${method} is not defined`);
     }
