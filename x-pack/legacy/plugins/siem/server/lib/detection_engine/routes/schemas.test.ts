@@ -506,7 +506,7 @@ describe('schemas', () => {
       ).toBeFalsy();
     });
 
-    test('saved_query type cannot have filters with it', () => {
+    test('saved_query type can have filters with it', () => {
       expect(
         createSignalsSchema.validate<Partial<SignalAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -522,6 +522,28 @@ describe('schemas', () => {
           type: 'saved_query',
           saved_id: 'some id',
           filters: [],
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('filters cannot be a string', () => {
+      expect(
+        createSignalsSchema.validate<
+          Partial<Omit<SignalAlertParamsRest, 'filters'> & { filters: string }>
+        >({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'saved_query',
+          saved_id: 'some id',
+          filters: 'some string',
         }).error
       ).toBeTruthy();
     });
@@ -1547,7 +1569,7 @@ describe('schemas', () => {
       ).toBeFalsy();
     });
 
-    test('saved_query type cannot have filters with it', () => {
+    test('saved_query type can have filters with it', () => {
       expect(
         updateSignalSchema.validate<Partial<UpdateSignalAlertParamsRest>>({
           id: 'rule-1',
@@ -1562,7 +1584,7 @@ describe('schemas', () => {
           saved_id: 'some id',
           filters: [],
         }).error
-      ).toBeTruthy();
+      ).toBeFalsy();
     });
 
     test('saved_query type cannot have filter with it', () => {
@@ -1716,6 +1738,18 @@ describe('schemas', () => {
         >({
           id: 'rule-1',
           meta: 'should not work',
+        }).error
+      ).toBeTruthy();
+    });
+
+    test('filters cannot be a string', () => {
+      expect(
+        updateSignalSchema.validate<
+          Partial<Omit<UpdateSignalAlertParamsRest, 'filters'> & { filters: string }>
+        >({
+          rule_id: 'rule-1',
+          type: 'query',
+          filters: 'some string',
         }).error
       ).toBeTruthy();
     });

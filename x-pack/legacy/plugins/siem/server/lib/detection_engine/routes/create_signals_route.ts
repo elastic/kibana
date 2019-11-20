@@ -32,24 +32,19 @@ export const createCreateSignalsRoute: Hapi.ServerRoute = {
     const {
       description,
       enabled,
-      // eslint-disable-next-line @typescript-eslint/camelcase
       false_positives: falsePositives,
       filter,
       from,
       immutable,
       query,
       language,
-      // eslint-disable-next-line @typescript-eslint/camelcase
       output_index: outputIndex,
-      // eslint-disable-next-line @typescript-eslint/camelcase
       saved_id: savedId,
       meta,
       filters,
-      // eslint-disable-next-line @typescript-eslint/camelcase
       rule_id: ruleId,
       index,
       interval,
-      // eslint-disable-next-line @typescript-eslint/camelcase
       max_signals: maxSignals,
       risk_score: riskScore,
       name,

@@ -56,17 +56,37 @@ export const createSignalsSchema = Joi.object({
   enabled: enabled.default(true),
   false_positives: false_positives.default([]),
   filter: filter.when('type', { is: 'filter', then: Joi.required(), otherwise: Joi.forbidden() }),
-  filters: filters.when('type', { is: 'query', then: Joi.optional(), otherwise: Joi.forbidden() }),
+  filters: Joi.when('type', {
+    is: 'query',
+    then: filters.optional(),
+    otherwise: Joi.when('type', {
+      is: 'saved_query',
+      then: filters.optional(),
+      otherwise: Joi.forbidden(),
+    }),
+  }),
   from: from.required(),
   rule_id,
   immutable: immutable.default(false),
   index: index.required(),
   interval: interval.default('5m'),
-  query: query.when('type', { is: 'query', then: Joi.required(), otherwise: Joi.forbidden() }),
-  language: language.when('type', {
+  query: Joi.when('type', {
     is: 'query',
-    then: Joi.required(),
-    otherwise: Joi.forbidden(),
+    then: query.required(),
+    otherwise: Joi.when('type', {
+      is: 'saved_query',
+      then: query.optional(),
+      otherwise: Joi.forbidden(),
+    }),
+  }),
+  language: Joi.when('type', {
+    is: 'query',
+    then: language.required(),
+    otherwise: Joi.when('type', {
+      is: 'saved_query',
+      then: language.optional(),
+      otherwise: Joi.forbidden(),
+    }),
   }),
   output_index: output_index.required(),
   saved_id: saved_id.when('type', {
@@ -90,18 +110,38 @@ export const updateSignalSchema = Joi.object({
   enabled,
   false_positives,
   filter: filter.when('type', { is: 'filter', then: Joi.optional(), otherwise: Joi.forbidden() }),
-  filters: filters.when('type', { is: 'query', then: Joi.optional(), otherwise: Joi.forbidden() }),
+  filters: Joi.when('type', {
+    is: 'query',
+    then: filters.optional(),
+    otherwise: Joi.when('type', {
+      is: 'saved_query',
+      then: filters.optional(),
+      otherwise: Joi.forbidden(),
+    }),
+  }),
   from,
   rule_id,
   id,
   immutable,
   index,
   interval,
-  query: query.when('type', { is: 'query', then: Joi.optional(), otherwise: Joi.forbidden() }),
-  language: language.when('type', {
+  query: Joi.when('type', {
     is: 'query',
-    then: Joi.optional(),
-    otherwise: Joi.forbidden(),
+    then: query.optional(),
+    otherwise: Joi.when('type', {
+      is: 'saved_query',
+      then: query.optional(),
+      otherwise: Joi.forbidden(),
+    }),
+  }),
+  language: Joi.when('type', {
+    is: 'query',
+    then: language.optional(),
+    otherwise: Joi.when('type', {
+      is: 'saved_query',
+      then: language.optional(),
+      otherwise: Joi.forbidden(),
+    }),
   }),
   output_index,
   saved_id: saved_id.when('type', {
