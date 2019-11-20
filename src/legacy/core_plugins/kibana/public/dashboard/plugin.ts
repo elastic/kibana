@@ -74,11 +74,7 @@ export class DashboardPlugin implements Plugin {
 
   public setup(
     core: CoreSetup,
-    {
-      __LEGACY: { getAngularDependencies, ...legacyServices },
-      home,
-      kibana_legacy,
-    }: DashboardPluginSetupDependencies
+    { __LEGACY: { getAngularDependencies }, home, kibana_legacy }: DashboardPluginSetupDependencies
   ) {
     const app: App = {
       id: '',
@@ -98,7 +94,6 @@ export class DashboardPlugin implements Plugin {
         const angularDependencies = await getAngularDependencies();
         const deps: RenderDeps = {
           core: contextCore as LegacyCoreStart,
-          ...legacyServices,
           ...angularDependencies,
           navigation,
           dataStart,
