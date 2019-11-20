@@ -25,6 +25,7 @@
 
 // Standardizes the look and layout of resizable area handles
 @mixin kbnResizer($size: ($euiSizeM + 2px), $direction: horizontal) {
+  position: relative;
   display: flex;
   flex: 0 0 $size;
   background-color: $euiPageBackgroundColor;
@@ -34,10 +35,8 @@
   user-select: none;
 
   @if ($direction == horizontal) {
-    cursor: ew-resize;
     width: $size;
   } @else if ($direction == vertical) {
-    cursor: ns-resize;
     height: $size;
     width: 100%;
   } @else {
@@ -52,6 +51,21 @@
   &.active {
     background-color: $euiColorPrimary;
     color: $euiColorEmptyShade;
+  }
+
+  &:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    @if ($direction == horizontal) {
+      cursor: ew-resize;
+    } @else if ($direction == vertical) {
+      cursor: ns-resize;
+    }
   }
 }
 

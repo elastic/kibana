@@ -4,6 +4,10 @@
 // LAYOUT
 //
 
+.visEditorSidebar {
+  min-width: $vis-editor-sidebar-min-width;
+}
+
 .visEditorSidebar__form {
   @include flex-parent(1, 1, auto);
 

@@ -95,16 +95,19 @@ export function Main() {
         </EuiFlexItem>
         {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
         <EuiFlexItem>
-          <PanelsContainer onPanelWidthChange={onPanelWidthChange}>
+          <PanelsContainer
+            onPanelWidthChange={onPanelWidthChange}
+            resizerClassName="conApp__resizer"
+          >
             <Panel
               style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
-              initialWidth={firstPanelWidth + '%'}
+              initialWidth={firstPanelWidth}
             >
               <Editor />
             </Panel>
             <Panel
               style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
-              initialWidth={secondPanelWidth + '%'}
+              initialWidth={secondPanelWidth}
             >
               <EditorOutput />
             </Panel>

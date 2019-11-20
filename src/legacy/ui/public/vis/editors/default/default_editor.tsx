@@ -18,11 +18,16 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
+import { getInitialWidth } from 'ui/vis/editor_size';
 
 import { start as embeddables } from '../../../../../core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { VisualizeEmbeddable } from '../../../../../core_plugins/kibana/public/visualize/embeddable';
 import { VisualizeEmbeddableFactory } from '../../../../../core_plugins/kibana/public/visualize/embeddable/visualize_embeddable_factory';
 import { EditorRenderProps } from '../../../../../core_plugins/kibana/public/visualize/types';
+import {
+  PanelsContainer,
+  Panel,
+} from '../../../../../core_plugins/console/np_ready/public/application/components/split_panel';
 
 import './vis_type_agg_filter';
 import { DefaultEditorSideBar } from './components/sidebar';
@@ -82,11 +87,15 @@ function DefaultEditor({
     visualize();
   }, [visRef.current, visHandler, uiState, savedObj, timeRange, filters, appState, query]);
 
-  return (
-    <>
-      <div className="visEditor--default">
-        <div className="visEditor__canvas" ref={visRef} />
+  const editorInitialWidth = getInitialWidth(vis.type.editorConfig.defaultSize);
 
+  return (
+    <PanelsContainer className="visEditor--default" resizerClassName="visEditor__resizer">
+      <Panel className="visEditor__visualization" initialWidth={100 - editorInitialWidth}>
+        <div className="visEditor__canvas" ref={visRef} />
+      </Panel>
+
+      <Panel className="visEditor__collapsibleSidebar" initialWidth={editorInitialWidth}>
         <DefaultEditorSideBar
           dispatch={dispatch}
           formState={formState}
@@ -97,8 +106,8 @@ function DefaultEditor({
           vis={vis}
           uiState={uiState}
         />
-      </div>
-    </>
+      </Panel>
+    </PanelsContainer>
   );
 }
 

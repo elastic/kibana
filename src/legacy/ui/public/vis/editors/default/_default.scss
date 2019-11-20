@@ -13,8 +13,8 @@
 
 .visEditor__collapsibleSidebar {
   min-width: $vis-editor-sidebar-min-width;
-  width: $vis-editor-sidebar-min-width;
   max-width: 100%;
+  flex-shrink: 0;
 
   @include euiBreakpoint('xs', 's', 'm') {
     // If we are on a small screen we force the editor to take 100% width.
@@ -30,25 +30,12 @@
   min-width: 0;
 }
 
-.visEditor__collapsibleSidebar--small {
-  width: 15%;
-}
-
-.visEditor__collapsibleSidebar--medium {
-  width: 30%;
-}
-
-.visEditor__collapsibleSidebar--large {
-  width: 50%;
-}
-
 /**
  * Resizer
  */
 
 .visEditor__resizer {
-  @include kbnResizer($vis-editor-resizer-width);
-
+  @include kbnResizer($euiSizeM);
   @include euiBreakpoint('xs', 's', 'm') {
     display: none;
   }
@@ -57,6 +44,16 @@
 /**
  * Canvas area
  */
+
+.visEditor__visualization {
+  display: flex;
+  flex-basis: 100%;
+
+  @include euiBreakpoint('xs', 's', 'm') {
+    // If we are on a small screen we force the visualization to take 100% width.
+    width: 100% !important;
+  }
+}
 
 .visEditor__canvas {
   background-color: $euiColorEmptyShade;

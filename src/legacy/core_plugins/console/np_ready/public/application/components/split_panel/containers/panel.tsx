@@ -22,20 +22,22 @@ import { usePanelContext } from '../context';
 
 export interface Props {
   children: ReactNode[] | ReactNode;
-  initialWidth?: string;
+  className?: string;
+  initialWidth?: number;
   style?: CSSProperties;
 }
 
-export function Panel({ children, initialWidth = '100%', style = {} }: Props) {
-  const [width, setWidth] = useState(initialWidth);
+export function Panel({ children, className, initialWidth = 100, style = {} }: Props) {
+  const [width, setWidth] = useState(`${initialWidth}%`);
   const { registry } = usePanelContext();
   const divRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     registry.registerPanel({
-      initialWidth,
+      width: initialWidth,
       setWidth(value) {
         setWidth(value + '%');
+        this.width = value;
       },
       getWidth() {
         return divRef.current!.getBoundingClientRect().width;
@@ -44,7 +46,7 @@ export function Panel({ children, initialWidth = '100%', style = {} }: Props) {
   }, []);
 
   return (
-    <div ref={divRef} style={{ ...style, width, display: 'flex' }}>
+    <div className={className} ref={divRef} style={{ ...style, width, display: 'flex' }}>
       {children}
     </div>
   );

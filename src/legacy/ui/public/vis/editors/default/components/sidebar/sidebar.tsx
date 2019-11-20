@@ -36,8 +36,6 @@ import {
 import { AggGroupNames } from '../../agg_groups';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
 
-const sidebarClassName = 'visEditor__collapsibleSidebar';
-
 interface DefaultEditorSideBarProps {
   dispatch: React.Dispatch<EditorAction>;
   formState: {
@@ -150,11 +148,7 @@ function DefaultEditorSideBar({
 
   return (
     <EuiFlexGroup
-      className={`collapsible-sidebar ${sidebarClassName} ${
-        vis.type.editorConfig.defaultSize
-          ? `visEditor__collapsibleSidebar--${vis.type.editorConfig.defaultSize}`
-          : ''
-      }`}
+      className="visEditorSidebar"
       direction="column"
       justifyContent="spaceBetween"
       gutterSize="none"
