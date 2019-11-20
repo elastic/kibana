@@ -17,10 +17,15 @@ exports[`MonitorStatusList component renders checks 1`] = `
   <EuiCallOut
     color="warning"
   >
-    Some heartbeat instances do not have a location defined.
-    <LocationLink />
-     
-    to your heartbeat configuration.
+    <FormattedMessage
+      defaultMessage="Some heartbeat instances do not have a location defined. {link} to your heartbeat configuration."
+      id="xpack.uptime.monitorList.drawer.missingLocation"
+      values={
+        Object {
+          "link": <LocationLink />,
+        }
+      }
+    />
   </EuiCallOut>
 </Fragment>
 `;
@@ -42,10 +47,15 @@ exports[`MonitorStatusList component renders null in place of child status with 
   <EuiCallOut
     color="warning"
   >
-    Some heartbeat instances do not have a location defined.
-    <LocationLink />
-     
-    to your heartbeat configuration.
+    <FormattedMessage
+      defaultMessage="Some heartbeat instances do not have a location defined. {link} to your heartbeat configuration."
+      id="xpack.uptime.monitorList.drawer.missingLocation"
+      values={
+        Object {
+          "link": <LocationLink />,
+        }
+      }
+    />
   </EuiCallOut>
 </Fragment>
 `;

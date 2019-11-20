@@ -5,10 +5,15 @@ exports[`MonitorStatusRow component renders status row when status is down 1`] =
   <EuiHealth
     color="#bd271e"
   >
-    Down in 
-    Berlin
-    , Islamabad
-    , London
+    <FormattedMessage
+      defaultMessage="Down in {locations}"
+      id="xpack.uptime.monitorList.drawer.locations.statusDown"
+      values={
+        Object {
+          "locations": "Berlin, Islamabad, London",
+        }
+      }
+    />
   </EuiHealth>
   <EuiSpacer
     size="s"
@@ -21,10 +26,15 @@ exports[`MonitorStatusRow component renders status row when status is up 1`] = `
   <EuiHealth
     color="#bd271e"
   >
-    Down in 
-    Berlin
-    , Islamabad
-    , London
+    <FormattedMessage
+      defaultMessage="Down in {locations}"
+      id="xpack.uptime.monitorList.drawer.locations.statusDown"
+      values={
+        Object {
+          "locations": "Berlin, Islamabad, London",
+        }
+      }
+    />
   </EuiHealth>
   <EuiSpacer
     size="s"
