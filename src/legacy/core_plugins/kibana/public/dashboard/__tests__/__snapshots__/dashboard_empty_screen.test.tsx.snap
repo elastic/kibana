@@ -218,44 +218,25 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
           This dashboard is empty. Let’s fill it up!
         </h2>
         <p>
-          <EuiI18n
-            defaults={
-              Array [
-                "Click the ",
-                " button in the menu bar above to add a visualization to the dashboard.",
-                "Add",
-                "Add visualization",
-              ]
-            }
-            tokens={
-              Array [
-                "kbn.dashboard.addVisualizationDescription1",
-                "kbn.dashboard.addVisualizationDescription2",
-                "kbn.dashboard.addVisualizationLinkText",
-                "kbn.dashboard.addVisualizationLinkAriaLabel",
-              ]
-            }
-          >
-            <span>
-              Click the 
-              <EuiLink
+          <span>
+            Click the 
+            <EuiLink
+              aria-label="Add visualization"
+              data-test-subj="emptyDashboardAddPanelButton"
+              onClick={[MockFunction]}
+            >
+              <button
                 aria-label="Add visualization"
+                className="euiLink euiLink--primary"
                 data-test-subj="emptyDashboardAddPanelButton"
                 onClick={[MockFunction]}
+                type="button"
               >
-                <button
-                  aria-label="Add visualization"
-                  className="euiLink euiLink--primary"
-                  data-test-subj="emptyDashboardAddPanelButton"
-                  onClick={[MockFunction]}
-                  type="button"
-                >
-                  Add
-                </button>
-              </EuiLink>
-               button in the menu bar above to add a visualization to the dashboard.
-            </span>
-          </EuiI18n>
+                Add
+              </button>
+            </EuiLink>
+             button in the menu bar above to add a visualization to the dashboard.
+          </span>
         </p>
         <p
           className="linkToVisualizeParagraph"
@@ -508,42 +489,25 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
           This dashboard is empty. Let’s fill it up!
         </h2>
         <p>
-          <EuiI18n
-            defaults={
-              Array [
-                "Click the ",
-                " button in the menu bar above to start working on your new dashboard.",
-                "Edit",
-                "Edit dashboard",
-              ]
-            }
-            tokens={
-              Array [
-                "kbn.dashboard.howToStartWorkingOnNewDashboardDescription1",
-                "kbn.dashboard.howToStartWorkingOnNewDashboardDescription2",
-                "kbn.dashboard.howToStartWorkingOnNewDashboardEditLinkText",
-                "kbn.dashboard.howToStartWorkingOnNewDashboardEditLinkAriaLabel",
-              ]
-            }
-          >
-            <span>
-              Click the 
-              <EuiLink
+          <span>
+            Click the 
+            <EuiLink
+              aria-label="Edit dashboard"
+              data-test-subj=""
+              onClick={[MockFunction]}
+            >
+              <button
                 aria-label="Edit dashboard"
+                className="euiLink euiLink--primary"
+                data-test-subj=""
                 onClick={[MockFunction]}
+                type="button"
               >
-                <button
-                  aria-label="Edit dashboard"
-                  className="euiLink euiLink--primary"
-                  onClick={[MockFunction]}
-                  type="button"
-                >
-                  Edit
-                </button>
-              </EuiLink>
-               button in the menu bar above to start working on your new dashboard.
-            </span>
-          </EuiI18n>
+                Edit
+              </button>
+            </EuiLink>
+             button in the menu bar above to start working on your new dashboard.
+          </span>
         </p>
       </PseudoLocaleWrapper>
     </IntlProvider>
