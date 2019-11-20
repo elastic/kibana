@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { plugin } from './np_ready';
+import { UpgradeAssistantUIPlugin } from './plugin';
+
+export const plugin = () => {
+  return new UpgradeAssistantUIPlugin();
+};
