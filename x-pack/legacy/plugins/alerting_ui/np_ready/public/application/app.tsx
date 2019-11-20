@@ -28,7 +28,7 @@ class ShareRouter extends Component {
 }
 
 export const App = () => {
-  const sections: Section[] = ['alerts', 'actions'];
+  const sections: Section[] = ['alerts', 'connectors'];
 
   const sectionsRegex = sections.join('|');
 

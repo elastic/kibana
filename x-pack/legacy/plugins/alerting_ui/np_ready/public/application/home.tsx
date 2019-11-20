@@ -8,7 +8,7 @@ import React, { useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import { BASE_PATH, Section, routeToActions, routeToAlerts } from './constants';
+import { BASE_PATH, Section, routeToConnectors, routeToAlerts } from './constants';
 import { breadcrumbService } from './lib/breadcrumb';
 import { docTitleService } from './lib/doc_title';
 import { useAppDependencies } from './index';
@@ -46,9 +46,12 @@ export const AlertsUIHome: React.FunctionComponent<RouteComponentProps<MatchPara
 
   if (canShowActions) {
     tabs.push({
-      id: 'actions',
+      id: 'connectors',
       name: (
-        <FormattedMessage id="xpack.alertingUI.home.actionsTabTitle" defaultMessage="Actions" />
+        <FormattedMessage
+          id="xpack.alertingUI.home.connectorsTabTitle"
+          defaultMessage="Connectors"
+        />
       ),
     });
   }
@@ -82,7 +85,7 @@ export const AlertsUIHome: React.FunctionComponent<RouteComponentProps<MatchPara
         <EuiSpacer size="s" />
 
         <Switch>
-          {canShowActions && <Route exact path={routeToActions} component={ActionsList} />}
+          {canShowActions && <Route exact path={routeToConnectors} component={ActionsList} />}
           {canShowAlerts && <Route exact path={routeToAlerts} component={AlertsList} />}
         </Switch>
       </EuiPageContent>
