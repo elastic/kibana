@@ -17,17 +17,10 @@
  * under the License.
  */
 
-import { uiRegistry } from './_registry';
-import { capabilities } from '../capabilities';
-export { FeatureCatalogueCategory } from '../../../../plugins/home/public';
-
-export const FeatureCatalogueRegistryProvider = uiRegistry({
-  name: 'featureCatalogue',
-  index: ['id'],
-  group: ['category'],
-  order: ['title'],
-  filter: featureCatalogItem => {
-    const isDisabledViaCapabilities = capabilities.get().catalogue[featureCatalogItem.id] === false;
-    return !isDisabledViaCapabilities && Object.keys(featureCatalogItem).length > 0;
-  }
-});
+export {
+  FeatureCatalogueCategory,
+  FeatureCatalogueEntry,
+  FeatureCatalogueRegistry,
+  FeatureCatalogueRegistrySetup,
+  FeatureCatalogueRegistryStart,
+} from './feature_catalogue_registry';
