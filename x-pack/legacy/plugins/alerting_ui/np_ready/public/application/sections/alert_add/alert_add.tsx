@@ -37,7 +37,7 @@ import { useAppDependencies } from '../..';
 import { saveAlert, loadActionTypes } from '../../lib/api';
 import { AlertsContext } from '../../context/alerts_context';
 import { alertReducer } from './alert_reducer';
-import { ErrableFormRow } from '../../components/page_error';
+import { ErrableFormRow, SectionError } from '../../components/page_error';
 import {
   AlertTypeModel,
   Alert,
@@ -114,6 +114,9 @@ export const AlertAdd = ({ refreshList }: Props) => {
   const [alertThrottle, setAlertThrottle] = useState<number | null>(null);
   const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>('');
   const tagsOptions = alert.tags ? alert.tags.map((label: string) => ({ label })) : [];
+  const [serverError, setServerError] = useState<{
+    body: { message: string; error: string };
+  } | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -170,6 +173,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
     setAlertType(undefined);
     setAlertAction(undefined);
     setSelectedTabId('alert');
+    setServerError(null);
   }, [setAlertFlyoutVisibility]);
 
   if (!alertFlyoutVisible) {
@@ -463,6 +467,20 @@ export const AlertAdd = ({ refreshList }: Props) => {
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <EuiForm>
+            {serverError && (
+              <Fragment>
+                <SectionError
+                  title={
+                    <FormattedMessage
+                      id="xpack.alertingUI.sections.alertAdd.saveActionErrorTitle"
+                      defaultMessage="Error saving alert"
+                    />
+                  }
+                  error={serverError}
+                />
+                <EuiSpacer />
+              </Fragment>
+            )}
             <EuiFlexGrid columns={2}>
               <EuiFlexItem>
                 <ErrableFormRow
@@ -622,7 +640,10 @@ export const AlertAdd = ({ refreshList }: Props) => {
                   setIsSaving(true);
                   const savedAlert = await onSaveAlert();
                   setIsSaving(false);
-                  setAlertFlyoutVisibility(false);
+                  if (savedAlert && savedAlert.error) {
+                    return setServerError(savedAlert.error);
+                  }
+                  closeFlyout();
                   refreshList();
                 }}
               >
