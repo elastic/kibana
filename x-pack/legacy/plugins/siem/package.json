@@ -18,16 +18,5 @@
     "lodash": "^4.17.15",
     "react-beautiful-dnd": "^10.0.1",
     "react-markdown": "^4.0.6"
-  },
-  "workspaces": {
-    "packages": [
-      "packages/*"
-    ],
-    "nohoist": [
-      "**/mochawesome",
-      "**/mochawesome/**",
-      "**/cypress-multi-reporters",
-      "**/cypress-multi-reporters/**"
-    ]
   }
 }

@@ -358,10 +358,9 @@
   },
   "workspaces": {
     "nohoist": [
-      "**/mochawesome",
-      "**/mochawesome/**",
-      "**/cypress-multi-reporters",
-      "**/cypress-multi-reporters/**"
+      "mochawesome",
+      "mochawesome-merge",
+      "cypress-multi-reporters"
     ]
   }
 }
