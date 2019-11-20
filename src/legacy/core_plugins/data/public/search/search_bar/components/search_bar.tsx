@@ -35,8 +35,8 @@ import {
   withKibana,
   KibanaReactContextValue,
 } from '../../../../../../../plugins/kibana_react/public';
-import { IDataPluginServices } from '../../../types';
 import {
+  IDataPluginServices,
   TimeRange,
   Query,
   esFilters,

@@ -17,17 +17,15 @@
  * under the License.
  */
 
-import { esFilters } from '../../../../../../../../../plugins/data/public';
+import { esFilters } from '../../..';
 
-export const phrasesFilter: esFilters.PhrasesFilter = {
+export const existsFilter: esFilters.ExistsFilter = {
   meta: {
     index: 'logstash-*',
-    type: 'phrases',
-    key: 'machine.os.raw',
-    value: 'win xp, osx',
-    params: ['win xp', 'osx'],
     negate: false,
     disabled: false,
+    type: 'exists',
+    key: 'machine.os',
     alias: null,
   },
   $state: {
