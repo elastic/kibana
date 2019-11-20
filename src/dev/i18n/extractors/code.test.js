@@ -21,7 +21,7 @@ import { parse } from '@babel/parser';
 import { isCallExpression, isJSXOpeningElement } from '@babel/types';
 
 import {
-  extractCodeMessages,
+  extractCodeMessages, isEuiI18nElement,
   isFormattedMessageElement,
   isIntlFormatMessageFunction,
 } from './code';
@@ -46,6 +46,42 @@ class Component extends PureComponent {
 }
 `);
 
+const extractCodeMessagesSource2 = Buffer.from(`
+i18n('kbn.mgmt.id-1', { defaultMessage: 'Message text 1' });
+
+class Component extends PureComponent {
+  render() {
+    return (
+      <div>
+        <EuiI18n token="euiI18nRenderprop.placeholderName" default="John Doe">
+          {placeholderName => <EuiFieldText placeholder={placeholderName} />}
+        </EuiI18n>
+      </div>
+    );
+  }
+}
+`);
+
+const extractCodeMessagesSource3 = Buffer.from(`
+class Component extends PureComponent {
+  render() {
+    return (
+      <div>
+         <EuiI18n
+        tokens={['euiI18nMulti.title', 'euiI18nMulti.description']}
+        defaults={['Card Title', 'Card Description']}>
+        {([title, description]) => (
+          <EuiCard title={title} description={description} />
+        )}
+      </EuiI18n>
+      </div>
+    );
+  }
+}
+
+i18n('kbn.mgmt.id-6', { defaultMessage: 'Message text 6' });
+`);
+
 const intlFormatMessageSource = `
   formatMessage({ id: 'kbn.mgmt.id-1', defaultMessage: 'Message text 1', description: 'Message description' });
   intl.formatMessage({ id: 'kbn.mgmt.id-2', defaultMessage: 'Message text 2', description: 'Message description' });
@@ -65,6 +101,20 @@ function f() {
 }
 `;
 
+const euiI18nSource = `
+function f() {
+  return (
+     <EuiI18n
+        tokens={['euiI18nMulti.title', 'euiI18nMulti.description']}
+        defaults={['Card Title', 'Card Description']}>
+        {([title, description]) => (
+          <EuiCard title={title} description={description} />
+        )}
+      </EuiI18n>
+  );
+}
+`;
+
 const report = jest.fn();
 
 describe('dev/i18n/extractors/code', () => {
@@ -74,6 +124,16 @@ describe('dev/i18n/extractors/code', () => {
 
   test('extracts React, server-side and angular service default messages', () => {
     const actual = Array.from(extractCodeMessages(extractCodeMessagesSource));
+    expect(actual.sort()).toMatchSnapshot();
+  });
+
+  test('extracts React, EuiI18n with a single token', () => {
+    const actual = Array.from(extractCodeMessages(extractCodeMessagesSource2));
+    expect(actual.sort()).toMatchSnapshot();
+  });
+
+  test('extracts React, EuiI18n with multiple tokens', () => {
+    const actual = Array.from(extractCodeMessages(extractCodeMessagesSource3));
     expect(actual.sort()).toMatchSnapshot();
   });
 
@@ -113,5 +173,16 @@ describe('isFormattedMessageElement', () => {
     );
 
     expect(isFormattedMessageElement(jsxOpeningElementNode)).toBe(true);
+  });
+});
+
+describe('isEuiI18nElement', () => {
+  test('detects EuiI18n jsx element', () => {
+    const AST = parse(euiI18nSource, { plugins: ['jsx'] });
+    const jsxOpeningElementNode = [...traverseNodes(AST.program.body)].find(node =>
+      isJSXOpeningElement(node)
+    );
+
+    expect(isEuiI18nElement(jsxOpeningElementNode)).toBe(true);
   });
 });

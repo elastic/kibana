@@ -1,5 +1,50 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`dev/i18n/extractors/code extracts React, EuiI18n with a single token 1`] = `
+Array [
+  Array [
+    "euiI18nRenderprop.placeholderName",
+    Object {
+      "description": undefined,
+      "message": "John Doe",
+    },
+  ],
+  Array [
+    "kbn.mgmt.id-1",
+    Object {
+      "description": undefined,
+      "message": "Message text 1",
+    },
+  ],
+]
+`;
+
+exports[`dev/i18n/extractors/code extracts React, EuiI18n with multiple tokens 1`] = `
+Array [
+  Array [
+    "euiI18nMulti.description",
+    Object {
+      "description": undefined,
+      "message": "Card Description",
+    },
+  ],
+  Array [
+    "euiI18nMulti.title",
+    Object {
+      "description": undefined,
+      "message": "Card Title",
+    },
+  ],
+  Array [
+    "kbn.mgmt.id-6",
+    Object {
+      "description": undefined,
+      "message": "Message text 6",
+    },
+  ],
+]
+`;
+
 exports[`dev/i18n/extractors/code extracts React, server-side and angular service default messages 1`] = `
 Array [
   Array [

@@ -26,7 +26,8 @@ import {
   isObjectProperty,
   isStringLiteral,
   isTemplateLiteral,
-  isBinaryExpression,
+  isBinaryExpression, isArrayExpression,
+  isJSXExpressionContainer,
 } from '@babel/types';
 import fs from 'fs';
 import glob from 'glob';
@@ -85,6 +86,18 @@ export function formatJSString(string) {
 
 export function formatHTMLString(string) {
   return (string || '').replace(HTML_LINE_BREAK_REGEX, ' ');
+}
+
+export function formatHTMLStringArray(array) {
+  return array.map(el => formatHTMLString(el));
+}
+
+export function formatTokenDefaultValue(token, defaultValue) {
+  return [token, { message: defaultValue, description: undefined }];
+}
+
+export function formatTokensDefaultValues(tokens, defaultValues) {
+  return tokens.map((token, index) => formatTokenDefaultValue(token, defaultValues[index]));
 }
 
 /**
@@ -291,6 +304,43 @@ export function extractMessageValueFromNode(node, messageId) {
     messageId,
     `defaultMessage value should be a string or template literal ("${messageId}").`
   );
+}
+
+export function extractTokenFromNode(node) {
+  if (!isStringLiteral(node)) {
+    throw createFailError(`Token should be a string literal.`);
+  }
+
+  return node.value;
+}
+
+export function extractDefaultValueFromNode(node, token) {
+  return extractStringFromNode(
+    node,
+    token,
+    `default value should be a string or template literal ("${token}").`
+  );
+}
+
+function extractStringArrayFromNode(node, name, extractionFunction) {
+  if (!isJSXExpressionContainer(node)) {
+    throw createFailError(`${name} are in an invalid format`);
+  }
+  const expression = node.expression;
+  if (!isArrayExpression(expression)) {
+    throw createFailError(`${name} should be an array`);
+  }
+  const elements = expression.elements;
+  const values = elements.map(el => extractionFunction(el));
+  return values;
+}
+
+export function extractTokensFromNode(node) {
+  return extractStringArrayFromNode(node, 'tokens', extractTokenFromNode);
+}
+
+export function extractDefaultValuesFromNode(node) {
+  return extractStringArrayFromNode(node, 'defaults', extractDefaultValueFromNode);
 }
 
 export function extractDescriptionValueFromNode(node, messageId) {

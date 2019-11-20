@@ -1,5 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`dev/i18n/extractors/react extractEui18nMessage extracts messages from "<EuiI18n>" element with a single token 1`] = `
+Array [
+  "euiI18nRenderprop.placeholderName",
+  Object {
+    "description": undefined,
+    "message": "John Doe",
+  },
+]
+`;
+
+exports[`dev/i18n/extractors/react extractEui18nMessage extracts messages from "<EuiI18n>" element with multiple tokens 1`] = `
+Array [
+  Array [
+    "euiI18nMulti.title",
+    Object {
+      "description": undefined,
+      "message": "Card Title",
+    },
+  ],
+  Array [
+    "euiI18nMulti.description",
+    Object {
+      "description": undefined,
+      "message": "Card Description",
+    },
+  ],
+]
+`;
+
 exports[`dev/i18n/extractors/react extractFormattedMessages extracts messages from "<FormattedMessage>" element 1`] = `
 Array [
   "message-id-2",
@@ -20,8 +49,8 @@ Array [
 ]
 `;
 
-exports[`dev/i18n/extractors/react extractIntlMessages throws if description value is not a string literal 1`] = `"description value should be a string or template literal (\\"message-id\\")."`;
-
 exports[`dev/i18n/extractors/react extractIntlMessages throws if defaultMessage value is not a string literal 1`] = `"defaultMessage value should be a string or template literal (\\"message-id\\")."`;
+
+exports[`dev/i18n/extractors/react extractIntlMessages throws if description value is not a string literal 1`] = `"description value should be a string or template literal (\\"message-id\\")."`;
 
 exports[`dev/i18n/extractors/react extractIntlMessages throws if message id is not a string literal 1`] = `"Message id should be a string literal."`;

@@ -17,17 +17,25 @@
  * under the License.
 */
 
-import { isJSXIdentifier, isObjectExpression, isJSXExpressionContainer } from '@babel/types';
+import {
+  isJSXIdentifier,
+  isObjectExpression,
+  isJSXExpressionContainer,
+} from '@babel/types';
 
 import {
   isPropertyWithKey,
   formatJSString,
   formatHTMLString,
+  formatHTMLStringArray,
+  formatTokenDefaultValue,
+  formatTokensDefaultValues,
   extractMessageIdFromNode,
   extractMessageValueFromNode,
   extractDescriptionValueFromNode,
   extractValuesKeysFromNode,
-  checkValuesProperty,
+  checkValuesProperty, extractDefaultValueFromNode, extractTokenFromNode,
+  extractTokensFromNode, extractDefaultValuesFromNode
 } from '../utils';
 import { DEFAULT_MESSAGE_KEY, VALUES_KEY, DESCRIPTION_KEY } from '../constants';
 import { createFailError } from '@kbn/dev-utils';
@@ -133,4 +141,56 @@ export function extractFormattedMessages(node) {
   checkValuesProperty(valuesKeys, message, messageId);
 
   return [messageId, { message, description }];
+}
+
+export function extractEuiI18nMessages(node) {
+  const [tokenAttribute, defaultAttribute, tokensAttribute, defaultsAttribute] = [
+    'token',
+    'default',
+    'tokens',
+    'defaults',
+  ].map(key => node.attributes.find(attribute => isJSXIdentifier(attribute.name, { name: key })));
+
+  const token = tokenAttribute
+    ? formatHTMLString(extractTokenFromNode(tokenAttribute.value))
+    : undefined;
+
+  const tokens = tokensAttribute
+    ? formatHTMLStringArray(extractTokensFromNode(tokensAttribute.value))
+    : undefined;
+
+  if (!token && !tokens) {
+    throw createFailError(`<EuiI18n> must have either token or tokens value`);
+  }
+
+  const defaultValue = defaultAttribute
+    ? formatHTMLString(extractDefaultValueFromNode(defaultAttribute.value, token))
+    : undefined;
+
+  const defaultValues = defaultsAttribute
+    ? formatHTMLStringArray(extractDefaultValuesFromNode(defaultsAttribute.value, tokens))
+    : undefined;
+
+  if (!defaultValue && !defaultValues) {
+    throw createFailError(`<EuiI18n> must have either default or defaults value`);
+  }
+
+  if (token && !defaultValue) {
+    throw createFailError(
+      `Empty default value in <EuiI18n> is not allowed ("${token}").`
+    );
+  } else if (tokens && !defaultValues) {
+    throw createFailError(
+      `Empty default values in <EuiI18n> are not allowed ("${tokens}").`
+    );
+  } else if (tokens && defaultValues && tokens.length !== defaultValues.length) {
+    throw createFailError(
+      `Number of tokens in <EuiI18n> must match number of default values ("${tokens}", "${defaultValues})`
+    );
+  }
+
+  if (tokens && defaultValues) {
+    return formatTokensDefaultValues(tokens, defaultValues);
+  }
+  return formatTokenDefaultValue(token, defaultValue);
 }

@@ -28,7 +28,7 @@ import {
 
 import { extractI18nCallMessages } from './i18n_call';
 import { createParserErrorMessage, isI18nTranslateFunction, traverseNodes } from '../utils';
-import { extractIntlMessages, extractFormattedMessages } from './react';
+import { extractIntlMessages, extractFormattedMessages, extractEuiI18nMessages } from './react';
 import { createFailError, isFailError } from '@kbn/dev-utils';
 
 /**
@@ -60,6 +60,15 @@ export function isIntlFormatMessageFunction(node) {
 export function isFormattedMessageElement(node) {
   return isJSXOpeningElement(node) && isJSXIdentifier(node.name, { name: 'FormattedMessage' });
 }
+
+export function isEuiI18nElement(node) {
+  return isJSXOpeningElement(node) && isJSXIdentifier(node.name, { name: 'EuiI18n' });
+}
+
+export function isEuiI18nElementMultipleTokens(node) {
+  return !!node.attributes.find(attribute => isJSXIdentifier(attribute.name, { name: 'tokens' }));
+}
+
 
 export function* extractCodeMessages(buffer, reporter) {
   let ast;
@@ -94,6 +103,15 @@ export function* extractCodeMessages(buffer, reporter) {
         yield extractIntlMessages(node);
       } else if (isFormattedMessageElement(node)) {
         yield extractFormattedMessages(node);
+      } else if (isEuiI18nElement(node)) {
+        const result = extractEuiI18nMessages(node);
+        if (isEuiI18nElementMultipleTokens(node)) {
+          for (let i = 0; i < result.length; i++) {
+            yield result[i];
+          }
+        } else {
+          yield result;
+        }
       }
     } catch (error) {
       if (!isFailError(error)) {
