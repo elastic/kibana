@@ -17,27 +17,24 @@
  * under the License.
  */
 
-import React, { Fragment, PureComponent } from 'react';
-import { EuiButton, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { getServices } from '../../kibana_services';
-const { docLinks } = getServices();
+import { esFilters } from '../../..';
 
-export class HelpMenu extends PureComponent {
-  render() {
-    return (
-      <Fragment>
-        <EuiHorizontalRule margin="none" />
-        <EuiSpacer />
-        <EuiButton
-          fill
-          iconType="popout"
-          href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/discover.html`}
-          target="_blank"
-        >
-          <FormattedMessage id="kbn.discover.helpMenu.docLabel" defaultMessage="Discover documentation" />
-        </EuiButton>
-      </Fragment>
-    );
-  }
-}
+export const rangeFilter: esFilters.RangeFilter = {
+  meta: {
+    index: 'logstash-*',
+    negate: false,
+    disabled: false,
+    alias: null,
+    type: 'range',
+    key: 'bytes',
+    value: '0 to 10',
+    params: {
+      gte: 0,
+      lt: 10,
+    },
+  },
+  $state: {
+    store: esFilters.FilterStateStore.APP_STATE,
+  },
+  range: {},
+};
