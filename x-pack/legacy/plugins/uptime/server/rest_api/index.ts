@@ -20,4 +20,5 @@ export const restApiRoutes: UMRestApiRouteCreator[] = [
   createGetSnapshotCount,
   createLogMonitorPageRoute,
   createLogOverviewPageRoute,
+  createGetMonitorDetailsRoute,
 ];
