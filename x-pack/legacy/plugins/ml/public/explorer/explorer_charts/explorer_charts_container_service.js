@@ -124,7 +124,7 @@ export function explorerChartsContainerServiceFactory(callback) {
           range.min,
           range.max,
           config.interval
-        );
+        ).toPromise();
       } else {
         // Extract the partition, by, over fields on which to filter.
         const criteriaFields = [];

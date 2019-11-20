@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { of } from 'rxjs';
 import jobConfig from '../../../../common/types/__mocks__/job_config_farequote';
 import mockAnnotations from './__mocks__/mock_annotations.json';
 import './annotations_table.test.mocks';
@@ -25,13 +24,17 @@ jest.mock('../../../services/job_service', () => ({
   }
 }));
 
-jest.mock('../../../services/ml_api_service', () => ({
-  ml: {
-    annotations: {
-      getAnnotations: jest.fn().mockReturnValue(of({ annotations: [] }))
+jest.mock('../../../services/ml_api_service', () => {
+  const { of } = require('rxjs');
+  const mockAnnotations$ = of({ annotations: [] });
+  return {
+    ml: {
+      annotations: {
+        getAnnotations: jest.fn().mockReturnValue(mockAnnotations$)
+      }
     }
-  }
-}));
+  };}
+);
 
 describe('AnnotationsTable', () => {
   test('Minimal initialization without props.', () => {
