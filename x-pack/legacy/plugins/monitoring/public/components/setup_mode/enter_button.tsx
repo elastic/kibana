@@ -29,10 +29,16 @@ export const SetupModeEnterButton: React.FC<SetupModeEnterButtonProps> = (
   }
 
   return (
-    <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 1 }}>
-      <EuiButton onClick={enterSetupMode} iconType="flag" iconSide="right" isLoading={isLoading}>
+    <div style={{ position: 'absolute', top: 15, left: 12, zIndex: 1 }}>
+      <EuiButton
+        onClick={enterSetupMode}
+        iconType="flag"
+        size="s"
+        iconSide="right"
+        isLoading={isLoading}
+      >
         {i18n.translate('xpack.monitoring.setupMode.enter', {
-          defaultMessage: 'Enter Setup Mode',
+          defaultMessage: 'Enter setup mode',
         })}
       </EuiButton>
     </div>
