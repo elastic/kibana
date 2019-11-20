@@ -81,7 +81,7 @@ export const isNotBetweenOperator = {
 
 export const existsOperator = {
   message: i18n.translate('data.filter.filterEditor.existsOperatorOptionLabel', {
-    defaultMessage: esFilters.FILTERS.EXISTS,
+    defaultMessage: 'exists',
   }),
   type: esFilters.FILTERS.EXISTS,
   negate: false,
