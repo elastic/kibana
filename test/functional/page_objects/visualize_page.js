@@ -676,11 +676,11 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async clickMetricsAndAxes() {
-      await testSubjects.click('visEditorTabadvanced');
+      await testSubjects.click('visEditorTab__advanced');
     }
 
     async clickOptionsTab() {
-      await testSubjects.click('visEditorTaboptions');
+      await testSubjects.click('visEditorTab__options');
     }
 
     async clickEnableCustomRanges() {

@@ -24,11 +24,11 @@ export function PointSeriesPageProvider({ getService }) {
 
   class PointSeriesVis {
     async clickOptions() {
-      return await testSubjects.click('visEditorTaboptions');
+      return await testSubjects.click('visEditorTab__options');
     }
 
     async clickAxisOptions() {
-      return await testSubjects.click('visEditorTabadvanced');
+      return await testSubjects.click('visEditorTab__advanced');
     }
 
     async clickAddAxis() {
