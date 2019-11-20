@@ -19,7 +19,6 @@ import { Location } from 'history';
 import React, { Component } from 'react';
 import { isEmpty, flatten } from 'lodash';
 import styled from 'styled-components';
-import { idx } from '@kbn/elastic-idx';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
@@ -172,9 +171,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
                   </EuiFlexItem>
                   <LicenseContext.Consumer>
                     {license =>
-                      this.renderMLHeader(
-                        idx(license, _ => _.features.ml.is_available)
-                      )
+                      this.renderMLHeader(license.features.ml?.is_available)
                     }
                   </LicenseContext.Consumer>
                 </EuiFlexGroup>

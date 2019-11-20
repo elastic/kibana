@@ -17,6 +17,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiTextAlign,
+  EuiFormErrorText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../common/constants';
@@ -43,6 +44,7 @@ export class GeometryFilterForm extends Component {
     intitialGeometryLabel: PropTypes.string.isRequired,
     onSubmit: PropTypes.func.isRequired,
     isFilterGeometryClosed: PropTypes.bool,
+    errorMsg: PropTypes.string,
   };
 
   static defaultProps = {
@@ -153,6 +155,10 @@ export class GeometryFilterForm extends Component {
         value: createIndexGeoFieldName({ indexPatternTitle, geoFieldName }),
       };
     });
+    let error;
+    if (this.props.errorMsg) {
+      error = <EuiFormErrorText>{this.props.errorMsg}</EuiFormErrorText>;
+    }
     return (
       <EuiForm className={this.props.className}>
         <EuiFormRow
@@ -190,6 +196,8 @@ export class GeometryFilterForm extends Component {
         {this._renderRelationInput()}
 
         <EuiSpacer size="m" />
+
+        {error}
 
         <EuiTextAlign textAlign="right">
           <EuiButton
