@@ -21,6 +21,7 @@ import { HelpMenu } from './components/help_menu/help_menu';
 import { loadExpressionTypes } from './lib/load_expression_types';
 // @ts-ignore: untyped local
 import { loadTransitions } from './lib/load_transitions';
+import { initLoadingIndicator } from './lib/loading_indicator';
 
 // @ts-ignore: untyped local
 import { initClipboard } from './lib/clipboard';
@@ -36,8 +37,6 @@ export interface CanvasStartDeps {
   __LEGACY: {
     absoluteToParsedUrl: (url: string, basePath: string) => any;
     formatMsg: any;
-    loadingCount: any;
-    badge: Chrome['badge'];
     setRootController: Chrome['setRootController'];
     storage: typeof Storage;
     trackSubUrlForApp: Chrome['trackSubUrlForApp'];
@@ -64,6 +63,7 @@ export class CanvasPlugin
     // This is where any setup actions need to occur.
     // Things like registering functions to the interpreter that need
     // to be available everywhere, not just in Canvas
+
     return {};
   }
 
@@ -75,6 +75,7 @@ export class CanvasPlugin
     initLocationProvider(core, plugins);
     initStore(core, plugins);
     initClipboard(plugins.__LEGACY.storage);
+    initLoadingIndicator(core.http.addLoadingCount);
 
     const CanvasRootController = CanvasRootControllerFactory(core, plugins);
     plugins.__LEGACY.setRootController('canvas', CanvasRootController);

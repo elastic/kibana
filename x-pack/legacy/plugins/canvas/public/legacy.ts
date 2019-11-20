@@ -26,12 +26,14 @@ const shimSetupPlugins = {};
 const shimStartPlugins: CanvasStartDeps = {
   ...npStart.plugins,
   __LEGACY: {
+    // ToDo: Copy directly into canvas
     absoluteToParsedUrl,
+    // ToDo: Copy directly into canvas
     formatMsg,
-    loadingCount,
-    badge: chrome.badge,
+    // ToDo: Remove in favor of core.application.register
     setRootController: chrome.setRootController,
     storage: Storage,
+    // ToDo: Won't be a part of New Platform. Will need to handle internally
     trackSubUrlForApp: chrome.trackSubUrlForApp,
     uiModules,
   },

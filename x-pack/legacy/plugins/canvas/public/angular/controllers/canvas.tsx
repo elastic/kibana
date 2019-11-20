@@ -26,7 +26,7 @@ export function CanvasRootControllerFactory(coreStart: CoreStart, plugins: Canva
     const domNode = $element[0];
 
     // set the read-only badge when appropriate
-    plugins.__LEGACY.badge.set(
+    coreStart.chrome.setBadge(
       coreStart.application.capabilities.canvas.save
         ? undefined
         : {
