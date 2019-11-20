@@ -16,9 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export { FeatureCatalogueSetup, FeatureCatalogueStart } from './plugin';
-export { FeatureCatalogueEntry, FeatureCatalogueCategory } from './services';
-import { FeatureCataloguePlugin } from './plugin';
-
-export const plugin = () => new FeatureCataloguePlugin();
+export {
+  TutorialsRegistry,
+  TutorialsRegistrySetup,
+  TutorialsRegistryStart,
+} from './tutorials_registry';
+export {
+  TutorialsCategory,
+  ParamTypes,
+  InstructionSetSchema,
+  ParamsSchema,
+  InstructionsSchema,
+  DashboardSchema,
+  ArtifactsSchema,
+  TutorialSchema,
+  TutorialProvider,
+  TutorialContextFactory,
+  ScopedTutorialContextFactory,
+} from './lib/tutorials_registry_types';

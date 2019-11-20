@@ -18,13 +18,13 @@
  */
 
 import { registryMock } from './plugin.test.mocks';
-import { HomePlugin } from './plugin';
+import { HomeServerPlugin } from './plugin';
 import { coreMock } from '../../../core/server/mocks';
 import { CoreSetup } from '../../../core/server';
 
 type MockedKeys<T> = { [P in keyof T]: jest.Mocked<T[P]> };
 
-describe('HomePlugin', () => {
+describe('HomeServerPlugin', () => {
   beforeEach(() => {
     registryMock.setup.mockClear();
     registryMock.start.mockClear();
@@ -34,7 +34,7 @@ describe('HomePlugin', () => {
     const mockCoreSetup: MockedKeys<CoreSetup> = coreMock.createSetup();
 
     test('wires up and returns registerTutorial and addScopedTutorialContextFactory', () => {
-      const setup = new HomePlugin().setup(mockCoreSetup);
+      const setup = new HomeServerPlugin().setup(mockCoreSetup);
       expect(setup).toHaveProperty('tutorials');
       expect(setup.tutorials).toHaveProperty('registerTutorial');
       expect(setup.tutorials).toHaveProperty('addScopedTutorialContextFactory');
@@ -43,7 +43,7 @@ describe('HomePlugin', () => {
 
   describe('start', () => {
     test('is defined', () => {
-      const start = new HomePlugin().start();
+      const start = new HomeServerPlugin().start();
       expect(start).toBeDefined();
       expect(start).toHaveProperty('tutorials');
     });
