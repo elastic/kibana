@@ -22,7 +22,6 @@ import { SearchService, SearchStart, createSearchBar, StatetfulSearchBarProps } 
 import { IndexPatternsService, IndexPatternsSetup, IndexPatternsStart } from './index_patterns';
 import { Storage, IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
-import { esFilters } from '../../../../plugins/data/common';
 import { initLegacyModule } from './shim/legacy_module';
 import { IUiActionsSetup } from '../../../../plugins/ui_actions/public';
 import {
@@ -56,7 +55,6 @@ export interface DataStart {
   ui: {
     SearchBar: React.ComponentType<StatetfulSearchBarProps>;
   };
-  filterTypes: any;
 }
 
 /**
@@ -124,7 +122,6 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, {}, DataPluginSt
       ui: {
         SearchBar,
       },
-      filterTypes: esFilters.FILTERS,
     };
   }
 
