@@ -11,7 +11,11 @@ def postComment(message) {
     error "Trying to post a GitHub PR comment on a non-PR or non-elastic PR build"
   }
 
-  return githubApi.post("repos/elastic/kibana/issues/${env.ghprbPullId}/comments", [ body: message ])
+  withCredentials([
+    string(credentialsId: '2a9602aa-ab9f-4e52-baf3-b71ca88469c7', variable: 'GITHUB_TOKEN'),
+  ]) {
+    return githubApi.post("repos/elastic/kibana/issues/${env.ghprbPullId}/comments", [ body: message ])
+  }
 }
 
 def withDefaultPrComments(closure) {
