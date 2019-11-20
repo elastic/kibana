@@ -175,8 +175,8 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     // }
 
     if (error.isGraphQLError === true) {
-      return response.badRequest({
-        // TODO(rylnd): make this dynamic on error code
+      return response.customError({
+        statusCode: error.statusCode,
         body: error.message,
         headers: {
           'content-type': 'application/json',
