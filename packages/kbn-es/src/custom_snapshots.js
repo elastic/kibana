@@ -28,7 +28,7 @@ function getCustomSnapshotUrl() {
   if (!process.env.KBN_ES_SNAPSHOT_URL && !process.argv.some(isVersionFlag)) {
     // return 'https://storage.googleapis.com/kibana-ci-tmp-artifacts/{name}-{version}-{os}-x86_64.{ext}';
     // return undefined;
-    return 'https://storage.googleapis.com/kibana-ci-tmp-artifacts/elasticsearch-6.8.6-SNAPSHOT.{ext}';
+    return 'https://storage.googleapis.com/kibana-ci-tmp-artifacts/{name}-{version}.{ext}';
   }
 
   if (process.env.KBN_ES_SNAPSHOT_URL && process.env.KBN_ES_SNAPSHOT_URL !== 'false') {
