@@ -11,6 +11,9 @@ export function addRoutes(router: IRouter) {
     {
       path: '/api/endpoint/hello-world',
       validate: false,
+      options: {
+        tags: ['access:resolver'],
+      },
     },
     async function greetingIndex(...passedArgs) {
       const [, , response] = passedArgs;
