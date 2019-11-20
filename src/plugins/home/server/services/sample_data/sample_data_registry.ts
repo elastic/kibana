@@ -21,17 +21,33 @@
   Plugin to relace the sample_data methods in the legacy code:
 
   During the setup phase of the sample_data_registry, the following methods are exposed:
-    getSampleDatasets
-    registerSampleDataset
-    addSavedObjectsToSampleDataset
-    addAppLinksToSampleDataset
-    replacePanelInSampleDatasetDashboard
+    getSampleDatasets DONE
+    registerSampleDataset DONE
+    addSavedObjectsToSampleDataset DONE
+    addAppLinksToSampleDataset DONE
+    replacePanelInSampleDatasetDashboard DONE
   During the start phase of the sample_data_registry, we expose the methods that use the setup methods:
   `getSampleDataSets returns the array of sample data sets, similarly to
+
+  Question: Where do these go?:
+    createListRoute
+    createInstallRoute
+    createUninstallRoute
+  I feel they should go into the start phase
+
+  Another question:
+  sample data is registered at the end of the file in src/legacy/server/sample_data/sample_data_mixin.js
+  Does this service need to do the registration itself? I don't think so but I need to confirm where the registration is going to happen
 */
 import Joi from 'joi';
 import { CoreSetup } from 'src/core/server';
-import { SampleDatasetProvider, SampleDatasetSchema } from './lib/data_set_registry_types';
+import { SavedObject } from 'src/core/public';
+import {
+  SampleDatasetProvider,
+  SampleDatasetSchema,
+  AppLinkSchema,
+  EmbeddableTypes,
+} from './lib/data_set_registry_types';
 import { sampleDataSchema } from './lib/data_set_schema';
 
 export class SampleDataRegistry {
@@ -68,6 +84,78 @@ export class SampleDataRegistry {
           );
         }
         this.sampleDatasets.push(value);
+      },
+      getSampleDatasets: () => this.sampleDatasets,
+
+      addSavedObjectsToSampleDataset: (id: string, savedObjects: SavedObject[]) => {
+        const sampleDataset = this.sampleDatasets.find(dataset => {
+          return dataset.id === id;
+        });
+
+        if (!sampleDataset) {
+          throw new Error(`Unable to find sample dataset with id: ${id}`);
+        }
+
+        sampleDataset.savedObjects = sampleDataset.savedObjects.concat(savedObjects);
+      },
+
+      addAppLinksToSampleDataset: (id: string, appLinks: AppLinkSchema[]) => {
+        const sampleDataset = this.sampleDatasets.find(dataset => {
+          return dataset.id === id;
+        });
+
+        if (!sampleDataset) {
+          throw new Error(`Unable to find sample dataset with id: ${id}`);
+        }
+
+        sampleDataset.appLinks = sampleDataset.appLinks.concat(appLinks);
+      },
+
+      replacePanelInSampleDatasetDashboard: (
+        sampleDataId: string,
+        dashboardId: string,
+        oldEmbeddableId: string,
+        embeddableId: string,
+        embeddableType: EmbeddableTypes,
+        embeddableConfig: object = {}
+      ) => {
+        const sampleDataset = this.sampleDatasets.find(dataset => {
+          return dataset.id === sampleDataId;
+        });
+        if (!sampleDataset) {
+          throw new Error(`Unaable to find sample dataset with id: ${sampleDataId}`);
+        }
+
+        const dashboard = sampleDataset.savedObjects.find((savedObject: SavedObject) => {
+          return savedObject.id === dashboardId && savedObject.type === 'dashboard';
+        });
+        if (!dashboard) {
+          throw new Error(`Unable to find dashboard with id: ${dashboardId}`);
+        }
+        try {
+          const reference = dashboard.references.find(referenceItem => {
+            return referenceItem.id === oldEmbeddableId;
+          });
+          if (!reference) {
+            throw new Error(`Unable to find reference for embeddable: ${oldEmbeddableId}`);
+          }
+          reference.type = embeddableType;
+          reference.id = embeddableId;
+
+          const panels = JSON.parse(dashboard.attributes.panelsJSON);
+          const panel = panels.find((panelItem: any) => {
+            return (panelItem.panelRefName = reference.name);
+          });
+          if (!panel) {
+            throw new Error(`Unable to find panel for reference: ${reference.name}`);
+          }
+          panel.embeddableConfig = embeddableConfig;
+          dashboard.attributes.panelsJSON = JSON.stringify(panels);
+        } catch (error) {
+          throw new Error(
+            `Unable to replace panel with embeddable ${oldEmbeddableId}, error: ${error}`
+          );
+        }
       },
     };
   }
