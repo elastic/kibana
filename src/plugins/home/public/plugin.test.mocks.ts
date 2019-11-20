@@ -17,22 +17,9 @@
  * under the License.
  */
 
-import { get } from 'lodash';
-import chrome from 'ui/chrome';
-import uiRoutes from 'ui/routes';
-import { UICapabilities } from '.';
+import { featureCatalogueRegistryMock } from './services/feature_catalogue/feature_catalogue_registry.mock';
 
-uiRoutes.addSetupWork(
-  (uiCapabilities: UICapabilities, kbnBaseUrl: string, $route: any, kbnUrl: any) => {
-    const route = get($route, 'current.$$route') as any;
-    if (!route.requireUICapability) {
-      return;
-    }
-
-    if (!get(uiCapabilities, route.requireUICapability)) {
-      const url = chrome.addBasePath(`${kbnBaseUrl}#/home`);
-      kbnUrl.redirect(url);
-      throw uiRoutes.WAIT_FOR_URL_CHANGE_TOKEN;
-    }
-  }
-);
+export const registryMock = featureCatalogueRegistryMock.create();
+jest.doMock('./services', () => ({
+  FeatureCatalogueRegistry: jest.fn(() => registryMock),
+}));
