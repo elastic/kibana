@@ -6,7 +6,6 @@
 
 import { GenericParams } from 'elasticsearch';
 import * as GraphiQL from 'apollo-server-module-graphiql';
-import Boom from 'boom';
 import { GraphQLSchema } from 'graphql';
 import { runHttpQuery } from 'apollo-server-core';
 import { schema as configSchema } from '@kbn/config-schema';
@@ -165,18 +164,8 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private handleError(error: any, response: KibanaResponseFactory) {
-    // TODO(rylnd): address this case
-    // if ('HttpQueryError' !== error.name) {
-    //   const queryError = Boom.boomify(error);
-
-    //   queryError.output.payload.message = error.message;
-
-    //   return queryError;
-    // }
-
-    if (error.isGraphQLError === true) {
-      return response.customError({
-        statusCode: error.statusCode,
+    if (error.name !== 'HttpQueryError') {
+      return response.internalError({
         body: error.message,
         headers: {
           'content-type': 'application/json',
@@ -184,18 +173,14 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
       });
     }
 
-    const genericError = new Boom(error.message, { statusCode: error.statusCode });
-
-    if (error.headers) {
-      Object.keys(error.headers).forEach(header => {
-        genericError.output.headers[header] = error.headers[header];
-      });
-    }
-
-    // Boom hides the error when status code is 500
-    genericError.output.payload.message = error.message;
-
-    throw genericError;
+    return response.customError({
+      statusCode: error.statusCode,
+      body: error.message,
+      headers: {
+        'content-type': 'application/json',
+        ...error.headers,
+      },
+    });
   }
 
   public getIndexPatternsService(request: FrameworkRequest): FrameworkIndexPatternsService {
