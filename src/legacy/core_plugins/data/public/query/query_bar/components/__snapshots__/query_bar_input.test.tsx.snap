@@ -344,7 +344,6 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
               "overrideLocalDefault": [MockFunction],
               "remove": [MockFunction],
               "set": [MockFunction],
-              "stop": [MockFunction],
             },
           }
         }
@@ -907,7 +906,6 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                       "overrideLocalDefault": [MockFunction],
                       "remove": [MockFunction],
                       "set": [MockFunction],
-                      "stop": [MockFunction],
                     },
                   },
                 }
@@ -1458,7 +1456,6 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
               "overrideLocalDefault": [MockFunction],
               "remove": [MockFunction],
               "set": [MockFunction],
-              "stop": [MockFunction],
             },
           }
         }
@@ -2018,7 +2015,6 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                       "overrideLocalDefault": [MockFunction],
                       "remove": [MockFunction],
                       "set": [MockFunction],
-                      "stop": [MockFunction],
                     },
                   },
                 }
@@ -2569,7 +2565,6 @@ exports[`QueryBarInput Should render the given query 1`] = `
               "overrideLocalDefault": [MockFunction],
               "remove": [MockFunction],
               "set": [MockFunction],
-              "stop": [MockFunction],
             },
           }
         }
@@ -3129,7 +3124,6 @@ exports[`QueryBarInput Should render the given query 1`] = `
                       "overrideLocalDefault": [MockFunction],
                       "remove": [MockFunction],
                       "set": [MockFunction],
-                      "stop": [MockFunction],
                     },
                   },
                 }
