@@ -269,7 +269,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
       customContent = (
         <>
           <EuiTitle size="xxs">
-            <span>{appName}</span>
+            <h3>{appName}</h3>
           </EuiTitle>
           <EuiSpacer size="s" />
           {customLinks}
@@ -311,10 +311,12 @@ class HeaderHelpMenuUI extends Component<Props, State> {
         <EuiPopoverTitle>
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem>
-              <FormattedMessage
-                id="core.ui.chrome.headerGlobalNav.helpMenuTitle"
-                defaultMessage="Help"
-              />
+              <h2>
+                <FormattedMessage
+                  id="core.ui.chrome.headerGlobalNav.helpMenuTitle"
+                  defaultMessage="Help"
+                />
+              </h2>
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="chrHeaderHelpMenu__version">
               <FormattedMessage
