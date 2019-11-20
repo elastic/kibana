@@ -64,7 +64,7 @@ export interface IRouter {
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  get: <P extends ObjectType, Q extends ObjectType, B extends never>(
+  get: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     route: RouteConfig<P, Q, B, 'get'>,
     handler: RequestHandler<P, Q, B>
   ) => void;
@@ -74,7 +74,7 @@ export interface IRouter {
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  options: <P extends ObjectType, Q extends ObjectType, B extends never>(
+  options: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     route: RouteConfig<P, Q, B, 'options'>,
     handler: RequestHandler<P, Q, B>
   ) => void;

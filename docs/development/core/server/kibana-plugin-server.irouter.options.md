@@ -9,5 +9,5 @@ Register a route handler for `OPTIONS` request.
 <b>Signature:</b>
 
 ```typescript
-options: <P extends ObjectType, Q extends ObjectType, B extends never>(route: RouteConfig<P, Q, B, 'options'>, handler: RequestHandler<P, Q, B>) => void;
+options: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B, 'options'>, handler: RequestHandler<P, Q, B>) => void;
 ```

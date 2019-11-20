@@ -715,10 +715,10 @@ export interface IndexSettingsDeprecationInfo {
 // @public
 export interface IRouter {
     delete: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'delete'>, handler: RequestHandler<P, Q, B>) => void;
-    get: <P extends ObjectType, Q extends ObjectType, B extends never>(route: RouteConfig<P, Q, B, 'get'>, handler: RequestHandler<P, Q, B>) => void;
+    get: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B, 'get'>, handler: RequestHandler<P, Q, B>) => void;
     // @internal
     getRoutes: () => RouterRoute[];
-    options: <P extends ObjectType, Q extends ObjectType, B extends never>(route: RouteConfig<P, Q, B, 'options'>, handler: RequestHandler<P, Q, B>) => void;
+    options: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B, 'options'>, handler: RequestHandler<P, Q, B>) => void;
     patch: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'patch'>, handler: RequestHandler<P, Q, B>) => void;
     post: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'post'>, handler: RequestHandler<P, Q, B>) => void;
     put: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'put'>, handler: RequestHandler<P, Q, B>) => void;
