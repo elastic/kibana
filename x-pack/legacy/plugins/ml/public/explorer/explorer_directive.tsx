@@ -15,10 +15,15 @@ import ReactDOM from 'react-dom';
 
 import { Subscription } from 'rxjs';
 
+import { IRootElementService, IRootScopeService, IScope } from 'angular';
+
+// @ts-ignore
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 import { I18nContext } from 'ui/i18n';
+import { State } from 'ui/state_management/state';
+import { AppState as IAppState, AppStateClass } from 'ui/state_management/app_state';
 
 import { jobSelectServiceFactory } from '../components/job_selector/job_select_service_utils';
 
@@ -29,20 +34,33 @@ import { subscribeAppStateToObservable } from '../util/app_state_utils';
 
 import { Explorer } from './explorer';
 import { EXPLORER_ACTION } from './explorer_constants';
-import { getExplorerDefaultAppState, explorerAction$, explorerAppState$ } from './explorer_dashboard_service';
+import {
+  getExplorerDefaultAppState,
+  explorerAction$,
+  explorerAppState$,
+} from './explorer_dashboard_service';
 
-module.directive('mlExplorerDirective', function (globalState, $rootScope, AppState) {
-  function link($scope, element) {
+interface ExplorerScope extends IScope {
+  appState: IAppState;
+}
+
+module.directive('mlExplorerDirective', function(
+  globalState: State,
+  $rootScope: IRootScopeService,
+  AppState: AppStateClass
+) {
+  function link($scope: ExplorerScope, element: IRootElementService) {
     const subscriptions = new Subscription();
 
     const { jobSelectService$, unsubscribeFromGlobalState } = jobSelectServiceFactory(globalState);
 
     ReactDOM.render(
       <I18nContext>
-        <Explorer {...{
-          globalState,
-          jobSelectService$,
-        }}
+        <Explorer
+          {...{
+            globalState,
+            jobSelectService$,
+          }}
         />
       </I18nContext>,
       element[0]
@@ -58,7 +76,7 @@ module.directive('mlExplorerDirective', function (globalState, $rootScope, AppSt
     // source of truth.
     explorerAction$.next({
       action: EXPLORER_ACTION.APP_STATE_SET,
-      payload: { mlExplorerSwimlane, mlExplorerFilter }
+      payload: { mlExplorerSwimlane, mlExplorerFilter },
     });
 
     // This is temporary and can be removed once explorer.js migrated fully
@@ -69,7 +87,7 @@ module.directive('mlExplorerDirective', function (globalState, $rootScope, AppSt
     // Now that appState in explorerState$ is the single source of truth,
     // subscribe to it and update the actual URL appState on changes.
     subscriptions.add(
-      explorerAppState$.subscribe(appState => {
+      explorerAppState$.subscribe((appState: IAppState) => {
         $scope.appState.fetch();
         $scope.appState = merge($scope.appState, appState);
         $scope.appState.save();
@@ -77,9 +95,21 @@ module.directive('mlExplorerDirective', function (globalState, $rootScope, AppSt
       })
     );
 
-    subscriptions.add(subscribeAppStateToObservable(AppState, 'mlShowCharts', showCharts$, () => $rootScope.$applyAsync()));
-    subscriptions.add(subscribeAppStateToObservable(AppState, 'mlSelectInterval', interval$, () => $rootScope.$applyAsync()));
-    subscriptions.add(subscribeAppStateToObservable(AppState, 'mlSelectSeverity', severity$, () => $rootScope.$applyAsync()));
+    subscriptions.add(
+      subscribeAppStateToObservable(AppState, 'mlShowCharts', showCharts$, () =>
+        $rootScope.$applyAsync()
+      )
+    );
+    subscriptions.add(
+      subscribeAppStateToObservable(AppState, 'mlSelectInterval', interval$, () =>
+        $rootScope.$applyAsync()
+      )
+    );
+    subscriptions.add(
+      subscribeAppStateToObservable(AppState, 'mlSelectSeverity', severity$, () =>
+        $rootScope.$applyAsync()
+      )
+    );
 
     element.on('$destroy', () => {
       ReactDOM.unmountComponentAtNode(element[0]);

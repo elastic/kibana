@@ -15,14 +15,13 @@ import { loadIndexPatterns } from '../util/index_utils';
 
 import { getAnomalyExplorerBreadcrumbs } from './breadcrumbs';
 
-uiRoutes
-  .when('/explorer/?', {
-    template: `<ml-explorer-directive class="ml-explorer" data-test-subj="mlPageAnomalyExplorer" />`,
-    k7Breadcrumbs: getAnomalyExplorerBreadcrumbs,
-    resolve: {
-      CheckLicense: checkFullLicense,
-      privileges: checkGetJobsPrivilege,
-      indexPatterns: loadIndexPatterns,
-      jobs: mlJobService.loadJobsWrapper
-    },
-  });
+uiRoutes.when('/explorer/?', {
+  template: `<ml-explorer-directive class="ml-explorer" data-test-subj="mlPageAnomalyExplorer" />`,
+  k7Breadcrumbs: getAnomalyExplorerBreadcrumbs,
+  resolve: {
+    CheckLicense: checkFullLicense,
+    privileges: checkGetJobsPrivilege,
+    indexPatterns: loadIndexPatterns,
+    jobs: mlJobService.loadJobsWrapper,
+  },
+});

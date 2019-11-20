@@ -203,8 +203,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     resizeRef = createRef();
     resizeChecker = undefined;
     resizeHandler = () => {
-      // console.warn('resize handler');
-      // explorerAction$.next({ action: EXPLORER_ACTION.REDRAW });
+      explorerAction$.next({ action: EXPLORER_ACTION.REDRAW });
     }
 
     subscriptions = new Subscription();
