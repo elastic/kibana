@@ -51,7 +51,7 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
           checkbox
         ) : (
           <div>
-            <EuiToolTip key={index.index} content={errorToI18n(index.validation!)}>
+            <EuiToolTip key={index.index} content={formatValidationError(index.validation!)}>
               {checkbox}
             </EuiToolTip>
           </div>
@@ -95,7 +95,7 @@ const indicesSelectionLabel = i18n.translate('xpack.infra.analysisSetup.indicesS
   defaultMessage: 'Indices',
 });
 
-function errorToI18n(error: ValidationIndicesUIError): React.ReactNode {
+const formatValidationError = (error: ValidationIndicesUIError): React.ReactNode => {
   switch (error.error) {
     case 'INDEX_NOT_FOUND':
       return (
@@ -133,4 +133,4 @@ function errorToI18n(error: ValidationIndicesUIError): React.ReactNode {
     default:
       return '';
   }
-}
+};

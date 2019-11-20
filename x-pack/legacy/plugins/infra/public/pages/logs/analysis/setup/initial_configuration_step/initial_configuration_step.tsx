@@ -77,7 +77,7 @@ const ValidationErrors: React.FC<{ errors: ValidationIndicesUIError[] }> = ({ er
       <EuiCallOut color="danger" iconType="alert" title={errorCalloutTitle}>
         <ul>
           {errors.map((error, i) => (
-            <li key={i}>{errorToI18n(error)}</li>
+            <li key={i}>{formatValidationError(error)}</li>
           ))}
         </ul>
       </EuiCallOut>
@@ -86,7 +86,7 @@ const ValidationErrors: React.FC<{ errors: ValidationIndicesUIError[] }> = ({ er
   );
 };
 
-function errorToI18n(error: ValidationIndicesUIError): React.ReactNode {
+const formatValidationError = (error: ValidationIndicesUIError): React.ReactNode => {
   switch (error.error) {
     case 'NETWORK_ERROR':
       return (
@@ -107,4 +107,4 @@ function errorToI18n(error: ValidationIndicesUIError): React.ReactNode {
     default:
       return '';
   }
-}
+};
