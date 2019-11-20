@@ -83,6 +83,7 @@ export function ExpressionWrapper({
           padding={noPadding ? undefined : 's'}
           variables={variables}
           expression={expression}
+          allowCache={true}
           interactive={interactive}
           searchContext={searchContext}
           searchSessionId={searchSessionId}

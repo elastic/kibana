@@ -312,4 +312,71 @@ describe('Executor', () => {
       });
     });
   });
+
+  describe('caching', () => {
+    const functionCache: Map<string, any> = new Map();
+    const fakeCacheEntry = { type: 'kibana_context', value: 'test' };
+    let executor: Executor;
+
+    beforeAll(() => {
+      executor = new Executor(undefined, functionCache);
+      executor.registerFunction(expressionFunctions.variable);
+      executor.registerFunction(expressionFunctions.kibana);
+    });
+
+    afterEach(() => {
+      functionCache.clear();
+    });
+
+    it('caches the result of function', async () => {
+      await executor.run('kibana', null);
+      expect(functionCache.size).toEqual(1);
+      const entry = functionCache.keys().next().value;
+      functionCache.set(entry, fakeCacheEntry);
+      const result = await executor.run('kibana', null);
+      expect(functionCache.size).toEqual(1);
+      expect(result).toEqual(fakeCacheEntry);
+    });
+
+    it('doesnt cache if disableCache flag is enabled', async () => {
+      await executor.run('kibana', null);
+      expect(functionCache.size).toEqual(1);
+      const entry = functionCache.keys().next().value;
+      functionCache.set(entry, fakeCacheEntry);
+      const result = await executor.run('kibana', null, { disableCache: true });
+      expect(functionCache.size).toEqual(1);
+      expect(result).not.toEqual(fakeCacheEntry);
+    });
+
+    it('doesnt cache results of functions that have disableCache property set', async () => {
+      await executor.run('var name="test"', null);
+      expect(functionCache.size).toEqual(0);
+    });
+
+    describe('doesnt use cached version', () => {
+      const cachedVersion = { test: 'value' };
+
+      beforeAll(async () => {
+        await executor.run('kibana', null);
+        expect(functionCache.size).toEqual(1);
+        const entry: string = Object.keys(functionCache)[0];
+        functionCache.set(entry, cachedVersion);
+      });
+
+      it('input changed', async () => {
+        const result = await executor.run('kibana', { type: 'kibana_context', value: 'test' });
+        expect(result).not.toEqual(cachedVersion);
+      });
+
+      it('arguments changed', async () => {
+        const result = await executor.run('kibana', null);
+        expect(result).not.toEqual(cachedVersion);
+      });
+
+      it('search context changed', async () => {
+        const result = await executor.run('kibana', null, { search: { filters: [] } });
+        expect(result).not.toEqual(cachedVersion);
+      });
+    });
+  });
 });

@@ -109,10 +109,13 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
    */
   public readonly types: TypesRegistry;
 
-  constructor(private readonly logger?: Logger, state?: ExecutorState<Context>) {
+  private functionCache: Map<string, any>;
+
+  constructor(private readonly logger?: Logger, state?: ExecutorState<Context>, functionCache: Map<string, any> = new Map()) {
     this.functions = new FunctionsRegistry(this as Executor);
     this.types = new TypesRegistry(this as Executor);
     this.container = createExecutorContainer<Context>(state);
+    this.functionCache = functionCache || new Map();
   }
 
   public get state(): ExecutorState<Context> {
@@ -189,6 +192,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     const executionParams = {
       params,
       executor: this,
+      functionCache: this.functionCache,
     } as ExecutionParams;
 
     if (typeof ast === 'string') executionParams.expression = ast;

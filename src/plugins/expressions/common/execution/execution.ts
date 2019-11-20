@@ -27,7 +27,7 @@ import {
   Subscription,
 } from 'rxjs';
 import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs';
-import { now, AbortError } from '@kbn/kibana-utils-plugin/common';
+import {now, AbortError, calculateObjectHash} from '@kbn/kibana-utils-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
@@ -69,6 +69,8 @@ export interface ExecutionResult<Output> {
    */
   result: Output;
 }
+
+const maxCacheSize = 1000;
 
 const createAbortErrorValue = () =>
   createError({
@@ -236,6 +238,9 @@ export class Execution<
    */
   private readonly childExecutions: Execution[] = [];
 
+  private functionCache: Map<string, any> = new Map();
+  private cacheTimeout: number = 30000;
+
   /**
    * Contract is a public representation of `Execution` instances. Contract we
    * can return to other plugins for their consumption.
@@ -278,6 +283,7 @@ export class Execution<
         ? () => execution.params.kibanaRequest!
         : undefined,
       variables: execution.params.variables || {},
+      allowCache: this.execution.params.allowCache,
       types: executor.getTypes(),
       abortSignal: this.abortController.signal,
       inspectorAdapters,
@@ -449,14 +455,52 @@ export class Execution<
     }).pipe(catchError((error) => of(error)));
   }
 
+  async getCachedResults(
+    fn: ExpressionFunction,
+    normalizedInput: unknown,
+    args: Record<string, unknown>
+  ) {
+    let fnOutput;
+    const hash = calculateObjectHash([fn.name, normalizedInput, args, this.context.getSearchContext()]);
+    if (this.context.allowCache && fn.allowCache && this.functionCache.has(hash)) {
+      fnOutput = this.functionCache.get(hash);
+    } else {
+      fnOutput = await of(fn.fn(normalizedInput, args, this.context));
+      if (fn.allowCache) {
+        while (this.functionCache.size >= maxCacheSize) {
+          this.functionCache.delete(this.functionCache.keys().next().value);
+        }
+        this.functionCache.set(hash, fnOutput);
+      }
+    }
+    return fnOutput;
+  }
+
   invokeFunction<Fn extends ExpressionFunction>(
     fn: Fn,
     input: unknown,
     args: Record<string, unknown>
   ): Observable<UnwrapReturnType<Fn['fn']>> {
+
+    let hash: string | undefined;
+
     return of(input).pipe(
       map((currentInput) => this.cast(currentInput, fn.inputTypes)),
-      switchMap((normalizedInput) => of(fn.fn(normalizedInput, args, this.context))),
+      map((normalizedInput) => {
+        if (fn.allowCache && this.context.allowCache) {
+          hash = calculateObjectHash([fn.name, normalizedInput, args, this.context.getSearchContext()]);
+        }
+        return normalizedInput;
+      }),
+      switchMap((normalizedInput) => {
+        if (hash && this.functionCache.has(hash)) {
+          const cached = this.functionCache.get(hash)
+          if (Date.now() - cached.time < this.cacheTimeout) {
+            return cached.value;
+          }
+        }
+        return of(fn.fn(normalizedInput, args, this.context))
+      }),
       switchMap(
         (fnResult) =>
           (isObservable(fnResult)
@@ -487,6 +531,12 @@ export class Execution<
           }
         }
 
+        if (hash) {
+          while (this.functionCache.size >= maxCacheSize) {
+            this.functionCache.delete(this.functionCache.keys().next().value);
+          }
+          this.functionCache.set(hash, { value: output, time: Date.now() });
+        }
         return output;
       })
     );
