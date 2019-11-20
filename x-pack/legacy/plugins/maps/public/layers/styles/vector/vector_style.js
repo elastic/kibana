@@ -6,7 +6,6 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { VectorStyleEditor } from './components/vector_style_editor';
 import { getDefaultProperties, vectorStyles } from './vector_style_defaults';
 import { AbstractStyle } from '../abstract_style';
@@ -44,14 +43,6 @@ export class VectorStyle extends AbstractStyle {
   static createDefaultStyleProperties(mapColors) {
     return getDefaultProperties(mapColors);
   }
-
-  static getDisplayName() {
-    return i18n.translate('xpack.maps.style.vector.displayNameLabel', {
-      defaultMessage: 'Vector style'
-    });
-  }
-
-  static description = '';
 
   constructor(descriptor = {}, source, layer) {
     super();
