@@ -150,10 +150,7 @@ export const ActionsList: React.FunctionComponent = () => {
       },
     },
     {
-      name: i18n.translate(
-        'xpack.alertingUI.sections.actionsList.actionsListTable.columns.actions',
-        { defaultMessage: 'Actions' }
-      ),
+      name: '',
       actions: [
         {
           enabled: () => canDelete,
