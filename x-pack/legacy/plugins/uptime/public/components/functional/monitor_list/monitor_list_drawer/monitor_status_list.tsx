@@ -7,7 +7,7 @@
 import React from 'react';
 import { get } from 'lodash';
 import { EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Check } from '../../../../../common/graphql/types';
 import { LocationLink } from './location_link';
 import { MonitorStatusRow } from './monitor_status_row';
@@ -47,13 +47,11 @@ export const MonitorStatusList = ({ checks }: MonitorStatusListProps) => {
       <MonitorStatusRow locationNames={absUpChecks} status={UP} />
       {(downChecks.has(UNNAMED_LOCATION) || upChecks.has(UNNAMED_LOCATION)) && (
         <EuiCallOut color="warning">
-          {i18n.translate('xpack.uptime.monitorList.drawer.missingLocation.description', {
-            defaultMessage: `Some heartbeat instances do not have a location defined.`,
-          })}
-          <LocationLink />{' '}
-          {i18n.translate('xpack.uptime.monitorList.drawer.missingLocation.toLocationDocsLink', {
-            defaultMessage: `to your heartbeat configuration.`,
-          })}
+          <FormattedMessage
+            id="xpack.uptime.monitorList.drawer.missingLocation"
+            defaultMessage="Some heartbeat instances do not have a location defined. {link} to your heartbeat configuration."
+            values={{ link: <LocationLink /> }}
+          />
         </EuiCallOut>
       )}
     </>

@@ -6,7 +6,7 @@
 
 import React, { useContext } from 'react';
 import { EuiHealth, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { UptimeSettingsContext } from '../../../../contexts';
 import { UNNAMED_LOCATION, UP } from './monitor_status_list';
 
@@ -35,19 +35,29 @@ export const MonitorStatusRow = ({ locationNames, status }: MonitorStatusRowProp
     checkListArray.push(UNNAMED_LOCATION);
   }
 
-  return locationNames.size > 0 ? (
+  if (locationNames.size === 0) {
+    return null;
+  }
+
+  const locations = checkListArray.join(', ');
+  return (
     <>
       <EuiHealth color={color}>
-        {status === UP
-          ? i18n.translate('xpack.uptime.monitorList.drawer.locations.statusUp', {
-              defaultMessage: `Up in `,
-            })
-          : i18n.translate('xpack.uptime.monitorList.drawer.locations.statusDown', {
-              defaultMessage: `Down in `,
-            })}
-        {checkListArray.map((location, index) => (index ? ', ' : '') + location)}
+        {status === UP ? (
+          <FormattedMessage
+            id="xpack.uptime.monitorList.drawer.locations.statusUp"
+            defaultMessage={`Up in {locations}`}
+            values={{ locations }}
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.uptime.monitorList.drawer.locations.statusDown"
+            defaultMessage={`Down in {locations}`}
+            values={{ locations }}
+          />
+        )}
       </EuiHealth>
       <EuiSpacer size="s" />
     </>
-  ) : null;
+  );
 };
