@@ -21,7 +21,11 @@ import { ml } from '../../../../../services/ml_api_service';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 import { EvaluateStat } from './evaluate_stat';
-import { RegressionResultsSearchQuery, getEvalQueryBody } from '../../../../common/analytics';
+import {
+  getEvalQueryBody,
+  isRegressionResultsSearchBoolQuery,
+  RegressionResultsSearchQuery,
+} from '../../../../common/analytics';
 import { SearchQuery } from './use_explore_data';
 
 interface Props {
@@ -152,9 +156,13 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     }
   };
 
-  const loadData = async ({ isTraining }: { isTraining?: { query: string; operator: string } }) => {
+  const loadData = async ({
+    isTrainingClause,
+  }: {
+    isTrainingClause?: { query: string; operator: string };
+  }) => {
     // searchBar query is filtering for testing data
-    if (isTraining !== undefined && isTraining.query === 'false') {
+    if (isTrainingClause !== undefined && isTrainingClause.query === 'false') {
       loadGeneralizationData();
 
       const docsCountResp = await loadDocsCount({ isTraining: false });
@@ -170,7 +178,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
         rSquared: '--',
         error: null,
       });
-    } else if (isTraining !== undefined && isTraining.query === 'true') {
+    } else if (isTrainingClause !== undefined && isTrainingClause.query === 'true') {
       // searchBar query is filtering for training data
       loadTrainingData();
 
@@ -215,17 +223,17 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
 
   useEffect(() => {
     const hasIsTrainingClause =
-      searchQuery.bool &&
+      isRegressionResultsSearchBoolQuery(searchQuery) &&
       searchQuery.bool.must.filter(
         (clause: any) => clause.match && clause.match[`${resultsField}.is_training`] !== undefined
       );
-    const isTraining =
+    const isTrainingClause =
       hasIsTrainingClause &&
       hasIsTrainingClause[0] &&
       hasIsTrainingClause[0].match[`${resultsField}.is_training`];
 
-    loadData({ isTraining });
-  }, [searchQuery]);
+    loadData({ isTrainingClause });
+  }, [JSON.stringify(searchQuery)]);
 
   return (
     <EuiPanel>

@@ -13,7 +13,7 @@ import { EvaluatePanel } from './evaluate_panel';
 import { ResultsTable } from './results_table';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 import { defaultSearchQuery } from './use_explore_data';
-import { SavedSearchQuery } from '../../../../../contexts/kibana';
+import { RegressionResultsSearchQuery } from '../../../../common/analytics';
 
 interface GetDataFrameAnalyticsResponse {
   count: number;
@@ -46,7 +46,7 @@ export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
   const [isLoadingJobConfig, setIsLoadingJobConfig] = useState<boolean>(false);
   const [jobConfigErrorMessage, setJobConfigErrorMessage] = useState<undefined | string>(undefined);
-  const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
+  const [searchQuery, setSearchQuery] = useState<RegressionResultsSearchQuery>(defaultSearchQuery);
 
   const loadJobConfig = async () => {
     setIsLoadingJobConfig(true);

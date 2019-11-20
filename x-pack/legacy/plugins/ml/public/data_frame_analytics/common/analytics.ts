@@ -11,7 +11,9 @@ import { Subscription } from 'rxjs';
 import { idx } from '@kbn/elastic-idx';
 import { cloneDeep } from 'lodash';
 import { ml } from '../../services/ml_api_service';
+import { Dictionary } from '../../../common/types/common';
 import { getErrorMessage } from '../pages/analytics_management/hooks/use_create_analytics_form';
+import { SavedSearchQuery } from '../../contexts/kibana';
 
 export type IndexName = string;
 export type IndexPattern = string;
@@ -120,6 +122,13 @@ export const isRegressionAnalysis = (arg: any): arg is RegressionAnalysis => {
   return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.REGRESSION;
 };
 
+export const isRegressionResultsSearchBoolQuery = (
+  arg: any
+): arg is RegressionResultsSearchBoolQuery => {
+  const keys = Object.keys(arg);
+  return keys.length === 1 && keys[0] === 'bool';
+};
+
 export interface DataFrameAnalyticsConfig {
   id: DataFrameAnalyticsId;
   // Description attribute is not supported yet
@@ -213,11 +222,17 @@ export function getValuesFromResponse(response: RegressionEvaluateResponse) {
 
   return { meanSquaredError, rSquared };
 }
-
-export interface RegressionResultsSearchQuery {
-  bool?: { [key: string]: any };
-  term?: { [key: string]: any };
+interface RegressionResultsSearchBoolQuery {
+  bool: Dictionary<any>;
 }
+interface RegressionResultsSearchTermQuery {
+  term: Dictionary<any>;
+}
+
+export type RegressionResultsSearchQuery =
+  | RegressionResultsSearchBoolQuery
+  | RegressionResultsSearchTermQuery
+  | SavedSearchQuery;
 
 export function getEvalQueryBody({
   resultsField,
@@ -227,8 +242,8 @@ export function getEvalQueryBody({
 }: {
   resultsField: string;
   isTraining: boolean;
-  searchQuery: RegressionResultsSearchQuery | undefined;
-  ignoreDefaultQuery: boolean | undefined;
+  searchQuery?: RegressionResultsSearchQuery;
+  ignoreDefaultQuery?: boolean;
 }) {
   let query: RegressionResultsSearchQuery = {
     term: { [`${resultsField}.is_training`]: { value: isTraining } },
@@ -236,10 +251,9 @@ export function getEvalQueryBody({
 
   if (searchQuery !== undefined && ignoreDefaultQuery === true) {
     query = searchQuery;
-  } else if (searchQuery !== undefined && searchQuery.bool !== undefined) {
+  } else if (isRegressionResultsSearchBoolQuery(searchQuery)) {
     const searchQueryClone = cloneDeep(searchQuery);
-    // Doing an explicit check for undefined above so non-null assertion operator should be safe
-    searchQueryClone.bool!.must.push(query);
+    searchQueryClone.bool.must.push(query);
     query = searchQueryClone;
   }
   return query;
@@ -259,7 +273,7 @@ export const loadEvalData = async ({
   dependentVariable: string;
   resultsField: string;
   predictionFieldName?: string;
-  searchQuery?: RegressionResultsSearchQuery | undefined;
+  searchQuery?: RegressionResultsSearchQuery;
   ignoreDefaultQuery?: boolean;
 }) => {
   const results: LoadEvaluateResult = { success: false, eval: null, error: null };
