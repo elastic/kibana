@@ -30,7 +30,7 @@ import {
 import { AnomaliesChart } from './chart';
 import { AnomaliesTable } from './table';
 import { LogAnalysisJobProblemIndicator } from '../../../../../components/logging/log_analysis_job_status';
-import { AnalyzeInMlButton } from '../analyze_in_ml_button';
+import { AnalyzeInMlButton } from '../../../../../components/logging/log_analysis_results';
 import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 
 export const AnomaliesResults: React.FunctionComponent<{

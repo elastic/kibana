@@ -4,19 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiSpacer } from '@elastic/eui';
-import { AnomaliesChart } from './chart';
-import { LogEntryRateResults } from '../../use_log_entry_rate_results';
+import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
+
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
+import { AnalyzeInMlButton } from '../../../../../components/logging/log_analysis_results';
+import { LogEntryRateResults } from '../../use_log_entry_rate_results';
 import {
-  getLogEntryRateSeriesForPartition,
   getAnnotationsForPartition,
+  getLogEntryRateSeriesForPartition,
   getTotalNumberOfLogEntriesForPartition,
 } from '../helpers/data_formatters';
-import { AnalyzeInMlButton } from '../analyze_in_ml_button';
+import { AnomaliesChart } from './chart';
 
 export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   partitionId: string;
@@ -28,14 +29,12 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
 }> = ({ results, timeRange, setTimeRange, partitionId, jobId }) => {
   const logEntryRateSeries = useMemo(
     () =>
-      results && results.histogramBuckets
-        ? getLogEntryRateSeriesForPartition(results, partitionId)
-        : [],
+      results?.histogramBuckets ? getLogEntryRateSeriesForPartition(results, partitionId) : [],
     [results, partitionId]
   );
   const anomalyAnnotations = useMemo(
     () =>
-      results && results.histogramBuckets
+      results?.histogramBuckets
         ? getAnnotationsForPartition(results, partitionId)
         : {
             warning: [],
@@ -47,7 +46,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   );
   const totalNumberOfLogEntries = useMemo(
     () =>
-      results && results.histogramBuckets
+      results?.histogramBuckets
         ? getTotalNumberOfLogEntriesForPartition(results, partitionId)
         : undefined,
     [results, partitionId]

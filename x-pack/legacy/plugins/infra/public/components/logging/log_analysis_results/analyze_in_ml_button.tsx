@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import url from 'url';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import { encode } from 'rison-node';
 import chrome from 'ui/chrome';
 import { QueryString } from 'ui/utils/query_string';
-import { encode } from 'rison-node';
-import { TimeRange } from '../../../../../common/http_api/shared/time_range';
+import url from 'url';
+
+import { TimeRange } from '../../../../common/http_api/shared/time_range';
 
 export const AnalyzeInMlButton: React.FunctionComponent<{
   jobId: string;
