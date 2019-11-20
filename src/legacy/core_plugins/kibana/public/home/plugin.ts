@@ -22,8 +22,8 @@ import { UiStatsMetricType } from '@kbn/analytics';
 
 import { DataStart } from '../../../data/public';
 import { setServices } from './kibana_services';
-import { FeatureCatalogueEntry } from '../../../../../plugins/feature_catalogue/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
+import { FeatureCatalogueEntry } from '../../../../../plugins/home/public';
 
 export interface LegacyAngularInjectedDependencies {
   telemetryOptInProvider: any;

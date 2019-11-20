@@ -21,13 +21,13 @@ import sinon from 'sinon';
 
 const mockObservable = () => {
   return {
-    subscribe: () => {}
+    subscribe: () => {},
   };
 };
 
 export const npSetup = {
   core: {
-    chrome: {}
+    chrome: {},
   },
   plugins: {
     embeddable: {
@@ -59,8 +59,11 @@ export const npSetup = {
         timefilter: {
           timefilter: sinon.fake(),
           history: sinon.fake(),
-        }
+        },
       },
+    },
+    share: {
+      register: () => {},
     },
     dev_tools: {
       register: () => {},
@@ -91,7 +94,7 @@ let isAutoRefreshSelectorEnabled = true;
 
 export const npStart = {
   core: {
-    chrome: {}
+    chrome: {},
   },
   plugins: {
     embeddable: {
@@ -127,7 +130,6 @@ export const npStart = {
           setFilters: sinon.fake(),
           removeAll: sinon.fake(),
           getUpdates$: mockObservable,
-
         },
         timefilter: {
           timefilter: {
@@ -151,7 +153,7 @@ export const npStart = {
             getRefreshInterval: () => {
               return refreshInterval;
             },
-            setRefreshInterval: (interval) => {
+            setRefreshInterval: interval => {
               refreshInterval = interval;
             },
             enableTimeRangeSelector: () => {
@@ -169,6 +171,9 @@ export const npStart = {
           history: sinon.fake(),
         },
       },
+    },
+    share: {
+      toggleShareContextMenu: () => {},
     },
     inspector: {
       isAvailable: () => false,

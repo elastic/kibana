@@ -62,9 +62,9 @@ class FilterItemUI extends Component<Props, State> {
       this.props.className
     );
 
-    const displayName = getDisplayValueFromFilter(filter, this.props.indexPatterns);
+    const valueLabel = getDisplayValueFromFilter(filter, this.props.indexPatterns);
     const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
-    const dataTestSubjValue = filter.meta.value ? `filter-value-${displayName}` : '';
+    const dataTestSubjValue = filter.meta.value ? `filter-value-${valueLabel}` : '';
     const dataTestSubjDisabled = `filter-${
       this.props.filter.meta.disabled ? 'disabled' : 'enabled'
     }`;
@@ -72,7 +72,7 @@ class FilterItemUI extends Component<Props, State> {
     const badge = (
       <FilterView
         filter={filter}
-        displayName={displayName}
+        valueLabel={valueLabel}
         className={classes}
         iconOnClick={() => this.props.onRemove()}
         onClick={this.togglePopover}

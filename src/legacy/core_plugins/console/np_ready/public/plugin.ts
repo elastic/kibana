@@ -31,11 +31,16 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
   async setup({ notifications }: CoreSetup, pluginSet: XPluginSet) {
     const {
       __LEGACY: { I18nContext },
+<<<<<<< HEAD
       dev_tools,
       feature_catalogue,
+=======
+      devTools,
+      home,
+>>>>>>> upstream/master
     } = pluginSet;
 
-    feature_catalogue.register({
+    home.featureCatalogue.register({
       id: 'console',
       title: i18n.translate('console.devToolsTitle', {
         defaultMessage: 'Console',
