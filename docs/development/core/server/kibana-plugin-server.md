@@ -84,6 +84,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [RouteConfig](./kibana-plugin-server.routeconfig.md) | Route specific configuration. |
 |  [RouteConfigOptions](./kibana-plugin-server.routeconfigoptions.md) | Additional route options. |
 |  [RouteConfigOptionsBody](./kibana-plugin-server.routeconfigoptionsbody.md) | Additional body options for a route |
+|  [RouterRoute](./kibana-plugin-server.routerroute.md) | Definition of a route |
+|  [RouteSchemas](./kibana-plugin-server.routeschemas.md) | RouteSchemas contains the schemas for validating the different parts of a request. |
 |  [SavedObject](./kibana-plugin-server.savedobject.md) |  |
 |  [SavedObjectAttributes](./kibana-plugin-server.savedobjectattributes.md) | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
 |  [SavedObjectReference](./kibana-plugin-server.savedobjectreference.md) | A reference to another saved object. |
@@ -128,6 +130,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  Variable | Description |
 |  --- | --- |
 |  [kibanaResponseFactory](./kibana-plugin-server.kibanaresponsefactory.md) | Set of helpers used to create <code>KibanaResponse</code> to form HTTP response on an incoming request. Should be returned as a result of [RequestHandler](./kibana-plugin-server.requesthandler.md) execution. |
+|  [validBodyOutput](./kibana-plugin-server.validbodyoutput.md) | The set of valid body.output |
 
 ## Type Aliases
 

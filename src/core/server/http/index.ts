@@ -43,10 +43,13 @@ export {
   KibanaResponseFactory,
   RouteConfig,
   IRouter,
+  RouterRoute,
   RouteMethod,
   RouteConfigOptions,
+  RouteSchemas,
   RouteConfigOptionsBody,
   RouteContentType,
+  validBodyOutput,
 } from './router';
 export { BasePathProxyServer } from './base_path_proxy_server';
 export { OnPreAuthHandler, OnPreAuthToolkit } from './lifecycle/on_pre_auth';

@@ -9,5 +9,5 @@ Additional body options [RouteConfigOptionsBody](./kibana-plugin-server.routecon
 <b>Signature:</b>
 
 ```typescript
-body?: Method extends 'get' ? never : RouteConfigOptionsBody;
+body?: Method extends 'get' | 'options' ? never : RouteConfigOptionsBody;
 ```

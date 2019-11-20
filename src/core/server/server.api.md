@@ -714,14 +714,14 @@ export interface IndexSettingsDeprecationInfo {
 
 // @public
 export interface IRouter {
-    delete: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B, 'delete'>, handler: RequestHandler<P, Q, B>) => void;
-    get: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B, 'get'>, handler: RequestHandler<P, Q, B>) => void;
-    // Warning: (ae-forgotten-export) The symbol "RouterRoute" needs to be exported by the entry point index.d.ts
-    // 
+    delete: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'delete'>, handler: RequestHandler<P, Q, B>) => void;
+    get: <P extends ObjectType, Q extends ObjectType, B extends never>(route: RouteConfig<P, Q, B, 'get'>, handler: RequestHandler<P, Q, B>) => void;
     // @internal
     getRoutes: () => RouterRoute[];
-    post: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B, 'post'>, handler: RequestHandler<P, Q, B>) => void;
-    put: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B, 'put'>, handler: RequestHandler<P, Q, B>) => void;
+    options: <P extends ObjectType, Q extends ObjectType, B extends never>(route: RouteConfig<P, Q, B, 'options'>, handler: RequestHandler<P, Q, B>) => void;
+    patch: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'patch'>, handler: RequestHandler<P, Q, B>) => void;
+    post: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'post'>, handler: RequestHandler<P, Q, B>) => void;
+    put: <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, 'put'>, handler: RequestHandler<P, Q, B>) => void;
     routerPath: string;
 }
 
@@ -751,10 +751,8 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
     // (undocumented)
     readonly body: Body;
-    // Warning: (ae-forgotten-export) The symbol "RouteSchemas" needs to be exported by the entry point index.d.ts
-    // 
     // @internal
-    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P["type"], Q["type"], B["type"]>;
+    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P["type"], Q["type"], B["type"]>;
     readonly headers: Headers;
     // (undocumented)
     readonly params: Params;
@@ -767,11 +765,11 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     }
 
 // @public
-export interface KibanaRequestRoute<Method extends RouteMethod | 'patch' | 'options'> {
+export interface KibanaRequestRoute<Method extends RouteMethod> {
     // (undocumented)
     method: Method;
     // (undocumented)
-    options: Method extends 'get' ? Required<Pick<RouteConfigOptions<Method>, 'authRequired' | 'tags'>> : Required<RouteConfigOptions>;
+    options: Method extends 'get' ? Required<Omit<RouteConfigOptions<Method>, 'body'>> : Required<RouteConfigOptions>;
     // (undocumented)
     path: string;
 }
@@ -1043,7 +1041,7 @@ export type RedirectResponseOptions = HttpResponseOptions & {
 };
 
 // @public
-export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (context: RequestHandlerContext, request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>> = (context: RequestHandlerContext, request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
 // @public
 export interface RequestHandlerContext {
@@ -1085,7 +1083,7 @@ export type ResponseHeaders = {
 };
 
 // @public
-export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType, Method extends RouteMethod> {
+export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>, Method extends RouteMethod> {
     options?: RouteConfigOptions<Method>;
     path: string;
     validate: RouteSchemas<P, Q, B> | false;
@@ -1094,7 +1092,7 @@ export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B exten
 // @public
 export interface RouteConfigOptions<Method extends RouteMethod = any> {
     authRequired?: boolean;
-    body?: Method extends 'get' ? never : RouteConfigOptionsBody;
+    body?: Method extends 'get' | 'options' ? never : RouteConfigOptionsBody;
     tags?: readonly string[];
 }
 
@@ -1102,7 +1100,7 @@ export interface RouteConfigOptions<Method extends RouteMethod = any> {
 export interface RouteConfigOptionsBody {
     accepts?: RouteContentType | RouteContentType[] | string | string[];
     maxBytes?: number;
-    output?: 'data' | 'stream';
+    output?: typeof validBodyOutput[number];
     parse?: boolean | 'gunzip';
 }
 
@@ -1110,7 +1108,29 @@ export interface RouteConfigOptionsBody {
 export type RouteContentType = 'application/json' | 'application/*+json' | 'application/octet-stream' | 'application/x-www-form-urlencoded' | 'multipart/form-data' | 'text/*';
 
 // @public
-export type RouteMethod = 'get' | 'post' | 'put' | 'delete';
+export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
+
+// @public
+export interface RouterRoute {
+    // (undocumented)
+    handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject | Boom<any>>;
+    // (undocumented)
+    method: RouteMethod;
+    // (undocumented)
+    options: RouteConfigOptions;
+    // (undocumented)
+    path: string;
+}
+
+// @public
+export interface RouteSchemas<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>> {
+    // (undocumented)
+    body?: B;
+    // (undocumented)
+    params?: P;
+    // (undocumented)
+    query?: Q;
+}
 
 // @public (undocumented)
 export interface SavedObject<T extends SavedObjectAttributes = any> {
@@ -1635,6 +1655,11 @@ export interface UserProvidedValues<T extends SavedObjectAttribute = any> {
     // (undocumented)
     userValue?: T;
 }
+
+// Warning: (ae-missing-release-tag) "validBodyOutput" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public
+export const validBodyOutput: readonly ["data", "stream"];
 
 
 // Warnings were encountered during analysis:

@@ -9,7 +9,7 @@ Request specific route information exposed to a handler.
 <b>Signature:</b>
 
 ```typescript
-export interface KibanaRequestRoute<Method extends RouteMethod | 'patch' | 'options'> 
+export interface KibanaRequestRoute<Method extends RouteMethod> 
 ```
 
 ## Properties
@@ -17,6 +17,6 @@ export interface KibanaRequestRoute<Method extends RouteMethod | 'patch' | 'opti
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [method](./kibana-plugin-server.kibanarequestroute.method.md) | <code>Method</code> |  |
-|  [options](./kibana-plugin-server.kibanarequestroute.options.md) | <code>Method extends 'get' ? Required&lt;Pick&lt;RouteConfigOptions&lt;Method&gt;, 'authRequired' &#124; 'tags'&gt;&gt; : Required&lt;RouteConfigOptions&gt;</code> |  |
+|  [options](./kibana-plugin-server.kibanarequestroute.options.md) | <code>Method extends 'get' ? Required&lt;Omit&lt;RouteConfigOptions&lt;Method&gt;, 'body'&gt;&gt; : Required&lt;RouteConfigOptions&gt;</code> |  |
 |  [path](./kibana-plugin-server.kibanarequestroute.path.md) | <code>string</code> |  |
 

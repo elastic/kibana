@@ -9,5 +9,5 @@ The set of common HTTP methods supported by Kibana routing.
 <b>Signature:</b>
 
 ```typescript
-export declare type RouteMethod = 'get' | 'post' | 'put' | 'delete';
+export declare type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
 ```

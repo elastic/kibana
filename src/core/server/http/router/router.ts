@@ -35,7 +35,12 @@ import {
 import { HapiResponseAdapter } from './response_adapter';
 import { RequestHandlerContext } from '../../../server';
 
-interface RouterRoute {
+/**
+ * Definition of a route
+ *
+ * @public
+ */
+export interface RouterRoute {
   method: RouteMethod;
   path: string;
   options: RouteConfigOptions;
