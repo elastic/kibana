@@ -4,17 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { Server } from 'hapi';
-
+import { schema } from '@kbn/config-schema';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { SavedObjectsClientContract } from 'kibana/server';
 import { ReindexStatus } from '../../../common/types';
-import { EsVersionPrecheck } from '../lib/es_version_precheck';
+import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { reindexServiceFactory, ReindexWorker } from '../lib/reindexing';
 import { CredentialStore } from '../lib/reindexing/credential_store';
 import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
-import { ServerShim } from '../types';
+import { ServerShim, ServerShimWithRouter } from '../types';
 import { createRequestShim } from './create_request_shim';
 
 export function registerReindexWorker(server: ServerShim, credentialStore: CredentialStore) {
@@ -31,11 +29,8 @@ export function registerReindexWorker(server: ServerShim, credentialStore: Crede
 
   // Cannot pass server.log directly because it's value changes during startup (?).
   // Use this function to proxy through.
-  const log: Server['log'] = (
-    tags: string | string[],
-    data?: string | object | (() => any),
-    timestamp?: number
-  ) => server.log(tags, data, timestamp);
+  const log = (tags: string | string[], data?: string | object | (() => any), timestamp?: number) =>
+    server.log(tags, data, timestamp);
 
   const worker = new ReindexWorker(
     savedObjectsClient,
@@ -56,7 +51,7 @@ export function registerReindexWorker(server: ServerShim, credentialStore: Crede
 }
 
 export function registerReindexIndicesRoutes(
-  server: ServerShim,
+  server: ServerShimWithRouter,
   worker: ReindexWorker,
   credentialStore: CredentialStore
 ) {
@@ -65,16 +60,19 @@ export function registerReindexIndicesRoutes(
   const BASE_PATH = '/api/upgrade_assistant/reindex';
 
   // Start reindex for an index
-  server.route({
-    path: `${BASE_PATH}/{indexName}`,
-    method: 'POST',
-    options: {
-      pre: [EsVersionPrecheck],
+  server.router.post(
+    {
+      path: `${BASE_PATH}/{indexName}`,
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
     },
-    async handler(request) {
+    versionCheckHandlerWrapper(async (ctx, request, response) => {
       const reqShim = createRequestShim(request);
       const { indexName } = reqShim.params;
-      const client = reqShim.getSavedObjectsClient!();
+      const { client } = ctx.core.savedObjects;
       const callCluster = callWithRequest.bind(null, reqShim) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
       const reindexService = reindexServiceFactory(
@@ -86,7 +84,9 @@ export function registerReindexIndicesRoutes(
 
       try {
         if (!(await reindexService.hasRequiredPrivileges(indexName))) {
-          throw Boom.forbidden(`You do not have adequate privileges to reindex this index.`);
+          return response.forbidden({
+            body: `You do not have adequate privileges to reindex this index.`,
+          });
         }
 
         const existingOp = await reindexService.findReindexOperation(indexName);
@@ -103,27 +103,26 @@ export function registerReindexIndicesRoutes(
         // Kick the worker on this node to immediately pickup the new reindex operation.
         worker.forceRefresh();
 
-        return reindexOp.attributes;
+        return response.ok({ body: reindexOp.attributes });
       } catch (e) {
-        if (!e.isBoom) {
-          return Boom.boomify(e, { statusCode: 500 });
-        }
-
-        return e;
+        return response.internalError({ body: e });
       }
-    },
-  });
+    })
+  );
 
   // Get status
-  server.route({
-    path: `${BASE_PATH}/{indexName}`,
-    method: 'GET',
-    options: {
-      pre: [EsVersionPrecheck],
+  server.router.get(
+    {
+      path: `${BASE_PATH}/{indexName}`,
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
     },
-    async handler(request) {
+    versionCheckHandlerWrapper(async (ctx, request, response) => {
       const reqShim = createRequestShim(request);
-      const client = reqShim.getSavedObjectsClient!();
+      const { client } = ctx.core.savedObjects;
       const { indexName } = reqShim.params;
       const callCluster = callWithRequest.bind(null, reqShim) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
@@ -143,33 +142,42 @@ export function registerReindexIndicesRoutes(
           : [];
         const indexGroup = reindexService.getIndexGroup(indexName);
 
-        return {
-          reindexOp: reindexOp ? reindexOp.attributes : null,
-          warnings,
-          indexGroup,
-          hasRequiredPrivileges,
-        };
+        return response.ok({
+          body: {
+            reindexOp: reindexOp ? reindexOp.attributes : null,
+            warnings,
+            indexGroup,
+            hasRequiredPrivileges,
+          },
+        });
       } catch (e) {
         if (!e.isBoom) {
-          return Boom.boomify(e, { statusCode: 500 });
+          return response.internalError({ body: e });
         }
-
-        return e;
+        return response.customError({
+          body: {
+            message: e.message,
+          },
+          statusCode: e.statusCode,
+        });
       }
-    },
-  });
+    })
+  );
 
   // Cancel reindex
-  server.route({
-    path: `${BASE_PATH}/{indexName}/cancel`,
-    method: 'POST',
-    options: {
-      pre: [EsVersionPrecheck],
+  server.router.post(
+    {
+      path: `${BASE_PATH}/{indexName}/cancel`,
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
     },
-    async handler(request) {
+    versionCheckHandlerWrapper(async (ctx, request, response) => {
       const reqShim = createRequestShim(request);
       const { indexName } = reqShim.params;
-      const client = reqShim.getSavedObjectsClient!();
+      const { client } = ctx.core.savedObjects;
       const callCluster = callWithRequest.bind(null, reqShim) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
       const reindexService = reindexServiceFactory(
@@ -182,14 +190,18 @@ export function registerReindexIndicesRoutes(
       try {
         await reindexService.cancelReindexing(indexName);
 
-        return { acknowledged: true };
+        return response.ok({ body: { acknowledged: true } });
       } catch (e) {
         if (!e.isBoom) {
-          return Boom.boomify(e, { statusCode: 500 });
+          return response.internalError({ body: e });
         }
-
-        return e;
+        return response.customError({
+          body: {
+            message: e.message,
+          },
+          statusCode: e.statusCode,
+        });
       }
-    },
-  });
+    })
+  );
 }

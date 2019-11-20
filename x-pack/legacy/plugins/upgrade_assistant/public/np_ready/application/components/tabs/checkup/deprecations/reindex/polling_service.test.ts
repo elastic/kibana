@@ -8,11 +8,7 @@ import { mockClient } from './polling_service.test.mocks';
 
 import { ReindexStatus, ReindexStep } from '../../../../../../../../common/types';
 import { ReindexPollingService } from './polling_service';
-
-const getCoreHttpMock = (path?: string) =>
-  ({
-    basePath: { prepend: () => path || 'test' },
-  } as any);
+import { httpServiceMock } from 'src/core/public/http/http_service.mock';
 
 describe('ReindexPollingService', () => {
   beforeEach(() => {
@@ -29,7 +25,11 @@ describe('ReindexPollingService', () => {
       },
     });
 
-    const service = new ReindexPollingService('myIndex', 'myXsrf', getCoreHttpMock());
+    const service = new ReindexPollingService(
+      'myIndex',
+      'myXsrf',
+      httpServiceMock.createSetupContract()
+    );
     service.updateStatus();
     await new Promise(resolve => setTimeout(resolve, 1200)); // wait for poll interval
 
@@ -50,7 +50,11 @@ describe('ReindexPollingService', () => {
       },
     });
 
-    const service = new ReindexPollingService('myIndex', 'myXsrf', getCoreHttpMock());
+    const service = new ReindexPollingService(
+      'myIndex',
+      'myXsrf',
+      httpServiceMock.createSetupContract()
+    );
     service.updateStatus();
     await new Promise(resolve => setTimeout(resolve, 1200)); // wait for poll interval
 
@@ -71,7 +75,11 @@ describe('ReindexPollingService', () => {
       },
     });
 
-    const service = new ReindexPollingService('myIndex', 'myXsrf', getCoreHttpMock());
+    const service = new ReindexPollingService(
+      'myIndex',
+      'myXsrf',
+      httpServiceMock.createSetupContract()
+    );
     service.updateStatus();
     await new Promise(resolve => setTimeout(resolve, 1200)); // wait for poll interval
 
@@ -84,7 +92,7 @@ describe('ReindexPollingService', () => {
       const service = new ReindexPollingService(
         'myIndex',
         'myXsrf',
-        getCoreHttpMock('/api/upgrade_assistant/reindex/myIndex')
+        httpServiceMock.createSetupContract()
       );
       await service.startReindex();
 
@@ -97,7 +105,7 @@ describe('ReindexPollingService', () => {
       const service = new ReindexPollingService(
         'myIndex',
         'myXsrf',
-        getCoreHttpMock('/api/upgrade_assistant/reindex/myIndex/cancel')
+        httpServiceMock.createSetupContract()
       );
       await service.cancelReindex();
 

@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
+import { KibanaRequest } from 'kibana/server';
 import { RequestShim } from '../types';
 
-export const createRequestShim = (req: Request): RequestShim => {
+export const createRequestShim = (req: KibanaRequest): RequestShim => {
   return {
-    headers: req.headers,
-    payload: req.payload,
+    headers: req.headers as Record<string, string>,
+    payload: req.body || (req as any).payload,
     params: req.params,
-    getSavedObjectsClient: req.getSavedObjectsClient ? req.getSavedObjectsClient.bind(req) : null,
   };
 };

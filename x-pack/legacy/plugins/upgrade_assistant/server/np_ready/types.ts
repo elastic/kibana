@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Legacy } from 'kibana';
-import { SavedObjectsClientContract } from 'kibana/server';
-import { ServerRoute } from 'hapi';
+import { IRouter } from 'src/core/server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
-
-export type RegisterRoute = (args: ServerRoute) => void;
 
 export interface ServerShim {
   usage: {
@@ -21,17 +18,23 @@ export interface ServerShim {
   plugins: {
     elasticsearch: ElasticsearchPlugin;
     xpack_main: XPackMainPlugin;
+    cloud: {
+      config: {
+        isCloudEnabled: boolean;
+      };
+    };
   };
-  route: RegisterRoute;
   log: any;
   events: any;
   savedObjects: Legacy.SavedObjectsService;
 }
 
+export interface ServerShimWithRouter extends ServerShim {
+  router: IRouter;
+}
+
 export interface RequestShim {
-  headers: { [key: string]: string };
+  headers: Record<string, string>;
   payload: any;
   params: any;
-  // May not exist in tests, flagging it as possible null here.
-  getSavedObjectsClient: (() => SavedObjectsClientContract) | null;
 }

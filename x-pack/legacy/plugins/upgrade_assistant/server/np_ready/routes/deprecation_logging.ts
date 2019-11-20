@@ -4,55 +4,54 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 
 import {
   getDeprecationLoggingStatus,
   setDeprecationLogging,
 } from '../lib/es_deprecation_logging_apis';
-import { EsVersionPrecheck } from '../lib/es_version_precheck';
-import { ServerShim } from '../types';
+import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
+import { ServerShimWithRouter } from '../types';
 import { createRequestShim } from './create_request_shim';
 
-export function registerDeprecationLoggingRoutes(server: ServerShim) {
+export function registerDeprecationLoggingRoutes(server: ServerShimWithRouter) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
 
-  server.route({
-    path: '/api/upgrade_assistant/deprecation_logging',
-    method: 'GET',
-    options: {
-      pre: [EsVersionPrecheck],
+  server.router.get(
+    {
+      path: '/api/upgrade_assistant/deprecation_logging',
+      validate: false,
     },
-    async handler(request) {
+    versionCheckHandlerWrapper(async (ctx, request, response) => {
       const reqShim = createRequestShim(request);
       try {
-        return await getDeprecationLoggingStatus(callWithRequest, reqShim);
+        const result = await getDeprecationLoggingStatus(callWithRequest, reqShim);
+        return response.ok({ body: result });
       } catch (e) {
-        return Boom.boomify(e, { statusCode: 500 });
+        return response.internalError({ body: e });
       }
-    },
-  });
+    })
+  );
 
-  server.route({
-    path: '/api/upgrade_assistant/deprecation_logging',
-    method: 'PUT',
-    options: {
-      pre: [EsVersionPrecheck],
+  server.router.put(
+    {
+      path: '/api/upgrade_assistant/deprecation_logging',
       validate: {
-        payload: Joi.object({
-          isEnabled: Joi.boolean(),
+        body: schema.object({
+          isEnabled: schema.boolean(),
         }),
       },
     },
-    async handler(request) {
+    versionCheckHandlerWrapper(async (ctx, request, response) => {
       const reqShim = createRequestShim(request);
       try {
         const { isEnabled } = reqShim.payload as { isEnabled: boolean };
-        return await setDeprecationLogging(callWithRequest, reqShim, isEnabled);
+        return response.ok({
+          body: await setDeprecationLogging(callWithRequest, reqShim, isEnabled),
+        });
       } catch (e) {
-        return Boom.boomify(e, { statusCode: 500 });
+        return response.internalError({ body: e });
       }
-    },
-  });
+    })
+  );
 }

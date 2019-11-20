@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory } from 'src/core/server';
+import { createMockRouter, MockRouter } from './__mocks__/routes.mock';
+import { createRequestMock } from './__mocks__/request.mock';
 
 const mockReindexService = {
   hasRequiredPrivileges: jest.fn(),
@@ -18,7 +21,10 @@ const mockReindexService = {
   cancelReindexing: jest.fn(),
 };
 
-jest.mock('../lib/es_version_precheck');
+jest.mock('../lib/es_version_precheck', () => ({
+  versionCheckHandlerWrapper: (a: any) => a,
+}));
+
 jest.mock('../lib/reindexing', () => {
   return {
     reindexServiceFactory: () => mockReindexService,
@@ -40,28 +46,36 @@ import { registerReindexIndicesRoutes } from './reindex_indices';
  * more thoroughly in the es_migration_apis test.
  */
 describe('reindex API', () => {
-  const server = new Server();
-  server.plugins = {
-    elasticsearch: {
-      getCluster: () => ({ callWithRequest: jest.fn() } as any),
-    } as any,
-    xpack_main: {
-      info: {},
-    },
-  } as any;
-  server.config = () => ({ get: () => '' } as any);
-  server.decorate('request', 'getSavedObjectsClient', () => jest.fn());
+  let serverShim: any;
+  let mockRouter: MockRouter;
+  let ctxMock: any;
 
   const credentialStore = credentialStoreFactory();
-
   const worker = {
     includes: jest.fn(),
     forceRefresh: jest.fn(),
   } as any;
 
-  registerReindexIndicesRoutes(server, worker, credentialStore);
-
   beforeEach(() => {
+    ctxMock = {
+      core: {
+        savedObjects: savedObjectsClientMock.create(),
+      },
+    };
+    mockRouter = createMockRouter();
+    serverShim = {
+      router: mockRouter,
+      plugins: {
+        xpack_main: {
+          info: jest.fn(),
+        },
+        elasticsearch: {
+          getCluster: () => ({ callWithRequest: jest.fn() } as any),
+        } as any,
+      },
+    };
+    registerReindexIndicesRoutes(serverShim, worker, credentialStore);
+
     mockReindexService.hasRequiredPrivileges.mockResolvedValue(true);
     mockReindexService.detectReindexWarnings.mockReset();
     mockReindexService.getIndexGroup.mockReset();
@@ -78,6 +92,8 @@ describe('reindex API', () => {
     credentialStore.clear();
   });
 
+  afterEach(() => jest.clearAllMocks());
+
   describe('GET /api/upgrade_assistant/reindex/{indexName}', () => {
     it('returns the attributes of the reindex operation and reindex warnings', async () => {
       mockReindexService.findReindexOperation.mockResolvedValueOnce({
@@ -85,18 +101,18 @@ describe('reindex API', () => {
       });
       mockReindexService.detectReindexWarnings.mockResolvedValueOnce([ReindexWarning.allField]);
 
-      const resp = await server.inject({
-        method: 'GET',
-        url: `/api/upgrade_assistant/reindex/wowIndex`,
-      });
+      const resp = await serverShim.router.getHandler({
+        method: 'get',
+        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+      })(ctxMock, createRequestMock({ params: { indexName: 'wowIndex' } }), kibanaResponseFactory);
 
       // It called into the service correctly
       expect(mockReindexService.findReindexOperation).toHaveBeenCalledWith('wowIndex');
       expect(mockReindexService.detectReindexWarnings).toHaveBeenCalledWith('wowIndex');
 
       // It returned the right results
-      expect(resp.statusCode).toEqual(200);
-      const data = JSON.parse(resp.payload);
+      expect(resp.status).toEqual(200);
+      const data = resp.payload;
       expect(data.reindexOp).toEqual({ indexName: 'wowIndex', status: ReindexStatus.inProgress });
       expect(data.warnings).toEqual([0]);
     });
@@ -105,13 +121,13 @@ describe('reindex API', () => {
       mockReindexService.findReindexOperation.mockResolvedValueOnce(null);
       mockReindexService.detectReindexWarnings.mockResolvedValueOnce(null);
 
-      const resp = await server.inject({
-        method: 'GET',
-        url: `/api/upgrade_assistant/reindex/anIndex`,
-      });
+      const resp = await serverShim.router.getHandler({
+        method: 'get',
+        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+      })(ctxMock, createRequestMock({ params: { indexName: 'anIndex' } }), kibanaResponseFactory);
 
-      expect(resp.statusCode).toEqual(200);
-      const data = JSON.parse(resp.payload);
+      expect(resp.status).toEqual(200);
+      const data = resp.payload;
       expect(data.reindexOp).toBeNull();
       expect(data.warnings).toBeNull();
     });
@@ -121,13 +137,13 @@ describe('reindex API', () => {
       mockReindexService.detectReindexWarnings.mockResolvedValueOnce([]);
       mockReindexService.getIndexGroup.mockReturnValue(IndexGroup.ml);
 
-      const resp = await server.inject({
-        method: 'GET',
-        url: `/api/upgrade_assistant/reindex/.ml-state`,
-      });
+      const resp = await serverShim.router.getHandler({
+        method: 'get',
+        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+      })(ctxMock, createRequestMock({ params: { indexName: 'anIndex' } }), kibanaResponseFactory);
 
-      expect(resp.statusCode).toEqual(200);
-      const data = JSON.parse(resp.payload);
+      expect(resp.status).toEqual(200);
+      const data = resp.payload;
       expect(data.indexGroup).toEqual(IndexGroup.ml);
     });
   });
@@ -138,17 +154,17 @@ describe('reindex API', () => {
         attributes: { indexName: 'theIndex' },
       });
 
-      const resp = await server.inject({
-        method: 'POST',
-        url: '/api/upgrade_assistant/reindex/theIndex',
-      });
+      const resp = await serverShim.router.getHandler({
+        method: 'post',
+        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+      })(ctxMock, createRequestMock({ params: { indexName: 'theIndex' } }), kibanaResponseFactory);
 
       // It called create correctly
       expect(mockReindexService.createReindexOperation).toHaveBeenCalledWith('theIndex');
 
       // It returned the right results
-      expect(resp.statusCode).toEqual(200);
-      const data = JSON.parse(resp.payload);
+      expect(resp.status).toEqual(200);
+      const data = resp.payload;
       expect(data).toEqual({ indexName: 'theIndex' });
     });
 
@@ -157,10 +173,10 @@ describe('reindex API', () => {
         attributes: { indexName: 'theIndex' },
       });
 
-      await server.inject({
-        method: 'POST',
-        url: '/api/upgrade_assistant/reindex/theIndex',
-      });
+      await serverShim.router.getHandler({
+        method: 'post',
+        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+      })(ctxMock, createRequestMock({ params: { indexName: 'theIndex' } }), kibanaResponseFactory);
 
       expect(worker.forceRefresh).toHaveBeenCalled();
     });
@@ -171,13 +187,19 @@ describe('reindex API', () => {
       } as ReindexSavedObject;
       mockReindexService.createReindexOperation.mockResolvedValueOnce(reindexOp);
 
-      await server.inject({
-        method: 'POST',
-        url: '/api/upgrade_assistant/reindex/theIndex',
-        headers: {
-          'kbn-auth-x': 'HERE!',
-        },
-      });
+      await serverShim.router.getHandler({
+        method: 'post',
+        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+      })(
+        ctxMock,
+        createRequestMock({
+          headers: {
+            'kbn-auth-x': 'HERE!',
+          },
+          params: { indexName: 'theIndex' },
+        }),
+        kibanaResponseFactory
+      );
 
       expect(credentialStore.get(reindexOp)!['kbn-auth-x']).toEqual('HERE!');
     });
@@ -190,30 +212,41 @@ describe('reindex API', () => {
         attributes: { indexName: 'theIndex', status: ReindexStatus.inProgress },
       });
 
-      const resp = await server.inject({
-        method: 'POST',
-        url: '/api/upgrade_assistant/reindex/theIndex',
-      });
-
+      const resp = await serverShim.router.getHandler({
+        method: 'post',
+        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+      })(
+        ctxMock,
+        createRequestMock({
+          params: { indexName: 'theIndex' },
+        }),
+        kibanaResponseFactory
+      );
       // It called resume correctly
       expect(mockReindexService.resumeReindexOperation).toHaveBeenCalledWith('theIndex');
       expect(mockReindexService.createReindexOperation).not.toHaveBeenCalled();
 
       // It returned the right results
-      expect(resp.statusCode).toEqual(200);
-      const data = JSON.parse(resp.payload);
+      expect(resp.status).toEqual(200);
+      const data = resp.payload;
       expect(data).toEqual({ indexName: 'theIndex', status: ReindexStatus.inProgress });
     });
 
     it('returns a 403 if required privileges fails', async () => {
       mockReindexService.hasRequiredPrivileges.mockResolvedValueOnce(false);
 
-      const resp = await server.inject({
-        method: 'POST',
-        url: '/api/upgrade_assistant/reindex/theIndex',
-      });
+      const resp = await serverShim.router.getHandler({
+        method: 'post',
+        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+      })(
+        ctxMock,
+        createRequestMock({
+          params: { indexName: 'theIndex' },
+        }),
+        kibanaResponseFactory
+      );
 
-      expect(resp.statusCode).toEqual(403);
+      expect(resp.status).toEqual(403);
     });
   });
 
@@ -221,13 +254,19 @@ describe('reindex API', () => {
     it('returns a 501', async () => {
       mockReindexService.cancelReindexing.mockResolvedValueOnce({});
 
-      const resp = await server.inject({
-        method: 'POST',
-        url: '/api/upgrade_assistant/reindex/cancelMe/cancel',
-      });
+      const resp = await serverShim.router.getHandler({
+        method: 'post',
+        pathPattern: '/api/upgrade_assistant/reindex/{indexName}/cancel',
+      })(
+        ctxMock,
+        createRequestMock({
+          params: { indexName: 'cancelMe' },
+        }),
+        kibanaResponseFactory
+      );
 
-      expect(resp.statusCode).toEqual(200);
-      expect(resp.payload).toMatchInlineSnapshot(`"{\\"acknowledged\\":true}"`);
+      expect(resp.status).toEqual(200);
+      expect(resp.payload).toEqual({ acknowledged: true });
       expect(mockReindexService.cancelReindexing).toHaveBeenCalledWith('cancelMe');
     });
   });
