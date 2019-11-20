@@ -41,9 +41,5 @@ export function getNotifyUserAboutOptInDefault({
     return false;
   }
 
-  if (telemetryOptedIn !== null) {
-    return false; // they were not defaulted in
-  }
-
-  return configTelemetryOptIn;
+  return telemetryOptedIn === true && configTelemetryOptIn === true;
 }
