@@ -36,6 +36,11 @@ interface RouterRoute {
   handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject | Boom<any>>;
 }
 
+export type RouteRegistrar = <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+  route: RouteConfig<P, Q, B>,
+  handler: RequestHandler<P, Q, B>
+) => void;
+
 /**
  * Registers route handlers for specified resource path and method.
  * See {@link RouteConfig} and {@link RequestHandler} for more information about arguments to route registrations.
@@ -53,40 +58,28 @@ export interface IRouter {
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  get: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B>,
-    handler: RequestHandler<P, Q, B>
-  ) => void;
+  get: RouteRegistrar;
 
   /**
    * Register a route handler for `POST` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  post: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B>,
-    handler: RequestHandler<P, Q, B>
-  ) => void;
+  post: RouteRegistrar;
 
   /**
    * Register a route handler for `PUT` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  put: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B>,
-    handler: RequestHandler<P, Q, B>
-  ) => void;
+  put: RouteRegistrar;
 
   /**
    * Register a route handler for `DELETE` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
    */
-  delete: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    route: RouteConfig<P, Q, B>,
-    handler: RequestHandler<P, Q, B>
-  ) => void;
+  delete: RouteRegistrar;
 
   /**
    * Wrap a router handler to catch and converts legacy boom errors to proper custom errors.
