@@ -21,8 +21,8 @@ import { EuiIcon, EuiLink, EuiFormHelpText, EuiFormControlLayoutDelimited } from
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React from 'react';
-import { useKibana } from '../../../../../../../plugins/kibana_react/public';
-import { IFieldType } from '../../../../../../../plugins/data/public';
+import { useKibana } from '../../../../../kibana_react/public';
+import { IFieldType } from '../../..';
 import { ValueInputType } from './value_input_type';
 
 interface RangeParams {
