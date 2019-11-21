@@ -238,7 +238,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
         <TimeCursor x1={width / 3} x2={width} y1={timeCursorY} y2={timeCursorY} />
         <DragTargetArea
           isGrabbing={Boolean(drag)}
-          innerRef={node => {
+          ref={node => {
             this.dragTargetArea = node;
           }}
           x={0}
