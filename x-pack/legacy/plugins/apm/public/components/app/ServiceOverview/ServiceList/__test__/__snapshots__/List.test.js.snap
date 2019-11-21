@@ -7,11 +7,11 @@ exports[`ServiceOverview -> List should render columns correctly 1`] = `
   id="service-name-tooltip"
   position="top"
 >
-  <Styled(TransactionOverviewLink)
+  <ForwardRef(Styled(TransactionOverviewLink))
     serviceName="opbeans-python"
   >
     opbeans-python
-  </Styled(TransactionOverviewLink)>
+  </ForwardRef(Styled(TransactionOverviewLink))>
 </EuiToolTip>
 `;
 
