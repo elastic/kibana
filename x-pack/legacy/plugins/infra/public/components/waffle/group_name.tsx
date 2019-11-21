@@ -52,7 +52,7 @@ export class GroupName extends React.PureComponent<Props, {}> {
 
 const GroupNameContainer = euiStyled.div`
   position: relative;
-  text-align: center
+  text-align: center;
   font-size: 16px;
   margin-bottom: 5px;
   top: 20px;
@@ -65,7 +65,7 @@ interface InnerProps {
   isChild?: boolean;
 }
 
-const Inner = euiStyled<InnerProps, 'div'>('div')`
+const Inner = euiStyled.div<InnerProps>`
   border: 1px solid ${props => props.theme.eui.euiBorderColor};
   background-color: ${props =>
     props.isChild ? props.theme.eui.euiColorLightestShade : props.theme.eui.euiColorEmptyShade};
