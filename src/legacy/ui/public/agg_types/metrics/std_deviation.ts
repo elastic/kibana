@@ -21,15 +21,15 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { getResponseAggConfigClass, IResponseAggConfig } from './get_response_agg_config_class';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 interface ValProp {
   valProp: string[];
   title: string;
 }
 
-interface IStdDevAggConfig extends IResponseAggConfig {
+export interface IStdDevAggConfig extends IResponseAggConfig {
   keyedDetails: (customLabel: string, fieldDisplayName?: string) => { [key: string]: ValProp };
   valProp: () => ValProp;
 }

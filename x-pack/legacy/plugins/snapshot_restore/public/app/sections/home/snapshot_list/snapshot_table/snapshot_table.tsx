@@ -21,11 +21,12 @@ import { useAppDependencies } from '../../../../index';
 import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
 import { uiMetricService } from '../../../../services/ui_metric';
 import { DataPlaceholder, FormattedDateTime, SnapshotDeleteProvider } from '../../../../components';
+import { SendRequestResponse } from '../../../../../shared_imports';
 
 interface Props {
   snapshots: SnapshotDetails[];
   repositories: string[];
-  reload: () => Promise<void>;
+  reload: () => Promise<SendRequestResponse>;
   openSnapshotDetailsUrl: (repositoryName: string, snapshotId: string) => string;
   repositoryFilter?: string;
   policyFilter?: string;

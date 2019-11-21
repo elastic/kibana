@@ -9,10 +9,11 @@ import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
-import { InjectedData } from './util/injected_data';
 import {
+  MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
-  SOURCE_DATA_ID_ORIGIN
+  MIN_ZOOM,
+  SOURCE_DATA_ID_ORIGIN,
 } from '../../common/constants';
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../reducers/util';
@@ -32,11 +33,6 @@ export class AbstractLayer {
     } else {
       this._dataRequests = [];
     }
-    if (this._descriptor.__injectedData) {
-      this._injectedData = new InjectedData(this._descriptor.__injectedData);
-    } else {
-      this._injectedData = null;
-    }
   }
 
   static getBoundDataForSource(mbMap, sourceId) {
@@ -48,14 +44,12 @@ export class AbstractLayer {
     const layerDescriptor = { ...options };
 
     layerDescriptor.__dataRequests = _.get(options, '__dataRequests', []);
-    layerDescriptor.__injectedData = _.get(options, '__injectedData', null);
     layerDescriptor.id = _.get(options, 'id', uuid());
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
-    layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
-    layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
+    layerDescriptor.minZoom = _.get(options, 'minZoom', MIN_ZOOM);
+    layerDescriptor.maxZoom = _.get(options, 'maxZoom', MAX_ZOOM);
     layerDescriptor.alpha = _.get(options, 'alpha', 0.75);
     layerDescriptor.visible = _.get(options, 'visible', true);
-    layerDescriptor.applyGlobalQuery = _.get(options, 'applyGlobalQuery', true);
     layerDescriptor.style = _.get(options, 'style',  {});
 
     return layerDescriptor;
@@ -238,10 +232,6 @@ export class AbstractLayer {
     return this._descriptor.query;
   }
 
-  getApplyGlobalQuery() {
-    return this._descriptor.applyGlobalQuery;
-  }
-
   getZoomConfig() {
     return {
       minZoom: this._descriptor.minZoom,
@@ -285,10 +275,6 @@ export class AbstractLayer {
 
   getDataRequest(id) {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === id);
-  }
-
-  getInjectedData() {
-    return this._injectedData ? this._injectedData.getData() : null;
   }
 
   isLayerLoading() {
@@ -394,14 +380,10 @@ export class AbstractLayer {
   }
 
   getIndexPatternIds() {
-    return  [];
+    return [];
   }
 
   getQueryableIndexPatternIds() {
-    if (this.getApplyGlobalQuery()) {
-      return this.getIndexPatternIds();
-    }
-
     return [];
   }
 
@@ -415,6 +397,10 @@ export class AbstractLayer {
 
   syncVisibilityWithMb(mbMap, mbLayerId) {
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+  }
+
+  getType() {
+    return this._descriptor.type;
   }
 
 }

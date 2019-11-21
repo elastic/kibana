@@ -29,8 +29,6 @@ export interface TimerangeInput {
   to: number;
   /** The beginning of the timerange */
   from: number;
-  /** The default browser set time zone */
-  timezone?: Maybe<string>;
 }
 
 export interface PaginationInputPaginated {
@@ -89,6 +87,10 @@ export interface NetworkDnsSortField {
   direction: Direction;
 }
 
+export interface NetworkHttpSortField {
+  direction: Direction;
+}
+
 export interface TlsSortField {
   field: TlsFields;
 
@@ -122,6 +124,8 @@ export interface TimelineInput {
 
   description?: Maybe<string>;
 
+  filters?: Maybe<FilterTimelineInput[]>;
+
   kqlMode?: Maybe<string>;
 
   kqlQuery?: Maybe<SerializedFilterQueryInput>;
@@ -129,6 +133,8 @@ export interface TimelineInput {
   title?: Maybe<string>;
 
   dateRange?: Maybe<DateRangePickerInput>;
+
+  savedQueryId?: Maybe<string>;
 
   sort?: Maybe<SortTimelineInput>;
 }
@@ -183,6 +189,46 @@ export interface QueryMatchInput {
   displayValue?: Maybe<string>;
 
   operator?: Maybe<string>;
+}
+
+export interface FilterTimelineInput {
+  exists?: Maybe<string>;
+
+  meta?: Maybe<FilterMetaTimelineInput>;
+
+  match_all?: Maybe<string>;
+
+  missing?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  range?: Maybe<string>;
+
+  script?: Maybe<string>;
+}
+
+export interface FilterMetaTimelineInput {
+  alias?: Maybe<string>;
+
+  controlledBy?: Maybe<string>;
+
+  disabled?: Maybe<boolean>;
+
+  field?: Maybe<string>;
+
+  formattedValue?: Maybe<string>;
+
+  index?: Maybe<string>;
+
+  key?: Maybe<string>;
+
+  negate?: Maybe<boolean>;
+
+  params?: Maybe<string>;
+
+  type?: Maybe<string>;
+
+  value?: Maybe<string>;
 }
 
 export interface SerializedFilterQueryInput {
@@ -298,6 +344,16 @@ export enum NetworkDirectionEcs {
   unknown = 'unknown',
 }
 
+export enum NetworkHttpFields {
+  domains = 'domains',
+  lastHost = 'lastHost',
+  lastSourceIp = 'lastSourceIp',
+  methods = 'methods',
+  path = 'path',
+  requestCount = 'requestCount',
+  statuses = 'statuses',
+}
+
 export enum FlowDirection {
   uniDirectional = 'uniDirectional',
   biDirectional = 'biDirectional',
@@ -405,6 +461,8 @@ export interface Source {
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
 
+  AuthenticationsOverTime: AuthenticationsOverTimeData;
+
   Timeline: TimelineData;
 
   TimelineDetails: TimelineDetailsData;
@@ -434,6 +492,8 @@ export interface Source {
   NetworkTopNFlow: NetworkTopNFlowData;
 
   NetworkDns: NetworkDnsData;
+
+  NetworkHttp: NetworkHttpData;
 
   OverviewNetwork?: Maybe<OverviewNetworkData>;
 
@@ -636,6 +696,22 @@ export interface Inspect {
   dsl: string[];
 
   response: string[];
+}
+
+export interface AuthenticationsOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  authenticationsOverTime: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface MatrixOverTimeHistogramData {
+  x: number;
+
+  y: number;
+
+  g: string;
 }
 
 export interface TimelineData {
@@ -1222,14 +1298,6 @@ export interface EventsOverTimeData {
   totalCount: number;
 }
 
-export interface MatrixOverTimeHistogramData {
-  x: number;
-
-  y: number;
-
-  g: string;
-}
-
 export interface HostsData {
   edges: HostsEdges[];
 
@@ -1582,6 +1650,40 @@ export interface NetworkDnsItem {
   uniqueDomains?: Maybe<number>;
 }
 
+export interface NetworkHttpData {
+  edges: NetworkHttpEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfoPaginated;
+
+  inspect?: Maybe<Inspect>;
+}
+
+export interface NetworkHttpEdges {
+  node: NetworkHttpItem;
+
+  cursor: CursorType;
+}
+
+export interface NetworkHttpItem {
+  _id?: Maybe<string>;
+
+  domains: string[];
+
+  lastHost?: Maybe<string>;
+
+  lastSourceIp?: Maybe<string>;
+
+  methods: string[];
+
+  path?: Maybe<string>;
+
+  requestCount?: Maybe<number>;
+
+  statuses: string[];
+}
+
 export interface OverviewNetworkData {
   auditbeatSocket?: Maybe<number>;
 
@@ -1704,9 +1806,11 @@ export interface SayMyName {
 }
 
 export interface TimelineResult {
-  savedObjectId: string;
-
   columns?: Maybe<ColumnHeaderResult[]>;
+
+  created?: Maybe<number>;
+
+  createdBy?: Maybe<string>;
 
   dataProviders?: Maybe<DataProviderResult[]>;
 
@@ -1717,6 +1821,8 @@ export interface TimelineResult {
   eventIdToNoteIds?: Maybe<NoteResult[]>;
 
   favorite?: Maybe<FavoriteTimelineResult[]>;
+
+  filters?: Maybe<FilterTimelineResult[]>;
 
   kqlMode?: Maybe<string>;
 
@@ -1730,13 +1836,13 @@ export interface TimelineResult {
 
   pinnedEventsSaveObject?: Maybe<PinnedEvent[]>;
 
-  title?: Maybe<string>;
+  savedQueryId?: Maybe<string>;
+
+  savedObjectId: string;
 
   sort?: Maybe<SortTimelineResult>;
 
-  created?: Maybe<number>;
-
-  createdBy?: Maybe<string>;
+  title?: Maybe<string>;
 
   updated?: Maybe<number>;
 
@@ -1809,6 +1915,46 @@ export interface FavoriteTimelineResult {
   userName?: Maybe<string>;
 
   favoriteDate?: Maybe<number>;
+}
+
+export interface FilterTimelineResult {
+  exists?: Maybe<string>;
+
+  meta?: Maybe<FilterMetaTimelineResult>;
+
+  match_all?: Maybe<string>;
+
+  missing?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  range?: Maybe<string>;
+
+  script?: Maybe<string>;
+}
+
+export interface FilterMetaTimelineResult {
+  alias?: Maybe<string>;
+
+  controlledBy?: Maybe<string>;
+
+  disabled?: Maybe<boolean>;
+
+  field?: Maybe<string>;
+
+  formattedValue?: Maybe<string>;
+
+  index?: Maybe<string>;
+
+  key?: Maybe<string>;
+
+  negate?: Maybe<boolean>;
+
+  params?: Maybe<string>;
+
+  type?: Maybe<string>;
+
+  value?: Maybe<string>;
 }
 
 export interface SerializedFilterQueryResult {
@@ -1982,6 +2128,13 @@ export interface AuthenticationsSourceArgs {
 
   defaultIndex: string[];
 }
+export interface AuthenticationsOverTimeSourceArgs {
+  timerange: TimerangeInput;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+}
 export interface TimelineSourceArgs {
   pagination: PaginationInput;
 
@@ -2144,6 +2297,21 @@ export interface NetworkDnsSourceArgs {
   pagination: PaginationInputPaginated;
 
   sort: NetworkDnsSortField;
+
+  timerange: TimerangeInput;
+
+  defaultIndex: string[];
+}
+export interface NetworkHttpSourceArgs {
+  id?: Maybe<string>;
+
+  filterQuery?: Maybe<string>;
+
+  ip?: Maybe<string>;
+
+  pagination: PaginationInputPaginated;
+
+  sort: NetworkHttpSortField;
 
   timerange: TimerangeInput;
 
@@ -2588,6 +2756,12 @@ export namespace SourceResolvers {
     /** Gets Authentication success and failures based on a timerange */
     Authentications?: AuthenticationsResolver<AuthenticationsData, TypeParent, TContext>;
 
+    AuthenticationsOverTime?: AuthenticationsOverTimeResolver<
+      AuthenticationsOverTimeData,
+      TypeParent,
+      TContext
+    >;
+
     Timeline?: TimelineResolver<TimelineData, TypeParent, TContext>;
 
     TimelineDetails?: TimelineDetailsResolver<TimelineDetailsData, TypeParent, TContext>;
@@ -2621,6 +2795,8 @@ export namespace SourceResolvers {
     NetworkTopNFlow?: NetworkTopNFlowResolver<NetworkTopNFlowData, TypeParent, TContext>;
 
     NetworkDns?: NetworkDnsResolver<NetworkDnsData, TypeParent, TContext>;
+
+    NetworkHttp?: NetworkHttpResolver<NetworkHttpData, TypeParent, TContext>;
 
     OverviewNetwork?: OverviewNetworkResolver<Maybe<OverviewNetworkData>, TypeParent, TContext>;
 
@@ -2657,6 +2833,19 @@ export namespace SourceResolvers {
     timerange: TimerangeInput;
 
     pagination: PaginationInputPaginated;
+
+    filterQuery?: Maybe<string>;
+
+    defaultIndex: string[];
+  }
+
+  export type AuthenticationsOverTimeResolver<
+    R = AuthenticationsOverTimeData,
+    Parent = Source,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext, AuthenticationsOverTimeArgs>;
+  export interface AuthenticationsOverTimeArgs {
+    timerange: TimerangeInput;
 
     filterQuery?: Maybe<string>;
 
@@ -2916,6 +3105,27 @@ export namespace SourceResolvers {
     pagination: PaginationInputPaginated;
 
     sort: NetworkDnsSortField;
+
+    timerange: TimerangeInput;
+
+    defaultIndex: string[];
+  }
+
+  export type NetworkHttpResolver<
+    R = NetworkHttpData,
+    Parent = Source,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext, NetworkHttpArgs>;
+  export interface NetworkHttpArgs {
+    id?: Maybe<string>;
+
+    filterQuery?: Maybe<string>;
+
+    ip?: Maybe<string>;
+
+    pagination: PaginationInputPaginated;
+
+    sort: NetworkHttpSortField;
 
     timerange: TimerangeInput;
 
@@ -3617,6 +3827,62 @@ export namespace InspectResolvers {
     Parent,
     TContext
   >;
+}
+
+export namespace AuthenticationsOverTimeDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = AuthenticationsOverTimeData> {
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+
+    authenticationsOverTime?: AuthenticationsOverTimeResolver<
+      MatrixOverTimeHistogramData[],
+      TypeParent,
+      TContext
+    >;
+
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
+  }
+
+  export type InspectResolver<
+    R = Maybe<Inspect>,
+    Parent = AuthenticationsOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type AuthenticationsOverTimeResolver<
+    R = MatrixOverTimeHistogramData[],
+    Parent = AuthenticationsOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = AuthenticationsOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace MatrixOverTimeHistogramDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = MatrixOverTimeHistogramData> {
+    x?: XResolver<number, TypeParent, TContext>;
+
+    y?: YResolver<number, TypeParent, TContext>;
+
+    g?: GResolver<string, TypeParent, TContext>;
+  }
+
+  export type XResolver<
+    R = number,
+    Parent = MatrixOverTimeHistogramData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type YResolver<
+    R = number,
+    Parent = MatrixOverTimeHistogramData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type GResolver<
+    R = string,
+    Parent = MatrixOverTimeHistogramData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
 }
 
 export namespace TimelineDataResolvers {
@@ -5569,32 +5835,6 @@ export namespace EventsOverTimeDataResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
-export namespace MatrixOverTimeHistogramDataResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = MatrixOverTimeHistogramData> {
-    x?: XResolver<number, TypeParent, TContext>;
-
-    y?: YResolver<number, TypeParent, TContext>;
-
-    g?: GResolver<string, TypeParent, TContext>;
-  }
-
-  export type XResolver<
-    R = number,
-    Parent = MatrixOverTimeHistogramData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type YResolver<
-    R = number,
-    Parent = MatrixOverTimeHistogramData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type GResolver<
-    R = string,
-    Parent = MatrixOverTimeHistogramData,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
 export namespace HostsDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = HostsData> {
     edges?: EdgesResolver<HostsEdges[], TypeParent, TContext>;
@@ -6799,6 +7039,119 @@ export namespace NetworkDnsItemResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
+export namespace NetworkHttpDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = NetworkHttpData> {
+    edges?: EdgesResolver<NetworkHttpEdges[], TypeParent, TContext>;
+
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
+
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, TContext>;
+
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+  }
+
+  export type EdgesResolver<
+    R = NetworkHttpEdges[],
+    Parent = NetworkHttpData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = NetworkHttpData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type PageInfoResolver<
+    R = PageInfoPaginated,
+    Parent = NetworkHttpData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type InspectResolver<
+    R = Maybe<Inspect>,
+    Parent = NetworkHttpData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace NetworkHttpEdgesResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = NetworkHttpEdges> {
+    node?: NodeResolver<NetworkHttpItem, TypeParent, TContext>;
+
+    cursor?: CursorResolver<CursorType, TypeParent, TContext>;
+  }
+
+  export type NodeResolver<
+    R = NetworkHttpItem,
+    Parent = NetworkHttpEdges,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type CursorResolver<
+    R = CursorType,
+    Parent = NetworkHttpEdges,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace NetworkHttpItemResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = NetworkHttpItem> {
+    _id?: _IdResolver<Maybe<string>, TypeParent, TContext>;
+
+    domains?: DomainsResolver<string[], TypeParent, TContext>;
+
+    lastHost?: LastHostResolver<Maybe<string>, TypeParent, TContext>;
+
+    lastSourceIp?: LastSourceIpResolver<Maybe<string>, TypeParent, TContext>;
+
+    methods?: MethodsResolver<string[], TypeParent, TContext>;
+
+    path?: PathResolver<Maybe<string>, TypeParent, TContext>;
+
+    requestCount?: RequestCountResolver<Maybe<number>, TypeParent, TContext>;
+
+    statuses?: StatusesResolver<string[], TypeParent, TContext>;
+  }
+
+  export type _IdResolver<
+    R = Maybe<string>,
+    Parent = NetworkHttpItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type DomainsResolver<
+    R = string[],
+    Parent = NetworkHttpItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type LastHostResolver<
+    R = Maybe<string>,
+    Parent = NetworkHttpItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type LastSourceIpResolver<
+    R = Maybe<string>,
+    Parent = NetworkHttpItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type MethodsResolver<
+    R = string[],
+    Parent = NetworkHttpItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type PathResolver<
+    R = Maybe<string>,
+    Parent = NetworkHttpItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type RequestCountResolver<
+    R = Maybe<number>,
+    Parent = NetworkHttpItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type StatusesResolver<
+    R = string[],
+    Parent = NetworkHttpItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
 export namespace OverviewNetworkDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = OverviewNetworkData> {
     auditbeatSocket?: AuditbeatSocketResolver<Maybe<number>, TypeParent, TContext>;
@@ -7204,9 +7557,11 @@ export namespace SayMyNameResolvers {
 
 export namespace TimelineResultResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = TimelineResult> {
-    savedObjectId?: SavedObjectIdResolver<string, TypeParent, TContext>;
-
     columns?: ColumnsResolver<Maybe<ColumnHeaderResult[]>, TypeParent, TContext>;
+
+    created?: CreatedResolver<Maybe<number>, TypeParent, TContext>;
+
+    createdBy?: CreatedByResolver<Maybe<string>, TypeParent, TContext>;
 
     dataProviders?: DataProvidersResolver<Maybe<DataProviderResult[]>, TypeParent, TContext>;
 
@@ -7217,6 +7572,8 @@ export namespace TimelineResultResolvers {
     eventIdToNoteIds?: EventIdToNoteIdsResolver<Maybe<NoteResult[]>, TypeParent, TContext>;
 
     favorite?: FavoriteResolver<Maybe<FavoriteTimelineResult[]>, TypeParent, TContext>;
+
+    filters?: FiltersResolver<Maybe<FilterTimelineResult[]>, TypeParent, TContext>;
 
     kqlMode?: KqlModeResolver<Maybe<string>, TypeParent, TContext>;
 
@@ -7234,13 +7591,13 @@ export namespace TimelineResultResolvers {
       TContext
     >;
 
-    title?: TitleResolver<Maybe<string>, TypeParent, TContext>;
+    savedQueryId?: SavedQueryIdResolver<Maybe<string>, TypeParent, TContext>;
+
+    savedObjectId?: SavedObjectIdResolver<string, TypeParent, TContext>;
 
     sort?: SortResolver<Maybe<SortTimelineResult>, TypeParent, TContext>;
 
-    created?: CreatedResolver<Maybe<number>, TypeParent, TContext>;
-
-    createdBy?: CreatedByResolver<Maybe<string>, TypeParent, TContext>;
+    title?: TitleResolver<Maybe<string>, TypeParent, TContext>;
 
     updated?: UpdatedResolver<Maybe<number>, TypeParent, TContext>;
 
@@ -7249,13 +7606,18 @@ export namespace TimelineResultResolvers {
     version?: VersionResolver<string, TypeParent, TContext>;
   }
 
-  export type SavedObjectIdResolver<
-    R = string,
+  export type ColumnsResolver<
+    R = Maybe<ColumnHeaderResult[]>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type ColumnsResolver<
-    R = Maybe<ColumnHeaderResult[]>,
+  export type CreatedResolver<
+    R = Maybe<number>,
+    Parent = TimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type CreatedByResolver<
+    R = Maybe<string>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -7281,6 +7643,11 @@ export namespace TimelineResultResolvers {
   > = Resolver<R, Parent, TContext>;
   export type FavoriteResolver<
     R = Maybe<FavoriteTimelineResult[]>,
+    Parent = TimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type FiltersResolver<
+    R = Maybe<FilterTimelineResult[]>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -7314,8 +7681,13 @@ export namespace TimelineResultResolvers {
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type TitleResolver<
+  export type SavedQueryIdResolver<
     R = Maybe<string>,
+    Parent = TimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type SavedObjectIdResolver<
+    R = string,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -7324,12 +7696,7 @@ export namespace TimelineResultResolvers {
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type CreatedResolver<
-    R = Maybe<number>,
-    Parent = TimelineResult,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type CreatedByResolver<
+  export type TitleResolver<
     R = Maybe<string>,
     Parent = TimelineResult,
     TContext = SiemContext
@@ -7568,6 +7935,142 @@ export namespace FavoriteTimelineResultResolvers {
   export type FavoriteDateResolver<
     R = Maybe<number>,
     Parent = FavoriteTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace FilterTimelineResultResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = FilterTimelineResult> {
+    exists?: ExistsResolver<Maybe<string>, TypeParent, TContext>;
+
+    meta?: MetaResolver<Maybe<FilterMetaTimelineResult>, TypeParent, TContext>;
+
+    match_all?: MatchAllResolver<Maybe<string>, TypeParent, TContext>;
+
+    missing?: MissingResolver<Maybe<string>, TypeParent, TContext>;
+
+    query?: QueryResolver<Maybe<string>, TypeParent, TContext>;
+
+    range?: RangeResolver<Maybe<string>, TypeParent, TContext>;
+
+    script?: ScriptResolver<Maybe<string>, TypeParent, TContext>;
+  }
+
+  export type ExistsResolver<
+    R = Maybe<string>,
+    Parent = FilterTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type MetaResolver<
+    R = Maybe<FilterMetaTimelineResult>,
+    Parent = FilterTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type MatchAllResolver<
+    R = Maybe<string>,
+    Parent = FilterTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type MissingResolver<
+    R = Maybe<string>,
+    Parent = FilterTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type QueryResolver<
+    R = Maybe<string>,
+    Parent = FilterTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type RangeResolver<
+    R = Maybe<string>,
+    Parent = FilterTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ScriptResolver<
+    R = Maybe<string>,
+    Parent = FilterTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace FilterMetaTimelineResultResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = FilterMetaTimelineResult> {
+    alias?: AliasResolver<Maybe<string>, TypeParent, TContext>;
+
+    controlledBy?: ControlledByResolver<Maybe<string>, TypeParent, TContext>;
+
+    disabled?: DisabledResolver<Maybe<boolean>, TypeParent, TContext>;
+
+    field?: FieldResolver<Maybe<string>, TypeParent, TContext>;
+
+    formattedValue?: FormattedValueResolver<Maybe<string>, TypeParent, TContext>;
+
+    index?: IndexResolver<Maybe<string>, TypeParent, TContext>;
+
+    key?: KeyResolver<Maybe<string>, TypeParent, TContext>;
+
+    negate?: NegateResolver<Maybe<boolean>, TypeParent, TContext>;
+
+    params?: ParamsResolver<Maybe<string>, TypeParent, TContext>;
+
+    type?: TypeResolver<Maybe<string>, TypeParent, TContext>;
+
+    value?: ValueResolver<Maybe<string>, TypeParent, TContext>;
+  }
+
+  export type AliasResolver<
+    R = Maybe<string>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ControlledByResolver<
+    R = Maybe<string>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type DisabledResolver<
+    R = Maybe<boolean>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type FieldResolver<
+    R = Maybe<string>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type FormattedValueResolver<
+    R = Maybe<string>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type IndexResolver<
+    R = Maybe<string>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type KeyResolver<
+    R = Maybe<string>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type NegateResolver<
+    R = Maybe<boolean>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ParamsResolver<
+    R = Maybe<string>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TypeResolver<
+    R = Maybe<string>,
+    Parent = FilterMetaTimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ValueResolver<
+    R = Maybe<string>,
+    Parent = FilterMetaTimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -8112,6 +8615,8 @@ export type IResolvers<TContext = SiemContext> = {
   CursorType?: CursorTypeResolvers.Resolvers<TContext>;
   PageInfoPaginated?: PageInfoPaginatedResolvers.Resolvers<TContext>;
   Inspect?: InspectResolvers.Resolvers<TContext>;
+  AuthenticationsOverTimeData?: AuthenticationsOverTimeDataResolvers.Resolvers<TContext>;
+  MatrixOverTimeHistogramData?: MatrixOverTimeHistogramDataResolvers.Resolvers<TContext>;
   TimelineData?: TimelineDataResolvers.Resolvers<TContext>;
   TimelineEdges?: TimelineEdgesResolvers.Resolvers<TContext>;
   TimelineItem?: TimelineItemResolvers.Resolvers<TContext>;
@@ -8163,7 +8668,6 @@ export type IResolvers<TContext = SiemContext> = {
   DetailItem?: DetailItemResolvers.Resolvers<TContext>;
   LastEventTimeData?: LastEventTimeDataResolvers.Resolvers<TContext>;
   EventsOverTimeData?: EventsOverTimeDataResolvers.Resolvers<TContext>;
-  MatrixOverTimeHistogramData?: MatrixOverTimeHistogramDataResolvers.Resolvers<TContext>;
   HostsData?: HostsDataResolvers.Resolvers<TContext>;
   HostsEdges?: HostsEdgesResolvers.Resolvers<TContext>;
   HostItem?: HostItemResolvers.Resolvers<TContext>;
@@ -8200,6 +8704,9 @@ export type IResolvers<TContext = SiemContext> = {
   NetworkDnsData?: NetworkDnsDataResolvers.Resolvers<TContext>;
   NetworkDnsEdges?: NetworkDnsEdgesResolvers.Resolvers<TContext>;
   NetworkDnsItem?: NetworkDnsItemResolvers.Resolvers<TContext>;
+  NetworkHttpData?: NetworkHttpDataResolvers.Resolvers<TContext>;
+  NetworkHttpEdges?: NetworkHttpEdgesResolvers.Resolvers<TContext>;
+  NetworkHttpItem?: NetworkHttpItemResolvers.Resolvers<TContext>;
   OverviewNetworkData?: OverviewNetworkDataResolvers.Resolvers<TContext>;
   OverviewHostData?: OverviewHostDataResolvers.Resolvers<TContext>;
   TlsData?: TlsDataResolvers.Resolvers<TContext>;
@@ -8215,6 +8722,8 @@ export type IResolvers<TContext = SiemContext> = {
   QueryMatchResult?: QueryMatchResultResolvers.Resolvers<TContext>;
   DateRangePickerResult?: DateRangePickerResultResolvers.Resolvers<TContext>;
   FavoriteTimelineResult?: FavoriteTimelineResultResolvers.Resolvers<TContext>;
+  FilterTimelineResult?: FilterTimelineResultResolvers.Resolvers<TContext>;
+  FilterMetaTimelineResult?: FilterMetaTimelineResultResolvers.Resolvers<TContext>;
   SerializedFilterQueryResult?: SerializedFilterQueryResultResolvers.Resolvers<TContext>;
   SerializedKueryQueryResult?: SerializedKueryQueryResultResolvers.Resolvers<TContext>;
   KueryFilterQueryResult?: KueryFilterQueryResultResolvers.Resolvers<TContext>;

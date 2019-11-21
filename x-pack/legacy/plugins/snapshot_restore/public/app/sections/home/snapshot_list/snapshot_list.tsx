@@ -10,7 +10,7 @@ import { parse } from 'querystring';
 import { EuiButton, EuiCallOut, EuiLink, EuiEmptyPrompt, EuiSpacer, EuiIcon } from '@elastic/eui';
 
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common/constants';
-import { SectionError, SectionLoading } from '../../../components';
+import { SectionError, SectionLoading, Error } from '../../../components';
 import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
 import { WithPrivileges } from '../../../lib/authorization';
 import { useAppDependencies } from '../../../index';
@@ -125,7 +125,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
             defaultMessage="Error loading snapshots"
           />
         }
-        error={error}
+        error={error as Error}
       />
     );
   } else if (Object.keys(errors).length && repositories.length === 0) {
@@ -168,7 +168,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           <h1 data-test-subj="title">
             <FormattedMessage
               id="xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesTitle"
-              defaultMessage="You don't have any snapshots or repositories yet"
+              defaultMessage="Start by registering a repository"
             />
           </h1>
         }
@@ -177,7 +177,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
             <p>
               <FormattedMessage
                 id="xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesDescription"
-                defaultMessage="Start by registering a repository for your snapshots."
+                defaultMessage="You need a place where your snapshots will live."
               />
             </p>
             <p>

@@ -6,7 +6,7 @@
 
 
 import { ESTermSource } from '../sources/es_term_source';
-import { VectorStyle } from '../styles/vector_style';
+import { VectorStyle } from '../styles/vector/vector_style';
 
 export class InnerJoin {
 
@@ -88,6 +88,10 @@ export class InnerJoin {
 
   getIndexPatternIds() {
     return  this._rightSource.getIndexPatternIds();
+  }
+
+  getQueryableIndexPatternIds() {
+    return  this._rightSource.getQueryableIndexPatternIds();
   }
 
   getWhereQuery() {

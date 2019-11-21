@@ -23,9 +23,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import chrome from 'ui/chrome';
-// @ts-ignore
-import { fieldFormats } from 'ui/registry/field_formats';
-import { NotificationsSetup, SavedObjectsClientContract } from 'src/core/public';
+import { SavedObjectsClientContract } from 'src/core/public';
+
 import {
   DuplicateField,
   SavedObjectNotFound,
@@ -33,6 +32,13 @@ import {
   FieldMappingSpec,
   MappingObject,
 } from '../../../../../../plugins/kibana_utils/public';
+import { toMountPoint } from '../../../../../../plugins/kibana_react/public';
+
+import {
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  IIndexPattern,
+} from '../../../../../../plugins/data/public';
 
 import { findIndexPatternByTitle, getRoutes } from '../utils';
 import { IndexPatternMissingIndices } from '../errors';
@@ -41,21 +47,17 @@ import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from './index_patterns_api_client';
-import { ES_FIELD_TYPES } from '../../../../../../plugins/data/common';
+import { getNotifications, getFieldFormats } from '../services';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
 
-export interface StaticIndexPattern {
-  fields: FieldType[];
-  title: string;
-  id?: string;
-  type?: string;
-  timeFieldName?: string;
-  intervalName?: string | null;
-}
+/** @deprecated
+ *  Please use IIndexPattern instead
+ * */
+export type StaticIndexPattern = IIndexPattern;
 
-export class IndexPattern implements StaticIndexPattern {
+export class IndexPattern implements IIndexPattern {
   [key: string]: any;
 
   public id?: string;
@@ -70,7 +72,6 @@ export class IndexPattern implements StaticIndexPattern {
   public formatField: any;
   public flattenHit: any;
   public metaFields: string[];
-  public notifications: NotificationsSetup;
 
   private version: string | undefined;
   private savedObjectsClient: SavedObjectsClientContract;
@@ -108,8 +109,7 @@ export class IndexPattern implements StaticIndexPattern {
     getConfig: any,
     savedObjectsClient: SavedObjectsClientContract,
     apiClient: IIndexPatternsApiClient,
-    patternCache: any,
-    notifications: NotificationsSetup
+    patternCache: any
   ) {
     this.id = id;
     this.savedObjectsClient = savedObjectsClient;
@@ -117,15 +117,17 @@ export class IndexPattern implements StaticIndexPattern {
     // instead of storing config we rather store the getter only as np uiSettingsClient has circular references
     // which cause problems when being consumed from angular
     this.getConfig = getConfig;
-    this.notifications = notifications;
 
     this.shortDotsEnable = this.getConfig('shortDots:enable');
     this.metaFields = this.getConfig('metaFields');
 
-    this.fields = new FieldList(this, [], this.shortDotsEnable, notifications);
+    this.fields = new FieldList(this, [], this.shortDotsEnable);
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig('metaFields'));
     this.flattenHit = flattenHitWrapper(this, this.getConfig('metaFields'));
-    this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
+    this.formatHit = formatHitProvider(
+      this,
+      getFieldFormats().getDefaultInstance(KBN_FIELD_TYPES.STRING)
+    );
     this.formatField = this.formatHit.formatField;
   }
 
@@ -136,13 +138,15 @@ export class IndexPattern implements StaticIndexPattern {
   }
 
   private deserializeFieldFormatMap(mapping: any) {
-    const FieldFormat = fieldFormats.getType(mapping.id);
+    const FieldFormat = getFieldFormats().getType(mapping.id);
+
     return FieldFormat && new FieldFormat(mapping.params, this.getConfig);
   }
 
   private initFields(input?: any) {
     const newValue = input || this.fields;
-    this.fields = new FieldList(this, newValue, this.shortDotsEnable, this.notifications);
+
+    this.fields = new FieldList(this, newValue, this.shortDotsEnable);
   }
 
   private isFieldRefreshRequired(): boolean {
@@ -213,9 +217,11 @@ export class IndexPattern implements StaticIndexPattern {
       // This has all been removed as of 8.0.
       const $injector = await chrome.dangerouslyGetActiveInjector();
       const kbnUrl = $injector.get('kbnUrl') as any; // `any` because KbnUrl interface doesn't have `getRouteHref`
-      this.notifications.toasts.addWarning({
+      const { toasts } = getNotifications();
+
+      toasts.addWarning({
         title: warningTitle,
-        text: (
+        text: toMountPoint(
           <div>
             <p>{warningText}</p>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
@@ -345,8 +351,7 @@ export class IndexPattern implements StaticIndexPattern {
           filterable: true,
           searchable: true,
         },
-        false,
-        this.notifications
+        false
       )
     );
 
@@ -452,8 +457,7 @@ export class IndexPattern implements StaticIndexPattern {
           this.getConfig,
           this.savedObjectsClient,
           this.patternCache,
-          this.fieldsFetcher,
-          this.notifications
+          this.fieldsFetcher
         );
         await duplicatePattern.destroy();
       }
@@ -505,8 +509,7 @@ export class IndexPattern implements StaticIndexPattern {
             this.getConfig,
             this.savedObjectsClient,
             this.patternCache,
-            this.fieldsFetcher,
-            this.notifications
+            this.fieldsFetcher
           );
           return samePattern.init().then(() => {
             // What keys changed from now and what the server returned
@@ -538,7 +541,10 @@ export class IndexPattern implements StaticIndexPattern {
                     'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
                 } // eslint-disable-line max-len
               );
-              this.notifications.toasts.addDanger(message);
+              const { toasts } = getNotifications();
+
+              toasts.addDanger(message);
+
               throw err;
             }
 
@@ -576,12 +582,15 @@ export class IndexPattern implements StaticIndexPattern {
         // we still want to notify the user that there is a problem
         // but we do not want to potentially make any pages unusable
         // so do not rethrow the error here
+        const { toasts } = getNotifications();
+
         if (err instanceof IndexPatternMissingIndices) {
-          this.notifications.toasts.addDanger((err as any).message);
+          toasts.addDanger((err as any).message);
+
           return [];
         }
 
-        this.notifications.toasts.addError(err, {
+        toasts.addError(err, {
           title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
             defaultMessage: 'Error fetching fields',
           }),

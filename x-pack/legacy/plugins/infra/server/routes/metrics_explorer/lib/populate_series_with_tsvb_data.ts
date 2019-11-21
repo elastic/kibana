@@ -83,7 +83,10 @@ export const populateSeriesWithTSVBData = (
   // MetricsExplorerRow.
   const timestamps = tsvbResults.custom.series.reduce(
     (currentTimestamps, tsvbSeries) =>
-      union(currentTimestamps, tsvbSeries.data.map(row => row[0])).sort(),
+      union(
+        currentTimestamps,
+        tsvbSeries.data.map(row => row[0])
+      ).sort(),
     [] as number[]
   );
   // Combine the TSVB series for multiple metrics.

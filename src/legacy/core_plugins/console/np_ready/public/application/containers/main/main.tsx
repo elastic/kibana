@@ -19,7 +19,8 @@
 
 import React, { useCallback, useState } from 'react';
 import { debounce } from 'lodash';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
 import { EditorOutput, Editor, ConsoleHistory } from '../editor';
 import { Settings } from '../settings';
@@ -69,7 +70,7 @@ export function Main() {
   };
 
   return (
-    <>
+    <div id="consoleRoot">
       <EuiFlexGroup
         className="consoleContainer"
         gutterSize="none"
@@ -77,6 +78,13 @@ export function Main() {
         responsive={false}
       >
         <EuiFlexItem grow={false}>
+          <EuiTitle className="euiScreenReaderOnly">
+            <h1>
+              {i18n.translate('console.pageHeading', {
+                defaultMessage: 'Console',
+              })}
+            </h1>
+          </EuiTitle>
           <TopNavMenu
             items={getTopNavConfig({
               onClickHistory: () => setShowHistory(!showingHistory),
@@ -116,6 +124,6 @@ export function Main() {
       {showSettings ? <Settings onClose={() => setShowSettings(false)} /> : null}
 
       {showHelp ? <HelpPanel onClose={() => setShowHelp(false)} /> : null}
-    </>
+    </div>
   );
 }

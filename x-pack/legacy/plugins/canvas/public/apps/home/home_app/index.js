@@ -14,7 +14,4 @@ const mapDispatchToProps = dispatch => ({
   },
 });
 
-export const HomeApp = connect(
-  null,
-  mapDispatchToProps
-)(Component);
+export const HomeApp = connect(null, mapDispatchToProps)(Component);

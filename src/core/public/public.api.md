@@ -5,15 +5,20 @@
 ```ts
 
 import { Breadcrumb } from '@elastic/eui';
+import { EuiButtonEmptyProps } from '@elastic/eui';
+import { EuiGlobalToastListToast } from '@elastic/eui';
+import { ExclusiveUnion } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { ShallowPromise } from '@kbn/utility-types';
-import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
+import { UiSettingsParams as UiSettingsParams_2 } from 'src/core/server/types';
+import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @public
 export interface App extends AppBase {
+    chromeless?: boolean;
     mount: (context: AppMountContext, params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
 }
 
@@ -105,13 +110,55 @@ export interface ChromeBrand {
 // @public (undocumented)
 export type ChromeBreadcrumb = Breadcrumb;
 
+// @public
+export interface ChromeDocTitle {
+    // @internal (undocumented)
+    __legacy: {
+        setBaseTitle(baseTitle: string): void;
+    };
+    change(newTitle: string | string[]): void;
+    reset(): void;
+}
+
 // @public (undocumented)
-export type ChromeHelpExtension = (element: HTMLDivElement) => () => void;
+export interface ChromeHelpExtension {
+    appName: string;
+    content?: (element: HTMLDivElement) => () => void;
+    links?: ChromeHelpExtensionMenuLink[];
+}
+
+// @public (undocumented)
+export type ChromeHelpExtensionMenuCustomLink = EuiButtonEmptyProps & {
+    linkType: 'custom';
+    content: React.ReactNode;
+};
+
+// @public (undocumented)
+export type ChromeHelpExtensionMenuDiscussLink = EuiButtonEmptyProps & {
+    linkType: 'discuss';
+    href: string;
+};
+
+// @public (undocumented)
+export type ChromeHelpExtensionMenuDocumentationLink = EuiButtonEmptyProps & {
+    linkType: 'documentation';
+    href: string;
+};
+
+// @public (undocumented)
+export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
+    linkType: 'github';
+    labels: string[];
+    title?: string;
+};
+
+// @public (undocumented)
+export type ChromeHelpExtensionMenuLink = ExclusiveUnion<ChromeHelpExtensionMenuGitHubLink, ExclusiveUnion<ChromeHelpExtensionMenuDiscussLink, ExclusiveUnion<ChromeHelpExtensionMenuDocumentationLink, ChromeHelpExtensionMenuCustomLink>>>;
 
 // @public (undocumented)
 export interface ChromeNavControl {
     // (undocumented)
-    mount(targetDomElement: HTMLElement): () => void;
+    mount: MountPoint;
     // (undocumented)
     order?: number;
 }
@@ -186,6 +233,7 @@ export interface ChromeRecentlyAccessedHistoryItem {
 // @public
 export interface ChromeStart {
     addApplicationClass(className: string): void;
+    docTitle: ChromeDocTitle;
     getApplicationClasses$(): Observable<string[]>;
     getBadge$(): Observable<ChromeBadge | undefined>;
     getBrand$(): Observable<ChromeBrand>;
@@ -488,6 +536,7 @@ export interface HttpResponse extends InterceptedHttpResponse {
 // @public (undocumented)
 export interface HttpServiceBase {
     addLoadingCount(countSource$: Observable<number>): void;
+    anonymousPaths: IAnonymousPaths;
     basePath: IBasePath;
     delete: HttpHandler;
     fetch: HttpHandler;
@@ -515,6 +564,14 @@ export interface I18nStart {
     Context: ({ children }: {
         children: React.ReactNode;
     }) => JSX.Element;
+}
+
+// Warning: (ae-missing-release-tag) "IAnonymousPaths" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public
+export interface IAnonymousPaths {
+    isAnonymous(path: string): boolean;
+    register(path: string): void;
 }
 
 // @public
@@ -596,6 +653,9 @@ export interface LegacyNavLink {
     url: string;
 }
 
+// @public
+export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
+
 // @public (undocumented)
 export interface NotificationsSetup {
     // (undocumented)
@@ -608,12 +668,9 @@ export interface NotificationsStart {
     toasts: ToastsStart;
 }
 
-// @public
-export type OverlayBannerMount = (element: HTMLElement) => OverlayBannerUnmount;
-
 // @public (undocumented)
 export interface OverlayBannersStart {
-    add(mount: OverlayBannerMount, priority?: number): string;
+    add(mount: MountPoint, priority?: number): string;
     // Warning: (ae-forgotten-export) The symbol "OverlayBanner" needs to be exported by the entry point index.d.ts
     // 
     // @internal (undocumented)
@@ -621,11 +678,8 @@ export interface OverlayBannersStart {
     // (undocumented)
     getComponent(): JSX.Element;
     remove(id: string): boolean;
-    replace(id: string | undefined, mount: OverlayBannerMount, priority?: number): string;
+    replace(id: string | undefined, mount: MountPoint, priority?: number): string;
 }
-
-// @public
-export type OverlayBannerUnmount = () => void;
 
 // @public
 export interface OverlayRef {
@@ -637,17 +691,14 @@ export interface OverlayRef {
 export interface OverlayStart {
     // (undocumented)
     banners: OverlayBannersStart;
+    // Warning: (ae-forgotten-export) The symbol "OverlayFlyoutStart" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
-    openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
-        closeButtonAriaLabel?: string;
-        'data-test-subj'?: string;
-    }) => OverlayRef;
+    openFlyout: OverlayFlyoutStart['open'];
+    // Warning: (ae-forgotten-export) The symbol "OverlayModalStart" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
-    openModal: (modalChildren: React.ReactNode, modalProps?: {
-        className?: string;
-        closeButtonAriaLabel?: string;
-        'data-test-subj'?: string;
-    }) => OverlayRef;
+    openModal: OverlayModalStart['open'];
 }
 
 // @public (undocumented)
@@ -678,7 +729,11 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends obje
 export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
-export interface PluginInitializerContext {
+export interface PluginInitializerContext<ConfigSchema extends object = object> {
+    // (undocumented)
+    readonly config: {
+        get: <T extends object = ConfigSchema>() => T;
+    };
     // (undocumented)
     readonly env: {
         mode: Readonly<EnvironmentMode>;
@@ -894,35 +949,39 @@ export class SimpleSavedObject<T extends SavedObjectAttributes> {
     _version?: SavedObject<T>['version'];
 }
 
-export { Toast }
+// Warning: (ae-missing-release-tag) "Toast" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export type Toast = ToastInputFields & {
+    id: string;
+};
 
 // @public
-export type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
+export type ToastInput = string | ToastInputFields;
 
 // @public
-export type ToastInputFields = Pick<Toast, Exclude<keyof Toast, 'id'>>;
+export type ToastInputFields = Pick<EuiGlobalToastListToast, Exclude<keyof EuiGlobalToastListToast, 'id' | 'text' | 'title'>> & {
+    title?: string | MountPoint;
+    text?: string | MountPoint;
+};
 
 // @public
 export class ToastsApi implements IToasts {
     constructor(deps: {
         uiSettings: UiSettingsClientContract;
     });
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     add(toastOrTitle: ToastInput): Toast;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     addDanger(toastOrTitle: ToastInput): Toast;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     addError(error: Error, options: ErrorToastOptions): Toast;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     addSuccess(toastOrTitle: ToastInput): Toast;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     addWarning(toastOrTitle: ToastInput): Toast;
     get$(): Rx.Observable<Toast[]>;
+    remove(toastOrId: Toast | string): void;
     // @internal (undocumented)
-    registerOverlays(overlays: OverlayStart): void;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ToastApi"
-    remove(toast: Toast): void;
+    start({ overlays, i18n }: {
+        overlays: OverlayStart;
+        i18n: I18nStart;
+    }): void;
     }
 
 // @public (undocumented)
@@ -937,7 +996,7 @@ export class UiSettingsClient {
     constructor(params: UiSettingsClientParams);
     get$(key: string, defaultOverride?: any): Rx.Observable<any>;
     get(key: string, defaultOverride?: any): any;
-    getAll(): UiSettingsState;
+    getAll(): Record<string, UiSettingsParams_2 & UserProvidedValues_2<any>>;
     getSaved$(): Rx.Observable<{
         key: string;
         newValue: any;
@@ -959,17 +1018,17 @@ export class UiSettingsClient {
     stop(): void;
     }
 
-// @public (undocumented)
+// @public
 export type UiSettingsClientContract = PublicMethodsOf<UiSettingsClient>;
 
 // @public (undocumented)
 export interface UiSettingsState {
-    // Warning: (ae-forgotten-export) The symbol "InjectedUiSettingsDefault" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "InjectedUiSettingsUser" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
-    [key: string]: InjectedUiSettingsDefault & InjectedUiSettingsUser;
+    [key: string]: UiSettingsParams_2 & UserProvidedValues_2;
 }
+
+// @public
+export type UnmountCallback = () => void;
 
 
 ```

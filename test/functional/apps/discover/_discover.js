@@ -26,14 +26,13 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
+  const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
 
   describe('discover app', function describeIndexTests() {
-    const fromTime = '2015-09-19 06:31:44.000';
-    const toTime = '2015-09-23 18:31:44.000';
 
     before(async function () {
       // delete .kibana index and update configDoc
@@ -46,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('logstash_functional');
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     describe('query', function () {
@@ -55,8 +54,8 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct time range string by timepicker', async function () {
         const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.be('Sep 19, 2015 @ 06:31:44.000');
-        expect(time.end).to.be('Sep 23, 2015 @ 18:31:44.000');
+        expect(time.start).to.be(PageObjects.timePicker.defaultStartTime);
+        expect(time.end).to.be(PageObjects.timePicker.defaultEndTime);
       });
 
       it('save query should show toast message and display query name', async function () {
@@ -86,12 +85,12 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct time range string in chart', async function () {
         const actualTimeString = await PageObjects.discover.getChartTimespan();
-        const expectedTimeString = `Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000`;
+        const expectedTimeString = `${PageObjects.timePicker.defaultStartTime} - ${PageObjects.timePicker.defaultEndTime}`;
         expect(actualTimeString).to.be(expectedTimeString);
       });
 
       it('should modify the time range when a bar is clicked', async function () {
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.clickHistogramBar();
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.be('Sep 21, 2015 @ 09:00:00.000');
@@ -101,17 +100,17 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should modify the time range when the histogram is brushed', async function () {
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.brushHistogram();
 
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-        expect(Math.round(newDurationHours)).to.be(108);
+        expect(Math.round(newDurationHours)).to.be(25);
         const rowData = await PageObjects.discover.getDocTableField(1);
-        expect(rowData).to.have.string('Sep 22, 2015 @ 23:50:13.253');
+        expect(Date.parse(rowData)).to.be.within(Date.parse('Sep 20, 2015 @ 22:00:00.000'), Date.parse('Sep 20, 2015 @ 23:30:00.000'));
       });
 
       it('should show correct initial chart interval of Auto', async function () {
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const actualInterval = await PageObjects.discover.getChartInterval();
 
@@ -133,8 +132,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('query #2, which has an empty time range', () => {
-      const fromTime = '1999-06-11 09:22:11.000';
-      const toTime = '1999-06-12 11:21:04.000';
+      const fromTime = 'Jun 11, 1999 @ 09:22:11.000';
+      const toTime = 'Jun 12, 1999 @ 11:21:04.000';
 
       before(async () => {
         log.debug('setAbsoluteRangeForAnotherQuery');
@@ -151,6 +150,26 @@ export default function ({ getService, getPageObjects }) {
         const isVisible = await PageObjects.discover.hasNoResultsTimepicker();
         expect(isVisible).to.be(true);
       });
+    });
+
+    describe('nested query', () => {
+
+      before(async () => {
+        log.debug('setAbsoluteRangeForAnotherQuery');
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+      });
+
+      it('should support querying on nested fields', async function () {
+        await queryBar.setQuery('nestedField:{ child: nestedValue }');
+        await queryBar.submitQuery();
+        await retry.try(async function () {
+          expect(await PageObjects.discover.getHitCount()).to.be(
+            '1'
+          );
+        });
+      });
+
     });
 
     describe('filter editor', function () {
@@ -192,7 +211,7 @@ export default function ({ getService, getPageObjects }) {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
         await PageObjects.header.awaitKibanaChrome();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
 
         const maxTicks = [
           '2015-09-20 00:00',
@@ -217,7 +236,7 @@ export default function ({ getService, getPageObjects }) {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
         await PageObjects.header.awaitKibanaChrome();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
 
         log.debug('check that the newest doc timestamp is now -7 hours from the UTC time in the first test');
         const rowData = await PageObjects.discover.getDocTableIndex(1);

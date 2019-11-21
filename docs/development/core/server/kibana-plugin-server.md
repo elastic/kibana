@@ -63,7 +63,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IKibanaSocket](./kibana-plugin-server.ikibanasocket.md) | A tiny abstraction for TCP socket. |
 |  [IndexSettingsDeprecationInfo](./kibana-plugin-server.indexsettingsdeprecationinfo.md) |  |
 |  [IRouter](./kibana-plugin-server.irouter.md) | Registers route handlers for specified resource path and method. See [RouteConfig](./kibana-plugin-server.routeconfig.md) and [RequestHandler](./kibana-plugin-server.requesthandler.md) for more information about arguments to route registrations. |
-|  [IUiSettingsClient](./kibana-plugin-server.iuisettingsclient.md) | Service that provides access to the UiSettings stored in elasticsearch. |
+|  [IUiSettingsClient](./kibana-plugin-server.iuisettingsclient.md) | Server-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. |
 |  [KibanaRequestRoute](./kibana-plugin-server.kibanarequestroute.md) | Request specific route information exposed to a handler. |
 |  [LegacyRequest](./kibana-plugin-server.legacyrequest.md) |  |
 |  [LegacyServiceSetupDeps](./kibana-plugin-server.legacyservicesetupdeps.md) |  |
@@ -75,6 +75,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OnPreAuthToolkit](./kibana-plugin-server.onpreauthtoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
 |  [PackageInfo](./kibana-plugin-server.packageinfo.md) |  |
 |  [Plugin](./kibana-plugin-server.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
+|  [PluginConfigDescriptor](./kibana-plugin-server.pluginconfigdescriptor.md) | Describes a plugin configuration schema and capabilities. |
 |  [PluginInitializerContext](./kibana-plugin-server.plugininitializercontext.md) | Context that's available to plugins during initialization stage. |
 |  [PluginManifest](./kibana-plugin-server.pluginmanifest.md) | Describes the set of required and optional properties plugin can define in its mandatory JSON manifest file. |
 |  [PluginsServiceSetup](./kibana-plugin-server.pluginsservicesetup.md) |  |
@@ -90,10 +91,12 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsBulkGetObject](./kibana-plugin-server.savedobjectsbulkgetobject.md) |  |
 |  [SavedObjectsBulkResponse](./kibana-plugin-server.savedobjectsbulkresponse.md) |  |
 |  [SavedObjectsBulkUpdateObject](./kibana-plugin-server.savedobjectsbulkupdateobject.md) |  |
+|  [SavedObjectsBulkUpdateOptions](./kibana-plugin-server.savedobjectsbulkupdateoptions.md) |  |
 |  [SavedObjectsBulkUpdateResponse](./kibana-plugin-server.savedobjectsbulkupdateresponse.md) |  |
 |  [SavedObjectsClientProviderOptions](./kibana-plugin-server.savedobjectsclientprovideroptions.md) | Options to control the creation of the Saved Objects Client. |
 |  [SavedObjectsClientWrapperOptions](./kibana-plugin-server.savedobjectsclientwrapperoptions.md) | Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance. |
 |  [SavedObjectsCreateOptions](./kibana-plugin-server.savedobjectscreateoptions.md) |  |
+|  [SavedObjectsDeleteOptions](./kibana-plugin-server.savedobjectsdeleteoptions.md) |  |
 |  [SavedObjectsExportOptions](./kibana-plugin-server.savedobjectsexportoptions.md) | Options controlling the export operation. |
 |  [SavedObjectsExportResultDetails](./kibana-plugin-server.savedobjectsexportresultdetails.md) | Structure of the export result details entry |
 |  [SavedObjectsFindOptions](./kibana-plugin-server.savedobjectsfindoptions.md) |  |
@@ -116,6 +119,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SessionStorageCookieOptions](./kibana-plugin-server.sessionstoragecookieoptions.md) | Configuration used to create HTTP session storage based on top of cookie mechanism. |
 |  [SessionStorageFactory](./kibana-plugin-server.sessionstoragefactory.md) | SessionStorage factory to bind one to an incoming request |
 |  [UiSettingsParams](./kibana-plugin-server.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
+|  [UiSettingsServiceSetup](./kibana-plugin-server.uisettingsservicesetup.md) |  |
+|  [UserProvidedValues](./kibana-plugin-server.userprovidedvalues.md) | Describes the values explicitly set by user. |
 
 ## Variables
 
@@ -149,8 +154,10 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [LifecycleResponseFactory](./kibana-plugin-server.lifecycleresponsefactory.md) | Creates an object containing redirection or error response with error details, HTTP headers, and other data transmitted to the client. |
 |  [MIGRATION\_ASSISTANCE\_INDEX\_ACTION](./kibana-plugin-server.migration_assistance_index_action.md) |  |
 |  [MIGRATION\_DEPRECATION\_LEVEL](./kibana-plugin-server.migration_deprecation_level.md) |  |
+|  [MutatingOperationRefreshSetting](./kibana-plugin-server.mutatingoperationrefreshsetting.md) | Elasticsearch Refresh setting for mutating operation |
 |  [OnPostAuthHandler](./kibana-plugin-server.onpostauthhandler.md) | See [OnPostAuthToolkit](./kibana-plugin-server.onpostauthtoolkit.md)<!-- -->. |
 |  [OnPreAuthHandler](./kibana-plugin-server.onpreauthhandler.md) | See [OnPreAuthToolkit](./kibana-plugin-server.onpreauthtoolkit.md)<!-- -->. |
+|  [PluginConfigSchema](./kibana-plugin-server.pluginconfigschema.md) | Dedicated type for plugin configuration schema. |
 |  [PluginInitializer](./kibana-plugin-server.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>server</code> directory should conform to this interface. |
 |  [PluginName](./kibana-plugin-server.pluginname.md) | Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays that use it as a key or value more obvious. |
 |  [PluginOpaqueId](./kibana-plugin-server.pluginopaqueid.md) |  |

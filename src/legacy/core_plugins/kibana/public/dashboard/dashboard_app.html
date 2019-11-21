@@ -4,11 +4,11 @@
 >
   <!-- Local nav. -->
   <kbn-top-nav
-    ng-show="chrome.getVisible()"
+    ng-show="isVisible"
     app-name="'dashboard'"
     config="topNavMenu"
 
-    show-search-bar="chrome.getVisible()"
+    show-search-bar="isVisible"
     show-filter-bar="showFilterBar()"
     show-save-query="showSaveQuery"
 
@@ -34,20 +34,20 @@
   The top nav is hidden in embed mode but the filter bar must still be present so
   we show the filter bar on its own here if the chrome is not visible.
 -->
-  <filter-bar
-    ng-if="showFilterBar() && !chrome.getVisible()"
-    class-name="'globalFilterGroup__filterBar'"
-    filters="model.filters"
-    on-filters-updated="onFiltersUpdated"
-    index-patterns="indexPatterns"
-  ></filter-bar>
+  <kbn-top-nav
+    ng-if="showFilterBar() && !isVisible"
 
-  <apply-filters-popover
-    filters="appState.$newFilters"
-    on-cancel="onCancelApplyFilters"
-    on-submit="onApplyFilters"
+    app-name="'dashboard'"
+    show-search-bar="true"
+    show-filter-bar="true"
+    show-save-query="false"
+    show-date-picker="false"
+
+    filters="model.filters"
     index-patterns="indexPatterns"
-  ></apply-filters-popover>
+    on-filters-updated="onFiltersUpdated"
+  >
+  </kbn-top-nav>
 
   <div ng-show="getShouldShowEditHelp() || getShouldShowViewHelp()" class="dshStartScreen">
     <div class="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--horizontalCenter">

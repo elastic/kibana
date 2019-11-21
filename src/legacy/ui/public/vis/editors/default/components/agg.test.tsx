@@ -156,7 +156,7 @@ describe('DefaultEditorAgg component', () => {
 
   it('should add schema component', () => {
     defaultProps.agg.schema = {
-      editorComponent: () => <div className="schemaComponent"></div>,
+      editorComponent: () => <div className="schemaComponent" />,
     } as any;
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
 
@@ -248,10 +248,9 @@ describe('DefaultEditorAgg component', () => {
       expect(compHistogram.find(DefaultEditorAggParams).props()).toHaveProperty('disabledParams', [
         'min_doc_count',
       ]);
-      expect(compDateHistogram.find(DefaultEditorAggParams).props()).toHaveProperty(
-        'disabledParams',
-        ['min_doc_count']
-      );
+      expect(
+        compDateHistogram.find(DefaultEditorAggParams).props()
+      ).toHaveProperty('disabledParams', ['min_doc_count']);
     });
 
     it('should set error when agg is not histogram or date_histogram', () => {

@@ -12,6 +12,7 @@ import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { MetricSelect, METRIC_AGGREGATION_VALUES } from './metric_select';
 import { SingleFieldSelect } from './single_field_select';
+import { METRIC_TYPE } from '../../common/constants';
 
 export function MetricEditor({ fields, metricsFilter, metric, onChange, removeButton }) {
   const onAggChange = metricAggregationType => {
@@ -34,10 +35,12 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
   };
 
   let fieldSelect;
-  if (metric.type && metric.type !== 'count') {
-    const filterNumberFields = field => {
-      return field.type === 'number';
-    };
+  if (metric.type && metric.type !== METRIC_TYPE.COUNT) {
+    const filterField = metric.type !== METRIC_TYPE.UNIQUE_COUNT
+      ? field => {
+        return field.type === 'number';
+      }
+      : undefined;
     fieldSelect = (
       <EuiFormRow
         label={i18n.translate('xpack.maps.metricsEditor.selectFieldLabel', {
@@ -51,7 +54,7 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
           })}
           value={metric.field}
           onChange={onFieldChange}
-          filterField={filterNumberFields}
+          filterField={filterField}
           fields={fields}
           isClearable={false}
           compressed

@@ -6,10 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { visualizations } from '../../../../../src/legacy/core_plugins/visualizations/public';
-import { BASE_APP_URL, getEditPath } from '../common';
+import { getBasePath, getEditPath } from '../common';
 
 visualizations.types.registerAlias({
-  aliasUrl: BASE_APP_URL,
+  aliasUrl: getBasePath(),
   name: 'lens',
   promotion: {
     description: i18n.translate('xpack.lens.visTypeAlias.promotion.description', {
@@ -20,7 +20,7 @@ visualizations.types.registerAlias({
     }),
   },
   title: i18n.translate('xpack.lens.visTypeAlias.title', {
-    defaultMessage: 'Lens Visualizations',
+    defaultMessage: 'Lens',
   }),
   description: i18n.translate('xpack.lens.visTypeAlias.description', {
     defaultMessage: `Lens is a simpler way to create basic visualizations`,

@@ -72,7 +72,7 @@ beforeEach(() => {
     core: {
       context: contextServiceMock.createSetupContract(),
       elasticsearch: { legacy: {} } as any,
-      uiSettings: uiSettingsServiceMock.createSetup(),
+      uiSettings: uiSettingsServiceMock.createSetupContract(),
       http: {
         ...httpServiceMock.createSetupContract(),
         auth: {
@@ -86,6 +86,7 @@ beforeEach(() => {
           public: new Map([['plugin-id', {} as DiscoveredPlugin]]),
           internal: new Map([['plugin-id', {} as DiscoveredPluginInternal]]),
         },
+        uiPluginConfigs: new Map(),
       },
     },
     plugins: { 'plugin-id': 'plugin-value' },

@@ -2,11 +2,11 @@
 
 exports[`UrlFormatEditor should render label template help 1`] = `
 <Fragment>
-  <InjectIntl(LabelTemplateFlyout)
+  <LabelTemplateFlyout
     isVisible={true}
     onClose={[Function]}
   />
-  <InjectIntl(UrlTemplateFlyout)
+  <UrlTemplateFlyout
     isVisible={false}
     onClose={[Function]}
   />
@@ -124,7 +124,8 @@ exports[`UrlFormatEditor should render label template help 1`] = `
       value=""
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
+    sampleType="html"
     samples={Array []}
   />
 </Fragment>
@@ -132,11 +133,11 @@ exports[`UrlFormatEditor should render label template help 1`] = `
 
 exports[`UrlFormatEditor should render normally 1`] = `
 <Fragment>
-  <InjectIntl(LabelTemplateFlyout)
+  <LabelTemplateFlyout
     isVisible={false}
     onClose={[Function]}
   />
-  <InjectIntl(UrlTemplateFlyout)
+  <UrlTemplateFlyout
     isVisible={false}
     onClose={[Function]}
   />
@@ -254,7 +255,8 @@ exports[`UrlFormatEditor should render normally 1`] = `
       value=""
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
+    sampleType="html"
     samples={Array []}
   />
 </Fragment>
@@ -262,11 +264,11 @@ exports[`UrlFormatEditor should render normally 1`] = `
 
 exports[`UrlFormatEditor should render url template help 1`] = `
 <Fragment>
-  <InjectIntl(LabelTemplateFlyout)
+  <LabelTemplateFlyout
     isVisible={false}
     onClose={[Function]}
   />
-  <InjectIntl(UrlTemplateFlyout)
+  <UrlTemplateFlyout
     isVisible={true}
     onClose={[Function]}
   />
@@ -384,8 +386,213 @@ exports[`UrlFormatEditor should render url template help 1`] = `
       value=""
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
+    sampleType="html"
     samples={Array []}
+  />
+</Fragment>
+`;
+
+exports[`UrlFormatEditor should render width and height fields if image 1`] = `
+<Fragment>
+  <LabelTemplateFlyout
+    isVisible={false}
+    onClose={[Function]}
+  />
+  <UrlTemplateFlyout
+    isVisible={false}
+    onClose={[Function]}
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Type"
+        id="common.ui.fieldEditor.url.typeLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiSelect
+      compressed={false}
+      data-test-subj="urlEditorType"
+      fullWidth={false}
+      hasNoInitialSelection={false}
+      isLoading={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Link",
+            "value": "a",
+          },
+          Object {
+            "text": "Image",
+            "value": "img",
+          },
+          Object {
+            "text": "Audio",
+            "value": "audio",
+          },
+        ]
+      }
+      value="img"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    error={null}
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <ForwardRef
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="URL template help"
+          id="common.ui.fieldEditor.url.template.helpLinkText"
+          values={Object {}}
+        />
+      </ForwardRef>
+    }
+    isInvalid={false}
+    label={
+      <FormattedMessage
+        defaultMessage="URL template"
+        id="common.ui.fieldEditor.url.urlTemplateLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiFieldText
+      compressed={false}
+      data-test-subj="urlEditorUrlTemplate"
+      fullWidth={false}
+      isLoading={false}
+      onChange={[Function]}
+      value=""
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    error={null}
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <ForwardRef
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="Label template help"
+          id="common.ui.fieldEditor.url.labelTemplateHelpText"
+          values={Object {}}
+        />
+      </ForwardRef>
+    }
+    isInvalid={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Label template"
+        id="common.ui.fieldEditor.url.labelTemplateLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiFieldText
+      compressed={false}
+      data-test-subj="urlEditorLabelTemplate"
+      fullWidth={false}
+      isLoading={false}
+      onChange={[Function]}
+      value=""
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Width"
+        id="common.ui.fieldEditor.url.widthLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiFieldNumber
+      compressed={false}
+      data-test-subj="urlEditorWidth"
+      fullWidth={false}
+      isLoading={false}
+      onChange={[Function]}
+      value=""
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Height"
+        id="common.ui.fieldEditor.url.heightLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiFieldNumber
+      compressed={false}
+      data-test-subj="urlEditorHeight"
+      fullWidth={false}
+      isLoading={false}
+      onChange={[Function]}
+      value=""
+    />
+  </EuiFormRow>
+  <FormatEditorSamples
+    sampleType="html"
+    samples={
+      Array [
+        Object {
+          "input": "go",
+          "output": "converted url for go",
+        },
+        Object {
+          "input": "stop",
+          "output": "converted url for stop",
+        },
+        Object {
+          "input": Array [
+            "de",
+            "ne",
+            "us",
+            "ni",
+          ],
+          "output": "converted url for de,ne,us,ni",
+        },
+        Object {
+          "input": "cv",
+          "output": "converted url for cv",
+        },
+      ]
+    }
   />
 </Fragment>
 `;

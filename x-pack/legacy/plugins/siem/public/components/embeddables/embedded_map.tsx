@@ -4,43 +4,76 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
+import { EuiLink, EuiText } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { npStart } from 'ui/new_platform';
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
-import { Query } from 'src/plugins/data/common';
+import styled, { css } from 'styled-components';
+import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
+import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 
-import styled from 'styled-components';
-import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { EmbeddablePanel } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-
-import { Loader } from '../loader';
-import { useIndexPatterns } from '../../hooks/use_index_patterns';
-import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
+import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
-import { MapEmbeddable, SetQuery } from './types';
-import * as i18n from './translations';
-import { useStateToaster } from '../toasters';
-import { createEmbeddable, displayErrorToast, setupEmbeddablesAPI } from './embedded_map_helpers';
-import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import { getIndexPatternTitleIdMapping } from '../../hooks/api/helpers';
+import { useIndexPatterns } from '../../hooks/use_index_patterns';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
+import { useKibanaPlugins } from '../../lib/compose/kibana_plugins';
+import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
+import { Loader } from '../loader';
+import { useStateToaster } from '../toasters';
+import { Embeddable } from './embeddable';
+import { EmbeddableHeader } from './embeddable_header';
+import { createEmbeddable, displayErrorToast, setupEmbeddablesAPI } from './embedded_map_helpers';
+import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
+import { MapToolTip } from './map_tool_tip/map_tool_tip';
+import * as i18n from './translations';
+import { MapEmbeddable, SetQuery } from './types';
+import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
-const EmbeddableWrapper = styled(EuiFlexGroup)`
-  position: relative;
-  height: 400px;
-  margin: 0;
+interface EmbeddableMapProps {
+  maintainRatio?: boolean;
+}
+
+const EmbeddableMap = styled.div.attrs(() => ({
+  className: 'siemEmbeddable__map',
+}))<EmbeddableMapProps>`
+  .embPanel {
+    border: none;
+    box-shadow: none;
+  }
 
   .mapToolbarOverlay__button {
     display: none;
   }
+
+  ${({ maintainRatio }) =>
+    maintainRatio &&
+    css`
+      padding-top: calc(3 / 4 * 100%); //4:3 (standard) ratio
+      position: relative;
+
+      @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
+        padding-top: calc(9 / 32 * 100%); //32:9 (ultra widescreen) ratio
+      }
+
+      @media only screen and (min-width: 1441px) and (min-height: 901px) {
+        padding-top: calc(9 / 21 * 100%); //21:9 (ultrawide) ratio
+      }
+
+      .embPanel {
+        bottom: 0;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
+    `}
 `;
+EmbeddableMap.displayName = 'EmbeddableMap';
 
 export interface EmbeddedMapProps {
   query: Query;
-  filters: Filter[];
+  filters: esFilters.Filter[];
   startDate: number;
   endDate: number;
   setQuery: SetQuery;
@@ -63,20 +96,24 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
     // Search InPortal/OutPortal for implementation touch points
     const portalNode = React.useMemo(() => createPortalNode(), []);
 
+    const plugins = useKibanaPlugins();
+    const core = useKibanaCore();
+
+    // Setup embeddables API (i.e. detach extra actions) useEffect
+    useEffect(() => {
+      try {
+        setupEmbeddablesAPI(plugins);
+      } catch (e) {
+        displayErrorToast(i18n.ERROR_CONFIGURING_EMBEDDABLES_API, e.message, dispatchToaster);
+        setIsLoading(false);
+        setIsError(true);
+      }
+    }, []);
+
     // Initial Load useEffect
     useEffect(() => {
       let isSubscribed = true;
       async function setupEmbeddable() {
-        // Configure Embeddables API
-        try {
-          setupEmbeddablesAPI();
-        } catch (e) {
-          displayErrorToast(i18n.ERROR_CONFIGURING_EMBEDDABLES_API, e.message, dispatchToaster);
-          setIsLoading(false);
-          setIsError(true);
-          return false;
-        }
-
         // Ensure at least one `siem:defaultIndex` index pattern exists before trying to import
         const matchingIndexPatterns = kibanaIndexPatterns.filter(ip =>
           siemDefaultIndices.includes(ip.attributes.title)
@@ -96,7 +133,8 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
             startDate,
             endDate,
             setQuery,
-            portalNode
+            portalNode,
+            plugins.embeddable
           );
           if (isSubscribed) {
             setEmbeddable(embeddableObject);
@@ -145,21 +183,33 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
     }, [startDate, endDate]);
 
     return isError ? null : (
-      <>
+      <Embeddable>
+        <EmbeddableHeader title={i18n.EMBEDDABLE_HEADER_TITLE}>
+          <EuiText size="xs">
+            <EuiLink
+              href={`${ELASTIC_WEBSITE_URL}guide/en/siem/guide/${DOC_LINK_VERSION}/conf-map-ui.html`}
+              target="_blank"
+            >
+              {i18n.EMBEDDABLE_HEADER_HELP}
+            </EuiLink>
+          </EuiText>
+        </EmbeddableHeader>
+
         <InPortal node={portalNode}>
           <MapToolTip />
         </InPortal>
-        <EmbeddableWrapper>
+
+        <EmbeddableMap maintainRatio={!isIndexError}>
           {embeddable != null ? (
             <EmbeddablePanel
               data-test-subj="embeddable-panel"
               embeddable={embeddable}
-              getActions={npStart.plugins.uiActions.getTriggerCompatibleActions}
+              getActions={plugins.uiActions.getTriggerCompatibleActions}
               getEmbeddableFactory={start.getEmbeddableFactory}
               getAllEmbeddableFactories={start.getEmbeddableFactories}
-              notifications={npStart.core.notifications}
-              overlays={npStart.core.overlays}
-              inspector={npStart.plugins.inspector}
+              notifications={core.notifications}
+              overlays={core.overlays}
+              inspector={plugins.inspector}
               SavedObjectFinder={SavedObjectFinder}
             />
           ) : !isLoading && isIndexError ? (
@@ -167,9 +217,8 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
           ) : (
             <Loader data-test-subj="loading-panel" overlay size="xl" />
           )}
-        </EmbeddableWrapper>
-        <EuiSpacer />
-      </>
+        </EmbeddableMap>
+      </Embeddable>
     );
   }
 );

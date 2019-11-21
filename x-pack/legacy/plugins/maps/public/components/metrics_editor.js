@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiSpacer, EuiTextAlign } from '@elastic/eui';
 import { MetricEditor } from './metric_editor';
+import { METRIC_TYPE } from '../../common/constants';
 
 export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics, metricsFilter }) {
   function renderMetrics() {
@@ -99,6 +100,6 @@ MetricsEditor.propTypes = {
 };
 
 MetricsEditor.defaultProps = {
-  metrics: [{ type: 'count' }],
+  metrics: [{ type: METRIC_TYPE.COUNT }],
   allowMultipleMetrics: true,
 };

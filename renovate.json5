@@ -352,14 +352,6 @@
         ],
       },
       {
-        groupSlug: 'execa',
-        groupName: 'execa related packages',
-        packageNames: [
-          'execa',
-          '@types/execa',
-        ],
-      },
-      {
         groupSlug: 'fetch-mock',
         groupName: 'fetch-mock related packages',
         packageNames: [
@@ -405,14 +397,6 @@
         packageNames: [
           'history',
           '@types/history',
-        ],
-      },
-      {
-        groupSlug: 'humps',
-        groupName: 'humps related packages',
-        packageNames: [
-          'humps',
-          '@types/humps',
         ],
       },
       {
@@ -536,14 +520,6 @@
         ],
       },
       {
-        groupSlug: 'rimraf',
-        groupName: 'rimraf related packages',
-        packageNames: [
-          'rimraf',
-          '@types/rimraf',
-        ],
-      },
-      {
         groupSlug: 'selenium-webdriver',
         groupName: 'selenium-webdriver related packages',
         packageNames: [
@@ -589,6 +565,14 @@
         packageNames: [
           'supertest',
           '@types/supertest',
+        ],
+      },
+      {
+        groupSlug: 'supertest-as-promised',
+        groupName: 'supertest-as-promised related packages',
+        packageNames: [
+          'supertest-as-promised',
+          '@types/supertest-as-promised',
         ],
       },
       {

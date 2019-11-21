@@ -6,13 +6,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { AlertsClient } from './alerts_client';
-import { SavedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 
 const taskManager = taskManagerMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
-const savedObjectsClient = SavedObjectsClientMock.create();
+const savedObjectsClient = savedObjectsClientMock.create();
 
 const alertsClientParams = {
   taskManager,
@@ -43,6 +43,8 @@ const mockedDate = new Date('2019-02-12T21:01:22.479Z');
 function getMockData(overwrites: Record<string, any> = {}) {
   return {
     enabled: true,
+    name: 'abc',
+    tags: ['foo'],
     alertTypeId: '123',
     interval: '10s',
     throttle: null,
@@ -172,6 +174,10 @@ describe('create()', () => {
         "interval": "10s",
         "muteAll": false,
         "mutedInstanceIds": Array [],
+        "name": "abc",
+        "tags": Array [
+          "foo",
+        ],
         "throttle": null,
         "updatedBy": "elastic",
       }
@@ -504,6 +510,7 @@ describe('create()', () => {
           },
         ],
         alertTypeId: '123',
+        name: 'abc',
         alertTypeParams: { bar: true },
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
@@ -514,6 +521,7 @@ describe('create()', () => {
         throttle: null,
         muteAll: false,
         mutedInstanceIds: [],
+        tags: ['foo'],
       },
       {
         references: [
@@ -1173,6 +1181,8 @@ describe('update()', () => {
       id: '1',
       data: {
         interval: '10s',
+        name: 'abc',
+        tags: ['foo'],
         alertTypeParams: {
           bar: true,
         },
@@ -1230,7 +1240,11 @@ describe('update()', () => {
         "apiKeyOwner": null,
         "enabled": true,
         "interval": "10s",
+        "name": "abc",
         "scheduledTaskId": "task-123",
+        "tags": Array [
+          "foo",
+        ],
         "updatedBy": "elastic",
       }
     `);
@@ -1304,6 +1318,8 @@ describe('update()', () => {
       id: '1',
       data: {
         interval: '10s',
+        name: 'abc',
+        tags: ['foo'],
         alertTypeParams: {
           bar: true,
         },
@@ -1362,7 +1378,11 @@ describe('update()', () => {
         "apiKeyOwner": "elastic",
         "enabled": true,
         "interval": "10s",
+        "name": "abc",
         "scheduledTaskId": "task-123",
+        "tags": Array [
+          "foo",
+        ],
         "updatedBy": "elastic",
       }
     `);
@@ -1406,6 +1426,8 @@ describe('update()', () => {
         id: '1',
         data: {
           interval: '10s',
+          name: 'abc',
+          tags: ['foo'],
           alertTypeParams: {
             bar: true,
           },

@@ -14,6 +14,7 @@ import {
 import { findSignalsRoute } from './find_signals_route';
 import { ServerInjectOptions } from 'hapi';
 import { getFindResult, getResult, getFindRequest } from './__mocks__/request_responses';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 
 describe('find_signals', () => {
   let { server, alertsClient, actionsClient } = createMockServer();
@@ -28,7 +29,7 @@ describe('find_signals', () => {
   });
 
   describe('status codes with actionClient and alertClient', () => {
-    it('returns 200 when deleting a single signal with a valid actionClient and alertClient', async () => {
+    test('returns 200 when finding a single signal with a valid actionClient and alertClient', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       actionsClient.find.mockResolvedValue({
         page: 1,
@@ -41,21 +42,21 @@ describe('find_signals', () => {
       expect(statusCode).toBe(200);
     });
 
-    it('returns 404 if actionClient is not available on the route', async () => {
+    test('returns 404 if actionClient is not available on the route', async () => {
       const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
       findSignalsRoute(serverWithoutActionClient);
       const { statusCode } = await serverWithoutActionClient.inject(getFindRequest());
       expect(statusCode).toBe(404);
     });
 
-    it('returns 404 if alertClient is not available on the route', async () => {
+    test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
       findSignalsRoute(serverWithoutAlertClient);
       const { statusCode } = await serverWithoutAlertClient.inject(getFindRequest());
       expect(statusCode).toBe(404);
     });
 
-    it('returns 404 if alertClient and actionClient are both not available on the route', async () => {
+    test('returns 404 if alertClient and actionClient are both not available on the route', async () => {
       const {
         serverWithoutActionOrAlertClient,
       } = createMockServerWithoutActionOrAlertClientDecoration();
@@ -66,24 +67,23 @@ describe('find_signals', () => {
   });
 
   describe('validation', () => {
-    it('returns 400 if a bad query parameter is given', async () => {
+    test('returns 400 if a bad query parameter is given', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       const request: ServerInjectOptions = {
         method: 'GET',
-        url: '/api/siem/signals/_find?invalid_value=500',
+        url: `${DETECTION_ENGINE_RULES_URL}/_find?invalid_value=500`,
       };
       const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(400);
     });
 
-    it('returns 200 if the set of optional query parameters are given', async () => {
+    test('returns 200 if the set of optional query parameters are given', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       const request: ServerInjectOptions = {
         method: 'GET',
-        url:
-          '/api/siem/signals/_find?page=2&per_page=20&sort_field=timestamp&fields=["field-1","field-2","field-3]',
+        url: `${DETECTION_ENGINE_RULES_URL}/_find?page=2&per_page=20&sort_field=timestamp&fields=["field-1","field-2","field-3]`,
       };
       const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(200);

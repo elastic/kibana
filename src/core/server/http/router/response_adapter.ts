@@ -120,7 +120,11 @@ export class HapiResponseAdapter {
     });
 
     error.output.payload.message = getErrorMessage(payload);
-    error.output.payload.attributes = getErrorAttributes(payload);
+
+    const attributes = getErrorAttributes(payload);
+    if (attributes) {
+      error.output.payload.attributes = attributes;
+    }
 
     const headers = kibanaResponse.options.headers;
     if (headers) {

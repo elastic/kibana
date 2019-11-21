@@ -325,10 +325,10 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
         yAccessor: 'anomaly_score'
       });
 
-      const offsets = (target.className === 'sl-cell-inner' ? { x: 0, y: 0 } : { x: 2, y: 1 });
+      const offsets = (target.className === 'sl-cell-inner' ? { x: 6, y: 0 } : { x: 8, y: 1 });
       mlChartTooltipService.show(tooltipData, target, {
-        x: target.offsetWidth - offsets.x,
-        y: 10 + offsets.y
+        x: target.offsetWidth + offsets.x,
+        y: 6 + offsets.y
       });
     }
 
@@ -364,7 +364,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
             .on('mouseover', label => {
               mlChartTooltipService.show([{ skipHeader: true }, { name: swimlaneData.fieldName, value: label }], this, {
                 x: laneLabelWidth,
-                y: 8
+                y: 0
               });
             })
             .on('mouseout', () => {

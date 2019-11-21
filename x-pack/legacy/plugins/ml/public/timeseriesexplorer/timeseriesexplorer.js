@@ -16,6 +16,7 @@ import PropTypes from 'prop-types';
 import React, { createRef, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiCheckbox,
@@ -26,11 +27,12 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
-import { ResizeChecker } from 'ui/resize_checker';
+import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../common/constants/search';
 import { parseInterval } from '../../common/util/parse_interval';
@@ -66,7 +68,6 @@ import { mlJobService } from '../services/job_service';
 import { mlResultsService } from '../services/results_service';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
-import { getIndexPatterns } from '../util/index_utils';
 import { getBoundsRoundedToInterval } from '../util/time_buckets';
 
 import { APP_STATE_ACTION, CHARTS_POINT_TARGET, TIME_FIELD_NAME } from './timeseriesexplorer_constants';
@@ -161,6 +162,8 @@ export class TimeSeriesExplorer extends React.Component {
 
   subscriptions = new Subscription();
 
+  _criteriaFields = null;
+
   constructor(props) {
     super(props);
     const { jobSelectService, unsubscribeFromGlobalState } = jobSelectServiceFactory(props.globalState);
@@ -216,17 +219,36 @@ export class TimeSeriesExplorer extends React.Component {
 
   tableFilter = (field, value, operator) => {
     const { entities } = this.state;
+    const entity = entities.find(({ fieldName }) => fieldName === field);
 
-    const entity = find(entities, { fieldName: field });
-    if (entity !== undefined) {
-      if (operator === '+' && entity.fieldValue !== value) {
-        entity.fieldValue = value;
-        this.saveSeriesPropertiesAndRefresh();
-      } else if (operator === '-' && entity.fieldValue === value) {
-        entity.fieldValue = '';
-        this.saveSeriesPropertiesAndRefresh();
-      }
+    if (entity === undefined) {
+      return;
     }
+
+    const { appStateHandler } = this.props;
+
+    let resultValue = '';
+    if (operator === '+' && entity.fieldValue !== value) {
+      resultValue = value;
+    } else if (operator === '-' && entity.fieldValue === value) {
+      resultValue = '';
+    } else {
+      return;
+    }
+
+    const resultEntities = {
+      ...entities.reduce((appStateEntities, appStateEntity) => {
+        appStateEntities[appStateEntity.fieldName] = appStateEntity.fieldValue;
+        return appStateEntities;
+      }, {}),
+      [entity.fieldName]: resultValue,
+    };
+
+    appStateHandler(APP_STATE_ACTION.SET_ENTITIES, resultEntities);
+
+    this.updateControlsForDetector(() => {
+      this.refresh();
+    });
   }
 
   contextChartSelectedInitCallDone = false;
@@ -296,7 +318,6 @@ export class TimeSeriesExplorer extends React.Component {
       const searchBounds = getBoundsRoundedToInterval(bounds, focusAggregationInterval, false);
 
       const {
-        criteriaFields,
         detectorId,
         entities,
         modelPlotEnabled,
@@ -310,7 +331,7 @@ export class TimeSeriesExplorer extends React.Component {
       });
 
       getFocusData(
-        criteriaFields,
+        this._criteriaFields,
         +detectorId,
         focusAggregationInterval,
         appStateHandler(APP_STATE_ACTION.GET_FORECAST_ID),
@@ -357,11 +378,11 @@ export class TimeSeriesExplorer extends React.Component {
 
   loadAnomaliesTableData = (earliestMs, latestMs) => {
     const { dateFormatTz } = this.props;
-    const { criteriaFields, selectedJob } = this.state;
+    const { selectedJob } = this.state;
 
     ml.results.getAnomaliesTableData(
       [selectedJob.job_id],
-      criteriaFields,
+      this._criteriaFields,
       [],
       interval$.getValue().val,
       severity$.getValue().val,
@@ -430,16 +451,17 @@ export class TimeSeriesExplorer extends React.Component {
 
           this.setState({
             entities: entities.map((entity) => {
-              if (firstRec.partition_field_name === entity.fieldName) {
-                entity.fieldValues = chain(resp.records).pluck('partition_field_value').uniq().value();
+              const newEntity = { ...entity };
+              if (firstRec.partition_field_name === newEntity.fieldName) {
+                newEntity.fieldValues = chain(resp.records).pluck('partition_field_value').uniq().value();
               }
-              if (firstRec.over_field_name === entity.fieldName) {
-                entity.fieldValues = chain(resp.records).pluck('over_field_value').uniq().value();
+              if (firstRec.over_field_name === newEntity.fieldName) {
+                newEntity.fieldValues = chain(resp.records).pluck('over_field_value').uniq().value();
               }
-              if (firstRec.by_field_name === entity.fieldName) {
-                entity.fieldValues = chain(resp.records).pluck('by_field_value').uniq().value();
+              if (firstRec.by_field_name === newEntity.fieldName) {
+                newEntity.fieldValues = chain(resp.records).pluck('by_field_value').uniq().value();
               }
-              return entity;
+              return newEntity;
             })
           }, callback);
         }
@@ -582,12 +604,7 @@ export class TimeSeriesExplorer extends React.Component {
         }
       };
 
-      // Only filter on the entity if the field has a value.
       const nonBlankEntities = filter(currentEntities, (entity) => { return entity.fieldValue.length > 0; });
-      stateUpdate.criteriaFields = [{
-        'fieldName': 'detector_index',
-        'fieldValue': +currentDetectorId }
-      ].concat(nonBlankEntities);
 
       if (modelPlotEnabled === false &&
         isSourceDataChartableForDetector(selectedJob, detectorIndex) === false &&
@@ -641,7 +658,7 @@ export class TimeSeriesExplorer extends React.Component {
       // across full time range for use in the swimlane.
       mlResultsService.getRecordMaxScoreByTime(
         selectedJob.job_id,
-        stateUpdate.criteriaFields,
+        this._criteriaFields,
         searchBounds.min.valueOf(),
         searchBounds.max.valueOf(),
         stateUpdate.contextAggregationInterval.expression
@@ -698,6 +715,10 @@ export class TimeSeriesExplorer extends React.Component {
     });
   }
 
+  /**
+   * Updates local state of detector related controls from the global state.
+   * @param callback to invoke after a state update.
+   */
   updateControlsForDetector = (callback = () => {}) => {
     const { appStateHandler } = this.props;
     const { detectorId, selectedJob } = this.state;
@@ -729,7 +750,26 @@ export class TimeSeriesExplorer extends React.Component {
       entities.push({ fieldName: byFieldName, fieldValue: byFieldValue });
     }
 
+    this.updateCriteriaFields(detectorIndex, entities);
+
     this.setState({ entities }, callback);
+  };
+
+  /**
+   * Updates criteria fields for API calls, e.g. getAnomaliesTableData
+   * @param detectorIndex
+   * @param entities
+   */
+  updateCriteriaFields(detectorIndex, entities) {
+    // Only filter on the entity if the field has a value.
+    const nonBlankEntities = filter(entities, (entity) => { return entity.fieldValue.length > 0; });
+    this._criteriaFields = [
+      {
+        fieldName: 'detector_index',
+        fieldValue: detectorIndex
+      },
+      ...nonBlankEntities
+    ];
   }
 
   loadForJobId(jobId, jobs) {
@@ -786,7 +826,7 @@ export class TimeSeriesExplorer extends React.Component {
       () => {
         this.updateControlsForDetector(() => {
           // Populate the map of jobs / detectors / field formatters for the selected IDs and refresh.
-          mlFieldFormatService.populateFormats([jobId], getIndexPatterns())
+          mlFieldFormatService.populateFormats([jobId])
             .catch((err) => { console.log('Error populating field formats:', err); })
           // Load the data - if the FieldFormats failed to populate
           // the default formatting will be used for metric values.
@@ -988,6 +1028,11 @@ export class TimeSeriesExplorer extends React.Component {
       zoomToFocusLoaded,
     } = this.state;
 
+    const fieldNamesWithEmptyValues = entities
+      .filter(({ fieldValue }) => !fieldValue)
+      .map(({ fieldName }) => fieldName);
+    const arePartitioningFieldsProvided = fieldNamesWithEmptyValues.length === 0;
+
     const chartProps = {
       modelPlotEnabled,
       contextChartData,
@@ -1050,9 +1095,32 @@ export class TimeSeriesExplorer extends React.Component {
     this.previousShowForecast = showForecast;
     this.previousShowModelBounds = showModelBounds;
 
+    /**
+     * Indicates if any of the previous controls is empty.
+     * @type {boolean}
+     */
+    let hasEmptyFieldValues = false;
+
     return (
       <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps} loading={loading} resizeRef={this.resizeRef}>
-        <ChartTooltip />
+
+        {fieldNamesWithEmptyValues.length > 0 && <EuiCallOut
+          className="single-metric-request-callout"
+          title={<FormattedMessage
+            id="xpack.ml.timeSeriesExplorer.singleMetricRequiredMessage"
+            /* eslint-disable-next-line max-len */
+            defaultMessage="To view a single metric you must select {missingValuesCount, plural, one {a value for {fieldName1}} other {values for {fieldName1} and {fieldName2}}}"
+            values={{
+              missingValuesCount: fieldNamesWithEmptyValues.length,
+              fieldName1: fieldNamesWithEmptyValues[0],
+              fieldName2: fieldNamesWithEmptyValues[1],
+            }}
+          />}
+          color="warning"
+          iconType="help"
+          size="s"
+        />}
+
         <div className="series-controls" data-test-subj="mlSingleMetricViewerSeriesControls">
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
@@ -1070,14 +1138,18 @@ export class TimeSeriesExplorer extends React.Component {
             </EuiFlexItem>
             {entities.map((entity) => {
               const entityKey = `${entity.fieldName}`;
+              const forceSelection = !hasEmptyFieldValues && !entity.fieldValue;
+              hasEmptyFieldValues = !hasEmptyFieldValues && forceSelection;
               return (
                 <EntityControl
                   entity={entity}
                   entityFieldValueChanged={this.entityFieldValueChanged}
+                  forceSelection={forceSelection}
                   key={entityKey}
                 />
               );
             })}
+            {arePartitioningFieldsProvided &&
             <EuiFlexItem style={{ textAlign: 'right' }}>
               <EuiFormRow hasEmptyLabelSpace style={{ maxWidth: '100%' }}>
                 <ForecastingModal
@@ -1088,7 +1160,7 @@ export class TimeSeriesExplorer extends React.Component {
                   className="forecast-controls"
                 />
               </EuiFormRow>
-            </EuiFlexItem>
+            </EuiFlexItem>}
           </EuiFlexGroup>
         </div>
 
@@ -1100,12 +1172,15 @@ export class TimeSeriesExplorer extends React.Component {
           />
         )}
 
-        {(jobs.length > 0 && loading === false && hasResults === false) && (
+        {(arePartitioningFieldsProvided && jobs.length > 0 && (fullRefresh === false || loading === false) && hasResults === false) && (
           <TimeseriesexplorerNoChartData dataNotChartable={dataNotChartable} entities={entities} />
         )}
 
-        {(jobs.length > 0 && loading === false && hasResults === true) && (
+        {(arePartitioningFieldsProvided && jobs.length > 0 && (fullRefresh === false || loading === false) && hasResults === true) && (
           <EuiText className="results-container">
+            {/* Make sure ChartTooltip is inside this plain wrapping element so positioning can be infered correctly. */}
+            <ChartTooltip />
+
             <span className="panel-title">
               {i18n.translate('xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle', {
                 defaultMessage: 'Single time series analysis of {functionLabel}',

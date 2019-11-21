@@ -11,14 +11,14 @@ import * as React from 'react';
 import { Router } from 'react-router-dom';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { ActionCreator } from 'typescript-fsa';
-import { npSetup } from 'ui/new_platform';
 
 import '../../../mock/match_media';
 
 import { mocksSource } from '../../../containers/source/mock';
 import { FlowTarget } from '../../../graphql/types';
+import { useKibanaCore } from '../../../lib/compose/kibana_core';
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../mock';
-import { MockNpSetUp, mockUiSettings } from '../../../mock/ui_settings';
+import { mockUiSettings } from '../../../mock/ui_settings';
 import { createStore, State } from '../../../store';
 import { InputsModelId } from '../../../store/inputs/constants';
 
@@ -31,14 +31,19 @@ const pop: Action = 'POP';
 
 type GlobalWithFetch = NodeJS.Global & { fetch: jest.Mock };
 
-const mockNpSetup: MockNpSetUp = (npSetup as unknown) as MockNpSetUp;
-jest.mock('ui/new_platform');
-mockNpSetup.core.uiSettings = mockUiSettings;
+const mockUseKibanaCore = useKibanaCore as jest.Mock;
+jest.mock('../../../lib/compose/kibana_core');
+mockUseKibanaCore.mockImplementation(() => ({
+  uiSettings: mockUiSettings,
+}));
 
 // Test will fail because we will to need to mock some core services to make the test work
-// For now let's forget about SiemSearchBar
+// For now let's forget about SiemSearchBar and QueryBar
 jest.mock('../../../components/search_bar', () => ({
   SiemSearchBar: () => null,
+}));
+jest.mock('../../../components/query_bar', () => ({
+  QueryBar: () => null,
 }));
 
 let localSource: Array<{
@@ -161,7 +166,7 @@ describe('Ip Details', () => {
     wrapper.update();
     expect(
       wrapper
-        .find('[data-test-subj="ip-details-headline"] [data-test-subj="page_headline_title"]')
+        .find('[data-test-subj="ip-details-headline"] [data-test-subj="header-page-title"]')
         .text()
     ).toEqual('fe80::24ce:f7ff:fede:a571');
   });

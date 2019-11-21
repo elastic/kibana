@@ -1,0 +1,47 @@
+[[breaking-changes-7.5]]
+== Breaking changes in 7.5
+++++
+<titleabbrev>7.5</titleabbrev>
+++++
+
+This page discusses the breaking changes that you need to be aware of when migrating
+your application to Kibana 7.5.
+
+//See also <<release-highlights-7.4.0, release highlights>> and <<release-notes-7.4.0, release notes>>.
+
+//NOTE: The notable-breaking-changes tagged regions are re-used in the
+//Installation and Upgrade Guide
+
+////
+The following section is re-used in the Installation and Upgrade Guide
+[[breaking_70_notable]]
+=== Notable breaking changes
+////
+// tag::notable-breaking-changes[]
+
+[float]
+[[breaking_75_search_instead_of-msearch]]
+=== The default setting for `courier:batchSearches` is now `false`
+
+*Details:*
+Changing the default setting for `courier:batchSearches` to `false` means
+that search requests will use the `_search` {es} endpoint rather than `_msearch`.
+
+*Impact:*
+Dashboard panels will load individually, and search requests will terminate
+when users navigate away or update the query.
+
+[float]
+[[breaking_75_codeapp]]
+=== The experimental Code app has been removed
+
+*Details:*
+The experimental Code app that was previously disabled by default has been
+removed. Due to the existing implementation of code being untenable, we've
+decided not to pursue further development of the code app at this time.
+
+*Impact:*
+Any installs that previously enabled the Code app will now log a warning when
+Kibana starts up. It's safe to remove all configurations starting with
+`xpack.code.`. Starting in 8.0, these warnings will become errors that prevent
+Kibana from starting up.

@@ -28,12 +28,15 @@ const path = require('path');
 // this type of information. You usually will want to make any hand edits after
 // doing a search to KQL conversion before posting it as a signal or checking it
 // into another repository.
-const INTERVAL = '24h';
+const INTERVAL = '5m';
 const SEVERITY = 'low';
-const TYPE = 'kql';
-const FROM = 'now-24h';
+const TYPE = 'query';
+const FROM = 'now-6m';
 const TO = 'now';
+const IMMUTABLE = true;
 const INDEX = ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
+const OUTPUT_INDEX = process.env.SIGNALS_INDEX || '.siem-signals';
+const RISK_SCORE = 50;
 
 const walk = dir => {
   const list = fs.readdirSync(dir);
@@ -70,43 +73,77 @@ async function main() {
   const files = process.argv[2];
   const outputDir = process.argv[3];
 
-  const savedSearchesJson = walk(files).filter(file => file.endsWith('.ndjson'));
+  const savedSearchesJson = walk(files).filter(file => {
+    return !path.basename(file).startsWith('.') && file.endsWith('.ndjson');
+  });
 
   const savedSearchesParsed = savedSearchesJson.reduce((accum, json) => {
     const jsonFile = fs.readFileSync(json, 'utf8');
-    try {
-      const parsedFile = JSON.parse(jsonFile);
-      parsedFile._file = json;
-      parsedFile.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.parse(
-        parsedFile.attributes.kibanaSavedObjectMeta.searchSourceJSON
-      );
-      return [...accum, parsedFile];
-    } catch (err) {
-      return accum;
-    }
+    const jsonLines = jsonFile.split(/\r{0,1}\n/);
+    const parsedLines = jsonLines.reduce((accum, line, index) => {
+      try {
+        const parsedLine = JSON.parse(line);
+        if (index !== 0) {
+          parsedLine._file = `${json.substring(0, json.length - '.ndjson'.length)}_${String(
+            index
+          )}.ndjson`;
+        } else {
+          parsedLine._file = json;
+        }
+        parsedLine.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.parse(
+          parsedLine.attributes.kibanaSavedObjectMeta.searchSourceJSON
+        );
+        return [...accum, parsedLine];
+      } catch (err) {
+        console.log('error parsing a line in this file:', json);
+        return accum;
+      }
+    }, []);
+    return [...accum, ...parsedLines];
   }, []);
 
-  savedSearchesParsed.forEach(savedSearch => {
-    const fileToWrite = cleanupFileName(savedSearch._file);
+  savedSearchesParsed.forEach(
+    ({
+      _file,
+      attributes: {
+        description,
+        title,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: {
+            query: { query, language },
+            filter,
+          },
+        },
+      },
+    }) => {
+      const fileToWrite = cleanupFileName(_file);
 
-    const query = savedSearch.attributes.kibanaSavedObjectMeta.searchSourceJSON.query.query;
-    if (query != null && query.trim() !== '') {
-      const outputMessage = {
-        id: fileToWrite,
-        description: savedSearch.attributes.description || savedSearch.attributes.title,
-        index: INDEX,
-        interval: INTERVAL,
-        name: savedSearch.attributes.title,
-        severity: SEVERITY,
-        type: TYPE,
-        from: FROM,
-        to: TO,
-        kql: savedSearch.attributes.kibanaSavedObjectMeta.searchSourceJSON.query.query,
-      };
+      if (query != null && query.trim() !== '') {
+        const outputMessage = {
+          rule_id: fileToWrite,
+          risk_score: RISK_SCORE,
+          description: description || title,
+          immutable: IMMUTABLE,
+          index: INDEX,
+          interval: INTERVAL,
+          name: title,
+          severity: SEVERITY,
+          type: TYPE,
+          from: FROM,
+          to: TO,
+          query,
+          language,
+          filters: filter,
+          output_index: OUTPUT_INDEX,
+        };
 
-      fs.writeFileSync(`${outputDir}/${fileToWrite}.json`, JSON.stringify(outputMessage, null, 2));
+        fs.writeFileSync(
+          `${outputDir}/${fileToWrite}.json`,
+          JSON.stringify(outputMessage, null, 2)
+        );
+      }
     }
-  });
+  );
 }
 
 if (require.main === module) {

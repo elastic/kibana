@@ -68,18 +68,27 @@ describe('setup.getPlugins()', () => {
   it('returns injectedMetadata.uiPlugins', () => {
     const injectedMetadata = new InjectedMetadataService({
       injectedMetadata: {
-        uiPlugins: [{ id: 'plugin-1', plugin: {} }, { id: 'plugin-2', plugin: {} }],
+        uiPlugins: [
+          { id: 'plugin-1', plugin: {}, config: { clientProp: 'clientValue' } },
+          { id: 'plugin-2', plugin: {} },
+        ],
       },
     } as any);
 
     const plugins = injectedMetadata.setup().getPlugins();
-    expect(plugins).toEqual([{ id: 'plugin-1', plugin: {} }, { id: 'plugin-2', plugin: {} }]);
+    expect(plugins).toEqual([
+      { id: 'plugin-1', plugin: {}, config: { clientProp: 'clientValue' } },
+      { id: 'plugin-2', plugin: {} },
+    ]);
   });
 
   it('returns frozen version of uiPlugins', () => {
     const injectedMetadata = new InjectedMetadataService({
       injectedMetadata: {
-        uiPlugins: [{ id: 'plugin-1', plugin: {} }, { id: 'plugin-2', plugin: {} }],
+        uiPlugins: [
+          { id: 'plugin-1', plugin: {} },
+          { id: 'plugin-2', plugin: {} },
+        ],
       },
     } as any);
 

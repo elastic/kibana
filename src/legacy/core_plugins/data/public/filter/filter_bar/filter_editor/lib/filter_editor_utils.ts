@@ -18,88 +18,33 @@
  */
 
 import dateMath from '@elastic/datemath';
-import {
-  buildExistsFilter,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  buildRangeFilter,
-  FieldFilter,
-  Filter,
-  FilterMeta,
-  FilterStateStore,
-  PhraseFilter,
-  PhrasesFilter,
-  RangeFilter,
-} from '@kbn/es-query';
-import { omit, get } from 'lodash';
 import { Ipv4Address } from '../../../../../../../../plugins/kibana_utils/public';
-import { Field, IndexPattern, isFilterable } from '../../../../index_patterns';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
+import {
+  esFilters,
+  IIndexPattern,
+  IFieldType,
+  isFilterable,
+} from '../../../../../../../../plugins/data/public';
 
-export function getIndexPatternFromFilter(
-  filter: Filter,
-  indexPatterns: IndexPattern[]
-): IndexPattern | undefined {
-  return indexPatterns.find(indexPattern => indexPattern.id === filter.meta.index);
-}
-
-function getValueFormatter(indexPattern?: IndexPattern, key?: string) {
-  if (!indexPattern || !key) return;
-  let format = get(indexPattern, ['fields', 'byName', key, 'format']);
-  if (!format && indexPattern.fields.getByName) {
-    // TODO: Why is indexPatterns sometimes a map and sometimes an array?
-    format = (indexPattern.fields.getByName(key) as Field).format;
-  }
-  return format;
-}
-
-export function getDisplayValueFromFilter(filter: Filter, indexPatterns: IndexPattern[]): string {
-  const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
-
-  if (typeof filter.meta.value === 'function') {
-    const valueFormatter: any = getValueFormatter(indexPattern, filter.meta.key);
-    return filter.meta.value(valueFormatter);
-  } else {
-    return filter.meta.value || '';
-  }
-}
-
-export function getFieldFromFilter(filter: FieldFilter, indexPattern: IndexPattern) {
+export function getFieldFromFilter(filter: esFilters.FieldFilter, indexPattern: IIndexPattern) {
   return indexPattern.fields.find(field => field.name === filter.meta.key);
 }
 
-export function getOperatorFromFilter(filter: Filter) {
+export function getOperatorFromFilter(filter: esFilters.Filter) {
   return FILTER_OPERATORS.find(operator => {
     return filter.meta.type === operator.type && filter.meta.negate === operator.negate;
   });
 }
 
-export function getQueryDslFromFilter(filter: Filter) {
-  return omit(filter, ['$state', 'meta']);
-}
-
-export function getFilterableFields(indexPattern: IndexPattern) {
+export function getFilterableFields(indexPattern: IIndexPattern) {
   return indexPattern.fields.filter(isFilterable);
 }
 
-export function getOperatorOptions(field: Field) {
+export function getOperatorOptions(field: IFieldType) {
   return FILTER_OPERATORS.filter(operator => {
     return !operator.fieldTypes || operator.fieldTypes.includes(field.type);
   });
-}
-
-export function getFilterParams(filter: Filter) {
-  switch (filter.meta.type) {
-    case 'phrase':
-      return (filter as PhraseFilter).meta.params.query;
-    case 'phrases':
-      return (filter as PhrasesFilter).meta.params;
-    case 'range':
-      return {
-        from: (filter as RangeFilter).meta.params.gte,
-        to: (filter as RangeFilter).meta.params.lt,
-      };
-  }
 }
 
 export function validateParams(params: any, type: string) {
@@ -119,8 +64,8 @@ export function validateParams(params: any, type: string) {
 }
 
 export function isFilterValid(
-  indexPattern?: IndexPattern,
-  field?: Field,
+  indexPattern?: IIndexPattern,
+  field?: IFieldType,
   operator?: Operator,
   params?: any
 ) {
@@ -145,56 +90,4 @@ export function isFilterValid(
     default:
       throw new Error(`Unknown operator type: ${operator.type}`);
   }
-}
-
-export function buildFilter(
-  indexPattern: IndexPattern,
-  field: Field,
-  operator: Operator,
-  disabled: boolean,
-  params: any,
-  alias: string | null,
-  store: FilterStateStore
-): Filter {
-  const filter = buildBaseFilter(indexPattern, field, operator, params);
-  filter.meta.alias = alias;
-  filter.meta.negate = operator.negate;
-  filter.meta.disabled = disabled;
-  filter.$state = { store };
-  return filter;
-}
-
-function buildBaseFilter(
-  indexPattern: IndexPattern,
-  field: Field,
-  operator: Operator,
-  params: any
-): Filter {
-  switch (operator.type) {
-    case 'phrase':
-      return buildPhraseFilter(field, params, indexPattern);
-    case 'phrases':
-      return buildPhrasesFilter(field, params, indexPattern);
-    case 'range':
-      const newParams = { gte: params.from, lt: params.to };
-      return buildRangeFilter(field, newParams, indexPattern);
-    case 'exists':
-      return buildExistsFilter(field, indexPattern);
-    default:
-      throw new Error(`Unknown operator type: ${operator.type}`);
-  }
-}
-
-export function buildCustomFilter(
-  index: string,
-  queryDsl: any,
-  disabled: boolean,
-  negate: boolean,
-  alias: string | null,
-  store: FilterStateStore
-): Filter {
-  const meta: FilterMeta = { index, type: 'custom', disabled, negate, alias };
-  const filter: Filter = { ...queryDsl, meta };
-  filter.$state = { store };
-  return filter;
 }

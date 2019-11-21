@@ -9,9 +9,6 @@
 // Public UI styles
 @import 'src/legacy/ui/public/index';
 
-// Context styles
-@import './context/index';
-
 // Dev tools styles
 @import './dev_tools/index';
 
@@ -30,16 +27,6 @@
 // Management styles
 @import './management/index';
 
-// Doc Viewer
-@import './doc_viewer/index';
-
 // Dashboard styles
 // MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS
 @import './dashboard/index';
-
-// helper class that hides elements when rendered in percy
-@media only percy {
-  .hideInPercy {
-    visibility: hidden;
-  }
-}

@@ -5,34 +5,24 @@
  */
 
 import Hapi from 'hapi';
-import Joi from 'joi';
 import { isFunction } from 'lodash/fp';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import { findSignals } from '../alerts/find_signals';
 import { FindSignalsRequest } from '../alerts/types';
+import { findSignalsSchema } from './schemas';
+import { ServerFacade } from '../../../types';
+import { transformFindAlertsOrError } from './utils';
 
 export const createFindSignalRoute: Hapi.ServerRoute = {
   method: 'GET',
-  path: '/api/siem/signals/_find',
+  path: `${DETECTION_ENGINE_RULES_URL}/_find`,
   options: {
     tags: ['access:signals-all'],
     validate: {
       options: {
         abortEarly: false,
       },
-      query: Joi.object()
-        .keys({
-          per_page: Joi.number()
-            .min(0)
-            .default(20),
-          page: Joi.number()
-            .min(1)
-            .default(1),
-          sort_field: Joi.string(),
-          fields: Joi.array()
-            .items(Joi.string())
-            .single(),
-        })
-        .default(),
+      query: findSignalsSchema,
     },
   },
   async handler(request: FindSignalsRequest, headers) {
@@ -44,15 +34,18 @@ export const createFindSignalRoute: Hapi.ServerRoute = {
       return headers.response().code(404);
     }
 
-    return findSignals({
+    const signals = await findSignals({
       alertsClient,
       perPage: query.per_page,
       page: query.page,
       sortField: query.sort_field,
+      sortOrder: query.sort_order,
+      filter: query.filter,
     });
+    return transformFindAlertsOrError(signals);
   },
 };
 
-export const findSignalsRoute = (server: Hapi.Server) => {
+export const findSignalsRoute = (server: ServerFacade) => {
   server.route(createFindSignalRoute);
 };

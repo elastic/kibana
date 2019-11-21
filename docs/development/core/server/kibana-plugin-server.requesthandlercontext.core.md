@@ -15,5 +15,8 @@ core: {
             dataClient: IScopedClusterClient;
             adminClient: IScopedClusterClient;
         };
+        uiSettings: {
+            client: IUiSettingsClient;
+        };
     };
 ```

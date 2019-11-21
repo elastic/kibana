@@ -39,14 +39,6 @@ export const MODULE_NOT_COMPATIBLE_TITLE = (incompatibleJobCount: number) =>
       '{incompatibleJobCount} {incompatibleJobCount, plural, =1 {job} other {jobs}} are currently unavailable',
   });
 
-export const MODULE_NOT_COMPATIBLE_DESCRIPTION = i18n.translate(
-  'xpack.siem.components.mlPopup.moduleNotCompatibleDescription',
-  {
-    defaultMessage:
-      'You may be missing the required index patterns. Learn more in our documentation.',
-  }
-);
-
 export const START_JOB_FAILURE = i18n.translate(
   'xpack.siem.components.mlPopup.errors.startJobFailureTitle',
   {

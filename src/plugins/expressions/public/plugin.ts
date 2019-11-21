@@ -18,30 +18,157 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import { ExpressionInterpretWithHandlers, ExpressionExecutor } from './types';
+import { FunctionsRegistry, RenderFunctionsRegistry, TypesRegistry } from './registries';
+import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
+import { setCoreStart, setInspector, setInterpreter, setRenderersRegistry } from './services';
+import { clog as clogFunction } from './functions/clog';
+import { font as fontFunction } from './functions/font';
+import { kibana as kibanaFunction } from './functions/kibana';
+import { kibanaContext as kibanaContextFunction } from './functions/kibana_context';
 import {
-  ExpressionsService,
-  ExpressionsSetupContract,
-  ExpressionsStartContract,
-} from './expressions/expressions_service';
+  boolean as booleanType,
+  datatable as datatableType,
+  error as errorType,
+  filter as filterType,
+  image as imageType,
+  nullType,
+  number as numberType,
+  pointseries,
+  range as rangeType,
+  render as renderType,
+  shape as shapeType,
+  string as stringType,
+  style as styleType,
+  kibanaContext as kibanaContextType,
+  kibanaDatatable as kibanaDatatableType,
+} from '../common/expression_types';
+import { interpreterProvider } from './interpreter_provider';
+import { createHandlers } from './create_handlers';
+import { ExpressionRendererImplementation } from './expression_renderer';
+import { ExpressionLoader, loader } from './loader';
+import { ExpressionDataHandler, execute } from './execute';
+import { render, ExpressionRenderHandler } from './render';
+import { AnyExpressionFunction, AnyExpressionType } from '../common/types';
+
+export interface ExpressionsSetupDeps {
+  inspector: InspectorSetup;
+}
+
+export interface ExpressionsStartDeps {
+  inspector: InspectorStart;
+}
+
+export interface ExpressionsSetup {
+  registerFunction: (fn: AnyExpressionFunction | (() => AnyExpressionFunction)) => void;
+  registerRenderer: (renderer: any) => void;
+  registerType: (type: () => AnyExpressionType) => void;
+  __LEGACY: {
+    functions: FunctionsRegistry;
+    renderers: RenderFunctionsRegistry;
+    types: TypesRegistry;
+    getExecutor: () => ExpressionExecutor;
+  };
+}
+
+export interface ExpressionsStart {
+  execute: typeof execute;
+  ExpressionDataHandler: typeof ExpressionDataHandler;
+  ExpressionLoader: typeof ExpressionLoader;
+  ExpressionRenderer: typeof ExpressionRendererImplementation;
+  ExpressionRenderHandler: typeof ExpressionRenderHandler;
+  loader: typeof loader;
+  render: typeof render;
+}
 
 export class ExpressionsPublicPlugin
-  implements Plugin<{}, {}, ExpressionsSetupContract, ExpressionsStartContract> {
-  private readonly expressions = new ExpressionsService();
+  implements
+    Plugin<ExpressionsSetup, ExpressionsStart, ExpressionsSetupDeps, ExpressionsStartDeps> {
+  private readonly functions = new FunctionsRegistry();
+  private readonly renderers = new RenderFunctionsRegistry();
+  private readonly types = new TypesRegistry();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup): ExpressionsSetupContract {
-    const expressions = this.expressions.setup();
+  public setup(core: CoreSetup, { inspector }: ExpressionsSetupDeps): ExpressionsSetup {
+    const { functions, renderers, types } = this;
+
+    setRenderersRegistry(renderers);
+
+    const registerFunction: ExpressionsSetup['registerFunction'] = fn => {
+      functions.register(fn);
+    };
+
+    registerFunction(clogFunction);
+    registerFunction(fontFunction);
+    registerFunction(kibanaFunction);
+    registerFunction(kibanaContextFunction);
+
+    types.register(booleanType);
+    types.register(datatableType);
+    types.register(errorType);
+    types.register(filterType);
+    types.register(imageType);
+    types.register(nullType);
+    types.register(numberType);
+    types.register(pointseries);
+    types.register(rangeType);
+    types.register(renderType);
+    types.register(shapeType);
+    types.register(stringType);
+    types.register(styleType);
+    types.register(kibanaContextType);
+    types.register(kibanaDatatableType);
+
+    // TODO: Refactor this function.
+    const getExecutor = () => {
+      const interpretAst: ExpressionInterpretWithHandlers = (ast, context, handlers) => {
+        const interpret = interpreterProvider({
+          types: types.toJS(),
+          handlers: { ...handlers, ...createHandlers() },
+          functions,
+        });
+        return interpret(ast, context);
+      };
+      const executor: ExpressionExecutor = { interpreter: { interpretAst } };
+      return executor;
+    };
+
+    setInterpreter(getExecutor().interpreter);
+
+    const setup: ExpressionsSetup = {
+      registerFunction,
+      registerRenderer: (renderer: any) => {
+        renderers.register(renderer);
+      },
+      registerType: type => {
+        types.register(type);
+      },
+      __LEGACY: {
+        functions,
+        renderers,
+        types,
+        getExecutor,
+      },
+    };
+
+    return setup;
+  }
+
+  public start(core: CoreStart, { inspector }: ExpressionsStartDeps): ExpressionsStart {
+    setCoreStart(core);
+    setInspector(inspector);
+
     return {
-      ...expressions,
+      execute,
+      ExpressionDataHandler,
+      ExpressionLoader,
+      ExpressionRenderer: ExpressionRendererImplementation,
+      ExpressionRenderHandler,
+      loader,
+      render,
     };
   }
 
-  public start(core: CoreStart): ExpressionsStartContract {
-    const expressions = this.expressions.start();
-    return {
-      ...expressions,
-    };
-  }
   public stop() {}
 }

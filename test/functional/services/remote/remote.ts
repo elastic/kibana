@@ -26,6 +26,17 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const browserType: Browsers = config.get('browser.type');
+  type BrowserStorage = 'sessionStorage' | 'localStorage';
+
+  const clearBrowserStorage = async (storageType: BrowserStorage) => {
+    try {
+      await driver.executeScript(`window.${storageType}.clear();`);
+    } catch (error) {
+      if (!error.message.includes(`Failed to read the '${storageType}' property from 'Window'`)) {
+        throw error;
+      }
+    }
+  };
 
   const { driver, By, until, consoleLog$ } = await initWebDriver(
     log,
@@ -75,6 +86,8 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
       .manage()
       .window()
       .setRect({ width, height });
+    await clearBrowserStorage('sessionStorage');
+    await clearBrowserStorage('localStorage');
   });
 
   lifecycle.on('cleanup', async () => await driver.quit());

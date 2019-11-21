@@ -10,7 +10,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { SlmPolicy } from '../../../../../common/types';
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common/constants';
-import { SectionError, SectionLoading } from '../../../components';
+import { SectionError, SectionLoading, Error } from '../../../components';
 import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { useLoadPolicies, useLoadRetentionSettings } from '../../../services/http';
@@ -102,7 +102,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
             defaultMessage="Error loading policies"
           />
         }
-        error={error}
+        error={error as Error}
       />
     );
   } else if (policies && policies.length === 0) {
@@ -113,7 +113,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
           <h1>
             <FormattedMessage
               id="xpack.snapshotRestore.policyList.emptyPromptTitle"
-              defaultMessage="You don't have any snapshot policies yet"
+              defaultMessage="Create your first snapshot policy"
             />
           </h1>
         }
@@ -122,7 +122,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
             <p>
               <FormattedMessage
                 id="xpack.snapshotRestore.policyList.emptyPromptDescription"
-                defaultMessage="Create a policy to automatically back up your cluster."
+                defaultMessage="A policy automates the creation and deletion of snapshots."
               />
             </p>
           </Fragment>

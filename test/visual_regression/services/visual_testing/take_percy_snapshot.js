@@ -20,42 +20,88 @@
 import { readFileSync } from 'fs';
 import { agentJsFilename } from '@percy/agent/dist/utils/sdk-utils';
 
-export function takePercySnapshot() {
+export function takePercySnapshot(show, hide) {
   if (!window.PercyAgent) {
     return false;
   }
 
-  const agent = new window.PercyAgent({
-    handleAgentCommunication: false
-  });
+  // add percy styles to hide/show specific elements
+  const styleElement = document.createElement('style');
+  styleElement.appendChild(document.createTextNode(`
+    .hideInPercy {
+      visibility: hidden;
 
-  const queryAll = selector => [
-    ...document.querySelectorAll(selector)
-  ];
+      .showInPercy {
+        visibility: visible;
+      }
+    }
 
-  // array of canvas/image replacements
-  const replacements = [];
+    .showInPercy {
+      visibility: visible;
+
+      .hideInPercy {
+        visibility: hidden;
+      }
+    }
+  `));
+  document.head.appendChild(styleElement);
+
+  const add = (selectors, className) => {
+    for (const selector of selectors) {
+      for (const element of document.querySelectorAll(selector)) {
+        element.classList.add(className);
+      }
+    }
+  };
+
+  const remove = (selectors, className) => {
+    for (const selector of selectors) {
+      for (const element of document.querySelectorAll(selector)) {
+        element.classList.remove(className);
+      }
+    }
+  };
+
+  // set Percy visibility on elements
+  add(hide, 'hideInPercy');
+  if (show.length > 0) {
+    // hide the body by default
+    add(['body'], 'hideInPercy');
+    add(show, 'showInPercy');
+  }
 
   // convert canvas elements into static images
-  for (const canvas of queryAll('canvas')) {
+  const replacements = [];
+  for (const canvas of document.querySelectorAll('canvas')) {
     const image = document.createElement('img');
+    image.classList.value = canvas.classList.value;
     image.src = canvas.toDataURL();
     image.style.cssText = window.getComputedStyle(canvas).cssText;
     canvas.parentElement.replaceChild(image, canvas);
     replacements.push({ canvas, image });
   }
 
-  // cache the dom snapshot containing the images
-  const snapshot = agent.snapshot(document, {
-    widths: [document.documentElement.clientWidth]
-  });
+  try {
+    const agent = new window.PercyAgent({
+      handleAgentCommunication: false
+    });
 
-  // restore replaced canvases
-  for (const { image, canvas } of replacements) {
-    image.parentElement.replaceChild(canvas, image);
+    // cache the dom snapshot containing the images
+    return agent.snapshot(document, {
+      widths: [document.documentElement.clientWidth]
+    });
+  } finally {
+    // restore replaced canvases
+    for (const { image, canvas } of replacements) {
+      image.parentElement.replaceChild(canvas, image);
+    }
+
+    // restore element visibility
+    document.head.removeChild(styleElement);
+    remove(['body'], 'hideInPercy');
+    remove(show, 'showInPercy');
+    remove(hide, 'hideInPercy');
   }
-
-  return snapshot;
 }
 
 export const takePercySnapshotWithAgent = `

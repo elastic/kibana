@@ -8,17 +8,17 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingChart,
   EuiSpacer,
   EuiStat,
   EuiTitle,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 
 import euiStyled from '../../../../../../../../common/eui_styled_components';
-import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api';
+import { LogRateResults } from '../../../../../containers/logs/log_analysis/log_analysis_results';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { JobStatus, SetupStatus } from '../../../../../../common/log_analysis';
 import {
@@ -31,11 +31,12 @@ import { AnomaliesChart } from './chart';
 import { AnomaliesTable } from './table';
 import { LogAnalysisJobProblemIndicator } from '../../../../../components/logging/log_analysis_job_status';
 import { AnalyzeInMlButton } from '../analyze_in_ml_button';
+import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 
 export const AnomaliesResults: React.FunctionComponent<{
   isLoading: boolean;
   jobStatus: JobStatus;
-  results: GetLogEntryRateSuccessResponsePayload['data'] | null;
+  results: LogRateResults | null;
   setTimeRange: (timeRange: TimeRange) => void;
   setupStatus: SetupStatus;
   timeRange: TimeRange;
@@ -53,15 +54,6 @@ export const AnomaliesResults: React.FunctionComponent<{
   viewSetupForUpdate,
   jobId,
 }) => {
-  const title = i18n.translate('xpack.infra.logs.analysis.anomaliesSectionTitle', {
-    defaultMessage: 'Anomalies',
-  });
-
-  const loadingAriaLabel = i18n.translate(
-    'xpack.infra.logs.analysis.anomaliesSectionLoadingAriaLabel',
-    { defaultMessage: 'Loading anomalies' }
-  );
-
   const hasAnomalies = useMemo(() => {
     return results && results.histogramBuckets
       ? results.histogramBuckets.some(bucket => {
@@ -117,92 +109,94 @@ export const AnomaliesResults: React.FunctionComponent<{
         onRecreateMlJobForUpdate={viewSetupForUpdate}
       />
       <EuiSpacer size="m" />
-      {isLoading ? (
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingChart size="xl" aria-label={loadingAriaLabel} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : !results || (results && results.histogramBuckets && !results.histogramBuckets.length) ? (
-        <EuiEmptyPrompt
-          title={
-            <h2>
-              {i18n.translate('xpack.infra.logs.analysis.anomalySectionNoDataTitle', {
-                defaultMessage: 'There is no data to display.',
-              })}
-            </h2>
-          }
-          titleSize="m"
-          body={
-            <p>
-              {i18n.translate('xpack.infra.logs.analysis.anomalySectionNoDataBody', {
-                defaultMessage: 'You may want to adjust your time range.',
-              })}
-            </p>
-          }
-        />
-      ) : !hasAnomalies ? (
-        <EuiEmptyPrompt
-          title={
-            <h2>
-              {i18n.translate('xpack.infra.logs.analysis.anomalySectionNoAnomaliesTitle', {
-                defaultMessage: 'No anomalies were detected.',
-              })}
-            </h2>
-          }
-          titleSize="m"
-        />
-      ) : (
-        <>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={8}>
-              <AnomaliesChart
-                chartId="overall"
-                setTimeRange={setTimeRange}
-                timeRange={timeRange}
-                series={logEntryRateSeries}
-                annotations={anomalyAnnotations}
-                renderAnnotationTooltip={renderAnnotationTooltip}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={2}>
-              <EuiStat
-                title={numeral(results.totalNumberOfLogEntries).format('0.00a')}
-                description={i18n.translate(
-                  'xpack.infra.logs.analysis.overallAnomaliesNumberOfLogEntriesDescription',
-                  {
-                    defaultMessage: 'Number of log entries',
-                  }
-                )}
-                reverse
-              />
-              <EuiStat
-                title={topAnomalyScore ? formatAnomalyScore(topAnomalyScore) : null}
-                description={i18n.translate(
-                  'xpack.infra.logs.analysis.overallAnomaliesTopAnomalyScoreDescription',
-                  {
-                    defaultMessage: 'Max anomaly score',
-                  }
-                )}
-                reverse
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
-          <AnomaliesTable
-            results={results}
-            setTimeRange={setTimeRange}
-            timeRange={timeRange}
-            jobId={jobId}
+      <LoadingOverlayWrapper isLoading={isLoading} loadingChildren={<LoadingOverlayContent />}>
+        {!results || (results && results.histogramBuckets && !results.histogramBuckets.length) ? (
+          <EuiEmptyPrompt
+            title={
+              <h2>
+                {i18n.translate('xpack.infra.logs.analysis.anomalySectionNoDataTitle', {
+                  defaultMessage: 'There is no data to display.',
+                })}
+              </h2>
+            }
+            titleSize="m"
+            body={
+              <p>
+                {i18n.translate('xpack.infra.logs.analysis.anomalySectionNoDataBody', {
+                  defaultMessage: 'You may want to adjust your time range.',
+                })}
+              </p>
+            }
           />
-        </>
-      )}
+        ) : !hasAnomalies ? (
+          <EuiEmptyPrompt
+            title={
+              <h2>
+                {i18n.translate('xpack.infra.logs.analysis.anomalySectionNoAnomaliesTitle', {
+                  defaultMessage: 'No anomalies were detected.',
+                })}
+              </h2>
+            }
+            titleSize="m"
+          />
+        ) : (
+          <>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={8}>
+                <AnomaliesChart
+                  chartId="overall"
+                  setTimeRange={setTimeRange}
+                  timeRange={timeRange}
+                  series={logEntryRateSeries}
+                  annotations={anomalyAnnotations}
+                  renderAnnotationTooltip={renderAnnotationTooltip}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={2}>
+                <EuiStat
+                  title={numeral(results.totalNumberOfLogEntries).format('0.00a')}
+                  titleSize="m"
+                  description={i18n.translate(
+                    'xpack.infra.logs.analysis.overallAnomaliesNumberOfLogEntriesDescription',
+                    {
+                      defaultMessage: 'Number of log entries',
+                    }
+                  )}
+                  reverse
+                />
+                <EuiStat
+                  title={topAnomalyScore ? formatAnomalyScore(topAnomalyScore) : null}
+                  titleSize="m"
+                  description={i18n.translate(
+                    'xpack.infra.logs.analysis.overallAnomaliesTopAnomalyScoreDescription',
+                    {
+                      defaultMessage: 'Max anomaly score',
+                    }
+                  )}
+                  reverse
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+            <AnomaliesTable
+              results={results}
+              setTimeRange={setTimeRange}
+              timeRange={timeRange}
+              jobId={jobId}
+            />
+          </>
+        )}
+      </LoadingOverlayWrapper>
     </>
   );
 };
 
+const title = i18n.translate('xpack.infra.logs.analysis.anomaliesSectionTitle', {
+  defaultMessage: 'Anomalies',
+});
+
 interface ParsedAnnotationDetails {
-  anomalyScoresByPartition: Array<{ partitionId: string; maximumAnomalyScore: number }>;
+  anomalyScoresByPartition: Array<{ partitionName: string; maximumAnomalyScore: number }>;
 }
 
 const overallAnomalyScoreLabel = i18n.translate(
@@ -211,6 +205,7 @@ const overallAnomalyScoreLabel = i18n.translate(
     defaultMessage: 'Max anomaly scores:',
   }
 );
+
 const AnnotationTooltip: React.FunctionComponent<{ details: string }> = ({ details }) => {
   const parsedDetails: ParsedAnnotationDetails = JSON.parse(details);
   return (
@@ -219,11 +214,11 @@ const AnnotationTooltip: React.FunctionComponent<{ details: string }> = ({ detai
         <b>{overallAnomalyScoreLabel}</b>
       </span>
       <ul>
-        {parsedDetails.anomalyScoresByPartition.map(({ partitionId, maximumAnomalyScore }) => {
+        {parsedDetails.anomalyScoresByPartition.map(({ partitionName, maximumAnomalyScore }) => {
           return (
-            <li key={`overall-anomaly-chart-${partitionId}`}>
+            <li key={`overall-anomaly-chart-${partitionName}`}>
               <span>
-                {`${partitionId}: `}
+                {`${partitionName}: `}
                 <b>{maximumAnomalyScore}</b>
               </span>
             </li>
@@ -237,7 +232,7 @@ const AnnotationTooltip: React.FunctionComponent<{ details: string }> = ({ detai
 const renderAnnotationTooltip = (details?: string) => {
   // Note: Seems to be necessary to get things typed correctly all the way through to elastic-charts components
   if (!details) {
-    return <div></div>;
+    return <div />;
   }
   return <AnnotationTooltip details={details} />;
 };
@@ -245,3 +240,10 @@ const renderAnnotationTooltip = (details?: string) => {
 const TooltipWrapper = euiStyled('div')`
   white-space: nowrap;
 `;
+
+const loadingAriaLabel = i18n.translate(
+  'xpack.infra.logs.analysis.anomaliesSectionLoadingAriaLabel',
+  { defaultMessage: 'Loading anomalies' }
+);
+
+const LoadingOverlayContent = () => <EuiLoadingSpinner size="xl" aria-label={loadingAriaLabel} />;

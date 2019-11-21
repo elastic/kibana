@@ -21,8 +21,8 @@ export default function ({ getService, getPageObjects }) {
 
       before(async () => {
         await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
-          from: '2017-10-05 20:28:28.475',
-          to: '2017-10-05 20:34:38.341',
+          from: 'Oct 5, 2017 @ 20:28:28.475',
+          to: 'Oct 5, 2017 @ 20:34:38.341',
         });
 
         // go to nodes listing
@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }) {
         expect(await esClusterSummaryStatus.getContent()).to.eql({
           nodesCount: 'Nodes\n2',
           indicesCount: 'Indices\n20',
-          memory: 'Memory\n696.6 MB / 1.3 GB',
+          memory: 'JVM Heap\n696.6 MB / 1.3 GB',
           totalShards: 'Total shards\n79',
           unassignedShards: 'Unassigned shards\n7',
           documentCount: 'Documents\n25,758',
@@ -196,8 +196,8 @@ export default function ({ getService, getPageObjects }) {
 
       before(async () => {
         await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
-          from: '2017-10-05 20:31:48.354',
-          to: '2017-10-05 20:35:12.176',
+          from: 'Oct 5, 2017 @ 20:31:48.354',
+          to: 'Oct 5, 2017 @ 20:35:12.176',
         });
 
         // go to nodes listing
@@ -213,7 +213,7 @@ export default function ({ getService, getPageObjects }) {
         expect(await esClusterSummaryStatus.getContent()).to.eql({
           nodesCount: 'Nodes\n3',
           indicesCount: 'Indices\n20',
-          memory: 'Memory\n575.3 MB / 2.0 GB',
+          memory: 'JVM Heap\n575.3 MB / 2.0 GB',
           totalShards: 'Total shards\n80',
           unassignedShards: 'Unassigned shards\n5',
           documentCount: 'Documents\n25,927',

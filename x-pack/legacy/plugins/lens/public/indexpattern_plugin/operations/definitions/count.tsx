@@ -7,9 +7,10 @@
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from '.';
 import { ParameterlessIndexPatternColumn, BaseIndexPatternColumn } from './column_types';
+import { IndexPatternField } from '../../types';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
-  defaultMessage: 'Count of documents',
+  defaultMessage: 'Count of records',
 });
 
 export type CountIndexPatternColumn = ParameterlessIndexPatternColumn<
@@ -23,14 +24,23 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
   displayName: i18n.translate('xpack.lens.indexPattern.count', {
     defaultMessage: 'Count',
   }),
-  getPossibleOperationForDocument: () => {
+  onFieldChange: (oldColumn, indexPattern, field) => {
     return {
-      dataType: 'number',
-      isBucketed: false,
-      scale: 'ratio',
+      ...oldColumn,
+      label: field.name,
+      sourceField: field.name,
     };
   },
-  buildColumn({ suggestedPriority }) {
+  getPossibleOperationForField: (field: IndexPatternField) => {
+    if (field.type === 'document') {
+      return {
+        dataType: 'number',
+        isBucketed: false,
+        scale: 'ratio',
+      };
+    }
+  },
+  buildColumn({ suggestedPriority, field }) {
     return {
       label: countLabel,
       dataType: 'number',
@@ -38,6 +48,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       suggestedPriority,
       isBucketed: false,
       scale: 'ratio',
+      sourceField: field.name,
     };
   },
   toEsAggsConfig: (column, columnId) => ({

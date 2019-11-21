@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 interface IntegrationLinkProps {
   ariaLabel: string;
   href: string | undefined;
-  iconType: 'apmApp' | 'infraApp' | 'loggingApp';
+  iconType: 'apmApp' | 'metricsApp' | 'logsApp';
   message: string;
   tooltipContent: string;
 }

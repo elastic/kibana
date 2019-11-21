@@ -20,11 +20,11 @@
 import Hapi from 'hapi';
 import { createMockServer } from './_mock_server';
 import { createBulkUpdateRoute } from './bulk_update';
-import { SavedObjectsClientMock } from '../../../../core/server/mocks';
+import { savedObjectsClientMock } from '../../../../core/server/mocks';
 
 describe('PUT /api/saved_objects/_bulk_update', () => {
   let server: Hapi.Server;
-  const savedObjectsClient = SavedObjectsClientMock.create();
+  const savedObjectsClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
     server = createMockServer();

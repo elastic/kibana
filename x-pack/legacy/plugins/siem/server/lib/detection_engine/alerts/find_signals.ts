@@ -7,16 +7,31 @@
 import { SIGNALS_ID } from '../../../../common/constants';
 import { FindSignalParams } from './types';
 
-// TODO: Change this from a search to a filter once this ticket is solved:
-// https://github.com/elastic/kibana/projects/26#card-27462236
-export const findSignals = async ({ alertsClient, perPage, page, fields }: FindSignalParams) => {
+export const getFilter = (filter: string | null | undefined) => {
+  if (filter == null) {
+    return `alert.attributes.alertTypeId: ${SIGNALS_ID}`;
+  } else {
+    return `alert.attributes.alertTypeId: ${SIGNALS_ID} AND ${filter}`;
+  }
+};
+
+export const findSignals = async ({
+  alertsClient,
+  perPage,
+  page,
+  fields,
+  filter,
+  sortField,
+  sortOrder,
+}: FindSignalParams) => {
   return alertsClient.find({
     options: {
       fields,
       page,
       perPage,
-      searchFields: ['alertTypeId'],
-      search: SIGNALS_ID,
+      filter: getFilter(filter),
+      sortOrder,
+      sortField,
     },
   });
 };

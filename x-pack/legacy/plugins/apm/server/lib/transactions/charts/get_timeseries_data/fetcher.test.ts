@@ -21,6 +21,7 @@ describe('timeseriesFetcher', () => {
         start: 1528113600000,
         end: 1528977600000,
         client: { search: clientSpy } as any,
+        internalClient: { search: clientSpy } as any,
         config: {
           get: () => 'myIndex' as any,
           has: () => true
@@ -29,7 +30,17 @@ describe('timeseriesFetcher', () => {
           {
             term: { 'service.environment': 'test' }
           }
-        ]
+        ],
+        indices: {
+          'apm_oss.sourcemapIndices': 'myIndex',
+          'apm_oss.errorIndices': 'myIndex',
+          'apm_oss.onboardingIndices': 'myIndex',
+          'apm_oss.spanIndices': 'myIndex',
+          'apm_oss.transactionIndices': 'myIndex',
+          'apm_oss.metricsIndices': 'myIndex',
+          'apm_oss.apmAgentConfigurationIndex': 'myIndex'
+        },
+        dynamicIndexPattern: null as any
       }
     });
   });

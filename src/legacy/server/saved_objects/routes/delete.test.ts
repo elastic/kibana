@@ -20,11 +20,11 @@
 import Hapi from 'hapi';
 import { createMockServer } from './_mock_server';
 import { createDeleteRoute } from './delete';
-import { SavedObjectsClientMock } from '../../../../core/server/mocks';
+import { savedObjectsClientMock } from '../../../../core/server/mocks';
 
 describe('DELETE /api/saved_objects/{type}/{id}', () => {
   let server: Hapi.Server;
-  const savedObjectsClient = SavedObjectsClientMock.create();
+  const savedObjectsClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
     savedObjectsClient.delete.mockImplementation(() => Promise.resolve('{}'));
