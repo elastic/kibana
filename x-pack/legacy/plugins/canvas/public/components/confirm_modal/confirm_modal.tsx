@@ -58,7 +58,7 @@ export const ConfirmModal: FunctionComponent<Props> = props => {
 };
 
 ConfirmModal.propTypes = {
-  isOpen: PropTypes.bool,
+  isOpen: PropTypes.bool.isRequired,
   title: PropTypes.string,
   message: PropTypes.string.isRequired,
   onConfirm: PropTypes.func.isRequired,

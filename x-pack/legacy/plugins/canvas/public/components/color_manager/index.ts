@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pure } from 'recompose';
-
+import React from 'react';
 import { ColorManager as Component } from './color_manager';
-
 export { Props } from './color_manager';
-export const ColorManager = pure(Component);
+
+export const ColorManager = React.memo(Component);

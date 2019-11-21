@@ -50,7 +50,7 @@ export const getKqlFilterQuerySelector = () =>
     timeline.kqlQuery.filterQuery &&
     timeline.kqlQuery.filterQuery.kuery
       ? timeline.kqlQuery.filterQuery.kuery.expression
-      : null
+      : ''
   );
 
 export const getKqlFilterQueryDraftSelector = () =>

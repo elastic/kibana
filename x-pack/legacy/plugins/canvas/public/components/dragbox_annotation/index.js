@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pure } from 'recompose';
+import React from 'react';
 import { DragBoxAnnotation as Component } from './dragbox_annotation';
 
-export const DragBoxAnnotation = pure(Component);
+export const DragBoxAnnotation = React.memo(Component);

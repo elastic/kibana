@@ -17,7 +17,7 @@ interface Props {
   inFlight: boolean;
 }
 
-export const RefreshControl = ({ doRefresh, inFlight }: Props) => (
+export const RefreshControl: React.FC<Props> = ({ doRefresh, inFlight }) => (
   <EuiToolTip
     position="bottom"
     content={
@@ -38,5 +38,5 @@ export const RefreshControl = ({ doRefresh, inFlight }: Props) => (
 
 RefreshControl.propTypes = {
   doRefresh: PropTypes.func.isRequired,
-  inFlight: PropTypes.bool,
+  inFlight: PropTypes.bool.isRequired,
 };

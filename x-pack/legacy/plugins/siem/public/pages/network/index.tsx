@@ -28,51 +28,53 @@ export const NetworkContainer = React.memo<Props>(() => {
   return (
     <GlobalTime>
       {({ to, from, setQuery, deleteQuery, isInitializing }) => (
-        <Switch>
-          <Route
-            strict
-            path={getNetworkRoutePath(
-              networkPagePath,
-              capabilities.capabilitiesFetched,
-              hasMlUserPermissions(capabilities)
-            )}
-            render={() => (
-              <Network
-                networkPagePath={networkPagePath}
-                to={to}
-                from={from}
-                setQuery={setQuery}
-                deleteQuery={deleteQuery}
-                isInitializing={isInitializing}
-                capabilitiesFetched={capabilities.capabilitiesFetched}
-                hasMlUserPermissions={hasMlUserPermissions(capabilities)}
-              />
-            )}
-          />
-          <Route
-            path={ipDetailsPagePath}
-            render={({
-              match: {
-                params: { detailName },
-              },
-            }) => (
-              <IPDetails
-                detailName={detailName}
-                to={to}
-                from={from}
-                setQuery={setQuery}
-                deleteQuery={deleteQuery}
-                isInitializing={isInitializing}
-              />
-            )}
-          />
-          <Route
-            path={`/${SiemPageName.network}/`}
-            render={({ location: { search = '' } }) => (
-              <Redirect to={`/${SiemPageName.network}/${NetworkRouteType.flows}${search}`} />
-            )}
-          />
-        </Switch>
+        <>
+          <Switch>
+            <Route
+              strict
+              path={getNetworkRoutePath(
+                networkPagePath,
+                capabilities.capabilitiesFetched,
+                hasMlUserPermissions(capabilities)
+              )}
+              render={() => (
+                <Network
+                  networkPagePath={networkPagePath}
+                  to={to}
+                  from={from}
+                  setQuery={setQuery}
+                  deleteQuery={deleteQuery}
+                  isInitializing={isInitializing}
+                  capabilitiesFetched={capabilities.capabilitiesFetched}
+                  hasMlUserPermissions={hasMlUserPermissions(capabilities)}
+                />
+              )}
+            />
+            <Route
+              path={ipDetailsPagePath}
+              render={({
+                match: {
+                  params: { detailName },
+                },
+              }) => (
+                <IPDetails
+                  detailName={detailName}
+                  to={to}
+                  from={from}
+                  setQuery={setQuery}
+                  deleteQuery={deleteQuery}
+                  isInitializing={isInitializing}
+                />
+              )}
+            />
+            <Route
+              path={`/${SiemPageName.network}/`}
+              render={({ location: { search = '' } }) => (
+                <Redirect to={`/${SiemPageName.network}/${NetworkRouteType.flows}${search}`} />
+              )}
+            />
+          </Switch>
+        </>
       )}
     </GlobalTime>
   );

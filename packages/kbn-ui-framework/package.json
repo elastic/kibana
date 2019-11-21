@@ -18,7 +18,7 @@
     "classnames": "2.2.6",
     "focus-trap-react": "^3.1.1",
     "lodash": "npm:@elastic/lodash@3.10.1-kibana3",
-    "prop-types": "15.6.0",
+    "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-ace": "^5.9.0",
     "react-color": "^2.13.8",

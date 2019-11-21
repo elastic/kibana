@@ -70,7 +70,7 @@ interface DispatchProps {
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
 
-const StatefulFlyoutHeader = ({
+const StatefulFlyoutHeader: React.FC<Props> = ({
   associateNote,
   createTimeline,
   description,
@@ -88,7 +88,7 @@ const StatefulFlyoutHeader = ({
   updateNote,
   updateTitle,
   usersViewing,
-}: Props) => {
+}) => {
   const getNotesByIds = useCallback(
     (noteIdsVar: string[]): Note[] => appSelectors.getNotes(notesById, noteIdsVar),
     [notesById]
@@ -157,7 +157,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
+const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps): DispatchProps => ({
   associateNote: (noteId: string) => {
     dispatch(timelineActions.addNote({ id: timelineId, noteId }));
   },
@@ -213,4 +213,7 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
   },
 });
 
-export const FlyoutHeader = connect(makeMapStateToProps, mapDispatchToProps)(StatefulFlyoutHeader);
+export const FlyoutHeader = connect<{}, DispatchProps, OwnProps>(
+  makeMapStateToProps,
+  mapDispatchToProps
+)(StatefulFlyoutHeader);

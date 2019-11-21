@@ -76,7 +76,6 @@ interface DispatchProps {
   }>;
   updateColumns?: ActionCreator<{
     id: string;
-    category: string;
     columns: ColumnHeader[];
   }>;
   updateProviders?: ActionCreator<{

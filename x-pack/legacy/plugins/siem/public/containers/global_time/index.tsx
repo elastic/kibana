@@ -47,7 +47,7 @@ interface OwnProps {
 
 type GlobalTimeProps = OwnProps & GlobalTimeReduxState & GlobalTimeDispatch;
 
-export const GlobalTimeComponent: React.FC<GlobalTimeProps> = ({
+export const GlobalTimeComponent: React.FunctionComponent<GlobalTimeProps> = ({
   children,
   deleteAllQuery,
   deleteOneQuery,
@@ -88,7 +88,7 @@ const mapStateToProps = (state: State) => {
   };
 };
 
-export const GlobalTime = connect(mapStateToProps, {
+export const GlobalTime = connect<{}, {}, GlobalTimeDispatch, State>(mapStateToProps, {
   deleteAllQuery: inputsActions.deleteAllQuery,
   deleteOneQuery: inputsActions.deleteOneQuery,
   setGlobalQuery: inputsActions.setQuery,
