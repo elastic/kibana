@@ -14,7 +14,7 @@ interface Props {
   intl: InjectedIntl;
 }
 
-const ConfirmAlterActiveSpaceModalUI: React.SFC<Props> = props => (
+const ConfirmAlterActiveSpaceModalUI: React.FC<Props> = props => (
   <EuiOverlayMask>
     <EuiConfirmModal
       onConfirm={props.onConfirm}
