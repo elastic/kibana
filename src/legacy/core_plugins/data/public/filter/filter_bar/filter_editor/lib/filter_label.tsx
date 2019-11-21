@@ -51,50 +51,43 @@ export function FilterLabel({ filter, valueLabel }: Props) {
   }
 
   switch (filter.meta.type) {
-    case 'exists':
+    case esFilters.FILTERS.EXISTS:
       return (
         <Fragment>
           {prefix}
           {filter.meta.key} {existsOperator.message}
         </Fragment>
       );
-    case 'geo_bounding_box':
+    case esFilters.FILTERS.GEO_BOUNDING_BOX:
       return (
         <Fragment>
           {prefix}
           {filter.meta.key}: {valueLabel}
         </Fragment>
       );
-    case 'geo_polygon':
+    case esFilters.FILTERS.GEO_POLYGON:
       return (
         <Fragment>
           {prefix}
           {filter.meta.key}: {valueLabel}
         </Fragment>
       );
-    case 'phrase':
-      return (
-        <Fragment>
-          {prefix}
-          {filter.meta.key}: {valueLabel}
-        </Fragment>
-      );
-    case 'phrases':
+    case esFilters.FILTERS.PHRASES:
       return (
         <Fragment>
           {prefix}
           {filter.meta.key} {isOneOfOperator.message} {valueLabel}
         </Fragment>
       );
-    case 'query_string':
+    case esFilters.FILTERS.QUERY_STRING:
       return (
         <Fragment>
           {prefix}
           {valueLabel}
         </Fragment>
       );
-    case 'range':
-    case 'phrase':
+    case esFilters.FILTERS.PHRASE:
+    case esFilters.FILTERS.RANGE:
       return (
         <Fragment>
           {prefix}
