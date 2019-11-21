@@ -93,6 +93,7 @@ src/plugins
   "ui": true
 }
 ```
+More details about[manifest file format](/docs/development/core/server/kibana-plugin-server.pluginmanifest.md)
 
 Note that `package.json` files are irrelevant to and ignored by the new platform.
 
@@ -1318,6 +1319,13 @@ export class Plugin implements Plugin<PluginSetup, PluginStart> {
     const config = this.initializerContext.config.get<ClientConfigType>();
     // ...
   }
+```
+
+If you want to disable your plugin by default, you could declare the `enabled` flag in plugin config. This is a special Kibana platform key. The platform reads its value and won't create a plugin instance if `enabled: false`. All plugins are considered enabled by default.
+```js
+export const config = {
+  schema: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
+};
 ```
 
 ### Mock new platform services in tests

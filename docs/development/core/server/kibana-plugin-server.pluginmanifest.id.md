@@ -4,7 +4,7 @@
 
 ## PluginManifest.id property
 
-Identifier of the plugin.
+Identifier of the plugin. Must be a string in snake\_case.
 
 <b>Signature:</b>
 

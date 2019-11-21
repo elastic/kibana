@@ -30,7 +30,7 @@ my_plugin/
     ├── index.ts
     └── plugin.ts
 ```
-
+- `my_plugin` should be the same as plugin `id` declared in `kibana.json` [manifest file](/docs/development/core/server/kibana-plugin-server.pluginmanifest.md)
 - Both `server` and `public` should have an `index.ts` and a `plugin.ts` file:
   - `index.ts` should only contain:
     - The `plugin` export
