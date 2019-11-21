@@ -622,7 +622,6 @@ module.exports = {
         // will introduced after the other warns are fixed
         // 'react/sort-comp': 'error',
         'react/void-dom-elements-no-children': 'error',
-        'react/jsx-boolean-value': ['error', 'warn'],
         // will introduced after the other warns are fixed
         // 'react/jsx-no-bind': 'error',
         'react/jsx-no-comment-textnodes': 'error',
