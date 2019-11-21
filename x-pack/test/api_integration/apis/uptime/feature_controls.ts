@@ -47,17 +47,6 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       .catch((error: any) => ({ error, response: undefined }));
   };
 
-  const executeIsValidRequest = async (username: string, password: string, spaceId?: string) => {
-    const basePath = spaceId ? `/s/${spaceId}` : '';
-
-    return await supertest
-      .get(`${basePath}/api/uptime/is_valid`)
-      .auth(username, password)
-      .set('kbn-xsrf', 'foo')
-      .then((response: any) => ({ error: undefined, response }))
-      .catch((error: any) => ({ error, response: undefined }));
-  };
-
   const executePingsRequest = async (username: string, password: string, spaceId?: string) => {
     const basePath = spaceId ? `/s/${spaceId}` : '';
 
@@ -97,9 +86,6 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         const graphQLResult = await executeGraphQLQuery(username, password);
         expect404(graphQLResult);
 
-        const isValidResult = await executeIsValidRequest(username, password);
-        expect404(isValidResult);
-
         const pingsResult = await executePingsRequest(username, password);
         expect404(pingsResult);
       } finally {
@@ -138,9 +124,6 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
         const graphQLResult = await executeGraphQLQuery(username, password);
         expectResponse(graphQLResult);
-
-        const isValidResult = await executeIsValidRequest(username, password);
-        expectResponse(isValidResult);
 
         const pingsResult = await executePingsRequest(username, password);
         expectResponse(pingsResult);
@@ -183,9 +166,6 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
         const graphQLResult = await executeGraphQLQuery(username, password);
         expect404(graphQLResult);
-
-        const isValidResult = await executeIsValidRequest(username, password);
-        expect404(isValidResult);
 
         const pingsResult = await executePingsRequest(username, password);
         expect404(pingsResult);
@@ -256,9 +236,6 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         const graphQLResult = await executeGraphQLQuery(username, password, space1Id);
         expectResponse(graphQLResult);
 
-        const isValidResult = await executeIsValidRequest(username, password, space1Id);
-        expectResponse(isValidResult);
-
         const pingsResult = await executePingsRequest(username, password, space1Id);
         expectResponse(pingsResult);
       });
@@ -266,9 +243,6 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       it(`user_1 can't access APIs in space_2`, async () => {
         const graphQLResult = await executeGraphQLQuery(username, password);
         expect404(graphQLResult);
-
-        const isValidResult = await executeIsValidRequest(username, password);
-        expect404(isValidResult);
 
         const pingsResult = await executePingsRequest(username, password);
         expect404(pingsResult);
