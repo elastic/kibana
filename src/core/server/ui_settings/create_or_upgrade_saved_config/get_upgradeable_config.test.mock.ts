@@ -17,13 +17,7 @@
  * under the License.
  */
 
-import { once } from 'lodash';
-
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-import { IndexPatterns } from '../index_patterns/index_patterns';
-
-/** @internal */
-export const initLegacyModule = once((indexPatterns: IndexPatterns): void => {
-  uiModules.get('kibana/index_patterns').value('indexPatterns', indexPatterns);
-});
+export const getUpgradeableConfigMock = jest.fn();
+jest.doMock('./get_upgradeable_config', () => ({
+  getUpgradeableConfig: getUpgradeableConfigMock,
+}));
