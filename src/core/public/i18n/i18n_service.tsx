@@ -491,7 +491,7 @@ export class I18nService {
         }),
       'euiStepHorizontal.buttonTitle': ({ step, title, disabled, isComplete }: EuiValues) => {
         return i18n.translate('core.euiStepHorizontal.buttonTitle', {
-          defaultMessage: 'Step {step}: {title}{titleAppendix}}',
+          defaultMessage: 'Step {step}: {title}{titleAppendix}',
           values: {
             step,
             title,
