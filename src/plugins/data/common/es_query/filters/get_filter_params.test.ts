@@ -17,29 +17,27 @@
  * under the License.
  */
 
-import {
-  CONTAINS_SPACES,
-  ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  validateIndexPattern,
-} from './utils';
+import { phraseFilter, phrasesFilter, rangeFilter, existsFilter } from './stubs';
+import { getFilterParams } from './get_filter_params';
 
-describe('Index Pattern Utils', () => {
-  describe('Validation', () => {
-    it('should not allow space in the pattern', () => {
-      const errors = validateIndexPattern('my pattern');
-      expect(errors[CONTAINS_SPACES]).toBe(true);
-    });
+describe('getFilterParams', () => {
+  it('should retrieve params from phrase filter', () => {
+    const params = getFilterParams(phraseFilter);
+    expect(params).toBe('ios');
+  });
 
-    it('should not allow illegal characters', () => {
-      INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.forEach(char => {
-        const errors = validateIndexPattern(`pattern${char}`);
-        expect(errors[ILLEGAL_CHARACTERS]).toEqual([char]);
-      });
-    });
+  it('should retrieve params from phrases filter', () => {
+    const params = getFilterParams(phrasesFilter);
+    expect(params).toEqual(['win xp', 'osx']);
+  });
 
-    it('should return empty object when there are no errors', () => {
-      expect(validateIndexPattern('my-pattern-*')).toEqual({});
-    });
+  it('should retrieve params from range filter', () => {
+    const params = getFilterParams(rangeFilter);
+    expect(params).toEqual({ from: 0, to: 10 });
+  });
+
+  it('should return undefined for exists filter', () => {
+    const params = getFilterParams(existsFilter);
+    expect(params).toBeUndefined();
   });
 });
