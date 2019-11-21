@@ -14,6 +14,7 @@ import { TextType } from './text_type';
 import { BooleanType } from './boolean_type';
 import { BinaryType } from './binary_type';
 import { RangeType } from './range_type';
+import { SearchAsYouType } from './search_as_you_type';
 
 const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   alias: AliasType,
@@ -23,6 +24,7 @@ const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   boolean: BooleanType,
   binary: BinaryType,
   range: RangeType,
+  search_as_you_type: SearchAsYouType,
 };
 
 export const getParametersFormForType = (
