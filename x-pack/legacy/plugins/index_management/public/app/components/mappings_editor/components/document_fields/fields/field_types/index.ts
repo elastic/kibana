@@ -15,6 +15,7 @@ import { BooleanType } from './boolean_type';
 import { BinaryType } from './binary_type';
 import { RangeType } from './range_type';
 import { SearchAsYouType } from './search_as_you_type';
+import { FlattenedType } from './flattened_type';
 
 const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   alias: AliasType,
@@ -25,6 +26,7 @@ const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   binary: BinaryType,
   range: RangeType,
   search_as_you_type: SearchAsYouType,
+  flattened: FlattenedType,
 };
 
 export const getParametersFormForType = (

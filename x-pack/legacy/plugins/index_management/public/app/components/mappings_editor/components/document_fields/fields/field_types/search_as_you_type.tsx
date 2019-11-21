@@ -26,26 +26,12 @@ interface Props {
 
 const getDefaultValueToggle = (param: string, field: FieldType) => {
   switch (param) {
-    case 'boost':
-    case 'position_increment_gap':
     case 'similarity':
     case 'term_vector': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
     case 'analyzers': {
       return field.search_analyzer !== undefined && field.search_analyzer !== field.analyzer;
-    }
-    case 'indexPrefixes': {
-      if (field.index_prefixes === undefined) {
-        return false;
-      }
-
-      const minCharsValue = (field.index_prefixes as any).min_chars;
-      const defaultMinCharsValue = getFieldConfig('index_prefixes', 'min_chars').defaultValue;
-      const maxCharsValue = (field.index_prefixes as any).max_chars;
-      const defaultMaxCharsValue = getFieldConfig('index_prefixes', 'min_chars').defaultValue;
-
-      return minCharsValue !== defaultMinCharsValue || maxCharsValue !== defaultMaxCharsValue;
     }
     default:
       return false;

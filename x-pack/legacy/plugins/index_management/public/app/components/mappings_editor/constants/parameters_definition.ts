@@ -444,4 +444,20 @@ export const PARAMETERS_DEFINITION = {
       ],
     },
   },
+  depth_limit: {
+    fieldConfig: {
+      defaultValue: 20,
+      type: FIELD_TYPES.NUMBER,
+      formatters: [toInt],
+      validations: [
+        {
+          validator: (({ value }: ValidationFuncArg<any, number>) => {
+            if ((value as number) < 0) {
+              return { message: commonErrorMessages.smallerThanZero };
+            }
+          }) as ValidationFunc,
+        },
+      ],
+    },
+  },
 };

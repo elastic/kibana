@@ -99,7 +99,8 @@ export type ParameterName =
   | 'ignore_above'
   | 'split_queries_on_whitespace'
   | 'scaling_factor'
-  | 'path';
+  | 'path'
+  | 'depth_limit';
 
 export interface Parameter {
   fieldConfig: FieldConfig;
