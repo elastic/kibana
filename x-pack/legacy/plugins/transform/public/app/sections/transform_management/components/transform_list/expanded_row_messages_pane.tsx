@@ -22,7 +22,7 @@ interface Props {
   transformId: string;
 }
 
-export const ExpandedRowMessagesPane: React.SFC<Props> = ({ transformId }) => {
+export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
