@@ -22,6 +22,7 @@ import { defer, throwError, iif, timer } from 'rxjs';
 import * as legacyElasticsearch from 'elasticsearch';
 
 import { CallAPIOptions } from '.';
+import { Logger } from '../logging';
 
 const esErrors = legacyElasticsearch.errors;
 
@@ -41,15 +42,21 @@ export function migrationsRetryCallCluster(
     endpoint: string,
     clientParams: Record<string, any>,
     options?: CallAPIOptions
-  ) => Promise<any>
+  ) => Promise<any>,
+  log: Logger
 ) {
+  const previousErrors: string[] = [];
   return (endpoint: string, clientParams: Record<string, any> = {}, options?: CallAPIOptions) => {
     return defer(() => apiCaller(endpoint, clientParams, options))
       .pipe(
-        retryWhen(errors =>
-          errors.pipe(
-            concatMap((error, i) =>
-              iif(
+        retryWhen(error$ =>
+          error$.pipe(
+            concatMap((error, i) => {
+              if (!previousErrors.includes(error.message)) {
+                log.warn(`Unable to connect to Elasticsearch. Error: ${error.message}`);
+                previousErrors.push(error.message);
+              }
+              return iif(
                 () => {
                   return (
                     error instanceof esErrors.NoConnections ||
@@ -59,10 +66,10 @@ export function migrationsRetryCallCluster(
                     error instanceof esErrors.AuthenticationException
                   );
                 },
-                timer(1000),
+                timer(2500),
                 throwError(error)
-              )
-            )
+              );
+            })
           )
         )
       )

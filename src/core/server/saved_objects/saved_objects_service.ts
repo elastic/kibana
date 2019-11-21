@@ -105,7 +105,10 @@ export class SavedObjectsService
       config: coreSetup.legacy.pluginExtendedConfig,
       savedObjectsConfig,
       kibanaConfig,
-      callCluster: migrationsRetryCallCluster(adminClient.callAsInternalUser),
+      callCluster: migrationsRetryCallCluster(
+        adminClient.callAsInternalUser,
+        this.coreContext.logger.get('migrations')
+      ),
     }));
 
     const mappings = this.migrator.getActiveMappings();
