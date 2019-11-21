@@ -109,10 +109,6 @@ export class EmbeddableFlyoutPortal extends React.Component<Props & WithKibanaPr
 }
 
 export const AddEmbeddablePanel = compose<Props & WithKibanaProps, { onClose: () => void }>(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withKibana
 )(EmbeddableFlyoutPortal);
