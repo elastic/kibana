@@ -6,57 +6,41 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 /* eslint-disable @typescript-eslint/camelcase */
 import { ElasticsearchMappingOf } from '../../utils/typed_elasticsearch_mappings';
-import { NewCaseWithDate } from '../../../../../../plugins/case/server/routes/api/types';
+import {
+  NewCaseFormatted,
+  NewCommentFormatted,
+} from '../../../../../../plugins/case/server/routes/api/types';
 
 // Temporary file to write mappings for case
 // while Saved Object Mappings API is programmed for the NP
 // See: https://github.com/elastic/kibana/issues/50309
 
 export const caseSavedObjectType = 'case-workflow';
+export const caseCommentSavedObjectType = 'case-workflow-comment';
 
 export const caseSavedObjectMappings: {
-  [caseSavedObjectType]: ElasticsearchMappingOf<NewCaseWithDate>;
+  [caseSavedObjectType]: ElasticsearchMappingOf<NewCaseFormatted>;
 } = {
   [caseSavedObjectType]: {
     properties: {
       assignees: {
         properties: {
-          id: {
+          username: {
             type: 'keyword',
           },
-          name: {
+          full_name: {
             type: 'keyword',
           },
         },
       },
       comments: {
-        properties: {
-          comment: {
-            type: 'keyword',
-          },
-          creation_date: {
-            type: 'date',
-          },
-          last_edit_date: {
-            type: 'date',
-          },
-          user: {
-            properties: {
-              id: {
-                type: 'keyword',
-              },
-              name: {
-                type: 'keyword',
-              },
-            },
-          },
-        },
+        type: 'keyword',
       },
       creation_date: {
         type: 'date',
       },
       description: {
-        type: 'keyword',
+        type: 'text',
       },
       last_edit_date: {
         type: 'date',
@@ -66,10 +50,10 @@ export const caseSavedObjectMappings: {
       },
       reporter: {
         properties: {
-          id: {
+          username: {
             type: 'keyword',
           },
-          name: {
+          full_name: {
             type: 'keyword',
           },
         },
@@ -82,6 +66,37 @@ export const caseSavedObjectMappings: {
       },
       case_type: {
         type: 'keyword',
+      },
+    },
+  },
+};
+
+export const caseCommentSavedObjectMappings: {
+  [caseCommentSavedObjectType]: ElasticsearchMappingOf<NewCommentFormatted>;
+} = {
+  [caseCommentSavedObjectType]: {
+    properties: {
+      case_workflow_id: {
+        type: 'keyword',
+      },
+      comment: {
+        type: 'text',
+      },
+      creation_date: {
+        type: 'long',
+      },
+      last_edit_date: {
+        type: 'long',
+      },
+      user: {
+        properties: {
+          full_name: {
+            type: 'keyword',
+          },
+          username: {
+            type: 'keyword',
+          },
+        },
       },
     },
   },

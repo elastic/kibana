@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { dateNewCase, wrapError } from './utils';
+import { formatNewCase, wrapError } from './utils';
 import { NewCaseSchema } from './schema';
 import { RouteDeps } from '.';
 
-export function initPostCaseApi({ caseIndex, log, router }: RouteDeps) {
+export function initPostCaseApi({ authentication, log, router }: RouteDeps) {
   router.post(
     {
       path: '/api/cases',
@@ -17,11 +17,20 @@ export function initPostCaseApi({ caseIndex, log, router }: RouteDeps) {
       },
     },
     async (context, request, response) => {
-      const datedCase = dateNewCase(request.body);
+      const user = await authentication!.getCurrentUser(request);
+      if (!user) {
+        log.debug(`Error on POST a new case: Bad User`);
+        return response.customError(
+          wrapError({ name: 'Bad User', message: 'The user is not authenticated' })
+        );
+      }
+      const { full_name, username } = user;
+      const formattedCase = formatNewCase(request.body, { full_name, username });
+
       try {
         log.debug(`Attempting to POST a new case`);
         const newCase = await context.core.savedObjects.client.create('case-workflow', {
-          ...datedCase,
+          ...formattedCase,
         });
         return response.ok({ body: newCase });
       } catch (error) {

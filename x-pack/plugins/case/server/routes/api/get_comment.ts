@@ -8,10 +8,10 @@ import { schema } from '@kbn/config-schema';
 import { RouteDeps } from '.';
 import { wrapError } from './utils';
 
-export function initGetCaseApi({ log, router }: RouteDeps) {
+export function initGetCommentApi({ log, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/{id}',
+      path: '/api/cases/comments/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -20,14 +20,14 @@ export function initGetCaseApi({ log, router }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        log.debug(`Attempting to GET case ${request.params.id}`);
-        const theCase = await context.core.savedObjects.client.get(
-          'case-workflow',
+        log.debug(`Attempting to GET comment ${request.params.id}`);
+        const theComment = await context.core.savedObjects.client.get(
+          'case-workflow-comment',
           request.params.id
         );
-        return response.ok({ body: theCase });
+        return response.ok({ body: theComment });
       } catch (error) {
-        log.debug(`Error on GET case  ${request.params.id}: ${error}`);
+        log.debug(`Error on GET comment  ${request.params.id}: ${error}`);
         return response.customError(wrapError(error));
       }
     }

@@ -7,7 +7,7 @@
 import { RouteDeps } from '.';
 import { wrapError } from './utils';
 
-export function initGetAllApi({ caseIndex, log, router }: RouteDeps) {
+export function initGetAllCasesApi({ log, router }: RouteDeps) {
   router.get(
     {
       path: '/api/cases',

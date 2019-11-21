@@ -1,8 +1,9 @@
 {
-  "id": "case",
-  "version": "8.0.0",
-  "kibanaVersion": "kibana",
   "configPath": ["xpack", "case"],
+  "id": "case",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": ["security"],
   "server": true,
-  "ui": false
+  "ui": false,
+  "version": "8.0.0"
 }

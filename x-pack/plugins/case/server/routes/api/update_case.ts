@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { dateUpdatedCase, wrapError } from './utils';
+import { formatUpdatedCase, wrapError } from './utils';
 import { RouteDeps } from '.';
 import { UpdatedCaseSchema } from './schema';
 
@@ -21,17 +21,17 @@ export function initUpdateCaseApi({ log, router, caseIndex }: RouteDeps) {
       },
     },
     async (context, request, response) => {
-      const datedUpdatedCase = dateUpdatedCase(request.body);
+      const formattedUpdatedCase = formatUpdatedCase(request.body);
       try {
         log.debug(`Attempting to POST to update case ${request.params.id}`);
-        const newCase = await context.core.savedObjects.client.update(
+        const updatedCase = await context.core.savedObjects.client.update(
           'case-workflow',
           request.params.id,
           {
-            ...datedUpdatedCase,
+            ...formattedUpdatedCase,
           }
         );
-        return response.ok({ body: newCase });
+        return response.ok({ body: updatedCase });
       } catch (error) {
         log.debug(`Error on POST to update case ${request.params.id}: ${error}`);
         return response.customError(wrapError(error));

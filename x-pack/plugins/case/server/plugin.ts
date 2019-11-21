@@ -5,12 +5,17 @@
  */
 
 import { first, map } from 'rxjs/operators';
-import { CoreSetup, Logger, PluginInitializerContext, PluginName } from 'kibana/server';
+import { CoreSetup, Logger, PluginInitializerContext } from 'kibana/server';
 import { ConfigType } from './config';
 import { initCaseApi } from './routes/api';
+import { PluginSetupContract as SecurityPluginSetup } from '../../security/server';
 
 function createConfig$(context: PluginInitializerContext) {
   return context.config.create<ConfigType>().pipe(map(config => config));
+}
+
+export interface PluginsSetup {
+  security: SecurityPluginSetup;
 }
 
 export class CasePlugin {
@@ -20,22 +25,24 @@ export class CasePlugin {
     this.log = this.initializerContext.logger.get();
   }
 
-  public async setup(core: CoreSetup, deps: Record<PluginName, unknown>) {
+  public async setup(core: CoreSetup, plugins: PluginsSetup) {
     const config = await createConfig$(this.initializerContext)
       .pipe(first())
       .toPromise();
 
-    this.log.debug(
-      `Setting up Case Workflow with core contract [${Object.keys(core)}] and deps [${Object.keys(
-        deps
-      )}]`
-    );
     if (!config.enabled) {
       return;
     }
 
+    this.log.debug(
+      `Setting up Case Workflow with core contract [${Object.keys(
+        core
+      )}] and plugins [${Object.keys(plugins)}]`
+    );
+
     const router = core.http.createRouter();
     initCaseApi({
+      authentication: plugins.security ? plugins.security.authc : null,
       caseIndex: config.indexPattern,
       log: this.log,
       router,

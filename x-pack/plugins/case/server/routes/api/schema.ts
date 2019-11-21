@@ -7,8 +7,12 @@
 import { schema } from '@kbn/config-schema';
 
 export const UserSchema = schema.object({
-  id: schema.string(),
-  name: schema.string(),
+  username: schema.string(),
+  full_name: schema.maybe(schema.string()),
+});
+
+export const NewCommentSchema = schema.object({
+  comment: schema.string(),
 });
 
 export const CommentSchema = schema.object({
@@ -16,14 +20,14 @@ export const CommentSchema = schema.object({
   creation_date: schema.number(),
   last_edit_date: schema.number(),
   user: UserSchema,
+  case_workflow_id: schema.string(),
 });
 
 export const NewCaseSchema = schema.object({
   assignees: schema.arrayOf(UserSchema, { defaultValue: [] }),
-  comments: schema.arrayOf(CommentSchema, { defaultValue: [] }),
+  comments: schema.arrayOf(schema.string(), { defaultValue: [] }),
   description: schema.string(),
   name: schema.string(),
-  reporter: UserSchema,
   state: schema.oneOf([schema.literal('open'), schema.literal('closed')], { defaultValue: 'open' }),
   tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
   case_type: schema.string(),
@@ -37,4 +41,9 @@ export const UpdatedCaseSchema = schema.object({
   state: schema.maybe(schema.oneOf([schema.literal('open'), schema.literal('closed')])),
   tags: schema.maybe(schema.arrayOf(schema.string())),
   case_type: schema.maybe(schema.string()),
+});
+
+export const UpdatedCommentSchema = schema.object({
+  comment: schema.string(),
+  last_edit_date: schema.number(),
 });

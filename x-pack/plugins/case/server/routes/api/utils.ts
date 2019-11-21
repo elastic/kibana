@@ -6,21 +6,54 @@
 
 import { boomify, isBoom } from 'boom';
 import { CustomHttpResponseOptions, ResponseError } from 'kibana/server';
-import { NewCaseWithDate, NewCaseType, UpdatedCaseWithDate, UpdatedCaseType } from './types';
+import {
+  NewCaseType,
+  NewCaseFormatted,
+  NewCommentType,
+  NewCommentFormatted,
+  UpdatedCaseType,
+  UpdatedCaseFormatted,
+  UserType,
+  UpdatedCommentType,
+} from './types';
 
-export const dateNewCase = (newCase: NewCaseType): NewCaseWithDate => ({
+export const formatNewCase = (
+  newCase: NewCaseType,
+  { full_name, username }: { full_name?: string; username: string }
+): NewCaseFormatted => ({
   creation_date: new Date().valueOf(),
   last_edit_date: new Date().valueOf(),
-  reporter: {
-    id: 'user-3333',
-    name: 'Gayle Gergich',
-  },
+  reporter: { full_name, username },
   ...newCase,
 });
 
-export const dateUpdatedCase = (updateCase: UpdatedCaseType): UpdatedCaseWithDate => ({
+interface NewCommentArgs {
+  newComment: NewCommentType;
+  full_name?: UserType['full_name'];
+  username: UserType['username'];
+  id: string;
+}
+export const formatNewComment = ({
+  newComment,
+  full_name,
+  username,
+  id,
+}: NewCommentArgs): NewCommentFormatted => ({
+  creation_date: new Date().valueOf(),
   last_edit_date: new Date().valueOf(),
+  user: { full_name, username },
+  case_workflow_id: id,
+  ...newComment,
+});
+
+export const formatUpdatedCase = (updateCase: UpdatedCaseType): UpdatedCaseFormatted => ({
   ...updateCase,
+  last_edit_date: new Date().valueOf(),
+});
+
+export const formatUpdatedComment = (updatedComment: NewCommentType): UpdatedCommentType => ({
+  ...updatedComment,
+  last_edit_date: new Date().valueOf(),
 });
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {

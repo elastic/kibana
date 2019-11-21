@@ -5,17 +5,33 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { NewCaseSchema, UpdatedCaseSchema } from './schema';
+import {
+  CommentSchema,
+  NewCaseSchema,
+  NewCommentSchema,
+  UpdatedCaseSchema,
+  UpdatedCommentSchema,
+  UserSchema,
+} from './schema';
 
 export type UpdatedCaseType = TypeOf<typeof UpdatedCaseSchema>;
 
-export interface UpdatedCaseWithDate extends UpdatedCaseType {
+export type UpdatedCommentType = TypeOf<typeof UpdatedCommentSchema>;
+
+export interface UpdatedCaseFormatted extends UpdatedCaseType {
   last_edit_date: number;
 }
 
 export type NewCaseType = TypeOf<typeof NewCaseSchema>;
 
-export interface NewCaseWithDate extends NewCaseType {
+export type UserType = TypeOf<typeof UserSchema>;
+
+export interface NewCaseFormatted extends NewCaseType {
   creation_date: number;
   last_edit_date: number;
+  reporter: UserType;
 }
+
+export type NewCommentType = TypeOf<typeof NewCommentSchema>;
+
+export type NewCommentFormatted = TypeOf<typeof CommentSchema>;
