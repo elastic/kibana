@@ -32,9 +32,10 @@ describe('HomeServerPlugin', () => {
 
   describe('setup', () => {
     const mockCoreSetup: MockedKeys<CoreSetup> = coreMock.createSetup();
+    const initContext = coreMock.createPluginInitializerContext();
 
     test('wires up and returns registerTutorial and addScopedTutorialContextFactory', () => {
-      const setup = new HomeServerPlugin().setup(mockCoreSetup);
+      const setup = new HomeServerPlugin(initContext).setup(mockCoreSetup);
       expect(setup).toHaveProperty('tutorials');
       expect(setup.tutorials).toHaveProperty('registerTutorial');
       expect(setup.tutorials).toHaveProperty('addScopedTutorialContextFactory');
@@ -42,8 +43,9 @@ describe('HomeServerPlugin', () => {
   });
 
   describe('start', () => {
+    const initContext = coreMock.createPluginInitializerContext();
     test('is defined', () => {
-      const start = new HomeServerPlugin().start();
+      const start = new HomeServerPlugin(initContext).start();
       expect(start).toBeDefined();
       expect(start).toHaveProperty('tutorials');
     });
