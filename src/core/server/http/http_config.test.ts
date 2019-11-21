@@ -332,7 +332,7 @@ describe('with compression', () => {
     const obj = {
       compression: {
         enabled: false,
-        referrerWhitelist: ['foo'],
+        referrerWhitelist: validHostnames,
       },
     };
     expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
