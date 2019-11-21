@@ -22,9 +22,9 @@ interface LogEntryColumnProps {
   shrinkWeight: number;
 }
 
-export const LogEntryColumn = euiStyled.div.attrs<LogEntryColumnProps>({
+export const LogEntryColumn = euiStyled.div.attrs(() => ({
   role: 'cell',
-})`
+}))<LogEntryColumnProps>`
   align-items: stretch;
   display: flex;
   flex-basis: ${props => props.baseWidth || '0%'};
