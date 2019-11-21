@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch } from 'redux';
+import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux';
 
 /**
  * See https://docs.microsoft.com/en-us/previous-versions/msp-n-p/jj591569(v%3dpandp.10)
  */
 // TODO: Type this library
-export function createSagaMiddleware(saga: () => Promise<void>) {
+export function createSagaMiddleware(saga: () => Promise<void>): Middleware & { run: () => void } {
   // Q. Are we following the Flux standard? https://github.com/redux-utilities/flux-standard-action
 
-  interface StoreAction {
+  interface StoreAction extends AnyAction {
     payload: unknown[];
     type: string;
   }
@@ -67,12 +67,12 @@ export function createSagaMiddleware(saga: () => Promise<void>) {
   }
 
   let runSaga: () => void;
-  function middleware({ getState, dispatch }: { getState: () => unknown; dispatch: Dispatch }) {
+  function middleware({ getState, dispatch }: MiddlewareAPI) {
     runSaga = saga.bind(null, {
       actionsAndState: iterator,
       dispatch,
     });
-    return (next: (a: unknown) => (a: StoreAction) => StoreAction) => (action: StoreAction) => {
+    return (next: Dispatch<StoreAction>) => (action: StoreAction) => {
       // Call the next dispatch method in the middleware chain.
 
       const returnValue = next(action);
