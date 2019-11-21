@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup, Plugin } from 'src/core/server';
+import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
 import {
   TutorialsRegistry,
   TutorialsRegistrySetup,
@@ -27,8 +27,9 @@ import {
 } from './services';
 
 export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServerPluginStart> {
+  constructor(private readonly initContext: PluginInitializerContext) {}
   private readonly tutorialsRegistry = new TutorialsRegistry();
-  private readonly sampleDataRegistry = new SampleDataRegistry();
+  private readonly sampleDataRegistry = new SampleDataRegistry(this.initContext);
 
   public setup(core: CoreSetup): HomeServerPluginSetup {
     return {

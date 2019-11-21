@@ -72,6 +72,8 @@ export interface SampleDatasetSchema {
   // Should provide a nice demo of Kibana's functionality with the sample data set
   savedObjects: SavedObject[] | any[];
   dataIndices: DataIndexSchema[];
+  status: unknown;
+  statusMsg: unknown;
 }
 
 export type SampleDatasetProvider = () => SampleDatasetSchema;

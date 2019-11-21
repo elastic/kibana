@@ -29,6 +29,7 @@ import {
   logsSpecProvider,
   ecommerceSpecProvider
 } from './data_sets';
+
 import {
   makeSampleDataUsageCollector
 } from './usage';
@@ -136,6 +137,9 @@ export function sampleDataMixin(kbnServer, server) {
       }
     }
   );
+  // server.newPlatform.setup.plugins.home.server.sampleData.registerSampleDataset(flightsSpecProvider);
+  // server.newPlatform.setup.plugins.home.server.sampleData.registerSampleDataset(logsSpecProvider);
+  // server.newPlatform.setup.plugins.home.server.sampleData.registerSampleDataset(ecommerceSpecProvider);
 
   server.registerSampleDataset(flightsSpecProvider);
   server.registerSampleDataset(logsSpecProvider);

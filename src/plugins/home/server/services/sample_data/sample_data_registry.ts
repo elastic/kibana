@@ -42,7 +42,7 @@
 
 */
 import Joi from 'joi';
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { SavedObject } from 'src/core/public';
 import {
   SampleDatasetProvider,
@@ -51,14 +51,17 @@ import {
   EmbeddableTypes,
 } from './lib/sample_dataset_registry_types';
 import { sampleDataSchema } from './lib/sample_dataset_schema';
-import { createIndexName } from './lib/create_index_name';
+
 import { flightsSpecProvider, logsSpecProvider, ecommerceSpecProvider } from './data_sets';
+import { createListRoute } from './routes';
 
 const flightsSampleDataset = flightsSpecProvider();
 const logsSampleDataset = logsSpecProvider();
 const ecommerceSampleDataset = ecommerceSpecProvider();
+
 export class SampleDataRegistry {
-  // Initialize the array with built-in Kibana sample Datasets
+  constructor(private readonly initContext: PluginInitializerContext) {}
+  // use initContext for the loggin in install route, e.g.: installRouteForGet(router, this.initContext.logger).
   private readonly sampleDatasets: SampleDatasetSchema[] = [
     flightsSampleDataset,
     logsSampleDataset,
@@ -66,39 +69,9 @@ export class SampleDataRegistry {
   ];
 
   public setup(core: CoreSetup) {
-    // createListRoute()
-
     const router = core.http.createRouter();
-    router.get({ path: '/api/sample_data', validate: false }, async (context, req, res) => {
-      const response = await context.core.elasticsearch.dataClient.callAsCurrentUser(
-        'indices.exists',
-        { index: 'kibana_sample_data_ecommerce' }
-      );
-      return res.ok({ body: `Index exists: ${response}` });
-    });
-    //     const sampleDatasets = this.sampleDatasets.map(dataset => {
-    //       return {
-    //         id: dataset.id,
-    //         name: dataset.name,
-    //         description: dataset.description,
-    //         previewImagePath: dataset.previewImagePath,
-    //         darkPreviewImagePath: dataset.darkPreviewImagePath,
-    //         overviewDashboard: dataset.overviewDashboard,
-    //         appLinks: dataset.appLinks,
-    //         defaultIndex: dataset.defaultIndex,
-    //         dataIndices: dataset.dataIndices.map(({ id }) => ({ id })),
-    //       };
-    //     });
-    //     const isInstalledPromises = this.sampleDatasets.map(async sampleDataset => {
-    //       for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
-    //         const dataIndexConfig = sampleDataset.dataIndices[i];
-    //         const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
-    //         try {
+    createListRoute(router, this.sampleDatasets);
 
-    //         }
-    //       }
-    //     })
-    // });
     return {
       registerSampleDataset: (specProvider: SampleDatasetProvider) => {
         const { error, value } = Joi.validate(specProvider(), sampleDataSchema);
