@@ -52,8 +52,11 @@ export const EvaluateStat: FC<Props> = ({ isLoading, isMSE, title }) => (
         titleSize="xxs"
       />
     </EuiFlexItem>
-    <EuiFlexItem grow={false} className="mlDataFrameAnalyticsRegression__evaluateStat">
-      <EuiIconTip content={isMSE ? meanSquaredErrorTooltipContent : rSquaredTooltipContent} />
+    <EuiFlexItem grow={false}>
+      <EuiIconTip
+        anchorClassName="mlDataFrameAnalyticsRegression__evaluateStat"
+        content={isMSE ? meanSquaredErrorTooltipContent : rSquaredTooltipContent}
+      />
     </EuiFlexItem>
   </EuiFlexGroup>
 );
