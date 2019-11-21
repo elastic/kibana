@@ -18,3 +18,4 @@
  */
 
 export * from './types';
+export { isFilterable } from './utils';
