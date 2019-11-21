@@ -25,6 +25,12 @@ import {
   TaskInstanceWithId,
 } from './task';
 
+import { asyncRetry } from './lib/async_retry';
+
+interface DecoratedError {
+  statusCode: number;
+}
+
 export interface StoreOpts {
   callCluster: ElasticJs;
   index: string;
@@ -149,6 +155,18 @@ export class TaskStore {
    * @param task - The task being rescheduled.
    */
   public async rescheduleTask(
+    taskInstanceScheduling: TaskReschedulingOpts
+  ): Promise<ConcreteTaskInstance> {
+    return asyncRetry<ConcreteTaskInstance, DecoratedError>(
+      () => this.getTaskAndReschedule(taskInstanceScheduling),
+      // if we experience a document version conflict, we'll give it another attempt
+      error => error.statusCode === 409,
+      // after two retries, let the error bubble up
+      2
+    )();
+  }
+
+  private async getTaskAndReschedule(
     taskInstanceScheduling: TaskReschedulingOpts
   ): Promise<ConcreteTaskInstance> {
     const taskInstance = await this.getTask(taskInstanceScheduling.id);
