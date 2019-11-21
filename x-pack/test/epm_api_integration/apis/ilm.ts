@@ -29,7 +29,6 @@ export default function({ getService }: FtrProviderContext) {
       const indexName = 'test-index-with-alias';
       const aliasName = 'alias-to-index';
       const es = getService('es');
-      const policy = getPolicy();
 
       // Delete index first if it exists as otherwise we get an error
       const indexExists = await es.indices.exists({ index: indexName });
