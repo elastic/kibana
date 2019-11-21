@@ -1,0 +1,11 @@
+<legalnotice>
+    <simpara>
+      Welcome to the official documentation for Kibana!
+    </simpara>
+      <simpara>With Kibana, you can do anything from tracking query loads to understanding the way requests flow through your apps. These common tasks can help you get started. </simpara>
+      <itemizedlist>
+        <listitem><simpara><ulink url="setup.html"><citetitle>Set up Kibana and get data in</citetitle></ulink></simpara></listitem>
+        <listitem><simpara><ulink url="visualize.html"><citetitle>Visualize and analyze</citetitle></ulink></simpara></listitem>
+        <listitem><simpara><ulink url="management.html"><citetitle>Manage the stack</citetitle></ulink></simpara></listitem>
+      </itemizedlist>
+</legalnotice>
