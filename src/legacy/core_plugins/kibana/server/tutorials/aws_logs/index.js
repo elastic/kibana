@@ -27,14 +27,14 @@ export function awsLogsSpecProvider(server, context) {
   return {
     id: 'awsLogs',
     name: i18n.translate('kbn.server.tutorials.awsLogs.nameTitle', {
-      defaultMessage: 'AWS logs',
+      defaultMessage: 'AWS S3 based logs',
     }),
     category: TUTORIAL_CATEGORY.LOGGING,
     shortDescription: i18n.translate('kbn.server.tutorials.awsLogs.shortDescription', {
-      defaultMessage: 'Collect AWS logs with Filebeat.',
+      defaultMessage: 'Collect AWS logs from S3 bucket with Filebeat.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.awsLogs.longDescription', {
-      defaultMessage: 'Collect AWS logs by sending logs to S3 bucket which configured with SQS notification. \
+      defaultMessage: 'Collect AWS logs by exporting them to an S3 bucket which is configured with SQS notification. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-aws.html',
