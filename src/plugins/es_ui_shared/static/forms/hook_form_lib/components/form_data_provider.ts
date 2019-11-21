@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 import { FormData } from '../types';
 import { useFormContext } from '../form_context';
@@ -27,7 +27,7 @@ interface Props {
   pathsToWatch?: string | string[];
 }
 
-export const FormDataProvider = ({ children, pathsToWatch }: Props) => {
+export const FormDataProvider = React.memo(({ children, pathsToWatch }: Props) => {
   const [formData, setFormData] = useState<FormData>({});
   const previousRawData = useRef<FormData>({});
   const form = useFormContext();
@@ -54,4 +54,4 @@ export const FormDataProvider = ({ children, pathsToWatch }: Props) => {
   }, [form, pathsToWatch]);
 
   return children(formData);
-};
+});
