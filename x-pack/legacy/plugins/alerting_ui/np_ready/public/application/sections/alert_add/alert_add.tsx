@@ -119,7 +119,6 @@ export const AlertAdd = ({ refreshList }: Props) => {
   } | null>(null);
   const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(true);
   const [connectors, setConnectors] = useState<Action[]>([]);
-  const [actionsConnectors, setActionsConnectors] = useState<string[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -279,8 +278,6 @@ export const AlertAdd = ({ refreshList }: Props) => {
     );
     if (actionTypeConnectors.length > 0) {
       alert.actions.push({ id: actionTypeConnectors[0].id, group: selectedTabId, params: {} });
-      actionsConnectors.push(actionTypeConnectors[0].actionTypeId);
-      setActionsConnectors(actionsConnectors);
     }
   }
 
@@ -318,7 +315,14 @@ export const AlertAdd = ({ refreshList }: Props) => {
   const alertTabs = tabs.map(function(tab, index): any {
     return (
       <EuiTab
-        onClick={() => setSelectedTabId(tab.id)}
+        onClick={() => {
+          setSelectedTabId(tab.id);
+          if (!alert.actions.find((action: AlertAction) => action.group === tab.id)) {
+            setIsAddActionPanelOpen(true);
+          } else {
+            setIsAddActionPanelOpen(false);
+          }
+        }}
         isSelected={tab.id === selectedTabId}
         disabled={tab.disabled}
         key={index}
@@ -382,18 +386,22 @@ export const AlertAdd = ({ refreshList }: Props) => {
     ];
   };
 
-  const alertDetails = (
+  const actionsListForGroup = (
     <Fragment>
       {alert.actions.map((actionItem: AlertAction, index: number) => {
+        const actionConnector = connectors.find(field => field.id === actionItem.id);
+        if (!actionConnector) {
+          return null;
+        }
         const optionsList = connectors
-          .filter(field => field.actionTypeId === actionsConnectors[index])
+          .filter(field => field.actionTypeId === actionConnector.actionTypeId)
           .map(({ description, id }) => ({
             label: description,
             value: description,
             id,
           }));
-        const actionTypeRegisterd = actionTypeRegistry.get(actionsConnectors[index]);
-        if (actionTypeRegisterd === null) return null;
+        const actionTypeRegisterd = actionTypeRegistry.get(actionConnector.actionTypeId);
+        if (actionTypeRegisterd === null || actionItem.group !== selectedTabId) return null;
         const ParamsFieldsComponent = actionTypeRegisterd.actionParamsFields;
         return (
           <EuiAccordion
@@ -412,7 +420,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
                   <EuiTitle size="s">
                     <h5 id="alertActionTypeEditTitle">
                       <FormattedMessage
-                        defaultMessage={`Action: ${actionsConnectors[index]}`}
+                        defaultMessage={`Action: ${actionConnector.description}`}
                         id="xpack.alertingUI.sections.alertAdd.selectAlertActionTypeEditTitle"
                       />
                     </h5>
@@ -449,8 +457,8 @@ export const AlertAdd = ({ refreshList }: Props) => {
                   defaultMessage="{connectorInstance} instance"
                   values={{
                     connectorInstance: actionTypesIndex
-                      ? actionTypesIndex[actionsConnectors[index]].name
-                      : actionsConnectors[index],
+                      ? actionTypesIndex[actionConnector.actionTypeId].name
+                      : actionConnector.actionTypeId,
                   }}
                 />
               }
@@ -497,25 +505,6 @@ export const AlertAdd = ({ refreshList }: Props) => {
       ) : null}
     </Fragment>
   );
-
-  const warningDetails = <Fragment>Warning</Fragment>;
-
-  const unacknowledgedDetails = <Fragment>Unacknowledged</Fragment>;
-
-  let selectedTabContent;
-  switch (selectedTabId) {
-    case ACTION_GROUPS.ALERT:
-      selectedTabContent = alertDetails;
-      break;
-    case ACTION_GROUPS.WARNING:
-      selectedTabContent = warningDetails;
-      break;
-    case ACTION_GROUPS.UNACKNOWLEDGED:
-      selectedTabContent = unacknowledgedDetails;
-      break;
-    default:
-      selectedTabContent = null;
-  }
 
   let alertTypeArea;
   if (alertType) {
@@ -743,7 +732,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
             <EuiSpacer size="m" />
             {alertTypeArea}
             <EuiSpacer size="xl" />
-            {selectedTabContent}
+            {actionsListForGroup}
             {isAddActionPanelOpen || alert.actions.length === 0 ? (
               <Fragment>
                 <EuiTitle size="s">

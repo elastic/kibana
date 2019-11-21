@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiFieldText, EuiTextArea } from '@elastic/eui';
+import { EuiFieldText, EuiTextArea, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../components/page_error';
 import {
@@ -105,6 +106,15 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps> = ({
 
   return (
     <Fragment>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiButtonIcon
+            onClick={() => window.alert('Button clicked')}
+            iconType="indexOpen"
+            aria-label="Add variable"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <ErrableFormRow
         id="slackMessage"
         errorKey="message"
