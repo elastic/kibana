@@ -9,7 +9,6 @@
 import { ReactWrapper } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
 import { Location } from 'history';
-import 'jest-styled-components';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import React from 'react';
@@ -94,6 +93,7 @@ export function expectTextsInDocument(output: any, texts: string[]) {
 }
 
 interface MockSetup {
+  dynamicIndexPattern: any;
   start: number;
   end: number;
   client: any;
@@ -155,7 +155,8 @@ export async function inspectSearchParams(
       'apm_oss.transactionIndices': 'myIndex',
       'apm_oss.metricsIndices': 'myIndex',
       'apm_oss.apmAgentConfigurationIndex': 'myIndex'
-    }
+    },
+    dynamicIndexPattern: null as any
   };
   try {
     await fn(mockSetup);

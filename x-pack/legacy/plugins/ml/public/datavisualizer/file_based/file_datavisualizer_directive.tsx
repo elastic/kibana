@@ -16,7 +16,6 @@ const module = uiModules.get('apps/ml', ['react']);
 import uiRoutes from 'ui/routes';
 import { IndexPatterns } from 'ui/index_patterns';
 import { KibanaConfigTypeFix } from '../../contexts/kibana';
-// @ts-ignore
 import { getFileDataVisualizerBreadcrumbs } from './breadcrumbs';
 import { InjectorService } from '../../../common/types/angular';
 import { checkBasicLicense } from '../../license/check_license';
@@ -24,8 +23,7 @@ import { checkFindFileStructurePrivilege } from '../../privilege/check_privilege
 import { getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { loadMlServerInfo } from '../../services/ml_server_info';
 import { loadIndexPatterns } from '../../util/index_utils';
-// @ts-ignore
-import { FileDataVisualizerPage } from './file_datavisualizer';
+import { FileDataVisualizerPage, FileDataVisualizerPageProps } from './file_datavisualizer';
 
 const template = `
   <div class="euiSpacer euiSpacer--s" />
@@ -44,11 +42,6 @@ uiRoutes.when('/filedatavisualizer/?', {
   },
 });
 
-interface Props {
-  indexPatterns: IndexPatterns;
-  kibanaConfig: KibanaConfigTypeFix;
-}
-
 module.directive('fileDatavisualizerPage', function($injector: InjectorService) {
   return {
     scope: {},
@@ -57,7 +50,7 @@ module.directive('fileDatavisualizerPage', function($injector: InjectorService) 
       const indexPatterns = $injector.get<IndexPatterns>('indexPatterns');
       const kibanaConfig = $injector.get<KibanaConfigTypeFix>('config');
 
-      const props: Props = {
+      const props: FileDataVisualizerPageProps = {
         indexPatterns,
         kibanaConfig,
       };
