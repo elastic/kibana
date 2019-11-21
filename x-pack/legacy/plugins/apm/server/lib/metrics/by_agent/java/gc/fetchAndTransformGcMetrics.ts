@@ -9,7 +9,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import { sum, round } from 'lodash';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { Setup } from '../../../../helpers/setup_request';
@@ -24,16 +23,7 @@ import {
   METRIC_JAVA_GC_TIME
 } from '../../../../../../common/elasticsearch_fieldnames';
 import { getBucketSize } from '../../../../helpers/get_bucket_size';
-
-const colors = [
-  theme.euiColorVis0,
-  theme.euiColorVis1,
-  theme.euiColorVis2,
-  theme.euiColorVis3,
-  theme.euiColorVis4,
-  theme.euiColorVis5,
-  theme.euiColorVis6
-];
+import { getVizColorForIndex } from '../../../../../../common/viz_colors';
 
 export async function fetchAndTransformGcMetrics({
   setup,
@@ -113,7 +103,7 @@ export async function fetchAndTransformGcMetrics({
 
   const response = await client.search(params);
 
-  const aggregations = idx(response, _ => _.aggregations);
+  const { aggregations } = response;
 
   if (!aggregations) {
     return {
@@ -127,11 +117,12 @@ export async function fetchAndTransformGcMetrics({
     const label = poolBucket.key as string;
     const timeseriesData = poolBucket.over_time;
 
-    const data = (idx(timeseriesData, _ => _.buckets) || []).map(bucket => {
+    const data = timeseriesData.buckets.map(bucket => {
       // derivative/value will be undefined for the first hit and if the `max` value is null
+      const bucketValue = bucket.value?.value;
       const y =
-        'value' in bucket && bucket.value.value !== null
-          ? round(bucket.value.value * (60 / bucketSize), 1)
+        bucketValue !== null && bucketValue !== undefined && bucket.value
+          ? round(bucketValue * (60 / bucketSize), 1)
           : null;
 
       return {
@@ -148,7 +139,7 @@ export async function fetchAndTransformGcMetrics({
       title: label,
       key: label,
       type: chartBase.type,
-      color: colors[i],
+      color: getVizColorForIndex(i, theme),
       overallValue,
       data
     };

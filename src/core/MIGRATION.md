@@ -9,6 +9,7 @@
       - [Challenges on the server](#challenges-on-the-server)
       - [Challenges in the browser](#challenges-in-the-browser)
     - [Plan of action](#plan-of-action)
+    - [Shared application plugins](#shared-application-plugins)
   - [Server-side plan of action](#server-side-plan-of-action)
     - [De-couple from hapi.js server and request objects](#de-couple-from-hapijs-server-and-request-objects)
     - [Introduce new plugin definition shim](#introduce-new-plugin-definition-shim)
@@ -313,6 +314,43 @@ The approach and level of effort varies significantly between server and browser
 First, decouple your plugin's business logic from the dependencies that are not exposed through the new platform, hapi.js and angular.js. Then introduce plugin definitions that more accurately reflect how plugins are defined in the new platform. Finally, replace the functionality you consume from core and other plugins with their new platform equivalents.
 
 Once those things are finished for any given plugin, it can officially be switched to the new plugin system.
+
+### Shared application plugins
+
+Some services have been already moved to the new platform.
+
+Below you can find their new locations:
+
+| Service | Old place                                    | New place in the NP                                             |
+| --------------- | ----------------------------------------- | --------------------------------------------------- |
+| *FieldFormats*         | ui/registry/field_formats      | plugins/data/public |
+
+The `FieldFormats` service has been moved to the `data` plugin in the New Platform. If your plugin has any imports from `ui/registry/field_formats`, you'll need to update your imports as follows:
+
+Use it in your New Platform plugin:
+
+```ts
+class MyPlugin {
+  setup (core, { data }) {
+    data.fieldFormats.register(myFieldFormat);
+    // ...
+  }
+  start (core, { data }) {
+    data.fieldFormats.getType(myFieldFormatId);
+    // ...
+  }
+}
+```
+
+Or, in your legacy platform plugin, consume it through the `ui/new_platform` module:
+
+```ts
+import { npSetup, npStart } from 'ui/new_platform';
+
+npSetup.plugins.data.fieldFormats.register(myFieldFormat);
+npStart.plugins.data.fieldFormats.getType(myFieldFormatId);
+// ...
+```
 
 ## Server-side plan of action
 
@@ -1130,7 +1168,7 @@ import { setup, start } from '../core_plugins/visualizations/public/legacy';
 | ------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `import 'ui/apply_filters'`                       | `import { ApplyFiltersPopover } from '../data/public'`       | `import '../data/public/legacy` should be called to load legacy directives                                                                                   |
 | `import 'ui/filter_bar'`                          | `import { FilterBar } from '../data/public'`                 | `import '../data/public/legacy` should be called to load legacy directives                                                                                   |
-| `import 'ui/query_bar'`                           | `import { QueryBarInput } from '../data/public'`   | Directives are deprecated.                                                                                                                                   |
+| `import 'ui/query_bar'`                           | `import { QueryBarInput } from '../data/public'`   | Directives are deprecated.                                                                                                                                             |
 | `import 'ui/search_bar'`                          | `import { SearchBar } from '../data/public'`                 | Directive is deprecated.                                                                                                                                     |
 | `import 'ui/kbn_top_nav'`                         | `import { TopNavMenu } from '../navigation/public'`          | Directive is still available in `ui/kbn_top_nav`.                                                                                                            |
 | `ui/saved_objects/components/saved_object_finder` | `import { SavedObjectFinder } from '../kibana_react/public'` |                                                                                                                                                              |
@@ -1139,9 +1177,10 @@ import { setup, start } from '../core_plugins/visualizations/public/legacy';
 | `ui/embeddable`                                   | `embeddables`                                                | still in progress                                                                                                                                            |
 | `ui/filter_manager`                               | `data.filter`                                                | --                                                                                                                                                           |
 | `ui/index_patterns`                               | `data.indexPatterns`                                         | still in progress                                                                                                                                            |
-| `ui/registry/feature_catalogue                    | `feature_catalogue.register`                                 | Must add `feature_catalogue` as a dependency in your kibana.json.                                                                                            |
+| `ui/registry/feature_catalogue`                   | `home.featureCatalogue.register`                             | Must add `home` as a dependency in your kibana.json.                                                                                            |
 | `ui/registry/vis_types`                           | `visualizations.types`                                       | --                                                                                                                                                           |
 | `ui/vis`                                          | `visualizations.types`                                       | --                                                                                                                                                           |
+| `ui/share`                                        | `share`                                                      | `showShareContextMenu` is now called `toggleShareContextMenu`, `ShareContextMenuExtensionsRegistryProvider` is now called `register`                         |
 | `ui/vis/vis_factory`                              | `visualizations.types`                                       | --                                                                                                                                                           |
 | `ui/vis/vis_filters`                              | `visualizations.filters`                                     | --                                                                                                                                                           |
 | `ui/utils/parse_es_interval`                      | `import { parseEsInterval } from '../data/public'`           | `parseEsInterval`, `ParsedInterval`, `InvalidEsCalendarIntervalError`, `InvalidEsIntervalFormatError` items were moved to the `Data Plugin` as a static code |
@@ -1181,7 +1220,7 @@ This table shows where these uiExports have moved to in the New Platform. In mos
 | `fieldFormatEditors`         |                                                                                                                           |                                                                                                                                       |
 | `fieldFormats`               |                                                                                                                           |                                                                                                                                       |
 | `hacks`                      | n/a                                                                                                                       | Just run the code in your plugin's `start` method.                                                                                    |
-| `home`                       | [`plugins.feature_catalogue.register`](./src/plugins/feature_catalogue)                                                   | Must add `feature_catalogue` as a dependency in your kibana.json.                                                                     |
+| `home`                       | [`plugins.home.featureCatalogue.register`](./src/plugins/home/public/feature_catalogue)                                                    | Must add `home` as a dependency in your kibana.json.                                                                     |
 | `indexManagement`            |                                                                                                                           | Should be an API on the indexManagement plugin.                                                                                       |
 | `injectDefaultVars`          | n/a                                                                                                                       | Plugins will only be able to "whitelist" config values for the frontend. See [#41990](https://github.com/elastic/kibana/issues/41990) |
 | `inspectorViews`             |                                                                                                                           | Should be an API on the data (?) plugin.                                                                                              |

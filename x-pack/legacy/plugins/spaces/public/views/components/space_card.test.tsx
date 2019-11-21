@@ -30,7 +30,7 @@ test('it is clickable', () => {
   const clickHandler = jest.fn();
 
   const wrapper = mount(<SpaceCard space={space} onClick={clickHandler} />);
-  wrapper.simulate('click');
+  wrapper.find('button').simulate('click');
 
   expect(clickHandler).toHaveBeenCalledTimes(1);
 });
