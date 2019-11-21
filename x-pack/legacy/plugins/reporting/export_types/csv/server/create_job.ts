@@ -6,9 +6,9 @@
 
 import { cryptoFactory } from '../../../server/lib/crypto';
 import { ConditionalHeaders, ServerFacade, RequestFacade } from '../../../types';
-import { ESQueueCreateJobFnDiscoverCsv, JobParamsDiscoverCsv } from '../types';
+import { JobParamsDiscoverCsv } from '../types';
 
-export function createJobFactory(server: ServerFacade): ESQueueCreateJobFnDiscoverCsv {
+export const createJobFactory = function createJobFn(server: ServerFacade) {
   const crypto = cryptoFactory(server);
 
   return async function createJob(
@@ -31,4 +31,4 @@ export function createJobFactory(server: ServerFacade): ESQueueCreateJobFnDiscov
       ...jobParams,
     };
   };
-}
+};

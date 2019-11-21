@@ -7,9 +7,9 @@
 import { ServerFacade, RequestFacade, ConditionalHeaders } from '../../../../types';
 import { validateUrls } from '../../../../common/validate_urls';
 import { cryptoFactory } from '../../../../server/lib/crypto';
-import { JobParamsPNG, ESQueueCreateJobFnPNG } from '../../types';
+import { JobParamsPNG } from '../../types';
 
-export function createJobFactory(server: ServerFacade): ESQueueCreateJobFnPNG {
+export const createJobFactory = function createJobFn(server: ServerFacade) {
   const crypto = cryptoFactory(server);
 
   return async function createJob(
@@ -32,4 +32,4 @@ export function createJobFactory(server: ServerFacade): ESQueueCreateJobFnPNG {
       forceNow: new Date().toISOString(),
     };
   };
-}
+};
