@@ -18,15 +18,15 @@ export default function({ getService }: FtrProviderContext) {
   const transform = getService('transform');
 
   describe('creation_saved_search', function() {
-    this.tags(['smoke']);
+    this.tags(['smoke', 'walterra']);
     before(async () => {
       await esArchiver.load('ml/farequote');
     });
 
-    after(async () => {
-      await esArchiver.unload('ml/farequote');
-      await transform.api.cleanTransformIndices();
-    });
+    // after(async () => {
+    //   await esArchiver.unload('ml/farequote');
+    //   await transform.api.cleanTransformIndices();
+    // });
 
     const testDataList = [
       {
@@ -236,6 +236,19 @@ export default function({ getService }: FtrProviderContext) {
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,
           });
+        });
+
+        it('expands the transform management table row and walks through available tabs', async () => {
+          await transform.table.assertTransformExpandedRow();
+        });
+
+        it('displays the transform preview in the expanded row', async () => {
+          await transform.table.waitForTransformsExpandedRowPreviewTabToLoad();
+          await transform.table.assertEuiInMemoryTableResults(
+            'transformPreviewTabContent',
+            testData.pivotPreviewColumn,
+            testData.pivotPreviewExpectedColumnValues
+          );
         });
       });
     }

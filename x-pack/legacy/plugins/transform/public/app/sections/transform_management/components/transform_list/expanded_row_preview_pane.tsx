@@ -45,12 +45,14 @@ function getDataFromTransform(
   transformConfig: TransformPivotConfig
 ): { previewRequest: PreviewRequestBody; groupByArr: string[] | [] } {
   const index = transformConfig.source.index;
+  const query = transformConfig.source.query;
   const pivot = transformConfig.pivot;
   const groupByArr = [];
 
   const previewRequest: PreviewRequestBody = {
     source: {
       index,
+      query,
     },
     pivot,
   };
@@ -191,17 +193,25 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
     setSortDirection(direction);
   };
 
+  const transformTableLoading = previewData.length === 0 && isLoading === true;
+  const dataTestSubj = `transformPreviewTabContent${!transformTableLoading ? ' loaded' : ''}`;
+
   return (
-    <TransformTable
-      allowNeutralSort={false}
-      loading={previewData.length === 0 && isLoading === true}
-      compressed
-      items={previewData}
-      columns={columns}
-      onTableChange={onTableChange}
-      pagination={pagination}
-      sorting={sorting}
-      error={errorMessage}
-    />
+    <div data-test-subj={dataTestSubj}>
+      <TransformTable
+        allowNeutralSort={false}
+        loading={transformTableLoading}
+        compressed
+        items={previewData}
+        columns={columns}
+        onTableChange={onTableChange}
+        pagination={pagination}
+        rowProps={item => ({
+          'data-test-subj': `transformPreviewTabContentRow row-${item.id}`,
+        })}
+        sorting={sorting}
+        error={errorMessage}
+      />
+    </div>
   );
 };
