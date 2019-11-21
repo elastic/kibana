@@ -1,5 +1,5 @@
 {
-  "rule_id": "saved-query-1",
+  "rule_id": "saved-query-3",
   "risk_score": 5,
   "description": "Detecting root and admin users",
   "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
@@ -10,5 +10,5 @@
   "type": "saved_query",
   "from": "now-6m",
   "to": "now",
-  "saved_id": "Test Query From SIEM"
+  "saved_id": "Test Query From SIEM Three"
 }
