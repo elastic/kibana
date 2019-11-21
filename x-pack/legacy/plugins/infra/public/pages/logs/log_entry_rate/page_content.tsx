@@ -25,6 +25,7 @@ export const LogEntryRatePageContent = () => {
     availableIndices,
     cleanupAndSetup,
     fetchJobStatus,
+    fetchModuleDefinition,
     lastSetupErrorMessages,
     setup,
     setupStatus,
@@ -32,6 +33,7 @@ export const LogEntryRatePageContent = () => {
   } = useLogEntryRateJobsContext();
 
   useEffect(() => {
+    fetchModuleDefinition();
     fetchJobStatus();
   }, []);
 

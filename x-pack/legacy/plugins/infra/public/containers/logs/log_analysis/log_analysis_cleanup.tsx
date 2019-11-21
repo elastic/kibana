@@ -4,35 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import createContainer from 'constate';
 import { useMemo } from 'react';
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { callDeleteJobs, callStopDatafeed, callGetJobDeletionTasks } from './api/ml_cleanup';
-import { getAllModuleJobIds } from '../../../../common/log_analysis';
 
-export const useLogAnalysisCleanup = ({
+import { getJobId } from '../../../../common/log_analysis';
+import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { callDeleteJobs, callGetJobDeletionTasks, callStopDatafeeds } from './api/ml_cleanup';
+
+export const useLogAnalysisCleanup = <JobType extends string>({
   sourceId,
   spaceId,
+  jobTypes,
 }: {
   sourceId: string;
   spaceId: string;
+  jobTypes: JobType[];
 }) => {
   const [cleanupMLResourcesRequest, cleanupMLResources] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
         try {
-          await callStopDatafeed(spaceId, sourceId);
+          await callStopDatafeeds(spaceId, sourceId, jobTypes);
         } catch (err) {
-          // Datefeed has been deleted / doesn't exist, proceed with deleting jobs anyway
-          if (err && err.res && err.res.status === 404) {
-            return await deleteJobs(spaceId, sourceId);
-          } else {
+          // Proceed only if datafeed has been deleted or didn't exist in the first place
+          if (err?.res?.status !== 404) {
             throw err;
           }
         }
 
-        return await deleteJobs(spaceId, sourceId);
+        return await deleteJobs(spaceId, sourceId, jobTypes);
       },
     },
     [spaceId, sourceId]
@@ -48,20 +48,26 @@ export const useLogAnalysisCleanup = ({
   };
 };
 
-export const LogAnalysisCleanup = createContainer(useLogAnalysisCleanup);
-
-const deleteJobs = async (spaceId: string, sourceId: string) => {
-  const deleteJobsResponse = await callDeleteJobs(spaceId, sourceId);
-  await waitUntilJobsAreDeleted(spaceId, sourceId);
+const deleteJobs = async <JobType extends string>(
+  spaceId: string,
+  sourceId: string,
+  jobTypes: JobType[]
+) => {
+  const deleteJobsResponse = await callDeleteJobs(spaceId, sourceId, jobTypes);
+  await waitUntilJobsAreDeleted(spaceId, sourceId, jobTypes);
   return deleteJobsResponse;
 };
 
-const waitUntilJobsAreDeleted = async (spaceId: string, sourceId: string) => {
+const waitUntilJobsAreDeleted = async <JobType extends string>(
+  spaceId: string,
+  sourceId: string,
+  jobTypes: JobType[]
+) => {
+  const moduleJobIds = jobTypes.map(jobType => getJobId(spaceId, sourceId, jobType));
   while (true) {
-    const response = await callGetJobDeletionTasks();
-    const jobIdsBeingDeleted = response.jobIds;
-    const moduleJobIds = getAllModuleJobIds(spaceId, sourceId);
+    const { jobIds: jobIdsBeingDeleted } = await callGetJobDeletionTasks();
     const needToWait = jobIdsBeingDeleted.some(jobId => moduleJobIds.includes(jobId));
+
     if (needToWait) {
       await timeout(1000);
     } else {

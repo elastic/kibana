@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useMemo, useCallback, useEffect } from 'react';
+import { useMemo, useCallback } from 'react';
 
 import { callGetMlModuleAPI } from './api/ml_get_module';
 import { bucketSpan, getJobId } from '../../../../common/log_analysis';
@@ -20,20 +20,20 @@ export const useLogAnalysisJobs = <JobType extends string>({
   moduleId,
   sourceId,
   spaceId,
-  jobParameters,
+  timestampField,
 }: {
   indexPattern: string;
   jobTypes: JobType[];
   moduleId: string;
   sourceId: string;
   spaceId: string;
-  jobParameters: { timestampField: string };
+  timestampField: string;
 }) => {
-  const { cleanupMLResources } = useLogAnalysisCleanup({ sourceId, spaceId });
+  const { cleanupMLResources } = useLogAnalysisCleanup({ sourceId, spaceId, jobTypes });
   const [statusState, dispatch] = useStatusState(jobTypes, {
     bucketSpan,
     indexPattern,
-    timestampField: jobParameters.timestampField,
+    timestampField,
   });
 
   const [fetchModuleDefinitionRequest, fetchModuleDefinition] = useTrackedPromise(
@@ -55,7 +55,7 @@ export const useLogAnalysisJobs = <JobType extends string>({
         dispatch({ type: 'failedFetchingModuleDefinition' });
       },
     },
-    []
+    [moduleId]
   );
 
   const [setupMlModuleRequest, setupMlModule] = useTrackedPromise(
@@ -81,12 +81,12 @@ export const useLogAnalysisJobs = <JobType extends string>({
                 bucket_span: `${bucketSpan}ms`,
               },
               data_description: {
-                time_field: jobParameters.timestampField,
+                time_field: timestampField,
               },
               custom_settings: {
                 logs_source_config: {
                   indexPattern,
-                  timestampField: jobParameters.timestampField,
+                  timestampField,
                   bucketSpan,
                 },
               },
@@ -102,7 +102,7 @@ export const useLogAnalysisJobs = <JobType extends string>({
         dispatch({ type: 'failedSetup' });
       },
     },
-    [spaceId, sourceId, jobParameters.timestampField, bucketSpan]
+    [moduleId, spaceId, sourceId, timestampField, bucketSpan]
   );
 
   const [fetchJobStatusRequest, fetchJobStatus] = useTrackedPromise(
@@ -110,7 +110,7 @@ export const useLogAnalysisJobs = <JobType extends string>({
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
         dispatch({ type: 'fetchingJobStatuses' });
-        return await callJobsSummaryAPI(spaceId, sourceId);
+        return await callJobsSummaryAPI(spaceId, sourceId, jobTypes);
       },
       onResolve: response => {
         dispatch({ type: 'fetchedJobStatuses', payload: response, spaceId, sourceId });
@@ -156,10 +156,6 @@ export const useLogAnalysisJobs = <JobType extends string>({
     dispatch({ type: 'requestedJobDefinitionUpdate' });
   }, []);
 
-  useEffect(() => {
-    fetchModuleDefinition();
-  }, [fetchModuleDefinition]);
-
   const jobIds = useMemo(() => {
     return jobTypes.reduce(
       (accumulatedJobIds, jobType) => ({
@@ -173,6 +169,7 @@ export const useLogAnalysisJobs = <JobType extends string>({
   return {
     availableIndices,
     fetchJobStatus,
+    fetchModuleDefinition,
     isLoadingSetupStatus,
     jobStatus: statusState.jobStatus,
     lastSetupErrorMessages: statusState.lastSetupErrorMessages,

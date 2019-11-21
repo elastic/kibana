@@ -6,11 +6,9 @@
 
 import * as rt from 'io-ts';
 
+import { jobSourceConfigurationRT } from '../../../../../common/log_analysis';
+
 export const jobCustomSettingsRT = rt.partial({
   job_revision: rt.number,
-  logs_source_config: rt.partial({
-    indexPattern: rt.string,
-    timestampField: rt.string,
-    bucketSpan: rt.number,
-  }),
+  logs_source_config: rt.partial(jobSourceConfigurationRT.props),
 });

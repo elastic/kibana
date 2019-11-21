@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as rt from 'io-ts';
+
 export const bucketSpan = 900000;
 
 export const getJobIdPrefix = (spaceId: string, sourceId: string) =>
@@ -15,6 +17,10 @@ export const getJobId = (spaceId: string, sourceId: string, jobType: string) =>
 export const getDatafeedId = (spaceId: string, sourceId: string, jobType: string) =>
   `datafeed-${getJobId(spaceId, sourceId, jobType)}`;
 
-export const getAllModuleJobIds = (spaceId: string, sourceId: string) => [
-  getJobId(spaceId, sourceId, 'log-entry-rate'),
-];
+export const jobSourceConfigurationRT = rt.type({
+  indexPattern: rt.string,
+  timestampField: rt.string,
+  bucketSpan: rt.number,
+});
+
+export type JobSourceConfiguration = rt.TypeOf<typeof jobSourceConfigurationRT>;

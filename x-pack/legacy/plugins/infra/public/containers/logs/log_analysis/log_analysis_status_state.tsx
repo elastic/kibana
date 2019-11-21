@@ -7,13 +7,12 @@
 import { useReducer } from 'react';
 
 import {
+  JobSourceConfiguration,
+  JobStatus,
+  SetupStatus,
   getDatafeedId,
   getJobId,
   isJobStatusWithResults,
-  JobStatus,
-  // JobType,
-  // jobTypeRT,
-  SetupStatus,
 } from '../../../../common/log_analysis';
 import { FetchJobStatusResponsePayload, JobSummary } from './api/ml_get_jobs_summary_api';
 import { GetMlModuleResponsePayload, JobDefinition } from './api/ml_get_module';
@@ -417,9 +416,3 @@ export const useStatusState = <JobType extends string>(
     createInitialState
   );
 };
-
-interface JobSourceConfiguration {
-  bucketSpan: number;
-  indexPattern: string;
-  timestampField: string;
-}
