@@ -10,7 +10,6 @@ import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector/vector_style';
 import { InnerJoin } from './joins/inner_join';
 import {
-  GEO_JSON_TYPE,
   FEATURE_ID_PROPERTY_NAME,
   SOURCE_DATA_ID_ORIGIN,
   FEATURE_VISIBLE_PROPERTY_NAME,
@@ -24,42 +23,11 @@ import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataRequestAbortError } from './util/data_request';
-
-const VISIBILITY_FILTER_CLAUSE = ['all',
-  [
-    '==',
-    ['get', FEATURE_VISIBLE_PROPERTY_NAME],
-    true
-  ]
-];
-
-const FILL_LAYER_MB_FILTER = [
-  ...VISIBILITY_FILTER_CLAUSE,
-  [
-    'any',
-    ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
-    ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON]
-  ]
-];
-
-const LINE_LAYER_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE,
-  [
-    'any',
-    ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
-    ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON],
-    ['==', ['geometry-type'], GEO_JSON_TYPE.LINE_STRING],
-    ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_LINE_STRING]
-  ]
-];
-
-const POINT_LAYER_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE,
-  [
-    'any',
-    ['==', ['geometry-type'], GEO_JSON_TYPE.POINT],
-    ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POINT]
-  ]
-];
-
+import {
+  getFillFilterExpression,
+  getLineFilterExpression,
+  getPointFilterExpression,
+} from './util/mb_filter_expressions';
 
 let idCounter = 0;
 
@@ -113,6 +81,10 @@ export class VectorLayer extends AbstractLayer {
     return this._joins.filter(join => {
       return join.hasCompleteConfig();
     });
+  }
+
+  _hasJoins() {
+    return this.getValidJoins().length > 0;
   }
 
   isDataLoaded() {
@@ -571,13 +543,15 @@ export class VectorLayer extends AbstractLayer {
     }
 
     const sourceResult = await this._syncSource(syncContext);
-    if (!sourceResult.featureCollection || !sourceResult.featureCollection.features.length) {
+    if (
+      !sourceResult.featureCollection ||
+      !sourceResult.featureCollection.features.length ||
+      !this._hasJoins()) {
       return;
     }
 
     const joinStates = await this._syncJoins(syncContext);
     await this._performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData);
-
   }
 
   _getSourceFeatureCollection() {
@@ -639,6 +613,7 @@ export class VectorLayer extends AbstractLayer {
     const sourceId = this.getId();
     const pointLayerId = this._getMbPointLayerId();
     const pointLayer = mbMap.getLayer(pointLayerId);
+    const hasJoins = this._hasJoins();
 
     if (!pointLayer) {
       mbMap.addLayer({
@@ -647,7 +622,11 @@ export class VectorLayer extends AbstractLayer {
         source: sourceId,
         paint: {}
       });
-      mbMap.setFilter(pointLayerId, POINT_LAYER_MB_FILTER);
+    }
+
+    const filterExpr = getPointFilterExpression(hasJoins);
+    if (filterExpr !== mbMap.getFilter(pointLayerId)) {
+      mbMap.setFilter(pointLayerId, filterExpr);
     }
 
     this._style.setMBPaintPropertiesForPoints({
@@ -661,6 +640,7 @@ export class VectorLayer extends AbstractLayer {
     const sourceId = this.getId();
     const symbolLayerId = this._getMbSymbolLayerId();
     const symbolLayer = mbMap.getLayer(symbolLayerId);
+    const hasJoins = this._hasJoins();
 
     if (!symbolLayer) {
       mbMap.addLayer({
@@ -668,7 +648,11 @@ export class VectorLayer extends AbstractLayer {
         type: 'symbol',
         source: sourceId,
       });
-      mbMap.setFilter(symbolLayerId, POINT_LAYER_MB_FILTER);
+    }
+
+    const filterExpr = getPointFilterExpression(hasJoins);
+    if (filterExpr !== mbMap.getFilter(symbolLayerId)) {
+      mbMap.setFilter(symbolLayerId, filterExpr);
     }
 
     this._style.setMBSymbolPropertiesForPoints({
@@ -682,6 +666,7 @@ export class VectorLayer extends AbstractLayer {
     const sourceId = this.getId();
     const fillLayerId = this._getMbPolygonLayerId();
     const lineLayerId = this._getMbLineLayerId();
+    const hasJoins = this._hasJoins();
     if (!mbMap.getLayer(fillLayerId)) {
       mbMap.addLayer({
         id: fillLayerId,
@@ -689,7 +674,6 @@ export class VectorLayer extends AbstractLayer {
         source: sourceId,
         paint: {}
       });
-      mbMap.setFilter(fillLayerId, FILL_LAYER_MB_FILTER);
     }
     if (!mbMap.getLayer(lineLayerId)) {
       mbMap.addLayer({
@@ -698,7 +682,6 @@ export class VectorLayer extends AbstractLayer {
         source: sourceId,
         paint: {}
       });
-      mbMap.setFilter(lineLayerId, LINE_LAYER_MB_FILTER);
     }
     this._style.setMBPaintProperties({
       alpha: this.getAlpha(),
@@ -708,9 +691,18 @@ export class VectorLayer extends AbstractLayer {
     });
 
     this.syncVisibilityWithMb(mbMap, fillLayerId);
+    mbMap.setLayerZoomRange(fillLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    const fillFilterExpr = getFillFilterExpression(hasJoins);
+    if (fillFilterExpr !== mbMap.getFilter(fillLayerId)) {
+      mbMap.setFilter(fillLayerId, fillFilterExpr);
+    }
+
     this.syncVisibilityWithMb(mbMap, lineLayerId);
     mbMap.setLayerZoomRange(lineLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-    mbMap.setLayerZoomRange(fillLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    const lineFilterExpr = getLineFilterExpression(hasJoins);
+    if (lineFilterExpr !== mbMap.getFilter(fillLayerId)) {
+      mbMap.setFilter(fillLayerId, lineFilterExpr);
+    }
   }
 
   _syncStylePropertiesWithMb(mbMap) {
