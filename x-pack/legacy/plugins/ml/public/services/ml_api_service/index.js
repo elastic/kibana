@@ -9,7 +9,7 @@
 import { pick } from 'lodash';
 import chrome from 'ui/chrome';
 
-import { http, httpCall } from '../../services/http_service';
+import { http, http$ } from '../../services/http_service';
 
 import { annotations } from './annotations';
 import { dataFrameAnalytics } from './data_frame_analytics';
@@ -445,7 +445,7 @@ export const ml = {
   },
 
   esSearchRx(obj) {
-    return httpCall(`${basePath}/es_search`, {
+    return http$(`${basePath}/es_search`, {
       method: 'POST',
       body: obj
     });

@@ -6,13 +6,13 @@
 
 import chrome from 'ui/chrome';
 
-import { http, httpCall } from '../../services/http_service';
+import { http, http$ } from '../../services/http_service';
 
 const basePath = chrome.addBasePath('/api/ml');
 
 export const annotations = {
   getAnnotations(obj: any) {
-    return httpCall(`${basePath}/annotations`, {
+    return http$(`${basePath}/annotations`, {
       method: 'POST',
       body: obj,
     });

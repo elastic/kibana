@@ -64,7 +64,7 @@ export function http(options: any) {
   });
 }
 
-export function httpCall<T>(url: string, options: RequestInit): Observable<T> {
+export function http$<T>(url: string, options: RequestInit): Observable<T> {
   const requestInit: RequestInit = {
     ...options,
     credentials: 'same-origin',

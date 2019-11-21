@@ -8,7 +8,7 @@
 
 import chrome from 'ui/chrome';
 
-import { http, httpCall } from '../../services/http_service';
+import { http, http$ } from '../../services/http_service';
 
 const basePath = chrome.addBasePath('/api/ml');
 
@@ -25,7 +25,7 @@ export const results = {
     maxRecords,
     maxExamples,
     influencersFilterQuery) {
-    return httpCall(`${basePath}/results/anomalies_table_data`, {
+    return http$(`${basePath}/results/anomalies_table_data`, {
       method: 'POST',
       body: {
         jobIds,
