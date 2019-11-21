@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import React, { useEffect, useRef } from 'react';
 import $ from 'jquery';
 
@@ -26,6 +27,9 @@ import {
   useEditorReadContext,
   useRequestReadContext,
 } from '../../../../contexts';
+
+// @ts-ignore
+import utils from '../../../../../../../public/quarantined/src/utils';
 
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
@@ -63,14 +67,19 @@ function EditorOutputUI() {
     if (data) {
       const mode = modeForContentType(data[0].response.contentType);
       editorInstanceRef.current.session.setMode(mode);
-      editorInstanceRef.current.update(data.map(d => d.response.value).join('\n'));
+      editorInstanceRef.current.update(
+        data
+          .map(d => d.response.value)
+          .map(readOnlySettings.tripleQuotes ? utils.expandLiteralStrings : a => a)
+          .join('\n')
+      );
     } else if (error) {
       editorInstanceRef.current.session.setMode(modeForContentType(error.contentType));
       editorInstanceRef.current.update(error.value);
     } else {
       editorInstanceRef.current.update('');
     }
-  }, [data, error]);
+  }, [readOnlySettings, data, error]);
 
   useEffect(() => {
     applyCurrentSettings(editorInstanceRef.current, readOnlySettings);

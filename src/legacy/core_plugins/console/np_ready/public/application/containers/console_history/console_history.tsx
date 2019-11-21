@@ -171,7 +171,6 @@ export function ConsoleHistory({ close }: Props) {
                     setViewingReq(req);
                     selectedReq.current = req;
                     setSelectedIndex(idx);
-                    scrollIntoView(idx);
                   }}
                   role="option"
                   onMouseEnter={() => setViewingReq(req)}
