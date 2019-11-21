@@ -115,7 +115,7 @@ export const getResult = (): SignalAlertType => ({
   name: 'Detect Root/Admin Users',
   tags: [],
   alertTypeId: 'siem.signals',
-  alertTypeParams: {
+  params: {
     description: 'Detecting root and admin users',
     ruleId: 'rule-1',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],

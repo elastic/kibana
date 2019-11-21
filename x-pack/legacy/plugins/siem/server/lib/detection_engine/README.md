@@ -108,7 +108,7 @@ You should see the new alert instance created like so:
     "alertTypeId": "siem.signals",
     "interval": "5m",
     "actions": [ ],
-    "alertTypeParams": {},
+    "params": {},
     "enabled": true,
     "throttle": null,
     "createdBy": "elastic",

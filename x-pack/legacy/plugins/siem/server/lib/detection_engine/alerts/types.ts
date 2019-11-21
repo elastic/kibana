@@ -128,7 +128,7 @@ export type AlertTypeParams = Omit<SignalAlertParams, 'name' | 'enabled' | 'inte
 
 export type SignalAlertType = Alert & {
   id: string;
-  alertTypeParams: AlertTypeParams;
+  params: AlertTypeParams;
 };
 
 export interface SignalsRequest extends RequestFacade {

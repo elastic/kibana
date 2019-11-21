@@ -75,11 +75,11 @@ export const updateSignal = async ({
   // where it is trying to return AlertAction[] or RawAlertAction[]
   const actions = (signal.actions as AlertAction[] | undefined) || [];
 
-  const alertTypeParams = signal.alertTypeParams || {};
+  const params = signal.params || {};
 
-  const nextAlertTypeParams = defaults(
+  const nextParams = defaults(
     {
-      ...alertTypeParams,
+      ...params,
     },
     {
       description,
@@ -114,7 +114,7 @@ export const updateSignal = async ({
       name: calculateName({ updatedName: name, originalName: signal.name }),
       interval: calculateInterval(interval, signal.interval),
       actions,
-      alertTypeParams: nextAlertTypeParams,
+      params: nextParams,
     },
   });
 };

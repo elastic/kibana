@@ -94,12 +94,12 @@ export class TaskRunnerFactory {
         const services = getServices(fakeRequest);
         // Ensure API key is still valid and user has access
         const {
-          attributes: { alertTypeParams, actions, interval, throttle, muteAll, mutedInstanceIds },
+          attributes: { params, actions, interval, throttle, muteAll, mutedInstanceIds },
           references,
         } = await services.savedObjectsClient.get<RawAlert>('alert', alertId);
 
         // Validate
-        const validatedAlertTypeParams = validateAlertTypeParams(alertType, alertTypeParams);
+        const validatedAlertTypeParams = validateAlertTypeParams(alertType, params);
 
         // Inject ids into actions
         const actionsWithIds = actions.map(action => {
