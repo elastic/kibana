@@ -16,6 +16,7 @@ exports[`LocationLink component renders a help link when location not present 1`
 
 exports[`LocationLink component renders the location when present 1`] = `
 <EuiText
+  grow={false}
   size="s"
 >
   us-east-1
