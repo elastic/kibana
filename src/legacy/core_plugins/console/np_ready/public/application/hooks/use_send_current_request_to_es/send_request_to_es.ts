@@ -86,17 +86,6 @@ export function sendRequestToES({ requests }: EsRequestArgs): Promise<ESRequestR
 
           if (isSuccess) {
             let value = xhr.responseText;
-            // const mode = modeForContentType(xhr.getAllResponseHeaders('Content-Type') || '');
-
-            // Apply triple quotes to output.
-            // if (isUsingTripleQuotes && mode === null) {
-            //   // assume json - auto pretty
-            //   try {
-            //     value = utils.expandLiteralStrings(value);
-            //   } catch (e) {
-            //     // nothing to do here
-            //   }
-            // }
 
             const warnings = xhr.getResponseHeader('warning');
             if (warnings) {
