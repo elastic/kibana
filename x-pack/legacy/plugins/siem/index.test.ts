@@ -52,6 +52,14 @@ describe('siem plugin tests', () => {
       ]);
     });
 
+    test('alertingFeatureEnabled being true and an empty string for siemIndex returns regular kibana and elasticsearch plugins', () => {
+      expect(getRequiredPlugins(undefined, '')).toEqual(['kibana', 'elasticsearch']);
+    });
+
+    test('alertingFeatureEnabled being true and a string of spaces for siemIndex returns regular kibana and elasticsearch plugins', () => {
+      expect(getRequiredPlugins(undefined, '   ')).toEqual(['kibana', 'elasticsearch']);
+    });
+
     test('alertingFeatureEnabled being null and a string for siemIndex returns alerting and actions', () => {
       expect(getRequiredPlugins(null, '.siem-signals-frank')).toEqual([
         'kibana',

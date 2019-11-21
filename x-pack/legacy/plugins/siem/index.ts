@@ -42,7 +42,7 @@ export const getRequiredPlugins = (
 ) => {
   const baseRequire = ['kibana', 'elasticsearch'];
   if (
-    signalsIndex != null ||
+    (signalsIndex != null && signalsIndex.trim() !== '') ||
     (alertingFeatureEnabled && alertingFeatureEnabled.toLowerCase() === 'true')
   ) {
     return [...baseRequire, 'alerting', 'actions'];
