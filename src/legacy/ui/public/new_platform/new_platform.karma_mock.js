@@ -18,6 +18,7 @@
  */
 
 import sinon from 'sinon';
+import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_field_formats';
 
 const mockObservable = () => {
   return {
@@ -25,9 +26,24 @@ const mockObservable = () => {
   };
 };
 
+export const mockUiSettings = {
+  get: (item) => {
+    return mockUiSettings[item];
+  },
+  getUpdate$: () => ({
+    subscribe: sinon.fake(),
+  }),
+  'query:allowLeadingWildcards': true,
+  'query:queryString:options': {},
+  'courier:ignoreFilterIfFieldNotInIndex': true,
+  'dateFormat:tz': 'Browser',
+  'format:defaultTypeMap': {},
+};
+
 export const npSetup = {
   core: {
-    chrome: {}
+    chrome: {},
+    uiSettings: mockUiSettings,
   },
   plugins: {
     embeddable: {
@@ -61,6 +77,7 @@ export const npSetup = {
           history: sinon.fake(),
         }
       },
+      fieldFormats: getFieldFormatsRegistry(mockUiSettings),
     },
     share: {
       register: () => {},
@@ -80,6 +97,9 @@ export const npSetup = {
       attachAction: sinon.fake(),
       registerAction: sinon.fake(),
       registerTrigger: sinon.fake(),
+    },
+    feature_catalogue: {
+      register: sinon.fake(),
     },
   },
 };
@@ -164,6 +184,7 @@ export const npStart = {
           history: sinon.fake(),
         },
       },
+      fieldFormats: getFieldFormatsRegistry(mockUiSettings),
     },
     share: {
       toggleShareContextMenu: () => {},
@@ -184,6 +205,9 @@ export const npStart = {
       getTrigger: sinon.fake(),
       getTriggerActions: sinon.fake(),
       getTriggerCompatibleActions: sinon.fake(),
+    },
+    feature_catalogue: {
+      register: sinon.fake(),
     },
   },
 };

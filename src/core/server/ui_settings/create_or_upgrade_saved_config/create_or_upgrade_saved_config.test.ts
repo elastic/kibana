@@ -17,19 +17,18 @@
  * under the License.
  */
 
-import sinon from 'sinon';
 import Chance from 'chance';
 
 import { SavedObjectsErrorHelpers } from '../../saved_objects';
-
+import { savedObjectsClientMock } from '../../saved_objects/service/saved_objects_client.mock';
 import { loggingServiceMock } from '../../logging/logging_service.mock';
-import * as getUpgradeableConfigNS from './get_upgradeable_config';
+import { getUpgradeableConfigMock } from './get_upgradeable_config.test.mock';
+
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 
 const chance = new Chance();
 describe('uiSettings/createOrUpgradeSavedConfig', function() {
-  const sandbox = sinon.createSandbox();
-  afterEach(() => sandbox.restore());
+  afterEach(() => jest.resetAllMocks());
 
   const version = '4.0.1';
   const prevVersion = '4.0.0';
@@ -37,14 +36,16 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
 
   function setup() {
     const logger = loggingServiceMock.create();
-    const getUpgradeableConfig = sandbox.stub(getUpgradeableConfigNS, 'getUpgradeableConfig');
-    const savedObjectsClient = {
-      create: sinon.stub().callsFake(async (type, attributes, options = {}) => ({
-        type,
-        id: options.id,
-        version: 'foo',
-      })),
-    } as any; // mute until we have savedObjects mocks
+    const getUpgradeableConfig = getUpgradeableConfigMock;
+    const savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsClient.create.mockImplementation(
+      async (type, attributes, options = {}) =>
+        ({
+          type,
+          id: options.id,
+          version: 'foo',
+        } as any)
+    );
 
     async function run(options = {}) {
       const resp = await createOrUpgradeSavedConfig({
@@ -56,8 +57,8 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
         ...options,
       });
 
-      sinon.assert.calledOnce(getUpgradeableConfig);
-      sinon.assert.alwaysCalledWith(getUpgradeableConfig, { savedObjectsClient, version });
+      expect(getUpgradeableConfigMock).toHaveBeenCalledTimes(1);
+      expect(getUpgradeableConfig).toHaveBeenCalledWith({ savedObjectsClient, version });
 
       return resp;
     }
@@ -78,9 +79,8 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
 
       await run();
 
-      sinon.assert.calledOnce(savedObjectsClient.create);
-      sinon.assert.calledWithExactly(
-        savedObjectsClient.create,
+      expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.create).toHaveBeenCalledWith(
         'config',
         {
           buildNum,
@@ -103,7 +103,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
         [chance.word()]: chance.sentence(),
       };
 
-      getUpgradeableConfig.resolves({
+      getUpgradeableConfig.mockResolvedValue({
         id: prevVersion,
         attributes: savedAttributes,
         type: '',
@@ -112,10 +112,9 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
 
       await run();
 
-      sinon.assert.calledOnce(getUpgradeableConfig);
-      sinon.assert.calledOnce(savedObjectsClient.create);
-      sinon.assert.calledWithExactly(
-        savedObjectsClient.create,
+      expect(getUpgradeableConfig).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.create).toHaveBeenCalledWith(
         'config',
         {
           ...savedAttributes,
@@ -130,7 +129,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
     it('should log a message for upgrades', async () => {
       const { getUpgradeableConfig, logger, run } = setup();
 
-      getUpgradeableConfig.resolves({
+      getUpgradeableConfig.mockResolvedValue({
         id: prevVersion,
         attributes: { buildNum: buildNum - 100 },
         type: '',
@@ -154,16 +153,14 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
     it('does not log when upgrade fails', async () => {
       const { getUpgradeableConfig, logger, run, savedObjectsClient } = setup();
 
-      getUpgradeableConfig.resolves({
+      getUpgradeableConfig.mockResolvedValue({
         id: prevVersion,
         attributes: { buildNum: buildNum - 100 },
         type: '',
         references: [],
       });
 
-      savedObjectsClient.create.callsFake(async () => {
-        throw new Error('foo');
-      });
+      savedObjectsClient.create.mockRejectedValue(new Error('foo'));
 
       try {
         await run();
@@ -181,9 +178,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
       it('throws write errors', async () => {
         const { run, savedObjectsClient } = setup();
         const error = new Error('foo');
-        savedObjectsClient.create.callsFake(async () => {
-          throw error;
-        });
+        savedObjectsClient.create.mockRejectedValue(error);
 
         await expect(run({ handleWriteErrors: false })).rejects.toThrowError(error);
       });
@@ -192,7 +187,9 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
       it('returns undefined for ConflictError', async () => {
         const { run, savedObjectsClient } = setup();
         const error = new Error('foo');
-        savedObjectsClient.create.throws(SavedObjectsErrorHelpers.decorateConflictError(error));
+        savedObjectsClient.create.mockRejectedValue(
+          SavedObjectsErrorHelpers.decorateConflictError(error)
+        );
 
         expect(await run({ handleWriteErrors: true })).toBe(undefined);
       });
@@ -200,7 +197,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
       it('returns config attributes for NotAuthorizedError', async () => {
         const { run, savedObjectsClient } = setup();
         const error = new Error('foo');
-        savedObjectsClient.create.throws(
+        savedObjectsClient.create.mockRejectedValue(
           SavedObjectsErrorHelpers.decorateNotAuthorizedError(error)
         );
 
@@ -212,7 +209,9 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
       it('returns config attributes for ForbiddenError', async () => {
         const { run, savedObjectsClient } = setup();
         const error = new Error('foo');
-        savedObjectsClient.create.throws(SavedObjectsErrorHelpers.decorateForbiddenError(error));
+        savedObjectsClient.create.mockRejectedValue(
+          SavedObjectsErrorHelpers.decorateForbiddenError(error)
+        );
 
         expect(await run({ handleWriteErrors: true })).toEqual({
           buildNum,
@@ -222,7 +221,9 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
       it('throws error for other SavedObjects exceptions', async () => {
         const { run, savedObjectsClient } = setup();
         const error = new Error('foo');
-        savedObjectsClient.create.throws(SavedObjectsErrorHelpers.decorateGeneralError(error));
+        savedObjectsClient.create.mockRejectedValue(
+          SavedObjectsErrorHelpers.decorateGeneralError(error)
+        );
 
         await expect(run({ handleWriteErrors: true })).rejects.toThrowError(error);
       });
@@ -230,7 +231,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
       it('throws error for all other exceptions', async () => {
         const { run, savedObjectsClient } = setup();
         const error = new Error('foo');
-        savedObjectsClient.create.throws(error);
+        savedObjectsClient.create.mockRejectedValue(error);
 
         await expect(run({ handleWriteErrors: true })).rejects.toThrowError(error);
       });
