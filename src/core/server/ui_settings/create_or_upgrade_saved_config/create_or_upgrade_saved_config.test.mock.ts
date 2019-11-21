@@ -17,10 +17,7 @@
  * under the License.
  */
 
-import sinon from 'sinon';
-
-export function assertSinonMatch(value: any, match: any) {
-  const stub = sinon.stub();
-  stub(value);
-  sinon.assert.calledWithExactly(stub, match);
-}
+export const createOrUpgradeSavedConfigMock = jest.fn();
+jest.doMock('./create_or_upgrade_saved_config', () => ({
+  createOrUpgradeSavedConfig: createOrUpgradeSavedConfigMock,
+}));
