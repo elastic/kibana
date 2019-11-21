@@ -18,7 +18,3 @@
  */
 
 export * from './types_service';
-// @ts-ignore
-export { BaseVisType } from './base_vis_type';
-// @ts-ignore
-export { ReactVisType } from './react_vis_type';

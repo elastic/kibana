@@ -24,10 +24,11 @@ import { SerializedFieldFormat } from 'src/plugins/expressions/public';
 import {
   AggConfig,
   setBounds,
-  SearchSourceContract,
   isDateHistogramBucketAggConfig,
   createFormat,
 } from '../../../legacy_imports';
+// eslint-disable-next-line
+import { SearchSourceContract } from '../../../../../../ui/public/courier/search_source/search_source';
 import { Vis, VisParams, VisState } from '..';
 
 interface SchemaConfigParams {

@@ -19,10 +19,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { getUISettings } from '../services';
-import { I18nContext } from '../../../legacy_imports';
+import { getUISettings, getI18n } from '../services';
 import { BaseVisType } from './base_vis_type';
-
 
 class ReactVisController {
   constructor(element, vis) {
@@ -32,6 +30,8 @@ class ReactVisController {
 
   render(visData, visParams, updateStatus) {
     this.visData = visData;
+
+    const I18nContext = getI18n().Context;
 
     return new Promise((resolve) => {
       const Component = this.vis.type.visConfig.component;

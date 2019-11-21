@@ -29,7 +29,7 @@
 
 import { EventEmitter } from 'events';
 import _ from 'lodash';
-import { AggConfigs, PersistedState, SearchSource } from '../../legacy_imports';
+import { AggConfigs, PersistedState } from '../../legacy_imports';
 import { updateVisualizationConfig } from './legacy/vis_update';
 import { getTypes } from './services';
 
@@ -54,7 +54,6 @@ class Vis extends EventEmitter {
     this.sessionState = {};
 
     this.API = {
-      SearchSource: SearchSource,
       events: {
         filter: data => this.eventsSubject.next({ name: 'filterBucket', data }),
         brush: data => this.eventsSubject.next({ name: 'brush', data }),

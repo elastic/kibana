@@ -18,7 +18,7 @@
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { TypesService, TypesSetup, TypesStart } from './types';
-import { setUISettings, setTypes } from './services';
+import { setUISettings, setTypes, setI18n } from './services';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -55,6 +55,7 @@ export class VisualizationsPlugin implements Plugin<VisualizationsSetup, Visuali
   }
 
   public start(core: CoreStart) {
+    setI18n(core.i18n);
     const types = this.types.start();
     setTypes(types);
     return {

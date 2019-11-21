@@ -17,13 +17,15 @@
  * under the License.
  */
 
-import { BaseVisType, ReactVisType } from './types';
+import { I18nStart, SavedObjectsStart, UiSettingsClientContract } from 'src/core/public';
+import { createGetterSetter } from '../../../../plugins/kibana_utils/public';
 
-export const visFactory = {
-  createBaseVisualization: (config: any) => {
-    return new BaseVisType(config);
-  },
-  createReactVisualization: (config: any) => {
-    return new ReactVisType(config);
-  },
-};
+export const [getUISettings, setUISettings] = createGetterSetter<UiSettingsClientContract>(
+  'UISettings'
+);
+
+export const [getSavedObjectsClient, setSavedObjectsClient] = createGetterSetter<SavedObjectsStart>(
+  'SavedObjectsClient'
+);
+
+export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');

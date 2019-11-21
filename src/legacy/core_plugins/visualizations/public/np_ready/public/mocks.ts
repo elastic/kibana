@@ -29,14 +29,10 @@ import { VisualizationsSetup, VisualizationsStart } from './';
 import { VisualizationsPlugin } from './plugin';
 import { coreMock } from '../../../../../../core/public/mocks';
 
-/* eslint-disable */
-// @ts-ignore
-import { VisFiltersProvider, createFilter } from 'ui/vis/vis_filters';
-/* eslint-enable */
-
 const createSetupContract = (): VisualizationsSetup => ({
   types: {
-    registerVisualization: jest.fn(),
+    createBaseVisualization: jest.fn(),
+    createReactVisualization: jest.fn(),
     registerAlias: jest.fn(),
     hideTypes: jest.fn(),
   },

@@ -43,7 +43,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 /** @public static code */
-export { visFactory } from './vis_factory';
 export { Vis, VisParams, VisState } from './vis';
 export * from './filters';
 

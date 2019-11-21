@@ -21,8 +21,6 @@ import { PluginInitializerContext } from 'src/core/public';
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { npSetup, npStart } from 'ui/new_platform';
-// @ts-ignore
-import { VisFiltersProvider, createFilter } from 'ui/vis/vis_filters';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 import { plugin } from '.';
