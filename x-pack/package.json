@@ -116,7 +116,8 @@
     "cheerio": "0.22.0",
     "commander": "2.20.0",
     "copy-webpack-plugin": "^5.0.4",
-    "cypress": "^3.5.5",
+    "cypress": "^3.6.1",
+    "cypress-multi-reporters": "^1.2.3",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
     "enzyme-adapter-utils": "^1.12.0",
@@ -139,9 +140,9 @@
     "jest-styled-components": "^6.3.3",
     "jsdom": "^12.2.0",
     "madge": "3.4.4",
-    "mocha": "6.2.1",
+    "marge": "^1.0.1",
+    "mocha": "^6.2.2",
     "mocha-junit-reporter": "^1.23.1",
-    "mocha-multi-reporters": "^1.1.7",
     "mochawesome": "^4.1.0",
     "mochawesome-merge": "^2.0.1",
     "mustache": "^2.3.0",
@@ -357,10 +358,9 @@
   },
   "workspaces": {
     "nohoist": [
-      "**/mochawesome",
-      "**/mochawesome/**",
-      "**/mocha-multi-reporters",
-      "**/mocha-multi-reporters/**"
+      "mochawesome",
+      "mochawesome-merge",
+      "cypress-multi-reporters"
     ]
   }
 }
