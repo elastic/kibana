@@ -18,7 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useEffect, useState, useCallback } from 'react';
-import styled, { injectGlobal } from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
 import { OnDataProviderEdited } from '../timeline/events';
@@ -46,11 +46,11 @@ export const HeaderContainer = styled.div`
 
 HeaderContainer.displayName = 'HeaderContainer';
 
-// SIDE EFFECT: the following `injectGlobal` overrides the default styling
+// SIDE EFFECT: the following `createGlobalStyle` overrides the default styling
 // of euiComboBoxOptionsList because it's implemented as a popover, so it's
 // not selectable as a child of the styled component
 // eslint-disable-next-line no-unused-expressions
-injectGlobal`
+createGlobalStyle`
   .euiComboBoxOptionsList {
     z-index: 9999;
   }

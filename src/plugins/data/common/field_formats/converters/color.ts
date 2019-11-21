@@ -20,14 +20,14 @@
 import { findLast, cloneDeep, template, escape } from 'lodash';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
-import { HtmlContextTypeConvert } from '../types';
+import { HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString } from '../utils';
 import { DEFAULT_CONVERTER_COLOR } from '../constants';
 
 const convertTemplate = template('<span style="<%- style %>"><%- val %></span>');
 
 export class ColorFormat extends FieldFormat {
-  static id = 'color';
+  static id = FIELD_FORMAT_IDS.COLOR;
   static title = 'Color';
   static fieldType = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING];
 

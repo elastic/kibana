@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type ProcessorEvent = 'transaction' | 'error' | 'metric';
+export enum ProcessorEvent {
+  transaction = 'transaction',
+  error = 'error',
+  metric = 'metric'
+}

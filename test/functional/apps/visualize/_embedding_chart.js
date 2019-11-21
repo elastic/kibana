@@ -26,9 +26,6 @@ export default function ({ getService, getPageObjects }) {
   const embedding = getService('embedding');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'timePicker']);
 
-  const fromTime = '2015-09-19 06:31:44.000';
-  const toTime = '2015-09-23 18:31:44.000';
-
   describe('embedding', () => {
 
     describe('a data table', () => {
@@ -36,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.visualize.clickBucket('Split rows');
         await PageObjects.visualize.selectAggregation('Date Histogram');
         await PageObjects.visualize.selectField('@timestamp');
