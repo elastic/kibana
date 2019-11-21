@@ -53,10 +53,6 @@ declare module '@elastic/eui' {
     sizes: EuiSizesResponsive[];
   };
 
-  export const EuiHideFor: React.FC<EuiResponsiveProps>;
-
-  export const EuiShowFor: React.FC<EuiResponsiveProps>;
-
   type EuiInMemoryTableProps = CommonProps & {
     items?: any;
     columns?: any;
