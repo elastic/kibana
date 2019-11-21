@@ -26,7 +26,7 @@ interface KueryAutocompletionCurrentRequest {
   cursorPosition: number;
 }
 
-export const KueryAutocompletion = React.memo<KueryAutocompletionLifecycleProps>(
+export const KueryAutocompletion: React.FC<KueryAutocompletionLifecycleProps> = React.memo(
   ({ children, indexPattern }) => {
     const [currentRequest, setCurrentRequest] = useState<KueryAutocompletionCurrentRequest | null>(
       null

@@ -22,7 +22,7 @@ interface Props {
   timelineId: string;
 }
 
-export const EndgameSecurityEventDetails = React.memo<Props>(({ data, contextId, timelineId }) => {
+export const EndgameSecurityEventDetails: React.FC<Props> = React.memo(({ data, contextId, timelineId }) => {
   const endgameLogonType: number | null | undefined = get('endgame.logon_type[0]', data);
   const endgameSubjectDomainName: string | null | undefined = get(
     'endgame.subject_domain_name[0]',

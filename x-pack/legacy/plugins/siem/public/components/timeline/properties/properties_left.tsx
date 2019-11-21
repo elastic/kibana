@@ -61,7 +61,7 @@ export const DatePicker = styled(EuiFlexItem)`
 
 DatePicker.displayName = 'DatePicker';
 
-export const PropertiesLeft = React.memo<Props>(
+export const PropertiesLeft: React.FC<Props> = React.memo(
   ({
     isFavorite,
     timelineId,

@@ -17,7 +17,7 @@ interface Props {
   text: string | null | undefined;
 }
 
-export const ExitCodeDraggable = React.memo<Props>(
+export const ExitCodeDraggable: React.FC<Props> = React.memo(
   ({ contextId, endgameExitCode, eventId, text }) => {
     if (isNillEmptyOrNotFinite(endgameExitCode)) {
       return null;

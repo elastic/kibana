@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent, ChangeEvent, Fragment } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
@@ -136,9 +136,9 @@ export const ExtendedTemplate: FunctionComponent<Props> = props => {
 
 ExtendedTemplate.displayName = 'SeriesStyleArgAdvancedInput';
 
-ExtendedTemplate.propTypes = {
-  onValueChange: PropTypes.func.isRequired,
-  argValue: PropTypes.any.isRequired,
-  typeInstance: PropTypes.object,
-  labels: PropTypes.array.isRequired,
-};
+// ExtendedTemplate.propTypes = {
+//   onValueChange: PropTypes.func.isRequired,
+//   argValue: PropTypes.any.isRequired,
+//   typeInstance: PropTypes.object,
+//   labels: PropTypes.array.isRequired,
+// };

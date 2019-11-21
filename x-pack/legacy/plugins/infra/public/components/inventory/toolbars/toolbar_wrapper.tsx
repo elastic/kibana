@@ -18,7 +18,7 @@ interface Props {
   children: (props: ToolbarProps) => React.ReactElement;
 }
 
-export const ToolbarWrapper = (props: Props) => {
+export const ToolbarWrapper: React.FC<Props> = ({ children }) => {
   return (
     <Toolbar>
       <EuiFlexGroup alignItems="center" gutterSize="m">
@@ -34,7 +34,7 @@ export const ToolbarWrapper = (props: Props) => {
                 metric,
                 nodeType,
               }) =>
-                props.children({
+                children({
                   createDerivedIndexPattern,
                   changeMetric,
                   changeGroupBy,

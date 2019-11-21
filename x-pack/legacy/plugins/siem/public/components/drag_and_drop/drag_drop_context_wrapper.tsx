@@ -58,7 +58,7 @@ const onDragEndHandler = ({
 /**
  * DragDropContextWrapperComponent handles all drag end events
  */
-export const DragDropContextWrapperComponent = React.memo<Props>(
+export const DragDropContextWrapperComponent: React.FC<Props> = React.memo(
   ({ browserFields, children, dataProviders, dispatch }) => {
     const onDragEnd = useCallback(
       (result: DropResult) => {

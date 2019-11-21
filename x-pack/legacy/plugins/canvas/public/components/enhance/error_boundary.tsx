@@ -6,7 +6,7 @@
 
 import React, { Fragment, FunctionComponent, ReactChildren } from 'react';
 import { withState, withHandlers, lifecycle, mapProps, compose } from 'recompose';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { omit } from 'lodash';
 
 type ResetErrorState = ({
@@ -37,12 +37,12 @@ const ErrorBoundaryComponent: FunctionComponent<ComponentProps> = props => (
   </Fragment>
 );
 
-ErrorBoundaryComponent.propTypes = {
-  children: PropTypes.func.isRequired,
-  error: PropTypes.object,
-  errorInfo: PropTypes.object,
-  resetErrorState: PropTypes.func.isRequired,
-};
+// ErrorBoundaryComponent.propTypes = {
+//   children: PropTypes.func.isRequired,
+//   error: PropTypes.object,
+//   errorInfo: PropTypes.object,
+//   resetErrorState: PropTypes.func.isRequired,
+// };
 
 interface HOCProps {
   setError: Function;

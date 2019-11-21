@@ -37,7 +37,21 @@ export const withLogPosition = connect(
   })
 );
 
-export const WithLogPosition = asChildFunctionRenderer(withLogPosition, {
+interface WithLogPositionProps {
+  jumpToTargetPosition: typeof logPositionActions.jumpToTargetPosition;
+  jumpToTargetPositionTime: typeof logPositionActions.jumpToTargetPositionTime;
+  reportVisiblePositions: typeof logPositionActions.reportVisiblePositions;
+  startLiveStreaming: typeof logPositionActions.startAutoReload;
+  stopLiveStreaming: typeof logPositionActions.stopAutoReload;
+  scrollLockLiveStreaming: typeof logPositionActions.lockAutoReloadScroll;
+  scrollUnlockLiveStreaming: typeof logPositionActions.unlockAutoReloadScroll;
+  urlState: LogPositionUrlState;
+}
+
+export const WithLogPosition: React.FC<{
+  resetOnUnmount: boolean;
+  children: (args: WithLogPositionProps) => React.ReactNode;
+}> = asChildFunctionRenderer(withLogPosition, {
   onCleanup: ({ stopLiveStreaming }) => stopLiveStreaming(),
 });
 

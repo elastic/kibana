@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { LinkIcon, LinkIconProps } from '../../link_icon';
 import { BarAction } from './styles';
 
-const Popover = React.memo<UtilityBarActionProps>(
+const Popover: React.FC<UtilityBarActionProps> = React.memo(
   ({ children, color, iconSide, iconSize, iconType, popoverContent }) => {
     const [popoverState, setPopoverState] = useState(false);
 
@@ -41,7 +41,7 @@ export interface UtilityBarActionProps extends LinkIconProps {
   popoverContent?: React.ReactNode;
 }
 
-export const UtilityBarAction = React.memo<UtilityBarActionProps>(
+export const UtilityBarAction: React.FC<UtilityBarActionProps> = React.memo(
   ({ children, color, href, iconSide, iconSize, iconType, onClick, popoverContent }) => (
     <BarAction>
       {popoverContent ? (

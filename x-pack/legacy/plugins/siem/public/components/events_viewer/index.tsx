@@ -69,7 +69,7 @@ interface DispatchProps {
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
 
-const StatefulEventsViewerComponent = React.memo<Props>(
+const StatefulEventsViewerComponent: React.FC<Props> = React.memo(
   ({
     createTimeline,
     columns,

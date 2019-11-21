@@ -35,7 +35,7 @@ import { esQuery } from '../../../../../../../src/plugins/data/public';
 const KpiNetworkComponentManage = manageQuery(KpiNetworkComponent);
 const sourceId = 'default';
 
-const NetworkComponent = React.memo<NetworkComponentProps>(
+const NetworkComponent: React.FC<NetworkComponentProps> = React.memo(
   ({
     filters,
     query,

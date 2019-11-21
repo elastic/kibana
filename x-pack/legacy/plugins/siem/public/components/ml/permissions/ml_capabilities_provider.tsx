@@ -31,44 +31,48 @@ export const MlCapabilitiesContext = React.createContext<MlCapabilitiesProvider>
 
 MlCapabilitiesContext.displayName = 'MlCapabilitiesContext';
 
-export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ children }) => {
-  const [capabilities, setCapabilities] = useState<MlCapabilitiesProvider>(
-    emptyMlCapabilitiesProvider
-  );
-  const [, dispatchToaster] = useStateToaster();
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+export const MlCapabilitiesProvider: React.FC<{ children: JSX.Element }> = React.memo(
+  ({ children }) => {
+    const [capabilities, setCapabilities] = useState<MlCapabilitiesProvider>(
+      emptyMlCapabilitiesProvider
+    );
+    const [, dispatchToaster] = useStateToaster();
+    const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
-  useEffect(() => {
-    let isSubscribed = true;
-    const abortCtrl = new AbortController();
+    useEffect(() => {
+      let isSubscribed = true;
+      const abortCtrl = new AbortController();
 
-    async function fetchMlCapabilities() {
-      try {
-        const mlCapabilities = await getMlCapabilities(kbnVersion, abortCtrl.signal);
-        if (isSubscribed) {
-          setCapabilities({ ...mlCapabilities, capabilitiesFetched: true });
-        }
-      } catch (error) {
-        if (isSubscribed) {
-          errorToToaster({
-            title: i18n.MACHINE_LEARNING_PERMISSIONS_FAILURE,
-            error,
-            dispatchToaster,
-          });
+      async function fetchMlCapabilities() {
+        try {
+          const mlCapabilities = await getMlCapabilities(kbnVersion, abortCtrl.signal);
+          if (isSubscribed) {
+            setCapabilities({ ...mlCapabilities, capabilitiesFetched: true });
+          }
+        } catch (error) {
+          if (isSubscribed) {
+            errorToToaster({
+              title: i18n.MACHINE_LEARNING_PERMISSIONS_FAILURE,
+              error,
+              dispatchToaster,
+            });
+          }
         }
       }
-    }
 
-    fetchMlCapabilities();
-    return () => {
-      isSubscribed = false;
-      abortCtrl.abort();
-    };
-  }, []);
+      fetchMlCapabilities();
+      return () => {
+        isSubscribed = false;
+        abortCtrl.abort();
+      };
+    }, []);
 
-  return (
-    <MlCapabilitiesContext.Provider value={capabilities}>{children}</MlCapabilitiesContext.Provider>
-  );
-});
+    return (
+      <MlCapabilitiesContext.Provider value={capabilities}>
+        {children}
+      </MlCapabilitiesContext.Provider>
+    );
+  }
+);
 
 MlCapabilitiesProvider.displayName = 'MlCapabilitiesProvider';

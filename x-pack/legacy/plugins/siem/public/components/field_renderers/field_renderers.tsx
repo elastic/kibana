@@ -221,7 +221,7 @@ interface MoreContainerProps {
 }
 
 /** A container (with overflow) for showing "More" items in a popover */
-export const MoreContainer = React.memo<MoreContainerProps>(
+export const MoreContainer: React.FC<MoreContainerProps> = React.memo(
   ({ idPrefix, render, rowItems, moreMaxHeight, overflowIndexStart }) => (
     <div
       data-test-subj="more-container"
@@ -242,7 +242,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
 
 MoreContainer.displayName = 'MoreContainer';
 
-export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverflowProps>(
+export const DefaultFieldRendererOverflow: React.FC<DefaultFieldRendererOverflowProps> = React.memo(
   ({ idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (

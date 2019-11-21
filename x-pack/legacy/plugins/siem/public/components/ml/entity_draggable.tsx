@@ -16,7 +16,7 @@ interface Props {
   entityValue: string;
 }
 
-export const EntityDraggable = React.memo<Props>(
+export const EntityDraggable: React.FC<Props> = React.memo(
   ({ idPrefix, entityName, entityValue }): JSX.Element => {
     const id = escapeDataProviderId(`entity-draggable-${idPrefix}-${entityName}-${entityValue}`);
     return (

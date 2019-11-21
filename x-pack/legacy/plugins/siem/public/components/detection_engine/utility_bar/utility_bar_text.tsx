@@ -12,7 +12,7 @@ export interface UtilityBarTextProps {
   children: string;
 }
 
-export const UtilityBarText = React.memo<UtilityBarTextProps>(({ children }) => (
+export const UtilityBarText: React.FC<UtilityBarTextProps> = React.memo(({ children }) => (
   <BarText>{children}</BarText>
 ));
 UtilityBarText.displayName = 'UtilityBarText';

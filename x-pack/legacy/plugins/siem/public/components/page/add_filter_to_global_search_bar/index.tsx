@@ -22,7 +22,7 @@ interface OwnProps {
   onFilterAdded?: () => void;
 }
 
-export const AddFilterToGlobalSearchBar = React.memo<OwnProps>(
+export const AddFilterToGlobalSearchBar: React.FC<OwnProps> = React.memo(
   ({ children, filter, onFilterAdded }) => {
     const addToKql = () => {
       siemFilterManager.addFilters(filter);

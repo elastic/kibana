@@ -81,7 +81,7 @@ export const hasPorts = ({
   type: SourceDestinationType;
 }): boolean => getPorts({ destinationPort, sourcePort, type }).length > 0;
 
-const IpAdressesWithPorts = React.memo<{
+const IpAdressesWithPorts: React.FC<{
   contextId: string;
   destinationIp?: string[] | null;
   destinationPort?: Array<number | string | null> | null;
@@ -89,51 +89,53 @@ const IpAdressesWithPorts = React.memo<{
   sourceIp?: string[] | null;
   sourcePort?: Array<number | string | null> | null;
   type: SourceDestinationType;
-}>(({ contextId, destinationIp, destinationPort, eventId, sourceIp, sourcePort, type }) => {
-  const ip = type === 'source' ? sourceIp : destinationIp;
-  const ipFieldName = type === 'source' ? SOURCE_IP_FIELD_NAME : DESTINATION_IP_FIELD_NAME;
-  const port = type === 'source' ? sourcePort : destinationPort;
-  const portFieldName = type === 'source' ? SOURCE_PORT_FIELD_NAME : DESTINATION_PORT_FIELD_NAME;
+}> = React.memo(
+  ({ contextId, destinationIp, destinationPort, eventId, sourceIp, sourcePort, type }) => {
+    const ip = type === 'source' ? sourceIp : destinationIp;
+    const ipFieldName = type === 'source' ? SOURCE_IP_FIELD_NAME : DESTINATION_IP_FIELD_NAME;
+    const port = type === 'source' ? sourcePort : destinationPort;
+    const portFieldName = type === 'source' ? SOURCE_PORT_FIELD_NAME : DESTINATION_PORT_FIELD_NAME;
 
-  if (ip == null) {
-    return null; // if ip is not populated as an array, ports will be ignored
+    if (ip == null) {
+      return null; // if ip is not populated as an array, ports will be ignored
+    }
+
+    // IMPORTANT: The ip and port arrays are parallel arrays; the port at
+    // index `i` corresponds with the ip address at index `i`. We must
+    // preserve the relationships between the parallel arrays:
+    const ipPortPairs: IpPortPair[] =
+      port != null && ip.length === port.length
+        ? ip.map((address, i) => ({
+            ip: address,
+            port: port[i] != null ? `${port[i]}` : null, // use the corresponding port in the parallel array
+          }))
+        : ip.map(address => ({
+            ip: address,
+            port: null, // drop the port, because the length of the parallel ip and port arrays is different
+          }));
+
+    return (
+      <EuiFlexGroup gutterSize="none">
+        {uniqWith(isEqual, ipPortPairs).map(
+          ipPortPair =>
+            ipPortPair.ip != null && (
+              <EuiFlexItem grow={false} key={ipPortPair.ip}>
+                <IpWithPort
+                  contextId={contextId}
+                  data-test-subj={`${type}-ip-and-port`}
+                  eventId={eventId}
+                  ip={ipPortPair.ip}
+                  ipFieldName={ipFieldName}
+                  port={ipPortPair.port}
+                  portFieldName={portFieldName}
+                />
+              </EuiFlexItem>
+            )
+        )}
+      </EuiFlexGroup>
+    );
   }
-
-  // IMPORTANT: The ip and port arrays are parallel arrays; the port at
-  // index `i` corresponds with the ip address at index `i`. We must
-  // preserve the relationships between the parallel arrays:
-  const ipPortPairs: IpPortPair[] =
-    port != null && ip.length === port.length
-      ? ip.map((address, i) => ({
-          ip: address,
-          port: port[i] != null ? `${port[i]}` : null, // use the corresponding port in the parallel array
-        }))
-      : ip.map(address => ({
-          ip: address,
-          port: null, // drop the port, because the length of the parallel ip and port arrays is different
-        }));
-
-  return (
-    <EuiFlexGroup gutterSize="none">
-      {uniqWith(isEqual, ipPortPairs).map(
-        ipPortPair =>
-          ipPortPair.ip != null && (
-            <EuiFlexItem grow={false} key={ipPortPair.ip}>
-              <IpWithPort
-                contextId={contextId}
-                data-test-subj={`${type}-ip-and-port`}
-                eventId={eventId}
-                ip={ipPortPair.ip}
-                ipFieldName={ipFieldName}
-                port={ipPortPair.port}
-                portFieldName={portFieldName}
-              />
-            </EuiFlexItem>
-          )
-      )}
-    </EuiFlexGroup>
-  );
-});
+);
 
 IpAdressesWithPorts.displayName = 'IpAdressesWithPorts';
 
@@ -146,7 +148,7 @@ IpAdressesWithPorts.displayName = 'IpAdressesWithPorts';
  * - a port, hyperlinked to a port lookup service, when it's populated
  * - a summary of geolocation details, when they are populated
  */
-export const SourceDestinationIp = React.memo<SourceDestinationIpProps>(
+export const SourceDestinationIp: React.FC<SourceDestinationIpProps> = React.memo(
   ({
     contextId,
     destinationGeoContinentName,

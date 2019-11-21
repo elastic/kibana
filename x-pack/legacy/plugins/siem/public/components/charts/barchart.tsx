@@ -45,12 +45,12 @@ const checkIfAnyValidSeriesExist = (
   data.some(checkIfAllTheDataInTheSeriesAreValid);
 
 // Bar chart rotation: https://ela.st/chart-rotations
-export const BarChartBaseComponent = React.memo<{
+export const BarChartBaseComponent: React.FC<{
   data: ChartSeriesData[];
   width: string | null | undefined;
   height: string | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
-}>(({ data, ...chartConfigs }) => {
+}> = React.memo(({ data, ...chartConfigs }) => {
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
   const tickSize = getOr(0, 'configs.axis.tickSize', chartConfigs);
@@ -100,10 +100,10 @@ export const BarChartBaseComponent = React.memo<{
 
 BarChartBaseComponent.displayName = 'BarChartBaseComponent';
 
-export const BarChart = React.memo<{
+export const BarChart: React.FC<{
   barChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
-}>(({ barChart, configs }) => {
+}> = React.memo(({ barChart, configs }) => {
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
   return checkIfAnyValidSeriesExist(barChart) ? (

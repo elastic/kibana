@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { lifecycle, compose } from 'recompose';
 import { get } from 'lodash';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
@@ -46,11 +46,11 @@ const EnhancedExtendedTemplate = compose<ExtendedTemplateProps, Props>(
   })
 )(ExtendedTemplate);
 
-EnhancedExtendedTemplate.propTypes = {
-  argValue: PropTypes.any.isRequired,
-  setLabel: PropTypes.func.isRequired,
-  label: PropTypes.string,
-};
+// EnhancedExtendedTemplate.propTypes = {
+//   argValue: PropTypes.any.isRequired,
+//   setLabel: PropTypes.func.isRequired,
+//   label: PropTypes.string,
+// };
 
 export const seriesStyle = () => ({
   name: 'seriesStyle',

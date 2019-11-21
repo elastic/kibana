@@ -25,7 +25,7 @@ interface NoteCardsCompProps {
   children: React.ReactNode;
 }
 
-const NoteCardsComp = React.memo<NoteCardsCompProps>(({ children }) => (
+const NoteCardsComp: React.FC<NoteCardsCompProps> = React.memo(({ children }) => (
   <EuiPanel
     data-test-subj="note-cards"
     hasShadow={false}
@@ -54,7 +54,7 @@ interface Props {
 }
 
 /** A view for entering and reviewing notes */
-export const NoteCards = React.memo<Props>(
+export const NoteCards: React.FC<Props> = React.memo(
   ({
     associateNote,
     getNotesByIds,

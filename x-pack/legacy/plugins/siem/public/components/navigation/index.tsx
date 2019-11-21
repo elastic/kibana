@@ -17,7 +17,7 @@ import { TabNavigation } from './tab_navigation';
 import { TabNavigationProps } from './tab_navigation/types';
 import { SiemNavigationComponentProps } from './types';
 
-export const SiemNavigationComponent = React.memo<TabNavigationProps & RouteSpyState>(
+export const SiemNavigationComponent: React.FC<TabNavigationProps & RouteSpyState> = React.memo(
   ({
     query,
     detailName,
@@ -85,7 +85,7 @@ export const SiemNavigationRedux = compose<
   React.ComponentClass<SiemNavigationComponentProps & RouteSpyState>
 >(connect(makeMapStateToProps))(SiemNavigationComponent);
 
-export const SiemNavigation = React.memo<SiemNavigationComponentProps>(props => {
+export const SiemNavigation: React.FC<SiemNavigationComponentProps> = React.memo(props => {
   const [routeProps] = useRouteSpy();
   const stateNavReduxProps: RouteSpyState & SiemNavigationComponentProps = {
     ...routeProps,

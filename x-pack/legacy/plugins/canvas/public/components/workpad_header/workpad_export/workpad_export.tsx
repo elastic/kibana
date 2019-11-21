@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent, useState, MouseEvent } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiContextMenu, EuiIcon } from '@elastic/eui';
 // @ts-ignore Untyped local
 import { Popover } from '../../popover';
@@ -159,9 +159,9 @@ export const WorkpadExport: FunctionComponent<Props> = ({
   );
 };
 
-WorkpadExport.propTypes = {
-  enabled: PropTypes.bool.isRequired,
-  onCopy: PropTypes.func.isRequired,
-  onExport: PropTypes.func.isRequired,
-  getExportUrl: PropTypes.func.isRequired,
-};
+// WorkpadExport.propTypes = {
+//   enabled: PropTypes.bool.isRequired,
+//   onCopy: PropTypes.func.isRequired,
+//   onExport: PropTypes.func.isRequired,
+//   getExportUrl: PropTypes.func.isRequired,
+// };

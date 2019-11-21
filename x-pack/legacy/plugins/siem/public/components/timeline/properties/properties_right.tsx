@@ -82,7 +82,7 @@ interface Props {
   updateNote: UpdateNote;
 }
 
-export const PropertiesRight = React.memo<Props>(
+export const PropertiesRight: React.FC<Props> = React.memo(
   ({
     onButtonClick,
     showActions,

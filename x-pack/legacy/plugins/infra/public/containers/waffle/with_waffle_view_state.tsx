@@ -18,6 +18,7 @@ import {
 } from '../../store';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { convertKueryToElasticSearchQuery } from '../../utils/kuery';
+import { IIndexPattern } from 'src/plugins/data/common/index_patterns/types';
 
 const selectViewState = createSelector(
   waffleOptionsSelectors.selectMetric,
@@ -119,7 +120,16 @@ export const withWaffleViewState = connect(
   }
 );
 
-export const WithWaffleViewState = asChildFunctionRenderer(withWaffleViewState);
+interface withWaffleViewStateArgs {
+  defaultViewState: {};
+  viewState: {};
+  onViewChange: (viewState: {}) => void;
+}
+
+export const WithWaffleViewState: React.FC<{
+  indexPattern: IIndexPattern;
+  children: (args: withWaffleViewStateArgs) => JSX.Element;
+}> = asChildFunctionRenderer(withWaffleViewState);
 
 /**
  * View State

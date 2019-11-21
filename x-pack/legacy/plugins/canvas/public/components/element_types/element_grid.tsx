@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { map } from 'lodash';
 import { EuiFlexItem, EuiFlexGrid } from '@elastic/eui';
 import { ElementControls } from './element_controls';
@@ -97,11 +97,11 @@ export const ElementGrid = ({
   );
 };
 
-ElementGrid.propTypes = {
-  elements: PropTypes.array.isRequired,
-  handleClick: PropTypes.func.isRequired,
-  showControls: PropTypes.bool,
-};
+// ElementGrid.propTypes = {
+//   elements: PropTypes.array.isRequired,
+//   handleClick: PropTypes.func.isRequired,
+//   showControls: PropTypes.bool,
+// };
 
 ElementGrid.defaultProps = {
   showControls: false,

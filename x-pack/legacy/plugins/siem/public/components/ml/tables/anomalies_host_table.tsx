@@ -29,7 +29,7 @@ const sorting = {
   },
 };
 
-export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
+export const AnomaliesHostTable: React.FC<AnomaliesHostTableProps> = React.memo(
   ({ startDate, endDate, narrowDateRange, hostName, skip, type }): JSX.Element | null => {
     const capabilities = useContext(MlCapabilitiesContext);
     const [loading, tableData] = useAnomaliesTableData({

@@ -33,7 +33,6 @@ import {
   updateDescription,
   updateHighlightedDropAndProviderId,
   updateIsFavorite,
-  updateIsLive,
   updateItemsPerPage,
   updateItemsPerPageOptions,
   updateKqlMode,
@@ -67,7 +66,6 @@ import {
   updateTimelineColumns,
   updateTimelineDescription,
   updateTimelineIsFavorite,
-  updateTimelineIsLive,
   updateTimelineItemsPerPage,
   updateTimelineKqlMode,
   updateTimelinePageIndex,
@@ -254,10 +252,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(updateIsFavorite, (state, { id, isFavorite }) => ({
     ...state,
     timelineById: updateTimelineIsFavorite({ id, isFavorite, timelineById: state.timelineById }),
-  }))
-  .case(updateIsLive, (state, { id, isLive }) => ({
-    ...state,
-    timelineById: updateTimelineIsLive({ id, isLive, timelineById: state.timelineById }),
   }))
   .case(updateKqlMode, (state, { id, kqlMode }) => ({
     ...state,

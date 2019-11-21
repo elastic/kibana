@@ -123,7 +123,7 @@ export interface Columns<T, U = T> {
   width?: string;
 }
 
-export const PaginatedTable = memo<SiemTables>(
+export const PaginatedTable: React.FC<SiemTables> = memo(
   ({
     activePage,
     columns,

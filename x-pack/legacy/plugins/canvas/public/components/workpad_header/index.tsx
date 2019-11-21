@@ -46,4 +46,8 @@ const mergeProps = (
   toggleWriteable: () => dispatchProps.setWriteable(!stateProps.isWriteable),
 });
 
-export const WorkpadHeader = connect(mapStateToProps, mapDispatchToProps, mergeProps)(Component);
+export const WorkpadHeader = connect<StateProps, DispatchProps>(
+  mapStateToProps,
+  mapDispatchToProps,
+  mergeProps
+)(Component);

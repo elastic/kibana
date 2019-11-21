@@ -11,4 +11,4 @@ export const WorkpadColorPicker = (props: Props) => {
   return <ColorPickerPopover {...props} hasButtons={true} />;
 };
 
-WorkpadColorPicker.propTypes = ColorPickerPopover.propTypes;
+// WorkpadColorPicker.propTypes = ColorPickerPopover.propTypes;

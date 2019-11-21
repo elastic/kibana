@@ -6,7 +6,7 @@
 
 // @ts-ignore (elastic/eui#1262) EuiSuperSelect is not exported yet
 import { EuiSuperSelect } from '@elastic/eui';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import React, { FunctionComponent } from 'react';
 import { fonts, FontValue } from '../../../common/lib/fonts';
 
@@ -46,11 +46,11 @@ export const FontPicker: FunctionComponent<Props> = props => {
   );
 };
 
-FontPicker.propTypes = {
-  /** Initial value of the Font Picker. */
-  value: PropTypes.string,
-  /** Function to execute when a Font is selected. */
-  onSelect: PropTypes.func,
-};
+// FontPicker.propTypes = {
+//   /** Initial value of the Font Picker. */
+//   value: PropTypes.string,
+//   /** Function to execute when a Font is selected. */
+//   onSelect: PropTypes.func,
+// };
 
 FontPicker.displayName = 'FontPicker';

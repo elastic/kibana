@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent, MouseEvent } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 // @ts-ignore untyped local
 import { Popover } from '../../../../../public/components/popover';
 import { PrettyDuration } from '../pretty_duration';
@@ -47,8 +47,8 @@ export const TimePickerPopover: FunctionComponent<Props> = ({ from, to, onSelect
   );
 };
 
-TimePickerPopover.propTypes = {
-  from: PropTypes.string.isRequired,
-  to: PropTypes.string.isRequired,
-  onSelect: PropTypes.func.isRequired,
-};
+// TimePickerPopover.propTypes = {
+//   from: PropTypes.string.isRequired,
+//   to: PropTypes.string.isRequired,
+//   onSelect: PropTypes.func.isRequired,
+// };

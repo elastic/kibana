@@ -23,10 +23,10 @@ export const getFlag = (countryCode: string): string | null =>
     : null;
 
 /** Renders an emoji flag for the specified country code */
-export const CountryFlag = memo<{
+export const CountryFlag: React.FC<{
   countryCode: string;
   displayCountryNameOnHover?: boolean;
-}>(({ countryCode, displayCountryNameOnHover = false }) => {
+}> = memo(({ countryCode, displayCountryNameOnHover = false }) => {
   useEffect(() => {
     if (displayCountryNameOnHover && isEmpty(countries.getNames('en'))) {
       countries.registerLocale(countryJson);
@@ -49,10 +49,10 @@ export const CountryFlag = memo<{
 CountryFlag.displayName = 'CountryFlag';
 
 /** Renders an emjoi flag with country name for the specified country code */
-export const CountryFlagAndName = memo<{
+export const CountryFlagAndName: React.FC<{
   countryCode: string;
   displayCountryNameOnHover?: boolean;
-}>(({ countryCode, displayCountryNameOnHover = false }) => {
+}> = memo(({ countryCode, displayCountryNameOnHover = false }) => {
   const [localesLoaded, setLocalesLoaded] = useState(false);
   useEffect(() => {
     if (isEmpty(countries.getNames('en'))) {

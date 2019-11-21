@@ -26,7 +26,7 @@ interface LineToolTipContentProps {
   featureProps: FeatureProperty[];
 }
 
-export const LineToolTipContent = React.memo<LineToolTipContentProps>(
+export const LineToolTipContent: React.FC<LineToolTipContentProps> = React.memo(
   ({ contextId, featureProps }) => {
     const lineProps = featureProps.reduce<Record<string, string[]>>(
       (acc, f) => ({

@@ -5,7 +5,7 @@
  */
 
 import React, { MouseEvent } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { EuiLink, EuiPanel } from '@elastic/eui';
 import { Popover } from '../popover';
 import { ShapePicker } from '../shape_picker';
@@ -35,8 +35,8 @@ export const ShapePickerPopover = ({ shapes, onChange, value }: Props) => {
   );
 };
 
-ShapePickerPopover.propTypes = {
-  shapes: PropTypes.object.isRequired,
-  value: PropTypes.string,
-  onChange: PropTypes.func,
-};
+// ShapePickerPopover.propTypes = {
+//   shapes: PropTypes.object.isRequired,
+//   value: PropTypes.string,
+//   onChange: PropTypes.func,
+// };

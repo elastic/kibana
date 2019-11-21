@@ -43,7 +43,7 @@ const InMemoryTable = styled(EuiInMemoryTable)`
 InMemoryTable.displayName = 'InMemoryTable';
 
 /** A view for entering and reviewing notes */
-export const Notes = React.memo<Props>(
+export const Notes: React.FC<Props> = React.memo(
   ({ associateNote, getNotesByIds, getNewNoteId, noteIds, updateNote }) => {
     const [newNote, setNewNote] = useState('');
 

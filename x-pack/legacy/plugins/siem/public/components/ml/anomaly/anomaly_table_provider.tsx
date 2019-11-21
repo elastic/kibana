@@ -22,7 +22,7 @@ interface Props {
   skip: boolean;
 }
 
-export const AnomalyTableProvider = React.memo<Props>(
+export const AnomalyTableProvider: React.FC<Props> = React.memo(
   ({ influencers, startDate, endDate, children, criteriaFields, skip }) => {
     const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
       criteriaFields,

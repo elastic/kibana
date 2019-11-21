@@ -35,13 +35,13 @@ interface Props {
   loading: boolean;
 }
 
-export const LogEntryFlyout = ({
+export const LogEntryFlyout: React.FC<Props> = ({
   flyoutItem,
   loading,
   setFlyoutVisibility,
   setFilter,
   setTarget,
-}: Props) => {
+}) => {
   const createFilterHandler = useCallback(
     (field: InfraLogItemField) => () => {
       const filter = `${field.field}:"${field.value}"`;

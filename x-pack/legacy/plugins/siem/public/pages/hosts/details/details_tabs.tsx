@@ -22,7 +22,7 @@ import {
   EventsQueryTabBody,
 } from '../navigation';
 
-const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
+const HostDetailsTabs: React.FC<HostDetailsTabsProps> = React.memo(
   ({
     deleteQuery,
     filterQuery,

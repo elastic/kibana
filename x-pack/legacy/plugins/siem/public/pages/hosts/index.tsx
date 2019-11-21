@@ -32,7 +32,7 @@ const getHostDetailsTabPath = (pagePath: string) =>
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
-export const HostsContainer = React.memo<Props>(({ url }) => (
+export const HostsContainer: React.FC<Props> = React.memo(({ url }) => (
   <GlobalTime>
     {({ to, from, setQuery, deleteQuery, isInitializing }) => (
       <Switch>

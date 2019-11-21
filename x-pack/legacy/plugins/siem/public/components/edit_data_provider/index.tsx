@@ -82,7 +82,7 @@ export const getInitialOperatorLabel = (
   }
 };
 
-export const StatefulEditDataProvider = React.memo<Props>(
+export const StatefulEditDataProvider: React.FC<Props> = React.memo(
   ({
     andProviderId,
     browserFields,

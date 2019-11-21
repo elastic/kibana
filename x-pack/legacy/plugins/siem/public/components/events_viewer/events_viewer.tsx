@@ -59,7 +59,7 @@ interface Props {
   toggleColumn: (column: ColumnHeader) => void;
 }
 
-export const EventsViewer = React.memo<Props>(
+export const EventsViewer: React.FC<Props> = React.memo(
   ({
     browserFields,
     columns,

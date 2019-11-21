@@ -5,7 +5,7 @@
  */
 
 import React, { useState, ChangeEvent } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiButton, EuiFieldText } from '@elastic/eui';
 import { ButtonSize } from '@elastic/eui/src/components/button/button';
 import { FlexGroupGutterSize } from '@elastic/eui/src/components/flex/flex_group';
@@ -70,12 +70,12 @@ export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue 
   );
 };
 
-CustomInterval.propTypes = {
-  buttonSize: PropTypes.string,
-  gutterSize: PropTypes.string,
-  defaultValue: PropTypes.string,
-  onSubmit: PropTypes.func.isRequired,
-};
+// CustomInterval.propTypes = {
+//   buttonSize: PropTypes.string,
+//   gutterSize: PropTypes.string,
+//   defaultValue: PropTypes.string,
+//   onSubmit: PropTypes.func.isRequired,
+// };
 
 CustomInterval.defaultProps = {
   buttonSize: 's',

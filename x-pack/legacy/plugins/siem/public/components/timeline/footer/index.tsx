@@ -144,11 +144,11 @@ export const EventsCount = pure<{
 
 EventsCount.displayName = 'EventsCount';
 
-export const PagingControl = React.memo<{
+export const PagingControl: React.FC<{
   hasNextPage: boolean;
   isLoading: boolean;
   loadMore: () => void;
-}>(({ hasNextPage, isLoading, loadMore }) => (
+}> = React.memo(({ hasNextPage, isLoading, loadMore }) => (
   <>
     {hasNextPage && (
       <EuiButton
@@ -166,7 +166,7 @@ export const PagingControl = React.memo<{
 PagingControl.displayName = 'PagingControl';
 
 /** Renders a loading indicator and paging controls */
-export const Footer = React.memo<FooterProps>(
+export const Footer: React.FC<FooterProps> = React.memo(
   ({
     compact,
     getUpdatedAt,

@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent, ChangeEvent } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { ArgTypesStrings } from '../../../../i18n';
 
@@ -89,12 +89,12 @@ export const AppearanceForm: FunctionComponent<Props> = ({
   );
 };
 
-AppearanceForm.propTypes = {
-  padding: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  opacity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  overflow: PropTypes.oneOf(['hidden', 'visible']),
-  onChange: PropTypes.func.isRequired,
-};
+// AppearanceForm.propTypes = {
+//   padding: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+//   opacity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+//   overflow: PropTypes.oneOf(['hidden', 'visible']),
+//   onChange: PropTypes.func.isRequired,
+// };
 
 AppearanceForm.defaultProps = {
   opacity: 1,

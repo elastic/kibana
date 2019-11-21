@@ -12,7 +12,7 @@ export interface UtilityBarProps extends BarProps {
   children: React.ReactNode;
 }
 
-export const UtilityBar = React.memo<UtilityBarProps>(({ border, children }) => (
+export const UtilityBar: React.FC<UtilityBarProps> = React.memo(({ border, children }) => (
   <Bar border={border}>{children}</Bar>
 ));
 UtilityBar.displayName = 'UtilityBar';

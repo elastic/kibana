@@ -31,7 +31,7 @@ interface GroupsFilterPopoverProps {
  * @param siemJobs jobs to fetch groups from to display for filtering
  * @param onSelectedGroupsChanged change listener to be notified when group selection changes
  */
-export const GroupsFilterPopover = React.memo<GroupsFilterPopoverProps>(
+export const GroupsFilterPopover: React.FC<GroupsFilterPopoverProps> = React.memo(
   ({ siemJobs, onSelectedGroupsChanged }) => {
     const [isGroupPopoverOpen, setIsGroupPopoverOpen] = useState(false);
     const [selectedGroups, setSelectedGroups] = useState<string[]>([]);

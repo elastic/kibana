@@ -40,7 +40,7 @@ interface Props {
   toggleColumn: (column: ColumnHeader) => void;
 }
 
-export const ExpandableEvent = React.memo<Props>(
+export const ExpandableEvent: React.FC<Props> = React.memo(
   ({
     browserFields,
     columnHeaders,

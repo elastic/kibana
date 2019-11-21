@@ -111,7 +111,7 @@ interface ToolTipProps {
   categoryColumns: ColumnHeader[];
 }
 
-const ViewCategory = React.memo<ToolTipProps>(
+const ViewCategory: React.FC<ToolTipProps> = React.memo(
   ({ categoryId, onUpdateColumns, categoryColumns }) => {
     const isLoading = useContext(TimelineContext);
     return (
@@ -137,13 +137,13 @@ const ViewCategory = React.memo<ToolTipProps>(
 ViewCategory.displayName = 'ViewCategory';
 
 /** Renders a field name in it's non-dragging state */
-export const FieldName = React.memo<{
+export const FieldName: React.FC<{
   categoryId: string;
   categoryColumns: ColumnHeader[];
   fieldId: string;
   highlight?: string;
   onUpdateColumns: OnUpdateColumns;
-}>(({ categoryId, categoryColumns, fieldId, highlight = '', onUpdateColumns }) => (
+}> = React.memo(({ categoryId, categoryColumns, fieldId, highlight = '', onUpdateColumns }) => (
   <WithHoverActions
     hoverContent={
       <HoverActionsContainer data-test-subj="hover-actions-container" paddingSize="none">

@@ -325,6 +325,7 @@ const mapDispatchToProps = (dispatch: Dispatch): SuperDatePickerDispatchProps =>
 export const SuperDatePicker = connect<
   SuperDatePickerStateRedux,
   SuperDatePickerDispatchProps,
+  OwnProps,
   State
 >(
   makeMapStateToProps,

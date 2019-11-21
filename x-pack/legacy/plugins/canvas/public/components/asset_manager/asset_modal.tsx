@@ -22,7 +22,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import React, { FunctionComponent } from 'react';
 
 import { ComponentStrings } from '../../../i18n';
@@ -153,12 +153,12 @@ export const AssetModal: FunctionComponent<Props> = props => {
   );
 };
 
-AssetModal.propTypes = {
-  assetValues: PropTypes.array.isRequired,
-  isLoading: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  onFileUpload: PropTypes.func.isRequired,
-  onAssetCopy: PropTypes.func.isRequired,
-  onAssetCreate: PropTypes.func.isRequired,
-  onAssetDelete: PropTypes.func.isRequired,
-};
+// AssetModal.propTypes = {
+//   assetValues: PropTypes.array.isRequired,
+//   isLoading: PropTypes.bool.isRequired,
+//   onClose: PropTypes.func.isRequired,
+//   onFileUpload: PropTypes.func.isRequired,
+//   onAssetCopy: PropTypes.func.isRequired,
+//   onAssetCreate: PropTypes.func.isRequired,
+//   onAssetDelete: PropTypes.func.isRequired,
+// };

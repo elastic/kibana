@@ -21,62 +21,64 @@ interface QueryStringType {
 
 type MlNetworkConditionalProps = Partial<RouteComponentProps<{}>> & { url: string };
 
-export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProps>(({ url }) => (
-  <Switch>
-    <Route
-      strict
-      exact
-      path={url}
-      render={({ location }) => {
-        const queryStringDecoded: QueryStringType = QueryString.decode(
-          location.search.substring(1)
-        );
-        if (queryStringDecoded.query != null) {
-          queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
-        }
-        const reEncoded = QueryString.encode(queryStringDecoded);
-        return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
-      }}
-    />
-    <Route
-      path={`${url}/ip/:ip`}
-      render={({
-        location,
-        match: {
-          params: { ip },
-        },
-      }) => {
-        const queryStringDecoded: QueryStringType = QueryString.decode(
-          location.search.substring(1)
-        );
-        if (queryStringDecoded.query != null) {
-          queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
-        }
-        if (emptyEntity(ip)) {
-          const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
-        } else if (multipleEntities(ip)) {
-          const ips: string[] = getMultipleEntities(ip);
-          queryStringDecoded.query = addEntitiesToKql(
-            ['source.ip', 'destination.ip'],
-            ips,
-            queryStringDecoded.query || ''
+export const MlNetworkConditionalContainer: React.FC<MlNetworkConditionalProps> = React.memo(
+  ({ url }) => (
+    <Switch>
+      <Route
+        strict
+        exact
+        path={url}
+        render={({ location }) => {
+          const queryStringDecoded: QueryStringType = QueryString.decode(
+            location.search.substring(1)
           );
+          if (queryStringDecoded.query != null) {
+            queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
+          }
           const reEncoded = QueryString.encode(queryStringDecoded);
           return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
-        } else {
-          const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/${SiemPageName.network}/ip/${ip}?${reEncoded}`} />;
-        }
-      }}
-    />
-    <Route
-      path="/ml-network/"
-      render={({ location: { search = '' } }) => (
-        <Redirect from="/ml-network/" to={`/ml-network${search}`} />
-      )}
-    />
-  </Switch>
-));
+        }}
+      />
+      <Route
+        path={`${url}/ip/:ip`}
+        render={({
+          location,
+          match: {
+            params: { ip },
+          },
+        }) => {
+          const queryStringDecoded: QueryStringType = QueryString.decode(
+            location.search.substring(1)
+          );
+          if (queryStringDecoded.query != null) {
+            queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
+          }
+          if (emptyEntity(ip)) {
+            const reEncoded = QueryString.encode(queryStringDecoded);
+            return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
+          } else if (multipleEntities(ip)) {
+            const ips: string[] = getMultipleEntities(ip);
+            queryStringDecoded.query = addEntitiesToKql(
+              ['source.ip', 'destination.ip'],
+              ips,
+              queryStringDecoded.query || ''
+            );
+            const reEncoded = QueryString.encode(queryStringDecoded);
+            return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
+          } else {
+            const reEncoded = QueryString.encode(queryStringDecoded);
+            return <Redirect to={`/${SiemPageName.network}/ip/${ip}?${reEncoded}`} />;
+          }
+        }}
+      />
+      <Route
+        path="/ml-network/"
+        render={({ location: { search = '' } }) => (
+          <Redirect from="/ml-network/" to={`/ml-network${search}`} />
+        )}
+      />
+    </Switch>
+  )
+);
 
 MlNetworkConditionalContainer.displayName = 'MlNetworkConditionalContainer';

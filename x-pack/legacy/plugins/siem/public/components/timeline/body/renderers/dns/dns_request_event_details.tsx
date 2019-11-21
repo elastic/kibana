@@ -22,7 +22,7 @@ interface Props {
   timelineId: string;
 }
 
-export const DnsRequestEventDetails = React.memo<Props>(({ data, contextId, timelineId }) => {
+export const DnsRequestEventDetails: React.FC<Props> = React.memo(({ data, contextId, timelineId }) => {
   const dnsQuestionName: string | null | undefined = get('dns.question.name[0]', data);
   const dnsQuestionType: string | null | undefined = get('dns.question.type[0]', data);
   const dnsResolvedIp: string | null | undefined = get('dns.resolved_ip[0]', data);

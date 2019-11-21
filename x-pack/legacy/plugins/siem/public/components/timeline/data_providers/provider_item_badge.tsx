@@ -32,7 +32,7 @@ interface ProviderItemBadgeProps {
   val: string | number;
 }
 
-export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
+export const ProviderItemBadge: React.FC<ProviderItemBadgeProps> = React.memo(
   ({
     andProviderId,
     browserFields,

@@ -36,7 +36,7 @@ export interface QueryBarComponentProps {
   onSavedQuery: (savedQuery: SavedQuery | null) => void;
 }
 
-export const QueryBar = memo<QueryBarComponentProps>(
+export const QueryBar: React.FC<QueryBarComponentProps> = memo(
   ({
     dateRangeFrom,
     dateRangeTo,

@@ -81,7 +81,7 @@ interface AttributesProps {
   children: React.ReactNode;
 }
 
-const Attributes = React.memo<AttributesProps>(({ children }) => {
+const Attributes: React.FC<AttributesProps> = React.memo(({ children }) => {
   const width = useTimelineWidthContext();
 
   // Passing the styles directly to the component because the width is
@@ -98,7 +98,7 @@ const Attributes = React.memo<AttributesProps>(({ children }) => {
   );
 });
 
-export const StatefulEvent = React.memo<Props>(
+export const StatefulEvent: React.FC<Props> = React.memo(
   ({
     actionsColumnWidth,
     addNoteToEvent,

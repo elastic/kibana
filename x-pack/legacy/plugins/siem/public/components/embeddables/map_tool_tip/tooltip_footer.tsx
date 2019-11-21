@@ -30,7 +30,7 @@ interface MapToolTipFooterProps {
   nextFeature: () => void;
 }
 
-export const ToolTipFooter = React.memo<MapToolTipFooterProps>(
+export const ToolTipFooter: React.FC<MapToolTipFooterProps> = React.memo(
   ({ featureIndex, totalFeatures, previousFeature, nextFeature }) => {
     return (
       <>

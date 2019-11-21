@@ -33,7 +33,7 @@ export interface TimelineRefetchProps {
 
 type OwnProps = TimelineRefetchProps & TimelineRefetchDispatch;
 
-const TimelineRefetchComponent = memo<OwnProps>(
+const TimelineRefetchComponent: React.FC<OwnProps> = memo(
   ({ id, inputId, inspect, loading, refetch, setTimelineQuery }) => {
     useEffect(() => {
       setTimelineQuery({ id, inputId, inspect, loading, refetch });

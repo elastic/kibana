@@ -12,7 +12,7 @@ import { withRouter } from 'react-router-dom';
 import { SpyRouteProps } from './types';
 import { useRouteSpy } from './use_route_spy';
 
-export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
+export const SpyRouteComponent: React.FC<SpyRouteProps & { location: H.Location }> = memo(
   ({
     location: { pathname, search },
     history,

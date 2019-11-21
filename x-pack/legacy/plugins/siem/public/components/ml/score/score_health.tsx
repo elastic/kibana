@@ -13,7 +13,7 @@ interface Props {
 
 export const getScoreString = (score: number) => String(Math.ceil(score));
 
-export const ScoreHealth = React.memo<Props>(({ score }) => {
+export const ScoreHealth: React.FC<Props> = React.memo(({ score }) => {
   const scoreCeiling = getScoreString(score);
   const color = getSeverityColor(score);
   return <EuiHealth color={color}>{scoreCeiling}</EuiHealth>;

@@ -17,7 +17,7 @@ const detectionEnginePath = `/:pageName(detection-engine)`;
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
-export const DetectionEngineContainer = React.memo<Props>(() => (
+export const DetectionEngineContainer: React.FC<Props> = React.memo(() => (
   <Switch>
     <Route exact path={detectionEnginePath} render={() => <DetectionEngineComponent />} strict />
     <Route exact path={`${detectionEnginePath}/rules`} render={() => <RulesComponent />} />

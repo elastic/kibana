@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { EuiSwitch } from '@elastic/eui';
 
 export interface Props {
@@ -25,9 +25,9 @@ export const SimpleTemplate: FunctionComponent<Props> = ({ onValueChange, argVal
   );
 };
 
-SimpleTemplate.propTypes = {
-  onValueChange: PropTypes.func.isRequired,
-  argValue: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]).isRequired,
-};
+// SimpleTemplate.propTypes = {
+//   onValueChange: PropTypes.func.isRequired,
+//   argValue: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]).isRequired,
+// };
 
 SimpleTemplate.displayName = 'AxisConfigSimpleInput';

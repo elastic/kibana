@@ -34,7 +34,7 @@ interface SubtitleItemProps {
   dataTestSubj?: string;
 }
 
-const SubtitleItem = React.memo<SubtitleItemProps>(
+const SubtitleItem: React.FC<SubtitleItemProps> = React.memo(
   ({ children, dataTestSubj = 'header-panel-subtitle' }) => {
     if (typeof children === 'string') {
       return (
@@ -57,7 +57,7 @@ export interface SubtitleProps {
   items: string | React.ReactNode | Array<string | React.ReactNode>;
 }
 
-export const Subtitle = React.memo<SubtitleProps>(({ items }) => {
+export const Subtitle: React.FC<SubtitleProps> = React.memo(({ items }) => {
   return (
     <Wrapper className="siemSubtitle">
       {Array.isArray(items) ? (

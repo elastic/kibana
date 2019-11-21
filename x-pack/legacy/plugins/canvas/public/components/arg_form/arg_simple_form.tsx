@@ -5,7 +5,7 @@
  */
 
 import React, { ReactNode, MouseEventHandler } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { TooltipIcon, IconType } from '../tooltip_icon';
 
@@ -56,9 +56,9 @@ export const ArgSimpleForm: React.FunctionComponent<Props> = ({
   );
 };
 
-ArgSimpleForm.propTypes = {
-  children: PropTypes.node,
-  required: PropTypes.bool,
-  valueMissing: PropTypes.bool,
-  onRemove: PropTypes.func.isRequired,
-};
+// ArgSimpleForm.propTypes = {
+//   children: PropTypes.node,
+//   required: PropTypes.bool,
+//   valueMissing: PropTypes.bool,
+//   onRemove: PropTypes.func.isRequired,
+// };

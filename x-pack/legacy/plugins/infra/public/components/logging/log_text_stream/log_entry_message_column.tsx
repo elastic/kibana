@@ -29,7 +29,7 @@ interface LogEntryMessageColumnProps {
   isWrapped: boolean;
 }
 
-export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
+export const LogEntryMessageColumn: React.FC<LogEntryMessageColumnProps> = memo(
   ({ columnValue, highlights, isActiveHighlight, isHighlighted, isHovered, isWrapped }) => {
     const message = useMemo(
       () =>

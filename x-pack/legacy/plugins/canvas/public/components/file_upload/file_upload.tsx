@@ -6,7 +6,7 @@
 
 // @ts-ignore (elastic/eui#1262) EuiFilePicker is not exported yet
 import { EuiFilePicker } from '@elastic/eui';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import React, { FunctionComponent } from 'react';
 
 interface Props {
@@ -27,13 +27,13 @@ FileUpload.defaultProps = {
   className: 'canvasFileUpload',
 };
 
-FileUpload.propTypes = {
-  /** Optional ID of the component */
-  id: PropTypes.string,
-  /** Optional className of the component */
-  className: PropTypes.string,
-  /** Function to invoke when the file is successfully uploaded */
-  onUpload: PropTypes.func.isRequired,
-};
+// FileUpload.propTypes = {
+//   /** Optional ID of the component */
+//   id: PropTypes.string,
+//   /** Optional className of the component */
+//   className: PropTypes.string,
+//   /** Function to invoke when the file is successfully uploaded */
+//   onUpload: PropTypes.func.isRequired,
+// };
 
 FileUpload.displayName = 'FileUpload';

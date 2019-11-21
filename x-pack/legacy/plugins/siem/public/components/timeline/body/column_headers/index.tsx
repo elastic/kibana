@@ -56,7 +56,7 @@ interface Props {
 }
 
 /** Renders the timeline header columns */
-export const ColumnHeaders = React.memo<Props>(
+export const ColumnHeaders: React.FC<Props> = React.memo(
   ({
     actionsColumnWidth,
     browserFields,

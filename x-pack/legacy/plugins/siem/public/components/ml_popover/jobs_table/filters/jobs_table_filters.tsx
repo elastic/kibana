@@ -31,7 +31,7 @@ interface JobsTableFiltersProps {
  * @param siemJobs jobs to fetch groups from to display for filtering
  * @param onFilterChanged change listener to be notified on filter changes
  */
-export const JobsTableFilters = React.memo<JobsTableFiltersProps>(
+export const JobsTableFilters: React.FC<JobsTableFiltersProps> = React.memo(
   ({ siemJobs, onFilterChanged }) => {
     const [filterQuery, setFilterQuery] = useState<string>('');
     const [selectedGroups, setSelectedGroups] = useState<string[]>([]);

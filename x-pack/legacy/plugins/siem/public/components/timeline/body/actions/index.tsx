@@ -36,7 +36,7 @@ interface Props {
 
 const emptyNotes: string[] = [];
 
-export const Actions = React.memo<Props>(
+export const Actions: React.FC<Props> = React.memo(
   ({
     actionsColumnWidth,
     associateNote,

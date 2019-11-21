@@ -12,7 +12,7 @@ export interface UtilityBarGroupProps {
   children: React.ReactNode;
 }
 
-export const UtilityBarGroup = React.memo<UtilityBarGroupProps>(({ children }) => (
+export const UtilityBarGroup: React.FC<UtilityBarGroupProps> = React.memo(({ children }) => (
   <BarGroup>{children}</BarGroup>
 ));
 UtilityBarGroup.displayName = 'UtilityBarGroup';

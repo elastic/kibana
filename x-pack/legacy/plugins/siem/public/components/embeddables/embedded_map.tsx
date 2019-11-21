@@ -79,7 +79,7 @@ export interface EmbeddedMapProps {
   setQuery: SetQuery;
 }
 
-export const EmbeddedMap = React.memo<EmbeddedMapProps>(
+export const EmbeddedMap: React.FC<EmbeddedMapProps> = React.memo(
   ({ endDate, filters, query, setQuery, startDate }) => {
     const [embeddable, setEmbeddable] = React.useState<MapEmbeddable | null>(null);
     const [isLoading, setIsLoading] = useState(true);

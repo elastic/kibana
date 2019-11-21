@@ -39,7 +39,7 @@ const FlexGroupSpinner = styled(EuiFlexGroup)`
 
 FlexGroupSpinner.displayName = 'FlexGroupSpinner';
 
-export const KpiHostsComponent = React.memo<KpiHostsProps | KpiHostDetailsProps>(
+export const KpiHostsComponent: React.FC<KpiHostsProps | KpiHostDetailsProps> = React.memo(
   ({ data, from, loading, id, to, narrowDateRange }) => {
     const mappings =
       (data as KpiHostsData).hosts !== undefined ? kpiHostsMapping : kpiHostDetailsMapping;

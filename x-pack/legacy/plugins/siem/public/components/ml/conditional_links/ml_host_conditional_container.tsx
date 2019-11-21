@@ -22,70 +22,72 @@ interface QueryStringType {
 
 type MlHostConditionalProps = Partial<RouteComponentProps<{}>> & { url: string };
 
-export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ url }) => (
-  <Switch>
-    <Route
-      strict
-      exact
-      path={url}
-      render={({ location }) => {
-        const queryStringDecoded: QueryStringType = QueryString.decode(
-          location.search.substring(1)
-        );
-        if (queryStringDecoded.query != null) {
-          queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
-        }
-        const reEncoded = QueryString.encode(queryStringDecoded);
-        return <Redirect to={`/${SiemPageName.hosts}?${reEncoded}`} />;
-      }}
-    />
-    <Route
-      path={`${url}/:hostName`}
-      render={({
-        location,
-        match: {
-          params: { hostName },
-        },
-      }) => {
-        const queryStringDecoded: QueryStringType = QueryString.decode(
-          location.search.substring(1)
-        );
-        if (queryStringDecoded.query != null) {
-          queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
-        }
-        if (emptyEntity(hostName)) {
+export const MlHostConditionalContainer: React.FC<MlHostConditionalProps> = React.memo(
+  ({ url }) => (
+    <Switch>
+      <Route
+        strict
+        exact
+        path={url}
+        render={({ location }) => {
+          const queryStringDecoded: QueryStringType = QueryString.decode(
+            location.search.substring(1)
+          );
+          if (queryStringDecoded.query != null) {
+            queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
+          }
           const reEncoded = QueryString.encode(queryStringDecoded);
-          return (
-            <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
+          return <Redirect to={`/${SiemPageName.hosts}?${reEncoded}`} />;
+        }}
+      />
+      <Route
+        path={`${url}/:hostName`}
+        render={({
+          location,
+          match: {
+            params: { hostName },
+          },
+        }) => {
+          const queryStringDecoded: QueryStringType = QueryString.decode(
+            location.search.substring(1)
           );
-        } else if (multipleEntities(hostName)) {
-          const hosts: string[] = getMultipleEntities(hostName);
-          queryStringDecoded.query = addEntitiesToKql(
-            ['host.name'],
-            hosts,
-            queryStringDecoded.query || ''
-          );
-          const reEncoded = QueryString.encode(queryStringDecoded);
-          return (
-            <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
-          );
-        } else {
-          const reEncoded = QueryString.encode(queryStringDecoded);
-          return (
-            <Redirect
-              to={`/${SiemPageName.hosts}/${hostName}/${HostsTableType.anomalies}?${reEncoded}`}
-            />
-          );
-        }
-      }}
-    />
-    <Route
-      path="/ml-hosts/"
-      render={({ location: { search = '' } }) => (
-        <Redirect from="/ml-hosts/" to={`/ml-hosts${search}`} />
-      )}
-    />
-  </Switch>
-));
+          if (queryStringDecoded.query != null) {
+            queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
+          }
+          if (emptyEntity(hostName)) {
+            const reEncoded = QueryString.encode(queryStringDecoded);
+            return (
+              <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
+            );
+          } else if (multipleEntities(hostName)) {
+            const hosts: string[] = getMultipleEntities(hostName);
+            queryStringDecoded.query = addEntitiesToKql(
+              ['host.name'],
+              hosts,
+              queryStringDecoded.query || ''
+            );
+            const reEncoded = QueryString.encode(queryStringDecoded);
+            return (
+              <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
+            );
+          } else {
+            const reEncoded = QueryString.encode(queryStringDecoded);
+            return (
+              <Redirect
+                to={`/${SiemPageName.hosts}/${hostName}/${HostsTableType.anomalies}?${reEncoded}`}
+              />
+            );
+          }
+        }}
+      />
+      <Route
+        path="/ml-hosts/"
+        render={({ location: { search = '' } }) => (
+          <Redirect from="/ml-hosts/" to={`/ml-hosts${search}`} />
+        )}
+      />
+    </Switch>
+  )
+);
 
 MlHostConditionalContainer.displayName = 'MlHostConditionalContainer';

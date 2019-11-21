@@ -6,7 +6,7 @@
 
 import React, { ComponentType, FunctionComponent } from 'react';
 import { unmountComponentAtNode, render } from 'react-dom';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ErrorBoundary } from '../components/enhance/error_boundary';
 import { ArgumentHandlers } from '../../types/arguments';
@@ -33,9 +33,9 @@ export const templateFromReactComponent = (Component: ComponentType<any>) => {
     </ErrorBoundary>
   );
 
-  WrappedComponent.propTypes = {
-    renderError: PropTypes.func,
-  };
+  // WrappedComponent.propTypes = {
+  //   renderError: PropTypes.func,
+  // };
 
   return (domNode: HTMLElement, config: Props, handlers: ArgumentHandlers) => {
     try {

@@ -16,7 +16,7 @@ interface Props {
   processTitle: string | null | undefined;
 }
 
-export const Args = React.memo<Props>(({ args, contextId, eventId, processTitle }) => {
+export const Args: React.FC<Props> = React.memo(({ args, contextId, eventId, processTitle }) => {
   if (isNillEmptyOrNotFinite(args) && isNillEmptyOrNotFinite(processTitle)) {
     return null;
   }

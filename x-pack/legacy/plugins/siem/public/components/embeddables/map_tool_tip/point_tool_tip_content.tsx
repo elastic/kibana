@@ -22,7 +22,7 @@ interface PointToolTipContentProps {
   closeTooltip?(): void;
 }
 
-export const PointToolTipContent = React.memo<PointToolTipContentProps>(
+export const PointToolTipContent: React.FC<PointToolTipContentProps> = React.memo(
   ({ contextId, featureProps, closeTooltip }) => {
     const featureDescriptionListItems = featureProps.map(
       ({ _propertyKey: key, _rawValue: value }) => ({

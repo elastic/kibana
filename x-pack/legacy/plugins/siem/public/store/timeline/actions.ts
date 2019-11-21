@@ -155,8 +155,6 @@ export const updateIsFavorite = actionCreator<{ id: string; isFavorite: boolean 
   'UPDATE_IS_FAVORITE'
 );
 
-export const updateIsLive = actionCreator<{ id: string; isLive: boolean }>('UPDATE_IS_LIVE');
-
 export const updateItemsPerPage = actionCreator<{ id: string; itemsPerPage: number }>(
   'UPDATE_ITEMS_PER_PAGE'
 );

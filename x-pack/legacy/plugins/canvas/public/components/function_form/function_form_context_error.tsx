@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { ComponentStrings } from '../../../i18n/components';
 
 interface Props {
@@ -22,6 +22,6 @@ export const FunctionFormContextError: FunctionComponent<Props> = ({ context }) 
   </div>
 );
 
-FunctionFormContextError.propTypes = {
-  context: PropTypes.shape({ error: PropTypes.string }).isRequired,
-};
+// FunctionFormContextError.propTypes = {
+//   context: PropTypes.shape({ error: PropTypes.string }).isRequired,
+// };

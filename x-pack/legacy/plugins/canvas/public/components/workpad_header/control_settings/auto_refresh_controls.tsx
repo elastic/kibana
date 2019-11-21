@@ -5,7 +5,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -183,8 +183,8 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
   );
 };
 
-AutoRefreshControls.propTypes = {
-  refreshInterval: PropTypes.number,
-  setRefresh: PropTypes.func.isRequired,
-  disableInterval: PropTypes.func.isRequired,
-};
+// AutoRefreshControls.propTypes = {
+//   refreshInterval: PropTypes.number,
+//   setRefresh: PropTypes.func.isRequired,
+//   disableInterval: PropTypes.func.isRequired,
+// };

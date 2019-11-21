@@ -58,7 +58,7 @@ const rowItems: ItemsPerRow[] = [
 
 export const tlsTableId = 'tls-table';
 
-const TlsTableComponent = React.memo<TlsTableProps>(
+const TlsTableComponent: React.FC<TlsTableProps> = React.memo(
   ({
     activePage,
     data,

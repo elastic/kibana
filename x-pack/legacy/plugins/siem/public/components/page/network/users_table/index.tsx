@@ -61,7 +61,7 @@ const rowItems: ItemsPerRow[] = [
 
 export const usersTableId = 'users-table';
 
-const UsersTableComponent = React.memo<UsersTableProps>(
+const UsersTableComponent: React.FC<UsersTableProps> = React.memo(
   ({
     activePage,
     data,

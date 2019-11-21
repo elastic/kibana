@@ -206,7 +206,7 @@ type Props = OwnProps & DispatchProps;
  * data provider associated with the item being dropped
  */
 
-const DraggableWrapperComponent = React.memo<Props>(
+const DraggableWrapperComponent: React.FC<Props> = React.memo(
   ({ dataProvider, registerProvider, render, truncate, unRegisterProvider }) => {
     const usePortal = useDraggablePortalContext();
 
@@ -281,8 +281,11 @@ export const DraggableWrapper = connect(null, {
  *
  * See: https://github.com/atlassian/react-beautiful-dnd/issues/499
  */
-const ConditionalPortal = React.memo<{ children: React.ReactNode; usePortal: boolean }>(
-  ({ children, usePortal }) => (usePortal ? <EuiPortal>{children}</EuiPortal> : <>{children}</>)
+const ConditionalPortal: React.FC<{
+  children: React.ReactNode;
+  usePortal: boolean;
+}> = React.memo(({ children, usePortal }) =>
+  usePortal ? <EuiPortal>{children}</EuiPortal> : <>{children}</>
 );
 
 ConditionalPortal.displayName = 'ConditionalPortal';

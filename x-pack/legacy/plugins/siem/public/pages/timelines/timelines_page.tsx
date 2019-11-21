@@ -27,7 +27,7 @@ type OwnProps = TimelinesProps;
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
-export const TimelinesPage = React.memo<OwnProps>(({ apolloClient }) => (
+export const TimelinesPage: React.FC<OwnProps> = React.memo(({ apolloClient }) => (
   <>
     <WrapperPage>
       <HeaderPage border title={i18n.PAGE_TITLE} />

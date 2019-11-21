@@ -49,7 +49,7 @@ export interface QueryBarTimelineComponentProps {
 
 const timelineFilterDropArea = 'timeline-filter-drop-area';
 
-export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
+export const QueryBarTimeline: React.FC<QueryBarTimelineComponentProps> = memo(
   ({
     applyKqlFilterQuery,
     browserFields,

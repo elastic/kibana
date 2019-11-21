@@ -46,7 +46,8 @@ interface DispatchProps {
 /**
  * Manages the state of the field browser
  */
-export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & DispatchProps>(
+export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps &
+  DispatchProps> = React.memo(
   ({
     columnHeaders,
     browserFields,

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { fromExpression } from '@kbn/interpreter/common';
 import { TimePicker } from '../time_picker';
@@ -51,8 +51,8 @@ export const TimeFilter = ({ filter, commit, compact }: Props) => {
   }
 };
 
-TimeFilter.propTypes = {
-  filter: PropTypes.string.isRequired,
-  commit: PropTypes.func.isRequired, // Canvas filter
-  compact: PropTypes.bool,
-};
+// TimeFilter.propTypes = {
+//   filter: PropTypes.string.isRequired,
+//   commit: PropTypes.func.isRequired, // Canvas filter
+//   compact: PropTypes.bool,
+// };

@@ -27,7 +27,7 @@ interface Props {
 }
 
 /** Renders a table view or JSON view of the `ECS` `data` */
-export const EventFieldsBrowser = React.memo<Props>(
+export const EventFieldsBrowser: React.FC<Props> = React.memo(
   ({ browserFields, columnHeaders, data, eventId, onUpdateColumns, timelineId, toggleColumn }) => {
     const fieldsByName = getAllFieldsByName(browserFields);
     return (

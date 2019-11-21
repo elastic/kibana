@@ -19,7 +19,7 @@ export interface LastEventTimeProps {
   ip?: string;
 }
 
-export const LastEventTime = memo<LastEventTimeProps>(({ hostName, indexKey, ip }) => {
+export const LastEventTime: React.FC<LastEventTimeProps> = memo(({ hostName, indexKey, ip }) => {
   const { loading, lastSeen, errorMessage } = useLastEventTimeQuery(
     indexKey,
     { hostName, ip },

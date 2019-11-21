@@ -60,7 +60,7 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const NetworkHttpTableComponent = React.memo<NetworkHttpTableProps>(
+const NetworkHttpTableComponent: React.FC<NetworkHttpTableProps> = React.memo(
   ({
     activePage,
     data,

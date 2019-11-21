@@ -7,7 +7,6 @@
 import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-import { ActionCreator } from 'typescript-fsa';
 
 import { isEmpty, get } from 'lodash/fp';
 import { History } from '../../../lib/history';
@@ -60,12 +59,12 @@ interface DispatchProps {
     maxWidthPercent: number;
     minWidthPixels: number;
   }) => void;
-  createTimeline: ActionCreator<{ id: string; show?: boolean }>;
-  toggleLock: ActionCreator<{ linkToId: InputsModelId }>;
-  updateDescription: ActionCreator<{ id: string; description: string }>;
-  updateIsFavorite: ActionCreator<{ id: string; isFavorite: boolean }>;
+  createTimeline: ({ id, show }: { id: string; show?: boolean }) => void;
+  toggleLock: ({ linkToId }: { linkToId: InputsModelId }) => void;
+  updateDescription: ({ id, description }: { id: string; description: string }) => void;
+  updateIsFavorite: ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
   updateNote: UpdateNote;
-  updateTitle: ActionCreator<{ id: string; title: string }>;
+  updateTitle: ({ id, title }: { id: string; title: string }) => void;
 }
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
@@ -199,13 +198,10 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps): Dispa
   updateIsFavorite: ({ id, isFavorite }: { id: string; isFavorite: boolean }) => {
     dispatch(timelineActions.updateIsFavorite({ id, isFavorite }));
   },
-  updateIsLive: ({ id, isLive }: { id: string; isLive: boolean }) => {
-    dispatch(timelineActions.updateIsLive({ id, isLive }));
-  },
   updateNote: (note: Note) => {
     dispatch(appActions.updateNote({ note }));
   },
-  updateTitle: ({ id, title }: { id: string; title: string }) => {
+  updateTitle: ({ id, title }) => {
     dispatch(timelineActions.updateTitle({ id, title }));
   },
   toggleLock: ({ linkToId }: { linkToId: InputsModelId }) => {
@@ -213,4 +209,7 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps): Dispa
   },
 });
 
-export const FlyoutHeader = connect(makeMapStateToProps, mapDispatchToProps)(StatefulFlyoutHeader);
+export const FlyoutHeader = connect<StateReduxProps, DispatchProps, OwnProps, State>(
+  makeMapStateToProps,
+  mapDispatchToProps
+)(StatefulFlyoutHeader);

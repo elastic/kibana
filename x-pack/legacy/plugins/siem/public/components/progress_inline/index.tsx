@@ -31,7 +31,7 @@ export interface ProgressInlineProps {
   unit: string;
 }
 
-export const ProgressInline = React.memo<ProgressInlineProps>(
+export const ProgressInline: React.FC<ProgressInlineProps> = React.memo(
   ({ children, current, max, unit }) => (
     <Wrapper className="siemProgressInline">
       <dt className="siemProgressInline__title">{children}</dt>

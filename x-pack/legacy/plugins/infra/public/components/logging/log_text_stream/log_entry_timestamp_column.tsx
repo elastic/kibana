@@ -17,7 +17,7 @@ interface LogEntryTimestampColumnProps {
   time: number;
 }
 
-export const LogEntryTimestampColumn = memo<LogEntryTimestampColumnProps>(
+export const LogEntryTimestampColumn: React.FC<LogEntryTimestampColumnProps> = memo(
   ({ isHighlighted, isHovered, time }) => {
     const formattedTime = useFormattedTime(time, { format: 'time' });
 

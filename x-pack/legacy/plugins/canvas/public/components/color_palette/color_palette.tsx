@@ -5,7 +5,7 @@
  */
 
 import { EuiIcon, EuiLink } from '@elastic/eui';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import React, { FunctionComponent } from 'react';
 import tinycolor from 'tinycolor2';
 import { readableColor } from '../../lib/readable_color';
@@ -71,9 +71,9 @@ export const ColorPalette: FunctionComponent<Props> = ({
   );
 };
 
-ColorPalette.propTypes = {
-  colors: PropTypes.array,
-  colorsPerRow: PropTypes.number,
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.string,
-};
+// ColorPalette.propTypes = {
+//   colors: PropTypes.array,
+//   colorsPerRow: PropTypes.number,
+//   onChange: PropTypes.func.isRequired,
+//   value: PropTypes.string,
+// };

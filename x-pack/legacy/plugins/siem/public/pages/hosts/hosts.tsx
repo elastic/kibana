@@ -38,7 +38,7 @@ import { HostsComponentProps, HostsComponentReduxProps } from './types';
 
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
-const HostsComponent = React.memo<HostsComponentProps>(
+const HostsComponent: React.FC<HostsComponentProps> = React.memo(
   ({
     deleteQuery,
     isInitializing,

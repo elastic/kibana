@@ -63,7 +63,7 @@ WithHoverActionsContainer.displayName = 'WithHoverActionsContainer';
  * component also passes `showHoverContent` as a render prop, which
  * provides a signal to the content that the user is in a hover state.
  */
-export const WithHoverActions = React.memo<Props>(
+export const WithHoverActions: React.FC<Props> = React.memo(
   ({ alwaysShow = false, hoverContent, render }) => {
     const [showHoverContent, setShowHoverContent] = useState(false);
     const onMouseEnter = useCallback(() => {

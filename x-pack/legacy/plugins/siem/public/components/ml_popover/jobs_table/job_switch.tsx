@@ -41,7 +41,7 @@ export const isFailure = (jobState: string, datafeedState: string): boolean => {
   return failureStates.includes(jobState) || failureStates.includes(datafeedState);
 };
 
-export const JobSwitch = React.memo<JobSwitchProps>(
+export const JobSwitch: React.FC<JobSwitchProps> = React.memo(
   ({ job, isSiemJobsLoading, onJobStateChange }) => {
     const [isLoading, setIsLoading] = useState(false);
 

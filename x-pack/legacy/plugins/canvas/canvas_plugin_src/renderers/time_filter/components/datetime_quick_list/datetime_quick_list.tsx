@@ -5,7 +5,7 @@
  */
 
 import React, { ReactNode, FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import 'react-datetime/css/react-datetime.css';
 import { UnitStrings } from '../../../../../i18n';
@@ -52,9 +52,9 @@ export const DatetimeQuickList: FunctionComponent<Props> = ({ from, to, onSelect
   </div>
 );
 
-DatetimeQuickList.propTypes = {
-  from: PropTypes.string.isRequired,
-  to: PropTypes.string.isRequired,
-  onSelect: PropTypes.func.isRequired,
-  children: PropTypes.node,
-};
+// DatetimeQuickList.propTypes = {
+//   from: PropTypes.string.isRequired,
+//   to: PropTypes.string.isRequired,
+//   onSelect: PropTypes.func.isRequired,
+//   children: PropTypes.node,
+// };

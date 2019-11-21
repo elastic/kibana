@@ -77,7 +77,7 @@ const StartApp: FC<AppFrontendLibs> = memo(libs => {
 
 export const ROOT_ELEMENT_ID = 'react-siem-root';
 
-export const SiemApp = memo<{ core: LegacyCoreStart; plugins: PluginsStart }>(
+export const SiemApp: React.FC<{ core: LegacyCoreStart; plugins: PluginsStart }> = memo(
   ({ core, plugins }) => (
     <KibanaContextProvider
       services={{

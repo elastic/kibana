@@ -18,7 +18,7 @@ interface Props {
   text: string | null | undefined;
 }
 
-export const ParentProcessDraggable = React.memo<Props>(
+export const ParentProcessDraggable: React.FC<Props> = React.memo(
   ({ contextId, endgameParentProcessName, eventId, processPpid, text }) => {
     if (isNillEmptyOrNotFinite(endgameParentProcessName) && isNillEmptyOrNotFinite(processPpid)) {
       return null;

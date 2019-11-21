@@ -120,14 +120,14 @@ const FlexGroup = styled(EuiFlexGroup)`
 
 FlexGroup.displayName = 'FlexGroup';
 
-export const KpiNetworkBaseComponent = React.memo<{
+export const KpiNetworkBaseComponent: React.FC<{
   fieldsMapping: Readonly<StatItems[]>;
   data: KpiNetworkData;
   id: string;
   from: number;
   to: number;
   narrowDateRange: UpdateDateRange;
-}>(({ fieldsMapping, data, id, from, to, narrowDateRange }) => {
+}> = React.memo(({ fieldsMapping, data, id, from, to, narrowDateRange }) => {
   const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
     fieldsMapping,
     data,
@@ -146,7 +146,7 @@ export const KpiNetworkBaseComponent = React.memo<{
   );
 });
 
-export const KpiNetworkComponent = React.memo<KpiNetworkProps>(
+export const KpiNetworkComponent: React.FC<KpiNetworkProps> = React.memo(
   ({ data, from, id, loading, to, narrowDateRange }) => {
     return loading ? (
       <FlexGroup justifyContent="center" alignItems="center">

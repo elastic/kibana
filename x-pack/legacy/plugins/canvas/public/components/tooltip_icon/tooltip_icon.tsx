@@ -6,7 +6,7 @@
 
 /* eslint react/forbid-elements: 0 */
 import React from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { EuiIconTip, PropsOf } from '@elastic/eui';
 
 export enum IconType {
@@ -31,6 +31,6 @@ export const TooltipIcon = ({ icon = IconType.info, ...rest }: Props) => {
   return <EuiIconTip {...rest} type={icons[icon].type} color={icons[icon].color} />;
 };
 
-TooltipIcon.propTypes = {
-  icon: PropTypes.string,
-};
+// TooltipIcon.propTypes = {
+//   icon: PropTypes.string,
+// };

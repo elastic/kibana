@@ -19,7 +19,7 @@ import { PointToolTipContent } from './point_tool_tip_content';
 import { Loader } from '../../loader';
 import * as i18n from '../translations';
 
-export const MapToolTip = React.memo<MapToolTipProps>(
+export const MapToolTip: React.FC<MapToolTipProps> = React.memo(
   ({
     addFilters,
     closeTooltip,

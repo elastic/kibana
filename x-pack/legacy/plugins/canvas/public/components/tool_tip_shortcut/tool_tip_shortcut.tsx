@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { EuiText } from '@elastic/eui';
 import { FunctionComponent } from 'react';
 
@@ -22,6 +22,6 @@ export const ToolTipShortcut: FunctionComponent<Props> = ({ shortcut }) => (
   </EuiText>
 );
 
-ToolTipShortcut.propTypes = {
-  shortcut: PropTypes.string.isRequired,
-};
+// ToolTipShortcut.propTypes = {
+//   shortcut: PropTypes.string.isRequired,
+// };

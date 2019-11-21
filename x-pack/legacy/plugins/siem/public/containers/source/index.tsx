@@ -78,7 +78,7 @@ const getBrowserFields = memoizeOne(
       : {}
 );
 
-export const WithSource = React.memo<WithSourceProps>(({ children, sourceId }) => {
+export const WithSource: React.FC<WithSourceProps> = React.memo(({ children, sourceId }) => {
   return (
     <Query<SourceQuery.Query, SourceQuery.Variables>
       query={sourceQuery}

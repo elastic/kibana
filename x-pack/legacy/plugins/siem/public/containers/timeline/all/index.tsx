@@ -71,7 +71,7 @@ const getAllTimeline = memoizeOne(
     }))
 );
 
-export const AllTimelinesQuery = React.memo<OwnProps>(
+export const AllTimelinesQuery: React.FC<OwnProps> = React.memo(
   ({ children, onlyUserFavorite, pageInfo, search, sort }) => {
     const variables: GetAllTimeline.Variables = {
       onlyUserFavorite,

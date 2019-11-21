@@ -12,7 +12,7 @@ export interface UtilityBarSectionProps {
   children: React.ReactNode;
 }
 
-export const UtilityBarSection = React.memo<UtilityBarSectionProps>(({ children }) => (
+export const UtilityBarSection: React.FC<UtilityBarSectionProps> = React.memo(({ children }) => (
   <BarSection>{children}</BarSection>
 ));
 UtilityBarSection.displayName = 'UtilityBarSection';

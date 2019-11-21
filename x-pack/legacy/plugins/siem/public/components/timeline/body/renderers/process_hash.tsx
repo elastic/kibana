@@ -24,7 +24,7 @@ interface Props {
   processHashSha256: string | null | undefined;
 }
 
-export const ProcessHash = React.memo<Props>(
+export const ProcessHash: React.FC<Props> = React.memo(
   ({ contextId, eventId, processHashMd5, processHashSha1, processHashSha256 }) => {
     if (
       isNillEmptyOrNotFinite(processHashSha256) &&

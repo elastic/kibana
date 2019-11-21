@@ -23,7 +23,7 @@ interface Props {
   toggleColumn: (column: ColumnHeader) => void;
 }
 
-export const StatefulEventDetails = React.memo<Props>(
+export const StatefulEventDetails: React.FC<Props> = React.memo(
   ({ browserFields, columnHeaders, data, id, onUpdateColumns, timelineId, toggleColumn }) => {
     const [view, setView] = useState<View>('table-view');
 

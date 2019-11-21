@@ -28,7 +28,7 @@ const sorting = {
   },
 };
 
-export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
+export const AnomaliesNetworkTable: React.FC<AnomaliesNetworkTableProps> = React.memo(
   ({ startDate, endDate, narrowDateRange, skip, ip, type, flowTarget }): JSX.Element | null => {
     const capabilities = useContext(MlCapabilitiesContext);
     const [loading, tableData] = useAnomaliesTableData({

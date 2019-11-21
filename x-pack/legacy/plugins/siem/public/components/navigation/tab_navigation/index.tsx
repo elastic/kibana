@@ -11,7 +11,7 @@ import { trackUiAction as track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../l
 import { getSearch } from '../helpers';
 import { TabNavigationProps } from './types';
 
-export const TabNavigation = React.memo<TabNavigationProps>(props => {
+export const TabNavigation: React.FC<TabNavigationProps> = React.memo(props => {
   const { display, navTabs, pageName, tabName } = props;
 
   const mapLocationToTab = (): string => {

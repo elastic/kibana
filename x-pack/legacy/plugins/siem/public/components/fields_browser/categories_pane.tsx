@@ -52,7 +52,7 @@ type Props = Pick<FieldBrowserProps, 'browserFields' | 'timelineId' | 'onUpdateC
   width: number;
 };
 
-export const CategoriesPane = React.memo<Props>(
+export const CategoriesPane: React.FC<Props> = React.memo(
   ({
     browserFields,
     filteredBrowserFields,

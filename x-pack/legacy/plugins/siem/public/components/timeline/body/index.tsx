@@ -63,7 +63,7 @@ export interface BodyProps {
 }
 
 /** Renders the timeline body */
-export const Body = React.memo<BodyProps>(
+export const Body: React.FC<BodyProps> = React.memo(
   ({
     addNoteToEvent,
     browserFields,

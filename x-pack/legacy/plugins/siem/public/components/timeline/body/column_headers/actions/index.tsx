@@ -42,7 +42,7 @@ export const CloseButton = pure<{
 ));
 CloseButton.displayName = 'CloseButton';
 
-export const Actions = React.memo<Props>(({ header, onColumnRemoved, sort }) => {
+export const Actions: React.FC<Props> = React.memo(({ header, onColumnRemoved, sort }) => {
   const isLoading = useTimelineContext();
   return (
     <>

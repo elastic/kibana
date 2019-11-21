@@ -14,9 +14,15 @@ import { convertKueryToElasticSearchQuery } from '../../utils/kuery';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
 import { UrlStateContainer } from '../../utils/url_state';
+import { IIndexPattern } from 'src/plugins/data/common/index_patterns/types';
 
 interface WithWaffleFilterProps {
   indexPattern: StaticIndexPattern;
+}
+
+interface WithWaffleFilterArgs {
+  applyFilterQuery: Function;
+  filterQuery: Function;
 }
 
 export const withWaffleFilter = connect(
@@ -53,7 +59,12 @@ export const withWaffleFilter = connect(
     })
 );
 
-export const WithWaffleFilter = asChildFunctionRenderer(withWaffleFilter);
+interface WithWaffleFilterArgs {}
+
+export const WithWaffleFilter: React.FC<{
+  indexPattern: IIndexPattern;
+  children: (args: WithWaffleFilterArgs) => React.ReactNode;
+}> = asChildFunctionRenderer(withWaffleFilter);
 
 /**
  * Url State
@@ -63,7 +74,7 @@ type WaffleFilterUrlState = ReturnType<typeof waffleFilterSelectors.selectWaffle
 
 type WithWaffleFilterUrlStateProps = WithWaffleFilterProps;
 
-export const WithWaffleFilterUrlState: React.SFC<WithWaffleFilterUrlStateProps> = ({
+export const WithWaffleFilterUrlState: React.FC<WithWaffleFilterUrlStateProps> = ({
   indexPattern,
 }) => (
   <WithWaffleFilter indexPattern={indexPattern}>

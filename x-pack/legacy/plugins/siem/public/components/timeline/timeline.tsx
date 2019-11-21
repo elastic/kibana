@@ -86,7 +86,7 @@ interface Props {
 }
 
 /** The parent Timeline component */
-export const Timeline = React.memo<Props>(
+export const Timeline: React.FC<Props> = React.memo(
   ({
     browserFields,
     columns,

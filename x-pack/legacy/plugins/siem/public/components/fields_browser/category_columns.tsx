@@ -68,30 +68,32 @@ interface ToolTipProps {
   onUpdateColumns: OnUpdateColumns;
 }
 
-const ToolTip = React.memo<ToolTipProps>(({ categoryId, browserFields, onUpdateColumns }) => {
-  const isLoading = useContext(TimelineContext);
-  return (
-    <EuiToolTip content={i18n.VIEW_CATEGORY(categoryId)}>
-      {!isLoading ? (
-        <EuiIcon
-          aria-label={i18n.VIEW_CATEGORY(categoryId)}
-          color="text"
-          onClick={() => {
-            onUpdateColumns(
-              getColumnsWithTimestamp({
-                browserFields,
-                category: categoryId,
-              })
-            );
-          }}
-          type="visTable"
-        />
-      ) : (
-        <LoadingSpinner size="m" />
-      )}
-    </EuiToolTip>
-  );
-});
+const ToolTip: React.FC<ToolTipProps> = React.memo(
+  ({ categoryId, browserFields, onUpdateColumns }) => {
+    const isLoading = useContext(TimelineContext);
+    return (
+      <EuiToolTip content={i18n.VIEW_CATEGORY(categoryId)}>
+        {!isLoading ? (
+          <EuiIcon
+            aria-label={i18n.VIEW_CATEGORY(categoryId)}
+            color="text"
+            onClick={() => {
+              onUpdateColumns(
+                getColumnsWithTimestamp({
+                  browserFields,
+                  category: categoryId,
+                })
+              );
+            }}
+            type="visTable"
+          />
+        ) : (
+          <LoadingSpinner size="m" />
+        )}
+      </EuiToolTip>
+    );
+  }
+);
 
 ToolTip.displayName = 'ToolTip';
 

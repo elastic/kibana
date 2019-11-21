@@ -90,7 +90,7 @@ interface FlyoutButtonProps {
   timelineId: string;
 }
 
-export const FlyoutButton = React.memo<FlyoutButtonProps>(
+export const FlyoutButton: React.FC<FlyoutButtonProps> = React.memo(
   ({ onOpen, show, dataProviders, timelineId }) =>
     show ? (
       <Container onClick={onOpen}>

@@ -62,7 +62,27 @@ export const withWaffleOptions = connect(
   })
 );
 
-export const WithWaffleOptions = asChildFunctionRenderer(withWaffleOptions);
+interface WithWaffleOptionsArgs {
+  metric: typeof waffleOptionsSelectors.selectMetric;
+  groupBy: typeof waffleOptionsSelectors.selectGroupBy;
+  nodeType: typeof waffleOptionsSelectors.selectNodeType;
+  view: typeof waffleOptionsSelectors.selectView;
+  customOptions: typeof waffleOptionsSelectors.selectCustomOptions;
+  boundsOverride: typeof waffleOptionsSelectors.selectBoundsOverride;
+  autoBounds: typeof waffleOptionsSelectors.selectAutoBounds;
+  urlState: typeof selectOptionsUrlState;
+  changeMetric: typeof waffleOptionsActions.changeMetric;
+  changeGroupBy: typeof waffleOptionsActions.changeGroupBy;
+  changeNodeType: typeof waffleOptionsActions.changeNodeType;
+  changeView: typeof waffleOptionsActions.changeView;
+  changeCustomOptions: typeof waffleOptionsActions.changeCustomOptions;
+  changeBoundsOverride: typeof waffleOptionsActions.changeBoundsOverride;
+  changeAutoBounds: typeof waffleOptionsActions.changeAutoBounds;
+}
+
+export const WithWaffleOptions: React.FC<{
+  children: (args: WithWaffleOptionsArgs) => React.ReactNode;
+}> = asChildFunctionRenderer(withWaffleOptions);
 
 /**
  * Url State

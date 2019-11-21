@@ -22,7 +22,7 @@ interface Props {
   timelineId: string;
 }
 
-export const DataDrivenColumns = React.memo<Props>(
+export const DataDrivenColumns: React.FC<Props> = React.memo(
   ({ _id, columnHeaders, columnRenderers, data, timelineId }) => {
     // Passing the styles directly to the component because the width is
     // being calculated and is recommended by Styled Components for performance

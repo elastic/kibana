@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -98,6 +98,6 @@ export const KeyboardShortcutsDoc: FunctionComponent<Props> = ({ onClose }) => (
   </EuiFlyout>
 );
 
-KeyboardShortcutsDoc.propTypes = {
-  onClose: PropTypes.func.isRequired,
-};
+// KeyboardShortcutsDoc.propTypes = {
+//   onClose: PropTypes.func.isRequired,
+// };

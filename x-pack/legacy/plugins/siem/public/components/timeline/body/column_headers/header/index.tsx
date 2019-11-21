@@ -34,7 +34,7 @@ interface HeaderCompProps {
   sort: Sort;
 }
 
-const HeaderComp = React.memo<HeaderCompProps>(
+const HeaderComp: React.FC<HeaderCompProps> = React.memo(
   ({ children, header, isResizing, onClick, sort }) => {
     const isLoading = useTimelineContext();
 
@@ -91,7 +91,7 @@ interface Props {
 }
 
 /** Renders a header */
-export const Header = React.memo<Props>(
+export const Header: React.FC<Props> = React.memo(
   ({
     header,
     onColumnRemoved,

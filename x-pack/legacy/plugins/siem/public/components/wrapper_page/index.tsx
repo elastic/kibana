@@ -35,7 +35,7 @@ export interface WrapperPageProps {
   style?: Record<string, string>;
 }
 
-export const WrapperPage = React.memo<WrapperPageProps>(
+export const WrapperPage: React.FC<WrapperPageProps> = React.memo(
   ({ children, className, restrictWidth, style }) => {
     const classes = classNames(className, {
       siemWrapperPage: true,

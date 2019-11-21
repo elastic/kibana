@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { BorderForm } from './border_form';
 import { AppearanceForm } from './appearance_form';
@@ -62,10 +62,10 @@ export const ExtendedTemplate: FunctionComponent<Props> = ({
 
 ExtendedTemplate.displayName = 'ContainerStyleArgExtendedInput';
 
-ExtendedTemplate.propTypes = {
-  getArgValue: PropTypes.func.isRequired,
-  setArgValue: PropTypes.func.isRequired,
-  workpad: PropTypes.shape({
-    colors: PropTypes.array.isRequired,
-  }).isRequired,
-};
+// ExtendedTemplate.propTypes = {
+//   getArgValue: PropTypes.func.isRequired,
+//   setArgValue: PropTypes.func.isRequired,
+//   workpad: PropTypes.shape({
+//     colors: PropTypes.array.isRequired,
+//   }).isRequired,
+// };

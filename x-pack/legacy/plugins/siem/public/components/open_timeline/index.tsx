@@ -42,6 +42,7 @@ import {
 } from './types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { TimelineModel } from '../../store/timeline/model';
 
 interface OwnProps<TCache = object> {
   apolloClient: ApolloClient<TCache>;
@@ -324,6 +325,16 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
+interface StateProps {
+  timeline: TimelineModel;
+}
+
+interface DispatchProps {
+  createNewTimeline: typeof dispatchCreateNewTimeline;
+  updateIsLoading: typeof dispatchUpdateIsLoading;
+  updateTimeline: typeof dispatchUpdateTimeline;
+}
+
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   createNewTimeline: ({
     id,
@@ -339,7 +350,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateTimeline: dispatchUpdateTimeline(dispatch),
 });
 
-export const StatefulOpenTimeline = connect(
+export const StatefulOpenTimeline = connect<StateProps, DispatchProps, OwnProps, State>(
   makeMapStateToProps,
   mapDispatchToProps
 )(StatefulOpenTimelineComponent);

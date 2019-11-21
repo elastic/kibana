@@ -35,35 +35,37 @@ Updated.displayName = 'Updated';
 
 const prefix = ` ${i18n.UPDATED} `;
 
-export const LastUpdatedAt = React.memo<LastUpdatedAtProps>(({ compact = false, updatedAt }) => {
-  const [date, setDate] = useState(Date.now());
+export const LastUpdatedAt: React.FC<LastUpdatedAtProps> = React.memo(
+  ({ compact = false, updatedAt }) => {
+    const [date, setDate] = useState(Date.now());
 
-  function tick() {
-    setDate(Date.now());
+    function tick() {
+      setDate(Date.now());
+    }
+
+    useEffect(() => {
+      const timerID = setInterval(() => tick(), 10000);
+      return () => {
+        clearInterval(timerID);
+      };
+    }, []);
+
+    return (
+      <EuiToolTip
+        data-test-subj="timeline-stream-tool-tip"
+        content={
+          <>
+            <Updated date={date} prefix={prefix} updatedAt={updatedAt} />
+          </>
+        }
+      >
+        <EuiText size="s">
+          <EuiIcon data-test-subj="last-updated-at-clock-icon" type="clock" />
+          {!compact ? <Updated date={date} prefix={prefix} updatedAt={updatedAt} /> : null}
+        </EuiText>
+      </EuiToolTip>
+    );
   }
-
-  useEffect(() => {
-    const timerID = setInterval(() => tick(), 10000);
-    return () => {
-      clearInterval(timerID);
-    };
-  }, []);
-
-  return (
-    <EuiToolTip
-      data-test-subj="timeline-stream-tool-tip"
-      content={
-        <>
-          <Updated date={date} prefix={prefix} updatedAt={updatedAt} />
-        </>
-      }
-    >
-      <EuiText size="s">
-        <EuiIcon data-test-subj="last-updated-at-clock-icon" type="clock" />
-        {!compact ? <Updated date={date} prefix={prefix} updatedAt={updatedAt} /> : null}
-      </EuiText>
-    </EuiToolTip>
-  );
-});
+);
 
 LastUpdatedAt.displayName = 'LastUpdatedAt';

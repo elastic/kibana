@@ -5,7 +5,7 @@
  */
 
 import React, { MouseEventHandler } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { ToolTipShortcut } from '../../tool_tip_shortcut';
 
@@ -36,7 +36,7 @@ export const RefreshControl: React.FC<Props> = ({ doRefresh, inFlight }) => (
   </EuiToolTip>
 );
 
-RefreshControl.propTypes = {
-  doRefresh: PropTypes.func.isRequired,
-  inFlight: PropTypes.bool.isRequired,
-};
+// RefreshControl.propTypes = {
+//   doRefresh: PropTypes.func.isRequired,
+//   inFlight: PropTypes.bool.isRequired,
+// };

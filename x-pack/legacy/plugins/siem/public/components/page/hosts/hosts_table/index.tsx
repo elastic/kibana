@@ -95,7 +95,7 @@ const getSorting = (
   direction: Direction
 ): SortingBasicTable => ({ field: getNodeField(sortField), direction });
 
-const HostsTableComponent = React.memo<HostsTableProps>(
+const HostsTableComponent: React.FC<HostsTableProps> = React.memo(
   ({
     activePage,
     data,

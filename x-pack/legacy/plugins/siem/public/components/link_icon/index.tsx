@@ -50,7 +50,7 @@ export interface LinkIconProps extends LinkProps {
   iconType: IconType;
 }
 
-export const LinkIcon = React.memo<LinkIconProps>(
+export const LinkIcon: React.FC<LinkIconProps> = React.memo(
   ({ children, color, href, iconSide = 'left', iconSize = 's', iconType, onClick }) => (
     <Link className="siemLinkIcon" color={color} href={href} iconSide={iconSide} onClick={onClick}>
       <EuiIcon size={iconSize} type={iconType} />

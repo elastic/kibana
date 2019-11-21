@@ -102,7 +102,7 @@ type Props = Pick<
  * This component has no internal state, but it uses lifecycle methods to
  * set focus to the search input, scroll to the selected category, etc
  */
-export const FieldsBrowser = React.memo<Props>(
+export const FieldsBrowser: React.FC<Props> = React.memo(
   ({
     browserFields,
     columnHeaders,

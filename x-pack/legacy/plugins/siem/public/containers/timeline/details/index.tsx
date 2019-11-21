@@ -32,7 +32,7 @@ const getDetailsEvent = memoizeOne(
   (variables: string, detail: DetailItem[]): DetailItem[] => detail
 );
 
-export const TimelineDetailsComponentQuery = React.memo<TimelineDetailsProps>(
+export const TimelineDetailsComponentQuery: React.FC<TimelineDetailsProps> = React.memo(
   ({ children, indexName, eventId, executeQuery, sourceId }) => {
     const variables: GetTimelineDetailsQuery.Variables = {
       sourceId,

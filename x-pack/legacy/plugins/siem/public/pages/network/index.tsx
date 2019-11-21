@@ -22,7 +22,7 @@ type Props = Partial<RouteComponentProps<{}>> & { url: string };
 const networkPagePath = `/:pageName(${SiemPageName.network})`;
 const ipDetailsPagePath = `${networkPagePath}/ip/:detailName`;
 
-export const NetworkContainer = React.memo<Props>(() => {
+export const NetworkContainer: React.FC<Props> = React.memo(() => {
   const capabilities = useContext(MlCapabilitiesContext);
 
   return (

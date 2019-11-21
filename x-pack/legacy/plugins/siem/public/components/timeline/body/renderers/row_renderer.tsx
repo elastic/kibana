@@ -15,21 +15,23 @@ interface RowRendererContainerProps {
   children: React.ReactNode;
 }
 
-export const RowRendererContainer = React.memo<RowRendererContainerProps>(({ children }) => {
-  const width = useTimelineWidthContext();
+export const RowRendererContainer: React.FC<RowRendererContainerProps> = React.memo(
+  ({ children }) => {
+    const width = useTimelineWidthContext();
 
-  // Passing the styles directly to the component because the width is
-  // being calculated and is recommended by Styled Components for performance
-  // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-  return (
-    <EventsTrSupplement
-      className="siemEventsTable__trSupplement--summary"
-      style={{ width: `${width - OFFSET_SCROLLBAR}px` }}
-    >
-      {children}
-    </EventsTrSupplement>
-  );
-});
+    // Passing the styles directly to the component because the width is
+    // being calculated and is recommended by Styled Components for performance
+    // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
+    return (
+      <EventsTrSupplement
+        className="siemEventsTable__trSupplement--summary"
+        style={{ width: `${width - OFFSET_SCROLLBAR}px` }}
+      >
+        {children}
+      </EventsTrSupplement>
+    );
+  }
+);
 RowRendererContainer.displayName = 'RowRendererContainer';
 
 export interface RowRenderer {

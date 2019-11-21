@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { getId } from '../../lib/get_id';
 import { Tag } from '../tag';
 import { TagSpec } from '../../lib/tag';
@@ -36,8 +36,8 @@ export const TagList: FunctionComponent<Props> = ({ tags = [], tagType = 'health
   </Fragment>
 );
 
-TagList.propTypes = {
-  tags: PropTypes.array,
-  tagType: PropTypes.oneOf(['health', 'badge']),
-  getTag: PropTypes.func.isRequired,
-};
+// TagList.propTypes = {
+//   tags: PropTypes.array,
+//   tagType: PropTypes.oneOf(['health', 'badge']),
+//   getTag: PropTypes.func.isRequired,
+// };

@@ -61,7 +61,7 @@ export const removeGlobalResizeCursorStyleFromBody = () => {
   document.body.classList.remove(globalResizeCursorClassName);
 };
 
-export const Resizeable = React.memo<Props>(
+export const Resizeable: React.FC<Props> = React.memo(
   ({ bottom, handle, height, id, left, onResize, positionAbsolute, render, right, top }) => {
     const drag$ = useRef<Observable<MouseEvent> | null>(null);
     const dragEventTargets = useRef<Array<{ htmlElement: HTMLElement; prevCursor: string }>>([]);

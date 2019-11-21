@@ -5,7 +5,7 @@
  */
 
 import React, { MouseEventHandler } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 // @ts-ignore untyped local
 import { Popover } from '../../popover';
@@ -24,14 +24,14 @@ interface Props {
   setAutoplayInterval: (interval: number | undefined) => void;
 }
 
-export const ControlSettings = ({
+export const ControlSettings: React.FC<Props> = ({
   setRefreshInterval,
   refreshInterval,
   autoplayEnabled,
   autoplayInterval,
   enableAutoplay,
   setAutoplayInterval,
-}: Props) => {
+}) => {
   const setRefresh = (val: number | undefined) => setRefreshInterval(val);
 
   const disableInterval = () => {
@@ -74,11 +74,11 @@ export const ControlSettings = ({
   );
 };
 
-ControlSettings.propTypes = {
-  refreshInterval: PropTypes.number,
-  setRefreshInterval: PropTypes.func.isRequired,
-  autoplayEnabled: PropTypes.bool,
-  autoplayInterval: PropTypes.number,
-  enableAutoplay: PropTypes.func.isRequired,
-  setAutoplayInterval: PropTypes.func.isRequired,
-};
+// ControlSettings.propTypes = {
+//   refreshInterval: PropTypes.number,
+//   setRefreshInterval: PropTypes.func.isRequired,
+//   autoplayEnabled: PropTypes.bool,
+//   autoplayInterval: PropTypes.number,
+//   enableAutoplay: PropTypes.func.isRequired,
+//   setAutoplayInterval: PropTypes.func.isRequired,
+// };

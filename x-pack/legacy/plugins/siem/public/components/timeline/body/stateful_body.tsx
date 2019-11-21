@@ -84,7 +84,7 @@ type StatefulBodyComponentProps = OwnProps & ReduxProps & DispatchProps;
 
 export const emptyColumnHeaders: ColumnHeader[] = [];
 
-const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
+const StatefulBodyComponent: React.FC<StatefulBodyComponentProps> = React.memo(
   ({
     addNoteToEvent,
     applyDeltaToColumnWidth,

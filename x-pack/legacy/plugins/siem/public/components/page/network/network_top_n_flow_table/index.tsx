@@ -69,7 +69,7 @@ const rowItems: ItemsPerRow[] = [
 
 export const NetworkTopNFlowTableId = 'networkTopSourceFlow-top-talkers';
 
-const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
+const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = React.memo(
   ({
     activePage,
     data,

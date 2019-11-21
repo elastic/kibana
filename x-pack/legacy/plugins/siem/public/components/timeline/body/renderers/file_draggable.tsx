@@ -20,7 +20,7 @@ interface Props {
   filePath: string | null | undefined;
 }
 
-export const FileDraggable = React.memo<Props>(
+export const FileDraggable: React.FC<Props> = React.memo(
   ({ contextId, endgameFileName, endgameFilePath, eventId, fileName, filePath }) => {
     if (
       isNillEmptyOrNotFinite(fileName) &&

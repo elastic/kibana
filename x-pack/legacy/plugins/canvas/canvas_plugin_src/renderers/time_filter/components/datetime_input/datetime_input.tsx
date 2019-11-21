@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent, ChangeEvent } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { EuiFieldText } from '@elastic/eui';
 import moment, { Moment } from 'moment';
 
@@ -51,10 +51,10 @@ export const DatetimeInput: FunctionComponent<Props> = ({
   );
 };
 
-DatetimeInput.propTypes = {
-  setMoment: PropTypes.func,
-  strValue: PropTypes.string,
-  setStrValue: PropTypes.func,
-  valid: PropTypes.bool,
-  setValid: PropTypes.func,
-};
+// DatetimeInput.propTypes = {
+//   setMoment: PropTypes.func,
+//   strValue: PropTypes.string,
+//   setStrValue: PropTypes.func,
+//   valid: PropTypes.bool,
+//   setValid: PropTypes.func,
+// };

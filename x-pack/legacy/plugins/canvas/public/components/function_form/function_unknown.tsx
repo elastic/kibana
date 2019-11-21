@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { ComponentStrings } from '../../../i18n';
 
 interface Props {
@@ -20,6 +20,6 @@ export const FunctionUnknown: FunctionComponent<Props> = ({ argType }) => (
   </div>
 );
 
-FunctionUnknown.propTypes = {
-  argType: PropTypes.string,
-};
+// FunctionUnknown.propTypes = {
+//   argType: PropTypes.string,
+// };

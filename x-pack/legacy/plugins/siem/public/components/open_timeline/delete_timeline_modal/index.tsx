@@ -19,7 +19,7 @@ interface Props {
 /**
  * Renders a button that when clicked, displays the `Delete Timeline` modal
  */
-export const DeleteTimelineModalButton = React.memo<Props>(
+export const DeleteTimelineModalButton: React.FC<Props> = React.memo(
   ({ deleteTimelines, savedObjectId, title }) => {
     const [showModal, setShowModal] = useState(false);
 

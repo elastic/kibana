@@ -21,21 +21,23 @@ export interface EmbeddableHeaderProps {
   title: string | React.ReactNode;
 }
 
-export const EmbeddableHeader = React.memo<EmbeddableHeaderProps>(({ children, title }) => (
-  <Header>
-    <EuiFlexGroup alignItems="center" gutterSize="m">
-      <EuiFlexItem>
-        <EuiTitle size="xxxs">
-          <h6 data-test-subj="header-embeddable-title">{title}</h6>
-        </EuiTitle>
-      </EuiFlexItem>
-
-      {children && (
-        <EuiFlexItem data-test-subj="header-embeddable-supplements" grow={false}>
-          {children}
+export const EmbeddableHeader: React.FC<EmbeddableHeaderProps> = React.memo(
+  ({ children, title }) => (
+    <Header>
+      <EuiFlexGroup alignItems="center" gutterSize="m">
+        <EuiFlexItem>
+          <EuiTitle size="xxxs">
+            <h6 data-test-subj="header-embeddable-title">{title}</h6>
+          </EuiTitle>
         </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  </Header>
-));
+
+        {children && (
+          <EuiFlexItem data-test-subj="header-embeddable-supplements" grow={false}>
+            {children}
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </Header>
+  )
+);
 EmbeddableHeader.displayName = 'EmbeddableHeader';

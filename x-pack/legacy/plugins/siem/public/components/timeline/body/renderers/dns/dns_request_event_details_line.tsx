@@ -31,7 +31,7 @@ interface Props {
   winlogEventId: string | null | undefined;
 }
 
-export const DnsRequestEventDetailsLine = React.memo<Props>(
+export const DnsRequestEventDetailsLine: React.FC<Props> = React.memo(
   ({
     contextId,
     dnsQuestionName,

@@ -19,7 +19,7 @@ import { dispatchUpdateTimeline } from '../open_timeline/helpers';
 import { dispatchSetInitialStateFromUrl } from './initialize_redux_by_url';
 import { makeMapStateToProps } from './helpers';
 
-export const UrlStateContainer = React.memo<UrlStateContainerPropTypes>(
+export const UrlStateContainer: React.FC<UrlStateContainerPropTypes> = React.memo(
   (props: UrlStateContainerPropTypes) => {
     useUrlStateHooks(props);
     return null;
@@ -41,7 +41,7 @@ export const UrlStateRedux = compose<React.ComponentClass<UrlStateProps & RouteS
   connect(makeMapStateToProps, mapDispatchToProps)
 )(UrlStateContainer);
 
-export const UseUrlState = React.memo<UrlStateProps>(props => {
+export const UseUrlState: React.FC<UrlStateProps> = React.memo(props => {
   const [routeProps] = useRouteSpy();
   const urlStateReduxProps: RouteSpyState & UrlStateProps = { ...routeProps, ...props };
   return <UrlStateRedux {...urlStateReduxProps} />;

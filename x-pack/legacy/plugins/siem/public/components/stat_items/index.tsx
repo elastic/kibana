@@ -193,7 +193,7 @@ export const useKpiMatrixStatus = (
   return statItemsProps;
 };
 
-export const StatItemsComponent = React.memo<StatItemsProps>(
+export const StatItemsComponent: React.FC<StatItemsProps> = React.memo(
   ({
     areaChart,
     barChart,

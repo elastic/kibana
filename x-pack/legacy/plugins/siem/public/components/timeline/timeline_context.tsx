@@ -22,7 +22,7 @@ interface ManageTimelineContextProps {
 
 // todo we need to refactor this as more complex context/reducer with useReducer
 // to avoid so many Context, at least the separation of code is there now
-export const ManageTimelineContext = memo<ManageTimelineContextProps>(
+export const ManageTimelineContext: React.FC<ManageTimelineContextProps> = memo(
   ({ children, loading, width }) => {
     const [myLoading, setLoading] = useState(initTimelineContext);
     const [myWidth, setWidth] = useState(initTimelineWidth);

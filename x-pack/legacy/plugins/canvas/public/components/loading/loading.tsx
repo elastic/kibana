@@ -5,7 +5,7 @@
  */
 
 import { EuiIcon, EuiLoadingSpinner, isColorDark } from '@elastic/eui';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import React, { FunctionComponent } from 'react';
 import { hexToRgb } from '../../../common/lib/hex_to_rgb';
 
@@ -54,11 +54,11 @@ export const Loading: FunctionComponent<Props> = ({
   );
 };
 
-Loading.propTypes = {
-  animated: PropTypes.bool,
-  backgroundColor: PropTypes.string,
-  text: PropTypes.string,
-};
+// Loading.propTypes = {
+//   animated: PropTypes.bool,
+//   backgroundColor: PropTypes.string,
+//   text: PropTypes.string,
+// };
 
 Loading.defaultProps = {
   animated: false,

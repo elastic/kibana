@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -154,15 +154,15 @@ export const Toolbar = (props: Props) => {
   );
 };
 
-Toolbar.propTypes = {
-  workpadName: PropTypes.string,
-  tray: PropTypes.string,
-  setTray: PropTypes.func.isRequired,
-  nextPage: PropTypes.func.isRequired,
-  previousPage: PropTypes.func.isRequired,
-  selectedPageNumber: PropTypes.number.isRequired,
-  totalPages: PropTypes.number.isRequired,
-  selectedElement: PropTypes.object,
-  showWorkpadManager: PropTypes.bool.isRequired,
-  setShowWorkpadManager: PropTypes.func.isRequired,
-};
+// Toolbar.propTypes = {
+//   workpadName: PropTypes.string,
+//   tray: PropTypes.string,
+//   setTray: PropTypes.func.isRequired,
+//   nextPage: PropTypes.func.isRequired,
+//   previousPage: PropTypes.func.isRequired,
+//   selectedPageNumber: PropTypes.number.isRequired,
+//   totalPages: PropTypes.number.isRequired,
+//   selectedElement: PropTypes.object,
+//   showWorkpadManager: PropTypes.bool.isRequired,
+//   setShowWorkpadManager: PropTypes.func.isRequired,
+// };

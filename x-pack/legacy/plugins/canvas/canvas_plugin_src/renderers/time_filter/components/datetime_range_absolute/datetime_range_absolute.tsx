@@ -5,9 +5,9 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { Moment } from 'moment';
-import { momentObj } from 'react-moment-proptypes';
+// import { momentObj } from 'react-moment-proptypes';
 import { DatetimeCalendar } from '../datetime_calendar';
 
 interface Props {
@@ -67,8 +67,8 @@ export const DatetimeRangeAbsolute: FunctionComponent<Props> = ({ from, to, onSe
   </div>
 );
 
-DatetimeRangeAbsolute.propTypes = {
-  from: momentObj,
-  to: momentObj,
-  onSelect: PropTypes.func.isRequired,
-};
+// DatetimeRangeAbsolute.propTypes = {
+//   from: momentObj,
+//   to: momentObj,
+//   onSelect: PropTypes.func.isRequired,
+// };

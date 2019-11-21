@@ -70,7 +70,7 @@ const rowItems: ItemsPerRow[] = [
 
 export const NetworkTopCountriesTableId = 'networkTopCountries-top-talkers';
 
-const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTableProps>(
+const NetworkTopCountriesTableComponent: React.FC<NetworkTopCountriesTableProps> = React.memo(
   ({
     activePage,
     data,

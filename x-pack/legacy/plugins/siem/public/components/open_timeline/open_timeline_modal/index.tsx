@@ -18,7 +18,7 @@ export interface OpenTimelineModalProps {
 const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 const OPEN_TIMELINE_MODAL_WIDTH = 1000; // px
 
-export const OpenTimelineModal = React.memo<OpenTimelineModalProps>(({ onClose }) => {
+export const OpenTimelineModal: React.FC<OpenTimelineModalProps> = React.memo(({ onClose }) => {
   const apolloClient = useApolloClient();
 
   if (!apolloClient) return null;

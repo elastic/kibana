@@ -72,7 +72,7 @@ interface StateReduxProps {
 
 type Props = OwnProps & DispatchProps & StateReduxProps;
 
-export const FlyoutComponent = React.memo<Props>(
+export const FlyoutComponent: React.FC<Props> = React.memo(
   ({
     children,
     dataProviders,

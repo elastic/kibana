@@ -5,7 +5,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -136,9 +136,9 @@ export const KioskControls = ({
   );
 };
 
-KioskControls.propTypes = {
-  autoplayEnabled: PropTypes.bool.isRequired,
-  autoplayInterval: PropTypes.number.isRequired,
-  onSetEnabled: PropTypes.func.isRequired,
-  onSetInterval: PropTypes.func.isRequired,
-};
+// KioskControls.propTypes = {
+//   autoplayEnabled: PropTypes.bool.isRequired,
+//   autoplayInterval: PropTypes.number.isRequired,
+//   onSetEnabled: PropTypes.func.isRequired,
+//   onSetInterval: PropTypes.func.isRequired,
+// };

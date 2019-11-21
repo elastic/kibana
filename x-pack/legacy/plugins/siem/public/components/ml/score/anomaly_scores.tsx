@@ -23,7 +23,7 @@ interface Args {
 export const createJobKey = (score: Anomaly): string =>
   `${score.jobId}-${score.severity}-${score.entityName}-${score.entityValue}`;
 
-export const AnomalyScores = React.memo<Args>(
+export const AnomalyScores: React.FC<Args> = React.memo(
   ({ anomalies, startDate, endDate, isLoading, narrowDateRange, limit }): JSX.Element => {
     if (isLoading) {
       return <EuiLoadingSpinner data-test-subj="anomaly-score-spinner" size="m" />;

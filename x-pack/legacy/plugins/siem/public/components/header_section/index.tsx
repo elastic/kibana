@@ -40,7 +40,7 @@ export interface HeaderSectionProps extends HeaderProps {
   tooltip?: string;
 }
 
-export const HeaderSection = React.memo<HeaderSectionProps>(
+export const HeaderSection: React.FC<HeaderSectionProps> = React.memo(
   ({ border, children, id, showInspect = false, split, subtitle, title, tooltip }) => (
     <Header border={border}>
       <EuiFlexGroup alignItems="center">

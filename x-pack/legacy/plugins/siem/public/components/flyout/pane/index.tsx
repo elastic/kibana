@@ -84,11 +84,11 @@ const WrappedCloseButton = styled.div`
 
 WrappedCloseButton.displayName = 'WrappedCloseButton';
 
-const FlyoutHeaderWithCloseButton = React.memo<{
+const FlyoutHeaderWithCloseButton: React.FC<{
   onClose: () => void;
   timelineId: string;
   usersViewing: string[];
-}>(
+}> = React.memo(
   ({ onClose, timelineId, usersViewing }) => (
     <FlyoutHeaderContainer>
       <WrappedCloseButton>
@@ -111,7 +111,7 @@ const FlyoutHeaderWithCloseButton = React.memo<{
 
 FlyoutHeaderWithCloseButton.displayName = 'FlyoutHeaderWithCloseButton';
 
-const FlyoutPaneComponent = React.memo<Props>(
+const FlyoutPaneComponent: React.FC<Props> = React.memo(
   ({
     applyDeltaToWidth,
     children,

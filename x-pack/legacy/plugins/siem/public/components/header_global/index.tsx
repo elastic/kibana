@@ -35,48 +35,50 @@ FlexItem.displayName = 'FlexItem';
 interface HeaderGlobalProps {
   hideDetectionEngine?: boolean;
 }
-export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine = true }) => (
-  <Wrapper className="siemHeaderGlobal">
-    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
-      <FlexItem>
-        <EuiFlexGroup alignItems="center" responsive={false}>
-          <FlexItem grow={false}>
-            <EuiLink href={getOverviewUrl()}>
-              <EuiIcon aria-label={i18n.SIEM} type="securityAnalyticsApp" size="l" />
-            </EuiLink>
-          </FlexItem>
+export const HeaderGlobal: React.FC<HeaderGlobalProps> = React.memo(
+  ({ hideDetectionEngine = true }) => (
+    <Wrapper className="siemHeaderGlobal">
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
+        <FlexItem>
+          <EuiFlexGroup alignItems="center" responsive={false}>
+            <FlexItem grow={false}>
+              <EuiLink href={getOverviewUrl()}>
+                <EuiIcon aria-label={i18n.SIEM} type="securityAnalyticsApp" size="l" />
+              </EuiLink>
+            </FlexItem>
 
-          <FlexItem component="nav">
-            <SiemNavigation
-              display="condensed"
-              navTabs={
-                hideDetectionEngine
-                  ? pickBy((value, key) => key !== SiemPageName.detectionEngine, navTabs)
-                  : navTabs
-              }
-            />
-          </FlexItem>
-        </EuiFlexGroup>
-      </FlexItem>
+            <FlexItem component="nav">
+              <SiemNavigation
+                display="condensed"
+                navTabs={
+                  hideDetectionEngine
+                    ? pickBy((value, key) => key !== SiemPageName.detectionEngine, navTabs)
+                    : navTabs
+                }
+              />
+            </FlexItem>
+          </EuiFlexGroup>
+        </FlexItem>
 
-      <FlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-          <FlexItem grow={false}>
-            <MlPopover />
-          </FlexItem>
+        <FlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+            <FlexItem grow={false}>
+              <MlPopover />
+            </FlexItem>
 
-          <FlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="add-data"
-              href="kibana#home/tutorial_directory/siem"
-              iconType="plusInCircle"
-            >
-              {i18n.BUTTON_ADD_DATA}
-            </EuiButtonEmpty>
-          </FlexItem>
-        </EuiFlexGroup>
-      </FlexItem>
-    </EuiFlexGroup>
-  </Wrapper>
-));
+            <FlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="add-data"
+                href="kibana#home/tutorial_directory/siem"
+                iconType="plusInCircle"
+              >
+                {i18n.BUTTON_ADD_DATA}
+              </EuiButtonEmpty>
+            </FlexItem>
+          </EuiFlexGroup>
+        </FlexItem>
+      </EuiFlexGroup>
+    </Wrapper>
+  )
+);
 HeaderGlobal.displayName = 'HeaderGlobal';

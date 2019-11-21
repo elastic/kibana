@@ -18,23 +18,21 @@ interface SuggestionItemProps {
   suggestion: AutocompleteSuggestion;
 }
 
-export const SuggestionItem = React.memo<SuggestionItemProps>(
-  ({ isSelected = false, onClick, onMouseEnter, suggestion }) => {
-    return (
-      <SuggestionItemContainer
-        isSelected={isSelected}
-        onClick={onClick}
-        onMouseEnter={onMouseEnter}
-        data-test-subj="suggestion-item"
-      >
-        <SuggestionItemIconField suggestionType={suggestion.type}>
-          <EuiIcon type={getEuiIconType(suggestion.type)} />
-        </SuggestionItemIconField>
-        <SuggestionItemTextField>{suggestion.text}</SuggestionItemTextField>
-        <SuggestionItemDescriptionField>{suggestion.description}</SuggestionItemDescriptionField>
-      </SuggestionItemContainer>
-    );
-  }
+export const SuggestionItem: React.FC<SuggestionItemProps> = React.memo(
+  ({ isSelected = false, onClick, onMouseEnter, suggestion }) => (
+    <SuggestionItemContainer
+      isSelected={isSelected}
+      onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      data-test-subj="suggestion-item"
+    >
+      <SuggestionItemIconField suggestionType={suggestion.type}>
+        <EuiIcon type={getEuiIconType(suggestion.type)} />
+      </SuggestionItemIconField>
+      <SuggestionItemTextField>{suggestion.text}</SuggestionItemTextField>
+      <SuggestionItemDescriptionField>{suggestion.description}</SuggestionItemDescriptionField>
+    </SuggestionItemContainer>
+  )
 );
 
 SuggestionItem.displayName = 'SuggestionItem';

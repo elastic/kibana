@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { EuiFlexGrid, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { ShapePreview } from '../shape_preview';
 
@@ -32,7 +32,7 @@ export const ShapePicker = ({ shapes, onChange = () => {} }: Props) => {
   );
 };
 
-ShapePicker.propTypes = {
-  shapes: PropTypes.object.isRequired,
-  onChange: PropTypes.func,
-};
+// ShapePicker.propTypes = {
+//   shapes: PropTypes.object.isRequired,
+//   onChange: PropTypes.func,
+// };

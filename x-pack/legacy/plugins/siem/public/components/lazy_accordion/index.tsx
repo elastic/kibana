@@ -29,7 +29,7 @@ type Props = Pick<EuiAccordionProps, Exclude<keyof EuiAccordionProps, 'initialIs
  * TODO: animate the expansion and collapse of content rendered "below"
  * the real `EuiAccordion`.
  */
-export const LazyAccordion = React.memo<Props>(
+export const LazyAccordion: React.FC<Props> = React.memo(
   ({
     buttonContent,
     buttonContentClassName,

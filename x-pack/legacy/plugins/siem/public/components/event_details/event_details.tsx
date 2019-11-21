@@ -36,7 +36,7 @@ const Details = styled.div`
 
 Details.displayName = 'Details';
 
-export const EventDetails = React.memo<Props>(
+export const EventDetails: React.FC<Props> = React.memo(
   ({
     browserFields,
     columnHeaders,

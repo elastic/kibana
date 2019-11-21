@@ -47,7 +47,7 @@ const TimelineHeaderContainer = styled.div`
 
 TimelineHeaderContainer.displayName = 'TimelineHeaderContainer';
 
-export const TimelineHeader = React.memo<Props>(
+export const TimelineHeader: React.FC<Props> = React.memo(
   ({
     browserFields,
     id,

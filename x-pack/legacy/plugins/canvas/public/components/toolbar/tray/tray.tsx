@@ -5,7 +5,7 @@
  */
 
 import React, { ReactNode, Fragment, MouseEventHandler } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 
 import { ComponentStrings } from '../../../../i18n';
@@ -35,7 +35,7 @@ export const Tray = ({ children, done }: Props) => {
   );
 };
 
-Tray.propTypes = {
-  children: PropTypes.node,
-  done: PropTypes.func,
-};
+// Tray.propTypes = {
+//   children: PropTypes.node,
+//   done: PropTypes.func,
+// };

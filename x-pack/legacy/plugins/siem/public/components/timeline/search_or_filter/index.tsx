@@ -69,9 +69,9 @@ interface DispatchProps {
   updateReduxTime: DispatchUpdateReduxTime;
 }
 
-type Props = OwnProps & StateReduxProps & DispatchProps;
-
-const StatefulSearchOrFilterComponent = React.memo<Props>(
+const StatefulSearchOrFilterComponent: React.FC<OwnProps &
+  StateReduxProps &
+  DispatchProps> = React.memo(
   ({
     applyKqlFilterQuery,
     browserFields,
@@ -217,7 +217,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const mapDispatchToProps = (dispatch: ThunkDispatch) => ({
+const mapDispatchToProps = (dispatch: Dispatch) => ({
   applyKqlFilterQuery: ({ id, filterQuery }: { id: string; filterQuery: SerializedFilterQuery }) =>
     dispatch(
       timelineActions.applyKqlFilterQuery({

@@ -44,7 +44,7 @@ interface Props {
   winlogEventId: string | null | undefined;
 }
 
-export const EndgameSecurityEventDetailsLine = React.memo<Props>(
+export const EndgameSecurityEventDetailsLine: React.FC<Props> = React.memo(
   ({
     contextId,
     endgameLogonType,

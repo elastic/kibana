@@ -45,7 +45,7 @@ import { type } from './utils';
 const HostOverviewManage = manageQuery(HostOverview);
 const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
 
-const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
+const HostDetailsComponent: React.FC<HostDetailsComponentProps> = React.memo(
   ({
     filters,
     from,

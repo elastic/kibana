@@ -45,7 +45,7 @@ const getDescriptionList = (descriptionList: DescriptionList[], key: number) => 
   </EuiFlexItem>
 );
 
-export const HostOverview = React.memo<HostSummaryProps>(
+export const HostOverview: React.FC<HostSummaryProps> = React.memo(
   ({
     data,
     loading,

@@ -13,16 +13,18 @@ export interface OpenTimelineModalButtonProps {
   onClick: () => void;
 }
 
-export const OpenTimelineModalButton = React.memo<OpenTimelineModalButtonProps>(({ onClick }) => (
-  <EuiButtonEmpty
-    color="text"
-    data-test-subj="open-timeline-button"
-    iconSide="left"
-    iconType="folderOpen"
-    onClick={onClick}
-  >
-    {i18n.OPEN_TIMELINE}
-  </EuiButtonEmpty>
-));
+export const OpenTimelineModalButton: React.FC<OpenTimelineModalButtonProps> = React.memo(
+  ({ onClick }) => (
+    <EuiButtonEmpty
+      color="text"
+      data-test-subj="open-timeline-button"
+      iconSide="left"
+      iconType="folderOpen"
+      onClick={onClick}
+    >
+      {i18n.OPEN_TIMELINE}
+    </EuiButtonEmpty>
+  )
+);
 
 OpenTimelineModalButton.displayName = 'OpenTimelineModalButton';

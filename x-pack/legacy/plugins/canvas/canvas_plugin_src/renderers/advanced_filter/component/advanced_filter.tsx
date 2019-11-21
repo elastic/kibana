@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import React, { FunctionComponent } from 'react';
 import { ComponentStrings } from '../../../../i18n';
 
@@ -51,8 +51,8 @@ AdvancedFilter.defaultProps = {
   value: '',
 };
 
-AdvancedFilter.propTypes = {
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.string,
-  commit: PropTypes.func.isRequired,
-};
+// AdvancedFilter.propTypes = {
+//   onChange: PropTypes.func.isRequired,
+//   value: PropTypes.string,
+//   commit: PropTypes.func.isRequired,
+// };

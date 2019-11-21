@@ -91,7 +91,7 @@ const noteWidth = 130;
 const settingsWidth = 50;
 
 /** Displays the properties of a timeline, i.e. name, description, notes, etc */
-export const Properties = React.memo<Props>(
+export const Properties: React.FC<Props> = React.memo(
   ({
     associateNote,
     createTimeline,

@@ -45,7 +45,7 @@ export const getNewNoteId = (): string => uuid.v4();
 
 const emptyNotes: string[] = [];
 
-export const EventColumnView = React.memo<Props>(
+export const EventColumnView: React.FC<Props> = React.memo(
   ({
     id,
     actionsColumnWidth,

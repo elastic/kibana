@@ -46,7 +46,7 @@ export const getNewNoteId = (): string => uuid.v4();
 
 const emptyNotes: string[] = [];
 
-export const StatefulEventChild = React.memo<Props>(
+export const StatefulEventChild: React.FC<Props> = React.memo(
   ({
     id,
     actionsColumnWidth,

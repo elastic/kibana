@@ -60,7 +60,7 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
+export const NetworkDnsTableComponent: React.FC<NetworkDnsTableProps> = React.memo(
   ({
     activePage,
     data,

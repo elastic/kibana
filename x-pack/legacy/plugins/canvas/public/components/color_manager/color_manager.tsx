@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonIcon, EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import React, { FunctionComponent } from 'react';
 import tinycolor from 'tinycolor2';
 import { ColorDot } from '../color_dot/color_dot';
@@ -83,10 +83,10 @@ export const ColorManager: FunctionComponent<Props> = ({
   );
 };
 
-ColorManager.propTypes = {
-  hasButtons: PropTypes.bool,
-  onAddColor: PropTypes.func,
-  onChange: PropTypes.func.isRequired,
-  onRemoveColor: PropTypes.func,
-  value: PropTypes.string,
-};
+// ColorManager.propTypes = {
+//   hasButtons: PropTypes.bool,
+//   onAddColor: PropTypes.func,
+//   onChange: PropTypes.func.isRequired,
+//   onRemoveColor: PropTypes.func,
+//   value: PropTypes.string,
+// };
