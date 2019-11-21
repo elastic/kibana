@@ -7,7 +7,10 @@
 import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
+import { metadata } from 'ui/metadata';
+
+const docsUrl = `https://www.elastic.co/guide/en/elastic-stack-overview/${metadata.branch}/ml-calendars.html`;
 
 export const Description: FC = memo(({ children }) => {
   const title = i18n.translate(
@@ -23,7 +26,18 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsSelection.description"
-          defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam."
+          defaultMessage="Calendars contain a list of scheduled events for which you do not want to generate anomalies,
+              such as planned system outages or public holidays. The same calendar can be assigned to multiple jobs. {learnMoreLink}"
+          values={{
+            learnMoreLink: (
+              <EuiLink href={docsUrl} target="_blank">
+                <FormattedMessage
+                  id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsSelection.learnMoreLinkText"
+                  defaultMessage="Learn more"
+                />
+              </EuiLink>
+            ),
+          }}
         />
       }
     >
