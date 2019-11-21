@@ -21,12 +21,12 @@ import React, { useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import $ from 'jquery';
 
-import { DevToolsSettings } from '../../../../../services';
-import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
+import { DevToolsSettings } from '../../../services';
+import { subscribeResizeChecker } from '../editor/legacy/subscribe_console_resize_checker';
 
 // @ts-ignore
-import SenseEditor from '../../../../../../../public/quarantined/src/sense_editor/editor';
-import { applyCurrentSettings } from '../console_editor/apply_editor_settings';
+import SenseEditor from '../../../../../public/quarantined/src/sense_editor/editor';
+import { applyCurrentSettings } from '../editor/legacy/console_editor/apply_editor_settings';
 
 interface Props {
   settings: DevToolsSettings;

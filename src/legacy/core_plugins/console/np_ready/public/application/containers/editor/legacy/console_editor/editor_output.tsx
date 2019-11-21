@@ -21,34 +21,28 @@ import $ from 'jquery';
 
 // @ts-ignore
 import { initializeOutput } from '../../../../../../../public/quarantined/src/output';
-import { useAppContext } from '../../../../context';
-import { useEditorActionContext, useEditorReadContext } from '../../context';
+import { useServicesContext, useEditorReadContext } from '../../../../contexts';
+
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
 
 function _EditorOuput() {
   const editorRef = useRef<null | HTMLDivElement>(null);
   const editorInstanceRef = useRef<null | any>(null);
-  const {
-    services: { settings },
-  } = useAppContext();
-
-  const dispatch = useEditorActionContext();
+  const { services } = useServicesContext();
 
   const { settings: readOnlySettings } = useEditorReadContext();
 
   useEffect(() => {
     const editor$ = $(editorRef.current!);
-    editorInstanceRef.current = initializeOutput(editor$, settings);
+    editorInstanceRef.current = initializeOutput(editor$, services.settings);
     editorInstanceRef.current.update('');
     const unsubscribe = subscribeResizeChecker(editorRef.current!, editorInstanceRef.current);
-
-    dispatch({ type: 'setOutputEditor', value: editorInstanceRef.current });
 
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [services.settings]);
 
   useEffect(() => {
     applyCurrentSettings(editorInstanceRef.current, readOnlySettings);

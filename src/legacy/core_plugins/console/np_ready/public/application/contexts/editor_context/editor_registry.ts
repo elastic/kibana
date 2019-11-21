@@ -17,31 +17,17 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
-// @ts-ignore
-import exampleText from 'raw-loader!../constants/help_example.txt';
-import $ from 'jquery';
-// @ts-ignore
-import SenseEditor from '../../../../public/quarantined/src/sense_editor/editor';
+export class EditorRegistry {
+  inputEditor: any;
 
-interface EditorExampleProps {
-  panel: string;
+  setInputEditor(inputEditor: any) {
+    this.inputEditor = inputEditor;
+  }
+
+  getInputEditor() {
+    return this.inputEditor;
+  }
 }
 
-export function EditorExample(props: EditorExampleProps) {
-  const elemId = `help-example-${props.panel}`;
-
-  useEffect(() => {
-    const el = $(`#${elemId}`);
-    el.text(exampleText.trim());
-    const editor = new SenseEditor(el);
-    editor.setReadOnly(true);
-    editor.$blockScrolling = Infinity;
-
-    return () => {
-      editor.destroy();
-    };
-  }, [elemId]);
-
-  return <div id={elemId} className="conHelp__example" />;
-}
+// Create a single instance of this and use as private state.
+export const instance = new EditorRegistry();

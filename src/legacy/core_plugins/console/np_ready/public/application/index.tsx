@@ -18,9 +18,8 @@
  */
 
 import React from 'react';
-import { NotificationsSetup } from '../../../../../../core/public';
-import { AppContextProvider } from './context';
-import { EditorContextProvider } from './containers/editor/context';
+import { NotificationsSetup } from 'src/core/public';
+import { ServicesContextProvider, EditorContextProvider } from './contexts';
 import { Main } from './containers';
 import { createStorage, createHistory, createSettings, Settings } from '../services';
 
@@ -46,7 +45,7 @@ export function boot(deps: {
 
   return (
     <I18nContext>
-      <AppContextProvider
+      <ServicesContextProvider
         value={{
           docLinkVersion,
           services: { storage, history, settings, notifications },
@@ -55,7 +54,7 @@ export function boot(deps: {
         <EditorContextProvider settings={settings.toJSON()}>
           <Main />
         </EditorContextProvider>
-      </AppContextProvider>
+      </ServicesContextProvider>
     </I18nContext>
   );
 }
