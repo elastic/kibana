@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { CURRENT_MAJOR_VERSION, NEXT_MAJOR_VERSION } from '../../../../common/version';
 
-export const LatestMinorBanner: React.StatelessComponent = () => (
+export const LatestMinorBanner: React.FunctionComponent = () => (
   <EuiCallOut
     title={
       <FormattedMessage

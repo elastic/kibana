@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
@@ -60,7 +60,7 @@ interface Props {
   onChange(s: StepDetailsExposedState): void;
 }
 
-export const StepCreateForm: SFC<Props> = React.memo(
+export const StepCreateForm: FC<Props> = React.memo(
   ({ createIndexPattern, transformConfig, transformId, onChange, overrides }) => {
     const defaults = { ...getDefaultStepCreateState(), ...overrides };
 

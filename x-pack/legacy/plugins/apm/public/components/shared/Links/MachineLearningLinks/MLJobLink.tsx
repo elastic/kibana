@@ -13,7 +13,7 @@ interface Props {
   transactionType?: string;
 }
 
-export const MLJobLink: React.SFC<Props> = ({
+export const MLJobLink: React.FC<Props> = ({
   serviceName,
   transactionType,
   children
