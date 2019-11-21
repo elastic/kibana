@@ -8,19 +8,15 @@ import { Plugin, CoreSetup } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN } from '../../common/constants';
 import { ServerShim, ServerShimWithRouter } from './types';
-// @ts-ignore
+
+import { registerLicenseChecker } from '../../../../server/lib/register_license_checker';
 import { registerSettingsRoutes } from './routes/api/settings';
-// @ts-ignore
 import { registerIndicesRoutes } from './routes/api/indices';
-// @ts-ignore
 import { registerLicenseRoutes } from './routes/api/license';
-// @ts-ignore
 import { registerWatchesRoutes } from './routes/api/watches';
-// @ts-ignore
 import { registerWatchRoutes } from './routes/api/watch';
 import { registerListFieldsRoute } from './routes/api/register_list_fields_route';
 import { registerLoadHistoryRoute } from './routes/api/register_load_history_route';
-import { registerLicenseChecker } from '../../../../server/lib/register_license_checker';
 
 export class WatcherServerPlugin implements Plugin<void, void, any, any> {
   async setup({ http }: CoreSetup, { __LEGACY: serverShim }: { __LEGACY: ServerShim }) {
@@ -39,11 +35,11 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
 
     registerListFieldsRoute(serverShimWithRouter);
     registerLoadHistoryRoute(serverShimWithRouter);
-    registerIndicesRoutes(serverShim);
-    registerLicenseRoutes(serverShim);
-    registerSettingsRoutes(serverShim);
-    registerWatchesRoutes(serverShim);
-    registerWatchRoutes(serverShim);
+    registerIndicesRoutes(serverShimWithRouter);
+    registerLicenseRoutes(serverShimWithRouter);
+    registerSettingsRoutes(serverShimWithRouter);
+    registerWatchesRoutes(serverShimWithRouter);
+    registerWatchRoutes(serverShimWithRouter);
   }
   start() {}
   stop() {}
