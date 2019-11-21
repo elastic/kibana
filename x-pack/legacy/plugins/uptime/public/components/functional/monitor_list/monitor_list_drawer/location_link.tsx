@@ -22,7 +22,9 @@ const locationDocsLink =
  */
 export const LocationLink = ({ location, textSize }: LocationLinkProps) => {
   return location ? (
-    <EuiText size={textSize || 's'}>{location}</EuiText>
+    <EuiText size={textSize || 's'} grow={false}>
+      {location}
+    </EuiText>
   ) : (
     <EuiLink href={locationDocsLink} target="_blank">
       {i18n.translate('xpack.uptime.monitorList.geoName.helpLinkAnnotation', {

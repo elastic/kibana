@@ -4,14 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UiActionTypes, PopoverState, SET_INTEGRATION_POPOVER_STATE } from '../actions/ui';
+import {
+  UiActionTypes,
+  PopoverState,
+  SET_INTEGRATION_POPOVER_STATE,
+  SET_BASE_PATH,
+} from '../actions/ui';
 
 export interface UiState {
   integrationsPopoverOpen: PopoverState | null;
+  basePath: string;
 }
 
 const initialState: UiState = {
   integrationsPopoverOpen: null,
+  basePath: '',
 };
 
 export function uiReducer(state = initialState, action: UiActionTypes): UiState {
@@ -24,6 +31,12 @@ export function uiReducer(state = initialState, action: UiActionTypes): UiState 
           id: popoverState.id,
           open: popoverState.open,
         },
+      };
+    case SET_BASE_PATH:
+      const basePath = action.payload;
+      return {
+        ...state,
+        basePath,
       };
     default:
       return state;

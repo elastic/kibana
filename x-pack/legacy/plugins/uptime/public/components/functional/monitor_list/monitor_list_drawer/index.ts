@@ -4,11 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { combineReducers } from 'redux';
-import { uiReducer } from './ui';
-import { monitorReducer } from './monitor';
-
-export const rootReducer = combineReducers({
-  ui: uiReducer,
-  monitor: monitorReducer,
-});
+export { MonitorListDrawer } from './monitor_list_drawer';
+export { LocationLink } from './location_link';
