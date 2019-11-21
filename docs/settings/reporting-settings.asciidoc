@@ -33,11 +33,17 @@ However, if your client connections must go through a reverse-proxy
 to access {kib}, Reporting configuration must have the proxy port, protocol, 
 and hostname set in the `xpack.reporting.kibanaServer.*` settings.
 
-NOTE: If a reverse-proxy carries encrypted traffic from end-user 
+[NOTE] 
+====
+If a reverse-proxy carries encrypted traffic from end-user 
 clients back to a {kib} server, the proxy port, protocol, and hostname 
 in Reporting settings must be valid for the encryption that the Reporting 
 browser will receive. Encrypted communications will fail if there are 
 mismatches in the host information between the request and the certificate on the server.
+
+Configuring the `xpack.reporting.kibanaServer` settings to point to a
+proxy host requires that the Kibana server has network access to the proxy.
+====
 
 `xpack.reporting.kibanaServer.port`::
 The port for accessing Kibana, if different from the `server.port` value.
@@ -48,8 +54,6 @@ The protocol for accessing Kibana, typically `http` or `https`.
 `xpack.reporting.kibanaServer.hostname`::
 The hostname for accessing {kib}, if different from the `server.host` value.
 
-NOTE: Configuring the `xpack.reporting.kibanaServer` settings to point to a
-proxy host requires that the Kibana server has network access to the proxy.
 
 [float]
 [[reporting-job-queue-settings]]
