@@ -11,7 +11,7 @@
 import { chain, difference, each, find, first, get, has, isEqual, without } from 'lodash';
 import moment from 'moment-timezone';
 import { Subject, Subscription, forkJoin } from 'rxjs';
-import { map, debounceTime, filter, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { map, debounceTime, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import PropTypes from 'prop-types';
 import React, { createRef, Fragment } from 'react';
@@ -972,22 +972,20 @@ export class TimeSeriesExplorer extends React.Component {
             zoomTo: selection.to,
           });
         }),
-        filter(() => {
-          const {
-            contextChartData,
-            contextForecastData,
-          } = this.state;
-
-          return !((contextChartData === undefined || contextChartData.length === 0) &&
-            (contextForecastData === undefined || contextForecastData.length === 0));
-        }),
         debounceTime(500),
         tap((selection) => {
           const {
+            contextChartData,
+            contextForecastData,
             focusChartData,
             zoomFromFocusLoaded,
             zoomToFocusLoaded,
           } = this.state;
+
+          if ((contextChartData === undefined || contextChartData.length === 0) &&
+            (contextForecastData === undefined || contextForecastData.length === 0)) {
+            return;
+          }
 
           const defaultRange = this.getDefaultRangeFromState();
 
