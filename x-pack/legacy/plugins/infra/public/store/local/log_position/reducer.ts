@@ -38,6 +38,8 @@ export interface LogPositionState {
     startKey: TimeKey | null;
     middleKey: TimeKey | null;
     endKey: TimeKey | null;
+    pagesAfterEnd: number;
+    pagesBeforeStart: number;
   };
   controlsShouldDisplayTargetPosition: boolean;
   autoReloadJustAborted: boolean;
@@ -53,6 +55,8 @@ export const initialLogPositionState: LogPositionState = {
     endKey: null,
     middleKey: null,
     startKey: null,
+    pagesBeforeStart: Infinity,
+    pagesAfterEnd: Infinity,
   },
   controlsShouldDisplayTargetPosition: false,
   autoReloadJustAborted: false,
@@ -76,11 +80,16 @@ const targetPositionUpdatePolicyReducer = reducerWithInitialState(
 
 const visiblePositionReducer = reducerWithInitialState(
   initialLogPositionState.visiblePositions
-).case(reportVisiblePositions, (state, { startKey, middleKey, endKey }) => ({
-  endKey,
-  middleKey,
-  startKey,
-}));
+).case(
+  reportVisiblePositions,
+  (state, { startKey, middleKey, endKey, pagesBeforeStart, pagesAfterEnd }) => ({
+    endKey,
+    middleKey,
+    startKey,
+    pagesBeforeStart,
+    pagesAfterEnd,
+  })
+);
 
 // Determines whether to use the target position or the visible midpoint when
 // displaying a timestamp or time range in the toolbar and log minimap. When the

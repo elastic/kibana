@@ -26,6 +26,13 @@ export const selectMiddleVisiblePosition = (state: LogPositionState) =>
 export const selectLastVisiblePosition = (state: LogPositionState) =>
   state.visiblePositions.endKey ? state.visiblePositions.endKey : null;
 
+export const selectPagesBeforeAndAfter = (state: LogPositionState) =>
+  state.visiblePositions
+    ? {
+        pagesBeforeStart: state.visiblePositions.pagesBeforeStart,
+        pagesAfterEnd: state.visiblePositions.pagesAfterEnd,
+      }
+    : { pagesBeforeStart: null, pagesAfterEnd: null };
 export const selectControlsShouldDisplayTargetPosition = (state: LogPositionState) =>
   state.controlsShouldDisplayTargetPosition;
 

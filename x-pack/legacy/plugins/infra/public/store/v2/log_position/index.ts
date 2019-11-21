@@ -11,9 +11,12 @@ import { logPositionSelectors as logPositionReduxSelectors } from '../../../stor
 export const useLogPositionStore = () => {
   const state = useContext(ReduxStateContext);
   const timeKey = logPositionReduxSelectors.selectVisibleMidpointOrTarget(state.local);
-  return { timeKey };
+  const pages = logPositionReduxSelectors.selectPagesBeforeAndAfter(state.local);
+  return { timeKey, ...pages };
 };
 
 export const logPositionInitialState = {
   timeKey: null,
+  pagesAfterEnd: null,
+  pagesBeforeStart: null,
 };

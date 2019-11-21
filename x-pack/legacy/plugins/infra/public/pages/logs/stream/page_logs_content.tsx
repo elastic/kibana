@@ -24,11 +24,7 @@ import { WithLogMinimapUrlState } from '../../../containers/logs/with_log_minima
 import { WithLogPositionUrlState } from '../../../containers/logs/with_log_position';
 import { WithLogPosition } from '../../../containers/logs/with_log_position';
 import { WithLogTextviewUrlState } from '../../../containers/logs/with_log_textview';
-import {
-  ReduxSourceIdBridge,
-  WithStreamItems,
-  NewWithStreamItems,
-} from '../../../containers/logs/with_stream_items';
+import { WithStreamItems } from '../../../containers/logs/with_stream_items';
 import { Source } from '../../../containers/source';
 
 import { LogsToolbar } from './page_toolbar';
@@ -50,7 +46,6 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
   const derivedIndexPattern = createDerivedIndexPattern('logs');
   return (
     <>
-      <ReduxSourceIdBridge sourceId={sourceId} />
       <LogHighlightsBridge indexPattern={derivedIndexPattern} />
       <WithLogFilterUrlState indexPattern={derivedIndexPattern} />
       <WithLogPositionUrlState />
@@ -90,7 +85,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
             scrollUnlockLiveStreaming,
             isScrollLocked,
           }) => (
-            <NewWithStreamItems sourceId={sourceId} initializeOnMount={!isAutoReloading}>
+            <WithStreamItems sourceId={sourceId} initializeOnMount={!isAutoReloading}>
               {({
                 currentHighlightKey,
                 hasMoreAfterEnd,
@@ -127,7 +122,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                   }}
                 />
               )}
-            </NewWithStreamItems>
+            </WithStreamItems>
           )}
         </WithLogPosition>
         <AutoSizer content bounds detectAnyWindowResize="height">
@@ -143,7 +138,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                         visibleMidpointTime,
                         visibleTimeInterval,
                       }) => (
-                        <NewWithStreamItems initializeOnMount={!isAutoReloading}>
+                        <WithStreamItems initializeOnMount={!isAutoReloading}>
                           {({ isReloading }) => (
                             <LogMinimap
                               height={height}
@@ -160,7 +155,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                               target={visibleMidpointTime}
                             />
                           )}
-                        </NewWithStreamItems>
+                        </WithStreamItems>
                       )}
                     </WithLogPosition>
                   )}

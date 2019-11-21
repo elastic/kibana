@@ -29,31 +29,8 @@ const withReduxState = connect((state: State) => ({
   wasAutoReloadJustAborted: logPositionSelectors.selectAutoReloadJustAborted(state),
 }));
 
-const getLogEntriesAround = async ({ client, sourceId, timeKey, filterQuery }) => {
-  if (!timeKey) return false;
-  try {
-    console.log('making gql query');
-    const result = await client.query({
-      query: logEntriesQuery,
-      variables: {
-        sourceId,
-        timeKey,
-        countBefore: LOAD_CHUNK_SIZE,
-        countAfter: LOAD_CHUNK_SIZE,
-        filterQuery,
-      },
-      fetchPolicy: 'no-cache',
-    });
-    const { logEntriesAround } = result.data.source;
-    return logEntriesAround;
-  } catch (e) {
-    console.error('GQL Error', e);
-    throw e;
-  }
-};
-
 const LOAD_CHUNK_SIZE = 200;
-export const NewWithStreamItems = withReduxState(({ children, ...props }) => {
+export const WithStreamItems = withReduxState(({ children, ...props }) => {
   const { logEntries } = useContext(StoreContext);
   const { currentHighlightKey, logEntryHighlightsById } = useContext(LogHighlightsState.Context);
 
@@ -73,6 +50,7 @@ export const NewWithStreamItems = withReduxState(({ children, ...props }) => {
     hasMoreBeforeStart: logEntries.hasMoreBefore,
     hasMoreAfterEnd: logEntries.hasMoreAfter,
     isReloading: logEntries.isReloading,
+    isLoadingMore: logEntries.isLoadingMore,
     items,
     currentHighlightKey,
   });
@@ -98,54 +76,6 @@ export const withStreamItems = connect(
   })
 );
 
-type WithStreamItemsProps = PropsOfContainer<typeof withStreamItems>;
-
-export const WithStreamItems = withStreamItems(
-  ({
-    children,
-    initializeOnMount,
-    ...props
-  }: WithStreamItemsProps & {
-    children: RendererFunction<
-      WithStreamItemsProps & {
-        currentHighlightKey: UniqueTimeKey | null;
-        items: StreamItem[];
-      }
-    >;
-    initializeOnMount: boolean;
-  }) => {
-    const { currentHighlightKey, logEntryHighlightsById } = useContext(LogHighlightsState.Context);
-    const items = useMemo(
-      () =>
-        props.isReloading && !props.isAutoReloading && !props.wasAutoReloadJustAborted
-          ? []
-          : props.entries.map(logEntry =>
-              createLogEntryStreamItem(logEntry, logEntryHighlightsById[logEntry.gid] || [])
-            ),
-
-      [
-        props.isReloading,
-        props.isAutoReloading,
-        props.wasAutoReloadJustAborted,
-        props.entries,
-        logEntryHighlightsById,
-      ]
-    );
-
-    useEffect(() => {
-      if (initializeOnMount && !props.isReloading && !props.isLoadingMore) {
-        props.reloadEntries();
-      }
-    }, []);
-
-    return children({
-      ...props,
-      currentHighlightKey,
-      items,
-    });
-  }
-);
-
 const createLogEntryStreamItem = (
   logEntry: LogEntry,
   highlights: LogEntryHighlight[]
@@ -154,23 +84,3 @@ const createLogEntryStreamItem = (
   logEntry,
   highlights,
 });
-
-/**
- * This component serves as connection between the state and side-effects
- * managed by redux and the state and effects managed by hooks. In particular,
- * it forwards changes of the source id to redux via the action creator
- * `setSourceId`.
- *
- * It will be mounted beneath the hierachy level where the redux store and the
- * source state are initialized. Once the log entry state and loading
- * side-effects have been migrated from redux to hooks it can be removed.
- */
-export const ReduxSourceIdBridge = withStreamItems(
-  ({ setSourceId, sourceId }: { setSourceId: (sourceId: string) => void; sourceId: string }) => {
-    useEffect(() => {
-      setSourceId(sourceId);
-    }, [setSourceId, sourceId]);
-
-    return null;
-  }
-);

@@ -8,7 +8,11 @@ import { useApolloClient } from '../../../utils/apollo_context';
 
 const LOAD_CHUNK_SIZE = 200;
 
-const getLogEntriesAround = client => async ({ sourceId, timeKey, filterQuery }) => {
+const getLogEntries = (client, countBefore, countAfter) => async ({
+  sourceId,
+  timeKey,
+  filterQuery,
+}) => {
   if (!timeKey) return false;
   try {
     const result = await client.query({
@@ -16,8 +20,8 @@ const getLogEntriesAround = client => async ({ sourceId, timeKey, filterQuery })
       variables: {
         sourceId,
         timeKey: { time: timeKey.time, tiebreaker: timeKey.tiebreaker },
-        countBefore: LOAD_CHUNK_SIZE,
-        countAfter: LOAD_CHUNK_SIZE,
+        countBefore,
+        countAfter,
         filterQuery,
       },
       fetchPolicy: 'no-cache',
@@ -39,6 +43,8 @@ const getLogEntriesAround = client => async ({ sourceId, timeKey, filterQuery })
 export const useGraphQLQueries = () => {
   const client = useApolloClient();
   return {
-    getLogEntriesAround: getLogEntriesAround(client),
+    getLogEntriesAround: getLogEntries(client, LOAD_CHUNK_SIZE, LOAD_CHUNK_SIZE),
+    getLogEntriesBefore: getLogEntries(client, LOAD_CHUNK_SIZE, 0),
+    getLogEntriesAfter: getLogEntries(client, 0, LOAD_CHUNK_SIZE),
   };
 };
