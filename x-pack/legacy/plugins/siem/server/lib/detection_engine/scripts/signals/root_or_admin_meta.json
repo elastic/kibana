@@ -1,7 +1,7 @@
 {
-  "rule_id": "rule-4",
-  "risk_score": 4,
-  "description": "Detecting root and admin users with lucene",
+  "rule_id": "rule-meta-data",
+  "risk_score": 1,
+  "description": "Detecting root and admin users",
   "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
   "interval": "5m",
   "name": "Detect Root/Admin Users",
@@ -11,6 +11,11 @@
   "from": "now-6m",
   "to": "now",
   "query": "user.name: root or user.name: admin",
-  "language": "lucene",
-  "references": ["http://www.example.com", "https://ww.example.com"]
+  "language": "kuery",
+  "references": ["http://www.example.com", "https://ww.example.com"],
+  "meta": {
+    "anything_i_want": {
+      "total_meta_for_ui_needs": true
+    }
+  }
 }
