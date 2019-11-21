@@ -10,7 +10,7 @@ image::apm/images/apm-setup.png[Installation instructions on the APM page in Kib
 
 
 Index patterns tell Kibana which Elasticsearch indices you want to explore.
-An APM index pattern is necessary for certain features in the APM UI, like the query bar. 
+An APM index pattern is necessary for certain features in the APM app, like the query bar. 
 To set up the correct index pattern,
 simply click *Load Kibana objects* at the bottom of the Setup Instructions.
 

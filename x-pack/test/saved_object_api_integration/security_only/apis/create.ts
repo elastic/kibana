@@ -10,7 +10,7 @@ import { createTestSuiteFactory } from '../../common/suites/create';
 
 export default function({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const es = getService('es');
+  const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
 
   const {

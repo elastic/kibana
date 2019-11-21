@@ -10,6 +10,7 @@ export const SERVICE_NODE_NAME = 'service.node.name';
 export const URL_FULL = 'url.full';
 export const HTTP_REQUEST_METHOD = 'http.request.method';
 export const USER_ID = 'user.id';
+export const USER_AGENT_NAME = 'user_agent.name';
 
 export const OBSERVER_VERSION_MAJOR = 'observer.version_major';
 export const OBSERVER_LISTENING = 'observer.listening';
