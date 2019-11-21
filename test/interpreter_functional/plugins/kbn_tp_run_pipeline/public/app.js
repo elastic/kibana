@@ -38,7 +38,6 @@ import 'uiExports/visRequestHandlers';
 import 'uiExports/visEditorTypes';
 import 'uiExports/visualize';
 import 'uiExports/savedObjectTypes';
-import 'uiExports/fieldFormats';
 import 'uiExports/search';
 import 'uiExports/interpreter';
 
