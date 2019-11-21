@@ -11,7 +11,6 @@ import {
   DECIMAL_DEGREES_PRECISION,
   ES_GEO_FIELD_TYPE,
   ES_SPATIAL_RELATIONS,
-  FEATURE_ID_PROPERTY_NAME,
   GEO_JSON_TYPE,
   POLYGON_COORDINATES_EXTERIOR_INDEX,
   LON_INDEX,
@@ -80,12 +79,10 @@ export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
       features.push({
         type: 'Feature',
         geometry: tmpGeometriesAccumulator[j],
-        properties: {
-          ...properties,
-          // _id is not unique across Kibana index pattern. Multiple ES indices could have _id collisions
-          // Need to prefix with _index to guarantee uniqueness
-          [FEATURE_ID_PROPERTY_NAME]: `${properties._index}:${properties._id}:${j}`
-        }
+        // _id is not unique across Kibana index pattern. Multiple ES indices could have _id collisions
+        // Need to prefix with _index to guarantee uniqueness
+        id: `${properties._index}:${properties._id}:${j}`,
+        properties,
       });
     }
   }

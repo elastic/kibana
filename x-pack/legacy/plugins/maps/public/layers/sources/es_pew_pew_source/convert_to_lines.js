@@ -6,8 +6,6 @@
 
 import _ from 'lodash';
 
-import { FEATURE_ID_PROPERTY_NAME } from '../../../../common/constants';
-
 const LAT_INDEX = 0;
 const LON_INDEX = 1;
 
@@ -47,10 +45,10 @@ export function convertToLines(esResponse) {
           type: 'LineString',
           coordinates: [[sourceCentroid.location.lon, sourceCentroid.location.lat], dest]
         },
+        id: `${dest.join()},${key}`,
         properties: {
-          [FEATURE_ID_PROPERTY_NAME]: `${dest.join()},${key}`,
           ...rest
-        }
+        },
       });
     }
   }

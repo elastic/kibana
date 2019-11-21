@@ -69,8 +69,8 @@ describe('hitsToGeoJson', () => {
         coordinates: [100, 20],
         type: 'Point',
       },
+      id: 'index1:doc1:0',
       properties: {
-        __kbn__feature_id__: 'index1:doc1:0',
         _id: 'doc1',
         _index: 'index1',
       },
@@ -134,8 +134,8 @@ describe('hitsToGeoJson', () => {
         coordinates: [100, 20],
         type: 'Point',
       },
+      id: 'index1:doc1:0',
       properties: {
-        __kbn__feature_id__: 'index1:doc1:0',
         _id: 'doc1',
         _index: 'index1',
         myField: 8
@@ -147,8 +147,8 @@ describe('hitsToGeoJson', () => {
         coordinates: [110, 30],
         type: 'Point',
       },
+      id: 'index1:doc1:1',
       properties: {
-        __kbn__feature_id__: 'index1:doc1:1',
         _id: 'doc1',
         _index: 'index1',
         myField: 8

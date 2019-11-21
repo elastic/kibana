@@ -10,7 +10,6 @@ import {
   ES_GEO_FIELD_TYPE,
   GEOJSON_FILE,
   ES_SIZE_LIMIT,
-  FEATURE_ID_PROPERTY_NAME
 } from '../../../../common/constants';
 import { ClientFileCreateSourceEditor } from './create_client_file_source_editor';
 import { ESSearchSource } from '../es_search_source';
@@ -137,21 +136,8 @@ export class GeojsonFileSource extends AbstractVectorSource {
   }
 
   async getGeoJsonWithMeta() {
-    const copiedPropsFeatures = this._descriptor.__featureCollection.features.map((feature, index) => {
-      const properties = feature.properties ? { ...feature.properties } : {};
-      properties[FEATURE_ID_PROPERTY_NAME] = index;
-      return {
-        type: 'Feature',
-        geometry: feature.geometry,
-        properties,
-      };
-    });
-
     return {
-      data: {
-        type: 'FeatureCollection',
-        features: copiedPropsFeatures
-      },
+      data: this._descriptor.__featureCollection,
       meta: {}
     };
   }

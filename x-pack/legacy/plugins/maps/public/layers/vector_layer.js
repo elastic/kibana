@@ -24,6 +24,7 @@ import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataRequestAbortError } from './util/data_request';
+import { assignFeatureIds } from './util/assign_feature_ids';
 
 const VISIBILITY_FILTER_CLAUSE = ['all',
   [
@@ -59,16 +60,6 @@ const POINT_LAYER_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE,
     ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POINT]
   ]
 ];
-
-
-let idCounter = 0;
-
-function generateNumericalId() {
-  const newId = idCounter < Number.MAX_SAFE_INTEGER ? idCounter : 0;
-  idCounter = newId + 1;
-  return newId;
-}
-
 
 export class VectorLayer extends AbstractLayer {
 
@@ -524,7 +515,7 @@ export class VectorLayer extends AbstractLayer {
         await this._source.getGeoJsonWithMeta(layerName, searchFilters,
           registerCancelCallback.bind(null, requestToken)
         );
-      this._assignIdsToFeatures(featureCollection);
+      assignFeatureIds(featureCollection);
       stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, featureCollection, meta);
       return {
         refreshed: true,
@@ -540,30 +531,7 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
-  _assignIdsToFeatures(featureCollection) {
 
-    //wrt https://github.com/elastic/kibana/issues/39317
-    // In constrained resource environments, mapbox-gl may throw a stackoverflow error due to hitting the browser's recursion limit. This crashes Kibana.
-    //This error is thrown in mapbox-gl's quicksort implementation, when it is sorting all the features by id.
-    //This is a work-around to avoid hitting such a worst-case
-    //This was tested as a suitable work-around for mapbox-gl 0.54
-    //The core issue itself is likely related to https://github.com/mapbox/mapbox-gl-js/issues/6086
-
-    //This only shuffles the id-assignment, _not_ the features in the collection
-    //The reason for this is that we do not want to modify the feature-ordering, which is the responsiblity of the VectorSource#.
-    const ids = [];
-    for (let i = 0; i < featureCollection.features.length; i++) {
-      const id = generateNumericalId();
-      ids.push(id);
-    }
-
-    const randomizedIds = _.shuffle(ids);
-    for (let i = 0; i < featureCollection.features.length; i++) {
-      const id = randomizedIds[i];
-      const feature = featureCollection.features[i];
-      feature.id = id; // Mapbox feature state id, must be integer
-    }
-  }
 
   async syncData(syncContext) {
     if (!this.isVisible() || !this.showAtZoomLevel(syncContext.dataFilters.zoom)) {
@@ -576,8 +544,9 @@ export class VectorLayer extends AbstractLayer {
     }
 
     const joinStates = await this._syncJoins(syncContext);
-    await this._performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData);
 
+    // _performInnerJoins sets feature FEATURE_VISIBLE_PROPERTY_NAME, even for sources without joins.
+    await this._performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData);
   }
 
   _getSourceFeatureCollection() {
