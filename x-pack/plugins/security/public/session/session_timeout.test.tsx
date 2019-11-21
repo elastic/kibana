@@ -157,7 +157,7 @@ describe('Session Timeout', () => {
     test(`shows lifespan warning toast`, async () => {
       const sessionInfo = {
         now,
-        idleTimeoutExpiration: now + 2 * 60 * 1000,
+        idleTimeoutExpiration: null,
         lifespanExpiration: now + 2 * 60 * 1000,
       };
       http.fetch.mockResolvedValue(sessionInfo);
@@ -183,13 +183,26 @@ describe('Session Timeout', () => {
       jest.advanceTimersByTime(10 * 1000);
       expectIdleTimeoutWarningToast(notifications);
 
-      http.fetch.mockResolvedValue({
-        now: now + 55 * 1000,
-        idleTimeoutExpiration: now + 55 * 1000 + 2 * 60 * 1000,
-        lifespanExpiration: null,
-      });
       await sessionTimeout.extend('/foo');
       expect(http.fetch).toHaveBeenCalledTimes(3);
+    });
+
+    test(`extend does not result in an HTTP call if a lifespan warning is shown`, async () => {
+      const sessionInfo = {
+        now,
+        idleTimeoutExpiration: null,
+        lifespanExpiration: now + 2 * 60 * 1000,
+      };
+      http.fetch.mockResolvedValue(sessionInfo);
+      await sessionTimeout.init();
+
+      // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
+      jest.advanceTimersByTime(55 * 1000);
+      expectLifespanWarningToast(notifications);
+
+      expect(http.fetch).toHaveBeenCalledTimes(1);
+      await sessionTimeout.extend('/foo');
+      expect(http.fetch).toHaveBeenCalledTimes(1);
     });
 
     test(`extend hides displayed warning toast`, async () => {

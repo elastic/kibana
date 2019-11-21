@@ -84,8 +84,9 @@ export class SessionTimeout {
       return;
     }
 
-    if (this.warningToast) {
-      // the warning is currently showing and the user has clicked elsewhere on the page;
+    const { isMaximum } = this.getTimeout();
+    if (this.warningToast && !isMaximum) {
+      // the idle timeout warning is currently showing and the user has clicked elsewhere on the page;
       // make a new call to get the latest session info
       return this.fetchSessionInfoAndResetTimers();
     }
