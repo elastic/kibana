@@ -87,12 +87,12 @@ export const alertReducer = (state: any, action: ActionAlertReducerItem) => {
             [key]: value,
           },
         };
-
+        alert.actions.splice(index, 0, updatedAction);
         return {
           ...state,
           alert: {
             ...alert,
-            actions: [...alert.actions, updatedAction],
+            actions: [...alert.actions],
           },
         };
       }
@@ -107,12 +107,12 @@ export const alertReducer = (state: any, action: ActionAlertReducerItem) => {
           ...oldAction,
           [key]: value,
         };
-
+        alert.actions.splice(index, 0, updatedAction);
         return {
           ...state,
           alert: {
             ...alert,
-            actions: [...alert.actions, updatedAction],
+            actions: [...alert.actions],
           },
         };
       }
