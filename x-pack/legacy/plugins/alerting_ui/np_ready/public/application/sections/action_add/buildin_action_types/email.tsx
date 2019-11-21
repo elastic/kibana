@@ -16,7 +16,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../components/page_error';
-import { ActionTypeModel, Props, Action, ValidationResult, ParamsProps } from '../../../../types';
+import {
+  ActionTypeModel,
+  Props,
+  Action,
+  ValidationResult,
+  ActionParamsProps,
+} from '../../../../types';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -253,15 +259,17 @@ const EmailActionFields: React.FunctionComponent<Props> = ({
   );
 };
 
-const EmailParamsFields: React.FunctionComponent<ParamsProps> = ({
+const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
   action,
   editAction,
+  index,
   errors,
   hasErrors,
 }) => {
-  const { to, cc, subject, body } = action;
-  const toOptions = to ? to.map((label: any) => ({ label })) : [];
-  const ccOptions = cc ? cc.map((label: any) => ({ label })) : [];
+  const { to, cc, bcc, subject, message } = action;
+  const toOptions = to ? to.map((label: string) => ({ label })) : [];
+  const ccOptions = cc ? cc.map((label: string) => ({ label })) : [];
+  const bccOptions = bcc ? bcc.map((label: string) => ({ label })) : [];
 
   return (
     <Fragment>
@@ -274,7 +282,7 @@ const EmailParamsFields: React.FunctionComponent<ParamsProps> = ({
         label={i18n.translate(
           'xpack.alertingUI.sections.actionAdd.emailAction.recipientTextFieldLabel',
           {
-            defaultMessage: 'To email address',
+            defaultMessage: 'To',
           }
         )}
       >
@@ -287,18 +295,20 @@ const EmailParamsFields: React.FunctionComponent<ParamsProps> = ({
             const newOptions = [...toOptions, { label: searchValue }];
             editAction(
               'to',
-              newOptions.map(newOption => newOption.label)
+              newOptions.map(newOption => newOption.label),
+              index
             );
           }}
           onChange={(selectedOptions: Array<{ label: string }>) => {
             editAction(
               'to',
-              selectedOptions.map(selectedOption => selectedOption.label)
+              selectedOptions.map(selectedOption => selectedOption.label),
+              index
             );
           }}
           onBlur={() => {
             if (!to) {
-              editAction('to', []);
+              editAction('to', [], index);
             }
           }}
         />
@@ -312,7 +322,7 @@ const EmailParamsFields: React.FunctionComponent<ParamsProps> = ({
         label={i18n.translate(
           'xpack.alertingUI.sections.actionAdd.emailAction.recipientCopyTextFieldLabel',
           {
-            defaultMessage: 'CC email address',
+            defaultMessage: 'Cc',
           }
         )}
       >
@@ -325,29 +335,70 @@ const EmailParamsFields: React.FunctionComponent<ParamsProps> = ({
             const newOptions = [...ccOptions, { label: searchValue }];
             editAction(
               'cc',
-              newOptions.map(newOption => newOption.label)
+              newOptions.map(newOption => newOption.label),
+              index
             );
           }}
           onChange={(selectedOptions: Array<{ label: string }>) => {
             editAction(
               'cc',
-              selectedOptions.map(selectedOption => selectedOption.label)
+              selectedOptions.map(selectedOption => selectedOption.label),
+              index
             );
           }}
           onBlur={() => {
             if (!cc) {
-              editAction('cc', []);
+              editAction('cc', [], index);
             }
           }}
         />
       </ErrableFormRow>
-
+      <ErrableFormRow
+        id="emailBccRecipient"
+        errorKey="bcc"
+        fullWidth
+        errors={errors}
+        isShowingErrors={hasErrors && bcc !== undefined}
+        label={i18n.translate(
+          'xpack.alertingUI.sections.actionAdd.emailAction.recipientBccTextFieldLabel',
+          {
+            defaultMessage: 'Bcc',
+          }
+        )}
+      >
+        <EuiComboBox
+          noSuggestions
+          fullWidth
+          data-test-subj="bccEmailAddressInput"
+          selectedOptions={bccOptions}
+          onCreateOption={(searchValue: string) => {
+            const newOptions = [...bccOptions, { label: searchValue }];
+            editAction(
+              'bcc',
+              newOptions.map(newOption => newOption.label),
+              index
+            );
+          }}
+          onChange={(selectedOptions: Array<{ label: string }>) => {
+            editAction(
+              'bcc',
+              selectedOptions.map(selectedOption => selectedOption.label),
+              index
+            );
+          }}
+          onBlur={() => {
+            if (!bcc) {
+              editAction('bcc', [], index);
+            }
+          }}
+        />
+      </ErrableFormRow>
       <EuiFormRow
         fullWidth
         label={i18n.translate(
           'xpack.alertingUI.sections.actionAdd.emailAction.subjectTextFieldLabel',
           {
-            defaultMessage: 'Subject (optional)',
+            defaultMessage: 'Subject',
           }
         )}
       >
@@ -357,11 +408,10 @@ const EmailParamsFields: React.FunctionComponent<ParamsProps> = ({
           data-test-subj="emailSubjectInput"
           value={subject || ''}
           onChange={e => {
-            editAction('subject', e.target.value);
+            editAction('subject', e.target.value, index);
           }}
         />
       </EuiFormRow>
-
       <EuiFormRow
         fullWidth
         label={i18n.translate(
@@ -373,11 +423,11 @@ const EmailParamsFields: React.FunctionComponent<ParamsProps> = ({
       >
         <EuiTextArea
           fullWidth
-          value={body || ''}
+          value={message || ''}
           name="message"
           data-test-subj="emailMessageInput"
           onChange={e => {
-            editAction('message', e.target.value);
+            editAction('message', e.target.value, index);
           }}
         />
       </EuiFormRow>

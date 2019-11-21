@@ -23,7 +23,6 @@ import {
   EuiFlexGrid,
   EuiFormRow,
   EuiComboBox,
-  EuiComboBoxOptionProps,
   EuiCard,
   EuiTabs,
   EuiTab,
@@ -32,9 +31,11 @@ import {
   EuiSelect,
   EuiIconTip,
   EuiPortal,
+  EuiAccordion,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { useAppDependencies } from '../..';
-import { saveAlert, loadActionTypes } from '../../lib/api';
+import { saveAlert, loadActionTypes, loadAllActions } from '../../lib/api';
 import { AlertsContext } from '../../context/alerts_context';
 import { alertReducer } from './alert_reducer';
 import { ErrableFormRow, SectionError } from '../../components/page_error';
@@ -45,6 +46,7 @@ import {
   ActionTypeModel,
   AlertAction,
   ActionTypeIndex,
+  Action,
 } from '../../../types';
 import { ACTION_GROUPS } from '../../constants/action_groups';
 import { getTimeOptions } from '../../lib/get_time_options';
@@ -97,7 +99,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
     alertTypeId: null,
     interval: '1m',
     actions: [],
-    tags: ['sfdfsfsd'],
+    tags: [],
   };
 
   const { alertFlyoutVisible, setAlertFlyoutVisibility } = useContext(AlertsContext);
@@ -107,16 +109,17 @@ export const AlertAdd = ({ refreshList }: Props) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [selectedTabId, setSelectedTabId] = useState<string>('alert');
-  const [alertAction, setAlertAction] = useState<AlertAction | undefined>(undefined);
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [alertInterval, setAlertInterval] = useState<number | null>(null);
   const [alertIntervalUnit, setAlertIntervalUnit] = useState<string>('m');
   const [alertThrottle, setAlertThrottle] = useState<number | null>(null);
   const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>('');
-  const tagsOptions = alert.tags ? alert.tags.map((label: string) => ({ label })) : [];
   const [serverError, setServerError] = useState<{
     body: { message: string; error: string };
   } | null>(null);
+  const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(true);
+  const [connectors, setConnectors] = useState<Action[]>([]);
+  const [actionsConnectors, setActionsConnectors] = useState<string[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -157,6 +160,11 @@ export const AlertAdd = ({ refreshList }: Props) => {
     });
   }, [alertFlyoutVisible]);
 
+  useEffect(() => {
+    loadConnectors();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alertFlyoutVisible]);
+
   const setAlertProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
@@ -165,19 +173,38 @@ export const AlertAdd = ({ refreshList }: Props) => {
     dispatch({ command: { type: 'setAlertTypeParams' }, payload: { key, value } });
   };
 
-  const setActionParams = (key: string, value: any) => {
-    dispatch({ command: { type: 'setAlertActionParam' }, payload: { key, value } });
+  const setActionParamsProperty = (key: string, value: any, index: number) => {
+    dispatch({ command: { type: 'setAlertActionParams' }, payload: { key, value, index } });
   };
+
+  const setActionProperty = (key: string, value: any, index: number) => {
+    dispatch({ command: { type: 'setAlertActionProperty' }, payload: { key, value, index } });
+  };
+
   const closeFlyout = useCallback(() => {
     setAlertFlyoutVisibility(false);
     setAlertType(undefined);
-    setAlertAction(undefined);
     setSelectedTabId('alert');
     setServerError(null);
   }, [setAlertFlyoutVisibility]);
 
   if (!alertFlyoutVisible) {
     return null;
+  }
+
+  const tagsOptions = alert.tags ? alert.tags.map((label: string) => ({ label })) : [];
+
+  async function loadConnectors() {
+    try {
+      const actionsResponse = await loadAllActions({ http });
+      setConnectors(actionsResponse.data);
+    } catch (e) {
+      toastNotifications.addDanger({
+        title: i18n.translate('xpack.alertingUI.sections.alertAdd.unableToLoadActionsMessage', {
+          defaultMessage: 'Unable to load actions',
+        }),
+      });
+    }
   }
 
   const AlertTypeParamsExpressionComponent = alertType ? alertType.alertTypeParamsExpression : null;
@@ -188,13 +215,13 @@ export const AlertAdd = ({ refreshList }: Props) => {
   } as IErrorObject;
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
-  const actionErrors = alert.actions.reduce((acc: any, alertActionType: any) => {
-    const actionType = actionTypeRegistry.get(alertActionType.id);
+  const actionErrors = alert.actions.reduce((acc: any, alertAction: AlertAction) => {
+    const actionType = actionTypeRegistry.get(alertAction.id);
     if (!actionType) {
       return [];
     }
-    const actionValidationErrors = actionType.validateParams(alertActionType.params);
-    acc[alertActionType.id] = actionValidationErrors;
+    const actionValidationErrors = actionType.validateParams(alertAction.params);
+    acc[alertAction.id] = actionValidationErrors;
     return acc;
   }, {});
 
@@ -245,8 +272,16 @@ export const AlertAdd = ({ refreshList }: Props) => {
     }
   }
 
-  function addActionType(actionType: ActionTypeModel) {
-    setAlertAction({ id: actionType.id, group: selectedTabId, params: {} });
+  function addActionType(actionTypeModel: ActionTypeModel) {
+    setIsAddActionPanelOpen(false);
+    const actionTypeConnectors = connectors.filter(
+      field => field.actionTypeId === actionTypeModel.id
+    );
+    if (actionTypeConnectors.length > 0) {
+      alert.actions.push({ id: actionTypeConnectors[0].id, group: selectedTabId, params: {} });
+      actionsConnectors.push(actionTypeConnectors[0].actionTypeId);
+      setActionsConnectors(actionsConnectors);
+    }
   }
 
   const alertTypeNodes = alertTypeRegistry.list().map(function(item, index) {
@@ -333,51 +368,135 @@ export const AlertAdd = ({ refreshList }: Props) => {
     </Fragment>
   );
 
-  let alertDetails;
-  if (!alertAction) {
-    alertDetails = (
-      <Fragment>
-        <EuiTitle size="s">
-          <h5 id="alertActionTypeTitle">
-            <FormattedMessage
-              defaultMessage={'Select an action'}
-              id="xpack.alertingUI.sections.alertAdd.selectAlertActionTypeTitle"
-            />
-          </h5>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiFlexGrid gutterSize="m" columns={3}>
-          {actionTypeNodes}
-        </EuiFlexGrid>
-      </Fragment>
-    );
-  } else {
-    alert.actions.push(alertAction);
-    const actionTypeRegisterd = actionTypeRegistry.get(alert.actions[0].id);
-    if (actionTypeRegisterd === null) return null;
-    const ParamsFieldsComponent = actionTypeRegisterd.actionParamsFields;
-    alertDetails = (
-      <Fragment>
-        <EuiTitle size="s">
-          <h5 id="alertActionTypeEditTitle">
-            <FormattedMessage
-              defaultMessage={'Action: Name of action'}
-              id="xpack.alertingUI.sections.alertAdd.selectAlertActionTypeEditTitle"
-            />
-          </h5>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        {ParamsFieldsComponent !== null ? (
-          <ParamsFieldsComponent
-            action={alert.actions[0].params}
-            errors={{}}
-            editAction={setActionParams}
-            hasErrors={false}
+  const getSelectedOptions = (actionItemId: string) => {
+    const val = connectors.find(connector => connector.id === actionItemId);
+    if (!val) {
+      return [];
+    }
+    return [
+      {
+        label: val.description,
+        value: val.description,
+        id: actionItemId,
+      },
+    ];
+  };
+
+  const alertDetails = (
+    <Fragment>
+      {alert.actions.map((actionItem: AlertAction, index: number) => {
+        const optionsList = connectors
+          .filter(field => field.actionTypeId === actionsConnectors[index])
+          .map(({ description, id }) => ({
+            label: description,
+            value: description,
+            id,
+          }));
+        const actionTypeRegisterd = actionTypeRegistry.get(actionsConnectors[index]);
+        if (actionTypeRegisterd === null) return null;
+        const ParamsFieldsComponent = actionTypeRegisterd.actionParamsFields;
+        return (
+          <EuiAccordion
+            initialIsOpen={true}
+            key={index}
+            id={index.toString()}
+            className="euiAccordionForm"
+            buttonContentClassName="euiAccordionForm__button"
+            data-test-subj="alertActionAccordion"
+            buttonContent={
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={actionTypeRegisterd.iconClass} size="m" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiTitle size="s">
+                    <h5 id="alertActionTypeEditTitle">
+                      <FormattedMessage
+                        defaultMessage={`Action: ${actionsConnectors[index]}`}
+                        id="xpack.alertingUI.sections.alertAdd.selectAlertActionTypeEditTitle"
+                      />
+                    </h5>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            extraAction={
+              <EuiButtonIcon
+                iconType="cross"
+                color="danger"
+                className="euiAccordionForm__extraAction"
+                aria-label={i18n.translate(
+                  'xpack.alertingUI.sections.alertAdd.accordion.deleteIconAriaLabel',
+                  {
+                    defaultMessage: 'Delete',
+                  }
+                )}
+                onClick={() => {
+                  const updatedActions = alert.actions.filter(
+                    (item: AlertAction) => item.id !== actionItem.id
+                  );
+                  setAlertProperty('actions', updatedActions);
+                }}
+              />
+            }
+            paddingSize="l"
+          >
+            <ErrableFormRow
+              id="actionId"
+              label={
+                <FormattedMessage
+                  id="xpack.alertingUI.sections.alertAdd.actionIdLabel"
+                  defaultMessage="{connectorInstance} instance"
+                  values={{
+                    connectorInstance: actionTypesIndex
+                      ? actionTypesIndex[actionsConnectors[index]].name
+                      : actionsConnectors[index],
+                  }}
+                />
+              }
+              errorKey="name"
+              isShowingErrors={hasErrors && alert.name !== undefined}
+              errors={errors}
+            >
+              <EuiComboBox
+                fullWidth
+                singleSelection={{ asPlainText: true }}
+                options={optionsList}
+                selectedOptions={getSelectedOptions(actionItem.id)}
+                onChange={selectedOptions => {
+                  setActionProperty('id', selectedOptions[0].id, index);
+                }}
+                isClearable={false}
+              />
+            </ErrableFormRow>
+            <EuiSpacer size="s" />
+            {ParamsFieldsComponent ? (
+              <ParamsFieldsComponent
+                action={actionItem.params}
+                index={index}
+                errors={{}}
+                editAction={setActionParamsProperty}
+                hasErrors={false}
+              />
+            ) : null}
+          </EuiAccordion>
+        );
+      })}
+      <EuiSpacer size="m" />
+      {!isAddActionPanelOpen ? (
+        <EuiButton
+          fill
+          data-test-subj="addAlertActionButton"
+          onClick={() => setIsAddActionPanelOpen(true)}
+        >
+          <FormattedMessage
+            id="xpack.alertingUI.sections.alertAdd.addActionButtonLabel"
+            defaultMessage="Add action"
           />
-        ) : null}
-      </Fragment>
-    );
-  }
+        </EuiButton>
+      ) : null}
+    </Fragment>
+  );
 
   const warningDetails = <Fragment>Warning</Fragment>;
 
@@ -616,6 +735,22 @@ export const AlertAdd = ({ refreshList }: Props) => {
             {alertTypeArea}
             <EuiSpacer size="xl" />
             {selectedTabContent}
+            {isAddActionPanelOpen || alert.actions.length === 0 ? (
+              <Fragment>
+                <EuiTitle size="s">
+                  <h5 id="alertActionTypeTitle">
+                    <FormattedMessage
+                      defaultMessage={'Select an action'}
+                      id="xpack.alertingUI.sections.alertAdd.selectAlertActionTypeTitle"
+                    />
+                  </h5>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiFlexGrid gutterSize="m" columns={3}>
+                  {actionTypeNodes}
+                </EuiFlexGrid>
+              </Fragment>
+            ) : null}
           </EuiForm>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>

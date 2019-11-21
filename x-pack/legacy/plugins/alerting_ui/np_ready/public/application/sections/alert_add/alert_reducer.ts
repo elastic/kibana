@@ -6,7 +6,12 @@
 import { isEqual } from 'lodash';
 
 interface CommandType {
-  type: 'setAlert' | 'setProperty' | 'setAlertTypeParams' | 'setAlertActionParam';
+  type:
+    | 'setAlert'
+    | 'setProperty'
+    | 'setAlertTypeParams'
+    | 'setAlertActionParams'
+    | 'setAlertActionProperty';
 }
 
 export interface AlertState {
@@ -18,6 +23,7 @@ export interface ActionAlertReducerItem {
   payload: {
     key: string;
     value: {};
+    index?: number;
   };
 }
 
@@ -68,8 +74,48 @@ export const alertReducer = (state: any, action: ActionAlertReducerItem) => {
         };
       }
     }
-    case 'setAlertActionParam': {
-      return state;
+    case 'setAlertActionParams': {
+      const { key, value, index } = payload;
+      if (index === undefined || isEqual(alert.actions[index][key], value)) {
+        return state;
+      } else {
+        const oldAction = alert.actions.splice(index, 1)[0];
+        const updatedAction = {
+          ...oldAction,
+          params: {
+            ...oldAction.params,
+            [key]: value,
+          },
+        };
+
+        return {
+          ...state,
+          alert: {
+            ...alert,
+            actions: [...alert.actions, updatedAction],
+          },
+        };
+      }
+    }
+    case 'setAlertActionProperty': {
+      const { key, value, index } = payload;
+      if (index === undefined || isEqual(alert.actions[index][key], value)) {
+        return state;
+      } else {
+        const oldAction = alert.actions.splice(index, 1)[0];
+        const updatedAction = {
+          ...oldAction,
+          [key]: value,
+        };
+
+        return {
+          ...state,
+          alert: {
+            ...alert,
+            actions: [...alert.actions, updatedAction],
+          },
+        };
+      }
     }
   }
 };

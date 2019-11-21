@@ -7,7 +7,13 @@ import React, { Fragment } from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../components/page_error';
-import { ActionTypeModel, Props, Action, ValidationResult, ParamsProps } from '../../../../types';
+import {
+  ActionTypeModel,
+  Props,
+  Action,
+  ValidationResult,
+  ActionParamsProps,
+} from '../../../../types';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -46,6 +52,10 @@ export function getActionType(): ActionTypeModel {
           )
         );
       }
+      return validationResult;
+    },
+    validateParams: (action: Action): ValidationResult => {
+      const validationResult = { errors: {} };
       return validationResult;
     },
     actionFields: PagerDutyActionFields,
@@ -124,41 +134,42 @@ const PagerDutyActionFields: React.FunctionComponent<Props> = ({
   );
 };
 
-const PagerDutyParamsFields: React.FunctionComponent<ParamsProps> = ({
+const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
   action,
   editAction,
+  index,
   errors,
   hasErrors,
   children,
 }) => {
-  const { description } = action;
+  const { eventAction, dedupKey, summary, source, severity, timestamp, component, group } = action;
   return (
     <Fragment>
       {children}
       <ErrableFormRow
-        id="pagerDutyDescription"
-        errorKey="description"
+        id="pagerDutySummary"
+        errorKey="summary"
         fullWidth
         errors={errors}
-        isShowingErrors={hasErrors === true && description !== undefined}
+        isShowingErrors={hasErrors === true && summary !== undefined}
         label={i18n.translate(
-          'xpack.alertingUI.sections.actionAdd.pagerDutyAction.descriptionFieldLabel',
+          'xpack.alertingUI.sections.actionAdd.pagerDutyAction.summaryFieldLabel',
           {
-            defaultMessage: 'Description',
+            defaultMessage: 'Summary',
           }
         )}
       >
         <EuiFieldText
           fullWidth
-          name="description"
-          value={description || ''}
+          name="summary"
+          value={summary || ''}
           data-test-subj="pagerdutyDescriptionInput"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            editAction('description', e.target.value);
+            editAction('summary', e.target.value, index);
           }}
           onBlur={() => {
-            if (!description) {
-              editAction('description', '');
+            if (!summary) {
+              editAction('summary', '', index);
             }
           }}
         />

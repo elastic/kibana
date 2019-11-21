@@ -4,10 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiFieldText, EuiFormRow, EuiComboBox, EuiTextArea } from '@elastic/eui';
+import { EuiFieldText, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../components/page_error';
-import { ActionTypeModel, Props, Action, ValidationResult, ParamsProps } from '../../../../types';
+import {
+  ActionTypeModel,
+  Props,
+  Action,
+  ValidationResult,
+  ActionParamsProps,
+} from '../../../../types';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -35,6 +41,10 @@ export function getActionType(): ActionTypeModel {
           )
         );
       }
+      return validationResult;
+    },
+    validateParams: (action: Action): ValidationResult => {
+      const validationResult = { errors: {} };
       return validationResult;
     },
     actionFields: SlackActionFields,
@@ -84,68 +94,40 @@ const SlackActionFields: React.FunctionComponent<Props> = ({
   );
 };
 
-const SlackParamsFields: React.FunctionComponent<ParamsProps> = ({
+const SlackParamsFields: React.FunctionComponent<ActionParamsProps> = ({
   action,
   editAction,
+  index,
   errors,
   hasErrors,
-  children,
 }) => {
-  const { text, to } = action;
-  const toOptions = to ? to.map((label: any) => ({ label })) : [];
+  const { message } = action;
 
   return (
     <Fragment>
-      {children}
-      <EuiFormRow
+      <ErrableFormRow
+        id="slackMessage"
+        errorKey="message"
         fullWidth
-        label={i18n.translate(
-          'xpack.alertingUI.sections.actionAdd.slackAction.recipientTextFieldLabel',
-          {
-            defaultMessage: 'Recipient (optional)',
-          }
-        )}
-      >
-        <EuiComboBox
-          noSuggestions
-          fullWidth
-          selectedOptions={toOptions}
-          data-test-subj="slackRecipientComboBox"
-          onCreateOption={(searchValue: string) => {
-            const newOptions = [...toOptions, { label: searchValue }];
-            editAction(
-              'to',
-              newOptions.map(newOption => newOption.label)
-            );
-          }}
-          onChange={(selectedOptions: Array<{ label: string }>) => {
-            editAction(
-              'to',
-              selectedOptions.map(selectedOption => selectedOption.label)
-            );
-          }}
-        />
-      </EuiFormRow>
-
-      <EuiFormRow
-        fullWidth
+        errors={errors}
+        isShowingErrors={hasErrors && message !== undefined}
         label={i18n.translate(
           'xpack.alertingUI.sections.actionAdd.slackAction.messageTextAreaFieldLabel',
           {
-            defaultMessage: 'Message (optional)',
+            defaultMessage: 'Message',
           }
         )}
       >
         <EuiTextArea
           fullWidth
-          name="text"
-          value={text}
+          name="message"
+          value={message}
           data-test-subj="slackMessageTextarea"
           onChange={e => {
-            editAction('text', e.target.value);
+            editAction('message', e.target.value, index);
           }}
         />
-      </EuiFormRow>
+      </ErrableFormRow>
     </Fragment>
   );
 };

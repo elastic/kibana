@@ -15,9 +15,10 @@ export interface Props {
   hasErrors?: boolean;
 }
 
-export interface ParamsProps {
+export interface ActionParamsProps {
   action: any;
-  editAction: (property: string, value: any) => void;
+  index: number;
+  editAction: (property: string, value: any, index: number) => void;
   errors: { [key: string]: string[] };
   hasErrors?: boolean;
 }
@@ -34,7 +35,7 @@ export interface ActionTypeModel {
   validate: (action: Action) => ValidationResult;
   validateParams: (actionParams: any) => ValidationResult;
   actionFields: React.FunctionComponent<Props> | null;
-  actionParamsFields: React.FunctionComponent<ParamsProps> | null;
+  actionParamsFields: React.FunctionComponent<ActionParamsProps> | null;
 }
 
 export interface ValidationResult {
