@@ -695,10 +695,10 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends obje
 export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
-export interface PluginInitializerContext<ConfigSchema = unknown> {
+export interface PluginInitializerContext<ConfigSchema extends object = object> {
     // (undocumented)
     readonly config: {
-        get: <T = ConfigSchema>() => T;
+        get: <T extends object = ConfigSchema>() => T;
     };
     // (undocumented)
     readonly env: {

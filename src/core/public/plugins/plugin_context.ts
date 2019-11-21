@@ -30,7 +30,7 @@ import { CoreSetup, CoreStart } from '../';
  *
  * @public
  */
-export interface PluginInitializerContext<ConfigSchema = unknown> {
+export interface PluginInitializerContext<ConfigSchema extends object = object> {
   /**
    * A symbol used to identify this plugin in the system. Needed when registering handlers or context providers.
    */
@@ -40,7 +40,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
     packageInfo: Readonly<PackageInfo>;
   };
   readonly config: {
-    get: <T = ConfigSchema>() => T;
+    get: <T extends object = ConfigSchema>() => T;
   };
 }
 

@@ -968,7 +968,7 @@ export interface PluginConfigDescriptor<T = any> {
 }
 
 // @public
-export type PluginConfigSchema<T = unknown> = Type<T>;
+export type PluginConfigSchema<T> = Type<T>;
 
 // @public
 export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;

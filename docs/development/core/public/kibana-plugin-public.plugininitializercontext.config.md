@@ -8,6 +8,6 @@
 
 ```typescript
 readonly config: {
-        get: <T = ConfigSchema>() => T;
+        get: <T extends object = ConfigSchema>() => T;
     };
 ```

@@ -29,7 +29,7 @@ import { CoreSetup, CoreStart } from '..';
  *
  * @public
  */
-export type PluginConfigSchema<T = unknown> = Type<T>;
+export type PluginConfigSchema<T> = Type<T>;
 
 /**
  * Describes a plugin configuration schema and capabilities.
@@ -48,7 +48,9 @@ export type PluginConfigSchema<T = unknown> = Type<T>;
  * type ConfigType = TypeOf<typeof configSchema>;
  *
  * export const config: PluginConfigDescriptor<ConfigType> = {
- *   exposeToBrowser: ['uiProp'],
+ *   exposeToBrowser: {
+ *     uiProp: true,
+ *   },
  *   schema: configSchema,
  * };
  * ```
