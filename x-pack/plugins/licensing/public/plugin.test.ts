@@ -38,6 +38,25 @@ describe('licensing plugin', () => {
 
         expect(license.uid).toBe('fetched');
       });
+
+      it('data re-fetch call marked as a system api', async () => {
+        const sessionStorage = coreMock.createStorage();
+        plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
+
+        const coreSetup = coreMock.createSetup();
+        const fetchedLicense = licenseMock.create();
+        coreSetup.http.get.mockResolvedValue(fetchedLicense);
+
+        const { refresh } = await plugin.setup(coreSetup);
+
+        refresh();
+
+        expect(coreSetup.http.get.mock.calls[0][1]).toMatchObject({
+          headers: {
+            'kbn-system-api': 'true',
+          },
+        });
+      });
     });
 
     describe('#license$', () => {
@@ -238,7 +257,7 @@ describe('licensing plugin', () => {
           },
         },
         request: {
-          url: 'http://10.10.10.10:5601/api/xpack/v1/info',
+          url: 'http://10.10.10.10:5601/api/licensing/info',
         },
       };
       expect(coreSetup.http.get).toHaveBeenCalledTimes(0);
