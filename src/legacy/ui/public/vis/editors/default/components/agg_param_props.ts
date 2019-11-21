@@ -23,7 +23,6 @@ import { AggConfig } from '../../../../agg_types/agg_config';
 import { ComboBoxGroupedOptions } from '../utils';
 import { EditorConfig } from '../../config/types';
 import { VisState } from '../../..';
-import { SubAggParamsProp } from './agg_params';
 
 // NOTE: we cannot export the interface with export { InterfaceName }
 // as there is currently a bug on babel typescript transform plugin for it
@@ -34,12 +33,12 @@ export interface AggParamCommonProps<T, P = AggParam> {
   aggParam: P;
   disabled?: boolean;
   editorConfig: EditorConfig;
+  formIsTouched: boolean;
   indexedFields?: ComboBoxGroupedOptions<Field>;
   showValidation: boolean;
   state: VisState;
   value?: T;
   metricAggs: AggConfig[];
-  subAggParams: SubAggParamsProp;
   setValidity(isValid: boolean): void;
   setTouched(): void;
 }

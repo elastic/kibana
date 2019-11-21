@@ -21,30 +21,39 @@ import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AggParamType } from '../../../../agg_types/param_types/agg';
 import { AggConfig } from '../../..';
+import { useSubAggParamsHandlers } from './utils';
+import { AggGroupNames } from '../agg_groups';
 import { AggParamEditorProps, DefaultEditorAggParams } from '..';
 
 function OrderAggParamEditor({
   agg,
   aggParam,
+  formIsTouched,
   value,
   metricAggs,
   state,
   setValue,
   setValidity,
   setTouched,
-  subAggParams,
-}: AggParamEditorProps<AggConfig>) {
+}: AggParamEditorProps<AggConfig, AggParamType>) {
   const orderBy = agg.params.orderBy;
 
   useEffect(() => {
     if (orderBy === 'custom' && !value) {
-      setValue((aggParam as AggParamType).makeAgg(agg));
+      setValue(aggParam.makeAgg(agg));
     }
 
     if (orderBy !== 'custom' && value) {
       setValue(undefined);
     }
   }, [orderBy]);
+
+  const { onAggTypeChange, setAggParamValue } = useSubAggParamsHandlers(
+    agg,
+    aggParam,
+    value as AggConfig,
+    setValue
+  );
 
   if (!agg.params.orderAgg) {
     return null;
@@ -55,14 +64,14 @@ function OrderAggParamEditor({
       <EuiSpacer size="m" />
       <DefaultEditorAggParams
         agg={value as AggConfig}
-        groupName="metrics"
+        groupName={AggGroupNames.Metrics}
         className="visEditorAgg__subAgg"
-        formIsTouched={subAggParams.formIsTouched}
+        formIsTouched={formIsTouched}
         indexPattern={agg.getIndexPattern()}
         metricAggs={metricAggs}
         state={state}
-        setAggParamValue={subAggParams.setAggParamValue}
-        onAggTypeChange={subAggParams.onAggTypeChange}
+        setAggParamValue={setAggParamValue}
+        onAggTypeChange={onAggTypeChange}
         setValidity={setValidity}
         setTouched={setTouched}
       />

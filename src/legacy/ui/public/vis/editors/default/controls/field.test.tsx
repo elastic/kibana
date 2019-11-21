@@ -22,7 +22,7 @@ import { act } from 'react-dom/test-utils';
 import { mount, shallow, ReactWrapper } from 'enzyme';
 import { EuiComboBoxProps, EuiComboBox } from '@elastic/eui';
 import { Field } from '../../../../index_patterns';
-import { ComboBoxGroupedOptions, SubAggParamsProp } from '..';
+import { ComboBoxGroupedOptions } from '..';
 import { FieldParamEditor, FieldParamEditorProps } from './field';
 import { AggConfig, VisState } from '../../..';
 
@@ -69,6 +69,7 @@ describe('FieldParamEditor component', () => {
         editorComponent: () => null,
         onChange,
       } as any,
+      formIsTouched: false,
       value: undefined,
       editorConfig: {},
       indexedFields,
@@ -78,7 +79,6 @@ describe('FieldParamEditor component', () => {
       setTouched,
       state: {} as VisState,
       metricAggs: [] as AggConfig[],
-      subAggParams: {} as SubAggParamsProp,
     };
   });
 

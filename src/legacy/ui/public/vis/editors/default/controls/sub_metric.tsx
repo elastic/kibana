@@ -20,20 +20,22 @@
 import React, { useEffect } from 'react';
 import { EuiFormLabel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AggParamType } from '../../../../agg_types/param_types/agg';
+
+import { AggParamType } from 'ui/agg_types/param_types/agg';
 import { AggConfig } from '../../../../agg_types/agg_config';
+import { useSubAggParamsHandlers } from './utils';
 import { AggParamEditorProps, DefaultEditorAggParams, AggGroupNames } from '..';
 
 function SubMetricParamEditor({
   agg,
   aggParam,
+  formIsTouched,
   metricAggs,
   state,
   setValue,
   setValidity,
   setTouched,
-  subAggParams,
-}: AggParamEditorProps<AggConfig>) {
+}: AggParamEditorProps<AggConfig, AggParamType>) {
   const metricTitle = i18n.translate('common.ui.aggTypes.metrics.metricTitle', {
     defaultMessage: 'Metric',
   });
@@ -49,12 +51,16 @@ function SubMetricParamEditor({
     if (agg.params[type]) {
       setValue(agg.params[type]);
     } else {
-      const param = agg.type.paramByName(type);
-      if (param) {
-        setValue((param as AggParamType).makeAgg(agg));
-      }
+      setValue(aggParam.makeAgg(agg));
     }
   }, []);
+
+  const { onAggTypeChange, setAggParamValue } = useSubAggParamsHandlers(
+    agg,
+    aggParam,
+    agg.params[type],
+    setValue
+  );
 
   if (!agg.params[type]) {
     return null;
@@ -69,12 +75,12 @@ function SubMetricParamEditor({
         agg={agg.params[type]}
         groupName={aggGroup}
         className="visEditorAgg__subAgg"
-        formIsTouched={subAggParams.formIsTouched}
+        formIsTouched={formIsTouched}
         indexPattern={agg.getIndexPattern()}
         metricAggs={metricAggs}
         state={state}
-        setAggParamValue={subAggParams.setAggParamValue}
-        onAggTypeChange={subAggParams.onAggTypeChange}
+        setAggParamValue={setAggParamValue}
+        onAggTypeChange={onAggTypeChange}
         setValidity={setValidity}
         setTouched={setTouched}
       />

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AggConfig, Vis } from 'ui/vis';
+import { AggConfig, Vis, VisParams } from 'ui/vis';
 import { EditorStateActionTypes } from './constants';
 import { Schema } from '../schemas';
 
@@ -56,6 +56,10 @@ type ToggleEnabledAgg = ActionType<
   EditorStateActionTypes.TOGGLE_ENABLED_AGG,
   { aggId: AggId; enabled: AggConfig['enabled'] }
 >;
+type UpdateStateParams = ActionType<
+  EditorStateActionTypes.UPDATE_STATE_PARAMS,
+  { params: VisParams }
+>;
 
 export type EditorAction =
   | AddNewAgg
@@ -65,7 +69,8 @@ export type EditorAction =
   | SetStateParamValue
   | RemoveAgg
   | ReorderAggs
-  | ToggleEnabledAgg;
+  | ToggleEnabledAgg
+  | UpdateStateParams;
 
 export interface EditorActions {
   addNewAgg(schema: Schema): AddNewAgg;
@@ -83,6 +88,7 @@ export interface EditorActions {
   removeAgg(aggId: AggId): RemoveAgg;
   reorderAggs(sourceAgg: AggConfig, destinationAgg: AggConfig): ReorderAggs;
   toggleEnabledAgg(aggId: AggId, enabled: AggConfig['enabled']): ToggleEnabledAgg;
+  updateStateParams(params: VisParams): UpdateStateParams;
 }
 
 const addNewAgg: EditorActions['addNewAgg'] = schema => ({
@@ -145,6 +151,13 @@ const toggleEnabledAgg: EditorActions['toggleEnabledAgg'] = (aggId, enabled) => 
   },
 });
 
+const updateStateParams: EditorActions['updateStateParams'] = params => ({
+  type: EditorStateActionTypes.UPDATE_STATE_PARAMS,
+  payload: {
+    params,
+  },
+});
+
 export {
   addNewAgg,
   discardChanges,
@@ -154,4 +167,5 @@ export {
   removeAgg,
   reorderAggs,
   toggleEnabledAgg,
+  updateStateParams,
 };

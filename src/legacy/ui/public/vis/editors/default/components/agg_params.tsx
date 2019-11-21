@@ -21,8 +21,7 @@ import React, { useCallback, useReducer, useEffect, useMemo } from 'react';
 import { EuiForm, EuiAccordion, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { VisState } from 'ui/vis';
-import { AggType, AggParam, AggConfig } from 'ui/agg_types/';
+import { AggConfig } from 'ui/agg_types/';
 import { IndexPattern } from 'ui/index_patterns';
 
 import { DefaultEditorAggSelect } from './agg_select';
@@ -48,33 +47,22 @@ import { FixedParam, TimeIntervalParam, EditorParamConfig } from '../../config/t
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { useUnmount } from '../../../../../../../plugins/kibana_react/public/util/use_unmount';
 import { AggGroupNames } from '../agg_groups';
+import { DefaultEditorCommonProps } from './agg_common_props';
 
 const FIXED_VALUE_PROP = 'fixedValue';
 const DEFAULT_PROP = 'default';
 type EditorParamConfigType = EditorParamConfig & {
   [key: string]: unknown;
 };
-export interface SubAggParamsProp {
-  formIsTouched: boolean;
-  setAggParamValue: <T extends keyof AggConfig['params']>(
-    aggId: AggConfig['id'],
-    paramName: T,
-    value: AggConfig['params'][T]
-  ) => void;
-  onAggTypeChange: (aggId: AggConfig['id'], aggType: AggType) => void;
-}
-export interface DefaultEditorAggParamsProps extends SubAggParamsProp {
+
+export interface DefaultEditorAggParamsProps extends DefaultEditorCommonProps {
   agg: AggConfig;
   aggError?: string;
   aggIndex?: number;
   aggIsTooLow?: boolean;
   className?: string;
   disabledParams?: string[];
-  groupName: string;
   indexPattern: IndexPattern;
-  metricAggs: AggConfig[];
-  state: VisState;
-  setTouched: (isTouched: boolean) => void;
   setValidity: (isValid: boolean) => void;
 }
 
@@ -135,9 +123,7 @@ function DefaultEditorAggParams({
 
   useEffect(() => {
     Object.entries(editorConfig).forEach(([param, paramConfig]) => {
-      const paramOptions = agg.type.params.find(
-        (paramOption: AggParam) => paramOption.name === param
-      );
+      const paramOptions = agg.type.params.find(paramOption => paramOption.name === param);
 
       const hasFixedValue = paramConfig.hasOwnProperty(FIXED_VALUE_PROP);
       const hasDefault = paramConfig.hasOwnProperty(DEFAULT_PROP);
@@ -181,6 +167,7 @@ function DefaultEditorAggParams({
       <DefaultEditorAggParam
         key={`${paramInstance.aggParam.name}${agg.type ? agg.type.name : ''}`}
         disabled={disabledParams && disabledParams.includes(paramInstance.aggParam.name)}
+        formIsTouched={formIsTouched}
         showValidation={formIsTouched || model.touched}
         setAggParamValue={setAggParamValue}
         setValidity={valid => {
@@ -197,11 +184,6 @@ function DefaultEditorAggParams({
             paramName: paramInstance.aggParam.name,
             payload: isTouched,
           });
-        }}
-        subAggParams={{
-          setAggParamValue,
-          onAggTypeChange,
-          formIsTouched,
         }}
         {...paramInstance}
       />
@@ -228,7 +210,7 @@ function DefaultEditorAggParams({
         setValidity={valid => onChangeAggType({ type: AGG_TYPE_ACTION_KEYS.VALID, payload: valid })}
       />
 
-      {params.basic.map((param: ParamInstance) => {
+      {params.basic.map(param => {
         const model = paramsState[param.aggParam.name] || {
           touched: false,
           valid: true,
@@ -250,7 +232,7 @@ function DefaultEditorAggParams({
             )}
           >
             <EuiSpacer size="s" />
-            {params.advanced.map((param: ParamInstance) => {
+            {params.advanced.map(param => {
               const model = paramsState[param.aggParam.name] || {
                 touched: false,
                 valid: true,

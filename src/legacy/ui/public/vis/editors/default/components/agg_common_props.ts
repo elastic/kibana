@@ -28,10 +28,9 @@ type AggParams = AggConfig['params'];
 export type AddSchema = (schemas: Schema) => void;
 export type ReorderAggs = (sourceAgg: AggConfig, destinationAgg: AggConfig) => void;
 
-export interface DefaultEditorAggCommonProps {
+export interface DefaultEditorCommonProps {
   formIsTouched: boolean;
   groupName: AggGroupNames;
-  lastParentPipelineAggTitle?: string;
   metricAggs: AggConfig[];
   state: VisState;
   setAggParamValue: <T extends keyof AggParams>(
@@ -39,9 +38,13 @@ export interface DefaultEditorAggCommonProps {
     paramName: T,
     value: AggParams[T]
   ) => void;
-  setStateParamValue: <T extends keyof VisParams>(paramName: T, value: VisParams[T]) => void;
   onAggTypeChange: (aggId: AggId, aggType: AggType) => void;
+  setTouched: (isTouched: boolean) => void;
+}
+
+export interface DefaultEditorAggCommonProps extends DefaultEditorCommonProps {
+  lastParentPipelineAggTitle?: string;
+  setStateParamValue: <T extends keyof VisParams>(paramName: T, value: VisParams[T]) => void;
   onToggleEnableAgg: (aggId: AggId, isEnable: boolean) => void;
   removeAgg: (aggId: AggId) => void;
-  setTouched: (isTouched: boolean) => void;
 }

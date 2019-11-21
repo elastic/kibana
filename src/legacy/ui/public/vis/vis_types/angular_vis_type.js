@@ -18,6 +18,7 @@
  */
 
 import $ from 'jquery';
+import { isEqual } from 'lodash';
 import chrome from 'ui/chrome';
 
 export class AngularVisController {
@@ -38,6 +39,11 @@ export class AngularVisController {
         this.$scope.vis = this.vis;
         this.$scope.visState = this.vis.getState();
         this.$scope.esResponse = esResponse;
+
+        if (!isEqual(this.$scope.visParams, visParams)) {
+          this.vis.emit('updateEditorStateParams', visParams);
+        }
+
         this.$scope.visParams = visParams;
         this.$scope.renderComplete = resolve;
         this.$scope.renderFailed = reject;

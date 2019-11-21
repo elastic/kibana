@@ -91,7 +91,7 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
         metricAggs,
         state,
         value: agg.params[param.name],
-      } as ParamInstance);
+      });
     }
   });
 

@@ -17,63 +17,39 @@
  * under the License.
  */
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { AggParamType } from '../../../../agg_types/param_types/agg';
+
+import { AggParamType } from 'ui/agg_types/param_types/agg';
 import { AggConfig } from '../../..';
-import { AggParamEditorProps, DefaultEditorAggParams } from '..';
+import { useSubAggParamsHandlers } from './utils';
+import { AggParamEditorProps, DefaultEditorAggParams, AggGroupNames } from '..';
 
 function SubAggParamEditor({
   agg,
   aggParam,
+  formIsTouched,
   value,
   metricAggs,
   state,
   setValue,
   setValidity,
   setTouched,
-  subAggParams,
 }: AggParamEditorProps<AggConfig, AggParamType>) {
   useEffect(() => {
     // we aren't creating a custom aggConfig
     if (agg.params.metricAgg !== 'custom') {
       setValue(undefined);
     } else if (!agg.params.customMetric) {
-      // const customMetric = agg.type.paramByName('customMetric');
-      // if (customMetric) {
-      //   setValue(customMetric.makeAgg(agg));
-      // }
       setValue(aggParam.makeAgg(agg));
     }
   }, [value, metricAggs]);
 
-  const setAggParamValue = useCallback(
-    (aggId, paramName, val) => {
-      const parsedParams = agg.params.customMetric.toJSON();
-      const params = {
-        ...parsedParams,
-        params: {
-          ...parsedParams.params,
-          [paramName]: val,
-        },
-      };
-
-      setValue(aggParam.makeAgg(agg, params));
-    },
-    [agg, setValue]
-  );
-  const onAggTypeChange = useCallback(
-    (aggId, aggType) => {
-      const parsedAgg = agg.params.customMetric.toJSON();
-
-      const params = {
-        ...parsedAgg,
-        type: aggType,
-      };
-
-      setValue(aggParam.makeAgg(agg, params));
-    },
-    [agg, setValue]
+  const { onAggTypeChange, setAggParamValue } = useSubAggParamsHandlers(
+    agg,
+    aggParam,
+    agg.params.customMetric,
+    setValue
   );
 
   if (agg.params.metricAgg !== 'custom' || !agg.params.customMetric) {
@@ -85,9 +61,9 @@ function SubAggParamEditor({
       <EuiSpacer size="m" />
       <DefaultEditorAggParams
         agg={agg.params.customMetric}
-        groupName="metrics"
+        groupName={AggGroupNames.Metrics}
         className="visEditorAgg__subAgg"
-        formIsTouched={subAggParams.formIsTouched}
+        formIsTouched={formIsTouched}
         indexPattern={agg.getIndexPattern()}
         metricAggs={metricAggs}
         state={state}

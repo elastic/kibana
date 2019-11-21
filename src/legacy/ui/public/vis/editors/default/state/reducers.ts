@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { cloneDeep } from 'lodash';
+
 import { AggConfigs, AggConfig } from 'ui/agg_types';
 import { Vis, VisState } from 'ui/vis';
 import { move } from 'ui/utils/collection';
@@ -163,6 +165,15 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
       return {
         ...state,
         aggs: new AggConfigs(state.aggs.indexPattern, newAggs, state.aggs.schemas),
+      };
+    }
+
+    case EditorStateActionTypes.UPDATE_STATE_PARAMS: {
+      const { params } = action.payload;
+
+      return {
+        ...state,
+        params: cloneDeep(params),
       };
     }
   }

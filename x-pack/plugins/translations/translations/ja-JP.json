@@ -515,7 +515,6 @@
     "common.ui.vis.editors.aggGroups.bucketsText": "バケット",
     "common.ui.vis.editors.aggGroups.metricsText": "メトリック",
     "common.ui.vis.editors.aggParams.errors.aggWrongRunOrderErrorMessage": "「{schema}」集約は他のバケットの前に実行する必要があります！",
-    "common.ui.vis.editors.resizeAriaLabels": "左右のキーでエディターのサイズを変更します",
     "common.ui.vis.editors.sidebar.applyChangesAriaLabel": "ビジュアライゼーションを変更と共に更新します",
     "common.ui.vis.editors.sidebar.autoApplyChangesAriaLabel": "変更されるごとにビジュアライゼーションを自動的に更新します",
     "common.ui.vis.editors.sidebar.discardChangesAriaLabel": "ビジュアライゼーションをリセット",

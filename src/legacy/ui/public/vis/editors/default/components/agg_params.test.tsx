@@ -22,6 +22,7 @@ import { mount, shallow } from 'enzyme';
 import { IndexPattern } from 'ui/index_patterns';
 import { AggConfig, VisState } from '../../..';
 import { DefaultEditorAggParams, DefaultEditorAggParamsProps } from './agg_params';
+import { AggGroupNames } from '../agg_groups';
 
 const mockEditorConfig = {
   useNormalizedEsInterval: { hidden: false, fixedValue: false },
@@ -100,7 +101,7 @@ describe('DefaultEditorAggParams component', () => {
         },
         params: {},
       } as any) as AggConfig,
-      groupName: 'metrics',
+      groupName: AggGroupNames.Metrics,
       formIsTouched: false,
       indexPattern: {} as IndexPattern,
       metricAggs: [],
