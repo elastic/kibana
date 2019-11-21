@@ -7,14 +7,9 @@
 import { GraphQLSchema } from 'graphql';
 import { schema as kbnSchema } from '@kbn/config-schema';
 import { runHttpQuery } from 'apollo-server-core';
-import { ObjectType } from '@kbn/config-schema';
 import { UptimeCorePlugins, UptimeCoreSetup } from './adapter_types';
-import {
-  UMBackendFrameworkAdapter,
-  UMFrameworkRequest,
-  UMFrameworkResponse,
-  UMFrameworkRouteOptions,
-} from './adapter_types';
+import { UMBackendFrameworkAdapter } from './adapter_types';
+import { UMRouteDefinition } from '../../../rest_api';
 
 export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapter {
   constructor(
@@ -25,15 +20,7 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
     this.plugins = plugins;
   }
 
-  public registerRoute<
-    RouteRequest extends UMFrameworkRequest,
-    RouteResponse extends UMFrameworkResponse
-  >({
-    handler,
-    method,
-    path,
-    validate,
-  }: UMFrameworkRouteOptions<ObjectType, ObjectType, ObjectType>) {
+  public registerRoute({ handler, method, path, validate }: UMRouteDefinition) {
     switch (method) {
       case 'GET':
         this.server.route.get(

@@ -5,7 +5,7 @@
  */
 
 import { ObjectType } from '@kbn/config-schema';
-import { RequestHandler, RouteConfig } from 'kibana/server';
+import { RequestHandler, RouteConfig, RouteMethod } from 'kibana/server';
 import { UMServerLibs } from '../lib/lib';
 
 export interface UMServerRoute {
@@ -13,6 +13,6 @@ export interface UMServerRoute {
   handler: RequestHandler<ObjectType, ObjectType, ObjectType>;
 }
 
-export type UMRouteDefinition = UMServerRoute & RouteConfig<ObjectType, ObjectType, ObjectType>;
+export type UMRouteDefinition = UMServerRoute & RouteConfig<ObjectType, ObjectType, ObjectType, RouteMethod>;
 
 export type UMRestApiRouteCreator = (libs: UMServerLibs) => UMRouteDefinition;
