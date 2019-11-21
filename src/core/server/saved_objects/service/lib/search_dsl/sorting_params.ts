@@ -19,20 +19,22 @@
 
 import Boom from 'boom';
 import { getProperty, IndexMapping } from '../../../mappings';
+import { SavedObjectType } from '../../../types';
+import { SavedObjectsSchema } from '../../..';
+import { getField } from './get_field';
 
 const TOP_LEVEL_FIELDS = ['_id', '_score'];
 
 export function getSortingParams(
+  schema: SavedObjectsSchema,
   mappings: IndexMapping,
-  type: string | string[],
+  types: SavedObjectType[],
   sortField?: string,
   sortOrder?: string
 ) {
   if (!sortField) {
     return {};
   }
-
-  const types = Array.isArray(type) ? type : [type];
 
   if (TOP_LEVEL_FIELDS.includes(sortField)) {
     return {
@@ -65,20 +67,18 @@ export function getSortingParams(
       ],
     };
   }
-
-  const [typeField] = types;
-  const key = `${typeField}.${sortField}`;
-  const field = getProperty(mappings, key);
-  if (!field) {
+  const field = getField(schema, types[0], sortField);
+  const property = getProperty(mappings, field);
+  if (!property) {
     throw Boom.badRequest(`Unknown sort field ${sortField}`);
   }
 
   return {
     sort: [
       {
-        [key]: {
+        [field]: {
           order: sortOrder,
-          unmapped_type: field.type,
+          unmapped_type: property.type,
         },
       },
     ],

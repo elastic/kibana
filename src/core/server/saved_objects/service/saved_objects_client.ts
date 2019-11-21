@@ -26,7 +26,6 @@ import {
   SavedObjectsBaseOptions,
   MutatingOperationRefreshSetting,
   SavedObjectsFindOptions,
-  SavedObjectType,
 } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
 
@@ -195,7 +194,7 @@ export class SavedObjectsClient {
    * @param options
    */
   async create<T extends SavedObjectAttributes = any>(
-    type: string | SavedObjectType,
+    type: string,
     attributes: T,
     options?: SavedObjectsCreateOptions
   ) {
@@ -263,7 +262,7 @@ export class SavedObjectsClient {
    * @param options
    */
   async get<T extends SavedObjectAttributes = any>(
-    type: string | SavedObjectType,
+    type: string,
     id: string,
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObject<T>> {

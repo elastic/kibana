@@ -24,9 +24,10 @@ import { IndexMapping } from '../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
+import { SavedObjectType } from '../../../types';
 
 interface GetSearchDslOptions {
-  type: string | string[];
+  types: SavedObjectType[];
   search?: string;
   defaultSearchOperator?: string;
   searchFields?: string[];
@@ -46,7 +47,7 @@ export function getSearchDsl(
   options: GetSearchDslOptions
 ) {
   const {
-    type,
+    types,
     search,
     defaultSearchOperator,
     searchFields,
@@ -57,8 +58,8 @@ export function getSearchDsl(
     kueryNode,
   } = options;
 
-  if (!type) {
-    throw Boom.notAcceptable('type must be specified');
+  if (!types) {
+    throw Boom.notAcceptable('types must be specified');
   }
 
   if (sortOrder && !sortField) {
@@ -67,16 +68,15 @@ export function getSearchDsl(
 
   return {
     ...getQueryParams({
-      mappings,
       schema,
       namespace,
-      type,
+      types,
       search,
       searchFields,
       defaultSearchOperator,
       hasReference,
       kueryNode,
     }),
-    ...getSortingParams(mappings, type, sortField, sortOrder),
+    ...getSortingParams(schema, mappings, types, sortField, sortOrder),
   };
 }

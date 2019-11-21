@@ -17,18 +17,20 @@
  * under the License.
  */
 
-import Boom from 'boom';
-import { SavedObjectType } from 'src/core/server/types';
+import { SavedObjectType } from '../../../types';
+import { SavedObjectsSchema } from '../../..';
 
-export function parseSavedObjectType(typeString: string): SavedObjectType {
-  const parts = typeString.split('/');
-  if (parts.length !== 1 && parts.length !== 2) {
-    throw Boom.badRequest(`"${typeString}" is an invalid saved-object type.`);
+export function getField(
+  schema: SavedObjectsSchema,
+  savedObjectType: SavedObjectType,
+  attribute: string
+) {
+  if (
+    !savedObjectType.subType ||
+    schema.getSuperTypeCommonAttributeKeys(savedObjectType.type).includes(attribute)
+  ) {
+    return `${savedObjectType.type}.${attribute}`;
   }
 
-  const [type, subType] = parts;
-  return {
-    type,
-    subType,
-  };
+  return `${savedObjectType.type}.${savedObjectType.subType}.${attribute}`;
 }

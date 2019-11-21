@@ -118,7 +118,7 @@ export interface SavedObjectReference {
  * @public
  */
 export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
-  type: string | string[] | SavedObjectType | SavedObjectType[];
+  type: string | string[];
   page?: number;
   perPage?: number;
   sortField?: string;

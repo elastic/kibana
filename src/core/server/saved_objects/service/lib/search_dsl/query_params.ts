@@ -18,29 +18,18 @@
  */
 import { toElasticsearchQuery, KueryNode } from '@kbn/es-query';
 
-import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
-
-/**
- * Gets the types based on the type. Uses mappings to support
- * null type (all types), a single type string or an array
- */
-function getTypes(mappings: IndexMapping, type?: string | string[]) {
-  if (!type) {
-    return Object.keys(getRootPropertiesObjects(mappings));
-  }
-
-  if (Array.isArray(type)) {
-    return type;
-  }
-
-  return [type];
-}
+import { SavedObjectType } from '../../../types';
+import { getField } from './get_field';
 
 /**
  *  Get the field params based on the types and searchFields
  */
-function getFieldsForTypes(types: string[], searchFields?: string[]) {
+function getFieldsForTypes(
+  schema: SavedObjectsSchema,
+  types: SavedObjectType[],
+  searchFields?: string[]
+) {
   if (!searchFields || !searchFields.length) {
     return {
       lenient: true,
@@ -50,7 +39,7 @@ function getFieldsForTypes(types: string[], searchFields?: string[]) {
 
   let fields: string[] = [];
   for (const field of searchFields) {
-    fields = fields.concat(types.map(prefix => `${prefix}.${field}`));
+    fields = fields.concat(types.map(type => getField(schema, type, field)));
   }
 
   return { fields };
@@ -60,18 +49,29 @@ function getFieldsForTypes(types: string[], searchFields?: string[]) {
  *  Gets the clause that will filter for the type in the namespace.
  *  Some types are namespace agnostic, so they must be treated differently.
  */
-function getClauseForType(schema: SavedObjectsSchema, namespace: string | undefined, type: string) {
-  if (namespace && !schema.isNamespaceAgnostic(type)) {
+function getClauseForType(
+  schema: SavedObjectsSchema,
+  namespace: string | undefined,
+  savedObjectType: SavedObjectType
+) {
+  if (namespace && !schema.isNamespaceAgnostic(savedObjectType.type)) {
     return {
       bool: {
-        must: [{ term: { type } }, { term: { namespace } }],
+        must: [
+          { term: { type: savedObjectType.type } },
+          ...(savedObjectType.subType ? [{ term: { subType: savedObjectType.subType } }] : []),
+          { term: { namespace } },
+        ],
       },
     };
   }
 
   return {
     bool: {
-      must: [{ term: { type } }],
+      must: [
+        { term: { type: savedObjectType.type } },
+        ...(savedObjectType.subType ? [{ term: { subType: savedObjectType.subType } }] : []),
+      ],
       must_not: [{ exists: { field: 'namespace' } }],
     },
   };
@@ -83,10 +83,9 @@ interface HasReferenceQueryParams {
 }
 
 interface QueryParams {
-  mappings: IndexMapping;
   schema: SavedObjectsSchema;
   namespace?: string;
-  type?: string | string[];
+  types: SavedObjectType[];
   search?: string;
   searchFields?: string[];
   defaultSearchOperator?: string;
@@ -98,17 +97,15 @@ interface QueryParams {
  *  Get the "query" related keys for the search body
  */
 export function getQueryParams({
-  mappings,
   schema,
   namespace,
-  type,
+  types,
   search,
   searchFields,
   defaultSearchOperator,
   hasReference,
   kueryNode,
 }: QueryParams) {
-  const types = getTypes(mappings, type);
   const bool: any = {
     filter: [
       ...(kueryNode != null ? [toElasticsearchQuery(kueryNode)] : []),
@@ -139,7 +136,7 @@ export function getQueryParams({
                 },
               ]
             : undefined,
-          should: types.map(shouldType => getClauseForType(schema, namespace, shouldType)),
+          should: types.map(type => getClauseForType(schema, namespace, type)),
           minimum_should_match: 1,
         },
       },
@@ -151,7 +148,7 @@ export function getQueryParams({
       {
         simple_query_string: {
           query: search,
-          ...getFieldsForTypes(types, searchFields),
+          ...getFieldsForTypes(schema, types, searchFields),
           ...(defaultSearchOperator ? { default_operator: defaultSearchOperator } : {}),
         },
       },

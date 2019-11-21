@@ -19,9 +19,8 @@
 
 import Hapi from 'hapi';
 import Joi from 'joi';
-import { SavedObjectAttributes, SavedObjectsClient, SavedObjectsSchema } from 'src/core/server';
+import { SavedObjectAttributes, SavedObjectsClient } from 'src/core/server';
 import { Prerequisites, SavedObjectReference, WithoutQueryAndParams } from './types';
-import { parseSavedObjectType } from './parse_saved_object_type';
 
 interface CreateRequest extends WithoutQueryAndParams<Hapi.Request> {
   pre: {
@@ -41,7 +40,7 @@ interface CreateRequest extends WithoutQueryAndParams<Hapi.Request> {
   };
 }
 
-export const createCreateRoute = (prereqs: Prerequisites, schema: SavedObjectsSchema) => {
+export const createCreateRoute = (prereqs: Prerequisites) => {
   return {
     path: '/api/saved_objects/{type}/{id?}',
     method: 'POST',
@@ -78,10 +77,9 @@ export const createCreateRoute = (prereqs: Prerequisites, schema: SavedObjectsSc
         const { type, id } = request.params;
         const { overwrite } = request.query;
         const { migrationVersion, references } = request.payload;
-        const savedObjectType = parseSavedObjectType(type);
 
         const options = { id, overwrite, migrationVersion, references };
-        return savedObjectsClient.create(savedObjectType, request.payload.attributes, options);
+        return savedObjectsClient.create(type, request.payload.attributes, options);
       },
     },
   };

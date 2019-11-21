@@ -86,14 +86,19 @@ export interface SavedObjectsRepositoryOptions {
   onBeforeWrite?: (...args: Parameters<CallCluster>) => Promise<void>;
 }
 
-function coerceToSavedObjectType(type: string | SavedObjectType): SavedObjectType {
-  if (typeof type === 'string') {
-    return {
-      type,
-    };
+function parseSavedObjectType(typeString: string): SavedObjectType {
+  const parts = typeString.split(':');
+  if (parts.length !== 1 && parts.length !== 2) {
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      `"${typeString}" is an invalid saved-object type.`
+    );
   }
 
-  return type;
+  const [type, subType] = parts;
+  return {
+    type,
+    subType,
+  };
 }
 
 export interface IncrementCounterOptions extends SavedObjectsBaseOptions {
@@ -169,7 +174,7 @@ export class SavedObjectsRepository {
    * @returns {promise} - { id, type, version, attributes }
    */
   public async create<T extends SavedObjectAttributes>(
-    type: string | SavedObjectType,
+    type: string,
     attributes: T,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObject<T>> {
@@ -181,7 +186,7 @@ export class SavedObjectsRepository {
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
     } = options;
-    const savedObjectType = coerceToSavedObjectType(type);
+    const savedObjectType = parseSavedObjectType(type);
 
     if (!this._allowedTypes.includes(savedObjectType.type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(savedObjectType.type);
@@ -397,7 +402,7 @@ export class SavedObjectsRepository {
         conflicts: 'proceed',
         ...getSearchDsl(this._mappings, this._schema, {
           namespace,
-          type: typesToDelete,
+          type: typesToDelete.map(parseSavedObjectType),
         }),
       },
     };
@@ -441,8 +446,12 @@ export class SavedObjectsRepository {
       );
     }
 
-    const types = Array.isArray(type) ? type : [type];
-    const allowedTypes = types.filter(t => this._allowedTypes.includes(t));
+    const savedObjectTypes = Array.isArray(type)
+      ? type.map(parseSavedObjectType)
+      : [parseSavedObjectType(type)];
+    const allowedTypes = savedObjectTypes.filter(savedObjectType =>
+      this._allowedTypes.includes(savedObjectType.type)
+    );
     if (allowedTypes.length === 0) {
       return {
         page,
@@ -461,21 +470,21 @@ export class SavedObjectsRepository {
     }
 
     let kueryNode;
-    try {
-      kueryNode =
-        filter && filter !== ''
-          ? validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings)
-          : null;
-    } catch (e) {
-      if (e.name === 'KQLSyntaxError') {
-        throw SavedObjectsErrorHelpers.createBadRequestError('KQLSyntaxError: ' + e.message);
-      } else {
-        throw e;
-      }
-    }
+    // try {
+    //   kueryNode =
+    //     filter && filter !== ''
+    //       ? validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings)
+    //       : null;
+    // } catch (e) {
+    //   if (e.name === 'KQLSyntaxError') {
+    //     throw SavedObjectsErrorHelpers.createBadRequestError('KQLSyntaxError: ' + e.message);
+    //   } else {
+    //     throw e;
+    //   }
+    // }
 
     const esOptions = {
-      index: this.getIndicesForTypes(allowedTypes),
+      index: this.getIndicesForTypes(allowedTypes.map(savedObjectType => savedObjectType.type)),
       size: perPage,
       from: perPage * (page - 1),
       _source: includedFields(type, fields),
@@ -487,7 +496,7 @@ export class SavedObjectsRepository {
           search,
           defaultSearchOperator,
           searchFields,
-          type: allowedTypes,
+          types: allowedTypes,
           sortField,
           sortOrder,
           namespace,
@@ -604,11 +613,11 @@ export class SavedObjectsRepository {
    * @returns {promise} - { id, type, version, attributes }
    */
   async get<T extends SavedObjectAttributes = any>(
-    type: string | SavedObjectType,
+    type: string,
     id: string,
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObject<T>> {
-    const savedObjectType = coerceToSavedObjectType(type);
+    const savedObjectType = parseSavedObjectType(type);
 
     if (!this._allowedTypes.includes(savedObjectType.type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(savedObjectType.type, id);

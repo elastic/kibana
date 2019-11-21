@@ -21,7 +21,6 @@ import Hapi from 'hapi';
 import Joi from 'joi';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { Prerequisites } from './types';
-import { parseSavedObjectType } from './parse_saved_object_type';
 
 interface GetRequest extends Hapi.Request {
   pre: {
@@ -50,8 +49,7 @@ export const createGetRoute = (prereqs: Prerequisites) => ({
       const { savedObjectsClient } = request.pre;
       const { type, id } = request.params;
 
-      const savedObjectType = parseSavedObjectType(type);
-      return savedObjectsClient.get(savedObjectType, id);
+      return savedObjectsClient.get(type, id);
     },
   },
 });
