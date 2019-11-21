@@ -47,6 +47,23 @@ test('should preserve feature id when provided', () => {
   expect(feature1.properties[FEATURE_ID_PROPERTY_NAME]).toBe(featureId);
 });
 
+test('should preserve feature id for falsy value', () => {
+  const featureCollection = {
+    features: [
+      {
+        id: 0,
+        properties: {}
+      }
+    ]
+  };
+
+  assignFeatureIds(featureCollection);
+  const feature1 = featureCollection.features[0];
+  expect(typeof feature1.id).toBe('number');
+  expect(feature1.id).not.toBe(feature1.properties[FEATURE_ID_PROPERTY_NAME]);
+  expect(feature1.properties[FEATURE_ID_PROPERTY_NAME]).toBe(0);
+});
+
 test('should not modify original feature properties', () => {
   const featureProperties = {};
   const featureCollection = {
