@@ -180,7 +180,6 @@
     "@elastic/ems-client": "1.0.5",
     "@elastic/eui": "16.0.0",
     "@elastic/filesaver": "1.1.2",
-    "@elastic/javascript-typescript-langserver": "^0.3.3",
     "@elastic/lsp-extension": "^0.1.2",
     "@elastic/maki": "6.1.0",
     "@elastic/node-crypto": "^1.0.0",
