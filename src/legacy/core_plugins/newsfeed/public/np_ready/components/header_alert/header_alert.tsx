@@ -47,7 +47,7 @@ export const EuiHeaderAlert = ({
   const badgeContent = badge || null;
 
   return (
-    <EuiI18n token="euiHeaderAlert.dismiss" default="Dismiss">
+    <EuiI18n token="newsfeed.euiHeaderAlert.dismiss" default="Dismiss">
       {(dismiss: any) => (
         <div className={classes} {...rest}>
           <EuiFlexGroup justifyContent="spaceBetween">
