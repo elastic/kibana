@@ -6,7 +6,7 @@
 
 import React, { memo, useMemo } from 'react';
 
-import { css } from '../../../../../../common/eui_styled_components';
+import euiStyled, { css } from '../../../../../../common/eui_styled_components';
 import {
   isConstantSegment,
   isFieldSegment,
@@ -62,11 +62,13 @@ const unwrappedContentStyle = css`
   white-space: pre;
 `;
 
-const MessageColumnContent = LogEntryColumnContent.extend.attrs<{
+interface MessageColumnContentProps {
   isHovered: boolean;
   isHighlighted: boolean;
   isWrapped?: boolean;
-}>({})`
+}
+
+const MessageColumnContent = euiStyled(LogEntryColumnContent)<MessageColumnContentProps>`
   background-color: ${props => props.theme.eui.euiColorEmptyShade};
   text-overflow: ellipsis;
 

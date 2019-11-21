@@ -19,7 +19,7 @@
 
 import { Observable } from 'rxjs';
 import * as Rx from 'rxjs';
-import { share } from 'rxjs/operators';
+import { filter, share } from 'rxjs/operators';
 import { event, RenderId, Data, IInterpreterRenderHandlers } from './types';
 import { getRenderersRegistry } from './services';
 
@@ -38,7 +38,7 @@ export class ExpressionRenderHandler {
   private element: HTMLElement;
   private destroyFn?: any;
   private renderCount: number = 0;
-  private renderSubject: Rx.Subject<RenderId | RenderError>;
+  private renderSubject: Rx.BehaviorSubject<RenderId | RenderError | null>;
   private eventsSubject: Rx.Subject<unknown>;
   private updateSubject: Rx.Subject<unknown>;
   private handlers: IInterpreterRenderHandlers;
@@ -49,8 +49,11 @@ export class ExpressionRenderHandler {
     this.eventsSubject = new Rx.Subject();
     this.events$ = this.eventsSubject.asObservable().pipe(share());
 
-    this.renderSubject = new Rx.Subject();
-    this.render$ = this.renderSubject.asObservable().pipe(share());
+    this.renderSubject = new Rx.BehaviorSubject(null as RenderId | RenderError | null);
+    this.render$ = this.renderSubject.asObservable().pipe(
+      share(),
+      filter(_ => _ !== null)
+    ) as Observable<RenderId | RenderError>;
 
     this.updateSubject = new Rx.Subject();
     this.update$ = this.updateSubject.asObservable().pipe(share());
@@ -75,7 +78,7 @@ export class ExpressionRenderHandler {
     };
   }
 
-  render = (data: Data, extraHandlers: IExpressionRendererExtraHandlers = {}) => {
+  render = async (data: Data, extraHandlers: IExpressionRendererExtraHandlers = {}) => {
     if (!data || typeof data !== 'object') {
       this.renderSubject.next({
         type: 'error',
@@ -108,7 +111,7 @@ export class ExpressionRenderHandler {
 
     try {
       // Rendering is asynchronous, completed by handlers.done()
-      getRenderersRegistry()
+      await getRenderersRegistry()
         .get(data.as)!
         .render(this.element, data.value, { ...this.handlers, ...extraHandlers });
     } catch (e) {
