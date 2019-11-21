@@ -603,6 +603,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
             <EuiFlexGrid columns={2}>
               <EuiFlexItem>
                 <ErrableFormRow
+                  fullWidth
                   id="alertName"
                   label={
                     <FormattedMessage
@@ -615,6 +616,8 @@ export const AlertAdd = ({ refreshList }: Props) => {
                   errors={errors}
                 >
                   <EuiFieldText
+                    fullWidth
+                    compressed
                     name="name"
                     data-test-subj="alertNameInput"
                     value={alert.name || ''}
@@ -642,6 +645,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
                   <EuiComboBox
                     noSuggestions
                     fullWidth
+                    compressed
                     data-test-subj="tagsComboBox"
                     selectedOptions={tagsOptions}
                     onCreateOption={(searchValue: string) => {
@@ -668,11 +672,13 @@ export const AlertAdd = ({ refreshList }: Props) => {
             </EuiFlexGrid>
             <EuiSpacer size="m" />
             <EuiFlexGrid columns={2}>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem>
                 <EuiFormRow fullWidth compressed label={labelForAlertChecked}>
-                  <EuiFlexGroup gutterSize="none">
-                    <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s">
+                    <EuiFlexItem>
                       <EuiFieldNumber
+                        fullWidth
+                        compressed
                         value={alertInterval || 1}
                         name="interval"
                         data-test-subj="intervalInput"
@@ -686,23 +692,26 @@ export const AlertAdd = ({ refreshList }: Props) => {
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiSelect
+                        fullWidth
+                        compressed
                         value={alertIntervalUnit}
                         options={getTimeOptions((alertInterval ? alertInterval : 1).toString())}
                         onChange={(e: any) => {
                           setAlertIntervalUnit(e.target.value);
                           setAlertProperty('interval', `${alertInterval}${e.target.value}`);
                         }}
-                        fullWidth={true}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFormRow>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem>
                 <EuiFormRow fullWidth label={labelForAlertRenotify}>
-                  <EuiFlexGroup gutterSize="none">
-                    <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s">
+                    <EuiFlexItem>
                       <EuiFieldNumber
+                        fullWidth
+                        compressed
                         value={alertThrottle || ''}
                         name="throttle"
                         data-test-subj="throttleInput"
@@ -716,13 +725,13 @@ export const AlertAdd = ({ refreshList }: Props) => {
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiSelect
+                        compressed
                         value={alert.renotifyIntervalUnit}
                         options={getTimeOptions(alert.renotifyIntervalSize)}
                         onChange={(e: any) => {
                           setAlertThrottleUnit(e.target.value);
                           setAlertProperty('throttle', `${alertThrottle}${e.target.value}`);
                         }}
-                        fullWidth={true}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
