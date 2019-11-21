@@ -17,6 +17,27 @@
  * under the License.
  */
 
-export { startServers, getServices, stopServers } from './servers';
+import { phraseFilter, phrasesFilter, rangeFilter, existsFilter } from './stubs';
+import { getFilterParams } from './get_filter_params';
 
-export { chance } from './chance';
+describe('getFilterParams', () => {
+  it('should retrieve params from phrase filter', () => {
+    const params = getFilterParams(phraseFilter);
+    expect(params).toBe('ios');
+  });
+
+  it('should retrieve params from phrases filter', () => {
+    const params = getFilterParams(phrasesFilter);
+    expect(params).toEqual(['win xp', 'osx']);
+  });
+
+  it('should retrieve params from range filter', () => {
+    const params = getFilterParams(rangeFilter);
+    expect(params).toEqual({ from: 0, to: 10 });
+  });
+
+  it('should return undefined for exists filter', () => {
+    const params = getFilterParams(existsFilter);
+    expect(params).toBeUndefined();
+  });
+});

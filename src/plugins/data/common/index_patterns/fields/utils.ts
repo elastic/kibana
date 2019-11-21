@@ -17,5 +17,14 @@
  * under the License.
  */
 
-export * from './types';
-export { isFilterable } from './utils';
+import { getFilterableKbnTypeNames, IFieldType } from '../..';
+
+const filterableTypes = getFilterableKbnTypeNames();
+
+export function isFilterable(field: IFieldType): boolean {
+  return (
+    field.name === '_id' ||
+    field.scripted ||
+    Boolean(field.searchable && filterableTypes.includes(field.type))
+  );
+}

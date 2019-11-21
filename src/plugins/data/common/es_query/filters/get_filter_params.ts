@@ -17,5 +17,18 @@
  * under the License.
  */
 
-export * from './types';
-export { isFilterable } from './utils';
+import { Filter, FILTERS, PhraseFilter, PhrasesFilter, RangeFilter } from '.';
+
+export function getFilterParams(filter: Filter) {
+  switch (filter.meta.type) {
+    case FILTERS.PHRASE:
+      return (filter as PhraseFilter).meta.params.query;
+    case FILTERS.PHRASES:
+      return (filter as PhrasesFilter).meta.params;
+    case FILTERS.RANGE:
+      return {
+        from: (filter as RangeFilter).meta.params.gte,
+        to: (filter as RangeFilter).meta.params.lt,
+      };
+  }
+}
