@@ -59,7 +59,7 @@ and data directory are stored in the following locations.
 
 | plugins
   | Plugin files location. Each plugin will be contained in a subdirectory.
-  | /usr/local/var/homebrew/linked/kibana/plugins
+  | /usr/local/var/homebrew/linked/kibana-full/plugins
  d|
 
 |=======================================================================
