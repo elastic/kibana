@@ -10,7 +10,6 @@ exports[`DonutChart component passes correct props without errors for valid prop
   >
     <svg
       aria-label="Pie chart showing the current status. 32 of 127 monitors are down."
-      className="donutChart"
       height={125}
       width={125}
     />
@@ -33,7 +32,6 @@ exports[`DonutChart component renders a donut chart 1`] = `
   >
     <svg
       aria-label="Pie chart showing the current status. 32 of 127 monitors are down."
-      class="donutChart"
       height="125"
       width="125"
     />

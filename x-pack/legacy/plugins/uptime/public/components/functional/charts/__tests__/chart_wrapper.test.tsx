@@ -68,7 +68,7 @@ describe('ChartWrapper component', () => {
       </ChartWrapper>
     );
 
-    let donutChart = component.find(`.donutChart`);
+    let donutChart = component.find(DonutChart);
     expect(donutChart.length).toBe(1);
 
     component.setProps({
@@ -77,7 +77,7 @@ describe('ChartWrapper component', () => {
     await nextTick();
     component.update();
 
-    donutChart = component.find(`.donutChart`);
+    donutChart = component.find(DonutChart);
     expect(donutChart.length).toBe(1);
   });
 });
