@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { IContainer } from '../../containers';
 import { EmbeddableOutput, EmbeddableInput, Embeddable } from '../../embeddables';
+import { esFilters } from '../../../../../data/public';
 
 export const FILTERABLE_EMBEDDABLE = 'FILTERABLE_EMBEDDABLE';
 
 export interface FilterableEmbeddableInput extends EmbeddableInput {
-  filters: Filter[];
+  filters: esFilters.Filter[];
 }
 
 export class FilterableEmbeddable extends Embeddable<FilterableEmbeddableInput, EmbeddableOutput> {

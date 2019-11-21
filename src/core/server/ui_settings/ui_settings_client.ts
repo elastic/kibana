@@ -83,14 +83,11 @@ export class UiSettingsClient implements IUiSettingsClient {
   async getAll<T extends SavedObjectAttribute = any>() {
     const raw = await this.getRaw();
 
-    return Object.keys(raw).reduce(
-      (all, key) => {
-        const item = raw[key];
-        all[key] = ('userValue' in item ? item.userValue : item.value) as T;
-        return all;
-      },
-      {} as Record<string, T>
-    );
+    return Object.keys(raw).reduce((all, key) => {
+      const item = raw[key];
+      all[key] = ('userValue' in item ? item.userValue : item.value) as T;
+      return all;
+    }, {} as Record<string, T>);
   }
 
   async getUserProvided<T extends SavedObjectAttribute = any>(): Promise<UserProvided<T>> {

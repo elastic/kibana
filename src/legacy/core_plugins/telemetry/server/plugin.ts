@@ -17,14 +17,20 @@
  * under the License.
  */
 
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { registerRoutes } from './routes';
-import { telemetryCollectionManager } from './collection_manager';
-import { getStats } from './telemetry_collection';
+import { registerCollection } from './telemetry_collection';
 
 export class TelemetryPlugin {
+  private readonly currentKibanaVersion: string;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.currentKibanaVersion = initializerContext.env.packageInfo.version;
+  }
+
   public setup(core: CoreSetup) {
-    telemetryCollectionManager.setStatsGetter(getStats, 'local');
-    registerRoutes(core);
+    const currentKibanaVersion = this.currentKibanaVersion;
+    registerCollection();
+    registerRoutes({ core, currentKibanaVersion });
   }
 }

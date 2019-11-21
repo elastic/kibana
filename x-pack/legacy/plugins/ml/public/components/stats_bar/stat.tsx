@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 
 export interface StatsBarStat {
   label: string;
-  value: string | number;
+  value: number;
   show?: boolean;
 }
 interface StatProps {

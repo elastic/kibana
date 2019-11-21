@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { getOr, isEqual, set } from 'lodash/fp';
 import React, { memo, useEffect, useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
@@ -12,8 +11,6 @@ import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import { StaticIndexPattern, IndexPattern } from 'ui/index_patterns';
-
-import { TimeRange, Query } from 'src/plugins/data/common/types';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 
 import { OnTimeChangeProps } from '@elastic/eui';
@@ -37,11 +34,11 @@ import {
   toStrSelector,
 } from './selectors';
 import { timelineActions, hostsActions, networkActions } from '../../store/actions';
+import { TimeRange, Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
 const {
   ui: { SearchBar },
   search,
-  timefilter,
 } = data;
 
 export const siemFilterManager = npStart.plugins.data.query.filterManager;
@@ -67,7 +64,7 @@ interface SiemSearchBarDispatch {
     id: InputsModelId;
     savedQuery: SavedQuery | undefined;
   }) => void;
-  setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: Filter[] }) => void;
+  setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: esFilters.Filter[] }) => void;
 }
 
 interface SiemSearchBarProps {
@@ -99,10 +96,11 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
     toStr,
     updateSearch,
   }) => {
+    const { timefilter } = npStart.plugins.data.query.timefilter;
     if (fromStr != null && toStr != null) {
-      timefilter.timefilter.setTime({ from: fromStr, to: toStr });
+      timefilter.setTime({ from: fromStr, to: toStr });
     } else if (start != null && end != null) {
-      timefilter.timefilter.setTime({
+      timefilter.setTime({
         from: new Date(start).toISOString(),
         to: new Date(end).toISOString(),
       });
@@ -234,7 +232,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
           savedQuery: undefined,
         });
       }
-    }, [id, end, fromStr, start, toStr]);
+    }, [id, end, fromStr, start, toStr, savedQuery]);
 
     useEffect(() => {
       let isSubscribed = true;
@@ -258,13 +256,13 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
         subscriptions.unsubscribe();
       };
     }, []);
-    const IndexPatterns = useMemo(() => [indexPattern as IndexPattern], [indexPattern]);
+    const indexPatterns = useMemo(() => [indexPattern as IndexPattern], [indexPattern]);
     return (
       <SearchBarContainer data-test-subj={`${id}DatePicker`}>
         <SearchBar
           appName="siem"
           isLoading={isLoading}
-          indexPatterns={IndexPatterns}
+          indexPatterns={indexPatterns}
           query={filterQuery}
           onClearSavedQuery={onClearSavedQuery}
           onQuerySubmit={onQuerySubmit}
@@ -313,7 +311,7 @@ SearchBarComponent.displayName = 'SiemSearchBar';
 
 interface UpdateReduxSearchBar extends OnTimeChangeProps {
   id: InputsModelId;
-  filters?: Filter[];
+  filters?: esFilters.Filter[];
   query?: Query;
   savedQuery?: SavedQuery;
   resetSavedQuery?: boolean;
@@ -397,11 +395,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateSearch: dispatchUpdateSearch(dispatch),
   setSavedQuery: ({ id, savedQuery }: { id: InputsModelId; savedQuery: SavedQuery | undefined }) =>
     dispatch(inputsActions.setSavedQuery({ id, savedQuery })),
-  setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: Filter[] }) =>
+  setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: esFilters.Filter[] }) =>
     dispatch(inputsActions.setSearchBarFilter({ id, filters })),
 });
 
-export const SiemSearchBar = connect(
-  makeMapStateToProps,
-  mapDispatchToProps
-)(SearchBarComponent);
+export const SiemSearchBar = connect(makeMapStateToProps, mapDispatchToProps)(SearchBarComponent);

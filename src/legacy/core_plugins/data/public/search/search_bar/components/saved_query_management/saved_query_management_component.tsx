@@ -29,6 +29,7 @@ import {
   EuiPagination,
   EuiText,
   EuiSpacer,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -116,8 +117,6 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
 
   const savedQueryPopoverButton = (
     <EuiButtonEmpty
-      iconType="arrowDown"
-      iconSide="right"
       onClick={() => {
         setIsOpen(!isOpen);
       }}
@@ -129,7 +128,8 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
       })}
       data-test-subj="saved-query-management-popover-button"
     >
-      #
+      <EuiIcon type="save" className="euiQuickSelectPopover__buttonText" />
+      <EuiIcon type="arrowDown" />
     </EuiButtonEmpty>
   );
 

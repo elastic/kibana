@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export * from './es_query';
 export * from './kuery';
-export * from './filters';

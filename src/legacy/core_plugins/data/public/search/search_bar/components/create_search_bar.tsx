@@ -19,20 +19,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
-import { Filter } from '@kbn/es-query';
 import { CoreStart } from 'src/core/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
-import { TimefilterSetup } from '../../../timefilter';
 import { SearchBar } from '../../../';
 import { SearchBarOwnProps } from '.';
+import { DataPublicPluginStart, esFilters } from '../../../../../../../plugins/data/public';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
   data: DataPublicPluginStart;
   storage: IStorageWrapper;
-  timefilter: TimefilterSetup;
 }
 
 export type StatetfulSearchBarProps = SearchBarOwnProps & {
@@ -40,25 +37,26 @@ export type StatetfulSearchBarProps = SearchBarOwnProps & {
 };
 
 const defaultFiltersUpdated = (data: DataPublicPluginStart) => {
-  return (filters: Filter[]) => {
+  return (filters: esFilters.Filter[]) => {
     data.query.filterManager.setFilters(filters);
   };
 };
 
-const defaultOnRefreshChange = (timefilter: TimefilterSetup) => {
+const defaultOnRefreshChange = (data: DataPublicPluginStart) => {
+  const { timefilter } = data.query.timefilter;
   return (options: { isPaused: boolean; refreshInterval: number }) => {
-    timefilter.timefilter.setRefreshInterval({
+    timefilter.setRefreshInterval({
       value: options.refreshInterval,
       pause: options.isPaused,
     });
   };
 };
 
-export function createSearchBar({ core, storage, timefilter, data }: StatefulSearchBarDeps) {
+export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatetfulSearchBarProps) => {
-    const { filterManager } = data.query;
+    const { filterManager, timefilter } = data.query;
     const tfRefreshInterval = timefilter.timefilter.getRefreshInterval();
     const fmFilters = filterManager.getFilters();
     const [refreshInterval, setRefreshInterval] = useState(tfRefreshInterval.value);
@@ -119,7 +117,7 @@ export function createSearchBar({ core, storage, timefilter, data }: StatefulSea
           isRefreshPaused={refreshPaused}
           filters={filters}
           onFiltersUpdated={defaultFiltersUpdated(data)}
-          onRefreshChange={defaultOnRefreshChange(timefilter)}
+          onRefreshChange={defaultOnRefreshChange(data)}
           {...props}
         />
       </KibanaContextProvider>

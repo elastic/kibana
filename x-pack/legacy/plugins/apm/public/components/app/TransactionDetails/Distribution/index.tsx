@@ -11,7 +11,7 @@ import React, { FunctionComponent, useCallback } from 'react';
 import { TransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
 import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { getTimeFormatter, timeUnit } from '../../../../utils/formatters';
+import { getDurationFormatter } from '../../../../utils/formatters';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
@@ -132,8 +132,7 @@ export const TransactionDistribution: FunctionComponent<Props> = (
   );
 
   const xMax = d3.max(buckets, d => d.x) || 0;
-  const timeFormatter = getTimeFormatter(xMax);
-  const unit = timeUnit(xMax);
+  const timeFormatter = getDurationFormatter(xMax);
 
   const bucketIndex = buckets.findIndex(
     bucket =>
@@ -187,19 +186,18 @@ export const TransactionDistribution: FunctionComponent<Props> = (
             });
           }
         }}
-        formatX={timeFormatter}
+        formatX={(time: number) => timeFormatter(time).formatted}
         formatYShort={formatYShort}
         formatYLong={formatYLong}
         verticalLineHover={(bucket: IChartPoint) =>
           bucket.y > 0 && !bucket.sample
         }
         backgroundHover={(bucket: IChartPoint) => bucket.y > 0 && bucket.sample}
-        tooltipHeader={(bucket: IChartPoint) =>
-          `${timeFormatter(bucket.x0, { withUnit: false })} - ${timeFormatter(
-            bucket.x,
-            { withUnit: false }
-          )} ${unit}`
-        }
+        tooltipHeader={(bucket: IChartPoint) => {
+          const xFormatted = timeFormatter(bucket.x);
+          const x0Formatted = timeFormatter(bucket.x0);
+          return `${x0Formatted.value} - ${xFormatted.value} ${xFormatted.unit}`;
+        }}
         tooltipFooter={(bucket: IChartPoint) =>
           !bucket.sample &&
           i18n.translate(

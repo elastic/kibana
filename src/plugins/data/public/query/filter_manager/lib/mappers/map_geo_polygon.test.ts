@@ -16,23 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { mapGeoPolygon } from './map_geo_polygon';
-import { GeoPolygonFilter, Filter } from '@kbn/es-query';
+import { esFilters } from '../../../../../common';
 
 describe('filter manager utilities', () => {
+  let filter: esFilters.GeoPolygonFilter;
+
+  beforeEach(() => {
+    filter = {
+      meta: {
+        index: 'logstash-*',
+      },
+      geo_polygon: {
+        point: {
+          points: [
+            { lat: 5, lon: 10 },
+            { lat: 15, lon: 20 },
+          ],
+        },
+      },
+    } as esFilters.GeoPolygonFilter;
+  });
+
   describe('mapGeoPolygon()', () => {
     test('should return the key and value for matching filters with bounds', async () => {
-      const filter = {
-        meta: {
-          index: 'logstash-*',
-        },
-        geo_polygon: {
-          point: {
-            points: [{ lat: 5, lon: 10 }, { lat: 15, lon: 20 }],
-          },
-        },
-      } as GeoPolygonFilter;
-
       const result = mapGeoPolygon(filter);
 
       expect(result).toHaveProperty('key', 'point');
@@ -48,17 +56,6 @@ describe('filter manager utilities', () => {
     });
 
     test('should return the key and value even when using ignore_unmapped', async () => {
-      const filter = {
-        meta: {
-          index: 'logstash-*',
-        },
-        geo_polygon: {
-          ignore_unmapped: true,
-          point: {
-            points: [{ lat: 5, lon: 10 }, { lat: 15, lon: 20 }],
-          },
-        },
-      } as GeoPolygonFilter;
       const result = mapGeoPolygon(filter);
 
       expect(result).toHaveProperty('key', 'point');
@@ -74,15 +71,15 @@ describe('filter manager utilities', () => {
     });
 
     test('should return undefined for none matching', async done => {
-      const filter = {
+      const wrongFilter = {
         meta: { index: 'logstash-*' },
         query: { query_string: { query: 'foo:bar' } },
-      } as Filter;
+      } as esFilters.Filter;
 
       try {
-        mapGeoPolygon(filter);
+        mapGeoPolygon(wrongFilter);
       } catch (e) {
-        expect(e).toBe(filter);
+        expect(e).toBe(wrongFilter);
 
         done();
       }
