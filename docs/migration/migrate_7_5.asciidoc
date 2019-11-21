@@ -46,3 +46,5 @@ Any installs that previously enabled the Code app will now log a warning when
 Kibana starts up. It's safe to remove all configurations starting with
 `xpack.code.`. Starting in 8.0, these warnings will become errors that prevent
 Kibana from starting up.
+
+// end::notable-breaking-changes[]
