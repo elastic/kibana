@@ -18,10 +18,10 @@ In your `kibana.yml` file enable alerting and actions like so:
 
 ```sh
 # Feature flag to turn on alerting
-# xpack.alerting.enabled: true
+xpack.alerting.enabled: true
 
 # Feature flag to turn on actions which goes with alerting
-# xpack.actions.enabled: true
+xpack.actions.enabled: true
 ```
 
 Start Kibana and you will see these messages indicating signals is activated like so:
@@ -90,7 +90,8 @@ xpack.alerting.enabled: true
 xpack.actions.enabled: true
 ```
 
-Restart Kibana and you should see alerting and actions starting up
+Restart Kibana and ensure that you are using `--no-base-path` as changing the base path is a feature but will
+get in the way of the CURL scripts written as is. You should see alerting and actions starting up like so afterwards
 
 ```sh
 server    log   [22:05:22.277] [info][status][plugin:alerting@8.0.0] Status changed from uninitialized to green - Ready
