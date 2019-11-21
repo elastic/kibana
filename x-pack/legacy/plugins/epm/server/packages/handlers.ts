@@ -58,7 +58,7 @@ export async function handleGetInfo(req: PackageInfoRequest, extra: Extra) {
   return getPackageInfo({ savedObjectsClient, pkgkey });
 }
 
-export const handleGetFile = async (req: Request, extra: Extra) => {
+export async function handleGetFile(req: Request, extra: Extra) {
   if (!req.url.path) throw new Error('path is required');
   const filePath = req.url.path.replace(API_ROOT, '');
   const registryResponse = await getFile(filePath);
@@ -70,7 +70,7 @@ export const handleGetFile = async (req: Request, extra: Extra) => {
   });
 
   return epmResponse;
-};
+}
 
 export async function handleRequestInstall(req: InstallDeletePackageRequest, extra: Extra) {
   const { pkgkey } = req.params;
