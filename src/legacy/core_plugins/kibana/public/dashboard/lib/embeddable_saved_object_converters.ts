@@ -18,12 +18,10 @@
  */
 import { omit } from 'lodash';
 import { DashboardPanelState } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
-import chrome from 'ui/chrome';
 import { SavedDashboardPanel } from '../types';
 
 export function convertSavedDashboardPanelToPanelState(
-  savedDashboardPanel: SavedDashboardPanel,
-  useMargins: boolean
+  savedDashboardPanel: SavedDashboardPanel
 ): DashboardPanelState {
   return {
     type: savedDashboardPanel.type,
@@ -38,13 +36,14 @@ export function convertSavedDashboardPanelToPanelState(
 }
 
 export function convertPanelStateToSavedDashboardPanel(
-  panelState: DashboardPanelState
+  panelState: DashboardPanelState,
+  version: string
 ): SavedDashboardPanel {
   const customTitle: string | undefined = panelState.explicitInput.title
     ? (panelState.explicitInput.title as string)
     : undefined;
   return {
-    version: chrome.getKibanaVersion(),
+    version,
     type: panelState.type,
     gridData: panelState.gridData,
     panelIndex: panelState.explicitInput.id,

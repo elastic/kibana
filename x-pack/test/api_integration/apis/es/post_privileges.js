@@ -9,7 +9,7 @@ export default function ({ getService }) {
 
   describe('post_privileges', () => {
     it('should allow privileges to be updated', async () => {
-      const es = getService('es');
+      const es = getService('legacyEs');
       const application = 'foo';
       const response = await es.shield.postPrivileges({
         body: {

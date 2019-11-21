@@ -65,12 +65,6 @@ module.exports = {
       },
     },
     {
-      files: ['src/core/public/application/**/*.{js,ts,tsx}'],
-      rules: {
-        'react/no-danger': 'off',
-      },
-    },
-    {
       files: ['src/legacy/core_plugins/console/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
