@@ -8,15 +8,15 @@ import { createStaticIndexPattern } from '../lib/index_pattern/create_static_ind
 import { createRoute } from './create_route';
 import { setupRequest } from '../lib/helpers/setup_request';
 
-export const staticIndexPatternRoute = createRoute((core, { server }) => ({
+export const staticIndexPatternRoute = createRoute(() => ({
   method: 'POST',
   path: '/api/apm/index_pattern/static',
-  handler: async (req, params, h) => {
-    const setup = await setupRequest(req);
-    await createStaticIndexPattern(setup, server);
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    await createStaticIndexPattern(setup, context);
 
     // send empty response regardless of outcome
-    return h.response().code(204);
+    return undefined;
   }
 }));
 
@@ -31,8 +31,8 @@ export const dynamicIndexPatternRoute = createRoute(() => ({
       ])
     })
   },
-  handler: async request => {
-    const { dynamicIndexPattern } = await setupRequest(request);
+  handler: async ({ context, request }) => {
+    const { dynamicIndexPattern } = await setupRequest(context, request);
     return { dynamicIndexPattern };
   }
 }));

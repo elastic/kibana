@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
-import { Plugin } from './plugin';
+/*
+  Global import, so we don't need to remember to import the lib in each file
+  https://www.npmjs.com/package/jest-styled-components#global-installation
+*/
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin();
-}
+import 'jest-styled-components';
