@@ -5,16 +5,22 @@
  */
 
 import expect from '@kbn/expect';
+import { Client } from '@elastic/elasticsearch';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { getTemplate } from '../../../legacy/plugins/epm/server/lib/template/template';
 
 export default function({ getService }: FtrProviderContext) {
+  interface ClientWithInit extends Client {
+    init: () => void;
+  }
+  const indexPattern = 'foo';
+  const templateName = 'bar';
+  const es: ClientWithInit = getService('es') as ClientWithInit;
   // This test was inspired by https://github.com/elastic/kibana/blob/master/x-pack/test/api_integration/apis/monitoring/common/mappings_exist.js
   describe('load template', async () => {
-    const indexPattern = 'foo';
-    const templateName = 'bar';
-    const es = getService('es');
-
+    before(async () => {
+      es.init();
+    });
     const body = getTemplate(indexPattern);
 
     const { body: response } = await es.indices.putTemplate({
