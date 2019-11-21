@@ -68,6 +68,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await find.waitForElementHidden(spinner, defaultFindTimeout * 10);
     }
 
+    async waitUntilHistogramIsRendered() {
+      await testSubjects.waitForAttributeToChange(
+        '.echChart',
+        'data-ech-render-complete',
+        'true'
+      );
+    }
+
     async getColumnHeaders() {
       const headerElements = await testSubjects.findAll('docTableHeaderField');
       return await Promise.all(headerElements.map(async (el) => await el.getVisibleText()));
