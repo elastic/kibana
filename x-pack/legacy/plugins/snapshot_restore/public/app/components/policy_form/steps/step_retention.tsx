@@ -93,6 +93,11 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
             <EuiFieldNumber
               value={retention.expireAfterValue || ''}
               onBlur={() => setTouched({ ...touched, expireAfterValue: true })}
+              onKeyDown={e => {
+                if (e.which === 189) {
+                  e.preventDefault();
+                }
+              }}
               onChange={e => {
                 const value = e.target.value;
                 updatePolicyRetention({
@@ -100,6 +105,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
                 });
               }}
               data-test-subj="expireAfterValueInput"
+              min="0"
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -160,6 +166,11 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
               fullWidth
               value={retention.minCount || ''}
               onBlur={() => setTouched({ ...touched, minCount: true })}
+              onKeyDown={e => {
+                if (e.which === 189) {
+                  e.preventDefault();
+                }
+              }}
               onChange={e => {
                 const value = e.target.value;
                 updatePolicyRetention({
@@ -167,6 +178,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
                 });
               }}
               data-test-subj="minCountInput"
+              min="0"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -186,6 +198,11 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
               fullWidth
               value={retention.maxCount || ''}
               onBlur={() => setTouched({ ...touched, maxCount: true })}
+              onKeyDown={e => {
+                if (e.which === 189) {
+                  e.preventDefault();
+                }
+              }}
               onChange={e => {
                 const value = e.target.value;
                 updatePolicyRetention({
@@ -193,6 +210,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
                 });
               }}
               data-test-subj="maxCountInput"
+              min="0"
             />
           </EuiFormRow>
         </EuiFlexItem>
