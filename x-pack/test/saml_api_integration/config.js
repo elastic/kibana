@@ -17,7 +17,7 @@ export default async function ({ readConfigFile }) {
     testFiles: [require.resolve('./apis')],
     servers: xPackAPITestsConfig.get('servers'),
     services: {
-      chance: kibanaAPITestsConfig.get('services.chance'),
+      randomness: kibanaAPITestsConfig.get('services.randomness'),
       es: kibanaAPITestsConfig.get('services.es'),
       supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
     },

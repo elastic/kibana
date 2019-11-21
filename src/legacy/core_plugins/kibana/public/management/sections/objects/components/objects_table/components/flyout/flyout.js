@@ -579,6 +579,7 @@ class FlyoutUI extends Component {
     if (failedImports.length && (!this.hasUnmatchedReferences || (isLegacyFile === false && status === 'success'))) {
       return (
         <EuiCallOut
+          data-test-subj="importSavedObjectsFailedWarning"
           title={(
             <FormattedMessage id="kbn.management.objects.objectsTable.flyout.importFailedTitle" defaultMessage="Import failed"/>
           )}
@@ -788,6 +789,7 @@ class FlyoutUI extends Component {
     if (this.state.isLegacyFile) {
       legacyFileWarning = (
         <EuiCallOut
+          data-test-subj="importSavedObjectsLegacyWarning"
           title={(
             <FormattedMessage
               id="kbn.management.objects.objectsTable.flyout.legacyFileUsedTitle"
@@ -811,6 +813,7 @@ class FlyoutUI extends Component {
     if (this.hasUnmatchedReferences) {
       indexPatternConflictsWarning = (
         <EuiCallOut
+          data-test-subj="importSavedObjectsConflictsWarning"
           title={(
             <FormattedMessage
               id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsTitle"

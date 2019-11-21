@@ -19,7 +19,7 @@
 import React, { useState } from 'react';
 import { DocViewRenderProps } from 'ui/registry/doc_views';
 import { DocViewTableRow } from './table_row';
-import { formatValue, arrayContainsObjects } from './table_helper';
+import { arrayContainsObjects, trimAngularSpan } from './table_helper';
 
 const COLLAPSE_LINE_LENGTH = 350;
 
@@ -48,8 +48,9 @@ export function DocViewTable({
           .sort()
           .map(field => {
             const valueRaw = flattened[field];
-            const value = formatValue(valueRaw, formatted[field]);
-            const isCollapsible = typeof value === 'string' && value.length > COLLAPSE_LINE_LENGTH;
+            const value = trimAngularSpan(String(formatted[field]));
+
+            const isCollapsible = value.length > COLLAPSE_LINE_LENGTH;
             const isCollapsed = isCollapsible && !fieldRowOpen[field];
             const toggleColumn =
               onRemoveColumn && onAddColumn && Array.isArray(columns)
