@@ -51,7 +51,6 @@ export interface SavedObjectsServiceSetup {
 export interface SavedObjectsServiceStart {
   migrator: IKibanaMigrator;
   clientProvider: ISavedObjectsClientProvider;
-  schema: SavedObjectsSchema;
 }
 
 /** @internal */
@@ -112,7 +111,7 @@ export class SavedObjectsService
 
     const mappings = this.migrator.getActiveMappings();
     const allTypes = Object.keys(getRootPropertiesObjects(mappings));
-    const schema = (this.schema = new SavedObjectsSchema(savedObjectSchemas));
+    const schema = new SavedObjectsSchema(savedObjectSchemas);
     const serializer = new SavedObjectsSerializer(schema);
     const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
 
@@ -139,7 +138,7 @@ export class SavedObjectsService
   }
 
   public async start(core: SavedObjectsStartDeps): Promise<SavedObjectsServiceStart> {
-    if (!this.clientProvider || !this.schema) {
+    if (!this.clientProvider) {
       throw new Error('#setup() needs to be run first');
     }
 
@@ -166,7 +165,6 @@ export class SavedObjectsService
     return {
       migrator: this.migrator!,
       clientProvider: this.clientProvider,
-      schema: this.schema!,
     };
   }
 
