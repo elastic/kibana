@@ -7,6 +7,35 @@
 import { VectorStyle } from './vector_style';
 import { DataRequest } from '../../util/data_request';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
+import { FIELD_ORIGIN } from '../../../../common/constants';
+
+class MockField {
+  constructor({ fieldName }) {
+    this._fieldName = fieldName;
+  }
+
+  getName() {
+    return this._fieldName;
+  }
+
+  isValid() {
+    return !!this._fieldName;
+  }
+}
+
+class MockSource {
+
+  constructor({ supportedShapeTypes } = {}) {
+    this._supportedShapeTypes = supportedShapeTypes || Object.values(VECTOR_SHAPE_TYPES);
+  }
+  getSupportedShapeTypes() {
+    return this._supportedShapeTypes;
+  }
+  createField({ fieldName }) {
+    return new MockField({ fieldName });
+  }
+}
+
 
 describe('getDescriptorWithMissingStylePropsRemoved', () => {
   const fieldName = 'doIStillExist';
@@ -17,29 +46,32 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
     },
     lineColor: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
-      options: {}
+      options: {
+        'field': {
+          'name': fieldName,
+          'origin': FIELD_ORIGIN.SOURCE
+        }
+      }
     },
     iconSize: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         color: 'a color',
-        field: { name: fieldName }
+        field: { name: fieldName, origin: FIELD_ORIGIN.SOURCE }
       }
     }
   };
 
   it('Should return no changes when next oridinal fields contain existing style property fields', () => {
-    const vectorStyle = new VectorStyle({ properties });
+    const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
-    const nextOridinalFields = [
-      { name: fieldName }
-    ];
+    const nextOridinalFields = [new MockField({ fieldName })];
     const { hasChanges } = vectorStyle.getDescriptorWithMissingStylePropsRemoved(nextOridinalFields);
     expect(hasChanges).toBe(false);
   });
 
   it('Should clear missing fields when next oridinal fields do not contain existing style property fields', () => {
-    const vectorStyle = new VectorStyle({ properties });
+    const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
     const nextOridinalFields = [];
     const { hasChanges, nextStyleDescriptor } = vectorStyle.getDescriptorWithMissingStylePropsRemoved(nextOridinalFields);
@@ -83,12 +115,6 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
 
 describe('pluckStyleMetaFromSourceDataRequest', () => {
 
-  const sourceMock = {
-    getSupportedShapeTypes: () => {
-      return Object.values(VECTOR_SHAPE_TYPES);
-    }
-  };
-
   describe('has features', () => {
     it('Should identify when feature collection only contains points', async () => {
       const sourceDataRequest = new DataRequest({
@@ -110,7 +136,7 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
           ],
         }
       });
-      const vectorStyle = new VectorStyle({}, sourceMock);
+      const vectorStyle = new VectorStyle({}, new MockSource());
 
       const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
       expect(featuresMeta.hasFeatureType).toEqual({
@@ -140,7 +166,7 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
           ],
         }
       });
-      const vectorStyle = new VectorStyle({}, sourceMock);
+      const vectorStyle = new VectorStyle({}, new MockSource());
 
       const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
       expect(featuresMeta.hasFeatureType).toEqual({
@@ -183,12 +209,13 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
             type: VectorStyle.STYLE_TYPE.DYNAMIC,
             options: {
               field: {
+                origin: FIELD_ORIGIN.SOURCE,
                 name: 'myDynamicFieldWithNoValues'
               }
             }
           }
         }
-      }, sourceMock);
+      }, new MockSource());
 
       const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
       expect(featuresMeta.hasFeatureType).toEqual({
@@ -205,12 +232,13 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
             type: VectorStyle.STYLE_TYPE.DYNAMIC,
             options: {
               field: {
+                origin: FIELD_ORIGIN.SOURCE,
                 name: 'myDynamicField'
               }
             }
           }
         }
-      }, sourceMock);
+      }, new MockSource());
 
       const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
       expect(featuresMeta.myDynamicField).toEqual({
@@ -226,32 +254,24 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
 describe('checkIfOnlyFeatureType', () => {
 
   describe('source supports single feature type', () => {
-    const sourceMock = {
-      getSupportedShapeTypes: () => {
-        return [VECTOR_SHAPE_TYPES.POINT];
-      }
-    };
-
     it('isPointsOnly should be true when source feature type only supports points', async () => {
-      const vectorStyle = new VectorStyle({}, sourceMock);
+      const vectorStyle = new VectorStyle({}, new MockSource({
+        supportedShapeTypes: [VECTOR_SHAPE_TYPES.POINT]
+      }));
       const isPointsOnly = await vectorStyle._getIsPointsOnly();
       expect(isPointsOnly).toBe(true);
     });
 
     it('isLineOnly should be false when source feature type only supports points', async () => {
-      const vectorStyle = new VectorStyle({}, sourceMock);
+      const vectorStyle = new VectorStyle({}, new MockSource({
+        supportedShapeTypes: [VECTOR_SHAPE_TYPES.POINT]
+      }));
       const isLineOnly = await vectorStyle._getIsLinesOnly();
       expect(isLineOnly).toBe(false);
     });
   });
 
   describe('source supports multiple feature types', () => {
-    const sourceMock = {
-      getSupportedShapeTypes: () => {
-        return Object.values(VECTOR_SHAPE_TYPES);
-      }
-    };
-
     it('isPointsOnly should be true when data contains just points', async () => {
       const vectorStyle = new VectorStyle({
         __styleMeta: {
@@ -261,7 +281,9 @@ describe('checkIfOnlyFeatureType', () => {
             POLYGON: false
           }
         }
-      }, sourceMock);
+      }, new MockSource({
+        supportedShapeTypes: Object.values(VECTOR_SHAPE_TYPES)
+      }));
       const isPointsOnly = await vectorStyle._getIsPointsOnly();
       expect(isPointsOnly).toBe(true);
     });
@@ -275,7 +297,9 @@ describe('checkIfOnlyFeatureType', () => {
             POLYGON: false
           }
         }
-      }, sourceMock);
+      }, new MockSource({
+        supportedShapeTypes: Object.values(VECTOR_SHAPE_TYPES)
+      }));
       const isPointsOnly = await vectorStyle._getIsPointsOnly();
       expect(isPointsOnly).toBe(false);
     });
@@ -289,7 +313,9 @@ describe('checkIfOnlyFeatureType', () => {
             POLYGON: true
           }
         }
-      }, sourceMock);
+      }, new MockSource({
+        supportedShapeTypes: Object.values(VECTOR_SHAPE_TYPES)
+      }));
       const isPointsOnly = await vectorStyle._getIsPointsOnly();
       expect(isPointsOnly).toBe(false);
     });
