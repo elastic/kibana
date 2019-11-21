@@ -12,7 +12,6 @@ import { kfetch } from 'ui/kfetch';
 
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { getJobIdPrefix } from '../../../../../common/log_analysis';
-// import { jobCustomSettingsRT } from './ml_api_types';
 
 export const callSetupMlModuleAPI = async (
   moduleId: string,
@@ -36,25 +35,6 @@ export const callSetupMlModuleAPI = async (
         startDatafeed: true,
         jobOverrides,
         datafeedOverrides,
-        // jobOverrides: [
-        //   {
-        //     job_id: 'log-entry-rate' as const,
-        //     analysis_config: {
-        //       bucket_span: `${bucketSpan}ms`,
-        //     },
-        //     data_description: {
-        //       time_field: timeField,
-        //     },
-        //     custom_settings: {
-        //       logs_source_config: {
-        //         indexPattern,
-        //         timestampField: timeField,
-        //         bucketSpan,
-        //       },
-        //     },
-        //   },
-        // ],
-        // datafeedOverrides: [],
       })
     ),
   });
@@ -72,21 +52,11 @@ const setupMlModuleTimeParamsRT = rt.partial({
 
 const setupMlModuleJobOverridesRT = rt.object;
 
-type SetupMlModuleJobOverrides = rt.TypeOf<typeof setupMlModuleJobOverridesRT>;
+export type SetupMlModuleJobOverrides = rt.TypeOf<typeof setupMlModuleJobOverridesRT>;
 
 const setupMlModuleDatafeedOverridesRT = rt.object;
 
-type SetupMlModuleDatafeedOverrides = rt.TypeOf<typeof setupMlModuleDatafeedOverridesRT>;
-// const setupMlModuleLogEntryRateJobOverridesRT = rt.type({
-//   job_id: rt.literal('log-entry-rate'),
-//   analysis_config: rt.type({
-//     bucket_span: rt.string,
-//   }),
-//   data_description: rt.type({
-//     time_field: rt.string,
-//   }),
-//   custom_settings: jobCustomSettingsRT,
-// });
+export type SetupMlModuleDatafeedOverrides = rt.TypeOf<typeof setupMlModuleDatafeedOverridesRT>;
 
 const setupMlModuleRequestParamsRT = rt.type({
   indexPatternName: rt.string,

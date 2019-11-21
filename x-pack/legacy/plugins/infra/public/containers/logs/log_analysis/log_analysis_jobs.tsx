@@ -4,25 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useMemo, useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
-import { callGetMlModuleAPI } from './api/ml_get_module';
-import { bucketSpan, getJobId } from '../../../../common/log_analysis';
+import { getJobId } from '../../../../common/log_analysis';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callJobsSummaryAPI } from './api/ml_get_jobs_summary_api';
-import { callSetupMlModuleAPI, SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
+import { callGetMlModuleAPI } from './api/ml_get_module';
+import {
+  callSetupMlModuleAPI,
+  SetupMlModuleDatafeedOverrides,
+  SetupMlModuleJobOverrides,
+  SetupMlModuleResponsePayload,
+} from './api/ml_setup_module_api';
 import { useLogAnalysisCleanup } from './log_analysis_cleanup';
 import { useStatusState } from './log_analysis_status_state';
 
 export const useLogAnalysisJobs = <JobType extends string>({
+  bucketSpan,
+  datafeedOverrides,
   indexPattern,
+  jobOverrides,
   jobTypes,
   moduleId,
   sourceId,
   spaceId,
   timestampField,
 }: {
+  bucketSpan: number;
+  datafeedOverrides: SetupMlModuleDatafeedOverrides[];
   indexPattern: string;
+  jobOverrides: SetupMlModuleJobOverrides[];
   jobTypes: JobType[];
   moduleId: string;
   sourceId: string;
@@ -74,25 +85,8 @@ export const useLogAnalysisJobs = <JobType extends string>({
           spaceId,
           sourceId,
           indices.join(','),
-          [
-            {
-              job_id: 'log-entry-rate' as const,
-              analysis_config: {
-                bucket_span: `${bucketSpan}ms`,
-              },
-              data_description: {
-                time_field: timestampField,
-              },
-              custom_settings: {
-                logs_source_config: {
-                  indexPattern,
-                  timestampField,
-                  bucketSpan,
-                },
-              },
-            },
-          ],
-          []
+          jobOverrides,
+          datafeedOverrides
         );
       },
       onResolve: ({ datafeeds, jobs }: SetupMlModuleResponsePayload) => {
@@ -102,7 +96,7 @@ export const useLogAnalysisJobs = <JobType extends string>({
         dispatch({ type: 'failedSetup' });
       },
     },
-    [moduleId, spaceId, sourceId, timestampField, bucketSpan]
+    [moduleId, spaceId, sourceId, timestampField, bucketSpan, jobOverrides, datafeedOverrides]
   );
 
   const [fetchJobStatusRequest, fetchJobStatus] = useTrackedPromise(
@@ -115,7 +109,7 @@ export const useLogAnalysisJobs = <JobType extends string>({
       onResolve: response => {
         dispatch({ type: 'fetchedJobStatuses', payload: response, spaceId, sourceId });
       },
-      onReject: err => {
+      onReject: () => {
         dispatch({ type: 'failedFetchingJobStatuses' });
       },
     },

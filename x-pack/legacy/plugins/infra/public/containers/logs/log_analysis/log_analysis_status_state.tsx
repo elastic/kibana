@@ -317,10 +317,6 @@ const getSetupStatus = <JobType extends string>(
 ) => (previousSetupStatus: SetupStatus) =>
   Object.entries<JobStatus>(everyJobStatus).reduce<SetupStatus>(
     (setupStatus, [jobType, jobStatus]) => {
-      // if (!jobTypeRT.is(jobType)) {
-      //   return setupStatus;
-      // }
-
       const jobId = getJobId(spaceId, sourceId, jobType);
       const jobDefinition = jobDefinitions.find(({ id }) => id === jobType);
 

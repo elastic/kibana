@@ -5,7 +5,9 @@
  */
 
 import createContainer from 'constate';
+import { useMemo } from 'react';
 
+import { bucketSpan } from '../../../../common/log_analysis';
 import { useLogAnalysisJobs } from '../../../containers/logs/log_analysis';
 
 const jobTypes = ['log-entry-rate'];
@@ -21,8 +23,34 @@ export const useLogEntryRateJobs = ({
   spaceId: string;
   timeField: string;
 }) => {
+  const jobOverrides = useMemo(
+    () => [
+      {
+        job_id: 'log-entry-rate' as const,
+        analysis_config: {
+          bucket_span: `${bucketSpan}ms`,
+        },
+        data_description: {
+          time_field: timeField,
+        },
+        custom_settings: {
+          logs_source_config: {
+            indexPattern,
+            timestampField: timeField,
+            bucketSpan,
+          },
+        },
+      },
+    ],
+    [bucketSpan, timeField, indexPattern]
+  );
+  const datafeedOverrides = useMemo(() => [], []);
+
   return useLogAnalysisJobs({
+    bucketSpan,
+    datafeedOverrides,
     indexPattern,
+    jobOverrides,
     jobTypes,
     moduleId: 'logs_ui_analysis',
     sourceId,
