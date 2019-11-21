@@ -29,7 +29,7 @@ export const SetupModeEnterButton: React.FC<SetupModeEnterButtonProps> = (
   }
 
   return (
-    <div style={{ position: 'absolute', top: 15, left: 12, zIndex: 1 }}>
+    <div className="monSetupModeEnterButton__buttonWrapper">
       <EuiButton
         onClick={enterSetupMode}
         iconType="flag"
