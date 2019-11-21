@@ -4,9 +4,9 @@ exports[`EnterButton should render properly 1`] = `
 <div
   style={
     Object {
-      "left": 10,
+      "left": 12,
       "position": "absolute",
-      "top": 10,
+      "top": 15,
       "zIndex": 1,
     }
   }
@@ -16,8 +16,9 @@ exports[`EnterButton should render properly 1`] = `
     iconType="flag"
     isLoading={false}
     onClick={[Function]}
+    size="s"
   >
-    Enter Setup Mode
+    Enter setup mode
   </EuiButton>
 </div>
 `;
