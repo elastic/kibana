@@ -18,7 +18,7 @@ import {
   LAT_INDEX,
 } from '../common/constants';
 import { getEsSpatialRelationLabel } from '../common/i18n_getters';
-import { QUERY_DSL_FILTER_TYPE } from './kibana_services';
+import { SPATIAL_FILTER_TYPE } from './kibana_services';
 
 function ensureGeoField(type) {
   const expectedTypes = [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE];
@@ -288,7 +288,7 @@ function createGeometryFilterWithMeta({
     })
     : getEsSpatialRelationLabel(relation);
   const meta = {
-    type: QUERY_DSL_FILTER_TYPE,
+    type: SPATIAL_FILTER_TYPE,
     negate: false,
     index: indexPatternId,
     alias: `${geoFieldName} ${relationLabel} ${geometryLabel}`

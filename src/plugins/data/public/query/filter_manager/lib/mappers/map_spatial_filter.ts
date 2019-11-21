@@ -18,13 +18,18 @@
  */
 import { esFilters } from '../../../../../common';
 
-// Use mapQueryDsl mapper to avoid bloating meta with value and params for query DSL filters.
-export const mapQueryDsl = (filter: esFilters.Filter) => {
+// Use mapSpatialFilter mapper to avoid bloated meta with value and params for spatial filters.
+export const mapSpatialFilter = (filter: esFilters.Filter) => {
   const metaProperty = /(^\$|meta)/;
   const key = Object.keys(filter).find(item => {
     return !item.match(metaProperty);
   });
-  if (key && filter.meta && filter.meta.alias && filter.meta.type === esFilters.FILTERS.QUERY_DSL) {
+  if (
+    key &&
+    filter.meta &&
+    filter.meta.alias &&
+    filter.meta.type === esFilters.FILTERS.SPATIAL_FILTER
+  ) {
     return {
       key,
       type: filter.meta.type,

@@ -19,7 +19,7 @@
 
 import { reduceRight } from 'lodash';
 
-import { mapQueryDsl } from './mappers/map_query_dsl';
+import { mapSpatialFilter } from './mappers/map_spatial_filter';
 import { mapMatchAll } from './mappers/map_match_all';
 import { mapPhrase } from './mappers/map_phrase';
 import { mapPhrases } from './mappers/map_phrases';
@@ -51,7 +51,7 @@ export function mapFilter(filter: esFilters.Filter) {
   // that either handles the mapping operation or not
   // and add it here. ProTip: These are executed in order listed
   const mappers = [
-    mapQueryDsl,
+    mapSpatialFilter,
     mapMatchAll,
     mapRange,
     mapPhrase,

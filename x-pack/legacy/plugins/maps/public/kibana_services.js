@@ -9,7 +9,7 @@ export { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { start as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
 import { esFilters } from '../../../../../src/plugins/data/public';
 
-export const QUERY_DSL_FILTER_TYPE = esFilters.FILTERS.QUERY_DSL;
+export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
 export { SearchSource } from 'ui/courier';
 export const indexPatternService = data.indexPatterns.indexPatterns;
 
