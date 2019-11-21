@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { I18nContext } from 'ui/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
 import { DashboardCloneModal } from './clone_modal';
 
 export function showCloneModal(
@@ -54,7 +54,7 @@ export function showCloneModal(
   };
   document.body.appendChild(container);
   const element = (
-    <I18nContext>
+    <I18nProvider>
       <DashboardCloneModal
         onClone={onCloneConfirmed}
         onClose={closeModal}
@@ -63,7 +63,7 @@ export function showCloneModal(
           values: { title },
         })}
       />
-    </I18nContext>
+    </I18nProvider>
   );
   ReactDOM.render(element, container);
 }
