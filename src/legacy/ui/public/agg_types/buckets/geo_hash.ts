@@ -26,8 +26,7 @@ import { IsFilteredByCollarParamEditor } from '../../vis/editors/default/control
 import { PrecisionParamEditor } from '../../vis/editors/default/controls/precision';
 import { geohashColumns } from '../../utils/decode_geo_hash';
 import { AggGroupNames } from '../../vis/editors/default/agg_groups';
-import { AggConfig } from '../agg_config';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 // @ts-ignore
 import { geoContains, scaleBounds } from '../../utils/geo_utils';
@@ -143,7 +142,7 @@ export const geoHashBucketAgg = new BucketAggType<IBucketGeoHashGridAggConfig>({
     },
   ],
   getRequestAggs(agg) {
-    const aggs: AggConfig[] = [];
+    const aggs: IBucketAggConfig[] = [];
     const params = agg.params;
 
     if (params.isFilteredByCollar && agg.getField()) {

@@ -5,88 +5,100 @@
  */
 
 import Hapi from 'hapi';
-import Joi from 'joi';
 import { isFunction } from 'lodash/fp';
+import Boom from 'boom';
+import uuid from 'uuid';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import { createSignals } from '../alerts/create_signals';
 import { SignalsRequest } from '../alerts/types';
+import { createSignalsSchema } from './schemas';
+import { ServerFacade } from '../../../types';
+import { readSignals } from '../alerts/read_signals';
+import { transformOrError } from './utils';
 
 export const createCreateSignalsRoute: Hapi.ServerRoute = {
   method: 'POST',
-  path: '/api/siem/signals',
+  path: DETECTION_ENGINE_RULES_URL,
   options: {
     tags: ['access:signals-all'],
     validate: {
       options: {
         abortEarly: false,
       },
-      payload: Joi.object({
-        description: Joi.string().required(),
-        enabled: Joi.boolean().default(true),
-        filter: Joi.object(),
-        from: Joi.string().required(),
-        id: Joi.string().required(),
-        index: Joi.array().required(),
-        interval: Joi.string().default('5m'),
-        kql: Joi.string(),
-        max_signals: Joi.number().default(100),
-        name: Joi.string().required(),
-        severity: Joi.string().required(),
-        to: Joi.string().required(),
-        type: Joi.string()
-          .valid('filter', 'kql')
-          .required(),
-        references: Joi.array().default([]),
-      }).xor('filter', 'kql'),
+      payload: createSignalsSchema,
     },
   },
   async handler(request: SignalsRequest, headers) {
     const {
       description,
       enabled,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      false_positives: falsePositives,
       filter,
-      kql,
       from,
-      id,
+      immutable,
+      query,
+      language,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      saved_id: savedId,
+      filters,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      rule_id: ruleId,
       index,
       interval,
       // eslint-disable-next-line @typescript-eslint/camelcase
       max_signals: maxSignals,
       name,
       severity,
+      size,
+      tags,
       to,
       type,
       references,
     } = request.payload;
 
     const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-
     const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
 
     if (!alertsClient || !actionsClient) {
       return headers.response().code(404);
     }
 
-    return createSignals({
+    if (ruleId != null) {
+      const signal = await readSignals({ alertsClient, ruleId });
+      if (signal != null) {
+        return new Boom(`Signal rule_id ${ruleId} already exists`, { statusCode: 409 });
+      }
+    }
+    const createdSignal = await createSignals({
       alertsClient,
       actionsClient,
       description,
       enabled,
+      falsePositives,
       filter,
       from,
-      id,
+      immutable,
+      query,
+      language,
+      savedId,
+      filters,
+      ruleId: ruleId != null ? ruleId : uuid.v4(),
       index,
       interval,
-      kql,
       maxSignals,
       name,
       severity,
+      size,
+      tags,
       to,
       type,
       references,
     });
+    return transformOrError(createdSignal);
   },
 };
 
-export const createSignalsRoute = (server: Hapi.Server) => {
+export const createSignalsRoute = (server: ServerFacade) => {
   server.route(createCreateSignalsRoute);
 };

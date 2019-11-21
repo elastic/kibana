@@ -10,7 +10,6 @@ import { EuiIcon, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { FieldDataCardProps } from '../field_data_card';
-// @ts-ignore
 import { roundToDecimalPlace } from '../../../../../formatters/round_to_decimal_place';
 import { ExamplesList } from '../examples_list';
 
@@ -36,9 +35,6 @@ export const GeoPointContent: FC<FieldDataCardProps> = ({ config }) => {
   // }
 
   const { stats } = config;
-  if (stats === undefined) {
-    return null;
-  }
 
   const { count, sampleCount, cardinality, examples } = stats;
   const docsPercent = roundToDecimalPlace((count / sampleCount) * 100);

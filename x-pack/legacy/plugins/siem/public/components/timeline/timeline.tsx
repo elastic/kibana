@@ -13,6 +13,7 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { KqlMode } from '../../store/timeline/model';
 import { AutoSizer } from '../auto_sizer';
 import { ColumnHeader } from './body/column_headers/column_header';
@@ -35,6 +36,7 @@ import { TimelineHeader } from './header';
 import { calculateBodyHeight, combineQueries } from './helpers';
 import { TimelineRefetch } from './refetch_timeline';
 import { ManageTimelineContext } from './timeline_context';
+import { esQuery, esFilters } from '../../../../../../../src/plugins/data/public';
 
 const WrappedByAutoSizer = styled.div`
   width: 100%;
@@ -59,6 +61,7 @@ interface Props {
   columns: ColumnHeader[];
   dataProviders: DataProvider[];
   end: number;
+  filters: esFilters.Filter[];
   flyoutHeaderHeight: number;
   flyoutHeight: number;
   id: string;
@@ -89,6 +92,7 @@ export const Timeline = React.memo<Props>(
     columns,
     dataProviders,
     end,
+    filters,
     flyoutHeaderHeight,
     flyoutHeight,
     id,
@@ -111,11 +115,13 @@ export const Timeline = React.memo<Props>(
     sort,
     toggleColumn,
   }) => {
+    const core = useKibanaCore();
     const combinedQueries = combineQueries({
+      config: esQuery.getEsQueryConfig(core.uiSettings),
       dataProviders,
       indexPattern,
       browserFields,
-      filters: [],
+      filters,
       kqlQuery: { query: kqlQueryExpression, language: 'kuery' },
       kqlMode,
       start,
@@ -131,7 +137,7 @@ export const Timeline = React.memo<Props>(
             gutterSize="none"
             justifyContent="flexStart"
           >
-            <WrappedByAutoSizer innerRef={measureRef}>
+            <WrappedByAutoSizer ref={measureRef}>
               <TimelineHeader
                 browserFields={browserFields}
                 id={id}

@@ -5,11 +5,20 @@ See these two other pages for references:
 https://github.com/elastic/kibana/blob/master/x-pack/legacy/plugins/alerting/README.md
 https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/actions
 
-Since there is no UI yet and a lot of backend areas that are not created, you 
+Since there is no UI yet and a lot of backend areas that are not created, you
 should install the kbn-action and kbn-alert project from here:
 https://github.com/pmuellr/kbn-action
 
+The scripts rely on CURL and jq, ensure both of these are installed:
+
+```sh
+brew update
+brew install curl
+brew install jq
+```
+
 Open up your .zshrc/.bashrc and add these lines with the variables filled in:
+
 ```
 export ELASTICSEARCH_USERNAME=${user}
 export ELASTICSEARCH_PASSWORD=${password}
@@ -33,6 +42,7 @@ export USE_REINDEX_API=true
 ```
 
 Add these lines to your `kibana.dev.yml` to turn on the feature toggles of alerting and actions:
+
 ```
 # Feature flag to turn on alerting
 xpack.alerting.enabled: true
@@ -56,6 +66,7 @@ while commenting out the other require statement:
 ```
 
 Restart Kibana and you should see alerting and actions starting up
+
 ```
 server    log   [22:05:22.277] [info][status][plugin:alerting@8.0.0] Status changed from uninitialized to green - Ready
 server    log   [22:05:22.270] [info][status][plugin:actions@8.0.0] Status changed from uninitialized to green - Ready
@@ -76,12 +87,12 @@ Open a terminal and go into the scripts folder `cd kibana/x-pack/legacy/plugins/
 
 which will:
 
-* Delete any existing actions you have
-* Delete any existing alerts you have
-* Delete any existing alert tasks you have
-* Delete any existing signal mapping you might have had.
-* Add the latest signal index and its mappings
-* Posts a sample signal which checks for root or admin every 5 minutes
+- Delete any existing actions you have
+- Delete any existing alerts you have
+- Delete any existing alert tasks you have
+- Delete any existing signal mapping you might have had.
+- Add the latest signal index and its mappings
+- Posts a sample signal which checks for root or admin every 5 minutes
 
 Now you can run
 
@@ -90,20 +101,13 @@ Now you can run
 ```
 
 You should see the new alert instance created like so:
+
 ```ts
 {
     "id": "908a6af1-ac63-4d52-a856-fc635a00db0f",
     "alertTypeId": "siem.signals",
     "interval": "5m",
-    "actions": [
-        {
-            "group": "default",
-            "params": {
-                "message": "SIEM Alert Fired"
-            },
-            "id": "7edd7e98-9286-4fdb-a5c5-16de776bc7c7"
-        }
-    ],
+    "actions": [ ],
     "alertTypeParams": {},
     "enabled": true,
     "throttle": null,
@@ -120,10 +124,24 @@ Every 5 minutes you should see this message in your terminal now:
 server    log   [22:17:33.945] [info][alerting] SIEM Alert Fired
 ```
 
-See the scripts folder and the tools for more command line fun. 
+See the scripts folder and the tools for more command line fun.
 
 Add the `.siem-signals-${your user id}` to your advanced SIEM settings to see any signals
 created which should update once every 5 minutes at this point.
 
 Also add the `.siem-signals-${your user id}` as a kibana index for Maps to be able to see the
-signals 
+signals
+
+Optionally you can add these debug statements to your `kibana.dev.yml` to see more information when running the detection
+engine
+
+```sh
+logging.verbose: true
+logging.events:
+  {
+    log: ['siem', 'info', 'warning', 'error', 'fatal'],
+    request: ['info', 'warning', 'error', 'fatal'],
+    error: '*',
+    ops: __no-ops__,
+  }
+```

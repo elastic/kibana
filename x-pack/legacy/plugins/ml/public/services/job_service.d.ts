@@ -5,7 +5,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { CombinedJob } from '../jobs/new_job_new/common/job_creator/configs';
+import { CombinedJob } from '../jobs/new_job/common/job_creator/configs';
 
 export interface ExistingJobsAndGroups {
   jobIds: string[];
@@ -13,7 +13,6 @@ export interface ExistingJobsAndGroups {
 }
 
 declare interface JobService {
-  currentJob: any;
   createResultsUrlForJobs: (jobs: any[], target: string) => string;
   tempJobCloningObjects: {
     job: any;
@@ -35,6 +34,7 @@ declare interface JobService {
   createResultsUrl(jobId: string[], start: number, end: number, location: string): string;
   getJobAndGroupIds(): ExistingJobsAndGroups;
   searchPreview(job: CombinedJob): Promise<SearchResponse<any>>;
+  getJob(jobId: string): CombinedJob;
 }
 
 export const mlJobService: JobService;

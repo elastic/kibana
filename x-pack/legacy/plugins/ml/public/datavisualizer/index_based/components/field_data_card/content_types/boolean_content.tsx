@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiProgress, EuiSpacer, EuiText } f
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { FieldDataCardProps } from '../field_data_card';
-// @ts-ignore
 import { roundToDecimalPlace } from '../../../../../formatters/round_to_decimal_place';
 
 function getPercentLabel(valueCount: number, totalCount: number): string {
@@ -28,9 +27,6 @@ function getPercentLabel(valueCount: number, totalCount: number): string {
 
 export const BooleanContent: FC<FieldDataCardProps> = ({ config }) => {
   const { stats } = config;
-  if (stats === undefined) {
-    return null;
-  }
 
   const { count, sampleCount, trueCount, falseCount } = stats;
   const docsPercent = roundToDecimalPlace((count / sampleCount) * 100);

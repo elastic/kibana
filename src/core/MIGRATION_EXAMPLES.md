@@ -3,6 +3,19 @@
 This document is a list of examples of how to migrate plugin code from legacy
 APIs to their New Platform equivalents.
 
+- [Migration Examples](#migration-examples)
+  - [Configuration](#configuration)
+    - [Declaring config schema](#declaring-config-schema)
+    - [Using New Platform config from a Legacy plugin](#using-new-platform-config-from-a-legacy-plugin)
+      - [Create a New Platform plugin](#create-a-new-platform-plugin)
+  - [HTTP Routes](#http-routes)
+    - [1. Legacy route registration](#1-legacy-route-registration)
+    - [2. New Platform shim using legacy router](#2-new-platform-shim-using-legacy-router)
+    - [3. New Platform shim using New Platform router](#3-new-platform-shim-using-new-platform-router)
+      - [4. New Platform plugin](#4-new-platform-plugin)
+    - [Accessing Services](#accessing-services)
+  - [Chrome](#chrome)
+  
 ## Configuration
 
 ### Declaring config schema
@@ -149,16 +162,18 @@ This interface has a different API with slightly different behaviors.
   continue using the `boom` module internally in your plugin, the framework does
   not have native support for converting Boom exceptions into HTTP responses.
 
-### Route Registration
+Because of the incompatibility between the legacy and New Platform HTTP Route
+API's it might be helpful to break up your migration work into several stages.
 
+### 1. Legacy route registration
 ```ts
-// Legacy route registration
+// legacy/plugins/myplugin/index.ts
 import Joi from 'joi';
 
 new kibana.Plugin({
   init(server) {
     server.route({
-      path: '/api/my-plugin/my-route',
+      path: '/api/demoplugin/search',
       method: 'POST',
       options: {
         validate: {
@@ -173,17 +188,99 @@ new kibana.Plugin({
     });
   }
 });
+```
 
+### 2. New Platform shim using legacy router
+Create a New Platform shim and inject the legacy `server.route` into your
+plugin's setup function.
 
-// New Platform equivalent
+```ts
+// legacy/plugins/demoplugin/index.ts
+import { Plugin, LegacySetup } from './server/plugin';
+export default (kibana) => {
+  return new kibana.Plugin({
+    id: 'demo_plugin',
+
+    init(server) {
+      // core shim
+      const coreSetup: server.newPlatform.setup.core;
+      const pluginSetup = {};
+      const legacySetup: LegacySetup = {
+        route: server.route
+      };
+
+      new Plugin().setup(coreSetup, pluginSetup, legacySetup);
+    }
+  }
+}
+```
+```ts
+// legacy/plugins/demoplugin/server/plugin.ts
+import { CoreSetup } from 'src/core/server';
+import { Legacy } from 'kibana';
+
+export interface LegacySetup {
+  route: Legacy.Server['route'];
+};
+
+export interface DemoPluginsSetup {};
+
+export class Plugin {
+  public setup(core: CoreSetup, plugins: DemoPluginsSetup, __LEGACY: LegacySetup) {
+    __LEGACY.route({
+      path: '/api/demoplugin/search',
+      method: 'POST',
+      options: {
+        validate: {
+          payload: Joi.object({
+            field1: Joi.string().required(),
+          }),
+        }
+      },
+      async handler(req) {
+        return { message: `Received field1: ${req.payload.field1}` };
+      },
+    });
+  }
+}
+```
+
+### 3. New Platform shim using New Platform router
+We now switch the shim to use the real New Platform HTTP API's in `coreSetup`
+instead of relying on the legacy `server.route`. Since our plugin is now using
+the New Platform API's we are guaranteed that our HTTP route handling is 100% 
+compatible with the New Platform. As a result, we will also have to adapt our
+route registration accordingly. 
+```ts
+// legacy/plugins/demoplugin/index.ts
+import { Plugin } from './server/plugin';
+export default (kibana) => {
+  return new kibana.Plugin({
+    id: 'demo_plugin',
+
+    init(server) {
+      // core shim
+      const coreSetup = server.newPlatform.setup.core;
+      const pluginSetup = {};
+
+      new Plugin().setup(coreSetup, pluginSetup);
+    }
+  }
+}
+```
+```ts
+// legacy/plugins/demoplugin/server/plugin.ts
 import { schema } from '@kbn/config-schema';
+import { CoreSetup } from 'src/core/server';
+
+export interface DemoPluginsSetup {};
 
 class Plugin {
-  public setup(core) {
+  public setup(core: CoreSetup, pluginSetup: DemoPluginSetup) {
     const router = core.http.createRouter();
     router.post(
       {
-        path: '/api/my-plugin/my-route',
+        path: '/api/demoplugin/search',
         validate: {
           body: schema.object({
             field1: schema.string(),
@@ -200,6 +297,14 @@ class Plugin {
     )
   }
 }
+```
+
+#### 4. New Platform plugin
+As the final step we delete the shim and move all our code into a New Platform
+plugin. Since we were already consuming the New Platform API's no code changes
+are necessary inside `plugin.ts`.
+```ts
+// Move legacy/plugins/demoplugin/server/plugin.ts -> plugins/demoplugin/server/plugin.ts
 ```
 
 ### Accessing Services

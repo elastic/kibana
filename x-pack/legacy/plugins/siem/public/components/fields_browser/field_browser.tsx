@@ -5,9 +5,9 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { noop } from 'lodash/fp';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
@@ -25,17 +25,17 @@ import {
 import { FieldBrowserProps, OnHideFieldBrowser } from './types';
 
 const FieldsBrowserContainer = styled.div<{ width: number }>`
-  ${({ theme, width }) => css`
-    background-color: ${theme.eui.euiColorLightestShade};
-    border: ${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiColorMediumShade};
-    border-radius: ${theme.eui.euiBorderRadius};
-    left: 0;
-    padding: ${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.m};
-    position: absolute;
-    top: calc(100% + ${theme.eui.euiSize});
-    width: ${width}px;
-    z-index: 9990;
-  `}
+  background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
+  border: ${({ theme }) => theme.eui.euiBorderWidthThin} solid
+    ${({ theme }) => theme.eui.euiColorMediumShade};
+  border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
+  left: 0;
+  padding: ${({ theme }) => theme.eui.paddingSizes.s} ${({ theme }) => theme.eui.paddingSizes.s}
+    ${({ theme }) => theme.eui.paddingSizes.m};
+  position: absolute;
+  top: calc(100% + ${({ theme }) => theme.eui.euiSize});
+  width: ${({ width }) => width}px;
+  z-index: 9990;
 `;
 FieldsBrowserContainer.displayName = 'FieldsBrowserContainer';
 
@@ -122,7 +122,7 @@ export const FieldsBrowser = React.memo<Props>(
     width,
   }) => {
     /** Focuses the input that filters the field browser */
-    function focusInput() {
+    const focusInput = () => {
       const elements = document.getElementsByClassName(
         getFieldBrowserSearchInputClassName(timelineId)
       );
@@ -130,22 +130,28 @@ export const FieldsBrowser = React.memo<Props>(
       if (elements.length > 0) {
         (elements[0] as HTMLElement).focus(); // this cast is required because focus() does not exist on every `Element` returned by `getElementsByClassName`
       }
-    }
+    };
 
     /** Invoked when the user types in the input to filter the field browser */
-    function onInputChange(event: React.ChangeEvent<HTMLInputElement>) {
-      onSearchInputChange(event.target.value);
-    }
+    const onInputChange = useCallback(
+      (event: React.ChangeEvent<HTMLInputElement>) => {
+        onSearchInputChange(event.target.value);
+      },
+      [onSearchInputChange]
+    );
 
-    function selectFieldAndHide(fieldId: string) {
-      if (onFieldSelected != null) {
-        onFieldSelected(fieldId);
-      }
+    const selectFieldAndHide = useCallback(
+      (fieldId: string) => {
+        if (onFieldSelected != null) {
+          onFieldSelected(fieldId);
+        }
 
-      onHideFieldBrowser();
-    }
+        onHideFieldBrowser();
+      },
+      [onFieldSelected, onHideFieldBrowser]
+    );
 
-    function scrollViews() {
+    const scrollViews = () => {
       if (selectedCategoryId !== '') {
         const categoryPaneTitles = document.getElementsByClassName(
           getCategoryPaneCategoryClassName({
@@ -171,7 +177,7 @@ export const FieldsBrowser = React.memo<Props>(
       }
 
       focusInput(); // always re-focus the input to enable additional filtering
-    }
+    };
 
     useEffect(() => {
       scrollViews();

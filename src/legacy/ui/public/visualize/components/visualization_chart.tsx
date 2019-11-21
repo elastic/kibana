@@ -19,14 +19,10 @@
 
 import React from 'react';
 import * as Rx from 'rxjs';
-import { debounceTime, filter, share, switchMap, tap } from 'rxjs/operators';
+import { debounceTime, filter, share, switchMap } from 'rxjs/operators';
 
 import { PersistedState } from '../../persisted_state';
-import {
-  dispatchRenderComplete,
-  dispatchRenderStart,
-} from '../../../../../plugins/kibana_utils/public';
-import { ResizeChecker } from '../../resize_checker';
+import { ResizeChecker } from '../../../../../plugins/kibana_utils/public';
 import { Vis, VisualizationController } from '../../vis';
 import { getUpdateStatus } from '../../vis/update_status';
 
@@ -59,11 +55,6 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
     const render$ = this.renderSubject.asObservable().pipe(share());
 
     const success$ = render$.pipe(
-      tap(() => {
-        if (this.chartDiv.current) {
-          dispatchRenderStart(this.chartDiv.current);
-        }
-      }),
       filter(
         ({ vis, visData, container }) => vis && container && (!vis.type.requiresSearch || visData)
       ),
@@ -85,8 +76,8 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
     const requestError$ = render$.pipe(filter(({ vis }) => vis.requestError));
 
     this.renderSubscription = Rx.merge(success$, requestError$).subscribe(() => {
-      if (this.chartDiv.current !== null) {
-        dispatchRenderComplete(this.chartDiv.current);
+      if (this.props.onInit) {
+        this.props.onInit();
       }
     });
   }
@@ -111,18 +102,10 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
       throw new Error('chartDiv and currentDiv reference should always be present.');
     }
 
-    const { vis, onInit } = this.props;
+    const { vis } = this.props;
     const Visualization = vis.type.visualization;
 
     this.visualization = new Visualization(this.chartDiv.current, vis);
-
-    if (onInit) {
-      // In case the visualization implementation has an isLoaded function, we
-      // call that and wait for the result to resolve (in case it was a promise).
-      const visLoaded =
-        this.visualization && this.visualization.isLoaded && this.visualization.isLoaded();
-      Promise.resolve(visLoaded).then(onInit);
-    }
 
     // We know that containerDiv.current will never be null, since we will always
     // have rendered and the div is always rendered into the tree (i.e. not

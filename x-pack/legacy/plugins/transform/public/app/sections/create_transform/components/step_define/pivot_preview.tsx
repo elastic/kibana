@@ -12,12 +12,12 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
   EuiCallOut,
+  EuiCodeBlock,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiProgress,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -102,24 +102,11 @@ interface ErrorMessageProps {
   message: string;
 }
 
-const ErrorMessage: SFC<ErrorMessageProps> = ({ message }) => {
-  const error = JSON.parse(message);
-
-  const statusCodeLabel = i18n.translate('xpack.transform.pivotPreview.statusCodeLabel', {
-    defaultMessage: 'Status code',
-  });
-
-  return (
-    <EuiText size="xs">
-      <pre>
-        {(error.message &&
-          error.statusCode &&
-          `${statusCodeLabel}: ${error.statusCode}\n${error.message}`) ||
-          message}
-      </pre>
-    </EuiText>
-  );
-};
+const ErrorMessage: SFC<ErrorMessageProps> = ({ message }) => (
+  <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable>
+    {message}
+  </EuiCodeBlock>
+);
 
 interface PivotPreviewProps {
   aggs: PivotAggsConfigDict;
@@ -163,7 +150,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
     if (clearTable) {
       setTimeout(() => setClearTable(false), 0);
     }
-  });
+  }, [firstColumnNameChanged, clearTable]);
 
   if (firstColumnNameChanged) {
     return null;
@@ -171,7 +158,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
 
   if (status === PIVOT_PREVIEW_STATUS.ERROR) {
     return (
-      <EuiPanel grow={false}>
+      <EuiPanel grow={false} data-test-subj="transformPivotPreview error">
         <PreviewTitle previewRequest={previewRequest} />
         <EuiCallOut
           title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewError', {
@@ -205,7 +192,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
       );
     }
     return (
-      <EuiPanel grow={false}>
+      <EuiPanel grow={false} data-test-subj="transformPivotPreview empty">
         <PreviewTitle previewRequest={previewRequest} />
         <EuiCallOut
           title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewNoDataCalloutTitle', {
@@ -270,7 +257,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
   };
 
   return (
-    <EuiPanel>
+    <EuiPanel data-test-subj="transformPivotPreview loaded">
       <PreviewTitle previewRequest={previewRequest} />
       {status === PIVOT_PREVIEW_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
       {status !== PIVOT_PREVIEW_STATUS.LOADING && (

@@ -24,13 +24,13 @@ exports[`LineToolTipContent renders correctly against snapshot 1`] = `
     contextId="contextId"
     destinationBytes={
       Array [
-        undefined,
+        "testPropValue",
       ]
     }
     eventId="map-line-tooltip-contextId"
     sourceBytes={
       Array [
-        undefined,
+        "testPropValue",
       ]
     }
   />

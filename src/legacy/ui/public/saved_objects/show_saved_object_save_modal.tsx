@@ -34,7 +34,7 @@ function isSuccess(result: SaveResult): result is { id?: string } {
   return 'id' in result;
 }
 
-interface MinimalSaveModalProps {
+export interface MinimalSaveModalProps {
   onSave: (...args: any[]) => Promise<SaveResult>;
   onClose: () => void;
 }

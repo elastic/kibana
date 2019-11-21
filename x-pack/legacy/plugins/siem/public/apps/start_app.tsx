@@ -7,9 +7,10 @@
 import { createHashHistory } from 'history';
 import React, { memo, FC } from 'react';
 import { ApolloProvider } from 'react-apollo';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
+import { LegacyCoreStart } from 'kibana/public';
+import { PluginsStart } from 'ui/new_platform/new_platform';
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
@@ -18,15 +19,21 @@ import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 import { I18nContext } from 'ui/i18n';
 
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+
 import { DEFAULT_DARK_MODE } from '../../common/constants';
 import { ErrorToastDispatcher } from '../components/error_toast_dispatcher';
 import { compose } from '../lib/compose/kibana_compose';
 import { AppFrontendLibs } from '../lib/lib';
+import { KibanaCoreContextProvider } from '../lib/compose/kibana_core';
+import { KibanaPluginsContextProvider } from '../lib/compose/kibana_plugins';
+import { useKibanaUiSetting } from '../lib/settings/use_kibana_ui_setting';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';
 import { GlobalToaster, ManageGlobalToaster } from '../components/toasters';
 import { MlCapabilitiesProvider } from '../components/ml/permissions/ml_capabilities_provider';
-import { useKibanaUiSetting } from '../lib/settings/use_kibana_ui_setting';
+
 import { ApolloClientContext } from '../utils/apollo_context';
 
 const StartApp: FC<AppFrontendLibs> = memo(libs => {
@@ -68,21 +75,23 @@ const StartApp: FC<AppFrontendLibs> = memo(libs => {
   return <AppPluginRoot />;
 });
 
-const ROOT_ELEMENT_ID = 'react-siem-root';
+export const ROOT_ELEMENT_ID = 'react-siem-root';
 
-const App = memo(() => (
-  <div id={ROOT_ELEMENT_ID}>
-    <StartApp {...compose()} />
-  </div>
-));
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const SiemRootController = ($scope: any, $element: any) => {
-  const domNode: Element = $element[0];
-
-  render(<App />, domNode);
-
-  $scope.$on('$destroy', () => {
-    unmountComponentAtNode(domNode);
-  });
-};
+export const SiemApp = memo<{ core: LegacyCoreStart; plugins: PluginsStart }>(
+  ({ core, plugins }) => (
+    <KibanaContextProvider
+      services={{
+        appName: 'siem',
+        data: plugins.data,
+        storage: new Storage(localStorage),
+        ...core,
+      }}
+    >
+      <KibanaCoreContextProvider core={core}>
+        <KibanaPluginsContextProvider plugins={plugins}>
+          <StartApp {...compose()} />
+        </KibanaPluginsContextProvider>
+      </KibanaCoreContextProvider>
+    </KibanaContextProvider>
+  )
+);

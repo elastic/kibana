@@ -31,6 +31,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAlert.id, 'alert');
 
           const updatedData = {
+            name: 'bcd',
+            tags: ['bar'],
             alertTypeParams: {
               foo: true,
             },
@@ -89,6 +91,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
+              name: 'bcd',
+              tags: ['bar'],
               alertTypeParams: {
                 foo: true,
               },
@@ -134,6 +138,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
+              name: 'bcd',
+              tags: ['bar'],
               throttle: '1m',
               alertTypeId: '1',
               alertTypeParams: {
@@ -197,10 +203,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'child "throttle" fails because ["throttle" is required]. child "interval" fails because ["interval" is required]. child "alertTypeParams" fails because ["alertTypeParams" is required]. child "actions" fails because ["actions" is required]',
+                  'child "throttle" fails because ["throttle" is required]. child "name" fails because ["name" is required]. child "tags" fails because ["tags" is required]. child "interval" fails because ["interval" is required]. child "alertTypeParams" fails because ["alertTypeParams" is required]. child "actions" fails because ["actions" is required]',
                 validation: {
                   source: 'payload',
-                  keys: ['throttle', 'interval', 'alertTypeParams', 'actions'],
+                  keys: ['throttle', 'name', 'tags', 'interval', 'alertTypeParams', 'actions'],
                 },
               });
               break;
@@ -229,7 +235,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
-              interval: '10s',
+              name: 'bcd',
+              tags: ['bar'],
+              interval: '1m',
               throttle: '1m',
               alertTypeParams: {},
               actions: [],

@@ -59,6 +59,9 @@ export const SOURCE_DATA_ID_ORIGIN = 'source';
 
 export const GEOJSON_FILE = 'GEOJSON_FILE';
 
+export const MIN_ZOOM = 0;
+export const MAX_ZOOM = 24;
+
 export const DECIMAL_DEGREES_PRECISION = 5; // meters precision
 export const ZOOM_PRECISION = 2;
 export const ES_SIZE_LIMIT = 10000;
@@ -101,4 +104,13 @@ export const EMPTY_FEATURE_COLLECTION = {
 export const DRAW_TYPE = {
   BOUNDS: 'BOUNDS',
   POLYGON: 'POLYGON'
+};
+
+export const METRIC_TYPE = {
+  AVG: 'avg',
+  COUNT: 'count',
+  MAX: 'max',
+  MIN: 'min',
+  SUM: 'sum',
+  UNIQUE_COUNT: 'cardinality',
 };

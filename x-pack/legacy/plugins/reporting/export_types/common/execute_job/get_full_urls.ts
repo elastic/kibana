@@ -12,7 +12,7 @@ import {
 } from 'url';
 import { getAbsoluteUrlFactory } from '../../../common/get_absolute_url';
 import { validateUrls } from '../../../common/validate_urls';
-import { KbnServer } from '../../../types';
+import { ServerFacade } from '../../../types';
 import { JobDocPayloadPNG } from '../../png/types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
 
@@ -26,7 +26,7 @@ export async function getFullUrls({
   ...mergeValues // pass-throughs
 }: {
   job: JobDocPayloadPNG | JobDocPayloadPDF;
-  server: KbnServer;
+  server: ServerFacade;
 }) {
   const getAbsoluteUrl = getAbsoluteUrlFactory(server);
 

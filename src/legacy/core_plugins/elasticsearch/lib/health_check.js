@@ -21,7 +21,7 @@ import Bluebird from 'bluebird';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
 
-export default function (plugin, server, requestDelay) {
+export default function (plugin, server, requestDelay, ignoreVersionMismatch) {
   plugin.status.yellow('Waiting for Elasticsearch');
 
   function waitUntilReady() {
@@ -31,7 +31,7 @@ export default function (plugin, server, requestDelay) {
   }
 
   function check() {
-    return ensureEsVersion(server, kibanaVersion.get())
+    return ensureEsVersion(server, kibanaVersion.get(), ignoreVersionMismatch)
       .then(() => plugin.status.green('Ready'))
       .catch(err => plugin.status.red(err));
   }

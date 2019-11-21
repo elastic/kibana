@@ -2,32 +2,13 @@
 [[workpad-share-options]]
 == Share your workpad
 
-When you are ready to share your workpad, create a PDF, or export your workpad.
-
-[float]
-[[create-workpad-pdf]]
-=== Create a PDF
-
-To view your workpad outside of Kibana, generate a PDF. 
-
-. If you are using a Gold or Platinum license, enable reporting in your `config/kibana.yml` file.
-
-. From your workpad, click the *Share workpad* icon in the upper left corner, then select *PDF reports*.
-
-. Click *Generate PDF*. 
-+
-[role="screenshot"]
-image::images/canvas-generate-pdf.gif[Generate PDF]
-
-[float]
-[[export-workpad]]
-=== Export your workpad
-
-To share your workpad with another author, export it as a JSON file.
+When you've finished your workpad, you can share it outside of {kib}.
 
 [float]
 [[export-single-workpad]]
-==== Export a single workpad
+=== Export workpads
+
+Create a JSON file of your workpad that you can export outside of {kib}.
 
 . From your workpad, click the *Share workpad* icon in the upper left corner.
 
@@ -36,13 +17,85 @@ To share your workpad with another author, export it as a JSON file.
 [role="screenshot"]
 image::images/canvas-export-workpad.png[Export single workpad]
 
+Want to export multiple workpads? Go to the *Canvas workpads* view, select the workpads you want to export, then click *Export*.
+
 [float]
-[[export-multiple-workpads]]
-==== Export multiple workpads
+[[create-workpad-pdf]]
+=== Create a PDF
 
-. Go to the *Canvas workpads* page.
+Create a PDF copy of your workpad that you can save and share outside of {kib}.
 
-. Select the workpads you want to export
+. If you are using a Gold or Platinum license, enable reporting in your `config/kibana.yml` file.
 
-. Click *Export*.
+. From your workpad, click the *Share workpad* icon in the upper left corner, then select *PDF reports*.
 
+. Click *Generate PDF*.
++
+[role="screenshot"]
+image::images/canvas-generate-pdf.gif[Generate PDF]
+
+[float]
+[[create-workpad-URL]]
+=== Create a POST URL
+
+Create a POST URL that you can use to automatically generate PDF reports using Watcher or a script.
+
+For more information, refer to <<automating-report-generation, Automating report generation>>.
+
+. If you are using a Gold or Platinum license, enable reporting in your `config/kibana.yml` file.
+
+. From your workpad, click the *Share workpad* icon in the upper left corner, then select *PDF reports*.
+
+. Click *Copy POST URL*.
++
+[role="screenshot"]
+image::images/canvas-create-URL.gif[Create POST URL]
+
+[float]
+[[add-workpad-website]]
+=== Share the workpad on a website
+
+beta[] Canvas allows you to create _shareables_, which are workpads that you download and securely share on any website. To customize the behavior of the workpad on your website, you can choose to autoplay the pages or hide the workpad toolbar.
+
+. If you are using a Gold or Platinum license, enable reporting in your `config/kibana.yml` file.
+
+. From your workpad, click the *Share this workpad* icon in the upper left corner, then select *Share on a website*.
+
+. On the *Share on a website* pane, follow the instructions.
+
+. To customize the workpad behavior to autoplay the pages or hide the toolbar, use the inline parameters.
++
+To make sure that your data remains secure, the data in the JSON file is not connected to {kib}. Canvas does not display elements that manipulate the data on the workpad.
++
+[role="screenshot"]
+image::images/canvas-embed_workpad.gif[Share the workpad on a website]
++
+NOTE: Shareable workpads encode the current state of the workpad in a JSON file. When you make changes to the workpad, the changes do not appear in the shareable workpad on your website.
+
+[float]
+[[change-the-workpad-settings]]
+=== Change the settings
+
+After you've added the workpad to your website, you can change the autoplay and toolbar settings.
+
+[float]
+[[shareable-workpad-enable-autoplay]]
+==== Change the autoplay settings
+
+. In the lower right corner of the shareable workpad, click the settings icon.
+
+. Click *Auto Play*, then change the settings.
++
+[role="screenshot"]
+image::images/canvas_share_autoplay_480.gif[Autoplay settings]
+
+[float]
+[[hide-workpad-toolbar]]
+==== Change the toolbar settings
+
+. In the lower right corner, click the settings icon.
+
+. Click *Toolbar*, then change the settings.
++
+[role="screenshot"]
+image::images/canvas_share_hidetoolbar_480.gif[Hide toolbar settings]

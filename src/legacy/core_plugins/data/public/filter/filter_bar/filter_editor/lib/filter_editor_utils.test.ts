@@ -17,8 +17,15 @@
  * under the License.
  */
 
-import { FilterStateStore, toggleFilterNegated } from '@kbn/es-query';
-import { mockFields, mockIndexPattern } from '../../../../index_patterns';
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+import {
+  existsFilter,
+  phraseFilter,
+  phrasesFilter,
+  rangeFilter,
+  stubIndexPattern,
+  stubFields,
+} from '../../../../../../../../plugins/data/public/stubs';
 import { IndexPattern, Field } from '../../../../index';
 import {
   buildFilter,
@@ -38,15 +45,12 @@ import {
   isOneOfOperator,
   isOperator,
 } from './filter_operators';
-import { existsFilter } from './fixtures/exists_filter';
-import { phraseFilter } from './fixtures/phrase_filter';
-import { phrasesFilter } from './fixtures/phrases_filter';
-import { rangeFilter } from './fixtures/range_filter';
+import { esFilters } from '../../../../../../../../plugins/data/public';
 
 jest.mock('ui/new_platform');
 
-const mockedFields = mockFields as Field[];
-const mockedIndexPattern = mockIndexPattern as IndexPattern;
+const mockedFields = stubFields as Field[];
+const mockedIndexPattern = stubIndexPattern as IndexPattern;
 
 describe('Filter editor utils', () => {
   describe('getQueryDslFromFilter', () => {
@@ -81,7 +85,7 @@ describe('Filter editor utils', () => {
     });
 
     it('should return "is not" for phrase filter', () => {
-      const negatedPhraseFilter = toggleFilterNegated(phraseFilter);
+      const negatedPhraseFilter = esFilters.toggleFilterNegated(phraseFilter);
       const operator = getOperatorFromFilter(negatedPhraseFilter);
       expect(operator).not.toBeUndefined();
       expect(operator && operator.type).toBe('phrase');
@@ -96,7 +100,7 @@ describe('Filter editor utils', () => {
     });
 
     it('should return "is not one of" for negated phrases filter', () => {
-      const negatedPhrasesFilter = toggleFilterNegated(phrasesFilter);
+      const negatedPhrasesFilter = esFilters.toggleFilterNegated(phrasesFilter);
       const operator = getOperatorFromFilter(negatedPhrasesFilter);
       expect(operator).not.toBeUndefined();
       expect(operator && operator.type).toBe('phrases');
@@ -111,7 +115,7 @@ describe('Filter editor utils', () => {
     });
 
     it('should return "is not between" for negated range filter', () => {
-      const negatedRangeFilter = toggleFilterNegated(rangeFilter);
+      const negatedRangeFilter = esFilters.toggleFilterNegated(rangeFilter);
       const operator = getOperatorFromFilter(negatedRangeFilter);
       expect(operator).not.toBeUndefined();
       expect(operator && operator.type).toBe('range');
@@ -126,7 +130,7 @@ describe('Filter editor utils', () => {
     });
 
     it('should return "does not exists" for negated exists filter', () => {
-      const negatedExistsFilter = toggleFilterNegated(existsFilter);
+      const negatedExistsFilter = esFilters.toggleFilterNegated(existsFilter);
       const operator = getOperatorFromFilter(negatedExistsFilter);
       expect(operator).not.toBeUndefined();
       expect(operator && operator.type).toBe('exists');
@@ -171,14 +175,14 @@ describe('Filter editor utils', () => {
 
   describe('getOperatorOptions', () => {
     it('returns range for number fields', () => {
-      const [field] = mockFields.filter(({ type }) => type === 'number');
+      const [field] = stubFields.filter(({ type }) => type === 'number');
       const operatorOptions = getOperatorOptions(field as Field);
       const rangeOperator = operatorOptions.find(operator => operator.type === 'range');
       expect(rangeOperator).not.toBeUndefined();
     });
 
     it('does not return range for string fields', () => {
-      const [field] = mockFields.filter(({ type }) => type === 'string');
+      const [field] = stubFields.filter(({ type }) => type === 'string');
       const operatorOptions = getOperatorOptions(field as Field);
       const rangeOperator = operatorOptions.find(operator => operator.type === 'range');
       expect(rangeOperator).toBeUndefined();
@@ -246,7 +250,7 @@ describe('Filter editor utils', () => {
     it('should build phrase filters', () => {
       const params = 'foo';
       const alias = 'bar';
-      const state = FilterStateStore.APP_STATE;
+      const state = esFilters.FilterStateStore.APP_STATE;
       const filter = buildFilter(
         mockedIndexPattern,
         mockedFields[0],
@@ -268,7 +272,7 @@ describe('Filter editor utils', () => {
     it('should build phrases filters', () => {
       const params = ['foo', 'bar'];
       const alias = 'bar';
-      const state = FilterStateStore.APP_STATE;
+      const state = esFilters.FilterStateStore.APP_STATE;
       const filter = buildFilter(
         mockedIndexPattern,
         mockedFields[0],
@@ -290,7 +294,7 @@ describe('Filter editor utils', () => {
     it('should build range filters', () => {
       const params = { from: 'foo', to: 'qux' };
       const alias = 'bar';
-      const state = FilterStateStore.APP_STATE;
+      const state = esFilters.FilterStateStore.APP_STATE;
       const filter = buildFilter(
         mockedIndexPattern,
         mockedFields[0],
@@ -311,7 +315,7 @@ describe('Filter editor utils', () => {
     it('should build exists filters', () => {
       const params = undefined;
       const alias = 'bar';
-      const state = FilterStateStore.APP_STATE;
+      const state = esFilters.FilterStateStore.APP_STATE;
       const filter = buildFilter(
         mockedIndexPattern,
         mockedFields[0],
@@ -332,7 +336,7 @@ describe('Filter editor utils', () => {
     it('should include disabled state', () => {
       const params = undefined;
       const alias = 'bar';
-      const state = FilterStateStore.APP_STATE;
+      const state = esFilters.FilterStateStore.APP_STATE;
       const filter = buildFilter(
         mockedIndexPattern,
         mockedFields[0],
@@ -348,7 +352,7 @@ describe('Filter editor utils', () => {
     it('should negate based on operator', () => {
       const params = undefined;
       const alias = 'bar';
-      const state = FilterStateStore.APP_STATE;
+      const state = esFilters.FilterStateStore.APP_STATE;
       const filter = buildFilter(
         mockedIndexPattern,
         mockedFields[0],

@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from 'elasticsearch';
-import { idx } from '@kbn/elastic-idx';
+import { ESFilter } from '../../../../typings/elasticsearch';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
@@ -25,7 +24,7 @@ export async function getBuckets({
   bucketSize: number;
   setup: Setup;
 }) {
-  const { start, end, uiFiltersES, client, config } = setup;
+  const { start, end, uiFiltersES, client, indices } = setup;
   const filter: ESFilter[] = [
     { term: { [PROCESSOR_EVENT]: 'error' } },
     { term: { [SERVICE_NAME]: serviceName } },
@@ -38,7 +37,7 @@ export async function getBuckets({
   }
 
   const params = {
-    index: config.get<string>('apm_oss.errorIndices'),
+    index: indices['apm_oss.errorIndices'],
     body: {
       size: 0,
       query: {
@@ -64,12 +63,12 @@ export async function getBuckets({
 
   const resp = await client.search(params);
 
-  const buckets = (
-    idx(resp.aggregations, _ => _.distribution.buckets) || []
-  ).map(bucket => ({
-    key: bucket.key,
-    count: bucket.doc_count
-  }));
+  const buckets = (resp.aggregations?.distribution.buckets || []).map(
+    bucket => ({
+      key: bucket.key,
+      count: bucket.doc_count
+    })
+  );
 
   return {
     noHits: resp.hits.total.value === 0,

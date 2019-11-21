@@ -95,8 +95,16 @@ export class AbstractSource {
     return null;
   }
 
+  getApplyGlobalQuery() {
+    return !!this._descriptor.applyGlobalQuery;
+  }
+
   getIndexPatternIds() {
-    return  [];
+    return [];
+  }
+
+  getQueryableIndexPatternIds() {
+    return [];
   }
 
   getGeoGridPrecision() {
@@ -113,10 +121,6 @@ export class AbstractSource {
 
   shouldBeIndexed() {
     return AbstractSource.isIndexingSource;
-  }
-
-  isInjectedData() {
-    return false;
   }
 
   supportsElasticsearchFilters() {

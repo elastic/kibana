@@ -16,9 +16,10 @@ import {
   EuiPopover,
   EuiText,
   EuiToolTip,
+  EuiPopoverProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useEffect, useState } from 'react';
+import React, { FunctionComponent, useCallback, useEffect, useState } from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
@@ -55,7 +56,12 @@ const LoadingPanelContainer = styled.div`
 
 LoadingPanelContainer.displayName = 'LoadingPanelContainer';
 
-const PopoverRowItems = styled(EuiPopover)`
+const PopoverRowItems = styled((EuiPopover as unknown) as FunctionComponent)<
+  EuiPopoverProps & {
+    className?: string;
+    id?: string;
+  }
+>`
   .euiButtonEmpty__content {
     padding: 0px 0px;
   }
@@ -182,14 +188,14 @@ export const Footer = React.memo<FooterProps>(
     const [paginationLoading, setPaginationLoading] = useState(false);
     const [updatedAt, setUpdatedAt] = useState<number | null>(null);
 
-    const loadMore = () => {
+    const loadMore = useCallback(() => {
       setPaginationLoading(true);
       onLoadMore(nextCursor, tieBreaker);
-    };
+    }, [nextCursor, tieBreaker, onLoadMore]);
 
-    const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
+    const onButtonClick = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
 
-    const closePopover = () => setIsPopoverOpen(false);
+    const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
     useEffect(() => {
       if (paginationLoading && !isLoading) {

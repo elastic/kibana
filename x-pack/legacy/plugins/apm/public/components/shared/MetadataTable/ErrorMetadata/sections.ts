@@ -20,8 +20,8 @@ import {
 } from '../sections';
 
 export const ERROR_METADATA_SECTIONS: Section[] = [
-  ERROR,
   { ...LABELS, required: true },
+  ERROR,
   HTTP,
   HOST,
   CONTAINER,

@@ -3,6 +3,7 @@
 exports[`Transform: <GroupByListForm /> Minimal initialization 1`] = `
 <Fragment>
   <EuiPanel
+    data-test-subj="transformGroupByEntry 0"
     paddingSize="s"
   >
     <GroupByLabelForm

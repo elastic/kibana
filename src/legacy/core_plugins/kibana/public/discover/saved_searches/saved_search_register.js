@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
+import { getServices } from '../kibana_services';
 import './saved_searches';
 
 
-SavedObjectRegistryProvider.register((savedSearches) => {
+getServices().SavedObjectRegistryProvider.register((savedSearches) => {
   return savedSearches;
 });

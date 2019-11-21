@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Server } from 'hapi';
 import { cloneDeep, sortByOrder } from 'lodash';
 import { mergeProjection } from '../../../../common/projections/util/merge_projection';
 import { UIFilters } from '../../../../typings/ui-filters';
@@ -18,26 +17,24 @@ export type LocalUIFiltersAPIResponse = PromiseReturnType<
 >;
 
 export async function getLocalUIFilters({
-  server,
   setup,
   projection,
   uiFilters,
   localFilterNames
 }: {
-  server: Server;
   setup: Setup;
   projection: Projection;
   uiFilters: UIFilters;
   localFilterNames: LocalUIFilterName[];
 }) {
-  const { client } = setup;
+  const { client, dynamicIndexPattern } = setup;
 
   const projectionWithoutAggs = cloneDeep(projection);
 
   delete projectionWithoutAggs.body.aggs;
 
   const filterAggregations = await getFilterAggregations({
-    server,
+    indexPattern: dynamicIndexPattern,
     uiFilters,
     projection,
     localFilterNames
@@ -52,7 +49,6 @@ export async function getLocalUIFilters({
   });
 
   const response = await client.search(params);
-
   const { aggregations } = response;
 
   if (!aggregations) {
@@ -68,7 +64,7 @@ export async function getLocalUIFilters({
       options: sortByOrder(
         aggregationsForFilter.by_terms.buckets.map(bucket => {
           return {
-            name: bucket.key,
+            name: bucket.key as string,
             count:
               'bucket_count' in bucket
                 ? bucket.bucket_count.value

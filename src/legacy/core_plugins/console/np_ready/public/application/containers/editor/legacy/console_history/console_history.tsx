@@ -45,7 +45,6 @@ const CHILD_ELEMENT_PREFIX = 'historyReq';
 export function ConsoleHistory({ close }: Props) {
   const {
     services: { history },
-    ResizeChecker,
   } = useAppContext();
 
   const dispatch = useEditorActionContext();
@@ -200,7 +199,6 @@ export function ConsoleHistory({ close }: Props) {
           <HistoryViewer
             settings={readOnlySettings}
             req={viewingReq}
-            ResizeChecker={ResizeChecker}
           />
         </div>
 

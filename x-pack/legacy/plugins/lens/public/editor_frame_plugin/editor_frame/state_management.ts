@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { EditorFrameProps } from '../editor_frame';
 import { Document } from '../../persistence/saved_object_store';
 
@@ -113,7 +112,7 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
   }
 
   return {
-    title: i18n.translate('xpack.lens.chartTitle', { defaultMessage: 'New visualization' }),
+    title: '',
     datasourceStates,
     activeDatasourceId: getInitialDatasourceId(props),
     visualization: {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
@@ -29,7 +29,7 @@ interface Props {
 }
 
 const HoverActionsPanelContainer = styled.div`
-  color: ${props => props.theme.eui.textColors.default}
+  color: ${({ theme }) => theme.eui.textColors.default};
   height: 100%;
   position: relative;
 `;
@@ -66,13 +66,14 @@ WithHoverActionsContainer.displayName = 'WithHoverActionsContainer';
 export const WithHoverActions = React.memo<Props>(
   ({ alwaysShow = false, hoverContent, render }) => {
     const [showHoverContent, setShowHoverContent] = useState(false);
-    function onMouseEnter() {
+    const onMouseEnter = useCallback(() => {
       setShowHoverContent(true);
-    }
+    }, []);
 
-    function onMouseLeave() {
+    const onMouseLeave = useCallback(() => {
       setShowHoverContent(false);
-    }
+    }, []);
+
     return (
       <WithHoverActionsContainer onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
         <>{render(showHoverContent)}</>

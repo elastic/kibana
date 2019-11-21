@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { EuiBadge } from '@elastic/eui';
-import { Filter, isFilterPinned } from '@kbn/es-query';
+import { EuiBadge, useInnerText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { SFC } from 'react';
-import { getFilterDisplayText } from '../filter_editor/lib/get_filter_display_text';
+import { FilterLabel } from '../filter_editor/lib/filter_label';
+import { esFilters } from '../../../../../../../plugins/data/public';
 
 interface Props {
-  filter: Filter;
-  displayName: string;
+  filter: esFilters.Filter;
+  valueLabel: string;
   [propName: string]: any;
 }
 
@@ -33,15 +33,17 @@ export const FilterView: SFC<Props> = ({
   filter,
   iconOnClick,
   onClick,
-  displayName,
+  valueLabel,
   ...rest
 }: Props) => {
+  const [ref, innerText] = useInnerText();
+
   let title = i18n.translate('data.filter.filterBar.moreFilterActionsMessage', {
-    defaultMessage: 'Filter: {displayText}. Select for more filter actions.',
-    values: { displayText: getFilterDisplayText(filter, displayName) },
+    defaultMessage: 'Filter: {innerText}. Select for more filter actions.',
+    values: { innerText },
   });
 
-  if (isFilterPinned(filter)) {
+  if (esFilters.isFilterPinned(filter)) {
     title = `${i18n.translate('data.filter.filterBar.pinnedFilterPrefix', {
       defaultMessage: 'Pinned',
     })} ${title}`;
@@ -72,7 +74,9 @@ export const FilterView: SFC<Props> = ({
       })}
       {...rest}
     >
-      <span>{getFilterDisplayText(filter, displayName)}</span>
+      <span ref={ref}>
+        <FilterLabel filter={filter} valueLabel={valueLabel} />
+      </span>
     </EuiBadge>
   );
 };

@@ -15,6 +15,7 @@ import {
   EuiButtonIcon,
   EuiCallOut,
   EuiCheckbox,
+  EuiCodeBlock,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
@@ -133,7 +134,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
 
   if (status === SOURCE_INDEX_STATUS.ERROR) {
     return (
-      <EuiPanel grow={false}>
+      <EuiPanel grow={false} data-test-subj="transformSourceIndexPreview error">
         <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         <EuiCallOut
           title={i18n.translate('xpack.transform.sourceIndexPreview.sourceIndexPatternError', {
@@ -142,7 +143,9 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
           color="danger"
           iconType="cross"
         >
-          <p>{errorMessage}</p>
+          <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable>
+            {errorMessage}
+          </EuiCodeBlock>
         </EuiCallOut>
       </EuiPanel>
     );
@@ -150,7 +153,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
 
   if (status === SOURCE_INDEX_STATUS.LOADED && tableItems.length === 0) {
     return (
-      <EuiPanel grow={false}>
+      <EuiPanel grow={false} data-test-subj="transformSourceIndexPreview empty">
         <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         <EuiCallOut
           title={i18n.translate(
@@ -164,7 +167,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
           <p>
             {i18n.translate('xpack.transform.sourceIndexPreview.SourceIndexNoDataCalloutBody', {
               defaultMessage:
-                'The query for the source index returned no results. Please make sure the index contains documents and your query is not too restrictive.',
+                'The query for the source index returned no results. Please make sure you have sufficient permissions, the index contains documents and your query is not too restrictive.',
             })}
           </p>
         </EuiCallOut>
@@ -317,7 +320,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
   });
 
   return (
-    <EuiPanel grow={false}>
+    <EuiPanel grow={false} data-test-subj="transformSourceIndexPreview loaded">
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />

@@ -19,8 +19,9 @@
 
 import { ConnectableObservable, Observable, Subscription } from 'rxjs';
 import { filter, first, map, publishReplay, switchMap } from 'rxjs/operators';
-import { merge } from 'lodash';
+
 import { CoreService } from '../../types';
+import { merge } from '../../utils';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { ClusterClient } from './cluster_client';
@@ -50,7 +51,7 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
     this.log = coreContext.logger.get('elasticsearch-service');
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
-      .pipe(map(rawConfig => new ElasticsearchConfig(rawConfig)));
+      .pipe(map(rawConfig => new ElasticsearchConfig(rawConfig, coreContext.logger.get('config'))));
   }
 
   public async setup(deps: SetupDeps): Promise<InternalElasticsearchServiceSetup> {
