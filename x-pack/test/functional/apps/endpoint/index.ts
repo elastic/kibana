@@ -18,7 +18,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it("welcomes the user with 'Hello World'", async function() {
-      await testSubjects.find('welcomeTitle');
+      await testSubjects.existOrFail('welcomeTitle');
     });
   });
 }

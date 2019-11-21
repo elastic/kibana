@@ -17,17 +17,15 @@ export function renderApp(appMountContext: AppMountContext, { element }: AppMoun
 
   ReactDOM.render(<AppRoot />, element);
 
-  return function() {
+  return () => {
     ReactDOM.unmountComponentAtNode(element);
   };
 }
 
-const AppRoot = React.memo(function Root() {
-  return (
-    <I18nProvider>
-      <h1 data-test-subj="welcomeTitle">
-        <FormattedMessage id="xpack.endpoint.welcomeTitle" defaultMessage="Hello World" />
-      </h1>
-    </I18nProvider>
-  );
-});
+const AppRoot = React.memo(() => (
+  <I18nProvider>
+    <h1 data-test-subj="welcomeTitle">
+      <FormattedMessage id="xpack.endpoint.welcomeTitle" defaultMessage="Hello World" />
+    </h1>
+  </I18nProvider>
+));
