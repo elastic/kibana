@@ -698,8 +698,8 @@ export class VectorLayer extends AbstractLayer {
     this.syncVisibilityWithMb(mbMap, lineLayerId);
     mbMap.setLayerZoomRange(lineLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
     const lineFilterExpr = getLineFilterExpression(hasJoins);
-    if (lineFilterExpr !== mbMap.getFilter(fillLayerId)) {
-      mbMap.setFilter(fillLayerId, lineFilterExpr);
+    if (lineFilterExpr !== mbMap.getFilter(lineLayerId)) {
+      mbMap.setFilter(lineLayerId, lineFilterExpr);
     }
   }
 
