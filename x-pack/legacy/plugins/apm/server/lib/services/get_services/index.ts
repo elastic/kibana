@@ -20,17 +20,19 @@ export type ServiceListAPIResponse = PromiseReturnType<typeof getServices>;
 export async function getServices(
   setup: Setup & SetupTimeRange & SetupUIFilters
 ) {
-  const itemsPromise = getServicesItems(setup);
-  const hasLegacyDataPromise = getLegacyDataStatus(setup);
-  const items = await itemsPromise;
+  const [items, hasLegacyData] = await Promise.all([
+    getServicesItems(setup),
+    getLegacyDataStatus(setup)
+  ]);
 
   const noDataInCurrentTimeRange = isEmpty(items);
+  const hasHistoricalData = noDataInCurrentTimeRange
+    ? await hasHistoricalAgentData(setup)
+    : true;
 
   return {
     items,
-    hasHistoricalData: noDataInCurrentTimeRange
-      ? await hasHistoricalAgentData(setup)
-      : true,
-    hasLegacyData: await hasLegacyDataPromise
+    hasHistoricalData,
+    hasLegacyData
   };
 }
