@@ -265,7 +265,7 @@ export const ActionsList: React.FunctionComponent = () => {
                   data-test-subj="createActionButton"
                   key="create-action"
                   fill
-                  iconType="plusInCircleFilled"
+                  iconType="plusInCircle"
                   iconSide="left"
                   onClick={() => setFlyoutVisibility(true)}
                 >

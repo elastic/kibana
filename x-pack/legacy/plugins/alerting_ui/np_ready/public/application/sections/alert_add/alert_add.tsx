@@ -485,7 +485,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
       <EuiSpacer size="m" />
       {!isAddActionPanelOpen ? (
         <EuiButton
-          fill
+          iconType="plusInCircle"
           data-test-subj="addAlertActionButton"
           onClick={() => setIsAddActionPanelOpen(true)}
         >

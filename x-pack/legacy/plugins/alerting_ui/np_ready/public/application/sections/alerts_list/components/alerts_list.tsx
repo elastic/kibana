@@ -217,7 +217,7 @@ export const AlertsList: React.FunctionComponent = () => {
                 key="create-alert"
                 data-test-subj="createAlertButton"
                 fill
-                iconType="plusInCircleFilled"
+                iconType="plusInCircle"
                 iconSide="left"
                 onClick={() => setAlertFlyoutVisibility(true)}
               >
