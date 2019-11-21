@@ -4,13 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { schema } from '@kbn/config-schema';
 import { RequestHandler } from 'src/core/server';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
-import { Watch } from '../../../models/watch';
-import { VisualizeOptions } from '../../../models/visualize_options';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 import { ServerShimWithRouter } from '../../../types';
+
+// @ts-ignore
+import { Watch } from '../../../models/watch';
+// @ts-ignore
+import { VisualizeOptions } from '../../../models/visualize_options';
 
 function fetchVisualizeData(callWithRequest: any, index: any, body: any) {
   const params = {
@@ -28,8 +32,8 @@ export function registerVisualizeRoute(server: ServerShimWithRouter) {
   const isEsError = isEsErrorFactory(server);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(server, request);
-    const watch = Watch.fromDownstreamJson(request.payload.watch);
-    const options = VisualizeOptions.fromDownstreamJson(request.payload.options);
+    const watch = Watch.fromDownstreamJson(request.body.watch);
+    const options = VisualizeOptions.fromDownstreamJson(request.body.options);
     const body = watch.getVisualizeQuery(options);
 
     try {
@@ -55,7 +59,12 @@ export function registerVisualizeRoute(server: ServerShimWithRouter) {
   server.router.post(
     {
       path: '/api/watcher/watch/visualize',
-      validate: false,
+      validate: {
+        body: schema.object({
+          watch: schema.object({}, { allowUnknowns: true }),
+          options: schema.object({}, { allowUnknowns: true }),
+        }),
+      },
     },
     licensePreRoutingFactory(server, handler)
   );

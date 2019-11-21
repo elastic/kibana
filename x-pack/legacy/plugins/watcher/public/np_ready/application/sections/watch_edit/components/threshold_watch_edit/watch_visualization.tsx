@@ -129,30 +129,31 @@ export const WatchVisualization = () => {
     sendRequest: reload,
   } = useGetWatchVisualizationData(watchWithoutActions, visualizeOptions);
 
-  useEffect(() => {
-    // Prevent sending a second request on initial render.
-    if (isInitialRequest) {
-      return;
-    }
-
-    reload();
-  }, [
-    index,
-    timeField,
-    triggerIntervalSize,
-    triggerIntervalUnit,
-    aggType,
-    aggField,
-    termSize,
-    termField,
-    thresholdComparator,
-    timeWindowSize,
-    timeWindowUnit,
-    groupBy,
-    threshold,
-    isInitialRequest,
-    reload,
-  ]);
+  useEffect(
+    () => {
+      // Prevent sending a second request on initial render.
+      if (isInitialRequest) {
+        return;
+      }
+      reload();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      index,
+      timeField,
+      triggerIntervalSize,
+      triggerIntervalUnit,
+      aggType,
+      aggField,
+      termSize,
+      termField,
+      thresholdComparator,
+      timeWindowSize,
+      timeWindowUnit,
+      groupBy,
+      threshold,
+    ]
+  );
 
   if (isInitialRequest && isLoading) {
     return (

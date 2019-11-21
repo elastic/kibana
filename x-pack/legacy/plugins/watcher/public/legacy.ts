@@ -16,6 +16,7 @@ import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { TimeBuckets } from 'ui/time_buckets';
 // @ts-ignore
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
+/* Legacy UI imports */
 
 import { plugin } from './np_ready';
 import { PLUGIN } from '../common/constants';

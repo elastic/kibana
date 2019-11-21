@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { npSetup } from 'ui/new_platform';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FeatureCatalogueCategory } from 'src/plugins/feature_catalogue/public/services';
+import { FeatureCatalogueCategory } from '../../../../../src/plugins/feature_catalogue/public/services';
 
 npSetup.plugins.feature_catalogue.register({
   id: 'watcher',

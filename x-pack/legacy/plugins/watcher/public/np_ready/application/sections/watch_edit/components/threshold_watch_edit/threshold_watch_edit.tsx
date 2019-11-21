@@ -145,6 +145,7 @@ const getIndexOptions = async (patternString: string, indexPatterns: string[]) =
     }),
     options: [
       {
+        key: 'UNIQUE_CHOOSE_KEY',
         value: patternString,
         label: patternString,
       },
