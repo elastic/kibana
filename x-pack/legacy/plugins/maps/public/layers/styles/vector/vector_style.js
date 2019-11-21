@@ -448,10 +448,11 @@ export class VectorStyle extends AbstractStyle {
       return null;
     }
 
+    //fieldDescriptor.label is ignored. This is essentially cruft duplicating label-info from the metric-selection
+    //Ignore this custom label
     if (fieldDescriptor.origin === FIELD_ORIGIN.SOURCE) {
       return this._source.createField({
-        fieldName: fieldDescriptor.name,
-        label: fieldDescriptor.label
+        fieldName: fieldDescriptor.name
       });
     } else if (fieldDescriptor.origin === FIELD_ORIGIN.JOIN) {
       let matchingField = null;

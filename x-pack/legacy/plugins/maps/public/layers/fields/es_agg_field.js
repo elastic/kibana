@@ -25,7 +25,7 @@ export class ESAggMetricField extends AbstractField {
   }
 
   async getLabel() {
-    return this._label ? this._label : this._source.formatMetricLabel(this.getAggType(), this.getESDocFieldName());
+    return this._label ? await this._label : this._source.formatMetricLabel(this.getAggType(), this.getESDocFieldName());
   }
 
   getAggType() {

@@ -47,6 +47,15 @@ export class AbstractESAggSource extends AbstractESSource {
   }
 
   createField({ fieldName, label }) {
+
+    //if there is a corresponding field with a custom label, use that one.
+    if (!label) {
+      const matchField = this._metricFields.find(field => field.getName() === fieldName);
+      if (matchField) {
+        label = matchField.getLabel();
+      }
+    }
+
     if (fieldName === COUNT_PROP_NAME) {
       return new ESAggMetricField({
         aggType: COUNT_AGG_TYPE,
