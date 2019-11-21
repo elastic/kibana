@@ -23,7 +23,7 @@ export const formatRules = (rules: Rule[], selectedIds?: string[]): TableData[] 
     lastResponse: {
       type: getEmptyValue(), // TODO: Not available yet
     },
-    tags: rule.tags,
+    tags: rule.tags ?? [],
     activate: rule.enabled,
     sourceRule: rule,
     isLoading: selectedIds?.includes(rule.id) ?? false,

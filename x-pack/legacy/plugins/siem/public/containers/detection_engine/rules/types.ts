@@ -6,27 +6,31 @@
 
 import * as t from 'io-ts';
 
-export const RuleSchema = t.type({
-  created_by: t.string,
-  description: t.string,
-  enabled: t.boolean,
-  false_positives: t.array(t.string),
-  from: t.string,
-  id: t.string,
-  index: t.array(t.string),
-  interval: t.string,
-  language: t.string,
-  max_signals: t.number,
-  name: t.string,
-  query: t.string,
-  references: t.array(t.string),
-  rule_id: t.string,
-  severity: t.string,
-  tags: t.array(t.string),
-  to: t.string,
-  type: t.string,
-  updated_by: t.string,
-});
+export const RuleSchema = t.intersection([
+  t.type({
+    created_by: t.string,
+    description: t.string,
+    enabled: t.boolean,
+    id: t.string,
+    index: t.array(t.string),
+    interval: t.string,
+    language: t.string,
+    name: t.string,
+    query: t.string,
+    rule_id: t.string,
+    severity: t.string,
+    type: t.string,
+    updated_by: t.string,
+  }),
+  t.partial({
+    false_positives: t.array(t.string),
+    from: t.string,
+    max_signals: t.number,
+    references: t.array(t.string),
+    tags: t.array(t.string),
+    to: t.string,
+  }),
+]);
 
 export const RulesSchema = t.array(RuleSchema);
 

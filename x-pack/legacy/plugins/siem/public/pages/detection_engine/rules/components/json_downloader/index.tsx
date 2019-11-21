@@ -45,7 +45,7 @@ export const JSONDownloader = React.memo<JSONDownloaderProps>(
       }
     }, [payload]);
 
-    return <InvisibleAnchor innerRef={anchorRef} />;
+    return <InvisibleAnchor ref={anchorRef} />;
   }
 );
 

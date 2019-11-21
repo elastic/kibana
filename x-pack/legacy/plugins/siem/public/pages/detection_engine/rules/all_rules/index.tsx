@@ -11,7 +11,7 @@ import {
   EuiLoadingContent,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 
 import uuid from 'uuid';
 import { HeaderSection } from '../../../../components/header_section';
@@ -79,6 +79,15 @@ export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importComp
   const [isLoadingRules, rulesData] = useRules(pagination, filterOptions, refreshToggle);
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const [, dispatchToaster] = useStateToaster();
+
+  const getBatchItemsPopoverContent = useCallback(
+    (closePopover: () => void) => (
+      <EuiContextMenuPanel
+        items={getBatchItems(selectedItems, dispatch, closePopover, kbnVersion)}
+      />
+    ),
+    [selectedItems, dispatch, kbnVersion]
+  );
 
   useEffect(() => {
     dispatch({ type: 'loading', isLoading: isLoadingRules });
@@ -159,11 +168,7 @@ export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importComp
                   <UtilityBarAction
                     iconSide="right"
                     iconType="arrowDown"
-                    popoverContent={closePopover => (
-                      <EuiContextMenuPanel
-                        items={getBatchItems(selectedItems, dispatch, closePopover, kbnVersion)}
-                      />
-                    )}
+                    popoverContent={getBatchItemsPopoverContent}
                   >
                     {i18n.BATCH_ACTIONS}
                   </UtilityBarAction>
