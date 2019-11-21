@@ -24,6 +24,7 @@ import '../saved_visualizations/saved_visualizations';
 import './visualization_editor';
 import './visualization';
 
+import { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { migrateAppState } from './lib';
@@ -49,6 +50,7 @@ import {
 } from '../kibana_services';
 
 const {
+  core,
   capabilities,
   chrome,
   chromeLegacy,
@@ -71,7 +73,7 @@ uiRoutes
     template: editorTemplate,
     k7Breadcrumbs: getCreateBreadcrumbs,
     resolve: {
-      savedVis: function (savedVisualizations, redirectWhenMissing, $route) {
+      savedVis: function (savedVisualizations, redirectWhenMissing, $route, $rootScope, kbnUrl) {
         const visTypes = visualizations.types.all();
         const visType = _.find(visTypes, { name: $route.current.params.type });
         const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
@@ -84,7 +86,7 @@ uiRoutes
           );
         }
 
-        return savedVisualizations.get($route.current.params)
+        return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl).then(() => savedVisualizations.get($route.current.params))
           .then(savedVis => {
             if (savedVis.vis.type.setup) {
               return savedVis.vis.type.setup(savedVis)
@@ -102,28 +104,33 @@ uiRoutes
     template: editorTemplate,
     k7Breadcrumbs: getEditBreadcrumbs,
     resolve: {
-      savedVis: function (savedVisualizations, redirectWhenMissing, $route) {
-        return savedVisualizations.get($route.current.params.id)
+      savedVis: function (savedVisualizations, redirectWhenMissing, $route, $rootScope, kbnUrl) {
+        return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl)
+          .then(() => savedVisualizations.get($route.current.params.id))
           .then((savedVis) => {
             chrome.recentlyAccessed.add(
               savedVis.getFullPath(),
               savedVis.title,
-              savedVis.id);
+              savedVis.id
+            );
             return savedVis;
           })
           .then(savedVis => {
             if (savedVis.vis.type.setup) {
-              return savedVis.vis.type.setup(savedVis)
-                .catch(() => savedVis);
+              return savedVis.vis.type.setup(savedVis).catch(() => savedVis);
             }
             return savedVis;
           })
-          .catch(redirectWhenMissing({
-            'visualization': '/visualize',
-            'search': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-            'index-pattern': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-            'index-pattern-field': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id
-          }));
+          .catch(
+            redirectWhenMissing({
+              visualization: '/visualize',
+              search: '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+              'index-pattern':
+                '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+              'index-pattern-field':
+                '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+            })
+          );
       }
     }
   });
@@ -416,6 +423,12 @@ function VisEditor(
     }));
     subscriptions.add(subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
       next: updateTimeRange
+    }));
+
+    subscriptions.add(chrome.getIsVisible$().subscribe(isVisible => {
+      $scope.$evalAsync(() => {
+        $scope.isVisible = isVisible;
+      });
     }));
 
     // update the searchSource when query updates

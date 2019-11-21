@@ -86,6 +86,7 @@ beforeEach(() => {
           public: new Map([['plugin-id', {} as DiscoveredPlugin]]),
           internal: new Map([['plugin-id', {} as DiscoveredPluginInternal]]),
         },
+        uiPluginConfigs: new Map(),
       },
     },
     plugins: { 'plugin-id': 'plugin-value' },
