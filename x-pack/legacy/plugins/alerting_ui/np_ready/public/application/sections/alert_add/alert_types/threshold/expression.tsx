@@ -352,8 +352,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
     });
   };
 
-  const getFields = async (indices: string[]) => {
-    return await getThresholdAlertTypeFields({ indices, http });
+  const getFields = async (indexes: string[]) => {
+    return await getThresholdAlertTypeFields({ indexes, http });
   };
 
   useEffect(() => {

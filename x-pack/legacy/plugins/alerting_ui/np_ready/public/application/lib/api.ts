@@ -182,20 +182,20 @@ export async function getMatchingIndicesForThresholdAlertType({
     pattern = `${pattern}*`;
   }
   const { indices } = await http.post(`${WATCHER_API_ROOT}/indices`, {
-    body: JSON.stringify(pattern),
+    body: JSON.stringify({ pattern }),
   });
   return indices;
 }
 
 export async function getThresholdAlertTypeFields({
-  indices,
+  indexes,
   http,
 }: {
-  indices: string[];
+  indexes: string[];
   http: HttpServiceBase;
 }): Promise<Record<string, any>> {
   const { fields } = await http.post(`${WATCHER_API_ROOT}/fields`, {
-    body: JSON.stringify(indices),
+    body: JSON.stringify({ indexes }),
   });
   return fields;
 }
