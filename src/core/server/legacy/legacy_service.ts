@@ -230,6 +230,7 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
     }
   ) {
     const coreSetup: CoreSetup = {
+      capabilities: setupDeps.core.capabilities,
       context: setupDeps.core.context,
       elasticsearch: {
         adminClient$: setupDeps.core.elasticsearch.adminClient$,

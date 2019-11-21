@@ -102,6 +102,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreSetup {
   return {
+    capabilities: {},
     context: {
       createContextContainer: deps.context.createContextContainer,
     },

@@ -45,6 +45,7 @@ import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plug
 import { ContextSetup } from './context';
 import { IUiSettingsClient, UiSettingsServiceSetup } from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
+import { CapabilitiesSetup } from './capabilities';
 
 export { bootstrap } from './bootstrap';
 export { ConfigPath, ConfigService, EnvironmentMode, PackageInfo } from './config';
@@ -226,6 +227,8 @@ export interface RequestHandlerContext {
  * @public
  */
 export interface CoreSetup {
+  /** {@link CapabilitiesSetup} */
+  capabilities: CapabilitiesSetup;
   /** {@link ContextSetup} */
   context: ContextSetup;
   /** {@link ElasticsearchServiceSetup} */
@@ -243,4 +246,10 @@ export interface CoreSetup {
  */
 export interface CoreStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
-export { ContextSetup, PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId };
+export {
+  CapabilitiesSetup,
+  ContextSetup,
+  PluginsServiceSetup,
+  PluginsServiceStart,
+  PluginOpaqueId,
+};

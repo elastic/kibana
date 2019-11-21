@@ -17,25 +17,23 @@
  * under the License.
  */
 
-import { InternalElasticsearchServiceSetup } from './elasticsearch';
-import { InternalHttpServiceSetup } from './http';
-import { InternalUiSettingsServiceSetup } from './ui_settings';
-import { ContextSetup } from './context';
-import { SavedObjectsServiceStart } from './saved_objects';
-import { CapabilitiesSetup } from './capabilities';
+import { CapabilitiesService, CapabilitiesSetup } from './capabilities_service';
 
-/** @internal */
-export interface InternalCoreSetup {
-  capabilities: CapabilitiesSetup;
-  context: ContextSetup;
-  http: InternalHttpServiceSetup;
-  elasticsearch: InternalElasticsearchServiceSetup;
-  uiSettings: InternalUiSettingsServiceSetup;
-}
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<CapabilitiesSetup> = {};
+  return setupContract;
+};
 
-/**
- * @internal
- */
-export interface InternalCoreStart {
-  savedObjects: SavedObjectsServiceStart;
-}
+type CapabilitiesServiceContract = PublicMethodsOf<CapabilitiesService>;
+const createMock = () => {
+  const mocked: jest.Mocked<CapabilitiesServiceContract> = {
+    setup: jest.fn().mockReturnValue(createSetupContractMock()),
+    start: jest.fn(),
+  };
+  return mocked;
+};
+
+export const capabilitiesServiceMock = {
+  create: createMock,
+  createSetupContract: createSetupContractMock,
+};

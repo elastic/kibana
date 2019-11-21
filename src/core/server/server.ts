@@ -41,11 +41,13 @@ import { ContextService } from './context';
 import { SavedObjectsServiceSetup } from './saved_objects/saved_objects_service';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup } from './internal_types';
+import { CapabilitiesService } from './capabilities';
 
 const coreId = Symbol('core');
 
 export class Server {
   public readonly configService: ConfigService;
+  private readonly capabilities: CapabilitiesService;
   private readonly context: ContextService;
   private readonly elasticsearch: ElasticsearchService;
   private readonly http: HttpService;
@@ -71,6 +73,7 @@ export class Server {
     this.elasticsearch = new ElasticsearchService(core);
     this.savedObjects = new SavedObjectsService(core);
     this.uiSettings = new UiSettingsService(core);
+    this.capabilities = new CapabilitiesService(core);
   }
 
   public async setup() {
@@ -95,6 +98,8 @@ export class Server {
 
     this.registerDefaultRoute(httpSetup);
 
+    const capabilitiesSetup = this.capabilities.setup();
+
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
       http: httpSetup,
     });
@@ -104,6 +109,7 @@ export class Server {
     });
 
     const coreSetup: InternalCoreSetup = {
+      capabilities: capabilitiesSetup,
       context: contextServiceSetup,
       elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,

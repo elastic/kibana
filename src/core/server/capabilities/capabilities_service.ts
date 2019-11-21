@@ -17,25 +17,27 @@
  * under the License.
  */
 
-import { InternalElasticsearchServiceSetup } from './elasticsearch';
-import { InternalHttpServiceSetup } from './http';
-import { InternalUiSettingsServiceSetup } from './ui_settings';
-import { ContextSetup } from './context';
-import { SavedObjectsServiceStart } from './saved_objects';
-import { CapabilitiesSetup } from './capabilities';
+import { CoreContext } from '../core_context';
+import { Logger } from '..';
 
-/** @internal */
-export interface InternalCoreSetup {
-  capabilities: CapabilitiesSetup;
-  context: ContextSetup;
-  http: InternalHttpServiceSetup;
-  elasticsearch: InternalElasticsearchServiceSetup;
-  uiSettings: InternalUiSettingsServiceSetup;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CapabilitiesSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CapabilitiesStart {}
 
-/**
- * @internal
- */
-export interface InternalCoreStart {
-  savedObjects: SavedObjectsServiceStart;
+export class CapabilitiesService {
+  private logger: Logger;
+
+  constructor(core: CoreContext) {
+    this.logger = core.logger.get('capabilities-service');
+  }
+
+  public setup(): CapabilitiesSetup {
+    this.logger.debug('Setting up capabilities service');
+    return {};
+  }
+
+  public start(): CapabilitiesStart {
+    return {};
+  }
 }
