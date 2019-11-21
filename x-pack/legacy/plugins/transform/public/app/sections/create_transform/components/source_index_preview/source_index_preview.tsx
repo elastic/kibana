@@ -31,7 +31,7 @@ import {
 
 import {
   ColumnType,
-  MlInMemoryTableBasic,
+  mlInMemoryTableBasicFactory,
   SortingPropType,
   SORT_DIRECTION,
 } from '../../../../../shared_imports';
@@ -183,8 +183,8 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ cellClick, quer
     docFieldsCount = docFields.length;
   }
 
-  const columns: ColumnType[] = selectedFields.map(k => {
-    const column: ColumnType = {
+  const columns: Array<ColumnType<EsDoc>> = selectedFields.map(k => {
+    const column: ColumnType<EsDoc> = {
       field: `_source["${k}"]`,
       name: k,
       sortable: true,
@@ -319,6 +319,8 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ cellClick, quer
     defaultMessage: 'Copy Dev Console statement of the source index preview to the clipboard.',
   });
 
+  const MlInMemoryTableBasic = mlInMemoryTableBasicFactory<EsDoc>();
+
   return (
     <EuiPanel grow={false} data-test-subj="transformSourceIndexPreview loaded">
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -411,7 +413,7 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ cellClick, quer
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isExpandable={true}
           rowProps={item => ({
-            'data-test-subj': `transformSourceIndexPreviewRow row-${item.id}`,
+            'data-test-subj': `transformSourceIndexPreviewRow row-${item._id}`,
           })}
           sorting={sorting}
         />

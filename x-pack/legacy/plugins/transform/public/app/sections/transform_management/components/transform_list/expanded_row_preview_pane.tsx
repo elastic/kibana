@@ -14,12 +14,13 @@ import { useApi } from '../../../../hooks/use_api';
 import {
   getFlattenedFields,
   useRefreshTransformList,
+  EsDoc,
   PreviewRequestBody,
   TransformPivotConfig,
 } from '../../../../common';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
-import { TransformTable } from './transform_table';
+import { transformTableFactory } from './transform_table';
 
 interface Props {
   transformConfig: TransformPivotConfig;
@@ -69,8 +70,8 @@ function getDataFromTransform(
 }
 
 export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
-  const [previewData, setPreviewData] = useState([]);
-  const [columns, setColumns] = useState<FieldDataColumnType[] | []>([]);
+  const [previewData, setPreviewData] = useState<EsDoc[]>([]);
+  const [columns, setColumns] = useState<Array<FieldDataColumnType<EsDoc>> | []>([]);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<string>('');
@@ -99,8 +100,8 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
           const columnKeys = getFlattenedFields(resp.preview[0]);
           columnKeys.sort(sortColumns(groupByArr));
 
-          const tableColumns: FieldDataColumnType[] = columnKeys.map(k => {
-            const column: FieldDataColumnType = {
+          const tableColumns: Array<FieldDataColumnType<EsDoc>> = columnKeys.map(k => {
+            const column: FieldDataColumnType<EsDoc> = {
               field: k,
               name: k,
               sortable: true,
@@ -196,6 +197,8 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
   const transformTableLoading = previewData.length === 0 && isLoading === true;
   const dataTestSubj = `transformPreviewTabContent${!transformTableLoading ? ' loaded' : ''}`;
 
+  const TransformTable = transformTableFactory<EsDoc>();
+
   return (
     <div data-test-subj={dataTestSubj}>
       <TransformTable
@@ -206,8 +209,8 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
         columns={columns}
         onTableChange={onTableChange}
         pagination={pagination}
-        rowProps={item => ({
-          'data-test-subj': `transformPreviewTabContentRow row-${item.id}`,
+        rowProps={() => ({
+          'data-test-subj': 'transformPreviewTabContentRow',
         })}
         sorting={sorting}
         error={errorMessage}

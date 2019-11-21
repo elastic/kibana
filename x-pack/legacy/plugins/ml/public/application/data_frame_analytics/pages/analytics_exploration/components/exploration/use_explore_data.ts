@@ -27,7 +27,7 @@ import {
 import { getOutlierScoreFieldName } from './common';
 import { SavedSearchQuery } from '../../../../../contexts/kibana';
 
-type TableItem = Record<string, any>;
+export type TableItem = Record<string, any>;
 
 interface LoadExploreDataArg {
   field: string;

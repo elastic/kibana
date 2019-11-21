@@ -8,7 +8,7 @@ import React, { FC, useState } from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  MlInMemoryTable,
+  mlInMemoryTableFactory,
   SortDirection,
   SORT_DIRECTION,
   OnTableChangeArg,
@@ -27,7 +27,7 @@ import { AnalyticsViewAction } from '../../../data_frame_analytics/pages/analyti
 import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
 
 interface Props {
-  items: any[];
+  items: DataFrameAnalyticsListRow[];
 }
 export const AnalyticsTable: FC<Props> = ({ items }) => {
   const [pageIndex, setPageIndex] = useState(0);
@@ -37,7 +37,7 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
   // id, type, status, progress, created time, view icon
-  const columns: ColumnType[] = [
+  const columns: Array<ColumnType<DataFrameAnalyticsListRow>> = [
     {
       field: DataFrameAnalyticsListColumn.id,
       name: i18n.translate('xpack.ml.overview.analyticsList.id', { defaultMessage: 'ID' }),
@@ -112,6 +112,8 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
       direction: sortDirection,
     },
   };
+
+  const MlInMemoryTable = mlInMemoryTableFactory<DataFrameAnalyticsListRow>();
 
   return (
     <MlInMemoryTable
