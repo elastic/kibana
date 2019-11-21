@@ -47,7 +47,6 @@ describe('kuery functions', () => {
 
         expect(fieldName).toHaveProperty('type', 'literal');
         expect(fieldName).toHaveProperty('value', 'response');
-
         expect(value).toHaveProperty('type', 'literal');
         expect(value).toHaveProperty('value', 200);
       });
@@ -81,9 +80,9 @@ describe('kuery functions', () => {
         const expected = {
           match_all: {},
         };
-
         const node = nodeTypes.function.buildNode('is', '*', '*');
         const result = is.toElasticsearchQuery(node, indexPattern);
+
         expect(result).toEqual(expected);
       });
 
@@ -95,9 +94,9 @@ describe('kuery functions', () => {
             lenient: true,
           },
         };
-
         const node = nodeTypes.function.buildNode('is', null, 200);
         const result = is.toElasticsearchQuery(node, indexPattern);
+
         expect(result).toEqual(expected);
       });
 
@@ -107,9 +106,9 @@ describe('kuery functions', () => {
             query: 'jpg*',
           },
         };
-
         const node = nodeTypes.function.buildNode('is', null, 'jpg*');
         const result = is.toElasticsearchQuery(node, indexPattern);
+
         expect(result).toEqual(expected);
       });
 
@@ -128,9 +127,9 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-
         const node = nodeTypes.function.buildNode('is', 'extension', '*');
         const result = is.toElasticsearchQuery(node, indexPattern);
+
         expect(result).toEqual(expected);
       });
 
@@ -141,9 +140,9 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-
         const node = nodeTypes.function.buildNode('is', 'extension', 'jpg');
         const result = is.toElasticsearchQuery(node, indexPattern);
+
         expect(result).toEqual(expected);
       });
 
@@ -154,9 +153,9 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-
         const node = nodeTypes.function.buildNode('is', 'extension', 'jpg');
         const result = is.toElasticsearchQuery(node);
+
         expect(result).toEqual(expected);
       });
 
@@ -167,9 +166,9 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-
         const node = nodeTypes.function.buildNode('is', 'extension', 'jpg', true);
         const result = is.toElasticsearchQuery(node, indexPattern);
+
         expect(result).toEqual(expected);
       });
 
@@ -187,15 +186,16 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-
         const node = nodeTypes.function.buildNode('is', 'extension', 'jpg*');
         const result = is.toElasticsearchQuery(node, indexPattern);
+
         expect(result).toEqual(expected);
       });
 
       test('should support scripted fields', () => {
         const node = nodeTypes.function.buildNode('is', 'script string', 'foo');
         const result = is.toElasticsearchQuery(node, indexPattern);
+
         expect(result.bool.should[0]).toHaveProperty('script');
       });
 
@@ -215,9 +215,9 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-
         const node = nodeTypes.function.buildNode('is', '@timestamp', '"2018-04-03T19:04:17"');
         const result = is.toElasticsearchQuery(node, indexPattern);
+
         expect(result).toEqual(expected);
       });
 
@@ -270,9 +270,9 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-
         const node = nodeTypes.function.buildNode('is', 'ext*', 'jpg');
         const result = is.toElasticsearchQuery(node, indexPattern);
+
         expect(result).toEqual(expected);
       });
 
@@ -295,7 +295,6 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-
         const node = nodeTypes.function.buildNode('is', '*doublyNested*', 'foo');
         const result = is.toElasticsearchQuery(node, indexPattern);
 

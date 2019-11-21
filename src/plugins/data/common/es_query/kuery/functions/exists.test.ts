@@ -57,7 +57,6 @@ describe('kuery functions', () => {
         const expected = {
           exists: { field: 'response' },
         };
-
         const existsNode = nodeTypes.function.buildNode('exists', 'response');
         const result = exists.toElasticsearchQuery(existsNode, indexPattern);
 
@@ -68,7 +67,6 @@ describe('kuery functions', () => {
         const expected = {
           exists: { field: 'response' },
         };
-
         const existsNode = nodeTypes.function.buildNode('exists', 'response');
         const result = exists.toElasticsearchQuery(existsNode);
 
@@ -86,7 +84,6 @@ describe('kuery functions', () => {
         const expected = {
           exists: { field: 'nestedField.response' },
         };
-
         const existsNode = nodeTypes.function.buildNode('exists', 'response');
         const result = exists.toElasticsearchQuery(
           existsNode,

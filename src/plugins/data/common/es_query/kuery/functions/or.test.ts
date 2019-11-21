@@ -45,6 +45,7 @@ describe('kuery functions', () => {
         const {
           arguments: [actualChildNode1, actualChildNode2],
         } = result;
+
         expect(actualChildNode1).toBe(childNode1);
         expect(actualChildNode2).toBe(childNode2);
       });
@@ -54,6 +55,7 @@ describe('kuery functions', () => {
       test("should wrap subqueries in an ES bool query's should clause", () => {
         const node = nodeTypes.function.buildNode('or', [childNode1, childNode2]);
         const result = or.toElasticsearchQuery(node, indexPattern);
+
         expect(result).toHaveProperty('bool');
         expect(Object.keys(result).length).toBe(1);
         expect(result.bool).toHaveProperty('should');

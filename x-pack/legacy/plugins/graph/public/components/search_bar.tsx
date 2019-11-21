@@ -9,7 +9,6 @@ import React, { useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
-import { IDataPluginServices } from 'src/legacy/core_plugins/data/public/types';
 import { IndexPatternSavedObject, IndexPatternProvider } from '../types';
 import { QueryBarInput, IndexPattern } from '../../../../../../src/legacy/core_plugins/data/public';
 import { openSourceModal } from '../services/source_modal';
@@ -21,7 +20,7 @@ import {
 } from '../state_management';
 
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { Query, esKuery } from '../../../../../../src/plugins/data/public';
+import { IDataPluginServices, Query, esKuery } from '../../../../../../src/plugins/data/public';
 
 export interface OuterSearchBarProps {
   isLoading: boolean;

@@ -74,9 +74,10 @@ describe('kuery functions', () => {
         } = result;
 
         args.forEach((param: any, index: number) => {
-          expect(param).toHaveProperty('type', 'literal');
           const expectedPoint = points[index];
           const expectedLatLon = `${expectedPoint.lat}, ${expectedPoint.lon}`;
+
+          expect(param).toHaveProperty('type', 'literal');
           expect(param.value).toBe(expectedLatLon);
         });
       });
@@ -114,6 +115,7 @@ describe('kuery functions', () => {
       test('should use the ignore_unmapped parameter', () => {
         const node = nodeTypes.function.buildNode('geoPolygon', 'geo', points);
         const result = geoPolygon.toElasticsearchQuery(node, indexPattern);
+
         expect(result.geo_polygon.ignore_unmapped).toBe(true);
       });
 

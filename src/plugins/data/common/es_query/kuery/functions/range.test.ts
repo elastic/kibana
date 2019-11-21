@@ -83,9 +83,9 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-
         const node = nodeTypes.function.buildNode('range', 'bytes', { gt: 1000, lt: 8000 });
         const result = range.toElasticsearchQuery(node, indexPattern);
+
         expect(result).toEqual(expected);
       });
 
@@ -108,6 +108,7 @@ describe('kuery functions', () => {
 
         const node = nodeTypes.function.buildNode('range', 'bytes', { gt: 1000, lt: 8000 });
         const result = range.toElasticsearchQuery(node);
+
         expect(result).toEqual(expected);
       });
 
@@ -130,6 +131,7 @@ describe('kuery functions', () => {
 
         const node = nodeTypes.function.buildNode('range', 'byt*', { gt: 1000, lt: 8000 });
         const result = range.toElasticsearchQuery(node, indexPattern);
+
         expect(result).toEqual(expected);
       });
 
@@ -156,7 +158,6 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-
         const node = nodeTypes.function.buildNode('range', '@timestamp', {
           gt: '2018-01-03T19:04:17',
           lt: '2018-04-03T19:04:17',
@@ -209,7 +210,6 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-
         const node = nodeTypes.function.buildNode('range', 'bytes', { gt: 1000, lt: 8000 });
         const result = range.toElasticsearchQuery(
           node,

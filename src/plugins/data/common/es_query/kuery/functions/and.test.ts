@@ -57,7 +57,6 @@ describe('kuery functions', () => {
 
         expect(result).toHaveProperty('bool');
         expect(Object.keys(result).length).toBe(1);
-
         expect(result.bool).toHaveProperty('filter');
         expect(Object.keys(result.bool).length).toBe(1);
 
