@@ -6,7 +6,7 @@
 
 import { flatten } from 'lodash';
 import chrome from 'ui/chrome';
-import { ExpressionFunction, DatatableRow } from 'src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunction, DatatableRow } from 'src/plugins/expressions/public';
 import { fetch } from '../../common/lib/fetch';
 // @ts-ignore untyped local
 import { buildBoolArray } from '../../server/lib/build_bool_array';

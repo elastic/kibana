@@ -99,6 +99,12 @@ describe('Lens App', () => {
       data: {
         query: {
           filterManager: createMockFilterManager(),
+          timefilter: {
+            timefilter: {
+              getTime: jest.fn(() => ({ from: 'now-7d', to: 'now' })),
+              setTime: jest.fn(),
+            },
+          },
         },
       },
       dataShim: {
@@ -109,7 +115,6 @@ describe('Lens App', () => {
             }),
           },
         },
-        timefilter: { history: {} },
       },
       storage: {
         get: jest.fn(),

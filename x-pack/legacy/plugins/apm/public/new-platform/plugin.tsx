@@ -21,6 +21,7 @@ import { routes } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
 import { useUpdateBadgeEffect } from '../components/app/Main/useUpdateBadgeEffect';
 import { MatchedRouteProvider } from '../context/MatchedRouteContext';
+import { createStaticIndexPattern } from '../services/rest/index_pattern';
 
 export const REACT_APP_ROOT_ID = 'react-apm-root';
 
@@ -68,5 +69,8 @@ export class Plugin {
       </KibanaCoreContextProvider>,
       document.getElementById(REACT_APP_ROOT_ID)
     );
+
+    // create static index pattern and store as saved object. Not needed by APM UI but for legacy reasons in Discover, Dashboard etc.
+    createStaticIndexPattern(core.http);
   }
 }
