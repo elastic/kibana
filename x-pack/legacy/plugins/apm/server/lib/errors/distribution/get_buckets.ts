@@ -11,7 +11,11 @@ import {
   SERVICE_NAME
 } from '../../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../helpers/range_filter';
-import { Setup } from '../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../helpers/setup_request';
 
 export async function getBuckets({
   serviceName,
@@ -22,7 +26,7 @@ export async function getBuckets({
   serviceName: string;
   groupId?: string;
   bucketSize: number;
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
   const { start, end, uiFiltersES, client, indices } = setup;
   const filter: ESFilter[] = [
