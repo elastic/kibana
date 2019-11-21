@@ -10,10 +10,9 @@ import { Client } from 'elasticsearch';
  * Calls the given esClient, creates and index and sets it as write index on the given alias.
  */
 export async function createIndexWithAlias(esClient: Client, indexName: string, aliasName: string) {
-  const body = getIndexWithWithAlias(indexName, aliasName);
-  // TODO: API request go create it
+  const body = getIndexWithWithAlias(aliasName);
 
-  client.indices.create({
+  return esClient.indices.create({
     index: indexName,
     body,
   });
