@@ -20,7 +20,7 @@ describe('observable_utils', () => {
     const observable$ = new BehaviorSubject('initial text');
 
     // a simple stateless component that just renders some text
-    const TestComponent: React.SFC<Props> = ({ testProp }) => {
+    const TestComponent: React.FC<Props> = ({ testProp }) => {
       return <span>{testProp}</span>;
     };
 
