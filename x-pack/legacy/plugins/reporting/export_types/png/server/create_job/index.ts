@@ -9,7 +9,7 @@ import { validateUrls } from '../../../../common/validate_urls';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { JobParamsPNG, ESQueueCreateJobFnPNG } from '../../types';
 
-export function createJobFn(server: ServerFacade): ESQueueCreateJobFnPNG {
+export function createJobFactory(server: ServerFacade): ESQueueCreateJobFnPNG {
   const crypto = cryptoFactory(server);
 
   return async function createJob(
