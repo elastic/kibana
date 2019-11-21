@@ -68,7 +68,6 @@ export class SavedObjectsService
   private migrator: KibanaMigrator | undefined;
   private logger: Logger;
   private clientProvider: ISavedObjectsClientProvider<KibanaRequest> | undefined;
-  private schema: SavedObjectsSchema | undefined;
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');

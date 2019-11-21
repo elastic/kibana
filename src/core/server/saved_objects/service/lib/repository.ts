@@ -402,7 +402,7 @@ export class SavedObjectsRepository {
         conflicts: 'proceed',
         ...getSearchDsl(this._mappings, this._schema, {
           namespace,
-          type: typesToDelete.map(parseSavedObjectType),
+          types: typesToDelete.map(parseSavedObjectType),
         }),
       },
     };

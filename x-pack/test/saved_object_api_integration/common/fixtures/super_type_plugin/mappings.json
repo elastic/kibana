@@ -1,0 +1,41 @@
+{
+  "super_type": {
+    "properties": {
+      "name": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 2048
+          }
+        }
+      },
+      "sub_type_1": {
+        "properties": {
+          "description": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 2048
+              }
+            }
+          }
+        }
+      },
+      "sub_type_2": {
+        "properties": {
+          "title": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 2048
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
