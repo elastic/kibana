@@ -4,11 +4,11 @@
 >
   <!-- Local nav. -->
   <kbn-top-nav
-    ng-show="chrome.getVisible()"
+    ng-show="isVisible"
     app-name="'dashboard'"
     config="topNavMenu"
 
-    show-search-bar="chrome.getVisible()"
+    show-search-bar="isVisible"
     show-filter-bar="showFilterBar()"
     show-save-query="showSaveQuery"
 
@@ -36,7 +36,7 @@
 -->
   <kbn-top-nav
     ng-if="showFilterBar() && !isVisible"
-    
+
     app-name="'dashboard'"
     show-search-bar="true"
     show-filter-bar="true"
@@ -44,9 +44,10 @@
     show-date-picker="false"
 
     filters="model.filters"
-    on-filters-updated="onFiltersUpdated"
     index-patterns="indexPatterns"
-  ></kbn-top-nav>
+    on-filters-updated="onFiltersUpdated"
+  >
+  </kbn-top-nav>
 
   <div ng-show="getShouldShowEditHelp() || getShouldShowViewHelp()" class="dshStartScreen">
     <div class="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--horizontalCenter">

@@ -65,12 +65,6 @@ module.exports = {
       },
     },
     {
-      files: ['src/core/public/application/**/*.{js,ts,tsx}'],
-      rules: {
-        'react/no-danger': 'off',
-      },
-    },
-    {
       files: ['src/legacy/core_plugins/console/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
@@ -400,6 +394,7 @@ module.exports = {
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/legacy/plugins/apm/**/*.js',
         'test/*/config.ts',
+        'test/*/{tests,test_suites,apis,apps}/**/*',
         'test/visual_regression/tests/**/*',
         'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
         'x-pack/test/*/*config.*ts',

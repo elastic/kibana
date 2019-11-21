@@ -30,6 +30,7 @@ import {
 import { EuiUtilsStart } from '../../../../plugins/eui_utils/public';
 import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/public';
 import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
+import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
 
 export interface PluginsSetup {
   data: ReturnType<DataPlugin['setup']>;
@@ -38,6 +39,7 @@ export interface PluginsSetup {
   home: HomePublicPluginSetup;
   inspector: InspectorSetup;
   uiActions: IUiActionsSetup;
+  share: SharePluginSetup;
   devTools: DevToolsSetup;
 }
 
@@ -49,6 +51,7 @@ export interface PluginsStart {
   home: HomePublicPluginStart;
   inspector: InspectorStart;
   uiActions: IUiActionsStart;
+  share: SharePluginStart;
   devTools: DevToolsStart;
 }
 
