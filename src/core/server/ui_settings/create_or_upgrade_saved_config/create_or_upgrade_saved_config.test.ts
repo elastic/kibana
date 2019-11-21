@@ -49,7 +49,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
 
     async function run(options = {}) {
       const resp = await createOrUpgradeSavedConfig({
-        savedObjectsClient: savedObjectsClient as any,
+        savedObjectsClient,
         version,
         buildNum,
         log: logger.get(),
