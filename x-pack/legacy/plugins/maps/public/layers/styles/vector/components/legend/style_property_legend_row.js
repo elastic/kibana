@@ -39,7 +39,7 @@ export class StylePropertyLegendRow extends Component {
   }
 
   async _loadFieldFormatter() {
-    if (this.props.style.isDynamic() && this.props.style.getField() && this.props.style.getField().getSource()) {
+    if (this.props.style.isDynamic() && this.props.style.isComplete() && this.props.style.getField().getSource()) {
       const field = this.props.style.getField();
       const source = field.getSource();
       this._fieldValueFormatter = await source.getFieldFormatter(field.getName());
@@ -52,7 +52,7 @@ export class StylePropertyLegendRow extends Component {
   }
 
   _loadLabel = async () => {
-    if (this._isStatic()) {
+    if (this._excludeFromHeader()) {
       return;
     }
 
@@ -68,8 +68,8 @@ export class StylePropertyLegendRow extends Component {
     }
   }
 
-  _isStatic() {
-    return !this.props.style.isDynamic() || !this.props.style.getField() || !this.props.style.getField().getName();
+  _excludeFromHeader() {
+    return !this.props.style.isDynamic() || !this.props.style.isComplete() || !this.props.style.getField().getName();
   }
 
   _formatValue = value => {
@@ -83,7 +83,7 @@ export class StylePropertyLegendRow extends Component {
   render() {
 
     const { range, style } = this.props;
-    if (this._isStatic()) {
+    if (this._excludeFromHeader()) {
       return null;
     }
 

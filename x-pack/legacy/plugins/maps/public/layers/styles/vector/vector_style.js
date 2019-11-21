@@ -239,7 +239,7 @@ export class VectorStyle extends AbstractStyle {
 
   getDynamicPropertiesArray() {
     const styleProperties = this._getAllStyleProperties();
-    return styleProperties.filter(styleProperty => styleProperty.isDynamic());
+    return styleProperties.filter(styleProperty => (styleProperty.isDynamic() && styleProperty.isComplete()));
   }
 
   _checkIfOnlyFeatureType = async (featureType) => {
@@ -294,7 +294,8 @@ export class VectorStyle extends AbstractStyle {
     const styles = this._getAllStyleProperties();
     const styleProperties = styles.map((style) => {
       return {
-        range: style.isDynamic() && style.getField() && style.getField().getName() ? this._getFieldRange(style.getField().getName()) : null,
+        // eslint-disable-next-line max-len
+        range: (style.isDynamic() && style.isComplete() && style.getField().getName()) ? this._getFieldRange(style.getField().getName()) : null,
         style: style
       };
     });

@@ -21,6 +21,10 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
 
     isDynamic() {
+      return true;
+    }
+
+    isComplete() {
       return !!this._field;
     }
 
