@@ -4,15 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { UrlConfig } from '../../../../../../common/types/custom_urls';
+import { CREATED_BY_LABEL } from '../util/constants';
+
 export type JobId = string;
 export type BucketSpan = string;
+
+export interface CustomSettings {
+  custom_urls?: UrlConfig[];
+  created_by?: CREATED_BY_LABEL;
+}
 
 export interface Job {
   job_id: JobId;
   analysis_config: AnalysisConfig;
   analysis_limits?: AnalysisLimits;
   background_persist_interval?: string;
-  custom_settings?: any;
+  custom_settings?: CustomSettings;
   data_description: DataDescription;
   description: string;
   groups: string[];

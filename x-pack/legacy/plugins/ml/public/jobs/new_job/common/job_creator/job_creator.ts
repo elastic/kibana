@@ -6,10 +6,11 @@
 
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { IndexPattern } from 'ui/index_patterns';
+import { UrlConfig } from '../../../../../common/types/custom_urls';
 import { IndexPatternTitle } from '../../../../../common/types/kibana';
 import { ML_JOB_AGGREGATION } from '../../../../../common/constants/aggregation_types';
 import { ES_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/public';
-import { Job, Datafeed, Detector, JobId, DatafeedId, BucketSpan } from './configs';
+import { Job, Datafeed, Detector, JobId, DatafeedId, BucketSpan, CustomSettings } from './configs';
 import { Aggregation, Field } from '../../../../../common/types/fields';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
@@ -486,7 +487,10 @@ export class JobCreator {
     this._stopAllRefreshPolls.stop = true;
   }
 
-  private _setCustomSetting(setting: string, value: string | object | null) {
+  private _setCustomSetting(
+    setting: keyof CustomSettings,
+    value: CustomSettings[keyof CustomSettings] | null
+  ) {
     if (value === null) {
       // if null is passed in, delete the custom setting
       if (
@@ -507,12 +511,15 @@ export class JobCreator {
           [setting]: value,
         };
       } else {
+        // @ts-ignore
         this._job_config.custom_settings[setting] = value;
       }
     }
   }
 
-  private _getCustomSetting(setting: string): string | object | null {
+  private _getCustomSetting(
+    setting: keyof CustomSettings
+  ): CustomSettings[keyof CustomSettings] | null {
     if (
       this._job_config.custom_settings !== undefined &&
       this._job_config.custom_settings[setting] !== undefined
@@ -528,6 +535,14 @@ export class JobCreator {
 
   public get createdBy(): CREATED_BY_LABEL | null {
     return this._getCustomSetting('created_by') as CREATED_BY_LABEL | null;
+  }
+
+  public set customUrls(customUrls: UrlConfig[] | null) {
+    this._setCustomSetting('custom_urls', customUrls);
+  }
+
+  public get customUrls(): UrlConfig[] | null {
+    return this._getCustomSetting('custom_urls') as UrlConfig[] | null;
   }
 
   public get formattedJobJson() {
