@@ -6,7 +6,7 @@
 
 export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   async function createToken() {
     const { access_token: accessToken } = await es.shield.getAccessToken({
