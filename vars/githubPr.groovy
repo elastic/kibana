@@ -37,7 +37,6 @@ def getPipelineInfoFromComment(comment) {
   if (!matches || !matches[0]) {
     return null
   }
-  print matches[0][1]
 
   return toJSON(matches[0][1].trim())
 }
