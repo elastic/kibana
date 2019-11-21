@@ -250,10 +250,7 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
         style={{ height, width: width + scrollbarOffset }}
         scrollbarOffset={scrollbarOffset}
         onScroll={this.handleScroll}
-        innerRef={
-          /* workaround for missing RefObject support in styled-components typings */
-          this.scrollRef as any
-        }
+        ref={this.scrollRef}
       >
         {typeof children === 'function' ? children(this.registerChild) : null}
       </ScrollPanelWrapper>
@@ -261,7 +258,11 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
   }
 }
 
-const ScrollPanelWrapper = euiStyled.div.attrs<{ scrollbarOffset?: number }>({})`
+interface ScrollPanelWrapperProps {
+  scrollbarOffset?: number;
+}
+
+const ScrollPanelWrapper = euiStyled.div<ScrollPanelWrapperProps>`
   overflow-x: hidden;
   overflow-y: scroll;
   position: relative;

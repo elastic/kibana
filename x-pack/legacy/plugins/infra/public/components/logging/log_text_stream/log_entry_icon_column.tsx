@@ -49,10 +49,12 @@ export const LogEntryDetailsIconColumn: React.FunctionComponent<
   );
 };
 
-const IconColumnContent = LogEntryColumnContent.extend.attrs<{
+interface IconColumnContentProps {
   isHighlighted: boolean;
   isHovered: boolean;
-}>({})`
+}
+
+const IconColumnContent = euiStyled(LogEntryColumnContent)<IconColumnContentProps>`
   background-color: ${props => props.theme.eui.euiColorEmptyShade};
   overflow: hidden;
   user-select: none;

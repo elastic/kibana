@@ -35,41 +35,40 @@ interface EmbeddableMapProps {
   maintainRatio?: boolean;
 }
 
-const EmbeddableMap = styled.div.attrs({
+const EmbeddableMap = styled.div.attrs(() => ({
   className: 'siemEmbeddable__map',
-})<EmbeddableMapProps>`
-  ${({ maintainRatio, theme }) => css`
-    .embPanel {
-      border: none;
-      box-shadow: none;
-    }
+}))<EmbeddableMapProps>`
+  .embPanel {
+    border: none;
+    box-shadow: none;
+  }
 
-    .mapToolbarOverlay__button {
-      display: none;
-    }
+  .mapToolbarOverlay__button {
+    display: none;
+  }
 
-    ${maintainRatio &&
-      css`
-        padding-top: calc(3 / 4 * 100%); //4:3 (standard) ratio
-        position: relative;
+  ${({ maintainRatio }) =>
+    maintainRatio &&
+    css`
+      padding-top: calc(3 / 4 * 100%); //4:3 (standard) ratio
+      position: relative;
 
-        @media only screen and (min-width: ${theme.eui.euiBreakpoints.m}) {
-          padding-top: calc(9 / 32 * 100%); //32:9 (ultra widescreen) ratio
-        }
+      @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
+        padding-top: calc(9 / 32 * 100%); //32:9 (ultra widescreen) ratio
+      }
 
-        @media only screen and (min-width: 1441px) and (min-height: 901px) {
-          padding-top: calc(9 / 21 * 100%); //21:9 (ultrawide) ratio
-        }
+      @media only screen and (min-width: 1441px) and (min-height: 901px) {
+        padding-top: calc(9 / 21 * 100%); //21:9 (ultrawide) ratio
+      }
 
-        .embPanel {
-          bottom: 0;
-          left: 0;
-          position: absolute;
-          right: 0;
-          top: 0;
-        }
-      `}
-  `}
+      .embPanel {
+        bottom: 0;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
+    `}
 `;
 EmbeddableMap.displayName = 'EmbeddableMap';
 

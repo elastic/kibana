@@ -196,7 +196,7 @@ export const MetricDetail = withMetricPageProviders(
                           {({ measureRef, bounds: { width = 0 } }) => {
                             const w = width ? `${width}px` : `100%`;
                             return (
-                              <MetricsDetailsPageColumn innerRef={measureRef}>
+                              <MetricsDetailsPageColumn ref={measureRef}>
                                 <EuiPageBody style={{ width: w }}>
                                   <EuiPageHeader style={{ flex: '0 0 auto' }}>
                                     <EuiPageHeaderSection style={{ width: '100%' }}>

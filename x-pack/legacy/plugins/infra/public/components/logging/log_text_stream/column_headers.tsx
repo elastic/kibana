@@ -73,9 +73,9 @@ const LogColumnHeader: React.FunctionComponent<{
   </LogColumnHeaderWrapper>
 );
 
-const LogColumnHeadersWrapper = euiStyled.div.attrs({
+const LogColumnHeadersWrapper = euiStyled.div.attrs(() => ({
   role: 'row',
-})`
+}))`
   align-items: stretch;
   display: flex;
   flex-direction: row;
@@ -85,9 +85,9 @@ const LogColumnHeadersWrapper = euiStyled.div.attrs({
   padding-right: ${ASSUMED_SCROLLBAR_WIDTH}px;
 `;
 
-const LogColumnHeaderWrapper = LogEntryColumn.extend.attrs({
+const LogColumnHeaderWrapper = euiStyled(LogEntryColumn).attrs(() => ({
   role: 'columnheader',
-})`
+}))`
   align-items: center;
   border-bottom: ${props => props.theme.eui.euiBorderThick};
   display: flex;
@@ -96,7 +96,7 @@ const LogColumnHeaderWrapper = LogEntryColumn.extend.attrs({
   overflow: hidden;
 `;
 
-const LogColumnHeaderContent = LogEntryColumnContent.extend`
+const LogColumnHeaderContent = euiStyled(LogEntryColumnContent)`
   color: ${props => props.theme.eui.euiTitleColor};
   font-size: ${props => props.theme.eui.euiFontSizeS};
   font-weight: ${props => props.theme.eui.euiFontWeightSemiBold};

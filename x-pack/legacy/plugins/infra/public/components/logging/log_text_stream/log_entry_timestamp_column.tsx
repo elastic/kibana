@@ -7,7 +7,7 @@
 import { darken, transparentize } from 'polished';
 import React, { memo } from 'react';
 
-import { css } from '../../../../../../common/eui_styled_components';
+import euiStyled, { css } from '../../../../../../common/eui_styled_components';
 import { useFormattedTime } from '../../formatted_time';
 import { LogEntryColumnContent } from './log_entry_column';
 
@@ -41,17 +41,18 @@ const hoveredContentStyle = css`
   color: ${props => props.theme.eui.euiColorFullShade};
 `;
 
-const TimestampColumnContent = LogEntryColumnContent.extend.attrs<{
+interface TimestampColumnContentProps {
   isHovered: boolean;
   isHighlighted: boolean;
-}>({})`
-  background-color: ${props => props.theme.eui.euiColorLightestShade};
-  border-right: solid 2px ${props => props.theme.eui.euiColorLightShade};
-  color: ${props => props.theme.eui.euiColorDarkShade};
+}
+
+const TimestampColumnContent = euiStyled(LogEntryColumnContent)<TimestampColumnContentProps>`
+  background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
+  border-right: solid 2px ${({ theme }) => theme.eui.euiColorLightShade};
+  color: ${({ theme }) => theme.eui.euiColorDarkShade};
   overflow: hidden;
   text-align: right;
   text-overflow: clip;
   white-space: pre;
-
-  ${props => (props.isHovered || props.isHighlighted ? hoveredContentStyle : '')};
+  ${({ isHovered, isHighlighted }) => (isHovered || isHighlighted ? hoveredContentStyle : '')};
 `;

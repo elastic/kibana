@@ -5,7 +5,6 @@
  */
 
 import { mount, ReactWrapper } from 'enzyme';
-import 'jest-styled-components';
 import * as React from 'react';
 
 import { mockBrowserFields } from '../../../containers/source/mock';

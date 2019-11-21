@@ -21,10 +21,10 @@ export const AppNavigation = ({ children }: AppNavigationProps) => (
 );
 
 const Nav = euiStyled.nav`
-  background: ${props => props.theme.eui.euiColorEmptyShade};
-  border-bottom: ${props => props.theme.eui.euiBorderThin};
-  padding: ${props =>
-    `${props.theme.eui.euiSize} ${props.theme.eui.euiSizeL} ${props.theme.eui.euiSize} ${props.theme.eui.euiSizeL}`}
+  background: ${({ theme }) => theme.eui.euiColorEmptyShade};
+  border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
+  padding: ${({ theme }) =>
+    `${theme.eui.euiSize} ${theme.eui.euiSizeL} ${theme.eui.euiSize} ${theme.eui.euiSizeL}`};
   
   .euiTabs {
     padding-left: 3px;
