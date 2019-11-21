@@ -48,7 +48,7 @@ test('convertSavedDashboardPanelToPanelState', () => {
     version: '7.0.0',
   };
 
-  expect(convertSavedDashboardPanelToPanelState(savedDashboardPanel, true)).toEqual({
+  expect(convertSavedDashboardPanelToPanelState(savedDashboardPanel)).toEqual({
     gridData: {
       x: 0,
       y: 0,
@@ -82,7 +82,7 @@ test('convertSavedDashboardPanelToPanelState does not include undefined id', () 
     version: '7.0.0',
   };
 
-  const converted = convertSavedDashboardPanelToPanelState(savedDashboardPanel, false);
+  const converted = convertSavedDashboardPanelToPanelState(savedDashboardPanel);
   expect(converted.hasOwnProperty('savedObjectId')).toBe(false);
 });
 
@@ -103,7 +103,7 @@ test('convertPanelStateToSavedDashboardPanel', () => {
     type: 'search',
   };
 
-  expect(convertPanelStateToSavedDashboardPanel(dashboardPanel)).toEqual({
+  expect(convertPanelStateToSavedDashboardPanel(dashboardPanel, '6.3.0')).toEqual({
     type: 'search',
     embeddableConfig: {
       something: 'hi!',
@@ -137,6 +137,6 @@ test('convertPanelStateToSavedDashboardPanel will not add an undefined id when n
     type: 'search',
   };
 
-  const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel);
+  const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel, '8.0.0');
   expect(converted.hasOwnProperty('id')).toBe(false);
 });
