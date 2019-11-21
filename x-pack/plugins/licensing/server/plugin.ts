@@ -24,6 +24,8 @@ import { License } from '../common/license';
 import { createLicenseUpdate } from '../common/license_update';
 
 import { ElasticsearchError, RawLicense, RawFeatures } from './types';
+import { registerRoutes } from './routes';
+
 import { LicenseConfigType } from './licensing_config';
 import { createRouteHandlerContext } from './licensing_route_handler_context';
 
@@ -92,6 +94,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     const { refresh, license$ } = this.createLicensePoller(dataClient, config.pollingFrequency);
 
     core.http.registerRouteHandlerContext('licensing', createRouteHandlerContext(license$));
+    registerRoutes(core.http.createRouter());
 
     return {
       refresh,
