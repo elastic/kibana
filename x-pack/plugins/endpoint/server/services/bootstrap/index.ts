@@ -6,11 +6,13 @@
 
 import { IScopedClusterClient, LoggerFactory, Logger } from 'kibana/server';
 import { alreadyExists } from './errors';
+// figure out how to read in a json file
 import endpointTemplate from './template.json';
 
 const templateVersion = 1;
 const appName = 'endpoint';
 const ilmName = 'endpoint_policy';
+const fanPipeline = 'route-events';
 
 // TODO need to get the version of the endpoint app
 const appVersion = '1.0.0';
@@ -83,10 +85,10 @@ export class BootstrapService {
   }
 
   private async createIndex() {
-    const alias = makeNameVersion(appName, appVersion);
+    const alias = appName;
     try {
       const res = await this.client.callAsCurrentUser('indices.create', {
-        index: makeIndexName(alias),
+        index: makeIndexName(makeNameVersion(appName, appVersion)),
         body: makeAliasBody(alias),
       });
       this.logger.info(`success: ${res}`);
@@ -189,6 +191,35 @@ export class BootstrapService {
       lifecycleName,
       lifecycleRollOverAlias
     );
+  }
+
+  private async createAlias() {
+    const index = makeIndexName(makeNameVersion(appName, appVersion));
+    this.logger.info(`creating alias [${appName}] for index [${index}]`);
+    const res = await this.client.callAsCurrentUser('indices.putAlias', {
+      index,
+      name: appName,
+    });
+    this.logger.info(`response: ${res}`);
+  }
+
+  private async createIngestPipeline() {
+    this.logger.info(`creating ingest pipeline [${fanPipeline}]`);
+    await this.client.callAsCurrentUser('ingest.putPipeline', {
+      id: fanPipeline,
+      body: {
+        description: 'sends events to specific indices',
+        processors: [
+          {
+            set: {
+              if: 'ctx.endgame.event_type_full == alert_event',
+              field: '_index',
+              value: 'alerts',
+            },
+          },
+        ],
+      },
+    });
   }
 
   async doBootstrapping() {
