@@ -613,7 +613,6 @@ export class VectorLayer extends AbstractLayer {
     const sourceId = this.getId();
     const pointLayerId = this._getMbPointLayerId();
     const pointLayer = mbMap.getLayer(pointLayerId);
-    const hasJoins = this._hasJoins();
 
     if (!pointLayer) {
       mbMap.addLayer({
@@ -624,7 +623,7 @@ export class VectorLayer extends AbstractLayer {
       });
     }
 
-    const filterExpr = getPointFilterExpression(hasJoins);
+    const filterExpr = getPointFilterExpression(this._hasJoins());
     if (filterExpr !== mbMap.getFilter(pointLayerId)) {
       mbMap.setFilter(pointLayerId, filterExpr);
     }
@@ -640,7 +639,6 @@ export class VectorLayer extends AbstractLayer {
     const sourceId = this.getId();
     const symbolLayerId = this._getMbSymbolLayerId();
     const symbolLayer = mbMap.getLayer(symbolLayerId);
-    const hasJoins = this._hasJoins();
 
     if (!symbolLayer) {
       mbMap.addLayer({
@@ -650,7 +648,7 @@ export class VectorLayer extends AbstractLayer {
       });
     }
 
-    const filterExpr = getPointFilterExpression(hasJoins);
+    const filterExpr = getPointFilterExpression(this._hasJoins());
     if (filterExpr !== mbMap.getFilter(symbolLayerId)) {
       mbMap.setFilter(symbolLayerId, filterExpr);
     }
