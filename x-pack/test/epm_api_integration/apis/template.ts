@@ -5,7 +5,6 @@
  */
 
 import expect from '@kbn/expect';
-import { Client } from '@elastic/elasticsearch';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { getTemplate } from '../../../legacy/plugins/epm/server/lib/template/template';
 
