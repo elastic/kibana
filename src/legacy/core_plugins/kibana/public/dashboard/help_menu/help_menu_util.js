@@ -17,15 +17,19 @@
  * under the License.
  */
 
-import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { HelpMenu } from './help_menu';
+import { i18n } from '@kbn/i18n';
+import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
-export function addHelpMenuToAppChrome(chrome, docLinks) {
-  chrome.setHelpExtension(domElement => {
-    render(<HelpMenu docLinks={docLinks} />, domElement);
-    return () => {
-      unmountComponentAtNode(domElement);
-    };
+export function addHelpMenuToAppChrome(chrome) {
+  chrome.setHelpExtension({
+    appName: i18n.translate('kbn.dashboard.helpMenu.appName', {
+      defaultMessage: 'Dashboards',
+    }),
+    links: [
+      {
+        linkType: 'documentation',
+        href: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html`,
+      },
+    ],
   });
 }
