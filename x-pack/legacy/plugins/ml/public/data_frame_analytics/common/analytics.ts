@@ -38,6 +38,7 @@ export const defaultSearchQuery = {
 };
 
 export interface SearchQuery {
+  track_total_hits?: boolean;
   query: SavedSearchQuery;
   sort?: any;
 }
