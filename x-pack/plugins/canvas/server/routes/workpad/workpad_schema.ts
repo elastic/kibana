@@ -17,6 +17,7 @@ export const PositionSchema = schema.object({
 
 export const WorkpadElementSchema = schema.object({
   expression: schema.string(),
+  filter: schema.maybe(schema.string()),
   id: schema.string(),
   position: PositionSchema,
 });

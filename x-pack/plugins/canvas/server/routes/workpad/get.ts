@@ -11,6 +11,7 @@ import {
   API_ROUTE_WORKPAD,
 } from '../../../../../legacy/plugins/canvas/common/lib/constants';
 import { CanvasWorkpad } from '../../../../../legacy/plugins/canvas/types';
+import { catchErrorHandler } from '../catch_error_handler';
 
 export type WorkpadAttributes = Pick<CanvasWorkpad, Exclude<keyof CanvasWorkpad, 'id'>> & {
   '@timestamp': string;
@@ -28,47 +29,37 @@ export function initializeGetWorkpadRoute(deps: RouteInitializerDeps) {
         }),
       },
     },
-    async (context, request, response) => {
-      try {
-        const workpad = await context.core.savedObjects.client.get<WorkpadAttributes>(
-          CANVAS_TYPE,
-          request.params.id
-        );
+    catchErrorHandler(async (context, request, response) => {
+      const workpad = await context.core.savedObjects.client.get<WorkpadAttributes>(
+        CANVAS_TYPE,
+        request.params.id
+      );
 
-        if (
-          // not sure if we need to be this defensive
-          workpad.type === 'canvas-workpad' &&
-          workpad.attributes &&
-          workpad.attributes.pages &&
-          workpad.attributes.pages.length
-        ) {
-          workpad.attributes.pages.forEach(page => {
-            const elements = (page.elements || []).filter(
-              ({ id: pageId }) => !pageId.startsWith('group')
-            );
-            const groups = (page.groups || []).concat(
-              (page.elements || []).filter(({ id: pageId }) => pageId.startsWith('group'))
-            );
-            page.elements = elements;
-            page.groups = groups;
-          });
-        }
-
-        return response.ok({
-          body: {
-            id: workpad.id,
-            ...workpad.attributes,
-          },
+      if (
+        // not sure if we need to be this defensive
+        workpad.type === 'canvas-workpad' &&
+        workpad.attributes &&
+        workpad.attributes.pages &&
+        workpad.attributes.pages.length
+      ) {
+        workpad.attributes.pages.forEach(page => {
+          const elements = (page.elements || []).filter(
+            ({ id: pageId }) => !pageId.startsWith('group')
+          );
+          const groups = (page.groups || []).concat(
+            (page.elements || []).filter(({ id: pageId }) => pageId.startsWith('group'))
+          );
+          page.elements = elements;
+          page.groups = groups;
         });
-      } catch (error) {
-        if (error.isBoom) {
-          return response.customError({
-            body: error.output.payload,
-            statusCode: error.output.statusCode,
-          });
-        }
-        return response.badRequest({ body: error });
       }
-    }
+
+      return response.ok({
+        body: {
+          id: workpad.id,
+          ...workpad.attributes,
+        },
+      });
+    })
   );
 }

@@ -11,6 +11,7 @@ import {
   API_ROUTE_WORKPAD,
 } from '../../../../../legacy/plugins/canvas/common/lib/constants';
 import { okResponse } from './ok_response';
+import { catchErrorHandler } from '../catch_error_handler';
 
 export function initializeDeleteWorkpadRoute(deps: RouteInitializerDeps) {
   const { router } = deps;
@@ -23,19 +24,9 @@ export function initializeDeleteWorkpadRoute(deps: RouteInitializerDeps) {
         }),
       },
     },
-    async (context, request, response) => {
-      try {
-        context.core.savedObjects.client.delete(CANVAS_TYPE, request.params.id);
-        return response.ok({ body: okResponse });
-      } catch (error) {
-        if (error.isBoom) {
-          return response.customError({
-            body: error.output.payload,
-            statusCode: error.output.statusCode,
-          });
-        }
-        return response.badRequest({ body: error });
-      }
-    }
+    catchErrorHandler(async (context, request, response) => {
+      context.core.savedObjects.client.delete(CANVAS_TYPE, request.params.id);
+      return response.ok({ body: okResponse });
+    })
   );
 }

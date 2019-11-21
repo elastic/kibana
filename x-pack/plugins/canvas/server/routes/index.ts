@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'src/core/server';
+import { IRouter, Logger } from 'src/core/server';
 import { initWorkpadRoutes } from './workpad';
 
 export interface RouteInitializerDeps {
   router: IRouter;
+  logger: Logger;
 }
 
 export function initRoutes(deps: RouteInitializerDeps) {

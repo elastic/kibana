@@ -13,6 +13,7 @@ import { CanvasWorkpad } from '../../../../../legacy/plugins/canvas/types';
 import { getId } from '../../../../../legacy/plugins/canvas/public/lib/get_id';
 import { WorkpadSchema } from './workpad_schema';
 import { okResponse } from './ok_response';
+import { catchErrorHandler } from '../catch_error_handler';
 
 export type WorkpadAttributes = Pick<CanvasWorkpad, Exclude<keyof CanvasWorkpad, 'id'>> & {
   '@timestamp': string;
@@ -28,7 +29,7 @@ export function initializeCreateWorkpadRoute(deps: RouteInitializerDeps) {
         body: WorkpadSchema,
       },
     },
-    async (context, request, response) => {
+    catchErrorHandler(async (context, request, response) => {
       if (!request.body) {
         return response.badRequest({ body: 'A workpad payload is required' });
       }
@@ -38,29 +39,19 @@ export function initializeCreateWorkpadRoute(deps: RouteInitializerDeps) {
       const now = new Date().toISOString();
       const { id, ...payload } = workpad;
 
-      try {
-        await context.core.savedObjects.client.create<WorkpadAttributes>(
-          CANVAS_TYPE,
-          {
-            ...payload,
-            '@timestamp': now,
-            '@created': now,
-          },
-          { id: id || getId('workpad') }
-        );
+      await context.core.savedObjects.client.create<WorkpadAttributes>(
+        CANVAS_TYPE,
+        {
+          ...payload,
+          '@timestamp': now,
+          '@created': now,
+        },
+        { id: id || getId('workpad') }
+      );
 
-        return response.ok({
-          body: okResponse,
-        });
-      } catch (error) {
-        if (error.isBoom) {
-          return response.customError({
-            body: error.output.payload,
-            statusCode: error.output.statusCode,
-          });
-        }
-        return response.badRequest({ body: error });
-      }
-    }
+      return response.ok({
+        body: okResponse,
+      });
+    })
   );
 }

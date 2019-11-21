@@ -4,27 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, PluginInitializerContext, Plugin, Logger } from 'src/core/server';
 import { initRoutes } from './routes';
 
-/**
- * Represents Code Plugin instance that will be managed by the Kibana plugin system.
- */
-export class CanvasPlugin {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+export class CanvasPlugin implements Plugin {
+  private readonly logger: Logger;
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
 
   public setup(coreSetup: CoreSetup): void {
-    this.initializerContext.logger.get().debug('Setting up Canvas plugin');
     const canvasRouter = coreSetup.http.createRouter();
 
-    initRoutes({ router: canvasRouter });
+    initRoutes({ router: canvasRouter, logger: this.logger });
   }
 
-  public start() {
-    this.initializerContext.logger.get().debug('Starting Canvas plugin');
-  }
+  public start() {}
 
-  public stop() {
-    this.initializerContext.logger.get().debug('Stopping Canvas plugin');
-  }
+  public stop() {}
 }

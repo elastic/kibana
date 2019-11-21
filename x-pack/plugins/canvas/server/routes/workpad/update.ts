@@ -18,6 +18,7 @@ import {
 import { CanvasWorkpad } from '../../../../../legacy/plugins/canvas/types';
 import { WorkpadSchema, WorkpadAssetSchema } from './workpad_schema';
 import { okResponse } from './ok_response';
+import { catchErrorHandler } from '../catch_error_handler';
 
 export type WorkpadAttributes = Pick<CanvasWorkpad, Exclude<keyof CanvasWorkpad, 'id'>> & {
   '@timestamp': string;
@@ -38,31 +39,21 @@ const workpadUpdateHandler = async (
 ) => {
   const now = new Date().toISOString();
 
-  try {
-    const workpadObject = await savedObjectsClient.get<WorkpadAttributes>(CANVAS_TYPE, id);
-    await savedObjectsClient.create<WorkpadAttributes>(
-      CANVAS_TYPE,
-      {
-        ...workpadObject.attributes,
-        ...omit(payload, 'id'), // never write the id property
-        '@timestamp': now, // always update the modified time
-        '@created': workpadObject.attributes['@created'], // ensure created is not modified
-      },
-      { overwrite: true, id }
-    );
+  const workpadObject = await savedObjectsClient.get<WorkpadAttributes>(CANVAS_TYPE, id);
+  await savedObjectsClient.create<WorkpadAttributes>(
+    CANVAS_TYPE,
+    {
+      ...workpadObject.attributes,
+      ...omit(payload, 'id'), // never write the id property
+      '@timestamp': now, // always update the modified time
+      '@created': workpadObject.attributes['@created'], // ensure created is not modified
+    },
+    { overwrite: true, id }
+  );
 
-    return response.ok({
-      body: okResponse,
-    });
-  } catch (error) {
-    if (error.isBoom) {
-      return response.customError({
-        body: error.output.payload,
-        statusCode: error.output.statusCode,
-      });
-    }
-    return response.badRequest({ body: error });
-  }
+  return response.ok({
+    body: okResponse,
+  });
 };
 
 export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
@@ -79,14 +70,14 @@ export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
         body: WorkpadSchema,
       },
     },
-    async (context, request, response) => {
+    catchErrorHandler(async (context, request, response) => {
       return workpadUpdateHandler(
         request.body,
         request.params.id,
         context.core.savedObjects.client,
         response
       );
-    }
+    })
   );
 
   router.put(
@@ -99,14 +90,14 @@ export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
         body: WorkpadSchema,
       },
     },
-    async (context, request, response) => {
+    catchErrorHandler(async (context, request, response) => {
       return workpadUpdateHandler(
         request.body,
         request.params.id,
         context.core.savedObjects.client,
         response
       );
-    }
+    })
   );
 }
 
