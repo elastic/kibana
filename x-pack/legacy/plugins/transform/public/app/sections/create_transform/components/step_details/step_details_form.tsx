@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { metadata } from 'ui/metadata';
@@ -54,7 +54,7 @@ interface Props {
   onChange(s: StepDetailsExposedState): void;
 }
 
-export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange }) => {
+export const StepDetailsForm: FC<Props> = React.memo(({ overrides = {}, onChange }) => {
   const kibanaContext = useContext(KibanaContext);
 
   const defaults = { ...getDefaultStepDetailsState(), ...overrides };
