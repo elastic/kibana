@@ -62,6 +62,29 @@ export const ErrorCallout: FC<Props> = ({ error }) => {
         </p>
       </EuiCallOut>
     );
+  } else if (error.includes('userProvidedQueryBuilder')) {
+    // query bar syntax is incorrect
+    errorCallout = (
+      <EuiCallOut
+        title={i18n.translate(
+          'xpack.ml.dataframe.analytics.regressionExploration.queryParsingErrorMessage',
+          {
+            defaultMessage: 'Unable to parse query.',
+          }
+        )}
+        color="primary"
+      >
+        <p>
+          {i18n.translate(
+            'xpack.ml.dataframe.analytics.regressionExploration.queryParsingErrorBody',
+            {
+              defaultMessage:
+                'The query syntax is invalid and returned no results. Please check the query syntax and try again.',
+            }
+          )}
+        </p>
+      </EuiCallOut>
+    );
   }
 
   return <Fragment>{errorCallout}</Fragment>;
