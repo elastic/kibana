@@ -158,10 +158,6 @@ export class KibanaFramework {
           headers,
           body: errorBody,
         });
-
-        // NP_TODO: Do we still need to re-throw this error in this case? if we do, can we
-        // still call the response.customError method to control the HTTP response?
-        // throw error;
       }
     }
     this.router.post(routeOptions, handler);
