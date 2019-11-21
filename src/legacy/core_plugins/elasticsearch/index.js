@@ -17,10 +17,10 @@
  * under the License.
  */
 import { first } from 'rxjs/operators';
-import healthCheck from './lib/health_check';
 import { Cluster } from './lib/cluster';
 import { createProxy } from './lib/create_proxy';
 import { handleESError } from './lib/handle_es_error';
+import { versionHealthCheck } from './lib/version_health_check';
 
 export default function(kibana) {
   let defaultVars;
@@ -92,15 +92,13 @@ export default function(kibana) {
 
       createProxy(server);
 
-      // Set up the health check service and start it.
-      const { start, waitUntilReady } = healthCheck(
+      const waitUntilHealthy = versionHealthCheck(
         this,
-        server,
-        esConfig.healthCheckDelay.asMilliseconds(),
-        esConfig.ignoreVersionMismatch
+        server.logWithMetadata,
+        server.newPlatform.__internals.elasticsearch.esNodesCompatibilty$
       );
-      server.expose('waitUntilReady', waitUntilReady);
-      start();
+
+      server.expose('waitUntilReady', () => waitUntilHealthy);
     },
   });
 }

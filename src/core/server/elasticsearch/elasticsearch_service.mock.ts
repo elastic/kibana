@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { IClusterClient, ICustomClusterClient } from './cluster_client';
 import { IScopedClusterClient } from './scoped_cluster_client';
 import { ElasticsearchConfig } from './elasticsearch_config';
@@ -71,6 +71,7 @@ type MockedInternalElasticSearchServiceSetup = jest.Mocked<
 const createInternalSetupContractMock = () => {
   const setupContract: MockedInternalElasticSearchServiceSetup = {
     ...createSetupContractMock(),
+    esNodesCompatibility$: new Subject(),
     legacy: {
       config$: new BehaviorSubject({} as ElasticsearchConfig),
     },

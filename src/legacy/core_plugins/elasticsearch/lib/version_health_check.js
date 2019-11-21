@@ -17,11 +17,23 @@
  * under the License.
  */
 
-import { version as kibanaVersion } from '../../../../../package.json';
+export const versionHealthCheck = (esPlugin, logWithMetadata, esNodesCompatibility$) => {
+  esPlugin.status.yellow('Waiting for Elasticsearch');
 
-export default {
-  // Make the version stubbable to improve testability.
-  get() {
-    return kibanaVersion;
-  },
+  return new Promise(resolve => {
+    esNodesCompatibility$.subscribe(({ isCompatible, message, kibanaVersion, warningNodes }) => {
+      if (!isCompatible) {
+        esPlugin.status.red(message);
+      } else {
+        if (message && message.length > 0) {
+          logWithMetadata(['warning'], message, {
+            kibanaVersion,
+            nodes: warningNodes,
+          });
+        }
+        esPlugin.status.green('Ready');
+        resolve();
+      }
+    });
+  });
 };

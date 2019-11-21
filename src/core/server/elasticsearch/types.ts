@@ -77,4 +77,5 @@ export interface InternalElasticsearchServiceSetup extends ElasticsearchServiceS
   readonly legacy: {
     readonly config$: Observable<ElasticsearchConfig>;
   };
+  esNodesCompatibility$: Observable<unknown>;
 }
