@@ -11,9 +11,10 @@ import {
   AssetParts,
   CategoryId,
   CategorySummaryList,
+  KibanaAssetType,
   RegistryList,
-  RegistryPackage,
 } from '../../common/types';
+import { RegistryPackage } from '../types';
 import { cacheGet, cacheSet } from './cache';
 import { ArchiveEntry, untarBuffer } from './extract';
 import { fetchUrl, getResponseStream, getResponse } from './requests';
@@ -120,9 +121,11 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
   // ASK: best way, if any, to avoid `any`?
   const assets = paths.reduce((map: any, path) => {
     const parts = pathParts(path.replace(/^\/package\//, ''));
-    if (!map[parts.service]) map[parts.service] = {};
-    if (!map[parts.service][parts.type]) map[parts.service][parts.type] = [];
-    map[parts.service][parts.type].push(parts);
+    if (parts.type in KibanaAssetType) {
+      if (!map[parts.service]) map[parts.service] = {};
+      if (!map[parts.service][parts.type]) map[parts.service][parts.type] = [];
+      map[parts.service][parts.type].push(parts);
+    }
 
     return map;
   }, {});

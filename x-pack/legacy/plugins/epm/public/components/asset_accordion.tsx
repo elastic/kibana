@@ -49,12 +49,11 @@ export function AssetAccordion({ assets }: { assets: AssetsGroupedByServiceByTyp
             </FlexGroup>
             <EuiHorizontalRule margin="none" />
 
-            {entries(typeToParts).map(([type, parts], typeIndex, typeEntries) => {
-              let iconType = null;
-              if (type in AssetIcons) {
-                // only kibana assets have icons
-                iconType = AssetIcons[type as KibanaAssetType];
-              }
+            {entries(typeToParts).map(([_type], typeIndex, typeEntries) => {
+              // only kibana assets have icons
+              const type = _type as KibanaAssetType;
+              const iconType = type in AssetIcons && AssetIcons[type];
+
               // @types/styled-components@3 does yet support `defaultProps`, which EuiAccordion uses
               // Ref: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/31903
               // we're a major version behind; nearly 2
@@ -77,7 +76,7 @@ export function AssetAccordion({ assets }: { assets: AssetsGroupedByServiceByTyp
                     paddingSize="m"
                     extraAction={
                       <EuiNotificationBadge color="subdued" size="m">
-                        {parts.length}
+                        {typeEntries.length}
                       </EuiNotificationBadge>
                     }
                   >

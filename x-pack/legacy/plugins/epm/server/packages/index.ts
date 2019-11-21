@@ -5,7 +5,13 @@
  */
 
 import { IClusterClient, ScopedClusterClient } from 'src/core/server/';
-import { AssetType, Installable, Installation, Request } from '../../common/types';
+import {
+  AssetType,
+  ElasticsearchAssetType,
+  InstallationStatus,
+  KibanaAssetType,
+} from '../../common/types';
+import { Installable, Installation, Request } from '../types';
 
 export * from './get';
 export * from './install';
@@ -14,15 +20,12 @@ export * from './handlers';
 
 export type CallESAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];
 
-export const SAVED_OBJECT_TYPES = new Set<AssetType>([
-  'dashboard',
-  'ilm-policy',
-  'index-pattern',
-  'index-template',
-  'ingest-pipeline',
-  'search',
-  'visualization',
-]);
+// merge the values of the two types together, currently encompasses all types
+// can add a `.filter` or create from individual `enum` members if/when that changes
+export const savedObjectTypes: AssetType[] = [
+  ...Object.values(KibanaAssetType),
+  ...Object.values(ElasticsearchAssetType),
+];
 
 export function getClusterAccessor(esClient: IClusterClient, req: Request) {
   return esClient.asScoped(req).callAsCurrentUser;
@@ -32,15 +35,11 @@ export function createInstallableFrom<T>(from: T, savedObject?: Installation): I
   return savedObject
     ? {
         ...from,
-        status: 'installed',
+        status: InstallationStatus.installed,
         savedObject,
       }
     : {
         ...from,
-        status: 'not_installed',
+        status: InstallationStatus.notInstalled,
       };
-}
-
-export function assetUsesObjects(assetType: AssetType) {
-  return SAVED_OBJECT_TYPES.has(assetType);
 }

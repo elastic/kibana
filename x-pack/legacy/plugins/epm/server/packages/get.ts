@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE } from '../../common/constants';
-import { InstallationAttributes, Installed, Installation, NotInstalled } from '../../common/types';
+import { InstallationAttributes, Installed, Installation, NotInstalled } from '../types';
 import * as Registry from '../registry';
 import { createInstallableFrom } from './index';
 
