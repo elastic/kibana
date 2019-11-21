@@ -7,15 +7,15 @@
 import { once } from 'lodash';
 import { elasticsearchJsPlugin } from './elasticsearch_js_plugin';
 
-const callWithRequest = once(server => {
+const callWithRequest = once((server: any) => {
   const config = { plugins: [elasticsearchJsPlugin] };
   const cluster = server.plugins.elasticsearch.createCluster('watcher', config);
 
   return cluster.callWithRequest;
 });
 
-export const callWithRequestFactory = (server, request) => {
-  return (...args) => {
+export const callWithRequestFactory = (server: any, request: any) => {
+  return (...args: any[]) => {
     return callWithRequest(server)(request, ...args);
   };
 };

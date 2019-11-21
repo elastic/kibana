@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { schema } from '@kbn/config-schema';
 import { RequestHandler } from 'src/core/server';
 import { get } from 'lodash';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
@@ -66,7 +67,12 @@ export function registerExecuteRoute(server: ServerShimWithRouter) {
   server.router.put(
     {
       path: '/api/watcher/watch/execute',
-      validate: false,
+      validate: {
+        body: schema.object({
+          executeDetails: schema.object({}, { allowUnknowns: true }),
+          watch: schema.object({}, { allowUnknowns: true }),
+        }),
+      },
     },
     licensePreRoutingFactory(server, handler)
   );

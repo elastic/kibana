@@ -105,7 +105,7 @@ const getTimeFieldOptions = (fields: any) => {
 };
 interface IOption {
   label: string;
-  options: Array<{ value: string; label: string }>;
+  options: Array<{ value: string; label: string; key?: string }>;
 }
 
 const getIndexOptions = async (patternString: string, indexPatterns: string[]) => {
@@ -130,12 +130,14 @@ const getIndexOptions = async (patternString: string, indexPatterns: string[]) =
           defaultMessage: 'Based on your indices and index patterns',
         }
       ),
-      options: matchingOptions.map(match => {
-        return {
-          label: match,
-          value: match,
-        };
-      }),
+      options: matchingOptions
+        .map(match => {
+          return {
+            label: match,
+            value: match,
+          };
+        })
+        .sort((a, b) => String(a.label).localeCompare(b.label)),
     });
   }
 

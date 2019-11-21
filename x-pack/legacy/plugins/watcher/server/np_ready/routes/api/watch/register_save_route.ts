@@ -34,23 +34,31 @@ export function registerSaveRoute(server: ServerShimWithRouter) {
   const isEsError = isEsErrorFactory(server);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(server, request);
-    const { id, type, isNew, ...watchConfig } = request.body;
+    const { id } = request.params;
+    const { type, isNew, ...watchConfig } = request.body;
 
     // For new watches, verify watch with the same ID doesn't already exist
     if (isNew) {
-      const existingWatch = await fetchWatch(callWithRequest, id);
-
-      if (existingWatch.found) {
-        return response.conflict({
-          body: {
-            message: i18n.translate('xpack.watcher.saveRoute.duplicateWatchIdErrorMessage', {
-              defaultMessage: "There is already a watch with ID '{watchId}'.",
-              values: {
-                watchId: id,
-              },
-            }),
-          },
-        });
+      try {
+        const existingWatch = await fetchWatch(callWithRequest, id);
+        if (existingWatch.found) {
+          return response.conflict({
+            body: {
+              message: i18n.translate('xpack.watcher.saveRoute.duplicateWatchIdErrorMessage', {
+                defaultMessage: "There is already a watch with ID '{watchId}'.",
+                values: {
+                  watchId: id,
+                },
+              }),
+            },
+          });
+        }
+      } catch (e) {
+        const es404 = isEsError(e) && e.statusCode === 404;
+        if (!es404) {
+          return response.internalError({ body: e });
+        }
+        // Else continue...
       }
     }
 
@@ -89,6 +97,7 @@ export function registerSaveRoute(server: ServerShimWithRouter) {
         params: schema.object({
           id: schema.string(),
         }),
+        body: schema.object({}, { allowUnknowns: true }),
       },
     },
     licensePreRoutingFactory(server, handler)

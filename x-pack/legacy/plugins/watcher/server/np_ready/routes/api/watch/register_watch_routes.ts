@@ -13,8 +13,9 @@ import { registerActivateRoute } from './register_activate_route';
 import { registerDeactivateRoute } from './register_deactivate_route';
 import { registerVisualizeRoute } from './register_visualize_route';
 import { registerActionRoutes } from './action';
+import { ServerShimWithRouter } from '../../../types';
 
-export function registerWatchRoutes(server) {
+export function registerWatchRoutes(server: ServerShimWithRouter) {
   registerDeleteRoute(server);
   registerExecuteRoute(server);
   registerLoadRoute(server);

@@ -99,7 +99,7 @@ export const activateWatch = async (id: string) => {
 
 export const loadWatch = async (id: string) => {
   const { watch } = await getHttpClient().get(`${basePath}/watch/${id}`);
-  return Watch.fromUpstreamJson(watch.watch);
+  return Watch.fromUpstreamJson(watch);
 };
 
 export const getMatchingIndices = async (pattern: string) => {

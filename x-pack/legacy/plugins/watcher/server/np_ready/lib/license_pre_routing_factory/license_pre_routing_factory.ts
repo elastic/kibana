@@ -16,8 +16,8 @@ import { ServerShimWithRouter } from '../../types';
 
 export const licensePreRoutingFactory = (
   server: ServerShimWithRouter,
-  handler: RequestHandler
-): RequestHandler => {
+  handler: RequestHandler<any, any, any>
+): RequestHandler<any, any, any> => {
   const xpackMainPlugin = server.plugins.xpack_main;
 
   // License checking and enable/disable logic

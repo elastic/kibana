@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
 import { RequestHandler } from 'src/core/server';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
@@ -66,7 +67,11 @@ export function registerLoadHistoryRoute(server: ServerShimWithRouter) {
   server.router.get(
     {
       path: '/api/watcher/history/{id}',
-      validate: false,
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
     },
     licensePreRoutingFactory(server, handler)
   );
