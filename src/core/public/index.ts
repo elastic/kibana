@@ -40,6 +40,11 @@ import {
   ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
+  ChromeHelpExtensionMenuLink,
+  ChromeHelpExtensionMenuCustomLink,
+  ChromeHelpExtensionMenuDiscussLink,
+  ChromeHelpExtensionMenuDocumentationLink,
+  ChromeHelpExtensionMenuGitHubLink,
   ChromeNavControl,
   ChromeNavControls,
   ChromeNavLink,
@@ -117,13 +122,7 @@ export {
   InterceptedHttpResponse,
 } from './http';
 
-export {
-  OverlayStart,
-  OverlayBannerMount,
-  OverlayBannerUnmount,
-  OverlayBannersStart,
-  OverlayRef,
-} from './overlays';
+export { OverlayStart, OverlayBannersStart, OverlayRef } from './overlays';
 
 export {
   Toast,
@@ -135,6 +134,8 @@ export {
   ToastsStart,
   ErrorToastOptions,
 } from './notifications';
+
+export { MountPoint, UnmountCallback } from './types';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -246,6 +247,11 @@ export {
   ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
+  ChromeHelpExtensionMenuLink,
+  ChromeHelpExtensionMenuCustomLink,
+  ChromeHelpExtensionMenuDiscussLink,
+  ChromeHelpExtensionMenuDocumentationLink,
+  ChromeHelpExtensionMenuGitHubLink,
   ChromeNavControl,
   ChromeNavControls,
   ChromeNavLink,

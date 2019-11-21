@@ -22,16 +22,14 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import { UiSettingsClientContract } from 'src/core/public';
-import { IndexPattern } from '../../index_patterns';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
-import { getDisplayValueFromFilter } from './filter_editor/lib/get_display_value';
-import { esFilters } from '../../../../../../plugins/data/public';
+import { esFilters, utils, IIndexPattern } from '../../../../../../plugins/data/public';
 
 interface Props {
   id: string;
   filter: esFilters.Filter;
-  indexPatterns: IndexPattern[];
+  indexPatterns: IIndexPattern[];
   className?: string;
   onUpdate: (filter: esFilters.Filter) => void;
   onRemove: () => void;
@@ -62,9 +60,9 @@ class FilterItemUI extends Component<Props, State> {
       this.props.className
     );
 
-    const displayName = getDisplayValueFromFilter(filter, this.props.indexPatterns);
+    const valueLabel = utils.getDisplayValueFromFilter(filter, this.props.indexPatterns);
     const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
-    const dataTestSubjValue = filter.meta.value ? `filter-value-${displayName}` : '';
+    const dataTestSubjValue = filter.meta.value ? `filter-value-${valueLabel}` : '';
     const dataTestSubjDisabled = `filter-${
       this.props.filter.meta.disabled ? 'disabled' : 'enabled'
     }`;
@@ -72,7 +70,7 @@ class FilterItemUI extends Component<Props, State> {
     const badge = (
       <FilterView
         filter={filter}
-        displayName={displayName}
+        valueLabel={valueLabel}
         className={classes}
         iconOnClick={() => this.props.onRemove()}
         onClick={this.togglePopover}

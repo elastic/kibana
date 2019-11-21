@@ -24,6 +24,7 @@ import '../saved_visualizations/saved_visualizations';
 import './visualization_editor';
 import './visualization';
 
+import { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { migrateAppState } from './lib';
@@ -31,7 +32,7 @@ import editorTemplate from './editor.html';
 import { DashboardConstants } from '../../dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
-import { extractTimeFilter, changeTimeFilter } from '../../../../../../plugins/data/public';
+
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 
 import {
@@ -42,13 +43,14 @@ import {
   KibanaParsedUrl,
   migrateLegacyQuery,
   SavedObjectSaveModal,
-  showShareContextMenu,
   showSaveModal,
   stateMonitorFactory,
   subscribeWithScope,
+  unhashUrl,
 } from '../kibana_services';
 
 const {
+  core,
   capabilities,
   chrome,
   chromeLegacy,
@@ -56,12 +58,12 @@ const {
   docTitle,
   FilterBarQueryFilterProvider,
   getBasePath,
-  ShareContextMenuExtensionsRegistryProvider,
   toastNotifications,
   timefilter,
   uiModules,
   uiRoutes,
   visualizations,
+  share,
 } = getServices();
 
 const { savedQueryService } = data.search.services;
@@ -71,7 +73,7 @@ uiRoutes
     template: editorTemplate,
     k7Breadcrumbs: getCreateBreadcrumbs,
     resolve: {
-      savedVis: function (savedVisualizations, redirectWhenMissing, $route) {
+      savedVis: function (savedVisualizations, redirectWhenMissing, $route, $rootScope, kbnUrl) {
         const visTypes = visualizations.types.all();
         const visType = _.find(visTypes, { name: $route.current.params.type });
         const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
@@ -84,7 +86,7 @@ uiRoutes
           );
         }
 
-        return savedVisualizations.get($route.current.params)
+        return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl).then(() => savedVisualizations.get($route.current.params))
           .then(savedVis => {
             if (savedVis.vis.type.setup) {
               return savedVis.vis.type.setup(savedVis)
@@ -102,28 +104,33 @@ uiRoutes
     template: editorTemplate,
     k7Breadcrumbs: getEditBreadcrumbs,
     resolve: {
-      savedVis: function (savedVisualizations, redirectWhenMissing, $route) {
-        return savedVisualizations.get($route.current.params.id)
+      savedVis: function (savedVisualizations, redirectWhenMissing, $route, $rootScope, kbnUrl) {
+        return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl)
+          .then(() => savedVisualizations.get($route.current.params.id))
           .then((savedVis) => {
             chrome.recentlyAccessed.add(
               savedVis.getFullPath(),
               savedVis.title,
-              savedVis.id);
+              savedVis.id
+            );
             return savedVis;
           })
           .then(savedVis => {
             if (savedVis.vis.type.setup) {
-              return savedVis.vis.type.setup(savedVis)
-                .catch(() => savedVis);
+              return savedVis.vis.type.setup(savedVis).catch(() => savedVis);
             }
             return savedVis;
           })
-          .catch(redirectWhenMissing({
-            'visualization': '/visualize',
-            'search': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-            'index-pattern': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-            'index-pattern-field': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id
-          }));
+          .catch(
+            redirectWhenMissing({
+              visualization: '/visualize',
+              search: '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+              'index-pattern':
+                '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+              'index-pattern-field':
+                '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+            })
+          );
       }
     }
   });
@@ -159,7 +166,6 @@ function VisEditor(
 ) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const getUnhashableStates = Private(getUnhashableStatesProvider);
-  const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
 
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
@@ -239,14 +245,13 @@ function VisEditor(
     run: (anchorElement) => {
       const hasUnappliedChanges = vis.dirty;
       const hasUnsavedChanges = $appStatus.dirty;
-      showShareContextMenu({
+      share.toggleShareContextMenu({
         anchorElement,
         allowEmbed: true,
         allowShortUrl: capabilities.visualize.createShortUrl,
-        getUnhashableStates,
+        shareableUrl: unhashUrl(window.location.href, getUnhashableStates()),
         objectId: savedVis.id,
         objectType: 'visualization',
-        shareContextMenuExtensions,
         sharingData: {
           title: savedVis.title,
         },
@@ -342,23 +347,6 @@ function VisEditor(
     queryFilter.setFilters(filters);
   };
 
-  $scope.onCancelApplyFilters = () => {
-    $scope.state.$newFilters = [];
-  };
-
-  $scope.onApplyFilters = filters => {
-    const { timeRangeFilter, restOfFilters } = extractTimeFilter($scope.indexPattern.timeFieldName, filters);
-    queryFilter.addFilters(restOfFilters);
-    if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
-    $scope.state.$newFilters = [];
-  };
-
-  $scope.$watch('state.$newFilters', (filters = []) => {
-    if (filters.length === 1) {
-      $scope.onApplyFilters(filters);
-    }
-  });
-
   $scope.showSaveQuery = capabilities.visualize.saveQuery;
 
   $scope.$watch(() => capabilities.visualize.saveQuery, (newCapability) => {
@@ -437,6 +425,12 @@ function VisEditor(
       next: updateTimeRange
     }));
 
+    subscriptions.add(chrome.getIsVisible$().subscribe(isVisible => {
+      $scope.$evalAsync(() => {
+        $scope.isVisible = isVisible;
+      });
+    }));
+
     // update the searchSource when query updates
     $scope.fetch = function () {
       $state.save();
@@ -455,6 +449,12 @@ function VisEditor(
     }));
     subscriptions.add(subscribeWithScope($scope, queryFilter.getFetches$(), {
       next: $scope.fetch
+    }));
+
+    subscriptions.add(subscribeWithScope($scope, timefilter.getAutoRefreshFetch$(), {
+      next: () => {
+        $scope.vis.forceReload();
+      }
     }));
 
     $scope.$on('$destroy', function () {

@@ -5,8 +5,8 @@
  */
 
 
-import { newJobLimits } from '../../new_job_new/utils/new_job_defaults';
-import { populateValidationMessages } from '../../new_job_new/common/job_validator/util';
+import { getNewJobLimits } from '../../../services/ml_server_info';
+import { populateValidationMessages } from '../../new_job/common/job_validator/util';
 
 import {
   validateModelMemoryLimit as validateModelMemoryLimitUtils,
@@ -16,14 +16,14 @@ import {
 import { isValidLabel, isValidTimeRange } from '../../../util/custom_url_utils';
 
 export function validateModelMemoryLimit(mml) {
-  const limits = newJobLimits();
+  const limits = getNewJobLimits();
   const tempJob = {
     analysis_limits: {
       model_memory_limit: mml
     }
   };
 
-  let validationResults = validateModelMemoryLimitUnitsUtils(tempJob);
+  let validationResults = validateModelMemoryLimitUnitsUtils(mml);
   let { valid } = validationResults;
 
   if(valid) {

@@ -24,7 +24,7 @@ function isVersionFlag(a) {
 }
 
 function getCustomSnapshotUrl() {
-  // force use of manually created snapshots until live ones are available
+  // force use of manually created snapshots until ReindexPutMappings fix
   if (!process.env.KBN_ES_SNAPSHOT_URL && !process.argv.some(isVersionFlag)) {
     return 'https://storage.googleapis.com/kibana-ci-tmp-artifacts/{name}-{version}-{os}-x86_64.{ext}';
   }

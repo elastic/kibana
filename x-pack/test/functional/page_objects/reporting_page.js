@@ -165,15 +165,13 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
 
     async setTimepickerInDataRange() {
       log.debug('Reporting:setTimepickerInDataRange');
-      const fromTime = '2015-09-19 06:31:44.000';
-      const toTime = '2015-09-23 18:31:44.000';
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
     }
 
     async setTimepickerInNoDataRange() {
       log.debug('Reporting:setTimepickerInNoDataRange');
-      const fromTime = '1999-09-19 06:31:44.000';
-      const toTime = '1999-09-23 18:31:44.000';
+      const fromTime = 'Sep 19, 1999 @ 06:31:44.000';
+      const toTime = 'Sep 23, 1999 @ 18:31:44.000';
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
   }

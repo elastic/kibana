@@ -6,13 +6,7 @@
 
 import React, { FC } from 'react';
 
-import {
-  // @ts-ignore
-  EuiCodeEditor,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCodeEditor, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 interface Props {
   json: object;

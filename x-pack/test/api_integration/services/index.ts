@@ -30,7 +30,7 @@ export const services = {
   esSupertest: kibanaApiIntegrationServices.esSupertest,
   supertest: kibanaApiIntegrationServices.supertest,
 
-  es: LegacyEsProvider,
+  legacyEs: LegacyEsProvider,
   esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
   infraOpsGraphQLClient: InfraOpsGraphQLClientProvider,
   infraOpsGraphQLClientFactory: InfraOpsGraphQLClientFactoryProvider,

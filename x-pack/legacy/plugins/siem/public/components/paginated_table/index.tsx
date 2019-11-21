@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { memo, useState, useEffect } from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import { Direction } from '../../graphql/types';
 import { AuthTableColumns } from '../page/hosts/authentications_table';
@@ -35,7 +35,7 @@ import {
 import { TlsColumns } from '../page/network/tls_table/columns';
 import { UncommonProcessTableColumns } from '../page/hosts/uncommon_process_table';
 import { UsersColumns } from '../page/network/users_table/columns';
-import { HeaderPanel } from '../header_panel';
+import { HeaderSection } from '../header_section';
 import { Loader } from '../loader';
 import { useStateToaster } from '../toasters';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
@@ -234,7 +234,7 @@ export const PaginatedTable = memo<SiemTables>(
         onMouseEnter={() => setShowInspect(true)}
         onMouseLeave={() => setShowInspect(false)}
       >
-        <HeaderPanel
+        <HeaderSection
           id={id}
           showInspect={!loadingInitial && showInspect}
           subtitle={
@@ -245,7 +245,7 @@ export const PaginatedTable = memo<SiemTables>(
           tooltip={headerTooltip}
         >
           {!loadingInitial && headerSupplement}
-        </HeaderPanel>
+        </HeaderSection>
 
         {loadingInitial ? (
           <EuiLoadingContent data-test-subj="initialLoadingPanelPaginatedTable" lines={10} />
@@ -319,37 +319,35 @@ const BasicTable = styled(EuiBasicTable)`
 
 BasicTable.displayName = 'BasicTable';
 
-const FooterAction = styled(EuiFlexGroup).attrs({
+const FooterAction = styled(EuiFlexGroup).attrs(() => ({
   alignItems: 'center',
   responsive: false,
-})`
-  margin-top: ${props => props.theme.eui.euiSizeXS};
+}))`
+  margin-top: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 FooterAction.displayName = 'FooterAction';
 
 const PaginationEuiFlexItem = styled(EuiFlexItem)`
-  ${props => css`
-    @media only screen and (min-width: ${props.theme.eui.euiBreakpoints.m}) {
-      .euiButtonIcon:last-child {
-        margin-left: 28px;
-      }
-
-      .euiPagination {
-        position: relative;
-      }
-
-      .euiPagination::before {
-        bottom: 0;
-        color: ${props.theme.eui.euiButtonColorDisabled};
-        content: '\\2026';
-        font-size: ${props.theme.eui.euiFontSizeS};
-        padding: 5px ${props.theme.eui.euiSizeS};
-        position: absolute;
-        right: ${props.theme.eui.euiSizeL};
-      }
+  @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
+    .euiButtonIcon:last-child {
+      margin-left: 28px;
     }
-  `}
+
+    .euiPagination {
+      position: relative;
+    }
+
+    .euiPagination::before {
+      bottom: 0;
+      color: ${({ theme }) => theme.eui.euiButtonColorDisabled};
+      content: '\\2026';
+      font-size: ${({ theme }) => theme.eui.euiFontSizeS};
+      padding: 5px ${({ theme }) => theme.eui.euiSizeS};
+      position: absolute;
+      right: ${({ theme }) => theme.eui.euiSizeL};
+    }
+  }
 `;
 
 PaginationEuiFlexItem.displayName = 'PaginationEuiFlexItem';
