@@ -17,6 +17,7 @@
  * under the License.
  */
 
-export { startServers, getServices, stopServers } from './servers';
-
-export { chance } from './chance';
+export const getUpgradeableConfigMock = jest.fn();
+jest.doMock('./get_upgradeable_config', () => ({
+  getUpgradeableConfig: getUpgradeableConfigMock,
+}));
