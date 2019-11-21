@@ -28,9 +28,10 @@ export function initXAxis(chart, table) {
     : uniq(table.rows.map(r => r[accessor]));
   chart.xAxisFormat = format;
   chart.xAxisLabel = title;
+
   if (params.interval) {
     chart.ordered = {
-      interval: moment.duration(params.interval),
+      interval: params.date ? moment.duration(params.interval) : params.interval,
     };
   }
 }

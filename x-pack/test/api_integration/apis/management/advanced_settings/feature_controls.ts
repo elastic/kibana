@@ -7,10 +7,9 @@
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { SecurityService, SpacesService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function featureControlsTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest: SuperTest<any> = getService('supertestWithoutAuth');
   const security: SecurityService = getService('security');
   const spaces: SpacesService = getService('spaces');
@@ -43,7 +42,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
     const basePath = spaceId ? `/s/${spaceId}` : '';
 
     return await supertest
-      .post(`${basePath}/api/telemetry/v1/optIn`)
+      .post(`${basePath}/api/telemetry/v2/optIn`)
       .auth(username, password)
       .set('kbn-xsrf', 'foo')
       .send({ enabled: true })

@@ -1,0 +1,1422 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`metrics queries with a service node name fetches cpu chart data 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "processCPUAverage": Object {
+        "avg": Object {
+          "field": "system.process.cpu.total.norm.pct",
+        },
+      },
+      "processCPUMax": Object {
+        "max": Object {
+          "field": "system.process.cpu.total.norm.pct",
+        },
+      },
+      "systemCPUAverage": Object {
+        "avg": Object {
+          "field": "system.cpu.total.norm.pct",
+        },
+      },
+      "systemCPUMax": Object {
+        "max": Object {
+          "field": "system.cpu.total.norm.pct",
+        },
+      },
+      "timeseriesData": Object {
+        "aggs": Object {
+          "processCPUAverage": Object {
+            "avg": Object {
+              "field": "system.process.cpu.total.norm.pct",
+            },
+          },
+          "processCPUMax": Object {
+            "max": Object {
+              "field": "system.process.cpu.total.norm.pct",
+            },
+          },
+          "systemCPUAverage": Object {
+            "avg": Object {
+              "field": "system.cpu.total.norm.pct",
+            },
+          },
+          "systemCPUMax": Object {
+            "max": Object {
+              "field": "system.cpu.total.norm.pct",
+            },
+          },
+        },
+        "date_histogram": Object {
+          "extended_bounds": Object {
+            "max": 1528977600000,
+            "min": 1528113600000,
+          },
+          "field": "@timestamp",
+          "fixed_interval": "10800s",
+          "min_doc_count": 0,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "metric",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "service.node.name": "bar",
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`metrics queries with a service node name fetches heap memory chart data 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "heapMemoryCommitted": Object {
+        "avg": Object {
+          "field": "jvm.memory.heap.committed",
+        },
+      },
+      "heapMemoryMax": Object {
+        "avg": Object {
+          "field": "jvm.memory.heap.max",
+        },
+      },
+      "heapMemoryUsed": Object {
+        "avg": Object {
+          "field": "jvm.memory.heap.used",
+        },
+      },
+      "timeseriesData": Object {
+        "aggs": Object {
+          "heapMemoryCommitted": Object {
+            "avg": Object {
+              "field": "jvm.memory.heap.committed",
+            },
+          },
+          "heapMemoryMax": Object {
+            "avg": Object {
+              "field": "jvm.memory.heap.max",
+            },
+          },
+          "heapMemoryUsed": Object {
+            "avg": Object {
+              "field": "jvm.memory.heap.used",
+            },
+          },
+        },
+        "date_histogram": Object {
+          "extended_bounds": Object {
+            "max": 1528977600000,
+            "min": 1528113600000,
+          },
+          "field": "@timestamp",
+          "fixed_interval": "10800s",
+          "min_doc_count": 0,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "metric",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "service.node.name": "bar",
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+          Object {
+            "term": Object {
+              "agent.name": "java",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`metrics queries with a service node name fetches memory chart data 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "memoryUsedAvg": Object {
+        "avg": Object {
+          "script": Object {
+            "lang": "expression",
+            "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+          },
+        },
+      },
+      "memoryUsedMax": Object {
+        "max": Object {
+          "script": Object {
+            "lang": "expression",
+            "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+          },
+        },
+      },
+      "timeseriesData": Object {
+        "aggs": Object {
+          "memoryUsedAvg": Object {
+            "avg": Object {
+              "script": Object {
+                "lang": "expression",
+                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+              },
+            },
+          },
+          "memoryUsedMax": Object {
+            "max": Object {
+              "script": Object {
+                "lang": "expression",
+                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+              },
+            },
+          },
+        },
+        "date_histogram": Object {
+          "extended_bounds": Object {
+            "max": 1528977600000,
+            "min": 1528113600000,
+          },
+          "field": "@timestamp",
+          "fixed_interval": "10800s",
+          "min_doc_count": 0,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "metric",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "service.node.name": "bar",
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "system.memory.actual.free",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "system.memory.total",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`metrics queries with a service node name fetches non heap memory chart data 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "nonHeapMemoryCommitted": Object {
+        "avg": Object {
+          "field": "jvm.memory.non_heap.committed",
+        },
+      },
+      "nonHeapMemoryMax": Object {
+        "avg": Object {
+          "field": "jvm.memory.non_heap.max",
+        },
+      },
+      "nonHeapMemoryUsed": Object {
+        "avg": Object {
+          "field": "jvm.memory.non_heap.used",
+        },
+      },
+      "timeseriesData": Object {
+        "aggs": Object {
+          "nonHeapMemoryCommitted": Object {
+            "avg": Object {
+              "field": "jvm.memory.non_heap.committed",
+            },
+          },
+          "nonHeapMemoryMax": Object {
+            "avg": Object {
+              "field": "jvm.memory.non_heap.max",
+            },
+          },
+          "nonHeapMemoryUsed": Object {
+            "avg": Object {
+              "field": "jvm.memory.non_heap.used",
+            },
+          },
+        },
+        "date_histogram": Object {
+          "extended_bounds": Object {
+            "max": 1528977600000,
+            "min": 1528113600000,
+          },
+          "field": "@timestamp",
+          "fixed_interval": "10800s",
+          "min_doc_count": 0,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "metric",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "service.node.name": "bar",
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+          Object {
+            "term": Object {
+              "agent.name": "java",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`metrics queries with a service node name fetches thread count chart data 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "threadCount": Object {
+        "avg": Object {
+          "field": "jvm.thread.count",
+        },
+      },
+      "threadCountMax": Object {
+        "max": Object {
+          "field": "jvm.thread.count",
+        },
+      },
+      "timeseriesData": Object {
+        "aggs": Object {
+          "threadCount": Object {
+            "avg": Object {
+              "field": "jvm.thread.count",
+            },
+          },
+          "threadCountMax": Object {
+            "max": Object {
+              "field": "jvm.thread.count",
+            },
+          },
+        },
+        "date_histogram": Object {
+          "extended_bounds": Object {
+            "max": 1528977600000,
+            "min": 1528113600000,
+          },
+          "field": "@timestamp",
+          "fixed_interval": "10800s",
+          "min_doc_count": 0,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "metric",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "service.node.name": "bar",
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+          Object {
+            "term": Object {
+              "agent.name": "java",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`metrics queries with service_node_name_missing fetches cpu chart data 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "processCPUAverage": Object {
+        "avg": Object {
+          "field": "system.process.cpu.total.norm.pct",
+        },
+      },
+      "processCPUMax": Object {
+        "max": Object {
+          "field": "system.process.cpu.total.norm.pct",
+        },
+      },
+      "systemCPUAverage": Object {
+        "avg": Object {
+          "field": "system.cpu.total.norm.pct",
+        },
+      },
+      "systemCPUMax": Object {
+        "max": Object {
+          "field": "system.cpu.total.norm.pct",
+        },
+      },
+      "timeseriesData": Object {
+        "aggs": Object {
+          "processCPUAverage": Object {
+            "avg": Object {
+              "field": "system.process.cpu.total.norm.pct",
+            },
+          },
+          "processCPUMax": Object {
+            "max": Object {
+              "field": "system.process.cpu.total.norm.pct",
+            },
+          },
+          "systemCPUAverage": Object {
+            "avg": Object {
+              "field": "system.cpu.total.norm.pct",
+            },
+          },
+          "systemCPUMax": Object {
+            "max": Object {
+              "field": "system.cpu.total.norm.pct",
+            },
+          },
+        },
+        "date_histogram": Object {
+          "extended_bounds": Object {
+            "max": 1528977600000,
+            "min": 1528113600000,
+          },
+          "field": "@timestamp",
+          "fixed_interval": "10800s",
+          "min_doc_count": 0,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "metric",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "service.node.name",
+                  },
+                },
+              ],
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`metrics queries with service_node_name_missing fetches heap memory chart data 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "heapMemoryCommitted": Object {
+        "avg": Object {
+          "field": "jvm.memory.heap.committed",
+        },
+      },
+      "heapMemoryMax": Object {
+        "avg": Object {
+          "field": "jvm.memory.heap.max",
+        },
+      },
+      "heapMemoryUsed": Object {
+        "avg": Object {
+          "field": "jvm.memory.heap.used",
+        },
+      },
+      "timeseriesData": Object {
+        "aggs": Object {
+          "heapMemoryCommitted": Object {
+            "avg": Object {
+              "field": "jvm.memory.heap.committed",
+            },
+          },
+          "heapMemoryMax": Object {
+            "avg": Object {
+              "field": "jvm.memory.heap.max",
+            },
+          },
+          "heapMemoryUsed": Object {
+            "avg": Object {
+              "field": "jvm.memory.heap.used",
+            },
+          },
+        },
+        "date_histogram": Object {
+          "extended_bounds": Object {
+            "max": 1528977600000,
+            "min": 1528113600000,
+          },
+          "field": "@timestamp",
+          "fixed_interval": "10800s",
+          "min_doc_count": 0,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "metric",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "service.node.name",
+                  },
+                },
+              ],
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+          Object {
+            "term": Object {
+              "agent.name": "java",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`metrics queries with service_node_name_missing fetches memory chart data 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "memoryUsedAvg": Object {
+        "avg": Object {
+          "script": Object {
+            "lang": "expression",
+            "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+          },
+        },
+      },
+      "memoryUsedMax": Object {
+        "max": Object {
+          "script": Object {
+            "lang": "expression",
+            "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+          },
+        },
+      },
+      "timeseriesData": Object {
+        "aggs": Object {
+          "memoryUsedAvg": Object {
+            "avg": Object {
+              "script": Object {
+                "lang": "expression",
+                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+              },
+            },
+          },
+          "memoryUsedMax": Object {
+            "max": Object {
+              "script": Object {
+                "lang": "expression",
+                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+              },
+            },
+          },
+        },
+        "date_histogram": Object {
+          "extended_bounds": Object {
+            "max": 1528977600000,
+            "min": 1528113600000,
+          },
+          "field": "@timestamp",
+          "fixed_interval": "10800s",
+          "min_doc_count": 0,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "metric",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "service.node.name",
+                  },
+                },
+              ],
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "system.memory.actual.free",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "system.memory.total",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`metrics queries with service_node_name_missing fetches non heap memory chart data 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "nonHeapMemoryCommitted": Object {
+        "avg": Object {
+          "field": "jvm.memory.non_heap.committed",
+        },
+      },
+      "nonHeapMemoryMax": Object {
+        "avg": Object {
+          "field": "jvm.memory.non_heap.max",
+        },
+      },
+      "nonHeapMemoryUsed": Object {
+        "avg": Object {
+          "field": "jvm.memory.non_heap.used",
+        },
+      },
+      "timeseriesData": Object {
+        "aggs": Object {
+          "nonHeapMemoryCommitted": Object {
+            "avg": Object {
+              "field": "jvm.memory.non_heap.committed",
+            },
+          },
+          "nonHeapMemoryMax": Object {
+            "avg": Object {
+              "field": "jvm.memory.non_heap.max",
+            },
+          },
+          "nonHeapMemoryUsed": Object {
+            "avg": Object {
+              "field": "jvm.memory.non_heap.used",
+            },
+          },
+        },
+        "date_histogram": Object {
+          "extended_bounds": Object {
+            "max": 1528977600000,
+            "min": 1528113600000,
+          },
+          "field": "@timestamp",
+          "fixed_interval": "10800s",
+          "min_doc_count": 0,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "metric",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "service.node.name",
+                  },
+                },
+              ],
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+          Object {
+            "term": Object {
+              "agent.name": "java",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`metrics queries with service_node_name_missing fetches thread count chart data 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "threadCount": Object {
+        "avg": Object {
+          "field": "jvm.thread.count",
+        },
+      },
+      "threadCountMax": Object {
+        "max": Object {
+          "field": "jvm.thread.count",
+        },
+      },
+      "timeseriesData": Object {
+        "aggs": Object {
+          "threadCount": Object {
+            "avg": Object {
+              "field": "jvm.thread.count",
+            },
+          },
+          "threadCountMax": Object {
+            "max": Object {
+              "field": "jvm.thread.count",
+            },
+          },
+        },
+        "date_histogram": Object {
+          "extended_bounds": Object {
+            "max": 1528977600000,
+            "min": 1528113600000,
+          },
+          "field": "@timestamp",
+          "fixed_interval": "10800s",
+          "min_doc_count": 0,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "metric",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "service.node.name",
+                  },
+                },
+              ],
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+          Object {
+            "term": Object {
+              "agent.name": "java",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`metrics queries without a service node name fetches cpu chart data 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "processCPUAverage": Object {
+        "avg": Object {
+          "field": "system.process.cpu.total.norm.pct",
+        },
+      },
+      "processCPUMax": Object {
+        "max": Object {
+          "field": "system.process.cpu.total.norm.pct",
+        },
+      },
+      "systemCPUAverage": Object {
+        "avg": Object {
+          "field": "system.cpu.total.norm.pct",
+        },
+      },
+      "systemCPUMax": Object {
+        "max": Object {
+          "field": "system.cpu.total.norm.pct",
+        },
+      },
+      "timeseriesData": Object {
+        "aggs": Object {
+          "processCPUAverage": Object {
+            "avg": Object {
+              "field": "system.process.cpu.total.norm.pct",
+            },
+          },
+          "processCPUMax": Object {
+            "max": Object {
+              "field": "system.process.cpu.total.norm.pct",
+            },
+          },
+          "systemCPUAverage": Object {
+            "avg": Object {
+              "field": "system.cpu.total.norm.pct",
+            },
+          },
+          "systemCPUMax": Object {
+            "max": Object {
+              "field": "system.cpu.total.norm.pct",
+            },
+          },
+        },
+        "date_histogram": Object {
+          "extended_bounds": Object {
+            "max": 1528977600000,
+            "min": 1528113600000,
+          },
+          "field": "@timestamp",
+          "fixed_interval": "10800s",
+          "min_doc_count": 0,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "metric",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`metrics queries without a service node name fetches heap memory chart data 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "heapMemoryCommitted": Object {
+        "avg": Object {
+          "field": "jvm.memory.heap.committed",
+        },
+      },
+      "heapMemoryMax": Object {
+        "avg": Object {
+          "field": "jvm.memory.heap.max",
+        },
+      },
+      "heapMemoryUsed": Object {
+        "avg": Object {
+          "field": "jvm.memory.heap.used",
+        },
+      },
+      "timeseriesData": Object {
+        "aggs": Object {
+          "heapMemoryCommitted": Object {
+            "avg": Object {
+              "field": "jvm.memory.heap.committed",
+            },
+          },
+          "heapMemoryMax": Object {
+            "avg": Object {
+              "field": "jvm.memory.heap.max",
+            },
+          },
+          "heapMemoryUsed": Object {
+            "avg": Object {
+              "field": "jvm.memory.heap.used",
+            },
+          },
+        },
+        "date_histogram": Object {
+          "extended_bounds": Object {
+            "max": 1528977600000,
+            "min": 1528113600000,
+          },
+          "field": "@timestamp",
+          "fixed_interval": "10800s",
+          "min_doc_count": 0,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "metric",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+          Object {
+            "term": Object {
+              "agent.name": "java",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`metrics queries without a service node name fetches memory chart data 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "memoryUsedAvg": Object {
+        "avg": Object {
+          "script": Object {
+            "lang": "expression",
+            "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+          },
+        },
+      },
+      "memoryUsedMax": Object {
+        "max": Object {
+          "script": Object {
+            "lang": "expression",
+            "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+          },
+        },
+      },
+      "timeseriesData": Object {
+        "aggs": Object {
+          "memoryUsedAvg": Object {
+            "avg": Object {
+              "script": Object {
+                "lang": "expression",
+                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+              },
+            },
+          },
+          "memoryUsedMax": Object {
+            "max": Object {
+              "script": Object {
+                "lang": "expression",
+                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+              },
+            },
+          },
+        },
+        "date_histogram": Object {
+          "extended_bounds": Object {
+            "max": 1528977600000,
+            "min": 1528113600000,
+          },
+          "field": "@timestamp",
+          "fixed_interval": "10800s",
+          "min_doc_count": 0,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "metric",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "system.memory.actual.free",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "system.memory.total",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`metrics queries without a service node name fetches non heap memory chart data 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "nonHeapMemoryCommitted": Object {
+        "avg": Object {
+          "field": "jvm.memory.non_heap.committed",
+        },
+      },
+      "nonHeapMemoryMax": Object {
+        "avg": Object {
+          "field": "jvm.memory.non_heap.max",
+        },
+      },
+      "nonHeapMemoryUsed": Object {
+        "avg": Object {
+          "field": "jvm.memory.non_heap.used",
+        },
+      },
+      "timeseriesData": Object {
+        "aggs": Object {
+          "nonHeapMemoryCommitted": Object {
+            "avg": Object {
+              "field": "jvm.memory.non_heap.committed",
+            },
+          },
+          "nonHeapMemoryMax": Object {
+            "avg": Object {
+              "field": "jvm.memory.non_heap.max",
+            },
+          },
+          "nonHeapMemoryUsed": Object {
+            "avg": Object {
+              "field": "jvm.memory.non_heap.used",
+            },
+          },
+        },
+        "date_histogram": Object {
+          "extended_bounds": Object {
+            "max": 1528977600000,
+            "min": 1528113600000,
+          },
+          "field": "@timestamp",
+          "fixed_interval": "10800s",
+          "min_doc_count": 0,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "metric",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+          Object {
+            "term": Object {
+              "agent.name": "java",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`metrics queries without a service node name fetches thread count chart data 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "threadCount": Object {
+        "avg": Object {
+          "field": "jvm.thread.count",
+        },
+      },
+      "threadCountMax": Object {
+        "max": Object {
+          "field": "jvm.thread.count",
+        },
+      },
+      "timeseriesData": Object {
+        "aggs": Object {
+          "threadCount": Object {
+            "avg": Object {
+              "field": "jvm.thread.count",
+            },
+          },
+          "threadCountMax": Object {
+            "max": Object {
+              "field": "jvm.thread.count",
+            },
+          },
+        },
+        "date_histogram": Object {
+          "extended_bounds": Object {
+            "max": 1528977600000,
+            "min": 1528113600000,
+          },
+          "field": "@timestamp",
+          "fixed_interval": "10800s",
+          "min_doc_count": 0,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "metric",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+          Object {
+            "term": Object {
+              "agent.name": "java",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;

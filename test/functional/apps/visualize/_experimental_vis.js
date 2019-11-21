@@ -23,7 +23,8 @@ export default ({ getService, getPageObjects }) => {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'visualize']);
 
-  describe('visualize app', () => {
+  describe('visualize app', function () {
+    this.tags('smoke');
 
     describe('experimental visualizations', () => {
 
@@ -31,6 +32,23 @@ export default ({ getService, getPageObjects }) => {
         log.debug('navigateToApp visualize');
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.waitForVisualizationSelectPage();
+      });
+
+      it('should show an notification when creating beta visualizations', async () => {
+        // Try to find a beta visualization.
+        const betaTypes = await PageObjects.visualize.getBetaTypeLinks();
+        if (betaTypes.length === 0) {
+          log.info('No beta visualization found. Skipping this test.');
+          return;
+        }
+
+        // Create a new visualization
+        await betaTypes[0].click();
+        // Select a index-pattern/search if this vis requires it
+        await PageObjects.visualize.selectVisSourceIfRequired();
+        // Check that the beta banner is there and state that this is beta
+        const info = await PageObjects.visualize.getBetaInfo();
+        expect(await info.getVisibleText()).to.contain('beta');
       });
 
       it('should show an notification when creating experimental visualizations', async () => {
@@ -53,6 +71,7 @@ export default ({ getService, getPageObjects }) => {
       it('should not show that notification for stable visualizations', async () => {
         await PageObjects.visualize.clickAreaChart();
         await PageObjects.visualize.clickNewSearch();
+        expect(await PageObjects.visualize.isBetaInfoShown()).to.be(false);
         expect(await PageObjects.visualize.isExperimentalInfoShown()).to.be(false);
       });
     });

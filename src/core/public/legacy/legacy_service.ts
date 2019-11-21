@@ -18,7 +18,8 @@
  */
 
 import angular from 'angular';
-import { CoreSetup, CoreStart } from '../';
+import { InternalCoreSetup, InternalCoreStart } from '../core_system';
+import { LegacyCoreSetup, LegacyCoreStart, MountPoint } from '../';
 
 /** @internal */
 export interface LegacyPlatformParams {
@@ -27,16 +28,19 @@ export interface LegacyPlatformParams {
 }
 
 interface SetupDeps {
-  core: CoreSetup;
+  core: InternalCoreSetup;
+  plugins: Record<string, unknown>;
 }
 
 interface StartDeps {
-  core: CoreStart;
-  targetDomElement: HTMLElement;
+  core: InternalCoreStart;
+  plugins: Record<string, unknown>;
+  lastSubUrlStorage?: Storage;
+  targetDomElement?: HTMLElement;
 }
 
 interface BootstrapModule {
-  bootstrap: (targetDomElement: HTMLElement) => void;
+  bootstrap: MountPoint;
 }
 
 /**
@@ -47,39 +51,78 @@ interface BootstrapModule {
  * setup either the app or browser tests.
  */
 export class LegacyPlatformService {
+  /** Symbol to represent the legacy platform as a fake "plugin". Used by the ContextService */
+  public readonly legacyId = Symbol();
   private bootstrapModule?: BootstrapModule;
   private targetDomElement?: HTMLElement;
 
   constructor(private readonly params: LegacyPlatformParams) {}
 
-  public async setup({ core }: SetupDeps) {
-    const {
-      i18n,
-      injectedMetadata,
-      fatalErrors,
-      notifications,
-      http,
-      basePath,
-      uiSettings,
-      chrome,
-    } = core;
+  public setup({ core, plugins }: SetupDeps) {
+    // Always register legacy apps, even if not in legacy mode.
+    core.injectedMetadata.getLegacyMetadata().nav.forEach((navLink: any) =>
+      core.application.registerLegacyApp({
+        id: navLink.id,
+        order: navLink.order,
+        title: navLink.title,
+        euiIconType: navLink.euiIconType,
+        icon: navLink.icon,
+        appUrl: navLink.url,
+        subUrlBase: navLink.subUrlBase,
+        linkToLastSubUrl: navLink.linkToLastSubUrl,
+      })
+    );
+
+    const legacyCore: LegacyCoreSetup = {
+      ...core,
+      application: {
+        register: notSupported(`core.application.register()`),
+        registerMountContext: notSupported(`core.application.registerMountContext()`),
+      },
+    };
+
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
-    require('ui/new_platform').__newPlatformSetup__(core);
-    require('ui/metadata').__newPlatformSetup__(injectedMetadata.getLegacyMetadata());
-    require('ui/i18n').__newPlatformSetup__(i18n.Context);
-    require('ui/notify/fatal_error').__newPlatformSetup__(fatalErrors);
-    require('ui/notify/toasts').__newPlatformSetup__(notifications.toasts);
-    require('ui/chrome/api/loading_count').__newPlatformSetup__(http);
-    require('ui/chrome/api/base_path').__newPlatformSetup__(basePath);
-    require('ui/chrome/api/ui_settings').__newPlatformSetup__(uiSettings);
-    require('ui/chrome/api/injected_vars').__newPlatformSetup__(injectedMetadata);
-    require('ui/chrome/api/controls').__newPlatformSetup__(chrome);
-    require('ui/chrome/api/help_extension').__newPlatformSetup__(chrome);
-    require('ui/chrome/api/theme').__newPlatformSetup__(chrome);
-    require('ui/chrome/api/badge').__newPlatformSetup__(chrome);
-    require('ui/chrome/api/breadcrumbs').__newPlatformSetup__(chrome);
-    require('ui/chrome/services/global_nav_state').__newPlatformSetup__(chrome);
+    if (core.injectedMetadata.getLegacyMode()) {
+      require('ui/new_platform').__setup__(legacyCore, plugins);
+    }
+  }
+
+  public start({
+    core,
+    targetDomElement,
+    plugins,
+    lastSubUrlStorage = window.sessionStorage,
+  }: StartDeps) {
+    // Initialize legacy sub urls
+    core.chrome.navLinks
+      .getAll()
+      .filter(link => link.legacy)
+      .forEach(navLink => {
+        const lastSubUrl = lastSubUrlStorage.getItem(`lastSubUrl:${navLink.baseUrl}`);
+        core.chrome.navLinks.update(navLink.id, {
+          url: lastSubUrl || navLink.url || navLink.baseUrl,
+        });
+      });
+
+    // Only import and bootstrap legacy platform if we're in legacy mode.
+    if (!core.injectedMetadata.getLegacyMode()) {
+      return;
+    }
+
+    const legacyCore: LegacyCoreStart = {
+      ...core,
+      application: {
+        capabilities: core.application.capabilities,
+        getUrlForApp: core.application.getUrlForApp,
+        navigateToApp: core.application.navigateToApp,
+        registerMountContext: notSupported(`core.application.registerMountContext()`),
+      },
+    };
+
+    // Inject parts of the new platform into parts of the legacy platform
+    // so that legacy APIs/modules can mimic their new platform counterparts
+    require('ui/new_platform').__start__(legacyCore, plugins);
 
     // Load the bootstrap module before loading the legacy platform files so that
     // the bootstrap module can modify the environment a bit first
@@ -87,19 +130,15 @@ export class LegacyPlatformService {
 
     // require the files that will tie into the legacy platform
     this.params.requireLegacyFiles();
-  }
 
-  public start({ core, targetDomElement }: StartDeps) {
     if (!this.bootstrapModule) {
       throw new Error('Bootstrap module must be loaded before `start`');
     }
 
     this.targetDomElement = targetDomElement;
 
-    require('ui/new_platform').__newPlatformStart__(core);
-    require('ui/capabilities').__newPlatformStart__(core.capabilities);
-
-    this.bootstrapModule.bootstrap(this.targetDomElement);
+    // `targetDomElement` is always defined when in legacy mode
+    this.bootstrapModule.bootstrap(this.targetDomElement!);
   }
 
   public stop() {
@@ -110,7 +149,7 @@ export class LegacyPlatformService {
     const angularRoot = angular.element(this.targetDomElement);
     const injector$ = angularRoot.injector();
 
-    // if we haven't gotten to the point of bootstraping
+    // if we haven't gotten to the point of bootstrapping
     // angular, injector$ won't be defined
     if (!injector$) {
       return;
@@ -137,3 +176,7 @@ export class LegacyPlatformService {
     return require('ui/chrome');
   }
 }
+
+const notSupported = (methodName: string) => (...args: any[]) => {
+  throw new Error(`${methodName} is not supported in the legacy platform.`);
+};

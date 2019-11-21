@@ -7,7 +7,7 @@
 Elastic Application Performance Monitoring (APM) automatically collects in-depth
 performance metrics and errors from inside your applications.
 
-The **APM** page in {kib} is provided with the basic license. It
+The **APM** app in {kib} is provided with the basic license. It
 enables developers to drill down into the performance data for their applications
 and quickly locate the performance bottlenecks.
 

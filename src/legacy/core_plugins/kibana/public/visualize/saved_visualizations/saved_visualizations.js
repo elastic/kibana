@@ -18,10 +18,12 @@
  */
 
 import './_saved_vis';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
+import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
+import { createVisualizeEditUrl } from '../visualize_constants';
+import { findListItems } from './find_list_items';
 
 const app = uiModules.get('app/visualize');
 
@@ -29,14 +31,18 @@ const app = uiModules.get('app/visualize');
 // edited by the object editor.
 savedObjectManagementRegistry.register({
   service: 'savedVisualizations',
-  title: 'visualizations'
+  title: 'visualizations',
 });
 
-app.service('savedVisualizations', function (Promise, kbnIndex, SavedVis, Private, kbnUrl, $http, chrome) {
-  const visTypes = Private(VisTypesRegistryProvider);
-
+app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) {
+  const visTypes = visualizations.types;
   const savedObjectClient = Private(SavedObjectsClientProvider);
-  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnUrl, chrome, savedObjectClient);
+  const saveVisualizationLoader = new SavedObjectLoader(
+    SavedVis,
+    kbnUrl,
+    chrome,
+    savedObjectClient
+  );
 
   saveVisualizationLoader.mapHitSource = function (source, id) {
     source.id = id;
@@ -44,22 +50,43 @@ app.service('savedVisualizations', function (Promise, kbnIndex, SavedVis, Privat
 
     let typeName = source.typeName;
     if (source.visState) {
-      try { typeName = JSON.parse(source.visState).type; }
-      catch (e) { /* missing typename handled below */ } // eslint-disable-line no-empty
+      try {
+        typeName = JSON.parse(source.visState).type;
+      } catch (e) {
+        /* missing typename handled below */
+      } // eslint-disable-line no-empty
     }
 
-    if (!typeName || !visTypes.byName[typeName]) {
+    if (!typeName || !visTypes.get(typeName)) {
       source.error = 'Unknown visualization type';
       return source;
     }
 
-    source.type = visTypes.byName[typeName];
+    source.type = visTypes.get(typeName);
+    source.savedObjectType = 'visualization';
     source.icon = source.type.icon;
+    source.image = source.type.image;
+    source.typeTitle = source.type.title;
+    source.editUrl = `#${createVisualizeEditUrl(id)}`;
+
     return source;
   };
 
   saveVisualizationLoader.urlFor = function (id) {
     return kbnUrl.eval('#/visualize/edit/{{id}}', { id: id });
   };
+
+  // This behaves similarly to find, except it returns visualizations that are
+  // defined as appExtensions and which may not conform to type: visualization
+  saveVisualizationLoader.findListItems = function (search = '', size = 100) {
+    return findListItems({
+      search,
+      size,
+      mapSavedObjectApiHits: this.mapSavedObjectApiHits.bind(this),
+      savedObjectsClient: this.savedObjectsClient,
+      visTypes: visualizations.types.getAliases(),
+    });
+  };
+
   return saveVisualizationLoader;
 });

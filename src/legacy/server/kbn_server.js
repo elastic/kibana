@@ -18,11 +18,12 @@
  */
 
 import { constant, once, compact, flatten } from 'lodash';
+
+
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
 import { Config } from './config';
 import loggingConfiguration from './logging/configuration';
-import configSetupMixin from './config/setup';
 import httpMixin from './http';
 import { coreMixin } from './core';
 import { loggingMixin } from './logging';
@@ -36,8 +37,9 @@ import configCompleteMixin from './config/complete';
 import optimizeMixin from '../../optimize';
 import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
-import { savedObjectsMixin } from './saved_objects';
+import { savedObjectsMixin } from './saved_objects/saved_objects_mixin';
 import { sampleDataMixin } from './sample_data';
+import { capabilitiesMixin } from './capabilities';
 import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
@@ -47,42 +49,42 @@ import { i18nMixin } from './i18n';
 const rootDir = fromRoot('.');
 
 export default class KbnServer {
-  constructor(settings, core) {
+  constructor(settings, config, core, legacyPlugins) {
     this.name = pkg.name;
     this.version = pkg.version;
     this.build = pkg.build || false;
     this.rootDir = rootDir;
     this.settings = settings || {};
+    this.config = config;
 
-    const { setupDeps, startDeps, serverOptions, handledConfigPaths } = core;
+    const { setupDeps, startDeps, handledConfigPaths, logger, __internals, env } = core;
+
+    this.server = __internals.hapiServer;
     this.newPlatform = {
-      setup: {
-        core: {
-          elasticsearch: setupDeps.elasticsearch,
-          http: setupDeps.http,
-        },
-        plugins: setupDeps.plugins,
+      env: {
+        mode: env.mode,
+        packageInfo: env.packageInfo,
       },
-      start: {
-        core: {
-          http: startDeps.http,
-        },
-        plugins: startDeps.plugins,
+      __internals,
+      coreContext: {
+        logger,
       },
+      setup: setupDeps,
+      start: startDeps,
       stop: null,
       params: {
-        serverOptions,
         handledConfigPaths,
       },
     };
 
+    this.uiExports = legacyPlugins.uiExports;
+    this.pluginSpecs = legacyPlugins.pluginSpecs;
+    this.disabledPluginSpecs = legacyPlugins.disabledPluginSpecs;
+
     this.ready = constant(this.mixin(
       Plugins.waitForInitSetupMixin,
 
-      // sets this.config, reads this.settings
-      configSetupMixin,
-
-      // sets this.server
+      // Sets global HTTP behaviors
       httpMixin,
 
       coreMixin,
@@ -107,12 +109,15 @@ export default class KbnServer {
       // tell the config we are done loading plugins
       configCompleteMixin,
 
-      // setup this.uiExports and this.uiBundles
+      // setup this.uiBundles
       uiMixin,
       indexPatternsMixin,
 
       // setup saved object routes
       savedObjectsMixin,
+
+      // setup capabilities routes
+      capabilitiesMixin,
 
       // setup routes for installing/uninstalling sample data sets
       sampleDataMixin,
@@ -163,8 +168,6 @@ export default class KbnServer {
     await this.ready();
 
     const { server, config } = this;
-
-    await server.kibanaMigrator.awaitMigration();
 
     if (isWorker) {
       // help parent process know when we are ready

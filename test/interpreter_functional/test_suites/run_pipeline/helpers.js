@@ -66,6 +66,8 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
       runExpression: async (step, stepContext) => {
         log.debug(`running expression ${step || expression}`);
         const promise = browser.executeAsync((expression, context, initialContext, done) => {
+          if (!context) context = {};
+          if (!context.type) context.type = 'null';
           window.runPipeline(expression, context, initialContext).then(result => {
             done(result);
           });
@@ -82,7 +84,7 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
           for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
             lastResponse = await handler.runExpression(step, lastResponse);
-            const diff = await snapshots.compareAgainstBaseline(name + i, lastResponse, updateBaselines);
+            const diff = await snapshots.compareAgainstBaseline(name + i, toSerializable(lastResponse), updateBaselines);
             expect(diff).to.be.lessThan(0.05);
           }
           if (!responsePromise) {
@@ -99,7 +101,7 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
        */
       toMatchSnapshot: async () => {
         const pipelineResponse = await handler.getResponse();
-        await snapshots.compareAgainstBaseline(name, pipelineResponse, updateBaselines);
+        await snapshots.compareAgainstBaseline(name, toSerializable(pipelineResponse), updateBaselines);
         return handler;
       },
       /**
@@ -108,6 +110,7 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
        */
       toMatchScreenshot: async () => {
         const pipelineResponse = await handler.getResponse();
+        log.debug('starting to render');
         const result = await browser.executeAsync((context, done) => {
           window.renderPipelineResponse(context).then(result => {
             done(result);
@@ -124,4 +127,13 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
 
     return handler;
   };
+
+  function toSerializable(response) {
+    if (response.error) {
+      // in case of error, pass through only message to the snapshot
+      // as error could be expected and stack trace shouldn't be part of the snapshot
+      return response.error.message;
+    }
+    return response;
+  }
 };

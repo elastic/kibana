@@ -17,51 +17,31 @@
  * under the License.
  */
 
+import { omit } from 'lodash';
 import { DiscoveredPlugin } from '../../server';
-import { BasePathSetup } from '../base_path';
-import { ChromeSetup } from '../chrome';
+import { PluginOpaqueId, PackageInfo, EnvironmentMode } from '../../server/types';
 import { CoreContext } from '../core_system';
-import { FatalErrorsSetup } from '../fatal_errors';
-import { I18nSetup, I18nStart } from '../i18n';
-import { NotificationsSetup, NotificationsStart } from '../notifications';
-import { UiSettingsSetup } from '../ui_settings';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { CapabilitiesStart } from '../capabilities';
-import { OverlayStart } from '../overlays';
+import { CoreSetup, CoreStart } from '../';
 
 /**
  * The available core services passed to a `PluginInitializer`
  *
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginInitializerContext {}
-
-/**
- * The available core services passed to a plugin's `Plugin#setup` method.
- *
- * @public
- */
-export interface PluginSetupContext {
-  basePath: BasePathSetup;
-  chrome: ChromeSetup;
-  fatalErrors: FatalErrorsSetup;
-  i18n: I18nSetup;
-  notifications: NotificationsSetup;
-  uiSettings: UiSettingsSetup;
-}
-
-/**
- * The available core services passed to a plugin's `Plugin#start` method.
- *
- * @public
- */
-export interface PluginStartContext {
-  capabilities: CapabilitiesStart;
-  i18n: I18nStart;
-  notifications: NotificationsStart;
-  overlays: OverlayStart;
+export interface PluginInitializerContext<ConfigSchema extends object = object> {
+  /**
+   * A symbol used to identify this plugin in the system. Needed when registering handlers or context providers.
+   */
+  readonly opaqueId: PluginOpaqueId;
+  readonly env: {
+    mode: Readonly<EnvironmentMode>;
+    packageInfo: Readonly<PackageInfo>;
+  };
+  readonly config: {
+    get: <T extends object = ConfigSchema>() => T;
+  };
 }
 
 /**
@@ -69,14 +49,28 @@ export interface PluginStartContext {
  * empty but should provide static services in the future, such as config and logging.
  *
  * @param coreContext
- * @param pluginManinfest
+ * @param opaqueId
+ * @param pluginManifest
+ * @param pluginConfig
  * @internal
  */
 export function createPluginInitializerContext(
   coreContext: CoreContext,
-  pluginManifest: DiscoveredPlugin
+  opaqueId: PluginOpaqueId,
+  pluginManifest: DiscoveredPlugin,
+  pluginConfig: {
+    [key: string]: unknown;
+  }
 ): PluginInitializerContext {
-  return {};
+  return {
+    opaqueId,
+    env: coreContext.env,
+    config: {
+      get<T>() {
+        return (pluginConfig as unknown) as T;
+      },
+    },
+  };
 }
 
 /**
@@ -89,18 +83,30 @@ export function createPluginInitializerContext(
  * @param plugin
  * @internal
  */
-export function createPluginSetupContext<TSetup, TStart, TPluginsSetup, TPluginsStart>(
+export function createPluginSetupContext<
+  TSetup,
+  TStart,
+  TPluginsSetup extends object,
+  TPluginsStart extends object
+>(
   coreContext: CoreContext,
   deps: PluginsServiceSetupDeps,
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
-): PluginSetupContext {
+): CoreSetup {
   return {
-    basePath: deps.basePath,
-    chrome: deps.chrome,
+    application: {
+      register: app => deps.application.register(plugin.opaqueId, app),
+      registerMountContext: (contextName, provider) =>
+        deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
+    },
+    context: deps.context,
     fatalErrors: deps.fatalErrors,
-    i18n: deps.i18n,
+    http: deps.http,
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
+    injectedMetadata: {
+      getInjectedVar: deps.injectedMetadata.getInjectedVar,
+    },
   };
 }
 
@@ -114,15 +120,34 @@ export function createPluginSetupContext<TSetup, TStart, TPluginsSetup, TPlugins
  * @param plugin
  * @internal
  */
-export function createPluginStartContext<TSetup, TStart, TPluginsSetup, TPluginsStart>(
+export function createPluginStartContext<
+  TSetup,
+  TStart,
+  TPluginsSetup extends object,
+  TPluginsStart extends object
+>(
   coreContext: CoreContext,
   deps: PluginsServiceStartDeps,
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
-): PluginStartContext {
+): CoreStart {
   return {
-    capabilities: deps.capabilities,
+    application: {
+      capabilities: deps.application.capabilities,
+      navigateToApp: deps.application.navigateToApp,
+      getUrlForApp: deps.application.getUrlForApp,
+      registerMountContext: (contextName, provider) =>
+        deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
+    },
+    docLinks: deps.docLinks,
+    http: deps.http,
+    chrome: omit(deps.chrome, 'getComponent'),
     i18n: deps.i18n,
     notifications: deps.notifications,
     overlays: deps.overlays,
+    uiSettings: deps.uiSettings,
+    savedObjects: deps.savedObjects,
+    injectedMetadata: {
+      getInjectedVar: deps.injectedMetadata.getInjectedVar,
+    },
   };
 }

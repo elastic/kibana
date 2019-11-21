@@ -26,14 +26,13 @@ import { inspect } from 'util';
 
 import vfs from 'vinyl-fs';
 import { promisify } from 'bluebird';
-import mkdirpCb from 'mkdirp';
 import del from 'del';
 import deleteEmpty from 'delete-empty';
 import { createPromiseFromStreams, createMapStream } from '../../../legacy/utils';
 
 import tar from 'tar';
 
-const mkdirpAsync = promisify(mkdirpCb);
+const mkdirAsync = promisify(fs.mkdir);
 const writeFileAsync = promisify(fs.writeFile);
 const readFileAsync = promisify(fs.readFile);
 const readdirAsync = promisify(fs.readdir);
@@ -47,6 +46,17 @@ export function assertAbsolute(path) {
   }
 }
 
+export function isFileAccessible(path) {
+  assertAbsolute(path);
+
+  try {
+    fs.accessSync(path);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 function longInspect(value) {
   return inspect(value, {
     maxArrayLength: Infinity
@@ -55,7 +65,7 @@ function longInspect(value) {
 
 export async function mkdirp(path) {
   assertAbsolute(path);
-  await mkdirpAsync(path);
+  await mkdirAsync(path, { recursive: true });
 }
 
 export async function write(path, contents) {
@@ -174,7 +184,7 @@ export async function untar(source, destination, extractOptions = {}) {
   assertAbsolute(source);
   assertAbsolute(destination);
 
-  await mkdirpAsync(destination);
+  await mkdirAsync(destination, { recursive: true });
 
   await createPromiseFromStreams([
     fs.createReadStream(source),
@@ -188,8 +198,8 @@ export async function untar(source, destination, extractOptions = {}) {
 
 export async function compress(type, options = {}, source, destination) {
   const output = fs.createWriteStream(destination);
-  const archive = archiver(type, options);
-  const name = source.split(sep).slice(-1)[0];
+  const archive = archiver(type, options.archiverOptions);
+  const name = (options.createRootDirectory ? source.split(sep).slice(-1)[0] : false);
 
   archive.pipe(output);
 

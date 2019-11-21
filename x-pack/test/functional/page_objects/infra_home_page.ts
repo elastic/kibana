@@ -5,27 +5,61 @@
  */
 
 import testSubjSelector from '@kbn/test-subj-selector';
-import moment from 'moment';
 
-import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function InfraHomePageProvider({ getService }: KibanaFunctionalTestDefaultProviders) {
+export function InfraHomePageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const find = getService('find');
   const browser = getService('browser');
 
   return {
-    async goToTime(time: number) {
+    async goToTime(time: string) {
       const datePickerInput = await find.byCssSelector(
         `${testSubjSelector('waffleDatePicker')} .euiDatePicker.euiFieldText`
       );
-
-      await datePickerInput.type(Array(30).fill(browser.keys.BACK_SPACE));
-      await datePickerInput.type([moment(time).format('L LTS'), browser.keys.RETURN]);
+      await datePickerInput.clearValueWithKeyboard({ charByChar: true });
+      await datePickerInput.type([time, browser.keys.RETURN]);
     },
 
     async getWaffleMap() {
+      await retry.try(async () => {
+        const element = await testSubjects.find('waffleMap');
+        if (!element) {
+          throw new Error();
+        }
+      });
       return await testSubjects.find('waffleMap');
+    },
+
+    async goToMetricExplorer() {
+      return await testSubjects.click('infrastructureNavLink_/infrastructure/metrics-explorer');
+    },
+
+    async getSaveViewButton() {
+      return await testSubjects.find('openSaveViewModal');
+    },
+
+    async getLoadViewsButton() {
+      return await testSubjects.find('loadViews');
+    },
+
+    async openSaveViewsFlyout() {
+      return await testSubjects.click('loadViews');
+    },
+
+    async closeSavedViewFlyout() {
+      return await testSubjects.click('cancelSavedViewModal');
+    },
+
+    async openCreateSaveViewModal() {
+      return await testSubjects.click('openSaveViewModal');
+    },
+
+    async openEnterViewNameAndSave() {
+      await testSubjects.setValue('savedViewViweName', 'View1');
+      await testSubjects.click('createSavedViewButton');
     },
 
     async getNoMetricsIndicesPrompt() {

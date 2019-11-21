@@ -1,0 +1,75 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots arguments/AxisConfig simple 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div
+    className="euiSwitch euiSwitch--compressed"
+  >
+    <button
+      aria-checked={false}
+      aria-label=""
+      className="euiSwitch__button"
+      id="generated-id"
+      onClick={[Function]}
+      role="switch"
+      type="button"
+    >
+      <span
+        className="euiSwitch__body"
+      >
+        <span
+          className="euiSwitch__thumb"
+        />
+        <span
+          className="euiSwitch__track"
+        />
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Storyshots arguments/AxisConfig/components simple template 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div
+    className="euiSwitch euiSwitch--compressed"
+  >
+    <button
+      aria-checked={false}
+      aria-label=""
+      className="euiSwitch__button"
+      id="generated-id"
+      onClick={[Function]}
+      role="switch"
+      type="button"
+    >
+      <span
+        className="euiSwitch__body"
+      >
+        <span
+          className="euiSwitch__thumb"
+        />
+        <span
+          className="euiSwitch__track"
+        />
+      </span>
+    </button>
+  </div>
+</div>
+`;

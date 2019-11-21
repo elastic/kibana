@@ -17,28 +17,13 @@
  * under the License.
  */
 
-import { Capabilities as UICapabilities, CapabilitiesStart } from '../../../../core/public';
+import { npStart } from 'ui/new_platform';
+import { Capabilities as UICapabilities } from '../../../../core/public';
 
 export { UICapabilities };
 
-let uiCapabilities: UICapabilities = null!;
-
-export function __newPlatformStart__(capabililitiesService: CapabilitiesStart) {
-  if (uiCapabilities) {
-    throw new Error('ui/capabilities already initialized with new platform apis');
-  }
-
-  uiCapabilities = capabililitiesService.getCapabilities();
-}
-
 export const capabilities = {
   get() {
-    if (!uiCapabilities) {
-      throw new Error(
-        `UI Capabilities are only available in the legacy platform once Angular has booted.`
-      );
-    }
-
-    return uiCapabilities;
+    return npStart.core.application.capabilities;
   },
 };

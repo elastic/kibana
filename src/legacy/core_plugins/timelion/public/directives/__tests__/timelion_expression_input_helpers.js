@@ -60,7 +60,7 @@ describe('Timelion expression suggestions', () => {
     };
     const argValueSuggestions = ArgValueSuggestionsProvider(privateStub, indexPatternsStub); // eslint-disable-line new-cap
     beforeEach(function () {
-      Parser = PEG.buildParser(grammar);
+      Parser = PEG.generate(grammar);
     });
 
     describe('parse exception', () => {

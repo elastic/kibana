@@ -25,40 +25,14 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const inspector = getService('inspector');
-  const kibanaServer = getService('kibanaServer');
-  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker']);
 
   describe('visual builder', function describeIndexTests() {
+    this.tags('smoke');
     beforeEach(async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualBuilder.checkVisualBuilderIsPresent();
-    });
-
-    describe('Time Series', () => {
-      beforeEach(async () => {
-        await PageObjects.visualBuilder.resetPage();
-      });
-
-      it('should show the correct count in the legend', async () => {
-        const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('156');
-      });
-
-      it('should show the correct count in the legend with 2h offset', async () => {
-        await PageObjects.visualBuilder.clickSeriesOption();
-        await PageObjects.visualBuilder.enterOffsetSeries('2h');
-        const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('293');
-      });
-
-      it('should show the correct count in the legend with -2h offset', async () => {
-        await PageObjects.visualBuilder.clickSeriesOption();
-        await PageObjects.visualBuilder.enterOffsetSeries('-2h');
-        const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('53');
-      });
     });
 
     describe('metric', () => {
@@ -85,8 +59,19 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         const value = await PageObjects.visualBuilder.getMetricValue();
         expect(value).to.eql('157');
       });
+
+      it('should populate fields for basic functions', async () => {
+        const { visualBuilder } = PageObjects;
+
+        await visualBuilder.selectAggType('Average');
+        await visualBuilder.setFieldForAggregation('machine.ram');
+        const isFieldForAggregationValid = await visualBuilder.checkFieldForAggregationValidity();
+
+        expect(isFieldForAggregationValid).to.be(true);
+      });
     });
 
+    // FLAKY: https://github.com/elastic/kibana/issues/46677
     describe('gauge', () => {
       beforeEach(async () => {
         await PageObjects.visualBuilder.resetPage();
@@ -119,64 +104,30 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('table', () => {
+    describe('switch index patterns', () => {
       beforeEach(async () => {
-        await PageObjects.visualBuilder.resetPage(
-          '2015-09-22 06:00:00.000',
-          '2015-09-22 11:00:00.000'
-        );
-        await PageObjects.visualBuilder.clickTable();
-      });
-
-      it('should display correct values on changing group by field and column name', async () => {
-        await PageObjects.visualBuilder.selectGroupByField('machine.os.raw');
-        await PageObjects.visualBuilder.setLabelValue('OS');
-        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-        const tableData = await PageObjects.visualBuilder.getViewTable();
-        const expectedData = 'OS Count\nwin 8 13\nwin xp 10\nwin 7 12\nios 5\nosx 3';
-        expect(tableData).to.be(expectedData);
-      });
-    });
-
-    describe.skip('switch index patterns', () => {
-      before(async () => {
         log.debug('Load kibana_sample_data_flights data');
         await esArchiver.loadIfNeeded('kibana_sample_data_flights');
-        await PageObjects.visualBuilder.resetPage(
-          '2015-09-19 06:31:44.000',
-          '2018-10-31 00:0:00.000'
-        );
+        await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
+        await PageObjects.visualBuilder.checkMetricTabIsPresent();
       });
       after(async () => {
         await esArchiver.unload('kibana_sample_data_flights');
       });
-      it('should be able to switch between index patterns', async () => {
-        const expectedMetricValue = '156';
+
+      // FLAKY: https://github.com/elastic/kibana/issues/43150
+      it.skip('should be able to switch between index patterns', async () => {
         const value = await PageObjects.visualBuilder.getMetricValue();
-        log.debug(`metric value: ${value}`);
-        expect(value).to.eql(expectedMetricValue);
-        await PageObjects.visualBuilder.clickMetricPanelOptions();
-        const fromTime = '2018-10-22 00:00:00.000';
-        const toTime = '2018-10-28 23:59:59.999';
+        expect(value).to.eql('156');
+        await PageObjects.visualBuilder.clickPanelOptions('metric');
+        const fromTime = 'Oct 22, 2018 @ 00:00:00.000';
+        const toTime = 'Oct 28, 2018 @ 23:59:59.999';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualBuilder.setIndexPatternValue('kibana_sample_data_flights');
         await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
         const newValue = await PageObjects.visualBuilder.getMetricValue();
-        log.debug(`metric value: ${newValue}`);
         expect(newValue).to.eql('10');
-      });
-    });
-
-    describe.skip('dark mode', () => {
-      it('uses dark mode flag', async () => {
-        await kibanaServer.uiSettings.update({
-          'theme:darkMode': true,
-        });
-
-        await PageObjects.visualBuilder.resetPage();
-        const classNames = await testSubjects.getAttribute('timeseriesChart', 'class');
-        expect(classNames.includes('reversed')).to.be(true);
       });
     });
   });

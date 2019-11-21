@@ -20,20 +20,23 @@
 import { BehaviorSubject } from 'rxjs';
 import { ObjectToConfigAdapter } from './object_to_config_adapter';
 
-import { ConfigService } from './config_service';
+import { IConfigService } from './config_service';
 
-type ConfigSericeContract = PublicMethodsOf<ConfigService>;
-const createConfigServiceMock = () => {
-  const mocked: jest.Mocked<ConfigSericeContract> = {
+const createConfigServiceMock = ({
+  atPath = {},
+  getConfig$ = {},
+}: { atPath?: Record<string, any>; getConfig$?: Record<string, any> } = {}) => {
+  const mocked: jest.Mocked<IConfigService> = {
     atPath: jest.fn(),
     getConfig$: jest.fn(),
     optionalAtPath: jest.fn(),
     getUsedPaths: jest.fn(),
     getUnusedPaths: jest.fn(),
     isEnabledAtPath: jest.fn(),
+    setSchema: jest.fn(),
   };
-  mocked.atPath.mockReturnValue(new BehaviorSubject({}));
-  mocked.getConfig$.mockReturnValue(new BehaviorSubject(new ObjectToConfigAdapter({})));
+  mocked.atPath.mockReturnValue(new BehaviorSubject(atPath));
+  mocked.getConfig$.mockReturnValue(new BehaviorSubject(new ObjectToConfigAdapter(getConfig$)));
   mocked.getUsedPaths.mockResolvedValue([]);
   mocked.getUnusedPaths.mockResolvedValue([]);
   mocked.isEnabledAtPath.mockResolvedValue(true);

@@ -7,39 +7,64 @@
 import React, { ComponentType } from 'react';
 import { Store } from 'redux';
 import { ReactWrapper } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 
 import { mountWithIntl } from '../enzyme_helpers';
 import { WithMemoryRouter, WithRoute } from '../router_helpers';
 import { WithStore } from '../redux_helpers';
-import { TestBedOptions } from './types';
+import { MemoryRouterConfig } from './types';
 
-export const mountComponent = (
-  Component: ComponentType,
-  options: TestBedOptions,
-  store: Store | null,
-  props: any
-): ReactWrapper => {
-  const wrapWithRouter = options.memoryRouter.wrapComponent !== false;
+interface Config {
+  Component: ComponentType;
+  memoryRouter: MemoryRouterConfig;
+  store: Store | null;
+  props: any;
+  onRouter: (router: any) => void;
+}
 
-  let Comp;
+const getCompFromConfig = ({ Component, memoryRouter, store, onRouter }: Config): ComponentType => {
+  const wrapWithRouter = memoryRouter.wrapComponent !== false;
+
+  let Comp: ComponentType = store !== null ? WithStore(store)(Component) : Component;
 
   if (wrapWithRouter) {
-    const { componentRoutePath, onRouter, initialEntries, initialIndex } = options.memoryRouter;
+    const { componentRoutePath, initialEntries, initialIndex } = memoryRouter!;
 
     // Wrap the componenet with a MemoryRouter and attach it to a react-router <Route />
-    Comp = WithMemoryRouter(initialEntries, initialIndex)(
-      WithRoute(componentRoutePath, onRouter)(Component)
-    );
-
-    // Add the Redux Provider
-    if (store !== null) {
-      Comp = WithStore(store)(Comp);
-    }
-  } else {
-    Comp = store !== null ? WithStore(store)(Component) : Component;
+    Comp = WithMemoryRouter(
+      initialEntries,
+      initialIndex
+    )(WithRoute(componentRoutePath, onRouter)(Comp));
   }
 
-  return mountWithIntl(<Comp {...props} />);
+  return Comp;
+};
+
+export const mountComponentSync = (config: Config): ReactWrapper => {
+  const Comp = getCompFromConfig(config);
+  return mountWithIntl(<Comp {...config.props} />);
+};
+
+export const mountComponentAsync = async (config: Config): Promise<ReactWrapper> => {
+  const Comp = getCompFromConfig(config);
+
+  /**
+   * In order for hooks with effects to work in our tests
+   * we need to wrap the mounting under the new act "async"
+   * that ships with React 16.9.0
+   *
+   * https://github.com/facebook/react/pull/14853
+   * https://github.com/threepointone/react-act-examples/blob/master/sync.md
+   */
+  let component: ReactWrapper;
+
+  // @ts-ignore
+  await act(async () => {
+    component = mountWithIntl(<Comp {...config.props} />);
+  });
+
+  // @ts-ignore
+  return component;
 };
 
 export const getJSXComponentWithProps = (Component: ComponentType, props: any) => (

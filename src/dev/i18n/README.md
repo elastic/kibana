@@ -175,11 +175,11 @@ The tool throws an exception if `formats` object is missing in locale file.
 ### Usage
 
 ```bash
-node scripts/i18n_integrate --source path/to/locale.json --target x-pack/plugins/translations/translations/locale.json
+node scripts/i18n_integrate --source path/to/locale.json --target x-pack/legacy/plugins/translations/translations/locale.json
 ```
 
 * `--source` path to the JSON file with translations that should be integrated.
-* `--target` defines a single path to the JSON file where translations should be integrated to, path mappings from 
+* `--target` defines a single path to the JSON file where translations should be integrated to, path mappings from
 [.i18nrc.json](../../../.i18nrc.json) are ignored in this case. It's currently used for integrating of Kibana built-in
 translations that are located in a single JSON file within `x-pack/translations` plugin.
 * `--dry-run` tells the tool to exit after verification phase and not write translations to the disk.

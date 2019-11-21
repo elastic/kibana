@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Snapshot component renders without errors 1`] = `
+<ChartWrapper
+  loading={false}
+>
+  <SnapshotHeading
+    down={2}
+    total={10}
+  />
+  <EuiSpacer
+    size="xs"
+  />
+  <DonutChart
+    down={2}
+    height={144}
+    up={8}
+    width={144}
+  />
+</ChartWrapper>
+`;

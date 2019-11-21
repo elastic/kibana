@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from '../../buckets/_terms_other_bucket_helper';
-import { VisProvider } from '../../../vis';
+import { Vis } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 const visConfigSingleTerm = {
@@ -111,6 +111,22 @@ const nestedTermResponse = {
   }, 'status': 200
 };
 
+const nestedTermResponseNoResults = {
+  'took': 10,
+  'timed_out': false,
+  '_shards': {
+    'total': 1, 'successful': 1, 'skipped': 0, 'failed': 0
+  }, 'hits': {
+    'total': 0, 'max_score': null, 'hits': []
+  }, 'aggregations': {
+    '1': {
+      'doc_count_error_upper_bound': 0,
+      'sum_other_doc_count': 0,
+      'buckets': []
+    }
+  }, 'status': 200
+};
+
 const singleOtherResponse = {
   'took': 3,
   'timed_out': false,
@@ -142,7 +158,6 @@ describe('Terms Agg Other bucket helper', () => {
   function init(aggConfig) {
     ngMock.module('kibana');
     ngMock.inject((Private) => {
-      const Vis = Private(VisProvider);
       const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
       vis = new Vis(indexPattern, aggConfig);
@@ -153,32 +168,28 @@ describe('Terms Agg Other bucket helper', () => {
 
     it('returns a function', () => {
       init(visConfigSingleTerm);
-      const agg = buildOtherBucketAgg(vis.aggs, vis.aggs[0], singleTermResponse);
+      const agg = buildOtherBucketAgg(vis.aggs, vis.aggs.aggs[0], singleTermResponse);
       expect(agg).to.be.a('function');
     });
 
     it('correctly builds query with single terms agg', () => {
       init(visConfigSingleTerm);
-      const agg = buildOtherBucketAgg(vis.aggs, vis.aggs[0], singleTermResponse)();
+      const agg = buildOtherBucketAgg(vis.aggs, vis.aggs.aggs[0], singleTermResponse)();
       const expectedResponse = {
         aggs: undefined,
         filters: {
           filters: {
             '': {
-              'bool': {
-                'must': [{
-                  'exists': {
-                    'field': 'machine.os.raw',
-                  }
-                }],
-                'filter': [],
-                'should': [],
-                'must_not': [
-                  { 'match_phrase': { 'machine.os.raw': { 'query': 'ios' } } },
-                  { 'match_phrase': { 'machine.os.raw': { 'query': 'win xp' } } }
+              bool: {
+                must: [],
+                filter: [{ exists: { field: 'machine.os.raw' } }],
+                should: [],
+                must_not: [
+                  { match_phrase: { 'machine.os.raw': 'ios' } },
+                  { match_phrase: { 'machine.os.raw': 'win xp' } }
                 ]
               }
-            }
+            },
           }
         }
       };
@@ -188,43 +199,40 @@ describe('Terms Agg Other bucket helper', () => {
 
     it('correctly builds query for nested terms agg', () => {
       init(visConfigNestedTerm);
-      const agg = buildOtherBucketAgg(vis.aggs, vis.aggs[1], nestedTermResponse)();
+      const agg = buildOtherBucketAgg(vis.aggs, vis.aggs.aggs[1], nestedTermResponse)();
       const expectedResponse = {
         'other-filter': {
           aggs: undefined,
-          'filters': {
-            'filters': {
+          filters: {
+            filters: {
               '-IN': {
-                'bool': {
-                  'must': [
-                    { match_phrase: { 'geo.src': { 'query': 'IN' } } },
-                    {
-                      'exists': {
-                        'field': 'machine.os.raw',
-                      }
-                    }
-                  ], 'filter': [],
-                  'should': [],
-                  'must_not': [
-                    { 'match_phrase': { 'machine.os.raw': { 'query': 'ios' } } },
-                    { 'match_phrase': { 'machine.os.raw': { 'query': 'win xp' } } }
+                bool: {
+                  must: [],
+                  filter: [
+                    { match_phrase: { 'geo.src': 'IN' } },
+                    { exists: { field: 'machine.os.raw' } }
+                  ],
+                  should: [],
+                  must_not: [
+                    { match_phrase: { 'machine.os.raw': 'ios' } },
+                    { match_phrase: { 'machine.os.raw': 'win xp' } }
                   ]
                 }
-              }, '-US': {
-                'bool': {
-                  'must': [
-                    { 'match_phrase': { 'geo.src': { 'query': 'US' } } },
-                    {
-                      'exists': {
-                        'field': 'machine.os.raw',
-                      }
-                    }
-                  ], 'filter': [], 'should': [], 'must_not': [
-                    { 'match_phrase': { 'machine.os.raw': { 'query': 'ios' } } },
-                    { 'match_phrase': { 'machine.os.raw': { 'query': 'win xp' } } }
+              },
+              '-US': {
+                bool: {
+                  must: [],
+                  filter: [
+                    { match_phrase: { 'geo.src': 'US' } },
+                    { exists: { field: 'machine.os.raw' } }
+                  ],
+                  should: [],
+                  must_not: [
+                    { match_phrase: { 'machine.os.raw': 'ios' } },
+                    { match_phrase: { 'machine.os.raw': 'win xp' } }
                   ]
                 }
-              }
+              },
             }
           }
         }
@@ -232,17 +240,23 @@ describe('Terms Agg Other bucket helper', () => {
 
       expect(agg).to.eql(expectedResponse);
     });
+
+    it('returns false when nested terms agg has no buckets', () => {
+      init(visConfigNestedTerm);
+      const agg = buildOtherBucketAgg(vis.aggs, vis.aggs.aggs[1], nestedTermResponseNoResults);
+      expect(agg).to.eql(false);
+    });
   });
 
   describe('mergeOtherBucketAggResponse', () => {
     it('correctly merges other bucket with single terms agg', () => {
       init(visConfigSingleTerm);
-      const otherAggConfig = buildOtherBucketAgg(vis.aggs, vis.aggs[0], singleTermResponse)();
+      const otherAggConfig = buildOtherBucketAgg(vis.aggs, vis.aggs.aggs[0], singleTermResponse)();
       const mergedResponse = mergeOtherBucketAggResponse(
         vis.aggs,
         singleTermResponse,
         singleOtherResponse,
-        vis.aggs[0],
+        vis.aggs.aggs[0],
         otherAggConfig);
 
       expect(mergedResponse.aggregations['1'].buckets[3].key).to.equal('__other__');
@@ -250,9 +264,9 @@ describe('Terms Agg Other bucket helper', () => {
 
     it('correctly merges other bucket with nested terms agg', () => {
       init(visConfigNestedTerm);
-      const otherAggConfig = buildOtherBucketAgg(vis.aggs, vis.aggs[1], nestedTermResponse)();
+      const otherAggConfig = buildOtherBucketAgg(vis.aggs, vis.aggs.aggs[1], nestedTermResponse)();
       const mergedResponse = mergeOtherBucketAggResponse(vis.aggs, nestedTermResponse,
-        nestedOtherResponse, vis.aggs[1], otherAggConfig);
+        nestedOtherResponse, vis.aggs.aggs[1], otherAggConfig);
 
       expect(mergedResponse.aggregations['1'].buckets[1]['2'].buckets[3].key).to.equal('__other__');
     });
@@ -262,7 +276,7 @@ describe('Terms Agg Other bucket helper', () => {
   describe('updateMissingBucket', () => {
     it('correctly updates missing bucket key', () => {
       init(visConfigNestedTerm);
-      const updatedResponse = updateMissingBucket(singleTermResponse, vis.aggs, vis.aggs[0]);
+      const updatedResponse = updateMissingBucket(singleTermResponse, vis.aggs, vis.aggs.aggs[0]);
       expect(updatedResponse.aggregations['1'].buckets.find(bucket => bucket.key === '__missing__')).to.not.be('undefined');
     });
 

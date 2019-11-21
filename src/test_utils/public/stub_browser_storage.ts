@@ -27,7 +27,7 @@ export class StubBrowserStorage {
   // Browser-specific methods.
   // -----------------------------------------------------------------------------------------------
 
-  get length() {
+  public get length() {
     return this.keys.length;
   }
 

@@ -25,14 +25,20 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const pieChart = getService('pieChart');
-  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
+  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize']);
 
-  describe('dashboard filter bar', async () => {
+  describe('dashboard filter bar', () => {
     before(async () => {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.uiSettings.replace({
+        'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await PageObjects.common.navigateToApp('dashboard');
     });
 
-    describe('Add a filter bar', async function () {
+    describe('Add a filter bar', function () {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
       });
@@ -50,7 +56,9 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('filter editor field list', async () => {
+    describe('filter editor field list', function () {
+      this.tags(['skipFirefox']);
+
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
@@ -78,7 +86,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('filter pills', async function () {
+    describe('filter pills', function () {
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.dashboard.gotoDashboardLandingPage();
@@ -120,6 +128,24 @@ export default function ({ getService, getPageObjects }) {
         expect(filterCount).to.equal(1);
 
         await pieChart.expectPieSliceCount(1);
+      });
+    });
+
+    describe('saved search filtering', function () {
+      before(async () => {
+        await filterBar.ensureFieldEditorModalIsClosed();
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.dashboard.setTimepickerInDataRange();
+      });
+
+      it('are added when a cell magnifying glass is clicked', async function () {
+        await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
+        await PageObjects.dashboard.waitForRenderComplete();
+        await testSubjects.click('docTableCellFilter');
+
+        const filterCount = await filterBar.getFilterCount();
+        expect(filterCount).to.equal(1);
       });
     });
   });

@@ -23,6 +23,7 @@ import ngMock from 'ng_mock';
 import { EventsProvider } from '../events';
 import expect from '@kbn/expect';
 import '../private';
+import { createDefer } from 'ui/promises';
 import { createLegacyClass } from '../utils/legacy_class';
 
 describe('Events', function () {
@@ -128,7 +129,8 @@ describe('Events', function () {
 
   it('should handle emits from the handler', function () {
     const obj = new Events();
-    const secondEmit = Promise.defer();
+    const secondEmit = createDefer(Promise);
+
     const handler1 = sinon.spy(function () {
       if (handler1.calledTwice) {
         return;

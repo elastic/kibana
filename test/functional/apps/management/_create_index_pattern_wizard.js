@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['settings', 'common']);
 
   describe('"Create Index Pattern" wizard', function () {
+    this.tags('smoke');
 
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it

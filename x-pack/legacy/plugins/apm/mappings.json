@@ -1,0 +1,67 @@
+{
+  "apm-services-telemetry": {
+    "properties": {
+      "has_any_services": {
+        "type": "boolean"
+      },
+      "services_per_agent": {
+        "properties": {
+          "python": {
+            "type": "long",
+            "null_value": 0
+          },
+          "java": {
+            "type": "long",
+            "null_value": 0
+          },
+          "nodejs": {
+            "type": "long",
+            "null_value": 0
+          },
+          "js-base": {
+            "type": "long",
+            "null_value": 0
+          },
+          "rum-js": {
+            "type": "long",
+            "null_value": 0
+          },
+          "dotnet": {
+            "type": "long",
+            "null_value": 0
+          },
+          "ruby": {
+            "type": "long",
+            "null_value": 0
+          },
+          "go": {
+            "type": "long",
+            "null_value": 0
+          }
+        }
+      }
+    }
+  },
+  "apm-indices": {
+    "properties": {
+      "apm_oss.sourcemapIndices": {
+        "type": "keyword"
+      },
+      "apm_oss.errorIndices": {
+        "type": "keyword"
+      },
+      "apm_oss.onboardingIndices": {
+        "type": "keyword"
+      },
+      "apm_oss.spanIndices": {
+        "type": "keyword"
+      },
+      "apm_oss.transactionIndices": {
+        "type": "keyword"
+      },
+      "apm_oss.metricsIndices": {
+        "type": "keyword"
+      }
+    }
+  }
+}

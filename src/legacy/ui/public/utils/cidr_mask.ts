@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Ipv4Address from './ipv4_address';
+import { Ipv4Address } from '../../../../plugins/kibana_utils/public';
 const NUM_BITS = 32;
 
 function throwError(mask: string) {
@@ -35,7 +35,7 @@ export class CidrMask {
     }
     this.initialAddress = new Ipv4Address(splits[0]);
     this.prefixLength = Number(splits[1]);
-    if (this.prefixLength < 1 || this.prefixLength > NUM_BITS) {
+    if (isNaN(this.prefixLength) || this.prefixLength < 1 || this.prefixLength > NUM_BITS) {
       throwError(mask);
     }
   }

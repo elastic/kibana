@@ -17,46 +17,54 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { searchRequestQueue } from '../search_request_queue';
-import { FetchNowProvider } from './fetch_now';
+import { callClient } from './call_client';
 
 /**
- * This is usually the right fetch provider to use, rather than FetchNowProvider, as this class introduces
- * a slight delay in the request process to allow multiple requests to queue up (e.g. when a dashboard
- * is loading).
- *
- * @param Private
- * @param Promise
- * @constructor
+ * This function introduces a slight delay in the request process to allow multiple requests to queue
+ * up (e.g. when a dashboard is loading).
  */
-export function FetchSoonProvider(Private, Promise) {
+export async function fetchSoon(request, options, { es, config, esShardTimeout }) {
+  const delay = config.get('courier:batchSearches') ? 50 : 0;
+  return delayedFetch(request, options, { es, config, esShardTimeout }, delay);
+}
 
-  const fetchNow = Private(FetchNowProvider);
-
-  const debouncedFetchNow = _.debounce(() => {
-    fetchNow(searchRequestQueue.getPending());
-  }, {
-    wait: 10,
-    maxWait: 50
+/**
+   * Delays executing a function for a given amount of time, and returns a promise that resolves
+   * with the result.
+   * @param fn The function to invoke
+   * @param ms The number of milliseconds to wait
+   * @return Promise<any> A promise that resolves with the result of executing the function
+   */
+function delay(fn, ms) {
+  return new Promise(resolve => {
+    setTimeout(() => resolve(fn()), ms);
   });
+}
 
-  /**
-   * Fetch a list of requests
-   * @param {array} requests - the requests to fetch
-   * @async
-   */
-  this.fetchSearchRequests = (requests) => {
-    requests.forEach(req => req._setFetchRequested());
-    debouncedFetchNow();
-    return Promise.all(requests.map(req => req.getCompletePromise()));
-  };
+// The current batch/queue of requests to fetch
+let requestsToFetch = [];
+let requestOptions = [];
 
-  /**
-   * Return a promise that resembles the success of the fetch completing so we can execute
-   * logic based on this state change. Individual errors are routed to their respective requests.
+// The in-progress fetch (if there is one)
+let fetchInProgress = null;
+
+/**
+   * Delay fetching for a given amount of time, while batching up the requests to be fetched.
+   * Returns a promise that resolves with the response for the given request.
+   * @param request The request to fetch
+   * @param ms The number of milliseconds to wait (and batch requests)
+   * @return Promise<SearchResponse> The response for the given request
    */
-  this.fetchQueued = () => {
-    return this.fetchSearchRequests(searchRequestQueue.getStartable());
-  };
+async function delayedFetch(request, options, { es, config, esShardTimeout }, ms) {
+  const i = requestsToFetch.length;
+  requestsToFetch = [...requestsToFetch, request];
+  requestOptions = [...requestOptions, options];
+  const responses = await (fetchInProgress = fetchInProgress || delay(() => {
+    const response = callClient(requestsToFetch, requestOptions, { es, config, esShardTimeout });
+    requestsToFetch = [];
+    requestOptions = [];
+    fetchInProgress = null;
+    return response;
+  }, ms));
+  return responses[i];
 }

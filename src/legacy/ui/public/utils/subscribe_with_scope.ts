@@ -21,7 +21,7 @@ import { IScope } from 'angular';
 import * as Rx from 'rxjs';
 import { fatalError } from 'ui/notify/fatal_error';
 
-function callInDigest<T extends any[]>($scope: IScope, fn: (...args: T) => void, ...args: T) {
+function callInDigest($scope: IScope, fn: () => void) {
   try {
     // this is terrible, but necessary to synchronously deliver subscription values
     // to angular scopes. This is required by some APIs, like the `config` service,
@@ -30,9 +30,9 @@ function callInDigest<T extends any[]>($scope: IScope, fn: (...args: T) => void,
     //
     // If you copy this code elsewhere you better have a good reason :)
     if ($scope.$root.$$phase) {
-      fn(...args);
+      fn();
     } else {
-      $scope.$apply(() => fn(...args));
+      $scope.$apply(() => fn());
     }
   } catch (error) {
     fatalError(error);
@@ -51,7 +51,7 @@ export function subscribeWithScope<T>(
   return observable.subscribe({
     next(value) {
       if (observer && observer.next) {
-        callInDigest($scope, observer.next, value);
+        callInDigest($scope, () => observer.next!(value));
       }
     },
     error(error) {
@@ -69,7 +69,7 @@ export function subscribeWithScope<T>(
     },
     complete() {
       if (observer && observer.complete) {
-        callInDigest($scope, observer.complete);
+        callInDigest($scope, () => observer.complete!());
       }
     },
   });

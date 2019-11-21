@@ -27,6 +27,7 @@ import Stats from 'webpack/lib/Stats';
 import * as threadLoader from 'thread-loader';
 import webpackMerge from 'webpack-merge';
 import { DynamicDllPlugin } from './dynamic_dll_plugin';
+import WrapperPlugin from 'wrapper-webpack-plugin';
 
 import { defaults } from 'lodash';
 
@@ -36,6 +37,7 @@ import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 
 const POSTCSS_CONFIG_PATH = require.resolve('./postcss.config');
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
+const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
 const BABEL_EXCLUDE_RE = [
   /[\/\\](webpackShims|node_modules|bower_components)[\/\\]/,
 ];
@@ -43,6 +45,7 @@ const STATS_WARNINGS_FILTER = new RegExp([
   '(export .* was not found in)',
   '|(chunk .* \\[mini-css-extract-plugin\\]\\\nConflicting order between:)'
 ].join(''));
+const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 
 function recursiveIssuer(m) {
   if (m.issuer) {
@@ -157,7 +160,11 @@ export default class BaseOptimizer {
 
   getThreadLoaderPoolConfig() {
     // Calculate the node options from the NODE_OPTIONS env var
-    const parsedNodeOptions = process.env.NODE_OPTIONS ? process.env.NODE_OPTIONS.split(/\s/) : [];
+    const parsedNodeOptions = process.env.NODE_OPTIONS
+      // thread-loader could not receive empty string as options
+      // or it would break that's why we need to filter here
+      ? process.env.NODE_OPTIONS.split(/\s/).filter(opt => !!opt)
+      : [];
 
     return {
       name: 'optimizer-thread-loader-main-pool',
@@ -208,19 +215,17 @@ export default class BaseOptimizer {
     /**
      * Adds a cache loader if we're running in dev mode. The reason we're not adding
      * the cache-loader when running in production mode is that it creates cache
-     * files in optimize/.cache that are not necessary for distributable versions
+     * files in data/optimize/.cache that are not necessary for distributable versions
      * of Kibana and just make compressing and extracting it more difficult.
      */
     const maybeAddCacheLoader = (cacheName, loaders) => {
-      if (IS_KIBANA_DISTRIBUTABLE) {
-        return loaders;
-      }
-
       return [
         {
           loader: 'cache-loader',
           options: {
-            cacheDirectory: this.uiBundles.getCacheDirectory(cacheName)
+            cacheContext: fromRoot('.'),
+            cacheDirectory: this.uiBundles.getCacheDirectory(cacheName),
+            readOnly: process.env.KBN_CACHE_LOADER_WRITABLE ? false : IS_KIBANA_DISTRIBUTABLE
           }
         },
         ...loaders
@@ -381,9 +386,7 @@ export default class BaseOptimizer {
                 loader: 'babel-loader',
                 options: {
                   babelrc: false,
-                  presets: [
-                    BABEL_PRESET_PATH,
-                  ],
+                  presets: this.getPresets()
                 },
               }
             ]),
@@ -406,10 +409,7 @@ export default class BaseOptimizer {
           'node_modules',
           fromRoot('node_modules'),
         ],
-        alias: {
-          ...this.uiBundles.getAliases(),
-          'dll/set_csp_nonce$': require.resolve('./dynamic_dll_plugin/public/set_csp_nonce')
-        }
+        alias: this.uiBundles.getAliases(),
       },
 
       performance: {
@@ -456,6 +456,22 @@ export default class BaseOptimizer {
       ]
     };
 
+    const coverageConfig = {
+      plugins: [
+        new WrapperPlugin({
+          test: /commons\.bundle\.js$/, // only wrap output of bundle files with '.js' extension
+          header: `
+            window.flushCoverageToLog = function () {
+              if (window.__coverage__) {
+                console.log('coveragejson:' + btoa(JSON.stringify(window.__coverage__)));
+              }
+            };
+            window.addEventListener('beforeunload', window.flushCoverageToLog);
+          `
+        }),
+      ]
+    };
+
     // in production we set the process.env.NODE_ENV and run
     // the terser minimizer over our bundles
     const productionConfig = {
@@ -463,8 +479,10 @@ export default class BaseOptimizer {
       optimization: {
         minimizer: [
           new TerserPlugin({
-            parallel: true,
+            parallel: this.getThreadLoaderPoolConfig().workers,
             sourceMap: false,
+            cache: false,
+            extractComments: false,
             terserOptions: {
               compress: false,
               mangle: false
@@ -474,14 +492,19 @@ export default class BaseOptimizer {
       }
     };
 
-    return webpackMerge(
-      commonConfig,
-      IS_KIBANA_DISTRIBUTABLE
-        ? isDistributableConfig
-        : {},
-      this.uiBundles.isDevMode()
-        ? webpackMerge(watchingConfig, supportEnzymeConfig)
-        : productionConfig
+    return this.uiBundles.getExtendedConfig(
+      webpackMerge(
+        IS_CODE_COVERAGE
+          ? coverageConfig
+          : {},
+        commonConfig,
+        IS_KIBANA_DISTRIBUTABLE
+          ? isDistributableConfig
+          : {},
+        this.uiBundles.isDevMode()
+          ? webpackMerge(watchingConfig, supportEnzymeConfig)
+          : productionConfig
+      )
     );
   }
 
@@ -520,7 +543,8 @@ export default class BaseOptimizer {
       `Optimizations failure.\n${details.split('\n').join('\n    ')}\n`,
       stats.toJson(defaults({
         warningsFilter: STATS_WARNINGS_FILTER,
-        ...Stats.presetToOptions('detailed')
+        ...Stats.presetToOptions('detailed'),
+        maxModules: 1000,
       }))
     );
   }
@@ -532,5 +556,11 @@ export default class BaseOptimizer {
         entryPoints[`plugin/${pluginId}`] = `${plugin.path}/public`;
         return entryPoints;
       }, {});
+  }
+
+  getPresets() {
+    return IS_CODE_COVERAGE
+      ? [ ISTANBUL_PRESET_PATH, BABEL_PRESET_PATH, ]
+      : [ BABEL_PRESET_PATH, ];
   }
 }

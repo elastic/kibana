@@ -1,0 +1,137 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StickyProperties should render entire component 1`] = `
+<EuiFlexGroup
+  gutterSize="none"
+  style={
+    Object {
+      "marginBottom": "-1em",
+      "marginTop": "-1em",
+    }
+  }
+  wrap={true}
+>
+  <EuiFlexItem
+    grow={false}
+    key="0"
+    style={
+      Object {
+        "minWidth": 0,
+        "padding": "1em 1em 1em 0",
+      }
+    }
+  >
+    <PropertyLabel>
+      <EuiToolTip
+        content={
+          <ForwardRef(styled.span)>
+            url.full
+          </ForwardRef(styled.span)>
+        }
+        delay="regular"
+        position="top"
+      >
+        <span>
+          URL
+        </span>
+      </EuiToolTip>
+    </PropertyLabel>
+    <EuiToolTip
+      content="https://www.elastic.co/test"
+      delay="regular"
+      position="top"
+    >
+      <styled.span>
+        https://www.elastic.co/test
+      </styled.span>
+    </EuiToolTip>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+    key="1"
+    style={
+      Object {
+        "minWidth": 0,
+        "padding": "1em 1em 1em 0",
+      }
+    }
+  >
+    <PropertyLabel>
+      <EuiToolTip
+        content={
+          <ForwardRef(styled.span)>
+            http.request.method
+          </ForwardRef(styled.span)>
+        }
+        delay="regular"
+        position="top"
+      >
+        <span>
+          Request method
+        </span>
+      </EuiToolTip>
+    </PropertyLabel>
+    <PropertyValue>
+      GET
+    </PropertyValue>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+    key="2"
+    style={
+      Object {
+        "minWidth": 0,
+        "padding": "1em 1em 1em 0",
+      }
+    }
+  >
+    <PropertyLabel>
+      <EuiToolTip
+        content={
+          <ForwardRef(styled.span)>
+            error.exception.handled
+          </ForwardRef(styled.span)>
+        }
+        delay="regular"
+        position="top"
+      >
+        <span>
+          Handled
+        </span>
+      </EuiToolTip>
+    </PropertyLabel>
+    <PropertyValue>
+      true
+    </PropertyValue>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+    key="3"
+    style={
+      Object {
+        "minWidth": 0,
+        "padding": "1em 1em 1em 0",
+      }
+    }
+  >
+    <PropertyLabel>
+      <EuiToolTip
+        content={
+          <ForwardRef(styled.span)>
+            user.id
+          </ForwardRef(styled.span)>
+        }
+        delay="regular"
+        position="top"
+      >
+        <span>
+          User ID
+        </span>
+      </EuiToolTip>
+    </PropertyLabel>
+    <PropertyValue>
+      1337
+    </PropertyValue>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

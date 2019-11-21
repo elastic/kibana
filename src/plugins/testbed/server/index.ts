@@ -18,15 +18,30 @@
  */
 
 import { map, mergeMap } from 'rxjs/operators';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import {
+  CoreSetup,
+  CoreStart,
   Logger,
   PluginInitializerContext,
+  PluginConfigDescriptor,
   PluginName,
-  PluginSetupContext,
-  PluginStartContext,
 } from 'kibana/server';
-import { TestBedConfig } from './config';
+
+const configSchema = schema.object({
+  secret: schema.string({ defaultValue: 'Not really a secret :/' }),
+  uiProp: schema.string({ defaultValue: 'Accessible from client' }),
+});
+
+type ConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor = {
+  exposeToBrowser: {
+    uiProp: true,
+  },
+  schema: configSchema,
+};
 
 class Plugin {
   private readonly log: Logger;
@@ -35,36 +50,51 @@ class Plugin {
     this.log = this.initializerContext.logger.get();
   }
 
-  public setup(setupContext: PluginSetupContext, deps: Record<PluginName, unknown>) {
+  public setup(core: CoreSetup, deps: Record<PluginName, unknown>) {
     this.log.debug(
-      `Setting up TestBed with core contract [${Object.keys(setupContext)}] and deps [${Object.keys(
-        deps
-      )}]`
+      `Setting up TestBed with core contract [${Object.keys(core)}] and deps [${Object.keys(deps)}]`
+    );
+
+    const router = core.http.createRouter();
+    router.get(
+      { path: '/requestcontext/elasticsearch', validate: false },
+      async (context, req, res) => {
+        const response = await context.core.elasticsearch.adminClient.callAsInternalUser('ping');
+        return res.ok({ body: `Elasticsearch: ${response}` });
+      }
+    );
+
+    router.get(
+      { path: '/requestcontext/savedobjectsclient', validate: false },
+      async (context, req, res) => {
+        const response = await context.core.savedObjects.client.find({ type: 'TYPE' });
+        return res.ok({ body: `SavedObjects client: ${JSON.stringify(response)}` });
+      }
     );
 
     return {
-      data$: this.initializerContext.config.create(TestBedConfig).pipe(
-        map(config => {
-          this.log.debug(`I've got value from my config: ${config.secret}`);
-          return `Some exposed data derived from config: ${config.secret}`;
+      data$: this.initializerContext.config.create<ConfigType>().pipe(
+        map(configValue => {
+          this.log.debug(`I've got value from my config: ${configValue.secret}`);
+          return `Some exposed data derived from config: ${configValue.secret}`;
         })
       ),
-      pingElasticsearch$: setupContext.elasticsearch.adminClient$.pipe(
+      pingElasticsearch$: core.elasticsearch.adminClient$.pipe(
         mergeMap(client => client.callAsInternalUser('ping'))
       ),
     };
   }
 
-  public start(startContext: PluginStartContext, deps: Record<PluginName, unknown>) {
+  public start(core: CoreStart, deps: Record<PluginName, unknown>) {
     this.log.debug(
       `Starting up TestBed testbed with core contract [${Object.keys(
-        startContext
+        core
       )}] and deps [${Object.keys(deps)}]`
     );
 
     return {
       getStartContext() {
-        return startContext;
+        return core;
       },
     };
   }

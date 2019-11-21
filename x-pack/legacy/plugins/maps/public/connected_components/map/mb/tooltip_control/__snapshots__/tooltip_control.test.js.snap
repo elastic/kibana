@@ -1,0 +1,117 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TooltipControl render tooltipState is not provided should not render tooltip popover when tooltipState is not provided 1`] = `""`;
+
+exports[`TooltipControl render tooltipState is provided should render tooltip popover with custom tooltip content when renderTooltipContent provided 1`] = `
+<EuiPopover
+  anchorPosition="upCenter"
+  button={
+    <div
+      style={
+        Object {
+          "background": "transparent",
+          "height": "26px",
+          "width": "26px",
+        }
+      }
+    />
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="mapTooltip"
+  isOpen={true}
+  ownFocus={false}
+  panelPaddingSize="m"
+  style={
+    Object {
+      "pointerEvents": "none",
+      "transform": "translate(11987px, 2987px)",
+    }
+  }
+>
+  <div
+    addFilters={[Function]}
+    closeTooltip={[Function]}
+    features={
+      Array [
+        Object {
+          "geometry": Object {},
+          "id": 1,
+          "layerId": "tfi3f",
+        },
+      ]
+    }
+    getLayerName={[Function]}
+    isLocked={false}
+    loadFeatureGeometry={[Function]}
+    loadFeatureProperties={[Function]}
+  >
+    Custom tooltip content
+  </div>
+</EuiPopover>
+`;
+
+exports[`TooltipControl render tooltipState is provided should render tooltip popover with features tooltip content 1`] = `
+<EuiPopover
+  anchorPosition="upCenter"
+  button={
+    <div
+      style={
+        Object {
+          "background": "transparent",
+          "height": "26px",
+          "width": "26px",
+        }
+      }
+    />
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="mapTooltip"
+  isOpen={true}
+  ownFocus={false}
+  panelPaddingSize="m"
+  style={
+    Object {
+      "pointerEvents": "none",
+      "transform": "translate(11987px, 2987px)",
+    }
+  }
+>
+  <EuiText
+    size="xs"
+    style={
+      Object {
+        "maxWidth": "425px",
+      }
+    }
+  >
+    <FeaturesTooltip
+      addFilters={[Function]}
+      closeTooltip={[Function]}
+      features={
+        Array [
+          Object {
+            "geometry": Object {},
+            "id": 1,
+            "layerId": "tfi3f",
+          },
+        ]
+      }
+      findLayerById={[Function]}
+      geoFields={
+        Array [
+          Object {},
+        ]
+      }
+      getLayerName={[Function]}
+      isLocked={false}
+      loadFeatureGeometry={[Function]}
+      loadFeatureProperties={[Function]}
+      loadPreIndexedShape={[Function]}
+    />
+  </EuiText>
+</EuiPopover>
+`;

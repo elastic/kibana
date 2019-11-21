@@ -17,38 +17,128 @@
  * under the License.
  */
 
-import { BasePathSetup } from './base_path';
-import { Capabilities, CapabilitiesStart } from './capabilities';
+/**
+ * The Kibana Core APIs for client-side plugins.
+ *
+ * A plugin's `public/index` file must contain a named import, `plugin`, that
+ * implements {@link PluginInitializer} which returns an object that implements
+ * {@link Plugin}.
+ *
+ * The plugin integrates with the core system via lifecycle events: `setup`,
+ * `start`, and `stop`. In each lifecycle method, the plugin will receive the
+ * corresponding core services available (either {@link CoreSetup} or
+ * {@link CoreStart}) and any interfaces returned by dependency plugins'
+ * lifecycle method. Anything returned by the plugin's lifecycle method will be
+ * exposed to downstream dependencies when their corresponding lifecycle methods
+ * are invoked.
+ *
+ * @packageDocumentation
+ */
+
 import {
   ChromeBadge,
   ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
-  ChromeSetup,
+  ChromeHelpExtensionMenuLink,
+  ChromeHelpExtensionMenuCustomLink,
+  ChromeHelpExtensionMenuDiscussLink,
+  ChromeHelpExtensionMenuDocumentationLink,
+  ChromeHelpExtensionMenuGitHubLink,
+  ChromeNavControl,
+  ChromeNavControls,
+  ChromeNavLink,
+  ChromeNavLinks,
+  ChromeNavLinkUpdateableFields,
+  ChromeDocTitle,
+  ChromeStart,
+  ChromeRecentlyAccessed,
+  ChromeRecentlyAccessedHistoryItem,
 } from './chrome';
-import { FatalErrorsSetup } from './fatal_errors';
-import { HttpSetup } from './http';
-import { I18nSetup, I18nStart } from './i18n';
+import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
+import { HttpSetup, HttpStart } from './http';
+import { I18nStart } from './i18n';
+import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
+import { NotificationsSetup, NotificationsStart } from './notifications';
+import { OverlayStart } from './overlays';
+import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
+import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
+import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
+import { DocLinksStart } from './doc_links';
+import { SavedObjectsStart } from './saved_objects';
+export { PackageInfo, EnvironmentMode } from '../server/types';
 import {
-  InjectedMetadataParams,
-  InjectedMetadataSetup,
-  InjectedMetadataStart,
-} from './injected_metadata';
-import {
-  NotificationsSetup,
-  Toast,
-  ToastInput,
-  ToastsApi,
-  NotificationsStart,
-} from './notifications';
-import { FlyoutRef, OverlayStart } from './overlays';
-import { Plugin, PluginInitializer, PluginInitializerContext, PluginSetupContext } from './plugins';
-import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
+  IContextContainer,
+  IContextProvider,
+  ContextSetup,
+  HandlerFunction,
+  HandlerContextType,
+  HandlerParameters,
+} from './context';
 
 export { CoreContext, CoreSystem } from './core_system';
+export { RecursiveReadonly } from '../utils';
+
+export { App, AppBase, AppUnmount, AppMountContext, AppMountParameters } from './application';
+
+export {
+  SavedObjectsBatchResponse,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
+  SavedObjectsCreateOptions,
+  SavedObjectsFindResponsePublic,
+  SavedObjectsUpdateOptions,
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectAttributeSingle,
+  SavedObjectReference,
+  SavedObjectsBaseOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsMigrationVersion,
+  SavedObjectsClientContract,
+  SavedObjectsClient,
+  SimpleSavedObject,
+} from './saved_objects';
+
+export {
+  HttpServiceBase,
+  HttpHeadersInit,
+  HttpRequestInit,
+  HttpFetchOptions,
+  HttpFetchQuery,
+  HttpErrorResponse,
+  HttpErrorRequest,
+  HttpInterceptor,
+  HttpResponse,
+  HttpHandler,
+  HttpBody,
+  IBasePath,
+  IAnonymousPaths,
+  IHttpInterceptController,
+  IHttpFetchError,
+  InterceptedHttpResponse,
+} from './http';
+
+export { OverlayStart, OverlayBannersStart, OverlayRef } from './overlays';
+
+export {
+  Toast,
+  ToastInput,
+  IToasts,
+  ToastsApi,
+  ToastInputFields,
+  ToastsSetup,
+  ToastsStart,
+  ErrorToastOptions,
+} from './notifications';
+
+export { MountPoint, UnmountCallback } from './types';
 
 /**
- * Core services exposed to the start lifecycle
+ * Core services exposed to the `Plugin` setup lifecycle
  *
  * @public
  *
@@ -57,65 +147,141 @@ export { CoreContext, CoreSystem } from './core_system';
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup {
-  /** {@link I18nSetup} */
-  i18n: I18nSetup;
-  /** {@link InjectedMetadataSetup} */
-  injectedMetadata: InjectedMetadataSetup;
+  /** {@link ApplicationSetup} */
+  application: ApplicationSetup;
+  /** {@link ContextSetup} */
+  context: ContextSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
-  /** {@link NotificationsSetup} */
-  notifications: NotificationsSetup;
   /** {@link HttpSetup} */
   http: HttpSetup;
-  /** {@link BasePathSetup} */
-  basePath: BasePathSetup;
-  /** {@link UiSettingsSetup} */
-  uiSettings: UiSettingsSetup;
-  /** {@link ChromeSetup} */
-  chrome: ChromeSetup;
+  /** {@link NotificationsSetup} */
+  notifications: NotificationsSetup;
+  /** {@link UiSettingsClient} */
+  uiSettings: UiSettingsClientContract;
+  /**
+   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
+   * use *only* to retrieve config values. There is no way to set injected values
+   * in the new platform. Use the legacy platform API instead.
+   * @deprecated
+   * */
+  injectedMetadata: {
+    getInjectedVar: (name: string, defaultValue?: any) => unknown;
+  };
 }
 
+/**
+ * Core services exposed to the `Plugin` start lifecycle
+ *
+ * @public
+ *
+ * @internalRemarks We document the properties with \@link tags to improve
+ * navigation in the generated docs until there's a fix for
+ * https://github.com/Microsoft/web-build-tools/issues/1237
+ */
 export interface CoreStart {
-  /** {@link CapabilitiesStart} */
-  capabilities: CapabilitiesStart;
+  /** {@link ApplicationStart} */
+  application: ApplicationStart;
+  /** {@link ChromeStart} */
+  chrome: ChromeStart;
+  /** {@link DocLinksStart} */
+  docLinks: DocLinksStart;
+  /** {@link HttpStart} */
+  http: HttpStart;
+  /** {@link SavedObjectsStart} */
+  savedObjects: SavedObjectsStart;
   /** {@link I18nStart} */
   i18n: I18nStart;
-  /** {@link InjectedMetadataStart} */
-  injectedMetadata: InjectedMetadataStart;
   /** {@link NotificationsStart} */
   notifications: NotificationsStart;
   /** {@link OverlayStart} */
   overlays: OverlayStart;
+  /** {@link UiSettingsClient} */
+  uiSettings: UiSettingsClientContract;
+  /**
+   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
+   * use *only* to retrieve config values. There is no way to set injected values
+   * in the new platform. Use the legacy platform API instead.
+   * @deprecated
+   * */
+  injectedMetadata: {
+    getInjectedVar: (name: string, defaultValue?: any) => unknown;
+  };
+}
+
+/**
+ * Setup interface exposed to the legacy platform via the `ui/new_platform` module.
+ *
+ * @remarks
+ * Some methods are not supported in the legacy platform and while present to make this type compatibile with
+ * {@link CoreSetup}, unsupported methods will throw exceptions when called.
+ *
+ * @public
+ * @deprecated
+ */
+export interface LegacyCoreSetup extends CoreSetup {
+  /** @deprecated */
+  injectedMetadata: InjectedMetadataSetup;
+}
+
+/**
+ * Start interface exposed to the legacy platform via the `ui/new_platform` module.
+ *
+ * @remarks
+ * Some methods are not supported in the legacy platform and while present to make this type compatibile with
+ * {@link CoreStart}, unsupported methods will throw exceptions when called.
+ *
+ * @public
+ * @deprecated
+ */
+export interface LegacyCoreStart extends CoreStart {
+  /** @deprecated */
+  injectedMetadata: InjectedMetadataStart;
 }
 
 export {
-  BasePathSetup,
-  HttpSetup,
-  FatalErrorsSetup,
+  ApplicationSetup,
+  ApplicationStart,
   Capabilities,
-  CapabilitiesStart,
-  ChromeSetup,
   ChromeBadge,
-  ChromeBreadcrumb,
   ChromeBrand,
+  ChromeBreadcrumb,
   ChromeHelpExtension,
-  I18nSetup,
+  ChromeHelpExtensionMenuLink,
+  ChromeHelpExtensionMenuCustomLink,
+  ChromeHelpExtensionMenuDiscussLink,
+  ChromeHelpExtensionMenuDocumentationLink,
+  ChromeHelpExtensionMenuGitHubLink,
+  ChromeNavControl,
+  ChromeNavControls,
+  ChromeNavLink,
+  ChromeNavLinks,
+  ChromeNavLinkUpdateableFields,
+  ChromeDocTitle,
+  ChromeRecentlyAccessed,
+  ChromeRecentlyAccessedHistoryItem,
+  ChromeStart,
+  IContextContainer,
+  HandlerFunction,
+  HandlerContextType,
+  HandlerParameters,
+  IContextProvider,
+  ContextSetup,
+  DocLinksStart,
+  FatalErrorInfo,
+  FatalErrorsSetup,
+  HttpSetup,
+  HttpStart,
   I18nStart,
-  InjectedMetadataSetup,
-  InjectedMetadataStart,
-  InjectedMetadataParams,
+  LegacyNavLink,
+  NotificationsSetup,
+  NotificationsStart,
   Plugin,
   PluginInitializer,
   PluginInitializerContext,
-  PluginSetupContext,
-  NotificationsSetup,
-  NotificationsStart,
-  OverlayStart,
-  FlyoutRef,
-  Toast,
-  ToastInput,
-  ToastsApi,
+  SavedObjectsStart,
+  PluginOpaqueId,
   UiSettingsClient,
+  UiSettingsClientContract,
   UiSettingsState,
-  UiSettingsSetup,
 };

@@ -23,8 +23,8 @@ export default function ({ getService, getPageObjects }) {
 
       before(async () => {
         await setup('monitoring/singlecluster-yellow-platinum', {
-          from: '2017-08-29 17:23:47.528',
-          to: '2017-08-29 17:25:50.701',
+          from: 'Aug 29, 2017 @ 17:23:47.528',
+          to: 'Aug 29, 2017 @ 17:25:50.701',
         });
 
         // ensure cluster alerts are shown on overview
@@ -51,8 +51,8 @@ export default function ({ getService, getPageObjects }) {
 
       before(async () => {
         await setup('monitoring/singlecluster-yellow-platinum--with-10-alerts', {
-          from: '2017-08-29 17:23:47.528',
-          to: '2017-08-29 17:25:50.701',
+          from: 'Aug 29, 2017 @ 17:23:47.528',
+          to: 'Aug 29, 2017 @ 17:25:50.701',
         });
 
         // ensure cluster alerts are shown on overview
@@ -157,17 +157,17 @@ export default function ({ getService, getPageObjects }) {
             .to.be(`${tableData[index].alertIcon} ${tableData[index].alertText}`);
         });
 
-        await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters');
+        await PageObjects.monitoring.clickBreadcrumb('~breadcrumbClusters');
       });
     });
 
-    describe('alert actions take you to the elasticsearch indices listing', async () => {
+    describe('alert actions take you to the elasticsearch indices listing', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
         await setup('monitoring/singlecluster-yellow-platinum', {
-          from: '2017-08-29 17:23:47.528',
-          to: '2017-08-29 17:25:50.701',
+          from: 'Aug 29, 2017 @ 17:23:47.528',
+          to: 'Aug 29, 2017 @ 17:25:50.701',
         });
 
         // ensure cluster alerts are shown on overview
@@ -183,7 +183,7 @@ export default function ({ getService, getPageObjects }) {
         await alertAction.click();
         expect(await indices.isOnListing()).to.be(true);
 
-        await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters');
+        await PageObjects.monitoring.clickBreadcrumb('~breadcrumbClusters');
       });
 
       it('with alert on listing table page', async () => {
@@ -194,7 +194,7 @@ export default function ({ getService, getPageObjects }) {
         await alertAction.click();
         expect(await indices.isOnListing()).to.be(true);
 
-        await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters');
+        await PageObjects.monitoring.clickBreadcrumb('~breadcrumbClusters');
       });
     });
 

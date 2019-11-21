@@ -31,7 +31,7 @@ describe('KuiCollapseButton', () => {
   describe('Props', () => {
     describe('direction', () => {
       DIRECTIONS.forEach(direction => {
-        describe(direction, () => {
+        describe(`${direction}`, () => {
           test(`renders the ${direction} class`, () => {
             const component = <KuiCollapseButton direction={direction} {...requiredProps}/>;
             expect(render(component)).toMatchSnapshot();

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable import/no-duplicates */
+
 import React from 'react';
 import { renderToHtml } from '../../services';
 
@@ -30,7 +32,7 @@ import {
 } from '../../components';
 
 import Tabs from './tabs';
-const tabsSource = require('!!raw-loader!./tabs');
+import tabsSource from '!!raw-loader!./tabs';
 const tabsHtml = renderToHtml(Tabs);
 
 export default props => (

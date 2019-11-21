@@ -5,11 +5,49 @@ exports[`#setup constructs UiSettingsClient and UiSettingsApi: UiSettingsApi arg
   "calls": Array [
     Array [
       Object {
-        "addToPath": [MockFunction],
+        "addLoadingCount": [MockFunction] {
+          "calls": Array [
+            Array [
+              Object {
+                "loadingCountObservable": true,
+              },
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
+        "anonymousPaths": AnonymousPaths {
+          "basePath": BasePath {
+            "basePath": "",
+            "get": [Function],
+            "prepend": [Function],
+            "remove": [Function],
+          },
+          "paths": Set {},
+        },
+        "basePath": BasePath {
+          "basePath": "",
+          "get": [Function],
+          "prepend": [Function],
+          "remove": [Function],
+        },
+        "delete": [MockFunction],
+        "fetch": [MockFunction],
         "get": [MockFunction],
-        "removeFromPath": [MockFunction],
+        "getLoadingCount$": [MockFunction],
+        "head": [MockFunction],
+        "intercept": [MockFunction],
+        "options": [MockFunction],
+        "patch": [MockFunction],
+        "post": [MockFunction],
+        "put": [MockFunction],
+        "removeAllInterceptors": [MockFunction],
+        "stop": [MockFunction],
       },
-      "kibanaVersion",
     ],
   ],
   "results": Array [

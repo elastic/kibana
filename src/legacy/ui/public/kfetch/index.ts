@@ -17,5 +17,12 @@
  * under the License.
  */
 
-export { kfetch, addInterceptor, KFetchOptions, KFetchQuery } from './kfetch';
-export { kfetchAbortable } from './kfetch_abortable';
+import { npSetup } from 'ui/new_platform';
+import { createKfetch, KFetchKibanaOptions, KFetchOptions } from './kfetch';
+export { addInterceptor, KFetchOptions, KFetchQuery } from './kfetch';
+
+const kfetchInstance = createKfetch(npSetup.core.http);
+
+export const kfetch = (options: KFetchOptions, kfetchOptions?: KFetchKibanaOptions) => {
+  return kfetchInstance(options, kfetchOptions);
+};

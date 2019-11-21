@@ -16,27 +16,48 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { HttpService, HttpSetup } from './http_service';
 
-const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<HttpSetup> = {
-    addLoadingCount: jest.fn(),
-    getLoadingCount$: jest.fn(),
-  };
-  return setupContract;
+import { HttpService } from './http_service';
+import { HttpSetup } from './types';
+import { BehaviorSubject } from 'rxjs';
+import { BasePath } from './base_path_service';
+import { AnonymousPaths } from './anonymous_paths';
+
+type ServiceSetupMockType = jest.Mocked<HttpSetup> & {
+  basePath: BasePath;
 };
 
-type HttpServiceContract = PublicMethodsOf<HttpService>;
-const createMock = () => {
-  const mocked: jest.Mocked<HttpServiceContract> = {
+const createServiceMock = ({ basePath = '' } = {}): ServiceSetupMockType => ({
+  fetch: jest.fn(),
+  get: jest.fn(),
+  head: jest.fn(),
+  post: jest.fn(),
+  put: jest.fn(),
+  patch: jest.fn(),
+  delete: jest.fn(),
+  options: jest.fn(),
+  basePath: new BasePath(basePath),
+  anonymousPaths: new AnonymousPaths(new BasePath(basePath)),
+  addLoadingCount: jest.fn(),
+  getLoadingCount$: jest.fn().mockReturnValue(new BehaviorSubject(0)),
+  stop: jest.fn(),
+  intercept: jest.fn(),
+  removeAllInterceptors: jest.fn(),
+});
+
+const createMock = ({ basePath = '' } = {}) => {
+  const mocked: jest.Mocked<Required<HttpService>> = {
     setup: jest.fn(),
+    start: jest.fn(),
     stop: jest.fn(),
   };
-  mocked.setup.mockReturnValue(createSetupContractMock());
+  mocked.setup.mockReturnValue(createServiceMock({ basePath }));
+  mocked.start.mockReturnValue(createServiceMock({ basePath }));
   return mocked;
 };
 
 export const httpServiceMock = {
   create: createMock,
-  createSetupContract: createSetupContractMock,
+  createSetupContract: createServiceMock,
+  createStartContract: createServiceMock,
 };

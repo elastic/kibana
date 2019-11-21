@@ -17,92 +17,101 @@
  * under the License.
  */
 
-import { ElasticsearchConfig } from './elasticsearch_config';
+import { ElasticsearchConfig, config } from './elasticsearch_config';
 
 test('set correct defaults', () => {
-  const config = new ElasticsearchConfig(ElasticsearchConfig.schema.validate({}));
-  expect(config).toMatchInlineSnapshot(`
-ElasticsearchConfig {
-  "apiVersion": "master",
-  "customHeaders": Object {},
-  "healthCheckDelay": "PT2.5S",
-  "hosts": Array [
-    "http://localhost:9200",
-  ],
-  "logQueries": false,
-  "password": undefined,
-  "pingTimeout": "PT30S",
-  "requestHeadersWhitelist": Array [
-    "authorization",
-  ],
-  "requestTimeout": "PT30S",
-  "shardTimeout": "PT30S",
-  "sniffInterval": false,
-  "sniffOnConnectionFault": false,
-  "sniffOnStart": false,
-  "ssl": Object {
-    "alwaysPresentCertificate": true,
-    "certificateAuthorities": undefined,
-    "verificationMode": "full",
-  },
-  "username": undefined,
-}
-`);
+  const configValue = new ElasticsearchConfig(config.schema.validate({}));
+  expect(configValue).toMatchInlineSnapshot(`
+    ElasticsearchConfig {
+      "apiVersion": "master",
+      "customHeaders": Object {},
+      "healthCheckDelay": "PT2.5S",
+      "hosts": Array [
+        "http://localhost:9200",
+      ],
+      "ignoreVersionMismatch": false,
+      "logQueries": false,
+      "password": undefined,
+      "pingTimeout": "PT30S",
+      "requestHeadersWhitelist": Array [
+        "authorization",
+      ],
+      "requestTimeout": "PT30S",
+      "shardTimeout": "PT30S",
+      "sniffInterval": false,
+      "sniffOnConnectionFault": false,
+      "sniffOnStart": false,
+      "ssl": Object {
+        "alwaysPresentCertificate": true,
+        "certificateAuthorities": undefined,
+        "verificationMode": "full",
+      },
+      "username": undefined,
+    }
+  `);
 });
 
 test('#hosts accepts both string and array of strings', () => {
-  let config = new ElasticsearchConfig(
-    ElasticsearchConfig.schema.validate({ hosts: 'http://some.host:1234' })
+  let configValue = new ElasticsearchConfig(
+    config.schema.validate({ hosts: 'http://some.host:1234' })
   );
-  expect(config.hosts).toEqual(['http://some.host:1234']);
+  expect(configValue.hosts).toEqual(['http://some.host:1234']);
 
-  config = new ElasticsearchConfig(
-    ElasticsearchConfig.schema.validate({ hosts: ['http://some.host:1234'] })
+  configValue = new ElasticsearchConfig(
+    config.schema.validate({ hosts: ['http://some.host:1234'] })
   );
-  expect(config.hosts).toEqual(['http://some.host:1234']);
+  expect(configValue.hosts).toEqual(['http://some.host:1234']);
 
-  config = new ElasticsearchConfig(
-    ElasticsearchConfig.schema.validate({
+  configValue = new ElasticsearchConfig(
+    config.schema.validate({
       hosts: ['http://some.host:1234', 'https://some.another.host'],
     })
   );
-  expect(config.hosts).toEqual(['http://some.host:1234', 'https://some.another.host']);
+  expect(configValue.hosts).toEqual(['http://some.host:1234', 'https://some.another.host']);
 });
 
 test('#requestHeadersWhitelist accepts both string and array of strings', () => {
-  let config = new ElasticsearchConfig(
-    ElasticsearchConfig.schema.validate({ requestHeadersWhitelist: 'token' })
+  let configValue = new ElasticsearchConfig(
+    config.schema.validate({ requestHeadersWhitelist: 'token' })
   );
-  expect(config.requestHeadersWhitelist).toEqual(['token']);
+  expect(configValue.requestHeadersWhitelist).toEqual(['token']);
 
-  config = new ElasticsearchConfig(
-    ElasticsearchConfig.schema.validate({ requestHeadersWhitelist: ['token'] })
+  configValue = new ElasticsearchConfig(
+    config.schema.validate({ requestHeadersWhitelist: ['token'] })
   );
-  expect(config.requestHeadersWhitelist).toEqual(['token']);
+  expect(configValue.requestHeadersWhitelist).toEqual(['token']);
 
-  config = new ElasticsearchConfig(
-    ElasticsearchConfig.schema.validate({
+  configValue = new ElasticsearchConfig(
+    config.schema.validate({
       requestHeadersWhitelist: ['token', 'X-Forwarded-Proto'],
     })
   );
-  expect(config.requestHeadersWhitelist).toEqual(['token', 'X-Forwarded-Proto']);
+  expect(configValue.requestHeadersWhitelist).toEqual(['token', 'X-Forwarded-Proto']);
 });
 
 test('#ssl.certificateAuthorities accepts both string and array of strings', () => {
-  let config = new ElasticsearchConfig(
-    ElasticsearchConfig.schema.validate({ ssl: { certificateAuthorities: 'some-path' } })
+  let configValue = new ElasticsearchConfig(
+    config.schema.validate({ ssl: { certificateAuthorities: 'some-path' } })
   );
-  expect(config.ssl.certificateAuthorities).toEqual(['some-path']);
+  expect(configValue.ssl.certificateAuthorities).toEqual(['some-path']);
 
-  config = new ElasticsearchConfig(
-    ElasticsearchConfig.schema.validate({ ssl: { certificateAuthorities: ['some-path'] } })
+  configValue = new ElasticsearchConfig(
+    config.schema.validate({ ssl: { certificateAuthorities: ['some-path'] } })
   );
-  expect(config.ssl.certificateAuthorities).toEqual(['some-path']);
+  expect(configValue.ssl.certificateAuthorities).toEqual(['some-path']);
 
-  config = new ElasticsearchConfig(
-    ElasticsearchConfig.schema.validate({
+  configValue = new ElasticsearchConfig(
+    config.schema.validate({
       ssl: { certificateAuthorities: ['some-path', 'another-path'] },
     })
   );
-  expect(config.ssl.certificateAuthorities).toEqual(['some-path', 'another-path']);
+  expect(configValue.ssl.certificateAuthorities).toEqual(['some-path', 'another-path']);
+});
+
+test('#username throws if equal to "elastic", only while running from source', () => {
+  const obj = {
+    username: 'elastic',
+  };
+  expect(() => config.schema.validate(obj, { dist: false })).toThrowErrorMatchingSnapshot();
+  expect(() => config.schema.validate(obj, { dist: true })).not.toThrow();
 });

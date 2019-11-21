@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { createDefer } from 'ui/promises';
 
 // Throw this inside of an Angular route resolver after calling `kbnUrl.change`
 // so that the $router can observe the $location update. Otherwise, the location
@@ -90,7 +91,7 @@ export class RouteSetupManager {
       )
       .then(() => {
       // wait for the queue to fill up, then do all the work
-        const defer = Promise.defer();
+        const defer = createDefer(Promise);
         userWork.resolveWhenFull(defer);
 
         return defer.promise.then(() => Promise.all(userWork.doWork()));

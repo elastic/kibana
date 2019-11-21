@@ -1,0 +1,223 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Listing should render with certain data pieces missing 1`] = `
+<EuiMonitoringTable
+  className="logstashNodesTable"
+  columns={
+    Array [
+      Object {
+        "field": "name",
+        "name": "Name",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "field": "cpu_usage",
+        "name": "CPU Usage",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "field": "load_average",
+        "name": "Load Average",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "field": "jvm_heap_used",
+        "name": "JVM Heap Used",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "field": "events_out",
+        "name": "Events Ingested",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "name": "Config Reloads",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "field": "version",
+        "name": "Version",
+        "render": [Function],
+        "sortable": true,
+      },
+    ]
+  }
+  executeQueryOptions={
+    Object {
+      "defaultFields": Array [
+        "name",
+      ],
+    }
+  }
+  productName="logstash"
+  rows={
+    Array [
+      Object {
+        "availability": true,
+        "cpu_usage": "N/A",
+        "events_out": "N/A",
+        "jvm_heap_used": "N/A",
+        "load_average": "N/A",
+        "name": "N/A",
+        "reloads": Object {
+          "failures": 0,
+          "successes": 0,
+        },
+        "version": "N/A",
+      },
+    ]
+  }
+  search={
+    Object {
+      "box": Object {
+        "incremental": true,
+        "placeholder": "Filter Nodes…",
+      },
+    }
+  }
+  setupMode={Object {}}
+  sorting={
+    Object {
+      "sort": Object {
+        "0": "a",
+        "1": "s",
+        "2": "c",
+        "field": "name",
+      },
+    }
+  }
+/>
+`;
+
+exports[`Listing should render with expected props 1`] = `
+<EuiMonitoringTable
+  className="logstashNodesTable"
+  columns={
+    Array [
+      Object {
+        "field": "name",
+        "name": "Name",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "field": "cpu_usage",
+        "name": "CPU Usage",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "field": "load_average",
+        "name": "Load Average",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "field": "jvm_heap_used",
+        "name": "JVM Heap Used",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "field": "events_out",
+        "name": "Events Ingested",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "name": "Config Reloads",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "field": "version",
+        "name": "Version",
+        "render": [Function],
+        "sortable": true,
+      },
+    ]
+  }
+  executeQueryOptions={
+    Object {
+      "defaultFields": Array [
+        "name",
+      ],
+    }
+  }
+  productName="logstash"
+  rows={
+    Array [
+      Object {
+        "availability": true,
+        "cpu_usage": 0,
+        "events": Object {
+          "out": 3505,
+        },
+        "events_out": 3505,
+        "jvm": Object {
+          "mem": Object {
+            "heap_used_percent": 27,
+          },
+        },
+        "jvm_heap_used": 27,
+        "load_average": 2.54248046875,
+        "logstash": Object {
+          "host": "Elastic-MBP.local",
+          "http_address": "127.0.0.1:9600",
+          "name": "Elastic-MBP.local",
+          "pipeline": Object {
+            "batch_size": 125,
+            "workers": 4,
+          },
+          "status": "green",
+          "uuid": "4134a00e-89e4-4896-a3d4-c3a9aa03a594",
+          "version": "8.0.0",
+        },
+        "name": "Elastic-MBP.local",
+        "os": Object {
+          "cpu": Object {
+            "load_average": Object {
+              "1m": 2.54248046875,
+            },
+          },
+        },
+        "process": Object {
+          "cpu": Object {
+            "percent": 0,
+          },
+        },
+        "reloads": Object {
+          "failures": 0,
+          "successes": 0,
+        },
+        "version": "8.0.0",
+      },
+    ]
+  }
+  search={
+    Object {
+      "box": Object {
+        "incremental": true,
+        "placeholder": "Filter Nodes…",
+      },
+    }
+  }
+  setupMode={Object {}}
+  sorting={
+    Object {
+      "sort": Object {
+        "0": "a",
+        "1": "s",
+        "2": "c",
+        "field": "name",
+      },
+    }
+  }
+/>
+`;

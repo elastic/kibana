@@ -1,0 +1,47 @@
+@import '@elastic/eui/src/components/header/variables';
+@import '@elastic/eui/src/components/nav_drawer/variables';
+
+.chrHeaderWrapper {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  z-index: 10;
+}
+
+.chrHeaderWrapper ~ .app-wrapper:not(.hidden-chrome) {
+  top: $euiHeaderChildSize;
+  left: $euiHeaderChildSize;
+
+  // HOTFIX: Temporary fix for flyouts not inside portals
+  // SASSTODO: Find an actual solution
+  .euiFlyout {
+    top: $euiHeaderChildSize;
+    height: calc(100% - #{$euiHeaderChildSize});
+  }
+}
+
+.chrHeaderHelpMenu__version {
+  text-transform: none;
+}
+
+.chrHeaderBadge__wrapper {
+  align-self: center;
+  margin-right: $euiSize;
+}
+
+// Mobile header is smaller
+@include euiBreakpoint('xs', 's') {
+  .chrHeaderWrapper ~ .app-wrapper:not(.hidden-chrome) {
+    left: 0;
+  }
+}
+
+@include euiBreakpoint('xl') {
+  .chrHeaderWrapper--navIsLocked {
+    ~ .app-wrapper:not(.hidden-chrome) {
+      // Shrink the content from the left so it's no longer overlapped by the nav drawer (ALWAYS)
+      left: $euiNavDrawerWidthExpanded !important; // sass-lint:disable-line no-important
+      transition: left $euiAnimSpeedFast $euiAnimSlightResistance;
+    }
+  }
+}

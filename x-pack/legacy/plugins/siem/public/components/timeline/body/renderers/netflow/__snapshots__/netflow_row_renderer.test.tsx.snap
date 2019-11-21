@@ -1,0 +1,177 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
+<span>
+  <span>
+    some children
+  </span>
+  <RowRendererContainer>
+    <Details>
+      <Netflow
+        contextId="netflow-row-renderer-render-row-test-abcd"
+        destinationBytes={
+          Array [
+            40,
+          ]
+        }
+        destinationGeoCityName={
+          Array [
+            "New York",
+          ]
+        }
+        destinationGeoContinentName={
+          Array [
+            "North America",
+          ]
+        }
+        destinationGeoCountryIsoCode={
+          Array [
+            "US",
+          ]
+        }
+        destinationGeoCountryName={
+          Array [
+            "United States",
+          ]
+        }
+        destinationGeoRegionName={
+          Array [
+            "New York",
+          ]
+        }
+        destinationIp={
+          Array [
+            "10.1.2.3",
+          ]
+        }
+        destinationPackets={
+          Array [
+            1,
+          ]
+        }
+        destinationPort={
+          Array [
+            80,
+          ]
+        }
+        eventDuration={
+          Array [
+            1000000,
+          ]
+        }
+        eventEnd={
+          Array [
+            "2018-11-12T19:03:25.936Z",
+          ]
+        }
+        eventId="abcd"
+        eventStart={
+          Array [
+            "2018-11-12T19:03:25.836Z",
+          ]
+        }
+        networkBytes={
+          Array [
+            100,
+          ]
+        }
+        networkCommunityId={
+          Array [
+            "we.live.in.a",
+          ]
+        }
+        networkDirection={
+          Array [
+            "outgoing",
+          ]
+        }
+        networkPackets={
+          Array [
+            3,
+          ]
+        }
+        networkProtocol={
+          Array [
+            "http",
+          ]
+        }
+        processName={
+          Array [
+            "rat",
+          ]
+        }
+        sourceBytes={
+          Array [
+            60,
+          ]
+        }
+        sourceGeoCityName={
+          Array [
+            "Atlanta",
+          ]
+        }
+        sourceGeoContinentName={
+          Array [
+            "North America",
+          ]
+        }
+        sourceGeoCountryIsoCode={
+          Array [
+            "US",
+          ]
+        }
+        sourceGeoCountryName={
+          Array [
+            "United States",
+          ]
+        }
+        sourceGeoRegionName={
+          Array [
+            "Georgia",
+          ]
+        }
+        sourceIp={
+          Array [
+            "192.168.1.2",
+          ]
+        }
+        sourcePackets={
+          Array [
+            2,
+          ]
+        }
+        sourcePort={
+          Array [
+            9987,
+          ]
+        }
+        tlsClientCertificateFingerprintSha1={
+          Array [
+            "tls.client_certificate.fingerprint.sha1-value",
+          ]
+        }
+        tlsFingerprintsJa3Hash={
+          Array [
+            "tls.fingerprints.ja3.hash-value",
+          ]
+        }
+        tlsServerCertificateFingerprintSha1={
+          Array [
+            "tls.server_certificate.fingerprint.sha1-value",
+          ]
+        }
+        transport={
+          Array [
+            "tcp",
+          ]
+        }
+        userName={
+          Array [
+            "first.last",
+          ]
+        }
+      />
+    </Details>
+  </RowRendererContainer>
+</span>
+`;

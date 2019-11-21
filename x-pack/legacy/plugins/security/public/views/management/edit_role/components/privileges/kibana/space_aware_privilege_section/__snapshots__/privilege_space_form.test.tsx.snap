@@ -1,0 +1,598 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
+<EuiOverlayMask>
+  <EuiFlyout
+    closeButtonAriaLabel="Closes this dialog"
+    hideCloseButton={false}
+    maxWidth={true}
+    onClose={[Function]}
+    ownFocus={false}
+    size="m"
+  >
+    <EuiFlyoutHeader
+      hasBorder={true}
+    >
+      <EuiTitle
+        size="m"
+      >
+        <h2>
+          <FormattedMessage
+            defaultMessage="Space privileges"
+            id="xpack.security.management.editRole.spacePrivilegeForm.modalTitle"
+            values={Object {}}
+          />
+        </h2>
+      </EuiTitle>
+    </EuiFlyoutHeader>
+    <EuiFlyoutBody>
+      <EuiForm>
+        <EuiFormRow
+          describedByIds={Array []}
+          display="row"
+          fullWidth={true}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          label="Spaces"
+          labelType="label"
+        >
+          <SpaceSelector
+            intl={
+              Object {
+                "defaultFormats": Object {},
+                "defaultLocale": "en",
+                "formatDate": [Function],
+                "formatHTMLMessage": [Function],
+                "formatMessage": [Function],
+                "formatNumber": [Function],
+                "formatPlural": [Function],
+                "formatRelative": [Function],
+                "formatTime": [Function],
+                "formats": Object {
+                  "date": Object {
+                    "full": Object {
+                      "day": "numeric",
+                      "month": "long",
+                      "weekday": "long",
+                      "year": "numeric",
+                    },
+                    "long": Object {
+                      "day": "numeric",
+                      "month": "long",
+                      "year": "numeric",
+                    },
+                    "medium": Object {
+                      "day": "numeric",
+                      "month": "short",
+                      "year": "numeric",
+                    },
+                    "short": Object {
+                      "day": "numeric",
+                      "month": "numeric",
+                      "year": "2-digit",
+                    },
+                  },
+                  "number": Object {
+                    "currency": Object {
+                      "style": "currency",
+                    },
+                    "percent": Object {
+                      "style": "percent",
+                    },
+                  },
+                  "relative": Object {
+                    "days": Object {
+                      "units": "day",
+                    },
+                    "hours": Object {
+                      "units": "hour",
+                    },
+                    "minutes": Object {
+                      "units": "minute",
+                    },
+                    "months": Object {
+                      "units": "month",
+                    },
+                    "seconds": Object {
+                      "units": "second",
+                    },
+                    "years": Object {
+                      "units": "year",
+                    },
+                  },
+                  "time": Object {
+                    "full": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                      "timeZoneName": "short",
+                    },
+                    "long": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                      "timeZoneName": "short",
+                    },
+                    "medium": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                    },
+                    "short": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                    },
+                  },
+                },
+                "formatters": Object {
+                  "getDateTimeFormat": [Function],
+                  "getMessageFormat": [Function],
+                  "getNumberFormat": [Function],
+                  "getPluralFormat": [Function],
+                  "getRelativeFormat": [Function],
+                },
+                "locale": "en",
+                "messages": Object {},
+                "now": [Function],
+                "onError": [Function],
+                "textComponent": Symbol(react.fragment),
+                "timeZone": null,
+              }
+            }
+            onChange={[Function]}
+            selectedSpaceIds={Array []}
+            spaces={
+              Array [
+                Object {
+                  "_reserved": true,
+                  "description": "",
+                  "disabledFeatures": Array [],
+                  "id": "default",
+                  "name": "Default Space",
+                },
+                Object {
+                  "description": "",
+                  "disabledFeatures": Array [],
+                  "id": "marketing",
+                  "name": "Marketing",
+                },
+              ]
+            }
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          describedByIds={Array []}
+          display="row"
+          fullWidth={true}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          label="Privilege"
+          labelType="label"
+        >
+          <EuiSuperSelect
+            compressed={false}
+            data-test-subj="basePrivilegeComboBox"
+            disabled={true}
+            fullWidth={true}
+            hasDividers={true}
+            isInvalid={false}
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "disabled": false,
+                  "dropdownDisplay": <EuiText>
+                    <strong>
+                      <FormattedMessage
+                        defaultMessage="Custom"
+                        id="xpack.security.management.editRole.spacePrivilegeForm.customPrivilegeDropdownDisplay"
+                        values={Object {}}
+                      />
+                    </strong>
+                    <p>
+                      <FormattedMessage
+                        defaultMessage="Customize access by feature in selected spaces."
+                        id="xpack.security.management.editRole.spacePrivilegeForm.customPrivilegeDetails"
+                        values={Object {}}
+                      />
+                    </p>
+                  </EuiText>,
+                  "inputDisplay": <EuiText>
+                    <FormattedMessage
+                      defaultMessage="Custom"
+                      id="xpack.security.management.editRole.spacePrivilegeForm.customPrivilegeDisplay"
+                      values={Object {}}
+                    />
+                  </EuiText>,
+                  "value": "basePrivilege_custom",
+                },
+                Object {
+                  "disabled": false,
+                  "dropdownDisplay": <EuiText>
+                    <strong>
+                      <FormattedMessage
+                        defaultMessage="Read"
+                        id="xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDropdownDisplay"
+                        values={Object {}}
+                      />
+                    </strong>
+                    <p>
+                      <FormattedMessage
+                        defaultMessage="Grant read-only access to all features in selected spaces."
+                        id="xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDetails"
+                        values={Object {}}
+                      />
+                    </p>
+                  </EuiText>,
+                  "inputDisplay": <EuiText>
+                    <FormattedMessage
+                      defaultMessage="Read"
+                      id="xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDisplay"
+                      values={Object {}}
+                    />
+                  </EuiText>,
+                  "value": "basePrivilege_read",
+                },
+                Object {
+                  "dropdownDisplay": <EuiText>
+                    <strong>
+                      <FormattedMessage
+                        defaultMessage="All"
+                        id="xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDropdownDisplay"
+                        values={Object {}}
+                      />
+                    </strong>
+                    <p>
+                      <FormattedMessage
+                        defaultMessage="Grant full access to all features in selected spaces."
+                        id="xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDetails"
+                        values={Object {}}
+                      />
+                    </p>
+                  </EuiText>,
+                  "inputDisplay": <EuiText>
+                    <FormattedMessage
+                      defaultMessage="All"
+                      id="xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDisplay"
+                      values={Object {}}
+                    />
+                  </EuiText>,
+                  "value": "basePrivilege_all",
+                },
+              ]
+            }
+            valueOfSelected="basePrivilege_custom"
+          />
+        </EuiFormRow>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiTitle
+          size="xxs"
+        >
+          <h3>
+            Customize by feature
+          </h3>
+        </EuiTitle>
+        <EuiSpacer
+          size="xs"
+        />
+        <EuiText
+          size="s"
+        >
+          <p>
+            Increase privilege levels on a per feature basis. Some features might be hidden by the space or affected by a global space privilege.
+          </p>
+        </EuiText>
+        <EuiSpacer
+          size="l"
+        />
+        <FeatureTable
+          allowedPrivileges={
+            Object {
+              "base": Object {
+                "canUnassign": true,
+                "privileges": Array [
+                  "all",
+                  "read",
+                ],
+              },
+              "feature": Object {
+                "allPrivilegeExcludedFromBase": Object {
+                  "canUnassign": true,
+                  "privileges": Array [
+                    "all",
+                    "read",
+                  ],
+                },
+                "bothPrivilegesExcludedFromBase": Object {
+                  "canUnassign": true,
+                  "privileges": Array [
+                    "all",
+                    "read",
+                  ],
+                },
+                "normal": Object {
+                  "canUnassign": true,
+                  "privileges": Array [
+                    "all",
+                    "read",
+                  ],
+                },
+              },
+            }
+          }
+          calculatedPrivileges={
+            Object {
+              "base": Object {
+                "actualPrivilege": "none",
+                "actualPrivilegeSource": 40,
+                "isDirectlyAssigned": true,
+              },
+              "feature": Object {
+                "allPrivilegeExcludedFromBase": Object {
+                  "actualPrivilege": "none",
+                  "actualPrivilegeSource": 30,
+                  "isDirectlyAssigned": true,
+                },
+                "bothPrivilegesExcludedFromBase": Object {
+                  "actualPrivilege": "none",
+                  "actualPrivilegeSource": 30,
+                  "isDirectlyAssigned": true,
+                },
+                "normal": Object {
+                  "actualPrivilege": "none",
+                  "actualPrivilegeSource": 30,
+                  "isDirectlyAssigned": true,
+                },
+              },
+              "reserved": undefined,
+            }
+          }
+          disabled={true}
+          features={Array []}
+          intl={
+            Object {
+              "defaultFormats": Object {},
+              "defaultLocale": "en",
+              "formatDate": [Function],
+              "formatHTMLMessage": [Function],
+              "formatMessage": [Function],
+              "formatNumber": [Function],
+              "formatPlural": [Function],
+              "formatRelative": [Function],
+              "formatTime": [Function],
+              "formats": Object {
+                "date": Object {
+                  "full": Object {
+                    "day": "numeric",
+                    "month": "long",
+                    "weekday": "long",
+                    "year": "numeric",
+                  },
+                  "long": Object {
+                    "day": "numeric",
+                    "month": "long",
+                    "year": "numeric",
+                  },
+                  "medium": Object {
+                    "day": "numeric",
+                    "month": "short",
+                    "year": "numeric",
+                  },
+                  "short": Object {
+                    "day": "numeric",
+                    "month": "numeric",
+                    "year": "2-digit",
+                  },
+                },
+                "number": Object {
+                  "currency": Object {
+                    "style": "currency",
+                  },
+                  "percent": Object {
+                    "style": "percent",
+                  },
+                },
+                "relative": Object {
+                  "days": Object {
+                    "units": "day",
+                  },
+                  "hours": Object {
+                    "units": "hour",
+                  },
+                  "minutes": Object {
+                    "units": "minute",
+                  },
+                  "months": Object {
+                    "units": "month",
+                  },
+                  "seconds": Object {
+                    "units": "second",
+                  },
+                  "years": Object {
+                    "units": "year",
+                  },
+                },
+                "time": Object {
+                  "full": Object {
+                    "hour": "numeric",
+                    "minute": "numeric",
+                    "second": "numeric",
+                    "timeZoneName": "short",
+                  },
+                  "long": Object {
+                    "hour": "numeric",
+                    "minute": "numeric",
+                    "second": "numeric",
+                    "timeZoneName": "short",
+                  },
+                  "medium": Object {
+                    "hour": "numeric",
+                    "minute": "numeric",
+                    "second": "numeric",
+                  },
+                  "short": Object {
+                    "hour": "numeric",
+                    "minute": "numeric",
+                  },
+                },
+              },
+              "formatters": Object {
+                "getDateTimeFormat": [Function],
+                "getMessageFormat": [Function],
+                "getNumberFormat": [Function],
+                "getPluralFormat": [Function],
+                "getRelativeFormat": [Function],
+              },
+              "locale": "en",
+              "messages": Object {},
+              "now": [Function],
+              "onError": [Function],
+              "textComponent": Symbol(react.fragment),
+              "timeZone": null,
+            }
+          }
+          kibanaPrivileges={
+            KibanaPrivileges {
+              "rawKibanaPrivileges": Object {
+                "features": Object {
+                  "allPrivilegeExcludedFromBase": Object {
+                    "all": Array [
+                      "all-privilege-excluded-from-base-all",
+                      "all-privilege-excluded-from-base-read",
+                    ],
+                    "read": Array [
+                      "all-privilege-excluded-from-base-read",
+                    ],
+                  },
+                  "bothPrivilegesExcludedFromBase": Object {
+                    "all": Array [
+                      "both-privileges-excluded-from-base-all",
+                      "both-privileges-excluded-from-base-read",
+                    ],
+                    "read": Array [
+                      "both-privileges-excluded-from-base-read",
+                    ],
+                  },
+                  "normal": Object {
+                    "all": Array [
+                      "normal-feature-all",
+                      "normal-feature-read",
+                    ],
+                    "read": Array [
+                      "normal-feature-read",
+                    ],
+                  },
+                },
+                "global": Object {
+                  "all": Array [
+                    "normal-feature-all",
+                    "normal-feature-read",
+                    "just-global-all",
+                    "all-privilege-excluded-from-base-read",
+                  ],
+                  "read": Array [
+                    "normal-feature-read",
+                    "all-privilege-excluded-from-base-read",
+                  ],
+                },
+                "reserved": Object {},
+                "space": Object {
+                  "all": Array [
+                    "normal-feature-all",
+                    "normal-feature-read",
+                    "all-privilege-excluded-from-base-read",
+                  ],
+                  "read": Array [
+                    "normal-feature-read",
+                    "all-privilege-excluded-from-base-read",
+                  ],
+                },
+              },
+            }
+          }
+          onChange={[Function]}
+          onChangeAll={[Function]}
+          rankedFeaturePrivileges={
+            Object {
+              "allPrivilegeExcludedFromBase": Array [
+                "all",
+                "read",
+              ],
+              "bothPrivilegesExcludedFromBase": Array [
+                "all",
+                "read",
+              ],
+              "normal": Array [
+                "all",
+                "read",
+              ],
+            }
+          }
+          role={
+            Object {
+              "elasticsearch": Object {
+                "cluster": Array [
+                  "all",
+                ],
+                "indices": Array [],
+                "run_as": Array [],
+              },
+              "kibana": Array [
+                Object {
+                  "base": Array [],
+                  "feature": Object {},
+                  "spaces": Array [],
+                },
+              ],
+              "name": "test role",
+            }
+          }
+          showLocks={true}
+          spacesIndex={0}
+        />
+      </EuiForm>
+    </EuiFlyoutBody>
+    <EuiFlyoutFooter>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            data-test-subj="cancelSpacePrivilegeButton"
+            flush="left"
+            iconType="cross"
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Cancel"
+              id="xpack.security.management.editRolespacePrivilegeForm.cancelButton"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButton
+            color="primary"
+            data-test-subj="createSpacePrivilegeButton"
+            disabled={true}
+            fill={true}
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Update space privilege"
+              id="xpack.security.management.editRolespacePrivilegeForm.updatePrivilegeButton"
+              values={Object {}}
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlyoutFooter>
+  </EuiFlyout>
+</EuiOverlayMask>
+`;

@@ -22,12 +22,15 @@ import { get } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 
 import { AggConfig } from 'ui/vis';
+import { timefilter } from 'ui/timefilter';
 import { Vis } from '../../../vis';
-import { Filters, Query } from '../types';
+import { esFilters, Query } from '../../../../../../plugins/data/public';
+import { SearchSource } from '../../../courier';
 
 interface QueryGeohashBoundsParams {
-  filters?: Filters;
+  filters?: esFilters.Filter[];
   query?: Query;
+  searchSource?: SearchSource;
 }
 
 /**
@@ -40,12 +43,14 @@ interface QueryGeohashBoundsParams {
  * TODO: Remove this as a part of elastic/kibana#30593
  */
 export async function queryGeohashBounds(vis: Vis, params: QueryGeohashBoundsParams) {
-  const agg = vis.getAggConfig().find((a: AggConfig) => {
+  const agg = vis.getAggConfig().aggs.find((a: AggConfig) => {
     return get(a, 'type.dslName') === 'geohash_grid';
   });
 
   if (agg) {
-    const searchSource = vis.searchSource.createChild();
+    const searchSource = params.searchSource
+      ? params.searchSource.createChild()
+      : new SearchSource();
     searchSource.setField('size', 0);
     searchSource.setField('aggs', () => {
       const geoBoundsAgg = vis.getAggConfig().createAggConfig(
@@ -73,7 +78,8 @@ export async function queryGeohashBounds(vis: Vis, params: QueryGeohashBoundsPar
         const indexPattern = agg.getIndexPattern();
         const useTimeFilter = !!indexPattern.timeFieldName;
         if (useTimeFilter) {
-          activeFilters.push(vis.API.timeFilter.createFilter(indexPattern));
+          const filter = timefilter.createFilter(indexPattern);
+          if (filter) activeFilters.push((filter as any) as esFilters.Filter);
         }
         return activeFilters;
       });

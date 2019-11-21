@@ -30,6 +30,7 @@ import {
   CleanTypescriptTask,
   CleanNodeBuildsTask,
   CleanTask,
+  CleanCtagBuildTask,
   CopySourceTask,
   CreateArchivesSourcesTask,
   CreateArchivesTask,
@@ -44,12 +45,10 @@ import {
   ExtractNodeBuildsTask,
   InstallDependenciesTask,
   OptimizeBuildTask,
-  PatchNativeModulesTask,
   RemovePackageJsonDepsTask,
   RemoveWorkspacesTask,
   TranspileBabelTask,
   TranspileScssTask,
-  TypecheckTypescriptTask,
   UpdateLicenseFileTask,
   VerifyEnvTask,
   VerifyExistingNodeBuildsTask,
@@ -86,7 +85,7 @@ export async function buildDistributables(options) {
   const config = await getConfig({
     isRelease,
     versionQualifier,
-    targetAllPlatforms
+    targetAllPlatforms,
   });
 
   const run = createRunner({
@@ -108,7 +107,6 @@ export async function buildDistributables(options) {
    * run platform-generic build tasks
    */
   await run(CopySourceTask);
-  await run(TypecheckTypescriptTask);
   await run(CreateEmptyDirsAndFilesTask);
   await run(CreateReadmeTask);
   await run(TranspileBabelTask);
@@ -132,10 +130,10 @@ export async function buildDistributables(options) {
    * directories and perform platform-specific steps
    */
   await run(CreateArchivesSourcesTask);
-  await run(PatchNativeModulesTask);
   await run(CleanExtraBinScriptsTask);
   await run(CleanExtraBrowsersTask);
   await run(CleanNodeBuildsTask);
+  await run(CleanCtagBuildTask);
 
   await run(PathLengthTask);
 
@@ -143,16 +141,20 @@ export async function buildDistributables(options) {
    * package platform-specific builds into archives
    * or os-specific packages in the target directory
    */
-  if (createArchives) { // control w/ --skip-archives
+  if (createArchives) {
+    // control w/ --skip-archives
     await run(CreateArchivesTask);
   }
-  if (createDebPackage) { // control w/ --deb or --skip-os-packages
+  if (createDebPackage) {
+    // control w/ --deb or --skip-os-packages
     await run(CreateDebPackageTask);
   }
-  if (createRpmPackage) { // control w/ --rpm or --skip-os-packages
+  if (createRpmPackage) {
+    // control w/ --rpm or --skip-os-packages
     await run(CreateRpmPackageTask);
   }
-  if (createDockerPackage) { // control w/ --docker or --skip-os-packages
+  if (createDockerPackage) {
+    // control w/ --docker or --skip-os-packages
     await run(CreateDockerPackageTask);
   }
 

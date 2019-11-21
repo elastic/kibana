@@ -40,12 +40,11 @@ export default function ({ getService, getPageObjects }) {
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.clickIndexPatternLogstash();
-      await PageObjects.settings.removeIndexPattern();
+      await PageObjects.settings.removeLogstashIndexPatternIfExist();
     });
 
     it('should display script error when script is invalid', async function () {
-      const scriptResults = await PageObjects.settings.executeScriptedField(`doc['iHaveNoClosingTick].value`);
+      const scriptResults = await PageObjects.settings.executeScriptedField(`i n v a l i d  s c r i p t`);
       expect(scriptResults).to.contain('search_phase_execution_exception');
     });
 

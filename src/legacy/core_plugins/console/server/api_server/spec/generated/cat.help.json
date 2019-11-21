@@ -1,0 +1,15 @@
+{
+  "cat.help": {
+    "url_params": {
+      "help": "__flag__",
+      "s": []
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat.html"
+  }
+}

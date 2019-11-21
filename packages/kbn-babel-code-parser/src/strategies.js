@@ -62,8 +62,12 @@ export async function dependenciesParseStrategy(cwd, parseSingleFile, mainEntry,
   // new dependencies
   return dependencies.reduce((filteredEntries, entry) => {
     const absEntryPath = resolve(cwd, dirname(mainEntry), entry);
-    const requiredPath = canRequire(cwd, absEntryPath);
-    const requiredRelativePath = canRequire(cwd, entry);
+
+    // NOTE: cwd for following canRequires is absEntryPath
+    // because we should start looking from there
+    const requiredPath = canRequire(absEntryPath, absEntryPath);
+    const requiredRelativePath = canRequire(entry, absEntryPath);
+
     const isRelativeFile = !isAbsolute(entry);
     const isNodeModuleDep = isRelativeFile && !requiredPath && requiredRelativePath;
     const isNewEntry = isRelativeFile && requiredPath;

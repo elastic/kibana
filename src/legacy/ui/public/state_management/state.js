@@ -26,6 +26,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import rison from 'rison-node';
 import { applyDiff } from '../utils/diff_object';
@@ -41,8 +42,13 @@ import {
   isStateHash,
 } from './state_storage';
 
-export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl, i18n) {
+export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl, $injector) {
   const Events = Private(EventsProvider);
+
+  const isDummyRoute = () =>
+    $injector.has('$route') &&
+    $injector.get('$route').current &&
+    $injector.get('$route').current.outerAngularWrapperRoute;
 
   createLegacyClass(State).inherits(Events);
   function State(
@@ -103,7 +109,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
     }
 
     if (unableToParse) {
-      toastNotifications.addDanger(i18n('common.ui.stateManagement.unableToParseUrlErrorMessage', {
+      toastNotifications.addDanger(i18n.translate('common.ui.stateManagement.unableToParseUrlErrorMessage', {
         defaultMessage: 'Unable to parse URL'
       }));
       search[this._urlParam] = this.toQueryParam(this._defaults);
@@ -136,7 +142,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
 
     let stash = this._readFromURL();
 
-    // nothing to read from the url? save if ordered to persist
+    // nothing to read from the url? save if ordered to persist, but only if it's not on a wrapper route
     if (stash === null) {
       if (this._persistAcrossApps) {
         return this.save();
@@ -149,7 +155,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
     // apply diff to state from stash, will change state in place via side effect
     const diffResults = applyDiff(this, stash);
 
-    if (diffResults.keys.length) {
+    if (!isDummyRoute() && diffResults.keys.length) {
       this.emit('fetch_with_changes', diffResults.keys);
     }
   };
@@ -160,6 +166,10 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
    */
   State.prototype.save = function (replace) {
     if (!stateManagementConfig.enabled) {
+      return;
+    }
+
+    if (isDummyRoute()) {
       return;
     }
 
@@ -244,7 +254,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
   State.prototype._parseStateHash = function (stateHash) {
     const json = this._hashedItemStore.getItem(stateHash);
     if (json === null) {
-      toastNotifications.addDanger(i18n('common.ui.stateManagement.unableToRestoreUrlErrorMessage', {
+      toastNotifications.addDanger(i18n.translate('common.ui.stateManagement.unableToRestoreUrlErrorMessage', {
         defaultMessage: 'Unable to completely restore the URL, be sure to use the share functionality.'
       }));
     }
@@ -293,7 +303,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
     }
 
     // If we ran out of space trying to persist the state, notify the user.
-    const message = i18n('common.ui.stateManagement.unableToStoreHistoryInSessionErrorMessage', {
+    const message = i18n.translate('common.ui.stateManagement.unableToStoreHistoryInSessionErrorMessage', {
       defaultMessage: 'Kibana is unable to store history items in your session ' +
         `because it is full and there don't seem to be items any items safe ` +
         'to delete.\n\n' +

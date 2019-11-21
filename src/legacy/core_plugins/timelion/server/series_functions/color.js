@@ -58,7 +58,7 @@ colors, and have multiple series, you will get a gradient, e.g., "#00B1CC:#00FF9
     return alter(args, function (eachSeries) {
       if (gradient) {
         eachSeries.color = gradient[i++].toHexString();
-      } else if (colors.length === 1) {
+      } else if (colors.length === 1 || gradientStops === 1) {
         eachSeries.color = colors[0];
       } else {
         throw new Error(

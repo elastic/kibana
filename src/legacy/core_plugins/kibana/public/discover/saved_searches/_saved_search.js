@@ -17,17 +17,14 @@
  * under the License.
  */
 
-import 'ui/notify';
-import { uiModules } from 'ui/modules';
 import { createLegacyClass } from 'ui/utils/legacy_class';
-import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
+import { getServices } from '../kibana_services';
 
-const module = uiModules.get('discover/saved_searches', [
-  'kibana/notify',
-  'kibana/courier'
-]);
+const { uiModules, SavedObjectProvider } = getServices();
 
-module.factory('SavedSearch', function (Private, i18n) {
+const module = uiModules.get('discover/saved_searches', []);
+
+module.factory('SavedSearch', function (Private) {
   const SavedObject = Private(SavedObjectProvider);
   createLegacyClass(SavedSearch).inherits(SavedObject);
   function SavedSearch(id) {
@@ -38,14 +35,12 @@ module.factory('SavedSearch', function (Private, i18n) {
 
       id: id,
       defaults: {
-        title: i18n('kbn.discover.savedSearch.newSavedSearchTitle', {
-          defaultMessage: 'New Saved Search',
-        }),
+        title: '',
         description: '',
         columns: [],
         hits: 0,
         sort: [],
-        version: 1
+        version: 1,
       },
     });
 
@@ -60,7 +55,7 @@ module.factory('SavedSearch', function (Private, i18n) {
     hits: 'integer',
     columns: 'keyword',
     sort: 'keyword',
-    version: 'integer'
+    version: 'integer',
   };
 
   // Order these fields to the top, the rest are alphabetical

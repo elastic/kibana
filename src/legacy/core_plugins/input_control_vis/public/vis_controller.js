@@ -23,6 +23,8 @@ import { I18nContext } from 'ui/i18n';
 import { InputControlVis } from './components/vis/input_control_vis';
 import { controlFactory } from './control/control_factory';
 import { getLineageMap } from './lineage';
+import { npStart } from 'ui/new_platform';
+import { SearchSource } from '../../../ui/public/courier/search_source/search_source';
 
 class VisController {
   constructor(el, vis) {
@@ -31,7 +33,10 @@ class VisController {
     this.controls = [];
 
     this.queryBarUpdateHandler = this.updateControlsFromKbn.bind(this);
-    this.vis.API.queryFilter.on('update', this.queryBarUpdateHandler);
+
+    this.filterManager = npStart.plugins.data.query.filterManager;
+    this.updateSubsciption = this.filterManager.getUpdates$()
+      .subscribe(this.queryBarUpdateHandler);
   }
 
   async render(visData, visParams, status) {
@@ -40,14 +45,13 @@ class VisController {
       this.controls = [];
       this.controls = await this.initControls();
       this.drawVis();
-      return;
     }
-    return;
   }
 
   destroy() {
-    this.vis.API.queryFilter.off('update', this.queryBarUpdateHandler);
+    this.updateSubsciption.unsubscribe();
     unmountComponentAtNode(this.el);
+    this.controls.forEach(control => control.destroy());
   }
 
   drawVis = () => {
@@ -76,7 +80,7 @@ class VisController {
 
     const controlFactoryPromises = controlParamsList.map((controlParams) => {
       const factory = controlFactory(controlParams);
-      return factory(controlParams, this.vis.API, this.visParams.useTimeFilter);
+      return factory(controlParams, this.visParams.useTimeFilter, SearchSource);
     });
     const controls = await Promise.all(controlFactoryPromises);
 
@@ -116,15 +120,6 @@ class VisController {
   }
 
   submitFilters = () => {
-    // Clean up filter pills for nested controls that are now disabled because ancestors are not set
-    this.controls.map(async (control) => {
-      if (control.hasAncestors() && control.hasUnsetAncestor()) {
-        control.filterManager.findFilters().forEach((existingFilter) => {
-          this.vis.API.queryFilter.removeFilter(existingFilter);
-        });
-      }
-    });
-
     const stagedControls = this.controls.filter((control) => {
       return control.hasChanged();
     });
@@ -140,11 +135,22 @@ class VisController {
     stagedControls.forEach((control) => {
       // to avoid duplicate filters, remove any old filters for control
       control.filterManager.findFilters().forEach((existingFilter) => {
-        this.vis.API.queryFilter.removeFilter(existingFilter);
+        this.filterManager.removeFilter(existingFilter);
       });
     });
 
-    this.vis.API.queryFilter.addFilters(newFilters, this.visParams.pinFilters);
+    // Clean up filter pills for nested controls that are now disabled because ancestors are not set.
+    // This has to be done after looking up the staged controls because otherwise removing a filter
+    // will re-sync the controls of all other filters.
+    this.controls.map((control) => {
+      if (control.hasAncestors() && control.hasUnsetAncestor()) {
+        control.filterManager.findFilters().forEach((existingFilter) => {
+          this.filterManager.removeFilter(existingFilter);
+        });
+      }
+    });
+
+    this.filterManager.addFilters(newFilters, this.visParams.pinFilters);
   }
 
   clearControls = async () => {

@@ -18,6 +18,14 @@ exports[`properly validates types according chosen schema 1`] = `"value is [a] b
 
 exports[`properly validates types according chosen schema 2`] = `"value is [ab] but it must have a maximum length of [1]."`;
 
+exports[`properly validates when compares with "null" literal Schema 1`] = `"value is [a] but it must have a minimum length of [2]."`;
+
+exports[`properly validates when compares with "null" literal Schema 2`] = `"value is [ab] but it must have a minimum length of [3]."`;
+
+exports[`properly validates when compares with Schema 1`] = `"value is [a] but it must have a minimum length of [2]."`;
+
+exports[`properly validates when compares with Schema 2`] = `"value is [ab] but it must have a minimum length of [3]."`;
+
 exports[`required by default 1`] = `"expected value of type [string] but got [undefined]"`;
 
 exports[`works with both context and sibling references 1`] = `"[value]: expected value of type [string] but got [number]"`;

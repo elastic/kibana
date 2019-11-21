@@ -26,7 +26,7 @@ import {
   GuideSectionTypes,
 } from '../../components';
 
-const html = require('./view_sandbox.html');
+import html from './view_sandbox.html';
 
 export default props => (
   <GuideSandbox>

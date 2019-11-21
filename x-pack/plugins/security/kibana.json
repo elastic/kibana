@@ -1,0 +1,9 @@
+{
+  "id": "security",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "security"],
+  "requiredPlugins": ["features", "licensing"],
+  "server": true,
+  "ui": true
+}

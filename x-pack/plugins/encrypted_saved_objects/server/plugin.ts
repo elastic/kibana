@@ -4,83 +4,110 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import crypto from 'crypto';
-import { Legacy, Server } from 'kibana';
-import { SavedObjectsRepository } from 'src/legacy/server/saved_objects/service/lib';
-import { BaseOptions } from 'src/legacy/server/saved_objects/service/saved_objects_client';
+import {
+  Logger,
+  SavedObjectsBaseOptions,
+  PluginInitializerContext,
+  CoreSetup,
+  SavedObjectsLegacyService,
+  KibanaRequest,
+  LegacyRequest,
+} from 'src/core/server';
+import { first } from 'rxjs/operators';
+import { createConfig$ } from './config';
 import {
   EncryptedSavedObjectsService,
   EncryptedSavedObjectTypeRegistration,
   EncryptionError,
-  EncryptedSavedObjectsAuditLogger,
-  EncryptedSavedObjectsClientWrapper,
-} from './lib';
+} from './crypto';
+import { EncryptedSavedObjectsAuditLogger } from './audit';
+import { SavedObjectsSetup, setupSavedObjects } from './saved_objects';
 
-export const PLUGIN_ID = 'encrypted_saved_objects';
-export const CONFIG_PREFIX = `xpack.${PLUGIN_ID}`;
-
-interface CoreSetup {
-  config: { encryptionKey?: string };
-  elasticsearch: Legacy.Plugins.elasticsearch.Plugin;
-  savedObjects: Legacy.SavedObjectsService;
+export interface PluginSetupContract {
+  registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
+  __legacyCompat: { registerLegacyAPI: (legacyAPI: LegacyAPI) => void };
 }
 
-interface PluginsSetup {
-  audit: unknown;
+export interface PluginStartContract extends SavedObjectsSetup {
+  isEncryptionError: (error: Error) => boolean;
 }
 
+/**
+ * Describes a set of APIs that is available in the legacy platform only and required by this plugin
+ * to function properly.
+ */
+export interface LegacyAPI {
+  savedObjects: SavedObjectsLegacyService<KibanaRequest | LegacyRequest>;
+  auditLogger: {
+    log: (eventType: string, message: string, data?: Record<string, unknown>) => void;
+  };
+}
+
+/**
+ * Represents EncryptedSavedObjects Plugin instance that will be managed by the Kibana plugin system.
+ */
 export class Plugin {
-  constructor(private readonly log: Server.Logger) {}
+  private readonly logger: Logger;
+  private savedObjectsSetup?: ReturnType<typeof setupSavedObjects>;
 
-  public setup(core: CoreSetup, plugins: PluginsSetup) {
-    let encryptionKey = core.config.encryptionKey;
-    if (encryptionKey == null) {
-      this.log.warn(
-        `Generating a random key for ${CONFIG_PREFIX}.encryptionKey. To be able ` +
-          'to decrypt encrypted saved objects attributes after restart, please set ' +
-          `${CONFIG_PREFIX}.encryptionKey in kibana.yml`
-      );
-
-      encryptionKey = crypto.randomBytes(16).toString('hex');
+  private legacyAPI?: LegacyAPI;
+  private readonly getLegacyAPI = () => {
+    if (!this.legacyAPI) {
+      throw new Error('Legacy API is not registered!');
     }
+    return this.legacyAPI;
+  };
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.logger = this.initializerContext.logger.get();
+  }
+
+  public async setup(core: CoreSetup): Promise<PluginSetupContract> {
+    const config = await createConfig$(this.initializerContext)
+      .pipe(first())
+      .toPromise();
+    const adminClusterClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
 
     const service = Object.freeze(
       new EncryptedSavedObjectsService(
-        encryptionKey,
-        core.savedObjects.types,
-        this.log,
-        new EncryptedSavedObjectsAuditLogger(plugins.audit)
+        config.encryptionKey,
+        this.logger,
+        new EncryptedSavedObjectsAuditLogger(() => this.getLegacyAPI().auditLogger)
       )
     );
 
-    // Register custom saved object client that will encrypt, decrypt and strip saved object
-    // attributes where appropriate for any saved object repository request. We choose max possible
-    // priority for this wrapper to allow all other wrappers to set proper `namespace` for the Saved
-    // Object (e.g. wrapper registered by the Spaces plugin) before we encrypt attributes since
-    // `namespace` is included into AAD.
-    core.savedObjects.addScopedSavedObjectsClientWrapperFactory(
-      Number.MAX_SAFE_INTEGER,
-      ({ client: baseClient }) => new EncryptedSavedObjectsClientWrapper({ baseClient, service })
-    );
+    return {
+      registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) =>
+        service.registerType(typeRegistration),
+      __legacyCompat: {
+        registerLegacyAPI: (legacyAPI: LegacyAPI) => {
+          this.legacyAPI = legacyAPI;
+          this.savedObjectsSetup = setupSavedObjects({
+            adminClusterClient,
+            service,
+            savedObjects: legacyAPI.savedObjects,
+          });
+        },
+      },
+    };
+  }
 
-    const internalRepository: SavedObjectsRepository = core.savedObjects.getSavedObjectsRepository(
-      core.elasticsearch.getCluster('admin').callWithInternalUser
-    );
+  public start() {
+    this.logger.debug('Starting plugin');
 
     return {
       isEncryptionError: (error: Error) => error instanceof EncryptionError,
-      registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) =>
-        service.registerType(typeRegistration),
-      getDecryptedAsInternalUser: async (type: string, id: string, options?: BaseOptions) => {
-        const savedObject = await internalRepository.get(type, id, options);
-        return {
-          ...savedObject,
-          attributes: await service.decryptAttributes(
-            { type, id, namespace: options && options.namespace },
-            savedObject.attributes
-          ),
-        };
+      getDecryptedAsInternalUser: (type: string, id: string, options?: SavedObjectsBaseOptions) => {
+        if (!this.savedObjectsSetup) {
+          throw new Error('Legacy SavedObjects API is not registered!');
+        }
+
+        return this.savedObjectsSetup.getDecryptedAsInternalUser(type, id, options);
       },
     };
+  }
+
+  public stop() {
+    this.logger.debug('Stopping plugin');
   }
 }

@@ -1,0 +1,191 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SetupModeRenderer should render the flyout open 1`] = `
+<Fragment>
+  <Flyout
+    instance={null}
+    isSettingUpNew={false}
+    meta={Object {}}
+    onClose={[Function]}
+    product={
+      Object {
+        "isNetNewUser": true,
+      }
+    }
+    productName="elasticsearch"
+    updateProduct={[Function]}
+  />
+  <ChildComponent
+    setupMode={
+      Object {
+        "closeFlyout": [Function],
+        "data": Object {
+          "byUuid": Object {},
+        },
+        "enabled": true,
+        "meta": Object {},
+        "openFlyout": [Function],
+        "productName": "elasticsearch",
+        "shortcutToFinishMigration": [Function],
+        "updateSetupModeData": [Function],
+      }
+    }
+  />
+  <EuiSpacer
+    size="xxl"
+  />
+  <EuiBottomBar>
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiFlexGroup
+          gutterSize="s"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiTextColor
+              color="ghost"
+            >
+              <FormattedMessage
+                defaultMessage="You are in setup mode. The ({flagIcon}) icon indicates configuration options."
+                id="xpack.monitoring.setupMode.description"
+                values={
+                  Object {
+                    "flagIcon": <EuiIcon
+                      type="flag"
+                    />,
+                  }
+                }
+              />
+            </EuiTextColor>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiFlexGroup
+          gutterSize="s"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiButton
+              color="danger"
+              fill={true}
+              iconSide="right"
+              iconType="flag"
+              onClick={[Function]}
+              size="s"
+            >
+              Exit setup mode
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiBottomBar>
+</Fragment>
+`;
+
+exports[`SetupModeRenderer should render with setup mode disabled 1`] = `
+<Fragment>
+  <ChildComponent
+    setupMode={
+      Object {
+        "closeFlyout": [Function],
+        "data": null,
+        "enabled": false,
+        "meta": null,
+        "openFlyout": [Function],
+        "productName": "elasticsearch",
+        "shortcutToFinishMigration": [Function],
+        "updateSetupModeData": [Function],
+      }
+    }
+  />
+</Fragment>
+`;
+
+exports[`SetupModeRenderer should render with setup mode enabled 1`] = `
+<Fragment>
+  <ChildComponent
+    setupMode={
+      Object {
+        "closeFlyout": [Function],
+        "data": Object {},
+        "enabled": true,
+        "meta": Object {},
+        "openFlyout": [Function],
+        "productName": "elasticsearch",
+        "shortcutToFinishMigration": [Function],
+        "updateSetupModeData": [Function],
+      }
+    }
+  />
+  <EuiSpacer
+    size="xxl"
+  />
+  <EuiBottomBar>
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiFlexGroup
+          gutterSize="s"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiTextColor
+              color="ghost"
+            >
+              <FormattedMessage
+                defaultMessage="You are in setup mode. The ({flagIcon}) icon indicates configuration options."
+                id="xpack.monitoring.setupMode.description"
+                values={
+                  Object {
+                    "flagIcon": <EuiIcon
+                      type="flag"
+                    />,
+                  }
+                }
+              />
+            </EuiTextColor>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiFlexGroup
+          gutterSize="s"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiButton
+              color="danger"
+              fill={true}
+              iconSide="right"
+              iconType="flag"
+              onClick={[Function]}
+              size="s"
+            >
+              Exit setup mode
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiBottomBar>
+</Fragment>
+`;

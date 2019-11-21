@@ -71,7 +71,7 @@ export class DateFormatEditor extends DefaultFormatEditor {
           error={error}
           helpText={
             <span>
-              <EuiLink target="_window" href="http://momentjs.com/">
+              <EuiLink target="_blank" href="https://momentjs.com/">
                 <FormattedMessage id="common.ui.fieldEditor.date.documentationLabel" defaultMessage="Documentation" />&nbsp;
                 <EuiIcon type="link" />
               </EuiLink>

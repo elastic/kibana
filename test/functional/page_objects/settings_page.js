@@ -55,15 +55,17 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
       // check for the index pattern info flyout that covers the
       // create index pattern button on smaller screens
-      if (await testSubjects.exists('CreateIndexPatternPrompt')) {
-        await testSubjects.click('CreateIndexPatternPrompt euiFlyoutCloseButton');
-      }
+      await retry.waitFor('index pattern info flyout', async () => {
+        if (await testSubjects.exists('CreateIndexPatternPrompt')) {
+          await testSubjects.click('CreateIndexPatternPrompt > euiFlyoutCloseButton');
+        } else return true;
+      });
     }
 
     async getAdvancedSettings(propertyName) {
       log.debug('in getAdvancedSettings');
       const setting = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
-      return await setting.getProperty('value');
+      return await setting.getAttribute('value');
     }
 
     async expectDisabledAdvancedSetting(propertyName) {
@@ -73,7 +75,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async getAdvancedSettingCheckbox(propertyName) {
       log.debug('in getAdvancedSettingCheckbox');
-      return await testSubjects.getProperty(`advancedSetting-editField-${propertyName}`, 'checked');
+      return await testSubjects.getAttribute(`advancedSetting-editField-${propertyName}`, 'checked');
     }
 
     async clearAdvancedSettings(propertyName) {
@@ -208,21 +210,21 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getFieldNames() {
-      const fieldNameCells = await testSubjects.findAll('editIndexPattern indexedFieldName');
+      const fieldNameCells = await testSubjects.findAll('editIndexPattern > indexedFieldName');
       return await mapAsync(fieldNameCells, async cell => {
         return (await cell.getVisibleText()).trim();
       });
     }
 
     async getFieldTypes() {
-      const fieldNameCells = await testSubjects.findAll('editIndexPattern indexedFieldType');
+      const fieldNameCells = await testSubjects.findAll('editIndexPattern > indexedFieldType');
       return await mapAsync(fieldNameCells, async cell => {
         return (await cell.getVisibleText()).trim();
       });
     }
 
     async getScriptedFieldLangs() {
-      const fieldNameCells = await testSubjects.findAll('editIndexPattern scriptedFieldLang');
+      const fieldNameCells = await testSubjects.findAll('editIndexPattern > scriptedFieldLang');
       return await mapAsync(fieldNameCells, async cell => {
         return (await cell.getVisibleText()).trim();
       });
@@ -237,8 +239,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async setScriptedFieldLanguageFilter(language) {
       await find.clickByCssSelector(
         'select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[label="' +
-            language +
-            '"]'
+        language +
+        '"]'
       );
     }
 
@@ -267,7 +269,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getPopularity() {
-      return await testSubjects.getProperty('editorFieldCount', 'value');
+      return await testSubjects.getAttribute('editorFieldCount', 'value');
     }
 
     async controlChangeCancel() {
@@ -281,16 +283,38 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async clickIndexPatternLogstash() {
-      await find.clickByPartialLinkText('logstash-*');
+      const indexLink = await find.byXPath(`//a[descendant::*[text()='logstash-*']]`);
+      await indexLink.click();
     }
 
-    async createIndexPattern(indexPatternName, timefield = '@timestamp') {
+    async getIndexPatternList() {
+      await testSubjects.existOrFail('indexPatternTable', { timeout: 5000 });
+      return await find.allByCssSelector('[data-test-subj="indexPatternTable"] .euiTable a');
+    }
+
+    async isIndexPatternListEmpty() {
+      await testSubjects.existOrFail('indexPatternTable', { timeout: 5000 });
+      const indexPatternList = await this.getIndexPatternList();
+      return indexPatternList.length === 0;
+    }
+
+    async removeLogstashIndexPatternIfExist() {
+      if (!(await this.isIndexPatternListEmpty())) {
+        await this.clickIndexPatternLogstash();
+        await this.removeIndexPattern();
+      }
+    }
+
+    async createIndexPattern(indexPatternName, timefield = '@timestamp', isStandardIndexPattern = true) {
       await retry.try(async () => {
         await this.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickKibanaIndexPatterns();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickOptionalAddNewButton();
+        if (!isStandardIndexPattern) {
+          await this.clickCreateNewRollupButton();
+        }
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async () => {
           await this.setIndexPatternField({ indexPatternName });
@@ -322,6 +346,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       if (await testSubjects.isDisplayed('createIndexPatternButton')) {
         await testSubjects.click('createIndexPatternButton');
       }
+    }
+
+    async clickCreateNewRollupButton() {
+      await testSubjects.click('createRollupIndexPatternButton');
     }
 
     async getIndexPatternIdFromUrl() {
@@ -509,13 +537,12 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async setScriptedFieldScript(script) {
       log.debug('set scripted field script = ' + script);
-      const field = await testSubjects.find('editorFieldScript');
-      const currentValue = await field.getAttribute('value');
-      if (script === currentValue) {
-        return;
+      const aceEditorCssSelector = '[data-test-subj="codeEditorContainer"] .ace_editor';
+      await find.clickByCssSelector(aceEditorCssSelector);
+      for (let i = 0; i < 1000; i++) {
+        await browser.pressKeys(browser.keys.BACK_SPACE);
       }
-      await field.clearValueWithKeyboard({ charByChar: true });
-      await field.type(script);
+      await browser.pressKeys(...script.split(''));
     }
 
     async openScriptedFieldHelp(activeTab) {
@@ -564,12 +591,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       log.debug(`Clicking importObjects`);
       await testSubjects.click('importObjects');
       log.debug(`Setting the path on the file input`);
-      if (browser.isW3CEnabled) {
-        const input = await find.byCssSelector('.euiFilePicker__input');
-        await input.type(path);
-      } else {
-        await find.setValue('.euiFilePicker__input', path);
-      }
+      const input = await find.byCssSelector('.euiFilePicker__input');
+      await input.type(path);
 
       if (!overwriteAll) {
         log.debug(`Toggling overwriteAll`);
@@ -582,6 +605,26 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
       // Wait for all the saves to happen
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async checkImportSucceeded() {
+      await testSubjects.existOrFail('importSavedObjectsSuccess', { timeout: 20000 });
+    }
+
+    async checkNoneImported() {
+      await testSubjects.existOrFail('importSavedObjectsSuccessNoneImported', { timeout: 20000 });
+    }
+
+    async checkImportConflictsWarning() {
+      await testSubjects.existOrFail('importSavedObjectsConflictsWarning', { timeout: 20000 });
+    }
+
+    async checkImportLegacyWarning() {
+      await testSubjects.existOrFail('importSavedObjectsLegacyWarning', { timeout: 20000 });
+    }
+
+    async checkImportFailedWarning() {
+      await testSubjects.existOrFail('importSavedObjectsFailedWarning', { timeout: 20000 });
     }
 
     async clickImportDone() {
@@ -637,7 +680,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         const title = await titleCell.getVisibleText();
 
 
-        const viewInAppButtons = await row.findAllByCssSelector('[aria-label="In app"]');
+        const viewInAppButtons = await row.findAllByCssSelector('td:nth-child(3) a');
         const canViewInApp = Boolean(viewInAppButtons.length);
         summary.push({
           title,

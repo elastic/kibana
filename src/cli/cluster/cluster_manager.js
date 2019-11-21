@@ -24,6 +24,7 @@ import opn from 'opn';
 import { debounce, invoke, bindAll, once, uniq } from 'lodash';
 import * as Rx from 'rxjs';
 import { first, mapTo, filter, map, take } from 'rxjs/operators';
+import { REPO_ROOT } from '@kbn/dev-utils';
 
 import Log from '../log';
 import Worker from './worker';
@@ -102,10 +103,17 @@ export default class ClusterManager {
 
     if (opts.watch) {
       const pluginPaths = config.get('plugins.paths');
-      const scanDirs = config.get('plugins.scanDirs');
-      const extraPaths = [...pluginPaths, ...scanDirs];
+      const scanDirs = [
+        ...config.get('plugins.scanDirs'),
+        resolve(REPO_ROOT, 'src/plugins'),
+        resolve(REPO_ROOT, 'x-pack/plugins'),
+      ];
+      const extraPaths = [
+        ...pluginPaths,
+        ...scanDirs,
+      ];
 
-      const extraIgnores = scanDirs
+      const pluginInternalDirsIgnore = scanDirs
         .map(scanDir => resolve(scanDir, '*'))
         .concat(pluginPaths)
         .reduce(
@@ -116,12 +124,11 @@ export default class ClusterManager {
               resolve(path, 'target'),
               resolve(path, 'scripts'),
               resolve(path, 'docs'),
-              resolve(path, 'x-pack/plugins/canvas/canvas_plugin_src') // prevents server from restarting twice for Canvas plugin changes
             ),
           []
         );
 
-      this.setupWatching(extraPaths, extraIgnores);
+      this.setupWatching(extraPaths, pluginInternalDirsIgnore);
     } else this.startCluster();
   }
 
@@ -158,7 +165,7 @@ export default class ClusterManager {
       .then(() => opn(openUrl));
   }
 
-  setupWatching(extraPaths, extraIgnores) {
+  setupWatching(extraPaths, pluginInternalDirsIgnore) {
     const chokidar = require('chokidar');
     const { fromRoot } = require('../../legacy/utils');
 
@@ -168,19 +175,28 @@ export default class ClusterManager {
       fromRoot('src/legacy/server'),
       fromRoot('src/legacy/ui'),
       fromRoot('src/legacy/utils'),
-      fromRoot('x-pack/common'),
-      fromRoot('x-pack/plugins'),
-      fromRoot('x-pack/server'),
+      fromRoot('x-pack/legacy/common'),
+      fromRoot('x-pack/legacy/plugins'),
+      fromRoot('x-pack/legacy/server'),
       fromRoot('config'),
       ...extraPaths,
     ].map(path => resolve(path));
+
+    const ignorePaths = [
+      fromRoot('src/legacy/server/sass/__tmp__'),
+      fromRoot('x-pack/legacy/plugins/reporting/.chromium'),
+      fromRoot('x-pack/legacy/plugins/siem/cypress'),
+      fromRoot('x-pack/legacy/plugins/apm/cypress'),
+      fromRoot('x-pack/legacy/plugins/canvas/canvas_plugin_src') // prevents server from restarting twice for Canvas plugin changes
+    ];
 
     this.watcher = chokidar.watch(uniq(watchPaths), {
       cwd: fromRoot('.'),
       ignored: [
         /[\\\/](\..*|node_modules|bower_components|public|__[a-z0-9_]+__|coverage)[\\\/]/,
-        /\.test\.js$/,
-        ...extraIgnores,
+        /\.test\.(js|ts)$/,
+        ...pluginInternalDirsIgnore,
+        ...ignorePaths,
         'plugins/java_languageserver'
       ],
     });
@@ -252,9 +268,13 @@ export default class ClusterManager {
   }
 
   shouldRedirectFromOldBasePath(path) {
+    // strip `s/{id}` prefix when checking for need to redirect
+    if (path.startsWith('s/')) {
+      path = path.split('/').slice(2).join('/');
+    }
+
     const isApp = path.startsWith('app/');
     const isKnownShortPath = ['login', 'logout', 'status'].includes(path);
-
     return isApp || isKnownShortPath;
   }
 

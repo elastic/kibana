@@ -20,45 +20,45 @@
 import minimatch from 'minimatch';
 
 import { deleteAll, deleteEmptyFolders, scanDelete } from '../lib';
+import { resolve } from 'path';
+
+const RELATIVE_CTAGS_BUILD_DIR = 'node_modules/@elastic/node-ctags/ctags/build';
 
 export const CleanTask = {
   global: true,
   description: 'Cleaning artifacts from previous builds',
 
   async run(config, log) {
-    await deleteAll([
-      config.resolveFromRepo('build'),
-      config.resolveFromRepo('target'),
-      config.resolveFromRepo('.node_binaries'),
-    ], log);
+    await deleteAll(
+      [
+        config.resolveFromRepo('build'),
+        config.resolveFromRepo('target'),
+        config.resolveFromRepo('.node_binaries'),
+      ],
+      log
+    );
   },
 };
 
 export const CleanPackagesTask = {
-  description:
-    'Cleaning source for packages that are now installed in node_modules',
+  description: 'Cleaning source for packages that are now installed in node_modules',
 
   async run(config, log, build) {
-    await deleteAll([
-      build.resolvePath('packages'),
-      build.resolvePath('yarn.lock'),
-    ], log);
+    await deleteAll([build.resolvePath('packages'), build.resolvePath('yarn.lock')], log);
   },
 };
 
-
 export const CleanTypescriptTask = {
-  description:
-    'Cleaning typescript source files that have been transpiled to JS',
+  description: 'Cleaning typescript source files that have been transpiled to JS',
 
   async run(config, log, build) {
-    log.info('Deleted %d files', await scanDelete({
-      directory: build.resolvePath(),
-      regularExpressions: [
-        /\.(ts|tsx|d\.ts)$/,
-        /tsconfig.*\.json$/
-      ]
-    }));
+    log.info(
+      'Deleted %d files',
+      await scanDelete({
+        directory: build.resolvePath(),
+        regularExpressions: [/\.(ts|tsx|d\.ts)$/, /tsconfig.*\.json$/],
+      })
+    );
   },
 };
 
@@ -67,9 +67,7 @@ export const CleanExtraFilesFromModulesTask = {
 
   async run(config, log, build) {
     const makeRegexps = patterns =>
-      patterns.map(pattern =>
-        minimatch.makeRe(pattern, { nocase: true })
-      );
+      patterns.map(pattern => minimatch.makeRe(pattern, { nocase: true }));
 
     const regularExpressions = makeRegexps([
       // tests
@@ -166,16 +164,22 @@ export const CleanExtraFilesFromModulesTask = {
       '**/docker-compose.yml',
     ]);
 
-    log.info('Deleted %d files', await scanDelete({
-      directory: build.resolvePath('node_modules'),
-      regularExpressions
-    }));
+    log.info(
+      'Deleted %d files',
+      await scanDelete({
+        directory: build.resolvePath('node_modules'),
+        regularExpressions,
+      })
+    );
 
     if (!build.isOss()) {
-      log.info('Deleted %d files', await scanDelete({
-        directory: build.resolvePath('x-pack/node_modules'),
-        regularExpressions
-      }));
+      log.info(
+        'Deleted %d files',
+        await scanDelete({
+          directory: build.resolvePath('x-pack/node_modules'),
+          regularExpressions,
+        })
+      );
     }
   },
 };
@@ -186,14 +190,15 @@ export const CleanExtraBinScriptsTask = {
   async run(config, log, build) {
     for (const platform of config.getNodePlatforms()) {
       if (platform.isWindows()) {
-        await deleteAll([
-          build.resolvePathForPlatform(platform, 'bin', '*'),
-          `!${build.resolvePathForPlatform(platform, 'bin', '*.bat')}`,
-        ], log);
+        await deleteAll(
+          [
+            build.resolvePathForPlatform(platform, 'bin', '*'),
+            `!${build.resolvePathForPlatform(platform, 'bin', '*.bat')}`,
+          ],
+          log
+        );
       } else {
-        await deleteAll([
-          build.resolvePathForPlatform(platform, 'bin', '*.bat'),
-        ], log);
+        await deleteAll([build.resolvePathForPlatform(platform, 'bin', '*.bat')], log);
       }
     }
   },
@@ -204,7 +209,7 @@ export const CleanExtraBrowsersTask = {
 
   async run(config, log, build) {
     const getBrowserPathsForPlatform = platform => {
-      const reportingDir = 'x-pack/plugins/reporting';
+      const reportingDir = 'x-pack/legacy/plugins/reporting';
       const chromiumDir = '.chromium';
       const chromiumPath = p =>
         build.resolvePathForPlatform(platform, reportingDir, chromiumDir, p);
@@ -245,13 +250,45 @@ export const CleanEmptyFoldersTask = {
     // Delete every single empty folder from
     // the distributable except the plugins
     // and data folder.
-    await deleteEmptyFolders(
-      log,
-      build.resolvePath('.'),
-      [
-        build.resolvePath('plugins'),
-        build.resolvePath('data')
-      ]
+    await deleteEmptyFolders(log, build.resolvePath('.'), [
+      build.resolvePath('plugins'),
+      build.resolvePath('data'),
+    ]);
+  },
+};
+
+export const CleanCtagBuildTask = {
+  description: 'Cleaning extra platform-specific files from @elastic/node-ctag build dir',
+
+  async run(config, log, build) {
+    const getPlatformId = platform => {
+      if (platform.isWindows()) {
+        return 'win32';
+      } else if (platform.isLinux()) {
+        return 'linux';
+      } else if (platform.isMac()) {
+        return 'darwin';
+      }
+    };
+
+    await Promise.all(
+      config.getTargetPlatforms().map(async platform => {
+        if (build.isOss()) {
+          return;
+        }
+
+        const ctagsBuildDir = build.resolvePathForPlatform(platform, RELATIVE_CTAGS_BUILD_DIR);
+        await deleteAll(
+          [
+            resolve(ctagsBuildDir, '*'),
+            `!${resolve(
+              ctagsBuildDir,
+              `ctags-node-v${process.versions.modules}-${getPlatformId(platform)}-x64`
+            )}`,
+          ],
+          log
+        );
+      })
     );
   },
 };

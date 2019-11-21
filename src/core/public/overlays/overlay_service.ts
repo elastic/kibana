@@ -17,37 +17,49 @@
  * under the License.
  */
 
-import { FlyoutService } from './flyout';
-
-import { FlyoutRef } from '..';
 import { I18nStart } from '../i18n';
+import { UiSettingsClientContract } from '../ui_settings';
+import { OverlayBannersStart, OverlayBannersService } from './banners';
+import { FlyoutService, OverlayFlyoutStart } from './flyout';
+import { ModalService, OverlayModalStart } from './modal';
 
 interface StartDeps {
   i18n: I18nStart;
+  targetDomElement: HTMLElement;
+  uiSettings: UiSettingsClientContract;
 }
 
 /** @internal */
 export class OverlayService {
-  private flyoutService: FlyoutService;
+  private bannersService = new OverlayBannersService();
+  private modalService = new ModalService();
+  private flyoutService = new FlyoutService();
 
-  constructor(targetDomElement: HTMLElement) {
-    this.flyoutService = new FlyoutService(targetDomElement);
-  }
+  public start({ i18n, targetDomElement, uiSettings }: StartDeps): OverlayStart {
+    const flyoutElement = document.createElement('div');
+    targetDomElement.appendChild(flyoutElement);
+    const flyouts = this.flyoutService.start({ i18n, targetDomElement: flyoutElement });
 
-  public start({ i18n }: StartDeps): OverlayStart {
+    const banners = this.bannersService.start({ i18n, uiSettings });
+
+    const modalElement = document.createElement('div');
+    targetDomElement.appendChild(modalElement);
+    const modals = this.modalService.start({ i18n, targetDomElement: modalElement });
+
     return {
-      openFlyout: this.flyoutService.openFlyout.bind(this.flyoutService, i18n),
+      banners,
+      openFlyout: flyouts.open.bind(flyouts),
+      openModal: modals.open.bind(modals),
     };
   }
 }
 
 /** @public */
 export interface OverlayStart {
-  openFlyout: (
-    flyoutChildren: React.ReactNode,
-    flyoutProps?: {
-      closeButtonAriaLabel?: string;
-      'data-test-subj'?: string;
-    }
-  ) => FlyoutRef;
+  /** {@link OverlayBannersStart} */
+  banners: OverlayBannersStart;
+  /** {@link OverlayFlyoutStart#open} */
+  openFlyout: OverlayFlyoutStart['open'];
+  /** {@link OverlayModalStart#open} */
+  openModal: OverlayModalStart['open'];
 }

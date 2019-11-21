@@ -33,7 +33,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
         await PageObjects.dashboard.switchToEditMode();
       }
       await dashboardAddPanel.ensureAddPanelIsShowing();
-      await dashboardAddPanel.clickAddNewEmbeddableLink();
+      await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualize.saveVisualizationExpectSuccess(name);
     }
@@ -80,7 +80,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
         await PageObjects.dashboard.switchToEditMode();
       }
       await dashboardAddPanel.ensureAddPanelIsShowing();
-      await dashboardAddPanel.clickAddNewEmbeddableLink();
+      await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
       await PageObjects.visualize.clickMarkdownWidget();
       await PageObjects.visualize.setMarkdownTxt(markdown);
       await PageObjects.visualize.clickGo();

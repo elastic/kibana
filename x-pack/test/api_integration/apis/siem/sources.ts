@@ -5,12 +5,12 @@
  */
 
 import expect from '@kbn/expect';
-import { sourceQuery } from '../../../../plugins/siem/public/containers/source/index.gql_query';
-import { SourceQuery } from '../../../../plugins/siem/public/graphql/types';
+import { sourceQuery } from '../../../../legacy/plugins/siem/public/containers/source/index.gql_query';
+import { SourceQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
 
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-const sourcesTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
 
@@ -24,25 +24,15 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           query: sourceQuery,
           variables: {
             sourceId: 'default',
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
           },
         })
         .then(resp => {
-          const sourceConfiguration = resp.data.source.configuration;
           const sourceStatus = resp.data.source.status;
-
-          // shipped default values
-          expect(sourceConfiguration.auditbeatAlias).to.be('auditbeat-*');
-          expect(sourceConfiguration.logAlias).to.be('filebeat-*');
-
           // test data in x-pack/test/functional/es_archives/auditbeat_test_data/data.json.gz
-          expect(sourceStatus.indexFields.length).to.be(349);
-          expect(sourceStatus.auditbeatIndices.length).to.be(1);
-          expect(sourceStatus.auditbeatIndicesExist).to.be(true);
-          expect(sourceStatus.auditbeatAliasExists).to.be(true);
+          expect(sourceStatus.indexFields.length).to.be(395);
+          expect(sourceStatus.indicesExist).to.be(true);
         });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default sourcesTests;
+}

@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AttributionControl is rendered 1`] = `
+<div
+  className="mapAttributionControl"
+>
+  <EuiText
+    size="xs"
+  >
+    <small>
+      <strong>
+        <EuiLink
+          color="text"
+          href="https://coolmaps.com"
+          target="_blank"
+        >
+          attribution with link
+        </EuiLink>
+        , 
+        attribution with no link
+      </strong>
+    </small>
+  </EuiText>
+</div>
+`;

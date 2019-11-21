@@ -10,8 +10,8 @@ import { ES_INDEX_NAME } from './constants';
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
-  const chance = getService('chance');
+  const es = getService('legacyEs');
+  const randomness = getService('randomness');
 
   describe('assign_tags_to_beats', () => {
     const archive = 'beats/list';
@@ -180,7 +180,7 @@ export default function ({ getService }) {
     });
 
     it('should return errors for non-existent beats', async () => {
-      const nonExistentBeatId = chance.word();
+      const nonExistentBeatId = randomness.word();
 
       const { body: apiResponse } = await supertest
         .post('/api/beats/agents_tags/assignments')
@@ -196,7 +196,7 @@ export default function ({ getService }) {
     });
 
     it('should return errors for non-existent tags', async () => {
-      const nonExistentTag = chance.word();
+      const nonExistentTag = randomness.word();
 
       const { body: apiResponse } = await supertest
         .post('/api/beats/agents_tags/assignments')
@@ -220,8 +220,8 @@ export default function ({ getService }) {
     });
 
     it('should return errors for non-existent beats and tags', async () => {
-      const nonExistentBeatId = chance.word();
-      const nonExistentTag = chance.word();
+      const nonExistentBeatId = randomness.word();
+      const nonExistentTag = randomness.word();
 
       const { body: apiResponse } = await supertest
         .post('/api/beats/agents_tags/assignments')

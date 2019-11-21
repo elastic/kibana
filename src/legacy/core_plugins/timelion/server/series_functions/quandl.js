@@ -23,8 +23,6 @@ import fetch from 'node-fetch';
 import moment from 'moment';
 fetch.Promise = require('bluebird');
 
-//var parseDateMath = require('../utils/date_math.js');
-
 import Datasource from '../lib/classes/datasource';
 
 export default new Datasource ('quandl', {

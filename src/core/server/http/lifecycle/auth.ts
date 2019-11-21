@@ -16,40 +16,70 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import Boom from 'boom';
 import { Lifecycle, Request, ResponseToolkit } from 'hapi';
-import { SessionStorage, SessionStorageFactory } from '../session_storage';
+import { Logger } from '../../logging';
+import {
+  HapiResponseAdapter,
+  KibanaRequest,
+  IKibanaResponse,
+  lifecycleResponseFactory,
+  LifecycleResponseFactory,
+  isKibanaResponse,
+} from '../router';
 
-enum ResultType {
+/** @public */
+export enum AuthResultType {
   authenticated = 'authenticated',
-  redirected = 'redirected',
-  rejected = 'rejected',
 }
 
-/** @internal */
-class AuthResult {
-  public static authenticated(credentials: any) {
-    return new AuthResult(ResultType.authenticated, credentials);
-  }
-  public static redirected(url: string) {
-    return new AuthResult(ResultType.redirected, url);
-  }
-  public static rejected(error: Error, options: { statusCode?: number } = {}) {
-    return new AuthResult(ResultType.rejected, { error, statusCode: options.statusCode });
-  }
-  public static isValidResult(candidate: any) {
-    return candidate instanceof AuthResult;
-  }
-  constructor(private readonly type: ResultType, public readonly payload: any) {}
-  public isAuthenticated() {
-    return this.type === ResultType.authenticated;
-  }
-  public isRedirected() {
-    return this.type === ResultType.redirected;
-  }
-  public isRejected() {
-    return this.type === ResultType.rejected;
-  }
+/** @public */
+export interface Authenticated extends AuthResultParams {
+  type: AuthResultType.authenticated;
+}
+
+/** @public */
+export type AuthResult = Authenticated;
+
+const authResult = {
+  authenticated(data: Partial<AuthResultParams> = {}): AuthResult {
+    return {
+      type: AuthResultType.authenticated,
+      state: data.state,
+      requestHeaders: data.requestHeaders,
+      responseHeaders: data.responseHeaders,
+    };
+  },
+  isAuthenticated(result: AuthResult): result is Authenticated {
+    return result && result.type === AuthResultType.authenticated;
+  },
+};
+
+/**
+ * Auth Headers map
+ * @public
+ */
+
+export type AuthHeaders = Record<string, string | string[]>;
+
+/**
+ * Result of an incoming request authentication.
+ * @public
+ */
+export interface AuthResultParams {
+  /**
+   * Data to associate with an incoming request. Any downstream plugin may get access to the data.
+   */
+  state?: Record<string, any>;
+  /**
+   * Auth specific headers to attach to a request object.
+   * Used to perform a request to Elasticsearch on behalf of an authenticated user.
+   */
+  requestHeaders?: AuthHeaders;
+  /**
+   * Auth specific headers to attach to a response object.
+   * Used to send back authentication mechanism related headers to a client when needed.
+   */
+  responseHeaders?: AuthHeaders;
 }
 
 /**
@@ -58,55 +88,57 @@ class AuthResult {
  */
 export interface AuthToolkit {
   /** Authentication is successful with given credentials, allow request to pass through */
-  authenticated: (credentials: any) => AuthResult;
-  /** Authentication requires to interrupt request handling and redirect to a configured url */
-  redirected: (url: string) => AuthResult;
-  /** Authentication is unsuccessful, fail the request with specified error. */
-  rejected: (error: Error, options?: { statusCode?: number }) => AuthResult;
+  authenticated: (data?: AuthResultParams) => AuthResult;
 }
 
 const toolkit: AuthToolkit = {
-  authenticated: AuthResult.authenticated,
-  redirected: AuthResult.redirected,
-  rejected: AuthResult.rejected,
+  authenticated: authResult.authenticated,
 };
 
-/** @public */
-export type AuthenticationHandler<T> = (
-  request: Request,
-  sessionStorage: SessionStorage<T>,
-  t: AuthToolkit
-) => Promise<AuthResult>;
+/**
+ * See {@link AuthToolkit}.
+ * @public
+ */
+export type AuthenticationHandler = (
+  request: KibanaRequest,
+  response: LifecycleResponseFactory,
+  toolkit: AuthToolkit
+) => AuthResult | IKibanaResponse | Promise<AuthResult | IKibanaResponse>;
 
 /** @public */
-export function adoptToHapiAuthFormat<T = any>(
-  fn: AuthenticationHandler<T>,
-  sessionStorage: SessionStorageFactory<T>
+export function adoptToHapiAuthFormat(
+  fn: AuthenticationHandler,
+  log: Logger,
+  onSuccess: (req: Request, data: AuthResultParams) => void = () => undefined
 ) {
   return async function interceptAuth(
-    req: Request,
-    h: ResponseToolkit
+    request: Request,
+    responseToolkit: ResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
+    const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
-      const result = await fn(req, sessionStorage.asScoped(req), toolkit);
-
-      if (AuthResult.isValidResult(result)) {
-        if (result.isAuthenticated()) {
-          return h.authenticated({ credentials: result.payload });
-        }
-        if (result.isRedirected()) {
-          return h.redirect(result.payload).takeover();
-        }
-        if (result.isRejected()) {
-          const { error, statusCode } = result.payload;
-          return Boom.boomify(error, { statusCode });
-        }
+      const result = await fn(
+        KibanaRequest.from(request, undefined, false),
+        lifecycleResponseFactory,
+        toolkit
+      );
+      if (isKibanaResponse(result)) {
+        return hapiResponseAdapter.handle(result);
+      }
+      if (authResult.isAuthenticated(result)) {
+        onSuccess(request, {
+          state: result.state,
+          requestHeaders: result.requestHeaders,
+          responseHeaders: result.responseHeaders,
+        });
+        return responseToolkit.authenticated({ credentials: result.state || {} });
       }
       throw new Error(
-        `Unexpected result from Authenticate. Expected AuthResult, but given: ${result}.`
+        `Unexpected result from Authenticate. Expected AuthResult or KibanaResponse, but given: ${result}.`
       );
     } catch (error) {
-      return Boom.internal(error.message, { statusCode: 500 });
+      log.error(error);
+      return hapiResponseAdapter.toInternalError();
     }
   };
 }

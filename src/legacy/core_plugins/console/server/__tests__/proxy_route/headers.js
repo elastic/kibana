@@ -20,13 +20,13 @@
 import { request } from 'http';
 
 import sinon from 'sinon';
-import Wreck from 'wreck';
 import expect from '@kbn/expect';
 import { Server } from 'hapi';
+import * as requestModule from '../../request';
 
 import { createProxyRoute } from '../../';
 
-import { createWreckResponseStub } from './stubs';
+import { createResponseStub } from './stubs';
 
 describe('Console Proxy Route', () => {
   const sandbox = sinon.createSandbox();
@@ -34,13 +34,15 @@ describe('Console Proxy Route', () => {
   let setup;
 
   beforeEach(() => {
-    sandbox.stub(Wreck, 'request').callsFake(createWreckResponseStub());
+    sandbox.stub(requestModule, 'sendRequest').callsFake(createResponseStub());
 
     setup = () => {
       const server = new Server();
-      server.route(createProxyRoute({
-        baseUrl: 'http://localhost:9200'
-      }));
+      server.route(
+        createProxyRoute({
+          baseUrl: 'http://localhost:9200',
+        })
+      );
 
       teardowns.push(() => server.stop());
 
@@ -61,23 +63,34 @@ describe('Console Proxy Route', () => {
       await server.start();
 
       const resp = await new Promise(resolve => {
-        request({
-          protocol: server.info.protocol + ':',
-          host: server.info.address,
-          port: server.info.port,
-          method: 'POST',
-          path: '/api/console/proxy?method=GET&path=/'
-        }, resolve).end();
+        request(
+          {
+            protocol: server.info.protocol + ':',
+            host: server.info.address,
+            port: server.info.port,
+            method: 'POST',
+            path: '/api/console/proxy?method=GET&path=/',
+          },
+          resolve
+        ).end();
       });
 
       resp.destroy();
 
-      sinon.assert.calledOnce(Wreck.request);
-      const { headers } = Wreck.request.getCall(0).args[2];
-      expect(headers).to.have.property('x-forwarded-for').and.not.be('');
-      expect(headers).to.have.property('x-forwarded-port').and.not.be('');
-      expect(headers).to.have.property('x-forwarded-proto').and.not.be('');
-      expect(headers).to.have.property('x-forwarded-host').and.not.be('');
+      sinon.assert.calledOnce(requestModule.sendRequest);
+      const { headers } = requestModule.sendRequest.getCall(0).args[0];
+      expect(headers)
+        .to.have.property('x-forwarded-for')
+        .and.not.be('');
+      expect(headers)
+        .to.have.property('x-forwarded-port')
+        .and.not.be('');
+      expect(headers)
+        .to.have.property('x-forwarded-proto')
+        .and.not.be('');
+      expect(headers)
+        .to.have.property('x-forwarded-host')
+        .and.not.be('');
     });
   });
 });

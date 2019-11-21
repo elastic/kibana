@@ -20,19 +20,11 @@
 import Hapi from 'hapi';
 import { createMockServer } from './_mock_server';
 import { createResolveImportErrorsRoute } from './resolve_import_errors';
+import { savedObjectsClientMock } from '../../../../core/server/mocks';
 
 describe('POST /api/saved_objects/_resolve_import_errors', () => {
   let server: Hapi.Server;
-  const savedObjectsClient = {
-    errors: {} as any,
-    bulkCreate: jest.fn(),
-    bulkGet: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
+  const savedObjectsClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
     server = createMockServer();
@@ -47,7 +39,13 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
       },
     };
 
-    server.route(createResolveImportErrorsRoute(prereqs, server));
+    server.route(
+      createResolveImportErrorsRoute(prereqs, server, [
+        'index-pattern',
+        'visualization',
+        'dashboard',
+      ])
+    );
   });
 
   test('formats successful response', async () => {
@@ -105,6 +103,7 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
           attributes: {
             title: 'Look at my dashboard',
           },
+          references: [],
         },
       ],
     });
@@ -147,6 +146,7 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
           attributes: {
             title: 'Look at my dashboard',
           },
+          references: [],
         },
       ],
     });
@@ -155,29 +155,32 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
     expect(statusCode).toBe(200);
     expect(response).toEqual({ success: true, successCount: 1 });
     expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "attributes": Object {
-            "title": "Look at my dashboard",
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "title": "Look at my dashboard",
+                },
+                "id": "my-dashboard",
+                "migrationVersion": Object {},
+                "type": "dashboard",
+              },
+            ],
+            Object {
+              "namespace": undefined,
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
           },
-          "id": "my-dashboard",
-          "migrationVersion": Object {},
-          "type": "dashboard",
-        },
-      ],
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+        ],
+      }
+    `);
   });
 
   test('resolves conflicts for dashboard', async () => {
@@ -210,6 +213,7 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
           attributes: {
             title: 'Look at my dashboard',
           },
+          references: [],
         },
       ],
     });
@@ -218,32 +222,33 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
     expect(statusCode).toBe(200);
     expect(response).toEqual({ success: true, successCount: 1 });
     expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "attributes": Object {
-            "title": "Look at my dashboard",
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "title": "Look at my dashboard",
+                },
+                "id": "my-dashboard",
+                "migrationVersion": Object {},
+                "type": "dashboard",
+              },
+            ],
+            Object {
+              "namespace": undefined,
+              "overwrite": true,
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
           },
-          "id": "my-dashboard",
-          "migrationVersion": Object {},
-          "type": "dashboard",
-        },
-      ],
-      Object {
-        "overwrite": true,
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+        ],
+      }
+    `);
   });
 
   test('resolves conflicts by replacing the visualization references', async () => {
@@ -300,58 +305,64 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
     expect(statusCode).toBe(200);
     expect(response).toEqual({ success: true, successCount: 1 });
     expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "attributes": Object {
-            "title": "Look at my visualization",
-          },
-          "id": "my-vis",
-          "migrationVersion": Object {},
-          "references": Array [
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "title": "Look at my visualization",
+                },
+                "id": "my-vis",
+                "migrationVersion": Object {},
+                "references": Array [
+                  Object {
+                    "id": "existing",
+                    "name": "ref_0",
+                    "type": "index-pattern",
+                  },
+                ],
+                "type": "visualization",
+              },
+            ],
             Object {
-              "id": "existing",
-              "name": "ref_0",
-              "type": "index-pattern",
+              "namespace": undefined,
             },
           ],
-          "type": "visualization",
-        },
-      ],
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      }
+    `);
     expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "fields": Array [
-            "id",
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              Object {
+                "fields": Array [
+                  "id",
+                ],
+                "id": "existing",
+                "type": "index-pattern",
+              },
+            ],
+            Object {
+              "namespace": undefined,
+            },
           ],
-          "id": "existing",
-          "type": "index-pattern",
-        },
-      ],
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      }
+    `);
   });
 });

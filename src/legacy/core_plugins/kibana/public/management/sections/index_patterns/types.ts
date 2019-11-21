@@ -25,9 +25,10 @@ export interface IndexPatternCreationOption {
 
 export interface IndexPattern {
   id: string;
-  title: HTMLElement;
+  title: string;
   url: string;
   active: boolean;
   default: boolean;
   tag?: string[];
+  sort: string;
 }

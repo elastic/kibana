@@ -1,0 +1,51 @@
+.lnsPopoverEditor {
+  flex-grow: 1;
+  line-height: 0;
+  overflow: hidden;
+}
+
+.lnsPopoverEditor__anchor {
+  max-width: 100%;
+  display: block;
+}
+
+.lnsPopoverEditor__link {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: $euiSizeS;
+  min-height: $euiSizeXXL;
+}
+
+.lnsPopoverEditor__left,
+.lnsPopoverEditor__right {
+  padding: $euiSizeS;
+}
+
+.lnsPopoverEditor__left {
+  padding-top: 0;
+  background-color: $euiPageBackgroundColor;
+}
+
+.lnsPopoverEditor__right {
+  width: $euiSize * 20;
+}
+
+.lnsPopoverEditor__operation {
+  @include euiFontSizeS;
+  color: $euiColorPrimary;
+
+  // TODO: Fix in EUI or don't use EuiSideNav
+  .euiSideNavItemButton__label {
+    color: inherit;
+  }
+}
+
+.lnsPopoverEditor__operation--selected {
+  font-weight: bold;
+  color: $euiTextColor;
+}
+
+.lnsPopoverEditor__operation--incompatible {
+  color: $euiColorMediumShade;
+}

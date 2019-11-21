@@ -8,15 +8,15 @@ import expect from '@kbn/expect';
 
 import {
   Direction,
-  GetHostDetailsQuery,
+  GetHostOverviewQuery,
   GetHostFirstLastSeenQuery,
   GetHostsTableQuery,
   HostsFields,
-} from '../../../../plugins/siem/public/graphql/types';
-import { HostDetailsQuery } from './../../../../plugins/siem/public/containers/hosts/details/host_details.gql_query';
-import { HostFirstLastSeenGqlQuery } from './../../../../plugins/siem/public/containers/hosts/first_last_seen/first_last_seen.gql_query';
-import { HostsTableQuery } from './../../../../plugins/siem/public/containers/hosts/hosts_table.gql_query';
-import { KbnTestProvider } from './types';
+} from '../../../../legacy/plugins/siem/public/graphql/types';
+import { HostOverviewQuery } from '../../../../legacy/plugins/siem/public/containers/hosts/overview/host_overview.gql_query';
+import { HostFirstLastSeenGqlQuery } from './../../../../legacy/plugins/siem/public/containers/hosts/first_last_seen/first_last_seen.gql_query';
+import { HostsTableQuery } from './../../../../legacy/plugins/siem/public/containers/hosts/hosts_table.gql_query';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
 const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
@@ -27,7 +27,7 @@ const TOTAL_COUNT = 7;
 const EDGE_LENGTH = 1;
 const CURSOR_ID = '2ab45fc1c41e4c84bbd02202a7e5761f';
 
-const hostsTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
 
@@ -46,21 +46,25 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
               to: TO,
               from: FROM,
             },
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             sort: {
               field: HostsFields.lastSeen,
               direction: Direction.asc,
             },
             pagination: {
-              limit: 1,
-              cursor: null,
+              activePage: 0,
+              cursorStart: 0,
+              fakePossibleCount: 3,
+              querySize: 1,
             },
+            inspect: false,
           },
         })
         .then(resp => {
           const hosts = resp.data.source.Hosts;
           expect(hosts.edges.length).to.be(EDGE_LENGTH);
           expect(hosts.totalCount).to.be(TOTAL_COUNT);
-          expect(hosts.pageInfo.endCursor!.value).to.equal('1');
+          expect(hosts.pageInfo.fakeTotalCount).to.equal(3);
         });
     });
 
@@ -79,10 +83,14 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
               field: HostsFields.lastSeen,
               direction: Direction.asc,
             },
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             pagination: {
-              limit: 2,
-              cursor: '1',
+              activePage: 2,
+              cursorStart: 1,
+              fakePossibleCount: 5,
+              querySize: 2,
             },
+            inspect: false,
           },
         })
         .then(resp => {
@@ -90,31 +98,48 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
 
           expect(hosts.edges.length).to.be(EDGE_LENGTH);
           expect(hosts.totalCount).to.be(TOTAL_COUNT);
-          expect(hosts.edges[0]!.node.host!.os!.name).to.eql(HOST_NAME);
+          expect(hosts.edges[0]!.node.host!.os!.name).to.eql([HOST_NAME]);
         });
     });
 
-    it('Make sure that we get Host Details data', () => {
-      const expectedHost: GetHostDetailsQuery.Host = {
-        architecture: 'x86_64',
-        id: CURSOR_ID,
-        ip: [],
-        mac: [],
-        name: 'zeek-sensor-san-francisco',
-        os: {
-          family: 'debian',
-          name: HOST_NAME,
-          platform: 'ubuntu',
-          version: '18.04.2 LTS (Bionic Beaver)',
-          __typename: 'OsFields',
+    it('Make sure that we get Host Overview data', () => {
+      const expectedHost: Omit<GetHostOverviewQuery.HostOverview, 'inspect'> = {
+        _id: 'zeek-sensor-san-francisco',
+        host: {
+          architecture: ['x86_64'],
+          id: [CURSOR_ID],
+          ip: [],
+          mac: [],
+          name: ['zeek-sensor-san-francisco'],
+          os: {
+            family: ['debian'],
+            name: [HOST_NAME],
+            platform: ['ubuntu'],
+            version: ['18.04.2 LTS (Bionic Beaver)'],
+            __typename: 'OsEcsFields',
+          },
+          type: null,
+          __typename: 'HostEcsFields',
         },
-        type: null,
-        __typename: 'HostFields',
+        cloud: {
+          instance: {
+            id: ['132972452'],
+            __typename: 'CloudInstance',
+          },
+          machine: {
+            type: [],
+            __typename: 'CloudMachine',
+          },
+          provider: ['digitalocean'],
+          region: ['sfo2'],
+          __typename: 'CloudFields',
+        },
+        __typename: 'HostItem',
       };
 
       return client
-        .query<GetHostDetailsQuery.Query>({
-          query: HostDetailsQuery,
+        .query<GetHostOverviewQuery.Query>({
+          query: HostOverviewQuery,
           variables: {
             sourceId: 'default',
             hostName: 'zeek-sensor-san-francisco',
@@ -123,11 +148,13 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
               to: TO,
               from: FROM,
             },
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            inspect: false,
           },
         })
         .then(resp => {
-          const hosts = resp.data.source.HostDetails;
-          expect(hosts.host).to.eql(expectedHost);
+          const hosts = resp.data.source.HostOverview;
+          expect(hosts).to.eql(expectedHost);
         });
     });
 
@@ -138,6 +165,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
           variables: {
             sourceId: 'default',
             hostName: 'zeek-sensor-san-francisco',
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
           },
         })
         .then(resp => {
@@ -150,7 +178,4 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
         });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default hostsTests;
+}

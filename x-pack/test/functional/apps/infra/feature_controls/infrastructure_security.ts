@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import { DATES } from '../constants';
 
-const DATE_WITH_DATA = new Date(DATES.metricsAndLogs.hosts.withData);
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'infraHome', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
+  const retry = getService('retry');
 
   describe('infrastructure security', () => {
     describe('global infrastructure all privileges', () => {
@@ -59,11 +59,11 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         ]);
       });
 
-      it('shows infrastructure navlink', async () => {
+      it('shows metrics navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Infrastructure', 'Management']);
+        expect(navLinks).to.eql(['Metrics', 'Management']);
       });
 
       describe('infrastructure landing page without data', () => {
@@ -72,8 +72,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('infrastructureViewSetupInstructionsButton');
-          await testSubjects.existOrFail('configureSourceButton');
+          await testSubjects.existOrFail('~infrastructureViewSetupInstructionsButton');
+          await testSubjects.existOrFail('~configureSourceButton');
         });
 
         it(`doesn't show read-only badge`, async () => {
@@ -96,20 +96,22 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           });
           await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-          await testSubjects.existOrFail('waffleMap');
+          await testSubjects.existOrFail('~waffleMap');
         });
 
         describe('context menu', () => {
           before(async () => {
-            await testSubjects.click('nodeContainer');
+            await testSubjects.click('~nodeContainer');
           });
 
           it(`does not show link to view logs`, async () => {
-            await testSubjects.missingOrFail('viewLogsContextMenuItem');
+            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
+            await testSubjects.missingOrFail('~viewLogsContextMenuItem');
           });
 
           it(`does not show link to view apm traces`, async () => {
-            await testSubjects.missingOrFail('viewApmTracesContextMenuItem');
+            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
+            await testSubjects.missingOrFail('~viewApmTracesContextMenuItem');
           });
         });
 
@@ -121,13 +123,13 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it(`metrics page is visible`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'infraOps',
-          '/metrics/host/demo-stack-redis-01',
+          '/infrastructure/metrics/host/demo-stack-redis-01',
           {
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('infraMetricsPage');
+        await testSubjects.existOrFail('~infraMetricsPage');
       });
     });
 
@@ -172,11 +174,11 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         ]);
       });
 
-      it('shows infrastructure navlink', async () => {
+      it('shows metrics navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Infrastructure', 'Management']);
+        expect(navLinks).to.eql(['Metrics', 'Management']);
       });
 
       describe('infrastructure landing page without data', () => {
@@ -185,8 +187,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('infrastructureViewSetupInstructionsButton');
-          await testSubjects.missingOrFail('configureSourceButton');
+          await testSubjects.existOrFail('~infrastructureViewSetupInstructionsButton');
+          await testSubjects.missingOrFail('~configureSourceButton');
         });
 
         it(`shows read-only badge`, async () => {
@@ -209,20 +211,22 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           });
           await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-          await testSubjects.existOrFail('waffleMap');
+          await testSubjects.existOrFail('~waffleMap');
         });
 
         describe('context menu', () => {
           before(async () => {
-            await testSubjects.click('nodeContainer');
+            await testSubjects.click('~nodeContainer');
           });
 
           it(`does not show link to view logs`, async () => {
-            await testSubjects.missingOrFail('viewLogsContextMenuItem');
+            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
+            await testSubjects.missingOrFail('~viewLogsContextMenuItem');
           });
 
           it(`does not show link to view apm traces`, async () => {
-            await testSubjects.missingOrFail('viewApmTracesContextMenuItem');
+            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
+            await testSubjects.missingOrFail('~viewApmTracesContextMenuItem');
           });
         });
 
@@ -234,13 +238,13 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it(`metrics page is visible`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'infraOps',
-          '/metrics/host/demo-stack-redis-01',
+          '/infrastructure/metrics/host/demo-stack-redis-01',
           {
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('infraMetricsPage');
+        await testSubjects.existOrFail('~infraMetricsPage');
       });
     });
 
@@ -301,10 +305,11 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           });
           await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-          await testSubjects.existOrFail('waffleMap');
-          await testSubjects.click('nodeContainer');
-          await testSubjects.click('viewLogsContextMenuItem');
-          await testSubjects.existOrFail('infraLogsPage');
+          await testSubjects.existOrFail('~waffleMap');
+          await testSubjects.click('~nodeContainer');
+          await retry.waitFor('context menu', () => testSubjects.exists('nodeContextMenu'));
+          await testSubjects.click('~viewLogsContextMenuItem');
+          await testSubjects.existOrFail('~infraLogsPage');
         });
       });
     });
@@ -366,10 +371,11 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           });
           await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-          await testSubjects.existOrFail('waffleMap');
-          await testSubjects.click('nodeContainer');
-          await testSubjects.click('viewApmTracesContextMenuItem');
-          await testSubjects.existOrFail('apmMainContainer');
+          await testSubjects.existOrFail('~waffleMap');
+          await testSubjects.click('~nodeContainer');
+          await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
+          await testSubjects.click('~viewApmTracesContextMenuItem');
+          await testSubjects.existOrFail('~apmMainContainer');
         });
       });
     });
@@ -410,11 +416,11 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await security.user.delete('no_infrastructure_privileges_user');
       });
 
-      it(`doesn't show infrastructure navlink`, async () => {
+      it(`doesn't show metrics navlink`, async () => {
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.not.contain(['Infrastructure']);
+        expect(navLinks).to.not.contain(['Metrics']);
       });
 
       it(`infrastructure root renders not found page`, async () => {
@@ -422,7 +428,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('infraNotFoundPage');
+        await testSubjects.existOrFail('~infraNotFoundPage');
       });
 
       it(`infrastructure home page renders not found page`, async () => {
@@ -430,7 +436,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('infraNotFoundPage');
+        await testSubjects.existOrFail('~infraNotFoundPage');
       });
 
       it(`infrastructure landing page renders not found page`, async () => {
@@ -438,15 +444,15 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('infraNotFoundPage');
+        await testSubjects.existOrFail('~infraNotFoundPage');
       });
 
       it(`infrastructure snapshot page renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'infrastructure/snapshot', {
+        await PageObjects.common.navigateToActualUrl('infraOps', 'infrastructure/inventory', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('infraNotFoundPage');
+        await testSubjects.existOrFail('~infraNotFoundPage');
       });
 
       it(`metrics page renders not found page`, async () => {
@@ -458,7 +464,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('infraNotFoundPage');
+        await testSubjects.existOrFail('~infraNotFoundPage');
       });
     });
   });

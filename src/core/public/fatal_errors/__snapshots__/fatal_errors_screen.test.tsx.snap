@@ -10,6 +10,7 @@ exports[`rendering render matches snapshot 1`] = `
   }
 >
   <EuiPageBody
+    component="main"
     restrictWidth={false}
   >
     <EuiPageContent
@@ -24,10 +25,7 @@ exports[`rendering render matches snapshot 1`] = `
               color="primary"
               data-test-subj="clearSession"
               fill={true}
-              iconSide="left"
               onClick={[Function]}
-              size="m"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Clear your session"
@@ -36,11 +34,8 @@ exports[`rendering render matches snapshot 1`] = `
               />
             </EuiButton>,
             <EuiButtonEmpty
-              color="primary"
               data-test-subj="goBack"
-              iconSide="left"
               onClick={[Function]}
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Go back"
@@ -75,7 +70,6 @@ exports[`rendering render matches snapshot 1`] = `
         color="danger"
         iconType="alert"
         key="0"
-        size="m"
         title="foo"
       >
         <EuiCodeBlock
@@ -92,7 +86,6 @@ Error: foo
         color="danger"
         iconType="alert"
         key="1"
-        size="m"
         title="bar"
       >
         <EuiCodeBlock

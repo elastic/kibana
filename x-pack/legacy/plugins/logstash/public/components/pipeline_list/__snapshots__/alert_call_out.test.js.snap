@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AlertCallOut component renders expected component 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  title="Only pipelines created in Kibana Management appear here"
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="How can I see additional pipelines?"
+      id="xpack.logstash.alertCallOut.howToSeeAdditionalPipelinesDescription"
+      values={Object {}}
+    />
+  </p>
+  <div>
+    Some text
+  </div>
+</EuiCallOut>
+`;

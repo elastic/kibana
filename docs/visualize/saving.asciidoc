@@ -1,0 +1,19 @@
+[[save-visualize]]
+== Save visualizations
+To use your visualizations in <<dashboard, dashboards>>, you must save them.
+
+. In the {kib} toolbar, click *Save*.
+. Enter the visualization *Title* and optional *Description*, then *Save* the visualization.
+
+To access the saved visualization, go to *Management > {kib} > Saved Objects*.
+
+[float]
+[[save-visualization-read-only-access]]
+==== Read only access
+When you have insufficient privileges to save visualizations, the following indicator is
+displayed and the *Save* button is not visible.
+
+[role="screenshot"]
+image::visualize/images/read-only-badge.png[Example of Visualize's read only access indicator in Kibana's header]
+
+For more information, see <<xpack-security-authorization>>.

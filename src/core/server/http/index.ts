@@ -17,9 +17,48 @@
  * under the License.
  */
 
-export { HttpConfig } from './http_config';
-export { HttpService, HttpServiceSetup, HttpServiceStart } from './http_service';
-export { Router, KibanaRequest } from './router';
+export { config, HttpConfig, HttpConfigType } from './http_config';
+export { HttpService } from './http_service';
+export { GetAuthHeaders } from './auth_headers_storage';
+export { AuthStatus, GetAuthState, IsAuthenticated } from './auth_state_storage';
+export {
+  CustomHttpResponseOptions,
+  IKibanaSocket,
+  isRealRequest,
+  HttpResponseOptions,
+  HttpResponsePayload,
+  ErrorHttpResponseOptions,
+  KibanaRequest,
+  KibanaRequestRoute,
+  IKibanaResponse,
+  KnownHeaders,
+  LegacyRequest,
+  LifecycleResponseFactory,
+  RedirectResponseOptions,
+  RequestHandler,
+  ResponseError,
+  ResponseErrorAttributes,
+  ResponseHeaders,
+  kibanaResponseFactory,
+  KibanaResponseFactory,
+  RouteConfig,
+  IRouter,
+  RouteMethod,
+  RouteConfigOptions,
+} from './router';
 export { BasePathProxyServer } from './base_path_proxy_server';
-export { AuthenticationHandler, AuthToolkit } from './lifecycle/auth';
-export { OnRequestHandler, OnRequestToolkit } from './lifecycle/on_request';
+export { OnPreAuthHandler, OnPreAuthToolkit } from './lifecycle/on_pre_auth';
+export {
+  AuthenticationHandler,
+  AuthHeaders,
+  AuthResultParams,
+  AuthToolkit,
+  AuthResult,
+  Authenticated,
+  AuthResultType,
+} from './lifecycle/auth';
+export { OnPostAuthHandler, OnPostAuthToolkit } from './lifecycle/on_post_auth';
+export { SessionStorageFactory, SessionStorage } from './session_storage';
+export { SessionStorageCookieOptions } from './cookie_session_storage';
+export * from './types';
+export { BasePath, IBasePath } from './base_path_service';

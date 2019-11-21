@@ -19,17 +19,18 @@
 
 import { merge } from 'lodash';
 // @ts-ignore not really worth typing
-import { metadata } from 'ui/metadata';
-import url from 'url';
-import chrome from '../chrome';
 import { KFetchError } from './kfetch_error';
+
+import { HttpSetup } from '../../../../core/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { HttpRequestInit } from '../../../../core/public/http/types';
 
 export interface KFetchQuery {
   [key: string]: string | number | boolean | undefined;
 }
 
-export interface KFetchOptions extends RequestInit {
-  pathname?: string;
+export interface KFetchOptions extends HttpRequestInit {
+  pathname: string;
   query?: KFetchQuery;
 }
 
@@ -48,32 +49,21 @@ const interceptors: Interceptor[] = [];
 export const resetInterceptors = () => (interceptors.length = 0);
 export const addInterceptor = (interceptor: Interceptor) => interceptors.push(interceptor);
 
-export async function kfetch(
-  options: KFetchOptions,
-  { prependBasePath = true }: KFetchKibanaOptions = {}
-) {
-  const combinedOptions = withDefaultOptions(options);
-  const promise = requestInterceptors(combinedOptions).then(
-    ({ pathname, query, ...restOptions }) => {
-      const fullUrl = url.format({
-        pathname: prependBasePath ? chrome.addBasePath(pathname) : pathname,
-        query,
-      });
-
-      return window.fetch(fullUrl, restOptions).then(async res => {
-        if (!res.ok) {
-          throw new KFetchError(res, await getBodyAsJson(res));
-        }
-        const contentType = res.headers.get('content-type');
-        if (contentType && contentType.split(';')[0] === 'application/ndjson') {
-          return await getBodyAsBlob(res);
-        }
-        return await getBodyAsJson(res);
-      });
-    }
-  );
-
-  return responseInterceptors(promise);
+export function createKfetch(http: HttpSetup) {
+  return function kfetch(
+    options: KFetchOptions,
+    { prependBasePath = true }: KFetchKibanaOptions = {}
+  ) {
+    return responseInterceptors(
+      requestInterceptors(withDefaultOptions(options))
+        .then(({ pathname, ...restOptions }) =>
+          http.fetch(pathname, { ...restOptions, prependBasePath })
+        )
+        .catch(err => {
+          throw new KFetchError(err.response || { statusText: err.message }, err.body);
+        })
+    );
+  };
 }
 
 // Request/response interceptors are called in opposite orders.
@@ -91,36 +81,29 @@ function responseInterceptors(responsePromise: Promise<any>) {
   }, responsePromise);
 }
 
-async function getBodyAsJson(res: Response) {
-  try {
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
-}
-
-async function getBodyAsBlob(res: Response) {
-  try {
-    return await res.blob();
-  } catch (e) {
-    return null;
-  }
-}
-
 export function withDefaultOptions(options?: KFetchOptions): KFetchOptions {
-  return merge(
+  const withDefaults = merge(
     {
       method: 'GET',
       credentials: 'same-origin',
       headers: {
-        ...(options && options.headers && options.headers.hasOwnProperty('Content-Type')
-          ? {}
-          : {
-              'Content-Type': 'application/json',
-            }),
-        'kbn-version': metadata.version,
+        'Content-Type': 'application/json',
       },
     },
     options
-  );
+  ) as KFetchOptions;
+
+  if (
+    options &&
+    options.headers &&
+    'Content-Type' in options.headers &&
+    options.headers['Content-Type'] === undefined
+  ) {
+    // TS thinks headers could be undefined here, but that isn't possible because
+    // of the merge above.
+    // @ts-ignore
+    withDefaults.headers['Content-Type'] = undefined;
+  }
+
+  return withDefaults;
 }

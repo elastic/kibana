@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export { HttpService, HttpSetup } from './http_service';
+export { HttpService } from './http_service';
+export * from './types';

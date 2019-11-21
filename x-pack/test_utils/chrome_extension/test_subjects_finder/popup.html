@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+  <h1>Test subjects finder</h1>
+  <main>
+    <div class="track-config">
+      <div class="form-control">
+        <label class="form-control__label" for="domRootInput">Dom root</label>
+        <input class="form-control__input" type="text" id="domRootInput" placeholder="e.g. #my-app" />
+        <div class="form-control__helper-text">
+          The DOM node you want to start to traverse from. If not specified, the "body" will be used.
+        </div>
+      </div>
+
+      <div class="form-control">
+        <label class="form-control__label" for="outputTypeSelect">Output type</label>
+        <select class="form-control__select" id="outputTypeSelect">
+          <option value="typescript">Typescript</option>
+          <option value="list">List</option>
+        </select>
+        <div class="form-control__helper-text">
+          If you chose "typescript" you will get a Union Type ready to copy and paste in your test file.
+        </div>
+      </div>
+
+      <div class="form-control">
+        <label class="form-control__label" for="depthInput">Max parent - child depth</label>
+        <input class="form-control__input" type="text" id="depthInput" value="2" />
+        <div class="form-control__helper-text">
+          The dom traversal "depth" to be returned. In most cases 2 level depth is enough to access all your test subjects.
+          You can always add manually later other depths in your Typescript union string type.
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button id="startTrackingButton">Start tracking test subjects</button>
+      <button id="stopTrackingButton">Stop tracking test subjects</button>
+    </div>
+  </main>
+
+  <script src="popup.js"></script>
+</body>
+</html>

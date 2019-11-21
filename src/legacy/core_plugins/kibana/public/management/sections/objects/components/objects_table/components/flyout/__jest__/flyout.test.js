@@ -18,24 +18,11 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
 import { Flyout } from '../flyout';
 
 jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
-
-jest.mock('ui/errors', () => ({
-  SavedObjectNotFound: class SavedObjectNotFound extends Error {
-    constructor(options) {
-      super();
-      for (const option in options) {
-        if (options.hasOwnProperty(option)) {
-          this[option] = options[option];
-        }
-      }
-    }
-  },
-}));
 
 jest.mock('../../../../../lib/import_file', () => ({
   importFile: jest.fn(),
@@ -47,6 +34,7 @@ jest.mock('../../../../../lib/resolve_import_errors', () => ({
 
 jest.mock('ui/chrome', () => ({
   addBasePath: () => {},
+  getInjected: () => ['index-pattern', 'visualization', 'dashboard', 'search'],
 }));
 
 jest.mock('../../../../../lib/import_legacy_file', () => ({
@@ -68,6 +56,7 @@ const defaultProps = {
   services: [],
   newIndexPatternUrl: '',
   getConflictResolutions: jest.fn(),
+  confirmModalPromise: jest.fn(),
   indexPatterns: {
     getFields: jest.fn().mockImplementation(() => [{ id: '1' }, { id: '2' }]),
   },
@@ -84,7 +73,7 @@ const legacyMockFile = {
 
 describe('Flyout', () => {
   it('should render import step', async () => {
-    const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
+    const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -95,7 +84,7 @@ describe('Flyout', () => {
   });
 
   it('should toggle the overwrite all control', async () => {
-    const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
+    const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -108,7 +97,7 @@ describe('Flyout', () => {
   });
 
   it('should allow picking a file', async () => {
-    const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
+    const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -121,7 +110,7 @@ describe('Flyout', () => {
   });
 
   it('should allow removing a file', async () => {
-    const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
+    const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
 
     // Ensure all promises resolve
     await Promise.resolve();
@@ -137,7 +126,7 @@ describe('Flyout', () => {
 
   it('should handle invalid files', async () => {
     const { importLegacyFile } = require('../../../../../lib/import_legacy_file');
-    const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
+    const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -182,7 +171,7 @@ describe('Flyout', () => {
                   type: 'index-pattern',
                 },
               ],
-            }
+            },
           },
         ],
       }));
@@ -194,7 +183,7 @@ describe('Flyout', () => {
     });
 
     it('should figure out unmatchedReferences', async () => {
-      const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
+      const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -229,7 +218,7 @@ describe('Flyout', () => {
     });
 
     it('should allow conflict resolution', async () => {
-      const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
+      const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -244,9 +233,7 @@ describe('Flyout', () => {
       expect(component).toMatchSnapshot();
 
       // Ensure we can change the resolution
-      component
-        .instance()
-        .onIndexChanged('MyIndexPattern*', { target: { value: '2' } });
+      component.instance().onIndexChanged('MyIndexPattern*', { target: { value: '2' } });
       expect(component.state('unmatchedReferences')[0].newIndexPatternId).toBe('2');
 
       // Let's resolve now
@@ -259,7 +246,7 @@ describe('Flyout', () => {
     });
 
     it('should handle errors', async () => {
-      const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
+      const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -288,9 +275,7 @@ describe('Flyout', () => {
       await component.instance().import();
       component.update();
       // Set a resolution
-      component
-        .instance()
-        .onIndexChanged('MyIndexPattern*', { target: { value: '2' } });
+      component.instance().onIndexChanged('MyIndexPattern*', { target: { value: '2' } });
       await component
         .find('EuiButton[data-test-subj="importSavedObjectsConfirmBtn"]')
         .simulate('click');
@@ -309,6 +294,75 @@ describe('Flyout', () => {
         },
       ]);
       expect(component.find('EuiFlyoutBody EuiCallOut')).toMatchSnapshot();
+    });
+  });
+
+  describe('errors', () => {
+    const { importFile } = require('../../../../../lib/import_file');
+    const { resolveImportErrors } = require('../../../../../lib/resolve_import_errors');
+
+    it('should display unsupported type errors properly', async () => {
+      const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
+
+      // Ensure all promises resolve
+      await Promise.resolve();
+      // Ensure the state changes are reflected
+      component.update();
+
+      importFile.mockImplementation(() => ({
+        success: false,
+        successCount: 0,
+        errors: [
+          {
+            id: '1',
+            type: 'wigwags',
+            title: 'My Title',
+            error: {
+              type: 'unsupported_type',
+            },
+          },
+        ],
+      }));
+      resolveImportErrors.mockImplementation(() => ({
+        status: 'success',
+        importCount: 0,
+        failedImports: [
+          {
+            error: {
+              type: 'unsupported_type',
+            },
+            obj: {
+              id: '1',
+              type: 'wigwags',
+              title: 'My Title',
+            },
+          },
+        ],
+      }));
+
+      component.setState({ file: mockFile, isLegacyFile: false });
+
+      // Go through the import flow
+      await component.instance().import();
+      component.update();
+
+      // Ensure all promises resolve
+      await Promise.resolve();
+
+      expect(component.state('status')).toBe('success');
+      expect(component.state('failedImports')).toEqual([
+        {
+          error: {
+            type: 'unsupported_type',
+          },
+          obj: {
+            id: '1',
+            type: 'wigwags',
+            title: 'My Title',
+          },
+        },
+      ]);
+      expect(component.find('EuiFlyout EuiCallOut')).toMatchSnapshot();
     });
   });
 
@@ -347,7 +401,17 @@ describe('Flyout', () => {
         },
         obj: {
           searchSource: {
-            getOwnField: () => 'MyIndexPattern*',
+            getOwnField: field => {
+              if (field === 'index') {
+                return 'MyIndexPattern*';
+              }
+              if (field === 'filter') {
+                return [{ meta: { index: 'filterIndex' } }];
+              }
+            },
+          },
+          _serialize: () => {
+            return { references: [{ id: 'MyIndexPattern*' }, { id: 'filterIndex' }] };
           },
         },
       },
@@ -363,11 +427,12 @@ describe('Flyout', () => {
         conflictedSavedObjectsLinkedToSavedSearches: mockConflictedSavedObjectsLinkedToSavedSearches,
         conflictedSearchDocs: mockConflictedSearchDocs,
         importedObjectCount: 2,
+        confirmModalPromise: () => {},
       }));
     });
 
     it('should figure out unmatchedReferences', async () => {
-      const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
+      const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -380,10 +445,11 @@ describe('Flyout', () => {
       expect(importLegacyFile).toHaveBeenCalledWith(legacyMockFile);
       // Remove the last element from data since it should be filtered out
       expect(resolveSavedObjects).toHaveBeenCalledWith(
-        mockData.slice(0, 2).map((doc) => ({ ...doc, _migrationVersion: {} })),
+        mockData.slice(0, 2).map(doc => ({ ...doc, _migrationVersion: {} })),
         true,
         defaultProps.services,
-        defaultProps.indexPatterns
+        defaultProps.indexPatterns,
+        defaultProps.confirmModalPromise
       );
 
       expect(component.state()).toMatchObject({
@@ -405,12 +471,23 @@ describe('Flyout', () => {
               },
             ],
           },
+          {
+            existingIndexPatternId: 'filterIndex',
+            list: [
+              {
+                id: 'filterIndex',
+                title: 'MyIndexPattern*',
+                type: 'index-pattern',
+              },
+            ],
+            newIndexPatternId: undefined,
+          },
         ],
       });
     });
 
     it('should allow conflict resolution', async () => {
-      const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
+      const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -425,9 +502,7 @@ describe('Flyout', () => {
       expect(component).toMatchSnapshot();
 
       // Ensure we can change the resolution
-      component
-        .instance()
-        .onIndexChanged('MyIndexPattern*', { target: { value: '2' } });
+      component.instance().onIndexChanged('MyIndexPattern*', { target: { value: '2' } });
       expect(component.state('unmatchedReferences')[0].newIndexPatternId).toBe('2');
 
       // Let's resolve now
@@ -454,7 +529,7 @@ describe('Flyout', () => {
     });
 
     it('should handle errors', async () => {
-      const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
+      const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -471,9 +546,7 @@ describe('Flyout', () => {
       await component.instance().legacyImport();
       component.update();
       // Set a resolution
-      component
-        .instance()
-        .onIndexChanged('MyIndexPattern*', { target: { value: '2' } });
+      component.instance().onIndexChanged('MyIndexPattern*', { target: { value: '2' } });
       await component
         .find('EuiButton[data-test-subj="importSavedObjectsConfirmBtn"]')
         .simulate('click');

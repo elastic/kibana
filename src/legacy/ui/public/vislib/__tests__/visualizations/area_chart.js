@@ -225,5 +225,35 @@ _.forOwn(dataTypesArray, function (dataType, dataTypeName) {
         });
       });
     });
+    [0, 2, 4, 8].forEach(function (boundsMarginValue) {
+      describe('defaultYExtents is true and boundsMargin is defined', function () {
+        beforeEach(function () {
+          vis.visConfigArgs.defaultYExtents = true;
+          vis.visConfigArgs.boundsMargin = boundsMarginValue;
+          vis.render(dataType, persistedState);
+        });
+
+        it('should return yAxis extents equal to data extents with boundsMargin', function () {
+          vis.handler.charts.forEach(function (chart) {
+            const yAxis = chart.handler.valueAxes[0];
+            const min = vis.handler.valueAxes[0].axisScale.getYMin();
+            const max = vis.handler.valueAxes[0].axisScale.getYMax();
+            const domain = yAxis.getScale().domain();
+            if (min < 0 && max < 0) {
+              expect(domain[0]).to.equal(min);
+              expect(domain[1] - boundsMarginValue).to.equal(max);
+            }
+            else if (min > 0 && max > 0) {
+              expect(domain[0] + boundsMarginValue).to.equal(min);
+              expect(domain[1]).to.equal(max);
+            }
+            else {
+              expect(domain[0]).to.equal(min);
+              expect(domain[1]).to.equal(max);
+            }
+          });
+        });
+      });
+    });
   });
 });

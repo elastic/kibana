@@ -32,8 +32,11 @@ describe('RangeFilterManager', function () {
     const indexPatternMock = {
       id: indexPatternId,
       fields: {
-        byName: {
-          field1: fieldMock
+        getByName: name => {
+          const fields = {
+            field1: fieldMock
+          };
+          return fields[name];
         }
       }
     };
@@ -48,6 +51,7 @@ describe('RangeFilterManager', function () {
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
       expect(newFilter.meta.controlledBy).to.be(controlId);
+      expect(newFilter.meta.key).to.be('field1');
       expect(newFilter).to.have.property('range');
       expect(JSON.stringify(newFilter.range, null, '')).to.be('{"field1":{"gte":1,"lte":3}}');
     });
@@ -78,8 +82,8 @@ describe('RangeFilterManager', function () {
         {
           range: {
             field1: {
-              gte: 1,
-              lte: 3
+              gt: 1,
+              lt: 3
             }
           }
         }

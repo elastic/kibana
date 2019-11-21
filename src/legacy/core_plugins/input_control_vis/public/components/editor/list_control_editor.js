@@ -18,17 +18,12 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component }  from 'react';
+import React, { Component, Fragment } from 'react';
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  EuiFormRow,
-  EuiFieldNumber,
-  EuiSwitch,
-  EuiSelect,
-} from '@elastic/eui';
+import { EuiFormRow, EuiFieldNumber, EuiSwitch, EuiSelect } from '@elastic/eui';
 
 function filterField(field) {
   return field.aggregatable && ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type);
@@ -60,13 +55,13 @@ export class ListControlEditor extends Component {
     }
 
     return null;
-  }
+  };
 
   componentDidUpdate = () => {
     if (this.state.isLoadingFieldType) {
       this.loadIsStringField();
     }
-  }
+  };
 
   loadIsStringField = async () => {
     if (!this.props.controlParams.indexPattern || !this.props.controlParams.fieldName) {
@@ -86,7 +81,7 @@ export class ListControlEditor extends Component {
       return;
     }
 
-    const field = indexPattern.fields.find((field) => {
+    const field = indexPattern.fields.find(field => {
       return field.name === this.props.controlParams.fieldName;
     });
     if (!field) {
@@ -94,9 +89,9 @@ export class ListControlEditor extends Component {
     }
     this.setState({
       isLoadingFieldType: false,
-      isStringField: field.type === 'string'
+      isStringField: field.type === 'string',
     });
-  }
+  };
 
   renderOptions = () => {
     if (this.state.isLoadingFieldType || !this.props.controlParams.fieldName) {
@@ -105,24 +100,28 @@ export class ListControlEditor extends Component {
 
     const options = [];
     if (this.props.parentCandidates && this.props.parentCandidates.length > 0) {
-      const parentCandidatesOptions = [
-        { value: '', text: '' },
-        ...this.props.parentCandidates,
-      ];
+      const parentCandidatesOptions = [{ value: '', text: '' }, ...this.props.parentCandidates];
       options.push(
         <EuiFormRow
           id={`parentSelect-${this.props.controlIndex}`}
-          label={<FormattedMessage id="inputControl.editor.listControl.parentLabel" defaultMessage="Parent control" />}
-          helpText={<FormattedMessage
-            id="inputControl.editor.listControl.parentDescription"
-            defaultMessage="Options are based on the value of parent control. Disabled if parent is not set."
-          />}
+          label={
+            <FormattedMessage
+              id="inputControl.editor.listControl.parentLabel"
+              defaultMessage="Parent control"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="inputControl.editor.listControl.parentDescription"
+              defaultMessage="Options are based on the value of parent control. Disabled if parent is not set."
+            />
+          }
           key="parentSelect"
         >
           <EuiSelect
             options={parentCandidatesOptions}
             value={this.props.controlParams.parent}
-            onChange={(evt) => {
+            onChange={evt => {
               this.props.handleParentChange(this.props.controlIndex, evt);
             }}
           />
@@ -134,15 +133,22 @@ export class ListControlEditor extends Component {
       <EuiFormRow
         id={`multiselect-${this.props.controlIndex}`}
         key="multiselect"
-        helpText={<FormattedMessage
-          id="inputControl.editor.listControl.multiselectDescription"
-          defaultMessage="Allow multiple selection"
-        />}
+        helpText={
+          <FormattedMessage
+            id="inputControl.editor.listControl.multiselectDescription"
+            defaultMessage="Allow multiple selection"
+          />
+        }
       >
         <EuiSwitch
-          label={<FormattedMessage id="inputControl.editor.listControl.multiselectLabel" defaultMessage="Multiselect" />}
+          label={
+            <FormattedMessage
+              id="inputControl.editor.listControl.multiselectLabel"
+              defaultMessage="Multiselect"
+            />
+          }
           checked={this.props.controlParams.options.multiselect}
-          onChange={(evt) => {
+          onChange={evt => {
             this.props.handleCheckboxOptionChange(this.props.controlIndex, 'multiselect', evt);
           }}
           data-test-subj="listControlMultiselectInput"
@@ -150,18 +156,17 @@ export class ListControlEditor extends Component {
       </EuiFormRow>
     );
 
-    const dynamicOptionsHelpText = this.state.isStringField
-      ? (
-        <FormattedMessage
-          id="inputControl.editor.listControl.dynamicOptions.updateDescription"
-          defaultMessage="Update options in response to user input"
-        />
-      ) : (
-        <FormattedMessage
-          id="inputControl.editor.listControl.dynamicOptions.stringFieldDescription"
-          defaultMessage="Only available for &quot;string&quot; fields"
-        />
-      );
+    const dynamicOptionsHelpText = this.state.isStringField ? (
+      <FormattedMessage
+        id="inputControl.editor.listControl.dynamicOptions.updateDescription"
+        defaultMessage="Update options in response to user input"
+      />
+    ) : (
+      <FormattedMessage
+        id="inputControl.editor.listControl.dynamicOptions.stringFieldDescription"
+        defaultMessage='Only available for "string" fields'
+      />
+    );
     options.push(
       <EuiFormRow
         id={`dynamicOptions-${this.props.controlIndex}`}
@@ -169,9 +174,14 @@ export class ListControlEditor extends Component {
         helpText={dynamicOptionsHelpText}
       >
         <EuiSwitch
-          label={<FormattedMessage id="inputControl.editor.listControl.dynamicOptionsLabel" defaultMessage="Dynamic Options" />}
+          label={
+            <FormattedMessage
+              id="inputControl.editor.listControl.dynamicOptionsLabel"
+              defaultMessage="Dynamic Options"
+            />
+          }
           checked={this.props.controlParams.options.dynamicOptions}
-          onChange={(evt) => {
+          onChange={evt => {
             this.props.handleCheckboxOptionChange(this.props.controlIndex, 'dynamicOptions', evt);
           }}
           disabled={this.state.isStringField ? false : true}
@@ -185,14 +195,24 @@ export class ListControlEditor extends Component {
       options.push(
         <EuiFormRow
           id={`size-${this.props.controlIndex}`}
-          label={<FormattedMessage id="inputControl.editor.listControl.sizeLabel" defaultMessage="Size" />}
+          label={
+            <FormattedMessage
+              id="inputControl.editor.listControl.sizeLabel"
+              defaultMessage="Size"
+            />
+          }
           key="size"
-          helpText={<FormattedMessage id="inputControl.editor.listControl.sizeDescription" defaultMessage="Number of options" />}
+          helpText={
+            <FormattedMessage
+              id="inputControl.editor.listControl.sizeDescription"
+              defaultMessage="Number of options"
+            />
+          }
         >
           <EuiFieldNumber
             min={1}
             value={this.props.controlParams.options.size}
-            onChange={(evt) => {
+            onChange={evt => {
               this.props.handleNumberOptionChange(this.props.controlIndex, 'size', evt);
             }}
             data-test-subj="listControlSizeInput"
@@ -202,12 +222,11 @@ export class ListControlEditor extends Component {
     }
 
     return options;
-  }
+  };
 
   render() {
     return (
-      <div>
-
+      <Fragment>
         <IndexPatternSelectFormRow
           indexPatternId={this.props.controlParams.indexPattern}
           onChange={this.props.handleIndexPatternChange}
@@ -224,8 +243,7 @@ export class ListControlEditor extends Component {
         />
 
         {this.renderOptions()}
-
-      </div>
+      </Fragment>
     );
   }
 }
@@ -238,10 +256,11 @@ ListControlEditor.propTypes = {
   handleIndexPatternChange: PropTypes.func.isRequired,
   handleCheckboxOptionChange: PropTypes.func.isRequired,
   handleNumberOptionChange: PropTypes.func.isRequired,
-  parentCandidates: PropTypes.arrayOf(PropTypes.shape({
-    value: PropTypes.string.isRequired,
-    text: PropTypes.string.isRequired,
-  })).isRequired,
+  parentCandidates: PropTypes.arrayOf(
+    PropTypes.shape({
+      value: PropTypes.string.isRequired,
+      text: PropTypes.string.isRequired,
+    })
+  ).isRequired,
   handleParentChange: PropTypes.func.isRequired,
 };
-

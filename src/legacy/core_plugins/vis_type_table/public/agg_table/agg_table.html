@@ -1,0 +1,34 @@
+<paginated-table
+  ng-if="rows.length"
+  table="table"
+  rows="rows"
+  columns="formattedColumns"
+  per-page="perPage"
+  sort="sort"
+  show-total="showTotal"
+  percentage-col="percentageCol"
+  filter="filter"
+  totalFunc="totalFunc">
+
+  <div class="kbnAggTable__controls">
+    <small
+      i18n-id="visTypeTable.aggTable.exportLabel"
+      i18n-default-message="Export:"
+    ></small>&nbsp;&nbsp;
+    <a class="small" ng-click="aggTable.exportAsCsv(false)">
+      <span
+        i18n-id="visTypeTable.aggTable.rawLabel"
+        i18n-default-message="Raw"
+       ></span>
+       <i aria-hidden="true" class="fa fa-download"></i>
+    </a>&nbsp;&nbsp;&nbsp;
+    <a class="small" ng-click="aggTable.exportAsCsv(true)">
+      <span
+        i18n-id="visTypeTable.aggTable.formattedLabel"
+        i18n-default-message="Formatted"
+       ></span>
+       <i aria-hidden="true" class="fa fa-download"></i>
+    </a>
+    <paginate-controls></paginate-controls>
+  </div>
+</paginated-table>

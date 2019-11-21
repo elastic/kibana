@@ -11,15 +11,15 @@
     "kbn:watch": "yarn build --watch"
   },
   "devDependencies": {
-    "@babel/cli": "^7.2.3",
-    "@babel/preset-env": "^7.3.4",
-    "babel-plugin-add-module-exports": "^1.0.0",
-    "moment": "^2.13.0"
+    "@babel/cli": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "babel-plugin-add-module-exports": "^1.0.2",
+    "moment": "^2.24.0"
   },
   "dependencies": {
     "tslib": "^1.9.3"
   },
   "peerDependencies": {
-    "moment": "^2.13.0"
+    "moment": "^2.24.0"
   }
 }

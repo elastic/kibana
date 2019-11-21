@@ -17,32 +17,38 @@
  * under the License.
  */
 
-import { createUrlFormat } from '../../common/field_formats/types/url';
-import { createBytesFormat } from '../../common/field_formats/types/bytes';
-import { createDateOnServerFormat } from '../../common/field_formats/types/date_server';
-import { createDurationFormat } from '../../common/field_formats/types/duration';
-import { createIpFormat } from '../../common/field_formats/types/ip';
-import { createNumberFormat } from '../../common/field_formats/types/number';
-import { createPercentFormat } from '../../common/field_formats/types/percent';
-import { createStringFormat } from '../../common/field_formats/types/string';
-import { createSourceFormat } from '../../common/field_formats/types/source';
-import { createColorFormat } from '../../common/field_formats/types/color';
-import { createTruncateFormat } from '../../common/field_formats/types/truncate';
-import { createBoolFormat } from '../../common/field_formats/types/boolean';
-import { createStaticLookupFormat } from '../../common/field_formats/types/static_lookup';
+import {
+  UrlFormat,
+  StringFormat,
+  NumberFormat,
+  BytesFormat,
+  TruncateFormat,
+  RelativeDateFormat,
+  PercentFormat,
+  IpFormat,
+  DurationFormat,
+  DateNanosFormat,
+  DateFormat,
+  ColorFormat,
+  BoolFormat,
+  SourceFormat,
+  StaticLookupFormat
+} from '../../../../../plugins/data/server';
 
 export function registerFieldFormats(server) {
-  server.registerFieldFormat(createUrlFormat);
-  server.registerFieldFormat(createBytesFormat);
-  server.registerFieldFormat(createDateOnServerFormat);
-  server.registerFieldFormat(createDurationFormat);
-  server.registerFieldFormat(createIpFormat);
-  server.registerFieldFormat(createNumberFormat);
-  server.registerFieldFormat(createPercentFormat);
-  server.registerFieldFormat(createStringFormat);
-  server.registerFieldFormat(createSourceFormat);
-  server.registerFieldFormat(createColorFormat);
-  server.registerFieldFormat(createTruncateFormat);
-  server.registerFieldFormat(createBoolFormat);
-  server.registerFieldFormat(createStaticLookupFormat);
+  server.registerFieldFormat(UrlFormat);
+  server.registerFieldFormat(BytesFormat);
+  server.registerFieldFormat(DateFormat);
+  server.registerFieldFormat(DateNanosFormat);
+  server.registerFieldFormat(RelativeDateFormat);
+  server.registerFieldFormat(DurationFormat);
+  server.registerFieldFormat(IpFormat);
+  server.registerFieldFormat(NumberFormat);
+  server.registerFieldFormat(PercentFormat);
+  server.registerFieldFormat(StringFormat);
+  server.registerFieldFormat(SourceFormat);
+  server.registerFieldFormat(ColorFormat);
+  server.registerFieldFormat(TruncateFormat);
+  server.registerFieldFormat(BoolFormat);
+  server.registerFieldFormat(StaticLookupFormat);
 }

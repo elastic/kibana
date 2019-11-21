@@ -28,5 +28,4 @@ describe('Point Series Agg Response', function () {
   require('./_init_x_axis');
   require('./_init_y_axis');
   require('./_ordered_date_axis');
-  require('./_tooltip_formatter');
 });

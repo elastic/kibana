@@ -4,18 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
-  const find = getService('find');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
 
-  describe('security feature controls', () => {
+  describe('security feature controls', function() {
+    this.tags(['skipFirefox']);
     before(async () => {
       await esArchiver.load('canvas/default');
     });
@@ -87,7 +86,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it(`allows a workpad to be created`, async () => {
         await PageObjects.common.navigateToActualUrl('canvas', 'workpad/create', {
           ensureCurrentUrl: true,
-          showLoginIfPrompted: false,
+          shouldLoginIfPrompted: false,
         });
 
         await PageObjects.canvas.expectAddElementButton();
@@ -99,7 +98,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31',
           {
             ensureCurrentUrl: true,
-            showLoginIfPrompted: false,
+            shouldLoginIfPrompted: false,
           }
         );
 
@@ -222,15 +221,12 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await security.user.delete('no_canvas_privileges_user');
       });
 
-      const getMessageText = async () =>
-        await (await find.byCssSelector('body>pre')).getVisibleText();
-
       it(`returns a 404`, async () => {
         await PageObjects.common.navigateToActualUrl('canvas', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await getMessageText();
+        const messageText = await PageObjects.common.getBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,
@@ -245,7 +241,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await getMessageText();
+        const messageText = await PageObjects.common.getBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,

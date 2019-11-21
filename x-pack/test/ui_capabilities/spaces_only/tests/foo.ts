@@ -5,18 +5,17 @@
  */
 
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { SpaceScenarios } from '../scenarios';
 
-// eslint-disable-next-line import/no-default-export
-export default function fooTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function fooTests({ getService }: FtrProviderContext) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
   describe('foo', () => {
     SpaceScenarios.forEach(scenario => {
       it(`${scenario.name}`, async () => {
-        const uiCapabilities = await uiCapabilitiesService.get(null, scenario.id);
+        const uiCapabilities = await uiCapabilitiesService.get({ spaceId: scenario.id });
         switch (scenario.id) {
           case 'everything_space':
             expect(uiCapabilities.success).to.be(true);

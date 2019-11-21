@@ -22,7 +22,10 @@
   table {
     td,
     th {
+      text-align: left;
       padding: $euiSizeXS;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
     }
   }
 }
@@ -40,6 +43,11 @@
   + * {
     margin-top: $euiSizeS;
   }
+}
+.visTooltip__labelContainer,
+.visTooltip__valueContainer {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 .visTooltip__headerIcon {

@@ -20,6 +20,7 @@ export default async function ({ readConfigFile }) {
       ...functionalConfig.kbnTestServer,
       serverArgs: [
         ...functionalConfig.kbnTestServer.serverArgs,
+        '--xpack.reporting.csv.enablePanelActionDownload=true',
         `--xpack.reporting.capture.browser.type=chromium`,
       ],
     },

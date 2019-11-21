@@ -21,54 +21,49 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import chrome from '../../chrome';
 import { I18nContext } from '../../i18n';
-import { BaseVisTypeProvider } from './base_vis_type';
+import { BaseVisType } from './base_vis_type';
 
-export function ReactVisTypeProvider(Private) {
-  const BaseVisType = Private(BaseVisTypeProvider);
 
-  class ReactVisController {
-    constructor(element, vis) {
-      this.el = element;
-      this.vis = vis;
-    }
-
-    render(visData, visParams, updateStatus) {
-      this.visData = visData;
-
-      return new Promise((resolve) => {
-        const Component = this.vis.type.visConfig.component;
-        const config = chrome.getUiSettingsClient();
-        render(
-          <I18nContext>
-            <Component
-              config={config}
-              vis={this.vis}
-              visData={visData}
-              visParams={visParams}
-              renderComplete={resolve}
-              updateStatus={updateStatus}
-            />
-          </I18nContext>, this.el);
-      });
-    }
-
-    destroy() {
-      unmountComponentAtNode(this.el);
-    }
+class ReactVisController {
+  constructor(element, vis) {
+    this.el = element;
+    this.vis = vis;
   }
 
-  class ReactVisType extends BaseVisType {
-    constructor(opts) {
-      super({
-        ...opts,
-        visualization: ReactVisController
-      });
+  render(visData, visParams, updateStatus) {
+    this.visData = visData;
 
-      if (!this.visConfig.component) {
-        throw new Error('Missing component for ReactVisType');
-      }
-    }
+    return new Promise((resolve) => {
+      const Component = this.vis.type.visConfig.component;
+      const config = chrome.getUiSettingsClient();
+      render(
+        <I18nContext>
+          <Component
+            config={config}
+            vis={this.vis}
+            visData={visData}
+            visParams={visParams}
+            renderComplete={resolve}
+            updateStatus={updateStatus}
+          />
+        </I18nContext>, this.el);
+    });
   }
 
-  return ReactVisType;
+  destroy() {
+    unmountComponentAtNode(this.el);
+  }
+}
+
+export class ReactVisType extends BaseVisType {
+  constructor(opts) {
+    super({
+      ...opts,
+      visualization: ReactVisController
+    });
+
+    if (!this.visConfig.component) {
+      throw new Error('Missing component for ReactVisType');
+    }
+  }
 }

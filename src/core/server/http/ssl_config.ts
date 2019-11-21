@@ -30,7 +30,7 @@ const protocolMap = new Map<string, number>([
   ['TLSv1.2', cryptoConstants.SSL_OP_NO_TLSv1_2],
 ]);
 
-const sslSchema = schema.object(
+export const sslSchema = schema.object(
   {
     certificate: schema.maybe(schema.string()),
     certificateAuthorities: schema.maybe(
@@ -49,11 +49,19 @@ const sslSchema = schema.object(
       schema.oneOf([schema.literal('TLSv1'), schema.literal('TLSv1.1'), schema.literal('TLSv1.2')]),
       { defaultValue: ['TLSv1.1', 'TLSv1.2'], minSize: 1 }
     ),
+    clientAuthentication: schema.oneOf(
+      [schema.literal('none'), schema.literal('optional'), schema.literal('required')],
+      { defaultValue: 'none' }
+    ),
   },
   {
     validate: ssl => {
       if (ssl.enabled && (!ssl.key || !ssl.certificate)) {
         return 'must specify [certificate] and [key] when ssl is enabled';
+      }
+
+      if (!ssl.enabled && ssl.clientAuthentication !== 'none') {
+        return 'must enable ssl to use [clientAuthentication]';
       }
     },
   }
@@ -62,17 +70,14 @@ const sslSchema = schema.object(
 type SslConfigType = TypeOf<typeof sslSchema>;
 
 export class SslConfig {
-  /**
-   * @internal
-   */
-  public static schema = sslSchema;
-
   public enabled: boolean;
   public redirectHttpFromPort: number | undefined;
   public key: string | undefined;
   public certificate: string | undefined;
   public certificateAuthorities: string[] | undefined;
   public keyPassphrase: string | undefined;
+  public requestCert: boolean;
+  public rejectUnauthorized: boolean;
 
   public cipherSuites: string[];
   public supportedProtocols: string[];
@@ -89,6 +94,8 @@ export class SslConfig {
     this.keyPassphrase = config.keyPassphrase;
     this.cipherSuites = config.cipherSuites;
     this.supportedProtocols = config.supportedProtocols;
+    this.requestCert = config.clientAuthentication !== 'none';
+    this.rejectUnauthorized = config.clientAuthentication === 'required';
   }
 
   /**

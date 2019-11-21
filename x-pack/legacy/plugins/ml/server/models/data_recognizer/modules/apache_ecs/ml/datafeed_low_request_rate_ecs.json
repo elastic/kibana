@@ -1,0 +1,34 @@
+{
+    "job_id": "JOB_ID",
+    "indices": [
+      "INDEX_PATTERN_NAME"
+    ],
+    "query": {
+      "bool": {
+        "filter": [
+          { "term":  { "event.dataset": "apache.access" } }
+        ]
+      }
+    },
+    "aggregations": {
+      "buckets": {
+        "date_histogram": {
+          "field": "@timestamp",
+          "fixed_interval": "15m",
+          "offset": 0,
+          "order": {
+            "_key": "asc"
+          },
+          "keyed": false,
+          "min_doc_count": 0
+        },
+        "aggregations": {
+          "@timestamp": {
+            "max": {
+              "field": "@timestamp"
+            }
+          }
+        }
+      }
+    }
+}

@@ -21,7 +21,7 @@ import _ from 'lodash';
 
 import * as states from './states';
 import Status from './status';
-import { version } from '../../utils/package_json';
+import { pkg } from '../../utils/package_json';
 
 export default class ServerStatus {
   constructor(server) {
@@ -36,7 +36,7 @@ export default class ServerStatus {
   }
 
   createForPlugin(plugin) {
-    if (plugin.version === 'kibana') plugin.version = version;
+    if (plugin.version === 'kibana') plugin.version = pkg.version;
     const status = this.create(`plugin:${plugin.id}@${plugin.version}`);
     status.plugin = plugin;
     return status;

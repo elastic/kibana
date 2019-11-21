@@ -20,42 +20,29 @@
 import { DiscoveredPlugin } from '../../server';
 import { InjectedMetadataService } from './injected_metadata_service';
 
-describe('#getKibanaVersion', () => {
-  it('returns version from injectedMetadata', () => {
-    const injectedMetadata = new InjectedMetadataService({
-      injectedMetadata: {
-        version: 'foo',
-      },
-    } as any);
-
-    expect(injectedMetadata.getKibanaVersion()).toBe('foo');
-  });
-});
-
-describe('#getKibanaBuildNumber', () => {
+describe('setup.getKibanaBuildNumber()', () => {
   it('returns buildNumber from injectedMetadata', () => {
-    const injectedMetadata = new InjectedMetadataService({
+    const setup = new InjectedMetadataService({
       injectedMetadata: {
         buildNumber: 'foo',
       },
-    } as any);
+    } as any).setup();
 
-    expect(injectedMetadata.getKibanaBuildNumber()).toBe('foo');
+    expect(setup.getKibanaBuildNumber()).toBe('foo');
   });
 });
 
 describe('setup.getCspConfig()', () => {
   it('returns injectedMetadata.csp', () => {
-    const injectedMetadata = new InjectedMetadataService({
+    const setup = new InjectedMetadataService({
       injectedMetadata: {
         csp: {
           warnLegacyBrowsers: true,
         },
       },
-    } as any);
+    } as any).setup();
 
-    const contract = injectedMetadata.setup();
-    expect(contract.getCspConfig()).toEqual({
+    expect(setup.getCspConfig()).toEqual({
       warnLegacyBrowsers: true,
     });
   });
@@ -81,18 +68,27 @@ describe('setup.getPlugins()', () => {
   it('returns injectedMetadata.uiPlugins', () => {
     const injectedMetadata = new InjectedMetadataService({
       injectedMetadata: {
-        uiPlugins: [{ id: 'plugin-1', plugin: {} }, { id: 'plugin-2', plugin: {} }],
+        uiPlugins: [
+          { id: 'plugin-1', plugin: {}, config: { clientProp: 'clientValue' } },
+          { id: 'plugin-2', plugin: {} },
+        ],
       },
     } as any);
 
     const plugins = injectedMetadata.setup().getPlugins();
-    expect(plugins).toEqual([{ id: 'plugin-1', plugin: {} }, { id: 'plugin-2', plugin: {} }]);
+    expect(plugins).toEqual([
+      { id: 'plugin-1', plugin: {}, config: { clientProp: 'clientValue' } },
+      { id: 'plugin-2', plugin: {} },
+    ]);
   });
 
   it('returns frozen version of uiPlugins', () => {
     const injectedMetadata = new InjectedMetadataService({
       injectedMetadata: {
-        uiPlugins: [{ id: 'plugin-1', plugin: {} }, { id: 'plugin-2', plugin: {} }],
+        uiPlugins: [
+          { id: 'plugin-1', plugin: {} },
+          { id: 'plugin-2', plugin: {} },
+        ],
       },
     } as any);
 

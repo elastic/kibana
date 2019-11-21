@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import { statSync } from 'fs';
 import { resolve } from 'path';
+import url from 'url';
 
 import { fromRoot, IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
 import { getConfig } from '../../legacy/server/path';
@@ -70,6 +71,10 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   const has = _.partial(_.has, rawConfig);
   const merge = _.partial(_.merge, rawConfig);
 
+  if (opts.oss) {
+    delete rawConfig.xpack;
+  }
+
   if (opts.dev) {
     set('env', 'development');
     set('optimize.watch', true);
@@ -83,12 +88,37 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     }
 
     if (opts.ssl) {
-      set('server.ssl.enabled', true);
-    }
+      // @kbn/dev-utils is part of devDependencies
+      const { CA_CERT_PATH } = require('@kbn/dev-utils');
+      const customElasticsearchHosts = opts.elasticsearch
+        ? opts.elasticsearch.split(',')
+        : [].concat(get('elasticsearch.hosts') || []);
 
-    if (opts.ssl && !has('server.ssl.certificate') && !has('server.ssl.key')) {
+      function ensureNotDefined(path) {
+        if (has(path)) {
+          throw new Error(`Can't use --ssl when "${path}" configuration is already defined.`);
+        }
+      }
+      ensureNotDefined('server.ssl.certificate');
+      ensureNotDefined('server.ssl.key');
+      ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
+
+      const elasticsearchHosts = (
+        (customElasticsearchHosts.length > 0 && customElasticsearchHosts) ||
+        ['https://localhost:9200']
+      ).map(hostUrl => {
+        const parsedUrl = url.parse(hostUrl);
+        if (parsedUrl.hostname !== 'localhost') {
+          throw new Error(`Hostname "${parsedUrl.hostname}" can't be used with --ssl. Must be "localhost" to work with certificates.`);
+        }
+        return `https://localhost:${parsedUrl.port}`;
+      });
+
+      set('server.ssl.enabled', true);
       set('server.ssl.certificate', DEV_SSL_CERT_PATH);
       set('server.ssl.key', DEV_SSL_KEY_PATH);
+      set('elasticsearch.hosts', elasticsearchHosts);
+      set('elasticsearch.ssl.certificateAuthorities', CA_CERT_PATH);
     }
   }
 
@@ -164,7 +194,6 @@ export default function (program) {
     .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
     .option('--optimize', 'Optimize and then stop the server');
 
-
   if (CAN_REPL) {
     command.option('--repl', 'Run the server with a REPL prompt and access to the server object');
   }
@@ -180,19 +209,20 @@ export default function (program) {
       .option('--open', 'Open a browser window to the base url after the server is started')
       .option('--ssl', 'Run the dev server using HTTPS')
       .option('--no-base-path', 'Don\'t put a proxy in front of the dev server, which adds a random basePath')
-      .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode');
+      .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
+      .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode');
   }
 
   command
     .action(async function (opts) {
-      if (opts.dev) {
+      if (opts.dev && opts.devConfig !== false) {
         try {
           const kbnDevConfig = fromRoot('config/kibana.dev.yml');
           if (statSync(kbnDevConfig).isFile()) {
             opts.config.push(kbnDevConfig);
           }
         } catch (err) {
-        // ignore, kibana.dev.yml does not exist
+          // ignore, kibana.dev.yml does not exist
         }
       }
 
@@ -209,11 +239,10 @@ export default function (program) {
           repl: !!opts.repl,
           basePath: !!opts.basePath,
           optimize: !!opts.optimize,
+          oss: !!opts.oss
         },
         features: {
           isClusterModeSupported: CAN_CLUSTER,
-          isOssModeSupported: !IS_KIBANA_DISTRIBUTABLE,
-          isXPackInstalled: XPACK_INSTALLED,
           isReplModeSupported: CAN_REPL,
         },
         applyConfigOverrides: rawConfig => applyConfigOverrides(rawConfig, opts, unknownOptions),

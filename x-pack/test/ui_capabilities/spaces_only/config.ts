@@ -7,4 +7,4 @@
 import { createTestConfig } from '../common/config';
 
 // eslint-disable-next-line import/no-default-export
-export default createTestConfig('spaces_only', { license: 'basic' });
+export default createTestConfig('spaces_only', { disabledPlugins: ['security'], license: 'basic' });

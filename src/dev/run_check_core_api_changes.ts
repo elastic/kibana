@@ -39,7 +39,7 @@ const apiExtractorConfig = (folder: string): ExtractorConfig => {
       tsconfigFilePath: '<projectFolder>/tsconfig.json',
     },
     projectFolder: path.resolve('./'),
-    mainEntryPointFilePath: `target/types/${folder}/index.d.ts`,
+    mainEntryPointFilePath: `target/types/core/${folder}/index.d.ts`,
     apiReport: {
       enabled: true,
       reportFileName: `${folder}.api.md`,
@@ -57,6 +57,7 @@ const apiExtractorConfig = (folder: string): ExtractorConfig => {
       extractorMessageReporting: {
         default: {
           logLevel: 'warning' as ExtractorLogLevel.Warning,
+          addToApiReportFile: true,
         },
         'ae-internal-missing-underscore': {
           logLevel: 'none' as ExtractorLogLevel.None,
@@ -75,12 +76,16 @@ const apiExtractorConfig = (folder: string): ExtractorConfig => {
 };
 
 const runBuildTypes = async () => {
-  await execa.shell('yarn run build:types');
+  await execa('yarn', ['run', 'build:types']);
 };
 
 const runApiDocumenter = async (folder: string) => {
-  await execa.shell(
-    `api-documenter markdown -i ./build/${folder} -o ./docs/development/core/${folder}`
+  await execa(
+    'api-documenter',
+    ['markdown', '-i', `./build/${folder}`, '-o', `./docs/development/core/${folder}`],
+    {
+      preferLocal: true,
+    }
   );
 };
 
@@ -103,7 +108,7 @@ const runApiExtractor = (
   const config = apiExtractorConfig(folder);
   const options = {
     // Indicates that API Extractor is running as part of a local build,
-    // e.g. on developer's machine. For example, if the *.api.ts output file
+    // e.g. on developer's machine. For example, if the *.api.md output file
     // has differences, it will be automatically overwritten for a
     // local build, whereas this should report an error for a production build.
     localBuild: acceptChanges,
@@ -123,7 +128,7 @@ const runApiExtractor = (
         // ConsoleMessageId.ApiReportCopied
         log.warning(`You have changed the signature of the ${folder} Core API`);
         log.warning(
-          "Please commit the updated API documentation and the review file in '" +
+          "Please commit the updated API documentation and the API review file: '" +
             config.reportFilePath
         );
         message.handled = true;
@@ -138,14 +143,51 @@ const runApiExtractor = (
   return Extractor.invoke(config, options);
 };
 
-async function run(folder: string): Promise<boolean> {
+interface Options {
+  accept: boolean;
+  docs: boolean;
+  help: boolean;
+}
+
+async function run(
+  folder: string,
+  { log, opts }: { log: ToolingLog; opts: Options }
+): Promise<boolean> {
+  log.info(`Core ${folder} API: checking for changes in API signature...`);
+
+  const { apiReportChanged, succeeded } = runApiExtractor(log, folder, opts.accept);
+
+  // If we're not accepting changes and there's a failure, exit.
+  if (!opts.accept && !succeeded) {
+    return false;
+  }
+
+  // Attempt to generate docs even if api-extractor didn't succeed
+  if ((opts.accept && apiReportChanged) || opts.docs) {
+    try {
+      await renameExtractedApiPackageName(folder);
+      await runApiDocumenter(folder);
+    } catch (e) {
+      log.error(e);
+      return false;
+    }
+    log.info(`Core ${folder} API: updated documentation ✔`);
+  }
+
+  // If the api signature changed or any errors or warnings occured, exit with an error
+  // NOTE: Because of https://github.com/Microsoft/web-build-tools/issues/1258
+  //  api-extractor will not return `succeeded: false` when the API changes.
+  return !apiReportChanged && succeeded;
+}
+
+(async () => {
   const log = new ToolingLog({
     level: 'info',
     writeTo: process.stdout,
   });
 
   const extraFlags: string[] = [];
-  const opts = getopts(process.argv.slice(2), {
+  const opts = (getopts(process.argv.slice(2), {
     boolean: ['accept', 'docs', 'help'],
     default: {
       project: undefined,
@@ -154,7 +196,7 @@ async function run(folder: string): Promise<boolean> {
       extraFlags.push(name);
       return false;
     },
-  });
+  }) as any) as Options;
 
   if (extraFlags.length > 0) {
     for (const flag of extraFlags) {
@@ -192,43 +234,18 @@ async function run(folder: string): Promise<boolean> {
     return !(extraFlags.length > 0);
   }
 
-  log.info(`Core ${folder} API: checking for changes in API signature...`);
-
   try {
+    log.info(`Core: Building types...`);
     await runBuildTypes();
   } catch (e) {
     log.error(e);
     return false;
   }
 
-  const { apiReportChanged, succeeded } = runApiExtractor(log, folder, opts.accept);
+  const folders = ['public', 'server'];
+  const results = await Promise.all(folders.map(folder => run(folder, { log, opts })));
 
-  // If we're not accepting changes and there's a failure, exit.
-  if (!opts.accept && !succeeded) {
-    return false;
-  }
-
-  // Attempt to generate docs even if api-extractor didn't succeed
-  if ((opts.accept && apiReportChanged) || opts.docs) {
-    try {
-      await renameExtractedApiPackageName(folder);
-      await runApiDocumenter(folder);
-    } catch (e) {
-      log.error(e);
-      return false;
-    }
-    log.info(`Core ${folder} API: updated documentation ✔`);
-  }
-
-  // If any errors or warnings occured, exit with an error
-  return succeeded;
-}
-
-(async () => {
-  const publicSucceeded = await run('public');
-  const serverSucceeded = await run('server');
-
-  if (!publicSucceeded || !serverSucceeded) {
+  if (results.find(r => r === false) !== undefined) {
     process.exitCode = 1;
   }
 })();

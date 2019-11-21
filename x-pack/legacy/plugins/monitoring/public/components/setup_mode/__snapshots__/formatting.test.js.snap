@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`setupMode formatting formatProductName should format the product name for apm 1`] = `"APM"`;
+
+exports[`setupMode formatting formatProductName should format the product name for beats 1`] = `"Beats"`;
+
+exports[`setupMode formatting formatProductName should format the product name for elasticsearch 1`] = `"Elasticsearch"`;
+
+exports[`setupMode formatting formatProductName should format the product name for kibana 1`] = `"Kibana"`;
+
+exports[`setupMode formatting formatProductName should format the product name for logstash 1`] = `"Logstash"`;
+
+exports[`setupMode formatting getIdentifier should get the plural identifier for apm 1`] = `"servers"`;
+
+exports[`setupMode formatting getIdentifier should get the plural identifier for beats 1`] = `"instances"`;
+
+exports[`setupMode formatting getIdentifier should get the plural identifier for elasticsearch 1`] = `"nodes"`;
+
+exports[`setupMode formatting getIdentifier should get the plural identifier for kibana 1`] = `"instances"`;
+
+exports[`setupMode formatting getIdentifier should get the plural identifier for logstash 1`] = `"nodes"`;
+
+exports[`setupMode formatting getIdentifier should get the singular identifier for apm 1`] = `"server"`;
+
+exports[`setupMode formatting getIdentifier should get the singular identifier for beats 1`] = `"instance"`;
+
+exports[`setupMode formatting getIdentifier should get the singular identifier for elasticsearch 1`] = `"node"`;
+
+exports[`setupMode formatting getIdentifier should get the singular identifier for kibana 1`] = `"instance"`;
+
+exports[`setupMode formatting getIdentifier should get the singular identifier for logstash 1`] = `"node"`;

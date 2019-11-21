@@ -1,0 +1,291 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NetworkTopCountries Table Component rendering it renders the IP Details NetworkTopCountries table 1`] = `
+<Connect(NetworkTopCountriesTableComponent)
+  data={
+    Array [
+      Object {
+        "cursor": Object {
+          "value": "8.8.8.8",
+        },
+        "node": Object {
+          "destination": null,
+          "network": Object {
+            "bytes_in": 3826633497,
+            "bytes_out": 1083495734,
+          },
+          "source": Object {
+            "country": "DE",
+            "destination_ips": 12,
+            "flows": 12345,
+            "source_ips": 55,
+          },
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "9.9.9.9",
+        },
+        "node": Object {
+          "destination": null,
+          "network": Object {
+            "bytes_in": 3826633497,
+            "bytes_out": 1083495734,
+          },
+          "source": Object {
+            "country": "US",
+            "destination_ips": 12,
+            "flows": 12345,
+            "source_ips": 55,
+          },
+        },
+      },
+    ]
+  }
+  fakeTotalCount={50}
+  flowTargeted="source"
+  id="topCountriesSource"
+  indexPattern={
+    Object {
+      "fields": Array [
+        Object {
+          "aggregatable": true,
+          "name": "@timestamp",
+          "searchable": true,
+          "type": "date",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "@version",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.ephemeral_id",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.hostname",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.id",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test1",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test2",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test3",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test4",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test5",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test6",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test7",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test8",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "host.name",
+          "searchable": true,
+          "type": "string",
+        },
+      ],
+      "title": "filebeat-*,auditbeat-*,packetbeat-*",
+    }
+  }
+  isInspect={false}
+  loadPage={[MockFunction]}
+  loading={false}
+  showMorePagesIndicator={true}
+  totalCount={524}
+  type="details"
+/>
+`;
+
+exports[`NetworkTopCountries Table Component rendering it renders the default NetworkTopCountries table 1`] = `
+<Connect(NetworkTopCountriesTableComponent)
+  data={
+    Array [
+      Object {
+        "cursor": Object {
+          "value": "8.8.8.8",
+        },
+        "node": Object {
+          "destination": null,
+          "network": Object {
+            "bytes_in": 3826633497,
+            "bytes_out": 1083495734,
+          },
+          "source": Object {
+            "country": "DE",
+            "destination_ips": 12,
+            "flows": 12345,
+            "source_ips": 55,
+          },
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "9.9.9.9",
+        },
+        "node": Object {
+          "destination": null,
+          "network": Object {
+            "bytes_in": 3826633497,
+            "bytes_out": 1083495734,
+          },
+          "source": Object {
+            "country": "US",
+            "destination_ips": 12,
+            "flows": 12345,
+            "source_ips": 55,
+          },
+        },
+      },
+    ]
+  }
+  fakeTotalCount={50}
+  flowTargeted="source"
+  id="topCountriesSource"
+  indexPattern={
+    Object {
+      "fields": Array [
+        Object {
+          "aggregatable": true,
+          "name": "@timestamp",
+          "searchable": true,
+          "type": "date",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "@version",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.ephemeral_id",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.hostname",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.id",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test1",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test2",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test3",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test4",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test5",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test6",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test7",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test8",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "host.name",
+          "searchable": true,
+          "type": "string",
+        },
+      ],
+      "title": "filebeat-*,auditbeat-*,packetbeat-*",
+    }
+  }
+  isInspect={false}
+  loadPage={[MockFunction]}
+  loading={false}
+  showMorePagesIndicator={true}
+  totalCount={524}
+  type="page"
+/>
+`;

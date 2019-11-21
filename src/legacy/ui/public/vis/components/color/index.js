@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { VislibComponentsColorColorProvider } from './color';
+export { vislibColor } from './color';

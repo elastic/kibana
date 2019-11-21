@@ -198,6 +198,6 @@ describe('plugin generator sao integration', () => {
   it('includes dotfiles', async () => {
     const res = await sao.mockPrompt(template);
     expect(res.files['.gitignore']).toBeTruthy();
-    expect(res.files['.eslintrc']).toBeTruthy();
+    expect(res.files['.eslintrc.js']).toBeTruthy();
   });
 });

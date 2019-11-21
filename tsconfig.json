@@ -12,7 +12,7 @@
       ],
       "test_utils/*": [
         "src/test_utils/public/*"
-      ],
+      ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
@@ -20,7 +20,6 @@
     "strict": true,
     // enables "core language features"
     "lib": [
-      // ESNext auto includes previous versions all the way back to es5
       "esnext",
       // includes support for browser APIs
       "dom"

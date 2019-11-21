@@ -27,15 +27,18 @@ export type ConditionalTypeValue = string | number | boolean | object | null;
 export class ConditionalType<A extends ConditionalTypeValue, B, C> extends Type<B | C> {
   constructor(
     leftOperand: Reference<A>,
-    rightOperand: Reference<A> | A,
+    rightOperand: Reference<A> | A | Type<unknown>,
     equalType: Type<B>,
     notEqualType: Type<C>,
     options?: TypeOptions<B | C>
   ) {
     const schema = internals.when(leftOperand.getSchema(), {
-      is: Reference.isReference(rightOperand) ? rightOperand.getSchema() : rightOperand,
-      otherwise: notEqualType.getSchema(),
+      is:
+        Reference.isReference(rightOperand) || rightOperand instanceof Type
+          ? rightOperand.getSchema()
+          : rightOperand,
       then: equalType.getSchema(),
+      otherwise: notEqualType.getSchema(),
     });
 
     super(schema, options);

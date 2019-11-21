@@ -1,0 +1,85 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DetailView should render Discover button 1`] = `
+<DiscoverErrorLink
+  error={
+    Object {
+      "error": Object {
+        "exception": Object {
+          "handled": true,
+        },
+      },
+      "http": Object {
+        "request": Object {
+          "method": "GET",
+        },
+      },
+      "service": Object {
+        "name": "myService",
+      },
+      "timestamp": Object {
+        "us": 0,
+      },
+      "transaction": Object {
+        "id": "myTransactionId",
+        "sampled": true,
+      },
+      "url": Object {
+        "full": "myUrl",
+      },
+      "user": Object {
+        "id": "myUserId",
+      },
+    }
+  }
+>
+  <EuiButtonEmpty
+    iconType="discoverApp"
+  >
+    View 10 occurrences in Discover.
+  </EuiButtonEmpty>
+</DiscoverErrorLink>
+`;
+
+exports[`DetailView should render TabContent 1`] = `
+<TabContent
+  currentTab={
+    Object {
+      "key": "exception_stacktrace",
+      "label": "Exception stack trace",
+    }
+  }
+  error={
+    Object {
+      "context": Object {},
+      "error": Object {},
+      "timestamp": Object {
+        "us": 0,
+      },
+    }
+  }
+/>
+`;
+
+exports[`DetailView should render tabs 1`] = `
+<EuiTabs
+  display="default"
+  expand={false}
+  size="m"
+>
+  <EuiTab
+    isSelected={true}
+    key="exception_stacktrace"
+    onClick={[Function]}
+  >
+    Exception stack trace
+  </EuiTab>
+  <EuiTab
+    isSelected={false}
+    key="metadata"
+    onClick={[Function]}
+  >
+    Metadata
+  </EuiTab>
+</EuiTabs>
+`;

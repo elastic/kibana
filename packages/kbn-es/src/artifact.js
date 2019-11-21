@@ -22,7 +22,6 @@ const AbortController = require('abort-controller');
 const fs = require('fs');
 const { promisify } = require('util');
 const { pipeline, Transform } = require('stream');
-const mkdirp = require('mkdirp');
 const chalk = require('chalk');
 const { createHash } = require('crypto');
 const path = require('path');
@@ -31,7 +30,8 @@ const asyncPipeline = promisify(pipeline);
 const V1_VERSIONS_API = 'https://artifacts-api.elastic.co/v1/versions';
 
 const { cache } = require('./utils');
-const { createCliError } = require('./errors');
+const { resolveCustomSnapshotUrl } = require('./custom_snapshots');
+const { createCliError, isCliError } = require('./errors');
 
 const TEST_ES_SNAPSHOT_VERSION = process.env.TEST_ES_SNAPSHOT_VERSION
   ? process.env.TEST_ES_SNAPSHOT_VERSION
@@ -66,6 +66,25 @@ function headersToString(headers, indent = '') {
   );
 }
 
+async function retry(log, fn) {
+  async function doAttempt(attempt) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (isCliError(error) || attempt >= 5) {
+        throw error;
+      }
+
+      log.warning('...failure, retrying in 5 seconds:', error.message);
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      log.info('...retrying');
+      return await doAttempt(attempt + 1);
+    }
+  }
+
+  return await doAttempt(1);
+}
+
 exports.Artifact = class Artifact {
   /**
    * Fetch an Artifact from the Artifact API for a license level and version
@@ -75,25 +94,36 @@ exports.Artifact = class Artifact {
    */
   static async getSnapshot(license, version, log) {
     const urlVersion = `${encodeURIComponent(version)}-SNAPSHOT`;
+
+    const customSnapshotArtifactSpec = resolveCustomSnapshotUrl(urlVersion, license);
+    if (customSnapshotArtifactSpec) {
+      return new Artifact(customSnapshotArtifactSpec, log);
+    }
+
     const urlBuild = encodeURIComponent(TEST_ES_SNAPSHOT_VERSION);
     const url = `${V1_VERSIONS_API}/${urlVersion}/builds/${urlBuild}/projects/elasticsearch`;
 
-    log.info('downloading artifact info from %s', chalk.bold(url));
-    const abc = new AbortController();
-    const resp = await fetch(url, { signal: abc.signal });
-    const json = await resp.text();
+    const json = await retry(log, async () => {
+      log.info('downloading artifact info from %s', chalk.bold(url));
 
-    if (resp.status === 404) {
-      abc.abort();
-      throw createCliError(
-        `Snapshots for ${version}/${TEST_ES_SNAPSHOT_VERSION} are not available`
-      );
-    }
+      const abc = new AbortController();
+      const resp = await fetch(url, { signal: abc.signal });
+      const json = await resp.text();
 
-    if (!resp.ok) {
-      abc.abort();
-      throw new Error(`Unable to read artifact info from ${url}: ${resp.statusText}\n  ${json}`);
-    }
+      if (resp.status === 404) {
+        abc.abort();
+        throw createCliError(
+          `Snapshots for ${version}/${TEST_ES_SNAPSHOT_VERSION} are not available`
+        );
+      }
+
+      if (!resp.ok) {
+        abc.abort();
+        throw new Error(`Unable to read artifact info from ${url}: ${resp.statusText}\n  ${json}`);
+      }
+
+      return json;
+    });
 
     // parse the api response into an array of Artifact objects
     const {
@@ -184,21 +214,23 @@ exports.Artifact = class Artifact {
    * @return {Promise<void>}
    */
   async download(dest) {
-    const cacheMeta = cache.readMeta(dest);
-    const tmpPath = `${dest}.tmp`;
+    await retry(this._log, async () => {
+      const cacheMeta = cache.readMeta(dest);
+      const tmpPath = `${dest}.tmp`;
 
-    const artifactResp = await this._download(tmpPath, cacheMeta.etag, cacheMeta.ts);
-    if (artifactResp.cached) {
-      return;
-    }
+      const artifactResp = await this._download(tmpPath, cacheMeta.etag, cacheMeta.ts);
+      if (artifactResp.cached) {
+        return;
+      }
 
-    await this._verifyChecksum(artifactResp);
+      await this._verifyChecksum(artifactResp);
 
-    // cache the etag for future downloads
-    cache.writeMeta(dest, { etag: artifactResp.etag });
+      // cache the etag for future downloads
+      cache.writeMeta(dest, { etag: artifactResp.etag });
 
-    // rename temp download to the destination location
-    fs.renameSync(tmpPath, dest);
+      // rename temp download to the destination location
+      fs.renameSync(tmpPath, dest);
+    });
   }
 
   /**
@@ -252,7 +284,8 @@ exports.Artifact = class Artifact {
     let first500Bytes = Buffer.alloc(0);
     let contentLength = 0;
 
-    mkdirp.sync(path.dirname(tmpPath));
+    fs.mkdirSync(path.dirname(tmpPath), { recursive: true });
+
     await asyncPipeline(
       resp.body,
       new Transform({

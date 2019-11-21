@@ -56,6 +56,7 @@ export class PluginSpec {
       version,
       kibanaVersion,
       uiExports,
+      uiCapabilities,
       publicDir,
       configPrefix,
       config,
@@ -74,6 +75,7 @@ export class PluginSpec {
 
     this._publicDir = publicDir;
     this._uiExports = uiExports;
+    this._uiCapabilities = uiCapabilities;
 
     this._configPrefix = configPrefix;
     this._configSchemaProvider = config;
@@ -101,7 +103,10 @@ export class PluginSpec {
         throw createInvalidPluginError(this, 'plugin.publicDir must be an absolute path');
       }
       if (basename(this._publicDir) !== 'public') {
-        throw createInvalidPluginError(this, `publicDir for plugin ${this.getId()} must end with a "public" directory.`);
+        throw createInvalidPluginError(
+          this,
+          `publicDir for plugin ${this.getId()} must end with a "public" directory.`
+        );
       }
     }
   }
@@ -143,7 +148,9 @@ export class PluginSpec {
     // the version of kibana down to the patch level. If these two versions need
     // to diverge, they can specify a kibana.version in the package to indicate the
     // version of kibana the plugin is intended to work with.
-    return this._kibanaVersion || get(this.getPack().getPkg(), 'kibana.version') || this.getVersion();
+    return (
+      this._kibanaVersion || get(this.getPack().getPkg(), 'kibana.version') || this.getVersion()
+    );
   }
 
   isVersionCompatible(actualKibanaVersion) {
@@ -168,6 +175,10 @@ export class PluginSpec {
 
   getExportSpecs() {
     return this._uiExports;
+  }
+
+  getUiCapabilitiesProvider() {
+    return this._uiCapabilities;
   }
 
   getPreInitHandler() {

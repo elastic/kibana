@@ -1,0 +1,200 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`transactionGroupsFetcher type: top_traces should call client.search with correct query 1`] = `
+Array [
+  Array [
+    Object {
+      "body": Object {
+        "aggs": Object {
+          "transactions": Object {
+            "aggs": Object {
+              "avg": Object {
+                "avg": Object {
+                  "field": "transaction.duration.us",
+                },
+              },
+              "p95": Object {
+                "percentiles": Object {
+                  "field": "transaction.duration.us",
+                  "percents": Array [
+                    95,
+                  ],
+                },
+              },
+              "sample": Object {
+                "top_hits": Object {
+                  "size": 1,
+                  "sort": Array [
+                    Object {
+                      "_score": "desc",
+                    },
+                    Object {
+                      "@timestamp": Object {
+                        "order": "desc",
+                      },
+                    },
+                  ],
+                },
+              },
+              "sum": Object {
+                "sum": Object {
+                  "field": "transaction.duration.us",
+                },
+              },
+            },
+            "terms": Object {
+              "field": "transaction.name",
+              "order": Object {
+                "sum": "desc",
+              },
+              "size": 100,
+            },
+          },
+        },
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "format": "epoch_millis",
+                    "gte": 1528113600000,
+                    "lte": 1528977600000,
+                  },
+                },
+              },
+              Object {
+                "term": Object {
+                  "processor.event": "transaction",
+                },
+              },
+              Object {
+                "term": Object {
+                  "service.environment": "test",
+                },
+              },
+            ],
+            "must_not": Array [
+              Object {
+                "exists": Object {
+                  "field": "parent.id",
+                },
+              },
+            ],
+            "should": Array [
+              Object {
+                "term": Object {
+                  "transaction.sampled": true,
+                },
+              },
+            ],
+          },
+        },
+        "size": 0,
+      },
+      "index": "myIndex",
+    },
+  ],
+]
+`;
+
+exports[`transactionGroupsFetcher type: top_transactions should call client.search with correct query 1`] = `
+Array [
+  Array [
+    Object {
+      "body": Object {
+        "aggs": Object {
+          "transactions": Object {
+            "aggs": Object {
+              "avg": Object {
+                "avg": Object {
+                  "field": "transaction.duration.us",
+                },
+              },
+              "p95": Object {
+                "percentiles": Object {
+                  "field": "transaction.duration.us",
+                  "percents": Array [
+                    95,
+                  ],
+                },
+              },
+              "sample": Object {
+                "top_hits": Object {
+                  "size": 1,
+                  "sort": Array [
+                    Object {
+                      "_score": "desc",
+                    },
+                    Object {
+                      "@timestamp": Object {
+                        "order": "desc",
+                      },
+                    },
+                  ],
+                },
+              },
+              "sum": Object {
+                "sum": Object {
+                  "field": "transaction.duration.us",
+                },
+              },
+            },
+            "terms": Object {
+              "field": "transaction.name",
+              "order": Object {
+                "sum": "desc",
+              },
+              "size": 100,
+            },
+          },
+        },
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "format": "epoch_millis",
+                    "gte": 1528113600000,
+                    "lte": 1528977600000,
+                  },
+                },
+              },
+              Object {
+                "term": Object {
+                  "processor.event": "transaction",
+                },
+              },
+              Object {
+                "term": Object {
+                  "transaction.type": "request",
+                },
+              },
+              Object {
+                "term": Object {
+                  "service.name": "opbeans-node",
+                },
+              },
+              Object {
+                "term": Object {
+                  "service.environment": "test",
+                },
+              },
+            ],
+            "should": Array [
+              Object {
+                "term": Object {
+                  "transaction.sampled": true,
+                },
+              },
+            ],
+          },
+        },
+        "size": 0,
+      },
+      "index": "myIndex",
+    },
+  ],
+]
+`;

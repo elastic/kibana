@@ -22,10 +22,14 @@ import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
-import { Config, ConfigPath, ConfigWithSchema, Env } from '.';
+import { Config, ConfigPath, Env } from '.';
 import { Logger, LoggerFactory } from '../logging';
+import { hasConfigPathIntersection } from './config';
 
-/** @public */
+/** @internal */
+export type IConfigService = PublicMethodsOf<ConfigService>;
+
+/** @internal */
 export class ConfigService {
   private readonly log: Logger;
 
@@ -34,6 +38,7 @@ export class ConfigService {
    * then list all unhandled config paths when the startup process is completed.
    */
   private readonly handledPaths: ConfigPath[] = [];
+  private readonly schemas = new Map<string, Type<unknown>>();
 
   constructor(
     private readonly config$: Observable<Config>,
@@ -41,6 +46,22 @@ export class ConfigService {
     logger: LoggerFactory
   ) {
     this.log = logger.get('config');
+  }
+
+  /**
+   * Set config schema for a path and performs its validation
+   */
+  public async setSchema(path: ConfigPath, schema: Type<unknown>) {
+    const namespace = pathToString(path);
+    if (this.schemas.has(namespace)) {
+      throw new Error(`Validation schema for [${path}] was already registered.`);
+    }
+
+    this.schemas.set(namespace, schema);
+
+    await this.validateConfig(path)
+      .pipe(first())
+      .toPromise();
   }
 
   /**
@@ -56,16 +77,9 @@ export class ConfigService {
    * against the static `schema` on the given `ConfigClass`.
    *
    * @param path - The path to the desired subset of the config.
-   * @param ConfigClass - A class (not an instance of a class) that contains a
-   * static `schema` that we validate the config at the given `path` against.
    */
-  public atPath<TSchema extends Type<any>, TConfig>(
-    path: ConfigPath,
-    ConfigClass: ConfigWithSchema<TSchema, TConfig>
-  ) {
-    return this.getDistinctConfig(path).pipe(
-      map(config => this.createConfig(path, config, ConfigClass))
-    );
+  public atPath<TSchema>(path: ConfigPath) {
+    return this.validateConfig(path) as Observable<TSchema>;
   }
 
   /**
@@ -74,26 +88,38 @@ export class ConfigService {
    *
    * {@link ConfigService.atPath}
    */
-  public optionalAtPath<TSchema extends Type<any>, TConfig>(
-    path: ConfigPath,
-    ConfigClass: ConfigWithSchema<TSchema, TConfig>
-  ) {
+  public optionalAtPath<TSchema>(path: ConfigPath) {
     return this.getDistinctConfig(path).pipe(
-      map(config =>
-        config === undefined ? undefined : this.createConfig(path, config, ConfigClass)
-      )
+      map(config => {
+        if (config === undefined) return undefined;
+        return this.validate(path, config) as TSchema;
+      })
     );
   }
 
   public async isEnabledAtPath(path: ConfigPath) {
-    const enabledPath = createPluginEnabledPath(path);
+    const namespace = pathToString(path);
 
+    const validatedConfig = this.schemas.has(namespace)
+      ? await this.atPath<{ enabled?: boolean }>(path)
+          .pipe(first())
+          .toPromise()
+      : undefined;
+
+    const enabledPath = createPluginEnabledPath(path);
     const config = await this.config$.pipe(first()).toPromise();
-    if (!config.has(enabledPath)) {
+
+    // if plugin hasn't got a config schema, we try to read "enabled" directly
+    const isEnabled =
+      validatedConfig && validatedConfig.enabled !== undefined
+        ? validatedConfig.enabled
+        : config.get(enabledPath);
+
+    // not declared. consider that plugin is enabled by default
+    if (isEnabled === undefined) {
       return true;
     }
 
-    const isEnabled = config.get(enabledPath);
     if (isEnabled === false) {
       // If the plugin is _not_ enabled, we mark the entire plugin path as
       // handled, as it's expected that it won't be used.
@@ -122,33 +148,25 @@ export class ConfigService {
     return config.getFlattenedPaths().filter(path => isPathHandled(path, handledPaths));
   }
 
-  private createConfig<TSchema extends Type<any>, TConfig>(
-    path: ConfigPath,
-    config: Record<string, any>,
-    ConfigClass: ConfigWithSchema<TSchema, TConfig>
-  ) {
-    const namespace = Array.isArray(path) ? path.join('.') : path;
-
-    const configSchema = ConfigClass.schema;
-
-    if (configSchema === undefined || typeof configSchema.validate !== 'function') {
-      throw new Error(
-        `The config class [${
-          ConfigClass.name
-        }] did not contain a static 'schema' field, which is required when creating a config instance`
-      );
+  private validate(path: ConfigPath, config: Record<string, unknown>) {
+    const namespace = pathToString(path);
+    const schema = this.schemas.get(namespace);
+    if (!schema) {
+      throw new Error(`No validation schema has been defined for [${namespace}]`);
     }
-
-    const validatedConfig = ConfigClass.schema.validate(
+    return schema.validate(
       config,
       {
         dev: this.env.mode.dev,
         prod: this.env.mode.prod,
         ...this.env.packageInfo,
       },
-      namespace
+      `config validation of [${namespace}]`
     );
-    return new ConfigClass(validatedConfig, this.env);
+  }
+
+  private validateConfig(path: ConfigPath) {
+    return this.getDistinctConfig(path).pipe(map(config => this.validate(path, config)));
   }
 
   private getDistinctConfig(path: ConfigPath) {
@@ -180,4 +198,4 @@ const pathToString = (path: ConfigPath) => (Array.isArray(path) ? path.join('.')
  * handled paths.
  */
 const isPathHandled = (path: string, handledPaths: string[]) =>
-  handledPaths.some(handledPath => path.startsWith(handledPath));
+  handledPaths.some(handledPath => hasConfigPathIntersection(path, handledPath));

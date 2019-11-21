@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable import/no-duplicates */
+
 import React from 'react';
 import { renderToHtml } from '../../services';
 
@@ -29,11 +31,11 @@ import {
 } from '../../components';
 
 import { ToolBarPager } from './tool_bar_pager';
-const toolBarPagerSource = require('!!raw-loader!./tool_bar_pager');
+import toolBarPagerSource from '!!raw-loader!./tool_bar_pager'; // eslint-disable-line import/default
 const toolBarPagerHtml = renderToHtml(ToolBarPager);
 
 import { PagerButtons } from './pager_buttons';
-const pagerButtonsSource = require('!!raw-loader!./pager_buttons');
+import pagerButtonsSource from '!!raw-loader!./pager_buttons'; // eslint-disable-line import/default
 const pagerButtonsHtml = renderToHtml(PagerButtons);
 
 export default props => (

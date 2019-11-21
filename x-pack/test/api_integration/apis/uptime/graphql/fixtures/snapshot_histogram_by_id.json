@@ -1,0 +1,188 @@
+{
+  "queryResult": {
+    "histogram": [
+      {
+        "upCount": 93,
+        "downCount": 7,
+        "x": 1568172657286,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 93,
+        "downCount": 7,
+        "x": 1568172680087,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 93,
+        "downCount": 7,
+        "x": 1568172702888,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 0,
+        "downCount": 0,
+        "x": 1568172725689,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 93,
+        "downCount": 7,
+        "x": 1568172748490,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 93,
+        "downCount": 7,
+        "x": 1568172771291,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 92,
+        "downCount": 8,
+        "x": 1568172794092,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 0,
+        "downCount": 0,
+        "x": 1568172816893,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 93,
+        "downCount": 7,
+        "x": 1568172839694,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 93,
+        "downCount": 7,
+        "x": 1568172862495,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 93,
+        "downCount": 7,
+        "x": 1568172885296,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 0,
+        "downCount": 0,
+        "x": 1568172908097,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 93,
+        "downCount": 7,
+        "x": 1568172930898,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 93,
+        "downCount": 7,
+        "x": 1568172953699,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 92,
+        "downCount": 8,
+        "x": 1568172976500,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 0,
+        "downCount": 0,
+        "x": 1568172999301,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 93,
+        "downCount": 7,
+        "x": 1568173022102,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 93,
+        "downCount": 7,
+        "x": 1568173044903,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 93,
+        "downCount": 7,
+        "x": 1568173067704,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 0,
+        "downCount": 0,
+        "x": 1568173090505,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 93,
+        "downCount": 7,
+        "x": 1568173113306,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 93,
+        "downCount": 7,
+        "x": 1568173136107,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 92,
+        "downCount": 8,
+        "x": 1568173158908,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 93,
+        "downCount": 7,
+        "x": 1568173181709,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 0,
+        "downCount": 0,
+        "x": 1568173204510,
+        "x0": null,
+        "y": 1
+      },
+      {
+        "upCount": 93,
+        "downCount": 7,
+        "x": 1568173227311,
+        "x0": null,
+        "y": 1
+      }
+    ]
+  }
+}

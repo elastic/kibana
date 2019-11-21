@@ -5,15 +5,14 @@
  */
 
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   GetUICapabilitiesFailureReason,
   UICapabilitiesService,
 } from '../../common/services/ui_capabilities';
 import { UserAtSpaceScenarios } from '../scenarios';
 
-// eslint-disable-next-line import/no-default-export
-export default function fooTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function fooTests({ getService }: FtrProviderContext) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
   describe('foo', () => {
@@ -21,10 +20,10 @@ export default function fooTests({ getService }: KibanaFunctionalTestDefaultProv
       it(`${scenario.id}`, async () => {
         const { user, space } = scenario;
 
-        const uiCapabilities = await uiCapabilitiesService.get(
-          { username: user.username, password: user.password },
-          space.id
-        );
+        const uiCapabilities = await uiCapabilitiesService.get({
+          credentials: { username: user.username, password: user.password },
+          spaceId: space.id,
+        });
         switch (scenario.id) {
           // these users have a read/write view
           case 'superuser at everything_space':
@@ -71,9 +70,7 @@ export default function fooTests({ getService }: KibanaFunctionalTestDefaultProv
               show: false,
             });
             break;
-          // if we don't have access at the space itself, we're
-          // redirected to the space selector and the ui capabilities
-          // are largely irrelevant because they won't be consumed
+          // if we don't have access at the space itself, security interceptor responds with 404.
           case 'no_kibana_privileges at everything_space':
           case 'no_kibana_privileges at nothing_space':
           case 'legacy_all at everything_space':
@@ -83,9 +80,7 @@ export default function fooTests({ getService }: KibanaFunctionalTestDefaultProv
           case 'nothing_space_all at everything_space':
           case 'nothing_space_read at everything_space':
             expect(uiCapabilities.success).to.be(false);
-            expect(uiCapabilities.failureReason).to.be(
-              GetUICapabilitiesFailureReason.RedirectedToRoot
-            );
+            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;
           default:
             throw new UnreachableError(scenario);

@@ -38,8 +38,10 @@ exports[`Field for array setting should render as read only if saving is disable
             "array:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -126,8 +128,10 @@ exports[`Field for array setting should render as read only with help text if ov
             "array:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={
           <EuiText
@@ -213,8 +217,10 @@ exports[`Field for array setting should render custom setting icon if it is cust
             "array:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -279,8 +285,10 @@ exports[`Field for array setting should render default value if there is no user
             "array:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -367,25 +375,25 @@ exports[`Field for array setting should render user value if there is user value
             "array:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={
           <span>
             <span>
-              <EuiLink
+              <ForwardRef
                 aria-label="Reset array test setting to default"
-                color="primary"
                 data-test-subj="advancedSetting-resetField-array:test:setting"
                 onClick={[Function]}
-                type="button"
               >
                 <FormattedMessage
                   defaultMessage="Reset to default"
                   id="kbn.management.settings.field.resetToDefaultLinkText"
                   values={Object {}}
                 />
-              </EuiLink>
+              </ForwardRef>
                  
             </span>
           </span>
@@ -452,8 +460,10 @@ exports[`Field for boolean setting should render as read only if saving is disab
             "boolean:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={false}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -544,8 +554,10 @@ exports[`Field for boolean setting should render as read only with help text if 
             "boolean:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={false}
         hasEmptyLabelSpace={false}
         helpText={
           <EuiText
@@ -635,8 +647,10 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
             "boolean:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={false}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -705,8 +719,10 @@ exports[`Field for boolean setting should render default value if there is no us
             "boolean:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={false}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -797,25 +813,25 @@ exports[`Field for boolean setting should render user value if there is user val
             "boolean:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={false}
         hasEmptyLabelSpace={false}
         helpText={
           <span>
             <span>
-              <EuiLink
+              <ForwardRef
                 aria-label="Reset boolean test setting to default"
-                color="primary"
                 data-test-subj="advancedSetting-resetField-boolean:test:setting"
                 onClick={[Function]}
-                type="button"
               >
                 <FormattedMessage
                   defaultMessage="Reset to default"
                   id="kbn.management.settings.field.resetToDefaultLinkText"
                   values={Object {}}
                 />
-              </EuiLink>
+              </ForwardRef>
                  
             </span>
           </span>
@@ -886,8 +902,10 @@ exports[`Field for image setting should render as read only if saving is disable
             "image:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -899,6 +917,7 @@ exports[`Field for image setting should render as read only if saving is disable
           compressed={false}
           data-test-subj="advancedSetting-editField-image:test:setting"
           disabled={true}
+          display="large"
           initialPromptText="Select or drag and drop a file"
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -972,8 +991,10 @@ exports[`Field for image setting should render as read only with help text if ov
             "image:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={
           <EuiText
@@ -994,8 +1015,6 @@ exports[`Field for image setting should render as read only with help text if ov
           allowFullScreen={true}
           alt="image:test:setting"
           aria-label="image test setting"
-          fullScreenIconColor="light"
-          size="original"
           url="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
         />
       </EuiFormRow>
@@ -1056,8 +1075,10 @@ exports[`Field for image setting should render custom setting icon if it is cust
             "image:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -1069,6 +1090,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
           compressed={false}
           data-test-subj="advancedSetting-editField-image:test:setting"
           disabled={false}
+          display="large"
           initialPromptText="Select or drag and drop a file"
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -1120,8 +1142,10 @@ exports[`Field for image setting should render default value if there is no user
             "image:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -1133,6 +1157,7 @@ exports[`Field for image setting should render default value if there is no user
           compressed={false}
           data-test-subj="advancedSetting-editField-image:test:setting"
           disabled={false}
+          display="large"
           initialPromptText="Select or drag and drop a file"
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -1206,41 +1231,39 @@ exports[`Field for image setting should render user value if there is user value
             "image:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={
           <span>
             <span>
-              <EuiLink
+              <ForwardRef
                 aria-label="Reset image test setting to default"
-                color="primary"
                 data-test-subj="advancedSetting-resetField-image:test:setting"
                 onClick={[Function]}
-                type="button"
               >
                 <FormattedMessage
                   defaultMessage="Reset to default"
                   id="kbn.management.settings.field.resetToDefaultLinkText"
                   values={Object {}}
                 />
-              </EuiLink>
+              </ForwardRef>
                  
             </span>
             <span>
-              <EuiLink
+              <ForwardRef
                 aria-label="Change image test setting"
-                color="primary"
                 data-test-subj="advancedSetting-changeImage-image:test:setting"
                 onClick={[Function]}
-                type="button"
               >
                 <FormattedMessage
                   defaultMessage="Change image"
                   id="kbn.management.settings.field.changeImageLinkText"
                   values={Object {}}
                 />
-              </EuiLink>
+              </ForwardRef>
             </span>
           </span>
         }
@@ -1252,8 +1275,6 @@ exports[`Field for image setting should render user value if there is user value
           allowFullScreen={true}
           alt="image:test:setting"
           aria-label="image test setting"
-          fullScreenIconColor="light"
-          size="original"
           url="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
         />
       </EuiFormRow>
@@ -1329,8 +1350,10 @@ exports[`Field for json setting should render as read only if saving is disabled
             "json:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -1438,8 +1461,10 @@ exports[`Field for json setting should render as read only with help text if ove
             "json:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={
           <EuiText
@@ -1542,8 +1567,10 @@ exports[`Field for json setting should render custom setting icon if it is custo
             "json:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -1651,25 +1678,25 @@ exports[`Field for json setting should render default value if there is no user 
             "json:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={
           <span>
             <span>
-              <EuiLink
+              <ForwardRef
                 aria-label="Reset json test setting to default"
-                color="primary"
                 data-test-subj="advancedSetting-resetField-json:test:setting"
                 onClick={[Function]}
-                type="button"
               >
                 <FormattedMessage
                   defaultMessage="Reset to default"
                   id="kbn.management.settings.field.resetToDefaultLinkText"
                   values={Object {}}
                 />
-              </EuiLink>
+              </ForwardRef>
                  
             </span>
           </span>
@@ -1779,25 +1806,25 @@ exports[`Field for json setting should render user value if there is user value 
             "json:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={
           <span>
             <span>
-              <EuiLink
+              <ForwardRef
                 aria-label="Reset json test setting to default"
-                color="primary"
                 data-test-subj="advancedSetting-resetField-json:test:setting"
                 onClick={[Function]}
-                type="button"
               >
                 <FormattedMessage
                   defaultMessage="Reset to default"
                   id="kbn.management.settings.field.resetToDefaultLinkText"
                   values={Object {}}
                 />
-              </EuiLink>
+              </ForwardRef>
                  
             </span>
           </span>
@@ -1881,8 +1908,10 @@ exports[`Field for markdown setting should render as read only if saving is disa
             "markdown:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -1986,8 +2015,10 @@ exports[`Field for markdown setting should render as read only with help text if
             "markdown:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={
           <EuiText
@@ -2090,8 +2121,10 @@ exports[`Field for markdown setting should render custom setting icon if it is c
             "markdown:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -2173,8 +2206,10 @@ exports[`Field for markdown setting should render default value if there is no u
             "markdown:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -2278,25 +2313,25 @@ exports[`Field for markdown setting should render user value if there is user va
             "markdown:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={
           <span>
             <span>
-              <EuiLink
+              <ForwardRef
                 aria-label="Reset markdown test setting to default"
-                color="primary"
                 data-test-subj="advancedSetting-resetField-markdown:test:setting"
                 onClick={[Function]}
-                type="button"
               >
                 <FormattedMessage
                   defaultMessage="Reset to default"
                   id="kbn.management.settings.field.resetToDefaultLinkText"
                   values={Object {}}
                 />
-              </EuiLink>
+              </ForwardRef>
                  
             </span>
           </span>
@@ -2380,8 +2415,10 @@ exports[`Field for number setting should render as read only if saving is disabl
             "number:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -2468,8 +2505,10 @@ exports[`Field for number setting should render as read only with help text if o
             "number:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={
           <EuiText
@@ -2555,8 +2594,10 @@ exports[`Field for number setting should render custom setting icon if it is cus
             "number:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -2621,8 +2662,10 @@ exports[`Field for number setting should render default value if there is no use
             "number:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -2709,25 +2752,25 @@ exports[`Field for number setting should render user value if there is user valu
             "number:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={
           <span>
             <span>
-              <EuiLink
+              <ForwardRef
                 aria-label="Reset number test setting to default"
-                color="primary"
                 data-test-subj="advancedSetting-resetField-number:test:setting"
                 onClick={[Function]}
-                type="button"
               >
                 <FormattedMessage
                   defaultMessage="Reset to default"
                   id="kbn.management.settings.field.resetToDefaultLinkText"
                   values={Object {}}
                 />
-              </EuiLink>
+              </ForwardRef>
                  
             </span>
           </span>
@@ -2794,8 +2837,10 @@ exports[`Field for select setting should render as read only if saving is disabl
             "select:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -2899,8 +2944,10 @@ exports[`Field for select setting should render as read only with help text if o
             "select:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={
           <EuiText
@@ -3003,8 +3050,10 @@ exports[`Field for select setting should render custom setting icon if it is cus
             "select:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -3086,8 +3135,10 @@ exports[`Field for select setting should render default value if there is no use
             "select:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -3191,25 +3242,25 @@ exports[`Field for select setting should render user value if there is user valu
             "select:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={
           <span>
             <span>
-              <EuiLink
+              <ForwardRef
                 aria-label="Reset select test setting to default"
-                color="primary"
                 data-test-subj="advancedSetting-resetField-select:test:setting"
                 onClick={[Function]}
-                type="button"
               >
                 <FormattedMessage
                   defaultMessage="Reset to default"
                   id="kbn.management.settings.field.resetToDefaultLinkText"
                   values={Object {}}
                 />
-              </EuiLink>
+              </ForwardRef>
                  
             </span>
           </span>
@@ -3293,8 +3344,10 @@ exports[`Field for string setting should render as read only if saving is disabl
             "string:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -3381,8 +3434,10 @@ exports[`Field for string setting should render as read only with help text if o
             "string:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={
           <EuiText
@@ -3468,8 +3523,10 @@ exports[`Field for string setting should render custom setting icon if it is cus
             "string:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -3534,8 +3591,10 @@ exports[`Field for string setting should render default value if there is no use
             "string:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={null}
         isInvalid={false}
@@ -3622,25 +3681,25 @@ exports[`Field for string setting should render user value if there is user valu
             "string:test:setting-aria",
           ]
         }
+        display="row"
         error={null}
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         helpText={
           <span>
             <span>
-              <EuiLink
+              <ForwardRef
                 aria-label="Reset string test setting to default"
-                color="primary"
                 data-test-subj="advancedSetting-resetField-string:test:setting"
                 onClick={[Function]}
-                type="button"
               >
                 <FormattedMessage
                   defaultMessage="Reset to default"
                   id="kbn.management.settings.field.resetToDefaultLinkText"
                   values={Object {}}
                 />
-              </EuiLink>
+              </ForwardRef>
                  
             </span>
           </span>
@@ -3659,6 +3718,428 @@ exports[`Field for string setting should render user value if there is user valu
           onChange={[Function]}
           onKeyDown={[Function]}
           value="foo"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for stringWithValidation setting should render as read only if saving is disabled 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test validation setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="string:test-validation:setting-aria"
+      title={
+        <h3>
+          String test validation setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "string:test-validation:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="string:test-validation:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="string test validation setting"
+          compressed={false}
+          data-test-subj="advancedSetting-editField-string:test-validation:setting"
+          disabled={true}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="foo-default"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for stringWithValidation setting should render as read only with help text if overridden 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test validation setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="kbn.management.settings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        foo-default
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="string:test-validation:setting-aria"
+      title={
+        <h3>
+          String test validation setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "string:test-validation:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <EuiText
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+              id="kbn.management.settings.field.helpText"
+              values={Object {}}
+            />
+          </EuiText>
+        }
+        isInvalid={false}
+        label="string:test-validation:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="string test validation setting"
+          compressed={false}
+          data-test-subj="advancedSetting-editField-string:test-validation:setting"
+          disabled={true}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="fooUserValue"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for stringWithValidation setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test validation setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="string:test-validation:setting-aria"
+      title={
+        <h3>
+          String test validation setting
+          <EuiIconTip
+            aria-label="Custom setting"
+            color="primary"
+            content={
+              <FormattedMessage
+                defaultMessage="Custom setting"
+                id="kbn.management.settings.field.customSettingTooltip"
+                values={Object {}}
+              />
+            }
+            type="asterisk"
+          />
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "string:test-validation:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="string:test-validation:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="string test validation setting"
+          compressed={false}
+          data-test-subj="advancedSetting-editField-string:test-validation:setting"
+          disabled={false}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="foo-default"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for stringWithValidation setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test validation setting",
+              }
+            }
+          />
+        </React.Fragment>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="string:test-validation:setting-aria"
+      title={
+        <h3>
+          String test validation setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "string:test-validation:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={null}
+        isInvalid={false}
+        label="string:test-validation:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="string test validation setting"
+          compressed={false}
+          data-test-subj="advancedSetting-editField-string:test-validation:setting"
+          disabled={false}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="foo-default"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`Field for stringWithValidation setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  className="mgtAdvancedSettings__field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiDescribedFormGroup
+      className="mgtAdvancedSettings__fieldWrapper"
+      description={
+        <React.Fragment>
+          <div
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Description for String test validation setting",
+              }
+            }
+          />
+          <React.Fragment>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="xs"
+            >
+              <React.Fragment>
+                <FormattedMessage
+                  defaultMessage="Default: {value}"
+                  id="kbn.management.settings.field.defaultValueText"
+                  values={
+                    Object {
+                      "value": <EuiCode>
+                        foo-default
+                      </EuiCode>,
+                    }
+                  }
+                />
+              </React.Fragment>
+            </EuiText>
+          </React.Fragment>
+        </React.Fragment>
+      }
+      fullWidth={false}
+      gutterSize="l"
+      idAria="string:test-validation:setting-aria"
+      title={
+        <h3>
+          String test validation setting
+          
+        </h3>
+      }
+      titleSize="xs"
+    >
+      <EuiFormRow
+        className="mgtAdvancedSettings__fieldRow"
+        describedByIds={
+          Array [
+            "string:test-validation:setting-aria",
+          ]
+        }
+        display="row"
+        error={null}
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText={
+          <span>
+            <span>
+              <ForwardRef
+                aria-label="Reset string test validation setting to default"
+                data-test-subj="advancedSetting-resetField-string:test-validation:setting"
+                onClick={[Function]}
+              >
+                <FormattedMessage
+                  defaultMessage="Reset to default"
+                  id="kbn.management.settings.field.resetToDefaultLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+                 
+            </span>
+          </span>
+        }
+        isInvalid={false}
+        label="string:test-validation:setting"
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-label="string test validation setting"
+          compressed={false}
+          data-test-subj="advancedSetting-editField-string:test-validation:setting"
+          disabled={false}
+          fullWidth={false}
+          isLoading={false}
+          onChange={[Function]}
+          onKeyDown={[Function]}
+          value="fooUserValue"
         />
       </EuiFormRow>
     </EuiDescribedFormGroup>

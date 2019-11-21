@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import 'angular-elastic/elastic';
 import rison from 'rison-node';
@@ -27,10 +28,11 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { fatalError, toastNotifications } from 'ui/notify';
 import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
-import { castEsToKbnFieldTypeName } from '../../../../../../../legacy/utils';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { isNumeric } from 'ui/utils/numeric';
 import { canViewInApp } from './lib/in_app_url';
+
+import { castEsToKbnFieldTypeName } from '../../../../../../../plugins/data/public';
 
 import { getViewBreadcrumbs } from './breadcrumbs';
 
@@ -39,11 +41,12 @@ const location = 'SavedObject view';
 uiRoutes
   .when('/management/kibana/objects/:service/:id', {
     template: objectViewHTML,
-    k7Breadcrumbs: getViewBreadcrumbs
+    k7Breadcrumbs: getViewBreadcrumbs,
+    requireUICapability: 'management.kibana.objects',
   });
 
 uiModules.get('apps/management', ['monospaced.elastic'])
-  .directive('kbnManagementObjectsView', function (kbnIndex, confirmModal, i18n) {
+  .directive('kbnManagementObjectsView', function (kbnIndex, confirmModal) {
     return {
       restrict: 'E',
       controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Private, uiCapabilities) {
@@ -89,7 +92,7 @@ uiModules.get('apps/management', ['monospaced.elastic'])
             field.type = 'boolean';
             field.value = field.value;
           } else if (_.isPlainObject(field.value)) {
-          // do something recursive
+            // do something recursive
             return _.reduce(field.value, _.partialRight(createField, parents), memo);
           }
 
@@ -137,7 +140,7 @@ uiModules.get('apps/management', ['monospaced.elastic'])
           }
         };
 
-        const { edit: canEdit, delete: canDelete } = uiCapabilities.savedObjectsManagement[service.type];
+        const { edit: canEdit, delete: canDelete } = uiCapabilities.savedObjectsManagement;
         $scope.canEdit = canEdit;
         $scope.canDelete = canDelete;
         $scope.canViewInApp = canViewInApp(uiCapabilities, service.type);
@@ -220,15 +223,15 @@ uiModules.get('apps/management', ['monospaced.elastic'])
           }
           const confirmModalOptions = {
             onConfirm: doDelete,
-            confirmButtonText: i18n('kbn.management.objects.confirmModalOptions.deleteButtonLabel', {
+            confirmButtonText: i18n.translate('kbn.management.objects.confirmModalOptions.deleteButtonLabel', {
               defaultMessage: 'Delete',
             }),
-            title: i18n('kbn.management.objects.confirmModalOptions.modalTitle', {
+            title: i18n.translate('kbn.management.objects.confirmModalOptions.modalTitle', {
               defaultMessage: 'Delete saved Kibana object?'
             }),
           };
           confirmModal(
-            i18n('kbn.management.objects.confirmModalOptions.modalDescription', {
+            i18n.translate('kbn.management.objects.confirmModalOptions.modalDescription', {
               defaultMessage: 'You can\'t recover deleted objects',
             }),
             confirmModalOptions

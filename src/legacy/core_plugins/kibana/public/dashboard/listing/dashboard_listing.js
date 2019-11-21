@@ -19,16 +19,13 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiLink,
-  EuiButton,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { npStart } from 'ui/new_platform';
 
-import { TableListView } from './../../table_list_view';
+import { TableListView } from '../../../../../../../src/plugins/kibana_react/public';
 
 export const EMPTY_FILTER = '';
 
@@ -37,39 +34,36 @@ export const EMPTY_FILTER = '';
 // and not supporting server-side paging.
 // This component does not try to tackle these problems (yet) and is just feature matching the legacy component
 // TODO support server side sorting/paging once title and description are sortable on the server.
-class DashboardListingUi extends React.Component {
-
+export class DashboardListing extends React.Component {
   constructor(props) {
     super(props);
   }
 
   render() {
     return (
-      <TableListView
-        createItem={this.props.hideWriteControls ? null : this.props.createItem}
-        findItems={this.props.findItems}
-        deleteItems={this.props.hideWriteControls ? null : this.props.deleteItems}
-        editItem={this.props.hideWriteControls ? null : this.props.editItem}
-        tableColumns={this.getTableColumns()}
-        listingLimit={this.props.listingLimit}
-        initialFilter={this.props.initialFilter}
-        noItemsFragment={this.getNoItemsMessage()}
-        entityName={
-          i18n.translate('kbn.dashboard.listing.table.entityName', {
-            defaultMessage: 'dashboard'
-          })
-        }
-        entityNamePlural={
-          i18n.translate('kbn.dashboard.listing.table.entityNamePlural', {
-            defaultMessage: 'dashboards'
-          })
-        }
-        tableListTitle={
-          i18n.translate('kbn.dashboard.listing.dashboardsTitle', {
-            defaultMessage: 'Dashboards'
-          })
-        }
-      />
+      <I18nProvider>
+        <TableListView
+          createItem={this.props.hideWriteControls ? null : this.props.createItem}
+          findItems={this.props.findItems}
+          deleteItems={this.props.hideWriteControls ? null : this.props.deleteItems}
+          editItem={this.props.hideWriteControls ? null : this.props.editItem}
+          tableColumns={this.getTableColumns()}
+          listingLimit={this.props.listingLimit}
+          initialFilter={this.props.initialFilter}
+          noItemsFragment={this.getNoItemsMessage()}
+          entityName={i18n.translate('kbn.dashboard.listing.table.entityName', {
+            defaultMessage: 'dashboard',
+          })}
+          entityNamePlural={i18n.translate('kbn.dashboard.listing.table.entityNamePlural', {
+            defaultMessage: 'dashboards',
+          })}
+          tableListTitle={i18n.translate('kbn.dashboard.listing.dashboardsTitle', {
+            defaultMessage: 'Dashboards',
+          })}
+          toastNotifications={npStart.core.notifications.toasts}
+          uiSettings={npStart.core.uiSettings}
+        />
+      </I18nProvider>
     );
   }
 
@@ -146,7 +140,6 @@ class DashboardListingUi extends React.Component {
         />
       </div>
     );
-
   }
 
   getTableColumns() {
@@ -154,7 +147,7 @@ class DashboardListingUi extends React.Component {
       {
         field: 'title',
         name: i18n.translate('kbn.dashboard.listing.table.titleColumnName', {
-          defaultMessage: 'Title'
+          defaultMessage: 'Title',
         }),
         sortable: true,
         render: (field, record) => (
@@ -164,22 +157,22 @@ class DashboardListingUi extends React.Component {
           >
             {field}
           </EuiLink>
-        )
+        ),
       },
       {
         field: 'description',
         name: i18n.translate('kbn.dashboard.listing.table.descriptionColumnName', {
-          defaultMessage: 'Description'
+          defaultMessage: 'Description',
         }),
         dataType: 'string',
         sortable: true,
-      }
+      },
     ];
     return tableColumns;
   }
 }
 
-DashboardListingUi.propTypes = {
+DashboardListing.propTypes = {
   createItem: PropTypes.func.isRequired,
   findItems: PropTypes.func.isRequired,
   deleteItems: PropTypes.func.isRequired,
@@ -190,8 +183,6 @@ DashboardListingUi.propTypes = {
   initialFilter: PropTypes.string,
 };
 
-DashboardListingUi.defaultProps = {
+DashboardListing.defaultProps = {
   initialFilter: EMPTY_FILTER,
 };
-
-export const DashboardListing = injectI18n(DashboardListingUi);

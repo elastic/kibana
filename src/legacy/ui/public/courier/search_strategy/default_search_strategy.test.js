@@ -18,48 +18,89 @@
  */
 
 import { defaultSearchStrategy } from './default_search_strategy';
-import { Promise } from 'bluebird';
 
 const { search } = defaultSearchStrategy;
 
+function getConfigStub(config = {}) {
+  return {
+    get: key => config[key]
+  };
+}
+
+const msearchMockResponse = Promise.resolve([]);
+msearchMockResponse.abort = jest.fn();
+const msearchMock = jest.fn().mockReturnValue(msearchMockResponse);
+
+const searchMockResponse = Promise.resolve([]);
+searchMockResponse.abort = jest.fn();
+const searchMock = jest.fn().mockReturnValue(searchMockResponse);
+
 describe('defaultSearchStrategy', function () {
-
   describe('search', function () {
-
     let searchArgs;
 
     beforeEach(() => {
-      const msearchMock = jest.fn().mockReturnValue(Promise.resolve([]));
+      msearchMockResponse.abort.mockClear();
+      msearchMock.mockClear();
+
+      searchMockResponse.abort.mockClear();
+      searchMock.mockClear();
 
       searchArgs = {
-        searchRequests: [],
-        es: { msearch: msearchMock },
-        Promise,
-        serializeFetchParams: () => Promise.resolve('pretend this is a valid request body'),
+        searchRequests: [{
+          index: { title: 'foo' }
+        }],
+        es: {
+          msearch: msearchMock,
+          search: searchMock,
+        },
       };
     });
 
     test('does not send max_concurrent_shard_requests by default', async () => {
+      searchArgs.config = getConfigStub({ 'courier:batchSearches': true });
       await search(searchArgs);
-      expect(searchArgs.es.msearch.mock.calls[0][0]).not.toHaveProperty('max_concurrent_shard_requests');
+      expect(searchArgs.es.msearch.mock.calls[0][0].max_concurrent_shard_requests).toBe(undefined);
     });
 
     test('allows configuration of max_concurrent_shard_requests', async () => {
-      searchArgs.maxConcurrentShardRequests = 42;
+      searchArgs.config = getConfigStub({
+        'courier:batchSearches': true,
+        'courier:maxConcurrentShardRequests': 42,
+      });
       await search(searchArgs);
       expect(searchArgs.es.msearch.mock.calls[0][0].max_concurrent_shard_requests).toBe(42);
     });
 
     test('should set rest_total_hits_as_int to true on a request', async () => {
+      searchArgs.config = getConfigStub({ 'courier:batchSearches': true });
       await search(searchArgs);
       expect(searchArgs.es.msearch.mock.calls[0][0]).toHaveProperty('rest_total_hits_as_int', true);
     });
 
     test('should set ignore_throttled=false when including frozen indices', async () => {
-      await search({ ...searchArgs, includeFrozen: true });
+      searchArgs.config = getConfigStub({
+        'courier:batchSearches': true,
+        'search:includeFrozen': true,
+      });
+      await search(searchArgs);
       expect(searchArgs.es.msearch.mock.calls[0][0]).toHaveProperty('ignore_throttled', false);
     });
 
-  });
+    test('should properly call abort with msearch', () => {
+      searchArgs.config = getConfigStub({
+        'courier:batchSearches': true
+      });
+      search(searchArgs).abort();
+      expect(msearchMockResponse.abort).toHaveBeenCalled();
+    });
 
+    test('should properly abort with search', async () => {
+      searchArgs.config = getConfigStub({
+        'courier:batchSearches': false
+      });
+      search(searchArgs).abort();
+      expect(searchMockResponse.abort).toHaveBeenCalled();
+    });
+  });
 });

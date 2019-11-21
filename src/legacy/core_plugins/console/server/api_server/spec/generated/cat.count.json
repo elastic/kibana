@@ -1,0 +1,19 @@
+{
+  "cat.count": {
+    "url_params": {
+      "format": "",
+      "h": [],
+      "help": "__flag__",
+      "s": [],
+      "v": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/count",
+      "_cat/count/{indices}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-count.html"
+  }
+}

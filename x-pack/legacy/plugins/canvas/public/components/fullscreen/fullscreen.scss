@@ -1,0 +1,63 @@
+body.canvas-isFullscreen { // sass-lint:disable-line no-qualifying-elements
+  // hide global loading indicator
+  .kbnLoadingIndicator {
+    display: none;
+  }
+
+  // remove space for global nav elements
+  .chrHeaderWrapper ~ .app-wrapper {
+    // Override locked nav at all breakpoints
+    left: 0 !important; // sass-lint:disable-line no-important
+    top: 0;
+  }
+
+  // set the background color
+  .canvasLayout {
+    background: $euiColorInk;
+  }
+
+  // hide all the interface parts
+  .chrHeaderWrapper, // K7 global top nav
+  .canvasLayout__stageHeader,
+  .canvasLayout__sidebar,
+  .canvasLayout__footer,
+  .canvasGrid {
+    display: none;
+  }
+
+  .canvasLayout__stageContentOverflow {
+    display: block; // fixes center alignment for Safari
+    overflow: visible;
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+
+    .canvasWorkpad__buffer {
+      padding: 0;
+      margin: 0;
+    }
+  }
+
+  .canvasLayout__rows {
+    // this is critical for the row to expand outside of the viewport for proper fullscreen sizing
+    max-width: none;
+  }
+
+  .canvasLayout__rows,
+  .canvasLayout__cols {
+    align-items: center;
+    justify-content: center;
+  }
+
+  .canvasCheckered {
+    display: flex;
+    background: none;
+  }
+
+  .canvasPage {
+    box-shadow: none;
+    overflow: hidden;
+  }
+}

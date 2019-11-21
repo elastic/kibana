@@ -16,21 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import 'ui/directives/css_truncate';
+//field_name directive will be replaced very soon
 import 'ui/directives/field_name';
 import './discover_field';
-import 'ui/angular_ui_select';
+import './discover_field_search_directive';
+import './discover_index_pattern_directive';
 import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
 import { fieldCalculator } from './lib/field_calculator';
-import { FieldList } from 'ui/index_patterns/_field_list';
-import { uiModules } from 'ui/modules';
+import {
+  getServices,
+  FieldList
+} from '../../kibana_services';
 import fieldChooserTemplate from './field_chooser.html';
+
+const { uiModules } =  getServices();
 const app = uiModules.get('apps/discover');
 
-app.directive('discFieldChooser', function ($location, globalState, config, $route, i18n) {
+app.directive('discFieldChooser', function ($location, config, $route) {
   return {
     restrict: 'E',
     scope: {
@@ -46,22 +50,16 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
     },
     template: fieldChooserTemplate,
     link: function ($scope) {
-      $scope.$parent.$watch('showFilter', () =>{
-        $scope.toggleFieldFilterButtonAriaLabel = $scope.$parent.showFilter
-          ? i18n('kbn.discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
-            defaultMessage: 'Hide field settings',
-          })
-          : i18n('kbn.discover.fieldChooser.toggleFieldFilterButtonShowAriaLabel', {
-            defaultMessage: 'Show field settings',
-          });
-      });
+
+      $scope.showFilter = false;
+      $scope.toggleShowFilter = () =>  $scope.showFilter = !$scope.showFilter;
 
       $scope.selectedIndexPattern = $scope.indexPatternList.find(
         (pattern) => pattern.id === $scope.indexPattern.id
       );
       $scope.indexPatternList = _.sortBy($scope.indexPatternList, o => o.get('title'));
-      $scope.setIndexPattern = function (pattern) {
-        $scope.state.index = pattern.id;
+      $scope.setIndexPattern = function (id) {
+        $scope.state.index = id;
         $scope.state.save();
       };
 
@@ -80,40 +78,28 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
         ],
         defaults: {
           missing: true,
-          type: 'any'
+          type: 'any',
+          name: ''
         },
         boolOpts: [
           { label: 'any', value: undefined },
           { label: 'yes', value: true },
           { label: 'no', value: false }
         ],
-        toggleVal: function (name, def) {
-          if (filter.vals[name] !== def) filter.vals[name] = def;
-          else filter.vals[name] = undefined;
-        },
         reset: function () {
           filter.vals = _.clone(filter.defaults);
         },
-        isFieldSelected: function (field) {
-          return field.display;
+        /**
+         * filter for fields that are displayed / selected for the data table
+         */
+        isFieldFilteredAndDisplayed: function (field) {
+          return field.display && isFieldFiltered(field);
         },
-        isFieldFiltered: function (field) {
-          const matchFilter = (filter.vals.type === 'any' || field.type === filter.vals.type);
-          const isAggregatable = (filter.vals.aggregatable == null || field.aggregatable === filter.vals.aggregatable);
-          const isSearchable = (filter.vals.searchable == null || field.searchable === filter.vals.searchable);
-          const scriptedOrMissing = (!filter.vals.missing || field.scripted || field.rowCount > 0);
-          const matchName = (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1);
-
-          return !field.display
-            && matchFilter
-            && isAggregatable
-            && isSearchable
-            && scriptedOrMissing
-            && matchName
-          ;
-        },
-        popularity: function (field) {
-          return field.count > 0;
+        /**
+         * filter for fields that are not displayed / selected for the data table
+         */
+        isFieldFilteredAndNotDisplayed: function (field) {
+          return !field.display && isFieldFiltered(field) && field.type !== '_source';
         },
         getActive: function () {
           return _.some(filter.props, function (prop) {
@@ -122,11 +108,40 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
         }
       };
 
+      function isFieldFiltered(field) {
+        const matchFilter = (filter.vals.type === 'any' || field.type === filter.vals.type);
+        const isAggregatable = (filter.vals.aggregatable == null || field.aggregatable === filter.vals.aggregatable);
+        const isSearchable = (filter.vals.searchable == null || field.searchable === filter.vals.searchable);
+        const scriptedOrMissing = !filter.vals.missing || field.type === '_source' ||  field.scripted || field.rowCount > 0;
+        const matchName = (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1);
+
+        return matchFilter && isAggregatable && isSearchable && scriptedOrMissing && matchName;
+      }
+
+      $scope.setFilterValue = (name, value) => {
+        filter.vals[name] = value;
+      };
+
+      $scope.filtersActive = 0;
+
       // set the initial values to the defaults
       filter.reset();
 
       $scope.$watchCollection('filter.vals', function () {
         filter.active = filter.getActive();
+        if (filter.vals) {
+          let count = 0;
+          Object.keys(filter.vals).forEach((key) => {
+            if (key === 'missing' || key === 'name') {
+              return;
+            }
+            const value = filter.vals[key];
+            if ((value && value !== 'any') || value === false) {
+              count++;
+            }
+          });
+          $scope.filtersActive = count;
+        }
       });
 
       $scope.$watchMulti([
@@ -268,7 +283,7 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
 
         const fieldSpecs = indexPattern.fields.slice(0);
         const fieldNamesInDocs = _.keys(fieldCounts);
-        const fieldNamesInIndexPattern = _.keys(indexPattern.fields.byName);
+        const fieldNamesInIndexPattern = _.map(indexPattern.fields, 'name');
 
         _.difference(fieldNamesInDocs, fieldNamesInIndexPattern)
           .forEach(function (unknownFieldName) {
@@ -282,7 +297,7 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
 
         if (prevFields) {
           fields.forEach(function (field) {
-            field.details = _.get(prevFields, ['byName', field.name, 'details']);
+            field.details = (prevFields.getByName(field.name) || {}).details;
           });
         }
 

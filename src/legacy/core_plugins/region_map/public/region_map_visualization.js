@@ -17,19 +17,20 @@
  * under the License.
  */
 
-import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
-import { BaseMapsVisualizationProvider } from '../../tile_map/public/base_maps_visualization';
+import { i18n } from '@kbn/i18n';
 import ChoroplethLayer from './choropleth_layer';
 import { truncatedColorMaps }  from 'ui/vislib/components/color/truncated_colormaps';
 import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-import { TileMapTooltipFormatter } from './tooltip_formatter';
-import 'ui/vis/map/service_settings';
 import { toastNotifications } from 'ui/notify';
 
-export function RegionMapsVisualizationProvider(Private, config, i18n) {
+import { TileMapTooltipFormatter } from './tooltip_formatter';
 
-  const tooltipFormatter = Private(TileMapTooltipFormatter);
-  const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
+// TODO: reference to TILE_MAP plugin should be removed
+import { BaseMapsVisualizationProvider } from '../../tile_map/public/base_maps_visualization';
+
+export function createRegionMapVisualization({ serviceSettings, $injector, uiSettings }) {
+  const BaseMapsVisualization = new BaseMapsVisualizationProvider(serviceSettings);
+  const tooltipFormatter = new TileMapTooltipFormatter($injector);
 
   return class RegionMapsVisualization extends BaseMapsVisualization {
 
@@ -140,7 +141,8 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
           this._params.selectedLayer.format,
           showAllData,
           this._params.selectedLayer.meta,
-          this._params.selectedLayer
+          this._params.selectedLayer,
+          serviceSettings
         );
       } else {
         this._choroplethLayer = new ChoroplethLayer(
@@ -149,7 +151,8 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
           this._params.selectedLayer.format,
           showAllData,
           this._params.selectedLayer.meta,
-          this._params.selectedLayer
+          this._params.selectedLayer,
+          serviceSettings,
         );
       }
 
@@ -159,17 +162,17 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
       });
 
       this._choroplethLayer.on('styleChanged', (event) => {
-        const shouldShowWarning = this._params.isDisplayWarning && config.get('visualization:regionmap:showWarnings');
+        const shouldShowWarning = this._params.isDisplayWarning && uiSettings.get('visualization:regionmap:showWarnings');
         if (event.mismatches.length > 0 && shouldShowWarning) {
           toastNotifications.addWarning({
-            title: i18n('regionMap.visualization.unableToShowMismatchesWarningTitle', {
+            title: i18n.translate('regionMap.visualization.unableToShowMismatchesWarningTitle', {
               defaultMessage: 'Unable to show {mismatchesLength} {oneMismatch, plural, one {result} other {results}} on map',
               values: {
                 mismatchesLength: event.mismatches.length,
                 oneMismatch: event.mismatches.length > 1 ? 0 : 1,
               },
             }),
-            text: i18n('regionMap.visualization.unableToShowMismatchesWarningText', {
+            text: i18n.translate('regionMap.visualization.unableToShowMismatchesWarningText', {
               defaultMessage: 'Ensure that each of these term matches a shape on that shape\'s join field: {mismatches}',
               values: {
                 mismatches: event.mismatches ? event.mismatches.join(', ') : '',

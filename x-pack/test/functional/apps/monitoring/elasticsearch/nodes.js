@@ -12,14 +12,17 @@ export default function ({ getService, getPageObjects }) {
   const nodesList = getService('monitoringElasticsearchNodes');
   const esClusterSummaryStatus = getService('monitoringElasticsearchSummaryStatus');
 
-  describe('Elasticsearch nodes listing', () => {
+  describe('Elasticsearch nodes listing', function () {
+    // FF issue: https://github.com/elastic/kibana/issues/35551
+    this.tags(['skipFirefox']);
+
     describe('with offline node', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
         await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
-          from: '2017-10-05 20:28:28.475',
-          to: '2017-10-05 20:34:38.341',
+          from: 'Oct 5, 2017 @ 20:28:28.475',
+          to: 'Oct 5, 2017 @ 20:34:38.341',
         });
 
         // go to nodes listing
@@ -35,9 +38,9 @@ export default function ({ getService, getPageObjects }) {
         expect(await esClusterSummaryStatus.getContent()).to.eql({
           nodesCount: 'Nodes\n2',
           indicesCount: 'Indices\n20',
-          memory: 'Memory\n696.6 MB / 1.3 GB',
-          totalShards: 'Total Shards\n79',
-          unassignedShards: 'Unassigned Shards\n7',
+          memory: 'JVM Heap\n696.6 MB / 1.3 GB',
+          totalShards: 'Total shards\n79',
+          unassignedShards: 'Unassigned shards\n7',
           documentCount: 'Documents\n25,758',
           dataSize: 'Data\n100.0 MB',
           health: 'Health: yellow',
@@ -90,7 +93,7 @@ export default function ({ getService, getPageObjects }) {
           await nodesList.clickCpuCol();
 
           const nodesAll = await nodesList.getNodesAll();
-          const tableData = [{ cpu: '0% \n3% max\n0% min' }, { cpu: '2% \n3% max\n0% min' }, { cpu: undefined }];
+          const tableData = [{ cpu: '2% \n3% max\n0% min' }, { cpu: '0% \n3% max\n0% min' }, { cpu: undefined }];
           nodesAll.forEach((obj, node) => {
             expect(nodesAll[node].cpu).to.be(tableData[node].cpu);
           });
@@ -193,8 +196,8 @@ export default function ({ getService, getPageObjects }) {
 
       before(async () => {
         await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
-          from: '2017-10-05 20:31:48.354',
-          to: '2017-10-05 20:35:12.176',
+          from: 'Oct 5, 2017 @ 20:31:48.354',
+          to: 'Oct 5, 2017 @ 20:35:12.176',
         });
 
         // go to nodes listing
@@ -210,17 +213,16 @@ export default function ({ getService, getPageObjects }) {
         expect(await esClusterSummaryStatus.getContent()).to.eql({
           nodesCount: 'Nodes\n3',
           indicesCount: 'Indices\n20',
-          memory: 'Memory\n575.3 MB / 2.0 GB',
-          totalShards: 'Total Shards\n80',
-          unassignedShards: 'Unassigned Shards\n5',
+          memory: 'JVM Heap\n575.3 MB / 2.0 GB',
+          totalShards: 'Total shards\n80',
+          unassignedShards: 'Unassigned shards\n5',
           documentCount: 'Documents\n25,927',
           dataSize: 'Data\n101.6 MB',
           health: 'Health: yellow',
         });
       });
 
-      // Skip until https://github.com/elastic/eui/issues/1318 is implemented
-      it.skip('should filter for specific indices', async () => {
+      it('should filter for specific indices', async () => {
         await nodesList.setFilter('01');
         const rows = await nodesList.getRows();
         expect(rows.length).to.be(1);

@@ -4,36 +4,46 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as Rx from 'rxjs';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
-import { createSpacesService } from './create_spaces_service';
 import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_factory';
+import { SpacesService } from '../spaces_service';
+import { SavedObjectsLegacyService } from 'src/core/server';
+import { SpacesAuditLogger } from './audit_logger';
+import { elasticsearchServiceMock, coreMock } from '../../../../../src/core/server/mocks';
+import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
+import { LegacyAPI } from '../plugin';
+import { spacesConfig } from './__fixtures__';
+import { securityMock } from '../../../security/server/mocks';
 
-const server = {
-  config: () => {
-    return {
-      get: (key: string) => {
-        if (key === 'server.basePath') {
-          return '/foo';
-        }
-        throw new Error('unexpected key ' + key);
-      },
-    };
-  },
+const log = {
+  log: jest.fn(),
+  trace: jest.fn(),
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  fatal: jest.fn(),
 };
 
+const legacyAPI: LegacyAPI = {
+  legacyConfig: {},
+  savedObjects: {} as SavedObjectsLegacyService,
+} as LegacyAPI;
+
+const service = new SpacesService(log, () => legacyAPI);
+
 describe('createSpacesTutorialContextFactory', () => {
-  it('should create a valid context factory', () => {
-    const spacesService = createSpacesService(server);
+  it('should create a valid context factory', async () => {
+    const spacesService = spacesServiceMock.createSetupContract();
     expect(typeof createSpacesTutorialContextFactory(spacesService)).toEqual('function');
   });
 
-  it('should create context with the current space id for space my-space-id', () => {
-    const spacesService = createSpacesService(server);
+  it('should create context with the current space id for space my-space-id', async () => {
+    const spacesService = spacesServiceMock.createSetupContract('my-space-id');
     const contextFactory = createSpacesTutorialContextFactory(spacesService);
 
-    const request = {
-      getBasePath: () => '/foo/s/my-space-id',
-    };
+    const request = {};
 
     expect(contextFactory(request)).toEqual({
       spaceId: 'my-space-id',
@@ -41,13 +51,17 @@ describe('createSpacesTutorialContextFactory', () => {
     });
   });
 
-  it('should create context with the current space id for the default space', () => {
-    const spacesService = createSpacesService(server);
+  it('should create context with the current space id for the default space', async () => {
+    const spacesService = await service.setup({
+      http: coreMock.createSetup().http,
+      elasticsearch: elasticsearchServiceMock.createSetupContract(),
+      authorization: securityMock.createSetup().authz,
+      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
+      config$: Rx.of(spacesConfig),
+    });
     const contextFactory = createSpacesTutorialContextFactory(spacesService);
 
-    const request = {
-      getBasePath: () => '/foo',
-    };
+    const request = {};
 
     expect(contextFactory(request)).toEqual({
       spaceId: DEFAULT_SPACE_ID,

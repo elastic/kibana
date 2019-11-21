@@ -62,7 +62,7 @@ export class NumberFormatEditor extends DefaultFormatEditor {
           }
           helpText={
             <span>
-              <EuiLink target="_window" href="https://adamwdraper.github.io/Numeral-js/">
+              <EuiLink target="_blank" href="https://adamwdraper.github.io/Numeral-js/">
                 <FormattedMessage id="common.ui.fieldEditor.number.documentationLabel" defaultMessage="Documentation" />&nbsp;
                 <EuiIcon type="link" />
               </EuiLink>

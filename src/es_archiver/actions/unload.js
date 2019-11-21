@@ -31,12 +31,13 @@ import {
   readDirectory,
   createParseArchiveStreams,
   createFilterRecordsStream,
-  createDeleteIndexStream
+  createDeleteIndexStream,
 } from '../lib';
 
-export async function unloadAction({ name, client, dataDir, log, kibanaUrl }) {
+export async function unloadAction({ name, client, dataDir, log, kbnClient }) {
   const inputDir = resolve(dataDir, name);
   const stats = createStats(name, log);
+  const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
 
   const files = prioritizeMappings(await readDirectory(inputDir));
   for (const filename of files) {
@@ -46,7 +47,7 @@ export async function unloadAction({ name, client, dataDir, log, kibanaUrl }) {
       createReadStream(resolve(inputDir, filename)),
       ...createParseArchiveStreams({ gzip: isGzip(filename) }),
       createFilterRecordsStream('index'),
-      createDeleteIndexStream(client, stats, log, kibanaUrl)
+      createDeleteIndexStream(client, stats, log, kibanaPluginIds)
     ]);
   }
 

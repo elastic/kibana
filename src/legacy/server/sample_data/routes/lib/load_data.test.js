@@ -35,8 +35,8 @@ test('load log data', async () => {
     myDocsCount += docs.length;
   };
   const count = await loadData('./src/legacy/server/sample_data/data_sets/logs/logs.json.gz', bulkInsertMock);
-  expect(myDocsCount).toBe(14005);
-  expect(count).toBe(14005);
+  expect(myDocsCount).toBe(14074);
+  expect(count).toBe(14074);
 });
 
 test('load ecommerce data', async () => {

@@ -36,7 +36,7 @@ describe('Vislib Gauge Chart Test Suite', function () {
     addTooltip: true,
     addLegend: false,
     gauge: {
-      verticalSplit: false,
+      alignment: 'horizontal',
       autoExtend: false,
       percentageMode: false,
       gaugeStyle: 'Full',
@@ -113,19 +113,19 @@ describe('Vislib Gauge Chart Test Suite', function () {
     expect($(chartEl).find('svg').length).to.equal(5);
   });
 
-  it('creates gauge with percentage mode', function () {
+  it('creates gauge with automatic mode', function () {
     generateVis({
       gauge: {
-        percentageMode: true
+        alignment: 'automatic'
       }
     });
-    expect($(chartEl).find('svg > g > g > text').text()).to.equal('94%77%61%24%45%');
+    expect($(chartEl).find('svg').width()).to.equal(197);
   });
 
   it('creates gauge with vertical mode', function () {
     generateVis({
       gauge: {
-        verticalSplit: true
+        alignment: 'vertical'
       }
     });
     expect($(chartEl).find('svg').width()).to.equal($(chartEl).width());

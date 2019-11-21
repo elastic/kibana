@@ -63,16 +63,16 @@ uiRoutes
     template: indexTemplate,
     k7Breadcrumbs: getBreadcrumbs,
     requireUICapability: 'management.kibana.settings',
-    badge: (i18n, uiCapabilities) => {
+    badge: uiCapabilities => {
       if (uiCapabilities.advancedSettings.save) {
         return undefined;
       }
 
       return {
-        text: i18n('kbn.management.advancedSettings.badge.readOnly.text', {
+        text: i18n.translate('kbn.management.advancedSettings.badge.readOnly.text', {
           defaultMessage: 'Read only',
         }),
-        tooltip: i18n('kbn.management.advancedSettings.badge.readOnly.tooltip', {
+        tooltip: i18n.translate('kbn.management.advancedSettings.badge.readOnly.tooltip', {
           defaultMessage: 'Unable to save advanced settings',
         }),
         iconType: 'glasses'
@@ -106,13 +106,13 @@ management.getSection('kibana').register('settings', {
   url: '#/management/kibana/settings'
 });
 
-FeatureCatalogueRegistryProvider.register(i18n => {
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'advanced_settings',
-    title: i18n('kbn.management.settings.advancedSettingsLabel', {
+    title: i18n.translate('kbn.management.settings.advancedSettingsLabel', {
       defaultMessage: 'Advanced Settings',
     }),
-    description: i18n('kbn.management.settings.advancedSettingsDescription', {
+    description: i18n.translate('kbn.management.settings.advancedSettingsDescription', {
       defaultMessage: 'Directly edit settings that control behavior in Kibana.',
     }),
     icon: 'advancedSettingsApp',

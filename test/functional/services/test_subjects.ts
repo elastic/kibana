@@ -27,10 +27,14 @@ interface ExistsOptions {
   allowHidden?: boolean;
 }
 
+interface SetValueOptions {
+  clearWithKeyboard?: boolean;
+  typeCharByChar?: boolean;
+}
+
 export function TestSubjectsProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
-  const browser = getService('browser');
   const find = getService('find');
   const config = getService('config');
 
@@ -59,11 +63,35 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
 
     public async missingOrFail(
       selector: string,
-      existsOptions?: ExistsOptions
+      options: ExistsOptions = {}
     ): Promise<void | never> {
-      if (await this.exists(selector, existsOptions)) {
-        throw new Error(`expected testSubject(${selector}) to not exist`);
-      }
+      const { timeout = WAIT_FOR_EXISTS_TIME, allowHidden = false } = options;
+
+      log.debug(`TestSubjects.missingOrFail(${selector})`);
+      return await (allowHidden
+        ? this.waitForHidden(selector, timeout)
+        : find.waitForDeletedByCssSelector(testSubjSelector(selector), timeout));
+    }
+
+    async stringExistsInCodeBlockOrFail(codeBlockSelector: string, stringToFind: string) {
+      await retry.try(async () => {
+        const responseCodeBlock = await this.find(codeBlockSelector);
+        const spans = await find.allDescendantDisplayedByTagName('span', responseCodeBlock);
+        const foundInSpans = await Promise.all(
+          spans.map(async span => {
+            const text = await span.getVisibleText();
+            if (text === stringToFind) {
+              log.debug(`"${text}" matched "${stringToFind}"!`);
+              return true;
+            } else {
+              log.debug(`"${text}" did not match "${stringToFind}"`);
+            }
+          })
+        );
+        if (!foundInSpans.find(foundInSpan => foundInSpan)) {
+          throw new Error(`"${stringToFind}" was not found. Trying again...`);
+        }
+      });
     }
 
     public async append(selector: string, text: string): Promise<void> {
@@ -93,7 +121,7 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
         log.debug(`TestSubjects.doubleClick(${selector})`);
         const element = await this.find(selector, timeout);
         await element.moveMouseTo();
-        await browser.doubleClick();
+        await element.doubleClick();
       });
     }
 
@@ -134,21 +162,6 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    public async getPropertyAll(selector: string, property: string): Promise<string[]> {
-      log.debug(`TestSubjects.getPropertyAll(${selector}, ${property})`);
-      return await this._mapAll(selector, async (element: WebElementWrapper) => {
-        return (await element.getProperty(property)) as string;
-      });
-    }
-
-    public async getProperty(selector: string, property: string): Promise<string> {
-      log.debug(`TestSubjects.getProperty(${selector}, ${property})`);
-      return await retry.try(async () => {
-        const element = await this.find(selector);
-        return (await element.getProperty(property)) as string;
-      });
-    }
-
     public async getAttributeAll(selector: string, attribute: string): Promise<string[]> {
       log.debug(`TestSubjects.getAttributeAll(${selector}, ${attribute})`);
       return await this._mapAll(selector, async (element: WebElementWrapper) => {
@@ -164,17 +177,30 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    public async setValue(selector: string, text: string): Promise<void> {
+    public async setValue(
+      selector: string,
+      text: string,
+      options: SetValueOptions = {}
+    ): Promise<void> {
       return await retry.try(async () => {
+        const { clearWithKeyboard = false, typeCharByChar = false } = options;
         log.debug(`TestSubjects.setValue(${selector}, ${text})`);
         await this.click(selector);
         // in case the input element is actually a child of the testSubject, we
         // call clearValue() and type() on the element that is focused after
         // clicking on the testSubject
         const input = await find.activeElement();
-        await input.clearValue();
-        await input.type(text);
+        if (clearWithKeyboard === true) {
+          await input.clearValueWithKeyboard();
+        } else {
+          await input.clearValue();
+        }
+        await input.type(text, { charByChar: typeCharByChar });
       });
+    }
+
+    public async selectValue(selector: string, value: string): Promise<void> {
+      await find.selectValue(`[data-test-subj="${selector}"]`, value);
     }
 
     public async isEnabled(selector: string): Promise<boolean> {
@@ -258,6 +284,12 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       value: string
     ): Promise<void> {
       await find.waitForAttributeToChange(testSubjSelector(selector), attribute, value);
+    }
+
+    public async waitForHidden(selector: string, timeout?: number): Promise<void> {
+      log.debug(`TestSubjects.waitForHidden(${selector})`);
+      const element = await this.find(selector);
+      await find.waitForElementHidden(element, timeout);
     }
 
     public getCssSelector(selector: string): string {

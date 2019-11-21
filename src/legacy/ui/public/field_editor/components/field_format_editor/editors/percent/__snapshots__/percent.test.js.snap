@@ -4,16 +4,16 @@ exports[`PercentFormatEditor should render normally 1`] = `
 <Fragment>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     error={null}
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <span>
-        <EuiLink
-          color="primary"
+        <ForwardRef
           href="https://adamwdraper.github.io/Numeral-js/"
-          target="_window"
-          type="button"
+          target="_blank"
         >
           <FormattedMessage
             defaultMessage="Documentation"
@@ -24,7 +24,7 @@ exports[`PercentFormatEditor should render normally 1`] = `
           <EuiIcon
             type="link"
           />
-        </EuiLink>
+        </ForwardRef>
       </span>
     }
     isInvalid={false}
@@ -52,7 +52,8 @@ exports[`PercentFormatEditor should render normally 1`] = `
       placeholder="0,0.[000]%"
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
+    sampleType="text"
     samples={
       Array [
         Object {

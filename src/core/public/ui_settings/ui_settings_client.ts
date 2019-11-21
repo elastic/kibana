@@ -21,15 +21,28 @@ import { cloneDeep, defaultsDeep } from 'lodash';
 import * as Rx from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
+import { UiSettingsParams, UserProvidedValues } from 'src/core/server/types';
 import { UiSettingsState } from './types';
+
 import { UiSettingsApi } from './ui_settings_api';
 
 /** @public */
 interface UiSettingsClientParams {
   api: UiSettingsApi;
-  defaults: UiSettingsState;
+  defaults: Record<string, UiSettingsParams>;
   initialSettings?: UiSettingsState;
 }
+
+/**
+ * Client-side client that provides access to the advanced settings stored in elasticsearch.
+ * The settings provide control over the behavior of the Kibana application.
+ * For example, a user can specify how to display numeric or date fields.
+ * Users can adjust the settings via Management UI.
+ * {@link UiSettingsClient}
+ *
+ * @public
+ */
+export type UiSettingsClientContract = PublicMethodsOf<UiSettingsClient>;
 
 /** @public */
 export class UiSettingsClient {
@@ -38,10 +51,10 @@ export class UiSettingsClient {
   private readonly updateErrors$ = new Rx.Subject<Error>();
 
   private readonly api: UiSettingsApi;
-  private readonly defaults: UiSettingsState;
-  private cache: UiSettingsState;
+  private readonly defaults: Record<string, UiSettingsParams>;
+  private cache: Record<string, UiSettingsParams & UserProvidedValues>;
 
-  constructor(readonly params: UiSettingsClientParams) {
+  constructor(params: UiSettingsClientParams) {
     this.api = params.api;
     this.defaults = cloneDeep(params.defaults);
     this.cache = defaultsDeep({}, this.defaults, cloneDeep(params.initialSettings));

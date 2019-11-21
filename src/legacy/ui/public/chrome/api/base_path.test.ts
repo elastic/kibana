@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { basePathServiceMock } from '../../../../../core/public/mocks';
-import { __newPlatformSetup__, initChromeBasePathApi } from './base_path';
+import './base_path.test.mocks';
+import { initChromeBasePathApi } from './base_path';
 
 function initChrome() {
   const chrome: any = {};
@@ -26,39 +25,27 @@ function initChrome() {
   return chrome;
 }
 
-const newPlatformBasePath = basePathServiceMock.createSetupContract();
-__newPlatformSetup__(newPlatformBasePath);
-
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
 describe('#getBasePath()', () => {
-  it('proxies to newPlatformBasePath.get()', () => {
+  it('proxies to newPlatformHttp.basePath.get()', () => {
     const chrome = initChrome();
-    expect(newPlatformBasePath.get).not.toHaveBeenCalled();
-    expect(chrome.getBasePath()).toBe('get');
-    expect(newPlatformBasePath.get).toHaveBeenCalledTimes(1);
-    expect(newPlatformBasePath.get).toHaveBeenCalledWith();
+    expect(chrome.getBasePath()).toBe('npBasePath');
   });
 });
 
 describe('#addBasePath()', () => {
-  it('proxies to newPlatformBasePath.addToPath(path)', () => {
+  it('proxies to newPlatformHttp.basePath.prepend(path)', () => {
     const chrome = initChrome();
-    expect(newPlatformBasePath.addToPath).not.toHaveBeenCalled();
-    expect(chrome.addBasePath('foo/bar')).toBe('addToPath');
-    expect(newPlatformBasePath.addToPath).toHaveBeenCalledTimes(1);
-    expect(newPlatformBasePath.addToPath).toHaveBeenCalledWith('foo/bar');
+    expect(chrome.addBasePath('/foo/bar')).toBe('npBasePath/foo/bar');
   });
 });
 
 describe('#removeBasePath', () => {
-  it('proxies to newPlatformBasePath.removeFromPath(path)', () => {
+  it('proxies to newPlatformBasePath.basePath.remove(path)', () => {
     const chrome = initChrome();
-    expect(newPlatformBasePath.removeFromPath).not.toHaveBeenCalled();
-    expect(chrome.removeBasePath('foo/bar')).toBe('removeFromPath');
-    expect(newPlatformBasePath.removeFromPath).toHaveBeenCalledTimes(1);
-    expect(newPlatformBasePath.removeFromPath).toHaveBeenCalledWith('foo/bar');
+    expect(chrome.removeBasePath('npBasePath/foo/bar')).toBe('/foo/bar');
   });
 });

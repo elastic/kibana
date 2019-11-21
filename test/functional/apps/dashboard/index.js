@@ -17,25 +17,26 @@
  * under the License.
  */
 
-export default function ({ getService, loadTestFile, getPageObjects }) {
+export default function ({ getService, loadTestFile }) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['dashboard']);
 
   async function loadCurrentData() {
     await browser.setWindowSize(1300, 900);
-    await PageObjects.dashboard.initTests({
-      kibanaIndex: 'dashboard/current/kibana',
-      dataIndex: 'dashboard/current/data',
-      defaultIndex: 'logstash-*',
-    });
-    await PageObjects.dashboard.preserveCrossAppState();
+    await esArchiver.loadIfNeeded('dashboard/current/data');
   }
 
   async function unloadCurrentData() {
-    await PageObjects.dashboard.clearSavedObjectsFromAppLinks();
-    await esArchiver.unload('dashboard/current/kibana');
     await esArchiver.unload('dashboard/current/data');
+  }
+
+  async function loadLogstash() {
+    await browser.setWindowSize(1200, 900);
+    await esArchiver.loadIfNeeded('logstash_functional');
+  }
+
+  async function unloadLogstash() {
+    await esArchiver.unload('logstash_functional');
   }
 
   describe('dashboard app', function () {
@@ -70,8 +71,12 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       loadTestFile(require.resolve('./dashboard_filtering'));
       loadTestFile(require.resolve('./panel_expand_toggle'));
       loadTestFile(require.resolve('./dashboard_grid'));
-      loadTestFile(require.resolve('./dashboard_snapshots'));
       loadTestFile(require.resolve('./view_edit'));
+      // Order of test suites *shouldn't* be important but there's a bug for the view_edit test above
+      // https://github.com/elastic/kibana/issues/46752
+      // The dashboard_snapshot test below requires the timestamped URL which breaks the view_edit test.
+      // If we don't use the timestamp in the URL, the colors in the charts will be different.
+      loadTestFile(require.resolve('./dashboard_snapshots'));
     });
 
     // Each of these tests call initTests themselves, the way it was originally written.  The above tests only load
@@ -79,7 +84,8 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
     // legacy data only for specifically testing BWC situations.
     describe('using legacy data', function () {
       this.tags('ciGroup4');
-      before(() => browser.setWindowSize(1200, 900));
+      before(loadLogstash);
+      after(unloadLogstash);
 
       loadTestFile(require.resolve('./dashboard_time_picker'));
       loadTestFile(require.resolve('./bwc_shared_urls'));
@@ -89,7 +95,8 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
 
     describe('using legacy data', function () {
       this.tags('ciGroup5');
-      before(() => browser.setWindowSize(1200, 900));
+      before(loadLogstash);
+      after(unloadLogstash);
 
       loadTestFile(require.resolve('./dashboard_save'));
       loadTestFile(require.resolve('./dashboard_time'));

@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transform: Transform List <TransformList /> Minimal initialization 1`] = `
+<Fragment>
+  <ProgressBar
+    isLoading={false}
+  />
+  <EuiEmptyPrompt
+    actions={
+      Array [
+        <EuiButtonEmpty
+          data-test-subj="transformCreateFirstButton"
+          isDisabled={true}
+          onClick={[MockFunction]}
+        >
+          Create your first transform
+        </EuiButtonEmpty>,
+      ]
+    }
+    data-test-subj="transformNoTransformsFound"
+    title={
+      <h2>
+        No transforms found
+      </h2>
+    }
+  />
+</Fragment>
+`;

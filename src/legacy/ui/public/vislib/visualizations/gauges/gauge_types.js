@@ -17,11 +17,8 @@
  * under the License.
  */
 
-import { MeterGaugeProvider } from './meter';
+import { MeterGauge } from './meter';
 
-export function GaugeTypesProvider(Private) {
-
-  return {
-    meter: Private(MeterGaugeProvider)
-  };
-}
+export const gaugeTypes = {
+  meter: MeterGauge
+};

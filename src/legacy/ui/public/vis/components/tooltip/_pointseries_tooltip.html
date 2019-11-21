@@ -1,0 +1,12 @@
+<table>
+  <tbody>
+    <tr ng-repeat="detail in details" >
+      <td class="visTooltip__label">
+        <div class="visTooltip__labelContainer">{{detail.label}}</div>
+      </td>
+      <td class="visTooltip__value">
+        <div class="visTooltip__valueContainer">{{detail.value}}<span ng-if="detail.percent"> ({{detail.percent}})</span></div>
+      </td>
+    </tr>
+  </tbody>
+</table>

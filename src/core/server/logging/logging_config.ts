@@ -61,34 +61,34 @@ const createLoggerSchema = schema.object({
   level: createLevelSchema,
 });
 
-const loggingSchema = schema.object({
-  appenders: schema.mapOf(schema.string(), Appenders.configSchema, {
-    defaultValue: new Map<string, AppenderConfigType>(),
-  }),
-  loggers: schema.arrayOf(createLoggerSchema, {
-    defaultValue: [],
-  }),
-  root: schema.object({
-    appenders: schema.arrayOf(schema.string(), {
-      defaultValue: [DEFAULT_APPENDER_NAME],
-      minSize: 1,
-    }),
-    level: createLevelSchema,
-  }),
-});
-
 /** @internal */
 export type LoggerConfigType = TypeOf<typeof createLoggerSchema>;
+export const config = {
+  path: 'logging',
+  schema: schema.object({
+    appenders: schema.mapOf(schema.string(), Appenders.configSchema, {
+      defaultValue: new Map<string, AppenderConfigType>(),
+    }),
+    loggers: schema.arrayOf(createLoggerSchema, {
+      defaultValue: [],
+    }),
+    root: schema.object({
+      appenders: schema.arrayOf(schema.string(), {
+        defaultValue: [DEFAULT_APPENDER_NAME],
+        minSize: 1,
+      }),
+      level: createLevelSchema,
+    }),
+  }),
+};
 
-type LoggingConfigType = TypeOf<typeof loggingSchema>;
+export type LoggingConfigType = TypeOf<typeof config.schema>;
 
 /**
  * Describes the config used to fully setup logging subsystem.
  * @internal
  */
 export class LoggingConfig {
-  public static schema = loggingSchema;
-
   /**
    * Helper method that joins separate string context parts into single context string.
    * In case joined context is an empty string, `root` context name is returned.

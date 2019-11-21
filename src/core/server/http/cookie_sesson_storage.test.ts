@@ -16,10 +16,61 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Server } from 'hapi';
 import request from 'request';
+import supertest from 'supertest';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { BehaviorSubject } from 'rxjs';
 
+import { CoreContext } from '../core_context';
+import { HttpService } from './http_service';
+import { KibanaRequest } from './router';
+
+import { Env } from '../config';
+import { getEnvOptions } from '../config/__mocks__/env';
+import { configServiceMock } from '../config/config_service.mock';
+import { contextServiceMock } from '../context/context_service.mock';
+import { loggingServiceMock } from '../logging/logging_service.mock';
+
+import { httpServerMock } from './http_server.mocks';
 import { createCookieSessionStorageFactory } from './cookie_session_storage';
+
+let server: HttpService;
+
+let logger: ReturnType<typeof loggingServiceMock.create>;
+let env: Env;
+let coreContext: CoreContext;
+const configService = configServiceMock.create();
+const contextSetup = contextServiceMock.createSetupContract();
+
+const setupDeps = {
+  context: contextSetup,
+};
+
+configService.atPath.mockReturnValue(
+  new BehaviorSubject({
+    hosts: ['http://1.2.3.4'],
+    maxPayload: new ByteSizeValue(1024),
+    autoListen: true,
+    healthCheck: {
+      delay: 2000,
+    },
+    ssl: {
+      verificationMode: 'none',
+    },
+  } as any)
+);
+
+beforeEach(() => {
+  logger = loggingServiceMock.create();
+  env = Env.createDefault(getEnvOptions());
+
+  coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
+  server = new HttpService(coreContext);
+});
+
+afterEach(async () => {
+  await server.stop();
+});
 
 interface User {
   id: string;
@@ -53,24 +104,27 @@ const cookieOptions = {
 describe('Cookie based SessionStorage', () => {
   describe('#set()', () => {
     it('Should write to session storage & set cookies', async () => {
-      const server = new Server();
-      const factory = await createCookieSessionStorageFactory(server, cookieOptions);
-      server.route({
-        method: 'GET',
-        path: '/set',
-        options: {
-          handler: (req, h) => {
-            const sessionStorage = factory.asScoped(req);
-            sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
-            return h.response();
-          },
-        },
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('');
+
+      router.get({ path: '/', validate: false }, (context, req, res) => {
+        const sessionStorage = factory.asScoped(req);
+        sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
+        return res.ok({});
       });
 
-      const response = await server.inject('/set');
-      expect(response.statusCode).toBe(200);
+      const factory = await createCookieSessionStorageFactory(
+        logger.get(),
+        innerServer,
+        cookieOptions
+      );
+      await server.start();
 
-      const cookies = response.headers['set-cookie'];
+      const response = await supertest(innerServer.listener)
+        .get('/')
+        .expect(200);
+
+      const cookies = response.get('set-cookie');
       expect(cookies).toBeDefined();
       expect(cookies).toHaveLength(1);
 
@@ -83,138 +137,235 @@ describe('Cookie based SessionStorage', () => {
     });
   });
   describe('#get()', () => {
-    it('Should read from session storage', async () => {
-      const server = new Server();
-      const factory = await createCookieSessionStorageFactory(server, cookieOptions);
-      server.route({
-        method: 'GET',
-        path: '/get',
-        options: {
-          handler: async (req, h) => {
-            const sessionStorage = factory.asScoped(req);
-            const sessionValue = await sessionStorage.get();
-            if (!sessionValue) {
-              sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
-              return h.response();
-            }
-            return h.response(sessionValue.value);
-          },
-        },
+    it('reads from session storage', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('');
+
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        const sessionStorage = factory.asScoped(req);
+        const sessionValue = await sessionStorage.get();
+        if (!sessionValue) {
+          sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
+          return res.ok();
+        }
+        return res.ok({ body: { value: sessionValue.value } });
       });
 
-      const response = await server.inject('/get');
-      expect(response.statusCode).toBe(200);
+      const factory = await createCookieSessionStorageFactory(
+        logger.get(),
+        innerServer,
+        cookieOptions
+      );
+      await server.start();
 
-      const cookies = response.headers['set-cookie'];
+      const response = await supertest(innerServer.listener)
+        .get('/')
+        .expect(200);
+
+      const cookies = response.get('set-cookie');
       expect(cookies).toBeDefined();
       expect(cookies).toHaveLength(1);
 
       const sessionCookie = retrieveSessionCookie(cookies[0]);
 
-      const response2 = await server.inject({
-        method: 'GET',
-        url: '/get',
-        headers: { cookie: `${sessionCookie.key}=${sessionCookie.value}` },
-      });
-      expect(response2.statusCode).toBe(200);
-      expect(response2.result).toEqual(userData);
+      await supertest(innerServer.listener)
+        .get('/')
+        .set('Cookie', `${sessionCookie.key}=${sessionCookie.value}`)
+        .expect(200, { value: userData });
     });
-    it('Should return null for empty session', async () => {
-      const server = new Server();
-      const factory = await createCookieSessionStorageFactory(server, cookieOptions);
-      server.route({
-        method: 'GET',
-        path: '/get-empty',
-        options: {
-          handler: async (req, h) => {
-            const sessionStorage = factory.asScoped(req);
-            const sessionValue = await sessionStorage.get();
-            return h.response(JSON.stringify(sessionValue));
-          },
-        },
-      });
-      const response = await server.inject('/get-empty');
-      expect(response.statusCode).toBe(200);
-      expect(response.result).toBe('null');
+    it('returns null for empty session', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
 
-      const cookies = response.headers['set-cookie'];
+      const router = createRouter('');
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        const sessionStorage = factory.asScoped(req);
+        const sessionValue = await sessionStorage.get();
+        return res.ok({ body: { value: sessionValue } });
+      });
+
+      const factory = await createCookieSessionStorageFactory(
+        logger.get(),
+        innerServer,
+        cookieOptions
+      );
+      await server.start();
+
+      const response = await supertest(innerServer.listener)
+        .get('/')
+        .expect(200, { value: null });
+
+      const cookies = response.get('set-cookie');
       expect(cookies).not.toBeDefined();
     });
-    it('Should return null for invalid session & clean cookies', async () => {
-      const server = new Server();
-      const factory = await createCookieSessionStorageFactory(server, cookieOptions);
-      let setOnce = false;
-      server.route({
-        method: 'GET',
-        path: '/get-invalid',
-        options: {
-          handler: async (req, h) => {
-            const sessionStorage = factory.asScoped(req);
-            if (!setOnce) {
-              setOnce = true;
-              sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
-              return h.response();
-            }
-            const sessionValue = await sessionStorage.get();
-            return h.response(JSON.stringify(sessionValue));
-          },
-        },
-      });
-      const response = await server.inject('/get-invalid');
-      expect(response.statusCode).toBe(200);
 
-      const cookies = response.headers['set-cookie'];
+    it('returns null for invalid session & clean cookies', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+
+      const router = createRouter('');
+
+      let setOnce = false;
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        const sessionStorage = factory.asScoped(req);
+        if (!setOnce) {
+          setOnce = true;
+          sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
+          return res.ok({ body: { value: userData } });
+        }
+        const sessionValue = await sessionStorage.get();
+        return res.ok({ body: { value: sessionValue } });
+      });
+
+      const factory = await createCookieSessionStorageFactory(
+        logger.get(),
+        innerServer,
+        cookieOptions
+      );
+      await server.start();
+
+      const response = await supertest(innerServer.listener)
+        .get('/')
+        .expect(200, { value: userData });
+
+      const cookies = response.get('set-cookie');
       expect(cookies).toBeDefined();
 
       await delay(sessionDurationMs);
 
       const sessionCookie = retrieveSessionCookie(cookies[0]);
-      const response2 = await server.inject({
-        method: 'GET',
-        url: '/get-invalid',
-        headers: { cookie: `${sessionCookie.key}=${sessionCookie.value}` },
-      });
-      expect(response2.statusCode).toBe(200);
-      expect(response2.result).toBe('null');
+      const response2 = await supertest(innerServer.listener)
+        .get('/')
+        .set('Cookie', `${sessionCookie.key}=${sessionCookie.value}`)
+        .expect(200, { value: null });
 
-      const cookies2 = response2.headers['set-cookie'];
+      const cookies2 = response2.get('set-cookie');
       expect(cookies2).toEqual([
         'sid=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Path=/',
       ]);
     });
-  });
-  describe('#clear()', () => {
-    it('Should clear session storage & remove cookies', async () => {
-      const server = new Server();
-      const factory = await createCookieSessionStorageFactory(server, cookieOptions);
-      server.route({
-        method: 'GET',
-        path: '/clear',
-        options: {
-          handler: async (req, h) => {
-            const sessionStorage = factory.asScoped(req);
-            if (await sessionStorage.get()) {
-              sessionStorage.clear();
-              return h.response();
-            }
-            sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
-            return h.response();
+    // use mocks to simplify test setup
+    it('returns null if multiple session cookies are detected.', async () => {
+      const mockServer = {
+        register: jest.fn(),
+        auth: {
+          strategy: jest.fn(),
+          test: jest.fn(() => ['foo', 'bar']),
+        },
+      };
+
+      const mockRequest = httpServerMock.createRawRequest();
+
+      const factory = await createCookieSessionStorageFactory(
+        logger.get(),
+        mockServer as any,
+        cookieOptions
+      );
+
+      expect(mockServer.register).toBeCalledTimes(1);
+      expect(mockServer.auth.strategy).toBeCalledTimes(1);
+
+      const session = await factory.asScoped(KibanaRequest.from(mockRequest)).get();
+      expect(session).toBe(null);
+
+      expect(mockServer.auth.test).toBeCalledTimes(1);
+      expect(mockServer.auth.test).toHaveBeenCalledWith('security-cookie', mockRequest);
+
+      expect(loggingServiceMock.collect(logger).warn).toEqual([
+        ['Found 2 auth sessions when we were only expecting 1.'],
+      ]);
+    });
+
+    it('returns session if single session cookie is in an array.', async () => {
+      const mockServer = {
+        register: jest.fn(),
+        auth: {
+          strategy: jest.fn(),
+          test: jest.fn(() => ['foo']),
+        },
+      };
+
+      const mockRequest = httpServerMock.createRawRequest();
+
+      const factory = await createCookieSessionStorageFactory(
+        logger.get(),
+        mockServer as any,
+        cookieOptions
+      );
+
+      expect(mockServer.register).toBeCalledTimes(1);
+      expect(mockServer.auth.strategy).toBeCalledTimes(1);
+
+      const session = await factory.asScoped(KibanaRequest.from(mockRequest)).get();
+      expect(session).toBe('foo');
+
+      expect(mockServer.auth.test).toBeCalledTimes(1);
+      expect(mockServer.auth.test).toHaveBeenCalledWith('security-cookie', mockRequest);
+    });
+
+    it('logs the reason of validation function failure.', async () => {
+      const mockServer = {
+        register: jest.fn(),
+        auth: {
+          strategy: jest.fn(),
+          test: () => {
+            throw new Error('Invalid cookie.');
           },
         },
-      });
-      const response = await server.inject('/clear');
-      const cookies = response.headers['set-cookie'];
+      };
 
+      const mockRequest = httpServerMock.createRawRequest();
+
+      const factory = await createCookieSessionStorageFactory(
+        logger.get(),
+        mockServer as any,
+        cookieOptions
+      );
+
+      expect(mockServer.register).toBeCalledTimes(1);
+      expect(mockServer.auth.strategy).toBeCalledTimes(1);
+
+      const session = await factory.asScoped(KibanaRequest.from(mockRequest)).get();
+      expect(session).toBe(null);
+
+      expect(loggingServiceMock.collect(logger).debug).toEqual([['Error: Invalid cookie.']]);
+    });
+  });
+
+  describe('#clear()', () => {
+    it('clears session storage & remove cookies', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+
+      const router = createRouter('');
+
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        const sessionStorage = factory.asScoped(req);
+        if (await sessionStorage.get()) {
+          sessionStorage.clear();
+          return res.ok({});
+        }
+        sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
+        return res.ok({});
+      });
+
+      const factory = await createCookieSessionStorageFactory(
+        logger.get(),
+        innerServer,
+        cookieOptions
+      );
+      await server.start();
+
+      const response = await supertest(innerServer.listener)
+        .get('/')
+        .expect(200);
+
+      const cookies = response.get('set-cookie');
       const sessionCookie = retrieveSessionCookie(cookies[0]);
 
-      const response2 = await server.inject({
-        method: 'GET',
-        url: '/clear',
-        headers: { cookie: `${sessionCookie.key}=${sessionCookie.value}` },
-      });
-      expect(response2.statusCode).toBe(200);
+      const response2 = await supertest(innerServer.listener)
+        .get('/')
+        .set('Cookie', `${sessionCookie.key}=${sessionCookie.value}`)
+        .expect(200);
 
-      const cookies2 = response2.headers['set-cookie'];
+      const cookies2 = response2.get('set-cookie');
       expect(cookies2).toEqual([
         'sid=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Path=/',
       ]);

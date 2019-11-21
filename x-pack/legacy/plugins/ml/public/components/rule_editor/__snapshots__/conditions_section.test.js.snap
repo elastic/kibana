@@ -1,0 +1,100 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConditionsSectionExpression don't render when not enabled with conditions 1`] = `""`;
+
+exports[`ConditionsSectionExpression don't render when the section is not enabled 1`] = `""`;
+
+exports[`ConditionsSectionExpression renders when enabled with empty conditions supplied 1`] = `
+<Fragment>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiButtonEmpty
+    onClick={[Function]}
+  >
+    <FormattedMessage
+      defaultMessage="Add new condition"
+      id="xpack.ml.ruleEditor.conditionsSection.addNewConditionButtonLabel"
+      values={Object {}}
+    />
+  </EuiButtonEmpty>
+</Fragment>
+`;
+
+exports[`ConditionsSectionExpression renders when enabled with no conditions supplied 1`] = `
+<Fragment>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiButtonEmpty
+    onClick={[Function]}
+  >
+    <FormattedMessage
+      defaultMessage="Add new condition"
+      id="xpack.ml.ruleEditor.conditionsSection.addNewConditionButtonLabel"
+      values={Object {}}
+    />
+  </EuiButtonEmpty>
+</Fragment>
+`;
+
+exports[`ConditionsSectionExpression renders when enabled with one condition 1`] = `
+<Fragment>
+  <InjectIntl(ConditionExpression)
+    appliesTo="actual"
+    deleteCondition={[MockFunction]}
+    index={0}
+    key="0"
+    operator="lt"
+    updateCondition={[MockFunction]}
+    value={1}
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <EuiButtonEmpty
+    onClick={[Function]}
+  >
+    <FormattedMessage
+      defaultMessage="Add new condition"
+      id="xpack.ml.ruleEditor.conditionsSection.addNewConditionButtonLabel"
+      values={Object {}}
+    />
+  </EuiButtonEmpty>
+</Fragment>
+`;
+
+exports[`ConditionsSectionExpression renders when enabled with two conditions 1`] = `
+<Fragment>
+  <InjectIntl(ConditionExpression)
+    appliesTo="actual"
+    deleteCondition={[MockFunction]}
+    index={0}
+    key="0"
+    operator="lt"
+    updateCondition={[MockFunction]}
+    value={1}
+  />
+  <InjectIntl(ConditionExpression)
+    appliesTo="typical"
+    deleteCondition={[MockFunction]}
+    index={1}
+    key="1"
+    operator="gte"
+    updateCondition={[MockFunction]}
+    value={1.23}
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <EuiButtonEmpty
+    onClick={[Function]}
+  >
+    <FormattedMessage
+      defaultMessage="Add new condition"
+      id="xpack.ml.ruleEditor.conditionsSection.addNewConditionButtonLabel"
+      values={Object {}}
+    />
+  </EuiButtonEmpty>
+</Fragment>
+`;

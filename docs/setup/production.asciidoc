@@ -5,6 +5,7 @@
 * <<csp-strict-mode>>
 * <<enabling-ssl>>
 * <<load-balancing>>
+* <<high-availability>>
 
 How you deploy Kibana largely depends on your use case. If you are the only user,
 you can run Kibana on your local machine and configure it to point to whatever
@@ -22,20 +23,18 @@ and an Elasticsearch client node on the same machine. For more information, see
 [[configuring-kibana-shield]]
 === Using {stack} {security-features}
 
-You can use {stack-ov}/elasticsearch-security.html[{stack} {security-features}] 
-to control what {es} data users can access through Kibana.
+You can use {stack} {security-features} to control what {es} data users can
+access through Kibana.
 
 When {security-features} are enabled, Kibana users have to log in. They need to
-have the `kibana_user` role as well as access to the indices they
-will be working with in Kibana.
+have a role granting <<kibana-privileges, Kibana privileges>> as well as access 
+to the indices they will be working with in Kibana.
 
 If a user loads a Kibana dashboard that accesses data in an index that they
 are not authorized to view, they get an error that indicates the index does
-not exist. The {security-features} do not currently provide a way to control 
-which users can load which dashboards.
+not exist.
 
-For information about setting up Kibana users, see
-{kibana-ref}/using-kibana-with-security.html[Configuring security in Kibana].
+For more information on granting access to Kibana, see <<xpack-security-authorization>>.
 
 [float]
 [[csp-strict-mode]]
@@ -109,3 +108,21 @@ transport.tcp.port: 9300 - 9400
 # The Elasticsearch instance to use for all your queries.
 elasticsearch.hosts: ["http://localhost:9200"]
 --------
+
+[float]
+[[high-availability]]
+=== High Availability Across Multiple Elasticsearch Nodes
+Kibana can be configured to connect to multiple Elasticsearch nodes in the same cluster.  In situations where a node becomes unavailable,
+Kibana will transparently connect to an available node and continue operating.  Requests to available hosts will be routed in a round robin fashion.
+
+Currently the Console application is limited to connecting to the first node listed.
+
+In kibana.yml:
+--------
+elasticsearch.hosts:
+  - http://elasticsearch1:9200
+  - http://elasticsearch2:9200
+--------
+
+Related configurations include `elasticsearch.sniffInterval`, `elasticsearch.sniffOnStart`, and `elasticsearch.sniffOnConnectionFault`.
+These can be used to automatically update the list of hosts as a cluster is resized.  Parameters can be found on the {kibana-ref}/settings.html[settings page].

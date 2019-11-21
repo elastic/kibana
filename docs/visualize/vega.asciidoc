@@ -75,7 +75,7 @@ Here is an example of an Elasticsearch query that counts the number of documents
 // An object instead of a string for the url value
 // is treated as a context-aware Elasticsearch query.
 url: {
-  // Filter the time picker (upper right corner) with this field
+  // Specify the time filter (upper right corner) with this field
   %timefield%: @timestamp
   // Apply dashboard context filters when set
   %context%: true

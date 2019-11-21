@@ -17,10 +17,11 @@
  * under the License.
  */
 
+import Fs from 'fs';
+
 import sinon from 'sinon';
 import glob from 'glob-all';
-import rimraf from 'rimraf';
-import mkdirp from 'mkdirp';
+import del from 'del';
 import Logger from '../lib/logger';
 import { extract, getPackData } from './pack';
 import { _downloadSingle }  from './download';
@@ -40,7 +41,7 @@ describe('kibana cli', function () {
 
     beforeEach(function () {
       //These tests are dependent on the file system, and I had some inconsistent
-      //behavior with rimraf.sync show up. Until these tests are re-written to not
+      //behavior with del.sync show up. Until these tests are re-written to not
       //depend on the file system, I make sure that each test uses a different
       //working directory.
       testNum += 1;
@@ -58,13 +59,13 @@ describe('kibana cli', function () {
       logger = new Logger(settings);
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
-      mkdirp.sync(testWorkingPath);
+      Fs.mkdirSync(testWorkingPath, { recursive: true });
     });
 
     afterEach(function () {
       logger.log.restore();
       logger.error.restore();
-      rimraf.sync(workingPathRoot);
+      del.sync(workingPathRoot);
     });
 
     function copyReplyFile(filename) {

@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface Config {
-  get(key: string): string | boolean | number | null | undefined;
-}
-
-export function getSpaceSelectorUrl(serverConfig: Config) {
-  return serverConfig.get('server.basePath') || '/';
+export function getSpaceSelectorUrl(serverBasePath: string) {
+  return `${serverBasePath}/spaces/space_selector`;
 }

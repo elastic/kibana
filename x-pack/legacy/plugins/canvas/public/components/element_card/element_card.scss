@@ -1,0 +1,45 @@
+.canvasElementCard__wrapper {
+  position: relative;
+
+  &:hover,
+  &:focus {
+    .canvasElementCard__controls {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+
+  .canvasElementCard__controls {
+    position: absolute;
+    right: $euiSizeS;
+    top: $euiSizeS;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance;
+    transition-delay: $euiAnimSpeedNormal;
+    background: transparentize($euiColorGhost, .5);
+    border-radius: $euiBorderRadius;
+  }
+}
+
+.canvasElementCard {
+  .euiCard__top {
+    text-align: center;
+    width: calc(100% + #{$euiSize}* 2);
+    height: 85px;
+    margin: calc(-1 * #{$euiSize}) calc(-1 * #{$euiSize}) 0;
+  }
+
+  .euiCard__image {
+    max-height: 100%;
+    max-width: 100%;
+    width: auto;
+    left: 0;
+    top: 0;
+  }
+
+  &.canvasElementCard--hasIcon .euiCard__top {
+    min-width: $canvasElementCardWidth;
+    padding-top: $euiSize;
+  }
+}

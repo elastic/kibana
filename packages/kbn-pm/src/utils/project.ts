@@ -85,7 +85,7 @@ export class Project {
     this.scripts = this.json.scripts || {};
   }
 
-  get name(): string {
+  public get name(): string {
     return this.json.name;
   }
 
@@ -115,9 +115,7 @@ export class Project {
     }
 
     throw new CliError(
-      `[${this.name}] depends on [${
-        project.name
-      }] ${problemMsg}. Update its package.json to the expected value below.`,
+      `[${this.name}] depends on [${project.name}] ${problemMsg}. Update its package.json to the expected value below.`,
       {
         actual: `"${project.name}": "${versionInPackageJson}"`,
         expected: `"${project.name}": "${expectedVersionInPackageJson}"`,

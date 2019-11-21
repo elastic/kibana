@@ -17,17 +17,11 @@
  * under the License.
  */
 
-jest.mock('../chrome', () => ({
-  addBasePath: path => `myBase/${path}`,
-}));
-jest.mock('../metadata', () => ({
-  metadata: {
-    version: 'my-version',
-  },
-}));
-
+// @ts-ignore
+import './error_auto_create_index.test.mocks';
 import fetchMock from 'fetch-mock/es5/client';
-import { kfetch } from 'ui/kfetch';
+import { kfetch } from '../kfetch';
+
 import { isAutoCreateIndexError } from './error_auto_create_index';
 
 describe('isAutoCreateIndexError correctly handles KFetchError thrown by kfetch', () => {
@@ -45,7 +39,7 @@ describe('isAutoCreateIndexError correctly handles KFetchError thrown by kfetch'
     test('should return false', async () => {
       expect.assertions(1);
       try {
-        await kfetch({ method: 'POST', pathname: 'my/path' });
+        await kfetch({ method: 'POST', pathname: '/my/path' });
       } catch (kfetchError) {
         expect(isAutoCreateIndexError(kfetchError)).toBe(false);
       }
@@ -66,7 +60,7 @@ describe('isAutoCreateIndexError correctly handles KFetchError thrown by kfetch'
     test('should return false', async () => {
       expect.assertions(1);
       try {
-        await kfetch({ method: 'POST', pathname: 'my/path' });
+        await kfetch({ method: 'POST', pathname: '/my/path' });
       } catch (kfetchError) {
         expect(isAutoCreateIndexError(kfetchError)).toBe(false);
       }
@@ -79,7 +73,9 @@ describe('isAutoCreateIndexError correctly handles KFetchError thrown by kfetch'
         matcher: '*',
         response: {
           body: {
-            code: 'ES_AUTO_CREATE_INDEX_ERROR',
+            attributes: {
+              code: 'ES_AUTO_CREATE_INDEX_ERROR',
+            },
           },
           status: 503,
         },
@@ -90,7 +86,7 @@ describe('isAutoCreateIndexError correctly handles KFetchError thrown by kfetch'
     test('should return true', async () => {
       expect.assertions(1);
       try {
-        await kfetch({ method: 'POST', pathname: 'my/path' });
+        await kfetch({ method: 'POST', pathname: '/my/path' });
       } catch (kfetchError) {
         expect(isAutoCreateIndexError(kfetchError)).toBe(true);
       }

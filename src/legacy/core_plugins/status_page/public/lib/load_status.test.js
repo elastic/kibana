@@ -17,15 +17,8 @@
  * under the License.
  */
 
+import './load_status.test.mocks';
 import loadStatus from './load_status';
-
-// Make importing the ui/notify module work in jest
-jest.mock('ui/metadata', () => ({
-  metadata: {
-    branch: 'my-metadata-branch',
-    version: 'my-metadata-version'
-  }
-}));
 
 // A faked response to the `fetch` call
 const mockFetch = async () => ({

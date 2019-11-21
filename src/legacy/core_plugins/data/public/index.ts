@@ -17,47 +17,44 @@
  * under the License.
  */
 
-import { SearchBarService } from './search_bar';
-import { QueryBarService } from './query_bar';
-import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
+// /// Define plugin function
+import { DataPlugin as Plugin, DataSetup, DataStart } from './plugin';
 
-class DataPlugin {
-  private readonly indexPatterns: IndexPatternsService;
-  private readonly searchBar: SearchBarService;
-  private readonly queryBar: QueryBarService;
-
-  constructor() {
-    this.indexPatterns = new IndexPatternsService();
-    this.queryBar = new QueryBarService();
-    this.searchBar = new SearchBarService();
-  }
-
-  public setup() {
-    return {
-      indexPatterns: this.indexPatterns.setup(),
-      search: this.searchBar.setup(),
-      query: this.queryBar.setup(),
-    };
-  }
-
-  public stop() {
-    this.indexPatterns.stop();
-    this.searchBar.stop();
-    this.queryBar.stop();
-  }
+export function plugin() {
+  return new Plugin();
 }
 
-/**
- * We export data here so that users importing from 'plugins/data'
- * will automatically receive the response value of the `setup` contract, mimicking
- * the data that will eventually be injected by the new platform.
- */
-export const data = new DataPlugin().setup();
-
-/** @public */
-export interface DataSetup {
-  indexPatterns: IndexPatternsSetup;
-}
+// /// Export types & static code
 
 /** @public types */
-export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';
+export { DataSetup, DataStart };
+
+export { FilterBar, ApplyFiltersPopover } from './filter';
+export {
+  Field,
+  FieldType,
+  FieldListInterface,
+  IndexPattern,
+  IndexPatterns,
+  StaticIndexPattern,
+} from './index_patterns';
+export { QueryBarInput } from './query';
+export { SearchBar, SearchBarProps, SavedQueryAttributes, SavedQuery } from './search';
+
+/** @public static code */
+export * from '../common';
+export { FilterStateManager } from './filter/filter_manager';
+export {
+  CONTAINS_SPACES,
+  getFromSavedObject,
+  getRoutes,
+  IndexPatternSelect,
+  validateIndexPattern,
+  ILLEGAL_CHARACTERS,
+  INDEX_PATTERN_ILLEGAL_CHARACTERS,
+  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
+  IndexPatternAlreadyExists,
+  IndexPatternMissingIndices,
+  NoDefaultIndexPattern,
+  NoDefinedIndexPatterns,
+} from './index_patterns';

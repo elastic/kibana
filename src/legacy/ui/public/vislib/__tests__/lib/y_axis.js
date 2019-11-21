@@ -23,16 +23,15 @@ import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import $ from 'jquery';
 import '../../../persisted_state';
-import { VislibLibAxisProvider } from '../../lib/axis';
-import { VislibVisConfigProvider } from '../../lib/vis_config';
+import { Axis } from '../../lib/axis';
+import { VisConfig } from '../../lib/vis_config';
 
-let YAxis;
+const YAxis = Axis;
 let persistedState;
 let el;
 let buildYAxis;
 let yAxis;
 let yAxisDiv;
-let VisConfig;
 
 const timeSeries = [
   1408734060000,
@@ -111,10 +110,8 @@ function createData(seriesData) {
 describe('Vislib yAxis Class Test Suite', function () {
   beforeEach(ngMock.module('kibana'));
 
-  beforeEach(ngMock.inject(function (Private, $injector) {
+  beforeEach(ngMock.inject(function ($injector) {
     persistedState = new ($injector.get('PersistedState'))();
-    YAxis = Private(VislibLibAxisProvider);
-    VisConfig = Private(VislibVisConfigProvider);
 
     expect($('.y-axis-wrapper')).to.have.length(0);
   }));
@@ -343,16 +340,6 @@ describe('Vislib yAxis Class Test Suite', function () {
     afterEach(function () {
       yAxis.yMax = yMax;
       yAxis = buildYAxis();
-    });
-
-    it('should use percentage format for percentages', function () {
-      yAxis = buildYAxis({
-        scale: {
-          mode: 'percentage'
-        }
-      });
-      const tickFormat = yAxis.getAxis().tickFormat();
-      expect(tickFormat(1)).to.be('100%');
     });
 
     it('should use decimal format for small values', function () {

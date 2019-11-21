@@ -5,22 +5,20 @@
  */
 
 import { AUTHENTICATION } from '../../common/lib/authentication';
-import { TestInvoker } from '../../common/lib/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { importTestSuiteFactory } from '../../common/suites/import';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService }: TestInvoker) {
+export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const {
     importTest,
     createExpectResults,
     expectRbacForbidden,
-    expectUnknownType,
-    expectRbacForbiddenWithUnknownType,
-    expectRbacForbiddenForUnknownType,
+    expectUnknownTypeUnsupported,
+    expectResultsWithUnsupportedHiddenType,
   } = importTestSuiteFactory(es, esArchiver, supertest);
 
   describe('_import', () => {
@@ -31,9 +29,13 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacForbidden,
         },
+        hiddenType: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        },
         unknownType: {
           statusCode: 403,
-          response: expectRbacForbiddenWithUnknownType,
+          response: expectRbacForbidden,
         },
       },
     });
@@ -45,9 +47,14 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectResults(),
         },
+        hiddenType: {
+          // import filters out the space type, so the remaining objects will import successfully
+          statusCode: 200,
+          response: expectResultsWithUnsupportedHiddenType,
+        },
         unknownType: {
           statusCode: 200,
-          response: expectUnknownType,
+          response: expectUnknownTypeUnsupported,
         },
       },
     });
@@ -59,9 +66,13 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacForbidden,
         },
+        hiddenType: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        },
         unknownType: {
           statusCode: 403,
-          response: expectRbacForbiddenWithUnknownType,
+          response: expectRbacForbidden,
         },
       },
     });
@@ -73,9 +84,14 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectResults(),
         },
+        hiddenType: {
+          // import filters out the space type, so the remaining objects will import successfully
+          statusCode: 200,
+          response: expectResultsWithUnsupportedHiddenType,
+        },
         unknownType: {
-          statusCode: 403,
-          response: expectRbacForbiddenForUnknownType,
+          statusCode: 200,
+          response: expectUnknownTypeUnsupported,
         },
       },
     });
@@ -87,9 +103,13 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacForbidden,
         },
+        hiddenType: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        },
         unknownType: {
           statusCode: 403,
-          response: expectRbacForbiddenWithUnknownType,
+          response: expectRbacForbidden,
         },
       },
     });
@@ -101,9 +121,14 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectResults(),
         },
+        hiddenType: {
+          // import filters out the space type, so the remaining objects will import successfully
+          statusCode: 200,
+          response: expectResultsWithUnsupportedHiddenType,
+        },
         unknownType: {
-          statusCode: 403,
-          response: expectRbacForbiddenForUnknownType,
+          statusCode: 200,
+          response: expectUnknownTypeUnsupported,
         },
       },
     });
@@ -115,9 +140,13 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacForbidden,
         },
+        hiddenType: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        },
         unknownType: {
           statusCode: 403,
-          response: expectRbacForbiddenWithUnknownType,
+          response: expectRbacForbidden,
         },
       },
     });
@@ -129,9 +158,13 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacForbidden,
         },
+        hiddenType: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        },
         unknownType: {
           statusCode: 403,
-          response: expectRbacForbiddenWithUnknownType,
+          response: expectRbacForbidden,
         },
       },
     });
@@ -143,9 +176,13 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacForbidden,
         },
+        hiddenType: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        },
         unknownType: {
           statusCode: 403,
-          response: expectRbacForbiddenWithUnknownType,
+          response: expectRbacForbidden,
         },
       },
     });
@@ -157,9 +194,13 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacForbidden,
         },
+        hiddenType: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        },
         unknownType: {
           statusCode: 403,
-          response: expectRbacForbiddenWithUnknownType,
+          response: expectRbacForbidden,
         },
       },
     });
@@ -171,9 +212,13 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacForbidden,
         },
+        hiddenType: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        },
         unknownType: {
           statusCode: 403,
-          response: expectRbacForbiddenWithUnknownType,
+          response: expectRbacForbidden,
         },
       },
     });

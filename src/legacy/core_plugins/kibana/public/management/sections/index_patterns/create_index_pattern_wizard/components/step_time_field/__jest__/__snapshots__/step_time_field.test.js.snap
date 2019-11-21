@@ -16,12 +16,75 @@ exports[`StepTimeField should enable the action button if the user decides to no
 />
 `;
 
-exports[`StepTimeField should render a loading state when creating the index pattern 1`] = `
+exports[`StepTimeField should render "Custom index pattern ID already exists" when error is "Conflict" 1`] = `
 <EuiPanel
-  grow={true}
-  hasShadow={false}
-  paddingSize="m"
+  paddingSize="l"
 >
+  <Header
+    indexPattern="ki*"
+    indexPatternName="name"
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <TimeField
+    fetchTimeFields={[Function]}
+    isLoading={false}
+    isVisible={false}
+    onTimeFieldChanged={[Function]}
+    timeFieldOptions={
+      Array [
+        Object {
+          "text": "",
+          "value": "",
+        },
+      ]
+    }
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <AdvancedOptions
+    indexPatternId=""
+    isVisible={false}
+    onChangeIndexPatternId={[Function]}
+    toggleAdvancedOptions={[Function]}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiCallOut
+    color="danger"
+    iconType="cross"
+    title={
+      <FormattedMessage
+        defaultMessage="Error"
+        id="kbn.management.createIndexPattern.stepTime.error"
+        values={Object {}}
+      />
+    }
+  >
+    <p>
+      <FormattedMessage
+        defaultMessage="Custom index pattern ID already exists."
+        id="kbn.management.createIndexPattern.stepTime.patterAlreadyExists"
+        values={Object {}}
+      />
+    </p>
+  </EuiCallOut>
+  <EuiSpacer
+    size="m"
+  />
+  <ActionButtons
+    createIndexPattern={[Function]}
+    goToPreviousStep={[Function]}
+    submittable={true}
+  />
+</EuiPanel>
+`;
+
+exports[`StepTimeField should render a loading state when creating the index pattern 1`] = `
+<EuiPanel>
   <EuiFlexGroup
     alignItems="center"
   >
@@ -47,8 +110,6 @@ exports[`StepTimeField should render a loading state when creating the index pat
 
 exports[`StepTimeField should render a selected timeField 1`] = `
 <EuiPanel
-  grow={true}
-  hasShadow={false}
   paddingSize="l"
 >
   <Header
@@ -60,7 +121,7 @@ exports[`StepTimeField should render a selected timeField 1`] = `
   />
   <TimeField
     fetchTimeFields={[Function]}
-    isLoading={true}
+    isLoading={false}
     isVisible={true}
     onTimeFieldChanged={[Function]}
     selectedTimeField="@timestamp"
@@ -105,8 +166,6 @@ exports[`StepTimeField should render a selected timeField 1`] = `
 
 exports[`StepTimeField should render advanced options 1`] = `
 <EuiPanel
-  grow={true}
-  hasShadow={false}
   paddingSize="l"
 >
   <Header
@@ -118,7 +177,7 @@ exports[`StepTimeField should render advanced options 1`] = `
   />
   <TimeField
     fetchTimeFields={[Function]}
-    isLoading={true}
+    isLoading={false}
     isVisible={false}
     onTimeFieldChanged={[Function]}
     timeFieldOptions={
@@ -152,8 +211,6 @@ exports[`StepTimeField should render advanced options 1`] = `
 
 exports[`StepTimeField should render advanced options with an index pattern id 1`] = `
 <EuiPanel
-  grow={true}
-  hasShadow={false}
   paddingSize="l"
 >
   <Header
@@ -165,7 +222,7 @@ exports[`StepTimeField should render advanced options with an index pattern id 1
   />
   <TimeField
     fetchTimeFields={[Function]}
-    isLoading={true}
+    isLoading={false}
     isVisible={false}
     onTimeFieldChanged={[Function]}
     timeFieldOptions={
@@ -197,10 +254,8 @@ exports[`StepTimeField should render advanced options with an index pattern id 1
 </EuiPanel>
 `;
 
-exports[`StepTimeField should render normally 1`] = `
+exports[`StepTimeField should render any error message 1`] = `
 <EuiPanel
-  grow={true}
-  hasShadow={false}
   paddingSize="l"
 >
   <Header
@@ -212,7 +267,70 @@ exports[`StepTimeField should render normally 1`] = `
   />
   <TimeField
     fetchTimeFields={[Function]}
-    isLoading={true}
+    isLoading={false}
+    isVisible={false}
+    onTimeFieldChanged={[Function]}
+    timeFieldOptions={
+      Array [
+        Object {
+          "text": "",
+          "value": "",
+        },
+      ]
+    }
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <AdvancedOptions
+    indexPatternId=""
+    isVisible={false}
+    onChangeIndexPatternId={[Function]}
+    toggleAdvancedOptions={[Function]}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiCallOut
+    color="danger"
+    iconType="cross"
+    title={
+      <FormattedMessage
+        defaultMessage="Error"
+        id="kbn.management.createIndexPattern.stepTime.error"
+        values={Object {}}
+      />
+    }
+  >
+    <p>
+      foobar
+    </p>
+  </EuiCallOut>
+  <EuiSpacer
+    size="m"
+  />
+  <ActionButtons
+    createIndexPattern={[Function]}
+    goToPreviousStep={[Function]}
+    submittable={true}
+  />
+</EuiPanel>
+`;
+
+exports[`StepTimeField should render normally 1`] = `
+<EuiPanel
+  paddingSize="l"
+>
+  <Header
+    indexPattern="ki*"
+    indexPatternName="name"
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <TimeField
+    fetchTimeFields={[Function]}
+    isLoading={false}
     isVisible={false}
     onTimeFieldChanged={[Function]}
     timeFieldOptions={
@@ -246,8 +364,6 @@ exports[`StepTimeField should render normally 1`] = `
 
 exports[`StepTimeField should render timeFields 1`] = `
 <EuiPanel
-  grow={true}
-  hasShadow={false}
   paddingSize="l"
 >
   <Header
@@ -259,7 +375,7 @@ exports[`StepTimeField should render timeFields 1`] = `
   />
   <TimeField
     fetchTimeFields={[Function]}
-    isLoading={true}
+    isLoading={false}
     isVisible={true}
     onTimeFieldChanged={[Function]}
     timeFieldOptions={

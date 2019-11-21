@@ -19,15 +19,20 @@
 
 import _ from 'lodash';
 import d3 from 'd3';
-import { KbnError } from '../errors';
-import { EventsProvider } from '../events';
-import { VislibVisConfigProvider } from './lib/vis_config';
-import { VisHandlerProvider } from './lib/handler';
+import { EventEmitter } from 'events';
+import chrome from '../chrome';
+import { VislibError } from './errors';
+import { VisConfig } from './lib/vis_config';
+import { Handler } from './lib/handler';
+import { setHierarchicalTooltipFormatter } from '../vis/components/tooltip/_hierarchical_tooltip_formatter';
+import { setPointSeriesTooltipFormatter } from '../vis/components/tooltip/_pointseries_tooltip_formatter';
+
+const config = chrome.getUiSettingsClient();
 
 export function VislibVisProvider(Private) {
-  const Events = Private(EventsProvider);
-  const VisConfig = Private(VislibVisConfigProvider);
-  const Handler = Private(VisHandlerProvider);
+
+  setHierarchicalTooltipFormatter(Private);
+  setPointSeriesTooltipFormatter(Private);
 
   /**
    * Creates the visualizations.
@@ -37,11 +42,13 @@ export function VislibVisProvider(Private) {
    * @param $el {HTMLElement} jQuery selected HTML element
    * @param config {Object} Parameters that define the chart type and chart options
    */
-  class Vis extends Events {
+  class Vis extends EventEmitter {
     constructor($el, visConfigArgs) {
-      super(arguments);
+      super();
       this.el = $el.get ? $el.get(0) : $el;
       this.visConfigArgs = _.cloneDeep(visConfigArgs);
+      this.visConfigArgs.dimmingOpacity = config.get('visualization:dimmingOpacity');
+      this.visConfigArgs.heatmapMaxBuckets = config.get('visualization:heatmap:maxBuckets');
     }
 
     hasLegend() {
@@ -91,7 +98,7 @@ export function VislibVisProvider(Private) {
         this.handler[method]();
       } catch (error) {
 
-        if (error instanceof KbnError) {
+        if (error instanceof VislibError) {
           error.displayToScreen(this.handler);
         } else {
           throw error;
@@ -148,7 +155,7 @@ export function VislibVisProvider(Private) {
      */
     on(event, listener) {
       const first = this.listenerCount(event) === 0;
-      const ret = Events.prototype.on.call(this, event, listener);
+      const ret = EventEmitter.prototype.on.call(this, event, listener);
       const added = this.listenerCount(event) > 0;
 
       // if this is the first listener added for the event
@@ -167,11 +174,17 @@ export function VislibVisProvider(Private) {
      */
     off(event, listener) {
       const last = this.listenerCount(event) === 1;
-      const ret = Events.prototype.off.call(this, event, listener);
+      const ret = EventEmitter.prototype.off.call(this, event, listener);
       const removed = this.listenerCount(event) === 0;
 
       // Once all listeners are removed, disable the events in the handler
       if (last && removed && this.handler) this.handler.disable(event);
+      return ret;
+    }
+
+    removeAllListeners(event) {
+      const ret = EventEmitter.prototype.removeAllListeners.call(this, event);
+      this.handler.disable(event);
       return ret;
     }
   }

@@ -1,0 +1,19 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { toStaticIndexPattern } from '../to_static_index_pattern';
+
+describe('toStaticIndexPattern', () => {
+  it('provides the required fields', () => {
+    const pattern = {
+      attributes: {
+        fields: '[{"name":"@timestamp","type":"date","scripted":false,"searchable":true}]',
+      },
+      id: 'foo',
+    };
+    expect(toStaticIndexPattern(pattern)).toMatchSnapshot();
+  });
+});

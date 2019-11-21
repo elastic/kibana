@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '../../../../legacy/plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -17,6 +17,7 @@ interface ImportTest {
 
 interface ImportTests {
   default: ImportTest;
+  hiddenType: ImportTest;
   unknownType: ImportTest;
 }
 
@@ -53,7 +54,23 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     });
   };
 
-  const expectUnknownType = (resp: { [key: string]: any }) => {
+  const expectResultsWithUnsupportedHiddenType = async (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      success: false,
+      successCount: 2,
+      errors: [
+        {
+          error: {
+            type: 'unsupported_type',
+          },
+          id: '1',
+          type: 'hiddentype',
+        },
+      ],
+    });
+  };
+
+  const expectUnknownTypeUnsupported = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       success: false,
       successCount: 2,
@@ -63,10 +80,23 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
           type: 'wigwags',
           title: 'Wigwags title',
           error: {
-            message: `Unsupported saved object type: 'wigwags': Bad Request`,
-            statusCode: 400,
-            error: 'Bad Request',
-            type: 'unknown',
+            type: 'unsupported_type',
+          },
+        },
+      ],
+    });
+  };
+
+  const expectHiddenTypeUnsupported = (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      success: false,
+      successCount: 2,
+      errors: [
+        {
+          id: '1',
+          type: 'hiddentype',
+          error: {
+            type: 'unsupported_type',
           },
         },
       ],
@@ -78,22 +108,6 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       statusCode: 403,
       error: 'Forbidden',
       message: `Unable to bulk_create dashboard,globaltype`,
-    });
-  };
-
-  const expectRbacForbiddenWithUnknownType = (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unable to bulk_create dashboard,globaltype,wigwags`,
-    });
-  };
-
-  const expectRbacForbiddenForUnknownType = (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unable to bulk_create wigwags`,
     });
   };
 
@@ -119,6 +133,30 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
           )
           .expect(tests.default.statusCode)
           .then(tests.default.response);
+      });
+
+      describe('hiddentype', () => {
+        it(`should return ${tests.hiddenType.statusCode}`, async () => {
+          const data = createImportData(spaceId);
+          data.push({
+            type: 'hiddentype',
+            id: '1',
+            attributes: {
+              name: 'My Hidden Type',
+            },
+          });
+          await supertest
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_import`)
+            .query({ overwrite: true })
+            .auth(user.username, user.password)
+            .attach(
+              'file',
+              Buffer.from(data.map(obj => JSON.stringify(obj)).join('\n'), 'utf8'),
+              'export.ndjson'
+            )
+            .expect(tests.hiddenType.statusCode)
+            .then(tests.hiddenType.response);
+        });
       });
 
       describe('unknown type', () => {
@@ -154,9 +192,9 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
   return {
     importTest,
     createExpectResults,
+    expectResultsWithUnsupportedHiddenType,
     expectRbacForbidden,
-    expectUnknownType,
-    expectRbacForbiddenWithUnknownType,
-    expectRbacForbiddenForUnknownType,
+    expectUnknownTypeUnsupported,
+    expectHiddenTypeUnsupported,
   };
 }

@@ -29,7 +29,7 @@ let mockConsoleLog: jest.SpyInstance;
 import { createWriteStream } from 'fs';
 const mockCreateWriteStream = (createWriteStream as unknown) as jest.Mock<typeof createWriteStream>;
 
-import { LoggingConfig, LoggingService } from '.';
+import { LoggingService, config } from '.';
 
 let service: LoggingService;
 beforeEach(() => {
@@ -68,12 +68,10 @@ test('flushes memory buffer logger and switches to real logger once config is pr
 
   // Switch to console appender with `info` level, so that `trace` message won't go through.
   service.upgrade(
-    new LoggingConfig(
-      LoggingConfig.schema.validate({
-        appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
-        root: { level: 'info' },
-      })
-    )
+    config.schema.validate({
+      appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+      root: { level: 'info' },
+    })
   );
 
   expect(mockConsoleLog.mock.calls).toMatchSnapshot('buffered messages');
@@ -99,18 +97,16 @@ test('appends records via multiple appenders.', () => {
   expect(mockCreateWriteStream).not.toHaveBeenCalled();
 
   service.upgrade(
-    new LoggingConfig(
-      LoggingConfig.schema.validate({
-        appenders: {
-          default: { kind: 'console', layout: { kind: 'pattern' } },
-          file: { kind: 'file', layout: { kind: 'pattern' }, path: 'path' },
-        },
-        loggers: [
-          { appenders: ['file'], context: 'tests', level: 'warn' },
-          { context: 'tests.child', level: 'error' },
-        ],
-      })
-    )
+    config.schema.validate({
+      appenders: {
+        default: { kind: 'console', layout: { kind: 'pattern' } },
+        file: { kind: 'file', layout: { kind: 'pattern' }, path: 'path' },
+      },
+      loggers: [
+        { appenders: ['file'], context: 'tests', level: 'warn' },
+        { context: 'tests.child', level: 'error' },
+      ],
+    })
   );
 
   // Now all logs should added to configured appenders.
@@ -120,11 +116,9 @@ test('appends records via multiple appenders.', () => {
 
 test('uses `root` logger if context is not specified.', () => {
   service.upgrade(
-    new LoggingConfig(
-      LoggingConfig.schema.validate({
-        appenders: { default: { kind: 'console', layout: { kind: 'pattern' } } },
-      })
-    )
+    config.schema.validate({
+      appenders: { default: { kind: 'console', layout: { kind: 'pattern' } } },
+    })
   );
 
   const rootLogger = service.get();
@@ -135,12 +129,10 @@ test('uses `root` logger if context is not specified.', () => {
 
 test('`stop()` disposes all appenders.', async () => {
   service.upgrade(
-    new LoggingConfig(
-      LoggingConfig.schema.validate({
-        appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
-        root: { level: 'info' },
-      })
-    )
+    config.schema.validate({
+      appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+      root: { level: 'info' },
+    })
   );
 
   const bufferDisposeSpy = jest.spyOn((service as any).bufferAppender, 'dispose');
@@ -156,12 +148,10 @@ test('asLoggerFactory() only allows to create new loggers.', () => {
   const logger = service.asLoggerFactory().get('test', 'context');
 
   service.upgrade(
-    new LoggingConfig(
-      LoggingConfig.schema.validate({
-        appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
-        root: { level: 'all' },
-      })
-    )
+    config.schema.validate({
+      appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+      root: { level: 'all' },
+    })
   );
 
   logger.trace('buffered trace message');

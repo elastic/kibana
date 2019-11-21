@@ -18,10 +18,11 @@
  */
 
 import { snakeCase } from 'lodash';
-import Promise from 'bluebird';
 import { getCollectorLogger } from '../lib';
 import { Collector } from './collector';
 import { UsageCollector } from './usage_collector';
+
+let _waitingForAllCollectorsTimestamp = null;
 
 /*
  * A collector object has types registered into it with the register(type)
@@ -29,12 +30,11 @@ import { UsageCollector } from './usage_collector';
  * and optionally, how to combine it into a unified payload for bulk upload.
  */
 export class CollectorSet {
-
   /*
    * @param {Object} server - server object
    * @param {Array} collectors to initialize, usually as a result of filtering another CollectorSet instance
    */
-  constructor(server, collectors = []) {
+  constructor(server, collectors = [], config = null) {
     this._log = getCollectorLogger(server);
     this._collectors = collectors;
 
@@ -44,7 +44,9 @@ export class CollectorSet {
      */
     this.makeStatsCollector = options => new Collector(server, options);
     this.makeUsageCollector = options => new UsageCollector(server, options);
-    this._makeCollectorSetFromArray = collectorsArray => new CollectorSet(server, collectorsArray);
+    this._makeCollectorSetFromArray = collectorsArray => new CollectorSet(server, collectorsArray, config);
+
+    this._maximumWaitTimeForAllCollectorsInS = config ? config.get('stats.maximumWaitTimeForAllCollectorsInS') : 60;
   }
 
   /*
@@ -73,28 +75,64 @@ export class CollectorSet {
     return x instanceof UsageCollector;
   }
 
+  async areAllCollectorsReady(collectorSet = this) {
+    if (!(collectorSet instanceof CollectorSet)) {
+      throw new Error(`areAllCollectorsReady method given bad collectorSet parameter: ` + typeof collectorSet);
+    }
+
+    const collectorTypesNotReady = [];
+    let allReady = true;
+    await collectorSet.asyncEach(async collector => {
+      if (!await collector.isReady()) {
+        allReady = false;
+        collectorTypesNotReady.push(collector.type);
+      }
+    });
+
+    if (!allReady && this._maximumWaitTimeForAllCollectorsInS >= 0) {
+      const nowTimestamp = +new Date();
+      _waitingForAllCollectorsTimestamp = _waitingForAllCollectorsTimestamp || nowTimestamp;
+      const timeWaitedInMS = nowTimestamp - _waitingForAllCollectorsTimestamp;
+      const timeLeftInMS = (this._maximumWaitTimeForAllCollectorsInS * 1000) - timeWaitedInMS;
+      if (timeLeftInMS <= 0) {
+        this._log.debug(`All collectors are not ready (waiting for ${collectorTypesNotReady.join(',')}) `
+        + `but we have waited the required `
+        + `${this._maximumWaitTimeForAllCollectorsInS}s and will return data from all collectors that are ready.`);
+        return true;
+      } else {
+        this._log.debug(`All collectors are not ready. Waiting for ${timeLeftInMS}ms longer.`);
+      }
+    } else {
+      _waitingForAllCollectorsTimestamp = null;
+    }
+
+    return allReady;
+  }
+
   /*
    * Call a bunch of fetch methods and then do them in bulk
    * @param {CollectorSet} collectorSet - a set of collectors to fetch. Default to all registered collectors
    */
-  bulkFetch(callCluster, collectorSet = this) {
+  async bulkFetch(callCluster, collectorSet = this) {
     if (!(collectorSet instanceof CollectorSet)) {
       throw new Error(`bulkFetch method given bad collectorSet parameter: ` + typeof collectorSet);
     }
 
-    const fetchPromises = collectorSet.map(collector => {
-      const collectorType = collector.type;
-      this._log.debug(`Fetching data from ${collectorType} collector`);
-      return Promise.props({
-        type: collectorType,
-        result: collector.fetchInternal(callCluster) // use the wrapper for fetch, kicks in error checking
-      })
-        .catch(err => {
-          this._log.warn(err);
-          this._log.warn(`Unable to fetch data from ${collectorType} collector`);
+    const responses = [];
+    await collectorSet.asyncEach(async collector => {
+      this._log.debug(`Fetching data from ${collector.type} collector`);
+      try {
+        responses.push({
+          type: collector.type,
+          result: await collector.fetchInternal(callCluster)
         });
+      }
+      catch (err) {
+        this._log.warn(err);
+        this._log.warn(`Unable to fetch data from ${collector.type} collector`);
+      }
     });
-    return Promise.all(fetchPromises);
+    return responses;
   }
 
   /*
@@ -154,5 +192,15 @@ export class CollectorSet {
 
   map(mapFn) {
     return this._collectors.map(mapFn);
+  }
+
+  some(someFn) {
+    return this._collectors.some(someFn);
+  }
+
+  async asyncEach(eachFn) {
+    for (const collector of this._collectors) {
+      await eachFn(collector);
+    }
   }
 }

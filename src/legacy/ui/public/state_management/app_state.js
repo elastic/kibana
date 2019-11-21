@@ -35,7 +35,7 @@ import { callEach } from '../utils/function';
 
 const urlParam = '_a';
 
-export function AppStateProvider(Private, $rootScope, $location, $injector) {
+export function AppStateProvider(Private, $location, $injector) {
   const State = Private(StateProvider);
   const PersistedState = $injector.get('PersistedState');
   let persistedStates;

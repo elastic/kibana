@@ -16,39 +16,102 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup, CoreStart } from '../../../../core/public';
+import { IScope } from 'angular';
 
-const runtimeContext = {
-  setup: {
-    core: (null as unknown) as CoreSetup,
-    plugins: {},
-  },
-  start: {
-    core: (null as unknown) as CoreStart,
-    plugins: {},
-  },
+import { IUiActionsStart, IUiActionsSetup } from 'src/plugins/ui_actions/public';
+import { Start as EmbeddableStart, Setup as EmbeddableSetup } from 'src/plugins/embeddable/public';
+import { LegacyCoreSetup, LegacyCoreStart, App } from '../../../../core/public';
+import { Plugin as DataPlugin } from '../../../../plugins/data/public';
+import { Plugin as ExpressionsPlugin } from '../../../../plugins/expressions/public';
+import {
+  Setup as InspectorSetup,
+  Start as InspectorStart,
+} from '../../../../plugins/inspector/public';
+import { EuiUtilsStart } from '../../../../plugins/eui_utils/public';
+import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/public';
+import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
+import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
+
+export interface PluginsSetup {
+  data: ReturnType<DataPlugin['setup']>;
+  embeddable: EmbeddableSetup;
+  expressions: ReturnType<ExpressionsPlugin['setup']>;
+  home: HomePublicPluginSetup;
+  inspector: InspectorSetup;
+  uiActions: IUiActionsSetup;
+  share: SharePluginSetup;
+  devTools: DevToolsSetup;
+}
+
+export interface PluginsStart {
+  data: ReturnType<DataPlugin['start']>;
+  embeddable: EmbeddableStart;
+  eui_utils: EuiUtilsStart;
+  expressions: ReturnType<ExpressionsPlugin['start']>;
+  home: HomePublicPluginStart;
+  inspector: InspectorStart;
+  uiActions: IUiActionsStart;
+  share: SharePluginStart;
+  devTools: DevToolsStart;
+}
+
+export const npSetup = {
+  core: (null as unknown) as LegacyCoreSetup,
+  plugins: {} as PluginsSetup,
 };
 
-export function __newPlatformSetup__(core: CoreSetup) {
-  if (runtimeContext.setup.core) {
-    throw new Error('New platform core api was already set up');
-  }
+export const npStart = {
+  core: (null as unknown) as LegacyCoreStart,
+  plugins: {} as PluginsStart,
+};
 
-  runtimeContext.setup.core = core;
+/**
+ * Only used by unit tests
+ * @internal
+ */
+export function __reset__() {
+  npSetup.core = (null as unknown) as LegacyCoreSetup;
+  npSetup.plugins = {} as any;
+  npStart.core = (null as unknown) as LegacyCoreStart;
+  npStart.plugins = {} as any;
+  legacyAppRegistered = false;
 }
 
-export function __newPlatformStart__(core: CoreStart) {
-  if (runtimeContext.start.core) {
-    throw new Error('New platform core api was already started');
-  }
+export function __setup__(coreSetup: LegacyCoreSetup, plugins: PluginsSetup) {
+  npSetup.core = coreSetup;
+  npSetup.plugins = plugins;
 
-  runtimeContext.start.core = core;
+  // Setup compatibility layer for AppService in legacy platform
+  npSetup.core.application.register = legacyAppRegister;
 }
 
-export function getNewPlatform() {
-  if (runtimeContext.setup.core === null || runtimeContext.start.core === null) {
-    throw new Error('runtimeContext is not initialized yet');
-  }
-
-  return runtimeContext;
+export function __start__(coreStart: LegacyCoreStart, plugins: PluginsStart) {
+  npStart.core = coreStart;
+  npStart.plugins = plugins;
 }
+
+/** Flag used to ensure `legacyAppRegister` is only called once. */
+let legacyAppRegistered = false;
+
+/**
+ * Exported for testing only. Use `npSetup.core.application.register` in legacy apps.
+ * @internal
+ */
+export const legacyAppRegister = (app: App) => {
+  if (legacyAppRegistered) {
+    throw new Error(`core.application.register may only be called once for legacy plugins.`);
+  }
+  legacyAppRegistered = true;
+
+  require('ui/chrome').setRootController(app.id, ($scope: IScope, $element: JQLite) => {
+    const element = $element[0];
+
+    // Root controller cannot return a Promise so use an internal async function and call it immediately
+    (async () => {
+      const unmount = await app.mount({ core: npStart.core }, { element, appBasePath: '' });
+      $scope.$on('$destroy', () => {
+        unmount();
+      });
+    })();
+  });
+};

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
@@ -31,22 +30,16 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 export class OptionsTab extends Component {
 
-  setVisParam = (paramName, paramValue) => {
-    const params = _.cloneDeep(this.props.editorState.params);
-    params[paramName] = paramValue;
-    this.props.stageEditorParams(params);
-  }
-
   handleUpdateFiltersChange = (evt) => {
-    this.setVisParam('updateFiltersOnChange', evt.target.checked);
+    this.props.setValue('updateFiltersOnChange', evt.target.checked);
   }
 
   handleUseTimeFilter = (evt) => {
-    this.setVisParam('useTimeFilter', evt.target.checked);
+    this.props.setValue('useTimeFilter', evt.target.checked);
   }
 
   handlePinFilters = (evt) => {
-    this.setVisParam('pinFilters', evt.target.checked);
+    this.props.setValue('pinFilters', evt.target.checked);
   }
 
   render() {
@@ -60,7 +53,7 @@ export class OptionsTab extends Component {
               id="inputControl.editor.optionsTab.updateFilterLabel"
               defaultMessage="Update Kibana filters on each change"
             />}
-            checked={this.props.editorState.params.updateFiltersOnChange}
+            checked={this.props.stateParams.updateFiltersOnChange}
             onChange={this.handleUpdateFiltersChange}
             data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"
           />
@@ -74,7 +67,7 @@ export class OptionsTab extends Component {
               id="inputControl.editor.optionsTab.useTimeFilterLabel"
               defaultMessage="Use time filter"
             />}
-            checked={this.props.editorState.params.useTimeFilter}
+            checked={this.props.stateParams.useTimeFilter}
             onChange={this.handleUseTimeFilter}
             data-test-subj="inputControlEditorUseTimeFilterCheckbox"
           />
@@ -88,7 +81,7 @@ export class OptionsTab extends Component {
               id="inputControl.editor.optionsTab.pinFiltersLabel"
               defaultMessage="Pin filters for all applications"
             />}
-            checked={this.props.editorState.params.pinFilters}
+            checked={this.props.stateParams.pinFilters}
             onChange={this.handlePinFilters}
             data-test-subj="inputControlEditorPinFiltersCheckbox"
           />
@@ -99,6 +92,6 @@ export class OptionsTab extends Component {
 }
 
 OptionsTab.propTypes = {
-  scope: PropTypes.object.isRequired,
-  stageEditorParams: PropTypes.func.isRequired
+  vis: PropTypes.object.isRequired,
+  setValue: PropTypes.func.isRequired
 };

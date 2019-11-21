@@ -5,7 +5,6 @@ exports[`CallOuts should render normally 1`] = `
   <EuiCallOut
     color="danger"
     iconType="cross"
-    size="m"
     title={
       <FormattedMessage
         defaultMessage="Deprecation languages in use"
@@ -21,17 +20,15 @@ exports[`CallOuts should render normally 1`] = `
         values={
           Object {
             "deprecatedLangsInUse": "php",
-            "link": <EuiLink
-              color="primary"
+            "link": <ForwardRef
               href="http://www.elastic.co/painlessDocs"
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="Painless"
                 id="kbn.management.editIndexPattern.scripted.deprecationLangLabel.painlessDescription"
                 values={Object {}}
               />
-            </EuiLink>,
+            </ForwardRef>,
           }
         }
       />

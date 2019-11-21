@@ -6,8 +6,25 @@
 
 import Joi from 'joi';
 
+const scope = 'testing';
+const taskManagerQuery = {
+  bool: {
+    filter: {
+      bool: {
+        must: [
+          {
+            term: {
+              'task.scope': scope,
+            }
+          }
+        ]
+      }
+    }
+  }
+};
+
 export function initRoutes(server) {
-  const { taskManager } = server;
+  const taskManager = server.plugins.task_manager;
 
   server.route({
     path: '/api/sample_tasks',
@@ -15,18 +32,34 @@ export function initRoutes(server) {
     config: {
       validate: {
         payload: Joi.object({
-          taskType: Joi.string().required(),
-          interval: Joi.string().optional(),
-          params: Joi.object().required(),
-          state: Joi.object().optional(),
-          id: Joi.string().optional(),
+          task: Joi.object({
+            taskType: Joi.string().required(),
+            interval: Joi.string().optional(),
+            params: Joi.object().required(),
+            state: Joi.object().optional(),
+            id: Joi.string().optional()
+          }),
+          ensureScheduled: Joi.boolean()
+            .default(false)
+            .optional(),
         }),
       },
     },
     async handler(request) {
       try {
-        const task = await taskManager.schedule(request.payload, { request });
-        return task;
+        const { ensureScheduled = false, task: taskFields } = request.payload;
+        const task = {
+          ...taskFields,
+          scope: [scope],
+        };
+
+        const taskResult = await (
+          ensureScheduled
+            ? taskManager.ensureScheduled(task, { request })
+            : taskManager.schedule(task, { request })
+        );
+
+        return taskResult;
       } catch (err) {
         return err;
       }
@@ -38,7 +71,9 @@ export function initRoutes(server) {
     method: 'GET',
     async handler() {
       try {
-        return taskManager.fetch();
+        return taskManager.fetch({
+          query: taskManagerQuery,
+        });
       } catch (err) {
         return err;
       }
@@ -50,7 +85,9 @@ export function initRoutes(server) {
     method: 'DELETE',
     async handler() {
       try {
-        const { docs: tasks } = await taskManager.fetch();
+        const { docs: tasks } = await taskManager.fetch({
+          query: taskManagerQuery,
+        });
         return Promise.all(tasks.map((task) => taskManager.remove(task.id)));
       } catch (err) {
         return err;

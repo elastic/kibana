@@ -17,17 +17,15 @@
  * under the License.
  */
 
-import { BasePathSetup } from '../base_path';
 import { HttpSetup } from '../http';
 import { InjectedMetadataSetup } from '../injected_metadata';
 
 import { UiSettingsApi } from './ui_settings_api';
-import { UiSettingsClient } from './ui_settings_client';
+import { UiSettingsClient, UiSettingsClientContract } from './ui_settings_client';
 
 interface UiSettingsServiceDeps {
   http: HttpSetup;
   injectedMetadata: InjectedMetadataSetup;
-  basePath: BasePathSetup;
 }
 
 /** @internal */
@@ -35,8 +33,8 @@ export class UiSettingsService {
   private uiSettingsApi?: UiSettingsApi;
   private uiSettingsClient?: UiSettingsClient;
 
-  public setup({ http, injectedMetadata, basePath }: UiSettingsServiceDeps): UiSettingsSetup {
-    this.uiSettingsApi = new UiSettingsApi(basePath, injectedMetadata.getKibanaVersion());
+  public setup({ http, injectedMetadata }: UiSettingsServiceDeps): UiSettingsClientContract {
+    this.uiSettingsApi = new UiSettingsApi(http);
     http.addLoadingCount(this.uiSettingsApi.getLoadingCount$());
 
     // TODO: Migrate away from legacyMetadata https://github.com/elastic/kibana/issues/22779
@@ -51,6 +49,10 @@ export class UiSettingsService {
     return this.uiSettingsClient;
   }
 
+  public start(): UiSettingsClientContract {
+    return this.uiSettingsClient!;
+  }
+
   public stop() {
     if (this.uiSettingsClient) {
       this.uiSettingsClient.stop();
@@ -61,6 +63,3 @@ export class UiSettingsService {
     }
   }
 }
-
-/** @public */
-export type UiSettingsSetup = UiSettingsClient;

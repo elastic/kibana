@@ -23,12 +23,9 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 
-import { RequestAdapter } from 'ui/inspector/adapters/request';
-import { DataAdapter } from 'ui/inspector/adapters/data';
-import { runPipeline } from 'ui/visualize/loader/pipeline_helpers';
-import { visualizationLoader } from 'ui/visualize/loader/visualization_loader';
-
+import { RequestAdapter, DataAdapter } from 'ui/inspector/adapters';
 import { registries } from 'plugins/interpreter/registries';
+import { npStart } from 'ui/new_platform';
 
 // This is required so some default styles and required scripts/Angular modules are loaded,
 // or the timezone setting is correctly applied.
@@ -41,8 +38,8 @@ import 'uiExports/visRequestHandlers';
 import 'uiExports/visEditorTypes';
 import 'uiExports/visualize';
 import 'uiExports/savedObjectTypes';
-import 'uiExports/fieldFormats';
 import 'uiExports/search';
+import 'uiExports/interpreter';
 
 import { Main } from './components/main';
 
@@ -66,9 +63,8 @@ function RootController($scope, $element) {
   render(<Main
     RequestAdapter={RequestAdapter}
     DataAdapter={DataAdapter}
-    runPipeline={runPipeline}
+    expressions={npStart.plugins.expressions}
     registries={registries}
-    visualizationLoader={visualizationLoader}
   />, domNode);
 
   // unmount react on controller destroy

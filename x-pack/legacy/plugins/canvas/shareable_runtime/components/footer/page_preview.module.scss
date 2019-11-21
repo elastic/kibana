@@ -1,0 +1,16 @@
+@import '@elastic/eui/src/global_styling/variables/_size.scss';
+
+:global .kbnCanvas :local .root {
+  margin: 0 $euiSizeS;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+:global .kbnCanvas :local .root :global .canvasPage {
+  position: relative;
+}
+
+:global .kbnCanvas :local .preview {
+  pointer-events: none;
+  transform-origin: top left;
+}

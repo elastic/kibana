@@ -11,7 +11,7 @@ export default async function ({ readConfigFile }) {
     testFiles: [require.resolve('./auth')],
     servers: xPackAPITestsConfig.get('servers'),
     services: {
-      es: xPackAPITestsConfig.get('services.es'),
+      legacyEs: xPackAPITestsConfig.get('services.legacyEs'),
       supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
     },
     junit: {
@@ -32,7 +32,7 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=false',
-        '--xpack.security.authProviders=[\"token\"]',
+        '--xpack.security.authc.providers=[\"token\"]',
       ],
     },
   };

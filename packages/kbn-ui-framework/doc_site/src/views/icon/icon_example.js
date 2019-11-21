@@ -28,15 +28,15 @@ import {
   GuideText,
 } from '../../components';
 
-const iconHtml = require('./icon.html');
-const infoHtml = require('./icon_info.html');
-const basicHtml = require('./icon_basic.html');
-const successHtml = require('./icon_success.html');
-const warningHtml = require('./icon_warning.html');
-const errorHtml = require('./icon_error.html');
-const inactiveHtml = require('./icon_inactive.html');
-const spinnerHtml = require('./icon_spinner.html');
-const spinnerJs = require('raw-loader!./icon_spinner.js');
+import iconHtml from './icon.html';
+import infoHtml from './icon_info.html';
+import basicHtml from './icon_basic.html';
+import successHtml from './icon_success.html';
+import warningHtml from './icon_warning.html';
+import errorHtml from './icon_error.html';
+import inactiveHtml from './icon_inactive.html';
+import spinnerHtml from './icon_spinner.html';
+import spinnerJs from 'raw-loader!./icon_spinner.js';
 
 export default props => (
   <GuidePage title={props.route.name}>

@@ -12,7 +12,6 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const find = getService('find');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const userMenu = getService('userMenu');
@@ -28,6 +27,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const expectSpaceSelector = options.expectSpaceSelector || false;
       const expectSuccess = options.expectSuccess;
       const expectForbidden = options.expectForbidden || false;
+      const rawDataTabLocator = 'a[id=rawdata-tab]';
 
       await PageObjects.common.navigateToApp('login');
       await testSubjects.setValue('loginUsername', username);
@@ -39,7 +39,14 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
         await retry.try(() => testSubjects.find('kibanaSpaceSelector'));
         log.debug(`Finished login process, landed on space selector. currentUrl = ${await browser.getCurrentUrl()}`);
       } else if (expectForbidden) {
+        if (await find.existsByCssSelector(rawDataTabLocator)) {
+          // Firefox has 3 tabs and requires navigation to see Raw output
+          await find.clickByCssSelector(rawDataTabLocator);
+        }
         await retry.try(async () => {
+          if (await find.existsByCssSelector(rawDataTabLocator)) {
+            await find.clickByCssSelector(rawDataTabLocator);
+          }
           await PageObjects.error.expectForbidden();
         });
         log.debug(`Finished login process, found forbidden message. currentUrl = ${await browser.getCurrentUrl()}`);
@@ -71,9 +78,8 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     async initTests() {
       log.debug('SecurityPage:initTests');
       await esArchiver.load('empty_kibana');
-      await kibanaServer.uiSettings.disableToastAutohide();
       await esArchiver.loadIfNeeded('logstash_functional');
-      browser.setWindowSize(1600, 1000);
+      await browser.setWindowSize(1600, 1000);
     }
 
     async login(username, password, options = {}) {
@@ -135,6 +141,10 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       await retry.try(() => testSubjects.click('createRoleButton'));
     }
 
+    async clickCloneRole(roleName) {
+      await retry.try(() => testSubjects.click(`clone-role-action-${roleName}`));
+    }
+
     async getCreateIndexPatternInputFieldExists() {
       return await testSubjects.exists('createIndexPatternNameInput');
     }
@@ -154,7 +164,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
 
     async clickSaveEditRole() {
       const saveButton = await retry.try(() => testSubjects.find('roleFormSaveButton'));
-      await browser.moveMouseTo(saveButton);
+      await saveButton.moveMouseTo();
       await saveButton.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -216,7 +226,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
           fullname: await fullnameElement.getVisibleText(),
           email: await emailElement.getVisibleText(),
           roles: (await rolesElement.getVisibleText()).split(',').map(role => role.trim()),
-          reserved: (await isReservedElementVisible.getProperty('innerHTML')).includes('reservedUser')
+          reserved: (await isReservedElementVisible.getAttribute('innerHTML')).includes('reservedUser')
         };
       });
     }
@@ -225,7 +235,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const users = await testSubjects.findAll('roleRow');
       return mapAsync(users, async role => {
         const rolenameElement = await role.findByCssSelector('[data-test-subj="roleRowName"]');
-        const reservedRoleRow = await role.findByCssSelector('td:last-child');
+        const reservedRoleRow = await role.findByCssSelector('td:nth-last-child(2)');
 
         return {
           rolename: await rolenameElement.getVisibleText(),
@@ -354,7 +364,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
             await testSubjects.click('restrictFieldsQuery0');
 
             // have to remove the '*'
-            return find.clickByCssSelector('div[data-test-subj="fieldInput0"] .euiBadge[title="*"]')
+            return find.clickByCssSelector('div[data-test-subj="fieldInput0"] .euiBadge[title="*"] svg.euiIcon')
               .then(function () {
                 return addGrantedField(userObj.elasticsearch.indices[0].field_security.grant);
               });

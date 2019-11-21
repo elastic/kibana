@@ -17,178 +17,332 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { ContainerState, Embeddable } from 'ui/embeddable';
-import { OnEmbeddableStateChanged } from 'ui/embeddable/embeddable_factory';
-import { Filters, Query, TimeRange } from 'ui/embeddable/types';
+import _, { forEach } from 'lodash';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { PersistedState } from 'ui/persisted_state';
-import { VisualizeLoader } from 'ui/visualize/loader';
-import { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize_handler';
+import { Subscription } from 'rxjs';
+import * as Rx from 'rxjs';
+import { buildPipeline } from 'ui/visualize/loader/pipeline_helpers';
+import { SavedObject } from 'ui/saved_objects/saved_object';
+import { Vis } from 'ui/vis';
+import { SearchSource } from 'ui/courier';
+import { queryGeohashBounds } from 'ui/visualize/loader/utils';
+import { getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { AppState } from 'ui/state_management/app_state';
+import { npStart } from 'ui/new_platform';
+import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
+import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
-  VisSavedObject,
-  VisualizeLoaderParams,
-  VisualizeUpdateParams,
-} from 'ui/visualize/loader/types';
+  TimeRange,
+  Query,
+  onlyDisabledFiltersChanged,
+  esFilters,
+  mapAndFlattenFilters,
+} from '../../../../../../plugins/data/public';
+import {
+  EmbeddableInput,
+  EmbeddableOutput,
+  Embeddable,
+  Container,
+  APPLY_FILTER_TRIGGER,
+} from '../../../../../../plugins/embeddable/public';
+import { dispatchRenderComplete } from '../../../../../../plugins/kibana_utils/public';
 
-export interface VisualizeEmbeddableConfiguration {
-  onEmbeddableStateChanged: OnEmbeddableStateChanged;
-  savedVisualization: VisSavedObject;
-  indexPatterns?: StaticIndexPattern[];
-  editUrl?: string;
-  editable: boolean;
-  loader: VisualizeLoader;
+const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
+
+export interface VisSavedObject extends SavedObject {
+  vis: Vis;
+  description?: string;
+  searchSource: SearchSource;
+  title: string;
+  uiStateJSON?: string;
+  destroy: () => void;
 }
 
-export class VisualizeEmbeddable extends Embeddable {
-  private onEmbeddableStateChanged: OnEmbeddableStateChanged;
+export interface VisualizeEmbeddableConfiguration {
+  savedVisualization: VisSavedObject;
+  indexPatterns?: StaticIndexPattern[];
+  editUrl: string;
+  editable: boolean;
+  appState?: AppState;
+  uiState?: PersistedState;
+}
+
+export interface VisualizeInput extends EmbeddableInput {
+  timeRange?: TimeRange;
+  query?: Query;
+  filters?: esFilters.Filter[];
+  vis?: {
+    colors?: { [key: string]: string };
+  };
+  appState?: AppState;
+  uiState?: PersistedState;
+}
+
+export interface VisualizeOutput extends EmbeddableOutput {
+  editUrl: string;
+  indexPatterns?: StaticIndexPattern[];
+  savedObjectId: string;
+  visTypeName: string;
+}
+
+type ExpressionLoader = InstanceType<typeof npStart.plugins.expressions.ExpressionLoader>;
+
+export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
+  private handler?: ExpressionLoader;
   private savedVisualization: VisSavedObject;
-  private loader: VisualizeLoader;
+  private appState: AppState | undefined;
   private uiState: PersistedState;
-  private handler?: EmbeddedVisualizeHandler;
-  private customization?: object;
-  private panelTitle?: string;
   private timeRange?: TimeRange;
   private query?: Query;
-  private filters?: Filters;
+  private title?: string;
+  private filters?: esFilters.Filter[];
+  private visCustomizations: VisualizeInput['vis'];
+  private subscriptions: Subscription[] = [];
+  private expression: string = '';
+  private actions: any = {};
+  private vis: Vis;
+  private domNode: any;
+  public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
-  constructor({
-    onEmbeddableStateChanged,
-    savedVisualization,
-    indexPatterns,
-    editUrl,
-    editable,
-    loader,
-  }: VisualizeEmbeddableConfiguration) {
-    super({
-      title: savedVisualization.title,
+  constructor(
+    {
+      savedVisualization,
       editUrl,
-      editable,
       indexPatterns,
-    });
-    this.onEmbeddableStateChanged = onEmbeddableStateChanged;
+      editable,
+      appState,
+      uiState,
+    }: VisualizeEmbeddableConfiguration,
+    initialInput: VisualizeInput,
+    parent?: Container
+  ) {
+    super(
+      initialInput,
+      {
+        defaultTitle: savedVisualization.title,
+        editUrl,
+        indexPatterns,
+        editable,
+        savedObjectId: savedVisualization.id!,
+        visTypeName: savedVisualization.vis.type.name,
+      },
+      parent
+    );
+    this.appState = appState;
     this.savedVisualization = savedVisualization;
-    this.loader = loader;
+    this.vis = this.savedVisualization.vis;
 
-    const parsedUiState = savedVisualization.uiStateJSON
-      ? JSON.parse(savedVisualization.uiStateJSON)
-      : {};
-    this.uiState = new PersistedState(parsedUiState);
+    this.vis.on('update', this.handleVisUpdate);
+    this.vis.on('reload', this.reload);
 
-    this.uiState.on('change', this.uiStateChangeHandler);
+    if (uiState) {
+      this.uiState = uiState;
+    } else {
+      const parsedUiState = savedVisualization.uiStateJSON
+        ? JSON.parse(savedVisualization.uiStateJSON)
+        : {};
+      this.uiState = new PersistedState(parsedUiState);
+
+      this.uiState.on('change', this.uiStateChangeHandler);
+    }
+
+    this.vis._setUiState(this.uiState);
+
+    this.appState = appState;
+
+    this.subscriptions.push(
+      Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
+        this.handleChanges();
+      })
+    );
   }
 
-  public getInspectorAdapters() {
+  public getVisualizationDescription() {
+    return this.savedVisualization.description;
+  }
+
+  public getInspectorAdapters = () => {
     if (!this.handler) {
       return undefined;
     }
-    return this.handler.inspectorAdapters;
-  }
+    return this.handler.inspect();
+  };
 
-  public getEmbeddableState() {
-    return {
-      customization: this.customization,
-    };
-  }
+  public openInspector = () => {
+    if (this.handler) {
+      return this.handler.openInspector(this.getTitle() || '');
+    }
+  };
 
   /**
-   * Transfers all changes in the containerState.embeddableCustomization into
+   * Transfers all changes in the containerState.customization into
    * the uiState of this visualization.
    */
-  public transferCustomizationsToUiState(containerState: ContainerState) {
+  public transferCustomizationsToUiState() {
     // Check for changes that need to be forwarded to the uiState
     // Since the vis has an own listener on the uiState we don't need to
     // pass anything from here to the handler.update method
-    const customization = containerState.embeddableCustomization;
-    if (customization && !_.isEqual(this.customization, customization)) {
-      // Turn this off or the uiStateChangeHandler will fire for every modification.
-      this.uiState.off('change', this.uiStateChangeHandler);
+    const visCustomizations = this.input.vis;
+    if (visCustomizations) {
+      if (!_.isEqual(visCustomizations, this.visCustomizations)) {
+        this.visCustomizations = visCustomizations;
+        // Turn this off or the uiStateChangeHandler will fire for every modification.
+        this.uiState.off('change', this.uiStateChangeHandler);
+        this.uiState.clearAllKeys();
+        this.uiState.set('vis', visCustomizations);
+        getKeys(visCustomizations).forEach(key => {
+          this.uiState.set(key, visCustomizations[key]);
+        });
+        this.uiState.on('change', this.uiStateChangeHandler);
+      }
+    } else if (!this.appState) {
       this.uiState.clearAllKeys();
-      Object.getOwnPropertyNames(customization).forEach(key => {
-        this.uiState.set(key, customization[key]);
-      });
-      this.customization = customization;
-      this.uiState.on('change', this.uiStateChangeHandler);
     }
   }
 
-  public onContainerStateChanged(containerState: ContainerState) {
-    this.transferCustomizationsToUiState(containerState);
+  public async handleChanges() {
+    this.transferCustomizationsToUiState();
 
-    const updatedParams: VisualizeUpdateParams = {};
+    let dirty = false;
 
     // Check if timerange has changed
-    if (containerState.timeRange !== this.timeRange) {
-      updatedParams.timeRange = containerState.timeRange;
-      this.timeRange = containerState.timeRange;
+    if (!_.isEqual(this.input.timeRange, this.timeRange)) {
+      this.timeRange = _.cloneDeep(this.input.timeRange);
+      dirty = true;
     }
 
     // Check if filters has changed
-    if (containerState.filters !== this.filters) {
-      updatedParams.filters = containerState.filters;
-      this.filters = containerState.filters;
+    if (!onlyDisabledFiltersChanged(this.input.filters, this.filters)) {
+      this.filters = this.input.filters;
+      dirty = true;
     }
 
     // Check if query has changed
-    if (containerState.query !== this.query) {
-      updatedParams.query = containerState.query;
-      this.query = containerState.query;
+    if (!_.isEqual(this.input.query, this.query)) {
+      this.query = this.input.query;
+      dirty = true;
     }
 
-    const derivedPanelTitle = this.getPanelTitle(containerState);
-    if (this.panelTitle !== derivedPanelTitle) {
-      updatedParams.dataAttrs = {
-        title: derivedPanelTitle,
-      };
-      this.panelTitle = derivedPanelTitle;
+    if (this.output.title !== this.title) {
+      this.title = this.output.title;
+      if (this.domNode) {
+        this.domNode.setAttribute('data-title', this.title || '');
+      }
     }
 
-    if (this.handler && !_.isEmpty(updatedParams)) {
-      this.handler.update(updatedParams);
+    if (this.savedVisualization.description && this.domNode) {
+      this.domNode.setAttribute('data-description', this.savedVisualization.description);
+    }
+
+    if (this.handler && dirty) {
+      this.updateHandler();
     }
   }
 
   /**
    *
    * @param {Element} domNode
-   * @param {ContainerState} containerState
    */
-  public render(domNode: HTMLElement, containerState: ContainerState) {
-    this.panelTitle = this.getPanelTitle(containerState);
-    this.timeRange = containerState.timeRange;
-    this.query = containerState.query;
-    this.filters = containerState.filters;
+  public async render(domNode: HTMLElement) {
+    this.timeRange = _.cloneDeep(this.input.timeRange);
 
-    this.transferCustomizationsToUiState(containerState);
+    this.transferCustomizationsToUiState();
 
-    const dataAttrs: { [key: string]: string } = {
-      'shared-item': '',
-      title: this.panelTitle,
+    this.savedVisualization.vis._setUiState(this.uiState);
+    this.uiState = this.savedVisualization.vis.getUiState();
+
+    // init default actions
+    forEach(this.vis.type.events, (event, eventName) => {
+      if (event.disabled || !eventName) {
+        return;
+      } else {
+        this.actions[eventName] = event.defaultAction;
+      }
+    });
+
+    // This is a hack to give maps visualizations access to data in the
+    // globalState, since they can no longer access it via searchSource.
+    // TODO: Remove this as a part of elastic/kibana#30593
+    this.vis.API.getGeohashBounds = () => {
+      return queryGeohashBounds(this.savedVisualization.vis, {
+        filters: this.filters,
+        query: this.query,
+        searchSource: this.savedVisualization.searchSource,
+      });
     };
+
+    // this is a hack to make editor still work, will be removed once we clean up editor
+    this.vis.hasInspector = () => {
+      const visTypesWithoutInspector = ['markdown', 'input_control_vis', 'metrics', 'vega'];
+      if (visTypesWithoutInspector.includes(this.vis.type.name)) {
+        return false;
+      }
+      return this.getInspectorAdapters();
+    };
+
+    this.vis.openInspector = this.openInspector;
+
+    const div = document.createElement('div');
+    div.className = `visualize panel-content panel-content--fullWidth`;
+    domNode.appendChild(div);
+    this.domNode = div;
+
+    this.handler = new npStart.plugins.expressions.ExpressionLoader(this.domNode);
+
+    this.subscriptions.push(
+      this.handler.events$.subscribe(async event => {
+        if (this.actions[event.name]) {
+          event.data.aggConfigs = getTableAggs(this.vis);
+          const filters: esFilters.Filter[] = this.actions[event.name](event.data) || [];
+          const mappedFilters = mapAndFlattenFilters(filters);
+          const timeFieldName = this.vis.indexPattern.timeFieldName;
+
+          npStart.plugins.uiActions.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+            embeddable: this,
+            filters: mappedFilters,
+            timeFieldName,
+          });
+        }
+      })
+    );
+
+    div.setAttribute('data-title', this.output.title || '');
+
     if (this.savedVisualization.description) {
-      dataAttrs.description = this.savedVisualization.description;
+      div.setAttribute('data-description', this.savedVisualization.description);
     }
 
-    const handlerParams: VisualizeLoaderParams = {
-      uiState: this.uiState,
-      // Append visualization to container instead of replacing its content
-      append: true,
-      timeRange: containerState.timeRange,
-      query: containerState.query,
-      filters: containerState.filters,
-      cssClass: `panel-content panel-content--fullWidth`,
-      dataAttrs,
-    };
+    div.setAttribute('data-test-subj', 'visualizationLoader');
+    div.setAttribute('data-shared-item', '');
+    div.setAttribute('data-rendering-count', '0');
+    div.setAttribute('data-render-complete', 'false');
 
-    this.handler = this.loader.embedVisualizationWithSavedObject(
-      domNode,
-      this.savedVisualization,
-      handlerParams
+    this.subscriptions.push(
+      this.handler.loading$.subscribe(() => {
+        div.setAttribute('data-render-complete', 'false');
+        div.setAttribute('data-loading', '');
+      })
     );
+
+    this.subscriptions.push(
+      this.handler.render$.subscribe(count => {
+        div.removeAttribute('data-loading');
+        div.setAttribute('data-render-complete', 'true');
+        div.setAttribute('data-rendering-count', count.toString());
+        dispatchRenderComplete(div);
+      })
+    );
+
+    this.updateHandler();
   }
 
   public destroy() {
+    super.destroy();
+    this.subscriptions.forEach(s => s.unsubscribe());
     this.uiState.off('change', this.uiStateChangeHandler);
+    this.savedVisualization.vis.removeListener('reload', this.reload);
+    this.savedVisualization.vis.removeListener('update', this.handleVisUpdate);
     this.savedVisualization.destroy();
     if (this.handler) {
       this.handler.destroy();
@@ -196,29 +350,47 @@ export class VisualizeEmbeddable extends Embeddable {
     }
   }
 
-  public reload() {
+  public reload = () => {
+    this.handleVisUpdate();
+  };
+
+  private async updateHandler() {
+    const expressionParams: IExpressionLoaderParams = {
+      searchContext: {
+        type: 'kibana_context',
+        timeRange: this.timeRange,
+        query: this.input.query,
+        filters: this.input.filters,
+      },
+      extraHandlers: {
+        vis: this.vis,
+        uiState: this.uiState,
+      },
+    };
+    this.expression = await buildPipeline(this.vis, {
+      searchSource: this.savedVisualization.searchSource,
+      timeRange: this.timeRange,
+    });
+
+    this.vis.filters = { timeRange: this.timeRange };
+
     if (this.handler) {
-      this.handler.reload();
+      this.handler.update(this.expression, expressionParams);
     }
   }
 
-  /**
-   * Retrieve the panel title for this panel from the container state.
-   * This will either return the overwritten panel title or the visualization title.
-   */
-  private getPanelTitle(containerState: ContainerState) {
-    let derivedPanelTitle = '';
-    if (!containerState.hidePanelTitles) {
-      derivedPanelTitle =
-        containerState.customTitle !== undefined
-          ? containerState.customTitle
-          : this.savedVisualization.title;
+  private handleVisUpdate = async () => {
+    if (this.appState) {
+      this.appState.vis = this.savedVisualization.vis.getState();
+      this.appState.save();
     }
-    return derivedPanelTitle;
-  }
+
+    this.updateHandler();
+  };
 
   private uiStateChangeHandler = () => {
-    this.customization = this.uiState.toJSON();
-    this.onEmbeddableStateChanged(this.getEmbeddableState());
+    this.updateInput({
+      ...this.uiState.toJSON(),
+    });
   };
 }

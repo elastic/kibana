@@ -19,7 +19,7 @@
 
 import Hapi from 'hapi';
 import Joi from 'joi';
-import { SavedObjectAttributes, SavedObjectsClient } from '../';
+import { SavedObjectAttributes, SavedObjectsClient } from 'src/core/server';
 import { Prerequisites, SavedObjectReference } from './types';
 
 interface UpdateRequest extends Hapi.Request {
@@ -53,15 +53,13 @@ export const createUpdateRoute = (prereqs: Prerequisites) => {
         payload: Joi.object({
           attributes: Joi.object().required(),
           version: Joi.string(),
-          references: Joi.array()
-            .items(
-              Joi.object().keys({
-                name: Joi.string().required(),
-                type: Joi.string().required(),
-                id: Joi.string().required(),
-              })
-            )
-            .default([]),
+          references: Joi.array().items(
+            Joi.object().keys({
+              name: Joi.string().required(),
+              type: Joi.string().required(),
+              id: Joi.string().required(),
+            })
+          ),
         }).required(),
       },
       handler(request: UpdateRequest) {

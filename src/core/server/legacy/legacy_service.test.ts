@@ -17,75 +17,90 @@
  * under the License.
  */
 
-import { BehaviorSubject, Subject, throwError } from 'rxjs';
+import { BehaviorSubject, throwError } from 'rxjs';
 
-jest.mock('./legacy_platform_proxy');
 jest.mock('../../../legacy/server/kbn_server');
 jest.mock('../../../cli/cluster/cluster_manager');
+jest.mock('./plugins/find_legacy_plugin_specs.ts', () => ({
+  findLegacyPluginSpecs: (settings: Record<string, any>) => ({
+    pluginSpecs: [],
+    pluginExtendedConfig: settings,
+    disabledPluginSpecs: [],
+    uiExports: [],
+  }),
+}));
 
-import { first } from 'rxjs/operators';
-import { LegacyService } from '.';
+import { LegacyService, LegacyServiceSetupDeps, LegacyServiceStartDeps } from '.';
 // @ts-ignore: implicit any for JS file
 import MockClusterManager from '../../../cli/cluster/cluster_manager';
 import KbnServer from '../../../legacy/server/kbn_server';
 import { Config, Env, ObjectToConfigAdapter } from '../config';
+import { contextServiceMock } from '../context/context_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { configServiceMock } from '../config/config_service.mock';
-import { ElasticsearchServiceSetup } from '../elasticsearch';
-import { HttpServiceStart } from '../http';
+
+import { BasePathProxyServer } from '../http';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { DiscoveredPlugin, DiscoveredPluginInternal } from '../plugins';
-import { PluginsServiceSetup, PluginsServiceStart } from '../plugins/plugins_service';
-import { LegacyPlatformProxy } from './legacy_platform_proxy';
+
+import { KibanaMigrator } from '../saved_objects/migrations';
+import { ISavedObjectsClientProvider } from '../saved_objects';
+import { httpServiceMock } from '../http/http_service.mock';
+import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
-const MockLegacyPlatformProxy: jest.Mock<LegacyPlatformProxy> = LegacyPlatformProxy as any;
 
-let legacyService: LegacyService;
+let coreId: symbol;
 let env: Env;
 let config$: BehaviorSubject<Config>;
-let setupDeps: {
-  elasticsearch: ElasticsearchServiceSetup;
-  http: any;
-  plugins: PluginsServiceSetup;
-};
 
-let startDeps: {
-  http: HttpServiceStart;
-  plugins: PluginsServiceStart;
-};
+let setupDeps: LegacyServiceSetupDeps;
+
+let startDeps: LegacyServiceStartDeps;
 
 const logger = loggingServiceMock.create();
 let configService: ReturnType<typeof configServiceMock.create>;
 
 beforeEach(() => {
+  coreId = Symbol();
   env = Env.createDefault(getEnvOptions());
   configService = configServiceMock.create();
 
   MockKbnServer.prototype.ready = jest.fn().mockReturnValue(Promise.resolve());
 
   setupDeps = {
-    elasticsearch: { legacy: {} } as any,
-    http: {
-      options: { someOption: 'foo', someAnotherOption: 'bar' },
-      server: { listener: { addListener: jest.fn() }, route: jest.fn() },
-    },
-    plugins: {
-      contracts: new Map([['plugin-id', 'plugin-value']]),
-      uiPlugins: {
-        public: new Map([['plugin-id', {} as DiscoveredPlugin]]),
-        internal: new Map([['plugin-id', {} as DiscoveredPluginInternal]]),
+    core: {
+      context: contextServiceMock.createSetupContract(),
+      elasticsearch: { legacy: {} } as any,
+      uiSettings: uiSettingsServiceMock.createSetupContract(),
+      http: {
+        ...httpServiceMock.createSetupContract(),
+        auth: {
+          getAuthHeaders: () => undefined,
+        } as any,
+      },
+
+      plugins: {
+        contracts: new Map([['plugin-id', 'plugin-value']]),
+        uiPlugins: {
+          public: new Map([['plugin-id', {} as DiscoveredPlugin]]),
+          internal: new Map([['plugin-id', {} as DiscoveredPluginInternal]]),
+        },
+        uiPluginConfigs: new Map(),
       },
     },
+    plugins: { 'plugin-id': 'plugin-value' },
   };
 
   startDeps = {
-    http: {
-      isListening: () => true,
+    core: {
+      savedObjects: {
+        migrator: {} as KibanaMigrator,
+        clientProvider: {} as ISavedObjectsClientProvider,
+      },
+      plugins: { contracts: new Map() },
     },
-    plugins: {
-      contracts: new Map(),
-    },
+    plugins: {},
   };
 
   config$ = new BehaviorSubject<Config>(
@@ -97,8 +112,6 @@ beforeEach(() => {
 
   configService.getConfig$.mockReturnValue(config$);
   configService.getUsedPaths.mockResolvedValue(['foo.bar']);
-
-  legacyService = new LegacyService({ env, logger, configService: configService as any });
 });
 
 afterEach(() => {
@@ -106,72 +119,14 @@ afterEach(() => {
 });
 
 describe('once LegacyService is set up with connection info', () => {
-  test('register proxy route.', async () => {
-    await legacyService.setup(setupDeps);
-    await legacyService.start(startDeps);
-
-    expect(setupDeps.http.server.route.mock.calls).toMatchSnapshot('proxy route options');
-  });
-
-  test('proxy route responds with `503` if `kbnServer` is not ready yet.', async () => {
-    configService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
-
-    const kbnServerListen$ = new Subject();
-    MockKbnServer.prototype.listen = jest.fn(() => {
-      kbnServerListen$.next();
-      return kbnServerListen$.toPromise();
-    });
-
-    // Wait until listen is called and proxy route is registered, but don't allow
-    // listen to complete and make kbnServer available.
-    await legacyService.setup(setupDeps);
-    const legacySetupPromise = legacyService.start(startDeps);
-    await kbnServerListen$.pipe(first()).toPromise();
-
-    const mockResponse: any = {
-      code: jest.fn().mockImplementation(() => mockResponse),
-      header: jest.fn().mockImplementation(() => mockResponse),
-    };
-    const mockResponseToolkit = {
-      response: jest.fn().mockReturnValue(mockResponse),
-      abandon: Symbol('abandon'),
-    };
-    const mockRequest = { raw: { req: { a: 1 }, res: { b: 2 } } };
-
-    const [[{ handler }]] = setupDeps.http.server.route.mock.calls;
-    const response503 = await handler(mockRequest, mockResponseToolkit);
-
-    expect(response503).toBe(mockResponse);
-    expect({
-      body: mockResponseToolkit.response.mock.calls,
-      code: mockResponse.code.mock.calls,
-      header: mockResponse.header.mock.calls,
-    }).toMatchSnapshot('503 response');
-
-    // Make sure request hasn't been passed to the legacy platform.
-    const [mockedLegacyPlatformProxy] = MockLegacyPlatformProxy.mock.instances;
-    expect(mockedLegacyPlatformProxy.emit).not.toHaveBeenCalled();
-
-    // Now wait until kibana is ready and try to request once again.
-    kbnServerListen$.complete();
-    await legacySetupPromise;
-    mockResponseToolkit.response.mockClear();
-
-    const responseProxy = await handler(mockRequest, mockResponseToolkit);
-    expect(responseProxy).toBe(mockResponseToolkit.abandon);
-    expect(mockResponseToolkit.response).not.toHaveBeenCalled();
-
-    // Make sure request has been passed to the legacy platform.
-    expect(mockedLegacyPlatformProxy.emit).toHaveBeenCalledTimes(1);
-    expect(mockedLegacyPlatformProxy.emit).toHaveBeenCalledWith(
-      'request',
-      mockRequest.raw.req,
-      mockRequest.raw.res
-    );
-  });
-
   test('creates legacy kbnServer and calls `listen`.', async () => {
     configService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
+    const legacyService = new LegacyService({
+      coreId,
+      env,
+      logger,
+      configService: configService as any,
+    });
 
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
@@ -179,16 +134,9 @@ describe('once LegacyService is set up with connection info', () => {
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
       { server: { autoListen: true } },
-      {
-        setupDeps,
-        startDeps,
-        serverOptions: {
-          listener: expect.any(LegacyPlatformProxy),
-          someAnotherOption: 'bar',
-          someOption: 'foo',
-        },
-        handledConfigPaths: ['foo.bar'],
-      }
+      { server: { autoListen: true } },
+      expect.any(Object),
+      { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
 
     const [mockKbnServer] = MockKbnServer.mock.instances;
@@ -199,22 +147,21 @@ describe('once LegacyService is set up with connection info', () => {
   test('creates legacy kbnServer but does not call `listen` if `autoListen: false`.', async () => {
     configService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: false }));
 
+    const legacyService = new LegacyService({
+      coreId,
+      env,
+      logger,
+      configService: configService as any,
+    });
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
 
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
       { server: { autoListen: true } },
-      {
-        setupDeps,
-        startDeps,
-        serverOptions: {
-          listener: expect.any(LegacyPlatformProxy),
-          someAnotherOption: 'bar',
-          someOption: 'foo',
-        },
-        handledConfigPaths: ['foo.bar'],
-      }
+      { server: { autoListen: true } },
+      expect.any(Object),
+      { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
 
     const [mockKbnServer] = MockKbnServer.mock.instances;
@@ -226,9 +173,17 @@ describe('once LegacyService is set up with connection info', () => {
   test('creates legacy kbnServer and closes it if `listen` fails.', async () => {
     configService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
     MockKbnServer.prototype.listen.mockRejectedValue(new Error('something failed'));
+    const legacyService = new LegacyService({
+      coreId,
+      env,
+      logger,
+      configService: configService as any,
+    });
 
     await legacyService.setup(setupDeps);
-    await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingSnapshot();
+    await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"something failed"`
+    );
 
     const [mockKbnServer] = MockKbnServer.mock.instances;
     expect(mockKbnServer.listen).toHaveBeenCalled();
@@ -237,15 +192,31 @@ describe('once LegacyService is set up with connection info', () => {
 
   test('throws if fails to retrieve initial config.', async () => {
     configService.getConfig$.mockReturnValue(throwError(new Error('something failed')));
+    const legacyService = new LegacyService({
+      coreId,
+      env,
+      logger,
+      configService: configService as any,
+    });
 
-    await legacyService.setup(setupDeps);
-    await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingSnapshot();
+    await expect(legacyService.setup(setupDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"something failed"`
+    );
+    await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Legacy service is not setup yet."`
+    );
 
     expect(MockKbnServer).not.toHaveBeenCalled();
     expect(MockClusterManager).not.toHaveBeenCalled();
   });
 
   test('reconfigures logging configuration if new config is received.', async () => {
+    const legacyService = new LegacyService({
+      coreId,
+      env,
+      logger,
+      configService: configService as any,
+    });
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
 
@@ -260,6 +231,12 @@ describe('once LegacyService is set up with connection info', () => {
   });
 
   test('logs error if re-configuring fails.', async () => {
+    const legacyService = new LegacyService({
+      coreId,
+      env,
+      logger,
+      configService: configService as any,
+    });
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
 
@@ -278,6 +255,12 @@ describe('once LegacyService is set up with connection info', () => {
   });
 
   test('logs error if config service fails.', async () => {
+    const legacyService = new LegacyService({
+      coreId,
+      env,
+      logger,
+      configService: configService as any,
+    });
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
 
@@ -291,56 +274,24 @@ describe('once LegacyService is set up with connection info', () => {
     expect(mockKbnServer.applyLoggingConfiguration).not.toHaveBeenCalled();
     expect(loggingServiceMock.collect(logger).error).toEqual([[configError]]);
   });
-
-  test('proxy route abandons request processing and forwards it to the legacy Kibana', async () => {
-    const mockResponseToolkit = { response: jest.fn(), abandon: Symbol('abandon') };
-    const mockRequest = { raw: { req: { a: 1 }, res: { b: 2 } } };
-
-    await legacyService.setup(setupDeps);
-    await legacyService.start(startDeps);
-
-    const [[{ handler }]] = setupDeps.http.server.route.mock.calls;
-    const response = await handler(mockRequest, mockResponseToolkit);
-
-    expect(response).toBe(mockResponseToolkit.abandon);
-    expect(mockResponseToolkit.response).not.toHaveBeenCalled();
-
-    // Make sure request has been passed to the legacy platform.
-    const [mockedLegacyPlatformProxy] = MockLegacyPlatformProxy.mock.instances;
-    expect(mockedLegacyPlatformProxy.emit).toHaveBeenCalledTimes(1);
-    expect(mockedLegacyPlatformProxy.emit).toHaveBeenCalledWith(
-      'request',
-      mockRequest.raw.req,
-      mockRequest.raw.res
-    );
-  });
 });
 
 describe('once LegacyService is set up without connection info', () => {
-  const disabledHttpStartDeps = {
-    http: {
-      isListening: () => false,
-    },
-    plugins: {
-      contracts: new Map(),
-    },
-  };
+  let legacyService: LegacyService;
   beforeEach(async () => {
+    legacyService = new LegacyService({ coreId, env, logger, configService: configService as any });
+
     await legacyService.setup(setupDeps);
-    await legacyService.start(disabledHttpStartDeps);
+    await legacyService.start(startDeps);
   });
 
   test('creates legacy kbnServer with `autoListen: false`.', () => {
-    expect(setupDeps.http.server.route).not.toHaveBeenCalled();
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
       { server: { autoListen: true } },
-      {
-        setupDeps,
-        startDeps: disabledHttpStartDeps,
-        serverOptions: { autoListen: false },
-        handledConfigPaths: ['foo.bar'],
-      }
+      { server: { autoListen: true } },
+      expect.any(Object),
+      { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
   });
 
@@ -367,6 +318,7 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
 
   test('creates ClusterManager without base path proxy.', async () => {
     const devClusterLegacyService = new LegacyService({
+      coreId,
       env: Env.createDefault(
         getEnvOptions({
           cliArgs: { silent: true, basePath: false },
@@ -377,27 +329,17 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
       configService: configService as any,
     });
 
-    await devClusterLegacyService.setup({
-      elasticsearch: setupDeps.elasticsearch,
-      plugins: { contracts: new Map(), uiPlugins: { public: new Map(), internal: new Map() } },
-      http: setupDeps.http,
-    });
-    await devClusterLegacyService.start({
-      http: {
-        isListening: () => false,
-      },
-      plugins: {
-        contracts: new Map(),
-      },
-    });
+    await devClusterLegacyService.setup(setupDeps);
+    await devClusterLegacyService.start(startDeps);
 
-    expect(MockClusterManager.create.mock.calls).toMatchSnapshot(
-      'cluster manager without base path proxy'
-    );
+    const [[cliArgs, , basePathProxy]] = MockClusterManager.create.mock.calls;
+    expect(cliArgs.basePath).toBe(false);
+    expect(basePathProxy).not.toBeDefined();
   });
 
   test('creates ClusterManager with base path proxy.', async () => {
     const devClusterLegacyService = new LegacyService({
+      coreId,
       env: Env.createDefault(
         getEnvOptions({
           cliArgs: { quiet: true, basePath: true },
@@ -408,27 +350,24 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
       configService: configService as any,
     });
 
-    await devClusterLegacyService.setup({
-      elasticsearch: setupDeps.elasticsearch,
-      plugins: { contracts: new Map(), uiPlugins: { public: new Map(), internal: new Map() } },
-      http: setupDeps.http,
-    });
-    await devClusterLegacyService.start({
-      http: {
-        isListening: () => false,
-      },
-      plugins: {
-        contracts: new Map(),
-      },
-    });
+    await devClusterLegacyService.setup(setupDeps);
+    await devClusterLegacyService.start(startDeps);
 
-    expect(MockClusterManager.create.mock.calls).toMatchSnapshot(
-      'cluster manager with base path proxy'
-    );
+    expect(MockClusterManager.create).toBeCalledTimes(1);
+
+    const [[cliArgs, , basePathProxy]] = MockClusterManager.create.mock.calls;
+    expect(cliArgs.basePath).toEqual(true);
+    expect(basePathProxy).toBeInstanceOf(BasePathProxyServer);
   });
 });
 
 test('Cannot start without setup phase', async () => {
+  const legacyService = new LegacyService({
+    coreId,
+    env,
+    logger,
+    configService: configService as any,
+  });
   await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
     `"Legacy service is not setup yet."`
   );
