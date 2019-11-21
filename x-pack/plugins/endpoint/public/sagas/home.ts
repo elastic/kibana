@@ -8,10 +8,9 @@ import { AppMountContext } from 'kibana/public';
 import { withPageNavigationStatus } from './common';
 import { hrefIsForPath } from '../concerns/routing';
 import { actions as homeActions } from '../actions/home';
-import * as alertListSelectors from '../selectors/alert_list';
 
 // TODO: type this properly
-export async function alertListSaga(...args: any[]) {
+export async function homeSaga(...args: any[]) {
   await Promise.all([resourceSaga(...args)]);
 }
 
@@ -34,10 +33,9 @@ async function resourceSaga(
     actionsAndState,
     isOnPage,
   })) {
-    if (action.type === homeActions.userClickedArchiveItems.type) {
+    if (action.type === homeActions.userClickedBootstrap.type) {
       try {
-        const idsToArchive = action.payload[0];
-        const data = await context.core.http.post('/alerts/archive', {
+        const data = await context.core.http.post('/endpoint/bootstrap', {
           query: {
             'index-pattern': 'blah', // TODO: seems strange that we can't use lists in query params
           },

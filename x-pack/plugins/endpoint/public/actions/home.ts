@@ -9,11 +9,11 @@ import { actionCreatorFactory } from '../lib/action_creator';
 // TODO: Type return value
 export const actions = {
   serverReturnedData: actionCreatorFactory<'serverReturnedData', [any]>('serverReturnedData'),
-  userClickedArchiveItems: actionCreatorFactory<'userClickedArchiveItems', [void]>(
-    'userClickedArchiveItems'
+  userClickedBootstrap: actionCreatorFactory<'userClickedBootstrap', [void]>(
+    'userClickedBootstrap'
   ),
 };
 
 export type HomeAction =
   | ReturnType<typeof actions.serverReturnedData>
-  | ReturnType<typeof actions.userClickedArchiveItems>;
+  | ReturnType<typeof actions.userClickedBootstrap>;

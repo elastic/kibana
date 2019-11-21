@@ -4,21 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  IRouter,
-  RequestHandler,
-  RouteConfig,
-  LoggerFactory,
-  ElasticsearchServiceSetup,
-} from 'kibana/server';
+import { IRouter, RequestHandler, RouteConfig, LoggerFactory } from 'kibana/server';
 
 import { schema } from '@kbn/config-schema';
 
 import { BootstrapService } from '../services/bootstrap';
 import { wrapError } from '../services/bootstrap/errors';
 
-export function addRoutes(router: IRouter, factory: LoggerFactory, es: ElasticsearchServiceSetup) {
-  router.get(
+export function addRoutes(router: IRouter, factory: LoggerFactory) {
+  router.post(
     {
       path: '/endpoint/bootstrap',
       validate: bootstrapRequestSchema,

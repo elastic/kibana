@@ -8,6 +8,7 @@ import { Plugin, CoreSetup, PluginInitializerContext, LoggerFactory } from 'kiba
 import { managementRoutes } from './routes/management';
 import { alertsRoutes } from './routes/alerts';
 import { endpointsApi } from './routes/endpoints';
+import { addRoutes } from './routes/bootstrap';
 
 export class EndpointPlugin implements Plugin {
   private readonly factory: LoggerFactory;
@@ -20,6 +21,7 @@ export class EndpointPlugin implements Plugin {
     managementRoutes(router);
     alertsRoutes(router);
     endpointsApi(router);
+    addRoutes(router, this.factory);
   }
 
   public start() {}

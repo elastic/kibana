@@ -21,6 +21,7 @@ export default function(context: AppMountContext, history: History) {
       alertListSaga(...[...args, context, history]),
       alertDetailsSaga(...[...args, context, history]),
       endpointsListSaga(...[...args, context, history]),
+      homeSaga(...[...args, context, history]),
     ]);
   };
 }

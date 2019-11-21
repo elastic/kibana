@@ -26,7 +26,7 @@ export const Home = () => {
   const dispatch = useDispatch();
   const renderBootstrapButton = () => {
     async function onBootstrap() {
-      dispatch(homeActions.userClickedArchiveItems());
+      dispatch(homeActions.userClickedBootstrap());
       // TODO: how to unselect once pressed? See https://github.com/elastic/eui/issues/1077
     }
 
@@ -55,7 +55,7 @@ export const Home = () => {
             </EuiTitle>
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
-        <EuiPageContentBody>Body Content ${bootstrapButton}</EuiPageContentBody>
+        <EuiPageContentBody>Body Content {bootstrapButton}</EuiPageContentBody>
       </EuiPageContent>
     </EuiPageBody>
   );
