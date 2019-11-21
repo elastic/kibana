@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import { fork } from 'redux-saga/effects';
-
-// export function* rootSaga() {
-//    yield fork();
-// }
+export { createGetMonitorDetailsRoute } from './monitors_details';
