@@ -5,8 +5,13 @@
  */
 
 import { GraphQLSchema } from 'graphql';
-import { SavedObjectsLegacyService, RequestHandler, IRouter } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import {
+  SavedObjectsLegacyService,
+  RequestHandler,
+  IRouter,
+  CallAPIOptions,
+} from 'src/core/server';
 import { ObjectType } from '@kbn/config-schema';
 import { UMRouteDefinition } from '../../../rest_api';
 
@@ -22,12 +27,20 @@ export interface UMFrameworkRouteOptions<
   validate: any;
 }
 
+export type UMElasticsearchQueryFn<T = any, P = undefined> = (
+  callAsCurrentUser: (
+    endpoint: string,
+    clientParams: Record<string, any>,
+    options?: CallAPIOptions
+  ) => Promise<any>,
+  params: P
+) => Promise<T> | T;
+
 export interface UptimeCoreSetup {
   route: IRouter;
 }
 
 export interface UptimeCorePlugins {
-  elasticsearch: any;
   savedObjects: SavedObjectsLegacyService<any>;
   usageCollection: UsageCollectionSetup;
   xpack: any;

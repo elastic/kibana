@@ -5,16 +5,28 @@
  */
 
 import { MonitorChart, MonitorPageTitle } from '../../../../common/graphql/types';
+import { UMElasticsearchQueryFn } from '../framework';
+import { MonitorDetails } from '../../../../common/runtime_types';
+
+export interface GetMonitorChartsDataParams {
+  monitorId: string;
+  dateRangeStart: string;
+  dateRangeEnd: string;
+  location?: string | null;
+}
+
+export interface GetFilterBarParams {
+  dateRangeStart: string;
+  dateRangeEnd: string;
+}
+
+export interface GetMonitorDetailsParams {
+  monitorId: string;
+}
 
 export interface UMMonitorsAdapter {
-  getMonitorChartsData(
-    request: any,
-    monitorId: string,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    location?: string | null
-  ): Promise<MonitorChart>;
-  getFilterBar(request: any, dateRangeStart: string, dateRangeEnd: string): Promise<any>;
-  getMonitorPageTitle(request: any, monitorId: string): Promise<MonitorPageTitle | null>;
-  getMonitorDetails(request: any, monitorId: string): Promise<any>;
+  getMonitorChartsData: UMElasticsearchQueryFn<MonitorChart, GetMonitorChartsDataParams>;
+  getFilterBar: UMElasticsearchQueryFn<any, GetFilterBarParams>;
+  getMonitorPageTitle: UMElasticsearchQueryFn<MonitorPageTitle | null, { monitorId: string }>;
+  getMonitorDetails: UMElasticsearchQueryFn<MonitorDetails, GetMonitorDetailsParams>;
 }

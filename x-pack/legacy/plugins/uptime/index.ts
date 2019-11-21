@@ -44,7 +44,6 @@ export const uptime = (kibana: any) =>
           route: server.newPlatform.setup.core.http.createRouter(),
         },
         {
-          elasticsearch,
           savedObjects,
           usageCollection,
           xpack: xpack_main,
