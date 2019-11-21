@@ -4,56 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMAuthDomain } from '../auth';
+import { authDomain } from '../auth';
+import { RequestHandlerContext } from 'kibana/server';
 
-describe('Auth domain lib', () => {
-  let domain: UMAuthDomain;
-  let mockAdapter: any;
-  let mockGetLicenseType: jest.Mock<any, any>;
-  let mockLicenseIsActive: jest.Mock<any, any>;
-
-  beforeEach(() => {
-    mockAdapter = jest.fn();
-    mockGetLicenseType = jest.fn();
-    mockLicenseIsActive = jest.fn();
-    domain = new UMAuthDomain(mockAdapter, {});
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+describe('authDomain', () => {
+  let mockContext: RequestHandlerContext;
+  const isOneOf = jest.fn();
 
   it('throws for null license', () => {
-    mockGetLicenseType.mockReturnValue(null);
-    mockAdapter.getLicenseType = mockGetLicenseType;
-    expect(() => domain.requestIsValid({})).toThrowErrorMatchingSnapshot();
+    // @ts-ignore there's a null check in this function
+    mockContext = { licensing: { license: null } };
+    expect(() => authDomain(mockContext)).toThrowErrorMatchingSnapshot();
   });
 
   it('throws for unsupported license type', () => {
-    mockGetLicenseType.mockReturnValue('oss');
-    mockAdapter.getLicenseType = mockGetLicenseType;
-    expect(() => domain.requestIsValid({})).toThrowErrorMatchingSnapshot();
+    isOneOf.mockReturnValue(false);
+    expect(() =>
+      // @ts-ignore it needs to throw if the license is not supported
+      authDomain({ licensing: { license: { isOneOf } } })
+    ).toThrowErrorMatchingSnapshot();
   });
 
   it('throws for inactive license', () => {
-    mockLicenseIsActive.mockReturnValue(false);
-    mockAdapter.licenseIsActive = mockLicenseIsActive;
-    expect(() => domain.requestIsValid({})).toThrowErrorMatchingSnapshot();
+    isOneOf.mockReturnValue(true);
+    expect(() =>
+      // @ts-ignore it needs to throw if !isActive
+      authDomain({ licensing: { license: { isActive: false, isOneOf } } })
+    ).toThrowErrorMatchingSnapshot();
   });
 
-  it('throws if request is not authenticated', () => {
-    mockGetLicenseType.mockReturnValue('basic');
-    mockLicenseIsActive.mockReturnValue(true);
-    mockAdapter.getLicenseType = mockGetLicenseType;
-    mockAdapter.licenseIsActive = mockLicenseIsActive;
-    expect(() => domain.requestIsValid({})).toThrowErrorMatchingSnapshot();
-  });
-
-  it('accepts request if authenticated', () => {
-    mockGetLicenseType.mockReturnValue('basic');
-    mockLicenseIsActive.mockReturnValue(true);
-    mockAdapter.getLicenseType = mockGetLicenseType;
-    mockAdapter.licenseIsActive = mockLicenseIsActive;
-    expect(domain.requestIsValid({ auth: { isAuthenticated: true } })).toEqual(true);
+  it('returns true for a valid license', () => {
+    isOneOf.mockReturnValue(true);
+    // @ts-ignore license type needs to be non-null
+    expect(authDomain({ licensing: { license: { isActive: true, isOneOf } } })).toBe(true);
   });
 });
