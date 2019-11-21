@@ -2,14 +2,7 @@
 
 exports[`EnterButton should render properly 1`] = `
 <div
-  style={
-    Object {
-      "left": 12,
-      "position": "absolute",
-      "top": 15,
-      "zIndex": 1,
-    }
-  }
+  className="monSetupModeEnterButton__buttonWrapper"
 >
   <EuiButton
     iconSide="right"
