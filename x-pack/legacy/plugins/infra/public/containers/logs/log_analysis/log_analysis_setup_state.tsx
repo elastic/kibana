@@ -25,7 +25,7 @@ export type ValidationIndicesUIError =
 export interface ValidatedIndex {
   index: string;
   validation?: ValidationIndicesError;
-  checked: boolean;
+  isSelected: boolean;
 }
 
 interface AnalysisSetupStateArguments {
@@ -51,7 +51,7 @@ export const useAnalysisSetupState = ({
     availableIndices.map(index => ({
       index,
       validation: undefined,
-      checked: false,
+      isSelected: false,
     }))
   );
   const [validateIndicesRequest, validateIndices] = useTrackedPromise(
@@ -67,7 +67,7 @@ export const useAnalysisSetupState = ({
             return {
               index,
               validation,
-              checked: validation === undefined && !isExampleDataIndex(index),
+              isSelected: validation === undefined && !isExampleDataIndex(index),
             };
           })
         );
@@ -84,7 +84,7 @@ export const useAnalysisSetupState = ({
   }, [validateIndices]);
 
   const selectedIndexNames = useMemo(
-    () => validatedIndices.filter(i => i.checked).map(i => i.index),
+    () => validatedIndices.filter(i => i.isSelected).map(i => i.index),
     [validatedIndices]
   );
 

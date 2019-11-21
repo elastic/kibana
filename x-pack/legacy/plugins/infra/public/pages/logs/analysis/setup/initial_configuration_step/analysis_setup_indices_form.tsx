@@ -25,7 +25,7 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
       onChangeSelectedIndices(
         indices.map(index => {
           const checkbox = event.currentTarget;
-          return index.index === checkbox.id ? { ...index, checked: checkbox.checked } : index;
+          return index.index === checkbox.id ? { ...index, isSelected: checkbox.checked } : index;
         })
       );
     },
@@ -42,7 +42,7 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
             id={index.index}
             label={<EuiCode>{index.index}</EuiCode>}
             onChange={handleCheckboxChange}
-            checked={index.checked}
+            checked={index.isSelected}
             disabled={!validIndex}
           />
         );
