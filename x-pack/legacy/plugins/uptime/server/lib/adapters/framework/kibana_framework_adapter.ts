@@ -20,25 +20,18 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
     this.plugins = plugins;
   }
 
-  public registerRoute({ handler, method, path, validate }: UMRouteDefinition) {
+  public registerRoute({ handler, method, options, path, validate }: UMRouteDefinition) {
+    const routeDefinition = {
+      path,
+      validate,
+      options,
+    };
     switch (method) {
       case 'GET':
-        this.server.route.get(
-          {
-            path,
-            validate,
-          },
-          handler
-        );
+        this.server.route.get(routeDefinition, handler);
         break;
       case 'POST':
-        this.server.route.post(
-          {
-            path,
-            validate,
-          },
-          handler
-        );
+        this.server.route.post(routeDefinition, handler);
         break;
       default:
         throw new Error(`Handler for method ${method} is not defined`);
@@ -61,10 +54,13 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
         path: routePath,
         validate: {
           body: kbnSchema.object({
-            operationName: kbnSchema.string(),
+            operationName: kbnSchema.nullable(kbnSchema.string()),
             query: kbnSchema.string(),
             variables: kbnSchema.recordOf(kbnSchema.string(), kbnSchema.any()),
           }),
+        },
+        options: {
+          tags: ['access:uptime'],
         },
       },
       async (context, request, resp): Promise<any> => {
