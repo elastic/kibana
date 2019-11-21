@@ -243,9 +243,7 @@ export class AbstractESSource extends AbstractVectorSource {
 
   async getFieldFormatter(fieldName) {
 
-    const metricField = this.getMetricFields().find(({ propertyKey }) => {
-      return propertyKey === fieldName;
-    });
+    const metricField = this.getMetricFields().find(field => field.getName() === fieldName);
 
     // Do not use field formatters for counting metrics
     if (metricField && (metricField.type === METRIC_TYPE.COUNT || metricField.type === METRIC_TYPE.UNIQUE_COUNT)) {
