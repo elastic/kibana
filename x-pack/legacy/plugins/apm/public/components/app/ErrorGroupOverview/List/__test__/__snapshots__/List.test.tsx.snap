@@ -122,7 +122,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
         <caption
           aria-live="polite"
           aria-relevant="text"
-          className="euiScreenReaderOnly"
+          className="euiScreenReaderOnly euiTableCaption"
           role="status"
         />
         <thead>
@@ -501,7 +501,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
         <caption
           aria-live="polite"
           aria-relevant="text"
-          className="euiScreenReaderOnly"
+          className="euiScreenReaderOnly euiTableCaption"
           role="status"
         />
         <thead>
