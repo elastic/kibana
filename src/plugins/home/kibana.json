@@ -2,5 +2,8 @@
   "id": "home",
   "version": "kibana",
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredPlugins": [
+    "elasticsearch"
+  ]
 }

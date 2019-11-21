@@ -16,19 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup, Plugin } from 'src/core/server';
+import { CoreSetup, Plugin, ElasticsearchServiceSetup } from 'src/core/server';
 import { TutorialsRegistry, TutorialsRegistrySetup, TutorialsRegistryStart } from './services';
 
-export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServerPluginStart> {
+export interface HomeServerPluginSetupDeps {
+  elasticsearch: ElasticsearchServiceSetup;
+}
+
+export class HomeServerPlugin
+  implements Plugin<HomeServerPluginSetup, HomeServerPluginStart, HomeServerPluginSetupDeps> {
   private readonly tutorialsRegistry = new TutorialsRegistry();
 
-  public setup(core: CoreSetup) {
+  public setup(
+    core: CoreSetup,
+    { elasticsearch }: HomeServerPluginSetupDeps
+  ): HomeServerPluginSetup {
     return {
       tutorials: { ...this.tutorialsRegistry.setup(core) },
     };
   }
 
-  public start() {
+  public start(): HomeServerPluginStart {
     return {
       tutorials: { ...this.tutorialsRegistry.start() },
     };

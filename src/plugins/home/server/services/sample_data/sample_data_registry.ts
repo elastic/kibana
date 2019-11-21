@@ -29,15 +29,16 @@
   During the start phase of the sample_data_registry, we expose the methods that use the setup methods:
   `getSampleDataSets returns the array of sample data sets, similarly to
 
-  Question: Where do these go?:
+  Another question:
+  sample data is registered at the end of the file in src/legacy/server/sample_data/sample_data_mixin.js
+  Does this service need to do the registration itself? Yes, initialize the array with them!
+  DONE
+
+  TODO:
     createListRoute
     createInstallRoute
     createUninstallRoute
   They go into the setup phase before the return methods.
-
-  Another question:
-  sample data is registered at the end of the file in src/legacy/server/sample_data/sample_data_mixin.js
-  Does this service need to do the registration itself? Yes, initialize the array with them!
 
 */
 import Joi from 'joi';
@@ -50,12 +51,14 @@ import {
   EmbeddableTypes,
 } from './lib/data_set_registry_types';
 import { sampleDataSchema } from './lib/data_set_schema';
+import { createIndexName } from './lib/create_index_name';
 import { flightsSpecProvider, logsSpecProvider, ecommerceSpecProvider } from './data_sets';
 
 const flightsSampleDataset = flightsSpecProvider();
 const logsSampleDataset = logsSpecProvider();
 const ecommerceSampleDataset = ecommerceSpecProvider();
 export class SampleDataRegistry {
+  // Initialize the array with built-in Kibana sample Datasets
   private readonly sampleDatasets: SampleDatasetSchema[] = [
     flightsSampleDataset,
     logsSampleDataset,
@@ -63,6 +66,33 @@ export class SampleDataRegistry {
   ];
 
   public setup(core: CoreSetup) {
+    // const router = core.http.createRouter();
+    // router.get({ path: '/api/sample_data', validate: false },
+    //   async (context, req, res) => {
+
+    //     const sampleDatasets = this.sampleDatasets.map(dataset => {
+    //       return {
+    //         id: dataset.id,
+    //         name: dataset.name,
+    //         description: dataset.description,
+    //         previewImagePath: dataset.previewImagePath,
+    //         darkPreviewImagePath: dataset.darkPreviewImagePath,
+    //         overviewDashboard: dataset.overviewDashboard,
+    //         appLinks: dataset.appLinks,
+    //         defaultIndex: dataset.defaultIndex,
+    //         dataIndices: dataset.dataIndices.map(({ id }) => ({ id })),
+    //       };
+    //     });
+    //     const isInstalledPromises = this.sampleDatasets.map(async sampleDataset => {
+    //       for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
+    //         const dataIndexConfig = sampleDataset.dataIndices[i];
+    //         const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
+    //         try {
+
+    //         }
+    //       }
+    //     })
+    // });
     return {
       registerSampleDataset: (specProvider: SampleDatasetProvider) => {
         const { error, value } = Joi.validate(specProvider(), sampleDataSchema);
