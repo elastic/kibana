@@ -99,11 +99,11 @@ module.exports = {
           '@typescript-eslint/class-name-casing': 'error',
           '@typescript-eslint/explicit-member-accessibility': ['error',
             {
-              'accessibility': 'off',
-              'overrides': {
-                'accessors': 'explicit',
-                'constructors': 'no-public',
-                'parameterProperties': 'explicit'
+              accessibility: 'off',
+              overrides: {
+                accessors: 'explicit',
+                constructors: 'no-public',
+                parameterProperties: 'explicit'
               }
             }
           ],
@@ -112,7 +112,7 @@ module.exports = {
           '@typescript-eslint/prefer-function-type': 'error',
           '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
           '@typescript-eslint/member-ordering': ['error', {
-            'default': ['public-static-field', 'static-field', 'instance-field'],
+            'default': ['public-static-field', 'static-field', 'instance-field']
           }],
           '@typescript-eslint/consistent-type-assertions': 'error',
           '@typescript-eslint/no-empty-interface': 'error',
@@ -177,7 +177,7 @@ module.exports = {
             'asyncArrow': 'always'
           }],
           'spaced-comment': ["error", "always", {
-            "exceptions": ["/"],
+            "exceptions": ["/"]
           }],
           'use-isnan': 'error',
 
