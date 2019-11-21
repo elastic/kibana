@@ -9,6 +9,8 @@ import { Plugin, CoreStart } from 'src/core/public';
 import { initResources } from './util/indexing_service';
 // @ts-ignore
 import { JsonUploadAndParse } from './components/json_upload_and_parse';
+// @ts-ignore
+import { initServicesAndConstants } from './kibana_services';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -23,12 +25,7 @@ export class FileUploadPlugin implements Plugin<FileUploadPluginSetup, FileUploa
   public setup() {}
 
   public start(core: CoreStart) {
-    const { savedObjects, http, injectedMetadata } = core;
-    Object.assign(JsonUploadAndParse.defaultProps, {
-      savedObjects,
-      http,
-      injectedMetadata,
-    });
+    initServicesAndConstants(core);
     return {
       JsonUploadAndParse,
     };

@@ -16,7 +16,6 @@ import { IndexSettings } from './index_settings';
 import { JsonIndexFilePicker } from './json_index_file_picker';
 import { JsonImportProgress } from './json_import_progress';
 import _ from 'lodash';
-import { initServicesAndConstants } from '../kibana_services';
 
 const INDEXING_STAGE = {
   INDEXING_STARTED: i18n.translate(
@@ -65,11 +64,6 @@ export class JsonUploadAndParse extends Component {
     indexDataResp: '',
     indexPatternResp: '',
   };
-
-  constructor(props) {
-    super(props);
-    initServicesAndConstants(props);
-  }
 
   componentDidMount() {
     this._isMounted = true;
