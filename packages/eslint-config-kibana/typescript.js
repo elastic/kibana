@@ -52,7 +52,7 @@ module.exports = {
         // https://github.com/typescript-eslint/typescript-eslint/issues/389
         // https://github.com/typescript-eslint/typescript-eslint/issues/243
         // https://github.com/typescript-eslint/typescript-eslint/pull/361
-        project: undefined,
+        project: undefined
       },
 
       // NOTE: we can't override the extends option here to apply
@@ -74,43 +74,45 @@ module.exports = {
             types: {
               SFC: {
                 message: 'Use FC or FunctionComponent instead.',
-                fixWith: 'FC',
+                fixWith: 'FC'
               },
               'React.SFC': {
                 message: 'Use FC or FunctionComponent instead.',
-                fixWith: 'React.FC',
+                fixWith: 'React.FC'
               },
               StatelessComponent: {
                 message: 'Use FunctionComponent instead.',
-                fixWith: 'FunctionComponent',
+                fixWith: 'FunctionComponent'
               },
               'React.StatelessComponent': {
                 message: 'Use FunctionComponent instead.',
-                fixWith: 'React.FunctionComponent',
-              },
-            },
+                fixWith: 'React.FunctionComponent'
+              }
+            }
           }],
           'camelcase': 'off',
           '@typescript-eslint/camelcase': ['error', {
-            properties: 'never',
-            ignoreDestructuring: true,
-            allow: ['^[A-Z0-9_]+$'],
+            'properties': 'never',
+            'ignoreDestructuring': true,
+            'allow': ['^[A-Z0-9_]+$']
           }],
           '@typescript-eslint/class-name-casing': 'error',
-          '@typescript-eslint/explicit-member-accessibility': ['error', {
-            accessibility: 'off',
-            overrides: {
-              accessors: 'explicit',
-              constructors: 'no-public',
-              parameterProperties: 'explicit',
-            },
-          }],
+          '@typescript-eslint/explicit-member-accessibility': ['error',
+            {
+              'accessibility': 'off',
+              'overrides': {
+                'accessors': 'explicit',
+                'constructors': 'no-public',
+                'parameterProperties': 'explicit'
+              }
+            }
+          ],
           'indent': 'off',
           '@typescript-eslint/indent': [ 'error', 2, { SwitchCase: 1 } ],
           '@typescript-eslint/prefer-function-type': 'error',
           '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
           '@typescript-eslint/member-ordering': ['error', {
-            default: ['public-static-field', 'static-field', 'instance-field'],
+            'default': ['public-static-field', 'static-field', 'instance-field'],
           }],
           '@typescript-eslint/consistent-type-assertions': 'error',
           '@typescript-eslint/no-empty-interface': 'error',
@@ -119,7 +121,7 @@ module.exports = {
           '@typescript-eslint/triple-slash-reference': ['error', {
             path: 'never',
             types: 'never',
-            lib: 'never',
+            lib: 'never'
           }],
           '@typescript-eslint/no-var-requires': 'error',
           '@typescript-eslint/type-annotation-spacing': 'error',
@@ -131,17 +133,17 @@ module.exports = {
           'curly': 'error',
           'dot-notation': 'error',
           'eol-last': 'error',
-          'eqeqeq': ['error', 'always', { 'null': 'ignore' }],
+          'eqeqeq': ['error', 'always', {'null': 'ignore'}],
           'guard-for-in': 'error',
           'import/order': ['error', {
-            groups: [
+            'groups': [
               ['external', 'builtin'],
               'internal',
-              ['parent', 'sibling', 'index']
+              ['parent', 'sibling', 'index'],
             ],
           }],
           'max-classes-per-file': ['error', 1],
-          'max-len': [ 'error', { 'code': 120, 'ignoreComments': true, 'ignoreUrls': true } ],
+          'max-len': [ 'error', { code: 120, ignoreComments: true, ignoreUrls: true } ],
           'new-parens': 'error',
           'no-bitwise': 'error',
           'no-caller': 'error',
@@ -170,21 +172,22 @@ module.exports = {
           'radix': 'error',
           'semi': 'error',
           'space-before-function-paren': ['error', {
-            anonymous: 'never',
-            named: 'never',
-            asyncArrow: 'always',
+            'anonymous': 'never',
+            'named': 'never',
+            'asyncArrow': 'always'
           }],
-          'spaced-comment': ['error', 'always', {
-            exceptions: ['/'],
+          'spaced-comment': ["error", "always", {
+            "exceptions": ["/"],
           }],
           'use-isnan': 'error',
 
           // Old tslint yml override or defined rules
           'ban/ban': [
             2,
-            { 'name': ['describe', 'only'], 'message': 'No exclusive suites.' },
-            { 'name': ['it', 'only'], 'message': 'No exclusive tests.' },
-            { 'name': ['test', 'only'], 'message': 'No exclusive tests.' },
+            {'name': ['describe', 'only'], 'message': 'No exclusive suites.'},
+            {'name': ['it', 'only'], 'message': 'No exclusive tests.'},
+            {'name': ['test', 'only'], 'message': 'No exclusive tests.'},
+
           ],
           'import/no-default-export': 'error',
         },
