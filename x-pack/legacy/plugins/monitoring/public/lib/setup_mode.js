@@ -10,6 +10,9 @@ import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 
+import { npStart } from 'ui/new_platform';
+const { core } = npStart;
+
 function isOnPage(hash) {
   return contains(window.location.hash, hash);
 }
@@ -83,7 +86,7 @@ export const updateSetupModeData = async (uuid, fetchWithoutClusterUuid = false)
   const data = await fetchCollectionData(uuid, fetchWithoutClusterUuid);
   setupModeState.data = data;
 
-  const isCloud = chrome.getInjected('isOnCloud');
+  const isCloud = core.injectedMetadata.getInjectedVar('isOnCloud');
   const hasPermissions = get(data, '_meta.hasPermissions', false);
   if (isCloud || !hasPermissions) {
     const text = !hasPermissions
@@ -161,7 +164,7 @@ export const setSetupModeMenuItem = () => {
 
   const globalState = angularState.injector.get('globalState');
   const navItems = [];
-  if (!globalState.inSetupMode && !chrome.getInjected('isOnCloud')) {
+  if (!globalState.inSetupMode && !core.injectedMetadata.getInjectedVar('isOnCloud')) {
     navItems.push({
       id: 'enter',
       label: i18n.translate('xpack.monitoring.setupMode.enter', {

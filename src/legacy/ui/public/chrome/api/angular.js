@@ -29,7 +29,7 @@ export function initAngularApi(chrome, internals) {
   chrome.setupAngular = function () {
     const kibana = uiModules.get('kibana');
 
-    configureAppAngularModule(kibana, npStart.core, data, false);
+    configureAppAngularModule(kibana, npStart.core, false);
 
     kibana.value('chrome', chrome);
 

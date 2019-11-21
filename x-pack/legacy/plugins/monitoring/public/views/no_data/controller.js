@@ -19,6 +19,9 @@ import { CODE_PATH_LICENSE } from '../../../common/constants';
 import { MonitoringViewBaseController } from '../base_controller';
 import { i18n } from '@kbn/i18n';
 
+import { npStart } from 'ui/new_platform';
+const { core } = npStart;
+
 export class NoDataController extends MonitoringViewBaseController {
 
   constructor($injector, $scope) {
@@ -104,7 +107,7 @@ export class NoDataController extends MonitoringViewBaseController {
           {...props}
           enabler={enabler}
           changePath={this.changePath}
-          isOnCloud={chrome.getInjected('isOnCloud')}
+          isOnCloud={core.injectedMetadata.getInjectedVar('isOnCloud')}
         />
       </I18nContext>
     );

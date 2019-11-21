@@ -121,8 +121,8 @@ export class Plugin {
         'Internal collection for Kibana monitoring is disabled per configuration.'
       );
     }
-
-    core.injectUiAppVars('monitoring', (core) => {
+    //TODO: Not used anywhere?
+    /*core.injectUiAppVars('monitoring', (core) => {
       const config = core.config();
       return {
         maxBucketSize: config.get('xpack.monitoring.max_bucket_size'),
@@ -132,6 +132,6 @@ export class Plugin {
         showCgroupMetricsElasticsearch: config.get('xpack.monitoring.ui.container.elasticsearch.enabled'),
         showCgroupMetricsLogstash: config.get('xpack.monitoring.ui.container.logstash.enabled') // Note, not currently used, but see https://github.com/elastic/x-pack-kibana/issues/1559 part 2
       };
-    });
+    });*/
   }
 }
