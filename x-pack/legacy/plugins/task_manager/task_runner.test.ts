@@ -75,8 +75,8 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.update);
-    const instance = store.update.args[0][0];
+    sinon.assert.calledOnce(store.updateTask);
+    const instance = store.updateTask.args[0][0];
 
     expect(instance.id).toEqual(id);
     expect(instance.runAt.getTime()).toEqual(minutesFromNow(initialAttempts * 5).getTime());
@@ -104,8 +104,8 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.update);
-    const instance = store.update.args[0][0];
+    sinon.assert.calledOnce(store.updateTask);
+    const instance = store.updateTask.args[0][0];
 
     expect(instance.runAt.getTime()).toBeGreaterThan(minutesFromNow(9).getTime());
     expect(instance.runAt.getTime()).toBeLessThanOrEqual(minutesFromNow(10).getTime());
@@ -127,8 +127,8 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.update);
-    sinon.assert.calledWithMatch(store.update, { runAt });
+    sinon.assert.calledOnce(store.updateTask);
+    sinon.assert.calledWithMatch(store.updateTask, { runAt });
   });
 
   test('tasks that return runAt override interval', async () => {
@@ -150,8 +150,8 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.update);
-    sinon.assert.calledWithMatch(store.update, { runAt });
+    sinon.assert.calledOnce(store.updateTask);
+    sinon.assert.calledWithMatch(store.updateTask, { runAt });
   });
 
   test('removes non-recurring tasks after they complete', async () => {
@@ -174,8 +174,8 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.remove);
-    sinon.assert.calledWith(store.remove, id);
+    sinon.assert.calledOnce(store.removeTask);
+    sinon.assert.calledWith(store.removeTask, id);
   });
 
   test('cancel cancels the task runner, if it is cancellable', async () => {
@@ -249,8 +249,8 @@ describe('TaskManagerRunner', () => {
 
     await runner.markTaskAsRunning();
 
-    sinon.assert.calledOnce(store.update);
-    const instance = store.update.args[0][0];
+    sinon.assert.calledOnce(store.updateTask);
+    const instance = store.updateTask.args[0][0];
 
     expect(instance.attempts).toEqual(initialAttempts + 1);
     expect(instance.status).toBe('running');
@@ -285,9 +285,9 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.update);
+    sinon.assert.calledOnce(store.updateTask);
     sinon.assert.calledWith(getRetryStub, initialAttempts, error);
-    const instance = store.update.args[0][0];
+    const instance = store.updateTask.args[0][0];
 
     expect(instance.runAt.getTime()).toEqual(nextRetry.getTime());
   });
@@ -316,9 +316,9 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.update);
+    sinon.assert.calledOnce(store.updateTask);
     sinon.assert.calledWith(getRetryStub, initialAttempts, error);
-    const instance = store.update.args[0][0];
+    const instance = store.updateTask.args[0][0];
 
     const expectedRunAt = new Date(Date.now() + initialAttempts * 5 * 60 * 1000);
     expect(instance.runAt.getTime()).toEqual(expectedRunAt.getTime());
@@ -348,9 +348,9 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.update);
+    sinon.assert.calledOnce(store.updateTask);
     sinon.assert.calledWith(getRetryStub, initialAttempts, error);
-    const instance = store.update.args[0][0];
+    const instance = store.updateTask.args[0][0];
 
     expect(instance.status).toBe('failed');
   });
@@ -381,9 +381,9 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.update);
+    sinon.assert.calledOnce(store.updateTask);
     sinon.assert.notCalled(getRetryStub);
-    const instance = store.update.args[0][0];
+    const instance = store.updateTask.args[0][0];
 
     const nextIntervalDelay = 60000; // 1m
     const expectedRunAt = new Date(Date.now() + nextIntervalDelay);
@@ -415,9 +415,9 @@ describe('TaskManagerRunner', () => {
 
     await runner.markTaskAsRunning();
 
-    sinon.assert.calledOnce(store.update);
+    sinon.assert.calledOnce(store.updateTask);
     sinon.assert.calledWith(getRetryStub, initialAttempts + 1);
-    const instance = store.update.args[0][0];
+    const instance = store.updateTask.args[0][0];
 
     expect(instance.retryAt.getTime()).toEqual(
       new Date(nextRetry.getTime() + timeoutMinutes * 60 * 1000).getTime()
@@ -447,7 +447,7 @@ describe('TaskManagerRunner', () => {
       },
     });
 
-    store.update = sinon
+    store.updateTask = sinon
       .stub()
       .throws(
         SavedObjectsErrorHelpers.decorateConflictError(new Error('repo error')).output.payload
@@ -479,7 +479,7 @@ describe('TaskManagerRunner', () => {
       },
     });
 
-    store.update = sinon
+    store.updateTask = sinon
       .stub()
       .throws(SavedObjectsErrorHelpers.createGenericNotFoundError('type', 'id').output.payload);
 
@@ -516,9 +516,9 @@ describe('TaskManagerRunner', () => {
 
     await runner.markTaskAsRunning();
 
-    sinon.assert.calledOnce(store.update);
+    sinon.assert.calledOnce(store.updateTask);
     sinon.assert.calledWith(getRetryStub, initialAttempts + 1);
-    const instance = store.update.args[0][0];
+    const instance = store.updateTask.args[0][0];
 
     const attemptDelay = (initialAttempts + 1) * 5 * 60 * 1000;
     const timeoutDelay = timeoutMinutes * 60 * 1000;
@@ -551,9 +551,9 @@ describe('TaskManagerRunner', () => {
 
     await runner.markTaskAsRunning();
 
-    sinon.assert.calledOnce(store.update);
+    sinon.assert.calledOnce(store.updateTask);
     sinon.assert.calledWith(getRetryStub, initialAttempts + 1);
-    const instance = store.update.args[0][0];
+    const instance = store.updateTask.args[0][0];
 
     expect(instance.retryAt).toBeNull();
     expect(instance.status).toBe('running');
@@ -584,9 +584,9 @@ describe('TaskManagerRunner', () => {
 
     await runner.markTaskAsRunning();
 
-    sinon.assert.calledOnce(store.update);
+    sinon.assert.calledOnce(store.updateTask);
     sinon.assert.notCalled(getRetryStub);
-    const instance = store.update.args[0][0];
+    const instance = store.updateTask.args[0][0];
 
     const timeoutDelay = timeoutMinutes * 60 * 1000;
     expect(instance.retryAt.getTime()).toEqual(new Date(Date.now() + timeoutDelay).getTime());
@@ -615,8 +615,8 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.update);
-    const instance = store.update.args[0][0];
+    sinon.assert.calledOnce(store.updateTask);
+    const instance = store.updateTask.args[0][0];
     expect(instance.attempts).toEqual(3);
     expect(instance.status).toEqual('failed');
     expect(instance.retryAt).toBeNull();
@@ -648,8 +648,8 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.update);
-    const instance = store.update.args[0][0];
+    sinon.assert.calledOnce(store.updateTask);
+    const instance = store.updateTask.args[0][0];
     expect(instance.attempts).toEqual(3);
     expect(instance.status).toEqual('idle');
     expect(instance.runAt.getTime()).toEqual(
@@ -667,8 +667,8 @@ describe('TaskManagerRunner', () => {
     const createTaskRunner = sinon.stub();
     const logger = mockLogger();
     const store = {
-      update: sinon.stub(),
-      remove: sinon.stub(),
+      updateTask: sinon.stub(),
+      removeTask: sinon.stub(),
       maxAttempts: 5,
     };
     const runner = new TaskManagerRunner({

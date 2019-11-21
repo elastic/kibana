@@ -22,8 +22,14 @@ import {
   TaskDefinition,
   TaskDictionary,
   TaskInstance,
-  TaskInstanceScheduling,
+  TaskInstanceWithId,
 } from './task';
+
+import { asyncRetry } from './lib/async_retry';
+
+interface DecoratedError {
+  statusCode: number;
+}
 
 export interface StoreOpts {
   callCluster: ElasticJs;
@@ -83,6 +89,11 @@ export interface UpdateByQueryResult {
 }
 
 /**
+ * The Scheduling fields of a task instance that has an id.
+ */
+export type TaskReschedulingOpts = Pick<TaskInstanceWithId, 'id' | 'runAt' | 'interval'>;
+
+/**
  * Wraps an elasticsearch connection and provides a task manager-specific
  * interface into the index.
  */
@@ -120,7 +131,7 @@ export class TaskStore {
    *
    * @param task - The task being scheduled.
    */
-  public async schedule(taskInstance: TaskInstance): Promise<ConcreteTaskInstance> {
+  public async scheduleTask(taskInstance: TaskInstance): Promise<ConcreteTaskInstance> {
     if (!this.definitions[taskInstance.taskType]) {
       throw new Error(
         `Unsupported task type "${taskInstance.taskType}". Supported types are ${Object.keys(
@@ -143,11 +154,23 @@ export class TaskStore {
    *
    * @param task - The task being rescheduled.
    */
-  public async reschedule(
-    taskInstanceScheduling: TaskInstanceScheduling
+  public async rescheduleTask(
+    taskInstanceScheduling: TaskReschedulingOpts
+  ): Promise<ConcreteTaskInstance> {
+    return asyncRetry<ConcreteTaskInstance, DecoratedError>(
+      () => this.getTaskAndReschedule(taskInstanceScheduling),
+      // if we experience a document version conflict, we'll give it another attempt
+      error => error.statusCode === 409,
+      // after two retries, let the error bubble up
+      2
+    )();
+  }
+
+  private async getTaskAndReschedule(
+    taskInstanceScheduling: TaskReschedulingOpts
   ): Promise<ConcreteTaskInstance> {
     const taskInstance = await this.getTask(taskInstanceScheduling.id);
-    return await this.update(
+    return await this.updateTask(
       applyConcreteTaskInstanceDefaults(
         taskInstance.status === 'idle'
           ? {
@@ -176,7 +199,7 @@ export class TaskStore {
    *
    * @param opts - The query options used to filter tasks
    */
-  public async fetch(opts: FetchOpts = {}): Promise<FetchResult> {
+  public async fetchTasks(opts: FetchOpts = {}): Promise<FetchResult> {
     const sort = paginatableSort(opts.sort);
     return this.search({
       sort,
@@ -339,7 +362,7 @@ export class TaskStore {
    * @param {TaskDoc} doc
    * @returns {Promise<TaskDoc>}
    */
-  public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
+  public async updateTask(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
     const updatedSavedObject = await this.savedObjectsRepository.update(
       'task',
       doc.id,
@@ -359,7 +382,7 @@ export class TaskStore {
    * @param {string} id
    * @returns {Promise<void>}
    */
-  public async remove(id: string): Promise<void> {
+  public async removeTask(id: string): Promise<void> {
     await this.savedObjectsRepository.delete('task', id);
   }
 
@@ -432,10 +455,13 @@ const taskInstanceToAttributes = flow(
 );
 
 function serializeTaskInstanceFields(doc: ConcreteTaskInstance): SavedObjectAttributes {
+  const { scheduledAt, runAt, startedAt, retryAt, params, state } = doc;
   return {
     ...omit(doc, 'id', 'version'),
-    ...mapValues(pick(doc, isPlainObject), objectProp => JSON.stringify(objectProp)),
-    ...mapValues(pick(doc, isDate), (dateProp: Date) => dateProp.toISOString()),
+    ...mapValues(pick({ params, state }, isPlainObject), objectProp => JSON.stringify(objectProp)),
+    ...mapValues(pick({ scheduledAt, runAt, startedAt, retryAt }, isDate), (dateProp: Date) =>
+      dateProp.toISOString()
+    ),
   };
 }
 

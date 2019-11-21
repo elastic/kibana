@@ -1,0 +1,18 @@
+.upgDeprecations {
+  // Pull the container through the padding of EuiPageContent
+  margin-left: -$euiSizeL;
+  margin-right: -$euiSizeL;
+}
+
+.upgDeprecations__item {
+  padding: $euiSize $euiSizeL;
+  border-top: $euiBorderThin;
+
+  &:last-of-type {
+    margin-bottom: -$euiSizeL;
+  }
+}
+
+.upgDeprecations__itemName {
+  font-weight: $euiFontWeightMedium;
+}

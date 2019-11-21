@@ -11,13 +11,19 @@ import {
   TaskDictionary,
   TaskDefinition,
   TaskInstance,
-  TaskInstanceScheduling,
   TaskStatus,
   ConcreteTaskInstance,
 } from './task';
 
-import { FetchOpts, StoreOpts, OwnershipClaimingOpts, TaskStore } from './task_store';
+import {
+  FetchOpts,
+  StoreOpts,
+  OwnershipClaimingOpts,
+  TaskReschedulingOpts,
+  TaskStore,
+} from './task_store';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { SavedObjectsErrorHelpers } from 'src/core/server/saved_objects/service/lib/errors';
 import {
   SavedObjectsSerializer,
   SavedObjectsSchema,
@@ -90,7 +96,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
       });
-      const result = await store.schedule(task);
+      const result = await store.scheduleTask(task);
 
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
 
@@ -184,7 +190,7 @@ describe('TaskStore', () => {
 
   describe('reschedule', () => {
     async function testReschedule(
-      taskBeingRescheduled: TaskInstanceScheduling,
+      taskBeingRescheduled: TaskReschedulingOpts,
       taskCurrentlyInStore: ConcreteTaskInstance,
       taskInStoreAfterUpdate: ConcreteTaskInstance = taskCurrentlyInStore
     ) {
@@ -210,7 +216,7 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
       });
 
-      const result = await store.reschedule(taskBeingRescheduled);
+      const result = await store.rescheduleTask(taskBeingRescheduled);
 
       expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
@@ -365,6 +371,188 @@ describe('TaskStore', () => {
         retryAt: anHourInTheFuture.toISOString(),
       });
     });
+
+    test('when rescheduling a task fails, it retries', async () => {
+      const taskBeingRescheduled: TaskReschedulingOpts = {
+        id: 'myTask',
+        interval: '15m',
+        runAt: anHourInTheFuture,
+      };
+      const taskCurrentlyInStore: ConcreteTaskInstance = {
+        id: 'myTask',
+        taskType: 'foo',
+        version: '5a2a3c3e-a5a9-44ff-8aec-c3790c69b081',
+        scheduledAt: anHourAgo,
+        attempts: 0,
+        status: 'running',
+        interval: '5m',
+        runAt: anHourAgo,
+        startedAt: anHourAgo,
+        retryAt: anHourInTheFuture,
+        state: { field: 456 },
+        params: {},
+        ownerId: null,
+      };
+
+      const taskReturnedByUpdate: ConcreteTaskInstance = {
+        id: 'myTask',
+        taskType: 'foo',
+        version: '1f672d50-9fd8-44fa-b42c-1a5d9982dec7',
+        scheduledAt: mockedDate,
+        attempts: 0,
+        status: 'idle',
+        runAt: mockedDate,
+        startedAt: mockedDate,
+        retryAt: null,
+        interval: '10m',
+        state: {
+          field: 123,
+        },
+        params: {},
+        ownerId: null,
+      };
+
+      savedObjectsClient.get.mockImplementation(async (type: string, id: string) =>
+        concreteTaskInstanceAsSavedObject(id, type, taskCurrentlyInStore)
+      );
+
+      savedObjectsClient.update
+        // throw version conflict on first update
+        .mockImplementationOnce(async (type: string, id: string) => {
+          throw SavedObjectsErrorHelpers.decorateConflictError(new Error('version conflict')).output
+            .payload;
+        })
+        // succeed on second update
+        .mockImplementationOnce(async (type: string, id: string) =>
+          concreteTaskInstanceAsSavedObject(id, type, taskReturnedByUpdate)
+        );
+
+      const store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        callCluster: jest.fn(),
+        maxAttempts: 2,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+      });
+
+      const result = await store.rescheduleTask(taskBeingRescheduled);
+
+      expect(savedObjectsClient.update).toHaveBeenCalledTimes(2);
+
+      expect(result).toMatchObject(taskReturnedByUpdate);
+    });
+
+    test('when rescheduling a task fails, it only retries twice, then gives up', async () => {
+      savedObjectsClient.get.mockImplementation(async (type: string, id: string) =>
+        concreteTaskInstanceAsSavedObject(id, type, {
+          id: 'myTask',
+          taskType: 'foo',
+          version: '5a2a3c3e-a5a9-44ff-8aec-c3790c69b081',
+          scheduledAt: anHourAgo,
+          attempts: 0,
+          status: 'running',
+          interval: '5m',
+          runAt: anHourAgo,
+          startedAt: anHourAgo,
+          retryAt: anHourInTheFuture,
+          state: { field: 456 },
+          params: {},
+          ownerId: null,
+        })
+      );
+
+      savedObjectsClient.update
+        // throw version conflict on all updates
+        .mockImplementation(async (type: string, id: string) => {
+          throw SavedObjectsErrorHelpers.decorateConflictError(new Error('version conflict')).output
+            .payload;
+        });
+
+      const store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        callCluster: jest.fn(),
+        maxAttempts: 2,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+      });
+
+      expect.assertions(2);
+      try {
+        await store.rescheduleTask({
+          id: 'myTask',
+          interval: '15m',
+          runAt: anHourInTheFuture,
+        });
+      } catch (ex) {
+        expect(savedObjectsClient.update).toHaveBeenCalledTimes(3);
+        expect(ex).toMatchInlineSnapshot(`
+          Object {
+            "error": "Conflict",
+            "message": "version conflict",
+            "statusCode": 409,
+          }
+        `);
+      }
+    });
+
+    test('when rescheduling a task fails, it doesnt retry for non version conflict errors', async () => {
+      savedObjectsClient.get.mockImplementation(async (type: string, id: string) =>
+        concreteTaskInstanceAsSavedObject(id, type, {
+          id: 'myTask',
+          taskType: 'foo',
+          version: '5a2a3c3e-a5a9-44ff-8aec-c3790c69b081',
+          scheduledAt: anHourAgo,
+          attempts: 0,
+          status: 'running',
+          interval: '5m',
+          runAt: anHourAgo,
+          startedAt: anHourAgo,
+          retryAt: anHourInTheFuture,
+          state: { field: 456 },
+          params: {},
+          ownerId: null,
+        })
+      );
+
+      savedObjectsClient.update
+        // throw server error
+        .mockImplementation(async (type: string, id: string) => {
+          throw SavedObjectsErrorHelpers.decorateEsUnavailableError(new Error('ES unavailable'))
+            .output.payload;
+        });
+
+      const store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        callCluster: jest.fn(),
+        maxAttempts: 2,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+      });
+
+      expect.assertions(2);
+      try {
+        await store.rescheduleTask({
+          id: 'myTask',
+          interval: '15m',
+          runAt: anHourInTheFuture,
+        });
+      } catch (ex) {
+        expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+        expect(ex).toMatchInlineSnapshot(`
+          Object {
+            "error": "Service Unavailable",
+            "message": "ES unavailable",
+            "statusCode": 503,
+          }
+        `);
+      }
+    });
   });
 
   describe('getTask', () => {
@@ -409,7 +597,7 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
       });
 
-      const result = await store.fetch(opts);
+      const result = await store.fetchTasks(opts);
 
       sinon.assert.calledOnce(callCluster);
       sinon.assert.calledWith(callCluster, 'search');
@@ -920,7 +1108,7 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
       });
 
-      const result = await store.update(task);
+      const result = await store.updateTask(task);
 
       expect(savedObjectsClient.update).toHaveBeenCalledWith(
         'task',
@@ -968,7 +1156,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
       });
-      const result = await store.remove(id);
+      const result = await store.removeTask(id);
       expect(result).toBeUndefined();
       expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', id);
     });

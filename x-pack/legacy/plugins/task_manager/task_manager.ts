@@ -17,7 +17,6 @@ import {
   RunContext,
   TaskInstanceWithId,
   TaskInstance,
-  TaskInstanceScheduling,
 } from './task';
 import { TaskPoller } from './task_poller';
 import { TaskPool } from './task_pool';
@@ -27,6 +26,7 @@ import {
   FetchResult,
   TaskStore,
   OwnershipClaimingOpts,
+  TaskReschedulingOpts,
   ClaimOwnershipResult,
 } from './task_store';
 import { identifyEsError } from './lib/identify_es_error';
@@ -218,7 +218,7 @@ export class TaskManager {
       ...options,
       taskInstance,
     });
-    const result = await this.store.schedule(modifiedTask);
+    const result = await this.store.scheduleTask(modifiedTask);
     this.poller.attemptWork();
     return result;
   }
@@ -229,9 +229,9 @@ export class TaskManager {
    * @param taskInstanceUpdate - The task  being rescheduled with its id and any fields you wish to update.
    * @returns {Promise<ConcreteTaskInstance>}
    */
-  public async reschedule(taskInstance: TaskInstanceScheduling): Promise<ConcreteTaskInstance> {
+  public async reschedule(taskInstance: TaskReschedulingOpts): Promise<ConcreteTaskInstance> {
     await this.waitUntilStarted();
-    const result = await this.store.reschedule(taskInstance);
+    const result = await this.store.rescheduleTask(taskInstance);
     this.poller.attemptWork();
     return result;
   }
@@ -264,7 +264,7 @@ export class TaskManager {
    */
   public async fetch(opts: FetchOpts): Promise<FetchResult> {
     await this.waitUntilStarted();
-    return this.store.fetch(opts);
+    return this.store.fetchTasks(opts);
   }
 
   /**
@@ -275,7 +275,7 @@ export class TaskManager {
    */
   public async remove(id: string): Promise<void> {
     await this.waitUntilStarted();
-    return this.store.remove(id);
+    return this.store.removeTask(id);
   }
 
   /**

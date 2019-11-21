@@ -38,8 +38,8 @@ export interface TaskRunner {
 
 interface Updatable {
   readonly maxAttempts: number;
-  update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance>;
-  remove(id: string): Promise<void>;
+  updateTask(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance>;
+  removeTask(id: string): Promise<void>;
 }
 
 interface Opts {
@@ -181,7 +181,7 @@ export class TaskManagerRunner implements TaskRunner {
         );
       }
 
-      this.instance = await this.bufferedTaskStore.update({
+      this.instance = await this.bufferedTaskStore.updateTask({
         ...taskInstance,
         status: 'running',
         startedAt: now,
@@ -274,7 +274,7 @@ export class TaskManagerRunner implements TaskRunner {
       runAt = intervalFromDate(startedAt, this.instance.interval)!;
     }
 
-    await this.bufferedTaskStore.update({
+    await this.bufferedTaskStore.updateTask({
       ...this.instance,
       runAt,
       state,
@@ -291,7 +291,7 @@ export class TaskManagerRunner implements TaskRunner {
   private async processResultWhenDone(result: RunResult): Promise<RunResult> {
     // not a recurring task: clean up by removing the task instance from store
     try {
-      await this.bufferedTaskStore.remove(this.instance.id);
+      await this.bufferedTaskStore.removeTask(this.instance.id);
     } catch (err) {
       if (err.statusCode === 404) {
         this.logger.warn(`Task cleanup of ${this} failed in processing. Was remove called twice?`);

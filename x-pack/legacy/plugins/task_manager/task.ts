@@ -236,11 +236,6 @@ export interface TaskInstance {
 export type TaskInstanceWithId = Require<TaskInstance, 'id'>;
 
 /**
- * The Scheduling fields of a task instance that has an id.
- */
-export type TaskInstanceScheduling = Pick<TaskInstanceWithId, 'id' | 'runAt' | 'interval'>;
-
-/**
  * A task instance that has an id and is ready for storage.
  */
 export interface ConcreteTaskInstance extends TaskInstance {
