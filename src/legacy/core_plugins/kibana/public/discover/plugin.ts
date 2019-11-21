@@ -61,13 +61,14 @@ const embeddableAngularName = 'app/discoverEmbeddable';
 /**
  * Contains Discover, one of the oldest parts of Kibana
  * There are 2 kinds of Angular bootstrapped for rendering, additionally to the main Angular
- * Discover provides also saved searches for embeddables, those contain a slimmer Angular
+ * Discover provides embeddables, those contain a slimmer Angular
  */
 export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   private servicesInitialized: boolean = false;
   private innerAngularInitialized: boolean = false;
   /**
-   * why is or those functions public? it's still needed for some mocha tests, remove once all is jest
+   * why are those functions public? they are needed for some mocha tests
+   * can be removed once all is Jest
    */
   public initializeInnerAngular?: () => void;
   public initializeServices?: () => void;
@@ -94,6 +95,10 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
+    // we need to register the application service at setup, but to render it
+    // there are some start dependencies necessary, for this reason
+    // initializeInnerAngular + initializeServices are assigned at start and used
+    // when the application/embeddable is mounted
     this.initializeInnerAngular = async () => {
       if (this.innerAngularInitialized) {
         return;

@@ -19,6 +19,9 @@
 
 import angular from 'angular';
 
+/**
+ * Here's where Discover's inner angular is mounted and rendered
+ */
 export async function renderApp(moduleName: string, element: HTMLElement) {
   require('./angular');
   const $injector = mountDiscoverApp(moduleName, element);
