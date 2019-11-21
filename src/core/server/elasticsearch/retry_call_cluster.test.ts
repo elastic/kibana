@@ -18,17 +18,16 @@
  */
 import * as legacyElasticsearch from 'elasticsearch';
 
-import { retryCallCluster } from './retry_call_cluster';
+import { retryCallCluster, migrationsRetryCallCluster } from './retry_call_cluster';
 
 describe('retryCallCluster', () => {
-  it('retries ES API calls that rejects with NoConnection errors', () => {
+  it('retries ES API calls that rejects with NoConnections', () => {
     expect.assertions(1);
     const callEsApi = jest.fn();
     let i = 0;
+    const ErrorConstructor = legacyElasticsearch.errors.NoConnections;
     callEsApi.mockImplementation(() => {
-      return i++ <= 2
-        ? Promise.reject(new legacyElasticsearch.errors.NoConnections())
-        : Promise.resolve('success');
+      return i++ <= 2 ? Promise.reject(new ErrorConstructor()) : Promise.resolve('success');
     });
     const retried = retryCallCluster(callEsApi);
     return expect(retried('endpoint')).resolves.toMatchInlineSnapshot(`"success"`);
@@ -52,6 +51,52 @@ describe('retryCallCluster', () => {
         : null;
     });
     const retried = retryCallCluster(callEsApi);
+    await expect(retried('endpoint')).rejects.toMatchInlineSnapshot(`[Error: unknown error]`);
+    await expect(retried('endpoint')).resolves.toMatchInlineSnapshot(`"success"`);
+    return expect(retried('endpoint')).rejects.toMatchInlineSnapshot(`[Error: unknown error]`);
+  });
+});
+
+describe('migrationsRetryCallCluster', () => {
+  const errors = [
+    'NoConnections',
+    'ConnectionFault',
+    'ServiceUnavailable',
+    'RequestTimeout',
+    'AuthenticationException',
+  ];
+  errors.forEach(errorName => {
+    it('retries ES API calls that rejects with ' + errorName, () => {
+      expect.assertions(1);
+      const callEsApi = jest.fn();
+      let i = 0;
+      const ErrorConstructor = (legacyElasticsearch.errors as any)[errorName];
+      callEsApi.mockImplementation(() => {
+        return i++ <= 2 ? Promise.reject(new ErrorConstructor()) : Promise.resolve('success');
+      });
+      const retried = migrationsRetryCallCluster(callEsApi);
+      return expect(retried('endpoint')).resolves.toMatchInlineSnapshot(`"success"`);
+    });
+  });
+
+  it('rejects when ES API calls reject with other errors', async () => {
+    expect.assertions(3);
+    const callEsApi = jest.fn();
+    let i = 0;
+    callEsApi.mockImplementation(() => {
+      i++;
+
+      return i === 1
+        ? Promise.reject(new Error('unknown error'))
+        : i === 2
+        ? Promise.resolve('success')
+        : i === 3 || i === 4
+        ? Promise.reject(new legacyElasticsearch.errors.NoConnections())
+        : i === 5
+        ? Promise.reject(new Error('unknown error'))
+        : null;
+    });
+    const retried = migrationsRetryCallCluster(callEsApi);
     await expect(retried('endpoint')).rejects.toMatchInlineSnapshot(`[Error: unknown error]`);
     await expect(retried('endpoint')).resolves.toMatchInlineSnapshot(`"success"`);
     return expect(retried('endpoint')).rejects.toMatchInlineSnapshot(`[Error: unknown error]`);

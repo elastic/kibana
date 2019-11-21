@@ -23,6 +23,53 @@ import * as legacyElasticsearch from 'elasticsearch';
 
 import { CallAPIOptions } from '.';
 
+const esErrors = legacyElasticsearch.errors;
+
+/**
+ * Retries the provided Elasticsearch API call when an error such as
+ * `AuthenticationException` `NoConnections`, `ConnectionFault`,
+ * `ServiceUnavailable` or `RequestTimeout` are encountered. The API call will
+ * be retried once a second, indefinitely, until a successful response or a
+ * different error is received.
+ *
+ * @param apiCaller
+ */
+
+// TODO: Replace with APICaller from './scoped_cluster_client' once #46668 is merged
+export function migrationsRetryCallCluster(
+  apiCaller: (
+    endpoint: string,
+    clientParams: Record<string, any>,
+    options?: CallAPIOptions
+  ) => Promise<any>
+) {
+  return (endpoint: string, clientParams: Record<string, any> = {}, options?: CallAPIOptions) => {
+    return defer(() => apiCaller(endpoint, clientParams, options))
+      .pipe(
+        retryWhen(errors =>
+          errors.pipe(
+            concatMap((error, i) =>
+              iif(
+                () => {
+                  return (
+                    error instanceof esErrors.NoConnections ||
+                    error instanceof esErrors.ConnectionFault ||
+                    error instanceof esErrors.ServiceUnavailable ||
+                    error instanceof esErrors.RequestTimeout ||
+                    error instanceof esErrors.AuthenticationException
+                  );
+                },
+                timer(1000),
+                throwError(error)
+              )
+            )
+          )
+        )
+      )
+      .toPromise();
+  };
+}
+
 /**
  * Retries the provided Elasticsearch API call when a `NoConnections` error is
  * encountered. The API call will be retried once a second, indefinitely, until

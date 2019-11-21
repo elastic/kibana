@@ -33,7 +33,7 @@ import { CoreContext } from '../core_context';
 import { LegacyServiceSetup } from '../legacy/legacy_service';
 import { ElasticsearchServiceSetup } from '../elasticsearch';
 import { KibanaConfigType } from '../kibana_config';
-import { retryCallCluster } from '../elasticsearch/retry_call_cluster';
+import { retryCallCluster, migrationsRetryCallCluster } from '../elasticsearch/retry_call_cluster';
 import { SavedObjectsConfigType } from './saved_objects_config';
 import { KibanaRequest } from '../http';
 import { Logger } from '..';
@@ -105,7 +105,7 @@ export class SavedObjectsService
       config: coreSetup.legacy.pluginExtendedConfig,
       savedObjectsConfig,
       kibanaConfig,
-      callCluster: retryCallCluster(adminClient.callAsInternalUser),
+      callCluster: migrationsRetryCallCluster(adminClient.callAsInternalUser),
     }));
 
     const mappings = this.migrator.getActiveMappings();
