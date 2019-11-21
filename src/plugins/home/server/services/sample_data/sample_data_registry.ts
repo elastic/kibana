@@ -53,7 +53,7 @@ import {
 import { sampleDataSchema } from './lib/sample_dataset_schema';
 
 import { flightsSpecProvider, logsSpecProvider, ecommerceSpecProvider } from './data_sets';
-import { createListRoute } from './routes';
+import { createListRoute, createInstallRoute } from './routes';
 
 const flightsSampleDataset = flightsSpecProvider();
 const logsSampleDataset = logsSpecProvider();
@@ -71,7 +71,7 @@ export class SampleDataRegistry {
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
     createListRoute(router, this.sampleDatasets);
-
+    createInstallRoute(router, this.sampleDatasets, initContext);
     return {
       registerSampleDataset: (specProvider: SampleDatasetProvider) => {
         const { error, value } = Joi.validate(specProvider(), sampleDataSchema);

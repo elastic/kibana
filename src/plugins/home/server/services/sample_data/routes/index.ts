@@ -17,3 +17,4 @@
  * under the License.
  */
 export { createListRoute } from './list';
+export { createInstallRoute } from './install';
