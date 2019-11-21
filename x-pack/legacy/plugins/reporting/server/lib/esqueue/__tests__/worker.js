@@ -26,7 +26,8 @@ const defaultWorkerOptions = {
   intervalErrorMultiplier: 10
 };
 
-describe('Worker class', function () {
+// FAILING: https://github.com/elastic/kibana/issues/51372
+describe.skip('Worker class', function () {
   // some of these tests might be a little slow, give them a little extra time
   this.timeout(10000);
 

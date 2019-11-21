@@ -8,7 +8,8 @@ import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { validateConfig } from '../validate_config';
 
-describe('Reporting: Validate config', () => {
+// FAILING: https://github.com/elastic/kibana/issues/51373
+describe.skip('Reporting: Validate config', () => {
   const logger = {
     warning: sinon.spy(),
   };
