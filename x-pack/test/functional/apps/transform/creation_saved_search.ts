@@ -51,7 +51,7 @@ export default function({ getService }: FtrProviderContext) {
         ],
         transformId: `fq_1_${Date.now()}`,
         transformDescription:
-          'farequote batch transform with groups terms(airline) and aggregation avg(products.base_price) with saved search filter',
+          'farequote batch transform with groups terms(airline) and aggregation avg(responsetime.avg) with saved search filter',
         get destinationIndex(): string {
           return `dest_${this.transformId}`;
         },
