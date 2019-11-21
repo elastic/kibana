@@ -540,19 +540,32 @@ exports[`Timeline should render with data 1`] = `
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
               >
-                <div
-                  className="c0"
+                <styled.div
+                  clickable={true}
                   disabled={false}
                   fontSize="12px"
                   onBlur={[Function]}
                   onFocus={[Function]}
                 >
-                  <span
-                    className="c1"
-                    color="#98a2b3"
-                    radius={11}
-                  />
-                </div>
+                  <div
+                    className="c0"
+                    disabled={false}
+                    fontSize="12px"
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  >
+                    <styled.span
+                      color="#98a2b3"
+                      radius={11}
+                    >
+                      <span
+                        className="c1"
+                        color="#98a2b3"
+                        radius={11}
+                      />
+                    </styled.span>
+                  </div>
+                </styled.div>
               </span>
             </div>
             <div
@@ -569,19 +582,32 @@ exports[`Timeline should render with data 1`] = `
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
               >
-                <div
-                  className="c0"
+                <styled.div
+                  clickable={true}
                   disabled={false}
                   fontSize="12px"
                   onBlur={[Function]}
                   onFocus={[Function]}
                 >
-                  <span
-                    className="c1"
-                    color="#98a2b3"
-                    radius={11}
-                  />
-                </div>
+                  <div
+                    className="c0"
+                    disabled={false}
+                    fontSize="12px"
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  >
+                    <styled.span
+                      color="#98a2b3"
+                      radius={11}
+                    >
+                      <span
+                        className="c1"
+                        color="#98a2b3"
+                        radius={11}
+                      />
+                    </styled.span>
+                  </div>
+                </styled.div>
               </span>
             </div>
             <div
@@ -598,19 +624,32 @@ exports[`Timeline should render with data 1`] = `
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
               >
-                <div
-                  className="c0"
+                <styled.div
+                  clickable={true}
                   disabled={false}
                   fontSize="12px"
                   onBlur={[Function]}
                   onFocus={[Function]}
                 >
-                  <span
-                    className="c1"
-                    color="#98a2b3"
-                    radius={11}
-                  />
-                </div>
+                  <div
+                    className="c0"
+                    disabled={false}
+                    fontSize="12px"
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  >
+                    <styled.span
+                      color="#98a2b3"
+                      radius={11}
+                    >
+                      <span
+                        className="c1"
+                        color="#98a2b3"
+                        radius={11}
+                      />
+                    </styled.span>
+                  </div>
+                </styled.div>
               </span>
             </div>
           </div>

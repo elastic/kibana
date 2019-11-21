@@ -22,10 +22,6 @@ export const createCallApmApi = (http: HttpServiceBase) =>
     const { pathname, params = {}, ...opts } = options;
 
     const path = (params.path || {}) as Record<string, any>;
-    const body = params.body
-      ? { body: JSON.stringify(params.body) }
-      : undefined;
-    const query = params.query ? { query: params.query } : undefined;
 
     const formattedPathname = Object.keys(path).reduce((acc, paramName) => {
       return acc.replace(`{${paramName}}`, path[paramName]);
@@ -34,7 +30,7 @@ export const createCallApmApi = (http: HttpServiceBase) =>
     return callApi(http, {
       ...opts,
       pathname: formattedPathname,
-      ...body,
-      ...query
+      body: params.body,
+      query: params.query
     });
   }) as APMClient;

@@ -291,12 +291,13 @@ test('`stop` calls `stop` defined by the plugin instance', async () => {
 describe('#getConfigSchema()', () => {
   it('reads config schema from plugin', () => {
     const pluginSchema = schema.any();
+    const configDescriptor = {
+      schema: pluginSchema,
+    };
     jest.doMock(
       'plugin-with-schema/server',
       () => ({
-        config: {
-          schema: pluginSchema,
-        },
+        config: configDescriptor,
       }),
       { virtual: true }
     );
@@ -309,7 +310,7 @@ describe('#getConfigSchema()', () => {
       initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
     });
 
-    expect(plugin.getConfigSchema()).toBe(pluginSchema);
+    expect(plugin.getConfigDescriptor()).toBe(configDescriptor);
   });
 
   it('returns null if config definition not specified', () => {
@@ -322,7 +323,7 @@ describe('#getConfigSchema()', () => {
       opaqueId,
       initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
     });
-    expect(plugin.getConfigSchema()).toBe(null);
+    expect(plugin.getConfigDescriptor()).toBe(null);
   });
 
   it('returns null for plugins without a server part', () => {
@@ -334,7 +335,7 @@ describe('#getConfigSchema()', () => {
       opaqueId,
       initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
     });
-    expect(plugin.getConfigSchema()).toBe(null);
+    expect(plugin.getConfigDescriptor()).toBe(null);
   });
 
   it('throws if plugin contains invalid schema', () => {
@@ -357,7 +358,7 @@ describe('#getConfigSchema()', () => {
       opaqueId,
       initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
     });
-    expect(() => plugin.getConfigSchema()).toThrowErrorMatchingInlineSnapshot(
+    expect(() => plugin.getConfigDescriptor()).toThrowErrorMatchingInlineSnapshot(
       `"Configuration schema expected to be an instance of Type"`
     );
   });
