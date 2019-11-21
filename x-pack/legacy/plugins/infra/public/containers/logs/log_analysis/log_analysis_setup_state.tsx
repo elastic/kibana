@@ -7,7 +7,10 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 
 import { isExampleDataIndex } from '../../../../common/log_analysis';
-import { ValidationIndicesError } from '../../../../common/http_api';
+import {
+  ValidationIndicesError,
+  ValidationIndicesResponsePayload,
+} from '../../../../common/http_api';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callIndexPatternsValidate } from './api/index_patterns_validate';
 
@@ -24,7 +27,7 @@ export type ValidationIndicesUIError =
 
 export interface ValidatedIndex {
   index: string;
-  validation?: ValidationIndicesError;
+  errors: ValidationIndicesError[];
   isSelected: boolean;
 }
 
@@ -50,7 +53,7 @@ export const useAnalysisSetupState = ({
   const [validatedIndices, setValidatedIndices] = useState<ValidatedIndex[]>(
     availableIndices.map(index => ({
       index,
-      validation: undefined,
+      errors: [],
       isSelected: false,
     }))
   );
@@ -60,14 +63,14 @@ export const useAnalysisSetupState = ({
       createPromise: async () => {
         return await callIndexPatternsValidate(timestampField, availableIndices);
       },
-      onResolve: ({ data }) => {
+      onResolve: ({ data }: ValidationIndicesResponsePayload) => {
         setValidatedIndices(
           availableIndices.map(index => {
-            const validation = data.errors.find(error => error.index === index);
+            const errors = data.errors.filter(error => error.index === index);
             return {
               index,
-              validation,
-              isSelected: validation === undefined && !isExampleDataIndex(index),
+              errors,
+              isSelected: errors.length === 0 && !isExampleDataIndex(index),
             };
           })
         );
@@ -117,10 +120,7 @@ export const useAnalysisSetupState = ({
     }
 
     return validatedIndices.reduce<ValidationIndicesUIError[]>((errors, index) => {
-      if (selectedIndexNames.includes(index.index) && index.validation !== undefined) {
-        errors.push(index.validation);
-      }
-      return errors;
+      return selectedIndexNames.includes(index.index) ? errors.concat(index.errors) : errors;
     }, []);
   }, [selectedIndexNames, validatedIndices, validateIndicesRequest.state]);
 
