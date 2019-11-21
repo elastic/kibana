@@ -154,8 +154,8 @@ export const AssetModal: FunctionComponent<Props> = props => {
 };
 
 AssetModal.propTypes = {
-  assetValues: PropTypes.array,
-  isLoading: PropTypes.bool,
+  assetValues: PropTypes.array.isRequired,
+  isLoading: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onFileUpload: PropTypes.func.isRequired,
   onAssetCopy: PropTypes.func.isRequired,

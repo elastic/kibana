@@ -48,5 +48,5 @@ export const Tag: FunctionComponent<Props> = ({
 Tag.propTypes = {
   name: PropTypes.string.isRequired,
   color: PropTypes.string,
-  type: PropTypes.string,
+  type: PropTypes.oneOf(['health', 'badge']),
 };

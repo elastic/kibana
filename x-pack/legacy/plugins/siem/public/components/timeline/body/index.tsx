@@ -5,7 +5,7 @@
  */
 
 import * as React from 'react';
-import { injectGlobal } from 'styled-components';
+import { createGlobalStyle } from 'styled-components';
 
 import { BrowserFields } from '../../../containers/source';
 import { TimelineItem } from '../../../graphql/types';
@@ -30,7 +30,7 @@ import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
 
 // eslint-disable-next-line no-unused-expressions
-injectGlobal`
+createGlobalStyle`
   body.is-timeline-field-dragging .siemTimeline__body {
     overflow: hidden;
   }

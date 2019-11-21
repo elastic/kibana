@@ -17,7 +17,7 @@ export const updateNetworkTable = actionCreator<{
   updates: networkModel.TableUpdates;
 }>('UPDATE_NETWORK_TABLE');
 
-export const setIpDetailsTablesActivePageToZero = actionCreator(
+export const setIpDetailsTablesActivePageToZero = actionCreator<null>(
   'SET_IP_DETAILS_TABLES_ACTIVE_PAGE_TO_ZERO'
 );
 

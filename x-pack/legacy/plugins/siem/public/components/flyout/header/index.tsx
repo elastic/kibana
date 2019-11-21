@@ -213,7 +213,4 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps): Dispa
   },
 });
 
-export const FlyoutHeader = connect<{}, DispatchProps, OwnProps>(
-  makeMapStateToProps,
-  mapDispatchToProps
-)(StatefulFlyoutHeader);
+export const FlyoutHeader = connect(makeMapStateToProps, mapDispatchToProps)(StatefulFlyoutHeader);

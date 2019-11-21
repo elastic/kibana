@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment, FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiButtonIcon, EuiText } from '@elastic/eui';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
@@ -103,11 +103,11 @@ export const SimpleTemplate: FunctionComponent<Props> = props => {
 
 SimpleTemplate.displayName = 'SeriesStyleArgSimpleInput';
 
-SimpleTemplate.propTypes = {
-  argValue: PropTypes.any.isRequired,
-  labels: PropTypes.array,
-  onValueChange: PropTypes.func.isRequired,
-  workpad: PropTypes.shape({
-    colors: PropTypes.array.isRequired,
-  }).isRequired,
-};
+// SimpleTemplate.propTypes = {
+//   argValue: PropTypes.any.isRequired,
+//   labels: PropTypes.array,
+//   onValueChange: PropTypes.func.isRequired,
+//   workpad: PropTypes.shape({
+//     colors: PropTypes.array.isRequired,
+//   }).isRequired,
+// };

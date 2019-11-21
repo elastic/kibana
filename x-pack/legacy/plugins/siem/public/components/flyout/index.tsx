@@ -112,7 +112,7 @@ export const FlyoutComponent = React.memo<Props>(
 
 FlyoutComponent.displayName = 'FlyoutComponent';
 
-const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
+const mapStateToProps = (state: State, { timelineId }: OwnProps): StateReduxProps => {
   const timelineById = defaultTo({}, timelineSelectors.timelineByIdSelector(state));
   const dataProviders = getOr([], `${timelineId}.dataProviders`, timelineById);
   const show = getOr('false', `${timelineId}.show`, timelineById);

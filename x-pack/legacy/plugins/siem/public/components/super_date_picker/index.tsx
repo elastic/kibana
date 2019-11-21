@@ -34,7 +34,7 @@ import {
   queriesSelector,
   kqlQuerySelector,
 } from './selectors';
-import { InputsRange, Policy } from '../../store/inputs/model';
+import { InputsRange, Policy, GlobalKqlQuery, GlobalGraphqlQuery } from '../../store/inputs/model';
 
 const MAX_RECENTLY_USED_RANGES = 9;
 
@@ -299,21 +299,21 @@ export const makeMapStateToProps = () => {
     return {
       duration: getDurationSelector(inputsRange),
       end: getEndSelector(inputsRange),
-      fromStr: getFromStrSelector(inputsRange),
+      fromStr: getFromStrSelector(inputsRange) as string,
       isLoading: getIsLoadingSelector(inputsRange),
       kind: getKindSelector(inputsRange),
-      kqlQuery: getKqlQuerySelector(inputsRange),
+      kqlQuery: getKqlQuerySelector(inputsRange) as GlobalKqlQuery,
       policy: getPolicySelector(inputsRange),
-      queries: getQueriesSelector(inputsRange),
+      queries: getQueriesSelector(inputsRange) as GlobalGraphqlQuery[],
       start: getStartSelector(inputsRange),
-      toStr: getToStrSelector(inputsRange),
+      toStr: getToStrSelector(inputsRange) as string,
     };
   };
 };
 
 SuperDatePickerComponent.displayName = 'SuperDatePickerComponent';
 
-const mapDispatchToProps = (dispatch: Dispatch) => ({
+const mapDispatchToProps = (dispatch: Dispatch): SuperDatePickerDispatchProps => ({
   startAutoReload: ({ id }: { id: InputsModelId }) =>
     dispatch(inputsActions.startAutoReload({ id })),
   stopAutoReload: ({ id }: { id: InputsModelId }) => dispatch(inputsActions.stopAutoReload({ id })),
@@ -322,7 +322,11 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateReduxTime: dispatchUpdateReduxTime(dispatch),
 });
 
-export const SuperDatePicker = connect(
+export const SuperDatePicker = connect<
+  SuperDatePickerStateRedux,
+  SuperDatePickerDispatchProps,
+  State
+>(
   makeMapStateToProps,
   mapDispatchToProps
 )(SuperDatePickerComponent);
