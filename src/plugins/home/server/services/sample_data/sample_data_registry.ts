@@ -49,8 +49,8 @@ import {
   SampleDatasetSchema,
   AppLinkSchema,
   EmbeddableTypes,
-} from './lib/data_set_registry_types';
-import { sampleDataSchema } from './lib/data_set_schema';
+} from './lib/sample_dataset_registry_types';
+import { sampleDataSchema } from './lib/sample_dataset_schema';
 import { createIndexName } from './lib/create_index_name';
 import { flightsSpecProvider, logsSpecProvider, ecommerceSpecProvider } from './data_sets';
 
@@ -66,10 +66,16 @@ export class SampleDataRegistry {
   ];
 
   public setup(core: CoreSetup) {
-    // const router = core.http.createRouter();
-    // router.get({ path: '/api/sample_data', validate: false },
-    //   async (context, req, res) => {
+    // createListRoute()
 
+    const router = core.http.createRouter();
+    router.get({ path: '/api/sample_data', validate: false }, async (context, req, res) => {
+      const response = await context.core.elasticsearch.dataClient.callAsCurrentUser(
+        'indices.exists',
+        { index: 'kibana_sample_data_ecommerce' }
+      );
+      return res.ok({ body: `Index exists: ${response}` });
+    });
     //     const sampleDatasets = this.sampleDatasets.map(dataset => {
     //       return {
     //         id: dataset.id,
@@ -197,4 +203,13 @@ export class SampleDataRegistry {
       },
     };
   }
+
+  public start() {
+    return {};
+  }
 }
+/** @public */
+export type SampleDataRegistrySetup = ReturnType<SampleDataRegistry['setup']>;
+
+/** @public */
+export type SampleDataRegistryStart = ReturnType<SampleDataRegistry['start']>;

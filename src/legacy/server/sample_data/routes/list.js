@@ -25,7 +25,7 @@ const INSTALLED = 'installed';
 const UNKNOWN = 'unknown';
 
 export const createListRoute = () => ({
-  path: '/api/sample_data',
+  path: '/api/sample_data_LP',
   method: 'GET',
   config: {
     handler: async request => {

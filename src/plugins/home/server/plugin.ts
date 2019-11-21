@@ -16,29 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup, Plugin, ElasticsearchServiceSetup } from 'src/core/server';
-import { TutorialsRegistry, TutorialsRegistrySetup, TutorialsRegistryStart } from './services';
+import { CoreSetup, Plugin } from 'src/core/server';
+import {
+  TutorialsRegistry,
+  TutorialsRegistrySetup,
+  TutorialsRegistryStart,
+  SampleDataRegistry,
+  SampleDataRegistrySetup,
+  SampleDataRegistryStart,
+} from './services';
 
-export interface HomeServerPluginSetupDeps {
-  elasticsearch: ElasticsearchServiceSetup;
-}
-
-export class HomeServerPlugin
-  implements Plugin<HomeServerPluginSetup, HomeServerPluginStart, HomeServerPluginSetupDeps> {
+export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServerPluginStart> {
   private readonly tutorialsRegistry = new TutorialsRegistry();
+  private readonly sampleDataRegistry = new SampleDataRegistry();
 
-  public setup(
-    core: CoreSetup,
-    { elasticsearch }: HomeServerPluginSetupDeps
-  ): HomeServerPluginSetup {
+  public setup(core: CoreSetup): HomeServerPluginSetup {
     return {
       tutorials: { ...this.tutorialsRegistry.setup(core) },
+      sampleData: { ...this.sampleDataRegistry.setup(core) },
     };
   }
 
   public start(): HomeServerPluginStart {
     return {
       tutorials: { ...this.tutorialsRegistry.start() },
+      sampleData: { ...this.sampleDataRegistry.start() },
     };
   }
 }
@@ -46,9 +48,11 @@ export class HomeServerPlugin
 /** @public */
 export interface HomeServerPluginSetup {
   tutorials: TutorialsRegistrySetup;
+  sampleData: SampleDataRegistrySetup;
 }
 
 /** @public */
 export interface HomeServerPluginStart {
   tutorials: TutorialsRegistryStart;
+  sampleData: SampleDataRegistryStart;
 }

@@ -16,3 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+export {
+  SampleDataRegistry,
+  SampleDataRegistrySetup,
+  SampleDataRegistryStart,
+} from './sample_data_registry';
+
+export { SampleDatasetSchema, SampleDatasetProvider } from './lib/sample_dataset_registry_types';

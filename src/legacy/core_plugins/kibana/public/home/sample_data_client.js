@@ -19,6 +19,7 @@
 
 import { getServices } from './kibana_services';
 
+const sampleDataUrlLP = '/api/sample_data_LP';
 const sampleDataUrl = '/api/sample_data';
 
 function clearIndexPatternsCache() {
@@ -26,7 +27,8 @@ function clearIndexPatternsCache() {
 }
 
 export async function listSampleDataSets() {
-  return await getServices().http.get(sampleDataUrl);
+  return await getServices().http.get(sampleDataUrlLP);
+  // return await getServices().http.get(sampleDataUrl);
 }
 
 export async function installSampleDataSet(id, sampleDataDefaultIndex) {
