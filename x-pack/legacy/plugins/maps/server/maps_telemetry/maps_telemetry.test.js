@@ -15,7 +15,7 @@ describe('buildMapsTelemetry', () => {
   test('returns zeroed telemetry data when there are no saved objects',
     async () => {
 
-      const result = buildMapsTelemetry([], [], settings);
+      const result = buildMapsTelemetry({ mapSavedObjects: [], indexPatternSavedObjects: [], settings });
 
       expect(result).toMatchObject({
         indexPatternsWithGeoFieldCount: 0,
@@ -42,7 +42,7 @@ describe('buildMapsTelemetry', () => {
 
   test('returns expected telemetry data from saved objects', async () => {
 
-    const result = buildMapsTelemetry(mapSavedObjects.saved_objects, indexPatternSavedObjects.saved_objects, settings);
+    const result = buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings });
 
     expect(result).toMatchObject({
       indexPatternsWithGeoFieldCount: 2,
