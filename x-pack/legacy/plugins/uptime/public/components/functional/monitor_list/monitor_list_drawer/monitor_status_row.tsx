@@ -46,13 +46,13 @@ export const MonitorStatusRow = ({ locationNames, status }: MonitorStatusRowProp
         {status === UP ? (
           <FormattedMessage
             id="xpack.uptime.monitorList.drawer.locations.statusUp"
-            defaultMessage={`Up in {locations}`}
+            defaultMessage="Up in {locations}"
             values={{ locations }}
           />
         ) : (
           <FormattedMessage
             id="xpack.uptime.monitorList.drawer.locations.statusDown"
-            defaultMessage={`Down in {locations}`}
+            defaultMessage="Down in {locations}"
             values={{ locations }}
           />
         )}
