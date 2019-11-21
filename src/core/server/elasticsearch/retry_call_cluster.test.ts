@@ -19,6 +19,7 @@
 import * as legacyElasticsearch from 'elasticsearch';
 
 import { retryCallCluster, migrationsRetryCallCluster } from './retry_call_cluster';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 
 describe('retryCallCluster', () => {
   it('retries ES API calls that rejects with NoConnections', () => {
@@ -65,6 +66,13 @@ describe('migrationsRetryCallCluster', () => {
     'RequestTimeout',
     'AuthenticationException',
   ];
+
+  const mockLogger = loggingServiceMock.create();
+
+  beforeEach(() => {
+    loggingServiceMock.clear(mockLogger);
+  });
+
   errors.forEach(errorName => {
     it('retries ES API calls that rejects with ' + errorName, () => {
       expect.assertions(1);
@@ -74,7 +82,7 @@ describe('migrationsRetryCallCluster', () => {
       callEsApi.mockImplementation(() => {
         return i++ <= 2 ? Promise.reject(new ErrorConstructor()) : Promise.resolve('success');
       });
-      const retried = migrationsRetryCallCluster(callEsApi);
+      const retried = migrationsRetryCallCluster(callEsApi, mockLogger.get('mock log'), 1);
       return expect(retried('endpoint')).resolves.toMatchInlineSnapshot(`"success"`);
     });
   });
@@ -96,9 +104,29 @@ describe('migrationsRetryCallCluster', () => {
         ? Promise.reject(new Error('unknown error'))
         : null;
     });
-    const retried = migrationsRetryCallCluster(callEsApi);
+    const retried = migrationsRetryCallCluster(callEsApi, mockLogger.get('mock log'), 1);
     await expect(retried('endpoint')).rejects.toMatchInlineSnapshot(`[Error: unknown error]`);
     await expect(retried('endpoint')).resolves.toMatchInlineSnapshot(`"success"`);
     return expect(retried('endpoint')).rejects.toMatchInlineSnapshot(`[Error: unknown error]`);
+  });
+
+  it('logs only once for each unique error message', async () => {
+    const callEsApi = jest.fn();
+    callEsApi.mockRejectedValueOnce(new legacyElasticsearch.errors.NoConnections());
+    callEsApi.mockRejectedValueOnce(new legacyElasticsearch.errors.NoConnections());
+    callEsApi.mockRejectedValueOnce(new legacyElasticsearch.errors.AuthenticationException());
+    callEsApi.mockResolvedValueOnce('done');
+    const retried = migrationsRetryCallCluster(callEsApi, mockLogger.get('mock log'), 1);
+    await retried('endpoint');
+    expect(loggingServiceMock.collect(mockLogger).warn).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "Unable to connect to Elasticsearch. Error: No Living connections",
+        ],
+        Array [
+          "Unable to connect to Elasticsearch. Error: Authentication Exception",
+        ],
+      ]
+    `);
   });
 });

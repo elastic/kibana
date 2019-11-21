@@ -43,7 +43,8 @@ export function migrationsRetryCallCluster(
     clientParams: Record<string, any>,
     options?: CallAPIOptions
   ) => Promise<any>,
-  log: Logger
+  log: Logger,
+  delay: number = 2500
 ) {
   const previousErrors: string[] = [];
   return (endpoint: string, clientParams: Record<string, any> = {}, options?: CallAPIOptions) => {
@@ -66,7 +67,7 @@ export function migrationsRetryCallCluster(
                     error instanceof esErrors.AuthenticationException
                   );
                 },
-                timer(2500),
+                timer(delay),
                 throwError(error)
               );
             })
