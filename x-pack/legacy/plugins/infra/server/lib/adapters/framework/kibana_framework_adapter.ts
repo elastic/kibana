@@ -252,7 +252,7 @@ export class KibanaFramework {
     }
   }
 
-  // NP_TODO: This method needs to no longer require full KibanaRequest
+  // NP_TODO: [TSVB_GROUP] This method needs fixing when the metrics plugin has migrated to the New Platform
   public async makeTSVBRequest(
     request: KibanaRequest,
     model: TSVBMetricModel,
