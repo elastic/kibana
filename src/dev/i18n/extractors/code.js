@@ -106,8 +106,8 @@ export function* extractCodeMessages(buffer, reporter) {
       } else if (isEuiI18nElement(node)) {
         const result = extractEuiI18nMessages(node);
         if (isEuiI18nElementMultipleTokens(node)) {
-          for (let i = 0; i < result.length; i++) {
-            yield result[i];
+          for (const el of result) {
+            yield el;
           }
         } else {
           yield result;
