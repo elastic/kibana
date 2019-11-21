@@ -37,8 +37,7 @@ import {
 import { ChartTooltip } from '../components/chart_tooltip';
 import { ExplorerSwimlane } from './explorer_swimlane';
 import { KqlFilterBar } from '../components/kql_filter_bar';
-import { formatHumanReadableDateTime } from '../util/date_utils';
-import { getBoundsRoundedToInterval, TimeBuckets } from '../util/time_buckets';
+import { TimeBuckets } from '../util/time_buckets';
 import { getSelectedJobIds } from '../components/job_selector/job_select_service_utils';
 import { InfluencersList } from '../components/influencers_list';
 import {
@@ -71,7 +70,6 @@ import { jobSelectionActionCreator, loadOverallDataActionCreator } from './explo
 import {
   getClearedSelectedAnomaliesState,
   getDateFormatTz,
-  getDefaultViewBySwimlaneData,
   getFilteredTopInfluencers,
   getSelectionInfluencers,
   getSelectionTimeRange,
@@ -80,9 +78,7 @@ import {
   loadAnnotationsTableData,
   loadAnomaliesTableData,
   loadDataForCharts,
-  loadOverallData,
   loadTopInfluencers,
-  processViewByResults,
   getInfluencers,
 } from './explorer_utils';
 import {
@@ -155,8 +151,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
     // make sure dragSelect is only available if the mouse pointer is actually over a swimlane
     disableDragSelectOnMouseLeave = true;
-    // skip listening to clicks on swimlanes while they are loading to avoid race conditions
-    skipCellClicks = true;
 
     // initialize an empty callback, this will be set in componentDidMount()
     updateCharts = () => {};
@@ -277,8 +271,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     }
 
     resetCache() {
-      this.loadOverallDataPreviousArgs = null;
-      this.loadViewBySwimlanePreviousArgs = null;
       this.topFieldsPreviousArgs = null;
       this.annotationsTablePreviousArgs = null;
       this.anomaliesTablePreviousArgs = null;
@@ -425,112 +417,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       return indexPattern;
     }
 
-    loadViewBySwimlanePreviousArgs = null;
-    loadViewBySwimlanePreviousData = null;
-    loadViewBySwimlane(fieldValues, overallSwimlaneData, selectedJobs, swimlaneViewByFieldName, influencersFilterQuery) {
-      const { swimlaneLimit } = this.props;
-
-      const compareArgs = {
-        fieldValues,
-        overallSwimlaneData,
-        selectedJobs,
-        swimlaneLimit,
-        swimlaneViewByFieldName,
-        interval: getSwimlaneBucketInterval(selectedJobs, getSwimlaneContainerWidth(this.state.noInfluencersConfigured)).asSeconds(),
-        influencersFilterQuery
-      };
-
-      return new Promise((resolve) => {
-        this.skipCellClicks = true;
-
-        // check if we can just return existing cached data
-        if (_.isEqual(compareArgs, this.loadViewBySwimlanePreviousArgs)) {
-          this.skipCellClicks = false;
-
-          resolve({
-            viewBySwimlaneData: this.loadViewBySwimlanePreviousData,
-            viewBySwimlaneDataLoading: false
-          });
-          return;
-        }
-
-        this.setState({
-          viewBySwimlaneData: getDefaultViewBySwimlaneData(),
-          viewBySwimlaneDataLoading: true
-        });
-
-        const finish = (resp) => {
-          this.skipCellClicks = false;
-          if (resp !== undefined) {
-            const viewBySwimlaneData = processViewByResults(
-              resp.results,
-              fieldValues,
-              overallSwimlaneData,
-              swimlaneViewByFieldName,
-              getSwimlaneBucketInterval(selectedJobs, getSwimlaneContainerWidth(this.state.noInfluencersConfigured)).asSeconds(),
-            );
-            this.loadViewBySwimlanePreviousArgs = compareArgs;
-            this.loadViewBySwimlanePreviousData = viewBySwimlaneData;
-            console.log('Explorer view by swimlane data set:', viewBySwimlaneData);
-
-            resolve({
-              viewBySwimlaneData,
-              viewBySwimlaneDataLoading: false
-            });
-          } else {
-            resolve({ viewBySwimlaneDataLoading: false });
-          }
-        };
-
-        if (
-          selectedJobs === undefined ||
-          swimlaneViewByFieldName === undefined
-        ) {
-          finish();
-          return;
-        } else {
-          // Ensure the search bounds align to the bucketing interval used in the swimlane so
-          // that the first and last buckets are complete.
-          const bounds = timefilter.getActiveBounds();
-          const searchBounds = getBoundsRoundedToInterval(
-            bounds,
-            getSwimlaneBucketInterval(selectedJobs, getSwimlaneContainerWidth(this.state.noInfluencersConfigured)),
-            false,
-          );
-          const selectedJobIds = selectedJobs.map(d => d.id);
-
-          // load scores by influencer/jobId value and time.
-          // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
-          // which wouldn't be the case if e.g. '1M' was used.
-          const interval = `${getSwimlaneBucketInterval(
-            selectedJobs,
-            getSwimlaneContainerWidth(this.state.noInfluencersConfigured)
-          ).asSeconds()}s`;
-          if (swimlaneViewByFieldName !== VIEW_BY_JOB_LABEL) {
-            mlResultsService.getInfluencerValueMaxScoreByTime(
-              selectedJobIds,
-              swimlaneViewByFieldName,
-              fieldValues,
-              searchBounds.min.valueOf(),
-              searchBounds.max.valueOf(),
-              interval,
-              swimlaneLimit,
-              influencersFilterQuery
-            ).then(finish);
-          } else {
-            const jobIds = (fieldValues !== undefined && fieldValues.length > 0) ? fieldValues : selectedJobIds;
-            mlResultsService.getScoresByBucket(
-              jobIds,
-              searchBounds.min.valueOf(),
-              searchBounds.max.valueOf(),
-              interval,
-              swimlaneLimit
-            ).then(finish);
-          }
-        }
-      });
-    }
-
     topFieldsPreviousArgs = null;
     topFieldsPreviousData = null;
     loadViewByTopFieldValuesForSelectedTime(earliestMs, latestMs, selectedJobs, swimlaneViewByFieldName) {
@@ -609,19 +495,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         ...stateUpdate
       };
 
-      this.skipCellClicks = false;
-
       if (noJobsFound) {
         this.setState(stateUpdate);
-        return;
-      }
-
-      if (this.swimlaneCellClickQueue.length > 0) {
-        this.setState(stateUpdate);
-
-        const latestSelectedCells = this.swimlaneCellClickQueue.pop();
-        this.swimlaneCellClickQueue.length = 0;
-        this.swimlaneCellClick(latestSelectedCells);
         return;
       }
 
@@ -636,24 +511,30 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         bounds,
       );
 
+      const viewBySwimlaneOptions = getViewBySwimlaneOptions({
+        currentSwimlaneViewByFieldName: swimlaneViewByFieldName,
+        filterActive,
+        filteredFields,
+        isAndOperator,
+        selectedJobs,
+        selectedCells
+      });
+
       // Load the overall data - if the FieldFormats failed to populate
       // the default formatting will be used for metric values.
       explorerAction$.next(loadOverallDataActionCreator(
+        selectedCells,
         selectedJobs,
         getSwimlaneBucketInterval(selectedJobs, getSwimlaneContainerWidth(this.state.noInfluencersConfigured)),
         bounds,
         showOverallLoadingIndicator,
+        viewBySwimlaneOptions,
+        influencersFilterQuery,
+        timerange,
+        this.props.swimlaneLimit,
+        this.state.noInfluencersConfigured,
+        filterActive
       ));
-      Object.assign(
-        stateUpdate,
-        await loadOverallData(
-          selectedJobs,
-          getSwimlaneBucketInterval(selectedJobs, getSwimlaneContainerWidth(this.state.noInfluencersConfigured)),
-          bounds,
-        )
-      );
-
-      const { overallSwimlaneData } = stateUpdate;
 
       const annotationsTableCompareArgs = {
         selectedCells,
@@ -673,77 +554,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           getSwimlaneBucketInterval(selectedJobs, getSwimlaneContainerWidth(this.state.noInfluencersConfigured)).asSeconds(),
           bounds,
         );
-      }
-
-      const viewBySwimlaneOptions = getViewBySwimlaneOptions({
-        currentSwimlaneViewByFieldName: swimlaneViewByFieldName,
-        filterActive,
-        filteredFields,
-        isAndOperator,
-        selectedJobs,
-        selectedCells
-      });
-
-      Object.assign(stateUpdate, viewBySwimlaneOptions);
-      if (selectedCells !== null && selectedCells.showTopFieldValues === true) {
-        // this.setState({ viewBySwimlaneData: getDefaultViewBySwimlaneData(), viewBySwimlaneDataLoading: true });
-        // Click is in one of the cells in the Overall swimlane - reload the 'view by' swimlane
-        // to show the top 'view by' values for the selected time.
-        const topFieldValues = await this.loadViewByTopFieldValuesForSelectedTime(
-          timerange.earliestMs,
-          timerange.latestMs,
-          selectedJobs,
-          viewBySwimlaneOptions.swimlaneViewByFieldName
-        );
-        Object.assign(
-          stateUpdate,
-          await this.loadViewBySwimlane(
-            topFieldValues || [],
-            overallSwimlaneData,
-            selectedJobs,
-            viewBySwimlaneOptions.swimlaneViewByFieldName,
-            influencersFilterQuery
-          ),
-          { viewByLoadedForTimeFormatted: formatHumanReadableDateTime(timerange.earliestMs) }
-        );
-      } else {
-        Object.assign(
-          stateUpdate,
-          viewBySwimlaneOptions,
-          await this.loadViewBySwimlane(
-            [],
-            overallSwimlaneData,
-            selectedJobs,
-            viewBySwimlaneOptions.swimlaneViewByFieldName,
-            influencersFilterQuery
-          ),
-        );
-      }
-
-      const { viewBySwimlaneData } = stateUpdate;
-
-      // do a sanity check against selectedCells. It can happen that a previously
-      // selected lane loaded via URL/AppState is not available anymore.
-      // If filter is active - selectedCell may not be available due to swimlane view by change to filter fieldName
-      // Ok to keep cellSelection in this case
-      let clearSelection = false;
-      if (
-        selectedCells !== null &&
-        selectedCells.type === SWIMLANE_TYPE.VIEW_BY
-      ) {
-        clearSelection = (filterActive === false) && !selectedCells.lanes.some((lane) => {
-          return viewBySwimlaneData.points.some((point) => {
-            return (
-              point.laneLabel === lane &&
-              (point.time >= selectedCells.times[0] && point.time <= selectedCells.times[1])
-            );
-          });
-        });
-      }
-
-      if (clearSelection === true) {
-        explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
-        Object.assign(stateUpdate, getClearedSelectedAnomaliesState());
       }
 
       const selectionInfluencers = getSelectionInfluencers(selectedCells, viewBySwimlaneOptions.swimlaneViewByFieldName);
@@ -876,22 +686,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       }
     };
 
-    // This queue tracks click events while the swimlanes are loading.
-    // To avoid race conditions we keep the click events selectedCells in this queue
-    // and trigger another event only after the current loading is done.
-    // The queue is necessary since a click in the overall swimlane triggers
-    // an update of the viewby swimlanes. If we'd just ignored click events
-    // during the loading, we could miss programmatically triggered events like
-    // those coming via AppState when a selection is part of the URL.
-    swimlaneCellClickQueue = [];
-
     // Listener for click events in the swimlane to load corresponding anomaly data.
     swimlaneCellClick = (swimlaneSelectedCells) => {
-      if (this.skipCellClicks === true) {
-        this.swimlaneCellClickQueue.push(swimlaneSelectedCells);
-        return;
-      }
-
       // If selectedCells is an empty object we clear any existing selection,
       // otherwise we save the new selection in AppState and update the Explorer.
       if (Object.keys(swimlaneSelectedCells).length === 0) {
@@ -961,7 +757,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       filteredFields,
       queryString,
       tableQueryString }) => {
-      const { selectedCells, swimlaneViewByFieldName, viewBySwimlaneOptions } = this.state;
+      const { viewBySwimlaneOptions } = this.props.explorerState;
+      const { selectedCells, swimlaneViewByFieldName } = this.state;
       let selectedViewByFieldName = swimlaneViewByFieldName;
 
       if (influencersFilterQuery.match_all && Object.keys(influencersFilterQuery.match_all).length === 0) {
@@ -1038,7 +835,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         indexPattern,
         maskAll,
         influencers,
-        hasResults,
         noInfluencersConfigured,
         noJobsFound,
         queryString,
@@ -1046,17 +842,18 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         swimlaneViewByFieldName,
         tableData,
         tableQueryString,
+      } = this.state;
+
+      const {
+        hasResults,
+        overallSwimlaneData,
         viewByLoadedForTimeFormatted,
         viewBySwimlaneData,
         viewBySwimlaneDataLoading,
         viewBySwimlaneOptions,
-      } = this.state;
-
-      const {
-        overallSwimlaneData,
       } = this.props.explorerState;
 
-      const loading = this.props.loading || this.state.loading;
+      const loading = this.props.explorerState.loading;
 
       const swimlaneWidth = getSwimlaneContainerWidth(noInfluencersConfigured);
 
@@ -1093,6 +890,11 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       const mainColumnWidthClassName = noInfluencersConfigured === true ? 'col-xs-12' : 'col-xs-10';
       const mainColumnClasses = `column ${mainColumnWidthClassName}`;
 
+      const showOverallSwimlane = (
+        overallSwimlaneData !== null &&
+        overallSwimlaneData.laneLabels &&
+        overallSwimlaneData.laneLabels.length > 0
+      );
       const showViewBySwimlane = (
         viewBySwimlaneData !== null &&
         viewBySwimlaneData.laneLabels &&
@@ -1160,21 +962,23 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                 onMouseLeave={this.onSwimlaneLeaveHandler}
                 data-test-subj="mlAnomalyExplorerSwimlaneOverall"
               >
-                <ExplorerSwimlane
-                  chartWidth={swimlaneWidth}
-                  filterActive={filterActive}
-                  maskAll={maskAll}
-                  TimeBuckets={TimeBuckets}
-                  swimlaneCellClick={this.swimlaneCellClick}
-                  swimlaneData={overallSwimlaneData}
-                  swimlaneType={SWIMLANE_TYPE.OVERALL}
-                  selection={selectedCells}
-                  swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
-                />
+                {showOverallSwimlane && (
+                  <ExplorerSwimlane
+                    chartWidth={swimlaneWidth}
+                    filterActive={filterActive}
+                    maskAll={maskAll}
+                    TimeBuckets={TimeBuckets}
+                    swimlaneCellClick={this.swimlaneCellClick}
+                    swimlaneData={overallSwimlaneData}
+                    swimlaneType={SWIMLANE_TYPE.OVERALL}
+                    selection={selectedCells}
+                    swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
+                  />
+                )}
               </div>
 
               {viewBySwimlaneOptions.length > 0 && (
-                <React.Fragment>
+                <>
                   <EuiFlexGroup direction="row" gutterSize="l" responsive={true}>
                     <EuiFlexItem grow={false}>
                       <EuiFormRow
@@ -1230,7 +1034,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                   </EuiFlexGroup>
 
                   {showViewBySwimlane && (
-                    <React.Fragment>
+                    <>
                       <EuiSpacer size="m" />
                       <div
                         className="ml-explorer-swimlane euiText"
@@ -1250,7 +1054,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                           swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
                         />
                       </div>
-                    </React.Fragment>
+                    </>
                   )}
 
                   {viewBySwimlaneDataLoading && (
@@ -1263,11 +1067,11 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                       showFilterMessage={(filterActive === true)}
                     />
                   )}
-                </React.Fragment>
+                </>
               )}
 
               {annotationsData.length > 0 && (
-                <React.Fragment>
+                <>
                   <span className="panel-title euiText">
                     <FormattedMessage
                       id="xpack.ml.explorer.annotationsTitle"
@@ -1281,7 +1085,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                   />
                   <AnnotationFlyout />
                   <EuiSpacer size="l" />
-                </React.Fragment>
+                </>
               )}
 
               <span className="panel-title euiText">

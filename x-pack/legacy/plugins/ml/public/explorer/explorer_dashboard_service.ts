@@ -20,7 +20,7 @@ import { CombinedJob } from '../jobs/new_job/common/job_creator/configs';
 
 import { EXPLORER_ACTION } from './explorer_constants';
 import { getDefaultChartsData } from './explorer_charts/explorer_charts_container_service';
-import { getDefaultViewBySwimlaneData, getInfluencers } from './explorer_utils';
+import { getDefaultViewBySwimlaneData, getInfluencers, SwimlaneData } from './explorer_utils';
 
 export const ALLOW_CELL_RANGE_SELECTION = true;
 
@@ -72,7 +72,7 @@ interface ExplorerState {
   loading: boolean;
   noInfluencersConfigured: boolean;
   noJobsFound: boolean;
-  overallSwimlaneData: any[];
+  overallSwimlaneData: SwimlaneData;
   queryString: string;
   selectedCells: any;
   selectedJobs: CombinedJob[] | null;
@@ -80,7 +80,7 @@ interface ExplorerState {
   tableData: any;
   tableQueryString: string;
   viewByLoadedForTimeFormatted: any;
-  viewBySwimlaneData: any;
+  viewBySwimlaneData: SwimlaneData;
   viewBySwimlaneDataLoading: boolean;
   viewBySwimlaneOptions: any[];
 }
@@ -103,7 +103,7 @@ export function getExplorerDefaultState(): ExplorerState {
     loading: true,
     noInfluencersConfigured: true,
     noJobsFound: true,
-    overallSwimlaneData: [],
+    overallSwimlaneData: getDefaultViewBySwimlaneData(),
     queryString: '',
     selectedCells: null,
     selectedJobs: null,
@@ -240,7 +240,7 @@ export const explorerFilteredAction$ = explorerAction$.pipe(
   ),
   tap(triggerSideEffect),
   filter(filterSideEffect),
-  distinctUntilChanged((prev, curr) => prev !== null && curr !== null && prev.type === curr.type)
+  distinctUntilChanged(isEqual)
 );
 
 // filter events which should not be propagated to the Explorer react component.

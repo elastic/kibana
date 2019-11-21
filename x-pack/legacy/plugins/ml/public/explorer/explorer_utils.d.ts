@@ -10,14 +10,27 @@ import { CombinedJob } from '../jobs/new_job/common/job_creator/configs';
 
 import { TimeBucketsInterval } from '../util/time_buckets';
 
-declare interface DefaultViewBySwimlaneData {
+interface ClearedSelectedAnomaliesState {
+  anomalyChartRecords: [];
+  selectedCells: null;
+  viewByLoadedForTimeFormatted: null;
+}
+
+export declare const getClearedSelectedAnomaliesState: () => ClearedSelectedAnomaliesState;
+
+export declare interface SwimlaneData {
   fieldName: string;
   laneLabels: string[];
   points: any[];
   interval: number;
 }
 
-export declare const getDefaultViewBySwimlaneData: () => DefaultViewBySwimlaneData;
+export declare interface OverallSwimlaneData extends SwimlaneData {
+  earliest: number;
+  latest: number;
+}
+
+export declare const getDefaultViewBySwimlaneData: () => SwimlaneData;
 
 export declare const getInfluencers: (selectedJobs: any[]) => string[];
 
@@ -34,10 +47,15 @@ export declare interface TimeRangeBounds {
   max: Moment | undefined;
 }
 
+declare interface SwimlaneBounds {
+  earliest: number;
+  latest: number;
+}
+
 declare interface LoadOverallDataResponse {
   hasResults: boolean;
   loading: boolean;
-  overallSwimlaneData: any;
+  overallSwimlaneData: OverallSwimlaneData;
 }
 
 export declare const loadOverallData: (
@@ -45,6 +63,25 @@ export declare const loadOverallData: (
   interval: TimeBucketsInterval,
   bounds: TimeRangeBounds
 ) => Promise<LoadOverallDataResponse>;
+
+export declare const loadViewBySwimlane: (
+  fieldValues: string[],
+  bounds: SwimlaneBounds,
+  selectedJobs: ExplorerJob[],
+  swimlaneViewByFieldName: string,
+  swimlaneLimit: number,
+  influencersFilterQuery: any,
+  noInfluencersConfigured: boolean
+) => Promise<any>;
+
+export declare const loadViewByTopFieldValuesForSelectedTime: (
+  earliestMs: number,
+  latestMs: number,
+  selectedJobs: ExplorerJob[],
+  swimlaneViewByFieldName: string,
+  swimlaneLimit: number,
+  noInfluencersConfigured: boolean
+) => Promise<any>;
 
 declare interface FilterData {
   influencersFilterQuery: any;

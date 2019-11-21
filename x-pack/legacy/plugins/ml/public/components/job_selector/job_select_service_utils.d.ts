@@ -8,12 +8,14 @@ import { BehaviorSubject } from 'rxjs';
 
 import { State } from 'ui/state_management/state';
 
+export declare type JobSelectService$ = BehaviorSubject<{
+  selection: string[];
+  groups: string[];
+  resetSelection: boolean;
+}>;
+
 declare interface JobSelectService {
-  jobSelectService$: BehaviorSubject<{
-    selection: string[];
-    groups: string[];
-    resetSelection: boolean;
-  }>;
+  jobSelectService$: JobSelectService$;
   unsubscribeFromGlobalState(): void;
 }
 
