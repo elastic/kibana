@@ -36,8 +36,8 @@ type FunctionName =
   | 'nested';
 
 interface FunctionType {
-  buildNode: (functionName: FunctionName, ...args: any[]) => KueryNode;
-  buildNodeWithArgumentNodes: (functionName: FunctionName, ...args: any[]) => KueryNode;
+  buildNode: (functionName: FunctionName, ...args: any[]) => FunctionTypeBuildNode;
+  buildNodeWithArgumentNodes: (functionName: FunctionName, ...args: any[]) => FunctionTypeBuildNode;
   toElasticsearchQuery: (
     node: any,
     indexPattern?: IIndexPattern,
@@ -46,24 +46,45 @@ interface FunctionType {
   ) => JsonValue;
 }
 
+interface FunctionTypeBuildNode {
+  type: 'function';
+  function: FunctionName;
+  // TODO -> Need to define a better type for DSL query
+  arguments: any[];
+}
+
 interface LiteralType {
-  buildNode: (
-    value: null | boolean | number | string
-  ) => { type: 'literal'; value: null | boolean | number | string };
+  buildNode: (value: null | boolean | number | string) => LiteralTypeBuildNode;
   toElasticsearchQuery: (node: any) => null | boolean | number | string;
 }
 
+interface LiteralTypeBuildNode {
+  type: 'literal';
+  value: null | boolean | number | string;
+}
+
 interface NamedArgType {
-  buildNode: (name: string, value: any) => { type: 'namedArg'; name: string; value: any };
+  buildNode: (name: string, value: any) => NamedArgTypeBuildNode;
   toElasticsearchQuery: (node: any) => string;
 }
 
+interface NamedArgTypeBuildNode {
+  type: 'namedArg';
+  name: string;
+  value: any;
+}
+
 interface WildcardType {
-  buildNode: (value: string) => { type: 'wildcard'; value: string };
+  buildNode: (value: string) => WildcardTypeBuildNode;
   test: (node: any, string: string) => boolean;
   toElasticsearchQuery: (node: any) => string;
   toQueryStringQuery: (node: any) => string;
   hasLeadingWildcard: (node: any) => boolean;
+}
+
+interface WildcardTypeBuildNode {
+  type: 'wildcard';
+  value: string;
 }
 
 interface NodeTypes {

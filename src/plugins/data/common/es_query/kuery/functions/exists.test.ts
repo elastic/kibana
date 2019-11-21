@@ -17,65 +17,74 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import * as exists from '../exists';
-import { nodeTypes } from '../../node_types';
-import _ from 'lodash';
-import { fields } from '../../../../index_patterns/mocks';
+import { nodeTypes } from '../node_types';
+import { fields } from '../../../index_patterns/mocks';
+import { IIndexPattern } from '../../../index_patterns';
 
-describe('kuery functions', function () {
-  describe('exists', function () {
-    let indexPattern;
+// @ts-ignore
+import * as exists from './exists';
+
+describe('kuery functions', () => {
+  describe('exists', () => {
+    let indexPattern: IIndexPattern;
 
     beforeEach(() => {
-      indexPattern = {
+      indexPattern = ({
         fields,
-      };
+      } as unknown) as IIndexPattern;
     });
 
-    describe('buildNodeParams', function () {
-      it('should return a single "arguments" param', function () {
+    describe('buildNodeParams', () => {
+      test('should return a single "arguments" param', () => {
         const result = exists.buildNodeParams('response');
-        expect(result).to.only.have.key('arguments');
+
+        expect(result).toHaveProperty('arguments');
+        expect(Object.keys(result).length).toBe(1);
       });
 
-      it('arguments should contain the provided fieldName as a literal', function () {
-        const { arguments: [ arg ] } = exists.buildNodeParams('response');
-        expect(arg).to.have.property('type', 'literal');
-        expect(arg).to.have.property('value', 'response');
+      test('arguments should contain the provided fieldName as a literal', () => {
+        const {
+          arguments: [arg],
+        } = exists.buildNodeParams('response');
+
+        expect(arg).toHaveProperty('type', 'literal');
+        expect(arg).toHaveProperty('value', 'response');
       });
     });
 
-    describe('toElasticsearchQuery', function () {
-      it('should return an ES exists query', function () {
+    describe('toElasticsearchQuery', () => {
+      test('should return an ES exists query', () => {
         const expected = {
-          exists: { field: 'response' }
+          exists: { field: 'response' },
         };
 
         const existsNode = nodeTypes.function.buildNode('exists', 'response');
         const result = exists.toElasticsearchQuery(existsNode, indexPattern);
-        expect(_.isEqual(expected, result)).to.be(true);
+
+        expect(expected).toEqual(result);
       });
 
-      it('should return an ES exists query without an index pattern', function () {
+      test('should return an ES exists query without an index pattern', () => {
         const expected = {
-          exists: { field: 'response' }
+          exists: { field: 'response' },
         };
 
         const existsNode = nodeTypes.function.buildNode('exists', 'response');
         const result = exists.toElasticsearchQuery(existsNode);
-        expect(_.isEqual(expected, result)).to.be(true);
+
+        expect(expected).toEqual(result);
       });
 
-      it('should throw an error for scripted fields', function () {
+      test('should throw an error for scripted fields', () => {
         const existsNode = nodeTypes.function.buildNode('exists', 'script string');
-        expect(exists.toElasticsearchQuery)
-          .withArgs(existsNode, indexPattern).to.throwException(/Exists query does not support scripted fields/);
+        expect(() => exists.toElasticsearchQuery(existsNode, indexPattern)).toThrowError(
+          /Exists query does not support scripted fields/
+        );
       });
 
-      it('should use a provided nested context to create a full field name', function () {
+      test('should use a provided nested context to create a full field name', () => {
         const expected = {
-          exists: { field: 'nestedField.response' }
+          exists: { field: 'nestedField.response' },
         };
 
         const existsNode = nodeTypes.function.buildNode('exists', 'response');
@@ -85,7 +94,8 @@ describe('kuery functions', function () {
           {},
           { nested: { path: 'nestedField' } }
         );
-        expect(_.isEqual(expected, result)).to.be(true);
+
+        expect(expected).toEqual(result);
       });
     });
   });

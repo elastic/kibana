@@ -17,34 +17,27 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import * as literal from '../literal';
+// @ts-ignore
+import { buildNode, toElasticsearchQuery } from './literal';
 
-describe('kuery node types', function () {
+describe('kuery node types', () => {
+  describe('literal', () => {
+    describe('buildNode', () => {
+      test('should return a node representing the given value', () => {
+        const result = buildNode('foo');
 
-  describe('literal', function () {
-
-    describe('buildNode', function () {
-
-      it('should return a node representing the given value', function () {
-        const result = literal.buildNode('foo');
-        expect(result).to.have.property('type', 'literal');
-        expect(result).to.have.property('value', 'foo');
+        expect(result).toHaveProperty('type', 'literal');
+        expect(result).toHaveProperty('value', 'foo');
       });
-
     });
 
-    describe('toElasticsearchQuery', function () {
+    describe('toElasticsearchQuery', () => {
+      test('should return the literal value represented by the given node', () => {
+        const node = buildNode('foo');
+        const result = toElasticsearchQuery(node);
 
-      it('should return the literal value represented by the given node', function () {
-        const node = literal.buildNode('foo');
-        const result = literal.toElasticsearchQuery(node);
-        expect(result).to.be('foo');
+        expect(result).toBe('foo');
       });
-
     });
-
-
   });
-
 });

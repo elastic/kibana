@@ -17,39 +17,41 @@
  * under the License.
  */
 
-import { getFields } from '../../utils/get_fields';
-import expect from '@kbn/expect';
-import { fields } from '../../../../../index_patterns/mocks';
+import { fields } from '../../../../index_patterns/mocks';
 
-import { nodeTypes } from '../../..';
+import { nodeTypes } from '../../index';
+import { IIndexPattern, IFieldType } from '../../../../index_patterns';
 
-describe('getFields', function () {
-  let indexPattern;
+// @ts-ignore
+import { getFields } from './get_fields';
+
+describe('getFields', () => {
+  let indexPattern: IIndexPattern;
 
   beforeEach(() => {
-    indexPattern = {
+    indexPattern = ({
       fields,
-    };
+    } as unknown) as IIndexPattern;
   });
 
-  describe('field names without a wildcard', function () {
-
-    it('should return an empty array if the field does not exist in the index pattern', function () {
+  describe('field names without a wildcard', () => {
+    test('should return an empty array if the field does not exist in the index pattern', () => {
       const fieldNameNode = nodeTypes.literal.buildNode('nonExistentField');
-      const expected = [];
       const actual = getFields(fieldNameNode, indexPattern);
-      expect(actual).to.eql(expected);
+
+      expect(actual).toEqual([]);
     });
 
-    it('should return the single matching field in an array', function () {
+    test('should return the single matching field in an array', () => {
       const fieldNameNode = nodeTypes.literal.buildNode('extension');
       const results = getFields(fieldNameNode, indexPattern);
-      expect(results).to.be.an('array');
-      expect(results).to.have.length(1);
-      expect(results[0].name).to.be('extension');
+
+      expect(results).toHaveLength(1);
+      expect(Array.isArray(results)).toBeTruthy();
+      expect(results[0].name).toBe('extension');
     });
 
-    it('should not match a wildcard in a literal node', function () {
+    test('should not match a wildcard in a literal node', () => {
       const indexPatternWithWildField = {
         title: 'wildIndex',
         fields: [
@@ -61,37 +63,32 @@ describe('getFields', function () {
 
       const fieldNameNode = nodeTypes.literal.buildNode('foo*');
       const results = getFields(fieldNameNode, indexPatternWithWildField);
-      expect(results).to.be.an('array');
-      expect(results).to.have.length(1);
-      expect(results[0].name).to.be('foo*');
 
-      // ensure the wildcard is not actually being parsed
-      const expected = [];
+      expect(results).toHaveLength(1);
+      expect(Array.isArray(results)).toBeTruthy();
+      expect(results[0].name).toBe('foo*');
+
       const actual = getFields(nodeTypes.literal.buildNode('fo*'), indexPatternWithWildField);
-      expect(actual).to.eql(expected);
+      expect(actual).toEqual([]);
     });
   });
 
-  describe('field name patterns with a wildcard', function () {
-
-    it('should return an empty array if it does not match any fields in the index pattern', function () {
+  describe('field name patterns with a wildcard', () => {
+    test('should return an empty array if test does not match any fields in the index pattern', () => {
       const fieldNameNode = nodeTypes.wildcard.buildNode('nonExistent*');
-      const expected = [];
       const actual = getFields(fieldNameNode, indexPattern);
-      expect(actual).to.eql(expected);
+
+      expect(actual).toEqual([]);
     });
 
-    it('should return all fields that match the pattern in an array', function () {
+    test('should return all fields that match the pattern in an array', () => {
       const fieldNameNode = nodeTypes.wildcard.buildNode('machine*');
       const results = getFields(fieldNameNode, indexPattern);
-      expect(results).to.be.an('array');
-      expect(results).to.have.length(2);
-      expect(results.find((field) => {
-        return field.name === 'machine.os';
-      })).to.be.ok();
-      expect(results.find((field) => {
-        return field.name === 'machine.os.raw';
-      })).to.be.ok();
+
+      expect(Array.isArray(results)).toBeTruthy();
+      expect(results).toHaveLength(2);
+      expect(results.find((field: IFieldType) => field.name === 'machine.os')).toBeDefined();
+      expect(results.find((field: IFieldType) => field.name === 'machine.os.raw')).toBeDefined();
     });
   });
 });

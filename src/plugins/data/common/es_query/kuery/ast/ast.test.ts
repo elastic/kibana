@@ -38,31 +38,31 @@ describe('kuery AST API', () => {
   });
 
   describe('fromKueryExpression', () => {
-    it('should return a match all "is" function for whitespace', () => {
+    test('should return a match all "is" function for whitespace', () => {
       const expected = nodeTypes.function.buildNode('is', '*', '*');
       const actual = fromKueryExpression('  ');
       expect(actual).toEqual(expected);
     });
 
-    it('should return an "is" function with a null field for single literals', () => {
+    test('should return an "is" function with a null field for single literals', () => {
       const expected = nodeTypes.function.buildNode('is', null, 'foo');
       const actual = fromKueryExpression('foo');
       expect(actual).toEqual(expected);
     });
 
-    it('should ignore extraneous whitespace at the beginning and end of the query', () => {
+    test('should ignore extraneous whitespace at the beginning and end of the query', () => {
       const expected = nodeTypes.function.buildNode('is', null, 'foo');
       const actual = fromKueryExpression('  foo ');
       expect(actual).toEqual(expected);
     });
 
-    it('should not split on whitespace', () => {
+    test('should not split on whitespace', () => {
       const expected = nodeTypes.function.buildNode('is', null, 'foo bar');
       const actual = fromKueryExpression('foo bar');
       expect(actual).toEqual(expected);
     });
 
-    it('should support "and" as a binary operator', () => {
+    test('should support "and" as a binary operator', () => {
       const expected = nodeTypes.function.buildNode('and', [
         nodeTypes.function.buildNode('is', null, 'foo'),
         nodeTypes.function.buildNode('is', null, 'bar'),
@@ -71,7 +71,7 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
-    it('should support "or" as a binary operator', () => {
+    test('should support "or" as a binary operator', () => {
       const expected = nodeTypes.function.buildNode('or', [
         nodeTypes.function.buildNode('is', null, 'foo'),
         nodeTypes.function.buildNode('is', null, 'bar'),
@@ -80,7 +80,7 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
-    it('should support negation of queries with a "not" prefix', () => {
+    test('should support negation of queries with a "not" prefix', () => {
       const expected = nodeTypes.function.buildNode(
         'not',
         nodeTypes.function.buildNode('or', [
@@ -92,7 +92,7 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
-    it('"and" should have a higher precedence than "or"', () => {
+    test('"and" should have a higher precedence than "or"', () => {
       const expected = nodeTypes.function.buildNode('or', [
         nodeTypes.function.buildNode('is', null, 'foo'),
         nodeTypes.function.buildNode('or', [
@@ -107,7 +107,7 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
-    it('should support grouping to override default precedence', () => {
+    test('should support grouping to override default precedence', () => {
       const expected = nodeTypes.function.buildNode('and', [
         nodeTypes.function.buildNode('or', [
           nodeTypes.function.buildNode('is', null, 'foo'),
@@ -119,25 +119,25 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
-    it('should support matching against specific fields', () => {
+    test('should support matching against specific fields', () => {
       const expected = nodeTypes.function.buildNode('is', 'foo', 'bar');
       const actual = fromKueryExpression('foo:bar');
       expect(actual).toEqual(expected);
     });
 
-    it('should also not split on whitespace when matching specific fields', () => {
+    test('should also not split on whitespace when matching specific fields', () => {
       const expected = nodeTypes.function.buildNode('is', 'foo', 'bar baz');
       const actual = fromKueryExpression('foo:bar baz');
       expect(actual).toEqual(expected);
     });
 
-    it('should treat quoted values as phrases', () => {
+    test('should treat quoted values as phrases', () => {
       const expected = nodeTypes.function.buildNode('is', 'foo', 'bar baz', true);
       const actual = fromKueryExpression('foo:"bar baz"');
       expect(actual).toEqual(expected);
     });
 
-    it('should support a shorthand for matching multiple values against a single field', () => {
+    test('should support a shorthand for matching multiple values against a single field', () => {
       const expected = nodeTypes.function.buildNode('or', [
         nodeTypes.function.buildNode('is', 'foo', 'bar'),
         nodeTypes.function.buildNode('is', 'foo', 'baz'),
@@ -146,7 +146,7 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
-    it('should support "and" and "not" operators and grouping in the shorthand as well', () => {
+    test('should support "and" and "not" operators and grouping in the shorthand as well', () => {
       const expected = nodeTypes.function.buildNode('and', [
         nodeTypes.function.buildNode('or', [
           nodeTypes.function.buildNode('is', 'foo', 'bar'),
@@ -158,7 +158,7 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
-    it('should support exclusive range operators', () => {
+    test('should support exclusive range operators', () => {
       const expected = nodeTypes.function.buildNode('and', [
         nodeTypes.function.buildNode('range', 'bytes', {
           gt: 1000,
@@ -171,7 +171,7 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
-    it('should support inclusive range operators', () => {
+    test('should support inclusive range operators', () => {
       const expected = nodeTypes.function.buildNode('and', [
         nodeTypes.function.buildNode('range', 'bytes', {
           gte: 1000,
@@ -184,25 +184,25 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
-    it('should support wildcards in field names', () => {
+    test('should support wildcards in field names', () => {
       const expected = nodeTypes.function.buildNode('is', 'machine*', 'osx');
       const actual = fromKueryExpression('machine*:osx');
       expect(actual).toEqual(expected);
     });
 
-    it('should support wildcards in values', () => {
+    test('should support wildcards in values', () => {
       const expected = nodeTypes.function.buildNode('is', 'foo', 'ba*');
       const actual = fromKueryExpression('foo:ba*');
       expect(actual).toEqual(expected);
     });
 
-    it('should create an exists "is" query when a field is given and "*" is the value', () => {
+    test('should create an exists "is" query when a field is given and "*" is the value', () => {
       const expected = nodeTypes.function.buildNode('is', 'foo', '*');
       const actual = fromKueryExpression('foo:*');
       expect(actual).toEqual(expected);
     });
 
-    it('should support nested queries indicated by curly braces', () => {
+    test('should support nested queries indicated by curly braces', () => {
       const expected = nodeTypes.function.buildNode(
         'nested',
         'nestedField',
@@ -212,7 +212,7 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
-    it('should support nested subqueries and subqueries inside nested queries', () => {
+    test('should support nested subqueries and subqueries inside nested queries', () => {
       const expected = nodeTypes.function.buildNode('and', [
         nodeTypes.function.buildNode('is', 'response', '200'),
         nodeTypes.function.buildNode(
@@ -230,7 +230,7 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
-    it('should support nested sub-queries inside paren groups', () => {
+    test('should support nested sub-queries inside paren groups', () => {
       const expected = nodeTypes.function.buildNode('and', [
         nodeTypes.function.buildNode('is', 'response', '200'),
         nodeTypes.function.buildNode('or', [
@@ -252,7 +252,7 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
-    it('should support nested groups inside other nested groups', () => {
+    test('should support nested groups inside other nested groups', () => {
       const expected = nodeTypes.function.buildNode(
         'nested',
         'nestedField',
@@ -268,7 +268,7 @@ describe('kuery AST API', () => {
   });
 
   describe('fromLiteralExpression', () => {
-    it('should create literal nodes for unquoted values with correct primitive types', () => {
+    test('should create literal nodes for unquoted values with correct primitive types', () => {
       const stringLiteral = nodeTypes.literal.buildNode('foo');
       const booleanFalseLiteral = nodeTypes.literal.buildNode(false);
       const booleanTrueLiteral = nodeTypes.literal.buildNode(true);
@@ -280,26 +280,26 @@ describe('kuery AST API', () => {
       expect(fromLiteralExpression('42')).toEqual(numberLiteral);
     });
 
-    it('should allow escaping of special characters with a backslash', () => {
+    test('should allow escaping of special characters with a backslash', () => {
       const expected = nodeTypes.literal.buildNode('\\():<>"*');
       // yo dawg
       const actual = fromLiteralExpression('\\\\\\(\\)\\:\\<\\>\\"\\*');
       expect(actual).toEqual(expected);
     });
 
-    it('should support double quoted strings that do not need escapes except for quotes', () => {
+    test('should support double quoted strings that do not need escapes except for quotes', () => {
       const expected = nodeTypes.literal.buildNode('\\():<>"*');
       const actual = fromLiteralExpression('"\\():<>\\"*"');
       expect(actual).toEqual(expected);
     });
 
-    it('should support escaped backslashes inside quoted strings', () => {
+    test('should support escaped backslashes inside quoted strings', () => {
       const expected = nodeTypes.literal.buildNode('\\');
       const actual = fromLiteralExpression('"\\\\"');
       expect(actual).toEqual(expected);
     });
 
-    it('should detect wildcards and build wildcard AST nodes', () => {
+    test('should detect wildcards and build wildcard AST nodes', () => {
       const expected = nodeTypes.wildcard.buildNode('foo*bar');
       const actual = fromLiteralExpression('foo*bar');
       expect(actual).toEqual(expected);
@@ -307,14 +307,14 @@ describe('kuery AST API', () => {
   });
 
   describe('toElasticsearchQuery', () => {
-    it("should return the given node type's ES query representation", () => {
+    test("should return the given node type's ES query representation", () => {
       const node = nodeTypes.function.buildNode('exists', 'response');
       const expected = nodeTypes.function.toElasticsearchQuery(node, indexPattern);
       const result = toElasticsearchQuery(node, indexPattern);
       expect(result).toEqual(expected);
     });
 
-    it('should return an empty "and" function for undefined nodes and unknown node types', () => {
+    test('should return an empty "and" function for undefined nodes and unknown node types', () => {
       const expected = nodeTypes.function.toElasticsearchQuery(
         nodeTypes.function.buildNode('and', []),
         indexPattern
@@ -333,7 +333,7 @@ describe('kuery AST API', () => {
       expect(toElasticsearchQuery(unknownTypeNode)).toEqual(expected);
     });
 
-    it("should return the given node type's ES query representation including a time zone parameter when one is provided", () => {
+    test("should return the given node type's ES query representation including a time zone parameter when one is provided", () => {
       const config = { dateFormatTZ: 'America/Phoenix' };
       const node = nodeTypes.function.buildNode('is', '@timestamp', '"2018-04-03T19:04:17"');
       const expected = nodeTypes.function.toElasticsearchQuery(node, indexPattern, config);
@@ -343,77 +343,77 @@ describe('kuery AST API', () => {
   });
 
   describe('doesKueryExpressionHaveLuceneSyntaxError', () => {
-    it('should return true for Lucene ranges', () => {
+    test('should return true for Lucene ranges', () => {
       const result = doesKueryExpressionHaveLuceneSyntaxError('bar: [1 TO 10]');
       expect(result).toEqual(true);
     });
 
-    it('should return false for KQL ranges', () => {
+    test('should return false for KQL ranges', () => {
       const result = doesKueryExpressionHaveLuceneSyntaxError('bar < 1');
       expect(result).toEqual(false);
     });
 
-    it('should return true for Lucene exists', () => {
+    test('should return true for Lucene exists', () => {
       const result = doesKueryExpressionHaveLuceneSyntaxError('_exists_: bar');
       expect(result).toEqual(true);
     });
 
-    it('should return false for KQL exists', () => {
+    test('should return false for KQL exists', () => {
       const result = doesKueryExpressionHaveLuceneSyntaxError('bar:*');
       expect(result).toEqual(false);
     });
 
-    it('should return true for Lucene wildcards', () => {
+    test('should return true for Lucene wildcards', () => {
       const result = doesKueryExpressionHaveLuceneSyntaxError('bar: ba?');
       expect(result).toEqual(true);
     });
 
-    it('should return false for KQL wildcards', () => {
+    test('should return false for KQL wildcards', () => {
       const result = doesKueryExpressionHaveLuceneSyntaxError('bar: ba*');
       expect(result).toEqual(false);
     });
 
-    it('should return true for Lucene regex', () => {
+    test('should return true for Lucene regex', () => {
       const result = doesKueryExpressionHaveLuceneSyntaxError('bar: /ba.*/');
       expect(result).toEqual(true);
     });
 
-    it('should return true for Lucene fuzziness', () => {
+    test('should return true for Lucene fuzziness', () => {
       const result = doesKueryExpressionHaveLuceneSyntaxError('bar: ba~');
       expect(result).toEqual(true);
     });
 
-    it('should return true for Lucene proximity', () => {
+    test('should return true for Lucene proximity', () => {
       const result = doesKueryExpressionHaveLuceneSyntaxError('bar: "ba"~2');
       expect(result).toEqual(true);
     });
 
-    it('should return true for Lucene boosting', () => {
+    test('should return true for Lucene boosting', () => {
       const result = doesKueryExpressionHaveLuceneSyntaxError('bar: ba^2');
       expect(result).toEqual(true);
     });
 
-    it('should return true for Lucene + operator', () => {
+    test('should return true for Lucene + operator', () => {
       const result = doesKueryExpressionHaveLuceneSyntaxError('+foo: bar');
       expect(result).toEqual(true);
     });
 
-    it('should return true for Lucene - operators', () => {
+    test('should return true for Lucene - operators', () => {
       const result = doesKueryExpressionHaveLuceneSyntaxError('-foo: bar');
       expect(result).toEqual(true);
     });
 
-    it('should return true for Lucene && operators', () => {
+    test('should return true for Lucene && operators', () => {
       const result = doesKueryExpressionHaveLuceneSyntaxError('foo: bar && baz: qux');
       expect(result).toEqual(true);
     });
 
-    it('should return true for Lucene || operators', () => {
+    test('should return true for Lucene || operators', () => {
       const result = doesKueryExpressionHaveLuceneSyntaxError('foo: bar || baz: qux');
       expect(result).toEqual(true);
     });
 
-    it('should return true for mixed KQL/Lucene queries', () => {
+    test('should return true for mixed KQL/Lucene queries', () => {
       const result = doesKueryExpressionHaveLuceneSyntaxError('foo: bar and (baz: qux || bag)');
       expect(result).toEqual(true);
     });

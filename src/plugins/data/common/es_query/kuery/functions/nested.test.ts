@@ -17,53 +17,60 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import * as nested from '../nested';
-import { nodeTypes } from '../../node_types';
-import * as ast from '../../ast';
-import { fields } from '../../../../index_patterns/mocks';
+import { nodeTypes } from '../node_types';
+import { fields } from '../../../index_patterns/mocks';
+import { IIndexPattern } from '../../../index_patterns';
+
+import * as ast from '../ast';
+
+// @ts-ignore
+import * as nested from './nested';
 
 const childNode = nodeTypes.function.buildNode('is', 'child', 'foo');
 
-describe('kuery functions', function () {
-  describe('nested', function () {
-    let indexPattern;
+describe('kuery functions', () => {
+  describe('nested', () => {
+    let indexPattern: IIndexPattern;
 
     beforeEach(() => {
-      indexPattern = {
+      indexPattern = ({
         fields,
-      };
+      } as unknown) as IIndexPattern;
     });
 
-    describe('buildNodeParams', function () {
-
-      it('arguments should contain the unmodified child nodes', function () {
+    describe('buildNodeParams', () => {
+      test('arguments should contain the unmodified child nodes', () => {
         const result = nested.buildNodeParams('nestedField', childNode);
-        const { arguments: [ resultPath, resultChildNode ] } = result;
-        expect(ast.toElasticsearchQuery(resultPath)).to.be('nestedField');
-        expect(resultChildNode).to.be(childNode);
+        const {
+          arguments: [resultPath, resultChildNode],
+        } = result;
+
+        expect(ast.toElasticsearchQuery(resultPath)).toBe('nestedField');
+        expect(resultChildNode).toBe(childNode);
       });
     });
 
-    describe('toElasticsearchQuery', function () {
-
-      it('should wrap subqueries in an ES nested query', function () {
+    describe('toElasticsearchQuery', () => {
+      test('should wrap subqueries in an ES nested query', () => {
         const node = nodeTypes.function.buildNode('nested', 'nestedField', childNode);
         const result = nested.toElasticsearchQuery(node, indexPattern);
-        expect(result).to.only.have.keys('nested');
-        expect(result.nested.path).to.be('nestedField');
-        expect(result.nested.score_mode).to.be('none');
+
+        expect(result).toHaveProperty('nested');
+        expect(Object.keys(result).length).toBe(1);
+
+        expect(result.nested.path).toBe('nestedField');
+        expect(result.nested.score_mode).toBe('none');
       });
 
-      it('should pass the nested path to subqueries so the full field name can be used', function () {
+      test('should pass the nested path to subqueries so the full field name can be used', () => {
         const node = nodeTypes.function.buildNode('nested', 'nestedField', childNode);
         const result = nested.toElasticsearchQuery(node, indexPattern);
         const expectedSubQuery = ast.toElasticsearchQuery(
           nodeTypes.function.buildNode('is', 'nestedField.child', 'foo')
         );
-        expect(result.nested.query).to.eql(expectedSubQuery);
-      });
 
+        expect(result.nested.query).toEqual(expectedSubQuery);
+      });
     });
   });
 });

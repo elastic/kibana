@@ -17,52 +17,57 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import * as range from '../range';
-import { nodeTypes } from '../../node_types';
-import { fields } from '../../../../index_patterns/mocks';
+import { get } from 'lodash';
+import { nodeTypes } from '../node_types';
+import { fields } from '../../../index_patterns/mocks';
+import { IIndexPattern } from '../../../index_patterns';
+import { RangeFilterParams } from '../../filters';
 
-describe('kuery functions', function () {
-  describe('range', function () {
-    let indexPattern;
+// @ts-ignore
+import * as range from './range';
+
+describe('kuery functions', () => {
+  describe('range', () => {
+    let indexPattern: IIndexPattern;
 
     beforeEach(() => {
-      indexPattern = {
+      indexPattern = ({
         fields,
-      };
+      } as unknown) as IIndexPattern;
     });
 
-    describe('buildNodeParams', function () {
-
-      it('arguments should contain the provided fieldName as a literal', function () {
+    describe('buildNodeParams', () => {
+      test('arguments should contain the provided fieldName as a literal', () => {
         const result = range.buildNodeParams('bytes', { gt: 1000, lt: 8000 });
-        const { arguments: [fieldName] } = result;
+        const {
+          arguments: [fieldName],
+        } = result;
 
-        expect(fieldName).to.have.property('type', 'literal');
-        expect(fieldName).to.have.property('value', 'bytes');
+        expect(fieldName).toHaveProperty('type', 'literal');
+        expect(fieldName).toHaveProperty('value', 'bytes');
       });
 
-      it('arguments should contain the provided params as named arguments', function () {
-        const givenParams = { gt: 1000, lt: 8000, format: 'epoch_millis' };
+      test('arguments should contain the provided params as named arguments', () => {
+        const givenParams: RangeFilterParams = { gt: 1000, lt: 8000, format: 'epoch_millis' };
         const result = range.buildNodeParams('bytes', givenParams);
-        const { arguments: [, ...params] } = result;
+        const {
+          arguments: [, ...params],
+        } = result;
 
-        expect(params).to.be.an('array');
-        expect(params).to.not.be.empty();
+        expect(Array.isArray(params)).toBeTruthy();
+        expect(params.length).toBeGreaterThan(1);
 
-        params.map((param) => {
-          expect(param).to.have.property('type', 'namedArg');
-          expect(['gt', 'lt', 'format'].includes(param.name)).to.be(true);
-          expect(param.value.type).to.be('literal');
-          expect(param.value.value).to.be(givenParams[param.name]);
+        params.map((param: any) => {
+          expect(param).toHaveProperty('type', 'namedArg');
+          expect(['gt', 'lt', 'format'].includes(param.name)).toBe(true);
+          expect(param.value.type).toBe('literal');
+          expect(param.value.value).toBe(get(givenParams, param.name));
         });
       });
-
     });
 
-    describe('toElasticsearchQuery', function () {
-
-      it('should return an ES range query for the node\'s field and params', function () {
+    describe('toElasticsearchQuery', () => {
+      test("should return an ES range query for the node's field and params", () => {
         const expected = {
           bool: {
             should: [
@@ -70,21 +75,21 @@ describe('kuery functions', function () {
                 range: {
                   bytes: {
                     gt: 1000,
-                    lt: 8000
-                  }
-                }
-              }
+                    lt: 8000,
+                  },
+                },
+              },
             ],
-            minimum_should_match: 1
-          }
+            minimum_should_match: 1,
+          },
         };
 
         const node = nodeTypes.function.buildNode('range', 'bytes', { gt: 1000, lt: 8000 });
         const result = range.toElasticsearchQuery(node, indexPattern);
-        expect(result).to.eql(expected);
+        expect(result).toEqual(expected);
       });
 
-      it('should return an ES range query without an index pattern', function () {
+      test('should return an ES range query without an index pattern', () => {
         const expected = {
           bool: {
             should: [
@@ -92,21 +97,21 @@ describe('kuery functions', function () {
                 range: {
                   bytes: {
                     gt: 1000,
-                    lt: 8000
-                  }
-                }
-              }
+                    lt: 8000,
+                  },
+                },
+              },
             ],
-            minimum_should_match: 1
-          }
+            minimum_should_match: 1,
+          },
         };
 
         const node = nodeTypes.function.buildNode('range', 'bytes', { gt: 1000, lt: 8000 });
         const result = range.toElasticsearchQuery(node);
-        expect(result).to.eql(expected);
+        expect(result).toEqual(expected);
       });
 
-      it('should support wildcard field names', function () {
+      test('should support wildcard field names', () => {
         const expected = {
           bool: {
             should: [
@@ -114,27 +119,28 @@ describe('kuery functions', function () {
                 range: {
                   bytes: {
                     gt: 1000,
-                    lt: 8000
-                  }
-                }
-              }
+                    lt: 8000,
+                  },
+                },
+              },
             ],
-            minimum_should_match: 1
-          }
+            minimum_should_match: 1,
+          },
         };
 
         const node = nodeTypes.function.buildNode('range', 'byt*', { gt: 1000, lt: 8000 });
         const result = range.toElasticsearchQuery(node, indexPattern);
-        expect(result).to.eql(expected);
+        expect(result).toEqual(expected);
       });
 
-      it('should support scripted fields', function () {
+      test('should support scripted fields', () => {
         const node = nodeTypes.function.buildNode('range', 'script number', { gt: 1000, lt: 8000 });
         const result = range.toElasticsearchQuery(node, indexPattern);
-        expect(result.bool.should[0]).to.have.key('script');
+
+        expect(result.bool.should[0]).toHaveProperty('script');
       });
 
-      it('should support date fields without a dateFormat provided', function () {
+      test('should support date fields without a dateFormat provided', () => {
         const expected = {
           bool: {
             should: [
@@ -143,20 +149,24 @@ describe('kuery functions', function () {
                   '@timestamp': {
                     gt: '2018-01-03T19:04:17',
                     lt: '2018-04-03T19:04:17',
-                  }
-                }
-              }
+                  },
+                },
+              },
             ],
-            minimum_should_match: 1
-          }
+            minimum_should_match: 1,
+          },
         };
 
-        const node = nodeTypes.function.buildNode('range', '@timestamp', { gt: '2018-01-03T19:04:17', lt: '2018-04-03T19:04:17' });
+        const node = nodeTypes.function.buildNode('range', '@timestamp', {
+          gt: '2018-01-03T19:04:17',
+          lt: '2018-04-03T19:04:17',
+        });
         const result = range.toElasticsearchQuery(node, indexPattern);
-        expect(result).to.eql(expected);
+
+        expect(result).toEqual(expected);
       });
 
-      it('should support date fields with a dateFormat provided', function () {
+      test('should support date fields with a dateFormat provided', () => {
         const config = { dateFormatTZ: 'America/Phoenix' };
         const expected = {
           bool: {
@@ -167,20 +177,23 @@ describe('kuery functions', function () {
                     gt: '2018-01-03T19:04:17',
                     lt: '2018-04-03T19:04:17',
                     time_zone: 'America/Phoenix',
-                  }
-                }
-              }
+                  },
+                },
+              },
             ],
-            minimum_should_match: 1
-          }
+            minimum_should_match: 1,
+          },
         };
-
-        const node = nodeTypes.function.buildNode('range', '@timestamp', { gt: '2018-01-03T19:04:17', lt: '2018-04-03T19:04:17' });
+        const node = nodeTypes.function.buildNode('range', '@timestamp', {
+          gt: '2018-01-03T19:04:17',
+          lt: '2018-04-03T19:04:17',
+        });
         const result = range.toElasticsearchQuery(node, indexPattern, config);
-        expect(result).to.eql(expected);
+
+        expect(result).toEqual(expected);
       });
 
-      it('should use a provided nested context to create a full field name', function () {
+      test('should use a provided nested context to create a full field name', () => {
         const expected = {
           bool: {
             should: [
@@ -188,13 +201,13 @@ describe('kuery functions', function () {
                 range: {
                   'nestedField.bytes': {
                     gt: 1000,
-                    lt: 8000
-                  }
-                }
-              }
+                    lt: 8000,
+                  },
+                },
+              },
             ],
-            minimum_should_match: 1
-          }
+            minimum_should_match: 1,
+          },
         };
 
         const node = nodeTypes.function.buildNode('range', 'bytes', { gt: 1000, lt: 8000 });
@@ -204,10 +217,11 @@ describe('kuery functions', function () {
           {},
           { nested: { path: 'nestedField' } }
         );
-        expect(result).to.eql(expected);
+
+        expect(result).toEqual(expected);
       });
 
-      it('should automatically add a nested query when a wildcard field name covers a nested field', function () {
+      test('should automatically add a nested query when a wildcard field name covers a nested field', () => {
         const expected = {
           bool: {
             should: [
@@ -218,21 +232,24 @@ describe('kuery functions', function () {
                     range: {
                       'nestedField.nestedChild.doublyNestedChild': {
                         gt: 1000,
-                        lt: 8000
-                      }
-                    }
+                        lt: 8000,
+                      },
+                    },
                   },
-                  score_mode: 'none'
-                }
-              }
+                  score_mode: 'none',
+                },
+              },
             ],
-            minimum_should_match: 1
-          }
+            minimum_should_match: 1,
+          },
         };
-
-        const node = nodeTypes.function.buildNode('range', '*doublyNested*', { gt: 1000, lt: 8000 });
+        const node = nodeTypes.function.buildNode('range', '*doublyNested*', {
+          gt: 1000,
+          lt: 8000,
+        });
         const result = range.toElasticsearchQuery(node, indexPattern);
-        expect(result).to.eql(expected);
+
+        expect(result).toEqual(expected);
       });
     });
   });

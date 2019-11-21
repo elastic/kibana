@@ -17,20 +17,22 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import * as ast from '../ast';
-import * as literal from '../node_types/literal';
-import * as wildcard from '../node_types/wildcard';
+import { get, isUndefined } from 'lodash';
 import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings } from '../../utils/get_time_zone_from_settings';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
 
+import * as ast from '../ast';
+
+import * as literal from '../node_types/literal';
+import * as wildcard from '../node_types/wildcard';
+
 export function buildNodeParams(fieldName, value, isPhrase = false) {
-  if (_.isUndefined(fieldName)) {
+  if (isUndefined(fieldName)) {
     throw new Error('fieldName is a required argument');
   }
-  if (_.isUndefined(value)) {
+  if (isUndefined(value)) {
     throw new Error('value is a required argument');
   }
   const fieldNode = typeof fieldName === 'string' ? ast.fromLiteralExpression(fieldName) : literal.buildNode(fieldName);
@@ -45,7 +47,7 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}, con
   const { arguments: [fieldNameArg, valueArg, isPhraseArg] } = node;
   const fullFieldNameArg = getFullFieldNameNode(fieldNameArg, indexPattern, context.nested ? context.nested.path : undefined);
   const fieldName = ast.toElasticsearchQuery(fullFieldNameArg);
-  const value = !_.isUndefined(valueArg) ? ast.toElasticsearchQuery(valueArg) : valueArg;
+  const value = !isUndefined(valueArg) ? ast.toElasticsearchQuery(valueArg) : valueArg;
   const type = isPhraseArg.value ? 'phrase' : 'best_fields';
   if (fullFieldNameArg.value === null) {
     if (valueArg.type === 'wildcard') {
@@ -94,7 +96,7 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}, con
       // users handle this themselves so we automatically add nested queries in this scenario.
       if (
         !(fullFieldNameArg.type === 'wildcard')
-        || !_.get(field, 'subType.nested')
+        || !get(field, 'subType.nested')
         || context.nested
       ) {
         return query;
