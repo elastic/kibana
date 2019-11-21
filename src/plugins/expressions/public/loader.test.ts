@@ -46,6 +46,13 @@ jest.mock('./services', () => {
     getRenderersRegistry: () => ({
       get: (id: string) => renderers[id],
     }),
+    getNotifications: jest.fn(() => {
+      return {
+        toasts: {
+          addError: jest.fn(() => {}),
+        },
+      };
+    }),
   };
 });
 

@@ -51,7 +51,9 @@ export class ExpressionLoader {
     this.loadingSubject = new Subject();
     this.loading$ = this.loadingSubject.asObservable().pipe(share());
 
-    this.renderHandler = new ExpressionRenderHandler(element);
+    this.renderHandler = new ExpressionRenderHandler(element, {
+      onRenderError: params && params.onRenderError,
+    });
     this.render$ = this.renderHandler.render$;
     this.update$ = this.renderHandler.update$;
     this.events$ = this.renderHandler.events$;
