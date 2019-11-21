@@ -74,5 +74,14 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
       await testSubjects.click('configureSourceButton');
       await testSubjects.exists('sourceConfigurationFlyout');
     },
+
+    async waitForChartToLoad() {
+      await retry.try(async () => {
+        const renderComplete = await find.byCssSelector('[data-ech-render-complete="true"]');
+        if (! renderComplete ) {
+          throw new Error('Chart did not render');
+        }
+      });
+    },
   };
 }

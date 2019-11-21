@@ -13,17 +13,16 @@ export default function ({ getPageObjects, getService }) {
   const find = getService('find');
 
   describe('saved views', () => {
-
-    before(async function () {
-      esArchiver.load('infra/metrics_and_logs');
-      await PageObjects.common.navigateToApp('infraOps');
-      await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
-    });
-
+    before(() => esArchiver.load('infra/metrics_and_logs'));
     after(() => esArchiver.unload('infra/metrics_and_logs'));
 
     describe('Inventory Test save functionality', () => {
+      before(async function () {
+        await PageObjects.common.navigateToApp('infraOps');
+        await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
+        await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+      });
+
       it('should have save and load controls', async () => {
         await PageObjects.infraHome.getSaveViewButton();
         await PageObjects.infraHome.getLoadViewsButton();
@@ -56,15 +55,15 @@ export default function ({ getPageObjects, getService }) {
     });
 
     describe('Metric Explorer Test save functionality', () => {
-
-      const fromTime = '2018-10-16 09:00:00.000';
-      const toTime = '2018-10-18 19:00:00.000';
+      const fromTime = 'Oct 16, 2018 @ 00:00:00.000';
+      const toTime =   'Oct 18, 2018 @ 00:00:00.000';
 
       before(async function () {
         await PageObjects.common.navigateToApp('infraOps');
         await PageObjects.infraHome.goToMetricExplorer();
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+        await PageObjects.infraHome.waitForChartToLoad();
       });
 
       it('should have save and load controls', async () => {
