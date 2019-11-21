@@ -26,22 +26,18 @@ setting to preserve the same key across multiple restarts and multiple instances
 [[reporting-kibana-server-settings]]
 ==== Kibana server settings
 
-Reporting uses the Kibana interface to generate reports. In most cases, you don't need
-to configure Reporting to communicate with Kibana. If you use a reverse-proxy to access Kibana, you can set the proxy port, protocol, 
-and hostname to have Reporting use the proxy to load Kibana URLs. In most cases, 
-this is only required if the proxy is responsible for modifying requests to 
-make them work with Kibana. 
+Reporting opens the {kib} web interface in a server process to generate 
+screenshots of {kib} visualizations. In most cases, the default settings 
+will work and you don't need to configure Reporting to communicate with {kib}. 
+However, if your client connections must go through a reverse-proxy
+to access {kib}, Reporting configuration must have the proxy port, protocol, 
+and hostname set in the `xpack.reporting.kibanaServer.*` settings.
 
-For example, a reverse proxy can be responsible for translating the public hostname 
-for the Kibana server to a different name in a private network. 
-It can also be responsible for maintaining encrypted communications between 
-the outside world and hosts in the internal network. 
-
-Encrypted communications 
-will fail if the hostname from the request doesn't match the destination 
-server's hostname because it is rejected by the proxy. In such cases, 
-Reporting should not assume a direct connection to the Kibana server. An administrator 
-must configure Reporting to send the hostname the proxy expects, by using the `xpack.reporting.kibanaServer.*` settings.
+NOTE: If a reverse-proxy carries encrypted traffic from end-user 
+clients back to a {kib} server, the proxy port, protocol, and hostname 
+in Reporting settings must be valid for the encryption that the Reporting 
+browser will receive. Encrypted communications will fail if there are 
+mismatches in the host information between the request and the certificate on the server.
 
 `xpack.reporting.kibanaServer.port`::
 The port for accessing Kibana, if different from the `server.port` value.
