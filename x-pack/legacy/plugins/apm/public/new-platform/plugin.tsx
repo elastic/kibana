@@ -71,6 +71,9 @@ export class Plugin {
     );
 
     // create static index pattern and store as saved object. Not needed by APM UI but for legacy reasons in Discover, Dashboard etc.
-    createStaticIndexPattern(core.http);
+    createStaticIndexPattern(core.http).catch(e => {
+      // eslint-disable-next-line no-console
+      console.log('Error fetching static index pattern', e);
+    });
   }
 }

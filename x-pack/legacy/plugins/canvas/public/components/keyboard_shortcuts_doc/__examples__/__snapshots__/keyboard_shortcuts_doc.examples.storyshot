@@ -1,1601 +1,1599 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
-<span>
+<div
+  onMouseDown={[Function]}
+  onMouseUp={[Function]}
+  onTouchEnd={[Function]}
+  onTouchStart={[Function]}
+>
   <div
-    onMouseDown={[Function]}
-    onMouseUp={[Function]}
-    onTouchEnd={[Function]}
-    onTouchStart={[Function]}
+    data-focus-guard={true}
+    style={
+      Object {
+        "height": "0px",
+        "left": "1px",
+        "overflow": "hidden",
+        "padding": 0,
+        "position": "fixed",
+        "top": "1px",
+        "width": "1px",
+      }
+    }
+    tabIndex={0}
+  />
+  <div
+    data-focus-guard={true}
+    style={
+      Object {
+        "height": "0px",
+        "left": "1px",
+        "overflow": "hidden",
+        "padding": 0,
+        "position": "fixed",
+        "top": "1px",
+        "width": "1px",
+      }
+    }
+    tabIndex={1}
+  />
+  <div
+    data-focus-lock-disabled={false}
+    onBlur={[Function]}
+    onFocus={[Function]}
   >
     <div
-      data-focus-guard={true}
-      style={
-        Object {
-          "height": "0px",
-          "left": "1px",
-          "overflow": "hidden",
-          "padding": 0,
-          "position": "fixed",
-          "top": "1px",
-          "width": "1px",
-        }
-      }
+      className="euiFlyout euiFlyout--small"
+      role="dialog"
       tabIndex={0}
-    />
-    <div
-      data-focus-guard={true}
-      style={
-        Object {
-          "height": "0px",
-          "left": "1px",
-          "overflow": "hidden",
-          "padding": 0,
-          "position": "fixed",
-          "top": "1px",
-          "width": "1px",
-        }
-      }
-      tabIndex={1}
-    />
-    <div
-      data-focus-lock-disabled={false}
-      onBlur={[Function]}
-      onFocus={[Function]}
     >
-      <div
-        className="euiFlyout euiFlyout--small"
-        role="dialog"
-        tabIndex={0}
+      <button
+        aria-label="Closes keyboard shortcuts reference"
+        className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+        data-test-subj="euiFlyoutCloseButton"
+        onClick={[Function]}
+        type="button"
       >
-        <button
-          aria-label="Closes keyboard shortcuts reference"
-          className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
-          data-test-subj="euiFlyoutCloseButton"
-          onClick={[Function]}
-          type="button"
+        <svg
+          aria-hidden="true"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+          focusable="false"
+          height={16}
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </button>
+      <div
+        className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+      >
+        <h2
+          className="euiTitle euiTitle--small"
         >
-          <svg
-            aria-hidden="true"
-            className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-            focusable="false"
-            height={16}
-            style={null}
-            viewBox="0 0 16 16"
-            width={16}
-            xmlns="http://www.w3.org/2000/svg"
-          />
-        </button>
+          Keyboard shortcuts
+        </h2>
+      </div>
+      <div
+        className="euiFlyoutBody"
+      >
         <div
-          className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
-        >
-          <h2
-            className="euiTitle euiTitle--small"
-          >
-            Keyboard Shortcuts
-          </h2>
-        </div>
-        <div
-          className="euiFlyoutBody"
+          className="euiFlyoutBody__overflow"
         >
           <div
-            className="euiFlyoutBody__overflow"
+            className="canvasKeyboardShortcut"
           >
-            <div
-              className="canvasKeyboardShortcut"
+            <h4
+              className="euiTitle euiTitle--xsmall"
             >
-              <h4
-                className="euiTitle euiTitle--xsmall"
-              >
-                Element controls
-              </h4>
-              <hr
-                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
-              />
-              <dl
-                className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
-              >
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Cut
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        CTRL
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        X
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Copy
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        CTRL
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        C
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Paste
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        CTRL
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        V
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Clone
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        CTRL
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        D
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Delete
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        DEL
-                      </code>
-                    </span>
-                  </span>
-                  <span>
-                     
-                    or
-                     
-                  </span>
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        BACKSPACE
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Bring forward
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        CTRL
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ↑
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Bring to front
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        CTRL
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        SHIFT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ↑
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Send backward
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        CTRL
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ↓
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Send to back
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        CTRL
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        SHIFT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ↓
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Group
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        G
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Ungroup
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        U
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Shift up by 10px
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ↑
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Shift down by 10px
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ↓
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Shift left by 10px
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ←
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Shift right by 10px
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        →
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Shift up by 1px
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        SHIFT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ↑
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Shift down by 1px
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        SHIFT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ↓
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Shift left by 1px
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        SHIFT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ←
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Shift right by 1px
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        SHIFT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        →
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-              </dl>
-              <div
-                className="euiSpacer euiSpacer--l"
-              />
-            </div>
-            <div
-              className="canvasKeyboardShortcut"
+              Element controls
+            </h4>
+            <hr
+              className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+            />
+            <dl
+              className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
             >
-              <h4
-                className="euiTitle euiTitle--xsmall"
+              <dt
+                className="euiDescriptionList__title"
               >
-                Expression controls
-              </h4>
-              <hr
-                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
-              />
-              <dl
-                className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
+                Cut
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
               >
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Run whole expression
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
                     >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        CTRL
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ENTER
-                      </code>
-                    </span>
+                      CTRL
+                    </code>
                   </span>
-                </dd>
-              </dl>
-              <div
-                className="euiSpacer euiSpacer--l"
-              />
-            </div>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      X
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Copy
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      CTRL
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      C
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Paste
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      CTRL
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      V
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Clone
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      CTRL
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      D
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Delete
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      DEL
+                    </code>
+                  </span>
+                </span>
+                <span>
+                   
+                  or
+                   
+                </span>
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      BACKSPACE
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Bring forward
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      CTRL
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ↑
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Bring to front
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      CTRL
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      SHIFT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ↑
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Send backward
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      CTRL
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ↓
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Send to back
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      CTRL
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      SHIFT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ↓
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Group
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      G
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Ungroup
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      U
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Shift up by 10px
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ↑
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Shift down by 10px
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ↓
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Shift left by 10px
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ←
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Shift right by 10px
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      →
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Shift up by 1px
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      SHIFT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ↑
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Shift down by 1px
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      SHIFT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ↓
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Shift left by 1px
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      SHIFT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ←
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Shift right by 1px
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      SHIFT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      →
+                    </code>
+                  </span>
+                </span>
+              </dd>
+            </dl>
             <div
-              className="canvasKeyboardShortcut"
+              className="euiSpacer euiSpacer--l"
+            />
+          </div>
+          <div
+            className="canvasKeyboardShortcut"
+          >
+            <h4
+              className="euiTitle euiTitle--xsmall"
             >
-              <h4
-                className="euiTitle euiTitle--xsmall"
+              Expression controls
+            </h4>
+            <hr
+              className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+            />
+            <dl
+              className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
+            >
+              <dt
+                className="euiDescriptionList__title"
               >
-                Editor controls
-              </h4>
-              <hr
-                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
-              />
-              <dl
-                className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
+                Run whole expression
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
               >
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Select multiple elements
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
                     >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        SHIFT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        CLICK
-                      </code>
-                    </span>
+                      CTRL
+                    </code>
                   </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Resize from center
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
                     >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ALT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        DRAG
-                      </code>
-                    </span>
+                      ENTER
+                    </code>
                   </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Move, resize, and rotate without snapping
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        CTRL
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        DRAG
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Select element below
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        CTRL
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        CLICK
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Undo last action
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        CTRL
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        Z
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Redo last action
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        CTRL
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        SHIFT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        Z
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Go to previous page
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ALT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        [
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Go to next page
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ALT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ]
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Toggle edit mode
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ALT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        E
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Show grid
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ALT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        G
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Refresh workpad
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ALT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        R
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Zoom in
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        CTRL
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ALT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        +
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Zoom out
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        CTRL
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ALT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        -
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Reset zoom to 100%
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        CTRL
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ALT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        [
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Enter presentation mode
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ALT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        F
-                      </code>
-                    </span>
-                  </span>
-                  <span>
-                     
-                    or
-                     
-                  </span>
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ALT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        P
-                      </code>
-                    </span>
-                  </span>
-                </dd>
-              </dl>
-              <div
-                className="euiSpacer euiSpacer--l"
-              />
-            </div>
+                </span>
+              </dd>
+            </dl>
             <div
-              className="canvasKeyboardShortcut"
+              className="euiSpacer euiSpacer--l"
+            />
+          </div>
+          <div
+            className="canvasKeyboardShortcut"
+          >
+            <h4
+              className="euiTitle euiTitle--xsmall"
             >
-              <h4
-                className="euiTitle euiTitle--xsmall"
+              Editor controls
+            </h4>
+            <hr
+              className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+            />
+            <dl
+              className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
+            >
+              <dt
+                className="euiDescriptionList__title"
               >
-                Presentation controls
-              </h4>
-              <hr
-                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
-              />
-              <dl
-                className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
+                Select multiple elements
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
               >
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Enter presentation mode
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
                     >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ALT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
+                      SHIFT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
                     >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        F
-                      </code>
-                    </span>
+                      CLICK
+                    </code>
                   </span>
-                  <span>
-                     
-                    or
-                     
-                  </span>
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Resize from center
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
                     >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ALT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
+                      ALT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
                     >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        P
-                      </code>
-                    </span>
+                      DRAG
+                    </code>
                   </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Exit presentation mode
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Move, resize, and rotate without snapping
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
                     >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ESC
-                      </code>
-                    </span>
+                      CTRL
+                    </code>
                   </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Go to previous page
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
                     >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ALT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
+                      DRAG
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Select element below
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
                     >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        [
-                      </code>
-                    </span>
+                      CTRL
+                    </code>
                   </span>
-                  <span>
-                     
-                    or
-                     
-                  </span>
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
                     >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        BACKSPACE
-                      </code>
-                    </span>
+                      CLICK
+                    </code>
                   </span>
-                  <span>
-                     
-                    or
-                     
-                  </span>
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Undo last action
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
                     >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ←
-                      </code>
-                    </span>
+                      CTRL
+                    </code>
                   </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Go to next page
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
                     >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ALT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
+                      Z
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Redo last action
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
                     >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ]
-                      </code>
-                    </span>
+                      CTRL
+                    </code>
                   </span>
-                  <span>
-                     
-                    or
-                     
-                  </span>
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
                     >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        SPACE
-                      </code>
-                    </span>
+                      SHIFT
+                    </code>
                   </span>
-                  <span>
-                     
-                    or
-                     
-                  </span>
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
                     >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        →
-                      </code>
-                    </span>
+                      Z
+                    </code>
                   </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Refresh workpad
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Go to previous page
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
                     >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        ALT
-                      </code>
-                    </span>
-                     
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
-                    >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        R
-                      </code>
-                    </span>
+                      ALT
+                    </code>
                   </span>
-                </dd>
-                <dt
-                  className="euiDescriptionList__title"
-                >
-                  Toggle page cycling
-                </dt>
-                <dd
-                  className="euiDescriptionList__description"
-                >
-                  <span>
-                    <span
-                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                      style={Object {}}
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
                     >
-                      <code
-                        className="euiCodeBlock__code"
-                      >
-                        P
-                      </code>
-                    </span>
+                      [
+                    </code>
                   </span>
-                </dd>
-              </dl>
-              <div
-                className="euiSpacer euiSpacer--l"
-              />
-            </div>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Go to next page
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ALT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ]
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Toggle edit mode
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ALT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      E
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Show grid
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ALT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      G
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Refresh workpad
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ALT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      R
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Zoom in
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      CTRL
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ALT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      +
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Zoom out
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      CTRL
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ALT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      -
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Reset zoom to 100%
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      CTRL
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ALT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      [
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Enter presentation mode
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ALT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      F
+                    </code>
+                  </span>
+                </span>
+                <span>
+                   
+                  or
+                   
+                </span>
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ALT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      P
+                    </code>
+                  </span>
+                </span>
+              </dd>
+            </dl>
+            <div
+              className="euiSpacer euiSpacer--l"
+            />
+          </div>
+          <div
+            className="canvasKeyboardShortcut"
+          >
+            <h4
+              className="euiTitle euiTitle--xsmall"
+            >
+              Presentation controls
+            </h4>
+            <hr
+              className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+            />
+            <dl
+              className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
+            >
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Enter presentation mode
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ALT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      F
+                    </code>
+                  </span>
+                </span>
+                <span>
+                   
+                  or
+                   
+                </span>
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ALT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      P
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Exit presentation mode
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ESC
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Go to previous page
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ALT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      [
+                    </code>
+                  </span>
+                </span>
+                <span>
+                   
+                  or
+                   
+                </span>
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      BACKSPACE
+                    </code>
+                  </span>
+                </span>
+                <span>
+                   
+                  or
+                   
+                </span>
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ←
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Go to next page
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ALT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ]
+                    </code>
+                  </span>
+                </span>
+                <span>
+                   
+                  or
+                   
+                </span>
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      SPACE
+                    </code>
+                  </span>
+                </span>
+                <span>
+                   
+                  or
+                   
+                </span>
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      →
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Refresh workpad
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      ALT
+                    </code>
+                  </span>
+                   
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      R
+                    </code>
+                  </span>
+                </span>
+              </dd>
+              <dt
+                className="euiDescriptionList__title"
+              >
+                Toggle page cycling
+              </dt>
+              <dd
+                className="euiDescriptionList__description"
+              >
+                <span>
+                  <span
+                    className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                    style={Object {}}
+                  >
+                    <code
+                      className="euiCodeBlock__code"
+                    >
+                      P
+                    </code>
+                  </span>
+                </span>
+              </dd>
+            </dl>
+            <div
+              className="euiSpacer euiSpacer--l"
+            />
           </div>
         </div>
       </div>
     </div>
-    <div
-      data-focus-guard={true}
-      style={
-        Object {
-          "height": "0px",
-          "left": "1px",
-          "overflow": "hidden",
-          "padding": 0,
-          "position": "fixed",
-          "top": "1px",
-          "width": "1px",
-        }
-      }
-      tabIndex={0}
-    />
   </div>
-</span>
+  <div
+    data-focus-guard={true}
+    style={
+      Object {
+        "height": "0px",
+        "left": "1px",
+        "overflow": "hidden",
+        "padding": 0,
+        "position": "fixed",
+        "top": "1px",
+        "width": "1px",
+      }
+    }
+    tabIndex={0}
+  />
+</div>
 `;
