@@ -73,7 +73,10 @@ export class SavedObjectsService
     this.logger = coreContext.logger.get('savedobjects-service');
   }
 
-  public async setup(coreSetup: SavedObjectsSetupDeps): Promise<SavedObjectsServiceSetup> {
+  public async setup(
+    coreSetup: SavedObjectsSetupDeps,
+    migrationsRetryDelay?: number
+  ): Promise<SavedObjectsServiceSetup> {
     this.logger.debug('Setting up SavedObjects service');
 
     const {
@@ -107,7 +110,8 @@ export class SavedObjectsService
       kibanaConfig,
       callCluster: migrationsRetryCallCluster(
         adminClient.callAsInternalUser,
-        this.coreContext.logger.get('migrations')
+        this.coreContext.logger.get('migrations'),
+        migrationsRetryDelay
       ),
     }));
 
