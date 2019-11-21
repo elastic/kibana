@@ -7,25 +7,25 @@
 import * as rt from 'io-ts';
 import { SnapshotMetricTypeRT } from '../inventory_models/types';
 
-export const SnapshotNodePath = rt.type({
+export const SnapshotNodePathRT = rt.type({
   value: rt.string,
   label: rt.string,
   ip: rt.string,
 });
 
-const SnapshotNodeMetricOptional = rt.partial({
+const SnapshotNodeMetricOptionalRT = rt.partial({
   value: rt.number,
   average: rt.number,
   max: rt.number,
 });
 
-const SnapshotNodeMetricRequired = rt.type({
+const SnapshotNodeMetricRequiredRT = rt.type({
   name: SnapshotMetricTypeRT,
 });
 
 export const SnapshotNodeRT = rt.type({
-  metric: rt.intersection([SnapshotNodeMetricRequired, SnapshotNodeMetricOptional]),
-  path: rt.array(SnapshotNodePath),
+  metric: rt.intersection([SnapshotNodeMetricRequiredRT, SnapshotNodeMetricOptionalRT]),
+  path: rt.array(SnapshotNodePathRT),
 });
 
 export const SnapshotNodeResponseRT = rt.type({
