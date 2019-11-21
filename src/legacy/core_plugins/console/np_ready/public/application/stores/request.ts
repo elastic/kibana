@@ -26,12 +26,14 @@ import { ESRequestResult } from '../hooks/use_send_current_request_to_es/send_re
 export type Actions =
   | { type: 'sendRequest'; payload: undefined }
   | { type: 'requestSuccess'; payload: { data: ESRequestResult[] } }
-  | { type: 'requestFail'; payload: string };
+  | { type: 'requestFail'; payload: { contentType: BaseResponseType; value: string } };
 
 export interface Store {
   requestInFlight: boolean;
-  lastResult: { data: ESRequestResult[] | null; error?: string };
-  error: string | null;
+  lastResult: {
+    data: ESRequestResult[] | null;
+    error?: { contentType: BaseResponseType; value: string };
+  };
 }
 
 const initialResultValue = {
@@ -43,7 +45,6 @@ export const initialValue: Store = produce<Store>(
   {
     requestInFlight: false,
     lastResult: initialResultValue,
-    error: null,
   },
   identity
 );
@@ -53,21 +54,18 @@ export const reducer: Reducer<Store, Actions> = (state, action) =>
     if (action.type === 'sendRequest') {
       draft.requestInFlight = true;
       draft.lastResult = initialResultValue;
-      draft.error = null;
       return;
     }
 
     if (action.type === 'requestSuccess') {
       draft.requestInFlight = false;
-      draft.error = null;
       draft.lastResult = action.payload;
       return;
     }
 
     if (action.type === 'requestFail') {
       draft.requestInFlight = false;
-      draft.lastResult = initialResultValue;
-      draft.error = action.payload;
+      draft.lastResult = { ...initialResultValue, error: action.payload };
       return;
     }
   });

@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
 import { instance as registry } from '../../contexts/editor_context/editor_registry';
 import { useServicesContext } from '../../contexts';
@@ -26,7 +27,7 @@ import mappings from '../../../../../public/quarantined/src/mappings';
 
 export const useSendCurrentRequestToES = () => {
   const {
-    services: { history, settings },
+    services: { history, settings, notifications },
   } = useServicesContext();
 
   const dispatch = useRequestActionContext();
@@ -39,7 +40,7 @@ export const useSendCurrentRequestToES = () => {
       if (!requests.length) {
         dispatch({
           type: 'requestFail',
-          payload: 'No requests in range',
+          payload: { value: 'No requests in range', contentType: 'text/plain' },
         });
         return;
       }
@@ -67,10 +68,18 @@ export const useSendCurrentRequestToES = () => {
         },
       });
     } catch (e) {
-      dispatch({
-        type: 'requestFail',
-        payload: e.message,
-      });
+      if (e.contentType) {
+        dispatch({
+          type: 'requestFail',
+          payload: e,
+        });
+      } else {
+        notifications.toasts.addError(e, {
+          title: i18n.translate('console.unknownRequestErrorTitle', {
+            defaultMessage: 'Unknown Request Error',
+          }),
+        });
+      }
     }
-  }, [dispatch, settings, history]);
+  }, [dispatch, settings, history, notifications]);
 };

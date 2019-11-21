@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { NotificationsSetup } from 'src/core/public';
-import { ServicesContextProvider, EditorContextProvider } from './contexts';
+import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { Main } from './containers';
 import { createStorage, createHistory, createSettings, Settings } from '../services';
 
@@ -51,9 +51,11 @@ export function boot(deps: {
           services: { storage, history, settings, notifications },
         }}
       >
-        <EditorContextProvider settings={settings.toJSON()}>
-          <Main />
-        </EditorContextProvider>
+        <RequestContextProvider>
+          <EditorContextProvider settings={settings.toJSON()}>
+            <Main />
+          </EditorContextProvider>
+        </RequestContextProvider>
       </ServicesContextProvider>
     </I18nContext>
   );

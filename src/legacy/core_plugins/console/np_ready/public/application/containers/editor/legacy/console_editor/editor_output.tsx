@@ -21,28 +21,56 @@ import $ from 'jquery';
 
 // @ts-ignore
 import { initializeOutput } from '../../../../../../../public/quarantined/src/output';
-import { useServicesContext, useEditorReadContext } from '../../../../contexts';
+import {
+  useServicesContext,
+  useEditorReadContext,
+  useRequestReadContext,
+} from '../../../../contexts';
 
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
 
-function _EditorOuput() {
+function modeForContentType(contentType: string) {
+  if (contentType.indexOf('application/json') >= 0) {
+    return 'ace/mode/json';
+  } else if (contentType.indexOf('application/yaml') >= 0) {
+    return 'ace/mode/yaml';
+  }
+  return 'ace/mode/text';
+}
+
+function EditorOutputUI() {
   const editorRef = useRef<null | HTMLDivElement>(null);
   const editorInstanceRef = useRef<null | any>(null);
   const { services } = useServicesContext();
 
   const { settings: readOnlySettings } = useEditorReadContext();
+  const {
+    lastResult: { data, error },
+  } = useRequestReadContext();
 
   useEffect(() => {
     const editor$ = $(editorRef.current!);
     editorInstanceRef.current = initializeOutput(editor$, services.settings);
-    editorInstanceRef.current.update('');
     const unsubscribe = subscribeResizeChecker(editorRef.current!, editorInstanceRef.current);
 
     return () => {
       unsubscribe();
     };
   }, [services.settings]);
+
+  useEffect(() => {
+    if (data) {
+      const mode = modeForContentType(data[0].response.contentType);
+      editorInstanceRef.current.session.setMode(mode);
+      editorInstanceRef.current.update(data.map(d => d.response.value).join('\n'));
+    } else if (error) {
+      editorInstanceRef.current.session.setMode(modeForContentType(error.contentType));
+      editorInstanceRef.current.update(error.value);
+    } else {
+      editorInstanceRef.current.update('');
+    }
+  }, [data, error]);
 
   useEffect(() => {
     applyCurrentSettings(editorInstanceRef.current, readOnlySettings);
@@ -55,4 +83,4 @@ function _EditorOuput() {
   );
 }
 
-export const EditorOutput = React.memo(_EditorOuput);
+export const EditorOutput = React.memo(EditorOutputUI);

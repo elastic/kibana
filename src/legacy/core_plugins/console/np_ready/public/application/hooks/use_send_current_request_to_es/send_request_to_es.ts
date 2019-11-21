@@ -79,15 +79,6 @@ export function sendRequestToES({ requests }: EsRequestArgs): Promise<ESRequestR
 
           const xhr = dataOrjqXHR.promise ? dataOrjqXHR : jqXhrORerrorThrown;
 
-          function modeForContentType(contentType: string) {
-            if (contentType.indexOf('text/plain') >= 0) {
-              return 'ace/mode/text';
-            } else if (contentType.indexOf('application/yaml') >= 0) {
-              return 'ace/mode/yaml';
-            }
-            return null;
-          }
-
           const isSuccess =
             typeof xhr.status === 'number' &&
             // Things like DELETE index where the index is not there are OK.
@@ -119,7 +110,7 @@ export function sendRequestToES({ requests }: EsRequestArgs): Promise<ESRequestR
 
             results.push({
               response: {
-                contentType: xhr.getAllResponseHeaders('Content-Type'),
+                contentType: xhr.getResponseHeader('Content-Type'),
                 value,
               },
               request: {
@@ -133,25 +124,18 @@ export function sendRequestToES({ requests }: EsRequestArgs): Promise<ESRequestR
             sendNextRequest();
           } else {
             let value;
-            let mode: any;
+            let contentType: string;
             if (xhr.responseText) {
               value = xhr.responseText; // ES error should be shown
-              mode = modeForContentType(xhr.getAllResponseHeaders('Content-Type') || '');
-              // if (value[0] === '{') {
-              //   try {
-              //     value = JSON.stringify(JSON.parse(value), null, 2);
-              //   } catch (e) {
-              //     // nothing to do here
-              //   }
-              // }
+              contentType = xhr.getResponseHeader('Content-Type');
             } else {
               value = 'Request failed to get to the server (status code: ' + xhr.status + ')';
-              mode = 'ace/mode/text';
+              contentType = 'text/plain';
             }
             if (isMultiRequest) {
               value = '# ' + req.method + ' ' + req.url + '\n' + value;
             }
-            reject({ value, mode });
+            reject({ value, contentType });
           }
         }
       );
