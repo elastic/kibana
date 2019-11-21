@@ -64,7 +64,8 @@ export function migrationsRetryCallCluster(
                     error instanceof esErrors.ConnectionFault ||
                     error instanceof esErrors.ServiceUnavailable ||
                     error instanceof esErrors.RequestTimeout ||
-                    error instanceof esErrors.AuthenticationException
+                    error instanceof esErrors.AuthenticationException ||
+                    error instanceof esErrors.AuthorizationException
                   );
                 },
                 timer(delay),
