@@ -66,7 +66,7 @@ import {
 } from '../components/kql_filter_bar/utils';
 import { mlJobService } from '../services/job_service';
 
-import { jobSelectionActionCreator, loadOverallDataActionCreator } from './explorer_actions';
+import { jobSelectionActionCreator, loadOverallDataActionCreator } from './actions';
 import {
   getClearedSelectedAnomaliesState,
   getDateFormatTz,
