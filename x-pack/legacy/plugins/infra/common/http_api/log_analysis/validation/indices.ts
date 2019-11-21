@@ -29,14 +29,14 @@ export const validationIndicesErrorRT = rt.union([
     index: rt.string,
   }),
   rt.type({
-    error: rt.literal('TIMESTAMP_NOT_FOUND'),
+    error: rt.literal('FIELD_NOT_FOUND'),
     index: rt.string,
-    timestampField: rt.string,
+    field: rt.string,
   }),
   rt.type({
-    error: rt.literal('TIMESTAMP_NOT_VALID'),
+    error: rt.literal('FIELD_NOT_VALID'),
     index: rt.string,
-    timestampField: rt.string,
+    field: rt.string,
   }),
 ]);
 

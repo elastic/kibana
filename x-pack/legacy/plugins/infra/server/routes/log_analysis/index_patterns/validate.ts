@@ -19,6 +19,8 @@ import {
 
 import { throwErrors } from '../../../../common/runtime_types';
 
+const partitionField = 'event.dataset';
+
 export const initIndexPatternsValidateRoute = ({ framework }: InfraBackendLibs) => {
   framework.registerRoute({
     method: 'POST',
@@ -38,7 +40,7 @@ export const initIndexPatternsValidateRoute = ({ framework }: InfraBackendLibs) 
         indices.map(async index => {
           const fieldCaps = await framework.callWithRequest(req, 'fieldCaps', {
             index,
-            fields: timestampField,
+            fields: `${timestampField},${partitionField}`,
           });
 
           if (fieldCaps.indices.length === 0) {
@@ -49,25 +51,30 @@ export const initIndexPatternsValidateRoute = ({ framework }: InfraBackendLibs) 
             return;
           }
 
-          const fieldMetadata = fieldCaps.fields[timestampField];
+          ([
+            [timestampField, 'date'],
+            [partitionField, 'keyword'],
+          ] as const).forEach(([field, fieldType]) => {
+            const fieldMetadata = fieldCaps.fields[field];
 
-          if (fieldMetadata === undefined) {
-            errors.push({
-              error: 'TIMESTAMP_NOT_FOUND',
-              index,
-              timestampField,
-            });
-          } else {
-            const fieldTypes = Object.keys(fieldMetadata);
-
-            if (fieldTypes.length > 1 || fieldTypes[0] !== 'date') {
+            if (fieldMetadata === undefined) {
               errors.push({
-                error: 'TIMESTAMP_NOT_VALID',
+                error: 'FIELD_NOT_FOUND',
                 index,
-                timestampField,
+                field,
               });
+            } else {
+              const fieldTypes = Object.keys(fieldMetadata);
+
+              if (fieldTypes.length > 1 || fieldTypes[0] !== fieldType) {
+                errors.push({
+                  error: `FIELD_NOT_VALID`,
+                  index,
+                  field,
+                });
+              }
             }
-          }
+          });
         })
       );
 

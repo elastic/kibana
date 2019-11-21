@@ -106,26 +106,26 @@ const formatValidationError = (error: ValidationIndicesUIError): React.ReactNode
         />
       );
 
-    case 'TIMESTAMP_NOT_FOUND':
+    case 'FIELD_NOT_FOUND':
       return (
         <FormattedMessage
           id="xpack.infra.analysisSetup.indicesSelectionNoTimestampField"
-          defaultMessage="At least one index matching {index} lacks a field called {timestamp}."
+          defaultMessage="At least one index matching {index} lacks a required field {field}."
           values={{
             index: <EuiCode>{error.index}</EuiCode>,
-            timestamp: <EuiCode>{error.timestampField}</EuiCode>,
+            field: <EuiCode>{error.field}</EuiCode>,
           }}
         />
       );
 
-    case 'TIMESTAMP_NOT_VALID':
+    case 'FIELD_NOT_VALID':
       return (
         <FormattedMessage
           id="xpack.infra.analysisSetup.indicesSelectionTimestampNotValid"
-          defaultMessage="At least one index matching {index} has a field called {timestamp} which is not a date field."
+          defaultMessage="At least one index matching {index} has a field called {field} without the correct type."
           values={{
             index: <EuiCode>{error.index}</EuiCode>,
-            timestamp: <EuiCode>{error.timestampField}</EuiCode>,
+            field: <EuiCode>{error.field}</EuiCode>,
           }}
         />
       );
