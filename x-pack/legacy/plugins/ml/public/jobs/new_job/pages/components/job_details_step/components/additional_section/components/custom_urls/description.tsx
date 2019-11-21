@@ -7,7 +7,10 @@
 import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
+import { metadata } from 'ui/metadata';
+
+const docsUrl = `https://www.elastic.co/guide/en/elastic-stack-overview/${metadata.branch}/ml-configuring-url.html`;
 
 export const Description: FC = memo(({ children }) => {
   const title = i18n.translate(
@@ -22,8 +25,18 @@ export const Description: FC = memo(({ children }) => {
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
-          id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsSelection.description"
-          defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam."
+          id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.customUrlsSelection.description"
+          defaultMessage="Custom URLs provide links from the anomalies table in the Anomaly Explorer or Single Metric Viewer window to Kibana dashboards, the Discovery page, or external websites. {learnMoreLink}"
+          values={{
+            learnMoreLink: (
+              <EuiLink href={docsUrl} target="_blank">
+                <FormattedMessage
+                  id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.customUrlsSelection.learnMoreLinkText"
+                  defaultMessage="Learn more"
+                />
+              </EuiLink>
+            ),
+          }}
         />
       }
     >
