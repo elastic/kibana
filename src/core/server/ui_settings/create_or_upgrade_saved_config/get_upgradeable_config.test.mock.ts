@@ -17,5 +17,7 @@
  * under the License.
  */
 
-export * from './types';
-export { isFilterable } from './utils';
+export const getUpgradeableConfigMock = jest.fn();
+jest.doMock('./get_upgradeable_config', () => ({
+  getUpgradeableConfig: getUpgradeableConfigMock,
+}));

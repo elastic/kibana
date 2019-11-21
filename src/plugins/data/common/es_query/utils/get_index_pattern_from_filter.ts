@@ -17,5 +17,12 @@
  * under the License.
  */
 
-export * from './types';
-export { isFilterable } from './utils';
+import { Filter } from '../filters';
+import { IIndexPattern } from '../..';
+
+export function getIndexPatternFromFilter(
+  filter: Filter,
+  indexPatterns: IIndexPattern[]
+): IIndexPattern | undefined {
+  return indexPatterns.find(indexPattern => indexPattern.id === filter.meta.index);
+}

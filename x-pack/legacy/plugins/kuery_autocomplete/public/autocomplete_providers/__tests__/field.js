@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { getSuggestionsProvider } from '../field';
 import indexPatternResponse from '../__fixtures__/index_pattern_response.json';
-import { isFilterable } from 'ui/index_patterns';
+import { isFilterable } from '../../../../../../../src/plugins/data/public';
 
 describe('Kuery field suggestions', function () {
   let indexPattern;
