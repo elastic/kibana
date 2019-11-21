@@ -71,6 +71,7 @@
 /x-pack/test/api_integration/apis/security/ @elastic/kibana-security
 
 # Kibana Stack Services
+/src/dev/i18n @elastic/kibana-stack-services
 /packages/kbn-analytics/ @elastic/kibana-stack-services
 /src/legacy/core_plugins/ui_metric/ @elastic/kibana-stack-services
 /x-pack/legacy/plugins/telemetry @elastic/kibana-stack-services

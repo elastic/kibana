@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useContext, useEffect, useRef, useState } from 'react';
+import React, { Fragment, FC, useContext, useEffect, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -42,7 +42,7 @@ interface DefinePivotStepProps {
   setStepDefineState: React.Dispatch<React.SetStateAction<StepDefineExposedState>>;
 }
 
-const StepDefine: SFC<DefinePivotStepProps> = ({
+const StepDefine: FC<DefinePivotStepProps> = ({
   isCurrentStep,
   stepDefineState,
   setCurrentStep,
@@ -67,7 +67,7 @@ const StepDefine: SFC<DefinePivotStepProps> = ({
   );
 };
 
-export const Wizard: SFC = React.memo(() => {
+export const Wizard: FC = React.memo(() => {
   const kibanaContext = useContext(KibanaContext);
 
   // The current WIZARD_STEP

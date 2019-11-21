@@ -63,7 +63,7 @@ type WaffleFilterUrlState = ReturnType<typeof waffleFilterSelectors.selectWaffle
 
 type WithWaffleFilterUrlStateProps = WithWaffleFilterProps;
 
-export const WithWaffleFilterUrlState: React.SFC<WithWaffleFilterUrlStateProps> = ({
+export const WithWaffleFilterUrlState: React.FC<WithWaffleFilterUrlStateProps> = ({
   indexPattern,
 }) => (
   <WithWaffleFilter indexPattern={indexPattern}>
