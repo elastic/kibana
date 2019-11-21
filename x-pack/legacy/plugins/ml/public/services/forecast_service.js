@@ -248,7 +248,7 @@ function getForecastData(
       min: aggType.min
     };
 
-  return ml.esSearchRx({
+  return ml.esSearch$({
     index: ML_RESULTS_INDEX_PATTERN,
     size: 0,
     body: {

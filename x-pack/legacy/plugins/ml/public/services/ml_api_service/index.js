@@ -444,7 +444,7 @@ export const ml = {
     });
   },
 
-  esSearchRx(obj) {
+  esSearch$(obj) {
     return http$(`${basePath}/es_search`, {
       method: 'POST',
       body: obj

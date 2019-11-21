@@ -99,7 +99,7 @@ declare interface Ml {
   getJobStats(obj: object): Promise<any>;
   getDatafeedStats(obj: object): Promise<any>;
   esSearch(obj: object): any;
-  esSearchRx(obj: object): Observable<any>;
+  esSearch$(obj: object): Observable<any>;
   getIndices(): Promise<EsIndex[]>;
   dataRecognizerModuleJobsExist(obj: { moduleId: string }): Promise<any>;
   getDataRecognizerModule(obj: { moduleId: string }): Promise<any>;

@@ -129,7 +129,7 @@ export function getMetricData(
     body.aggs.byTime.aggs.metric = metricAgg;
   }
 
-  return ml.esSearchRx({ index, body }).pipe(
+  return ml.esSearch$({ index, body }).pipe(
     map((resp: any) => {
       const obj: MetricData = { success: true, results: {} };
       const dataByTime = resp?.aggregations?.byTime?.buckets ?? [];
@@ -234,7 +234,7 @@ export function getModelPlotOutput(
   ];
 
   return ml
-    .esSearchRx({
+    .esSearch$({
       index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
       body: {
@@ -375,7 +375,7 @@ export function getRecordsForCriteria(
   });
 
   return ml
-    .esSearchRx({
+    .esSearch$({
       index: ML_RESULTS_INDEX_PATTERN,
       rest_total_hits_as_int: true,
       size: maxResults !== undefined ? maxResults : 100,
@@ -464,7 +464,7 @@ export function getScheduledEventsByBucket(
   }
 
   return ml
-    .esSearchRx({
+    .esSearch$({
       index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
       body: {
