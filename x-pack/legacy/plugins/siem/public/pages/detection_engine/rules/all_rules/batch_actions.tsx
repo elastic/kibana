@@ -77,7 +77,7 @@ export const getBatchItems = (
       onClick={async () => {
         closePopover();
         await deleteRulesAction(
-          selectedState.map(r => r.sourceRule.id),
+          selectedState.map(({ sourceRule: { id } }) => id),
           dispatch,
           kbnVersion
         );

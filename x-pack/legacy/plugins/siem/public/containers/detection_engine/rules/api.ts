@@ -36,6 +36,7 @@ export const fetchRules = async ({
   },
   id,
   kbnVersion,
+  signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
   const queryParams = [
     `page=${pagination.page}`,
@@ -60,6 +61,7 @@ export const fetchRules = async ({
       'kbn-version': kbnVersion,
       'kbn-xsrf': kbnVersion,
     },
+    signal,
   });
   await throwIfNotOk(response);
   return id != null

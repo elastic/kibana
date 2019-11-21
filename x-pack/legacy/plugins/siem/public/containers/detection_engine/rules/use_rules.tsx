@@ -45,7 +45,12 @@ export const useRules = (
 
     async function fetchData() {
       try {
-        const fetchRulesResult = await fetchRules({ filterOptions, pagination, kbnVersion });
+        const fetchRulesResult = await fetchRules({
+          filterOptions,
+          pagination,
+          kbnVersion,
+          signal: abortCtrl.signal,
+        });
 
         if (isSubscribed) {
           setRules(fetchRulesResult);

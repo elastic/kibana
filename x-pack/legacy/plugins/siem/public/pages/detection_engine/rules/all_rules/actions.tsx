@@ -53,6 +53,7 @@ export const enableRulesAction = async (
     const updatedRules = await enableRules({ ids, enabled, kbnVersion });
     dispatch({ type: 'updateRules', rules: updatedRules });
   } catch {
+    // TODO Add error toast support to actions (and @throw jsdoc to api calls)
     dispatch({ type: 'updateLoading', ids, isLoading: false });
   }
 };

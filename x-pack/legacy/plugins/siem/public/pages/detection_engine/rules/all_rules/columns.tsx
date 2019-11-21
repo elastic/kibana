@@ -96,7 +96,7 @@ export const getColumns = (dispatch: React.Dispatch<Action>, kbnVersion: string)
     field: 'lastCompletedRun',
     name: i18n.COLUMN_LAST_COMPLETE_RUN,
     render: (value: TableData['lastCompletedRun']) => {
-      return value === undefined ? (
+      return value == null ? (
         getEmptyTagValue()
       ) : (
         <PreferenceFormattedDate value={new Date(value)} />
@@ -110,7 +110,7 @@ export const getColumns = (dispatch: React.Dispatch<Action>, kbnVersion: string)
     field: 'lastResponse',
     name: i18n.COLUMN_LAST_RESPONSE,
     render: (value: TableData['lastResponse']) => {
-      return value === undefined ? (
+      return value == null ? (
         getEmptyTagValue()
       ) : (
         <>

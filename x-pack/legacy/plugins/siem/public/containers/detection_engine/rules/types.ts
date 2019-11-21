@@ -48,6 +48,7 @@ export interface FetchRulesProps {
   filterOptions?: FilterOptions;
   id?: string;
   kbnVersion: string;
+  signal: AbortSignal;
 }
 
 export interface FilterOptions {
