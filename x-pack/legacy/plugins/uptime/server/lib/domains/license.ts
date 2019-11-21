@@ -9,7 +9,7 @@ import { RequestHandlerContext } from 'kibana/server';
 
 export type UMLicenseCheck = (context: RequestHandlerContext) => boolean;
 
-export const authDomain: UMLicenseCheck = ({ licensing: { license } }) => {
+export const licenseCheck: UMLicenseCheck = ({ licensing: { license } }) => {
   if (license === null) {
     throw Boom.badRequest('Missing license information');
   }

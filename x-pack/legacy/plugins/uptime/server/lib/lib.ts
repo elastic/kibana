@@ -15,7 +15,7 @@ import {
 import { UMLicenseCheck } from './domains';
 
 export interface UMDomainLibs {
-  auth: UMLicenseCheck;
+  license: UMLicenseCheck;
   monitors: UMMonitorsAdapter;
   monitorStates: UMMonitorStatesAdapter;
   pings: UMPingsAdapter;
