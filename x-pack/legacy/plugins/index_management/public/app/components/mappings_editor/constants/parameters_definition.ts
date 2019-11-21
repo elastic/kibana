@@ -145,7 +145,7 @@ export const PARAMETERS_DEFINITION = {
   },
   ignore_malformed: {
     fieldConfig: {
-      defaultValue: true,
+      defaultValue: false,
     },
   },
   null_value: {
@@ -458,6 +458,17 @@ export const PARAMETERS_DEFINITION = {
           }) as ValidationFunc,
         },
       ],
+    },
+  },
+  orientation: {
+    fieldConfig: {
+      defaultValue: 'ccw',
+      type: FIELD_TYPES.SUPER_SELECT,
+    },
+  },
+  ignore_z_value: {
+    fieldConfig: {
+      defaultValue: true,
     },
   },
 };

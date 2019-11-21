@@ -38,6 +38,8 @@ type TermVectorOptions =
   | 'termVector.withPositionsPayloads'
   | 'termVector.withPositionsOffsetsPayloads';
 
+type OrientationOptions = 'orientation.counterclockwise' | 'orientation.clockwise';
+
 type LanguageAnalyzerOption =
   | 'arabic'
   | 'armenian'
@@ -74,7 +76,12 @@ type LanguageAnalyzerOption =
   | 'turkish'
   | 'thai';
 
-export type FieldOption = IndexOptions | AnalyzerOptions | SimilarityOptions | TermVectorOptions;
+export type FieldOption =
+  | IndexOptions
+  | AnalyzerOptions
+  | SimilarityOptions
+  | TermVectorOptions
+  | OrientationOptions;
 
 export const FIELD_OPTIONS_TEXTS: { [key in FieldOption]: Optioni18n } = {
   'indexOptions.docs': {
@@ -341,6 +348,32 @@ export const FIELD_OPTIONS_TEXTS: { [key in FieldOption]: Optioni18n } = {
       'xpack.idxMgmt.mappingsEditor.formSelect.termVector.withPositionsOffsetsPayloadsDescription',
       {
         defaultMessage: 'Terms, positions, offsets and payloads are stored.',
+      }
+    ),
+  },
+  'orientation.counterclockwise': {
+    title: i18n.translate(
+      'xpack.idxMgmt.mappingsEditor.formSelect.orientation.counterclockwiseTitle',
+      {
+        defaultMessage: 'Counterclockwise',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.idxMgmt.mappingsEditor.formSelect.orientation.counterclockwiseDescription',
+      {
+        defaultMessage:
+          'Defines outer ring vertices in counterclockwise order with inner ring(s) vertices (holes) in clockwise order.',
+      }
+    ),
+  },
+  'orientation.clockwise': {
+    title: i18n.translate('xpack.idxMgmt.mappingsEditor.formSelect.orientation.clockwiseTitle', {
+      defaultMessage: 'Clockwise',
+    }),
+    description: i18n.translate(
+      'xpack.idxMgmt.mappingsEditor.formSelect.orientation.clockwiseDescription',
+      {
+        defaultMessage: 'TODO: Get description for this option.',
       }
     ),
   },

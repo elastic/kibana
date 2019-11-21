@@ -27,14 +27,12 @@ import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../
 
 const getDefaultValueToggle = (param: string, field: FieldType) => {
   switch (param) {
-    case 'boost': {
+    case 'boost':
+    case 'ignore_malformed': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
     case 'null_value': {
       return field.null_value !== undefined && field.null_value !== '';
-    }
-    case 'ignore_malformed': {
-      return field.ignore_malformed !== undefined ? field.ignore_malformed : false;
     }
     default:
       return false;
