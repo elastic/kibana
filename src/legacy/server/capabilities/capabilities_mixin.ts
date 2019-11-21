@@ -33,10 +33,6 @@ export type CapabilitiesModifier = (
 export async function capabilitiesMixin(kbnServer: KbnServer, server: Server) {
   const modifiers: CapabilitiesModifier[] = [];
 
-  server.decorate('server', 'registerCapabilitiesModifier', (provider: CapabilitiesModifier) => {
-    modifiers.push(provider);
-  });
-
   // Some plugin capabilities are derived from data provided by other plugins,
   // so we need to wait until after all plugins have been init'd to fetch uiCapabilities.
   kbnServer.afterPluginsInit(async () => {

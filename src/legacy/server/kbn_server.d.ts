@@ -70,7 +70,6 @@ declare module 'hapi' {
     usage: { collectorSet: any };
     injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
     getHiddenUiAppById(appId: string): UiApp;
-    registerCapabilitiesModifier: (provider: CapabilitiesModifier) => void;
     addScopedTutorialContextFactory: (
       scopedTutorialContextFactory: (...args: any[]) => any
     ) => void;

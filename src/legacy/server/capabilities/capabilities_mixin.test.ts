@@ -75,17 +75,6 @@ describe('capabilitiesMixin', () => {
     );
   });
 
-  it('exposes server#registerCapabilitiesModifier for providing modifiers to the route', async () => {
-    const kbnServer = getKbnServer();
-    await capabilitiesMixin(kbnServer, server);
-    const mockModifier1 = jest.fn();
-    const mockModifier2 = jest.fn();
-    server.registerCapabilitiesModifier(mockModifier1);
-    server.registerCapabilitiesModifier(mockModifier2);
-
-    expect(mockRegisterCapabilitiesRoute.mock.calls[0][2]).toEqual([mockModifier1, mockModifier2]);
-  });
-
   it('exposes request#getCapabilities for retrieving legacy capabilities', async () => {
     const kbnServer = getKbnServer();
     jest.spyOn(server, 'decorate');

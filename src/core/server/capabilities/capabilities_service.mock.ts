@@ -20,7 +20,9 @@
 import { CapabilitiesService, CapabilitiesSetup } from './capabilities_service';
 
 const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<CapabilitiesSetup> = {};
+  const setupContract: jest.Mocked<CapabilitiesSetup> = {
+    registerCapabilitiesSwitcher: jest.fn(),
+  };
   return setupContract;
 };
 

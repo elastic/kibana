@@ -130,9 +130,6 @@ export const spaces = (kibana: Record<string, any>) =>
         tutorial: {
           addScopedTutorialContextFactory: server.addScopedTutorialContextFactory,
         },
-        capabilities: {
-          registerCapabilitiesModifier: server.registerCapabilitiesModifier,
-        },
         auditLogger: {
           create: (pluginId: string) =>
             new AuditLogger(server, pluginId, server.config(), server.plugins.xpack_main.info),

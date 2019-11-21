@@ -6,11 +6,9 @@
 
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { CapabilitiesModifier } from 'src/legacy/server/capabilities';
 import {
   SavedObjectsLegacyService,
   CoreSetup,
-  KibanaRequest,
   Logger,
   PluginInitializerContext,
 } from '../../../../src/core/server';
@@ -45,9 +43,6 @@ export interface LegacyAPI {
   };
   tutorial: {
     addScopedTutorialContextFactory: (factory: any) => void;
-  };
-  capabilities: {
-    registerCapabilitiesModifier: (provider: CapabilitiesModifier) => void;
   };
   auditLogger: {
     create: (pluginId: string) => AuditLogger;
@@ -135,6 +130,16 @@ export class Plugin {
       features: plugins.features,
     });
 
+    core.capabilities.registerCapabilitiesSwitcher(async (request, uiCapabilities) => {
+      try {
+        const activeSpace = await spacesService.getActiveSpace(request);
+        const features = plugins.features.getFeatures();
+        return toggleUICapabilities(features, uiCapabilities, activeSpace);
+      } catch (e) {
+        return uiCapabilities;
+      }
+    });
+
     if (plugins.security) {
       plugins.security.registerSpacesService(spacesService);
     }
@@ -180,15 +185,6 @@ export class Plugin {
     legacyAPI.tutorial.addScopedTutorialContextFactory(
       createSpacesTutorialContextFactory(spacesService)
     );
-    legacyAPI.capabilities.registerCapabilitiesModifier(async (request, uiCapabilities) => {
-      try {
-        const activeSpace = await spacesService.getActiveSpace(KibanaRequest.from(request));
-        const features = featuresSetup.getFeatures();
-        return toggleUICapabilities(features, uiCapabilities, activeSpace);
-      } catch (e) {
-        return uiCapabilities;
-      }
-    });
     // Register a function with server to manage the collection of usage stats
     legacyAPI.usage.collectorSet.register(
       getSpacesUsageCollector({

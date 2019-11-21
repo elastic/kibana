@@ -17,15 +17,18 @@
  * under the License.
  */
 
+import { CapabilitiesSwitcher } from './types';
 import { CoreContext } from '../core_context';
 import { Logger } from '..';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CapabilitiesSetup {}
+export interface CapabilitiesSetup {
+  registerCapabilitiesSwitcher(switcher: CapabilitiesSwitcher): void;
+}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CapabilitiesStart {}
 
 export class CapabilitiesService {
+  private capabilitiesSwitcher: CapabilitiesSwitcher[] = [];
   private logger: Logger;
 
   constructor(core: CoreContext) {
@@ -34,7 +37,11 @@ export class CapabilitiesService {
 
   public setup(): CapabilitiesSetup {
     this.logger.debug('Setting up capabilities service');
-    return {};
+    return {
+      registerCapabilitiesSwitcher: (switcher: CapabilitiesSwitcher) => {
+        this.capabilitiesSwitcher.push(switcher);
+      },
+    };
   }
 
   public start(): CapabilitiesStart {
