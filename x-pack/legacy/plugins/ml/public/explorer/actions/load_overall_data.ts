@@ -7,24 +7,20 @@
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
 
-import { forkJoin, from } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { map, mergeMap, tap } from 'rxjs/operators';
 
-import { mlFieldFormatService } from '../../services/field_format_service';
-import { mlJobService } from '../../services/job_service';
 import { formatHumanReadableDateTime } from '../../util/date_utils';
 import { TimeBucketsInterval } from '../../util/time_buckets';
 
 import { EXPLORER_ACTION, SWIMLANE_TYPE } from '../explorer_constants';
-import { explorerAction$, ExplorerAppState } from '../explorer_dashboard_service';
+import { explorerAction$ } from '../explorer_dashboard_service';
 import {
-  createJobs,
   getClearedSelectedAnomaliesState,
   getDefaultViewBySwimlaneData,
   loadOverallData,
   loadViewBySwimlane,
   loadViewByTopFieldValuesForSelectedTime,
-  restoreAppState,
   ExplorerJob,
   TimeRangeBounds,
 } from '../explorer_utils';

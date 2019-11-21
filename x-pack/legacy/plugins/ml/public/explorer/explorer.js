@@ -43,11 +43,11 @@ import { InfluencersList } from '../components/influencers_list';
 import {
   ALLOW_CELL_RANGE_SELECTION,
   dragSelect$,
-  getExplorerDefaultState,
   explorer$,
   explorerAction$,
   explorerState$,
 } from './explorer_dashboard_service';
+import { getExplorerDefaultState } from './reducers';
 import { mlResultsService } from '../services/results_service';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { NavigationMenu } from '../components/navigation_menu';

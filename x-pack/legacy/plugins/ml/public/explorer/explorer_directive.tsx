@@ -34,11 +34,8 @@ import { subscribeAppStateToObservable } from '../util/app_state_utils';
 
 import { Explorer } from './explorer';
 import { EXPLORER_ACTION } from './explorer_constants';
-import {
-  getExplorerDefaultAppState,
-  explorerAction$,
-  explorerAppState$,
-} from './explorer_dashboard_service';
+import { explorerAction$, explorerAppState$ } from './explorer_dashboard_service';
+import { getExplorerDefaultAppState } from './reducers';
 
 interface ExplorerScope extends IScope {
   appState: IAppState;
