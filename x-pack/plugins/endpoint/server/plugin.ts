@@ -5,8 +5,8 @@
  */
 
 import { Plugin, CoreSetup, CoreStart } from 'kibana/server';
+import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { addRoutes } from './routes';
-import { PluginSetupContract as FeaturesPluginSetupContract } from 'x-pack/plugins/features/server';
 
 export interface PluginsSetup {
   features: FeaturesPluginSetupContract;
