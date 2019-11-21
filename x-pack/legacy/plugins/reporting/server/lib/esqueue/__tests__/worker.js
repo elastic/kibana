@@ -26,8 +26,8 @@ const defaultWorkerOptions = {
   intervalErrorMultiplier: 10
 };
 
-// FAILING: https://github.com/elastic/kibana/issues/51372
-describe.skip('Worker class', function () {
+
+describe('Worker class', function () {
   // some of these tests might be a little slow, give them a little extra time
   this.timeout(10000);
 
@@ -1069,7 +1069,8 @@ describe('Format Job Object', () => {
   });
 });
 
-describe('Get Doc Path from ES Response', () => {
+// FAILING: https://github.com/elastic/kibana/issues/51372
+describe.skip('Get Doc Path from ES Response', () => {
   it('returns a formatted string after response of an update', function () {
     const responseMock = {
       _index: 'foo',

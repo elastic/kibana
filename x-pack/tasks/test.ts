@@ -10,7 +10,7 @@ import gulp from 'gulp';
 import { getEnabledPlugins } from './helpers/flags';
 
 export const testServerTask = async () => {
-  throw new Error('server mocha tests are now included in the `node scripts/mocha`');
+  throw new Error('server mocha tests are now included in the `node scripts/mocha` script');
 };
 
 export const testBrowserTask = async () => {
